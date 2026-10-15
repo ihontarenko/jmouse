@@ -9,6 +9,7 @@ import org.jmouse.telegram.MessageDraft;
 import org.jmouse.telegram.MessageHandle;
 import org.jmouse.telegram.SentMessage;
 import org.jmouse.telegram.TelegramException;
+import org.jmouse.telegram.TelegramFile;
 import org.jmouse.telegram.TelegramIdentity;
 import org.jmouse.telegram.TelegramRefusal;
 import org.jmouse.telegram.media.MediaAttachment;
@@ -18,6 +19,7 @@ import org.jmouse.telegram.spi.TelegramTransport;
 import org.jmouse.telegram.update.Update;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
@@ -57,6 +59,7 @@ public class BotApiTransport extends BotApiClient implements TelegramTransport, 
             Capability.SEND_MEDIA,
             Capability.REPLY_MARKUP,
             Capability.ANSWER_CALLBACK,
+            Capability.DOWNLOAD_FILES,
             Capability.ADMINISTER_CHAT,
             Capability.MANAGE_TOPICS);
 
@@ -142,6 +145,29 @@ public class BotApiTransport extends BotApiClient implements TelegramTransport, 
         }
 
         call(identity, "answerCallbackQuery", fields);
+    }
+
+    /** {@code getFile}: where Telegram is holding the file, for about an hour. */
+    @Override
+    public TelegramFile describeFile(TelegramIdentity identity, String fileId) {
+        JsonNode file = call(identity, "getFile", Map.of("file_id", fileId));
+
+        if (!file.hasNonNull("file_path")) {
+            // ⚠️ Telegram answers ok without a path for a file it will not hand over through this API.
+            throw new TelegramException(new TelegramRefusal.Rejected(400,
+                    "Telegram did not offer this file for download - it may be larger than the Bot API allows"));
+        }
+
+        return new TelegramFile(
+                fileId,
+                file.path("file_unique_id").asText(null),
+                file.path("file_size").isNumber() ? file.path("file_size").asLong() : -1L,
+                file.get("file_path").asText());
+    }
+
+    @Override
+    public InputStream openFile(TelegramIdentity identity, TelegramFile file) {
+        return download(identity, file.path());
     }
 
     /**

@@ -1,0 +1,29 @@
+symbol "Operational amplifier" as operational-amplifier-symbol {
+    meta {
+        summary "Operational amplifier, as drawn on a schematic: inputs on the left, output on the right, supply top and bottom"
+        category circuits
+        tags electronics, schematic
+    }
+    # The triangle's slanted sides cross x = 0 at y = ±15; the supply leads leave from there, so the rails come in from
+    # above and below and never cross the signal path, as on every datasheet's drawing.
+    size 80 x 60
+    # Each stroke its own shape, so the symbol editor takes and moves one at a time: the body, the four leads, the input
+    # signs and the supply signs.
+    path "M-20-30V30L20 0Z"
+    path "M-40-20H-20"
+    path "M-40 20H-20"
+    path "M20 0H40"
+    path "M0-15V-30"
+    path "M0 15V30"
+    path "M-15-20H-9"
+    path "M-15 20H-9M-12 17V23"
+    path "M4-24H8M6-26V-22"
+    path "M4 24H8"
+    pin inverting_input at -40, -20
+    pin non_inverting_input at -40, 20
+    pin output at 40, 0
+    pin positive_supply at 0, -30
+    pin negative_supply at 0, 30
+    label name at 24, -24
+    label value at 24, 28
+}

@@ -1,0 +1,13 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>org.jmouse</groupId><artifactId>jmouse-parent</artifactId><version>1.0.1</version></parent>
+    <artifactId>jmouse-git</artifactId>
+    <version>1.0.1</version>
+    <name>jMouse - Git</name>
+    <description>Bounded Git checkouts over JGit — shallow, hook-free, timed and size-capped — with a credentials seam and typed refusals; no hosting knowledge.</description>
+    <dependencyManagement><dependencies><dependency><groupId>org.jmouse</groupId><artifactId>jmouse-dependencies</artifactId><version>1.0.1</version><type>pom</type><scope>import</scope></dependency></dependencies></dependencyManagement>
+    <dependencies>
+        <dependency><groupId>org.eclipse.jgit</groupId><artifactId>org.eclipse.jgit</artifactId></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,16 @@
+symbol "Wattmeter" as wattmeter-symbol {
+    meta {
+        summary "Wattmeter, as drawn on a schematic: a dial marked W, its current through left and right, its voltage top and bottom"
+        category circuits
+        tags electronics, schematic, instrument
+    }
+    size 80 x 80
+    path "M-40 0H-18M18 0H40M0 -40V-18M0 18V40M-18 0A18 18 0 1 0 18 0A18 18 0 1 0 -18 0"
+    path "M-9 -8L-5 8L0 -2L5 8L9 -8" upright
+    pin a at -40, 0
+    pin b at 40, 0
+    pin c at 0, -40
+    pin d at 0, 40
+    label name at -26, -28
+    label value at 26, 32
+}

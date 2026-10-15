@@ -1,0 +1,140 @@
+# jMF — jMouse Formula: examples, from the simplest to the very complex.
+# One formula per line. '#' starts a comment, 'name:' labels a formula; both belong to the file, not to jMF.
+# A formula is a jMF document: definitions first (f(x) = …; r = …), then the formula, separated by ';'.
+# Every line below parses and compiles; the shipped catalogue uses many of them.
+
+# ── Simple ──────────────────────────────────────────────────────────────────
+constant: 42
+negative: -3.5
+scientific: 6.022e23 * n
+sum: x + y
+product: 2x
+power: x^2
+power-alternative: x**2
+square-root: sqrt(x)
+sine: sin(x)
+named-constants: pi * e + tau / phi
+greek-constant: π r^2
+
+# ── Ordinary ────────────────────────────────────────────────────────────────
+line: a * x + b
+parabola: a x^2 + b x + c
+quadratic-root: (-b + sqrt(b^2 - 4 a c)) / (2 a)
+circle: x^2 + y^2 - r^2
+radial-wave: A * sin(k * (x^2 + y^2) - t)
+saddle: A * (x^2 - y^2) / 3
+gaussian: exp(-(x - mu)^2 / (2 * sigma^2)) / (sigma * sqrt(2 * pi))
+logistic: r * x * (1 - x)
+damped-oscillation: exp(-gamma * t) * cos(omega * t)
+polar-rose: cos(k * theta)
+distance: hypot(x2 - x1, y2 - y1)
+angle: atan2(y, x)
+juxtaposition: (x + 1)(x - 1)
+implicit-product: 3(x + 1) - 2(y - 1)
+right-associative-power: 2^3^2
+negative-exponent: 2^-x
+leading-minus-binds-looser-than-power: -x^2
+modulo: mod(n, 7)
+remainder-operator: n % 7
+unicode-notation: x² + y² − 1
+unicode-product: 2·x × 3 ÷ y
+
+# ── Complex ─────────────────────────────────────────────────────────────────
+complex-square: z^2
+mandelbrot-step: z^2 + c
+mobius-transformation: (a z + b) / (c z + d)
+complex-exponential: exp(i * z)
+joukowsky: z + 1 / z
+newton-polynomial: z^3 - 1
+modulus-and-phase: abs(z) * exp(i * arg(z))
+burning-ship: (abs(re(z)) + i * abs(im(z)))^2 + c
+conjugate-mapping: conj(z) * z
+complex-sine: sin(z) / z
+
+# ── Calculus and fields ─────────────────────────────────────────────────────
+rosenbrock: (a - x)^2 + b * (y - x^2)^2
+himmelblau: (x^2 + y - 11)^2 + (x + y^2 - 7)^2
+monkey-saddle: x^3 - 3 x y^2
+vortex-x: -y / (x^2 + y^2 + 0.01)
+vortex-y: x / (x^2 + y^2 + 0.01)
+dipole-x: (x - 1) / ((x - 1)^2 + y^2 + 0.05)^1.5 - (x + 1) / ((x + 1)^2 + y^2 + 0.05)^1.5
+abc-flow: A * sin(z) + C * cos(y)
+gyroid: sin(x) * cos(y) + sin(y) * cos(z) + sin(z) * cos(x)
+lorenz-x: sigma * (y - x)
+lorenz-y: x * (rho - z) - y
+lorenz-z: x * y - beta * z
+van-der-pol: mu * (1 - x^2) * y - x
+pendulum: -sin(theta) - g * omega
+
+# ── Surfaces and curves ─────────────────────────────────────────────────────
+torus-x: (R + r * cos(v)) * cos(u)
+mobius-x: (1 + v / 2 * cos(u / 2)) * cos(u)
+klein-x: (a + cos(u / 2) * sin(v) - sin(u / 2) * sin(2 * v)) * cos(u)
+enneper-x: u - u^3 / 3 + u * v^2
+catenoid-x: c * cosh(v / c) * cos(u)
+trefoil-x: sin(t) + 2 * sin(2 * t)
+lissajous: sin(a * t + d)
+cycloid: r * (t - sin(t))
+clifford-torus: cos(u) / sqrt(2)
+heart: (x^2 + y^2 - 1)^3 - x^2 * y^3
+
+# ── Very complex ────────────────────────────────────────────────────────────
+double-pendulum: (-3 * g * sin(a1) - g * sin(a1 - 2 * a2) - 2 * sin(a1 - a2) * (w2^2 + w1^2 * cos(a1 - a2))) / (3 - cos(2 * a1 - 2 * a2))
+bivariate-normal: exp(-((x - mux)^2 / sx^2 - 2 rho (x - mux)(y - muy) / (sx sy) + (y - muy)^2 / sy^2) / (2 (1 - rho^2))) / (2 pi sx sy sqrt(1 - rho^2))
+sinc-ripple: sin(sqrt(x^2 + y^2) * k) / (sqrt(x^2 + y^2) * k + 0.0001) * exp(-0.1 * (x^2 + y^2))
+nested-functions: ln(1 + exp(-abs(sin(x) * cosh(y / 2)))) ^ (1 / 3)
+fourier-square-wave: 4 / pi * (sin(x) + sin(3 x) / 3 + sin(5 x) / 5 + sin(7 x) / 7 + sin(9 x) / 9)
+weierstrass-partial: cos(pi x) + 0.5 cos(3 pi x) + 0.25 cos(9 pi x) + 0.125 cos(27 pi x)
+hyperbolic-identity: cosh(x)^2 - sinh(x)^2 - 1 + tanh(asinh(x)) * sqrt(1 + x^2) - x
+deep-nesting: sqrt(abs(sin(cos(tan(atan(x / (1 + abs(y)))) * pi) + exp(-(x^2 + y^2) / (2 + sin(t))))))
+rational-surface: (x^4 - 6 x^2 y^2 + y^4) / (x^2 + y^2 + 1)^2 + atan2(y, x) / tau
+gamma-free-stirling: sqrt(2 pi n) * (n / e)^n * (1 + 1 / (12 n) + 1 / (288 n^2))
+
+# ── Conditions and pieces ───────────────────────────────────────────────────
+absolute-by-cases: if(x >= 0, x, -x)
+ternary: x > 0 ? sqrt(x) : 0
+heaviside-window: if(abs(x) <= 1, 1, 0)
+restricted-domain: if(x^2 + y^2 < 4, sqrt(4 - x^2 - y^2))   # undefined outside the disc: a hemisphere
+triangle-wave: piecewise(mod(x, 2) < 1, mod(x, 2), 2 - mod(x, 2))
+tax-brackets: piecewise(x <= 10, 0, x <= 40, 0.2 (x - 10), 6 + 0.4 (x - 40))
+annulus: x^2 + y^2 >= 1 and x^2 + y^2 <= 4
+unicode-logic: x ≥ 0 ∧ y ≥ 0 ∨ ¬(x < -1)
+equation-circle: x^2 + y^2 = r^2
+equation-folium: x^3 + y^3 = 3 a x y
+
+# ── Your own functions ──────────────────────────────────────────────────────
+local-name: r = sqrt(x^2 + y^2); sin(r) / r
+own-function: f(u) = u^2 - 1; f(x) * f(y)
+two-arguments: bump(u, s) = exp(-u^2 / (2 s^2)); bump(x - 1, 0.5) + bump(x + 1, 0.3)
+composition: g(u) = u^3 - u; h(u) = g(g(u)); h(x)
+parameter-in-body: wave(u) = A sin(k u - t); wave(x) + wave(y)
+smooth-step: s(u) = if(u <= 0, 0, if(u >= 1, 1, 3 u^2 - 2 u^3)); s((x + 1) / 2)
+
+# ── Sums, products, series ──────────────────────────────────────────────────
+partial-sum: sum(k, 1, n, k^2)
+basel: sum(k, 1, inf, 1 / k^2)
+exponential-series: sum(k, 0, inf, x^k / k!)
+fourier-square-wave-n: 4 / pi * sum(k, 0, N, sin((2 k + 1) x) / (2 k + 1))
+weierstrass: sum(k, 0, 30, a^k cos(b^k pi x))
+wallis: product(k, 1, inf, 4 k^2 / (4 k^2 - 1))
+binomial-expansion: sum(k, 0, n, binomial(n, k) x^k y^(n - k))
+riemann-zeta: sum(k, 1, inf, 1 / k^s)
+complex-exponential: sum(k, 0, inf, z^k / factorial(k))
+
+# ── Integrals and derivatives ───────────────────────────────────────────────
+error-function: 2 / sqrt(pi) * integral(t, 0, x, exp(-t^2))
+gaussian-integral: integral(t, -inf, inf, exp(-t^2))
+sine-integral: integral(t, 0, x, if(t == 0, 1, sin(t) / t))
+fresnel-curve-x: integral(s, 0, t, cos(s^2))
+area-under-own-function: f(u) = u^2 + 1; integral(u, 0, x, f(u))
+convolution: integral(s, -5, 5, exp(-s^2) * if(abs(x - s) < 1, 1, 0))
+gamma-by-integral: integral(t, 0, inf, t^(x - 1) exp(-t))
+derivative-inline: diff(sin(x) / x, x)
+second-derivative: diff(exp(-x^2), x, 2)
+gradient-length: f = x^2 y - y^3; sqrt(diff(f, x)^2 + diff(f, y)^2)
+
+# ── Special functions ───────────────────────────────────────────────────────
+factorials: n! / (k! (n - k)!)
+gamma: gamma(x)
+stirling-ratio: gamma(n + 1) / (sqrt(2 pi n) (n / e)^n)
+normal-cdf: (1 + erf((x - mu) / (sigma sqrt(2)))) / 2

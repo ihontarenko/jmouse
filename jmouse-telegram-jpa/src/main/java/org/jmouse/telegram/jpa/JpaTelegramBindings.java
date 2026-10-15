@@ -1,6 +1,7 @@
 package org.jmouse.telegram.jpa;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.jmouse.telegram.ChatReference;
 import org.jmouse.telegram.update.TelegramUser;
 import org.slf4j.Logger;
@@ -129,6 +130,50 @@ public final class JpaTelegramBindings implements TelegramBindings {
                 .stream()
                 .map(JpaTelegramBindings::describe)
                 .toList();
+    }
+
+    @Override
+    public Optional<String> subjectOf(long telegramUserId) {
+        List<String> subjects = entityManager
+                .createQuery("""
+                        SELECT DISTINCT binding.subject FROM TelegramBinding binding
+                        WHERE binding.telegramUserId = :user
+                        """, String.class)
+                .setParameter("user", telegramUserId)
+                .setMaxResults(2)
+                .getResultList();
+
+        if (subjects.size() > 1) {
+            LOGGER.warn("telegram user {} is bound as more than one subject; commands from them are refused", telegramUserId);
+            return Optional.empty();
+        }
+
+        return subjects.stream().findFirst();
+    }
+
+    @Override
+    public BindingPage page(Boolean deliverable, int offset, int limit) {
+        String where = deliverable == null ? "" : " WHERE binding.deliverable = :deliverable";
+
+        TypedQuery<TelegramBinding> rows = entityManager.createQuery(
+                "SELECT binding FROM TelegramBinding binding" + where + " ORDER BY binding.createdAt DESC",
+                TelegramBinding.class);
+        TypedQuery<Long> count = entityManager.createQuery(
+                "SELECT COUNT(binding) FROM TelegramBinding binding" + where, Long.class);
+
+        if (deliverable != null) {
+            rows.setParameter("deliverable", deliverable);
+            count.setParameter("deliverable", deliverable);
+        }
+
+        List<Binding> bindings = rows.setFirstResult(Math.max(0, offset))
+                                     .setMaxResults(Math.max(1, limit))
+                                     .getResultList()
+                                     .stream()
+                                     .map(JpaTelegramBindings::describe)
+                                     .toList();
+
+        return new BindingPage(bindings, count.getSingleResult());
     }
 
     /**

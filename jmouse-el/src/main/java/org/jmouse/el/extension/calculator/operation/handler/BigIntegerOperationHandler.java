@@ -23,13 +23,15 @@ public class BigIntegerOperationHandler implements OperationHandler<BigInteger, 
 
     @Override
     public Object execute(OperationType type, BigInteger x, Number right) {
-        BigInteger y = (right == null ? BigInteger.ZERO : BigInteger.valueOf(right.longValue()));
+        BigInteger y = right == null ? BigInteger.ZERO
+                : right instanceof BigInteger integer ? integer : BigInteger.valueOf(right.longValue());
 
         if ((type == DIVIDE || type == MODULUS) && BigInteger.ZERO.equals(y)) {
             throw new IllegalOperationException("%s by zero".formatted(type));
-        } else if (type == EXPONENTIAL && y.intValue() < 0) {
+        } else if (type == EXPONENTIAL && (y.signum() < 0 || y.compareTo(BigInteger.valueOf(16_384)) > 0
+                || x.abs().bitLength() * (long) y.intValue() > 16_385)) {
             throw new IllegalOperationException(
-                    "Exponential operation with negative value %d (raw: %s)".formatted(y.intValue(), y));
+                    "Exponential operation exceeds the exact integer budget: %s ^ %s".formatted(x, y));
         }
 
         return switch (type) {

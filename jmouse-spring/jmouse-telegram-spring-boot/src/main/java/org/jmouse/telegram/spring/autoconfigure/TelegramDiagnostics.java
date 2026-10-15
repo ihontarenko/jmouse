@@ -1,5 +1,6 @@
 package org.jmouse.telegram.spring.autoconfigure;
 
+import org.jmouse.telegram.IdentitySource;
 import org.jmouse.telegram.spi.TelegramTransport;
 import org.jmouse.telegram.spring.TelegramSettings;
 import org.slf4j.Logger;
@@ -34,8 +35,13 @@ public class TelegramDiagnostics {
                 ? "none configured"
                 : String.join(", ", settings.identities().keySet());
 
+        TelegramSettings.Updates updates   = settings.updates();
+        String                   receiving = updates.mode() == TelegramSettings.Mode.NONE
+                ? "NONE"
+                : "%s as '%s'".formatted(updates.mode(), updates.purpose());
+
         LOGGER.info("jmouse-telegram ready: transports=[{}], purposes=[{}], updates={}, pacing={}",
-                kinds, purposes, settings.updates().mode(),
+                kinds, purposes, receiving,
                 settings.pace().enabled()
                         ? "%d/s global, %d/min per chat".formatted(
                                 settings.pace().globalPerSecond(), settings.pace().perChatPerMinute())
@@ -47,6 +53,15 @@ public class TelegramDiagnostics {
         if (settings.identities().isEmpty()) {
             LOGGER.warn("no Telegram identity is configured; every call will refuse. "
                         + "Set jmouse.telegram.identities.general.token");
+        }
+
+        // ⚠️ A receiving purpose with no identity of its own falls back to general — which, when general
+        // is the shared bot, takes that bot's updates away from whichever product was meant to have them.
+        if (updates.mode() != TelegramSettings.Mode.NONE
+                && !updates.purpose().equals(IdentitySource.GENERAL)
+                && !settings.identities().containsKey(updates.purpose())) {
+            LOGGER.warn("jmouse.telegram.updates.purpose='{}' has no identity under jmouse.telegram.identities, "
+                        + "so the general bot is the one being consumed", updates.purpose());
         }
     }
 }

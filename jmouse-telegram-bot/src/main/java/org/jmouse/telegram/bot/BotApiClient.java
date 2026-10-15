@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -105,6 +106,41 @@ public abstract class BotApiClient {
         return exchange(identity, method, request, Map.of());
     }
 
+    /**
+     * Opens a file Telegram is holding, at {@code <api base>/file/bot<token>/<path>}, as a stream.
+     *
+     * <p>⚠️ Not {@code exchange}: the answer is the file, not JSON, and a failure is an HTTP status with no
+     * Telegram description to translate. And the address carries the token, so nothing here ever puts it
+     * into a message.
+     */
+    protected InputStream download(TelegramIdentity identity, String path) {
+        requireCredential(identity);
+
+        String address = "%s/file/bot%s/%s".formatted(
+                trimTrailingSlash(identity.apiBaseOrDefault()), identity.credential(), path);
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(address)).timeout(readTimeout).GET().build();
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            if (response.statusCode() != 200) {
+                response.body().close();
+                throw new TelegramException(new TelegramRefusal.TransportFailure(
+                        "the file could not be downloaded (HTTP %d)".formatted(response.statusCode())));
+            }
+
+            return response.body();
+        } catch (IllegalArgumentException exception) {
+            throw new TelegramException(new TelegramRefusal.TransportFailure("the file path is not a valid address"), exception);
+        } catch (IOException exception) {
+            String detail = exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage();
+            throw new TelegramException(new TelegramRefusal.TransportFailure(detail), exception);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new TelegramException(new TelegramRefusal.TransportFailure("the download was interrupted"), exception);
+        }
+    }
+
     private HttpRequest.Builder requestFor(TelegramIdentity identity, String method, Duration timeout) {
         requireCredential(identity);
 
@@ -134,8 +170,13 @@ public abstract class BotApiClient {
         try {
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
         } catch (IOException exception) {
-            throw new TelegramException(
-                    new TelegramRefusal.TransportFailure(exception.getMessage()), exception);
+            // ⚠️ A refused connection arrives as a ConnectException with no message at all, which made the
+            // sentence "Telegram could not be reached: null". The type is the information then.
+            String detail = exception.getMessage() == null
+                    ? exception.getClass().getSimpleName()
+                    : exception.getMessage();
+
+            throw new TelegramException(new TelegramRefusal.TransportFailure(detail), exception);
         } catch (InterruptedException exception) {
             // Restoring the flag matters: a polling loop is shut down by interrupting it, and a
             // swallowed interrupt is a thread that will not stop.

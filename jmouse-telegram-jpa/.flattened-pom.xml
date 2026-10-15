@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-telegram-jpa</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Telegram Persistence</name>
   <description>jMouse Framework - Telegram accounts, a database-backed identity source, credential sealing, and the library's own migrations</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-telegram-jpa</url>
@@ -30,7 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-telegram</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-vault</artifactId>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

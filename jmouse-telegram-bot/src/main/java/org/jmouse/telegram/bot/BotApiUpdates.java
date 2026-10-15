@@ -3,6 +3,7 @@ package org.jmouse.telegram.bot;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jmouse.telegram.ChatReference;
 import org.jmouse.telegram.MessageHandle;
+import org.jmouse.telegram.update.Attachment;
 import org.jmouse.telegram.update.IncomingMessage;
 import org.jmouse.telegram.update.TelegramUser;
 import org.jmouse.telegram.update.Update;
@@ -99,7 +100,7 @@ public final class BotApiUpdates {
                 message.path("text").asText(null),
                 message.path("caption").asText(null),
                 Instant.ofEpochSecond(message.path("date").asLong()),
-                attachmentIds(message),
+                attachments(message),
                 message.path("reply_to_message").path("message_id").isNumber()
                         ? message.path("reply_to_message").path("message_id").asInt()
                         : null);
@@ -144,7 +145,7 @@ public final class BotApiUpdates {
     }
 
     /** ⚠️ Null for a channel post, which genuinely has no author. */
-    private static TelegramUser readUser(JsonNode user) {
+    static TelegramUser readUser(JsonNode user) {
         if (user == null || !user.isObject()) {
             return null;
         }
@@ -159,29 +160,40 @@ public final class BotApiUpdates {
     }
 
     /**
-     * Every {@code file_id} the message carries.
+     * Everything the message carries, by reference.
      *
      * <p>⚠️ A photo arrives as an array of sizes and the last is the largest — the same trap as on the
      * sending side, and with the same consequence: a {@code file_id} taken from the front fetches a
      * thumbnail.
      */
-    private static List<String> attachmentIds(JsonNode message) {
-        List<String> ids   = new ArrayList<>(1);
-        JsonNode     photo = message.path("photo");
+    private static List<Attachment> attachments(JsonNode message) {
+        List<Attachment> found = new ArrayList<>(1);
+        JsonNode         photo = message.path("photo");
 
         if (photo.isArray() && !photo.isEmpty()) {
-            ids.add(photo.get(photo.size() - 1).path("file_id").asText());
+            found.add(attachment(photo.get(photo.size() - 1), Attachment.Kind.PHOTO));
         }
 
-        for (String field : new String[]{"document", "video", "audio", "animation", "voice", "video_note"}) {
-            JsonNode node = message.path(field);
+        for (Attachment.Kind kind : new Attachment.Kind[]{Attachment.Kind.DOCUMENT, Attachment.Kind.VIDEO, Attachment.Kind.AUDIO,
+                                                          Attachment.Kind.ANIMATION, Attachment.Kind.VOICE, Attachment.Kind.VIDEO_NOTE}) {
+            JsonNode node = message.path(kind.name().toLowerCase());
 
             if (node.isObject() && node.hasNonNull("file_id")) {
-                ids.add(node.get("file_id").asText());
+                found.add(attachment(node, kind));
             }
         }
 
-        return ids;
+        return found;
+    }
+
+    private static Attachment attachment(JsonNode node, Attachment.Kind kind) {
+        return new Attachment(
+                node.path("file_id").asText(),
+                node.path("file_unique_id").asText(null),
+                kind,
+                node.path("file_name").asText(null),
+                node.path("mime_type").asText(null),
+                node.path("file_size").isNumber() ? node.path("file_size").asLong() : Attachment.UNKNOWN_SIZE);
     }
 
     /**

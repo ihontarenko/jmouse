@@ -3,3 +3,7 @@ org.jmouse.telegram.spring.autoconfigure.TelegramPollingAutoConfiguration
 org.jmouse.telegram.spring.autoconfigure.TelegramWebAutoConfiguration
 org.jmouse.telegram.spring.autoconfigure.TelegramJpaAutoConfiguration
 org.jmouse.telegram.spring.autoconfigure.TelegramFlywayAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramJournalJpaAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramCommandAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramUserAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramBindingsAutoConfiguration

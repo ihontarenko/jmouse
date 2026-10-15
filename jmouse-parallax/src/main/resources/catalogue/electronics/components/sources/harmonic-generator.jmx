@@ -1,0 +1,49 @@
+# A composite voltage: a fundamental and its harmonics, each with its own amplitude and phase, summed — the way a real
+# signal is built from them, and the way a square, a triangle or a sawtooth is approximated. Eight harmonics as
+# parameters; the circuit sets the ones it needs. A tone that is not a harmonic is another generator in series.
+
+component "Harmonic generator" as harmonic-generator type generator {
+    meta {
+        designator G
+        summary "A fundamental and up to eight harmonics, summed: offset + Σ a_k · sin(2π · k · frequency · time + φ_k)"
+        category circuits
+    }
+
+    parameters {
+        frequency = 100 Hz       "the fundamental: harmonic k is k times it"
+        a1 = 1 V                 "amplitude of the fundamental"
+        a2 = 0 V                 "amplitude of the 2nd harmonic"
+        a3 = 0 V                 "amplitude of the 3rd harmonic"
+        a4 = 0 V                 "amplitude of the 4th harmonic"
+        a5 = 0 V                 "amplitude of the 5th harmonic"
+        a6 = 0 V                 "amplitude of the 6th harmonic"
+        a7 = 0 V                 "amplitude of the 7th harmonic"
+        a8 = 0 V                 "amplitude of the 8th harmonic"
+        p1 = 0 rad               "phase of the fundamental"
+        p2 = 0 rad               "phase of the 2nd harmonic"
+        p3 = 0 rad               "phase of the 3rd harmonic"
+        p4 = 0 rad               "phase of the 4th harmonic"
+        p5 = 0 rad               "phase of the 5th harmonic"
+        p6 = 0 rad               "phase of the 6th harmonic"
+        p7 = 0 rad               "phase of the 7th harmonic"
+        p8 = 0 rad               "phase of the 8th harmonic"
+        offset = 0 V             "the voltage it swings around"
+    }
+
+    pins {
+        positive analog 1  "positive terminal"
+        negative analog 2  "negative terminal"
+    }
+
+    symbol uses composite-source-symbol {
+        a positive
+        b negative
+    }
+
+    equations {
+        local phase = 2 * pi * frequency * time
+        local low = a1 * sin(phase + p1) + a2 * sin(2 * phase + p2) + a3 * sin(3 * phase + p3) + a4 * sin(4 * phase + p4)
+        local high = a5 * sin(5 * phase + p5) + a6 * sin(6 * phase + p6) + a7 * sin(7 * phase + p7) + a8 * sin(8 * phase + p8)
+        voltage positive -> negative = offset + low + high
+    }
+}

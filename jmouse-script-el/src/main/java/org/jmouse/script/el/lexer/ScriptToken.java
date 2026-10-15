@@ -3,9 +3,12 @@ package org.jmouse.script.el.lexer;
 import org.jmouse.el.language.lexer.LanguageToken;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
+import org.jmouse.script.el.lexer.StatementToken;
 
 /**
- * The keywords a {@code .jms} script adds on top of the expression language.
+ * The keywords jMS adds on top of the statement core — the file-scope constructions and the handler. The
+ * statement keywords ({@code include}, {@code do}, {@code then}, {@code end}, {@code local}, {@code return},
+ * {@code for}) are the core's {@link org.jmouse.script.el.lexer.StatementToken}.
  *
  * <p>Deliberately small. {@code if}, {@code elseif}, {@code else} and {@code function} are
  * {@link LanguageToken}s the engine already owns, {@code in} is a {@link BasicToken} operator, and
@@ -22,9 +25,6 @@ import org.jmouse.el.lexer.Token;
  */
 public enum ScriptToken implements Token.Type {
 
-    /** {@code include 'common.jms'} — composition, recorded and not followed. */
-    T_INCLUDE(10000, "include"),
-
     /** {@code script "slice-01" { … }} — the story half of a file. */
     T_SCRIPT(10100, "script"),
 
@@ -40,25 +40,7 @@ public enum ScriptToken implements Token.Type {
     T_ON(11000, "on"),
 
     /** The optional guard on a handler. */
-    T_WHEN(11100, "when"),
-
-    /** Opens a word-delimited body — a handler's, a behaviour's, a loop's. */
-    T_DO(12000, "do"),
-
-    /** Opens a branch's body. */
-    T_THEN(12100, "then"),
-
-    /** Closes every word-delimited body in the language. */
-    T_END(12200, "end"),
-
-    /** {@code local slot = @store.next_slot(entry)} — a name bound in this body. */
-    T_LOCAL(13000, "local"),
-
-    /** {@code return}, with or without a value. */
-    T_RETURN(13100, "return"),
-
-    /** {@code for entry in @store.pending('inbox') do … end} */
-    T_FOR(13200, "for");
+    T_WHEN(11100, "when");
 
     private final int      type;
     private final String[] values;
@@ -95,28 +77,13 @@ public enum ScriptToken implements Token.Type {
         return values();
     }
 
-    /**
-     * Everything that may stand where this language expects a <em>name</em>.
-     *
-     * <p>⚠️ <strong>A keyword is also an ordinary word.</strong> The lexer has no idea whether the
-     * {@code end} it just read closes a body or is the name of a facade method, and a host is entitled
-     * to an event called {@code on} or a function called {@code local} — those are its nouns, not this
-     * language's. Reading a name against this set rather than against
-     * {@link BasicToken#T_IDENTIFIER} is what keeps a grammar from dictating a host's vocabulary.</p>
-     *
-     * <p>It costs no ambiguity, because a name is only ever read at a position where the construction
-     * around it has already been identified.</p>
-     *
-     * @return the identifier token, plus every keyword of this dialect
-     */
+    /** Everything that may stand where jMS expects a name: the core's names, which include these keywords. */
     public static Token.Type[] nameTokens() {
-        ScriptToken[] keywords = values();
-        Token.Type[]  names    = new Token.Type[keywords.length + 1];
+        return StatementToken.nameTokens();
+    }
 
-        names[0] = BasicToken.T_IDENTIFIER;
-        System.arraycopy(keywords, 0, names, 1, keywords.length);
-
-        return names;
+    static {
+        StatementToken.registerDialectKeywords(values());
     }
 
 }

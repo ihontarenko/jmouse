@@ -1,6 +1,9 @@
 package org.jmouse.ai.jpa;
 
 import jakarta.persistence.EntityManagerFactory;
+import org.jmouse.ai.jpa.credential.CredentialContexts;
+import org.jmouse.ai.jpa.credential.CredentialProtection;
+import org.jmouse.ai.jpa.credential.ProviderCredentials;
 import org.jmouse.ai.jpa.entity.AiProviderSettings;
 import org.jmouse.ai.provider.ProviderException;
 import org.jmouse.ai.provider.ProviderSettings;
@@ -22,15 +25,36 @@ import java.util.List;
  *
  * <p>A product that wants caching wraps this or replaces it; a caller cannot tell, which is why that
  * decision belongs behind the interface rather than in front of it.
+ *
+ * <p>⚠️ <strong>The stored key is opened here, and only here.</strong> The column may hold a sealed
+ * value or a legacy one; {@link CredentialProtection} reads both, and refuses a sealed one when no
+ * credential key is configured rather than handing ciphertext to a provider.
  */
 public final class JpaProviderSettingsSource implements ProviderSettingsSource {
 
     private final EntityManagerFactory entityManagerFactory;
     private final String               application;
+    private final CredentialProtection credentialProtection;
+    private final ProviderCredentials  providerCredentials;
 
-    public JpaProviderSettingsSource(EntityManagerFactory entityManagerFactory, String application) {
+    public JpaProviderSettingsSource(
+            EntityManagerFactory entityManagerFactory,
+            String               application,
+            CredentialProtection credentialProtection) {
+        this(entityManagerFactory, application, credentialProtection, null);
+    }
+
+    /** @param providerCredentials resolves a row that names a vault credential, at each call; may be null */
+    public JpaProviderSettingsSource(
+            EntityManagerFactory entityManagerFactory,
+            String               application,
+            CredentialProtection credentialProtection,
+            ProviderCredentials  providerCredentials) {
+
         this.entityManagerFactory = entityManagerFactory;
         this.application          = application;
+        this.credentialProtection = credentialProtection;
+        this.providerCredentials  = providerCredentials;
     }
 
     @Override
@@ -145,8 +169,28 @@ public final class JpaProviderSettingsSource implements ProviderSettingsSource {
     }
 
     private ProviderSettings asSettings(AiProviderSettings row) {
+        if (row.getCredentialName() != null) {
+            if (providerCredentials == null) {
+                throw new ProviderException("The AI provider configuration '" + row.getId() + "' takes its key from the vault "
+                        + "credential '" + row.getCredentialName() + "', and this application has no vault configured.");
+            }
+
+            ProviderCredentials.Resolved resolved;
+
+            try {
+                resolved = providerCredentials.resolve(row.getCredentialName());
+            } catch (RuntimeException unresolved) {
+                throw new ProviderException("The vault credential '" + row.getCredentialName() + "' of the AI provider "
+                        + "configuration '" + row.getId() + "' cannot be read: " + unresolved.getMessage());
+            }
+
+            return new ProviderSettings(row.getProvider(), row.getModel(), resolved.apiKey(), resolved.apiUrl(),
+                    row.getMaximumTokens(), row.getCapabilities(), row.getId(), row.getRevision());
+        }
+
         return new ProviderSettings(
-                row.getProvider(), row.getModel(), row.getApiKey(), row.getApiUrl(), row.getMaximumTokens(),
+                row.getProvider(), row.getModel(), credentialProtection.reveal(row.getApiKey(), CredentialContexts.providerConfiguration(row.getId())), row.getApiUrl(),
+                row.getMaximumTokens(),
                 row.getCapabilities(), row.getId(), row.getRevision());
     }
 }

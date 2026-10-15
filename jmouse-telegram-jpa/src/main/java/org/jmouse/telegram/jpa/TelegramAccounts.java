@@ -16,7 +16,7 @@ import java.util.Optional;
  * <h2>⚠️ Every write takes the credential in the CLEAR and seals it here</h2>
  *
  * <p>The alternative — a caller sealing before it writes — means every caller holds a
- * {@link CredentialCipher}, and the first one that forgets writes a plaintext token into a column that
+ * the vault's {@link org.jmouse.vault.seal.SecretCipher}, and the first one that forgets writes a plaintext token into a column that
  * looks exactly like a sealed one. Sealing on the way in makes that unrepresentable.
  *
  * <h2>⚠️ No read ever answers with a credential, sealed or otherwise</h2>

@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260902</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -37,6 +37,14 @@
         <module>jmouse-money-spring-boot</module>
         <module>jmouse-script-spring-boot</module>
         <module>jmouse-telegram-spring-boot</module>
+        <module>jmouse-telegram-management</module>
+        <module>jmouse-vault-spring-boot</module>
+        <module>jmouse-vault-management</module>
+        <module>jmouse-notifier-spring-boot</module>
+        <module>jmouse-scheduler-spring-boot</module>
+        <module>jmouse-parallax-spring-boot</module>
+        <module>jmouse-parallax-management</module>
+        <module>jmouse-parallax-live</module>
     </modules>
 
 </project>

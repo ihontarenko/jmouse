@@ -1,0 +1,3 @@
+org.jmouse.notifier.spring.autoconfigure.NotifierChannelsAutoConfiguration
+org.jmouse.notifier.spring.autoconfigure.NotifierJpaAutoConfiguration
+org.jmouse.notifier.spring.autoconfigure.NotifierAutoConfiguration

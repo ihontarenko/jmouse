@@ -1,5 +1,7 @@
 package org.jmouse.telegram;
 
+import java.io.InputStream;
+
 /**
  * Carrying a message to Telegram, and saying what happened.
  *
@@ -83,6 +85,24 @@ public interface TelegramGateway {
      * product.
      */
     boolean supports(Capability capability);
+
+    /**
+     * Asks Telegram for a file somebody sent — an {@link org.jmouse.telegram.update.Attachment}'s
+     * {@code fileId} — ready to download. Needs {@link Capability#DOWNLOAD_FILES}.
+     *
+     * <p>⚠️ Asked as the identity this gateway resolves, and a {@code file_id} is valid only for the bot that
+     * received it: fetch with the gateway of the purpose that heard the message.
+     *
+     * @throws TelegramException when Telegram refused — a file over the Bot API's 20 MB is the usual case
+     */
+    default TelegramFile describeFile(String fileId) {
+        throw new UnsupportedOperationException("this gateway cannot download files");
+    }
+
+    /** Opens the bytes of a file {@link #describeFile} answered; the caller closes the stream. */
+    default InputStream openFile(TelegramFile file) {
+        throw new UnsupportedOperationException("this gateway cannot download files");
+    }
 
     /**
      * The same gateway, speaking as whichever identity is configured for {@code purpose}.

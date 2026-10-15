@@ -1,0 +1,28 @@
+# An NPN transistor at the bipolar model's neutral defaults: what an imported `.model … NPN(…)` becomes, the model's
+# numbers set on it. A datasheet NPN part is a member of this family.
+
+component "NPN transistor" as npn-transistor type bjt {
+    meta {
+        designator Q
+        summary "NPN bipolar transistor, the Gummel–Poon model at its defaults"
+        category circuits
+        failure open
+    }
+    extends bipolar-transistor
+
+    parameters {
+        polarity = 1                          "NPN"
+    }
+
+    symbol uses npn-transistor-symbol
+
+    expect "on: 10 µA of base drives a milliampere" from "BF 100 at the defaults" {
+        bench for 1 ms {
+            V1 voltage-source (collector, 0) U_output = 5 V
+            I1 current-source (base, 0) I_output = 10 uA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure operating current V1
+        within -1.05 mA .. -0.95 mA
+    }
+}

@@ -1,0 +1,27 @@
+# Signals a generator is written with, as functions of the time alone: the same instant always gives the same value,
+# so the solver may evaluate a moment as often as Newton and the step control ask. A random draw per evaluation would
+# be a different voltage each time the same instant was solved, and no step would ever converge.
+#
+# Noise is a sum of N sines spread over the band — the way a DSP noise generator builds it —, never a floor() of the
+# time: every sine is smooth, so the engine meets no edge to land on, and the band is exactly where its sines are.
+# Their frequencies sit one in each of N equal slices of the band, jittered within it, their phases scattered; the
+# jitter and the phases come from sines of the slice's number and the seed, so nothing here is random at run time.
+
+functions "Signals" as signals {
+    meta {
+        summary "Band-limited white and pink noise as functions of the time: smooth, repeatable, RMS 1"
+    }
+
+    formulas {
+        # where in its slice the k-th sine sits, 0.05 … 0.95, and its phase: deterministic scatter
+        slice_jitter(k, seed) = 0.5 + 0.45 * sin(12.9898 * k + 78.233 * seed)
+        slice_phase(k, seed) = pi * (1 + sin(39.3468 * k + 11.135 * seed))
+
+        # white noise up to `bandwidth`: 48 sines, equally strong, evenly over the band — RMS 1
+        band_noise(t, bandwidth, seed) = sqrt(2 / 48) * sum(k, 1, 48, sin(2 * pi * bandwidth * (k - 1 + slice_jitter(k, seed)) / 48 * t + slice_phase(k, seed)))
+
+        # pink noise from `lowest` to `highest`: 48 sines, equally strong, evenly over the band's LOGARITHM — the same
+        # power in every octave, which is what pink means — RMS 1
+        pink_noise(t, lowest, highest, seed) = sqrt(2 / 48) * sum(k, 1, 48, sin(2 * pi * lowest * (highest / lowest)^((k - 1 + slice_jitter(k, seed)) / 48) * t + slice_phase(k, seed)))
+    }
+}

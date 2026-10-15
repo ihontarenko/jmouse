@@ -1,0 +1,13 @@
+symbol "Inductor" as inductor-symbol {
+    meta {
+        summary "Inductor, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-18C-18-16-6-16-6 0C-6-16 6-16 6 0C6-16 18-16 18 0H40"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

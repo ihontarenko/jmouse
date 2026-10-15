@@ -1,0 +1,11 @@
+symbol "Antenna" as antenna-symbol {
+    meta {
+        summary "Antenna, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 60 x 40
+    path "M0 20V-15M-15-15L0 4 15-15M-15-15H15"
+    pin signal at 0, 20
+    label name at 0, -26
+}

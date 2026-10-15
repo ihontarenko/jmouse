@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-telegram</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Telegram Core</name>
   <description>jMouse Framework - Telegram core contracts (identity, chat reference, message draft, gateway, capabilities, refusal taxonomy, update model and dispatch)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-telegram</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-http</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-validation-management</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Validation builder (management)</name>
   <description>jMouse Framework - The validation builder as a library surface: the check catalogue, and rows rendered into .jmv through the one writer</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-validation-management</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-validation-el</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-validation-jpa</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -1,5 +1,6 @@
 package org.jmouse.ai.provider;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,14 +46,39 @@ public final class ProviderCatalog {
      *                      option unusable
      * @param note          one line a screen shows beside the name, so choosing does not require
      *                      knowing the landscape
+     * @param capabilityAddresses where each capability answers when it does not answer at
+     *                      {@code defaultApiUrl}. ⚠️ One provider is often several endpoints — Voyage embeds
+     *                      at {@code /v1/embeddings} and reranks at {@code /v1/rerank} — and a single address
+     *                      per provider would force one configuration per capability for no reason
      */
-    public record Shipped(String name, String defaultApiUrl, boolean requiresKey, String note, Set<AiCapability> capabilities) {
+    public record Shipped(String name, String defaultApiUrl, boolean requiresKey, String note, Set<AiCapability> capabilities,
+                          Map<AiCapability, String> capabilityAddresses) {
         public Shipped {
             capabilities = Set.copyOf(capabilities);
+            capabilityAddresses = Map.copyOf(capabilityAddresses);
+            if (!capabilities.containsAll(capabilityAddresses.keySet())) {
+                throw new IllegalArgumentException("An address is given for a capability the provider does not offer.");
+            }
+        }
+
+        public Shipped(String name, String defaultApiUrl, boolean requiresKey, String note, Set<AiCapability> capabilities) {
+            this(name, defaultApiUrl, requiresKey, note, capabilities, Map.of());
         }
 
         public Shipped(String name, String defaultApiUrl, boolean requiresKey, String note) {
             this(name, defaultApiUrl, requiresKey, note, Set.of(AiCapability.CHAT));
+        }
+
+        /**
+         * Where this provider answers for one capability when a configuration names no address of its own:
+         * the capability's own address, otherwise the provider's. ⚠️ Null for a capability it does not offer,
+         * and for a provider that has nothing to guess (a gateway, a local server).
+         */
+        public String defaultAddress(AiCapability capability) {
+            if (!capabilities.contains(capability)) {
+                return null;
+            }
+            return capabilityAddresses.getOrDefault(capability, defaultApiUrl);
         }
     }
 
@@ -77,10 +103,19 @@ public final class ProviderCatalog {
                     + "Ollama port, and the model is whatever you have pulled.", Set.of(AiCapability.CHAT, AiCapability.EMBEDDINGS)),
 
             new Shipped("voyage", "https://api.voyageai.com/v1/embeddings", true,
-                    "Voyage AI text embeddings. Model and retrieval input type are caller configured.", Set.of(AiCapability.EMBEDDINGS)),
+                    "Voyage AI text embeddings and reranking. Model and retrieval input type are caller configured.",
+                    Set.of(AiCapability.EMBEDDINGS, AiCapability.RERANK),
+                    Map.of(AiCapability.RERANK, "https://api.voyageai.com/v1/rerank")),
 
-            new Shipped("tei", null, false, "Local Text Embeddings Inference. Configure an explicit endpoint.",
-                    Set.of(AiCapability.EMBEDDINGS)),
+            new Shipped("cohere", "https://api.cohere.com/v2/rerank", true,
+                    "Cohere reranking (rerank v2 shape). Name the model, e.g. rerank-v3.5.", Set.of(AiCapability.RERANK)),
+
+            new Shipped("jina", "https://api.jina.ai/v1/rerank", true,
+                    "Jina AI reranking, speaking Cohere's rerank shape. Free tier for trying it out.", Set.of(AiCapability.RERANK)),
+
+            new Shipped("tei", null, false,
+                    "Local Text Embeddings Inference — embeddings or a reranker model. Configure an explicit endpoint.",
+                    Set.of(AiCapability.EMBEDDINGS, AiCapability.RERANK)),
 
             new Shipped("groq", "https://api.groq.com/openai/v1/chat/completions", true,
                     "Free tier, and the fastest of these by a distance. Open-weight models."),
@@ -122,6 +157,17 @@ public final class ProviderCatalog {
         return known == null ? Set.of() : known.capabilities();
     }
 
+    /** Where a provider answers for one capability by default, or empty where there is nothing to guess. */
+    public static Optional<String> defaultAddress(String providerName, AiCapability capability) {
+        Shipped known = SHIPPED.get(normalised(providerName));
+
+        if (known == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(known.defaultAddress(capability));
+    }
+
     /**
      * Whether a configuration naming this provider must carry a credential.
      *
@@ -154,6 +200,38 @@ public final class ProviderCatalog {
             // Everything else is OpenAI's shape at a different address, which is the whole reason there
             // is no class for any of them.
             default -> new OpenAiChatModel(settings, known.name(), known.defaultApiUrl());
+        });
+    }
+
+    /** Builds a shipped CHAT adapter with caller-owned finite transport deadlines. */
+    public static Optional<ChatModel> modelFor(String providerName, ProviderSettingsSource settings,
+                                               Duration connectTimeout, Duration readTimeout) {
+        if (connectTimeout == null || connectTimeout.isZero() || connectTimeout.isNegative()
+                || readTimeout == null || readTimeout.isZero() || readTimeout.isNegative()) {
+            throw new IllegalArgumentException("Positive connection and response deadlines are required.");
+        }
+        Shipped known = SHIPPED.get(normalised(providerName));
+        if (known == null || !known.capabilities().contains(AiCapability.CHAT)) {
+            return Optional.empty();
+        }
+        return Optional.of(switch (known.name()) {
+            case AnthropicChatModel.PROVIDER_NAME -> new AnthropicChatModel(settings, connectTimeout, readTimeout);
+            case GatewayChatModel.PROVIDER_NAME   -> new GatewayChatModel(settings, connectTimeout, readTimeout);
+            default -> new OpenAiChatModel(settings, known.name(), known.defaultApiUrl(), connectTimeout, readTimeout);
+        });
+    }
+
+    /** Builds a shipped CHAT model with explicit bounded HTTP response admission. */
+    public static Optional<ChatModel> modelFor(String providerName, ProviderSettingsSource settings, ChatHttpPolicy policy) {
+        java.util.Objects.requireNonNull(policy, "CHAT HTTP policy is required.");
+        Shipped known = SHIPPED.get(normalised(providerName));
+        if (known == null || !known.capabilities().contains(AiCapability.CHAT)) {
+            return Optional.empty();
+        }
+        return Optional.of(switch (known.name()) {
+            case AnthropicChatModel.PROVIDER_NAME -> new AnthropicChatModel(settings, policy);
+            case GatewayChatModel.PROVIDER_NAME   -> new GatewayChatModel(settings, policy);
+            default -> new OpenAiChatModel(settings, known.name(), known.defaultApiUrl(), policy);
         });
     }
 

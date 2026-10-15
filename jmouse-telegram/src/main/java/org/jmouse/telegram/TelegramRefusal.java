@@ -101,6 +101,28 @@ public sealed interface TelegramRefusal {
         }
     }
 
+    /**
+     * The person has never pressed Start in this bot, and a bot cannot write first.
+     *
+     * <p>⚠️ <strong>Not a blocked bot, and must not be treated as one.</strong> It is what a shared
+     * notification bot answers for somebody who bound through a product's own bot: the private chat's id
+     * is the person's Telegram id for every bot, so the binding is right — they have only to start this
+     * bot once. Deactivating the binding here would switch off a person who did nothing wrong.
+     */
+    record ConversationNotStarted(String chat) implements TelegramRefusal {
+
+        @Override
+        public String message() {
+            return "the person in chat %s has never started this bot; a bot cannot write first — ask them to press Start in it once"
+                    .formatted(chat);
+        }
+
+        @Override
+        public boolean retryable() {
+            return false;
+        }
+    }
+
     /** The destination does not exist, or this identity cannot see it. */
     record ChatNotFound(String chat) implements TelegramRefusal {
 

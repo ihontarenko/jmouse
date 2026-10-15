@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
-        <version>1.0.0-b20260902</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -53,6 +53,12 @@
             <artifactId>jmouse-telegram</artifactId>
         </dependency>
 
+        <!-- Tokens are vault references (vault:telegram/<purpose>/token), resolved at each use. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-vault</artifactId>
+        </dependency>
+
         <!-- The Bot API transport. Not optional: an application wiring Telegram with no transport at
              all would get a gateway that refuses everything, which is a worse default than a
              dependency it does not notice. -->
@@ -69,6 +75,21 @@
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-telegram-jpa</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Acting as a person. Optional, and inert until the product supplies a UserClientFactory over the
+             MTProto library it accepted (decided 2026-09-29: no tdlight in the framework). -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-telegram-user</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- Bot commands. Optional: the router appears only when the product put it on its classpath. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-telegram-command</artifactId>
+            <version>${project.version}</version>
             <optional>true</optional>
         </dependency>
 

@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260902</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -60,6 +60,11 @@
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-telegram</artifactId>
+        </dependency>
+        <!-- The credential column is sealed by the vault's cipher, under the vault's keyring. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-vault</artifactId>
         </dependency>
 
         <!-- Jakarta Persistence only. No Spring Data, no Spring: transaction demarcation belongs to

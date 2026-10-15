@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-money-jpa</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Money JPA</name>
   <description>jMouse Framework - Exchange rates over Jakarta Persistence, with their own migration history</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-money-jpa</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-money</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -71,6 +71,36 @@ public interface TelegramBindings {
     List<Binding> allFor(String subject);
 
     /**
+     * The subject a Telegram user is bound as — what a bot command acts as.
+     *
+     * <p>⚠️ <strong>Empty when the user is bound as more than one subject.</strong> Picking one would let
+     * a command act as whichever row a query happened to return first; a person bound twice is asked to
+     * sort it out rather than guessed at.
+     *
+     * @param telegramUserId the sender's id — ⚠️ never the username, which is optional and changeable
+     */
+    Optional<String> subjectOf(long telegramUserId);
+
+    /**
+     * One page of every binding, newest first — what an administration table draws.
+     *
+     * @param deliverable only deliverable ones ({@code true}), only switched-off ones ({@code false}), or
+     *                    both ({@code null})
+     */
+    BindingPage page(Boolean deliverable, int offset, int limit);
+
+    /**
+     * @param bindings this page
+     * @param total    how many match in all, for the pager
+     */
+    record BindingPage(List<Binding> bindings, long total) {
+
+        public BindingPage {
+            bindings = List.copyOf(bindings);
+        }
+    }
+
+    /**
      * Stops sending to a chat.
      *
      * <p>⚠️ <strong>This is what a {@code BotBlocked} refusal must call.</strong> The person turned the

@@ -1,0 +1,13 @@
+symbol "Resistor" as resistor-symbol {
+    meta {
+        summary "Resistor, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-16V-7H16V7H-16V0M16 0H40"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

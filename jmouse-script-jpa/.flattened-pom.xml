@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-script-jpa</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Script (storage)</name>
   <description>jMouse Framework - where jMS rules are kept: the documents, what they are assigned to, and the store that binds them</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-script-jpa</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-script</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

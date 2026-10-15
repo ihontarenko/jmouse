@@ -1,0 +1,17 @@
+component "Voltage source" as voltage-source type voltage-source {
+    meta {
+        summary "Two-terminal voltage source: constant, a step, a sine or a square — drawn as alternating when it alternates"
+        category circuits
+    }
+    parameters {
+        U_output = 5 V "source voltage"
+    }
+    pins {
+        positive analog 1 "positive terminal"
+        negative analog 2 "negative terminal"
+    }
+    symbol uses voltage-source-symbol, alternating-source-symbol {
+        a positive
+        b negative
+    }
+}

@@ -33,7 +33,7 @@ public class PrefixUnaryOperation extends UnaryOperation {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        Object     value      = operand.evaluate(context);
+        Object     value      = UnaryOperation.countingFromZero(operand, operator, operand.evaluate(context));
         Conversion conversion = context.getConversion();
 
         if (operand instanceof PropertyNode property && (operator == INCREMENT || operator == DECREMENT)) {

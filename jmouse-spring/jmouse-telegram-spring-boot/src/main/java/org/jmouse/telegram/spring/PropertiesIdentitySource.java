@@ -5,8 +5,12 @@ import org.jmouse.telegram.TelegramException;
 import org.jmouse.telegram.TelegramIdentity;
 import org.jmouse.telegram.TelegramRefusal;
 
+import org.jmouse.vault.SecretReference;
+import org.jmouse.vault.Vault;
+
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Identities out of {@code jmouse.telegram.identities}.
@@ -24,9 +28,19 @@ import java.util.Objects;
 public final class PropertiesIdentitySource implements IdentitySource {
 
     private final Map<String, TelegramSettings.Identity> identities;
+    private final Supplier<Vault>                        vault;
 
     public PropertiesIdentitySource(TelegramSettings settings) {
+        this(settings, () -> null);
+    }
+
+    /**
+     * @param vault resolves a token written as {@code vault:<name>}, at each use; may supply null when
+     *              the application has no vault, and such a token is then refused
+     */
+    public PropertiesIdentitySource(TelegramSettings settings, Supplier<Vault> vault) {
         this.identities = Objects.requireNonNull(settings, "settings").identities();
+        this.vault      = Objects.requireNonNull(vault, "vault");
     }
 
     @Override
@@ -57,6 +71,19 @@ public final class PropertiesIdentitySource implements IdentitySource {
         }
 
         return new TelegramIdentity(
-                configured.kind(), purpose, configured.token(), configured.apiBase());
+                configured.kind(), purpose, tokenOf(purpose, configured.token()), configured.apiBase());
+    }
+
+    private String tokenOf(String purpose, String configured) {
+        SecretReference reference = SecretReference.parse(configured);
+
+        if (reference == null) {
+            throw new TelegramException(new TelegramRefusal.Unauthorized(purpose, "the identity has no token"));
+        }
+
+        return reference.resolve(vault.get())
+                .orElseThrow(() -> new TelegramException(new TelegramRefusal.Unauthorized(purpose,
+                        "the token %s is not in the vault".formatted(reference))))
+                .reveal();
     }
 }

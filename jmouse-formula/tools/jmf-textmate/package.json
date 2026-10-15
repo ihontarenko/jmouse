@@ -1,0 +1,37 @@
+{
+  "name": "jmf-textmate",
+  "displayName": "jMouse Formula (.jmf)",
+  "description": "Syntax highlighting for jMF — jMouse Formula, the mathematical dialect of jME.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jmf",
+        "aliases": [
+          "jMouse Formula",
+          "jMF",
+          "jmf"
+        ],
+        "extensions": [
+          ".jmf"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jmf",
+        "scopeName": "source.jmf",
+        "path": "./syntaxes/jmf.tmLanguage.json"
+      }
+    ]
+  }
+}

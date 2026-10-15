@@ -1,0 +1,13 @@
+symbol "Lamp" as lamp-symbol {
+    meta {
+        summary "Lamp, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-14M14 0H40M-14 0A14 14 0 1 0 14 0A14 14 0 1 0-14 0M-10-10L10 10M10-10L-10 10"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

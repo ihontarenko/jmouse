@@ -17,7 +17,8 @@ class VoyageProtocolTest {
 
     @Test
     void explicitRetrievalRoleOrderedVectorsAndVoyageUsage() {
-        assertEquals(Set.of(AiCapability.EMBEDDINGS), ProviderCatalog.capabilities("voyage"));
+        assertEquals(Set.of(AiCapability.EMBEDDINGS, AiCapability.RERANK), ProviderCatalog.capabilities("voyage"));
+        assertEquals("https://api.voyageai.com/v1/embeddings", ProviderCatalog.defaultAddress("voyage", AiCapability.EMBEDDINGS).orElseThrow());
         assertTrue(ProviderCatalog.modelFor("voyage", () -> settings).isEmpty());
         for (var role : EmbeddingModel.InputType.values()) {
             EmbeddingTransport transport = (uri, provider, rawBody, bounds) -> {

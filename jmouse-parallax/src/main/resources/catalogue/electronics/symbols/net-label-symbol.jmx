@@ -1,0 +1,12 @@
+symbol "Net label" as net-label-symbol {
+    meta {
+        summary "A net's label: a tag on a short lead, the net's name over it. Every label of one name is one net — a rail or any signal — with no wire drawn between them, as KiCad's labels are."
+        category circuits
+        tags electronics, schematic
+    }
+    size 40 x 40
+    path "M0 20V10"
+    path "M0 10L-7 4V-8H7V4Z"
+    pin label at 0, 20
+    label name at 0, -16
+}

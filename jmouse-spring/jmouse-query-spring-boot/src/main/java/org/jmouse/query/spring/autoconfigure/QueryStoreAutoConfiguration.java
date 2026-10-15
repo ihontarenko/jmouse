@@ -20,6 +20,7 @@ import org.jmouse.query.store.SchemaCatalog;
 import org.jmouse.query.store.jpa.JpaAuthoredSources;
 import org.jmouse.query.store.jpa.JpaSavedQueries;
 import org.jmouse.query.store.jpa.migration.QueryStoreMigrations;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -60,7 +61,12 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration(after = {QueryAutoConfiguration.class, QueryBuilderAutoConfiguration.class}, afterName = {
+        "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration",
+        "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
+        "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration",
+        "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+})
 @ConditionalOnClass({JpaSavedQueries.class, EntityManager.class})
 public class QueryStoreAutoConfiguration {
 

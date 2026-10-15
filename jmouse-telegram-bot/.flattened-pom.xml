@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-telegram-bot</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Telegram Bot API</name>
   <description>jMouse Framework - Telegram Bot API transport over the JDK HTTP client (sending, editing, media, keyboards, forum topics, refusal translation)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-telegram-bot</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-telegram</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

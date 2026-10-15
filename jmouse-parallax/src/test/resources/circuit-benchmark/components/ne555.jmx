@@ -1,0 +1,137 @@
+# Mixed signal in one small part. The divider and the output stage are analog; the two comparators are crossings
+# (`on above` / `on below`); the flip-flop between them is a discrete state the equations read; the output follows it
+# with a finite edge.
+
+component "NE555" as ne555 type timer {
+    meta {
+        summary "Precision timer, 4.5 V to 16 V"
+        source "TI NE555 datasheet (SLFS022)"
+        package "SOIC-8"
+        category circuits
+    }
+    formulas "smooth-transitions"
+
+    parameters {
+        R_divider = 5 kOhm           "each of the three divider resistors"
+        V_output_high_drop = 1.7 V          "output high sits this far below Vcc"
+        V_output_low = 0.1 V                "output low"
+        R_output = 2 Ohm
+        I_output_limit = 200 mA             "output sink and source"
+        switching_time = 100 ns            "output rise and fall time"
+        R_discharge = 10 Ohm         "discharge transistor, on"
+        I_discharge = 50 mA          "discharge transistor, saturation"
+        V_reset = 0.7 V              "reset threshold"
+        I_trigger = 0.5 uA           "out of TRIG"
+        I_threshold = 0.1 uA         "into THR"
+        I_quiescent = 3 mA                   "supply current at 5 V"
+    }
+
+    pins {
+        GND ground 1
+        trigger analog input 2         "trigger: sets below Vcc / 3"
+        output analog output 3
+        reset analog input 4        "active low"
+        control analog 5               "control voltage, the 2/3 Vcc tap"
+        threshold analog input 6          "threshold: resets above 2/3 Vcc"
+        discharge analog output 7         "discharge, open collector"
+        Vcc power 8
+    }
+
+    nodes {
+        lower                       "the 1/3 Vcc tap of the internal divider"
+    }
+
+    symbol box {
+        left trigger, threshold, control
+        right output, discharge
+        top Vcc, reset
+        bottom GND
+    }
+
+    state {
+        latched = 0 discrete        "the internal flip-flop; written by the behaviour, read by the equations"
+        shown = 0 continuous        "the output stage following it with a finite edge"
+    }
+
+    equations {
+        current Vcc -> control = (Vcc - control) / R_divider
+        current control -> lower = (control - lower) / R_divider
+        current lower -> GND = (lower - GND) / R_divider
+
+        d(shown)/dt = (latched - shown) / switching_time
+
+        local target = GND + V_output_low + shown * ((Vcc - GND) - V_output_high_drop - V_output_low)
+        local drive = (target - output) / R_output
+        current Vcc -> output = I_output_limit * tanh(soft_positive_part(drive, 0.0001) / I_output_limit)
+        current output -> GND = I_output_limit * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_limit)
+
+        # The discharge transistor conducts while the output is low.
+        current discharge -> GND = (1 - shown) * I_discharge * tanh((discharge - GND) / (R_discharge * I_discharge))
+
+        current Vcc -> trigger = I_trigger
+        current threshold -> GND = I_threshold
+        current Vcc -> GND = I_quiescent * tanh(Vcc - GND)
+    }
+
+    behaviour {
+        on start do
+            if (reset - GND) > V_reset and (trigger - lower) < 0 then
+                latched = 1
+            end
+        end
+
+        # the trigger fell under Vcc / 3: set
+        on below 'trigger - lower' when (reset - GND) > V_reset do
+            latched = 1
+        end
+
+        # the threshold rose over 2/3 Vcc: reset, unless the trigger still holds it set
+        on above 'threshold - control' when (trigger - lower) > 0 do
+            latched = 0
+        end
+
+        # the trigger let go while the threshold was already over
+        on above 'trigger - lower' when (threshold - control) > 0 do
+            latched = 0
+        end
+
+        # reset dominates
+        on below 'reset - GND - V_reset' do
+            latched = 0
+        end
+    }
+
+    expect "astable frequency" from "applications, astable: f = 1.44 / ((RA + 2 RB) C) = 6.86 kHz" {
+        bench for 3 ms {
+            V1 voltage-source (Vcc, 0) U_output = 5 V
+            R1 resistor (Vcc, discharge) resistance = 1 kOhm
+            R2 resistor (discharge, threshold) resistance = 10 kOhm
+            C1 capacitor (threshold, 0) capacitance = 10 nF
+            U1 self (Vcc = Vcc, GND = 0, trigger = threshold, threshold = threshold, discharge = discharge, output = output, reset = Vcc)
+        }
+        measure frequency output above 2.5 V after 1 ms
+        near 6.86 kHz +- 5%
+    }
+
+    expect "astable duty cycle" from "applications, astable: D = (RA + RB) / (RA + 2 RB) = 52.4%" {
+        bench for 3 ms {
+            V1 voltage-source (Vcc, 0) U_output = 5 V
+            R1 resistor (Vcc, discharge) resistance = 1 kOhm
+            R2 resistor (discharge, threshold) resistance = 10 kOhm
+            C1 capacitor (threshold, 0) capacitance = 10 nF
+            U1 self (Vcc = Vcc, GND = 0, trigger = threshold, threshold = threshold, discharge = discharge, output = output, reset = Vcc)
+        }
+        measure duty output above 2.5 V after 1 ms
+        near 0.524 +- 3%
+    }
+
+    expect "output high sourcing 100 mA at 15 V" from "electrical characteristics, VOH min 12.75 V" {
+        bench for 100 us {
+            V1 voltage-source (Vcc, 0) U_output = 15 V
+            R1 resistor (output, 0) resistance = 130 Ohm
+            U1 self (Vcc = Vcc, GND = 0, trigger = 0, threshold = 0, output = output, reset = Vcc)
+        }
+        measure final output
+        within 12.75 V .. 15 V
+    }
+}

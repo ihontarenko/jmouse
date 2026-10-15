@@ -1,6 +1,7 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.extension.Operator;
+import org.jmouse.el.extension.operator.UnaryOperator;
 import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
@@ -55,6 +56,23 @@ abstract public class UnaryOperation extends AbstractExpression {
      *
      * @return the operand tag
      */
+    /**
+     * The value a step operator starts from: a variable never assigned counts from zero.
+     *
+     * <p>{@code taken++} on a name that does not exist yet is the first line of every counter, and it
+     * used to fail on the missing value's type. Only {@code ++} and {@code --} on a variable get the
+     * zero; every other operator, and every operand that is not a variable, sees the value as it is.</p>
+     *
+     * @param operand  what the operator applies to
+     * @param operator the operator
+     * @param value    the operand's evaluated value
+     * @return {@code 0} for an unassigned variable under {@code ++} or {@code --}; {@code value} otherwise
+     */
+    public static Object countingFromZero(Expression operand, Operator operator, Object value) {
+        boolean step = operator == UnaryOperator.INCREMENT || operator == UnaryOperator.DECREMENT;
+        return value == null && step && operand instanceof PropertyNode ? Integer.valueOf(0) : value;
+    }
+
     public Expression getOperand() {
         return operand;
     }

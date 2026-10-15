@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-script-spring-boot</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Script Spring Boot Starter</name>
   <description>Spring Boot auto-configuration for jMS rules: the stage registry and dispatcher, the
         document store and its index, the event bridge, and the library's own schema migration</description>
@@ -31,19 +31,19 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-script-el</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-script</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-script-jpa</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>

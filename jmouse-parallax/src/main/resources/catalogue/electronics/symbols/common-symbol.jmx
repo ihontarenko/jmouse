@@ -1,0 +1,11 @@
+symbol "Common, 0 V" as common-symbol {
+    meta {
+        summary "The circuit's 0 V — the common of a bipolar supply —, drawn as an open triangle rather than an earth"
+        category circuits
+        tags electronics, schematic
+    }
+    size 40 x 40
+    path "M0-20V0M-12 0H12L0 12Z"
+    pin common at 0, -20
+    label name at 0, 24
+}

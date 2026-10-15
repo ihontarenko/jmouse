@@ -19,9 +19,11 @@ import java.time.LocalDateTime;
  * being usable as a library. Several rows may exist for one application; exactly one of them should be
  * {@link #active}, and the source refuses rather than guesses when none is.
  *
- * <p>⚠️ The key is stored as given. Encrypting it at rest is a product's decision and belongs behind
- * whatever secret handling that product already has — a library that encrypted it would be choosing
- * the key management too.
+ * <p>⚠️ <strong>{@link #apiKey} holds the stored form, not the key.</strong> Sealed by a
+ * the vault's {@code SecretCipher} when the installation configures a vault key ({@code sealed:v3:…}), as
+ * given when it does not, and as given in every row written before encryption existed. Reading it in
+ * the clear goes through {@code CredentialProtection}; nothing should read this column directly and
+ * hand the result to a provider.
  */
 @Entity
 @Table(name = AiProviderSettings.TABLE_NAME)
@@ -79,12 +81,28 @@ public class AiProviderSettings {
     @Column(name = "provider", length = 32, nullable = false)
     private String provider;
 
-    @Column(name = "api_key", length = 255)
+    /** The stored form — see the class comment. Wide enough for a sealed 255-character key. */
+    @Column(name = "api_key", length = 1024)
     private String apiKey;
+
+    /**
+     * Identifies the key without revealing it, so rows sharing one key can still be found when each
+     * holds a differently sealed value. See {@code CredentialFingerprint}. Null when there is no key,
+     * and in a legacy row until the credential upgrade has passed over it.
+     */
+    @Column(name = "api_key_fingerprint", length = 64)
+    private String apiKeyFingerprint;
 
     /** Null or blank means the provider's own address. */
     @Column(name = "api_url", length = 255)
     private String apiUrl;
+
+    /**
+     * The vault credential the URL and key come from. When set, {@link #apiKey} and {@link #apiUrl} are empty:
+     * the row names the account and the vault holds it.
+     */
+    @Column(name = "credential_name", length = 255)
+    private String credentialName;
 
     @Column(name = "model", length = 128, nullable = false)
     private String model;
@@ -119,6 +137,7 @@ public class AiProviderSettings {
             String        application,
             String        provider,
             String        apiKey,
+            String        apiKeyFingerprint,
             String        apiUrl,
             String        model,
             int           maximumTokens,
@@ -129,13 +148,14 @@ public class AiProviderSettings {
         this.id            = id;
         this.application   = application;
         this.provider      = provider;
-        this.apiKey        = apiKey;
-        this.apiUrl        = apiUrl;
-        this.model         = model;
-        this.maximumTokens = maximumTokens;
-        this.active        = active;
-        this.createdAt     = createdAt;
-        this.updatedAt     = updatedAt;
+        this.apiKey            = apiKey;
+        this.apiKeyFingerprint = apiKeyFingerprint;
+        this.apiUrl            = apiUrl;
+        this.model             = model;
+        this.maximumTokens     = maximumTokens;
+        this.active            = active;
+        this.createdAt         = createdAt;
+        this.updatedAt         = updatedAt;
     }
 
     public String getId() {
@@ -159,8 +179,13 @@ public class AiProviderSettings {
         return provider;
     }
 
+    /** ⚠️ The stored form, possibly sealed — not something to send to a provider. */
     public String getApiKey() {
         return apiKey;
+    }
+
+    public String getApiKeyFingerprint() {
+        return apiKeyFingerprint;
     }
 
     public String getApiUrl() {
@@ -198,13 +223,31 @@ public class AiProviderSettings {
         this.provider = provider;
     }
 
-    /** ⚠️ Only when a new one was actually given: a blank field on a form must not erase the key. */
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    /**
+     * ⚠️ Only when a new one was actually given: a blank field on a form must not erase the key.
+     *
+     * <p>Both at once, because a stored key whose fingerprint describes a different key would group this
+     * row with the wrong provider account.
+     */
+    public void replaceApiKey(String storedApiKey, String apiKeyFingerprint) {
+        this.apiKey            = storedApiKey;
+        this.apiKeyFingerprint = apiKeyFingerprint;
     }
 
     public void setApiUrl(String apiUrl) {
         this.apiUrl = apiUrl;
+    }
+
+    public String getCredentialName() {
+        return credentialName;
+    }
+
+    /** Points the row at a vault credential and empties the columns that held the URL and key on the row. */
+    public void useCredential(String credentialName) {
+        this.credentialName    = credentialName;
+        this.apiKey            = null;
+        this.apiKeyFingerprint = null;
+        this.apiUrl            = null;
     }
 
     public void setModel(String model) {

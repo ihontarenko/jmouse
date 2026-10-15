@@ -1,0 +1,13 @@
+symbol "Composite signal source" as composite-source-symbol {
+    meta {
+        summary "A voltage source that sums several signals — a slow wave and a fast one over it, in the circle"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-16M16 0H40M-16 0A16 16 0 1 0 16 0A16 16 0 1 0-16 0M-11 0C-8-9-3-9 0 0S8 9 11 0M-11 2L-9-1L-7 3L-5-2L-3 2L-1-2L1 2L3-2L5 2L7-2L9 2L11-1M-26-9V-3M-29-6H-23"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

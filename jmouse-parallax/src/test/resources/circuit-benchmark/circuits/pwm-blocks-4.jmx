@@ -1,0 +1,61 @@
+# The engine's heavier benchmark: four PWM blocks on one supply, each an NE555 astable whose wiper sets the duty, an RC
+# filter and an LM358 follower driving a load. The blocks run at different periods, so their edges never line up and
+# every one of them shortens the steps of the whole circuit — the case a circuit cut into parts is built for.
+# Fixed on purpose: a benchmark compares against its own past, so it never follows the catalogue.
+
+circuit "Four PWM blocks with followers" as pwm-blocks-4 {
+    meta {
+        summary "Benchmark: 4 × [NE555 PWM + RC + LM358 follower] on one supply, at four periods."
+        category circuits
+    }
+    parameters {
+        U = 12 V in 5 .. 15 step 0.5 "Supply voltage"
+    }
+    parts {
+        V1 voltage-source (vcc, 0) waveform = step, U_output = U
+        R1_1 resistor (vcc, discharge_1) resistance = 1000
+        P1_1 potentiometer (a = charge_1, w = discharge_1, b = drain_1) resistance = 100000
+        D1_1 1n4148 (anode = charge_1, cathode = timing_1)
+        D2_1 1n4148 (anode = timing_1, cathode = drain_1)
+        CT_1 capacitor (timing_1, 0) capacitance = 10e-9
+        U1_1 ne555 (Vcc = vcc, GND = 0, trigger = timing_1, threshold = timing_1, discharge = discharge_1, output = pwm_1, reset = vcc)
+        R2_1 resistor (pwm_1, out_1) resistance = 4700
+        C1_1 capacitor (out_1, 0) capacitance = 1e-6
+        U2_1 lm358 (A.non_inverting_input = out_1, A.inverting_input = buffered_1, A.output = buffered_1, Vcc = vcc, GND = 0)
+        RL_1 resistor (buffered_1, 0) resistance = 10000
+        R1_2 resistor (vcc, discharge_2) resistance = 1000
+        P1_2 potentiometer (a = charge_2, w = discharge_2, b = drain_2) resistance = 68000
+        D1_2 1n4148 (anode = charge_2, cathode = timing_2)
+        D2_2 1n4148 (anode = timing_2, cathode = drain_2)
+        CT_2 capacitor (timing_2, 0) capacitance = 10e-9
+        U1_2 ne555 (Vcc = vcc, GND = 0, trigger = timing_2, threshold = timing_2, discharge = discharge_2, output = pwm_2, reset = vcc)
+        R2_2 resistor (pwm_2, out_2) resistance = 4700
+        C1_2 capacitor (out_2, 0) capacitance = 1e-6
+        U2_2 lm358 (A.non_inverting_input = out_2, A.inverting_input = buffered_2, A.output = buffered_2, Vcc = vcc, GND = 0)
+        RL_2 resistor (buffered_2, 0) resistance = 10000
+        R1_3 resistor (vcc, discharge_3) resistance = 1000
+        P1_3 potentiometer (a = charge_3, w = discharge_3, b = drain_3) resistance = 47000
+        D1_3 1n4148 (anode = charge_3, cathode = timing_3)
+        D2_3 1n4148 (anode = timing_3, cathode = drain_3)
+        CT_3 capacitor (timing_3, 0) capacitance = 10e-9
+        U1_3 ne555 (Vcc = vcc, GND = 0, trigger = timing_3, threshold = timing_3, discharge = discharge_3, output = pwm_3, reset = vcc)
+        R2_3 resistor (pwm_3, out_3) resistance = 4700
+        C1_3 capacitor (out_3, 0) capacitance = 1e-6
+        U2_3 lm358 (A.non_inverting_input = out_3, A.inverting_input = buffered_3, A.output = buffered_3, Vcc = vcc, GND = 0)
+        RL_3 resistor (buffered_3, 0) resistance = 10000
+        R1_4 resistor (vcc, discharge_4) resistance = 1000
+        P1_4 potentiometer (a = charge_4, w = discharge_4, b = drain_4) resistance = 150000
+        D1_4 1n4148 (anode = charge_4, cathode = timing_4)
+        D2_4 1n4148 (anode = timing_4, cathode = drain_4)
+        CT_4 capacitor (timing_4, 0) capacitance = 10e-9
+        U1_4 ne555 (Vcc = vcc, GND = 0, trigger = timing_4, threshold = timing_4, discharge = discharge_4, output = pwm_4, reset = vcc)
+        R2_4 resistor (pwm_4, out_4) resistance = 4700
+        C1_4 capacitor (out_4, 0) capacitance = 1e-6
+        U2_4 lm358 (A.non_inverting_input = out_4, A.inverting_input = buffered_4, A.output = buffered_4, Vcc = vcc, GND = 0)
+        RL_4 resistor (buffered_4, 0) resistance = 10000
+    }
+    analysis transient for 0.02 s
+    view {
+        transient_response primary
+    }
+}

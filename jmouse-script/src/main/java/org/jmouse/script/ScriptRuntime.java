@@ -1,8 +1,8 @@
 package org.jmouse.script;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.script.el.host.BoundScript;
-import org.jmouse.script.el.host.ScriptHost;
+import org.jmouse.script.host.BoundScript;
+import org.jmouse.script.host.ScriptHost;
 import org.jmouse.script.spi.ScriptDocuments;
 import org.jmouse.script.spi.ScriptStage;
 import org.slf4j.Logger;
@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * The one place rules are actually run.
@@ -75,6 +76,34 @@ public class ScriptRuntime {
      * @throws ScriptRefusedException when a rule objected; the caller decides what that means
      */
     public int dispatch(ScriptStage<?> stage, String scope, Map<String, Object> values) {
+        return dispatch(stage, scope, values, host::newContext);
+    }
+
+    /**
+     * Opens a session: one evaluation context per script, kept for as long as the session lives, so a
+     * variable a handler assigns — {@code taken++} — is still there on the next dispatch.
+     *
+     * @return an empty session
+     * @see ScriptSession
+     */
+    public ScriptSession session() {
+        return new ScriptSession(this, Map.of());
+    }
+
+    /**
+     * Reopens a session from the variables an earlier one {@linkplain ScriptSession#variables() exported},
+     * so a host can persist a session beside its own checkpoint and continue it.
+     *
+     * @param variables the exported variables, by script name
+     * @return a session that starts from them
+     */
+    public ScriptSession session(Map<String, Map<String, Object>> variables) {
+        return new ScriptSession(this, variables);
+    }
+
+    /** As {@link #dispatch(ScriptStage, String, Map)}, with each script's context taken from {@code contexts}. */
+    int dispatch(ScriptStage<?> stage, String scope, Map<String, Object> values,
+                 Function<BoundScript, EvaluationContext> contexts) {
         List<BoundScript> assigned = documents.forStage(scope, stage.name());
 
         if (assigned.isEmpty()) {
@@ -94,7 +123,7 @@ public class ScriptRuntime {
                 continue;
             }
 
-            ran += run(script, stage.name(), scope, values);
+            ran += run(script, stage.name(), scope, values, contexts.apply(script));
         }
 
         return ran;
@@ -110,18 +139,22 @@ public class ScriptRuntime {
      * @return 1 if it ran, 0 if no bound, enabled document of that name handles the stage
      */
     public int dispatchOne(ScriptStage<?> stage, String scope, String documentName, Map<String, Object> values) {
+        return dispatchOne(stage, scope, documentName, values, host::newContext);
+    }
+
+    /** As {@link #dispatchOne(ScriptStage, String, String, Map)}, with the context taken from {@code contexts}. */
+    int dispatchOne(ScriptStage<?> stage, String scope, String documentName, Map<String, Object> values,
+                    Function<BoundScript, EvaluationContext> contexts) {
         for (BoundScript script : documents.forStage(scope, stage.name())) {
             if (script.getName().equals(documentName) && !script.handlersFor(stage.name()).isEmpty()) {
-                return run(script, stage.name(), scope, values);
+                return run(script, stage.name(), scope, values, contexts.apply(script));
             }
         }
 
         return 0;
     }
 
-    private int run(BoundScript script, String stage, String scope, Map<String, Object> values) {
-        EvaluationContext context = host.newContext(script);
-
+    private int run(BoundScript script, String stage, String scope, Map<String, Object> values, EvaluationContext context) {
         values.forEach(context::setValue);
 
         LOGGER.debug("running '{}' at '{}'", script.getName(), stage);

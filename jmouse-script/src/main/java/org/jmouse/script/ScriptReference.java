@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * <h2>⚠️ NOT {@code ScriptCatalogue} — THE LANGUAGE ALREADY HAS ONE, AND IT IS A DIFFERENT THING</h2>
  *
- * <p>{@code org.jmouse.script.el.host.ScriptCatalogue} is the <b>closed set of names a script may
+ * <p>{@code org.jmouse.script.host.ScriptCatalogue} is the <b>closed set of names a script may
  * call</b> — the security boundary itself. This is the <b>reference somebody reads before writing a
  * rule</b>. Sharing a name would put two unrelated ideas one import apart, and any file wiring both
  * would have to spell one of them out in full to say which it meant.</p>

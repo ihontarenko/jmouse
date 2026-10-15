@@ -1,0 +1,13 @@
+symbol "Bench power supply" as bench-supply-symbol {
+    meta {
+        summary "A DC supply with a current limit, as drawn on a schematic: a source with the DC mark and a limit bar"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-16M16 0H40M-16 0A16 16 0 1 0 16 0A16 16 0 1 0-16 0M-8-3H8M-8 3H-4M-1 3H2M5 3H8M-6 9H6M-26-9V-3M-29-6H-23"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

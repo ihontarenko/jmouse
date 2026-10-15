@@ -1,0 +1,11 @@
+symbol "Ground" as ground-symbol {
+    meta {
+        summary "Ground, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 60 x 40
+    path "M0-20V0M-16 0H16M-10 6H10M-4 12H4"
+    pin ground at 0, -20
+    label name at 0, 26
+}

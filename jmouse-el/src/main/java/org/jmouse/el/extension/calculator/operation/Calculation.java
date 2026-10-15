@@ -95,6 +95,10 @@ public class Calculation {
             return java.math.BigDecimal.valueOf(((Number) value).longValue());
         }
 
+        if (other instanceof java.math.BigInteger) {
+            return java.math.BigInteger.valueOf(((Number) value).longValue());
+        }
+
         if (other instanceof Double || other instanceof Float) {
             return ((Number) value).doubleValue();
         }

@@ -1,0 +1,35 @@
+# A real PWM generator, not a square-wave source: an NE555 in astable mode whose duty cycle is set by a
+# potentiometer between two diodes. The timing capacitor charges through R1, the wiper's upper half and D1, and
+# discharges through D2 and the lower half into pin 7 — so the wiper moves the duty while the period stays nearly
+# constant, f ≈ 1.44 / ((R1 + RP) · CT). The 555's comparators, flip-flop and output stage are its own model.
+
+circuit "PWM from a 555 and output filter" as pwm-filter-lab {
+    meta {
+        summary "A real NE555 PWM generator: the potentiometer sets the duty cycle while it runs, the RC filter turns the pulses into a voltage."
+        category circuits
+        tags pwm, filter, timer, hands-on
+        purpose "PWM pulses from a real timer, filtered output and ripple" "Measure"
+    }
+    parameters {
+        U = 12 V in 5 .. 15 step 0.5 "Supply voltage"
+        RP = 100 kΩ in 10 .. 470 step 10 "Potentiometer value — sets the period; its wiper (live part P1) sets the duty"
+        CT = 10 nF in 1 .. 100 step 1 "Timing capacitance"
+        R = 4.7 kΩ in 0.1 .. 47 step 0.1 "Filter resistance"
+        C = 1 µF in 0.1 .. 10 step 0.1 "Filter capacitance"
+    }
+    parts {
+        V1 voltage-source (vcc, 0) waveform = step, U_output = U
+        R1 resistor (vcc, discharge) resistance = 1000
+        P1 potentiometer (a = charge, w = discharge, b = drain) resistance = RP
+        D1 1n4148 (anode = charge, cathode = timing)
+        D2 1n4148 (anode = timing, cathode = drain)
+        CT1 capacitor (timing, 0) capacitance = CT
+        U1 ne555 (Vcc = vcc, GND = 0, trigger = timing, threshold = timing, discharge = discharge, output = pwm, reset = vcc)
+        R2 resistor (pwm, out) resistance = R
+        C1 capacitor (out, 0) capacitance = C
+    }
+    analysis transient for 0.02 s
+    view {
+        transient_response primary
+    }
+}

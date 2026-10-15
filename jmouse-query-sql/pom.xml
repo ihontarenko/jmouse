@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260902</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -73,6 +73,24 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-jdbc</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!--
+            How a compiled statement BINDS is a question only a driver answers: the PostgreSQL driver
+            refused the Instant that now() used to be bound as, and nothing short of a real driver says
+            so. The database tests run against MySQL and PostgreSQL when an address is given for them
+            (JMOUSE_TEST_MYSQL_URL, JMOUSE_TEST_POSTGRESQL_URL) and are skipped otherwise; the MySQL
+            driver is already here through jmouse-jdbc.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

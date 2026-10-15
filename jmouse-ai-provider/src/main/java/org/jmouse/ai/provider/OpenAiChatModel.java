@@ -91,6 +91,21 @@ public final class OpenAiChatModel extends HttpChatModel {
         this.defaultApiUrl = DEFAULT_API_URL;
     }
 
+    /** Provider identity and transport deadlines are selected independently by the caller. */
+    public OpenAiChatModel(ProviderSettingsSource settingsSource, String providerName, String defaultApiUrl,
+                           Duration connectTimeout, Duration readTimeout) {
+        super(settingsSource, connectTimeout, readTimeout);
+        this.providerName  = providerName;
+        this.defaultApiUrl = defaultApiUrl == null ? DEFAULT_API_URL : defaultApiUrl;
+    }
+
+    /** The same bounded HTTP policy supports every OpenAI-compatible provider identity. */
+    public OpenAiChatModel(ProviderSettingsSource settingsSource, String providerName, String defaultApiUrl, ChatHttpPolicy policy) {
+        super(settingsSource, policy);
+        this.providerName  = providerName;
+        this.defaultApiUrl = defaultApiUrl == null ? DEFAULT_API_URL : defaultApiUrl;
+    }
+
     @Override
     public String providerName() {
         return providerName;

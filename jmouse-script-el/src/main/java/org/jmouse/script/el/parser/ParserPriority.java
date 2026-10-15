@@ -1,7 +1,9 @@
 package org.jmouse.script.el.parser;
 
 /**
- * The order the script parsers are offered a statement in, and why that order is what it is.
+ * The order jMS's own parsers are offered a statement in, and why that order is what it is. The statements
+ * inside a body are the core's, ordered by {@link org.jmouse.script.el.parser.StatementPriority} in the same
+ * scale — {@code include} at 1200, between these file-scope bands and the handler.
  *
  * <p>Dispatch asks every parser {@code supports(cursor)} in priority order and takes the first yes,
  * where a <em>lower</em> number is asked earlier. Two rules set the numbers below.</p>
@@ -11,7 +13,7 @@ package org.jmouse.script.el.parser;
  * everything that can identify itself by its first token.</p>
  *
  * <p><strong>Order is a safety net, not the mechanism.</strong> The matchers in
- * {@link org.jmouse.script.el.CursorMatcher} are written so that at most one of them can match any
+ * {@link org.jmouse.script.el.CursorMatcher} and {@link org.jmouse.script.el.StatementMatcher} are written so that at most one of them can match any
  * statement; a grammar whose correctness rests on which parser was registered first is a grammar one
  * refactor away from a silent change of meaning. These numbers exist so that if two shapes ever do
  * overlap, the more specific one is the one that wins.</p>
@@ -35,24 +37,10 @@ public final class ParserPriority {
      */
     public static final int SCRIPT    = Integer.MIN_VALUE + 1000;
     public static final int BEHAVIOUR = Integer.MIN_VALUE + 1100;
-    public static final int INCLUDE   = Integer.MIN_VALUE + 1200;
 
-    /** Declarations written inside a block. */
-    public static final int HANDLER  = Integer.MIN_VALUE + 2000;
-    public static final int FUNCTION = Integer.MIN_VALUE + 2100;
+    /** A handler is declared inside a block, just before a function (the core's {@code StatementPriority}). */
+    public static final int HANDLER = Integer.MIN_VALUE + 2000;
 
-    /** Statements written inside a body. */
-    public static final int BRANCH = Integer.MIN_VALUE + 3000;
-    public static final int LOOP   = Integer.MIN_VALUE + 3100;
-    public static final int LOCAL  = Integer.MIN_VALUE + 3200;
-    public static final int RETURN = Integer.MIN_VALUE + 3300;
-
-    /**
-     * ⚠️ Asked last of all the statements, because it is the only shape opening with a bare name and
-     * therefore the only one that could be offered somebody else's line. Everything with a keyword in
-     * front of it gets first refusal.
-     */
-    public static final int ASSIGNMENT = Integer.MIN_VALUE + 3900;
 
     private ParserPriority() {
     }

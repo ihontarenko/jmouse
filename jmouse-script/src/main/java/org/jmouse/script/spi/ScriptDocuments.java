@@ -1,6 +1,6 @@
 package org.jmouse.script.spi;
 
-import org.jmouse.script.el.host.BoundScript;
+import org.jmouse.script.host.BoundScript;
 
 import java.util.List;
 

@@ -62,6 +62,28 @@ public interface IdentitySource {
         return identity();
     }
 
+    /**
+     * The identity for a purpose, refused with a sentence when there is none or it has no credential.
+     *
+     * <p>What every router calls before it routes — one place, so the gateway and chat administration
+     * cannot disagree about what "no identity" means.
+     */
+    default TelegramIdentity require(String purpose) {
+        TelegramIdentity identity = identity(purpose);
+
+        if (identity == null) {
+            throw new TelegramException(new TelegramRefusal.Unauthorized(
+                    purpose, "no identity is configured for this purpose"));
+        }
+
+        if (!identity.hasCredential()) {
+            throw new TelegramException(new TelegramRefusal.Unauthorized(
+                    identity.name(), "the identity has no credential"));
+        }
+
+        return identity;
+    }
+
     /** One fixed identity, for a smoke class and for a product that configures its bot in properties. */
     static IdentitySource fixed(TelegramIdentity identity) {
         return () -> identity;

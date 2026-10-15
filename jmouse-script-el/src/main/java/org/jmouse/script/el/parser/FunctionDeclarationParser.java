@@ -1,5 +1,7 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.core.Priority;
 import org.jmouse.el.language.lexer.LanguageToken;
 import org.jmouse.el.language.parser.AbstractBodyParser;
@@ -8,9 +10,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.expression.SpanNode;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.SourceReader;
-import org.jmouse.script.el.lexer.ScriptToken;
 import org.jmouse.script.el.node.FunctionDeclarationNode;
 
 /**
@@ -23,7 +23,7 @@ import org.jmouse.script.el.node.FunctionDeclarationNode;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.FUNCTION)
+@Priority(StatementPriority.FUNCTION)
 public class FunctionDeclarationParser extends AbstractBodyParser<FunctionDeclarationNode, LanguageToken> {
 
     @Override
@@ -54,7 +54,7 @@ public class FunctionDeclarationParser extends AbstractBodyParser<FunctionDeclar
 
     @Override
     protected boolean matches(TokenCursor cursor) {
-        return CursorMatcher.function().matches(cursor);
+        return StatementMatcher.function().matches(cursor);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class FunctionDeclarationParser extends AbstractBodyParser<FunctionDeclar
 
     @Override
     protected void closeBlock(TokenCursor cursor) {
-        cursor.ensure(ScriptToken.T_END);
+        cursor.ensure(StatementToken.T_END);
     }
 
     @Override

@@ -50,6 +50,11 @@ final class BotApiErrors {
             return new TelegramRefusal.BotBlocked(chat);
         }
 
+        // ⚠️ Before the "not found" family, and distinct from a block: the person never started this bot.
+        if (text.contains("bot can't initiate conversation")) {
+            return new TelegramRefusal.ConversationNotStarted(chat);
+        }
+
         if (text.contains("chat not found")
                 || text.contains("peer_id_invalid")
                 || text.contains("user not found")) {

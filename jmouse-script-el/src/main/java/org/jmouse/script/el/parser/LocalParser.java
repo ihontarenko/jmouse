@@ -1,14 +1,14 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.core.Priority;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.AbstractParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.SourceReader;
-import org.jmouse.script.el.lexer.ScriptToken;
 import org.jmouse.script.el.node.LocalNode;
 
 /**
@@ -20,7 +20,7 @@ import org.jmouse.script.el.node.LocalNode;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.LOCAL)
+@Priority(StatementPriority.LOCAL)
 public class LocalParser extends AbstractParser {
 
     @Override
@@ -29,7 +29,7 @@ public class LocalParser extends AbstractParser {
 
         node.setSpan(SourceReader.span(cursor));
 
-        cursor.ensure(ScriptToken.T_LOCAL);
+        cursor.ensure(StatementToken.T_LOCAL);
         node.setName(SourceReader.name(cursor));
         cursor.ensure(BasicToken.T_EQ);
         node.setValue(Expressions.read(cursor, context));
@@ -39,7 +39,7 @@ public class LocalParser extends AbstractParser {
 
     @Override
     public boolean supports(TokenCursor cursor) {
-        return CursorMatcher.local().matches(cursor);
+        return StatementMatcher.local().matches(cursor);
     }
 
 }

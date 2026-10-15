@@ -1,9 +1,7 @@
 package org.jmouse.script.el.lexer;
 
-import org.jmouse.el.language.lexer.LanguageToken;
-import org.jmouse.el.lexer.BasicToken;
-import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
+import org.jmouse.script.el.lexer.StatementRecognizer;
 
 /**
  * Recognizes the three vocabularies a {@code .jms} file is written in.
@@ -20,17 +18,10 @@ import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ScriptRecognizer extends CompositeRecognizer {
+public class ScriptRecognizer extends StatementRecognizer {
 
     public ScriptRecognizer() {
-        addRecognizer(new EnumTokenRecognizer<>(BasicToken.class, 3000));
-        addRecognizer(new EnumTokenRecognizer<>(LanguageToken.class, 2000));
-        addRecognizer(new EnumTokenRecognizer<>(ScriptToken.class, 1000));
-    }
-
-    @Override
-    public int order() {
-        return -10;
+        addRecognizer(new EnumTokenRecognizer<>(ScriptToken.class, 900));
     }
 
 }

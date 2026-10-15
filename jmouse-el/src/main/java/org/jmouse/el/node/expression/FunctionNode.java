@@ -75,9 +75,13 @@ public class FunctionNode extends AbstractExpression {
         Arguments arguments = Arguments.empty();
 
         if (function == null) {
-            if (context.getValue(getName()) instanceof Lambda lambda) {
+            // A callable value in the context: a declared function (a Lambda) or any function a host put there.
+            Object value = context.getValue(getName());
+            if (value instanceof Lambda lambda) {
                 lambda.setName(getName());
                 function = lambda;
+            } else if (value instanceof Function callable) {
+                function = callable;
             }
 
             if (function == null) {

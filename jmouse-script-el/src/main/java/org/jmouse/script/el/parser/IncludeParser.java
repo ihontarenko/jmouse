@@ -1,16 +1,17 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.core.Priority;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.AbstractParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.SourceReader;
 import org.jmouse.script.el.node.IncludeNode;
 
 import static org.jmouse.el.lexer.BasicToken.T_STRING;
-import static org.jmouse.script.el.lexer.ScriptToken.T_INCLUDE;
+import static org.jmouse.script.el.lexer.StatementToken.T_INCLUDE;
 
 /**
  * Parses {@code include 'common.jms'} — a path recorded, never followed.
@@ -18,7 +19,7 @@ import static org.jmouse.script.el.lexer.ScriptToken.T_INCLUDE;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.INCLUDE)
+@Priority(StatementPriority.INCLUDE)
 public class IncludeParser extends AbstractParser {
 
     @Override
@@ -35,7 +36,7 @@ public class IncludeParser extends AbstractParser {
 
     @Override
     public boolean supports(TokenCursor cursor) {
-        return CursorMatcher.include().matches(cursor);
+        return StatementMatcher.include().matches(cursor);
     }
 
 }

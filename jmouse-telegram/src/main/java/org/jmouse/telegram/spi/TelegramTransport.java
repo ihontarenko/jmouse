@@ -7,7 +7,10 @@ import org.jmouse.telegram.IdentityKind;
 import org.jmouse.telegram.MessageDraft;
 import org.jmouse.telegram.MessageHandle;
 import org.jmouse.telegram.SentMessage;
+import org.jmouse.telegram.TelegramFile;
 import org.jmouse.telegram.TelegramIdentity;
+
+import java.io.InputStream;
 
 /**
  * One way of actually talking to Telegram.
@@ -50,4 +53,24 @@ public interface TelegramTransport {
     void delete(TelegramIdentity identity, MessageHandle message);
 
     void answerCallback(TelegramIdentity identity, CallbackAnswer answer);
+
+    /**
+     * Asks Telegram for a file somebody sent, ready to download. Needs {@link Capability#DOWNLOAD_FILES}.
+     *
+     * <p>A default that refuses, so a transport written before files could be fetched still compiles and says
+     * plainly what it cannot do.
+     */
+    default TelegramFile describeFile(TelegramIdentity identity, String fileId) {
+        throw new UnsupportedOperationException(kind() + " transport cannot download files");
+    }
+
+    /**
+     * Opens the bytes of a file {@link #describeFile} answered. The caller closes the stream.
+     *
+     * <p>⚠️ A stream rather than an array: a file goes on to storage, and holding twenty megabytes in memory
+     * per message is how a bot falls over when several people send files at once.
+     */
+    default InputStream openFile(TelegramIdentity identity, TelegramFile file) {
+        throw new UnsupportedOperationException(kind() + " transport cannot download files");
+    }
 }

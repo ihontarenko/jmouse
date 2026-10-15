@@ -1,0 +1,36 @@
+# A noise voltage, white or pink, of a set RMS level and band — written, like every generator here, as one equation of
+# the time. The noise itself is the `signals` library's: a sum of sines spread over the band, the same at the same
+# instant, so the circuit runs through it as through any other generator.
+
+component "Noise generator" as noise-generator type generator {
+    meta {
+        designator G
+        summary "Band-limited noise: white (flat to the bandwidth) or pink (equal power per octave), at an RMS level"
+        category circuits
+    }
+
+    use signals
+
+    parameters {
+        level = 100 mV                          "RMS voltage of the noise"
+        bandwidth = 20 kHz                      "the highest frequency in it"
+        lowest = 20 Hz                          "where pink noise starts; white noise starts at zero"
+        pink = 0 in 0 .. 1 step 1 live          "0: white — flat to the bandwidth; 1: pink — equal power in every octave"
+        offset = 0 V                            "the voltage it wanders around"
+        seed = 1                                "another seed, another noise of the same kind"
+    }
+
+    pins {
+        positive analog 1  "positive terminal"
+        negative analog 2  "negative terminal"
+    }
+
+    symbol uses noise-source-symbol {
+        a positive
+        b negative
+    }
+
+    equations {
+        voltage positive -> negative = offset + level * ((1 - pink) * band_noise(time, bandwidth, seed) + pink * pink_noise(time, lowest, bandwidth, seed))
+    }
+}

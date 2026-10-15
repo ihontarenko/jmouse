@@ -1,12 +1,12 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
 import org.jmouse.core.Priority;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.AbstractParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.ScriptParseException;
 import org.jmouse.script.el.SourceReader;
 import org.jmouse.script.el.node.AssignmentNode;
@@ -28,7 +28,7 @@ import org.jmouse.script.el.node.AssignmentNode;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.ASSIGNMENT)
+@Priority(StatementPriority.ASSIGNMENT)
 public class AssignmentParser extends AbstractParser {
 
     @Override
@@ -38,7 +38,7 @@ public class AssignmentParser extends AbstractParser {
         node.setSpan(SourceReader.span(cursor));
         node.setPath(SourceReader.propertyPath(cursor));
 
-        if (!CursorMatcher.assignsAt(cursor, 0)) {
+        if (!StatementMatcher.assignsAt(cursor, 0)) {
             throw new ScriptParseException(
                     SourceReader.at(cursor),
                     ("'%s' compares two values and this statement assigns one; write a single '=' "
@@ -55,7 +55,7 @@ public class AssignmentParser extends AbstractParser {
 
     @Override
     public boolean supports(TokenCursor cursor) {
-        return CursorMatcher.assignment().matches(cursor);
+        return StatementMatcher.assignment().matches(cursor);
     }
 
 }

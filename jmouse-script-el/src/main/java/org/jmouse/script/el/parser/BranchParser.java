@@ -1,5 +1,7 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.core.Priority;
 import org.jmouse.el.language.lexer.LanguageToken;
 import org.jmouse.el.language.node.IfBranchNode;
@@ -9,9 +11,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.expression.SpanNode;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.SourceReader;
-import org.jmouse.script.el.lexer.ScriptToken;
 
 import static org.jmouse.el.language.lexer.LanguageToken.*;
 
@@ -31,7 +31,7 @@ import static org.jmouse.el.language.lexer.LanguageToken.*;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.BRANCH)
+@Priority(StatementPriority.BRANCH)
 public class BranchParser extends AbstractBranchParser<IfNode, IfBranchNode, LanguageToken> {
 
     @Override
@@ -46,7 +46,7 @@ public class BranchParser extends AbstractBranchParser<IfNode, IfBranchNode, Lan
 
     @Override
     protected boolean matches(TokenCursor cursor) {
-        return CursorMatcher.branch().matches(cursor);
+        return StatementMatcher.branch().matches(cursor);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class BranchParser extends AbstractBranchParser<IfNode, IfBranchNode, Lan
     protected void parseBranchHeader(TokenCursor cursor, IfBranchNode branch, ParserContext context) {
         if (cursor.isPrevious(T_IF, T_ELSE_IF)) {
             branch.setCondition(Expressions.read(cursor, context));
-            cursor.ensure(ScriptToken.T_THEN);
+            cursor.ensure(StatementToken.T_THEN);
         }
     }
 
@@ -86,7 +86,7 @@ public class BranchParser extends AbstractBranchParser<IfNode, IfBranchNode, Lan
 
     @Override
     protected void closeBlock(TokenCursor cursor) {
-        cursor.ensure(ScriptToken.T_END);
+        cursor.ensure(StatementToken.T_END);
     }
 
     @Override

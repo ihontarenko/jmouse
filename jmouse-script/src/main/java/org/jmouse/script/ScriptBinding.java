@@ -1,6 +1,6 @@
 package org.jmouse.script;
 
-import org.jmouse.script.el.host.BoundScript;
+import org.jmouse.script.host.BoundScript;
 
 /**
  * What came back from asking the host to load a document: a script, or a sentence saying why not.

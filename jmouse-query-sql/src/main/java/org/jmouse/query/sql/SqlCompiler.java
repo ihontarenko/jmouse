@@ -17,6 +17,10 @@ import org.jmouse.el.node.expression.unary.NegateUnaryOperation;
 import org.jmouse.query.schema.QueryAttribute;
 import org.jmouse.query.schema.QueryType;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -782,7 +786,7 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
 
         items.forEach(item -> {
             holes.add("?");
-            values.add(item);
+            values.add(parameter(item));
         });
 
         return new Fragment(String.join(", ", holes), values);
@@ -968,7 +972,34 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
     }
 
     private static Fragment bound(Object value) {
-        return new Fragment("?", List.of(value));
+        return new Fragment("?", List.of(parameter(value)));
+    }
+
+    /**
+     * A value in the form every supported driver binds.
+     *
+     * <h2>⚠️ A moment leaves as an {@link OffsetDateTime}, never as an {@link Instant}</h2>
+     *
+     * <p>{@code now()} is an {@link Instant}, and so is many a value a caller supplies. JDBC 4.2 does not map
+     * {@code Instant} at all: the PostgreSQL driver refuses it outright ("Can't infer the SQL type to use for
+     * an instance of java.time.Instant"), so every filter that mentioned {@code now()} failed there.
+     * {@link OffsetDateTime} is the type JDBC 4.2 names for a moment. The PostgreSQL driver binds it as
+     * {@code timestamptz}; the MySQL driver answers exactly as it does for the {@code Instant}, under every
+     * {@code connectionTimeZone} and {@code preserveInstants} setting, so nothing changes there.</p>
+     *
+     * <p>A {@link ZonedDateTime} is refused by the PostgreSQL driver for the same reason and takes the same
+     * road, keeping its offset.</p>
+     */
+    private static Object parameter(Object value) {
+        if (value instanceof Instant instant) {
+            return instant.atOffset(ZoneOffset.UTC);
+        }
+
+        if (value instanceof ZonedDateTime zoned) {
+            return zoned.toOffsetDateTime();
+        }
+
+        return value;
     }
 
     private static List<Object> join(List<Object> first, List<Object> second) {

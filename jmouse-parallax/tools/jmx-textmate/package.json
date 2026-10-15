@@ -1,0 +1,37 @@
+{
+  "name": "jmx-textmate",
+  "displayName": "jMouse eXperience (.jmx)",
+  "description": "Syntax highlighting for jMX — the jMouse document language: objects, components, circuits and the catalogue.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jmx",
+        "aliases": [
+          "jMX",
+          "jMouse eXperience",
+          "jmx"
+        ],
+        "extensions": [
+          ".jmx"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jmx",
+        "scopeName": "source.jmx",
+        "path": "./syntaxes/jmx.tmLanguage.json"
+      }
+    ]
+  }
+}

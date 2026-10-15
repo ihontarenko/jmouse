@@ -1,0 +1,14 @@
+symbol "N-channel JFET" as n-channel-jfet-symbol {
+    meta {
+        summary "N-channel JFET, as drawn on a schematic: the gate's arrow points into the channel"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 80
+    path "M-40 10H-5M-5-15V15M-5-10H20V-40M-5 10H20V40M-13 6L-5 10-13 14"
+    pin gate at -40, 10
+    pin drain at 20, -40
+    pin source at 20, 40
+    label name at 32, -8
+    label value at 32, 8
+}

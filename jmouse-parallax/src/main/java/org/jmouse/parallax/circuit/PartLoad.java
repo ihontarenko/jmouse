@@ -1,0 +1,67 @@
+package org.jmouse.parallax.circuit;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * How hard a part of a running circuit works, over the samples just computed.
+ *
+ * @param power       the average power it took from the circuit, in watts; negative for a source that delivered it
+ * @param terminals   the current into each of its terminals at the last sample, in amperes, by terminal: "+" and "−"
+ *                    for a two-terminal part, the pin names of a model
+ * @param temperature how warm it is now, in °C: it moves towards the bench temperature plus its power times its
+ *                    thermal resistance, at its own thermal time constant ({@link PartThermal}); NaN for a part that
+ *                    is not warmed (a source, a capacitor)
+ * @param maximum     the temperature its component lets it reach, °C; NaN when it sets none
+ * @param rating      the power its component rates it for, W; NaN when it states none
+ * @param failure     how it failed — {@code open} or {@code short} — on a realistic bench; null while it works
+ * @param displays    what its symbol shows now, by indicator name ({@link PartDisplays}); empty for a part that shows nothing
+ * @param cause       why it failed: {@code overheated}, or — when its component displays {@code overvoltage} or
+ *                    {@code overcurrent}, as a percentage of its limit — the one that reached 100 %; null while it works
+ */
+public record PartLoad(double power, Map<String, Double> terminals, double temperature, double maximum, double rating,
+                       String failure, Map<String, Double> displays, String cause) {
+
+    /** The display figures a component writes its limits as, a percentage of each; at 100 % a realistic bench fails it. */
+    public static final List<String> STRESSES = List.of("overvoltage", "overcurrent");
+
+    public PartLoad {
+        terminals = terminals == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(terminals));
+        displays = displays == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(displays));
+    }
+
+    /** A part's load before anything is shown on its symbol. */
+    public PartLoad(double power, Map<String, Double> terminals, double temperature, double maximum, double rating, String failure) {
+        this(power, terminals, temperature, maximum, rating, failure, Map.of(), null);
+    }
+
+    /** The same load with what its symbol shows. */
+    public PartLoad showing(Map<String, Double> shown) {
+        return new PartLoad(power, terminals, temperature, maximum, rating, failure, shown, cause);
+    }
+
+    /** The same load, failed for this reason. */
+    public PartLoad causedBy(String reason) {
+        return new PartLoad(power, terminals, temperature, maximum, rating, failure, displays, reason);
+    }
+
+    /** Why it should fail now, on a realistic bench: overheated, or a limit it displays reached; null while it holds. */
+    public String breaking() {
+        if (overheated()) {
+            return "overheated";
+        }
+        return STRESSES.stream().filter(stress -> displays.getOrDefault(stress, 0.0) >= 100).findFirst().orElse(null);
+    }
+
+    /** A part that knows no limits. */
+    public PartLoad(double power, Map<String, Double> terminals, double temperature) {
+        this(power, terminals, temperature, Double.NaN, Double.NaN, null);
+    }
+
+    /** Whether it is hotter than its component lets it be. */
+    public boolean overheated() {
+        return Double.isFinite(maximum) && temperature > maximum;
+    }
+}

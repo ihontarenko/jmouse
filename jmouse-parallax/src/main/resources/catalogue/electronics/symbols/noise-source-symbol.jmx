@@ -1,0 +1,13 @@
+symbol "Noise source" as noise-source-symbol {
+    meta {
+        summary "A voltage source whose voltage is noise — a ragged line in the circle, as a schematic draws it"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-16M16 0H40M-16 0A16 16 0 1 0 16 0A16 16 0 1 0-16 0M-11 1L-8-6L-6 4L-3-8L0 7L3-4L5 5L8-3L11 1M-26-9V-3M-29-6H-23"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

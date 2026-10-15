@@ -1,0 +1,3 @@
+org.jmouse.parallax.spring.autoconfigure.ParallaxFlywayAutoConfiguration
+org.jmouse.parallax.spring.autoconfigure.ParallaxJpaAutoConfiguration
+org.jmouse.parallax.spring.autoconfigure.ParallaxStoreAutoConfiguration

@@ -1,5 +1,8 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.lexer.StatementToken;
+import org.jmouse.script.el.parser.Expressions;
+import org.jmouse.script.el.parser.ScriptBodyParser;
 import org.jmouse.core.Priority;
 import org.jmouse.el.language.parser.AbstractBodyParser;
 import org.jmouse.el.lexer.TokenCursor;
@@ -46,7 +49,7 @@ public class HandlerParser extends AbstractBodyParser<HandlerNode, ScriptToken> 
             node.setCondition(Expressions.read(cursor, context));
         }
 
-        cursor.ensure(ScriptToken.T_DO);
+        cursor.ensure(StatementToken.T_DO);
 
         return node;
     }
@@ -68,7 +71,7 @@ public class HandlerParser extends AbstractBodyParser<HandlerNode, ScriptToken> 
 
     @Override
     protected void closeBlock(TokenCursor cursor) {
-        cursor.ensure(ScriptToken.T_END);
+        cursor.ensure(StatementToken.T_END);
     }
 
     @Override

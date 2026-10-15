@@ -1,0 +1,17 @@
+component "Capacitor" as capacitor type capacitor {
+    meta {
+        summary "Two-terminal capacitor"
+        category circuits
+    }
+    parameters {
+        capacitance = 100 nF "capacitance"
+    }
+    pins {
+        terminal_one analog 1 "first terminal"
+        terminal_two analog 2 "second terminal"
+    }
+    symbol uses capacitor-symbol {
+        a terminal_one
+        b terminal_two
+    }
+}

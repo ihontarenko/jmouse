@@ -3,8 +3,8 @@ package org.jmouse.script;
 import org.jmouse.script.el.ScriptParseException;
 import org.jmouse.script.el.SourceSpan;
 import org.jmouse.script.el.budget.ScriptBudget;
-import org.jmouse.script.el.host.ScriptBindException;
-import org.jmouse.script.el.host.ScriptHost;
+import org.jmouse.script.host.ScriptBindException;
+import org.jmouse.script.host.ScriptHost;
 import org.jmouse.script.spi.ScriptStage;
 
 /**

@@ -34,7 +34,7 @@ public class AiProperties {
      */
     private String application = "application";
 
-    private final Guards        guards        = new Guards();
+    private final Guards       guards        = new Guards();
     private final RateLimit     rateLimit     = new RateLimit();
     private final Provider      provider      = new Provider();
     private final Conversation  conversation  = new Conversation();

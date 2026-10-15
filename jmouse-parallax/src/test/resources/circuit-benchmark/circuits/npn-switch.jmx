@@ -1,0 +1,17 @@
+# The bipolar benchmark: a 2N2222A switched hard into saturation and out of it by a 100 kHz square — the base charge,
+# the stored charge of saturation (the storage time) and the Miller capacitance all show on the collector's edges.
+
+circuit "NPN saturated switch" as npn-switch {
+    meta {
+        summary "Benchmark: 2N2222A switch, 100 kHz, 150 mA into saturation."
+        category circuits
+    }
+    parts {
+        G1 square-generator (positive = drive, negative = 0) high = 5, low = -5, frequency = 100000
+        R1 resistor (drive, base) resistance = 330
+        V1 voltage-source (supply, 0) U_output = 10
+        R2 resistor (supply, collector) resistance = 66
+        Q1 2n2222 (base = base, collector = collector, emitter = 0)
+    }
+    analysis transient for 0.0001 s
+}

@@ -12,6 +12,20 @@ import org.jmouse.ai.jpa.JpaCallCounter;
 import org.jmouse.ai.jpa.JpaConfirmationStore;
 import org.jmouse.ai.jpa.JpaProviderAdministration;
 import org.jmouse.ai.jpa.JpaProviderSettingsSource;
+import org.jmouse.ai.jpa.ProviderCredentialMigration;
+import org.jmouse.ai.jpa.ProviderCredentialUpgrade;
+import org.jmouse.vault.credential.CredentialKind;
+import org.jmouse.vault.credential.Credentials;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+import java.util.function.Supplier;
+import org.jmouse.vault.seal.SecretCipher;
+import org.jmouse.ai.jpa.credential.CredentialProtection;
+import org.jmouse.ai.jpa.credential.ProviderCredentials;
+import org.springframework.beans.factory.ObjectProvider;
 import org.jmouse.ai.preferences.AiPreferences;
 import org.jmouse.ai.preferences.PreferenceCatalog;
 import org.jmouse.ai.provider.ProviderSettingsSource;
@@ -48,7 +62,9 @@ import org.springframework.context.annotation.Bean;
  * validates only what it was given, which means a missing package <em>starts cleanly</em> and dies on
  * the first query — a failure that looks like a bug in this library and is a line of configuration.
  */
-@AutoConfiguration(before = {AiProviderAutoConfiguration.class, AiAutoConfiguration.class})
+@AutoConfiguration(before = {AiProviderAutoConfiguration.class, AiAutoConfiguration.class},
+                   afterName = {"org.jmouse.vault.spring.autoconfigure.VaultJpaAutoConfiguration",
+                                "org.jmouse.vault.spring.autoconfigure.VaultAutoConfiguration"})
 @ConditionalOnClass({JpaCallCounter.class, EntityManagerFactory.class})
 @EnableConfigurationProperties(AiProperties.class)
 public class AiJpaAutoConfiguration {
@@ -89,9 +105,44 @@ public class AiJpaAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "jmouse.ai.provider.source", havingValue = "database")
     public ProviderSettingsSource aiJpaProviderSettingsSource(
-            EntityManagerFactory entityManagerFactory, AiProperties properties) {
+            EntityManagerFactory entityManagerFactory,
+            AiProperties         properties,
+            CredentialProtection credentialProtection,
+            ObjectProvider<ProviderCredentials> providerCredentials) {
 
-        return new JpaProviderSettingsSource(entityManagerFactory, properties.getApplication());
+        return new JpaProviderSettingsSource(entityManagerFactory, properties.getApplication(), credentialProtection,
+                providerCredentials.getIfAvailable());
+    }
+
+    /**
+     * How stored credentials are sealed: by the vault's {@link SecretCipher} — the keyring under
+     * {@code jmouse.vault.keys} — when the application has one, else not at all.
+     *
+     * <p>Public as a bean because it is not only for provider keys: a product storing other credentials on
+     * its own rows seals them the same way and under the same keyring rather than inventing a second scheme.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public CredentialProtection aiCredentialProtection(ObjectProvider<SecretCipher> vaultCipher) {
+        SecretCipher cipher = vaultCipher.getIfAvailable();
+
+        return cipher == null ? CredentialProtection.plainText() : CredentialProtection.encrypting(cipher);
+    }
+
+    /**
+     * Seals legacy keys, and refuses to start over sealed keys it cannot open — see
+     * {@link ProviderCredentialStartupCheck}. Under the same condition as the rows it reads.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "jmouse.ai.provider.source", havingValue = "database")
+    public ProviderCredentialStartupCheck aiProviderCredentialStartupCheck(
+            EntityManagerFactory entityManagerFactory,
+            AiProperties         properties,
+            CredentialProtection credentialProtection) {
+
+        return new ProviderCredentialStartupCheck(
+                new ProviderCredentialUpgrade(entityManagerFactory, properties.getApplication(), credentialProtection),
+                credentialProtection);
     }
 
     /**
@@ -113,9 +164,13 @@ public class AiJpaAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "jmouse.ai.provider.source", havingValue = "database")
     public ProviderAdministration aiJpaProviderAdministration(
-            EntityManagerFactory entityManagerFactory, AiProperties properties) {
+            EntityManagerFactory entityManagerFactory,
+            AiProperties         properties,
+            CredentialProtection credentialProtection,
+            ObjectProvider<ProviderCredentials> providerCredentials) {
 
-        return new JpaProviderAdministration(entityManagerFactory, properties.getApplication());
+        return new JpaProviderAdministration(entityManagerFactory, properties.getApplication(), credentialProtection,
+                providerCredentials.getIfAvailable());
     }
 
     /**
@@ -167,5 +222,53 @@ public class AiJpaAutoConfiguration {
     @ConditionalOnMissingBean
     public AgentConnections aiJpaAgentConnections(EntityManagerFactory entityManagerFactory) {
         return new JpaAgentConnections(entityManagerFactory);
+    }
+
+    /**
+     * 🗝️ Provider URLs and keys in the vault, when the application has one: every configuration names a vault
+     * credential, and rows still holding a key are moved there at start-up.
+     */
+    @org.springframework.context.annotation.Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Credentials.class)
+    @ConditionalOnBean(Credentials.class)
+    static class VaultProviderCredentials {
+
+        @Bean
+        @ConditionalOnMissingBean
+        ProviderCredentials aiProviderCredentials(Credentials credentials, ObjectProvider<PlatformTransactionManager> transactionManager) {
+            PlatformTransactionManager manager = transactionManager.getIfAvailable();
+
+            TransactionTemplate template = manager == null ? null : new TransactionTemplate(manager);
+
+            ProviderCredentials.Transactions transactions = new ProviderCredentials.Transactions() {
+                @Override
+                public <T> T call(Supplier<T> work) {
+                    return template == null ? work.get() : template.execute(status -> work.get());
+                }
+            };
+
+            return new ProviderCredentials(credentials, transactions);
+        }
+
+        @Bean
+        CredentialKind aiProviderCredentialKind() {
+            return ProviderCredentials.kind();
+        }
+
+        @Bean
+        @ConditionalOnProperty(name = "jmouse.ai.provider.source", havingValue = "database")
+        SmartInitializingSingleton aiProviderCredentialMigration(
+                EntityManagerFactory entityManagerFactory, AiProperties properties,
+                CredentialProtection credentialProtection, ProviderCredentials providerCredentials) {
+            return () -> {
+                int moved = new ProviderCredentialMigration(entityManagerFactory, properties.getApplication(),
+                        credentialProtection, providerCredentials).migrate();
+
+                if (moved > 0) {
+                    LoggerFactory.getLogger(AiJpaAutoConfiguration.class)
+                            .info("🗝️ Moved {} AI provider configuration(s) into the vault (ai/providers/<id>).", moved);
+                }
+            };
+        }
     }
 }

@@ -3,6 +3,10 @@ package org.jmouse.ai.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.ai.administration.ProviderAdministration;
+import org.jmouse.ai.jpa.credential.CredentialContexts;
+import org.jmouse.ai.jpa.credential.CredentialFingerprint;
+import org.jmouse.ai.jpa.credential.CredentialProtection;
+import org.jmouse.ai.jpa.credential.ProviderCredentials;
 import org.jmouse.ai.jpa.entity.AiProviderSettings;
 import org.jmouse.ai.provider.ProviderCatalog;
 
@@ -29,15 +33,40 @@ import java.util.UUID;
  *
  * <p>⚠️ <strong>The key is write-only.</strong> {@link Configuration} has no field for one, and a draft
  * carrying a blank key keeps whatever is stored — see {@link Draft}.
+ *
+ * <p>⚠️ <strong>And it is written through {@link CredentialProtection}.</strong> Every key written here
+ * is sealed when the installation has a credential key, and carries its {@link CredentialFingerprint}
+ * either way. A change that does not replace the key still re-seals a legacy plain value and refreshes
+ * the fingerprint, because the provider is part of what the fingerprint identifies.
  */
 public final class JpaProviderAdministration implements ProviderAdministration {
 
     private final EntityManagerFactory entityManagerFactory;
     private final String               application;
+    private final CredentialProtection credentialProtection;
+    private final ProviderCredentials  providerCredentials;
 
-    public JpaProviderAdministration(EntityManagerFactory entityManagerFactory, String application) {
+    public JpaProviderAdministration(
+            EntityManagerFactory entityManagerFactory,
+            String               application,
+            CredentialProtection credentialProtection) {
+        this(entityManagerFactory, application, credentialProtection, null);
+    }
+
+    /**
+     * @param providerCredentials the vault the URL and key are kept in; null keeps them on the row, for an
+     *                            installation without a vault
+     */
+    public JpaProviderAdministration(
+            EntityManagerFactory entityManagerFactory,
+            String               application,
+            CredentialProtection credentialProtection,
+            ProviderCredentials  providerCredentials) {
+
         this.entityManagerFactory = entityManagerFactory;
         this.application          = application;
+        this.credentialProtection = credentialProtection;
+        this.providerCredentials  = providerCredentials;
     }
 
     @Override
@@ -65,14 +94,13 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                         .setParameter("application", application)
                         .getResultList())
                 .stream()
-                .map(JpaProviderAdministration::describe)
+                .map(this::describe)
                 .toList();
     }
 
     @Override
     public Optional<Configuration> find(String id) {
-        return OwnTransaction.call(entityManagerFactory,
-                entityManager -> row(entityManager, id).map(JpaProviderAdministration::describe));
+        return OwnTransaction.call(entityManagerFactory, entityManager -> row(entityManager, id)).map(this::describe);
     }
 
     @Override
@@ -80,13 +108,34 @@ public final class JpaProviderAdministration implements ProviderAdministration {
         String        provider = requireSupported(draft.provider());
         requireCapabilities(provider, draft);
         LocalDateTime now      = LocalDateTime.now();
+        String        id       = UUID.randomUUID().toString();
+
+        if (providerCredentials != null) {
+            String credentialName = credentialFor(id, draft);
+
+            return describe(OwnTransaction.call(entityManagerFactory, entityManager -> {
+                AiProviderSettings created = new AiProviderSettings(id, application, provider, null, null, null,
+                        draft.model(), draft.maximumTokens(), false, now, now);
+
+                created.setPurpose(draft.purpose());
+                created.setCapabilities(draft.capabilities());
+                created.useCredential(credentialName);
+
+                entityManager.persist(created);
+
+                return created;
+            }));
+        }
+
+        String apiKey = blankToNull(draft.apiKey());
 
         return OwnTransaction.call(entityManagerFactory, entityManager -> {
             AiProviderSettings created = new AiProviderSettings(
-                    UUID.randomUUID().toString(),
+                    id,
                     application,
                     provider,
-                    blankToNull(draft.apiKey()),
+                    credentialProtection.protect(apiKey, CredentialContexts.providerConfiguration(id)),
+                    CredentialFingerprint.of(provider, apiKey),
                     blankToNull(draft.apiUrl()),
                     draft.model(),
                     draft.maximumTokens(),
@@ -109,13 +158,43 @@ public final class JpaProviderAdministration implements ProviderAdministration {
         String provider = requireSupported(draft.provider());
         requireCapabilities(provider, draft);
 
+        if (providerCredentials != null) {
+            AiProviderSettings before = OwnTransaction.call(entityManagerFactory, entityManager -> {
+                AiProviderSettings configured = require(entityManager, id);
+
+                requireChangeable(configured, draft);
+
+                return configured;
+            });
+
+            String             credentialName = credentialFor(id, draft);
+            AiProviderSettings changed        = OwnTransaction.call(entityManagerFactory, entityManager -> {
+                AiProviderSettings configured = require(entityManager, id);
+
+                configured.setProvider(provider);
+                configured.setModel(draft.model());
+                configured.setMaximumTokens(draft.maximumTokens());
+                configured.setPurpose(draft.purpose());
+                configured.setCapabilities(draft.capabilities());
+                configured.setUpdatedAt(LocalDateTime.now());
+                configured.useCredential(credentialName);
+
+                entityManager.flush();
+
+                return configured;
+            });
+
+            if (ProviderCredentials.isOwn(before.getCredentialName(), id) && !ProviderCredentials.isOwn(credentialName, id)) {
+                providerCredentials.removeOwn(id);
+            }
+
+            return describe(changed);
+        }
+
         return OwnTransaction.call(entityManagerFactory, entityManager -> {
             AiProviderSettings configured = require(entityManager, id);
 
-            if (configured.isActive() && (!samePurpose(configured.getPurpose(), draft.purpose())
-                    || !configured.getCapabilities().equals(draft.capabilities()))) {
-                throw new RefusedException("Take the configuration out of force before changing purpose or capabilities.");
-            }
+            requireChangeable(configured, draft);
 
             configured.setProvider(provider);
             configured.setModel(draft.model());
@@ -127,7 +206,11 @@ public final class JpaProviderAdministration implements ProviderAdministration {
 
             // Blank means "leave it", never "clear it" — see Draft.
             if (draft.carriesKey()) {
-                configured.setApiKey(draft.apiKey());
+                configured.replaceApiKey(
+                        credentialProtection.protect(draft.apiKey(), CredentialContexts.providerConfiguration(id)),
+                        CredentialFingerprint.of(provider, draft.apiKey()));
+            } else if (hasKey(configured)) {
+                keepApiKey(configured, provider);
             }
 
             entityManager.flush();
@@ -148,7 +231,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
             // ⚠️ Asked of the provider rather than demanded of every configuration. A model running on
             // this machine has no credential to give, and refusing it for not having one would make the
             // only free-in-every-sense option the one option that cannot be switched on.
-            if (ProviderCatalog.requiresKey(target.getProvider()) && !hasKey(target)) {
+            if (ProviderCatalog.requiresKey(target.getProvider()) && !keyConfigured(target)) {
                 throw new RefusedException(
                         "This configuration has no key, so every call through it would be refused before "
                         + "it was sent. Add the key first, then put it in force.");
@@ -202,7 +285,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
 
     @Override
     public void discard(String id) {
-        OwnTransaction.call(entityManagerFactory, entityManager -> {
+        String credentialName = OwnTransaction.call(entityManagerFactory, entityManager -> {
             AiProviderSettings configured = require(entityManager, id);
 
             if (configured.isActive()) {
@@ -213,8 +296,13 @@ public final class JpaProviderAdministration implements ProviderAdministration {
 
             entityManager.remove(configured);
 
-            return null;
+            return configured.getCredentialName();
         });
+
+        // Its own credential goes with it; a shared one stays, other configurations may name it.
+        if (providerCredentials != null && ProviderCredentials.isOwn(credentialName, id)) {
+            providerCredentials.removeOwn(id);
+        }
     }
 
     private String requireSupported(String provider) {
@@ -258,6 +346,23 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                 .findFirst();
     }
 
+    /**
+     * The stored key stays — re-sealed if it was still plain or in an older format — with a fingerprint
+     * for the provider it now belongs to. A value already in the current format is not re-sealed: nothing
+     * would change but the nonce.
+     */
+    private void keepApiKey(AiProviderSettings configured, String provider) {
+        String stored  = configured.getApiKey();
+        String context =CredentialContexts.providerConfiguration(configured.getId());
+        String apiKey  = credentialProtection.reveal(stored, context);
+
+        if (credentialProtection.needsSealing(stored)) {
+            stored = credentialProtection.protect(apiKey, context);
+        }
+
+        configured.replaceApiKey(stored, CredentialFingerprint.of(provider, apiKey));
+    }
+
     private static void deactivate(AiProviderSettings configured) {
         configured.setActive(false);
         configured.setUpdatedAt(LocalDateTime.now());
@@ -293,19 +398,64 @@ public final class JpaProviderAdministration implements ProviderAdministration {
         return value == null || value.isBlank() ? org.jmouse.ai.provider.ProviderSettingsSource.GENERAL : value.trim();
     }
 
-    private static Configuration describe(AiProviderSettings configured) {
+    private static void requireChangeable(AiProviderSettings configured, Draft draft) {
+        if (configured.isActive() && (!samePurpose(configured.getPurpose(), draft.purpose())
+                || !configured.getCapabilities().equals(draft.capabilities()))) {
+            throw new RefusedException("Take the configuration out of force before changing purpose or capabilities.");
+        }
+    }
+
+    /**
+     * The credential a configuration points at after this draft: the shared one it names, else its own,
+     * written now with the draft's URL and — when one was typed — its key.
+     */
+    private String credentialFor(String id, Draft draft) {
+        if (draft.credentialName() != null) {
+            try {
+                providerCredentials.requireExists(draft.credentialName());
+            } catch (IllegalArgumentException refusal) {
+                throw new RefusedException(refusal.getMessage());
+            }
+
+            return draft.credentialName();
+        }
+
+        return providerCredentials.saveOwn(id, draft.apiUrl(), draft.apiKey());
+    }
+
+    /** Whether a key is there to call with — on the row, or in the vault credential it points at. */
+    private boolean keyConfigured(AiProviderSettings configured) {
+        if (configured.getCredentialName() == null || providerCredentials == null) {
+            return hasKey(configured);
+        }
+
+        return providerCredentials.tryResolve(configured.getCredentialName())
+                .map(resolved -> resolved.apiKey() != null)
+                .orElse(false);
+    }
+
+    private Configuration describe(AiProviderSettings configured) {
+        String apiUrl = configured.getApiUrl();
+
+        if (configured.getCredentialName() != null && providerCredentials != null) {
+            apiUrl = providerCredentials.tryResolve(configured.getCredentialName())
+                    .map(ProviderCredentials.Resolved::apiUrl)
+                    .orElse(null);
+        }
+
         return new Configuration(
                 configured.getId(),
                 configured.getProvider(),
                 configured.getModel(),
-                configured.getApiUrl(),
+                apiUrl,
                 configured.getMaximumTokens(),
                 configured.isActive(),
-                hasKey(configured),
+                keyConfigured(configured),
                 configured.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant(),
                 configured.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant(),
                 configured.getPurpose(),
                 configured.getCapabilities(),
-                configured.getRevision());
+                configured.getRevision(),
+                configured.getCredentialName());
     }
 }

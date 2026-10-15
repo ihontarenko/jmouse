@@ -1,22 +1,29 @@
 package org.jmouse.script.el;
 
 import org.jmouse.core.access.AttributeResolver;
-import org.jmouse.el.extension.*;
+import org.jmouse.el.extension.Extension;
+import org.jmouse.el.extension.Filter;
+import org.jmouse.el.extension.Function;
+import org.jmouse.el.extension.Operator;
+import org.jmouse.el.extension.Test;
 import org.jmouse.el.extension.attribute.JavaBeanAttributeResolver;
 import org.jmouse.el.extension.attribute.ListAttributeResolver;
 import org.jmouse.el.extension.attribute.MapAttributeResolver;
 import org.jmouse.el.extension.filter.*;
 import org.jmouse.el.extension.filter.converter.*;
-import org.jmouse.el.extension.function.MaxFunction;
-import org.jmouse.el.extension.function.MinFunction;
-import org.jmouse.el.extension.function.mathematic.ExponentaFunction;
-import org.jmouse.el.extension.function.mathematic.SquareRootFunction;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
-import org.jmouse.el.language.parser.StatementsParser;
 import org.jmouse.el.parser.*;
 import org.jmouse.el.parser.sub.*;
-import org.jmouse.script.el.parser.*;
+import org.jmouse.formula.el.FormulaCoreExtension;
+import org.jmouse.formula.el.FormulaOperator;
+import org.jmouse.script.el.function.AppendFunction;
+import org.jmouse.script.el.parser.BehaviourParser;
+import org.jmouse.script.el.parser.HandlerParser;
+import org.jmouse.script.el.parser.ParserPriority;
+import org.jmouse.script.el.parser.ScriptDocumentParser;
+import org.jmouse.script.el.parser.ScriptParser;
+import org.jmouse.script.el.StatementExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,35 +32,34 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Everything the {@code .jms} language is made of, registered as one extension.
+ * jMS — the one script language: the statement core, jME's expressions, jMF's mathematics, and — optionally —
+ * {@code on … do … end}, the interception of an event, with {@code script} and {@code behaviour} grouping the
+ * handlers of a file.
+ *
+ * <p>A document needs none of the event constructions. A list of statements that returns a value is a program
+ * ({@link ProgramEvaluator}); a file with handlers is a script a host drives ({@link ScriptEvaluator}). What either
+ * may reach is never the document's to claim — it is the facades and the budget the evaluation context was given
+ * by whoever runs it.</p>
+ *
+ * <ul>
+ *   <li><strong>Statements</strong> are the core's ({@link StatementExtension}): {@code include}, {@code function},
+ *       {@code if}, {@code for}, {@code local}, {@code return}, assignment.</li>
+ *   <li><strong>Expressions</strong> are jME's grammar — filters, tests, {@code ??}, ranges, {@code in}, map and
+ *       list literals, and {@code @facade.method()}.</li>
+ *   <li><strong>Mathematics</strong> is jMF's vocabulary: {@code ^} as a power and every mathematical function
+ *       ({@code sin}, {@code gamma}, {@code erf}, {@code binomial}, …). jMF's <em>formula grammar</em> — implicit
+ *       multiplication, definitions, equations — is not taken: {@code 3 r} would be ambiguous among statements.</li>
+ * </ul>
  *
  * <h2>⚠️ What is deliberately absent</h2>
  *
- * <p>This list is a <strong>closed vocabulary</strong>, not a convenience selection, and three things
- * the expression language offers are left out on purpose:</p>
+ * <p>The vocabulary is closed: no reflection ({@code ClassFilter}, {@code ClassFunction},
+ * {@code JavaReflectedFunction} would make the facade boundary decorative), no wall clock ({@code NowFunction}
+ * answers differently on two machines; a host that wants time gives a clock facade), and no
+ * {@code setVariable}/{@code getVariable} (the language has {@code local} and assignment).</p>
  *
- * <ul>
- *   <li><strong>Reflection.</strong> {@code ClassFilter}, {@code ClassFunction} and
- *       {@code JavaReflectedFunction} turn a string into a {@link Class} and call into it. Any one of
- *       them makes the catalogue in {@link org.jmouse.script.el.host.ScriptCatalogue} decorative — a
- *       script that can name a class does not need a facade.</li>
- *   <li><strong>The wall clock.</strong> {@code NowFunction} reads the current time, which makes an
- *       expression answer differently on two machines given identical inputs. A host that wants a clock
- *       declares one as a facade, and then it is the host's clock — replayable, testable, and the same
- *       for everybody watching the same simulation.</li>
- *   <li><strong>{@code setVariable} / {@code getVariable}.</strong> The language already has
- *       {@code local} and assignment. A second way to write a variable is a second thing to explain,
- *       and it reaches the scope chain from inside an expression, where nobody looks for it.</li>
- * </ul>
- *
- * <p>What <em>is</em> present that {@code .jmp} refuses is {@link BeanAccessParser}. The two dialects
- * take opposite halves of one decision: a policy strips {@code @bean.method} so a rule cannot call
- * {@code @userRepository.deleteAll()}; a script keeps the syntax and closes the set of names it can
- * resolve. See {@link org.jmouse.script.el.host.FacadeLookup} for the half that has to hold.</p>
- *
- * <p>⚠️ The order of {@link #getParsers()} carries no meaning. Dispatch sorts by
- * {@link ParserPriority}, and that class — not this list — is where the reason each shape is offered
- * before another is written down.</p>
+ * <p>⚠️ The order of {@link #getParsers()} carries no meaning. Dispatch sorts by {@link ParserPriority} and the
+ * core's {@code StatementPriority}, and those classes — not this list — say why each shape is offered first.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -83,14 +89,15 @@ public class ScriptExtension implements Extension {
         );
     }
 
+    /**
+     * jMF's mathematical functions — they replace jME's own sqrt, exp, min and max, which they include — and
+     * {@code append}, how a script accumulates a list.
+     */
     @Override
     public List<Function> getFunctions() {
-        return List.of(
-                new SquareRootFunction(),
-                new ExponentaFunction(),
-                new MinFunction(),
-                new MaxFunction()
-        );
+        List<Function> functions = new ArrayList<>(FormulaCoreExtension.mathematicalFunctions());
+        functions.add(new AppendFunction());
+        return List.copyOf(functions);
     }
 
     @Override
@@ -144,10 +151,13 @@ public class ScriptExtension implements Extension {
         );
     }
 
+    /**
+     * jME's expression parsers, the statement core's, and jMS's own four: the document, {@code script},
+     * {@code behaviour} and the {@code on} handler.
+     */
     @Override
     public List<Parser> getParsers() {
-        return List.of(
-                // jmouse-el — the expression half, unchanged
+        List<Parser> parsers = new ArrayList<>(List.of(
                 new ExpressionParser(),
                 new OperatorParser(),
                 new PrimaryExpressionParser(),
@@ -156,12 +166,10 @@ public class ScriptExtension implements Extension {
                 new FunctionParser(),
                 new ScopedCallParser(),
                 new BeanAccessParser(),
-                // ⚠️ Registered so they PARSE, not so they may be used. `PrimaryExpressionParser` reads
-                // `(a)` as the opening of a lambda before it reads it as a parenthesised expression, so
-                // a language that left LambdaParser out would fail on ordinary brackets — and the three
-                // shapes below are then refused, by name and with a line, when the binder audits the
-                // tree. Refusing at bind says what is wrong; refusing by omission says "unexpected
-                // token" about a bracket.
+                // ⚠️ Registered so they PARSE, not so they may be used. `PrimaryExpressionParser` reads `(a)` as
+                // the opening of a lambda before it reads it as a parenthesised expression, so a language that
+                // left LambdaParser out would fail on ordinary brackets — and a host refuses these shapes, by name
+                // and with a line, when it audits the tree.
                 new LambdaParser(),
                 new PlaceholderParser(),
                 new VariableAliasParser(),
@@ -175,40 +183,37 @@ public class ScriptExtension implements Extension {
                 new ParenthesesParser(),
                 new ArgumentsParser(),
                 new NamesParser(),
-                new ParametersParser(),
-                // jms specific — the order here is documented by ParserPriority, not by this list
-                new StatementsParser(),
-                new ScriptBodyParser(),
-                new ScriptDocumentParser(),
-                new ScriptParser(),
-                new BehaviourParser(),
-                new IncludeParser(),
-                new HandlerParser(),
-                new FunctionDeclarationParser(),
-                new BranchParser(),
-                new LoopParser(),
-                new LocalParser(),
-                new ReturnParser(),
-                new AssignmentParser()
-        );
+                new ParametersParser()
+        ));
+        parsers.addAll(new StatementExtension().getParsers());
+        // jms specific — the order here is documented by ParserPriority, not by this list
+        parsers.add(new ScriptDocumentParser());
+        parsers.add(new ScriptParser());
+        parsers.add(new BehaviourParser());
+        parsers.add(new HandlerParser());
+        return List.copyOf(parsers);
     }
 
+    /**
+     * jME's operators with {@code ^} as jMF's power — the caret is free since jME no longer reads it as XOR — and
+     * {@code /} as jMF's exact division, so {@code 7 / 2} is {@code 3.5} (decision 69).
+     */
     @Override
     public List<Operator> getOperators() {
         List<Operator> operators = new ArrayList<>();
-
         operators.addAll(Arrays.asList(MathematicOperator.values()));
+        operators.remove(MathematicOperator.DIVIDE);
+        operators.add(FormulaOperator.DIVIDE);
+        operators.add(FormulaOperator.POWER);
         operators.addAll(Arrays.asList(UnaryOperator.values()));
         operators.addAll(Arrays.asList(LogicalOperator.values()));
         operators.addAll(Arrays.asList(ComparisonOperator.values()));
-
         operators.add(FilterOperator.FILTER);
         operators.add(TestOperator.IS);
         operators.add(InOperator.IN);
         operators.add(NullCoalesceOperator.NULL_COALESCE);
         operators.add(RangeOperator.RANGE);
         operators.add(ConcatOperator.CONCAT);
-
         return operators;
     }
 

@@ -1,0 +1,18 @@
+Full-wave bridge with a reservoir
+* mains-like 50 Hz, four junctions
+VAC a b SIN(0 12 50)
+D1 a p D1N4148
+D2 b p D1N4148
+D3 0 a D1N4148
+D4 0 b D1N4148
+C1 p 0 470u IC=0
+RL p 0 100
+.model D1N4148 D(IS=2.52n RS=0.568 N=1.752
++ CJO=4p M=0.4 TT=20n BV=100 IBV=100u)
+.options reltol=1e-4
+.tran 10u 100m uic
+.control
+run
+wrdata bridge.txt v(p)
+.endc
+.end

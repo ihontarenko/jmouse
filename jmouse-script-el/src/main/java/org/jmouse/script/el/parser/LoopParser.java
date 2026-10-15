@@ -1,5 +1,7 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.core.Priority;
 import org.jmouse.el.language.parser.AbstractBodyParser;
 import org.jmouse.el.lexer.BasicToken;
@@ -7,9 +9,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.expression.SpanNode;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.SourceReader;
-import org.jmouse.script.el.lexer.ScriptToken;
 import org.jmouse.script.el.node.ForNode;
 
 /**
@@ -18,8 +18,8 @@ import org.jmouse.script.el.node.ForNode;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.LOOP)
-public class LoopParser extends AbstractBodyParser<ForNode, ScriptToken> {
+@Priority(StatementPriority.LOOP)
+public class LoopParser extends AbstractBodyParser<ForNode, StatementToken> {
 
     @Override
     protected ForNode createNode(TokenCursor cursor, ParserContext context) {
@@ -31,19 +31,19 @@ public class LoopParser extends AbstractBodyParser<ForNode, ScriptToken> {
 
         node.setIterable(Expressions.read(cursor, context));
 
-        cursor.ensure(ScriptToken.T_DO);
+        cursor.ensure(StatementToken.T_DO);
 
         return node;
     }
 
     @Override
-    protected ScriptToken token() {
-        return ScriptToken.T_FOR;
+    protected StatementToken token() {
+        return StatementToken.T_FOR;
     }
 
     @Override
     protected boolean matches(TokenCursor cursor) {
-        return CursorMatcher.loop().matches(cursor);
+        return StatementMatcher.loop().matches(cursor);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class LoopParser extends AbstractBodyParser<ForNode, ScriptToken> {
 
     @Override
     protected void closeBlock(TokenCursor cursor) {
-        cursor.ensure(ScriptToken.T_END);
+        cursor.ensure(StatementToken.T_END);
     }
 
     @Override

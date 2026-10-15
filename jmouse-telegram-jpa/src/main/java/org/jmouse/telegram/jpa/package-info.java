@@ -7,7 +7,7 @@
  *
  * <h2>⚠️ The credential never travels in the clear</h2>
  *
- * <p>It is sealed on the way in by {@link org.jmouse.telegram.jpa.CredentialCipher}, and opened in
+ * <p>It is sealed on the way in by the vault's {@link org.jmouse.vault.seal.SecretCipher}, and opened in
  * exactly one place — at the moment of use. No read answers with it: {@code Description} has no
  * credential field at all, which is what lets an administration endpoint list accounts without a
  * reviewer having to check whether it masked something.

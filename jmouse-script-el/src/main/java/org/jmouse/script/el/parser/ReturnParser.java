@@ -1,5 +1,7 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.StatementMatcher;
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.core.Priority;
 import org.jmouse.el.language.lexer.LanguageToken;
 import org.jmouse.el.lexer.BasicToken;
@@ -7,9 +9,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.AbstractParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.script.el.CursorMatcher;
 import org.jmouse.script.el.SourceReader;
-import org.jmouse.script.el.lexer.ScriptToken;
 import org.jmouse.script.el.node.ReturnNode;
 
 /**
@@ -25,7 +25,7 @@ import org.jmouse.script.el.node.ReturnNode;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Priority(ParserPriority.RETURN)
+@Priority(StatementPriority.RETURN)
 public class ReturnParser extends AbstractParser {
 
     @Override
@@ -34,7 +34,7 @@ public class ReturnParser extends AbstractParser {
 
         node.setSpan(SourceReader.span(cursor));
 
-        cursor.ensure(ScriptToken.T_RETURN);
+        cursor.ensure(StatementToken.T_RETURN);
 
         if (carriesValue(cursor)) {
             node.setValue(Expressions.read(cursor, context));
@@ -52,13 +52,13 @@ public class ReturnParser extends AbstractParser {
     private boolean carriesValue(TokenCursor cursor) {
         return cursor.hasNext() && !cursor.isCurrent(
                 BasicToken.T_NEW_LINE, BasicToken.T_EOL, BasicToken.T_SEMICOLON, BasicToken.T_HASH,
-                ScriptToken.T_END, LanguageToken.T_ELSE, LanguageToken.T_ELSE_IF
+                StatementToken.T_END, LanguageToken.T_ELSE, LanguageToken.T_ELSE_IF
         );
     }
 
     @Override
     public boolean supports(TokenCursor cursor) {
-        return CursorMatcher.returned().matches(cursor);
+        return StatementMatcher.returned().matches(cursor);
     }
 
 }

@@ -1,0 +1,10 @@
+RC low-pass driven by a sine
+* a first-order filter: the corner is 1 / (2 pi R C)
+.param R=1k C=100n
+V1 in 0 DC 0 SIN(0 1 {1/(6.283*R*C)} 0 0 0) AC 1
+R1 in out {R}   ; the series resistor
+C1 out 0 {C}    $ the shunt capacitor
+.tran 10u 5m
+.ac dec 20 10 1meg
+* the end of the deck
+.end

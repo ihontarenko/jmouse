@@ -1,0 +1,14 @@
+symbol "Potentiometer" as potentiometer-symbol {
+    meta {
+        summary "Potentiometer, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 60 x 40
+    path "M-30 0H-16V-7H16V7H-16V0M16 0H30M0 -20V-10M-4 -14L0 -10L4 -14"
+    pin a at -30, 0
+    pin w at 0, -20
+    pin b at 30, 0
+    label name at 0, 26
+    label value at 22, -16
+}

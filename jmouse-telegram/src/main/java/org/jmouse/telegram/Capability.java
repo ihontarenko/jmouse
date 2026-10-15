@@ -63,5 +63,11 @@ public enum Capability {
     INITIATE_CONVERSATION,
 
     /** Read a chat's earlier messages. Not available to a bot, which only ever sees what arrives. */
-    READ_HISTORY
+    READ_HISTORY,
+
+    /**
+     * Fetch the content of a file somebody sent — a document, a photo. ⚠️ Through the public Bot API, only
+     * files up to 20 MB.
+     */
+    DOWNLOAD_FILES
 }

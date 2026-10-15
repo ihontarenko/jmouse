@@ -1,0 +1,23 @@
+{
+  "id": 278964,
+  "description": "GitLab is an open source end-to-end software development platform.",
+  "name": "GitLab",
+  "name_with_namespace": "GitLab.org / GitLab",
+  "path": "gitlab",
+  "path_with_namespace": "gitlab-org/gitlab",
+  "created_at": "2015-05-20T10:12:20.000Z",
+  "default_branch": "master",
+  "tag_list": [],
+  "topics": [],
+  "ssh_url_to_repo": "git@gitlab.com:gitlab-org/gitlab.git",
+  "http_url_to_repo": "https://gitlab.com/gitlab-org/gitlab.git",
+  "web_url": "https://gitlab.com/gitlab-org/gitlab",
+  "namespace": {
+    "id": 9970,
+    "name": "GitLab.org",
+    "path": "gitlab-org",
+    "kind": "group",
+    "full_path": "gitlab-org",
+    "parent_id": null
+  }
+}

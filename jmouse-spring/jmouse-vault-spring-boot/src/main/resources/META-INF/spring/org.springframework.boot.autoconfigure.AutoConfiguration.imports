@@ -1,0 +1,3 @@
+org.jmouse.vault.spring.autoconfigure.VaultJpaAutoConfiguration
+org.jmouse.vault.spring.autoconfigure.VaultAutoConfiguration
+org.jmouse.vault.spring.autoconfigure.VaultFlywayAutoConfiguration

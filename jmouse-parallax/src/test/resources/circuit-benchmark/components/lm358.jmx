@@ -1,0 +1,110 @@
+# Two identical amplifiers in one package, sharing a supply. `units A, B` makes the pin table give each block its own
+# numbers; state and equations are written once and live separately in each unit, while supply and ground are shared.
+
+component "LM358" as lm358 type opamp {
+    meta {
+        summary "Dual operational amplifier, single supply 3 V to 32 V, inputs and output to ground"
+        source "TI LM358 datasheet (SLOS068)"
+        package "SOIC-8"
+        category circuits
+    }
+    units A, B
+    formulas "smooth-transitions"
+
+    parameters {
+        open_loop_gain = 100000                 "open-loop gain, 100 dB (min 25 V/mV)"
+        gain_bandwidth = 0.7 MHz               "unity-gain bandwidth"
+        slew_rate = 0.3 V/us               "slew rate"
+        V_input_offset = 0 V per unit          "input offset; typically 2 mV either way"
+        I_input_bias = 20 nA               "input bias current, out of the input pins (PNP inputs)"
+        I_quiescent = 0.35 mA                "supply current per unit"
+        R_output = 50 Ohm
+        I_output_source = 40 mA             "output short-circuit current, sourcing"
+        I_output_sink = 20 mA               "output short-circuit current, sinking"
+        V_output_headroom = 1.5 V               "the output stays this far below V+"
+        V_output_low = 5 mV                 "the output reaches this close to ground"
+        recovery = 1e6 1/s          "how fast the gain stage comes back out of saturation"
+    }
+
+    pins {
+        output analog output 1 7
+        inverting_input analog input 2 6        "inverting"
+        non_inverting_input analog input 3 5        "non-inverting"
+        Vcc power 8
+        GND ground 4
+    }
+
+    symbol triangle {
+        left non_inverting_input "+", inverting_input "-"
+        right output
+        power Vcc, GND
+    }
+
+    state {
+        gain_stage_voltage = 0 continuous            "the gain stage, before the output is held between the rails"
+    }
+
+    equations {
+        local high = GND + V_output_low + soft_positive_part((Vcc - GND) - V_output_headroom - V_output_low, 0.02)
+        local low = GND + V_output_low
+        local error = (non_inverting_input - inverting_input) + V_input_offset - gain_stage_voltage / open_loop_gain
+        local target = soft_clamp(gain_stage_voltage, low, high, 0.02)
+        local drive = (target - output) / R_output
+
+        # A dominant pole at gain_bandwidth / open_loop_gain whose rate saturates at slew_rate: bandwidth and slew rate from one equation. The
+        # saturation is algebraic, slew_ratio / sqrt(1 + slew_ratio^2), not tanh: far from the answer tanh is flat to the last digit and
+        # leaves Newton nothing to stand on. The second term keeps gain_stage_voltage from winding up past the rails.
+        local slew_ratio = 2 * pi * gain_bandwidth * error / slew_rate
+        d(gain_stage_voltage)/dt = slew_rate * slew_ratio / sqrt(1 + slew_ratio ^ 2) - recovery * (gain_stage_voltage - soft_clamp(gain_stage_voltage, low - 0.5, high + 0.5, 0.05))
+
+        current Vcc -> output = I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source)
+        current output -> GND = I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)
+        current Vcc -> non_inverting_input = I_input_bias
+        current Vcc -> inverting_input = I_input_bias
+        current Vcc -> GND = I_quiescent * tanh(Vcc - GND)
+    }
+
+    expect "inverting gain of ten" from "closed-loop application, G = -R2 / R1" {
+        bench for 1 ms {
+            V1 voltage-source (Vcc, 0) U_output = 15 V
+            V2 voltage-source (reference, 0) U_output = 7.5 V
+            V3 voltage-source (input, 0) U_output = 7.4 V
+            R1 resistor (input, inverting_input) resistance = 10 kOhm
+            R2 resistor (inverting_input, output) resistance = 100 kOhm
+            U1 self (A.non_inverting_input = reference, A.inverting_input = inverting_input, A.output = output, Vcc = Vcc, GND = 0)
+        }
+        measure operating output
+        near 8.5 V +- 1%
+    }
+
+    expect "slew rate" from "electrical characteristics, slew_rate 0.3 V/us" {
+        bench for 10 us {
+            V1 voltage-source (Vcc, 0) U_output = 15 V
+            V2 voltage-source (input, 0) waveform = step, U_output = 5 V
+            U1 self (A.non_inverting_input = input, A.inverting_input = output, A.output = output, Vcc = Vcc, GND = 0)
+        }
+        measure final output
+        near 3 V +- 25%
+    }
+
+    expect "output high with 2 kOhm at 30 V" from "electrical characteristics, VOH min 26 V" {
+        bench for 1 ms {
+            V1 voltage-source (Vcc, 0) U_output = 30 V
+            V2 voltage-source (input, 0) U_output = 1 V
+            R1 resistor (output, 0) resistance = 2 kOhm
+            U1 self (A.non_inverting_input = input, A.inverting_input = 0, A.output = output, Vcc = Vcc, GND = 0)
+        }
+        measure operating output
+        within 26 V .. 30 V
+    }
+
+    expect "supply current, both units" from "electrical characteristics, ICC max 1.2 mA at 5 V" {
+        bench for 1 ms {
+            V1 voltage-source (Vcc, 0) U_output = 5 V
+            V2 voltage-source (input, 0) U_output = 2.5 V
+            U1 self (A.non_inverting_input = input, A.inverting_input = a, A.output = a, B.non_inverting_input = input, B.inverting_input = b, B.output = b, Vcc = Vcc, GND = 0)
+        }
+        measure final current V1
+        within -1.2 mA .. 0 mA
+    }
+}

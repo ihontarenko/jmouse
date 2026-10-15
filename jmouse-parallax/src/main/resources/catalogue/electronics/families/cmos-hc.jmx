@@ -1,0 +1,21 @@
+# What every 74HC part has in common. A digital pin never meets the analog solver directly: where it lands on an
+# analog node, the emulator puts a bridge on it built from these numbers — an input reads the node through the
+# thresholds, an output pulls it towards a rail through the output resistance, moving over the edge time.
+
+family "74HC CMOS logic" as cmos-hc {
+    meta {
+        summary "74HC high-speed CMOS, 2 V to 6 V"
+        source "74HC family characteristics (Nexperia, TI)"
+    }
+
+    parameters {
+        input_low = 0.3              "VIL as a fraction of Vcc"
+        input_high = 0.7             "VIH as a fraction of Vcc"
+        input_capacitance = 3.5 pF "input pin capacitance to ground; adjustable for a specific part"
+        output_capacitance = 5 pF   "pin capacitance to ground; adjustable for a specific part"
+        output_resistance = 45 Ohm   "at Vcc = 4.5 V; it grows as the supply drops"
+        edge = 7 ns                  "output transition time, 4.5 V, 50 pF"
+        delay_reference = 4.5 V      "the supply the delays of a part are written at"
+        delay_exponent = 2           "delay grows as (delay_reference / Vcc)^2: about five times slower at 2 V"
+    }
+}

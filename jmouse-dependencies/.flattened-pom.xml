@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-dependencies</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <packaging>pom</packaging>
   <name>jMouse - Dependencies</name>
   <description>jMouse Framework - BOM-POM</description>
@@ -44,6 +44,7 @@
     <jaxb.version>4.0.0</jaxb.version>
     <flatten-maven-plugin.version>1.2.7</flatten-maven-plugin.version>
     <maven-surefire.version>3.5.6</maven-surefire.version>
+    <jgit.version>6.10.0.202406032230-r</jgit.version>
     <slf4j.version>2.0.13</slf4j.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
     <jakarta-inject.version>2.0.1</jakarta-inject.version>
@@ -81,7 +82,7 @@
     <java.version>21</java.version>
     <jakarta-tx.version>2.0.1</jakarta-tx.version>
     <jdbc-postgresql>42.7.3</jdbc-postgresql>
-    <jmouse.version>1.0.0-b20260902</jmouse.version>
+    <jmouse.version>1.0.1</jmouse.version>
     <maven.compiler.target>21</maven.compiler.target>
     <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
     <jdbc-mssql>12.6.1.jre11</jdbc-mssql>
@@ -89,6 +90,16 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-ai-model</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-ai-embeddings</artifactId>
+        <version>1.0.1</version>
+      </dependency>
       <dependency>
         <groupId>software.amazon.awssdk</groupId>
         <artifactId>bom</artifactId>
@@ -208,6 +219,41 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-formula</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-spice</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parallax</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parallax-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parallax-spring-boot</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parallax-management</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parallax-live</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-access-projection</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
@@ -323,6 +369,21 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-git</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-git-hosting</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-java-parser</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-telegram</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
@@ -334,6 +395,76 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-telegram-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-vault</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-vault-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-vault-spring-boot</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-vault-management</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-telegram-command</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-telegram-user</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-telegram-management</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-notifier</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-notifier-telegram</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-notifier-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-notifier-web</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-notifier-spring-boot</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-scheduler</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-scheduler-spring-boot</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -395,6 +526,11 @@
         <groupId>org.glassfish</groupId>
         <artifactId>jakarta.el</artifactId>
         <version>${jakarta-el.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -590,6 +726,11 @@
         <artifactId>json-path</artifactId>
         <version>${json-path}</version>
         <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jgit</groupId>
+        <artifactId>org.eclipse.jgit</artifactId>
+        <version>${jgit.version}</version>
       </dependency>
       <dependency>
         <groupId>io.modelcontextprotocol.sdk</groupId>

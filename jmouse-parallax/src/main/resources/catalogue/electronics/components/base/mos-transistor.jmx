@@ -1,0 +1,122 @@
+# The MOSFET every MOS part is a member of: SPICE's level 1 (Shichman–Hodges) as ngspice 47 writes it, with the bulk
+# junction as the body diode. A datasheet part writes `family n-mosfet` (or p-mosfet) and its numbers; the physics is here.
+#
+# What the effects are for:
+#   VTO, KP          where the channel opens, and how hard it conducts once it has — RDS(on), the transfer curve
+#   LAMBDA           channel-length modulation — the drain current still rises with VDS in saturation
+#   RD, RS           the series resistances — the part of RDS(on) the gate cannot reduce
+#   IS, N            the body diode (drain–bulk junction, the bulk being the source): freewheeling in a half-bridge
+#   CBD, PB, MJ, FC  that junction's depletion capacitance — Coss, falling as VDS rises
+#   CGSO, CGDO       the gate overlap capacitances — Ciss, and Crss: the Miller plateau of a switching gate
+#   V_breakdown      drain–source avalanche: not part of level 1, but where an inductive kick stops
+#
+# The channel is the whole device: W = L = 1, so KP is the part's β and CGSO, CGDO are farads — an exported deck writes
+# `W=1 L=1` on the M line for that reason. The bulk is tied to the source, so the body effect (GAMMA, PHI) never acts.
+# Polarity is a parameter: 1 for n-channel, -1 for p-channel; VTO keeps SPICE's sign (negative for a p-channel
+# enhancement part). Not represented: Meyer's intrinsic gate charge (TOX), the source–bulk junction, CJ/CJSW per area,
+# KF/AF noise. Not SPICE, and left at "none" by default: the threshold's drift and the series resistances' rise with
+# temperature — what a datasheet's "RDS(on) normalised to temperature" curve needs.
+
+component "MOS transistor" as mos-transistor type mosfet {
+    meta {
+        designator Q
+        summary "Level-1 MOSFET: square-law channel, channel-length modulation, series resistances, body diode, gate and junction capacitances"
+        source "MOS level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
+        category circuits
+        failure short
+    }
+    use smooth-transitions, junctions
+
+    parameters {
+        polarity = 1                          "1 for n-channel, -1 for p-channel"
+        V_threshold = 0 V                     "VTO: zero-bias threshold voltage, SPICE's sign"
+        V_threshold_spread = 0 V              "how far the threshold's magnitude spreads from part to part: a bench's tolerance corners use it"
+        transconductance_spread = 0           "how far KP spreads from part to part, as a share"
+        transconductance = 20 uA/V^2          "KP: the channel's transconductance parameter, the whole device (W/L = 1)"
+        channel_length_modulation = 0         "LAMBDA: per volt"
+        R_drain = 1 mOhm                      "RD: drain series resistance"
+        R_source = 1 mOhm                     "RS: source series resistance"
+        I_saturation = 10 fA                  "IS: bulk junction saturation current — the body diode"
+        emission_coefficient = 1              "N: its emission coefficient"
+        C_bulk_drain = 0 F                    "CBD: drain–bulk zero-bias capacitance"
+        V_junction = 0.8 V                    "PB: its built-in potential"
+        grading_coefficient = 0.5             "MJ: its grading coefficient"
+        forward_bias_coefficient = 0.5        "FC: past FC·PB the depletion capacitance goes on as a straight line"
+        C_gate_source = 0 F                   "CGSO: gate–source overlap capacitance (W = 1)"
+        C_gate_drain = 0 F                    "CGDO: gate–drain overlap capacitance (W = 1)"
+        R_gate = 1 mOhm                       "RG: the gate's internal resistance, which with Ciss sets how fast it switches"
+        body_transit_time = 0 s               "the body diode's transit time: its stored charge, the reverse recovery of a freewheeling diode"
+        T_nominal = 300.15 K                  "TNOM: the temperature the figures above are measured at"
+        V_threshold_coefficient = 0           "not SPICE: how the threshold's magnitude drifts, V/K (negative: it opens earlier when hot)"
+        resistance_temperature_exponent = 0   "not SPICE: RD and RS grow as (temperature / T_nominal)^this"
+        E_gap = 1.11 V                        "the band gap the body diode's saturation current follows"
+        V_breakdown = 1 kV                    "drain–source avalanche voltage"
+        I_breakdown = 1 mA                    "avalanche current at V_breakdown"
+        power_rating = 0.4 W                  "what it is rated for"
+        thermal_resistance = 312 K/W          "kelvin above the bench per watt it takes"
+        thermal_time_constant = 2 s           "how fast it warms to that"
+        T_maximum = 150 °C                    "past this it fails on a realistic bench"
+        V_drain_source_maximum = 1e6 V        "VDS: the drain-source voltage it is rated for; none is a megavolt"
+        V_gate_source_maximum = 1e6 V         "VGS: what the gate oxide is rated for, either way; none is a megavolt"
+        I_drain_maximum = 1e6 A               "ID: the drain current it is rated for; none is a megaampere"
+    }
+
+    pins {
+        source analog 1                       "source, and the bulk"
+        gate analog input 2                   "gate"
+        drain analog output 3                 "drain"
+    }
+
+    nodes {
+        di                                    "the intrinsic drain, behind the drain resistance"
+        gi                                    "the intrinsic gate, behind the gate resistance"
+        si                                    "the intrinsic source, behind the source resistance"
+    }
+
+    symbol uses n-channel-mosfet-symbol
+
+    display {
+        overvoltage = 100 * max(abs(drain - source) / V_drain_source_maximum, abs(gate - source) / V_gate_source_maximum) unit % "of VDS or VGS"
+        overcurrent = 100 * abs(current(drain)) / I_drain_maximum unit % "of its rated ID"
+    }
+
+    state {
+        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
+    }
+
+    equations {
+        local T_junction = temperature + heating
+        local warmth = T_junction / T_nominal
+        local V_gs = polarity * (gi - si)
+        local V_gd = polarity * (gi - di)
+        local V_ds = polarity * (di - si)
+        local V_bd = polarity * (source - di)
+
+        # The device is symmetric: with VDS reversed the drain acts as the source.
+        local V_control = if(V_ds >= 0, V_gs, V_gd)
+        local V_across = abs(V_ds)
+        local V_threshold_now = polarity * V_threshold + tolerance_corner * V_threshold_spread + V_threshold_coefficient * (T_junction - T_nominal)
+        local beta = transconductance * (1 + tolerance_corner * transconductance_spread) / warmth ^ 1.5
+        local overdrive = V_control - V_threshold_now
+        local square_law = if(V_across < overdrive, beta * (overdrive - V_across / 2) * V_across, beta / 2 * overdrive ^ 2)
+        local channel = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
+
+        local I_saturation_now = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
+        local body = junction_current(V_bd, I_saturation_now, emission_coefficient, T_junction)
+        local Q_bulk_drain = depletion_charge(V_bd, C_bulk_drain, V_junction, grading_coefficient, forward_bias_coefficient) + body_transit_time * body
+        local avalanche = I_breakdown * limit_exponential((V_ds - V_breakdown) / thermal_voltage(T_junction))
+        local resistance_drift = warmth ^ resistance_temperature_exponent
+
+        current drain -> di = (drain - di) / (R_drain * resistance_drift)
+        current si -> source = (si - source) / (R_source * resistance_drift)
+        # The channel's thermal noise, 8/3 · kT · gm, with gm = √(2 · KP · ID) in saturation: nothing to the solution.
+        current di -> si = polarity * (if(V_ds >= 0, channel, 0 - channel) + avalanche) + noise(8 / 3 * 1.380649e-23 * T_junction * sqrt(2 * beta * soft_positive_part(channel, 1e-15)))
+        current source -> di = polarity * (body + d(Q_bulk_drain)/dt)
+        current gate -> gi = (gate - gi) / R_gate
+        current gi -> si = polarity * d(C_gate_source * V_gs)/dt
+        current gi -> di = polarity * d(C_gate_drain * V_gd)/dt
+
+        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
+        d(heating)/dt = (realistic * ((drain - source) * (drain - di) / (R_drain * resistance_drift)) * thermal_resistance - heating) / thermal_time_constant
+    }
+}

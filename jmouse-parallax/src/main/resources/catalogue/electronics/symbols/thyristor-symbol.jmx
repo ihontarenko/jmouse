@@ -1,0 +1,14 @@
+symbol "Thyristor" as thyristor-symbol {
+    meta {
+        summary "Thyristor (SCR), as drawn on a schematic: a diode with a gate at its cathode"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 60
+    path "M-40 0H-12V-10L10 0-12 10V0M10-10V10M10 0H40M10 6L20 20V30"
+    pin a at -40, 0
+    pin b at 40, 0
+    pin gate at 20, 30
+    label name at 0, -18
+    label value at 0, 40
+}

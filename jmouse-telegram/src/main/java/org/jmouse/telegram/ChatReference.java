@@ -59,6 +59,35 @@ public record ChatReference(Long chatId, String username, Integer threadId) {
         return new ChatReference(null, normalised, null);
     }
 
+    /**
+     * Reads a chat back from its {@link #wireValue()} — a signed id, or {@code @username}.
+     *
+     * <p>⚠️ Strict where {@link #of(String)} is forgiving: text that is neither a number nor starts with
+     * {@code @} is refused, because it usually came from somebody's typing or a URL, and "my chat"
+     * silently becoming {@code @my chat} addresses nobody.
+     *
+     * @throws IllegalArgumentException with a sentence, never a {@link NumberFormatException}
+     */
+    public static ChatReference parse(String wireValue) {
+        if (wireValue == null || wireValue.isBlank()) {
+            throw new IllegalArgumentException("A chat needs an id or an @username");
+        }
+
+        String value = wireValue.strip();
+
+        if (value.startsWith("@") && value.length() > 1) {
+            return of(value);
+        }
+
+        try {
+            // ⚠️ long, signed: a supergroup is a large negative number, and truncation reaches another chat.
+            return of(Long.parseLong(value));
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(
+                    "'%s' is not a Telegram chat — expected a chat id or an @username".formatted(wireValue), exception);
+        }
+    }
+
     /** The same chat, addressed inside one of its forum topics. */
     public ChatReference inThread(int threadId) {
         return new ChatReference(chatId, username, threadId);

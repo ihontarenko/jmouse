@@ -1,0 +1,14 @@
+symbol "Frequency meter" as frequency-meter-symbol {
+    meta {
+        summary "Frequency meter, as drawn on a schematic: a dial marked F"
+        category circuits
+        tags electronics, schematic, instrument
+    }
+    size 80 x 40
+    path "M-40 0H-18M18 0H40M-18 0A18 18 0 1 0 18 0A18 18 0 1 0 -18 0"
+    path "M-5 8V-8H6M-5 0H4" upright
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -28
+    label value at 0, 32
+}

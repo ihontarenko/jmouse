@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jmouse</groupId>
+  <artifactId>jmouse-scheduler-spring-boot</artifactId>
+  <version>1.0.1</version>
+  <name>jMouse - Scheduler Spring Boot Starter</name>
+  <description>Spring Boot auto-configuration for jMouse Scheduler: the runner, the JDBC trigger store over the application's DataSource, and handler and gate beans collected by type; off unless enabled</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-scheduler-spring-boot</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>ihontarenko</id>
+      <name>Ivan Hontarenko</name>
+      <email>ihontarenko@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git/jmouse-spring/jmouse-scheduler-spring-boot</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git/jmouse-spring/jmouse-scheduler-spring-boot</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core/jmouse-spring/jmouse-scheduler-spring-boot</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-scheduler</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <version>4.0.7</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.13</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

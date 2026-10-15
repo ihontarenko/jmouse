@@ -48,7 +48,7 @@ public class TelegramPollingAutoConfiguration {
                 transport,
                 identities,
                 dispatcher,
-                IdentitySource.GENERAL,
+                settings.updates().purpose(),
                 settings.updates().pollTimeout(),
                 LongPolling.DEFAULT_FAILURE_BACKOFF,
                 Set.copyOf(settings.updates().allowed()));

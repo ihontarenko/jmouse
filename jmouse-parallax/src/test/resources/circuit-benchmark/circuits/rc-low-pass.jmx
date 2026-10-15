@@ -1,0 +1,15 @@
+# A step into a resistor and a capacitor: the output rises as 1 − e^(−t/RC), RC = 1 ms. The plainest transient there
+# is, and so the first answer two simulators must agree on. Fixed on purpose: a benchmark compares against its own past.
+
+circuit "RC low-pass, stepped" as rc-low-pass {
+    meta {
+        summary "Benchmark: 5 V step into 1 kΩ and 1 µF; RC = 1 ms."
+        category circuits
+    }
+    parts {
+        V1 voltage-source (in, 0) waveform = step, U_output = 5
+        R1 resistor (in, out) resistance = 1000
+        C1 capacitor (out, 0) capacitance = 1e-6
+    }
+    analysis transient for 0.01 s
+}

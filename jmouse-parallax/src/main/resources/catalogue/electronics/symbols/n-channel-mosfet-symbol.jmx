@@ -1,0 +1,14 @@
+symbol "N-channel MOSFET" as n-channel-mosfet-symbol {
+    meta {
+        summary "N-channel MOSFET, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 80
+    path "M-40 0H-10M-10-13V13M-5-13V-7M-5-3V3M-5 7V13M-5-10H20V-40M-5 10H20V40M20 10V0H-4M0-4L-4 0 0 4"
+    pin gate at -40, 0
+    pin drain at 20, -40
+    pin source at 20, 40
+    label name at 32, -8
+    label value at 32, 8
+}

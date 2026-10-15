@@ -1,0 +1,18 @@
+Inverting amplifier on a macromodel
+* a single-pole operational amplifier
+.subckt opamp inp inn out params: gain=1e5 pole=10
+Rin inp inn 1meg
+E1 int 0 inp inn {gain}
+Rp int pole_node 1k
+Cp pole_node 0 {1/(6.283*1k*pole)}
+* the output stage
+B1 out 0 V=V(pole_node)
+.ends opamp
+Vin in 0 PULSE(0 1 0 1n 1n 0.5m 1m)
+R1 in minus 10k
+R2 minus out 100k
+X1 0 minus out opamp gain=2e5
+Q1 c b 0 QN
+.model QN NPN(IS=1e-14 BF=100 VAF=50)
+.tran 1u 3m 0 1u
+.end

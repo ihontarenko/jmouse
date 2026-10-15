@@ -234,7 +234,7 @@ public class ExpressionLanguage {
      *   1 2 3                            → 1
      *   'a' 'b'                          → a
      *   1 == 1 nonsense 2 == 2           → true
-     *   true xor true                    → true   ⚠️ 'xor' is not a word here; only '^' is
+     *   true xor true                    → true   ⚠️ 'xor' is not a word here, and '^' is no longer XOR
      *   x == 'a' OR x == 'b'             → the left half   ⚠️ 'OR' uppercase is not a keyword
      * </pre>
      *
@@ -300,7 +300,7 @@ public class ExpressionLanguage {
                 + "everything from there on was ignored. This is a syntax error rather than a warning "
                 + "because the prefix on its own is a perfectly plausible answer — check for a typo, "
                 + "for a keyword in the wrong case ('AND' and 'OR' are not keywords; 'and' and 'or' "
-                + "are), or for a word this language does not have ('xor' is spelled '^').");
+                + "are), or for a word this language does not have (there is no xor; '^' is not an operator in plain jME).");
     }
 
     /**

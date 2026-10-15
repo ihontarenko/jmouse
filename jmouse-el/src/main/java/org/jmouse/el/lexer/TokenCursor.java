@@ -129,12 +129,12 @@ public interface TokenCursor extends Streamable<Token> {
     void retract(int count);
 
     /**
-     * Consumes the next token and verifies that its type matches the expected type.
-     * If the token's type does not match, a SyntaxErrorException is thrown.
+     * Verifies that the current token — the one {@link #next()} would return — has one of the expected
+     * types, and consumes it. The same check as {@link #ensure(Token.Type...)}.
      *
      * @param expected the expected Token.Type
      * @return the consumed Token object
-     * @throws SyntaxErrorException if the next token's type does not match the expected type
+     * @throws SyntaxErrorException if the current token's type does not match the expected type
      */
     Token expect(Token.Type... expected) throws SyntaxErrorException;
 

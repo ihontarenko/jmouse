@@ -1,0 +1,17 @@
+# A series RLC driven at its resonance, read across the resistor: L = 10 mH and C = 1 µF resonate at 1/(2π√LC) ≈
+# 1592 Hz, where the reactances cancel and the resistor sees the whole drive. An inductor's current and a capacitor's
+# charge trade energy every cycle — what an integrator must keep in step for the amplitude to come out right.
+
+circuit "RLC band-pass at resonance" as rlc-band-pass {
+    meta {
+        summary "Benchmark: 1 V at 1592 Hz into 10 mH, 1 µF and 100 Ω; the output is across the resistor."
+        category circuits
+    }
+    parts {
+        G1 sine-generator (positive = in, negative = 0) amplitude = 1, frequency = 1591.55
+        L1 inductor (in, middle) inductance = 0.01
+        C1 capacitor (middle, out) capacitance = 1e-6
+        R1 resistor (out, 0) resistance = 100
+    }
+    analysis transient for 0.02 s
+}

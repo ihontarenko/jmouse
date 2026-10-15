@@ -1,0 +1,28 @@
+# A PNP transistor at the bipolar model's neutral defaults: what an imported `.model … PNP(…)` becomes, the model's
+# numbers set on it. A datasheet PNP part is a member of this family.
+
+component "PNP transistor" as pnp-transistor type bjt {
+    meta {
+        designator Q
+        summary "PNP bipolar transistor, the Gummel–Poon model at its defaults"
+        category circuits
+        failure open
+    }
+    family bipolar-transistor
+
+    parameters {
+        polarity = -1                         "PNP"
+    }
+
+    symbol uses pnp-transistor-symbol
+
+    expect "on: 10 µA drawn out of the base drives a milliampere" from "BF 100 at the defaults" {
+        bench for 1 ms {
+            V1 voltage-source (0, collector) U_output = 5 V
+            I1 current-source (0, base) I_output = 10 uA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure operating current V1
+        within -1.05 mA .. -0.95 mA
+    }
+}

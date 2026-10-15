@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
  *
  * <h2>⚠️ The credential is sealed, and this entity never unseals it</h2>
  *
- * <p>{@link #credentialSealed} holds whatever {@link CredentialCipher} produced. Opening it is
+ * <p>{@link #credentialSealed} holds whatever the vault's {@link org.jmouse.vault.seal.SecretCipher} produced. Opening it is
  * {@link JpaIdentitySource}'s business, at the moment of use, so that a read of the table — a
  * listing, an administration screen, a debug query — never materialises a token anywhere.
  *
@@ -74,7 +74,7 @@ public class TelegramAccount {
     private IdentityKind kind;
 
     /**
-     * The sealed credential — see {@link CredentialCipher}.
+     * The sealed credential — see the vault's {@link org.jmouse.vault.seal.SecretCipher}.
      *
      * <p>1024 because AES-GCM with base64 inflates by roughly a third and a user session reference is
      * substantially longer than a bot token; generous rather than tight, since a truncated credential is

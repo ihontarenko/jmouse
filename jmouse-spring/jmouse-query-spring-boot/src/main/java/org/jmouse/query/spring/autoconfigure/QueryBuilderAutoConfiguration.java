@@ -3,21 +3,15 @@ package org.jmouse.query.spring.autoconfigure;
 import org.jmouse.query.spring.builder.QueryBuilderController;
 import org.jmouse.query.spring.builder.QueryBuilders;
 import org.jmouse.query.spring.builder.QueryCallers;
-import org.jmouse.query.spring.builder.QueryRunner;
 import org.jmouse.query.spring.builder.QuerySubject;
 import org.jmouse.query.spring.builder.QuerySubjects;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.sql.DataSource;
 
 import java.util.List;
 
@@ -39,7 +33,7 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@AutoConfiguration
+@AutoConfiguration(after = QueryAutoConfiguration.class)
 @ConditionalOnClass(RestController.class)
 @ConditionalOnWebApplication
 @Import(QueryBuilderController.class)
@@ -55,26 +49,6 @@ public class QueryBuilderAutoConfiguration {
     @ConditionalOnMissingBean
     public QueryBuilders jmQueryBuilders(QuerySubjects subjects) {
         return new QueryBuilders(subjects);
-    }
-
-    /**
-     * Running a composed filter — the SQL half.
-     *
-     * <p>⚠️ Conditioned on the {@code DataSource} and not on a {@code JdbcTemplate} <strong>bean</strong>.
-     * Whether Boot's template autoconfiguration has run by the time this one is evaluated is an ordering
-     * question, and a condition that asks it gets a silent answer — the failure mode already recorded on
-     * {@code QueryAutoConfiguration}. An {@link ObjectProvider} defers the question to call time instead,
-     * so the product's own template is used when it has one and an equivalent is made when it does not.</p>
-     *
-     * <p>⚠️ Composing a query and RUNNING one are deliberately separable: the first works over any
-     * adapter, the second is SQL by definition. A product filtering a list of maps takes the builder and
-     * never sees this.</p>
-     */
-    @Bean
-    @ConditionalOnBean(DataSource.class)
-    @ConditionalOnMissingBean
-    public QueryRunner jmQueryRunner(ObjectProvider<JdbcTemplate> jdbcTemplate, DataSource dataSource) {
-        return new QueryRunner(jdbcTemplate.getIfAvailable(() -> new JdbcTemplate(dataSource)), dataSource);
     }
 
     /**

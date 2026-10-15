@@ -8,11 +8,22 @@ import org.jmouse.ai.model.AiCapability;
 
 /** Shared management: provider says who, capabilities what, application purpose why. Credentials are write-only. */
 public interface ProviderAdministration {
+    /**
+     * @param credentialName the vault credential the URL and key come from ({@code ai/providers/<id>} when they
+     *                       were entered with the configuration, or a shared one such as {@code ai/openai/primary});
+     *                       null where the installation keeps them on the row because it has no vault
+     */
     record Configuration(String id, String provider, String model, String apiUrl, int maximumTokens,
             boolean active, boolean keyConfigured, Instant createdAt, Instant updatedAt, String purpose,
-            Set<AiCapability> capabilities, long revision) {
+            Set<AiCapability> capabilities, long revision, String credentialName) {
         public Configuration {
             capabilities = Set.copyOf(capabilities);
+        }
+        public Configuration(String id, String provider, String model, String apiUrl, int maximumTokens,
+                boolean active, boolean keyConfigured, Instant createdAt, Instant updatedAt, String purpose,
+                Set<AiCapability> capabilities, long revision) {
+            this(id, provider, model, apiUrl, maximumTokens, active, keyConfigured, createdAt, updatedAt, purpose,
+                    capabilities, revision, null);
         }
         public Configuration(String id, String provider, String model, String apiUrl, int maximumTokens,
                 boolean active, boolean keyConfigured, Instant createdAt, Instant updatedAt, String purpose) {
@@ -25,16 +36,27 @@ public interface ProviderAdministration {
         }
     }
 
-    /** Missing capabilities retains legacy CHAT semantics; a blank key retains the stored key on change. */
+    /**
+     * Missing capabilities retains legacy CHAT semantics; a blank key retains the stored key on change.
+     *
+     * @param credentialName a shared vault credential to take the URL and key from — {@code apiKey} and
+     *                       {@code apiUrl} are then ignored; null keeps them with this configuration
+     */
     record Draft(String provider, String model, String apiKey, String apiUrl, int maximumTokens, String purpose,
-            Set<AiCapability> capabilities) {
+            Set<AiCapability> capabilities, String credentialName) {
         public Draft {
             capabilities = capabilities == null ? Set.of(AiCapability.CHAT) : Set.copyOf(capabilities);
+            credentialName = credentialName == null || credentialName.isBlank() ? null : credentialName.strip();
             if (capabilities.isEmpty() || model == null || model.isBlank() || model.length() > 128
                     || maximumTokens < 1 || (purpose != null && purpose.trim().length() > 64)
-                    || (apiUrl != null && apiUrl.length() > 255) || (apiKey != null && apiKey.length() > 255)) {
+                    || (apiUrl != null && apiUrl.length() > 255) || (apiKey != null && apiKey.length() > 255)
+                    || (credentialName != null && credentialName.length() > 255)) {
                 throw new IllegalArgumentException("A bounded model, positive token limit and nonempty capabilities are required.");
             }
+        }
+        public Draft(String provider, String model, String apiKey, String apiUrl, int maximumTokens, String purpose,
+                Set<AiCapability> capabilities) {
+            this(provider, model, apiKey, apiUrl, maximumTokens, purpose, capabilities, null);
         }
         public Draft(String provider, String model, String apiKey, String apiUrl, int maximumTokens, String purpose) {
             this(provider, model, apiKey, apiUrl, maximumTokens, purpose, Set.of(AiCapability.CHAT));
@@ -47,7 +69,8 @@ public interface ProviderAdministration {
         }
         @Override
         public String toString() {
-            return "Draft[provider=" + provider + ", model=" + model + ", capabilities=" + capabilities + "]";
+            return "Draft[provider=" + provider + ", model=" + model + ", capabilities=" + capabilities
+                   + ", credentialName=" + credentialName + "]";
         }
     }
 

@@ -1,5 +1,7 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.lexer.StatementToken;
+import org.jmouse.script.el.parser.ScriptBodyParser;
 import org.jmouse.core.Priority;
 import org.jmouse.el.language.parser.AbstractBodyParser;
 import org.jmouse.el.lexer.BasicToken;
@@ -27,7 +29,7 @@ public class BehaviourParser extends AbstractBodyParser<BehaviourNode, ScriptTok
 
         node.setName(SourceReader.literal(cursor.ensure(BasicToken.T_STRING)));
 
-        cursor.ensure(ScriptToken.T_DO);
+        cursor.ensure(StatementToken.T_DO);
 
         return node;
     }
@@ -49,7 +51,7 @@ public class BehaviourParser extends AbstractBodyParser<BehaviourNode, ScriptTok
 
     @Override
     protected void closeBlock(TokenCursor cursor) {
-        cursor.ensure(ScriptToken.T_END);
+        cursor.ensure(StatementToken.T_END);
     }
 
     @Override

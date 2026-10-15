@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-script-el</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Script (jms)</name>
   <description>jMouse Framework - jMS scripting dialect (parser, binder, closed host catalogue)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-script-el</url>
@@ -29,8 +29,8 @@
   <dependencies>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-b20260902</version>
+      <artifactId>jmouse-formula</artifactId>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

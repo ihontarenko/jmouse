@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-telegram-spring-boot</artifactId>
-  <version>1.0.0-b20260902</version>
+  <version>1.0.1</version>
   <name>jMouse - Telegram Spring Boot Starter</name>
   <description>Spring Boot auto-configuration for jMouse Telegram: identities from properties, the gateway, pacing, long polling and the webhook endpoint</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-telegram-spring-boot</url>
@@ -30,19 +30,39 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-telegram</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-vault</artifactId>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-telegram-bot</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-telegram-jpa</artifactId>
-      <version>1.0.0-b20260902</version>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-telegram-user</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-telegram-command</artifactId>
+      <version>1.0.1</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>

@@ -27,12 +27,12 @@ public enum LogicalOperator implements Operator {
     /**
      * Logical NOT ({@code !}).
      */
-    NOT(LogicalCalculator.NOT, BasicToken.T_NEGATE, "NOT", 150),
+    NOT(LogicalCalculator.NOT, BasicToken.T_NEGATE, "NOT", 150);
 
-    /**
-     * Logical XOR ({@code ^}).
-     */
-    XOR(LogicalCalculator.XOR, BasicToken.T_CARET, "XOR", 150);
+    // Logical XOR on ^ is switched off at the root of jME, kept here for history (2026-10-08). Nothing used
+    // it, and the caret belongs to power: jMF registers POWER on T_CARET, and with XOR gone it no longer
+    // replaces one of jME's operators to do so. LogicalCalculator.XOR stays, unregistered.
+    // XOR(LogicalCalculator.XOR, BasicToken.T_CARET, "XOR", 150);
 
     private final Calculator<Boolean> calculator;
     private final Token.Type          type;

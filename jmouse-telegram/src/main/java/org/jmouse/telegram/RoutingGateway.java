@@ -4,6 +4,7 @@ import org.jmouse.telegram.spi.TelegramTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -136,20 +137,28 @@ public final class RoutingGateway implements TelegramGateway {
         return new RoutingGateway(identities, transports, purpose);
     }
 
+    @Override
+    public TelegramFile describeFile(String fileId) {
+        TelegramIdentity  identity  = resolve();
+        TelegramTransport transport = transportFor(identity);
+
+        requireCapability(identity, transport, Capability.DOWNLOAD_FILES);
+
+        return transport.describeFile(identity, fileId);
+    }
+
+    @Override
+    public InputStream openFile(TelegramFile file) {
+        TelegramIdentity  identity  = resolve();
+        TelegramTransport transport = transportFor(identity);
+
+        requireCapability(identity, transport, Capability.DOWNLOAD_FILES);
+
+        return transport.openFile(identity, file);
+    }
+
     private TelegramIdentity resolve() {
-        TelegramIdentity identity = identities.identity(purpose);
-
-        if (identity == null) {
-            throw new TelegramException(new TelegramRefusal.Unauthorized(
-                    purpose, "no identity is configured for this purpose"));
-        }
-
-        if (!identity.hasCredential()) {
-            throw new TelegramException(new TelegramRefusal.Unauthorized(
-                    identity.name(), "the identity has no credential"));
-        }
-
-        return identity;
+        return identities.require(purpose);
     }
 
     private TelegramTransport transportFor(TelegramIdentity identity) {

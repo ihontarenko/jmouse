@@ -3,12 +3,23 @@ package org.jmouse.telegram.spring.autoconfigure;
 import org.jmouse.telegram.IdentitySource;
 import org.jmouse.telegram.RoutingGateway;
 import org.jmouse.telegram.TelegramGateway;
+import org.jmouse.telegram.administration.ChatAdministration;
+import org.jmouse.telegram.administration.RoutingChatAdministration;
+import org.jmouse.telegram.bot.BotApiChatAdministration;
+import org.jmouse.telegram.bot.BotApiMenus;
+import org.jmouse.telegram.menu.BotMenus;
 import org.jmouse.telegram.bot.BotApiTransport;
+import org.jmouse.telegram.spi.AdministrationTransport;
+import org.jmouse.telegram.journal.JournalingTransport;
+import org.jmouse.telegram.journal.MemoryTelegramJournal;
+import org.jmouse.telegram.journal.TelegramJournal;
 import org.jmouse.telegram.pace.Pace;
 import org.jmouse.telegram.pace.PacedTransport;
 import org.jmouse.telegram.pace.TokenBucketPace;
 import org.jmouse.telegram.spi.TelegramTransport;
 import org.jmouse.telegram.spring.PropertiesIdentitySource;
+import org.jmouse.vault.Vault;
+import org.springframework.beans.factory.ObjectProvider;
 import org.jmouse.telegram.spring.TelegramSettings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -63,8 +74,8 @@ public class TelegramAutoConfiguration {
     /** ⚙️ Identities from properties. Replaced wholesale by a product with a store of its own. */
     @Bean
     @ConditionalOnMissingBean
-    public IdentitySource telegramIdentitySource(TelegramSettings settings) {
-        return new PropertiesIdentitySource(settings);
+    public IdentitySource telegramIdentitySource(TelegramSettings settings, ObjectProvider<Vault> vault) {
+        return new PropertiesIdentitySource(settings, vault::getIfAvailable);
     }
 
     /**
@@ -116,13 +127,63 @@ public class TelegramAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public TelegramGateway telegramGateway(
-            IdentitySource identities, List<TelegramTransport> transports, Pace pace) {
+            IdentitySource identities, List<TelegramTransport> transports, Pace pace, TelegramJournal journal) {
 
-        List<TelegramTransport> paced = transports.stream()
-                .map(transport -> (TelegramTransport) new PacedTransport(transport, pace))
+        // ⚠️ Journaling OUTSIDE pacing: an entry is the call's final outcome, retries and waits included.
+        // Inside, a flood wait that was retried and then went through would journal a refusal for a
+        // message that arrived.
+        List<TelegramTransport> wrapped = transports.stream()
+                .map(transport -> (TelegramTransport) new JournalingTransport(new PacedTransport(transport, pace), journal))
                 .toList();
 
-        return new RoutingGateway(identities, paced);
+        return new RoutingGateway(identities, wrapped);
+    }
+
+    /**
+     * ⚙️ The journal of calls — in memory unless {@code jmouse.telegram.journal.store} says otherwise.
+     *
+     * <p>⚠️ {@code database} is supplied by {@link TelegramJournalJpaAutoConfiguration}, which runs first;
+     * when it is asked for and cannot be built (no {@code jmouse-telegram-jpa}, no JPA), this one refuses
+     * to start rather than quietly keeping the journal in memory — a setting that silently does something
+     * else is the same as a lie.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public TelegramJournal telegramJournal(TelegramSettings settings) {
+        return switch (settings.journal().store()) {
+            case MEMORY -> new MemoryTelegramJournal(settings.journal().capacity());
+            case NONE -> TelegramJournal.none();
+            case DATABASE -> throw new IllegalStateException(
+                    "jmouse.telegram.journal.store=database needs jmouse-telegram-jpa and a JPA EntityManagerFactory "
+                    + "on the classpath; neither journal store could be built");
+        };
+    }
+
+    /** ⚙️ A bot's command menu — the list behind Telegram's "Menu" button. */
+    @Bean
+    @ConditionalOnMissingBean(BotMenus.class)
+    public BotApiMenus botApiMenus(IdentitySource identities) {
+        return new BotApiMenus(identities);
+    }
+
+    /** ⚙️ Chat administration over the Bot API. */
+    @Bean
+    @ConditionalOnMissingBean
+    public BotApiChatAdministration botApiChatAdministration() {
+        return new BotApiChatAdministration();
+    }
+
+    /**
+     * ⚙️ Chat administration — members, bans, invite links, topics.
+     *
+     * <p>⚠️ A bean of its own, never reachable through {@link TelegramGateway}: inject it only where the
+     * product administers, so the power to ban does not travel with the power to send.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ChatAdministration telegramChatAdministration(
+            IdentitySource identities, List<AdministrationTransport> transports) {
+        return new RoutingChatAdministration(identities, transports);
     }
 
     /**

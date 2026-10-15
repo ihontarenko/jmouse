@@ -40,6 +40,11 @@ public final class AnthropicChatModel extends HttpChatModel {
         super(settingsSource, connectTimeout, readTimeout);
     }
 
+    /** Caller-owned connection, response-time and body-byte admission. */
+    public AnthropicChatModel(ProviderSettingsSource settingsSource, ChatHttpPolicy policy) {
+        super(settingsSource, policy);
+    }
+
     @Override
     public String providerName() {
         return PROVIDER_NAME;

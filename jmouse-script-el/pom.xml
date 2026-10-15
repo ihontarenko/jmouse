@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260902</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -59,7 +59,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-el</artifactId>
+            <artifactId>jmouse-formula</artifactId>
             <version>${project.version}</version>
         </dependency>
 

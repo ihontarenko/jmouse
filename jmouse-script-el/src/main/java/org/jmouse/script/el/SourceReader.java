@@ -1,9 +1,9 @@
 package org.jmouse.script.el;
 
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.support.SourceReading;
-import org.jmouse.script.el.lexer.ScriptToken;
 import org.jmouse.script.el.node.ScriptSpanNode;
 
 /**
@@ -14,9 +14,9 @@ import org.jmouse.script.el.node.ScriptSpanNode;
  * the fact that a name in a script may be any of {@link ScriptToken}'s own keywords.</p>
  *
  * <p>⚠️ The keyword set is why these methods exist at all rather than callers reaching for
- * {@link SourceReading} directly. Passing {@code ScriptToken.nameTokens()} at forty call sites is
+ * {@link SourceReading} directly. Passing {@code StatementToken.nameTokens()} at forty call sites is
  * forty chances to forget it, and forgetting it is a host event or a facade method that cannot be
- * written down — see {@link ScriptToken#nameTokens()}.</p>
+ * written down — see {@link StatementToken.nameTokens()}.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -64,7 +64,7 @@ public final class SourceReader {
      * @return the name, quotes removed
      */
     public static String name(TokenCursor cursor) {
-        return SourceReading.literal(cursor.ensure(ScriptToken.nameTokens()));
+        return SourceReading.literal(cursor.ensure(StatementToken.nameTokens()));
     }
 
     /**
@@ -79,7 +79,7 @@ public final class SourceReader {
      * @return the name, dots included
      */
     public static String propertyPath(TokenCursor cursor) {
-        return SourceReading.dottedName(cursor, ScriptToken.nameTokens());
+        return SourceReading.dottedName(cursor, StatementToken.nameTokens());
     }
 
     /**

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 4,
+    "name": "Puppet",
+    "path": "puppet",
+    "path_with_namespace": "brightbox/puppet",
+    "default_branch": "main",
+    "visibility": "private",
+    "http_url_to_repo": "https://gitlab.example.com/brightbox/puppet.git",
+    "namespace": { "id": 4, "name": "Brightbox", "path": "brightbox", "kind": "group", "full_path": "brightbox" }
+  },
+  {
+    "id": 6,
+    "name": "Empty",
+    "path": "empty",
+    "path_with_namespace": "john_smith/empty",
+    "default_branch": null,
+    "visibility": "public",
+    "http_url_to_repo": "https://gitlab.example.com/john_smith/empty.git",
+    "empty_repo": true,
+    "namespace": { "id": 1, "name": "john_smith", "path": "john_smith", "kind": "user", "full_path": "john_smith" }
+  }
+]

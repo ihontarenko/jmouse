@@ -1,0 +1,75 @@
+# Two coupled windings — what SPICE writes as two inductors and a K line. Each winding's voltage is its resistance's
+# drop plus the rate of the flux it links: its own inductance times its current, and the mutual inductance
+# M = k · √(L1 · L2) times the other winding's. The turns ratio is √(L1 / L2); a coupling below 1 is the leakage
+# inductance a real core has. The `_one` pins are the dotted ends: a current into both makes flux the same way.
+# Not represented: the core's saturation and hysteresis, its losses, the windings' capacitance.
+
+component "Transformer" as transformer type transformer {
+    meta {
+        designator T
+        summary "Two coupled windings: self and mutual inductance, leakage, winding resistance"
+        source "coupled inductors as in Berkeley SPICE3 / ngspice 47 (L, L, K)"
+        category circuits
+        failure open
+    }
+
+    parameters {
+        L_primary = 10 H                      "primary inductance: the magnetising inductance seen from the primary"
+        L_secondary = 0.1 H                   "secondary inductance: turns ratio √(L1 / L2) = 10"
+        coupling = 0.999                      "K: 1 is a perfect core; below it, leakage"
+        R_primary = 10 Ohm                    "primary winding resistance"
+        R_secondary = 0.1 Ohm                 "secondary winding resistance"
+        copper_temperature_coefficient = 0.00393 "copper: the windings' resistance rises 0.393 % per kelvin"
+        T_nominal = 298.15 K                  "the temperature the resistances are given at"
+        power_rating = 10 W                   "what it is rated for"
+        thermal_resistance = 10 K/W           "kelvin above the bench per watt it takes"
+        thermal_time_constant = 300 s         "how fast it warms to that"
+        T_maximum = 120 °C                    "past this it fails on a realistic bench"
+    }
+
+    pins {
+        primary_one analog 1                  "primary, dotted end"
+        primary_two analog 2                  "primary"
+        secondary_one analog 3                "secondary, dotted end"
+        secondary_two analog 4                "secondary"
+    }
+
+    nodes {
+        primary_current                       "a node whose voltage above primary_two is the primary current, one volt per ampere"
+        secondary_current                     "the same for the secondary"
+    }
+
+    symbol uses transformer-symbol
+
+    state {
+        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
+    }
+
+    equations {
+        local T_winding = temperature + heating
+        local R_primary_now = R_primary * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
+        local R_secondary_now = R_secondary * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
+        # A flux is a charge the equations differentiate, and a charge reads voltages, not currents: each winding's
+        # current is carried as a voltage on a node of its own.
+        local M = coupling * sqrt(L_primary * L_secondary)
+        local I_primary = primary_current - primary_two
+        local I_secondary = secondary_current - secondary_two
+        voltage primary_current -> primary_two = current(primary_one)
+        voltage secondary_current -> secondary_two = current(secondary_one)
+        voltage primary_one -> primary_two = R_primary_now * current(primary_one) + d(L_primary * I_primary + M * I_secondary)/dt
+        voltage secondary_one -> secondary_two = R_secondary_now * current(secondary_one) + d(L_secondary * I_secondary + M * I_primary)/dt
+
+        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
+        d(heating)/dt = (realistic * (R_primary_now * I_primary ^ 2 + R_secondary_now * I_secondary ^ 2) * thermal_resistance - heating) / thermal_time_constant
+    }
+
+    expect "ten to one on a loaded secondary" from "turns ratio √(L1 / L2) = 10: 100 V peak in, about 10 V peak out into 100 Ω" {
+        bench for 60 ms {
+            V1 sine-generator (positive = input, negative = 0) amplitude = 100 V, frequency = 50 Hz
+            U1 self (primary_one = input, primary_two = 0, secondary_one = output, secondary_two = 0)
+            R1 resistor (output, 0) resistance = 100 Ohm
+        }
+        measure maximum output after 40 ms
+        within 9 V .. 10.2 V
+    }
+}

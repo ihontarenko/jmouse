@@ -1,10 +1,10 @@
 package org.jmouse.script.el.parser;
 
+import org.jmouse.script.el.lexer.StatementToken;
 import org.jmouse.el.language.lexer.LanguageToken;
 import org.jmouse.el.language.parser.StatementsParser;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.script.el.lexer.ScriptToken;
 
 /**
  * Reads a word-delimited body — everything between a {@code do} or a {@code then} and the word that
@@ -41,7 +41,7 @@ public class ScriptBodyParser extends StatementsParser {
     protected boolean isClosed(TokenCursor cursor) {
         return !cursor.hasNext()
                 || cursor.isCurrent(BasicToken.T_EOL)
-                || cursor.isCurrent(ScriptToken.T_END)
+                || cursor.isCurrent(StatementToken.T_END)
                 || cursor.isCurrent(LanguageToken.T_ELSE, LanguageToken.T_ELSE_IF);
     }
 

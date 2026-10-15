@@ -1,0 +1,93 @@
+# The JFET every junction FET part is a member of: SPICE's JFET level 1 (Shichman–Hodges) as ngspice 47 writes it.
+# A datasheet part writes `family n-jfet` (or p-jfet) and its numbers.
+#
+# What the effects are for:
+#   VTO, BETA        the pinch-off voltage and how hard the channel conducts: IDSS = BETA · VTO²
+#   LAMBDA           channel-length modulation — the drain current still rises with VDS in saturation
+#   RD, RS           the series resistances
+#   IS, N            the gate junctions: a gate driven forward conducts like a diode
+#   CGS, CGD, PB, FC the gate junctions' depletion capacitances — the input capacitance and its Miller part
+#
+# VTO keeps SPICE's sign, negative for a depletion part of either channel; polarity (1 n-channel, -1 p-channel) turns
+# every voltage and current. Not represented: the doping-tail parameter B (level 1 with B = 1), the temperature
+# coefficients of VTO and BETA, noise. SPICE import and export of `NJF` / `PJF` is not wired yet.
+
+component "Junction FET" as junction-field-effect-transistor type jfet {
+    meta {
+        designator J
+        summary "JFET level 1: square-law channel, channel-length modulation, gate junctions and their capacitances"
+        source "JFET level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
+        category circuits
+        failure open
+    }
+    use smooth-transitions, junctions
+
+    parameters {
+        polarity = 1                          "1 for n-channel, -1 for p-channel"
+        V_threshold = -2 V                    "VTO: pinch-off voltage, negative for a depletion part"
+        V_threshold_spread = 0 V              "how far the pinch-off spreads from part to part: a bench's tolerance corners use it"
+        transconductance_spread = 0           "how far BETA spreads from part to part, as a share"
+        threshold_temperature_coefficient = 0 "VTOTC: how VTO moves per kelvin, V/K"
+        transconductance = 100 uA/V^2         "BETA: IDSS = BETA · VTO²"
+        channel_length_modulation = 0         "LAMBDA: per volt"
+        R_drain = 1 mOhm                      "RD: drain series resistance"
+        R_source = 1 mOhm                     "RS: source series resistance"
+        I_saturation = 10 fA                  "IS: gate junction saturation current"
+        emission_coefficient = 1              "N: its emission coefficient"
+        C_gate_source = 0 F                   "CGS: gate–source zero-bias capacitance"
+        C_gate_drain = 0 F                    "CGD: gate–drain zero-bias capacitance"
+        V_junction = 1 V                      "PB: gate junction potential"
+        forward_bias_coefficient = 0.5        "FC"
+        T_nominal = 300.15 K                  "TNOM"
+        E_gap = 1.11 V                        "the band gap the gate junctions' saturation current follows"
+        power_rating = 0.35 W                 "what it is rated for"
+        thermal_resistance = 350 K/W          "kelvin above the bench per watt it takes"
+        thermal_time_constant = 2 s           "how fast it warms to that"
+        T_maximum = 150 °C                    "past this it fails on a realistic bench"
+    }
+
+    pins {
+        source analog 1                       "source"
+        gate analog input 2                   "gate"
+        drain analog output 3                 "drain"
+    }
+
+    nodes {
+        di                                    "the intrinsic drain, behind the drain resistance"
+        si                                    "the intrinsic source, behind the source resistance"
+    }
+
+    symbol uses n-channel-jfet-symbol
+
+    state {
+        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
+    }
+
+    equations {
+        local T_junction = temperature + heating
+        local V_gs = polarity * (gate - si)
+        local V_gd = polarity * (gate - di)
+        local V_ds = polarity * (di - si)
+
+        # The channel is symmetric: with VDS reversed the drain acts as the source.
+        local V_control = if(V_ds >= 0, V_gs, V_gd)
+        local V_across = abs(V_ds)
+        local beta = transconductance * (1 + tolerance_corner * transconductance_spread) / (T_junction / T_nominal) ^ 1.5
+        local overdrive = V_control - (V_threshold - tolerance_corner * V_threshold_spread + threshold_temperature_coefficient * (T_junction - T_nominal))
+        local square_law = if(V_across < overdrive, beta * V_across * (2 * overdrive - V_across), beta * overdrive ^ 2)
+        local channel = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
+
+        local I_saturation_now = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
+        local Q_gate_source = depletion_charge(V_gs, C_gate_source, V_junction, 0.5, forward_bias_coefficient)
+        local Q_gate_drain = depletion_charge(V_gd, C_gate_drain, V_junction, 0.5, forward_bias_coefficient)
+
+        current drain -> di = (drain - di) / R_drain
+        current si -> source = (si - source) / R_source
+        current di -> si = polarity * if(V_ds >= 0, channel, 0 - channel)
+        current gate -> si = polarity * (junction_current(V_gs, I_saturation_now, emission_coefficient, T_junction) + d(Q_gate_source)/dt)
+        current gate -> di = polarity * (junction_current(V_gd, I_saturation_now, emission_coefficient, T_junction) + d(Q_gate_drain)/dt)
+
+        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
+        d(heating)/dt = (realistic * ((drain - source) * (drain - di) / R_drain) * thermal_resistance - heating) / thermal_time_constant
+    }
+}

@@ -1,0 +1,17 @@
+# The benchmark's edge case: a 10 kHz square into an RC and a diode clamp — two hundred edges in 10 ms, each one a step
+# the solver has to land on. Fixed on purpose: a benchmark compares against its own past.
+
+circuit "Square into RC with a clamp" as square-rc {
+    meta {
+        summary "Benchmark: 10 kHz square, RC, diode clamp."
+        category circuits
+    }
+    parts {
+        G1 square-generator (positive = in, negative = 0) high = 5, low = 0, frequency = 10000
+        R1 resistor (in, out) resistance = 1000
+        C1 capacitor (out, 0) capacitance = 10e-9
+        D1 1n4148 (anode = out, cathode = clamp)
+        R2 resistor (clamp, 0) resistance = 10000
+    }
+    analysis transient for 0.01 s
+}

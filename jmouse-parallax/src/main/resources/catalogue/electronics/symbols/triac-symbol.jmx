@@ -1,0 +1,14 @@
+symbol "Triac" as triac-symbol {
+    meta {
+        summary "Triac, as drawn on a schematic: two thyristors back to back with one gate"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 60
+    path "M-40 0H-10M-10-14V14M10-14V14M10 0H40M-10-12L10-4-10 4M10 12L-10 4 10-4M10 8L20 20V30"
+    pin a at -40, 0
+    pin b at 40, 0
+    pin gate at 20, 30
+    label name at 0, -20
+    label value at 0, 40
+}

@@ -54,6 +54,7 @@ public abstract class HttpChatModel implements ChatModel {
     private final ProviderSettingsSource settingsSource;
     private final HttpClient             httpClient;
     private final Duration               readTimeout;
+    private final HttpResponse.BodyHandler<String> responseBody;
 
     protected HttpChatModel(ProviderSettingsSource settingsSource) {
         this(settingsSource, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -62,6 +63,17 @@ public abstract class HttpChatModel implements ChatModel {
     protected HttpChatModel(
             ProviderSettingsSource settingsSource, Duration connectTimeout, Duration readTimeout) {
 
+        this(settingsSource, connectTimeout, readTimeout, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+    }
+
+    /** Opt-in bounded response admission; legacy constructors retain their prior response behavior. */
+    protected HttpChatModel(ProviderSettingsSource settingsSource, ChatHttpPolicy policy) {
+        this(settingsSource, policy.connectTimeout(), policy.responseTimeout(), new BoundedChatResponse(policy.maximumResponseBytes()));
+    }
+
+    private HttpChatModel(ProviderSettingsSource settingsSource, Duration connectTimeout, Duration readTimeout,
+                          HttpResponse.BodyHandler<String> responseBody) {
+        this.responseBody   = responseBody;
         this.settingsSource = settingsSource;
         this.readTimeout    = readTimeout;
         this.httpClient     = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
@@ -153,15 +165,20 @@ public abstract class HttpChatModel implements ChatModel {
         HttpResponse<String> response;
 
         try {
-            response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            response = send(httpRequest);
 
         } catch (IOException noAnswer) {
+            for (Throwable failure = noAnswer; failure != null; failure = failure.getCause()) {
+                if (failure instanceof ChatResponseLimitException exceeded) {
+                    throw exceeded;
+                }
+            }
             // Connection refused, a timeout, a name that does not resolve. Nothing arrived, so there is
             // no body to explain it and the exception's own message is the best there is.
             LOGGER.warn("{} did not answer at {}: {}", providerName(), url, noAnswer.getMessage());
 
             throw new ProviderException(providerName() + " is unreachable at " + url + ": "
-                                      + describe(noAnswer) + ". Nothing was sent that it acted on.",
+                                      + describe(noAnswer) + ". The remote operation may have happened; do not assume a retry is safe.",
                                         noAnswer);
 
         } catch (InterruptedException interrupted) {
@@ -173,6 +190,25 @@ public abstract class HttpChatModel implements ChatModel {
         }
 
         return readAnswer(response);
+    }
+
+    /** The bounded policy times the whole body future, including a provider stalling after headers. */
+    private HttpResponse<String> send(HttpRequest request) throws IOException, InterruptedException {
+        if (!(responseBody instanceof BoundedChatResponse)) {
+            return httpClient.send(request, responseBody);
+        }
+        var pending = httpClient.sendAsync(request, responseBody);
+        try {
+            return pending.get(readTimeout.toNanos(), java.util.concurrent.TimeUnit.NANOSECONDS);
+        } catch (java.util.concurrent.TimeoutException expired) {
+            pending.cancel(true);
+            throw new java.net.http.HttpTimeoutException("CHAT response deadline reached during body reception.");
+        } catch (java.util.concurrent.ExecutionException failed) {
+            throw new IOException("CHAT HTTP body did not complete.", failed.getCause());
+        } catch (InterruptedException interrupted) {
+            pending.cancel(true);
+            throw interrupted;
+        }
     }
 
     private HttpRequest buildRequest(String url, ProviderSettings settings, Map<String, Object> body) {

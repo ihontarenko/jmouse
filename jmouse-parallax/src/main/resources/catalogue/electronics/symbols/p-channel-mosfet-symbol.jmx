@@ -1,0 +1,14 @@
+symbol "P-channel MOSFET" as p-channel-mosfet-symbol {
+    meta {
+        summary "P-channel MOSFET, as drawn on a schematic: the source at the top, the arrow pointing out of the channel"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 80
+    path "M-40 0H-10M-10-13V13M-5-13V-7M-5-3V3M-5 7V13M-5-10H20V-40M-5 10H20V40M20-10V0H-4M-1-4L3 0-1 4"
+    pin gate at -40, 0
+    pin source at 20, -40
+    pin drain at 20, 40
+    label name at 32, -8
+    label value at 32, 8
+}

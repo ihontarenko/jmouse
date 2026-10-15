@@ -1,0 +1,60 @@
+# A battery as a load sees it: an EMF that follows its state of charge, an internal resistance that the load current
+# drops across at once, and a polarisation — an RC — that sags the voltage further over seconds and recovers when the
+# load goes. The state of charge is a live setting, not integrated from the current: a circuit's operating point would
+# have to hold the battery's current at nought for its charge to stand still.
+# Defaults: one lithium-ion cell. Not represented: the EMF's fall with cold, ageing, the charger's CC/CV.
+
+component "Battery" as battery type source {
+    meta {
+        designator B
+        summary "Battery: EMF by state of charge, internal resistance, polarisation sag and recovery"
+        source "the Thevenin battery model (EMF + R0 + one RC), a lithium-ion cell's figures"
+        category circuits
+        failure open
+    }
+
+    parameters {
+        V_full = 4.2 V                        "EMF when full"
+        V_empty = 3.0 V                       "EMF when empty"
+        state_of_charge = 1 in 0 .. 1 step 0.05 live "how full it is"
+        R_internal = 50 mOhm                  "R0: the drop under load, at once"
+        R_polarisation = 30 mOhm              "R1: the further sag, over the polarisation time"
+        C_polarisation = 300 F                "C1: with R1, a sag over about ten seconds"
+        power_rating = 10 W                   "what it may deliver"
+        thermal_resistance = 20 K/W           "kelvin above the bench per watt it takes"
+        thermal_time_constant = 300 s         "how fast it warms to that"
+        T_maximum = 60 °C                     "past this it fails on a realistic bench"
+    }
+
+    pins {
+        positive analog 1                     "positive terminal"
+        negative analog 2                     "negative terminal"
+    }
+
+    nodes {
+        emf                                   "the EMF, behind the internal resistance"
+        polarised                             "behind the polarisation RC"
+    }
+
+    symbol uses battery-symbol {
+        a positive
+        b negative
+    }
+
+    equations {
+        # A lithium cell's EMF is flat across the middle of its charge and falls off at the empty end.
+        local EMF = V_empty + (V_full - V_empty) * (0.8 * state_of_charge + 0.2 * (1 - (1 - state_of_charge) ^ 4))
+        voltage emf -> negative = EMF
+        current polarised -> emf = (polarised - emf) / R_polarisation + d(C_polarisation * (polarised - emf))/dt
+        current positive -> polarised = (positive - polarised) / R_internal
+    }
+
+    expect "sags under a 2 A load at once" from "R0 50 mΩ: 0.1 V at once from a full cell" {
+        bench for 1 ms {
+            I1 current-source (0, positive) I_output = 2 A
+            U1 self (positive = positive, negative = 0)
+        }
+        measure final positive
+        within 4.05 V .. 4.11 V
+    }
+}

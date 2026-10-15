@@ -1,0 +1,116 @@
+# The 2N2907A, the 2N2222A's complement: the bipolar transistor with the widely published 2N2907A Gummel–Poon numbers,
+# checked against onsemi's PN2907A limits. Every voltage of an NPN is negative here — the collector sits below the
+# emitter, and the base is pulled down to turn it on.
+
+component "2N2907A" as 2n2907 type bjt {
+    meta {
+        designator Q
+        summary "PNP small-signal switching transistor, -60 V, -600 mA"
+        source "onsemi PN2907A datasheet PN2907A/D; model: the standard 2N2907A Gummel–Poon parameters"
+        package "TO-92"
+        category circuits
+        failure open
+    }
+    family pnp-transistor
+
+    parameters {
+        I_saturation = 0.6506 fA              "IS: transport saturation current"
+        beta_forward = 231.7                  "BF: ideal forward current gain"
+        V_early = 115.7 V                     "VAF: forward Early voltage"
+        I_knee = 1.079 A                      "IKF: above it the gain falls"
+        I_leakage_base_emitter = 54.81 fA     "ISE: below a milliampere the gain falls"
+        leakage_emission_base_emitter = 1.829 "NE"
+        beta_reverse = 3.563                  "BR: ideal reverse current gain"
+        R_base = 10 Ohm                       "RB: base spreading resistance"
+        R_collector = 0.715 Ohm               "RC: collector resistance"
+        R_emitter = 0.1 Ohm                   "RE: emitter resistance — not in the model; a bond wire's worth"
+        C_base_emitter = 19.82 pF             "CJE"
+        grading_base_emitter = 0.3357         "MJE"
+        C_base_collector = 14.76 pF           "CJC"
+        grading_base_collector = 0.5383       "MJC"
+        transit_time_forward = 603.7 ps       "TF: fT about 200 MHz"
+        transit_time_bias_dependence = 1.7    "XTF"
+        transit_time_bias_voltage = 5 V       "VTF"
+        transit_time_current = 0.65 A         "ITF"
+        transit_time_reverse = 111.3 ns       "TR: the storage time of a saturated switch"
+        beta_temperature_exponent = 1.5       "XTB"
+        T_nominal = 298.15 K                  "the temperature the figures above are measured at"
+        V_breakdown = 80 V                    "avalanche onset: an approximation — VCEO is guaranteed to 60 V"
+        # How it warms and where it gives up (TO-92: 625 mW at 25 °C, RθJA 200 K/W, TJ max 150 °C).
+        power_rating = 0.625 W                "what it is rated for"
+        thermal_resistance = 200 K/W          "kelvin above the bench per watt it takes"
+        thermal_time_constant = 2 s           "how fast it warms to that"
+        T_maximum = 150 °C                    "past this it fails on a realistic bench"
+    }
+
+    pins {
+        emitter analog 1                      "emitter"
+        base analog input 2                   "base"
+        collector analog output 3             "collector"
+    }
+
+    symbol uses pnp-transistor-symbol
+
+    expect "gain at a tenth of a milliampere" from "hFE at least 75 at IC -0.1 mA, VCE -10 V" {
+        bench for 1 ms {
+            V1 voltage-source (0, collector) U_output = 10 V
+            I1 current-source (0, base) I_output = 1 uA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure operating current V1
+        within -0.3 mA .. -75 uA
+    }
+
+    expect "DC current gain at about 150 mA" from "hFE 100 … 300 at IC -150 mA, VCE -10 V" {
+        bench for 1 ms {
+            V1 voltage-source (0, collector) U_output = 10 V
+            I1 current-source (0, base) I_output = 1 mA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure operating current V1
+        within -0.3 A .. -0.1 A
+    }
+
+    expect "gain at half an ampere" from "hFE at least 50 at IC -500 mA, VCE -10 V" {
+        bench for 1 ms {
+            V1 voltage-source (0, collector) U_output = 10 V
+            I1 current-source (0, base) I_output = 5 mA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure operating current V1
+        within -1.5 A .. -0.25 A
+    }
+
+    expect "saturated at 150 mA with 15 mA of base current" from "VCE(sat) at most -0.4 V at IC -150 mA, IB -15 mA" {
+        bench for 1 ms {
+            V1 voltage-source (0, supply) U_output = 10 V
+            R1 resistor (collector, supply) resistance = 64.7 Ohm
+            C1 capacitor (collector, 0) capacitance = 1 nF
+            I1 current-source (0, base) I_output = 15 mA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure final collector
+        within -0.4 V .. -0.05 V
+    }
+
+    expect "base-emitter voltage in saturation" from "VBE(sat) at most -1.3 V at IC -150 mA, IB -15 mA" {
+        bench for 1 ms {
+            V1 voltage-source (0, supply) U_output = 10 V
+            R1 resistor (collector, supply) resistance = 64.7 Ohm
+            C1 capacitor (collector, 0) capacitance = 1 nF
+            I1 current-source (0, base) I_output = 15 mA
+            U1 self (base = base, collector = collector, emitter = 0)
+        }
+        measure final base
+        within -1.3 V .. -0.6 V
+    }
+
+    expect "off when the base is at the emitter" from "collector cut-off current at most 50 nA at VCE -30 V" {
+        bench for 1 ms {
+            V1 voltage-source (0, collector) U_output = 30 V
+            U1 self (base = 0, collector = collector, emitter = 0)
+        }
+        measure operating current V1
+        within -50 nA .. 50 nA
+    }
+}

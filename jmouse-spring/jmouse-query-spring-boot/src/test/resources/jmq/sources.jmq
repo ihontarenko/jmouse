@@ -1,0 +1,5 @@
+# One source, so the engine has something to be built over.
+source events {
+  from      events as e key id
+  attribute event.happened from happened_at temporal in column
+}

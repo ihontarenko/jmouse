@@ -1,6 +1,8 @@
 package org.jmouse.telegram.spring;
 
 import org.jmouse.telegram.IdentityKind;
+import org.jmouse.telegram.IdentitySource;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -17,11 +19,15 @@ import java.util.Map;
  *       general:                       # the fallback purpose; see IdentitySource.GENERAL
  *         kind: bot
  *         token: ${TELEGRAM_BOT_TOKEN}
- *       kitsu-notifications:           # a purpose the product names itself
+ *       notifications:                 # a purpose the product names itself — here, the shared bot
+ *         kind: bot
+ *         token: ${SHARED_NOTIFICATION_BOT_TOKEN}
+ *       kitsu-commands:                # and the product's own bot, whose updates it consumes
  *         kind: bot
  *         token: ${KITSU_BOT_TOKEN}
  *     updates:
  *       mode: polling                  # none | polling | webhook
+ *       purpose: kitsu-commands        # whose updates this application consumes; default general
  *       poll-timeout: 50s
  *       allowed: [message, callback_query]
  *       webhook:
@@ -35,32 +41,63 @@ import java.util.Map;
  * its own configuration, so renaming one is a break in each of them at once — which is why this record
  * exists at all rather than properties being read wherever they are needed.
  *
- * <p>⚠️ A token belongs in an environment variable, as above, and never in a committed file.
+ * <p>⚠️ A token belongs in the vault, never in a committed file: {@code token: vault:telegram/notifications/token}
+ * is resolved through {@code jmouse-vault} at each use, so a rotated token needs no restart. A literal
+ * still works for an application without a vault.
  *
  * @param identities purpose → identity. The key is the <em>purpose</em>, which is the product's own
  *                   word; {@code general} is the one this library names, because it is the fallback
  * @param updates    how updates arrive, if at all
  * @param pace       how fast this application may talk to Telegram
- * @param credentialKey base64 AES-256 key sealing credentials in {@code telegram_accounts}.
- *                   ⚠️ Only needed by the database-backed identity source; an application configuring
- *                   its identities in properties has no sealed column and needs no key. Generate one
- *                   with {@code openssl rand -base64 32}
  */
 public record TelegramSettings(
         Map<String, Identity> identities,
         Updates               updates,
         Pacing                pace,
-        String                credentialKey
+        Journal               journal
 ) {
 
     public TelegramSettings {
         identities = identities == null ? Map.of() : new LinkedHashMap<>(identities);
         updates    = updates == null ? Updates.none() : updates;
         pace       = pace == null ? Pacing.defaults() : pace;
+        journal    = journal == null ? Journal.defaults() : journal;
     }
 
-    public boolean hasCredentialKey() {
-        return credentialKey != null && !credentialKey.isBlank();
+    /**
+     * Where the journal of calls is kept, and for how long.
+     *
+     * @param store     {@code memory} (default) or {@code database} — the latter needs
+     *                  {@code jmouse-telegram-jpa} and writes to {@code telegram_journal}
+     * @param capacity  how many entries the memory store keeps
+     * @param retention how long the database store keeps an entry; pruned hourly. ⚠️ A journal is a
+     *                  diagnostic, not an archive — thirty days answers every "why did it not arrive"
+     */
+    public record Journal(JournalStore store, int capacity, Duration retention) {
+
+        public static Journal defaults() {
+            return new Journal(null, 0, null);
+        }
+
+        public Journal {
+            store     = store == null ? JournalStore.MEMORY : store;
+            capacity  = capacity <= 0 ? 1000 : capacity;
+            retention = retention == null || retention.isNegative() || retention.isZero()
+                    ? Duration.ofDays(30) : retention;
+        }
+    }
+
+    /** Where journal entries go. */
+    public enum JournalStore {
+
+        /** The most recent entries in this process's memory. Forgotten on restart. */
+        MEMORY,
+
+        /** {@code telegram_journal}, through {@code jmouse-telegram-jpa}. */
+        DATABASE,
+
+        /** Nowhere — an application that has decided it wants no journal. */
+        NONE
     }
 
     /**
@@ -70,9 +107,10 @@ public record TelegramSettings(
      * @param token   the bot token, or a user session reference
      * @param apiBase a self-hosted {@code telegram-bot-api} server, or empty for Telegram's own.
      *                ⚠️ The only way past the 50 MB upload ceiling
-     * @param enabled so an identity can be switched off without deleting its configuration
+     * @param enabled so an identity can be switched off without deleting its configuration. ⚠️ True when
+     *                omitted — a primitive left to the binder would be false, and every call would refuse
      */
-    public record Identity(IdentityKind kind, String token, String apiBase, boolean enabled) {
+    public record Identity(IdentityKind kind, String token, String apiBase, @DefaultValue("true") boolean enabled) {
 
         public Identity {
             kind = kind == null ? IdentityKind.BOT : kind;
@@ -95,18 +133,24 @@ public record TelegramSettings(
      *                    default excludes {@code chat_member}, so an application that wants to know
      *                    who joined must name it here
      * @param webhook     the endpoint, when {@link Mode#WEBHOOK}
+     * @param purpose     whose updates this application consumes — the identity polled. Default
+     *                    {@code general}. ⚠️ <strong>Sending and receiving are different bots on
+     *                    purpose.</strong> Telegram hands a bot's updates to exactly one consumer, so
+     *                    several products can send through one shared bot but each must receive through
+     *                    its own: name the product's bot here and the shared one under a sending purpose
      */
-    public record Updates(Mode mode, Duration pollTimeout, List<String> allowed, Webhook webhook) {
+    public record Updates(Mode mode, Duration pollTimeout, List<String> allowed, Webhook webhook, String purpose) {
 
         public Updates {
             mode        = mode == null ? Mode.NONE : mode;
             pollTimeout = pollTimeout == null ? Duration.ofSeconds(50) : pollTimeout;
             allowed     = allowed == null ? List.of() : List.copyOf(allowed);
             webhook     = webhook == null ? new Webhook(null, null) : webhook;
+            purpose     = purpose == null || purpose.isBlank() ? IdentitySource.GENERAL : purpose.strip();
         }
 
         public static Updates none() {
-            return new Updates(Mode.NONE, null, null, null);
+            return new Updates(Mode.NONE, null, null, null, null);
         }
     }
 
@@ -170,7 +214,7 @@ public record TelegramSettings(
      * @param globalPerSecond Telegram's published overall guidance
      * @param perChatPerMinute Telegram's published per-group guidance
      */
-    public record Pacing(boolean enabled, int globalPerSecond, int perChatPerMinute) {
+    public record Pacing(@DefaultValue("true") boolean enabled, int globalPerSecond, int perChatPerMinute) {
 
         public static Pacing defaults() {
             return new Pacing(true, 30, 20);

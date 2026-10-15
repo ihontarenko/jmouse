@@ -5,7 +5,7 @@ import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -29,7 +29,8 @@ public class MapNode extends AbstractExpression {
      */
     @Override
     public Object evaluate(EvaluationContext context) {
-        Map<Object, Object> map = new HashMap<>();
+        // In the order written: a literal that reorders its own keys answers differently from what its reader sees.
+        Map<Object, Object> map = new LinkedHashMap<>();
 
         for (Node child : getChildren()) {
             if (child instanceof KeyValueNode kvNode) {

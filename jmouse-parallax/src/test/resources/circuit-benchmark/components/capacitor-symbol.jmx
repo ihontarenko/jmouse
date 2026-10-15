@@ -1,0 +1,13 @@
+symbol "Capacitor" as capacitor-symbol {
+    meta {
+        summary "Capacitor, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 60 x 40
+    path "M-30 0H-5M-5-14V14M5-14V14M5 0H30"
+    pin a at -30, 0
+    pin b at 30, 0
+    label name at 0, -26
+    label value at 0, 32
+}

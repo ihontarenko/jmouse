@@ -7,7 +7,7 @@
     <groupId>org.jmouse</groupId>
     <artifactId>jmouse-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-b20260902</version>
+    <version>1.0.1</version>
 
     <description>jMouse Framework</description>
     <url>https://github.com/ihontarenko/jmouse</url>
@@ -70,7 +70,7 @@
             <!-- <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>1.0.0-b20260902</version>
+                <version>1.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency> -->
@@ -91,13 +91,14 @@
         <module>jmouse-mapper</module>
         <module>jmouse-mapper-el</module>
         <module>jmouse-action</module>
-        <module>jmouse-common</module>
         <module>jmouse-materializer</module>
         <module>jmouse-el</module>
+        <module>jmouse-formula</module>
+        <module>jmouse-spice</module>
+        <module>jmouse-parallax</module>
         <module>jmouse-transaction</module>
         <module>jmouse-jdbc</module>
         <module>jmouse-security</module>
-        <module>jmouse-expression</module>
         <module>jmouse-validation</module>
         <module>jmouse-validation-el</module>
         <module>jmouse-validation-jpa</module>
@@ -127,20 +128,34 @@
         <module>jmouse-search-text</module>
         <module>jmouse-search-jpa</module>
         <module>jmouse-files-jpa</module>
+        <module>jmouse-parallax-jpa</module>
         <module>jmouse-ai</module>
         <module>jmouse-ai-model</module>
         <module>jmouse-ai-provider</module>
         <module>jmouse-ai-embeddings</module>
+        <module>jmouse-ai-reranking</module>
         <module>jmouse-ai-conversation</module>
         <module>jmouse-ai-mcp</module>
         <module>jmouse-ai-access</module>
         <module>jmouse-ai-jpa</module>
+        <module>jmouse-vault</module>
+        <module>jmouse-vault-jpa</module>
         <module>jmouse-telegram</module>
         <module>jmouse-telegram-bot</module>
         <module>jmouse-telegram-jpa</module>
+        <module>jmouse-telegram-command</module>
+        <module>jmouse-telegram-user</module>
+        <module>jmouse-notifier</module>
+        <module>jmouse-notifier-telegram</module>
+        <module>jmouse-notifier-jpa</module>
+        <module>jmouse-notifier-web</module>
+        <module>jmouse-scheduler</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
         <module>jmouse-grabber</module>
+        <module>jmouse-git</module>
+        <module>jmouse-git-hosting</module>
+        <module>jmouse-java-parser</module>
         <module>jmouse-spring</module>
         <module>pet-gallery</module>
         <module>wep-app</module>

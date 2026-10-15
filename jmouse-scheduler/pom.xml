@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>org.jmouse</groupId><artifactId>jmouse-parent</artifactId><version>1.0.1</version></parent>
+    <artifactId>jmouse-scheduler</artifactId>
+    <version>1.0.1</version>
+    <name>jMouse - Scheduler</name>
+    <description>Durable triggers (cron, interval, once) with misfire policies, gates and bounded history, claimed across processes through a store SPI and dispatched through a product's own dispatcher; no Spring.</description>
+    <dependencyManagement><dependencies><dependency><groupId>org.jmouse</groupId><artifactId>jmouse-dependencies</artifactId><version>1.0.1</version><type>pom</type><scope>import</scope></dependency></dependencies></dependencyManagement>
+    <dependencies>
+        <!-- Trigger parameters are stored as a JSON object by the JDBC store. -->
+        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId></dependency>
+        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+        <!-- The JDBC store's claim race runs against a real database engine, in memory. -->
+        <dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>test</scope></dependency>
+    </dependencies>
+</project>

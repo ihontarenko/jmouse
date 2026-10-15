@@ -69,13 +69,23 @@ public class Cursor implements TokenCursor {
     }
 
     /**
-     * Returns the previous token and moves the cursor backward.
+     * Moves the cursor back by one and returns the token now under it — the mirror of {@link #next()},
+     * so {@code next()} followed by {@code previous()} returns the same token twice.
      *
-     * @return the previous {@link Token}, or {@code null} if no previous tokens exist
+     * <p>⚠️ It returned the token that <em>was</em> current and then stepped back
+     * ({@code tokens.get(cursor--)}) — one token too late. Nothing in the reactor called it.</p>
+     *
+     * @return the previous {@link Token}, or {@code null} at the start
      */
     @Override
     public Token previous() {
-        return hasPrevious() ? tokens.get(cursor--) : null;
+        if (!hasPrevious()) {
+            return null;
+        }
+
+        cursor--;
+
+        return tokens.get(cursor);
     }
 
     /**
@@ -91,13 +101,24 @@ public class Cursor implements TokenCursor {
     /**
      * Looks at a token at the given offset relative to the current position.
      *
+     * <p>Clamped at both ends: a distance past the end answers the last token and a distance before the
+     * start answers the first. In a lexed stream those are the {@code T_EOL} and {@code T_SOL} markers,
+     * so a look outside the stream meets a boundary rather than an exception, and
+     * {@link #checkAt(int, Token.Type...)} can always ask a token for its type.</p>
+     *
+     * <p>⚠️ Only the upper end was clamped: a negative distance near the start — {@code lookAt(-1)} at
+     * position 0, which is what {@code isPrevious} asks — threw {@link IndexOutOfBoundsException}.</p>
+     *
      * @param offset the offset from the current cursor position
-     * @return the token at the given offset, or {@code null} if out of bounds
+     * @return the token at the clamped position, or {@code null} only when there are no tokens at all
      */
     @Override
     public Token lookAt(int offset) {
-        int position = Math.min(cursor + offset, tokens.size() - 1);
-        return position < tokens.size() ? tokens.get(position) : null;
+        if (tokens.isEmpty()) {
+            return null;
+        }
+
+        return tokens.get(Math.clamp((long) cursor + offset, 0, tokens.size() - 1));
     }
 
     /**
@@ -161,17 +182,23 @@ public class Cursor implements TokenCursor {
     }
 
     /**
-     * Expects a specific token type at the next position and advances if found.
+     * Expects the current token — the one {@link #next()} consumes — to have one of the given types, and
+     * consumes it.
      *
-     * @param expected the expected token type
-     * @return the next token if it matches the expected type
-     * @throws SyntaxErrorException if the next token does not match the expected type
+     * <p>⚠️ It tested the token <em>after</em> the current one ({@code isNext}) and then consumed the
+     * current one, so it checked one token and took another. It now checks what it takes, which makes
+     * it the same check as {@link #ensure(Token.Type...)}.</p>
+     *
+     * @param expected the expected token types
+     * @return the consumed token
+     * @throws SyntaxErrorException if the current token has none of the expected types
      */
     @Override
     public Token expect(Token.Type... expected) throws SyntaxErrorException {
-        if (!isNext(expected)) {
-            throw new SyntaxErrorException(source, lookAt(1), expected);
+        if (!isCurrent(expected)) {
+            throw new SyntaxErrorException(source, lookAt(0), expected);
         }
+
         return next();
     }
 

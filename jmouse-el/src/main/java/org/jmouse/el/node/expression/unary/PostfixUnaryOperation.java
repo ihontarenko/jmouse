@@ -30,7 +30,7 @@ public class PostfixUnaryOperation extends UnaryOperation {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        Object     value      = operand.evaluate(context);
+        Object     value      = UnaryOperation.countingFromZero(operand, operator, operand.evaluate(context));
         Conversion conversion = context.getConversion();
         Object     calculated = operator.getCalculator().calculate(value);
 

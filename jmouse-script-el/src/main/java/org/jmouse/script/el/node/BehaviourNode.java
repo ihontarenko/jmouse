@@ -1,5 +1,6 @@
 package org.jmouse.script.el.node;
 
+import org.jmouse.script.el.node.FunctionDeclarationNode;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.ExpressionsNode;
 

@@ -1,0 +1,25 @@
+circuit "RC low-pass filter" as rc-low-pass {
+    meta {
+        summary "A resistor and a capacitor: the output follows the input with a lag of RC."
+        category circuits
+        tags filters, first-order
+        time_constant "τ = RC"
+        cut_off "f = 1 / (2π RC)" "Cut-off"
+    }
+    parameters {
+        U = 5 V in 0.1 .. 24 step 0.1 "Input voltage"
+        R = 1000 Ω in 10 .. 100000 step 10 "Resistance"
+        C = 1 µF in 1 nF .. 10 µF step 1 nF "Capacitance"
+    }
+    parts {
+        V1 voltage-source (in, 0) waveform = step, U_output = U
+        R1 resistor (in, out) resistance = R
+        C1 capacitor (out, 0) capacitance = C
+    }
+    analysis transient for 0.01 s
+    view {
+        transient_response primary
+        frequency_response from 1 to 1000000 points 200
+        operating_point
+    }
+}

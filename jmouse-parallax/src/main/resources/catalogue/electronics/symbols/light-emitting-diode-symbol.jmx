@@ -1,0 +1,13 @@
+symbol "Light-emitting diode" as light-emitting-diode-symbol {
+    meta {
+        summary "Light-emitting diode, as drawn on a schematic"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    path "M-40 0H-12V-10L10 0-12 10V0M10-10V10M10 0H40M0-13L8-21M4-21H8V-17M11-12L19-20M15-20H19V-16"
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

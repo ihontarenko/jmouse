@@ -1,0 +1,79 @@
+# A bipolar laboratory supply: two bench-supply channels in series, their middle brought out as the common. Each
+# channel holds its own voltage until its load asks for more than its own limit, then gives the limit and sags — the
+# positive rail and the negative rail are limited apart, as on a real dual supply.
+#
+# The common is what the circuit calls 0 V: wire it to node 0 and draw it with a `common` mark, not an earth.
+
+component "Dual power supply" as dual-supply type dual-power-supply {
+    meta {
+        designator PS
+        summary "A bipolar supply: +V and −V around a common 0 V, each rail with its own current limit"
+        category circuits
+    }
+    use smooth-transitions
+
+    parameters {
+        V_positive = 15 V in 0 .. 30 step 0.1 live          "the positive rail above the common"
+        V_negative = 15 V in 0 .. 30 step 0.1 live          "the negative rail below the common, as a magnitude"
+        I_limit_positive = 1 A in 0.01 .. 5 step 0.01 live  "the most current the positive rail gives"
+        I_limit_negative = 1 A in 0.01 .. 5 step 0.01 live  "the most current the negative rail gives"
+        R_output = 10 mOhm                                  "each rail's output resistance while it holds its voltage"
+    }
+
+    pins {
+        positive analog 1  "positive rail"
+        common analog 2    "common, the circuit's 0 V"
+        negative analog 3  "negative rail"
+    }
+
+    symbol uses dual-supply-symbol {
+        a positive
+        c common
+        b negative
+    }
+
+    equations {
+        current common -> positive = soft_minimum((V_positive - (positive - common)) / R_output, I_limit_positive, 0.01 * I_limit_positive)
+        current negative -> common = soft_minimum((V_negative - (common - negative)) / R_output, I_limit_negative, 0.01 * I_limit_negative)
+    }
+
+    expect "holds both rails" from "constant-voltage mode: ±15 V into 1 kOhm each" {
+        bench for 1 ms {
+            R1 resistor (plus, 0) resistance = 1 kOhm
+            R2 resistor (0, minus) resistance = 1 kOhm
+            U1 self (positive = plus, common = 0, negative = minus)
+        }
+        measure final plus - minus
+        near 30 V +- 0.5%
+    }
+
+    expect "the negative rail sits below the common" from "constant-voltage mode: −15 V" {
+        bench for 1 ms {
+            R1 resistor (plus, 0) resistance = 1 kOhm
+            R2 resistor (0, minus) resistance = 1 kOhm
+            U1 self (positive = plus, common = 0, negative = minus)
+        }
+        measure final minus
+        near -15 V +- 0.5%
+    }
+
+    expect "each rail is limited on its own" from "the negative rail at its 1 A limit into 5 Ohm sags to −5 V" {
+        bench for 1 ms {
+            R1 resistor (plus, 0) resistance = 1 kOhm
+            R2 resistor (0, minus) resistance = 5 Ohm
+            U1 self (positive = plus, common = 0, negative = minus)
+        }
+        measure final minus
+        near -5 V +- 2%
+    }
+
+    expect "a sagging rail leaves the other one alone" from "the positive rail holds 15 V while the negative one is limited" {
+        bench for 1 ms {
+            R1 resistor (plus, 0) resistance = 1 kOhm
+            R2 resistor (0, minus) resistance = 5 Ohm
+            U1 self (positive = plus, common = 0, negative = minus)
+        }
+        measure final plus
+        near 15 V +- 0.5%
+    }
+}

@@ -1,0 +1,34 @@
+# Smooth replacements for the corners a Newton solver cannot cross. A model names this library with
+# `formulas "smooth-transitions"`; these are ordinary jMF definitions.
+#
+# Every one is written so that no exponential can overflow: each branch keeps exp's argument at or below zero, and
+# limit_exponential turns into its own tangent above 40.
+
+functions "Smooth transitions" as smooth-transitions {
+    meta {
+        summary "Smooth replacements for corners a Newton solver cannot cross"
+    }
+
+    formulas {
+        # max(x, 0), rounded over a knee `width` wide
+        soft_positive_part(x, width) = if(x > 0, x + width * ln(1 + exp(-x / width)), width * ln(1 + exp(x / width)))
+
+        # x held between low and high, with rounded knees
+        soft_clamp(x, low, high, width) = low + soft_positive_part(x - low, width) - soft_positive_part(x - high, width)
+
+        # min(a, b), rounded
+        soft_minimum(a, b, width) = a - soft_positive_part(a - b, width)
+
+        # |x|, rounded at zero
+        soft_absolute(x, width) = sqrt(x^2 + width^2)
+
+        # a step from 0 to 1 around zero, `width` wide
+        soft_step(x, width) = if(x > 0, 1 / (1 + exp(-x / width)), exp(x / width) / (1 + exp(x / width)))
+
+        # exp(x) that turns into its own tangent above 40 instead of overflowing
+        limit_exponential(x) = if(x < 40, exp(x), exp(40) * (x - 39))
+
+        # kT/q in volts
+        thermal_voltage(temperature) = 8.617333e-5 * temperature
+    }
+}

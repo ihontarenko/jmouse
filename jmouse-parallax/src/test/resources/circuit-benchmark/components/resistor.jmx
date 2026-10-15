@@ -1,0 +1,17 @@
+component "Resistor" as resistor type resistor {
+    meta {
+        summary "Two-terminal resistor"
+        category circuits
+    }
+    parameters {
+        resistance = 1 kOhm "resistance"
+    }
+    pins {
+        terminal_one analog 1 "first terminal"
+        terminal_two analog 2 "second terminal"
+    }
+    symbol uses resistor-symbol {
+        a terminal_one
+        b terminal_two
+    }
+}

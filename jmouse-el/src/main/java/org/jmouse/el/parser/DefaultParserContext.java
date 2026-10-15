@@ -12,7 +12,13 @@ public class DefaultParserContext implements ParserContext {
 
     private final ExtensionContainer                    extensions;
     private final ContextScope<Class<? extends Parser>> scope = new ContextScope<>();
-    private       ParserOptions                         options;
+
+    /**
+     * ⚠️ Per thread, like {@link ContextScope}. A parser sets options around its own argument parse and
+     * clears them afterwards; one context is shared by every thread parsing through the same language, so a
+     * single field let one parse clear — or replace — another's options in the middle of reading them.
+     */
+    private final ThreadLocal<ParserOptions>            options = new ThreadLocal<>();
 
     public DefaultParserContext() {
         this(new StandardExtensionContainer());
@@ -104,16 +110,16 @@ public class DefaultParserContext implements ParserContext {
 
     @Override
     public ParserOptions getOptions() {
-        return options;
+        return options.get();
     }
 
     @Override
     public void setOptions(ParserOptions options) {
-        this.options = options;
+        this.options.set(options);
     }
 
     @Override
     public void clearOptions() {
-        this.options = null;
+        this.options.remove();
     }
 }

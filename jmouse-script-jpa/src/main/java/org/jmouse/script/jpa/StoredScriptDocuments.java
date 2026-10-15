@@ -3,7 +3,7 @@ package org.jmouse.script.jpa;
 import jakarta.persistence.EntityManager;
 import org.jmouse.script.ScriptBinding;
 import org.jmouse.script.ScriptDocumentBinder;
-import org.jmouse.script.el.host.BoundScript;
+import org.jmouse.script.host.BoundScript;
 import org.jmouse.script.spi.ScriptDocuments;
 import org.jmouse.script.spi.ScriptStage;
 import org.jmouse.script.stage.StageRegistry;

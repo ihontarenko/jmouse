@@ -1,0 +1,85 @@
+# The 1N4148 is the general diode with its datasheet's numbers: the physics — junction, charge, breakdown, the series
+# resistance — is the diode family's; what is written here is this part's.
+
+component "1N4148" as 1n4148 type diode {
+    meta {
+        designator D
+        summary "Small-signal fast switching diode, 100 V"
+        source "onsemi 1N4148 datasheet; starting point: the common vendor SPICE model"
+        package "DO-35"
+        category circuits
+        failure short
+    }
+    family diode
+
+    parameters {
+        I_saturation = 2.52 nA                "saturation current"
+        emission_coefficient = 1.752          "emission coefficient"
+        R_series = 0.568 Ohm                  "series resistance"
+        C_junction_zero_bias = 4 pF           "zero-bias junction capacitance"
+        V_junction = 0.75 V                   "junction potential"
+        grading_coefficient = 0.4             "grading coefficient"
+        transit_time = 5 ns                   "transit time; the vendor model says 20 ns and then misses trr of 4 ns"
+        V_breakdown = 100 V                   "reverse breakdown voltage"
+        I_breakdown = 100 uA                  "current at V_breakdown"
+        # How it warms and where it gives up (DO-35: RθJA 350 K/W, TJ max 200 °C).
+        power_rating = 0.5 W                  "what it is rated for"
+        thermal_resistance = 350 K/W          "kelvin above the bench per watt it takes"
+        thermal_time_constant = 1 s           "how fast it warms to that"
+        T_maximum = 200 °C                    "past this it fails on a realistic bench"
+    }
+
+    pins {
+        anode analog 1                        "anode"
+        cathode analog 2                      "cathode, the banded end"
+    }
+
+    symbol uses diode-symbol {
+        a anode
+        b cathode
+    }
+
+    expect "forward voltage at 10 mA" from "electrical characteristics, VF" {
+        bench for 1 ms {
+            X1 forward current = 10 mA
+        }
+        measure operating anode
+        within 0.62 V .. 1.0 V
+    }
+
+    expect "forward voltage falls as it warms" from "VF temperature coefficient, about -2 mV/K: 10 mA at 85 C" {
+        bench for 1 ms at 85 °C {
+            X1 forward current = 10 mA
+        }
+        measure operating anode
+        within 0.54 V .. 0.64 V
+    }
+
+    expect "reverse current at 20 V" from "electrical characteristics, IR" {
+        bench for 1 ms {
+            X1 reverse voltage = 20 V
+        }
+        measure operating current V1
+        within -25 nA .. 0 nA
+    }
+
+    expect "breakdown at 100 uA" from "absolute maximum ratings, VRRM" {
+        bench for 1 ms {
+            I1 current-source (cathode, 0) I_output = 100 uA
+            U1 self (anode = 0, cathode = cathode)
+        }
+        measure operating cathode
+        within 100 V .. 110 V
+    }
+
+    expect "half-wave rectifier keeps 10 V peaks" from "typical application" {
+        bench for 40 ms {
+            V1 sine-generator (positive = input, negative = 0) amplitude = 10 V, frequency = 50 Hz
+            U1 self (anode = input, cathode = output)
+            C1 capacitor (output, 0) capacitance = 100 uF
+            R1 resistor (output, 0) resistance = 1 kOhm
+        }
+        measure maximum output after 20 ms
+        within 9.0 V .. 9.5 V
+    }
+}

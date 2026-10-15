@@ -1,0 +1,50 @@
+circuit "Full-wave bridge rectifier" as full-wave-rectifier {
+    meta {
+        summary "Four diodes turn both halves of an alternating voltage the same way round: the load sees |V_in| less two diode drops."
+        category circuits
+        tags rectifiers, diodes
+    }
+    parameters {
+        Vm = 10 V in 2 .. 24 step 0.5 "Peak input voltage"
+        R = 1000 Ω in 100 .. 10000 step 100 "Load resistance"
+    }
+    parts {
+        AC1 sine-generator (positive = a, negative = b) amplitude = Vm, frequency = 50
+        D1 1n4148 (anode = a, cathode = p)
+        D3 1n4148 (anode = b, cathode = p)
+        D2 1n4148 (anode = 0, cathode = b)
+        D4 1n4148 (anode = 0, cathode = a)
+        RL resistor (p, 0) resistance = R
+    }
+    layout {
+        D1 at 400, 220 rotate 270
+        D4 at 400, 380 rotate 270
+        D3 at 600, 220 rotate 270
+        D2 at 600, 380 rotate 270
+        AC1 at 500, 300
+        RL at 760, 300 rotate 90
+        Ja junction at 400, 300
+        Jb junction at 600, 300
+        Jp junction at 600, 160
+        Jg junction at 600, 440
+        GND1 ground at 600, 500
+        W1 wire D1.anode to Ja.j
+        W2 wire D4.cathode to Ja.j
+        W3 wire AC1.positive to Ja.j
+        W4 wire D3.anode to Jb.j
+        W5 wire D2.cathode to Jb.j
+        W6 wire AC1.negative to Jb.j
+        W7 wire D1.cathode to Jp.j via 400 160
+        W8 wire D3.cathode to Jp.j
+        W9 wire Jp.j to RL.positive via 760 160
+        W10 wire D4.anode to Jg.j via 400 440
+        W11 wire D2.anode to Jg.j
+        W12 wire RL.negative to Jg.j via 760 440
+        W13 wire Jg.j to GND1.ground
+    }
+    analysis transient for 0.04 s
+    view {
+        transient_response primary
+        operating_point
+    }
+}

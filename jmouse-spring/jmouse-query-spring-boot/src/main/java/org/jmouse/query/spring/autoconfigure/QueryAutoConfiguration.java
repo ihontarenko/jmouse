@@ -4,6 +4,8 @@ import org.jmouse.jdbc.dialect.Dialect;
 import org.jmouse.jdbc.dialect.Dialects;
 import org.jmouse.query.sql.QueryEngine;
 import org.jmouse.query.spring.QueryRepositories;
+import org.jmouse.query.spring.builder.QueryRunner;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -35,10 +38,22 @@ import java.nio.charset.StandardCharsets;
  * — a schema built from its own metadata, a source registered per tenant — declares a {@code QueryEngine}
  * and this configuration adds nothing but the repository factory over it.</p>
  *
+ * <h2>⚠️ Ordered after Boot's data source, by NAME and under both of its packages</h2>
+ *
+ * <p>Every bean here is {@code @ConditionalOnBean(DataSource.class)}, and an auto-configuration with no
+ * declared order is processed alphabetically — {@code org.jmouse…} before {@code org.springframework…}. So
+ * the condition was asked before {@code DataSourceAutoConfiguration} had registered the data source, and
+ * declined without a word; the product then failed for want of an engine or a runner. The class moved
+ * between Boot 3 and Boot 4, and a name that is not on the classpath is ignored by the sorter, so naming
+ * both keeps one jar right on either.</p>
+ *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@AutoConfiguration
+@AutoConfiguration(afterName = {
+        "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration",
+        "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
+})
 @ConditionalOnClass(QueryEngine.class)
 @EnableConfigurationProperties(QueryProperties.class)
 public class QueryAutoConfiguration {
@@ -143,6 +158,29 @@ public class QueryAutoConfiguration {
         @ConditionalOnMissingBean
         public QueryRepositories jmQueryRepositories(QueryEngine engine, DataSource dataSource) {
             return new QueryRepositories(engine, dataSource);
+        }
+    }
+
+    /**
+     * Running a composed filter — the SQL half, here rather than beside the builder's endpoints.
+     *
+     * <p>⚠️ Composing a query and RUNNING one are separable: the runner needs a data source and nothing of
+     * the web layer, so a product that excludes the builder's endpoints still gets it. Nested, so that
+     * {@code spring-jdbc} — optional here — is only asked for when it is on the classpath.</p>
+     *
+     * <p>⚠️ Conditioned on the {@code DataSource} and not on a {@code JdbcTemplate} <strong>bean</strong>.
+     * An {@link ObjectProvider} defers that question to call time, so the product's own template is used
+     * when it has one and an equivalent is made when it does not.</p>
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(JdbcTemplate.class)
+    @ConditionalOnBean(DataSource.class)
+    public static class Running {
+
+        @Bean
+        @ConditionalOnMissingBean
+        public QueryRunner jmQueryRunner(ObjectProvider<JdbcTemplate> jdbcTemplate, DataSource dataSource) {
+            return new QueryRunner(jdbcTemplate.getIfAvailable(() -> new JdbcTemplate(dataSource)), dataSource);
         }
     }
 }

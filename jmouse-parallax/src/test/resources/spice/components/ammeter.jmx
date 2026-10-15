@@ -1,0 +1,49 @@
+component "Ammeter" as ammeter type meter {
+    meta {
+        designator A
+        summary "Reads the current through it, put in the break of a wire"
+        category circuits
+    }
+    parameters {
+        R_shunt = 50 mOhm "the shunt it reads across: what it drops, on a realistic bench"
+    }
+    pins {
+        in analog 1 "where the current enters"
+        out analog 2 "where it leaves"
+    }
+    equations {
+        # Ideal it is a short: the current passes and nothing drops. On a realistic bench it is its shunt.
+        voltage in -> out = realistic * R_shunt * current(in)
+    }
+    leads {
+        in green stripes white
+        out blue stripes white
+    }
+    measure {
+        reading = current(in) unit A signal
+    }
+    symbol uses ammeter-symbol {
+        a in
+        b out
+    }
+
+    expect "is a short in the break of a wire" from "an ideal ammeter in series with 1 kOhm leaves all 10 V across the resistor" {
+        bench for 1 ms {
+            V1 voltage-source (top, 0) U_output = 10 V
+            U1 self (in = top, out = load)
+            R1 resistor (load, 0) resistance = 1 kOhm
+        }
+        measure final load
+        near 10 V +- 0.1%
+    }
+
+    expect "drops across its shunt on a realistic bench" from "50 mOhm in series with 10 Ohm from 10 V leaves 10 / 10.05 of it across the resistor" {
+        bench for 1 ms realistic {
+            V1 voltage-source (top, 0) U_output = 10 V
+            U1 self (in = top, out = load)
+            R1 resistor (load, 0) resistance = 10 Ohm
+        }
+        measure final load
+        near 9.9502 V +- 0.01%
+    }
+}

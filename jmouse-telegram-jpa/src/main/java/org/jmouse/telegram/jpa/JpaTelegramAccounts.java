@@ -3,6 +3,7 @@ package org.jmouse.telegram.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import org.jmouse.telegram.IdentityKind;
+import org.jmouse.vault.seal.SecretCipher;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,9 +19,9 @@ import java.util.UUID;
 public final class JpaTelegramAccounts implements TelegramAccounts {
 
     private final EntityManager     entityManager;
-    private final CredentialCipher  cipher;
+    private final SecretCipher      cipher;
 
-    public JpaTelegramAccounts(EntityManager entityManager, CredentialCipher cipher) {
+    public JpaTelegramAccounts(EntityManager entityManager, SecretCipher cipher) {
         this.entityManager = Objects.requireNonNull(entityManager, "entity manager");
         this.cipher        = Objects.requireNonNull(cipher, "credential cipher");
     }
@@ -53,11 +54,11 @@ public final class JpaTelegramAccounts implements TelegramAccounts {
 
         if (account == null) {
             account = new TelegramAccount(
-                    UUID.randomUUID().toString(), purpose, kind, cipher.seal(credential), apiBase);
+                    UUID.randomUUID().toString(), purpose, kind, cipher.seal(credential, contextOf(purpose)), apiBase);
 
             entityManager.persist(account);
         } else {
-            account.reseal(cipher.seal(credential));
+            account.reseal(cipher.seal(credential, contextOf(purpose)));
             account.pointAt(apiBase);
         }
 
@@ -70,7 +71,7 @@ public final class JpaTelegramAccounts implements TelegramAccounts {
 
         TelegramAccount account = require(purpose);
 
-        account.reseal(cipher.seal(credential));
+        account.reseal(cipher.seal(credential, contextOf(purpose)));
 
         return describe(account);
     }
@@ -125,7 +126,12 @@ public final class JpaTelegramAccounts implements TelegramAccounts {
 
     /** Opens the credential — the only path that does. Called by {@link JpaIdentitySource}. */
     String openCredential(TelegramAccount account) {
-        return cipher.open(account.getCredentialSealed());
+        return cipher.open(account.getCredentialSealed(), contextOf(account.getPurpose()));
+    }
+
+    /** The row a sealed credential belongs to: a value copied onto another purpose does not open there. */
+    private static String contextOf(String purpose) {
+        return "telegram-account:" + purpose;
     }
 
     private TelegramAccount require(String purpose) {

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "jMF — jMouse Formula",
+  "scopeName": "source.jmf",
+  "fileTypes": ["jmf"],
+  "comment": "A formula is a jMF document: definitions (f(x) = …; r = …) then one expression, separated by ';'. A .jmf file holds one formula per line, and 'name:' may label it — the label belongs to the file format, not to a formula. '#' starts a comment anywhere.",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#label" },
+    { "include": "#definition" },
+    { "include": "#expression" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.jmf",
+      "match": "#.*$"
+    },
+    "label": {
+      "match": "^\\s*([A-Za-z\\p{L}][\\w\\p{L}\\-]*)\\s*(:)(?!=)",
+      "captures": {
+        "1": { "name": "keyword.control.label.jmf" },
+        "2": { "name": "keyword.operator.label.jmf" }
+      }
+    },
+    "definition": {
+      "comment": "f(u, v) = … or r = … at the start of a line or after ';' or a label.",
+      "match": "(?:(?<=^)|(?<=;)|(?<=:))\\s*([A-Za-z\\p{L}][\\w\\p{L}]*)\\s*(?:(\\()([^()=]*)(\\)))?\\s*(=)(?!=)",
+      "captures": {
+        "1": { "name": "entity.name.function.definition.jmf" },
+        "2": { "name": "punctuation.section.parens.begin.jmf" },
+        "3": { "patterns": [
+          { "name": "variable.parameter.definition.jmf", "match": "[A-Za-z\\p{L}][\\w\\p{L}]*" },
+          { "include": "#separator" }
+        ] },
+        "4": { "name": "punctuation.section.parens.end.jmf" },
+        "5": { "name": "keyword.operator.assignment.jmf" }
+      }
+    },
+    "expression": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#number" },
+        { "include": "#binding-form" },
+        { "include": "#conditional-form" },
+        { "include": "#function-call" },
+        { "include": "#user-function-call" },
+        { "include": "#constant" },
+        { "include": "#imaginary" },
+        { "include": "#logical-word" },
+        { "include": "#variable" },
+        { "include": "#superscript" },
+        { "include": "#operator" },
+        { "include": "#parentheses" },
+        { "include": "#separator" },
+        { "include": "#terminator" },
+        { "include": "#invalid" }
+      ]
+    },
+    "number": {
+      "name": "constant.numeric.jmf",
+      "match": "(?<![\\w\\p{L}])(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?"
+    },
+    "binding-form": {
+      "comment": "sum(k, …), product(k, …), integral(t, …), diff(f, x): the first name after the paren is bound by the form.",
+      "begin": "\\b(sum|product|integral|integrate)\\s*(\\()\\s*([A-Za-z\\p{L}][\\w\\p{L}]*)?",
+      "end": "\\)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.form.binding.jmf" },
+        "2": { "name": "punctuation.section.parens.begin.jmf" },
+        "3": { "name": "variable.parameter.bound.jmf" }
+      },
+      "endCaptures": { "0": { "name": "punctuation.section.parens.end.jmf" } },
+      "patterns": [ { "include": "#expression" } ]
+    },
+    "conditional-form": {
+      "match": "\\b(if|piecewise|diff|derivative)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "keyword.control.form.jmf" }
+      }
+    },
+    "function-call": {
+      "match": "\\b(sin|cos|tan|cot|sec|csc|tg|ctg|asin|acos|atan|arcsin|arccos|arctan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|ln|log|log10|log2|sqrt|cbrt|abs|sign|sgn|floor|ceil|round|step|min|max|mod|hypot|pow|re|im|arg|conj|gamma|Gamma|factorial|binomial|choose|erf)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "entity.name.function.jmf" }
+      }
+    },
+    "user-function-call": {
+      "comment": "Any other name directly followed by '(' — an author's function, or a product such as rho(x - 1).",
+      "match": "(?<![\\w\\p{L}])([A-Za-z\\p{L}][\\w\\p{L}]*)(?=\\()",
+      "captures": {
+        "1": { "name": "entity.name.function.user.jmf" }
+      }
+    },
+    "constant": {
+      "name": "constant.language.math.jmf",
+      "match": "(?<![\\w\\p{L}])(pi|tau|phi|e|inf|π|∞)(?![\\w\\p{L}(])"
+    },
+    "imaginary": {
+      "name": "constant.language.imaginary.jmf",
+      "match": "(?<![\\w\\p{L}])i(?![\\w\\p{L}(])"
+    },
+    "logical-word": {
+      "name": "keyword.operator.logical.word.jmf",
+      "match": "(?<![\\w\\p{L}])(and|or)(?![\\w\\p{L}])"
+    },
+    "variable": {
+      "patterns": [
+        {
+          "name": "variable.parameter.coordinate.jmf",
+          "match": "(?<![\\w\\p{L}])(x|y|z|w|t|u|v|n)(?![\\w\\p{L}(])"
+        },
+        {
+          "name": "variable.other.field.greek.jmf",
+          "match": "(?<![\\w\\p{L}])(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|rho|sigma|upsilon|chi|psi|omega|[α-ωΑ-Ω])(?:_?\\w*)?(?![\\w\\p{L}(])"
+        },
+        {
+          "name": "variable.other.field.jmf",
+          "match": "(?<![\\w\\p{L}])[A-Za-z_][\\w]*(?![\\w(])"
+        }
+      ]
+    },
+    "superscript": {
+      "name": "keyword.control.power.jmf",
+      "match": "[⁰¹²³⁴⁵⁶⁷⁸⁹]+"
+    },
+    "operator": {
+      "patterns": [
+        { "name": "keyword.control.power.jmf", "match": "\\*\\*|\\^" },
+        { "name": "keyword.operator.comparison.jmf", "match": "<=|>=|==|!=|<|>|≤|≥|≠" },
+        { "name": "keyword.operator.logical.jmf", "match": "&&|\\|\\||∧|∨|¬" },
+        { "name": "keyword.operator.factorial.jmf", "match": "(?<=[\\w\\p{L})])!" },
+        { "name": "keyword.operator.logical.jmf", "match": "!" },
+        { "name": "keyword.operator.assignment.jmf", "match": "=" },
+        { "name": "keyword.operator.ternary.jmf", "match": "[?:]" },
+        { "name": "keyword.operator.arithmetic.jmf", "match": "[+\\-*/%·×÷−]" }
+      ]
+    },
+    "parentheses": {
+      "begin": "\\(",
+      "end": "\\)",
+      "beginCaptures": { "0": { "name": "punctuation.section.parens.begin.jmf" } },
+      "endCaptures": { "0": { "name": "punctuation.section.parens.end.jmf" } },
+      "patterns": [ { "include": "#expression" } ]
+    },
+    "separator": {
+      "name": "punctuation.separator.arguments.jmf",
+      "match": ","
+    },
+    "terminator": {
+      "name": "punctuation.terminator.statement.jmf",
+      "match": ";"
+    },
+    "invalid": {
+      "name": "invalid.illegal.jmf",
+      "match": "[\\[\\]{}'\"]"
+    }
+  }
+}
