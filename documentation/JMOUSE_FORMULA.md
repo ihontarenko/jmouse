@@ -322,6 +322,19 @@ Constant subtrees are folded once at compile time — including whole sums and i
 
 Anything that does not depend on the variable is 0 immediately, so `diff(floor(a), x)` is 0 rather than refused.
 
+## What a host adds — host calls, members, rates
+
+A host may extend the notation without forking it; every one of these is read in the tree, never out of the text.
+
+| Declared with | Written | Becomes |
+|---|---|---|
+| `withHostCalls("current", …)` | `current(anode)` | `HostCall("current", [anode])`, for the host to bind (`Substitution.replaceHostCalls`) |
+| the same declaration | `anode.current` | the same `HostCall` — a member its host declared is the call written as something the word has; any other property path is refused |
+| — | `current(in)`, `in.current` | a keyword alone as a call argument, or before a member, is a word: a pin may be called `in` |
+| `withRate("t", "d/dt")` | `d(q)/dt` | `HostCall("d/dt", [q])` — a rate the host integrates, not a derivative taken here. `polarity * d(q)/dt` (read as `(polarity * d(q)) / dt`) and `-d(q)/dt` are rates too; a `d(…)` not over `dt`, and `dt` not under a `d(…)`, are refused |
+
+The circuit engine declares all three; `diff(f, x)` stays the exact derivative taken by jMF itself.
+
 ## Printing
 
 ```java

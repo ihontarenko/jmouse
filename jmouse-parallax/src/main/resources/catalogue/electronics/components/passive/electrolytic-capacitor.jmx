@@ -39,9 +39,12 @@ component "Electrolytic capacitor" as electrolytic-capacitor type capacitor {
         b negative
     }
 
+    # Beside it on the sheet: how near its rating it is, and the two things a bench's temperature moves — its ESR, read
+    # exactly as the equations below read it, and the temperature of its body (the bench plus its own heat).
     display {
         overvoltage = 100 * abs(positive - negative) / voltage_rating unit % "of its rated voltage"
-        charge = 100 * (positive - negative) / voltage_rating unit % "of rating"
+        ESR = R_equivalent_series * 2 ^ ((T_nominal - temperature - heating) / ESR_doubling) unit Ω "at its temperature"
+        body = temperature + heating - 273.15 unit °C "the bench and its own heat"
     }
 
     state {
@@ -49,8 +52,8 @@ component "Electrolytic capacitor" as electrolytic-capacitor type capacitor {
     }
 
     equations {
-        local T_body = temperature + heating
-        local R_series_now = R_equivalent_series * 2 ^ ((T_nominal - T_body) / ESR_doubling)
+        let T_body : temperature = temperature + heating
+        let R_series_now : resistance = R_equivalent_series * 2 ^ ((T_nominal - T_body) / ESR_doubling)
         current positive -> plate = (positive - plate) / R_series_now
         current plate -> negative = d(capacitance * (plate - negative))/dt + (plate - negative) / R_leakage
 
@@ -66,5 +69,15 @@ component "Electrolytic capacitor" as electrolytic-capacitor type capacitor {
         }
         measure final positive
         within 0.08 V .. 0.12 V
+    }
+
+    expect "in the cold the ESR grows, and the step's jump with it" from "at −40 °C the ESR is 0.1 Ω × 2^(65/20) ≈ 0.95 Ω: 1 V × 0.95 / 1.95 at once" {
+        bench for 10 us at -40 °C {
+            V1 voltage-source (input, 0) waveform = step, U_output = 1 V
+            R1 resistor (input, positive) resistance = 1 Ohm
+            U1 self (positive = positive, negative = 0)
+        }
+        measure final positive
+        within 0.45 V .. 0.52 V
     }
 }

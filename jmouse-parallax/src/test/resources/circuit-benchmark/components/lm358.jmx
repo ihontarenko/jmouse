@@ -9,7 +9,7 @@ component "LM358" as lm358 type opamp {
         category circuits
     }
     units A, B
-    formulas "smooth-transitions"
+    use smooth-transitions
 
     parameters {
         open_loop_gain = 100000                 "open-loop gain, 100 dB (min 25 V/mV)"
@@ -45,23 +45,25 @@ component "LM358" as lm358 type opamp {
     }
 
     equations {
-        local high = GND + V_output_low + soft_positive_part((Vcc - GND) - V_output_headroom - V_output_low, 0.02)
-        local low = GND + V_output_low
-        local error = (non_inverting_input - inverting_input) + V_input_offset - gain_stage_voltage / open_loop_gain
-        local target = soft_clamp(gain_stage_voltage, low, high, 0.02)
-        local drive = (target - output) / R_output
+        let high : voltage = GND + V_output_low + soft_positive_part((Vcc - GND) - V_output_headroom - V_output_low, 0.02)
+        let low : voltage = GND + V_output_low
+        let error : voltage = (non_inverting_input - inverting_input) + V_input_offset - gain_stage_voltage / open_loop_gain
+        let target : voltage = soft_clamp(gain_stage_voltage, low, high, 0.02)
+        let drive : current = (target - output) / R_output
 
         # A dominant pole at gain_bandwidth / open_loop_gain whose rate saturates at slew_rate: bandwidth and slew rate from one equation. The
         # saturation is algebraic, slew_ratio / sqrt(1 + slew_ratio^2), not tanh: far from the answer tanh is flat to the last digit and
         # leaves Newton nothing to stand on. The second term keeps gain_stage_voltage from winding up past the rails.
-        local slew_ratio = 2 * pi * gain_bandwidth * error / slew_rate
+        let slew_ratio : ratio = 2 * pi * gain_bandwidth * error / slew_rate
         d(gain_stage_voltage)/dt = slew_rate * slew_ratio / sqrt(1 + slew_ratio ^ 2) - recovery * (gain_stage_voltage - soft_clamp(gain_stage_voltage, low - 0.5, high + 0.5, 0.05))
 
         current Vcc -> output = I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source)
         current output -> GND = I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)
         current Vcc -> non_inverting_input = I_input_bias
         current Vcc -> inverting_input = I_input_bias
-        current Vcc -> GND = I_quiescent * tanh(Vcc - GND)
+        # Below about a volt of supply the quiescent current falls away; the knee is that volt.
+        let V_supply_knee : voltage = 1
+        current Vcc -> GND = I_quiescent * tanh((Vcc - GND) / V_supply_knee)
     }
 
     expect "inverting gain of ten" from "closed-loop application, G = -R2 / R1" {

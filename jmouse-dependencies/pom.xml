@@ -365,6 +365,21 @@
                 <artifactId>jmouse-java-parser</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-index</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-index-store</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-index-jpa</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
             <!-- Telegram — the contracts, and the Bot API transport behind them -->
             <dependency>
                 <groupId>org.jmouse</groupId>

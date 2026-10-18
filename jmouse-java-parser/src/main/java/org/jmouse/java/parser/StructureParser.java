@@ -33,6 +33,8 @@ import org.jmouse.java.parser.model.RecordComponentDeclaration;
 import org.jmouse.java.parser.model.SymbolId;
 import org.jmouse.java.parser.model.TypeDeclaration;
 import org.jmouse.java.parser.model.TypeParameter;
+import org.jmouse.java.parser.model.TypeReference;
+import org.jmouse.java.parser.model.TypeReferenceRole;
 import org.jmouse.java.parser.node.CompilationUnitNode;
 import org.jmouse.java.parser.node.ImportNode;
 import org.jmouse.java.parser.node.JavaNode;
@@ -80,7 +82,12 @@ import static org.jmouse.java.parser.lexer.JavaTokenKind.isKeyword;
  * <p>Recovery is per declaration: the loop over a type body (or over the file) takes a
  * {@link TokenCursor#savepoint() savepoint} before each declaration; a {@link SyntaxFailure} is caught,
  * reported, the cursor is restored to that savepoint, and parsing resumes after the failed
- * declaration's semicolon or closing brace.
+ * declaration's semicolon or closing brace. The type references the failed declaration had recorded are
+ * dropped with it, so a reference never points into something the result does not contain.
+ *
+ * <p>Type references are recorded only from types that were <em>parsed</em>, never from the pure scans:
+ * a scan is a guess about what comes next, and recording during one would report names from a reading
+ * that was then thrown away.
  *
  * <p>The cursor is moved only by {@code next}, {@code savepoint} and {@code restore}; everything else
  * looks without moving, through {@code peek} and {@code lookAt}. {@code lookAt} is clamped at both ends
@@ -105,6 +112,7 @@ final class StructureParser {
     private final boolean[]            claimedDocumentation;
     private final List<JavaDoc>        javaDocs      = new ArrayList<>();
     private final List<SourceSpan>     opaqueBodies  = new ArrayList<>();
+    private final List<TypeReference>  typeReferences = new ArrayList<>();
     private final Map<String, Integer> symbolCounts  = new HashMap<>();
     private       String               packageName   = "";
 
@@ -126,7 +134,8 @@ final class StructureParser {
         List<JavaNode> children = new ArrayList<>();
 
         while (!at(END_OF_FILE)) {
-            TokenCursor.Savepoint start = cursor.savepoint();
+            TokenCursor.Savepoint start            = cursor.savepoint();
+            int                   referencesBefore = typeReferences.size();
             try {
                 if (at(SEMICOLON)) {
                     advance();
@@ -147,6 +156,7 @@ final class StructureParser {
                 }
             } catch (SyntaxFailure failure) {
                 problems.add(failure.problem());
+                dropTypeReferencesFrom(referencesBefore);
                 recover(start, true);
             }
         }
@@ -154,7 +164,9 @@ final class StructureParser {
         addOrphanDocumentation();
         javaDocs.sort(Comparator.comparingInt(javaDoc -> javaDoc.span().start().offset()));
         problems.sort(Comparator.comparingInt(problem -> problem.span().start().offset()));
-        CompilationUnitNode root = new CompilationUnitNode(source.getName(), lines.span(0, source.length()), comments, javaDocs, problems);
+        typeReferences.sort(Comparator.comparingInt(reference -> reference.span().start().offset()));
+        CompilationUnitNode root = new CompilationUnitNode(source.getName(), lines.span(0, source.length()), comments, javaDocs, problems,
+                typeReferences);
         children.forEach(root::add);
         return root;
     }
@@ -168,7 +180,9 @@ final class StructureParser {
             advance();
             isStatic = true;
         }
-        StringBuilder name     = new StringBuilder(expectIdentifier("an imported name").value());
+        Token         first    = expectIdentifier("an imported name");
+        StringBuilder name     = new StringBuilder(first.value());
+        int           nameEnd  = endOf(first);
         boolean       onDemand = false;
         while (at(DOT)) {
             advance();
@@ -177,10 +191,13 @@ final class StructureParser {
                 onDemand = true;
                 break;
             }
-            name.append('.').append(expectIdentifier("an imported name").value());
+            Token segment = expectIdentifier("an imported name");
+            name.append('.').append(segment.value());
+            nameEnd = endOf(segment);
         }
         expect(SEMICOLON, "Expected ';' after an import.");
-        return new ImportDeclaration(name.toString(), isStatic, onDemand, lines.span(keyword.offset(), endOfPrevious()));
+        return new ImportDeclaration(name.toString(), isStatic, onDemand, lines.span(first.offset(), nameEnd),
+                lines.span(keyword.offset(), endOfPrevious()));
     }
 
     private PackageDeclaration parsePackage(Header header) {
@@ -268,7 +285,9 @@ final class StructureParser {
 
     private Annotation parseAnnotation() {
         Token  at        = advance();
+        int    nameStart = position();
         String name      = parseQualifiedName("an annotation name");
+        addTypeReference(name, TypeReferenceRole.ANNOTATION, nameStart, position());
         String arguments = null;
         if (at(LEFT_PARENTHESIS)) {
             Token open  = current();
@@ -349,7 +368,8 @@ final class StructureParser {
         }
         advance();
 
-        String name          = expectIdentifier("a type name").value();
+        Token  nameToken     = expectIdentifier("a type name");
+        String name          = nameToken.value();
         String qualifiedName = enclosing == null ? qualify(packageName, name) : enclosing.qualifiedName + "." + name;
 
         List<TypeParameter> typeParameters   = at(LESS) ? parseTypeParameters() : List.of();
@@ -361,13 +381,13 @@ final class StructureParser {
         while (true) {
             if (atKeyword("extends")) {
                 advance();
-                extendedTypes = parseTypeList();
+                extendedTypes = parseTypeList(TypeReferenceRole.EXTENDS);
             } else if (atKeyword("implements")) {
                 advance();
-                implementedTypes = parseTypeList();
+                implementedTypes = parseTypeList(TypeReferenceRole.IMPLEMENTS);
             } else if (isIdentifier(current(), "permits")) {
                 advance();
-                permittedTypes = parseTypeList();
+                permittedTypes = parseTypeList(TypeReferenceRole.PERMITS);
             } else {
                 break;
             }
@@ -397,7 +417,7 @@ final class StructureParser {
 
         TypeDeclaration typeHeader = new TypeDeclaration(kind, name, qualifiedName, symbolId, header.modifiers(), header.annotations(),
                 typeParameters, extendedTypes, implementedTypes, permittedTypes, List.of(), List.of(), signature, signatureSpan,
-                bodySpan, span, javaDoc);
+                source.span(nameToken), bodySpan, span, javaDoc);
         TypeNode node = withTrivia(new TypeNode(typeHeader), header.startIndex());
         for (RecordComponentDeclaration component : components.components()) {
             node.add(new MemberNode(component));
@@ -412,11 +432,13 @@ final class StructureParser {
             parseEnumConstants(context, members);
         }
         while (!at(RIGHT_BRACE) && !at(END_OF_FILE)) {
-            TokenCursor.Savepoint start = cursor.savepoint();
+            TokenCursor.Savepoint start            = cursor.savepoint();
+            int                   referencesBefore = typeReferences.size();
             try {
                 parseMember(context, members, depth);
             } catch (SyntaxFailure failure) {
                 problems.add(failure.problem());
+                dropTypeReferencesFrom(referencesBefore);
                 recover(start, false);
             }
         }
@@ -433,10 +455,10 @@ final class StructureParser {
             List<String>     bounds      = new ArrayList<>();
             if (atKeyword("extends")) {
                 advance();
-                bounds.add(parseTypeText());
+                bounds.add(parseTypeText(TypeReferenceRole.TYPE_PARAMETER_BOUND));
                 while (at(AMPERSAND)) {
                     advance();
-                    bounds.add(parseTypeText());
+                    bounds.add(parseTypeText(TypeReferenceRole.TYPE_PARAMETER_BOUND));
                 }
             }
             parameters.add(new TypeParameter(name, bounds, annotations, spanFrom(startIndex)));
@@ -467,7 +489,7 @@ final class StructureParser {
             int              startIndex     = position();
             List<Annotation> annotations    = parseAnnotations();
             int              typeStartIndex = position();
-            String           type           = parseTypeText();
+            String           type           = parseTypeText(TypeReferenceRole.RECORD_COMPONENT_TYPE);
             int              typeEndIndex   = position();
             parseAnnotations();
             boolean variableArity = false;
@@ -475,11 +497,12 @@ final class StructureParser {
                 advance();
                 variableArity = true;
             }
-            String     name = expectIdentifier("a record component name").value();
-            SourceSpan span = spanFrom(startIndex);
+            Token      nameToken = expectIdentifier("a record component name");
+            String     name      = nameToken.value();
+            SourceSpan span      = spanFrom(startIndex);
             identityTypes.add(identityType(typeStartIndex, typeEndIndex) + (variableArity ? "..." : ""));
             components.add(new RecordComponentDeclaration(name, qualifiedName + "." + name, registerSymbol(qualifiedName + "#" + name),
-                    annotations, type, variableArity, collapse(span), span));
+                    annotations, type, variableArity, collapse(span), source.span(nameToken), span));
             if (at(COMMA)) {
                 advance();
                 continue;
@@ -526,12 +549,14 @@ final class StructureParser {
         int    typeEndIndex   = position();
         Token  nameToken      = expectIdentifier("a member name");
         if (at(LEFT_PARENTHESIS)) {
+            recordTypeReferences(typeStartIndex, typeEndIndex, TypeReferenceRole.RETURN_TYPE);
             members.add(parseMethod(header, typeParameters, type, nameToken, context));
             return;
         }
         if (!typeParameters.isEmpty()) {
             throw failure("Type parameters must be followed by a method or constructor.");
         }
+        recordTypeReferences(typeStartIndex, typeEndIndex, TypeReferenceRole.FIELD_TYPE);
         parseFields(header, typeStartIndex, typeEndIndex, type, nameToken, context, members);
     }
 
@@ -585,8 +610,8 @@ final class StructureParser {
                 new JavaDocOwner(symbolId, DeclarationKind.METHOD, qualifiedName, signature, span));
 
         return withTrivia(new MemberNode(new MethodDeclaration(name, qualifiedName, symbolId, header.modifiers(), header.annotations(),
-                typeParameters, declaredReturnType, parameters.parameters(), thrownTypes, defaultValue, signature, signatureSpan, body,
-                span, javaDoc)), header.startIndex());
+                typeParameters, declaredReturnType, parameters.parameters(), thrownTypes, defaultValue, signature, signatureSpan,
+                source.span(nameToken), body, span, javaDoc)), header.startIndex());
     }
 
     private MemberNode parseConstructor(Header header, List<TypeParameter> typeParameters, TypeContext context) {
@@ -603,7 +628,7 @@ final class StructureParser {
         }
         SourceSpan body     = skipBody();
         String     identity = context.qualifiedName + "#" + nameToken.value() + "(" + String.join(",", parameters.identityTypes()) + ")";
-        return constructor(header, typeParameters, context, nameToken.value(), parameters.parameters(), thrownTypes, false,
+        return constructor(header, typeParameters, context, nameToken, parameters.parameters(), thrownTypes, false,
                 identity, signatureSpan, body);
     }
 
@@ -612,12 +637,13 @@ final class StructureParser {
         SourceSpan signatureSpan = spanFrom(header.startIndex());
         SourceSpan body          = skipBody();
         String     identity      = context.qualifiedName + "#" + nameToken.value() + "(" + String.join(",", context.componentIdentityTypes) + ")";
-        return constructor(header, List.of(), context, nameToken.value(), List.of(), List.of(), true, identity, signatureSpan, body);
+        return constructor(header, List.of(), context, nameToken, List.of(), List.of(), true, identity, signatureSpan, body);
     }
 
-    private MemberNode constructor(Header header, List<TypeParameter> typeParameters, TypeContext context, String name,
+    private MemberNode constructor(Header header, List<TypeParameter> typeParameters, TypeContext context, Token nameToken,
                                    List<Parameter> parameters, List<String> thrownTypes, boolean compact,
                                    String identity, SourceSpan signatureSpan, SourceSpan body) {
+        String          name          = nameToken.value();
         String          qualifiedName = context.qualifiedName + "." + name;
         SymbolId        symbolId      = registerSymbol(identity);
         SourceSpan      span          = spanFrom(header.startIndex());
@@ -625,11 +651,12 @@ final class StructureParser {
         DeclarationKind kind          = compact ? DeclarationKind.COMPACT_CONSTRUCTOR : DeclarationKind.CONSTRUCTOR;
         JavaDoc         javaDoc       = documentationFor(header.startIndex(), new JavaDocOwner(symbolId, kind, qualifiedName, signature, span));
         return withTrivia(new MemberNode(new ConstructorDeclaration(name, qualifiedName, symbolId, header.modifiers(), header.annotations(),
-                typeParameters, parameters, thrownTypes, compact, signature, signatureSpan, body, span, javaDoc)), header.startIndex());
+                typeParameters, parameters, thrownTypes, compact, signature, signatureSpan, source.span(nameToken), body, span, javaDoc)),
+                header.startIndex());
     }
 
     /** One variable of a field statement, before the statement's end is known. */
-    private record FieldVariable(String name, String type, SourceSpan span) {
+    private record FieldVariable(String name, String type, SourceSpan nameSpan, SourceSpan span) {
     }
 
     private void parseFields(Header header, int typeStartIndex, int typeEndIndex, String type, Token firstName, TypeContext context,
@@ -649,7 +676,8 @@ final class StructureParser {
                 advance();
                 skipExpression();
             }
-            variables.add(new FieldVariable(nameToken.value(), variableType, lines.span(nameToken.offset(), endOfPrevious())));
+            variables.add(new FieldVariable(nameToken.value(), variableType, source.span(nameToken),
+                    lines.span(nameToken.offset(), endOfPrevious())));
             if (at(COMMA)) {
                 advance();
                 nameToken = expectIdentifier("a field name");
@@ -668,7 +696,7 @@ final class StructureParser {
             JavaDoc  javaDoc       = documentationFor(header.startIndex(),
                     new JavaDocOwner(symbolId, DeclarationKind.FIELD, qualifiedName, signature, span));
             MemberNode node = new MemberNode(new FieldDeclaration(variable.name(), qualifiedName, symbolId, header.modifiers(),
-                    header.annotations(), variable.type(), signature, signatureSpan, variable.span(), span, javaDoc));
+                    header.annotations(), variable.type(), signature, signatureSpan, variable.nameSpan(), variable.span(), span, javaDoc));
             node.addLeadingTrivia(trivia);
             members.add(node);
         }
@@ -683,8 +711,9 @@ final class StructureParser {
             if (at(RIGHT_BRACE) || at(END_OF_FILE)) {
                 return;
             }
-            TokenCursor.Savepoint start      = cursor.savepoint();
-            int                   startIndex = start.getPosition();
+            TokenCursor.Savepoint start            = cursor.savepoint();
+            int                   startIndex       = start.getPosition();
+            int                   referencesBefore = typeReferences.size();
             try {
                 List<Annotation> annotations = parseAnnotations();
                 Token            nameToken   = expectIdentifier("an enum constant");
@@ -704,7 +733,7 @@ final class StructureParser {
                 JavaDoc    javaDoc       = documentationFor(startIndex,
                         new JavaDocOwner(symbolId, DeclarationKind.ENUM_CONSTANT, qualifiedName, signature, span));
                 members.add(withTrivia(new MemberNode(new EnumConstantDeclaration(name, qualifiedName, symbolId, annotations, arguments,
-                        signature, signatureSpan, body, span, javaDoc)), startIndex));
+                        signature, signatureSpan, source.span(nameToken), body, span, javaDoc)), startIndex));
                 if (at(COMMA)) {
                     advance();
                     continue;
@@ -719,6 +748,7 @@ final class StructureParser {
                 throw failure("Expected ',', ';' or '}' after an enum constant.");
             } catch (SyntaxFailure failure) {
                 problems.add(failure.problem());
+                dropTypeReferencesFrom(referencesBefore);
                 if (recoverEnumConstant(start)) {
                     return;
                 }
@@ -744,7 +774,7 @@ final class StructureParser {
             int              startIndex     = position();
             Header           header         = parseHeader();
             int              typeStartIndex = position();
-            String           type           = parseTypeText();
+            String           type           = parseTypeText(TypeReferenceRole.PARAMETER_TYPE);
             int              typeEndIndex   = position();
             List<Annotation> annotations    = new ArrayList<>(header.annotations());
             annotations.addAll(parseAnnotations());
@@ -787,21 +817,33 @@ final class StructureParser {
             return List.of();
         }
         advance();
-        return parseTypeList();
+        return parseTypeList(TypeReferenceRole.THROWS);
     }
 
     // ------------------------------------------------------------------ type references
 
-    private List<String> parseTypeList() {
+    private List<String> parseTypeList(TypeReferenceRole role) {
         List<String> types = new ArrayList<>();
-        types.add(parseTypeText());
+        types.add(parseTypeText(role));
         while (at(COMMA)) {
             advance();
-            types.add(parseTypeText());
+            types.add(parseTypeText(role));
         }
         return types;
     }
 
+    /** Parses a type whose clause is already known and records the names written in it. */
+    private String parseTypeText(TypeReferenceRole role) {
+        int    startIndex = position();
+        String text       = parseTypeText();
+        recordTypeReferences(startIndex, position(), role);
+        return text;
+    }
+
+    /**
+     * Parses a type without recording it, for the one place the clause is decided only after the type:
+     * a member's type is a return type or a field type depending on what follows the name.
+     */
     private String parseTypeText() {
         int start = position();
         int end   = scanType(start);
@@ -917,6 +959,119 @@ final class StructureParser {
             }
         }
         return scan;
+    }
+
+    /**
+     * Records every type name in the already-parsed tokens {@code [fromIndex, toIndex)}: the outer names with
+     * {@code role}, everything inside angle brackets as {@link TypeReferenceRole#TYPE_ARGUMENT}, and every
+     * type-use annotation as {@link TypeReferenceRole#ANNOTATION}. Primitive types, wildcards and their
+     * {@code extends} / {@code super} keywords, brackets and separators name nothing and are passed over.
+     */
+    private void recordTypeReferences(int fromIndex, int toIndex, TypeReferenceRole role) {
+        int scan = fromIndex;
+        while (scan < toIndex) {
+            Token token = tokenAt(scan);
+            if (AT.matches(token) && !isKeyword(tokenAt(scan + 1), "interface")) {
+                scan = recordTypeUseAnnotation(scan, toIndex);
+            } else if (IDENTIFIER.matches(token)) {
+                scan = recordTypeName(scan, toIndex, role);
+            } else {
+                scan++;
+            }
+        }
+    }
+
+    /**
+     * Records one possibly qualified name starting at the identifier at {@code position}, together with the
+     * type arguments and annotations written between its segments.
+     *
+     * @return the position after the name and anything written inside it
+     */
+    private int recordTypeName(int position, int toIndex, TypeReferenceRole role) {
+        StringBuilder name           = new StringBuilder(tokenAt(position).value());
+        int           lastIdentifier = position;
+        int           scan           = position + 1;
+        while (scan < toIndex) {
+            if (LESS.matches(tokenAt(scan))) {
+                int closing = matchingGreater(scan, toIndex);
+                recordTypeReferences(scan + 1, closing, TypeReferenceRole.TYPE_ARGUMENT);
+                scan = closing + 1;
+                continue;
+            }
+            if (!DOT.matches(tokenAt(scan))) {
+                break;
+            }
+            int segment = scan + 1;
+            while (segment < toIndex && AT.matches(tokenAt(segment))) {
+                segment = recordTypeUseAnnotation(segment, toIndex);
+            }
+            if (segment >= toIndex || !IDENTIFIER.matches(tokenAt(segment))) {
+                break;
+            }
+            name.append('.').append(tokenAt(segment).value());
+            lastIdentifier = segment;
+            scan = segment + 1;
+        }
+        addTypeReference(name.toString(), role, position, lastIdentifier + 1);
+        return scan;
+    }
+
+    /**
+     * Records the name of the annotation whose {@code @} is at {@code position}.
+     *
+     * @return the position after the annotation and its arguments
+     */
+    private int recordTypeUseAnnotation(int position, int toIndex) {
+        int           nameStart = position + 1;
+        StringBuilder name      = new StringBuilder(tokenAt(nameStart).value());
+        int           scan      = nameStart + 1;
+        while (scan + 1 < toIndex && DOT.matches(tokenAt(scan)) && IDENTIFIER.matches(tokenAt(scan + 1))) {
+            name.append('.').append(tokenAt(scan + 1).value());
+            scan += 2;
+        }
+        addTypeReference(name.toString(), TypeReferenceRole.ANNOTATION, nameStart, scan);
+        if (scan < toIndex && LEFT_PARENTHESIS.matches(tokenAt(scan))) {
+            int depth = 0;
+            do {
+                Token token = tokenAt(scan);
+                if (LEFT_PARENTHESIS.matches(token)) {
+                    depth++;
+                } else if (RIGHT_PARENTHESIS.matches(token)) {
+                    depth--;
+                }
+                scan++;
+            } while (depth > 0 && scan < toIndex);
+        }
+        return scan;
+    }
+
+    /** The position of the {@code >} closing the {@code <} at {@code position}, or {@code toIndex} when it is not closed in range. */
+    private int matchingGreater(int position, int toIndex) {
+        int depth = 0;
+        for (int scan = position; scan < toIndex; scan++) {
+            if (LESS.matches(tokenAt(scan))) {
+                depth++;
+            } else if (GREATER.matches(tokenAt(scan))) {
+                depth--;
+                if (depth == 0) {
+                    return scan;
+                }
+            }
+        }
+        return toIndex;
+    }
+
+    /** Adds a reference spanning the tokens {@code [fromIndex, toIndex)}, which start and end with an identifier. */
+    private void addTypeReference(String name, TypeReferenceRole role, int fromIndex, int toIndex) {
+        if (toIndex <= fromIndex) {
+            return;
+        }
+        typeReferences.add(new TypeReference(name, role, lines.span(tokenAt(fromIndex).offset(), endOf(tokenAt(toIndex - 1)))));
+    }
+
+    /** Forgets the references a declaration recorded before it failed to parse. */
+    private void dropTypeReferencesFrom(int size) {
+        typeReferences.subList(size, typeReferences.size()).clear();
     }
 
     /**

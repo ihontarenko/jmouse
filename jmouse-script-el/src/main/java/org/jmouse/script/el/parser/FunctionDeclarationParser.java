@@ -6,6 +6,7 @@ import org.jmouse.core.Priority;
 import org.jmouse.el.language.lexer.LanguageToken;
 import org.jmouse.el.language.parser.AbstractBodyParser;
 import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.type.TypeAnnotations;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.expression.SpanNode;
 import org.jmouse.el.parser.Parser;
@@ -14,7 +15,7 @@ import org.jmouse.script.el.SourceReader;
 import org.jmouse.script.el.node.FunctionDeclarationNode;
 
 /**
- * Parses {@code function overdue(entry) … end}.
+ * Parses {@code function overdue(entry) … end} and {@code function share(count : int, total : int) : double … end}.
  *
  * <p>{@code function} is a {@link LanguageToken} the engine already owns, so this dialect gets the
  * keyword without spelling it a second time — and a file that mixed a {@code jmouse-el} {@code function}
@@ -35,7 +36,9 @@ public class FunctionDeclarationParser extends AbstractBodyParser<FunctionDeclar
         cursor.ensure(BasicToken.T_OPEN_PAREN);
 
         while (!cursor.isCurrent(BasicToken.T_CLOSE_PAREN)) {
-            node.addParameter(SourceReader.name(cursor));
+            String parameter = SourceReader.name(cursor);
+            TypeAnnotations.read(cursor, context).ifPresentOrElse(type -> node.addParameter(parameter, type),
+                    () -> node.addParameter(parameter));
 
             if (!cursor.consumeIf(BasicToken.T_COMMA)) {
                 break;
@@ -43,6 +46,7 @@ public class FunctionDeclarationParser extends AbstractBodyParser<FunctionDeclar
         }
 
         cursor.ensure(BasicToken.T_CLOSE_PAREN);
+        TypeAnnotations.read(cursor, context).ifPresent(node::setResultType);
 
         return node;
     }

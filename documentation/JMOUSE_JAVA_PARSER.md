@@ -3,7 +3,7 @@
 Structural Java parser: a `.java` text goes in; the package, imports, every type (nested ones included)
 and every member come out — modifiers, annotations, type parameters, parameters, `throws`, the signature
 as written, JavaDoc structured and linked to its owner, exact source spans and a stable symbol id on
-each. Method, constructor, initializer and enum-constant bodies are opaque spans. Nothing is executed or
+each. Declaration mode keeps bodies as spans. Optional `EXPRESSIONS` mode reads executable bodies and field initializers into immutable expression, binding and reference records. Nothing is executed or
 resolved: no class loading, no type lookup, no annotation processing, no inherited documentation copied.
 
 It is built on the jME (`jmouse-el`) lexing and tree contracts — `Token`, `Token.Type`, `Tokenizer`,
@@ -26,7 +26,7 @@ rather than re-invented.
 - `JavaParser` — the facade, stateless and thread-safe.
   - `parse(sourceName, text) → JavaSourceFile` — the immutable record projection.
   - `parseTree(sourceName, text) → CompilationUnitNode` — the jME node tree.
-  - `REVISION` — the algorithm revision (`1`), for consumers that freeze results.
+  - `REVISION` — the algorithm revision (`4`), for consumers that freeze results.
 - Lexing (`org.jmouse.java.parser.lexer`)
   - `JavaTokenKind implements Token.Type` — identifiers, keywords, literals, punctuation; operators are
     single characters on purpose so `>>` can close two levels of type arguments.
@@ -101,7 +101,7 @@ unclosed body keeps the declaration and reports `UNBALANCED_DELIMITER`; an unter
 its line end so the damage stays inside one statement. Problems are sorted by position. Types nest at
 most 64 deep.
 
-## Verification
+## Declaration baseline verification (initial release)
 
 `mvn -o -q install -pl jmouse-java-parser -am` — 38 JUnit tests, no network:
 
@@ -123,10 +123,10 @@ most 64 deep.
 
 ## Not in this module
 
-- Statement and expression parsing; local and anonymous classes inside bodies.
+- Full Java semantic analysis, pattern bindings, target-type inference for lambdas, and local/anonymous class declarations.
 - Type resolution, classpath, inherited JavaDoc. A semantic mode can mark references resolved later
   without the model changing shape (`ReferenceState`).
-- Lambdas, `switch` patterns and the like only matter inside bodies, which are opaque.
+- Complete switch-expression grammar and generic method inference remain outside the body reader. Unsupported syntax is reported explicitly.
 
 ## jmouse-el gaps
 
@@ -158,3 +158,40 @@ nothing in `jmouse-el` or `jmouse-core` was changed for this module.
 
 ⚠️ `-am` rebuilds and installs `jmouse-core` and `jmouse-el` from the working tree, including whatever
 uncommitted changes they carry at that moment.
+
+
+## Optional expressions (revision 3)
+
+`parser.parse(name, text, JavaParser.Level.EXPRESSIONS)` returns the same declarations plus
+`JavaSourceFile.bodies()`. The existing two-argument parse and parseTree remain declaration-only.
+The old JavaSourceFile constructor is retained; it supplies an empty body list.
+
+- `ExecutableBody`: owning declaration, enclosing type, source span, expression roots, local bindings,
+  unresolved body references. Methods, constructors, initializer blocks and field initializers are read.
+- `Expression`: kind, written name, exact name/full spans, receiver and arguments; includes calls,
+  fields, object creation, method references, operators, conditionals, arrays, casts and lambdas.
+- `LocalBinding`: name/type/name span/visibility span/initializer. A null type requests inference.
+  Parameters, block locals, control-header locals and lambda parameters carry lexical visibility.
+- `BodyReference`: expression, owner/type context, and role CALLS, READS, WRITES, READS_WRITES,
+  INSTANTIATES or METHOD_REFERENCE. References remain unresolved in the parser.
+- Recovery retains expressions before and after an incomplete statement; nesting is bounded.
+  `UNSUPPORTED_SYNTAX` distinguishes unsupported constructs from syntax errors. Local/anonymous
+  types are reported and skipped; this mode is a navigation reader, not a Java compiler.
+
+Expression records are attached to the optional record result; declaration-tree visitors are unchanged.
+No classpath, symbol resolution, I/O or product dependencies have been added to the parser.
+
+## Phase-one hardening (2026-10-18)
+
+Parser revision is now **4**. ParseProblem retains its three-argument constructor and adds
+Phase.LEXICAL / STRUCTURE / BODY. JavaSourceFile.isStructureComplete() separates body recovery
+from declaration damage. isDeclarationComplete(symbolId) and isBodyComplete(owner) expose a
+shared conservative ParseValidity policy. isComplete() retains its original all-diagnostics meaning.
+
+Primitive/void class literals are supported. Unsupported switch expressions are skipped as one
+bounded construct with an explicit diagnostic, avoiding cascades through their arms. Their body
+is incomplete; this does not invent references from skipped syntax. Local/anonymous classes,
+full switch expressions, pattern-flow scopes and full generic inference remain unsupported.
+
+CorpusReport in src/test is an explicit command-line tool accepting source roots; it is not a
+machine-specific test or a precision benchmark. Persistent BodyValidityTest covers these policies.

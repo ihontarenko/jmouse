@@ -13,14 +13,14 @@ component "Ammeter" as ammeter type meter {
     }
     equations {
         # Ideal it is a short: the current passes and nothing drops. On a realistic bench it is its shunt.
-        voltage in -> out = realistic * R_shunt * current(in)
+        voltage in -> out = realistic * R_shunt * in.current
     }
     leads {
         in green stripes white
         out blue stripes white
     }
     measure {
-        reading = current(in) unit A signal
+        reading = in.current unit A signal
     }
     symbol uses ammeter-symbol {
         a in

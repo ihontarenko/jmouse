@@ -3,6 +3,7 @@ package org.jmouse.el.extension;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.type.ValueType;
 
 import java.util.Collections;
 import java.util.List;
@@ -88,6 +89,15 @@ public interface Extension {
      * @return a list of {@link Filter} instances, or an empty list
      */
     default List<Filter> getFilters() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Returns the types a declaration may be annotated with ({@code let count : int}).
+     *
+     * @return a list of {@link ValueType} instances, or an empty list
+     */
+    default List<ValueType> getTypes() {
         return Collections.emptyList();
     }
 }

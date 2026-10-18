@@ -13,7 +13,7 @@
 
 ## What it is in one paragraph
 
-jMS is one language with two ways of being run. A document is **statements** — `local`, `for`, `if`, `return`,
+jMS is one language with two ways of being run. A document is **statements** — `let`, `const`, `for`, `if`, `return`,
 assignment, `function`, `include` — written in **jME's expression grammar** with **jMF's mathematics** on top
 (`^` is power, every mathematical function is in scope). A document that is just a list of statements returning a
 value is a **program**: `ProgramEvaluator` parses it and runs it, start to finish. A document that instead declares
@@ -36,7 +36,7 @@ org.jmouse.script.el                         (jmouse-script-el)
 ├── ProgramEvaluator       parse(source[,name]) → ProgramNode · run(program, variables, facades, budget) → Object
 ├── ScriptEvaluator        parse(source[,name]) → ScriptDocumentNode · getExtensions()
 ├── ScriptExtension        the dialect: jMF functions + append, jME grammar, `^` power, `/` exact division, its parsers
-├── StatementExtension     the statement core as a jME extension (parsers only): include/function/if/for/local/return/assign
+├── StatementExtension     the statement core as a jME extension (parsers only): include/function/if/for/let/const/return/assign
 ├── Facades (BeanLookup)   the @name objects a document may reach — by name only, never by type
 ├── DeclaredFunctions      a document's own functions, wrapped as callable Lambdas, installed per context
 ├── FacadeAccessException · ScriptParseException · SourceSpan · SourceReader
@@ -48,7 +48,7 @@ org.jmouse.script.el                         (jmouse-script-el)
 ├── node/
 │   ├── ScriptDocumentNode  one .jms file: includes, script blocks, behaviour blocks (evaluates to itself)
 │   ├── ProgramNode         a plain-statement document: statements + lifted functions + includes
-│   ├── ScriptBodyNode      abstract: runs its statements in order, owns its `local` scope when it has one
+│   ├── ScriptBodyNode      abstract: runs its statements in order, owns its scope when it declares a name
 │   ├── ScriptNode · BehaviourNode   file-scope wrappers grouping handlers / functions
 │   ├── HandlerNode         `on event [arg] [when cond] do … end`; matches(context), evaluate(context)
 │   ├── FunctionDeclarationNode · LocalNode · AssignmentNode · ForNode · ReturnNode · ReturnSignal · IncludeNode
@@ -56,7 +56,7 @@ org.jmouse.script.el                         (jmouse-script-el)
 ├── parser/                ScriptDocumentParser (root) · ScriptParser · BehaviourParser · HandlerParser ·
 │                          FunctionDeclarationParser · BranchParser · LoopParser · LocalParser · ReturnParser ·
 │                          IncludeParser · AssignmentParser · ScriptBodyParser · Expressions
-├── lexer/                 ScriptToken (script/behaviour/on/when) · StatementToken (include/do/then/end/local/return/for)
+├── lexer/                 ScriptToken (script/behaviour/on/when) · StatementToken (include/do/then/end/let·local/const/return/for)
 └── function/AppendFunction   append(list, value, …) → a new list
 
 org.jmouse.script.host                       (jmouse-script, the host seam)
@@ -76,7 +76,7 @@ org.jmouse.script.host                       (jmouse-script, the host seam)
 ProgramEvaluator evaluator = new ProgramEvaluator();                 // thread-safe; caches by name+text
 
 ProgramNode program = evaluator.parse("""
-        local total = 0
+        let total = 0
         for n in 1..k do
           total = total + 1 / n^2
         end
@@ -142,11 +142,11 @@ Statements are separated by a newline or `;`. `#` starts a comment to the end of
 
 | Form | Written | Notes |
 |---|---|---|
-| local binding | `local slot = @store.next_slot(entry)` | binds in **this body's own scope**, shadowing an outer name rather than overwriting it; a body that declares no `local` allocates no scope |
-| assignment | `entry.state = 'moving'` | the one statement not opened by a keyword — writes a value back where it was read; `local` in front is what makes a plain `=` unambiguous |
+| declaration | `let slot = @store.next_slot(entry)` · `let count : int = 1` · `let c : current` · `const limit = 10` | binds in **this body's own scope**, shadowing an outer name rather than overwriting it; a body that declares nothing allocates no scope. `local` is `let`'s other spelling — one token, one meaning. A type after `:` is checked on every write (see *Types*); `const` needs a value and refuses a second write |
+| assignment | `entry.state = 'moving'` | the one statement not opened by a keyword — writes a value back where it was read; a declared name is written where it was declared, as its type admits it; `let` in front is what makes a plain `=` unambiguous |
 | branch | `if c then … elseif c then … else … end` | the engine's `IfNode`, wearing jMS's `then`/`end` delimiters; one falsy notion shared with every other construct |
 | loop | `for entry in @store.pending('inbox') do … end` | one shape only — over a list, set, map or array; `null` is "nothing to iterate" (not an error), a non-collection **is** an error; the loop variable lives in its own scope |
-| function | `function overdue(entry) … end` | a named body called by name; not a statement — lifted out at parse time so running a document never runs a function by accident |
+| function | `function overdue(entry) … end` · `function share(count : int, total : int) : double … end` | a named body called by name; not a statement — lifted out at parse time so running a document never runs a function by accident. Each parameter may carry a type, and the function its result's |
 | return | `return`, `return expr` | leaves the enclosing body via a stackless `ReturnSignal`; a bare `return` reads no value across a line break |
 | include | `include 'common.jms'` | a path recorded, not followed by the parser — "relative to what" and cycle detection are the loader's; contributes functions only |
 | handler | `on unload [arg] when cond do … end` | host-driven only; the event name and the optional literal after it are carried uninterpreted, the `when` guard decides whether the body runs |
@@ -154,6 +154,34 @@ Statements are separated by a newline or `;`. `#` starts a comment to the end of
 A declared function **sees only the names before it and its own parameters** — there is no recursion guard other than
 the recursion-depth budget, counted on each function entry. Two functions of one name in a document are refused by
 the binder, naming the first.
+
+## Types
+
+A declaration, a parameter and a function's result may be annotated `name : Type`. **One order everywhere** — never
+`Type name`.
+
+- **A type is registered by the host, never named by a document.** jME's `ValueType` (`org.jmouse.el.type`) is a name,
+  the Java class a value is carried as, and `admit(value, conversion)`. An `Extension` contributes them through
+  `getTypes()`; `CoreExtension` registers `any`, `boolean`, `int`, `long`, `double`, `number`, `string`, `list`,
+  `map` (`int => java.lang.Integer` is that Java line). A document writing `java.lang.…` cannot exist: a saved text
+  must never be able to make the engine load a class.
+- **Resolved while parsing** (`TypeAnnotations.read`): a misspelt type is refused at its line, naming every type the
+  language knows.
+- **Checked on every write**: a value is admitted as it is when the carrier holds it, converted by the language's
+  conversion when it can be (`let a : int = 2.0` holds `2`), refused otherwise (`'abc' (String) is not int and does
+  not convert to it`). The same check runs on a typed parameter's argument and on a typed function's result.
+- **`let c : current`** — declared without a value — holds nothing until it is written; the type still governs that
+  write.
+- **`state hits : int = 0`** is the document's, not the body's: bound once per evaluation context in its outermost
+  scope, and kept from one event to the next — what a handler remembers. Written freely, as its type admits.
+- **`parameter limit : int = 10`** is the host's to give: bound once per context to the value the host put in the
+  context under that name (a program's `variables`), else to the written default; the document cannot write it.
+- ⚠️ `state` and `parameter` are **contextual words**, not keywords: they declare only where a name and `:` or `=`
+  follow. Hosts hand their scripts a plain `state` (`on jobFinished when state == 'FAILED'`), and a keyword would have
+  broken every such file. `let`, `local` and `const` are keywords.
+- An untyped declaration takes anything, exactly as before. A domain adds its own types through its own extension:
+  jMX's `ElectricalTypes` adds `voltage`, `current`, `charge`, `power`, `resistance`… — each a `double` that says what
+  it is.
 
 ## Expressions and mathematics
 
@@ -173,7 +201,7 @@ operator.
 
 ⚠️ **What is deliberately absent from the vocabulary:** no reflection (`class(...)`, reflected calls — they would make
 the facade boundary decorative), no wall clock (`now()` answers differently on two machines; a host that wants time
-gives a clock facade), and no `setVariable`/`getVariable` (the language has `local` and assignment). Lambdas and
+gives a clock facade), and no `setVariable`/`getVariable` (the language has `let` and assignment). Lambdas and
 scoped-call parsers are *registered so brackets parse*, but a host's binder refuses those shapes by name.
 
 ## The host model — facades, events, and the binder's audit
@@ -185,7 +213,7 @@ ceiling. The binder then refuses, at load:
 - any `@facade`, function, filter or test name the catalogue (plus the dialect's built-ins and the document's own
   functions) does not know;
 - a statement that **computes a value and does nothing with it** — a bare `entry.weight` on its own line. A statement
-  must be a call, an assignment, a `counter++`/`--` step, or one of `if`/`for`/`local`/`return`; anything else is the
+  must be a call, an assignment, a `counter++`/`--` step, or one of `if`/`for`/`let`/`const`/`return`; anything else is the
   silent half-deleted-line failure the audit exists to catch.
 
 `BoundScript` is built once and immutable: dispatching an event is a map lookup and a walk of an existing node tree —
@@ -198,13 +226,13 @@ jMS owns compilation and evaluation and nothing else. There is no scheduler in t
 
 ## Scoping and lifetime
 
-- A **body owns its `local` names.** `ScriptBodyNode` pushes a scope on entry and pops it on exit — including on the
-  way out through a `return`, so the pop sits in a `finally`. A body that declares no `local` pays nothing: whether it
+- A **body owns the names it declares** (`let`, `local`, `const`). `ScriptBodyNode` pushes a scope on entry and pops it on exit — including on the
+  way out through a `return`, so the pop sits in a `finally`. A body that declares nothing pays nothing: whether it
   needs a scope is decided once, on first evaluation, and remembered. The scan looks through `if` branches (a branch
   is not a scope) but not into a nested loop or function (which push their own).
 - A **loop variable lives in its own scope**, so it neither outlives the loop nor overwrites something the host put in
   the context under that name.
-- A `local` uses `ScopedChain.peek().set` (shadow in this scope), not `context.setValue` (which walks the chain and
+- A declaration uses `ScopedChain.peek().set` (shadow in this scope), not `context.setValue` (which walks the chain and
   would overwrite an outer binding) — that difference is the whole meaning of the keyword.
 - `ScriptExecution` is **one counter per dispatch, never per script**: two events are two budgets, and a handler that
   spent its whole allowance an hour ago starts the next dispatch with all of it. It is not thread-safe and must not be.
@@ -216,7 +244,7 @@ jMS owns compilation and evaluation and nothing else. There is no scheduler in t
 | parse | `ScriptParseException` (file + line/column) | `'…' is not a script declaration; a file holds 'include', 'script' and 'behaviour', and nothing else at its top level` |
 | bind — unknown event | `ScriptBindException` | `'unlod' is not an event this host fires; it declares […]` |
 | bind — duplicate function | `ScriptBindException` | `'hostile' is declared twice in this document; the first is at …` |
-| bind — effectless statement | `ScriptBindException` | `'entry.weight' computes a value and does nothing with it; a statement is a call, an assignment, a step such as counter++, or one of if / for / local / return` |
+| bind — effectless statement | `ScriptBindException` | `'entry.weight' computes a value and does nothing with it; a statement is a call, an assignment, a step such as counter++, or one of if / for / let / const / return` |
 | facade by type | `FacadeAccessException` | `a document resolves facades by name, never by type; nothing can ask for '…'` |
 | facade unknown | `FacadeAccessException` | `'@world' is not a facade this host gives; it gives […]` |
 | budget | `ScriptBudgetExceededException` | names the limit (`steps`/`loop iterations`/`recursion depth`/`time`), where it ran out, and whether a ceiling decided the number |
@@ -225,7 +253,7 @@ jMS owns compilation and evaluation and nothing else. There is no scheduler in t
 ## Gotchas
 
 - ⚠️ **A keyword is also an ordinary word.** `script`, `behaviour`, `on`, `when`, `include`, `do`, `then`, `end`,
-  `local`, `return`, `for` may all be used as facade methods, event names or field names — a name is read against the
+  `let`, `local`, `const`, `return`, `for` may all be used as facade methods, event names or field names — a name is read against the
   full name-token set wherever the grammar expects a name, so the language never dictates a host's vocabulary.
 - ⚠️ **`return` inside a handler means "this handler is finished"**, not "fail the dispatch" — `HandlerNode` catches
   the `ReturnSignal`, so a host dispatching an event never sees that a control-flow exception exists.

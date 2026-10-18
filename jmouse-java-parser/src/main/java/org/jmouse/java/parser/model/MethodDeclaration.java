@@ -19,6 +19,7 @@ import org.jmouse.java.parser.source.SourceSpan;
  * @param defaultValue   an annotation element's {@code default} value as written, or {@code null}
  * @param signature      the header, whitespace collapsed
  * @param signatureSpan  the exact header span
+ * @param nameSpan       the method name where it is declared
  * @param body           the opaque body from its opening to its closing brace, or {@code null} when declared with {@code ;}
  * @param span           the whole declaration
  * @param javaDoc        the documentation comment, or {@code null}
@@ -26,7 +27,7 @@ import org.jmouse.java.parser.source.SourceSpan;
 public record MethodDeclaration(String name, String qualifiedName, SymbolId symbolId, Set<Modifier> modifiers,
                                 List<Annotation> annotations, List<TypeParameter> typeParameters, String returnType,
                                 List<Parameter> parameters, List<String> thrownTypes, String defaultValue,
-                                String signature, SourceSpan signatureSpan, SourceSpan body, SourceSpan span,
+                                String signature, SourceSpan signatureSpan, SourceSpan nameSpan, SourceSpan body, SourceSpan span,
                                 JavaDoc javaDoc) implements Declaration {
 
     /**

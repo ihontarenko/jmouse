@@ -701,9 +701,11 @@ public final class EngineSelection {
         List<Part> parts = document.block(Block.Parts.class).map(Block.Parts::parts)
                 .orElseThrow(() -> new IllegalArgumentException(what + " has a 'parts' block."));
         List<CircuitElement> elements = parts.stream().map(this::element).toList();
+        Optional<Block.Probes> probes = document.block(Block.Probes.class);
         return new ObjectDefinition.Circuit(elements, transientSpan(),
                 document.block(Block.Layout.class).map(EngineSelection::layout).orElse(null), null,
-                document.block(Block.Probes.class).map(EngineSelection::probes).orElse(List.of()), circuitExpectations());
+                probes.map(EngineSelection::probes).orElse(List.of()), circuitExpectations(),
+                probes.flatMap(Block.Probes::timePerDivision).map(Quantity::value).orElse(null));
     }
 
     /**
@@ -731,7 +733,7 @@ public final class EngineSelection {
             case 'L' -> "level";
             default -> "voltage";
         }, probe.target(), probe.reference().orElse(null), probe.scale().map(Quantity::value).orElse(null),
-                probe.mode().orElse(null))).toList();
+                probe.mode().orElse(null), probe.expression().orElse(null))).toList();
     }
 
     private static Map<String, ObjectDefinition.LabelOffset> labelOffsets(Block.Placement placement) {

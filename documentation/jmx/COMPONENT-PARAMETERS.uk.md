@@ -360,7 +360,7 @@ _Reads the current through it, put in the break of a wire_
 
 **Виводи:** `in`, `out`
 
-**Показ приладу:** `reading = current(in) unit A signal`
+**Показ приладу:** `reading = in.current unit A signal`
 
 #### Duty cycle meter — `duty-cycle-meter`
 
@@ -422,7 +422,7 @@ _Reads the power a load takes: its current through in and out, its voltage acros
 
 **Виводи:** `in`, `out`, `plus`, `minus`
 
-**Показ приладу:** `reading = (plus - minus) * current(in) unit W signal`
+**Показ приладу:** `reading = (plus - minus) * in.current unit W signal`
 
 ### `integrated/amplifiers/`
 

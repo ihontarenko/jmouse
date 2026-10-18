@@ -9,7 +9,7 @@ import org.jmouse.el.parser.ParserContext;
  * The one way an expression is read in this language.
  *
  * <p>⚠️ <strong>One parser, every position.</strong> A {@code when} guard, an {@code if} condition, a
- * {@code local} value, the right-hand side of an assignment and the collection a loop walks are all
+ * {@code let} value, the right-hand side of an assignment and the collection a loop walks are all
  * read through here, so {@code and}, {@code or}, {@code ==}, {@code is} and {@code in} mean exactly one
  * thing wherever they are written.</p>
  *

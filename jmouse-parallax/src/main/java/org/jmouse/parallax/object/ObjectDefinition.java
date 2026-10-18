@@ -774,8 +774,12 @@ public sealed interface ObjectDefinition {
      * @param probes     what a bench measures it with — its {@code probes} block: the oscilloscope's channels and the
      *                   meters —; like the layout, nothing in it changes what is computed
      */
+    /**
+     * @param timePerDivision the time base the oscilloscope opens on, seconds a division — the {@code probes} block's
+     *                        {@code time 5 ms/div}; null when the circuit names none and the bench chooses
+     */
     record Circuit(List<CircuitElement> elements, Interval time, SchematicLayout layout, BenchConditions conditions,
-                   List<BenchProbe> probes, List<CircuitExpectation> expectations)
+                   List<BenchProbe> probes, List<CircuitExpectation> expectations, Double timePerDivision)
             implements ObjectDefinition {
 
         public static final String GROUND = "0";
@@ -817,7 +821,16 @@ public sealed interface ObjectDefinition {
             this(elements, time, layout, conditions, probes, List.of());
         }
 
+        /** A circuit whose oscilloscope opens on whatever time base the bench chooses. */
+        public Circuit(List<CircuitElement> elements, Interval time, SchematicLayout layout, BenchConditions conditions,
+                       List<BenchProbe> probes, List<CircuitExpectation> expectations) {
+            this(elements, time, layout, conditions, probes, expectations, null);
+        }
+
         public Circuit {
+            if (timePerDivision != null && !(timePerDivision > 0)) {
+                throw new IllegalArgumentException("A time base is a positive time a division.");
+            }
             probes = probes == null ? List.of() : List.copyOf(probes);
             expectations = expectations == null ? List.of() : List.copyOf(expectations);
             elements = elements == null ? List.of() : List.copyOf(elements);
@@ -872,8 +885,9 @@ public sealed interface ObjectDefinition {
      * @param reference a voltage's second node; null for ground
      * @param scale     an oscilloscope channel's volts per division; null when not written
      * @param mode      a meter's display: {@code dc}, {@code ac} or {@code rms}; null when not written
+     * @param expression what an oscilloscope channel's screen shows, X being the reading; null when not written
      */
-    record BenchProbe(String id, String measure, String target, String reference, Double scale, String mode) {
+    record BenchProbe(String id, String measure, String target, String reference, Double scale, String mode, String expression) {
         public BenchProbe {
             if (id == null || !id.matches("[A-Za-z][A-Za-z0-9_]{0,15}")) {
                 throw new IllegalArgumentException("A probe is named like a part: CH1, M1.");

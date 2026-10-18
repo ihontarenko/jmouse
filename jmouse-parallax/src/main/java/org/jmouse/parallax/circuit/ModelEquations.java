@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A model's {@code equations} compiled for one unit: every line a jMF formula over the unit's pin voltages, its
@@ -35,8 +33,8 @@ import java.util.regex.Pattern;
  */
 final class ModelEquations {
 
-    /** The call a written {@code d(q)/dt} reaches jMF as; an author never writes it. */
-    static final String RATE    = "ddt";
+    /** The call a written {@code d(q)/dt} reaches the solver as: not a name, so an author can never write it. */
+    static final String RATE    = "d/dt";
 
     /**
      * A noise current an equation adds, {@code noise(density)}: nothing to the solution, to a noise analysis a random
@@ -54,15 +52,20 @@ final class ModelEquations {
     /** The bench's flag a model reads to know it is realistic. */
     static final String REALISTIC = "realistic";
 
-    /** The language every model expression is read in: jMF, with the solver's rate and noise. */
-    static final FormulaLanguage LANGUAGE = FormulaLanguage.standard().withHostCalls(RATE, NOISE);
+    /** SPICE's spellings, read as calls only to be refused with what this language writes instead. */
+    private static final Map<String, String> BORROWED = Map.of(
+            "V", "a pin's name is its voltage — write 'anode - j', not V(anode, j), and 'output', not V(output).",
+            "I", "a current is written on the left: 'current anode -> j = …', or read as 'anode.current'.",
+            "ddt", "a rate is written d(q)/dt, not ddt(q).");
 
-    /** A written rate, {@code d(…)/dt}: its start; the rest is found by matching the parenthesis. */
-    private static final Pattern WRITTEN_RATE = Pattern.compile("(?<![A-Za-z0-9_])d\\s*\\(");
-    /** What follows a rate's parenthesis: {@code /dt}. */
-    private static final Pattern OVER_TIME = Pattern.compile("\\s*/\\s*dt(?![A-Za-z0-9_])");
-    /** What the language wrote before: a voltage V(…), a current I(…), a rate ddt(…). */
-    private static final Pattern BORROWED = Pattern.compile("(?<![A-Za-z0-9_.])(V|I|ddt)\\s*\\(");
+    /**
+     * The language every model expression is read in: jMF, with the solver's rate — {@code d(q)/dt}, recognised in the
+     * tree — and noise, a pin's members, and SPICE's spellings, read only to be refused.
+     */
+    static final FormulaLanguage LANGUAGE = FormulaLanguage.standard()
+            .withHostCalls(NOISE, PinQuantities.CURRENT, PinQuantities.VOLTAGE)
+            .withHostCalls(BORROWED.keySet().toArray(String[]::new))
+            .withRate("t", RATE);
 
     /** The name a model's expressions read the simulated time by. */
     static final String TIME = "time";
@@ -219,7 +222,7 @@ final class ModelEquations {
         this.nodes = List.copyOf(allNodes);
 
         requireDistinctFromNodes(parameterNames, "parameter");
-        requireDistinctFromNodes(List.copyOf(model.locals().keySet()), "local");
+        requireDistinctFromNodes(List.copyOf(model.locals().keySet()), "let");
         requireDistinctFromNodes(model.states().stream().map(ComponentModel.State::name).toList(), "state");
         List<Formula.Definition> library = new ArrayList<>(LANGUAGE.definitions(libraryText(model)));
         library.addAll(locals(library));
@@ -238,9 +241,9 @@ final class ModelEquations {
                             + "' is not a pin or a node of the model.");
                 }
             }
-            String written = pinCurrentsNamed(readable(model.name(), equation.formula(), equation.line()), pinNames, equation.line());
-            readsCurrents.add(written.contains(PartExpression.CURRENT_PREFIX));
-            Formula parsed = parse(written, library, equation.line());
+            Formula parsed = PinQuantities.bind(read(model.name(), equation.formula(), equation.line(), library), pinNames,
+                    written -> model.name() + ", line " + equation.line() + ": '" + written + "'");
+            readsCurrents.add(PinQuantities.readsCurrent(parsed));
             int index = parsedEquations.size();
             parsedEquations.add(parsed);
             Formula rates = Substitution.replaceHostCalls(parsed, call -> NOISE.equals(call.name())
@@ -347,8 +350,8 @@ final class ModelEquations {
         List<Formula> unbound = List.copyOf(rightSides);
         for (int index = 0; index < rightSides.size(); index++) {
             int line = model.equations().get(index).line();
-            rightSides.set(index, Substitution.bindHostNames(unbound.get(index), name -> name.startsWith(PartExpression.CURRENT_PREFIX)
-                    ? currentInto(name.substring(PartExpression.CURRENT_PREFIX.length()), unbound, readsCurrents, line) : null));
+            rightSides.set(index, Substitution.bindHostNames(unbound.get(index), name -> PinQuantities.pinOf(name) != null
+                    ? currentInto(PinQuantities.pinOf(name), unbound, readsCurrents, line) : null));
         }
     }
 
@@ -403,10 +406,13 @@ final class ModelEquations {
             return List.of();
         }
         StringBuilder text = new StringBuilder();
-        model.locals().forEach((name, formula) -> text.append(name).append(" = ").append(readable(model.name(), formula, 0)).append('\n'));
+        model.locals().forEach((name, formula) -> text.append(name).append(" = ").append(formula).append('\n'));
         List<Formula.Definition> definitions;
         try {
-            definitions = LANGUAGE.definitions(text.toString(), library);
+            definitions = LANGUAGE.definitions(text.toString(), library).stream()
+                    .map(definition -> new Formula.Definition(definition.name(), definition.parameters(),
+                            refuseBorrowed(model.name() + ": ", definition.body())))
+                    .toList();
         } catch (FormulaException failure) {
             throw new IllegalArgumentException(model.name() + ": " + failure.getMessage(), failure);
         }
@@ -511,21 +517,6 @@ final class ModelEquations {
         return Kind.valueOf(equation.kind().name());
     }
 
-    /** Every {@code current(pin)} in an expression as the name it is bound by; refused for a name that is no pin. */
-    private String pinCurrentsNamed(String text, List<String> pins, int line) {
-        Matcher currents = PartExpression.PIN_CURRENT.matcher(text);
-        StringBuilder named = new StringBuilder();
-        while (currents.find()) {
-            if (!pins.contains(currents.group(1))) {
-                throw new IllegalArgumentException(model.name() + ", line " + line + ": '" + currents.group() + "' — '"
-                        + currents.group(1) + "' is not one of its pins (" + String.join(", ", pins) + ").");
-            }
-            currents.appendReplacement(named, PartExpression.CURRENT_PREFIX + currents.group(1));
-        }
-        currents.appendTail(named);
-        return named.toString();
-    }
-
     /**
      * The current into {@code pin}: each voltage equation's branch current where its branch starts on the pin, less
      * where it ends there, and each current equation's right side alike — what {@code current a -> b} carries enters at a.
@@ -574,54 +565,31 @@ final class ModelEquations {
     }
 
     /**
-     * A model's expression as jMF reads it: every {@code d(q)/dt} marked as the solver's rate. What the language wrote
-     * before — {@code V(a, b)}, {@code I(…)}, {@code ddt(q)} — is refused with what to write instead.
+     * A model's expression as jMF reads it — every {@code d(q)/dt} already the solver's rate, recognised in the tree —,
+     * with SPICE's spellings ({@code V(a, b)}, {@code I(…)}, {@code ddt(q)}) refused saying what to write instead.
+     *
+     * @throws IllegalArgumentException when it does not read, naming the model, the line and the text
      */
-    static String readable(String model, String text, int line) {
+    static Formula read(String model, String text, int line, List<Formula.Definition> library) {
         String where = model + (line > 0 ? ", line " + line : "") + ": ";
-        Matcher borrowed = BORROWED.matcher(text);
-        if (borrowed.find()) {
-            throw new IllegalArgumentException(where + switch (borrowed.group(1)) {
-                case "V" -> "a pin's name is its voltage — write 'anode - j', not V(anode, j), and 'output', not V(output).";
-                case "I" -> "a current is written on the left: 'current anode -> j = …'.";
-                default -> "a rate is written d(q)/dt, not ddt(q).";
-            });
-        }
-        StringBuilder readable = new StringBuilder();
-        int from = 0;
-        Matcher rate = WRITTEN_RATE.matcher(text);
-        while (rate.find(from)) {
-            int open = rate.end() - 1;
-            int close = closing(text, open);
-            Matcher over = OVER_TIME.matcher(text);
-            if (close < 0 || !over.region(close + 1, text.length()).lookingAt()) {
-                throw new IllegalArgumentException(where + "a rate is d(q)/dt — d(…) is not followed by '/dt' in: " + text);
-            }
-            readable.append(text, from, rate.start()).append(RATE).append(text, open, close + 1);
-            from = over.end();
-        }
-        return readable.append(text.substring(from)).toString();
-    }
-
-    private static int closing(String text, int open) {
-        int depth = 0;
-        for (int index = open; index < text.length(); index++) {
-            char character = text.charAt(index);
-            if (character == '(') {
-                depth++;
-            } else if (character == ')' && --depth == 0) {
-                return index;
-            }
-        }
-        return -1;
-    }
-
-    private Formula parse(String text, List<Formula.Definition> library, int line) {
+        Formula parsed;
         try {
-            return LANGUAGE.parse(text, library);
+            parsed = LANGUAGE.parse(text, library);
         } catch (RuntimeException failure) {
-            throw new IllegalArgumentException(model.name() + ", line " + line + ": " + failure.getMessage() + " — in: " + text, failure);
+            throw new IllegalArgumentException(where + failure.getMessage() + " — in: " + text, failure);
         }
+        return refuseBorrowed(where, parsed);
+    }
+
+    /** {@code parsed}, refused where it calls one of SPICE's spellings. */
+    private static Formula refuseBorrowed(String where, Formula parsed) {
+        return Substitution.replaceHostCalls(parsed, call -> {
+            String instead = BORROWED.get(call.name());
+            if (instead != null) {
+                throw new IllegalArgumentException(where + instead);
+            }
+            return call;
+        });
     }
 
     /** The formula and its exact partial derivatives by every slot {@code differentiated} admits and every state it reads. */

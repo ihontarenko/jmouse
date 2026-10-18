@@ -19,12 +19,13 @@ import org.jmouse.java.parser.source.SourceSpan;
  * @param type          the declared type as written, with any brackets written after the variable name appended
  * @param signature     the statement header followed by the variable name, whitespace collapsed
  * @param signatureSpan the exact statement header, up to the end of the type
+ * @param nameSpan      this variable's name where it is declared
  * @param variableSpan  this variable: its name, brackets and initializer
  * @param span          the whole statement, to its semicolon
  * @param javaDoc       the statement's documentation comment, owned by this variable, or {@code null}
  */
 public record FieldDeclaration(String name, String qualifiedName, SymbolId symbolId, Set<Modifier> modifiers,
-                               List<Annotation> annotations, String type, String signature, SourceSpan signatureSpan,
+                               List<Annotation> annotations, String type, String signature, SourceSpan signatureSpan, SourceSpan nameSpan,
                                SourceSpan variableSpan, SourceSpan span, JavaDoc javaDoc) implements Declaration {
 
     /**

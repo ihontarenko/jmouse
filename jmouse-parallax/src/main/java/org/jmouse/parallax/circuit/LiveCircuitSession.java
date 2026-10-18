@@ -216,7 +216,7 @@ public final class LiveCircuitSession {
             }
         }
         Map<String, Double> levels = meanLevels(samples, order);
-        Map<String, PartLoad> loads = shown(solver.loads(), levels);
+        Map<String, PartLoad> loads = shown(solver.loads(), levels, lastTime(samples));
         burnOut(loads);
         return new Frame(time, channels, units, levels, withCauses(loads), traced(samples, order), samples.size(),
                 peaksOf(samples, positives, negatives));
@@ -236,7 +236,7 @@ public final class LiveCircuitSession {
             units.put(probe.channel(), probe.quantity() == Quantity.READING ? readingUnit(probe) : probe.quantity().unit());
         }
         Map<String, Double> levels = meanLevels(traced, order);
-        Map<String, PartLoad> loads = shown(solver.loads(), levels);
+        Map<String, PartLoad> loads = shown(solver.loads(), levels, lastTime(traced));
         burnOut(loads);
         return new Frame(new double[0], channels, units, levels, withCauses(loads), traced(traced, order), count, Map.of());
     }
@@ -307,12 +307,17 @@ public final class LiveCircuitSession {
         return levels;
     }
 
-    /** The loads with what each part's symbol shows over the frame, read from its mean levels. */
-    private Map<String, PartLoad> shown(Map<String, PartLoad> loads, Map<String, Double> levels) {
+    /** When the last of these samples was taken; NaN for none. */
+    private static double lastTime(List<LiveCircuitSolver.Sample> samples) {
+        return samples.isEmpty() ? Double.NaN : samples.getLast().time();
+    }
+
+    /** The loads with what each part's symbol shows over the frame, read from its mean levels at its last moment. */
+    private Map<String, PartLoad> shown(Map<String, PartLoad> loads, Map<String, Double> levels, double time) {
         if (displays == null || displays.isEmpty()) {
             return loads;
         }
-        Map<String, Map<String, Double>> figures = displays.read(levels, loads);
+        Map<String, Map<String, Double>> figures = displays.read(levels, loads, solver.states(), time);
         Map<String, PartLoad> shown = new LinkedHashMap<>(loads);
         figures.forEach((part, values) -> {
             PartLoad load = shown.get(part);

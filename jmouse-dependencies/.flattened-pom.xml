@@ -124,11 +124,6 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-common</artifactId>
-        <version>${jmouse.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-materializer</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
@@ -155,11 +150,6 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-security</artifactId>
-        <version>${jmouse.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-expression</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -380,6 +370,16 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-java-parser</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-java-index</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-java-index-store</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>

@@ -8,7 +8,7 @@ component "P-channel MOSFET" as p-mosfet type mosfet {
         category circuits
         failure short
     }
-    family mos-transistor
+    extends mos-transistor
 
     parameters {
         polarity = -1                         "p-channel"

@@ -15,6 +15,10 @@ import org.jmouse.parallax.script.Block.Pin;
 import org.jmouse.parallax.script.Block.PinNature;
 import org.jmouse.parallax.script.Block.Range;
 import org.jmouse.parallax.script.Block.StateVariable;
+import org.jmouse.el.type.ValueType;
+import org.jmouse.parallax.script.Dimension;
+import org.jmouse.parallax.script.ElectricalTypes;
+import org.jmouse.parallax.script.QuantityType;
 import org.jmouse.parallax.script.SourceText;
 
 import java.util.ArrayList;
@@ -37,9 +41,86 @@ final class DeclarationReader {
     private static final List<String> SINGLE_WORD_FLAGS = List.of("log", "integer", "animate", "live", "exact");
 
     private final Reading reading;
+    /** The quantities the document being read named with {@code type}, by name; forgotten at the next document. */
+    private final Map<String, ValueType> types = new LinkedHashMap<>();
 
     DeclarationReader(Reading reading) {
         this.reading = reading;
+    }
+
+    /** A new document begins: the types the last one named are not its. */
+    void forgetTypes() {
+        types.clear();
+    }
+
+    /**
+     * {@code type power_density = power / area}: a quantity the document names, built from the known ones — jMX's
+     * electrical quantities, the core's, and the document's own named earlier — by {@code *}, {@code /} and whole
+     * powers ({@code current ^ 2}, {@code 1 / time}). What it says is a dimension; a {@code let} may then be typed by it.
+     */
+    void type(Reading.Line line) {
+        if (line.size() < 3 || !line.value(1).equals("=")) {
+            throw line.refusal("a type is 'type name = power / area': a name, '=', and known types joined by * and /");
+        }
+        String name = line.value(0);
+        if (resolveType(name).isPresent()) {
+            throw line.refusal(0, "'" + name + "' is already a type");
+        }
+        types.put(name, new QuantityType(name, "", typeExpression(line, 2)));
+    }
+
+    /** What a written type name is: the document's own first, then jMX's and the core's. */
+    private Optional<ValueType> resolveType(String name) {
+        return Optional.ofNullable(types.get(name)).or(() -> ElectricalTypes.find(name));
+    }
+
+    /** {@code power / area}, {@code voltage * time}, {@code current ^ 2}, {@code 1 / time}: the product the words make. */
+    private Dimension typeExpression(Reading.Line line, int from) {
+        Dimension result = Dimension.NONE;
+        boolean dividing = false;
+        int at = from;
+        while (at < line.size()) {
+            String word = line.value(at);
+            Dimension factor;
+            if (word.equals("1") && at == from) {
+                factor = Dimension.NONE;
+            } else {
+                ValueType named = resolveType(word).orElseThrow(() -> line.refusal(from, "'" + word
+                        + "' is not a type here. Known types: " + String.join(", ", knownTypeNames())));
+                if (!(named instanceof QuantityType quantity)) {
+                    throw line.refusal(from, "'" + word + "' is not a quantity, so it measures nothing a type can be built of");
+                }
+                factor = quantity.dimension();
+            }
+            at++;
+            if (at < line.size() && line.value(at).equals("^")) {
+                int exponent;
+                try {
+                    exponent = Integer.parseInt(line.value(at + 1));
+                } catch (RuntimeException notWhole) {
+                    throw line.refusal(Math.min(at + 1, line.size() - 1), "a type's power is a whole number: current ^ 2");
+                }
+                factor = factor.power(exponent);
+                at += 2;
+            }
+            result = dividing ? result.over(factor) : result.times(factor);
+            if (at >= line.size()) {
+                break;
+            }
+            String operator = line.value(at);
+            if (!operator.equals("*") && !operator.equals("/")) {
+                throw line.refusal(at, "types are joined by * and /, not '" + operator + "'");
+            }
+            dividing = operator.equals("/");
+            at++;
+        }
+        return result;
+    }
+
+    private List<String> knownTypeNames() {
+        List<String> names = new ArrayList<>(types.keySet());
+        names.addAll(ElectricalTypes.names());
+        return names.stream().sorted().toList();
     }
 
     // ─── parameters ─────────────────────────────────────────────────────────────────────────────────
@@ -420,13 +501,20 @@ final class DeclarationReader {
     /**
      * {@code d(x)/dt = …}, {@code x_next = …}, {@code x_start = …}, {@code current a -> b = …} (a current from pin a to
      * pin b through the part), {@code voltage a -> b = …} (a branch holding pin a at that voltage above pin b),
-     * {@code 0 = …}, {@code local name = …}.
+     * {@code 0 = …}, {@code let name = …} or {@code let name : current = …} ({@code local} is the same word).
      */
     Equation equation(Reading.Line line) {
         String head = line.value(0);
-        if (head.equals("local")) {
-            requireEquals(line, 2);
-            return new Equation(EquationForm.LOCAL, line.value(1), null, null, line.text(3));
+        if (head.equals("let") || head.equals("local")) {
+            if (!line.value(2).equals(":")) {
+                requireEquals(line, 2);
+                return new Equation(EquationForm.LOCAL, line.value(1), null, null, line.text(3));
+            }
+            String typeName = line.value(3);
+            ValueType type = resolveType(typeName).orElseThrow(() -> line.refusal(3, "'" + typeName
+                    + "' is not a type here. Known types: " + String.join(", ", knownTypeNames())));
+            requireEquals(line, 4);
+            return new Equation(EquationForm.LOCAL, line.value(1), null, null, line.text(5), type);
         }
         if (head.equals("d") && line.value(1).equals("(") && line.value(3).equals(")") && line.value(4).equals("/")) {
             if (!line.value(5).equals("dt")) {
@@ -461,7 +549,7 @@ final class DeclarationReader {
             }
         }
         throw line.refusal("an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, "
-                + "voltage a -> b = …, 0 = … or local name = …");
+                + "voltage a -> b = …, 0 = … or let name [: type] = …");
     }
 
     private static void requireEquals(Reading.Line line, int at) {

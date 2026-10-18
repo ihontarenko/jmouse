@@ -99,8 +99,8 @@ org.jmouse.parallax.verification
 
 org.jmouse.parallax.circuit  the netlist engine behind `component` and `circuit` documents
 ├── ComponentDocuments          a component / family jMX document → ComponentModel (meta, parameters in SI, pins, equations, measure, display, leads)
-├── ModelEquations              a model's equations compiled per unit: pin names as voltages, d(q)/dt, current(pin), the exact Jacobian
-├── PartExpression              one expression over a part (measure, display): pin voltages, current(pin), states, parameters, power, time
+├── ModelEquations              a model's equations compiled per unit: pin names as voltages, d(q)/dt, pin.current, the exact Jacobian
+├── PartExpression              one expression over a part (measure, display): pin voltages, pin.current, states, parameters, power, time
 └── ComponentCheck              a ConsistencyCheck (COMPONENT_DATASHEET), not a representation: every `expect` built on its bench, simulated, measured, PASS / FAIL
 
 org.jmouse.parallax.object.ComponentHierarchy
@@ -399,14 +399,14 @@ component "Ammeter" as ammeter type meter {
     }
     equations {
         # Ideal it is a short: the current passes and nothing drops. On a realistic bench it is its shunt.
-        voltage in -> out = realistic * R_shunt * current(in)
+        voltage in -> out = realistic * R_shunt * in.current
     }
     leads {
         in green stripes white
         out blue stripes white
     }
     measure {
-        reading = current(in) unit A signal
+        reading = in.current unit A signal
     }
     symbol uses ammeter-symbol {
         a in
@@ -454,10 +454,10 @@ for all units, or one per unit declared by `units A, B`. **`nodes`** — interna
   name.
 - **`d(q)/dt` is the rate of a charge** and may stand inside a current: `I_diode + d(C_junction * V1)/dt`. Not inside a
   `local`, and a charge may not hold another `d(…)/dt`.
-- **`current(pin)` is the current into a pin**: the branch current of every `voltage` equation on that pin, plus the
+- **`pin.current` is the current into a pin**: the branch current of every `voltage` equation on that pin, plus the
   right side of every `current` equation on it, written out (`current a -> b` enters at `a`). A `current` equation
   inlined so may not itself read `current(…)` — that is refused with both lines named. So the ammeter's
-  `voltage in -> out = realistic * R_shunt * current(in)` is an exact short on an ideal bench and its shunt on a
+  `voltage in -> out = realistic * R_shunt * in.current` is an exact short on an ideal bench and its shunt on a
   realistic one.
 - **`temperature`** is the bench's, in kelvin (25 °C unless the bench says otherwise). Write a drift against
   `T_nominal`, the parameter naming the temperature the datasheet figures were measured at:
@@ -492,17 +492,17 @@ behaviour {
 **`parts`** — a component may be a subcircuit: its internal parts in the same netlist notation as a circuit (below),
 wired to its pins and nodes. It is flattened for the solver (`ComponentHierarchy.expand`), and a part made of several
 parts still reports by its own pins: the current into each pin is the sum of what enters its inner parts' terminals on
-that pin's net (`ComponentHierarchy.Assembly.pinCurrents`), so `current(pin)`, readings and the drawn currents see it
+that pin's net (`ComponentHierarchy.Assembly.pinCurrents`), so `pin.current`, readings and the drawn currents see it
 as one part.
 
 **`measure`** — makes the component an instrument. `name = expression unit U [signal]`; the expression reads what an
-equation reads — pin voltages, `current(pin)`, states, parameters — plus `power` and `time`. `signal` marks a signal
+equation reads — pin voltages, `pin.current`, states, parameters — plus `power` and `time`. `signal` marks a signal
 the bench can show as DC, AC or RMS; without it the figure is shown as it is (a frequency, a duty cycle). The engine
 knows no instrument; each is its document:
 
 ```jmx
 measure { reading = plus - minus unit V signal }               # voltmeter
-measure { reading = (plus - minus) * current(in) unit W signal } # wattmeter
+measure { reading = (plus - minus) * in.current unit W signal } # wattmeter
 measure { reading = frequency unit Hz }                         # frequency meter: a state its behaviour keeps
 ```
 

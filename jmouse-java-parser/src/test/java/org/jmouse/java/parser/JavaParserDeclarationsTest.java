@@ -55,10 +55,10 @@ class JavaParserDeclarationsTest {
 
         assertEquals("org.example.deep", file.packageName());
         assertEquals(List.of(
-                new ImportDeclaration("java.util.List", false, false, file.imports().get(0).span()),
-                new ImportDeclaration("java.util", false, true, file.imports().get(1).span()),
-                new ImportDeclaration("java.util.Objects.requireNonNull", true, false, file.imports().get(2).span()),
-                new ImportDeclaration("java.util.Map", true, true, file.imports().get(3).span())), file.imports());
+                new ImportDeclaration("java.util.List", false, false, file.imports().get(0).nameSpan(), file.imports().get(0).span()),
+                new ImportDeclaration("java.util", false, true, file.imports().get(1).nameSpan(), file.imports().get(1).span()),
+                new ImportDeclaration("java.util.Objects.requireNonNull", true, false, file.imports().get(2).nameSpan(), file.imports().get(2).span()),
+                new ImportDeclaration("java.util.Map", true, true, file.imports().get(3).nameSpan(), file.imports().get(3).span())), file.imports());
         assertEquals(3, file.imports().getFirst().span().startLine());
         assertEquals("org.example.deep.Holder", file.types().getFirst().symbolId().value());
     }

@@ -63,23 +63,26 @@ component "Junction FET" as junction-field-effect-transistor type jfet {
         heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
     }
 
+    # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
+    type transconductance_coefficient = current / voltage ^ 2
+
     equations {
-        local T_junction = temperature + heating
-        local V_gs = polarity * (gate - si)
-        local V_gd = polarity * (gate - di)
-        local V_ds = polarity * (di - si)
+        let T_junction : temperature = temperature + heating
+        let V_gs : voltage = polarity * (gate - si)
+        let V_gd : voltage = polarity * (gate - di)
+        let V_ds : voltage = polarity * (di - si)
 
         # The channel is symmetric: with VDS reversed the drain acts as the source.
-        local V_control = if(V_ds >= 0, V_gs, V_gd)
-        local V_across = abs(V_ds)
-        local beta = transconductance * (1 + tolerance_corner * transconductance_spread) / (T_junction / T_nominal) ^ 1.5
-        local overdrive = V_control - (V_threshold - tolerance_corner * V_threshold_spread + threshold_temperature_coefficient * (T_junction - T_nominal))
-        local square_law = if(V_across < overdrive, beta * V_across * (2 * overdrive - V_across), beta * overdrive ^ 2)
-        local channel = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
+        let V_control : voltage = if(V_ds >= 0, V_gs, V_gd)
+        let V_across : voltage = abs(V_ds)
+        let beta : transconductance_coefficient = transconductance * (1 + tolerance_corner * transconductance_spread) / (T_junction / T_nominal) ^ 1.5
+        let overdrive : voltage = V_control - (V_threshold - tolerance_corner * V_threshold_spread + threshold_temperature_coefficient * (T_junction - T_nominal))
+        let square_law : current = if(V_across < overdrive, beta * V_across * (2 * overdrive - V_across), beta * overdrive ^ 2)
+        let channel : current = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
 
-        local I_saturation_now = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
-        local Q_gate_source = depletion_charge(V_gs, C_gate_source, V_junction, 0.5, forward_bias_coefficient)
-        local Q_gate_drain = depletion_charge(V_gd, C_gate_drain, V_junction, 0.5, forward_bias_coefficient)
+        let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
+        let Q_gate_source : charge = depletion_charge(V_gs, C_gate_source, V_junction, 0.5, forward_bias_coefficient)
+        let Q_gate_drain : charge = depletion_charge(V_gd, C_gate_drain, V_junction, 0.5, forward_bias_coefficient)
 
         current drain -> di = (drain - di) / R_drain
         current si -> source = (si - source) / R_source

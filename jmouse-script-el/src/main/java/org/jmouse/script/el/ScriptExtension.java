@@ -1,7 +1,9 @@
 package org.jmouse.script.el;
 
 import org.jmouse.core.access.AttributeResolver;
+import org.jmouse.el.extension.CoreExtension;
 import org.jmouse.el.extension.Extension;
+import org.jmouse.el.type.ValueType;
 import org.jmouse.el.extension.Filter;
 import org.jmouse.el.extension.Function;
 import org.jmouse.el.extension.Operator;
@@ -43,7 +45,7 @@ import java.util.stream.Collectors;
  *
  * <ul>
  *   <li><strong>Statements</strong> are the core's ({@link StatementExtension}): {@code include}, {@code function},
- *       {@code if}, {@code for}, {@code local}, {@code return}, assignment.</li>
+ *       {@code if}, {@code for}, {@code let}, {@code return}, assignment.</li>
  *   <li><strong>Expressions</strong> are jME's grammar — filters, tests, {@code ??}, ranges, {@code in}, map and
  *       list literals, and {@code @facade.method()}.</li>
  *   <li><strong>Mathematics</strong> is jMF's vocabulary: {@code ^} as a power and every mathematical function
@@ -56,7 +58,7 @@ import java.util.stream.Collectors;
  * <p>The vocabulary is closed: no reflection ({@code ClassFilter}, {@code ClassFunction},
  * {@code JavaReflectedFunction} would make the facade boundary decorative), no wall clock ({@code NowFunction}
  * answers differently on two machines; a host that wants time gives a clock facade), and no
- * {@code setVariable}/{@code getVariable} (the language has {@code local} and assignment).</p>
+ * {@code setVariable}/{@code getVariable} (the language has {@code let} and assignment).</p>
  *
  * <p>⚠️ The order of {@link #getParsers()} carries no meaning. Dispatch sorts by {@link ParserPriority} and the
  * core's {@code StatementPriority}, and those classes — not this list — say why each shape is offered first.</p>
@@ -93,6 +95,12 @@ public class ScriptExtension implements Extension {
      * jMF's mathematical functions — they replace jME's own sqrt, exp, min and max, which they include — and
      * {@code append}, how a script accumulates a list.
      */
+    /** The core's types — {@code int}, {@code double}, {@code string}… —; a host adds its domain's through its own extension. */
+    @Override
+    public List<ValueType> getTypes() {
+        return new CoreExtension().getTypes();
+    }
+
     @Override
     public List<Function> getFunctions() {
         List<Function> functions = new ArrayList<>(FormulaCoreExtension.mathematicalFunctions());

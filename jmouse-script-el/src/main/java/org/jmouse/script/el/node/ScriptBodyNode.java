@@ -17,14 +17,14 @@ import java.util.List;
  * function, a declared function, a loop. What separates them is their header; what they do with their
  * body is this one method.</p>
  *
- * <h2>⚠️ A body owns its {@code local} names</h2>
+ * <h2>⚠️ A body owns its {@code let} names</h2>
  *
- * <p>A body that declares a {@code local} runs inside a scope of its own, pushed on entry and popped on
+ * <p>A body that declares a {@code let} runs inside a scope of its own, pushed on entry and popped on
  * the way out — including on the way out through a {@code return}, which is why the pop sits in a
  * {@code finally}.</p>
  *
- * <p>Without it, {@code local} is a lie. Two handlers written for one event share an evaluation
- * context, so the first handler's {@code local weight} is still there when the second one runs: a
+ * <p>Without it, {@code let} is a lie. Two handlers written for one event share an evaluation
+ * context, so the first handler's {@code let weight} is still there when the second one runs: a
  * second handler that reads {@code weight} without declaring it gets the first one's value, silently,
  * and only sometimes — the failure appears when somebody adds a handler <em>above</em> it, months
  * later, and nothing anywhere points at the cause. A loop variable named after something the host put
@@ -36,7 +36,7 @@ import java.util.List;
  * needs one is a property of its text, so it is decided once, on first evaluation, and remembered — a
  * handler that only calls facades never allocates.</p>
  *
- * <p>The scan looks through {@code if} branches, because a branch is not a scope here: a {@code local}
+ * <p>The scan looks through {@code if} branches, because a branch is not a scope here: a {@code let}
  * written inside one belongs to the body that holds it. A nested body — a loop, a declared function —
  * is <strong>not</strong> scanned, because it pushes its own.</p>
  *
@@ -128,16 +128,16 @@ abstract public class ScriptBodyNode extends ExpressionsNode {
     protected abstract String describe();
 
     /**
-     * Whether any statement written directly in this body — branches included — binds a local name.
+     * Whether any statement written directly in this body — branches included — declares a name.
      *
      * @param statements the statements to scan
-     * @return {@code true} when at least one {@code local} belongs to this body
+     * @return {@code true} when at least one {@code let} or {@code const} belongs to this body
      */
     private static boolean declaresLocals(List<Expression> statements) {
         for (int index = 0; index < statements.size(); index++) {
             Expression statement = statements.get(index);
 
-            if (statement instanceof LocalNode) {
+            if (statement instanceof DeclarationNode) {
                 return true;
             }
 

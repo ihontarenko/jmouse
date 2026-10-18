@@ -10,7 +10,7 @@ component "1N4148" as 1n4148 type diode {
         category circuits
         failure short
     }
-    family diode
+    extends diode
 
     parameters {
         I_saturation = 2.52 nA                "saturation current"

@@ -33,20 +33,41 @@ public final class FormulaLanguage {
     private static final FormulaLanguage STANDARD = new FormulaLanguage();
     private static final int MAXIMUM_LENGTH = 16000;
 
-    private final ExpressionLanguage language;
-    private final Set<String>        hostCalls;
+    private final ExpressionLanguage  language;
+    private final Set<String>         hostCalls;
+    private final Map<String, String> rates;
 
     public FormulaLanguage() {
         FormulaExtensionContainer extensions = new FormulaExtensionContainer();
         DefaultParserContext context = new DefaultParserContext(extensions);
         this.language = new ExpressionLanguage(extensions, new FormulaLexer(), context, ExpressionParser.class);
         this.hostCalls = Set.of();
+        this.rates = Map.of();
     }
 
-    private FormulaLanguage(ExpressionLanguage language, Set<String> hostCalls) {
+    private FormulaLanguage(ExpressionLanguage language, Set<String> hostCalls, Map<String, String> rates) {
         this.language = language;
         this.hostCalls = Set.copyOf(hostCalls);
+        this.rates = Map.copyOf(rates);
     }
+
+    /**
+     * The same language, reading {@code d(f)/d<variable>} — Leibniz's notation, recognised in the tree, never in the
+     * text — as the {@link Formula.HostCall} {@code hostCall} over {@code f}: a rate its host integrates rather than a
+     * derivative taken here, such as a circuit's {@code d(q)/dt}. With it declared, a {@code d(…)} that is not over
+     * {@code d<variable>}, and a {@code d<variable>} that is not under a {@code d(…)}, are refused naming the notation.
+     *
+     * @param variable the variable the rate is over: {@code t} for {@code d(q)/dt}
+     * @param hostCall the name the host binds the rate by; it need not be one a document can write
+     */
+    public FormulaLanguage withRate(String variable, String hostCall) {
+        Map<String, String> declared = new LinkedHashMap<>(rates);
+        declared.put(RATE_OPERATOR + variable, hostCall);
+        return new FormulaLanguage(language, hostCalls, declared);
+    }
+
+    /** The {@code d} of {@code d(f)/dt}, both above and in front of the variable below. */
+    public static final String RATE_OPERATOR = "d";
 
     /**
      * The same language, reading a call of any of {@code names} as a {@link Formula.HostCall} its host binds — a
@@ -56,7 +77,7 @@ public final class FormulaLanguage {
     public FormulaLanguage withHostCalls(String... names) {
         Set<String> declared = new LinkedHashSet<>(hostCalls);
         declared.addAll(List.of(names));
-        return new FormulaLanguage(language, declared);
+        return new FormulaLanguage(language, declared, rates);
     }
 
     public static FormulaLanguage standard() {
@@ -187,7 +208,7 @@ public final class FormulaLanguage {
         } catch (RuntimeException exception) {
             throw new FormulaException("The formula does not parse: " + exception.getMessage(), source, -1);
         }
-        return new FormulaTranslator(Map.copyOf(definitions), hostCalls, source).translate(parsed);
+        return new FormulaTranslator(Map.copyOf(definitions), hostCalls, rates, source).translate(parsed);
     }
 
     /**

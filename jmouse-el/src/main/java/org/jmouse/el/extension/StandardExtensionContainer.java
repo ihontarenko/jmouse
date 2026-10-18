@@ -8,6 +8,8 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContainer;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.TagParserContainer;
+import org.jmouse.el.type.TypeContainer;
+import org.jmouse.el.type.ValueType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
     private final ObjectContainer<String, Test>                    tests;
     private final ObjectContainer<String, Function>                functions;
     private final ObjectContainer<String, Filter>                  filters;
+    private final ObjectContainer<String, ValueType>               types;
     private final List<AttributeResolver>                          attributeResolvers;
 
     /**
@@ -43,6 +46,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
         functions = new FunctionContainer();
         filters = new FilterContainer();
         operators = new OperatorContainer();
+        types = new TypeContainer();
     }
 
     @Override
@@ -194,6 +198,21 @@ public class StandardExtensionContainer implements ExtensionContainer {
     @Override
     public void addFilter(Filter filter) {
         filters.register(filter);
+    }
+
+    @Override
+    public ValueType getType(String name) {
+        return types.get(name);
+    }
+
+    @Override
+    public List<ValueType> getTypes() {
+        return types.values();
+    }
+
+    @Override
+    public void addType(ValueType type) {
+        types.register(type);
     }
 
 }

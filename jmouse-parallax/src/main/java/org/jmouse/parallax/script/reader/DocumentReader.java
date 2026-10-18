@@ -81,6 +81,7 @@ public final class DocumentReader {
         }
         Token head = reading.cursor.next();
         Kind kind = Kind.ofKeyword(head.value()).orElseThrow();
+        declarations.forgetTypes();
         String title = reading.literal(reading.cursor.next());
         Reading.Line rest = reading.line();
         String slug = ExperienceDocument.slugOf(title);
@@ -147,6 +148,7 @@ public final class DocumentReader {
                 case "extends" -> body.base = Optional.of(word(keyword, "extends"));
                 case "units" -> body.units = names(keyword, "units");
                 case "use" -> body.uses.addAll(names(keyword, "use"));
+                case "type" -> declarations.type(reading.line());
                 default -> {
                     if (!kind.allows(name)) {
                         throw reading.refusal(keyword, "'" + name + "' is not a block of a " + kind.keyword()

@@ -42,16 +42,24 @@ public final class FormulaTranslator {
 
     private final Map<String, Formula.Definition> definitions;
     private final Set<String> hostCalls;
+    /** {@code dt} → the host call {@code d(f)/dt} is read as; see {@link FormulaLanguage#withRate}. */
+    private final Map<String, String> rates;
     private final String source;
 
     public FormulaTranslator(Map<String, Formula.Definition> definitions, String source) {
-        this(definitions, Set.of(), source);
+        this(definitions, Set.of(), Map.of(), source);
     }
 
-    /** @param hostCalls names read as {@link Formula.HostCall}s, which the formula's host binds */
-    public FormulaTranslator(Map<String, Formula.Definition> definitions, Set<String> hostCalls, String source) {
+    /**
+     * @param hostCalls names read as {@link Formula.HostCall}s, which the formula's host binds
+     * @param rates     each {@code d<variable>} a rate is written over, with the host call {@code d(f)/d<variable>}
+     *                  is read as
+     */
+    public FormulaTranslator(Map<String, Formula.Definition> definitions, Set<String> hostCalls,
+                             Map<String, String> rates, String source) {
         this.definitions = definitions;
         this.hostCalls = Set.copyOf(hostCalls);
+        this.rates = Map.copyOf(rates);
         this.source = source;
     }
 
@@ -77,6 +85,10 @@ public final class FormulaTranslator {
     }
 
     private Formula binary(BinaryOperation binary) {
+        Formula rate = rate(binary);
+        if (rate != null) {
+            return rate;
+        }
         Formula left = translate(binary.getLeft());
         Formula right = translate(binary.getRight());
         Operator operator = binary.getOperator();
@@ -116,6 +128,23 @@ public final class FormulaTranslator {
         throw refusal("'" + operator.getSpelling() + "' is not an operator of formulas.", null);
     }
 
+    /**
+     * {@code anode.current}: a word and a member its host declared as a call — the same thing as {@code current(anode)},
+     * written the way a reader thinks of it, as something the word has. Any other path is refused: a formula names
+     * symbols, not properties.
+     */
+    private Formula member(String path) {
+        int dot = path.indexOf('.');
+        String owner = path.substring(0, dot);
+        String member = path.substring(dot + 1);
+        if (member.contains(".") || owner.isEmpty() || !hostCalls.contains(member)) {
+            throw refusal("'" + path + "' is a property path; a formula names symbols only"
+                    + (hostCalls.isEmpty() ? "." : ", and a word's members here are " + String.join(", ",
+                    hostCalls.stream().sorted().toList()) + "."), path);
+        }
+        return new Formula.HostCall(member, List.of(new Formula.Variable(owner)));
+    }
+
     private Formula literal(LiteralNode<?> literal) {
         if (literal.getValue() instanceof Number number) {
             return new Formula.Constant(number.doubleValue());
@@ -123,9 +152,54 @@ public final class FormulaTranslator {
         throw refusal("'" + literal.toSource() + "' is not a number.", null);
     }
 
+    /**
+     * {@code d(f)/dt}, when the language declared a rate over {@code t}: the division whose left is the call
+     * {@code d(f)} and whose right is the name {@code dt}, read as one node — the host call the rate is bound by. Null
+     * for any other division.
+     */
+    private Formula rate(BinaryOperation binary) {
+        if (rates.isEmpty() || !isDivision(binary.getOperator())
+                || !(binary.getRight() instanceof PropertyNode over) || !rates.containsKey(over.getPath())) {
+            return null;
+        }
+        return over(binary.getLeft(), over.getPath());
+    }
+
+    /**
+     * What stands over {@code dt}, with its rate read: {@code d(q)} itself, or a product or a negation ending in it.
+     * Division binds left to right, so {@code polarity * d(q)/dt} reaches here as {@code (polarity * d(q)) / dt} —
+     * the same quantity as {@code polarity · dq/dt}, and read as that. Null when no {@code d(…)} ends it.
+     */
+    private Formula over(Expression above, String variable) {
+        if (above instanceof FunctionNode written && FormulaLanguage.RATE_OPERATOR.equals(written.getName())
+                && !definitions.containsKey(written.getName())) {
+            List<Formula> arguments = arguments(written);
+            if (arguments.size() != 1) {
+                throw refusal("A rate is the change of one expression: d(q)/" + variable + ".", "d");
+            }
+            return new Formula.HostCall(rates.get(variable), arguments);
+        }
+        if (above instanceof NegationNode negation) {
+            Formula operand = over(negation.getOperand(), variable);
+            return operand == null ? null : new Formula.Negation(operand);
+        }
+        if (above instanceof BinaryOperation product && product.getOperator() == MathematicOperator.MULTIPLY) {
+            Formula last = over(product.getRight(), variable);
+            return last == null ? null : Formula.multiply(translate(product.getLeft()), last);
+        }
+        return null;
+    }
+
+    private static boolean isDivision(Operator operator) {
+        return operator == FormulaOperator.DIVIDE || operator == MathematicOperator.DIVIDE;
+    }
+
     private Formula name(String path) {
         if (path.contains(".")) {
-            throw refusal("'" + path + "' is a property path; a formula names symbols only.", path);
+            return member(path);
+        }
+        if (rates.containsKey(path)) {
+            throw refusal("'" + path + "' stands only under a rate: d(q)/" + path + ".", path);
         }
         if (path.equals("i")) {
             return new Formula.ImaginaryUnit();
@@ -144,6 +218,10 @@ public final class FormulaTranslator {
 
     private Formula function(FunctionNode function) {
         String name = function.getName();
+        if (FormulaLanguage.RATE_OPERATOR.equals(name) && !rates.isEmpty() && !definitions.containsKey(name)) {
+            throw refusal("A rate is written over its variable: d(q)/"
+                    + rates.keySet().iterator().next() + ", and d(…) stands nowhere else.", name);
+        }
         List<Formula> arguments = arguments(function);
         return switch (name) {
             case "if" -> conditional(arguments);

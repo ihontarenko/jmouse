@@ -10,7 +10,7 @@ component "2N2222A" as 2n2222 type bjt {
         category circuits
         failure open
     }
-    family npn-transistor
+    extends npn-transistor
 
     parameters {
         I_saturation = 14.34 fA               "IS: transport saturation current"

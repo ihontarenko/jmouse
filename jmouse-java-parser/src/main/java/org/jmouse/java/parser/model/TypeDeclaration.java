@@ -24,6 +24,7 @@ import org.jmouse.java.parser.source.SourceSpan;
  * @param members          fields, methods, constructors, initializers, enum constants and nested types, in source order
  * @param signature        the header as written, whitespace collapsed, up to the opening brace
  * @param signatureSpan    the exact header span
+ * @param nameSpan         the simple name where it is declared
  * @param bodySpan         from the opening brace to the closing brace inclusive
  * @param span             the whole declaration
  * @param javaDoc          the documentation comment, or {@code null}
@@ -32,7 +33,7 @@ public record TypeDeclaration(DeclarationKind kind, String name, String qualifie
                               Set<Modifier> modifiers, List<Annotation> annotations, List<TypeParameter> typeParameters,
                               List<String> extendedTypes, List<String> implementedTypes, List<String> permittedTypes,
                               List<RecordComponentDeclaration> recordComponents, List<Declaration> members,
-                              String signature, SourceSpan signatureSpan, SourceSpan bodySpan, SourceSpan span,
+                              String signature, SourceSpan signatureSpan, SourceSpan nameSpan, SourceSpan bodySpan, SourceSpan span,
                               JavaDoc javaDoc) implements Declaration {
 
     /**

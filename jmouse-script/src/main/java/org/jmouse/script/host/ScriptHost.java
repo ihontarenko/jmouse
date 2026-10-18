@@ -317,7 +317,7 @@ public final class ScriptHost {
                 }
             }
             default -> {
-                // A leaf — a local, an assignment, a return, a bare call. Its own span is already named.
+                // A leaf — a declaration, an assignment, a return, a bare call. Its own span is already named.
             }
         }
     }

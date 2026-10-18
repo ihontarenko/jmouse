@@ -9,7 +9,7 @@ component "NE555" as ne555 type timer {
         package "SOIC-8"
         category circuits
     }
-    formulas "smooth-transitions"
+    use smooth-transitions
 
     parameters {
         R_divider = 5 kOhm           "each of the three divider resistors"
@@ -60,8 +60,8 @@ component "NE555" as ne555 type timer {
 
         d(shown)/dt = (latched - shown) / switching_time
 
-        local target = GND + V_output_low + shown * ((Vcc - GND) - V_output_high_drop - V_output_low)
-        local drive = (target - output) / R_output
+        let target : voltage = GND + V_output_low + shown * ((Vcc - GND) - V_output_high_drop - V_output_low)
+        let drive : current = (target - output) / R_output
         current Vcc -> output = I_output_limit * tanh(soft_positive_part(drive, 0.0001) / I_output_limit)
         current output -> GND = I_output_limit * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_limit)
 
@@ -70,7 +70,9 @@ component "NE555" as ne555 type timer {
 
         current Vcc -> trigger = I_trigger
         current threshold -> GND = I_threshold
-        current Vcc -> GND = I_quiescent * tanh(Vcc - GND)
+        # Below about a volt of supply the quiescent current falls away; the knee is that volt.
+        let V_supply_knee : voltage = 1
+        current Vcc -> GND = I_quiescent * tanh((Vcc - GND) / V_supply_knee)
     }
 
     behaviour {

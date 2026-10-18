@@ -33,7 +33,7 @@ import java.util.function.Function;
  * Reads and runs jMS programs — documents of top-level statements that return a value, with no event handlers.
  *
  * <pre>
- * local total = 0
+ * let total = 0
  * for n in 1..k do
  *   total = total + 1 / n^2
  * end

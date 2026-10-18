@@ -17,10 +17,13 @@ import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
 import org.jmouse.el.parser.*;
 import org.jmouse.el.parser.sub.*;
+import org.jmouse.el.type.CarrierType;
+import org.jmouse.el.type.ValueType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A standard implementation of the {@link Extension} interface.
@@ -42,6 +45,26 @@ public class CoreExtension implements Extension {
                 new JavaBeanAttributeResolver(),
                 new MapAttributeResolver(),
                 new ListAttributeResolver()
+        );
+    }
+
+    /**
+     * The core's types, each the Java class its values are carried as: {@code any} takes whatever is given.
+     *
+     * @return the core {@link ValueType}s
+     */
+    @Override
+    public List<ValueType> getTypes() {
+        return List.of(
+                new CarrierType("any", Object.class),
+                new CarrierType("boolean", Boolean.class),
+                new CarrierType("int", Integer.class),
+                new CarrierType("long", Long.class),
+                new CarrierType("double", Double.class),
+                new CarrierType("number", Number.class),
+                new CarrierType("string", String.class),
+                new CarrierType("list", List.class),
+                new CarrierType("map", Map.class)
         );
     }
 

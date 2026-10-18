@@ -115,6 +115,8 @@ public final class LiveCircuitSolver {
     private final Map<String, String> failures;
     /** How warm each part is now, carried from one reading to the next — and to the solver that goes on from this one. */
     private final Map<String, Double> temperatures = new LinkedHashMap<>();
+    /** Each part's states at the last {@link #loads()}: what the figures its component displays read. */
+    private Map<String, Map<String, Double>> states = Map.of();
     /** The parts on the sheet simulated as the parts they are made of: what they report is theirs, added up. */
     private final List<ComponentHierarchy.Assembly> assemblies;
     private double warmedAt;
@@ -196,11 +198,20 @@ public final class LiveCircuitSolver {
      * How hard every part worked since this was last asked — its average power, its current now, the temperature it
      * would settle at —, by part. A part the cut split between two pieces (a supply both use) adds up.
      */
+    /** Each part's states as the last {@link #loads()} found them, by part and state name; a part without states is absent. */
+    public synchronized Map<String, Map<String, Double>> states() {
+        return states;
+    }
+
     public synchronized Map<String, PartLoad> loads() {
         Map<String, double[]> merged = new LinkedHashMap<>();
         Map<String, Map<String, Double>> terminals = new LinkedHashMap<>();
+        Map<String, Map<String, Double>> partStates = new LinkedHashMap<>();
         for (LiveIntegrator part : parts) {
             for (LiveIntegrator.PartReading reading : part.readParts()) {
+                if (!reading.states().isEmpty()) {
+                    partStates.computeIfAbsent(reading.part(), ignored -> new LinkedHashMap<>()).putAll(reading.states());
+                }
                 double[] sum = merged.computeIfAbsent(reading.part(), ignored -> new double[] {0, 0, Double.NaN});
                 sum[0] += reading.power();
                 sum[1] = Math.max(sum[1], reading.thermalResistance());
@@ -256,6 +267,7 @@ public final class LiveCircuitSolver {
             loads.put(name, new PartLoad(0, Map.of(), temperature, thermal == null ? Double.NaN : thermal.maximum(),
                     thermal == null ? Double.NaN : thermal.rating(), failure));
         });
+        states = Map.copyOf(partStates);
         return loads;
     }
 

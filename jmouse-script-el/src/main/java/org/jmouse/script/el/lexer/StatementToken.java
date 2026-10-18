@@ -32,7 +32,9 @@ public enum StatementToken implements Token.Type {
     T_THEN(12100, "then"),
     T_END(12200, "end"),
 
-    T_LOCAL(13000, "local"),
+    /** {@code let} — and {@code local}, its other spelling: one keyword, one meaning. */
+    T_LET(13000, "let", "local"),
+    T_CONST(13010, "const"),
     T_RETURN(13100, "return"),
     T_FOR(13200, "for");
 
@@ -80,7 +82,7 @@ public enum StatementToken implements Token.Type {
      *
      * <p>⚠️ <strong>A keyword is also an ordinary word.</strong> The lexer has no idea whether the {@code end} it
      * just read closes a body or is the name of a facade method, and a host is entitled to an event called
-     * {@code on} or a function called {@code local} — those are its nouns, not this language's. Reading a name
+     * {@code on} or a function called {@code let} — those are its nouns, not this language's. Reading a name
      * against this set rather than against {@link BasicToken#T_IDENTIFIER} is what keeps a grammar from dictating
      * a host's vocabulary. It costs no ambiguity, because a name is only ever read at a position where the
      * construction around it has already been identified.</p>

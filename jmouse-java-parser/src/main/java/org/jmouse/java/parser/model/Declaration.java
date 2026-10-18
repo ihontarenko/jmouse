@@ -81,6 +81,13 @@ public sealed interface Declaration
     SourceSpan signatureSpan();
 
     /**
+     * Returns where the declared name is written: the identifier a reader clicks to reach this declaration.
+     *
+     * @return the name's span; for an initializer, which has no name, its {@link #signatureSpan() signature span}
+     */
+    SourceSpan nameSpan();
+
+    /**
      * Returns the whole declaration, documentation comment excluded.
      *
      * @return the span

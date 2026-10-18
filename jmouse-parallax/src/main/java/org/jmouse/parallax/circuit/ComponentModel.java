@@ -1,5 +1,6 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.el.type.ValueType;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.script.el.node.ScriptNode;
 
@@ -24,7 +25,8 @@ import java.util.Optional;
 public record ComponentModel(String name, boolean family, String kind, Map<String, List<String>> header,
                              List<String> units, List<Parameter> parameters, List<Pin> pins, List<String> nodes, List<String> digitalNodes,
                              List<String> symbol, List<SubcircuitLine> subcircuit, List<String> formulas, List<State> states,
-                             Map<String, String> locals, List<Equation> equations, ScriptNode behaviour,
+                             Map<String, String> locals, Map<String, ValueType> localTypes, List<Equation> equations,
+                             ScriptNode behaviour,
                              List<Expectation> expectations, Map<String, String> displays, Map<String, Measure> measures,
                              Map<String, LeadLook> leads, Map<String, String> displayUnits,
                              Map<String, String> displayCaptions) {
@@ -40,6 +42,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         subcircuit = List.copyOf(subcircuit);
         formulas = List.copyOf(formulas);
         states = List.copyOf(states);
+        // What a typed let says its value is: let I_through : current = …
+        localTypes = orderedCopy(localTypes);
         equations = List.copyOf(equations);
         expectations = List.copyOf(expectations);
         displays = orderedCopy(displays);
@@ -79,6 +83,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
                 behaves ? nodes : base.nodes, behaves ? digitalNodes : base.digitalNodes,
                 symbol.isEmpty() ? base.symbol : symbol, behaves ? subcircuit : base.subcircuit,
                 behaves ? formulas : base.formulas, behaves ? states : base.states, behaves ? locals : base.locals,
+                behaves ? localTypes : base.localTypes,
                 behaves ? equations : base.equations, behaves ? behaviour : base.behaviour, expectations,
                 displays.isEmpty() ? base.displays : displays, measures.isEmpty() ? base.measures : measures,
                 leads.isEmpty() ? base.leads : leads, displayUnits.isEmpty() ? base.displayUnits : displayUnits,
@@ -128,8 +133,13 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         return pins.stream().anyMatch(pin -> pin.nature() == PinNature.DIGITAL);
     }
 
-    /** {@code name = 2.52 nA [per unit] ["what it is"]}. */
-    public record Parameter(String name, double value, boolean perUnit, String description) {
+    /**
+     * {@code name = 2.52 nA [per unit] ["what it is"]}.
+     *
+     * @param unit the unit its value was written in — {@code nA}, {@code K/W} —; empty when it was written without one,
+     *             which says nothing about what it measures
+     */
+    public record Parameter(String name, double value, boolean perUnit, String description, String unit) {
     }
 
     /**

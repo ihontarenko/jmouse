@@ -94,39 +94,41 @@ component "Operational amplifier" as operational-amplifier type opamp {
     }
 
     equations {
-        local T_junction = temperature + heating
-        local V_offset_now = V_input_offset + tolerance_corner * V_offset_spread + V_offset_drift * (T_junction - T_nominal)
-        local I_bias_now = I_input_bias * 2 ^ ((T_junction - T_nominal) / bias_doubling)
-        local high = GND + V_output_low + soft_positive_part((Vcc - GND) - V_output_headroom - V_output_low, 0.02)
-        local low = GND + V_output_low
+        let T_junction : temperature = temperature + heating
+        # Below about a volt of supply the quiescent current falls away; the knee is that volt.
+        let V_supply_knee : voltage = 1
+        let V_offset_now : voltage = V_input_offset + tolerance_corner * V_offset_spread + V_offset_drift * (T_junction - T_nominal)
+        let I_bias_now : current = I_input_bias * 2 ^ ((T_junction - T_nominal) / bias_doubling)
+        let high : voltage = GND + V_output_low + soft_positive_part((Vcc - GND) - V_output_headroom - V_output_low, 0.02)
+        let low : voltage = GND + V_output_low
 
         # How far either input stands past the range: the input stage gives up as soon as one input leaves it, over about a
         # volt — not at once, since a sharper edge leaves Newton jumping across it. 0 inside, towards 1 a volt past.
-        local V_common = (non_inverting_input + inverting_input) / 2
-        local V_lowest = soft_minimum(non_inverting_input, inverting_input, 0.01)
-        local V_highest = 0 - soft_minimum(0 - non_inverting_input, 0 - inverting_input, 0.01)
-        local past_low = soft_positive_part(GND + V_common_mode_low - V_lowest, 0.1)
-        local past_high = soft_positive_part(V_highest - (Vcc - V_common_mode_high), 0.1)
-        local lost = (past_low + past_high) / sqrt(1 + (past_low + past_high) ^ 2)
-        local reversed = phase_reversal * past_low / sqrt(1 + past_low ^ 2)
+        let V_common : voltage = (non_inverting_input + inverting_input) / 2
+        let V_lowest : voltage = soft_minimum(non_inverting_input, inverting_input, 0.01)
+        let V_highest : voltage = 0 - soft_minimum(0 - non_inverting_input, 0 - inverting_input, 0.01)
+        let past_low : voltage = soft_positive_part(GND + V_common_mode_low - V_lowest, 0.1)
+        let past_high : voltage = soft_positive_part(V_highest - (Vcc - V_common_mode_high), 0.1)
+        let lost : ratio = (past_low + past_high) / sqrt(1 + (past_low + past_high) ^ 2)
+        let reversed : ratio = phase_reversal * past_low / sqrt(1 + past_low ^ 2)
 
-        local common_mode_error = (V_common - (Vcc + GND) / 2) / common_mode_rejection
-        local supply_error = ((Vcc - GND) - V_supply_nominal) / supply_rejection
-        local input = (non_inverting_input - inverting_input) + V_offset_now + (noise_input - GND) + common_mode_error + supply_error
-        local error = input * (1 - lost - reversed) - gain_stage_voltage / open_loop_gain
+        let common_mode_error : voltage = (V_common - (Vcc + GND) / 2) / common_mode_rejection
+        let supply_error : voltage = ((Vcc - GND) - V_supply_nominal) / supply_rejection
+        let input : voltage = (non_inverting_input - inverting_input) + V_offset_now + (noise_input - GND) + common_mode_error + supply_error
+        let error : voltage = input * (1 - lost - reversed) - gain_stage_voltage / open_loop_gain
 
         # A dominant pole at gain_bandwidth / open_loop_gain whose rate saturates at slew_rate: bandwidth and slew rate
         # from one equation. The saturation is algebraic, not tanh: far from the answer tanh is flat to the last digit
         # and leaves Newton nothing to stand on. The second term keeps the stage from winding up past the rails.
-        local slew_ratio = 2 * pi * gain_bandwidth * error / slew_rate
+        let slew_ratio : ratio = 2 * pi * gain_bandwidth * error / slew_rate
         d(gain_stage_voltage)/dt = slew_rate * slew_ratio / sqrt(1 + slew_ratio ^ 2) - recovery * (gain_stage_voltage - soft_clamp(gain_stage_voltage, low - 0.5, high + 0.5, 0.05))
 
         # The second pole as an RC the gain stage drives: with no pole its time is 0 and `delayed` is the stage itself.
-        local pole_time = if(second_pole > 0, 1 / (2 * pi * second_pole), 0)
-        local R_pole = 1000000
+        let pole_time : time = if(second_pole > 0, 1 / (2 * pi * second_pole), 0)
+        let R_pole : resistance = 1000000
         current delayed -> GND = (delayed - gain_stage_voltage) / R_pole + d(pole_time * (delayed - GND) / R_pole)/dt
-        local target = soft_clamp(delayed, low, high, 0.02)
-        local drive = (target - output) / R_output
+        let target : voltage = soft_clamp(delayed, low, high, 0.02)
+        let drive : current = (target - output) / R_output
 
         current Vcc -> output = I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source)
         current output -> GND = I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)
@@ -136,10 +138,11 @@ component "Operational amplifier" as operational-amplifier type opamp {
         current Vcc -> non_inverting_input = I_bias_now + I_input_offset / 2 + noise(I_noise ^ 2, noise_corner)
         current Vcc -> inverting_input = I_bias_now - I_input_offset / 2 + noise(I_noise ^ 2, noise_corner)
         # The input voltage noise: a noise current of V_noise² A²/Hz through one siemens is V_noise V/√Hz on noise_input.
-        current noise_input -> GND = (noise_input - GND) + noise(V_noise ^ 2, noise_corner)
-        current Vcc -> GND = I_quiescent * (1 + supply_current_coefficient * ((Vcc - GND) - V_supply_nominal)) * tanh(Vcc - GND)
+        let G_noise : conductance = 1
+        current noise_input -> GND = G_noise * (noise_input - GND) + noise(V_noise ^ 2, noise_corner)
+        current Vcc -> GND = I_quiescent * (1 + supply_current_coefficient * ((Vcc - GND) - V_supply_nominal)) * tanh((Vcc - GND) / V_supply_knee)
 
         # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
-        d(heating)/dt = (realistic * ((Vcc - GND) * I_quiescent * tanh(Vcc - GND) + (Vcc - output) * I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source) + (output - GND) * I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)) * thermal_resistance - heating) / thermal_time_constant
+        d(heating)/dt = (realistic * ((Vcc - GND) * I_quiescent * tanh((Vcc - GND) / V_supply_knee) + (Vcc - output) * I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source) + (output - GND) * I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)) * thermal_resistance - heating) / thermal_time_constant
     }
 }

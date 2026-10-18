@@ -9,6 +9,7 @@ import org.jmouse.java.parser.model.JavaSourceFile;
 import org.jmouse.java.parser.model.ModuleDeclaration;
 import org.jmouse.java.parser.model.PackageDeclaration;
 import org.jmouse.java.parser.model.TypeDeclaration;
+import org.jmouse.java.parser.model.TypeReference;
 import org.jmouse.java.parser.source.ParseProblem;
 import org.jmouse.java.parser.source.SourceSpan;
 
@@ -25,23 +26,35 @@ public final class CompilationUnitNode extends JavaNode {
     private final List<JavaComment>  comments;
     private final List<JavaDoc>      javaDocs;
     private final List<ParseProblem> problems;
+    private final List<TypeReference> typeReferences;
 
     /**
      * Creates the root.
      *
-     * @param sourceName the name the caller gave the text
-     * @param span       the whole text
-     * @param comments   every comment, in order
-     * @param javaDocs   every documentation comment outside opaque bodies, with its owner
-     * @param problems   every problem, in order
+     * @param sourceName     the name the caller gave the text
+     * @param span           the whole text
+     * @param comments       every comment, in order
+     * @param javaDocs       every documentation comment outside opaque bodies, with its owner
+     * @param problems       every problem, in order
+     * @param typeReferences every type name written in a declaration header, in order
      */
     public CompilationUnitNode(String sourceName, SourceSpan span, List<JavaComment> comments, List<JavaDoc> javaDocs,
-                               List<ParseProblem> problems) {
+                               List<ParseProblem> problems, List<TypeReference> typeReferences) {
         super(span);
         this.sourceName = sourceName;
         this.comments = List.copyOf(comments);
         this.javaDocs = List.copyOf(javaDocs);
         this.problems = List.copyOf(problems);
+        this.typeReferences = List.copyOf(typeReferences);
+    }
+
+    /**
+     * Returns every type name written in a declaration header, in source order.
+     *
+     * @return the references, unresolved
+     */
+    public List<TypeReference> typeReferences() {
+        return typeReferences;
     }
 
     /**
@@ -82,7 +95,8 @@ public final class CompilationUnitNode extends JavaNode {
                 }
             }
         }
-        return new JavaSourceFile(sourceName, packageDeclaration, moduleDeclaration, imports, types, comments, javaDocs, problems);
+        return new JavaSourceFile(sourceName, packageDeclaration, moduleDeclaration, imports, types, comments, javaDocs, problems,
+                typeReferences);
     }
 
     @Override

@@ -26,6 +26,16 @@ public record InitializerDeclaration(boolean isStatic, int ordinal, String quali
         return isStatic ? DeclarationKind.STATIC_INITIALIZER : DeclarationKind.INITIALIZER;
     }
 
+    /**
+     * Returns the signature span: an initializer has no name to point at.
+     *
+     * @return the {@code static} keyword, or an empty span at the opening brace
+     */
+    @Override
+    public SourceSpan nameSpan() {
+        return signatureSpan;
+    }
+
     @Override
     public String name() {
         return isStatic ? "<static-initializer>" : "<initializer>";

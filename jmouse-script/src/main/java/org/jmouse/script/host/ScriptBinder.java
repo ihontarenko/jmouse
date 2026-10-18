@@ -239,7 +239,11 @@ public final class ScriptBinder {
         switch (statement) {
             case ScriptBodyNode body -> auditBody(body, audit);
             case IfNode branch -> auditBranches(branch, audit, at);
-            case LocalNode local -> audit.audit(local.getValue(), at);
+            case DeclarationNode declaration -> {
+                if (declaration.getValue() != null) {
+                    audit.audit(declaration.getValue(), at);
+                }
+            }
             case AssignmentNode assignment -> audit.audit(assignment.getValue(), at);
             case ReturnNode returned -> audit.audit(returned.getValue(), at);
             default -> {
@@ -269,7 +273,7 @@ public final class ScriptBinder {
      * Refuses a statement that computes something and does nothing with it.
      *
      * <p>⚠️ <strong>A statement in this language is a call, or it is a mistake.</strong> Everything
-     * else a body may hold — {@code if}, {@code for}, {@code local}, {@code return}, an assignment, a
+     * else a body may hold — {@code if}, {@code for}, {@code let}, {@code return}, an assignment, a
      * nested declaration — is handled by the switch above, so what reaches here is a bare expression:
      * {@code entry.weight} on a line of its own, {@code @player:$id}, a leftover {@code 5}. Every one of
      * them parses, evaluates, throws the answer away and reports nothing.</p>
@@ -290,7 +294,7 @@ public final class ScriptBinder {
         if (!call && !isStep(statement)) {
             throw new ScriptBindException(at, ("'%s' computes a value and does nothing with it; a "
                     + "statement is a call, an assignment, a step such as counter++, or one of "
-                    + "if / for / local / return").formatted(statement.toSource()));
+                    + "if / for / let / const / return").formatted(statement.toSource()));
         }
     }
 

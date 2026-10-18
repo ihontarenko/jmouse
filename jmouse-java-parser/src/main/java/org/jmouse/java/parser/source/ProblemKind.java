@@ -5,6 +5,9 @@ package org.jmouse.java.parser.source;
  */
 public enum ProblemKind {
 
+    /** Valid or incomplete syntax outside the optional body reader's supported grammar. */
+    UNSUPPORTED_SYNTAX,
+
     /** A block or documentation comment reaches the end of the text without its closing delimiter. */
     UNTERMINATED_COMMENT,
 

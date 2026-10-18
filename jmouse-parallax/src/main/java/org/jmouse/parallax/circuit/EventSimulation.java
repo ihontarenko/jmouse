@@ -659,9 +659,8 @@ final class EventSimulation {
          * lays them —; a digital pin's name is its level, as the behaviour writes it, so a discrete state keeps its name.
          */
         private RealFunction compile(String expression) {
-            FormulaLanguage language = ModelEquations.LANGUAGE;
-            String readable = ModelEquations.readable(model.model().name(), expression, 0);
-            Formula parsed = language.parse(readable, language.definitions(ModelEquations.libraryText(model.model())));
+            Formula parsed = ModelEquations.read(model.model().name(), expression, 0,
+                    ModelEquations.LANGUAGE.definitions(ModelEquations.libraryText(model.model())));
             List<String> nodes = new ArrayList<>(model.pins().keySet());
             nodes.addAll(model.internalNodes().keySet());
             Formula bound = Substitution.bindHostNames(Substitution.replaceHostCalls(parsed, call -> {

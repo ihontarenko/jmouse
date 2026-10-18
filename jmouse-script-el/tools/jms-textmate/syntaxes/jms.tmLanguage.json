@@ -129,13 +129,23 @@
           "name": "punctuation.definition.parameters.begin.jms"
         }
       },
-      "end": "\\)",
+      "comment": "`function share(count : int, total : int) : double` — each parameter may carry a type, and the function its result's after the closing parenthesis.",
+      "end": "(\\))(?:\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?",
       "endCaptures": {
-        "0": {
+        "1": {
           "name": "punctuation.definition.parameters.end.jms"
+        },
+        "2": {
+          "name": "punctuation.separator.type.jms"
+        },
+        "3": {
+          "name": "entity.name.type.annotation.jms"
         }
       },
       "patterns": [
+        {
+          "include": "#type-annotation"
+        },
         {
           "match": "[A-Za-z_][A-Za-z0-9_]*",
           "name": "variable.parameter.jms"
@@ -158,6 +168,9 @@
           "include": "#function-block"
         },
         {
+          "include": "#declaration"
+        },
+        {
           "include": "#keyword"
         },
         {
@@ -165,10 +178,39 @@
         }
       ]
     },
+    "declaration": {
+      "comment": "`let count : int = 1`, `local` (the same word), `const limit = 10`; `state hits : int = 0` and `parameter limit = 10` only where they open a declaration — a name, then `:` or `=` — because a host hands its scripts a plain `state` (`when state == 'FAILED'`). The type gets a scope of its own — entity.name.type — so it stands apart from names and keywords in every theme.",
+      "match": "\\b(let|local|const|(?:state|parameter)(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*(?::|=(?!=))))\\b\\s+([A-Za-z_][A-Za-z0-9_]*)(?:\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?",
+      "captures": {
+        "1": {
+          "name": "storage.type.declaration.jms"
+        },
+        "2": {
+          "name": "variable.other.declaration.jms"
+        },
+        "3": {
+          "name": "punctuation.separator.type.jms"
+        },
+        "4": {
+          "name": "entity.name.type.annotation.jms"
+        }
+      }
+    },
+    "type-annotation": {
+      "match": "(:)\\s*([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": {
+          "name": "punctuation.separator.type.jms"
+        },
+        "2": {
+          "name": "entity.name.type.annotation.jms"
+        }
+      }
+    },
     "keyword": {
-      "comment": "Control words only. `and`, `or`, `not`, `is` and `in` are OPERATORS in this language and live in #operator-word — `not` in particular is the engine's second spelling of `!=` and the partner of `is`, never a prefix. Negation is `!`.",
+      "comment": "Control words only. `and`, `or`, `not`, `is` and `in` are OPERATORS in this language and live in #operator-word — `not` in particular is the engine's second spelling of `!=` and the partner of `is`, never a prefix. Negation is `!`. Declarations are #declaration.",
       "name": "keyword.control.jms",
-      "match": "\\b(if|then|elseif|else|end|do|for|local|return)\\b"
+      "match": "\\b(if|then|elseif|else|end|do|for|return)\\b"
     },
     "expression": {
       "patterns": [

@@ -6,6 +6,7 @@ import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
+import org.jmouse.el.type.ValueType;
 import org.jmouse.parallax.script.Quantity;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.circuit.ComponentModel.Criterion;
@@ -64,7 +65,10 @@ public final class ComponentDocuments {
      */
     public static ComponentModel model(ExperienceDocument document, ComponentLibrary library) {
         ComponentModel written = written(document, library);
-        return baseComponent(document, library).map(base -> written.memberOf(base, isModelled(document))).orElse(written);
+        ComponentModel model = baseComponent(document, library).map(base -> written.memberOf(base, isModelled(document)))
+                .orElse(written);
+        DimensionCheck.require(model);
+        return model;
     }
 
     /** The component this one extends, when it names one — the base whose physics it specializes. */
@@ -99,10 +103,16 @@ public final class ComponentDocuments {
                 .map(variable -> new State(variable.name(), initial(variable.initial().text(), document),
                         variable.discrete(), variable.description())).toList()).orElse(List.of());
         Map<String, String> locals = new LinkedHashMap<>();
+        Map<String, ValueType> localTypes = new LinkedHashMap<>();
         List<Equation> equations = new ArrayList<>();
         document.block(Block.Equations.class).ifPresent(block -> block.equations().forEach(equation -> {
             switch (equation.form()) {
-                case LOCAL -> locals.put(equation.subject(), equation.expression().text());
+                case LOCAL -> {
+                    locals.put(equation.subject(), equation.expression().text());
+                    if (equation.type() != null) {
+                        localTypes.put(equation.subject(), equation.type());
+                    }
+                }
                 case CURRENT, VOLTAGE -> equations.add(new Equation(equation.form() == Block.EquationForm.CURRENT
                         ? EquationKind.CURRENT : EquationKind.VOLTAGE, equation.positive(), equation.negative(), null,
                         equation.expression().text(), equation.expression().line()));
@@ -114,7 +124,7 @@ public final class ComponentDocuments {
         }));
         return new ComponentModel(document.title(), document.kind() == Kind.FAMILY, document.type().orElse(""),
                 header(document, library), units, parameters, pins, nodes, digitalNodes, symbol(document),
-                subcircuit(document, pins), formulas(document, library), states, locals, equations,
+                subcircuit(document, pins), formulas(document, library), states, locals, localTypes, equations,
                 document.block(Block.Behaviour.class).map(Block.Behaviour::script).orElse(null),
                 expectations(document, values), displays(document), measures(document), leads(document, pins),
                 document.block(Block.Display.class).map(Block.Display::units).orElse(Map.of()),
@@ -209,7 +219,7 @@ public final class ComponentDocuments {
                     .orElseGet(() -> evaluate(parameter.value().text(), known, document, parameter.value().line()));
             known.put(parameter.name(), value);
             parameters.add(new Parameter(parameter.name(), value, parameter.has(Block.ParameterFlag.PER_UNIT),
-                    parameter.description()));
+                    parameter.description(), parameter.quantity().map(Quantity::unit).orElse("")));
         }
         return parameters;
     }

@@ -90,6 +90,8 @@ public final class ExperienceReader {
     private static ParserContext context() {
         StandardExtensionContainer extensions = new StandardExtensionContainer();
         extensions.importExtension(new ScriptExtension());
+        // A behaviour's `let delay : time` names jMX's quantities, as an equation's `let` does.
+        extensions.importExtension(new ElectricalTypes());
         return new DefaultParserContext(extensions);
     }
 }

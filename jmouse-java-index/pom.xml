@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+    </parent>
+    <artifactId>jmouse-java-index</artifactId>
+    <version>1.0.1</version>
+    <name>jMouse - Java Index</name>
+    <description>Code intelligence over jmouse-java-parser results: what one file declares and which type names it
+        writes, the Java rules that decide what such a name denotes, and an in-memory index of a whole source tree
+        answering declaration, subtype, usage and name-search queries. Pure functions and in-memory state: no I/O, no
+        class loading, nothing executed.
+    </description>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>1.0.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-java-parser</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+    </dependencies>
+</project>

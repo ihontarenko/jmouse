@@ -1,6 +1,9 @@
 # A power inductor as it really is: a winding resistance (DCR) and a core that saturates. The flux it links is
-# L · I_saturation · tanh(I / I_saturation) — an inductance of L at small currents that falls away past the saturation
-# current, so the current of a converter that runs past it rises steeply and only the DCR still holds it.
+# L_air · I + (L − L_air) · I_saturation · tanh(I / I_saturation) — an inductance of L at small currents that falls,
+# past the saturation current, to the winding's own air-core inductance, so the current of a converter that runs past
+# it rises steeply and the DCR and that small L_air are what still hold it. The floor is physics, not a convenience:
+# without it the incremental inductance went to L · sech²(I / I_sat), 10⁻²² of L at 50 A, the equation stopped being
+# a differential one, and no step a solver could take settled the circuit.
 # Not represented: core losses, hysteresis, the winding's capacitance.
 
 component "Power inductor" as power-inductor type inductor {
@@ -15,6 +18,7 @@ component "Power inductor" as power-inductor type inductor {
     parameters {
         inductance = 100 uH                   "inductance at small currents"
         I_saturation = 2 A                    "ISAT: past it the core saturates and the inductance falls away"
+        saturated_inductance = 5 uH           "what is left once the core is saturated: the winding's air-core inductance. An approximation — a datasheet gives ISAT as a 30 % drop, not this floor"
         R_winding = 50 mOhm                   "DCR: the winding's resistance"
         copper_temperature_coefficient = 0.00393 "copper: the winding's resistance rises 0.393 % per kelvin"
         saturation_temperature_coefficient = -0.004 "a ferrite core saturates earlier when hot, about 0.4 % per kelvin"
@@ -44,14 +48,15 @@ component "Power inductor" as power-inductor type inductor {
     }
 
     equations {
-        local T_winding = temperature + heating
-        local R_winding_now = R_winding * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
-        local I_saturation_now = I_saturation * (1 + saturation_temperature_coefficient * (T_winding - T_nominal))
+        let T_winding : temperature = temperature + heating
+        let R_winding_now : resistance = R_winding * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
+        let I_saturation_now : current = I_saturation * (1 + saturation_temperature_coefficient * (T_winding - T_nominal))
         # The flux is a charge the equations differentiate, and a charge reads voltages, not currents: the current is
         # carried as a voltage on a node of its own.
-        local I_winding = winding_current - terminal_two
-        voltage winding_current -> terminal_two = current(terminal_one)
-        voltage terminal_one -> terminal_two = R_winding_now * current(terminal_one) + d(inductance * I_saturation_now * tanh(I_winding / I_saturation_now))/dt
+        let R_carrier : resistance = 1
+        let I_winding : current = (winding_current - terminal_two) / R_carrier
+        voltage winding_current -> terminal_two = R_carrier * terminal_one.current
+        voltage terminal_one -> terminal_two = R_winding_now * terminal_one.current + d(saturated_inductance * I_winding + (inductance - saturated_inductance) * I_saturation_now * tanh(I_winding / I_saturation_now))/dt
 
         # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
         d(heating)/dt = (realistic * (R_winding_now * I_winding ^ 2) * thermal_resistance - heating) / thermal_time_constant

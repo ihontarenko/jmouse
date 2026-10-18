@@ -7,7 +7,7 @@ import org.jmouse.script.el.lexer.StatementToken;
 
 /**
  * The keywords jMS adds on top of the statement core — the file-scope constructions and the handler. The
- * statement keywords ({@code include}, {@code do}, {@code then}, {@code end}, {@code local}, {@code return},
+ * statement keywords ({@code include}, {@code do}, {@code then}, {@code end}, {@code let}, {@code return},
  * {@code for}) are the core's {@link org.jmouse.script.el.lexer.StatementToken}.
  *
  * <p>Deliberately small. {@code if}, {@code elseif}, {@code else} and {@code function} are

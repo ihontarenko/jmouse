@@ -31,7 +31,7 @@ component "Bench power supply" as bench-supply type power-supply {
     }
 
     equations {
-        local wanted = (V_set - (positive - negative)) / R_output
+        let wanted : current = (V_set - (positive - negative)) / R_output
         current negative -> positive = soft_minimum(wanted, I_limit, 0.01 * I_limit)
     }
 

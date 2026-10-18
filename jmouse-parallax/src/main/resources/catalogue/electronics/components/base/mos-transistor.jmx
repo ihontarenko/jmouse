@@ -77,35 +77,38 @@ component "MOS transistor" as mos-transistor type mosfet {
 
     display {
         overvoltage = 100 * max(abs(drain - source) / V_drain_source_maximum, abs(gate - source) / V_gate_source_maximum) unit % "of VDS or VGS"
-        overcurrent = 100 * abs(current(drain)) / I_drain_maximum unit % "of its rated ID"
+        overcurrent = 100 * abs(drain.current) / I_drain_maximum unit % "of its rated ID"
     }
 
     state {
         heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
     }
 
+    # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
+    type transconductance_coefficient = current / voltage ^ 2
+
     equations {
-        local T_junction = temperature + heating
-        local warmth = T_junction / T_nominal
-        local V_gs = polarity * (gi - si)
-        local V_gd = polarity * (gi - di)
-        local V_ds = polarity * (di - si)
-        local V_bd = polarity * (source - di)
+        let T_junction : temperature = temperature + heating
+        let warmth : ratio = T_junction / T_nominal
+        let V_gs : voltage = polarity * (gi - si)
+        let V_gd : voltage = polarity * (gi - di)
+        let V_ds : voltage = polarity * (di - si)
+        let V_bd : voltage = polarity * (source - di)
 
         # The device is symmetric: with VDS reversed the drain acts as the source.
-        local V_control = if(V_ds >= 0, V_gs, V_gd)
-        local V_across = abs(V_ds)
-        local V_threshold_now = polarity * V_threshold + tolerance_corner * V_threshold_spread + V_threshold_coefficient * (T_junction - T_nominal)
-        local beta = transconductance * (1 + tolerance_corner * transconductance_spread) / warmth ^ 1.5
-        local overdrive = V_control - V_threshold_now
-        local square_law = if(V_across < overdrive, beta * (overdrive - V_across / 2) * V_across, beta / 2 * overdrive ^ 2)
-        local channel = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
+        let V_control : voltage = if(V_ds >= 0, V_gs, V_gd)
+        let V_across : voltage = abs(V_ds)
+        let V_threshold_now : voltage = polarity * V_threshold + tolerance_corner * V_threshold_spread + V_threshold_coefficient * (T_junction - T_nominal)
+        let beta : transconductance_coefficient = transconductance * (1 + tolerance_corner * transconductance_spread) / warmth ^ 1.5
+        let overdrive : voltage = V_control - V_threshold_now
+        let square_law : current = if(V_across < overdrive, beta * (overdrive - V_across / 2) * V_across, beta / 2 * overdrive ^ 2)
+        let channel : current = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
 
-        local I_saturation_now = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
-        local body = junction_current(V_bd, I_saturation_now, emission_coefficient, T_junction)
-        local Q_bulk_drain = depletion_charge(V_bd, C_bulk_drain, V_junction, grading_coefficient, forward_bias_coefficient) + body_transit_time * body
-        local avalanche = I_breakdown * limit_exponential((V_ds - V_breakdown) / thermal_voltage(T_junction))
-        local resistance_drift = warmth ^ resistance_temperature_exponent
+        let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
+        let body : current = junction_current(V_bd, I_saturation_now, emission_coefficient, T_junction)
+        let Q_bulk_drain : charge = depletion_charge(V_bd, C_bulk_drain, V_junction, grading_coefficient, forward_bias_coefficient) + body_transit_time * body
+        let avalanche : current = I_breakdown * limit_exponential((V_ds - V_breakdown) / thermal_voltage(T_junction))
+        let resistance_drift : ratio = warmth ^ resistance_temperature_exponent
 
         current drain -> di = (drain - di) / (R_drain * resistance_drift)
         current si -> source = (si - source) / (R_source * resistance_drift)

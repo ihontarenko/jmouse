@@ -128,7 +128,10 @@ public class ComponentModels {
                     .flatMap(model -> sourceAt(model, revision));
         }
         String text = source.orElseThrow(() -> ParallaxProblem.notFound("The component model"));
-        ComponentModel model = ComponentDocuments.read(text, reference, sharedDocuments);
+        // Read as the editor reads it, components included: a part that `extends diode` takes its displays, pins and
+        // parameters from the diode, and through the shared documents alone the base was not found and silently left
+        // out — the 1N4148 reached the sheet without its "overvoltage … of VRRM".
+        ComponentModel model = ComponentDocuments.read(text, reference, forEditing());
         ExperienceDocument document = ComponentSources.readComponent(text);
         List<String> variants = ComponentSources.symbolsOf(document);
         MathematicalObject symbol = variants.isEmpty() ? null : readableSymbol(variants.getFirst()).orElse(null);

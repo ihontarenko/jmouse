@@ -11,7 +11,7 @@ component "2N7000" as 2n7000 type mosfet {
         category circuits
         failure short
     }
-    family n-mosfet
+    extends n-mosfet
 
     parameters {
         V_threshold = 2.1 V                   "VTO: typical gate threshold at 1 mA"

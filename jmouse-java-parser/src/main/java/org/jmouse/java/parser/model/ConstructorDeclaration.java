@@ -18,6 +18,7 @@ import org.jmouse.java.parser.source.SourceSpan;
  * @param compact        whether this is a compact constructor
  * @param signature      the header, whitespace collapsed
  * @param signatureSpan  the exact header span
+ * @param nameSpan       the constructor name where it is declared
  * @param body           the opaque body from its opening to its closing brace
  * @param span           the whole declaration
  * @param javaDoc        the documentation comment, or {@code null}
@@ -25,7 +26,7 @@ import org.jmouse.java.parser.source.SourceSpan;
 public record ConstructorDeclaration(String name, String qualifiedName, SymbolId symbolId, Set<Modifier> modifiers,
                                      List<Annotation> annotations, List<TypeParameter> typeParameters,
                                      List<Parameter> parameters, List<String> thrownTypes, boolean compact,
-                                     String signature, SourceSpan signatureSpan, SourceSpan body, SourceSpan span,
+                                     String signature, SourceSpan signatureSpan, SourceSpan nameSpan, SourceSpan body, SourceSpan span,
                                      JavaDoc javaDoc) implements Declaration {
 
     /**

@@ -358,7 +358,7 @@ _Reads the current through it, put in the break of a wire_
 
 **Pins:** `in` (where the current enters), `out` (where it leaves)
 
-**Readings:** `reading = current(in) unit A signal`
+**Readings:** `reading = in.current unit A signal`
 
 #### Duty cycle meter — `duty-cycle-meter`
 
@@ -420,7 +420,7 @@ _Reads the power a load takes: its current through in and out, its voltage acros
 
 **Pins:** `in` (current in), `out` (current out), `plus` (voltage, red lead), `minus` (voltage, black lead)
 
-**Readings:** `reading = (plus - minus) * current(in) unit W signal`
+**Readings:** `reading = (plus - minus) * in.current unit W signal`
 
 ### `integrated/amplifiers/`
 

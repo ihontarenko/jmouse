@@ -14,12 +14,13 @@ import org.jmouse.java.parser.source.SourceSpan;
  * @param arguments     the exact text between the argument parentheses, or {@code null} when none are written
  * @param signature     the annotations, name and arguments as written, whitespace collapsed
  * @param signatureSpan the exact span of that text
+ * @param nameSpan      the constant's name where it is declared
  * @param body          the opaque class body, or {@code null}
  * @param span          the whole constant, without the separating comma
  * @param javaDoc       the documentation comment, or {@code null}
  */
 public record EnumConstantDeclaration(String name, String qualifiedName, SymbolId symbolId, List<Annotation> annotations,
-                                      String arguments, String signature, SourceSpan signatureSpan, SourceSpan body,
+                                      String arguments, String signature, SourceSpan signatureSpan, SourceSpan nameSpan, SourceSpan body,
                                       SourceSpan span, JavaDoc javaDoc) implements Declaration {
 
     /**

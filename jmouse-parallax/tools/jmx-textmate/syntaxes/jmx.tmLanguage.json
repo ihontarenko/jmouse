@@ -123,13 +123,23 @@
           "name": "punctuation.definition.parameters.begin.jmx"
         }
       },
-      "end": "\\)",
+      "comment": "`function share(count : int, total : int) : double` — each parameter may carry a type, and the function its result's after the closing parenthesis.",
+      "end": "(\\))(?:\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?",
       "endCaptures": {
-        "0": {
+        "1": {
           "name": "punctuation.definition.parameters.end.jmx"
+        },
+        "2": {
+          "name": "punctuation.separator.type.jmx"
+        },
+        "3": {
+          "name": "entity.name.type.annotation.jmx"
         }
       },
       "patterns": [
+        {
+          "include": "#type-annotation"
+        },
         {
           "match": "[A-Za-z_][A-Za-z0-9_]*",
           "name": "variable.parameter.jmx"
@@ -152,6 +162,9 @@
           "include": "#function-block"
         },
         {
+          "include": "#declaration"
+        },
+        {
           "include": "#keyword"
         },
         {
@@ -159,10 +172,39 @@
         }
       ]
     },
+    "declaration": {
+      "comment": "`let count : int = 1`, `local` (the same word), `const limit = 10`; `state hits : int = 0` and `parameter limit = 10` only where they open a declaration — a name, then `:` or `=` — because a host hands its scripts a plain `state` (`when state == 'FAILED'`). The type gets a scope of its own — entity.name.type — so it stands apart from names and keywords in every theme.",
+      "match": "\\b(let|local|const|(?:state|parameter)(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*(?::|=(?!=))))\\b\\s+([A-Za-z_][A-Za-z0-9_]*)(?:\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?",
+      "captures": {
+        "1": {
+          "name": "storage.type.declaration.jmx"
+        },
+        "2": {
+          "name": "variable.other.declaration.jmx"
+        },
+        "3": {
+          "name": "punctuation.separator.type.jmx"
+        },
+        "4": {
+          "name": "entity.name.type.annotation.jmx"
+        }
+      }
+    },
+    "type-annotation": {
+      "match": "(:)\\s*([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": {
+          "name": "punctuation.separator.type.jmx"
+        },
+        "2": {
+          "name": "entity.name.type.annotation.jmx"
+        }
+      }
+    },
     "keyword": {
-      "comment": "Control words only. `and`, `or`, `not`, `is` and `in` are OPERATORS in this language and live in #operator-word — `not` in particular is the engine's second spelling of `!=` and the partner of `is`, never a prefix. Negation is `!`.",
+      "comment": "Control words only. `and`, `or`, `not`, `is` and `in` are OPERATORS in this language and live in #operator-word — `not` in particular is the engine's second spelling of `!=` and the partner of `is`, never a prefix. Negation is `!`. Declarations are #declaration.",
       "name": "keyword.control.jmx",
-      "match": "\\b(if|then|elseif|else|end|do|for|local|return)\\b"
+      "match": "\\b(if|then|elseif|else|end|do|for|return)\\b"
     },
     "expression": {
       "patterns": [
@@ -454,6 +496,18 @@
           "include": "#equations-block"
         },
         {
+          "include": "#image-block"
+        },
+        {
+          "include": "#display-block"
+        },
+        {
+          "include": "#measure-block"
+        },
+        {
+          "include": "#leads-block"
+        },
+        {
           "include": "#pins-block"
         },
         {
@@ -538,6 +592,15 @@
           "include": "#items-line"
         },
         {
+          "include": "#instrument-line"
+        },
+        {
+          "include": "#collection-section"
+        },
+        {
+          "include": "#course-lesson"
+        },
+        {
           "include": "#course-step"
         },
         {
@@ -547,11 +610,11 @@
       ]
     },
     "header-line": {
-      "comment": "family ref, uses a, b and units A, B: top-level lines that change what the document computes.",
+      "comment": "Kind.DECLARATIONS — extends ref, use a, b and units A, B: top-level lines that change what the document computes.",
       "patterns": [
         {
           "name": "meta.line.header.jmx",
-          "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(family|uses)\\b",
+          "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(extends|use)\\b",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.header.jmx"
@@ -566,6 +629,37 @@
             {
               "match": "[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?",
               "name": "entity.name.type.reference.jmx"
+            }
+          ]
+        },
+        {
+          "comment": "type power_density = power / area: a quantity the document names; every word in it is a type.",
+          "name": "meta.line.type.jmx",
+          "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(type)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(=)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.header.jmx"
+            },
+            "2": {
+              "name": "entity.name.type.annotation.jmx"
+            },
+            "3": {
+              "name": "keyword.operator.assignment.jmx"
+            }
+          },
+          "end": "(?=[;#}]|$)",
+          "patterns": [
+            {
+              "match": "[*/^]",
+              "name": "keyword.operator.jmx"
+            },
+            {
+              "match": "\\b[0-9]+\\b",
+              "name": "constant.numeric.jmx"
+            },
+            {
+              "match": "[A-Za-z_][A-Za-z0-9_]*",
+              "name": "entity.name.type.annotation.jmx"
             }
           ]
         },
@@ -931,15 +1025,22 @@
           "include": "#comment"
         },
         {
-          "match": "(?:^|(?<=[;{]))[ \\t]*(local)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(=)(?!=)",
+          "comment": "let I_through : current = … — `local` is the same word; the type, when written, stands apart (entity.name.type).",
+          "match": "(?:^|(?<=[;{]))[ \\t]*(let|local)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?:[ \\t]*(:)[ \\t]*([A-Za-z_][A-Za-z0-9_]*))?[ \\t]*(=)(?!=)",
           "captures": {
             "1": {
-              "name": "storage.type.local.jmx"
+              "name": "storage.type.declaration.jmx"
             },
             "2": {
-              "name": "variable.other.local.jmx"
+              "name": "variable.other.declaration.jmx"
             },
             "3": {
+              "name": "punctuation.separator.type.jmx"
+            },
+            "4": {
+              "name": "entity.name.type.annotation.jmx"
+            },
+            "5": {
               "name": "keyword.operator.assignment.jmx"
             }
           }
@@ -1021,6 +1122,185 @@
         },
         {
           "include": "#circuit-function"
+        },
+        {
+          "include": "#formula"
+        }
+      ]
+    },
+    "display-block": {
+      "name": "meta.block.display.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(display)[ \\t]*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.block.display.jmx"
+        },
+        "2": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#text"
+        },
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(=)(?!=)",
+          "captures": {
+            "1": {
+              "name": "variable.other.figure.jmx"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.jmx"
+            }
+          }
+        },
+        {
+          "include": "#figure-unit"
+        },
+        {
+          "include": "#circuit-function"
+        },
+        {
+          "include": "#formula"
+        }
+      ]
+    },
+    "measure-block": {
+      "name": "meta.block.measure.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(measure)[ \\t]*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.block.measure.jmx"
+        },
+        "2": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#text"
+        },
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(=)(?!=)",
+          "captures": {
+            "1": {
+              "name": "variable.other.figure.jmx"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.jmx"
+            }
+          }
+        },
+        {
+          "include": "#figure-unit"
+        },
+        {
+          "include": "#circuit-function"
+        },
+        {
+          "match": "\\b(signal)\\b",
+          "name": "storage.modifier.figure.jmx"
+        },
+        {
+          "include": "#formula"
+        }
+      ]
+    },
+    "figure-unit": {
+      "comment": "display/measure: `unit %`, `unit V`, `unit A/V^2` after the expression.",
+      "match": "\\b(unit)[ \\t]+([^ \\t\"#;}]+)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.unit-marker.jmx"
+        },
+        "2": {
+          "name": "keyword.other.unit.jmx"
+        }
+      }
+    },
+    "leads-block": {
+      "name": "meta.block.leads.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(leads)[ \\t]*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.block.leads.jmx"
+        },
+        "2": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "comment": "plus red stripes black: a pin, its lead's colour, and its stripes'.",
+          "match": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)(?:[ \\t]+(stripes)[ \\t]+([A-Za-z_][A-Za-z0-9_]*))?",
+          "captures": {
+            "1": {
+              "name": "variable.other.pin.jmx"
+            },
+            "2": {
+              "name": "constant.other.colour.jmx"
+            },
+            "3": {
+              "name": "keyword.other.stripes.jmx"
+            },
+            "4": {
+              "name": "constant.other.colour.jmx"
+            }
+          }
+        }
+      ]
+    },
+    "image-block": {
+      "name": "meta.block.image.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(image)[ \\t]*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.block.image.jmx"
+        },
+        "2": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "match": "\\b(over|start|stop|hit|when|crosses|where|value|in)\\b",
+          "name": "keyword.other.image.jmx"
         },
         {
           "include": "#formula"
@@ -1289,7 +1569,8 @@
         },
         {
           "name": "meta.block.preset.jmx",
-          "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(preset)[ \\t]*(\"[^\"]*\"|'[^']*')[ \\t]*(\\{)",
+          "comment": "preset \"Title\" [\"what it shows\"] { name = value, … }",
+          "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(preset)[ \\t]*(\"[^\"]*\"|'[^']*')(?:[ \\t]*(\"[^\"]*\"|'[^']*'))?[ \\t]*(\\{)",
           "beginCaptures": {
             "1": {
               "name": "keyword.other.view.jmx"
@@ -1298,6 +1579,9 @@
               "name": "entity.name.section.preset.jmx"
             },
             "3": {
+              "name": "string.quoted.double.jmx"
+            },
+            "4": {
               "name": "punctuation.section.block.begin.jmx"
             }
           },
@@ -1504,18 +1788,81 @@
       ]
     },
     "symbol-uses": {
-      "match": "(?:^|(?<=[;{]))[ \\t]*\\b(symbol)[ \\t]+(uses)[ \\t]+([A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?)",
-      "captures": {
-        "1": {
-          "name": "keyword.control.block.symbol.jmx"
+      "comment": "symbol uses diode-symbol[, other] [{ a anode; b cathode }]: the symbols that draw the component, the first the default, and the port each pin lands on.",
+      "patterns": [
+        {
+          "name": "meta.block.symbol-uses.jmx",
+          "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(symbol)[ \\t]+(uses)[ \\t]+([A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?(?:[ \\t]*,[ \\t]*[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?)*)[ \\t]*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.block.symbol.jmx"
+            },
+            "2": {
+              "name": "keyword.other.uses.jmx"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "match": ",",
+                  "name": "punctuation.separator.comma.jmx"
+                },
+                {
+                  "match": "[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?",
+                  "name": "entity.name.type.reference.jmx"
+                }
+              ]
+            },
+            "4": {
+              "name": "punctuation.section.block.begin.jmx"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.jmx"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#comment"
+            },
+            {
+              "match": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)",
+              "captures": {
+                "1": {
+                  "name": "entity.name.tag.port.jmx"
+                },
+                "2": {
+                  "name": "variable.other.pin.jmx"
+                }
+              }
+            }
+          ]
         },
-        "2": {
-          "name": "keyword.other.uses.jmx"
-        },
-        "3": {
-          "name": "entity.name.type.reference.jmx"
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*\\b(symbol)[ \\t]+(uses)[ \\t]+([A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?(?:[ \\t]*,[ \\t]*[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?)*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.block.symbol.jmx"
+            },
+            "2": {
+              "name": "keyword.other.uses.jmx"
+            },
+            "3": {
+              "patterns": [
+                {
+                  "match": ",",
+                  "name": "punctuation.separator.comma.jmx"
+                },
+                {
+                  "match": "[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?",
+                  "name": "entity.name.type.reference.jmx"
+                }
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     "symbol-shape": {
       "comment": "symbol box { left d, clk edge; right q }: a shape or a glyph, its pins placed by side or by the glyph's ports.",
@@ -2460,6 +2807,111 @@
         }
       ]
     },
+    "instrument-line": {
+      "comment": "An instrument's objects, representations and the object it opens: objects geometric_construction, point_set.",
+      "name": "meta.line.instrument.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(objects|representations|opens)\\b",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.instrument.jmx"
+        }
+      },
+      "end": "(?=[;#}]|$)",
+      "patterns": [
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.jmx"
+        },
+        {
+          "match": "[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?",
+          "name": "entity.name.type.reference.jmx"
+        }
+      ]
+    },
+    "collection-section": {
+      "comment": "section \"Ordinary\" { items … }: a collection's section and its items.",
+      "name": "meta.block.section.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(section)[ \\t]*(\"[^\"]*\"|'[^']*')[ \\t]*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.block.section.jmx"
+        },
+        "2": {
+          "name": "entity.name.section.jmx"
+        },
+        "3": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#items-line"
+        },
+        {
+          "include": "#text"
+        }
+      ]
+    },
+    "course-lesson": {
+      "comment": "lesson \"Title\" [as slug] { summary …; minutes 10; object …; step \"…\" { … } }",
+      "name": "meta.block.lesson.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(lesson)[ \\t]*(\"[^\"]*\"|'[^']*')((?:[ \\t]+as[ \\t]+[A-Za-z0-9][A-Za-z0-9_-]*(?:@[0-9]+)?)?)[ \\t]*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.block.lesson.jmx"
+        },
+        "2": {
+          "name": "entity.name.section.lesson.jmx"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#document-identity"
+            }
+          ]
+        },
+        "4": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#course-step"
+        },
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "entity.other.attribute-name.field.jmx"
+            }
+          }
+        },
+        {
+          "include": "#text"
+        },
+        {
+          "include": "#formula"
+        }
+      ]
+    },
     "course-step": {
       "name": "meta.block.step.jmx",
       "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(step)[ \\t]*(\"[^\"]*\"|'[^']*')[ \\t]*(\\{)",
@@ -2523,8 +2975,19 @@
       ]
     },
     "circuit-function": {
-      "comment": "d(q)/dt in an equation; current and level in a measurement. A pin's name is its voltage, so it needs nothing.",
+      "comment": "d(q)/dt in an equation; a pin's members — anode.current, anode.voltage — anywhere a formula is; current and level in a measurement. A pin's bare name is its voltage, so it needs nothing.",
       "patterns": [
+        {
+          "match": "(?<=[A-Za-z0-9_])(\\.)(current|voltage)\\b",
+          "captures": {
+            "1": {
+              "name": "punctuation.accessor.jmx"
+            },
+            "2": {
+              "name": "support.variable.member.pin.jmx"
+            }
+          }
+        },
         {
           "match": "\\b(d)(?=[ \\t]*\\()",
           "name": "support.function.derivative.jmx"

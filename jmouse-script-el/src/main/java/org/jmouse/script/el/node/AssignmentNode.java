@@ -3,6 +3,7 @@ package org.jmouse.script.el.node;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Expression;
+import org.jmouse.script.el.Declarations;
 
 /**
  * {@code entry.state = 'moving'} — a value written back where it was read from.
@@ -42,6 +43,11 @@ public class AssignmentNode extends AbstractExpression {
     @Override
     public Object evaluate(EvaluationContext context) {
         Object evaluated = value.evaluate(context);
+
+        // A declared name is written where it was declared, as its type admits it — and never when it is a constant.
+        if (Declarations.of(context).find(context.getScopedChain(), path) != null) {
+            return Declarations.assign(context, path, evaluated);
+        }
 
         context.setValue(path, evaluated);
 

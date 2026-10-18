@@ -64,8 +64,8 @@ final class CanvasTexts {
         if (circuit.layout() != null) {
             text = layout(text, current.layout(), circuit.layout());
         }
-        if (!circuit.probes().equals(current.probes())) {
-            text = probes(text, current.probes(), circuit.probes());
+        if (!circuit.probes().equals(current.probes()) || !Objects.equals(circuit.timePerDivision(), current.timePerDivision())) {
+            text = probes(text, current, circuit);
         }
         if (!circuit.time().equals(current.time())) {
             text = analysis(text, DefinitionWriter.analysis(circuit.time()));
@@ -96,14 +96,23 @@ final class CanvasTexts {
      * The bench's probes — the oscilloscope's channels and the meters —, a line each by its id: a probe as it was keeps
      * its line, comment and alignment included; a changed one is written again; one the bench no longer has goes.
      */
-    private static String probes(String source, List<ObjectDefinition.BenchProbe> before, List<ObjectDefinition.BenchProbe> after) {
-        Map<String, ObjectDefinition.BenchProbe> was = new HashMap<>();
-        before.forEach(probe -> was.put(probe.id(), probe));
+    private static String probes(String source, ObjectDefinition.Circuit current, ObjectDefinition.Circuit circuit) {
+        Map<String, Object> was = new HashMap<>();
+        current.probes().forEach(probe -> was.put(probe.id(), probe));
         Map<String, String> lines = new LinkedHashMap<>();
-        Map<String, ObjectDefinition.BenchProbe> now = new HashMap<>();
-        for (ObjectDefinition.BenchProbe probe : after) {
+        Map<String, Object> now = new HashMap<>();
+        for (ObjectDefinition.BenchProbe probe : circuit.probes()) {
             lines.put(probe.id(), DefinitionWriter.probe(probe));
             now.put(probe.id(), probe);
+        }
+        // The time base is the block's line keyed by its word, kept as written while it stays the same.
+        String timeBase = DefinitionWriter.TIME_BASE;
+        if (current.timePerDivision() != null) {
+            was.put(timeBase, current.timePerDivision());
+        }
+        if (circuit.timePerDivision() != null) {
+            lines.put(timeBase, DefinitionWriter.timeBase(circuit.timePerDivision()));
+            now.put(timeBase, circuit.timePerDivision());
         }
         return keyedLines(source, "probes", lines, key -> Objects.equals(was.get(key), now.get(key)));
     }

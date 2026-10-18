@@ -1,10 +1,15 @@
 package org.jmouse.script.el.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.ScopeValues;
+import org.jmouse.el.type.ValueType;
+import org.jmouse.script.el.Declarations;
 import org.jmouse.script.el.budget.ScriptExecution;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@code function overdue(entry) … end} — a named body a script may call by name.
@@ -19,8 +24,10 @@ import java.util.List;
  */
 public class FunctionDeclarationNode extends ScriptBodyNode {
 
-    private final List<String> parameters = new ArrayList<>();
+    private final List<String>           parameters     = new ArrayList<>();
+    private final Map<String, ValueType> parameterTypes = new LinkedHashMap<>();
 
+    private ValueType resultType;
     private String name;
     private String described;
 
@@ -51,6 +58,31 @@ public class FunctionDeclarationNode extends ScriptBodyNode {
     }
 
     /**
+     * Declares a typed parameter: {@code count : int}, which every argument given to it must be.
+     *
+     * @param parameter the name it is bound to inside the body
+     * @param type      what an argument must be
+     */
+    public void addParameter(String parameter, ValueType type) {
+        parameters.add(parameter);
+        parameterTypes.put(parameter, type);
+    }
+
+    /** The type of a parameter; {@code null} for one written without a type. */
+    public ValueType getParameterType(String parameter) {
+        return parameterTypes.get(parameter);
+    }
+
+    /** {@code function f(x) : double} — what it returns must be; {@code null} when it does not say. */
+    public ValueType getResultType() {
+        return resultType;
+    }
+
+    public void setResultType(ValueType resultType) {
+        this.resultType = resultType;
+    }
+
+    /**
      * Runs the body, with whatever the caller has already bound the parameters to.
      *
      * <p>⚠️ <strong>This does not bind arguments</strong> — binding them means opening a scope, and who
@@ -78,9 +110,10 @@ public class FunctionDeclarationNode extends ScriptBodyNode {
         }
 
         try {
-            return evaluateBody(context);
+            admitArguments(context);
+            return admitResult(context, evaluateBody(context));
         } catch (ReturnSignal signal) {
-            return signal.value();
+            return admitResult(context, signal.value());
         } finally {
             if (execution != null) {
                 execution.leave();
@@ -89,6 +122,28 @@ public class FunctionDeclarationNode extends ScriptBodyNode {
     }
 
     /** What to call this function in a budget refusal. Built once; read on the counting path. */
+    /**
+     * Each typed parameter's argument as its type admits it, declared in the scope the call bound it in — so the body
+     * cannot write a value of another type to it either.
+     */
+    private void admitArguments(EvaluationContext context) {
+        if (parameterTypes.isEmpty()) {
+            return;
+        }
+        ScopeValues scope = context.getScopedChain().peek();
+        Declarations declarations = Declarations.of(context);
+        parameterTypes.forEach((parameter, type) -> {
+            Declarations.Declaration declaration = new Declarations.Declaration(parameter, type);
+            scope.set(parameter, Declarations.admit(context, declaration, scope.get(parameter)));
+            declarations.declare(scope, declaration);
+        });
+    }
+
+    private Object admitResult(EvaluationContext context, Object result) {
+        return resultType == null ? result
+                : Declarations.admit(context, new Declarations.Declaration(name + "()", resultType), result);
+    }
+
     @Override
     protected String describe() {
         if (described == null) {

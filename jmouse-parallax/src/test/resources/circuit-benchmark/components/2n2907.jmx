@@ -11,7 +11,7 @@ component "2N2907A" as 2n2907 type bjt {
         category circuits
         failure open
     }
-    family pnp-transistor
+    extends pnp-transistor
 
     parameters {
         I_saturation = 0.6506 fA              "IS: transport saturation current"

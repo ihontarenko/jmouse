@@ -43,7 +43,7 @@ component "Battery" as battery type source {
 
     equations {
         # A lithium cell's EMF is flat across the middle of its charge and falls off at the empty end.
-        local EMF = V_empty + (V_full - V_empty) * (0.8 * state_of_charge + 0.2 * (1 - (1 - state_of_charge) ^ 4))
+        let EMF : voltage = V_empty + (V_full - V_empty) * (0.8 * state_of_charge + 0.2 * (1 - (1 - state_of_charge) ^ 4))
         voltage emf -> negative = EMF
         current polarised -> emf = (polarised - emf) / R_polarisation + d(C_polarisation * (polarised - emf))/dt
         current positive -> polarised = (positive - polarised) / R_internal

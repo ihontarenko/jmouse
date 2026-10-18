@@ -24,7 +24,7 @@ public final class StatementPriority {
 
     public static final int BRANCH = Integer.MIN_VALUE + 3000;
     public static final int LOOP   = Integer.MIN_VALUE + 3100;
-    public static final int LOCAL  = Integer.MIN_VALUE + 3200;
+    public static final int DECLARATION = Integer.MIN_VALUE + 3200;
     public static final int RETURN = Integer.MIN_VALUE + 3300;
 
     public static final int ASSIGNMENT = Integer.MIN_VALUE + 3900;

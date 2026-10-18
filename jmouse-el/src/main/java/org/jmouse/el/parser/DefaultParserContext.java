@@ -5,6 +5,7 @@ import org.jmouse.el.extension.*;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.type.ValueType;
 
 import java.util.List;
 
@@ -101,6 +102,21 @@ public class DefaultParserContext implements ParserContext {
     @Override
     public void addFilter(Filter filter) {
         extensions.addFilter(filter);
+    }
+
+    @Override
+    public ValueType getType(String name) {
+        return extensions.getType(name);
+    }
+
+    @Override
+    public List<ValueType> getTypes() {
+        return extensions.getTypes();
+    }
+
+    @Override
+    public void addType(ValueType type) {
+        extensions.addType(type);
     }
 
     @Override

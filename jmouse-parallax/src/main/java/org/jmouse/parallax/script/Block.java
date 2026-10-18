@@ -167,7 +167,18 @@ public sealed interface Block {
      * @param positive the first node of a current or a voltage
      * @param negative the second node of a current or a voltage
      */
-    record Equation(EquationForm form, String subject, String positive, String negative, SourceText expression) {
+    /**
+     * One line of {@code equations}.
+     *
+     * @param type what a {@code let} names its value as — {@code let I_through : current = …} —; null for every other
+     *             form and for a {@code let} written without one
+     */
+    record Equation(EquationForm form, String subject, String positive, String negative, SourceText expression,
+                    org.jmouse.el.type.ValueType type) {
+
+        public Equation(EquationForm form, String subject, String positive, String negative, SourceText expression) {
+            this(form, subject, positive, negative, expression, null);
+        }
     }
 
     record Equations(List<Equation> equations) implements Block {
@@ -598,14 +609,22 @@ public sealed interface Block {
      * @param target    a node, or a part — a current's with its terminal, `PS1.negative`
      * @param reference the second node of a differential voltage probe; ground when absent
      * @param mode      what a meter's display shows: {@code dc}, {@code ac} or {@code rms}
+     * @param expression what an oscilloscope channel shows instead of its reading — {@code shows X * pi / 2}, X being
+     *                   the reading —, computed by the screen
      */
     record Probe(String id, char measure, String target, Optional<String> reference, Optional<Quantity> scale,
-                 Optional<String> mode) {
+                 Optional<String> mode, Optional<String> expression) {
     }
 
-    record Probes(List<Probe> probes) implements Block {
+    /**
+     * The oscilloscope as the circuit sets it up: its channels, and {@code time 5 ms/div} — the time base it opens on.
+     *
+     * @param timePerDivision seconds a division, when the circuit names one
+     */
+    record Probes(List<Probe> probes, Optional<Quantity> timePerDivision) implements Block {
         public Probes {
             probes = List.copyOf(probes);
+            timePerDivision = timePerDivision == null ? Optional.empty() : timePerDivision;
         }
 
         public String name() {

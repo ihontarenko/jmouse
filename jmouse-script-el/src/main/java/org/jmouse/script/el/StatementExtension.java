@@ -7,7 +7,7 @@ import org.jmouse.script.el.parser.AssignmentParser;
 import org.jmouse.script.el.parser.BranchParser;
 import org.jmouse.script.el.parser.FunctionDeclarationParser;
 import org.jmouse.script.el.parser.IncludeParser;
-import org.jmouse.script.el.parser.LocalParser;
+import org.jmouse.script.el.parser.DeclarationParser;
 import org.jmouse.script.el.parser.LoopParser;
 import org.jmouse.script.el.parser.ReturnParser;
 import org.jmouse.script.el.parser.ScriptBodyParser;
@@ -15,7 +15,7 @@ import org.jmouse.script.el.parser.ScriptBodyParser;
 import java.util.List;
 
 /**
- * The statement core as a jME extension: {@code include}, {@code function}, {@code if}, {@code for}, {@code local},
+ * The statement core as a jME extension: {@code include}, {@code function}, {@code if}, {@code for}, {@code let}, {@code const},
  * {@code return} and assignment, and the body they are written in. It contributes parsers only — no operators,
  * functions, filters or tests — because those are what makes a dialect a dialect: jMS takes jME's grammar and jMF's mathematics.
  *
@@ -37,7 +37,7 @@ public class StatementExtension implements Extension {
                 new FunctionDeclarationParser(),
                 new BranchParser(),
                 new LoopParser(),
-                new LocalParser(),
+                new DeclarationParser(),
                 new ReturnParser(),
                 new AssignmentParser()
         );

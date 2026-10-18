@@ -179,3 +179,29 @@ try (JdkHostingTransport transport = new JdkHostingTransport(Duration.ofSeconds(
 
 Not covered by a test: a whole-operation timeout of a clone (no local remote is slow enough to trigger it), and a
 real https host.
+
+## Local working trees (Atomic A8)
+
+org.jmouse.git.local.LocalGit is a separate capability from bounded remote checkout/update. JGitLocalGit implements:
+
+- status(directory): staged and working-tree states, configured author, HEAD, branch and content versions;
+- log(directory, limit): bounded current-HEAD history, real parent identities and branch/remote/tag references;
+- diff(directory, source, currentText): HEAD against disk or an optional unsaved buffer, with exclusive zero-based line edits;
+- commit(directory, CommitSelection): explicit selected saved working-tree versions, reviewed HEAD/content checks,
+  including new and deleted files. Unrelated staged entries remain staged. Initial commits are supported.
+
+LocalGitLimits bounds file bytes, diff lines, history and selected files. Paths are canonical repository-relative paths;
+Git metadata, traversal and symbolic-link escapes cannot be selected. Text diffs reject binary/oversized content.
+The configured project root must be the working-tree root; a parent repository is never silently adopted.
+
+Local commits are unsigned and do not run repository hooks. The hooksPath override is in-memory for the operation and
+is never persisted to the user's Git configuration. No network, checkout, reset or push is performed. JGit handles
+its ordinary index/working-tree conversion rules. A failed new-file commit may leave explicitly selected new files staged;
+the reported error says so. Reviewed checks and ordinary JGit locks protect normal concurrent-edit/ref-update cases;
+this API is not a distributed transaction across arbitrary external editors and Git processes.
+
+Atomic blocks commits of selected documents with unsaved buffers. The UI starts with no files selected, shows the exact
+selection and author, supports diff review, and makes the local/unsigned/no-hooks behavior explicit before Commit.
+
+Verification: one temporary-repository smoke covered status, log, HEAD/buffer diff, selected modification/addition/deletion,
+unrelated staged content, stale HEAD/content, traversal and initial commit. No real workspace commit was created.

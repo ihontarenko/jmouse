@@ -46,18 +46,19 @@ component "Transformer" as transformer type transformer {
     }
 
     equations {
-        local T_winding = temperature + heating
-        local R_primary_now = R_primary * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
-        local R_secondary_now = R_secondary * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
+        let T_winding : temperature = temperature + heating
+        let R_primary_now : resistance = R_primary * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
+        let R_secondary_now : resistance = R_secondary * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
         # A flux is a charge the equations differentiate, and a charge reads voltages, not currents: each winding's
         # current is carried as a voltage on a node of its own.
-        local M = coupling * sqrt(L_primary * L_secondary)
-        local I_primary = primary_current - primary_two
-        local I_secondary = secondary_current - secondary_two
-        voltage primary_current -> primary_two = current(primary_one)
-        voltage secondary_current -> secondary_two = current(secondary_one)
-        voltage primary_one -> primary_two = R_primary_now * current(primary_one) + d(L_primary * I_primary + M * I_secondary)/dt
-        voltage secondary_one -> secondary_two = R_secondary_now * current(secondary_one) + d(L_secondary * I_secondary + M * I_primary)/dt
+        let M : inductance = coupling * sqrt(L_primary * L_secondary)
+        let R_carrier : resistance = 1
+        let I_primary : current = (primary_current - primary_two) / R_carrier
+        let I_secondary : current = (secondary_current - secondary_two) / R_carrier
+        voltage primary_current -> primary_two = R_carrier * primary_one.current
+        voltage secondary_current -> secondary_two = R_carrier * secondary_one.current
+        voltage primary_one -> primary_two = R_primary_now * primary_one.current + d(L_primary * I_primary + M * I_secondary)/dt
+        voltage secondary_one -> secondary_two = R_secondary_now * secondary_one.current + d(L_secondary * I_secondary + M * I_primary)/dt
 
         # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
         d(heating)/dt = (realistic * (R_primary_now * I_primary ^ 2 + R_secondary_now * I_secondary ^ 2) * thermal_resistance - heating) / thermal_time_constant

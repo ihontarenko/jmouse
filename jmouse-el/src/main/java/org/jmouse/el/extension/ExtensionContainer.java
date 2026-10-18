@@ -5,6 +5,7 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.Parser;
+import org.jmouse.el.type.ValueType;
 import org.jmouse.core.Sorter;
 
 import java.util.List;
@@ -118,6 +119,24 @@ public interface ExtensionContainer {
     void addFilter(Filter filter);
 
     /**
+     * 🏷️ Retrieves a registered type by the name a document writes.
+     *
+     * @param name the type name
+     * @return the {@link ValueType}, or {@code null} if not found
+     */
+    ValueType getType(String name);
+
+    /** Every registered type. */
+    List<ValueType> getTypes();
+
+    /**
+     * ➕ Adds a new type to the container.
+     *
+     * @param type the {@link ValueType} to register
+     */
+    void addType(ValueType type);
+
+    /**
      * 🔄 Imports all available extensions from the given {@link Extension} instance.
      * <p>
      * This method automatically registers all functions, tests, filters, operators,
@@ -133,6 +152,7 @@ public interface ExtensionContainer {
         extension.getFilters().forEach(this::addFilter);
         extension.getOperators().forEach(this::addOperator);
         extension.getParsers().forEach(this::addParser);
+        extension.getTypes().forEach(this::addType);
         getAttributeResolvers().addAll(extension.getAttributeResolvers());
         Sorter.sort(getAttributeResolvers());
     }

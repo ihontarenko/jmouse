@@ -325,13 +325,44 @@ final class CircuitReader {
         }).toList());
     }
 
+    /** The channels, and at most one {@code time 5 ms/div}: the time base the oscilloscope opens on. */
     Block.Probes probes() {
-        return new Block.Probes(reading.blockLines("probes").stream().map(this::probe).toList());
+        List<Probe> probes = new ArrayList<>();
+        Optional<Quantity> timePerDivision = Optional.empty();
+        for (Reading.Line line : reading.blockLines("probes")) {
+            if (!line.value(0).equals(TIME_BASE)) {
+                probes.add(probe(line));
+                continue;
+            }
+            if (timePerDivision.isPresent()) {
+                throw line.refusal("the oscilloscope has one time base; this block names it twice");
+            }
+            timePerDivision = Optional.of(timeBase(line));
+        }
+        return new Block.Probes(probes, timePerDivision);
     }
+
+    /** {@code time 5 ms/div}: seconds a division, positive. */
+    private static Quantity timeBase(Reading.Line line) {
+        int perDivision = line.indexOf(1, "/");
+        if (line.size() < 2 || perDivision < 2 || !line.value(perDivision + 1).equals("div")) {
+            throw line.refusal("the time base is written as time a division: 'time 5 ms/div'");
+        }
+        Quantity quantity = Values.written(line, 1, perDivision).quantity()
+                .orElseThrow(() -> line.refusal(1, "the time base is a time: 'time 5 ms/div'"));
+        if (!(quantity.value() > 0)) {
+            throw line.refusal(1, "the time base is a positive time a division");
+        }
+        return quantity;
+    }
+
+    /** The word that opens the oscilloscope's time base in {@code probes}; no channel is named so. */
+    private static final String TIME_BASE = "time";
 
     /**
      * {@code CH1 out 2 V/div} — a node's voltage —, {@code CH2 out against reference}, {@code CH3 current R1} — a current
-     * clamp on a part's lead —, {@code L1 level clock}: the
+     * clamp on a part's lead —, {@code L1 level clock}, {@code CH1 out 1 V/div shows X * pi / 2} — what the screen draws
+     * instead of the reading —: the
      * oscilloscope's channels and the logic levels, named as the circuit names its nodes. A meter is no probe: it is a
      * part, wired across what it reads or in the break of a wire, and a line written as one is refused saying so.
      */
@@ -380,6 +411,15 @@ final class CircuitReader {
             next += 2;
         }
         int last = line.size();
+        Optional<String> expression = Optional.empty();
+        int shows = line.indexOf(next, EXPRESSION_WORD);
+        if (shows >= 0 && shows < last) {
+            if (shows + 1 >= last) {
+                throw line.refusal(shows, "'shows' is followed by what the screen draws, X being the reading: 'shows X * pi / 2'");
+            }
+            expression = Optional.of(line.text(shows + 1).text());
+            last = shows;
+        }
         if (last > next && DISPLAY_MODES.contains(line.value(last - 1))) {
             throw line.refusal(last - 1, "a channel has no display mode; a meter's display is chosen on the bench");
         }
@@ -390,8 +430,11 @@ final class CircuitReader {
             int end = perDivision >= 0 && perDivision < last && line.value(perDivision + 1).equals("div") ? perDivision : last;
             scale = Values.written(line, next, end).quantity();
         }
-        return new Probe(line.value(0), measure, target, reference, scale, mode);
+        return new Probe(line.value(0), measure, target, reference, scale, mode, expression);
     }
+
+    /** The word after a channel's scale that opens what its screen shows instead of the reading. */
+    private static final String EXPRESSION_WORD = "shows";
 
     /** What a meter's display showed when meters were probes: refused on a channel, which has none. */
     private static final java.util.Set<String> DISPLAY_MODES = java.util.Set.of("dc", "ac", "rms");

@@ -15,10 +15,11 @@ import org.jmouse.java.parser.source.SourceSpan;
  * @param type          the type as written, without the {@code ...} of a variable-arity component
  * @param variableArity whether it is declared with {@code ...}
  * @param signature     the component as written, whitespace collapsed
+ * @param nameSpan      the component's name where it is declared
  * @param span          the component
  */
 public record RecordComponentDeclaration(String name, String qualifiedName, SymbolId symbolId, List<Annotation> annotations,
-                                         String type, boolean variableArity, String signature, SourceSpan span)
+                                         String type, boolean variableArity, String signature, SourceSpan nameSpan, SourceSpan span)
         implements Declaration {
 
     /**

@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>org.jmouse</groupId><artifactId>jmouse-parent</artifactId><version>1.0.1</version></parent>
+    <artifactId>jmouse-java-index-jpa</artifactId>
+    <name>jMouse - Java Index JPA</name>
+    <description>Shared Java index persistence over Jakarta Persistence, with PostgreSQL and MySQL migrations. Caller-owned transactions; no product lifecycle or Spring dependency.</description>
+    <dependencyManagement><dependencies><dependency><groupId>org.jmouse</groupId><artifactId>jmouse-dependencies</artifactId><version>1.0.1</version><type>pom</type><scope>import</scope></dependency></dependencies></dependencyManagement>
+    <dependencies>
+        <dependency><groupId>org.jmouse</groupId><artifactId>jmouse-java-index-store</artifactId><version>1.0.1</version></dependency>
+        <dependency><groupId>jakarta.persistence</groupId><artifactId>jakarta.persistence-api</artifactId></dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>org.hibernate.orm</groupId><artifactId>hibernate-core</artifactId><version>7.2.19.Final</version><scope>test</scope></dependency>
+        <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>com.mysql</groupId><artifactId>mysql-connector-j</artifactId><scope>test</scope></dependency>
+        <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-core</artifactId><version>11.14.1</version><scope>test</scope></dependency>
+        <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-database-postgresql</artifactId><version>11.14.1</version><scope>test</scope></dependency>
+        <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-mysql</artifactId><version>11.14.1</version><scope>test</scope></dependency>
+    </dependencies>
+</project>

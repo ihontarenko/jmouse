@@ -49,7 +49,7 @@ public final class TypeNode extends JavaNode implements DeclarationNode {
         }
         return new TypeDeclaration(header.kind(), header.name(), header.qualifiedName(), header.symbolId(), header.modifiers(),
                 header.annotations(), header.typeParameters(), header.extendedTypes(), header.implementedTypes(),
-                header.permittedTypes(), components, members, header.signature(), header.signatureSpan(), header.bodySpan(),
+                header.permittedTypes(), components, members, header.signature(), header.signatureSpan(), header.nameSpan(), header.bodySpan(),
                 header.span(), header.javaDoc());
     }
 

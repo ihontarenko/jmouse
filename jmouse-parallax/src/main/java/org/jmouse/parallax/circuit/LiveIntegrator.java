@@ -56,12 +56,16 @@ final class LiveIntegrator {
     /** How much a step may grow at once when it used little of its allowed error. */
     private static final double GROWTH              = 2;
 
-    /** What one part did since the last reading: its average power, its current now, and how it warms. */
     /**
+     * What one part did since the last reading: its average power, its current now, how it warms, and its states now.
+     *
      * @param heating how far the part's own model has heated it above the bench, kelvin — a model that keeps its own heat
      *                ({@code heating}); NaN for a part that does not, whose temperature is estimated from its power
+     * @param states  its devices' states now, by name ({@link Device#stateValues}): what a figure its component displays
+     *                over a state reads; empty for a part without states
      */
-    record PartReading(String part, double power, Map<String, Double> terminals, double thermalResistance, double heating) {
+    record PartReading(String part, double power, Map<String, Double> terminals, double thermalResistance, double heating,
+                       Map<String, Double> states) {
     }
 
     private final Netlist             netlist;
@@ -669,8 +673,13 @@ final class LiveIntegrator {
         Map<String, Map<String, Double>> terminals = terminalCurrents();
         double[] heatings = new double[parts.length];
         java.util.Arrays.fill(heatings, Double.NaN);
+        List<Map<String, Double>> states = new ArrayList<>(parts.length);
+        for (int part = 0; part < parts.length; part++) {
+            states.add(new LinkedHashMap<>());
+        }
         for (int index = 0; index < devices.size(); index++) {
             if (partOfDevice[index] >= 0) {
+                states.get(partOfDevice[index]).putAll(devices.get(index).stateValues(state));
                 double heating = devices.get(index).heating(state);
                 if (!Double.isNaN(heating)) {
                     int part = partOfDevice[index];
@@ -681,7 +690,7 @@ final class LiveIntegrator {
         List<PartReading> readings = new ArrayList<>(parts.length);
         for (int part = 0; part < parts.length; part++) {
             double power = energyTime > 0 ? energy[part] / energyTime : 0;
-            readings.add(new PartReading(parts[part], power, terminals.get(parts[part]), thermalResistances[part], heatings[part]));
+            readings.add(new PartReading(parts[part], power, terminals.get(parts[part]), thermalResistances[part], heatings[part], states.get(part)));
         }
         java.util.Arrays.fill(energy, 0);
         energyTime = 0;
@@ -897,7 +906,7 @@ final class LiveIntegrator {
             }
             double[] next = assembly.solve();
             if (next == null) {
-                if (iteration == 0) {
+                if (iteration == 0 && isStructurallySingular(assembly)) {
                     throw new IllegalArgumentException("The circuit has no unique solution.");
                 }
                 return null;
@@ -926,6 +935,18 @@ final class LiveIntegrator {
             guess = stepped;
         }
         return null;
+    }
+
+    /**
+     * Whether a system singular where Newton started is the circuit's own — no unique solution anywhere — rather than
+     * the point's. At the first moment it is the circuit: there is no earlier solution to have strayed from. Later, an
+     * unknown no row or column mentions is the circuit too (a node a switch has just left floating). Anything else is
+     * the guess's: a step predicted far past where the circuit can go — a Zener's breakdown, a predictor that put its
+     * cathode at fifteen volts on a twelve-volt bench — linearizes to a matrix no pivot survives, and the step is
+     * refused and cut instead of the run being stopped.
+     */
+    private static boolean isStructurallySingular(Assembly assembly) {
+        return !assembly.isTransient() || assembly.time() <= 0 || assembly.unconstrained() >= 0;
     }
 
     /** The point a share of the way along a Newton step. */

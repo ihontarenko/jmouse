@@ -622,7 +622,9 @@ final class SpiceExporter {
             int line = equation.expression().line();
             Formula expression;
             try {
-                expression = FormulaLanguage.standard().parse(withPinCurrentsNamed(equation.expression().text()));
+                expression = Substitution.replaceHostCalls(PIN_CURRENT_LANGUAGE.parse(equation.expression().text()),
+                        call -> !(call.arguments().size() == 1 && call.arguments().getFirst() instanceof Formula.Variable pin)
+                                ? call : call.name().equals("voltage") ? pin : new Formula.Variable(PIN_CURRENT + pin.name()));
             } catch (RuntimeException unreadable) {
                 return Optional.of("line " + line + " — " + unreadable.getMessage());
             }
@@ -659,17 +661,13 @@ final class SpiceExporter {
         return Optional.empty();
     }
 
-    /** What {@code current(pin)} is read as: a name of its own, as the engine reads it, since a pin may be a keyword. */
-    private static final String PIN_CURRENT = "current_into_";
-
     /**
-     * The equation with each {@code current(pin)} as a name — {@code current_into_in} —: jMF reads a pin called
-     * {@code in} as a keyword, and a B source cannot read the current into a pin anyway, so the name only has to survive
-     * until an ideal bench folds it away or {@link #behaviouralName} refuses it.
+     * What {@code current(pin)} is read as: a name of its own. A B source cannot read the current into a pin, so the
+     * name only has to survive until an ideal bench folds it away or {@link #behaviouralName} refuses it.
      */
-    private static String withPinCurrentsNamed(String text) {
-        return text.replaceAll("(?<![A-Za-z0-9_])current\\s*\\(\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\)", PIN_CURRENT + "$1");
-    }
+    private static final String PIN_CURRENT = "current_into_";
+    /** jMF with a pin's members — {@code in.current}, {@code current(in)}, {@code in.voltage} — read as host calls. */
+    private static final FormulaLanguage PIN_CURRENT_LANGUAGE = FormulaLanguage.standard().withHostCalls("current", "voltage");
 
     /** The names an equation reads as node voltages: the component's pins and its inner nodes. */
     private static Map<String, String> nodes(ComponentModel model) {

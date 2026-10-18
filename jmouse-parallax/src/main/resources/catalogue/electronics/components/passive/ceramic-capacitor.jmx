@@ -44,15 +44,16 @@ component "Ceramic capacitor" as ceramic-capacitor type capacitor {
 
     display {
         overvoltage = 100 * abs(terminal_one - terminal_two) / voltage_rating unit % "of its rated voltage"
-        charge = 100 * (terminal_one - terminal_two) / voltage_rating unit % "of rating"
     }
 
     equations {
         # The current through ESL is carried as a voltage: a charge reads voltages, not currents.
-        local I_series = series_current - terminal_two
-        local C_now = capacitance * (1 - temperature_curvature * (temperature - T_nominal) ^ 2)
-        voltage series_current -> terminal_two = current(terminal_one)
-        voltage terminal_one -> plate = R_equivalent_series * current(terminal_one) + d(L_equivalent_series * I_series)/dt
+        # One volt on that node per ampere through ESL: the scale written as what it is, a resistance.
+        let R_carrier : resistance = 1
+        let I_series : current = (series_current - terminal_two) / R_carrier
+        let C_now : capacitance = capacitance * (1 - temperature_curvature * (temperature - T_nominal) ^ 2)
+        voltage series_current -> terminal_two = R_carrier * terminal_one.current
+        voltage terminal_one -> plate = R_equivalent_series * terminal_one.current + d(L_equivalent_series * I_series)/dt
         current plate -> terminal_two = d(C_now * V_half * atan((plate - terminal_two) / V_half))/dt
     }
 

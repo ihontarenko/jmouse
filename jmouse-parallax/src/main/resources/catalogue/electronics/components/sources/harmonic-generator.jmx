@@ -41,9 +41,9 @@ component "Harmonic generator" as harmonic-generator type generator {
     }
 
     equations {
-        local phase = 2 * pi * frequency * time
-        local low = a1 * sin(phase + p1) + a2 * sin(2 * phase + p2) + a3 * sin(3 * phase + p3) + a4 * sin(4 * phase + p4)
-        local high = a5 * sin(5 * phase + p5) + a6 * sin(6 * phase + p6) + a7 * sin(7 * phase + p7) + a8 * sin(8 * phase + p8)
+        let phase : ratio = 2 * pi * frequency * time
+        let low : voltage = a1 * sin(phase + p1) + a2 * sin(2 * phase + p2) + a3 * sin(3 * phase + p3) + a4 * sin(4 * phase + p4)
+        let high : voltage = a5 * sin(5 * phase + p5) + a6 * sin(6 * phase + p6) + a7 * sin(7 * phase + p7) + a8 * sin(8 * phase + p8)
         voltage positive -> negative = offset + low + high
     }
 }

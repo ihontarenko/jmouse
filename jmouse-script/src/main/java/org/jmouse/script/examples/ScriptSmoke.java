@@ -58,7 +58,7 @@ public final class ScriptSmoke {
                 end
 
                 on changed when entry.kind == 'delivery' do
-                    local weight = entry.weight
+                    let weight = entry.weight
 
                     if weight == 1 then
                         @journal.record('first')
@@ -88,7 +88,7 @@ public final class ScriptSmoke {
 
                 function step(entry)
                     if entry.state == 'waiting' then
-                        local next = @store.next_slot(entry)
+                        let next = @store.next_slot(entry)
                         if next == null then
                             return
                         end
@@ -210,7 +210,7 @@ public final class ScriptSmoke {
 
         System.out.println("DISPATCHED : changed -> " + journal.entries);
 
-        // ⚠️ The handler above wrote `local weight`. If it is still here, `local` is a lie and the next
+        // ⚠️ The handler above wrote `let weight`. If it is still here, `let` is a lie and the next
         // handler somebody adds reads a value the file never gave it.
         System.out.println("LOCAL LEAK : weight after the handler = " + context.getValue("weight"));
 

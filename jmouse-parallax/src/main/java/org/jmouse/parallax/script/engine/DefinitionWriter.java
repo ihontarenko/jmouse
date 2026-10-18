@@ -157,10 +157,10 @@ final class DefinitionWriter {
                 TextBlock.braced("equations", equations), inputs(input("t", system.time())));
     }
 
-    /** The step's values first, as {@code local} lines, then one update per variable. */
+    /** The step's values first, as {@code let} lines, then one update per variable. */
     private static WrittenDefinition discreteMap(DiscreteMap map) {
         List<String> equations = new ArrayList<>();
-        map.stepValues().forEach(value -> equations.add("local " + value.name() + " = " + value.expression()));
+        map.stepValues().forEach(value -> equations.add("let " + value.name() + " = " + value.expression()));
         for (int index = 0; index < map.variables().size(); index++) {
             equations.add(map.variables().get(index) + "_next = " + map.updates().get(index));
         }
@@ -407,14 +407,33 @@ final class DefinitionWriter {
         if (circuit.layout() != null) {
             blocks.add(TextBlock.braced("layout", layoutLines(circuit.layout())));
         }
-        if (!circuit.probes().isEmpty()) {
-            blocks.add(TextBlock.braced("probes", circuit.probes().stream().map(DefinitionWriter::probe).toList()));
+        if (!circuit.probes().isEmpty() || circuit.timePerDivision() != null) {
+            List<String> probes = new ArrayList<>(circuit.probes().stream().map(DefinitionWriter::probe).toList());
+            if (circuit.timePerDivision() != null) {
+                probes.add(timeBase(circuit.timePerDivision()));
+            }
+            blocks.add(TextBlock.braced("probes", probes));
         }
         blocks.add(TextBlock.statement(analysis));
         return plain("circuit", blocks.toArray(TextBlock[]::new));
     }
 
     /** {@code CH1 out against ref 2 V/div}, {@code M2 current PS1.negative rms}, {@code M3 power RL}. */
+    /** The word of the {@code probes} line that sets the oscilloscope's time base. */
+    static final String TIME_BASE = "time";
+
+    /** {@code time 5 ms/div}: the time base in the largest unit that keeps the figure at one or more. */
+    static String timeBase(double secondsPerDivision) {
+        String[] units = {"s", "ms", "µs", "ns"};
+        double value = secondsPerDivision;
+        int unit = 0;
+        while (value < 1 && unit < units.length - 1) {
+            value *= 1000;
+            unit++;
+        }
+        return TIME_BASE + " " + Notation.number(Math.round(value * 1e6) / 1e6) + " " + units[unit] + "/div";
+    }
+
     static String probe(ObjectDefinition.BenchProbe probe) {
         StringBuilder line = new StringBuilder(probe.id());
         if (!probe.measure().equals("voltage")) {
@@ -430,6 +449,9 @@ final class DefinitionWriter {
         }
         if (probe.mode() != null) {
             line.append(' ').append(probe.mode());
+        }
+        if (probe.expression() != null && !probe.expression().isBlank()) {
+            line.append(" shows ").append(probe.expression().strip());
         }
         return line.toString();
     }

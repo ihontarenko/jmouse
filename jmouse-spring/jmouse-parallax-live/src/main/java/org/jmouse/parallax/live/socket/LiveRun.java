@@ -34,6 +34,8 @@ import java.util.function.Function;
  * → pause · resume · step · reset                                    ← frame, binary — see {@link FrameEncoding}
  * → probes  { probes: [{ channel, positive, negative }] }
  * → sample  { interval } — sample every interval from now on; the circuit goes on, it does not start again
+ * → acquire { gapless } — true: every sample is read, none passed, and the run plays no faster than that allows — what
+ *                       a deep time base needs to see one edge in detail; false: real time first, the screen's block a frame
  * → pace    { speed } — circuit seconds per second of wall time: 1 is real time, 0.01 a hundred times slower; the slower
  *                       it plays, the more of its samples a frame traces for the sheet
  * → set     { part, parameter, value }  or  { parameter, value } for the circuit's own   ← changed { continued, controls }
@@ -85,7 +87,7 @@ final class LiveRun {
     /** What a reader sends; every field but {@code type} belongs to some messages only. */
     record Message(String type, String objectId, String source, ObjectDefinition definition, Map<String, Double> values,
                    Double interval, Double speed, List<LiveCircuitSession.Probe> probes, String part,
-                   String parameter, Double value) {
+                   String parameter, Double value, Boolean gapless) {
     }
 
     private final LiveCircuits     circuits;
@@ -113,6 +115,13 @@ final class LiveRun {
      * server has time left.
      */
     private double                      played = REAL_TIME;
+    /**
+     * Whether every sample is read: a frame never passes any, and the run plays no faster than
+     * {@link #SAMPLES_SHOWN_PER_FRAME} samples a frame allow. At a fine time base the screen then holds an unbroken
+     * record — every edge in it, the trigger finding each —, the run slowed to show it, as a reader zooming into one
+     * transistor's switching wants; off, the run keeps real time and the screen holds one block a frame, gaps between.
+     */
+    private volatile boolean            gapless;
     /** What a sample read, a sample passed and a frame besides them cost, in nanoseconds, smoothed; NaN until measured. */
     private double                      readCost = Double.NaN;
     private double                      passCost = Double.NaN;
@@ -154,6 +163,7 @@ final class LiveRun {
             case "probes" -> probe(message.probes());
             case "pace" -> pace(message.speed());
             case "sample" -> sample(message.interval());
+            case "acquire" -> acquire(message.gapless());
             case "set" -> set(message);
             case "restart" -> restart(message);
             default -> throw ParallaxProblem.invalid("'" + message.type() + "' is not something a running circuit does.");
@@ -178,7 +188,10 @@ final class LiveRun {
         if (message.speed() != null) {
             speed = requireSpeed(message.speed());
         }
-        played = speed;
+        if (message.gapless() != null) {
+            gapless = message.gapless();
+        }
+        played = Math.min(speed, fastestGapless());
         build();
         resume();
     }
@@ -410,14 +423,32 @@ final class LiveRun {
         interval = next;
         due = 0;
         forgetCosts();
-        played = speed;
+        played = Math.min(speed, fastestGapless());
         session.resample(circuits.prepare(object, circuit, parameters, values).compiled(), interval);
         traceDensity();
     }
 
+    /** Every sample read or real time first, from now on; the circuit goes on. */
+    private synchronized void acquire(Boolean requested) {
+        gapless = Boolean.TRUE.equals(requested);
+        due = 0;
+        played = Math.min(speed, fastestGapless());
+        if (session != null) {
+            traceDensity();
+        }
+    }
+
+    /**
+     * The fastest a gapless run plays: as much circuit time a frame as {@link #SAMPLES_SHOWN_PER_FRAME} samples cover —
+     * at 10 ns a sample a thousand times slower than real time. Unbounded while the run keeps real time first.
+     */
+    private double fastestGapless() {
+        return gapless ? Math.max(SLOWEST, SAMPLES_SHOWN_PER_FRAME * interval * 1000.0 / FRAME_MILLISECONDS) : FASTEST;
+    }
+
     private synchronized void pace(Double requested) {
         speed = requireSpeed(requested);
-        played = speed;
+        played = Math.min(speed, fastestGapless());
         if (session != null) {
             traceDensity();
         }
@@ -462,7 +493,7 @@ final class LiveRun {
         double samples = available <= shownCost
                 ? Math.max(1, available / readCost)
                 : SAMPLES_SHOWN_PER_FRAME + (available - shownCost) / (Double.isNaN(passCost) ? readCost : passCost);
-        double next = Math.min(speed, Math.max(SLOWEST, samples * interval * 1000.0 / FRAME_MILLISECONDS));
+        double next = Math.min(Math.min(speed, fastestGapless()), Math.max(SLOWEST, samples * interval * 1000.0 / FRAME_MILLISECONDS));
         if (Math.abs(next - played) > played * 0.05) {
             played = next;
             traceDensity();

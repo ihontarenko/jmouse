@@ -8,7 +8,7 @@ component "NPN transistor" as npn-transistor type bjt {
         category circuits
         failure open
     }
-    family bipolar-transistor
+    extends bipolar-transistor
 
     parameters {
         polarity = 1                          "NPN"

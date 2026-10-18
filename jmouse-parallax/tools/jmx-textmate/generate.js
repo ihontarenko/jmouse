@@ -175,6 +175,10 @@ addRules({
       include("outputs-block"),
       include("state-block"),
       include("equations-block"),
+      include("image-block"),
+      include("display-block"),
+      include("measure-block"),
+      include("leads-block"),
       include("pins-block"),
       include("nodes-block"),
       include("behaviour-body"),
@@ -203,6 +207,9 @@ addRules({
       include("edges-line"),
       include("points-block"),
       include("items-line"),
+      include("instrument-line"),
+      include("collection-section"),
+      include("course-lesson"),
       include("course-step"),
       { match: "\\{", name: "punctuation.section.block.begin.jmx" }
     ]
@@ -211,16 +218,32 @@ addRules({
   // ─── what a document says about itself ───────────────────────────────────────────────────────────
 
   "header-line": {
-    comment: "family ref, uses a, b and units A, B: top-level lines that change what the document computes.",
+    comment: "Kind.DECLARATIONS — extends ref, use a, b and units A, B: top-level lines that change what the document computes.",
     patterns: [
       {
         name: "meta.line.header.jmx",
-        begin: `${LINE}\\b(family|uses)\\b`,
+        begin: `${LINE}\\b(extends|use)\\b`,
         beginCaptures: { "1": { name: "keyword.other.header.jmx" } },
         end: LINE_END,
         patterns: [
           { match: ",", name: "punctuation.separator.comma.jmx" },
           { match: SLUG, name: "entity.name.type.reference.jmx" }
+        ]
+      },
+      {
+        comment: "type power_density = power / area: a quantity the document names; every word in it is a type.",
+        name: "meta.line.type.jmx",
+        begin: `${LINE}\\b(type)[ \\t]+(${NAME})[ \\t]*(=)`,
+        beginCaptures: {
+          "1": { name: "keyword.other.header.jmx" },
+          "2": { name: "entity.name.type.annotation.jmx" },
+          "3": { name: "keyword.operator.assignment.jmx" }
+        },
+        end: LINE_END,
+        patterns: [
+          { match: "[*/^]", name: "keyword.operator.jmx" },
+          { match: "\\b[0-9]+\\b", name: "constant.numeric.jmx" },
+          { match: NAME, name: "entity.name.type.annotation.jmx" }
         ]
       },
       {
@@ -339,11 +362,14 @@ addRules({
   "equations-block": braceBlock("equations", "equations", [
     include("comment"),
     {
-      match: `${LINE}(local)[ \\t]+(${NAME})[ \\t]*(=)(?!=)`,
+      comment: "let I_through : current = … — `local` is the same word; the type, when written, stands apart (entity.name.type).",
+      match: `${LINE}(let|local)[ \\t]+(${NAME})(?:[ \\t]*(:)[ \\t]*(${NAME}))?[ \\t]*(=)(?!=)`,
       captures: {
-        "1": { name: "storage.type.local.jmx" },
-        "2": { name: "variable.other.local.jmx" },
-        "3": { name: "keyword.operator.assignment.jmx" }
+        "1": { name: "storage.type.declaration.jmx" },
+        "2": { name: "variable.other.declaration.jmx" },
+        "3": { name: "punctuation.separator.type.jmx" },
+        "4": { name: "entity.name.type.annotation.jmx" },
+        "5": { name: "keyword.operator.assignment.jmx" }
       }
     },
     {
@@ -385,6 +411,46 @@ addRules({
       captures: { "1": { name: "constant.numeric.jmx" }, "2": { name: "keyword.operator.assignment.jmx" } }
     },
     include("circuit-function"),
+    include("formula")
+  ]),
+  "display-block": braceBlock("display", "display", [
+    include("comment"),
+    include("text"),
+    declares("variable.other.figure.jmx"),
+    include("figure-unit"),
+    include("circuit-function"),
+    include("formula")
+  ]),
+  "measure-block": braceBlock("measure", "measure", [
+    include("comment"),
+    include("text"),
+    declares("variable.other.figure.jmx"),
+    include("figure-unit"),
+    include("circuit-function"),
+    { match: "\\b(signal)\\b", name: "storage.modifier.figure.jmx" },
+    include("formula")
+  ]),
+  "figure-unit": {
+    comment: "display/measure: `unit %`, `unit V`, `unit A/V^2` after the expression.",
+    match: "\\b(unit)[ \\t]+([^ \\t\"#;}]+)",
+    captures: { "1": { name: "keyword.other.unit-marker.jmx" }, "2": { name: "keyword.other.unit.jmx" } }
+  },
+  "leads-block": braceBlock("leads", "leads", [
+    include("comment"),
+    {
+      comment: "plus red stripes black: a pin, its lead's colour, and its stripes'.",
+      match: `${LINE}(${NAME})[ \\t]+(${NAME})(?:[ \\t]+(stripes)[ \\t]+(${NAME}))?`,
+      captures: {
+        "1": { name: "variable.other.pin.jmx" },
+        "2": { name: "constant.other.colour.jmx" },
+        "3": { name: "keyword.other.stripes.jmx" },
+        "4": { name: "constant.other.colour.jmx" }
+      }
+    }
+  ]),
+  "image-block": braceBlock("image", "image", [
+    include("comment"),
+    { match: "\\b(over|start|stop|hit|when|crosses|where|value|in)\\b", name: "keyword.other.image.jmx" },
     include("formula")
   ]),
   "pins-block": braceBlock("pins", "pins", [
@@ -442,8 +508,14 @@ addRules({
     include("comment"),
     {
       name: "meta.block.preset.jmx",
-      begin: `${LINE}\\b(preset)[ \\t]*${STRING}[ \\t]*(\\{)`,
-      beginCaptures: { "1": { name: "keyword.other.view.jmx" }, "2": { name: "entity.name.section.preset.jmx" }, "3": blockBegin },
+      comment: "preset \"Title\" [\"what it shows\"] { name = value, … }",
+      begin: `${LINE}\\b(preset)[ \\t]*${STRING}(?:[ \\t]*(\"[^\"]*\"|'[^']*'))?[ \\t]*(\\{)`,
+      beginCaptures: {
+        "1": { name: "keyword.other.view.jmx" },
+        "2": { name: "entity.name.section.preset.jmx" },
+        "3": { name: "string.quoted.double.jmx" },
+        "4": blockBegin
+      },
       end: "\\}",
       endCaptures: blockEnd,
       patterns: [include("comment"), include("assignments")]
@@ -534,12 +606,36 @@ addRules({
   // ─── components and circuits: one netlist notation ───────────────────────────────────────────────
 
   "symbol-uses": {
-    match: `${LINE}\\b(symbol)[ \\t]+(uses)[ \\t]+(${SLUG})`,
-    captures: {
-      "1": keyword("symbol"),
-      "2": { name: "keyword.other.uses.jmx" },
-      "3": { name: "entity.name.type.reference.jmx" }
-    }
+    comment: "symbol uses diode-symbol[, other] [{ a anode; b cathode }]: the symbols that draw the component, the first the default, and the port each pin lands on.",
+    patterns: [
+      {
+        name: "meta.block.symbol-uses.jmx",
+        begin: `${LINE}\\b(symbol)[ \\t]+(uses)[ \\t]+(${SLUG}(?:[ \\t]*,[ \\t]*${SLUG})*)[ \\t]*(\\{)`,
+        beginCaptures: {
+          "1": keyword("symbol"),
+          "2": { name: "keyword.other.uses.jmx" },
+          "3": { patterns: [{ match: ",", name: "punctuation.separator.comma.jmx" }, { match: SLUG, name: "entity.name.type.reference.jmx" }] },
+          "4": blockBegin
+        },
+        end: "\\}",
+        endCaptures: blockEnd,
+        patterns: [
+          include("comment"),
+          {
+            match: `${LINE}(${NAME})[ \\t]+(${NAME})`,
+            captures: { "1": { name: "entity.name.tag.port.jmx" }, "2": { name: "variable.other.pin.jmx" } }
+          }
+        ]
+      },
+      {
+        match: `${LINE}\\b(symbol)[ \\t]+(uses)[ \\t]+(${SLUG}(?:[ \\t]*,[ \\t]*${SLUG})*)`,
+        captures: {
+          "1": keyword("symbol"),
+          "2": { name: "keyword.other.uses.jmx" },
+          "3": { patterns: [{ match: ",", name: "punctuation.separator.comma.jmx" }, { match: SLUG, name: "entity.name.type.reference.jmx" }] }
+        }
+      }
+    ]
   },
   "symbol-shape": {
     comment: "symbol box { left d, clk edge; right q }: a shape or a glyph, its pins placed by side or by the glyph's ports.",
@@ -815,6 +911,46 @@ addRules({
     { match: ",", name: "punctuation.separator.comma.jmx" },
     { match: SLUG, name: "entity.name.type.reference.jmx" }
   ]),
+  "instrument-line": {
+    comment: "An instrument's objects, representations and the object it opens: objects geometric_construction, point_set.",
+    name: "meta.line.instrument.jmx",
+    begin: `${LINE}\\b(objects|representations|opens)\\b`,
+    beginCaptures: { "1": { name: "keyword.other.instrument.jmx" } },
+    end: LINE_END,
+    patterns: [
+      { match: ",", name: "punctuation.separator.comma.jmx" },
+      { match: SLUG, name: "entity.name.type.reference.jmx" }
+    ]
+  },
+  "collection-section": {
+    comment: "section \"Ordinary\" { items … }: a collection's section and its items.",
+    name: "meta.block.section.jmx",
+    begin: `${LINE}\\b(section)[ \\t]*${STRING}[ \\t]*(\\{)`,
+    beginCaptures: { "1": keyword("section"), "2": { name: "entity.name.section.jmx" }, "3": blockBegin },
+    end: "\\}",
+    endCaptures: blockEnd,
+    patterns: [include("comment"), include("items-line"), include("text")]
+  },
+  "course-lesson": {
+    comment: "lesson \"Title\" [as slug] { summary …; minutes 10; object …; step \"…\" { … } }",
+    name: "meta.block.lesson.jmx",
+    begin: `${LINE}\\b(lesson)[ \\t]*${STRING}((?:[ \\t]+as[ \\t]+${SLUG})?)[ \\t]*(\\{)`,
+    beginCaptures: {
+      "1": keyword("lesson"),
+      "2": { name: "entity.name.section.lesson.jmx" },
+      "3": { patterns: [include("document-identity")] },
+      "4": blockBegin
+    },
+    end: "\\}",
+    endCaptures: blockEnd,
+    patterns: [
+      include("comment"),
+      include("course-step"),
+      { match: `${LINE}(${NAME})`, captures: { "1": { name: "entity.other.attribute-name.field.jmx" } } },
+      include("text"),
+      include("formula")
+    ]
+  },
   "course-step": {
     name: "meta.block.step.jmx",
     begin: `${LINE}\\b(step)[ \\t]*${STRING}[ \\t]*(\\{)`,
@@ -843,8 +979,12 @@ addRules({
     ]
   },
   "circuit-function": {
-    comment: "d(q)/dt in an equation; current and level in a measurement. A pin's name is its voltage, so it needs nothing.",
+    comment: "d(q)/dt in an equation; a pin's members — anode.current, anode.voltage — anywhere a formula is; current and level in a measurement. A pin's bare name is its voltage, so it needs nothing.",
     patterns: [
+      {
+        match: "(?<=[A-Za-z0-9_])(\\.)(current|voltage)\\b",
+        captures: { "1": { name: "punctuation.accessor.jmx" }, "2": { name: "support.variable.member.pin.jmx" } }
+      },
       { match: "\\b(d)(?=[ \\t]*\\()", name: "support.function.derivative.jmx" },
       { match: "(?<=\\))[ \\t]*(/)[ \\t]*(dt)\\b", captures: { "1": { name: "keyword.operator.jmx" }, "2": { name: "support.function.derivative.jmx" } } },
       { match: "\\b(current|power|level)\\b", name: "keyword.other.measure.jmx" }

@@ -14,11 +14,10 @@ component "Capacitor" as capacitor type capacitor {
         terminal_one analog 1 "first terminal"
         terminal_two analog 2 "second terminal"
     }
-    # While it runs, beside it: how full it is — its charge as a share of the charge it holds at its rated voltage,
-    # which is the voltage across it against that rating.
+    # While it runs, beside it: how near its rating it is — the voltage across it against that rating, which is also
+    # its charge against the charge it holds there. Past 100 % it fails.
     display {
         overvoltage = 100 * abs(terminal_one - terminal_two) / voltage_rating unit % "of its rated voltage"
-        charge = 100 * (terminal_one - terminal_two) / voltage_rating unit % "of rating"
     }
 
     # Drawn plain, or as an electrolytic — the polarized drawing, its "+" on terminal_one — by a part's `symbol` choice.

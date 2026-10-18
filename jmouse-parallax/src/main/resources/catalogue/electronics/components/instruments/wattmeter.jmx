@@ -24,7 +24,7 @@ component "Wattmeter" as wattmeter type meter {
         minus black stripes white
     }
     measure {
-        reading = (plus - minus) * current(in) unit W signal
+        reading = (plus - minus) * in.current unit W signal
     }
     symbol uses wattmeter-symbol {
         a in

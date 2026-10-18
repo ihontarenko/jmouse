@@ -156,6 +156,9 @@
         <module>jmouse-git</module>
         <module>jmouse-git-hosting</module>
         <module>jmouse-java-parser</module>
+        <module>jmouse-java-index</module>
+        <module>jmouse-java-index-store</module>
+        <module>jmouse-java-index-jpa</module>
         <module>jmouse-spring</module>
         <module>pet-gallery</module>
         <module>wep-app</module>

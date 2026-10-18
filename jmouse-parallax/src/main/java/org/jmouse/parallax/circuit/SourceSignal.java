@@ -100,7 +100,7 @@ final class SourceSignal {
         }
         ComponentModel.Equation equation = model.equations().getFirst();
         List<Formula.Definition> library = ModelEquations.LANGUAGE.definitions(ModelEquations.libraryText(model));
-        Formula formula = ModelEquations.LANGUAGE.parse(ModelEquations.readable(model.name(), equation.formula(), equation.line()), library);
+        Formula formula = ModelEquations.read(model.name(), equation.formula(), equation.line(), library);
         if (formula.mentionsHostCall()) {
             return Optional.empty();
         }

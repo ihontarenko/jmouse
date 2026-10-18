@@ -8,7 +8,7 @@ component "PNP transistor" as pnp-transistor type bjt {
         category circuits
         failure open
     }
-    family bipolar-transistor
+    extends bipolar-transistor
 
     parameters {
         polarity = -1                         "PNP"

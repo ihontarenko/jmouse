@@ -58,9 +58,9 @@ public final class StatementMatcher {
         return new LoopMatcher();
     }
 
-    /** {@code local slot = …} */
-    public static Matcher<TokenCursor> local() {
-        return new LocalMatcher();
+    /** {@code let slot = …}, {@code const limit = …} */
+    public static Matcher<TokenCursor> declaration() {
+        return new DeclarationMatcher();
     }
 
     /** {@code return} — with or without a value. */
@@ -113,11 +113,11 @@ public final class StatementMatcher {
         }
     }
 
-    private record LocalMatcher() implements Matcher<TokenCursor> {
+    private record DeclarationMatcher() implements Matcher<TokenCursor> {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return checkAt(cursor, 0, T_LOCAL) && checkAt(cursor, 1, StatementToken.nameTokens());
+            return checkAt(cursor, 0, T_LET, T_CONST) && checkAt(cursor, 1, StatementToken.nameTokens());
         }
     }
 

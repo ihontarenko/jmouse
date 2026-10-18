@@ -111,7 +111,7 @@ by quoting slugs after `formulas` — `formulas` is only a brace body of local d
 | `nets` | `out route 300,200 380,200` · `gnd ground` | node routing and ground flags |
 | `layout` | `R1 at 240,200 rotate 90 name at dx,dy shows rms graph` · `W1 wire R1.negative to C1.positive via 240 120` | the sheet drawing — placements and wires; a comment here survives a save from the canvas |
 | `ports` | `input in` | makes a circuit reusable as a component |
-| `probes` | `CH1 out 2 V/div` · `CH2 out against reference` · `L1 level clock` | oscilloscope channels and logic probes (meters are parts, not probes) |
+| `probes` | `CH1 out 2 V/div` · `CH2 out against reference` · `L1 level clock` · `time 1 ms/div` | oscilloscope channels and logic probes (meters are parts, not probes); `time` is the time base the bench opens on — a fresh run keeps it rather than taking one from the trigger's period, and a save from the bench writes the time base it was saved with |
 | `analysis` | `analysis transient for 5 ms` · `analysis ac from 10 Hz to 1 MHz points 200` | a batch run spec |
 | `sheet` | `sheet 1200 x 760 grid 20` | the schematic canvas size |
 
@@ -119,19 +119,50 @@ A pin's **name is its voltage** (`(anode - j) / R_series`); a branch is `current
 `voltage a -> b = …`; a charge's rate is `d(q)/dt`. SPICE's `V(…)`, `I(…)`, `ddt(…)` are refused with
 what to write instead. A data column is the circuit's own name with a unit — `out` [V], `R1` [A].
 
+A pin has two **members**: `anode.current` — the current into it — and `anode.voltage`, the same as the bare
+`anode`. They are jMF host calls, written as something the pin has: `anode.current` and `current(anode)` are one call,
+bound in the tree (`PinQuantities`), never read out of the text — so a pin spelled like a keyword works too
+(`in.current`). `pin.current` is the form the catalogue writes; `current(pin)` stays an equal spelling.
+
 ## Component blocks (`component`)
 
 | Block | Purpose |
 |---|---|
 | `pins` | `out analog output 1 7 "…"` — the package pins: name, nature (`analog`/`digital`/`power`/`ground`), direction, package numbers per unit, attributes (`edge`, `bubble`) |
 | `nodes` | `name [digital] "…"` — internal nodes |
-| `state` · `equations` | the device physics: `x = 1 continuous`, and `current a -> b = …`, `d(x)/dt = …`, `local n = …` |
+| `state` · `equations` | the device physics: `x = 1 continuous`, and `current a -> b = …`, `d(x)/dt = …`, `let n = …` / `let I_through : current = …` (`local` is the same word) |
 | `behaviour` | `behaviour { … }` — jMS event logic (digital parts) |
 | `measure` | `reading = plus - minus unit V signal` — makes the component an instrument; the engine evaluates the figure on every sample |
 | `display` | `charge = 100 * (…) / voltage_rating unit % "of the rated voltage"` — live figures drawn on the symbol |
 | `leads` | `plus red stripes black` — the colour of an instrument's leads |
 | `symbol` | how a part is drawn — see below |
 | `parts` · `nets` | a component built from other parts (a subcircuit) |
+
+**A `let` may say what its value is**: `let V_diode : voltage = j - cathode`, `let Q_junction : charge = …`. The type
+is jMX's electrical quantity (`ElectricalTypes`: `voltage` V, `current` A, `charge` C, `power` W, `energy` J,
+`resistance` Ω, `conductance` S, `capacitance` F, `inductance` H, `flux` Wb, `frequency` Hz, `time` s, `temperature`
+K, `ratio`) or one of the core's (`double`, `int`…); an unknown one is refused at its line, naming them all. Every
+quantity is carried as a `double` and the type never reaches the solver. A `behaviour` knows the same types — its
+`let delay : time = propagation_delay * delay_scale(Vcc - GND)` is checked on every write, as jMS checks any typed
+name — but no dimensions: those are an equation's.
+
+A document may name its own: **`type power_density = power / area`** — known types joined by `*`, `/` and whole
+powers (`current ^ 2`, `1 / time`), then `let p : power_density = …`.
+
+**Dimensions are checked when a component is read** (`DimensionCheck`): a current equation's right side must be a
+current, a voltage equation's a voltage, `d(x)/dt` what `x` is over a second, a typed `let` its type, a `display` or a
+`measure` figure what its `unit` says; a sum may not join a voltage and a current, and `exp`, `tanh`, `sin`… take pure
+numbers. It is **conservative**: a pin is a voltage, `pin.current` a current, `time` and `temperature` what they say, a
+parameter what its written unit says — but a parameter written without a unit, and a library function's result, are
+*unknown*, and a bare number is *free* (a pure number in a product, anything in a sum). A model is refused only where
+both sides are known and disagree, naming them: `'current a -> b' is a current [A], but its expression is a voltage
+[V]`. A hidden scale is written as what it is — `let R_carrier : resistance = 1` for a current carried on a node at
+one volt per ampere, `let V_supply_knee : voltage = 1` inside `tanh((Vcc - GND) / V_supply_knee)`.
+
+A rate `d(q)/dt` is **read in the tree**, never in the text: jMF's `withRate("t", …)` takes the division whose left
+ends in the call `d(…)` and whose right is the name `dt` as one node — `polarity * d(q)/dt` reaches it as
+`(polarity * d(q)) / dt` and means `polarity · dq/dt`. A `d(…)` not over `dt`, and `dt` not under a `d(…)`, are
+refused saying how a rate is written.
 
 Behaviour, heat and drift are written in jMX, never coded per component: heat from `power_rating`,
 `thermal_resistance`, `thermal_time_constant`, `T_maximum` and `meta failure open|short`; drift from a
