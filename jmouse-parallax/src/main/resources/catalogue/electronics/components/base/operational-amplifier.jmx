@@ -13,6 +13,9 @@
 #   V_common_mode_low/_high          where the inputs stop working; past the low limit some parts (TL07x) reverse
 #   V_output_headroom, V_output_low  how close the output gets to each rail
 #   I_output_source, I_output_sink   the output's short-circuit current
+#   open_collector                   1 for a comparator's open collector: the output only sinks, while the gain stage is
+#                                    below its middle, and a pull-up outside makes the high level — any level, the
+#                                    supply's or another
 #
 # The supply pins are Vcc and GND even on a dual-supply part, where GND is the negative rail: the circuits already
 # written name them so. Noise: V_noise and I_noise at the inputs, with a 1/f corner. Not represented: input
@@ -60,6 +63,7 @@ component "Operational amplifier" as operational-amplifier type opamp {
         V_output_headroom = 1.5 V             "the output stays this far below the positive rail"
         V_output_low = 1.5 V                  "the output reaches this close to the negative rail"
         recovery = 1e6 1/s                    "how fast the gain stage comes back out of saturation"
+        open_collector = 0                    "1: the output only sinks, switched by the gain stage; a pull-up makes the high level"
         thermal_resistance = 120 K/W          "kelvin above the bench per watt it takes"
         thermal_time_constant = 5 s           "how fast it warms to that"
         T_maximum = 150 °C                    "past this it fails on a realistic bench"
@@ -130,8 +134,13 @@ component "Operational amplifier" as operational-amplifier type opamp {
         let target : voltage = soft_clamp(delayed, low, high, 0.02)
         let drive : current = (target - output) / R_output
 
-        current Vcc -> output = I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source)
-        current output -> GND = I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)
+        # An open collector sinks while the gain stage stands below its middle — over about 50 mV — and gives nothing
+        # upwards: the pull-up decides the high level, whatever rail it is on. Made to aim far above the supply instead,
+        # the gain stage crossed tens of volts at every switch, and a slow input left a comparator tens of microseconds late.
+        let middle : voltage = (low + high) / 2
+        let sinking : ratio = 0.5 - 0.5 * (delayed - middle) / sqrt(0.0025 + (delayed - middle) ^ 2)
+        current Vcc -> output = (1 - open_collector) * I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source)
+        current output -> GND = (1 - open_collector) * I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink) + open_collector * sinking * I_output_sink * tanh(soft_positive_part(output - low, 0.0001) / (I_output_sink * R_output))
         current non_inverting_input -> inverting_input = (non_inverting_input - inverting_input) / R_input + d(C_input_differential * (non_inverting_input - inverting_input))/dt
         current non_inverting_input -> GND = d(C_input_common * (non_inverting_input - GND))/dt
         current inverting_input -> GND = d(C_input_common * (inverting_input - GND))/dt
