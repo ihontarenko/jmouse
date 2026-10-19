@@ -41,6 +41,8 @@ import java.util.function.Function;
  *                       it plays, the more of its samples a frame traces for the sheet
  * → set     { part, parameter, value }  or  { parameter, value } for the circuit's own   ← changed { continued, controls }
  * → restart { source } or { definition }, [interval], [probes] — the edited circuit, run at once with its probes   ← started
+ * → retune  { definition } — the same circuit with other values (a part's value or model values changed on the bench):
+ *                       the run goes on from now, and starts again only when its parts changed   ← changed { continued }
  * → capture { from, to, samples } — a stretch the run passed, replayed from where it stood just before and sampled
  *                       finely; the run goes on   ← capture, binary like a frame, its header's type "capture"
  *                                                                                ← problem { message }
@@ -171,6 +173,7 @@ final class LiveRun {
             case "acquire" -> acquire(message.gapless());
             case "set" -> set(message);
             case "restart" -> restart(message);
+            case "retune" -> retune(message);
             case "capture" -> capture(message);
             default -> throw ParallaxProblem.invalid("'" + message.type() + "' is not something a running circuit does.");
         }
@@ -581,6 +584,23 @@ final class LiveRun {
             changed.put(message.parameter(), message.value());
             values = Map.copyOf(changed);
         }
+        LiveCircuits.Prepared prepared = circuits.prepare(object, circuit, parameters, values);
+        boolean continued = session.retune(prepared.compiled());
+        controls = prepared.controls();
+        reply(Map.of("type", "changed", "continued", continued, "controls", controls, "time", session.time()));
+    }
+
+    /**
+     * The circuit with other values — a part's value, its model's values, as a bench changes them while it runs —, going
+     * on from now as a moved slider does ({@link LiveCircuitSession#retune}). A restart threw away the run, the screen
+     * and the parts' heat for a resistor changed from 47 to 56 Ω; a circuit whose parts changed still starts again.
+     */
+    private synchronized void retune(Message message) {
+        requireSession();
+        if (!(message.definition() instanceof ObjectDefinition.Circuit edited)) {
+            throw ParallaxProblem.invalid("Send the circuit with its new values to go on with them.");
+        }
+        circuit = edited;
         LiveCircuits.Prepared prepared = circuits.prepare(object, circuit, parameters, values);
         boolean continued = session.retune(prepared.compiled());
         controls = prepared.controls();
