@@ -570,9 +570,16 @@ expect "forward voltage falls as it warms" from "VF temperature coefficient, abo
   equations in kelvin) and whether instruments load what they read. The parts are netlist lines; `self` is the
   component under test (`U1 self (in = top, out = load)`, settings override its parameters). `X1 forward current = …`
   and `X1 reverse voltage = …` are whole two-terminal benches on their own.
-- `measure` — `operating`, `final`, `maximum`, `minimum`, `average`, `frequency … above|below <level>`, `duty … above|below
-  <level>`, each optionally `after <time>`, of a signal: a node (`load`), a difference (`out - ret`), a part's current
-  (`current V1`), a digital level (`level clock`); `final levels a, b` for digital nodes.
+- `measure` (`CircuitMeasurement`) — of a signal: a node (`load`), a difference (`out - ret`), a part's current
+  (`current V1`) or power (`power R1`), a digital level (`level clock`); `final levels a, b` for digital nodes.
+  - over the run: `final`, `maximum`, `minimum`, `average`, `rms`, `frequency … above|below <level>`,
+    `duty … above|below <level>`, each optionally `after <time>` (refused past the run's end); `value out at 2 ms`, the
+    value at a moment;
+  - at rest: `operating out`;
+  - small signal, linearized at the operating point: `gain out at 1 kHz` (dB), `phase out at 1 kHz` (degrees),
+    `corner out` — the lowest frequency the gain crosses 3 dB under its peak (1 mHz … 1 GHz);
+  - any of them `with R_load = 1 kΩ, S1.closed = 1`: the circuit with other slider values (refused outside their
+    range) or part settings. A DC sweep is a few such points: `operating out with V_in = 3 V`.
 - the criterion — `near 6.86 kHz +- 5%`, `within 26 V .. 30 V` (either end may be left open), `is 1`.
 
 ### A circuit

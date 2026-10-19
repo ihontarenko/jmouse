@@ -38,7 +38,8 @@ public final class CircuitExpectations implements ConsistencyCheck {
             String verdict;
             try {
                 ComponentModel.Criterion criterion = criterionOf(expectation);
-                ComponentCheck.Measurement measurement = ComponentCheck.measureCompiled(object, expectation.measure(), ComponentCheck.SAMPLES);
+                CircuitMeasurement.Measurement measurement = CircuitMeasurement.of(expectation.measure())
+                        .takeOn(object, CircuitMeasurement.SAMPLES);
                 boolean admitted = measurement.admittedBy(criterion);
                 if (!admitted) {
                     failed++;

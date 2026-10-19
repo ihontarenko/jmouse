@@ -187,7 +187,8 @@ public final class ElaboratedCircuit {
             pins.put(first, element.positive());
             pins.put(second, element.negative());
             Map<String, String> overrides = new LinkedHashMap<>(element.overrides() == null ? Map.of() : element.overrides());
-            overrides.put(model.parameters().getFirst().name(), element.value());
+            // A setting named for the first parameter wins over the written value, as on a model: 'with R1.resistance = …'.
+            overrides.putIfAbsent(model.parameters().getFirst().name(), element.value());
             String[] terminals = terminalNamesOf(element);
             reportedAs.put(element.id(), Map.of(first, terminals[0], second, terminals[1]));
             elements.add(new CircuitElement(element.id(), CircuitElementType.MODEL, null, null, null,

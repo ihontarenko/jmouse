@@ -258,7 +258,7 @@ public final class CircuitComputations {
             return new Dataset.TimeSeries("f", frequencies, columns, values, units, Dataset.TimeSeries.AxisScale.LOGARITHMIC);
         }
 
-        private static double gainOf(Complex response) {
+        static double gainOf(Complex response) {
             return 20 * Math.log10(Math.max(response.modulus(), 1e-12));
         }
 
@@ -583,7 +583,7 @@ public final class CircuitComputations {
     }
 
     /** Where a small-signal analysis linearizes: a linear circuit's model does not depend on its bias, so rest will do. */
-    private static double[] smallSignalBias(CircuitSolver solver, Netlist netlist) {
+    static double[] smallSignalBias(CircuitSolver solver, Netlist netlist) {
         return solver.nonlinear() ? solver.operatingPoint() : new double[netlist.size()];
     }
 
