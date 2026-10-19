@@ -4,10 +4,12 @@
 
 component "NE555" as ne555 type timer {
     meta {
+        designator U
         summary "Precision timer, 4.5 V to 16 V"
         source "TI NE555 datasheet (SLFS022)"
         package "SOIC-8"
         category circuits
+        failure short Vcc GND
     }
     use smooth-transitions
 
@@ -24,6 +26,10 @@ component "NE555" as ne555 type timer {
         I_trigger = 0.5 uA           "out of TRIG"
         I_threshold = 0.1 uA         "into THR"
         I_quiescent = 3 mA                   "supply current at 5 V"
+        # How it warms and where it gives up (DIP-8 in still air).
+        thermal_resistance = 120 K/W       "kelvin above the bench per watt it takes"
+        thermal_time_constant = 5 s      "how fast it warms to that"
+        T_maximum = 150 °C               "past this it fails on a realistic bench"
     }
 
     pins {

@@ -5,7 +5,7 @@ package org.jmouse.parallax.object;
  *
  * <p>A kind decides the shape of a definition and, through the computations that accept it, how the object may be
  * shown. Its nature decides the rest: which language or editor writes the definition, and which workbench a reader
- * opens it in — a plotter for mathematics, a runner for a program, an emulator for a circuit. It is
+ * opens it in — a plotter for mathematics, a runner for a program, an simulator for a circuit. It is
  * <strong>derived</strong> from the kind ({@link ObjectKind#nature()}) and never stored, so it cannot disagree with
  * it.</p>
  */

@@ -1,10 +1,12 @@
 # Smooth replacements for the corners a Newton solver cannot cross. A model names this library with
-# `formulas "smooth-transitions"`; these are ordinary jMF definitions.
+# `use smooth-transitions`; these are ordinary jMF definitions, over the physical constants it uses in turn.
 #
 # Every one is written so that no exponential can overflow: each branch keeps exp's argument at or below zero, and
 # limit_exponential turns into its own tangent above 40.
 
 functions "Smooth transitions" as smooth-transitions {
+    use constants
+
     meta {
         summary "Smooth replacements for corners a Newton solver cannot cross"
     }
@@ -29,6 +31,6 @@ functions "Smooth transitions" as smooth-transitions {
         limit_exponential(x) = if(x < 40, exp(x), exp(40) * (x - 39))
 
         # kT/q in volts
-        thermal_voltage(temperature) = 8.617333e-5 * temperature
+        thermal_voltage(temperature) = boltzmann * temperature / elementary_charge
     }
 }

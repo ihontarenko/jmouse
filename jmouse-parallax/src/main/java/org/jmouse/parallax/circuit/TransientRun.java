@@ -1,8 +1,10 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
+
 import org.jmouse.parallax.ComputationProgress;
 import org.jmouse.parallax.object.CompiledObject;
-import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
+import org.jmouse.parallax.object.ObjectDefinition;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,7 +20,7 @@ import java.util.Set;
  * included; each is read off the solution, never forcing a step to land on it.
  *
  * <p>What it holds is named as the circuit names it: a node's voltage by the node, a part's current by
- * {@link CircuitComputations#partCurrentColumn} ({@code V1}, {@code D1}, {@code U1.output}), a digital node's level by
+ * {@link ColumnNames#partCurrent} ({@code V1}, {@code D1}, {@code U1.output}), a digital node's level by
  * the node.</p>
  */
 public final class TransientRun {
@@ -29,13 +31,15 @@ public final class TransientRun {
     private final double[]                  times;
     private final Map<String, double[]>     voltages;
     private final Map<String, double[]>     currents;
-    private final List<Map<String, Object>> levels;
+    private final Map<String, double[]>     powers;
+    private final List<Map<String, LogicLevel>> levels;
 
     private TransientRun(double[] times, Map<String, double[]> voltages, Map<String, double[]> currents,
-                         List<Map<String, Object>> levels) {
+                         Map<String, double[]> powers, List<Map<String, LogicLevel>> levels) {
         this.times = times;
         this.voltages = voltages;
         this.currents = currents;
+        this.powers = powers;
         this.levels = levels;
     }
 
@@ -48,12 +52,17 @@ public final class TransientRun {
      *                  sample cost more than solving them
      */
     public static TransientRun of(CompiledObject object, int samples, boolean everyPart, ComputationProgress progress) {
+        return of(ElaboratedCircuit.of(object), samples, everyPart, progress);
+    }
+
+    /** The same, of a circuit already elaborated. */
+    static TransientRun of(ElaboratedCircuit elaborated, int samples, boolean everyPart, ComputationProgress progress) {
         if (samples < 2) {
             throw new IllegalArgumentException("A transient has at least two samples.");
         }
-        Netlist netlist = Netlist.of(object);
+        Netlist netlist = Netlist.of(elaborated);
         double duration = netlist.duration();
-        LiveCircuitSolver solver = new LiveCircuitSolver(object, duration / (samples - 1)).solutionOnly();
+        LiveCircuitSolver solver = new LiveCircuitSolver(elaborated, duration / (samples - 1)).solutionOnly();
         solver.trace(1);
         solver.traceOnly(everyPart ? null : partsWithCurrentsOfTheirOwn(netlist));
         List<String> nodes = solver.nodes();
@@ -61,13 +70,14 @@ public final class TransientRun {
         Map<String, double[]> voltages = new LinkedHashMap<>();
         nodes.forEach(node -> voltages.put(node, new double[samples]));
         Map<String, double[]> currents = new LinkedHashMap<>();
-        List<Map<String, Object>> levels = new ArrayList<>(samples);
+        Map<String, double[]> powers = new LinkedHashMap<>();
+        List<Map<String, LogicLevel>> levels = new ArrayList<>(samples);
         boolean digital = !solver.levels().isEmpty();
         int done = 0;
         while (done < samples) {
             // A digital node's level is the engine's state between samples, read after each one; analog alone, a chunk.
             int count = digital ? 1 : Math.min(CHUNK, samples - done);
-            for (LiveCircuitSolver.Sample sample : solver.advance(count)) {
+            for (LiveSample sample : solver.advance(count)) {
                 times[done] = sample.time();
                 for (int node = 0; node < nodes.size(); node++) {
                     voltages.get(nodes.get(node))[done] = sample.voltages()[node];
@@ -76,17 +86,22 @@ public final class TransientRun {
                     int index = done;
                     sample.terminals().forEach((part, terminals) -> {
                         terminals.forEach((terminal, current) -> {
-                            String column = CircuitComputations.partCurrentColumn(part, terminal);
+                            String column = ColumnNames.partCurrent(part, terminal);
                             if (column != null) {
                                 currents.computeIfAbsent(column, ignored -> new double[samples])[index] = current;
                             }
                         });
                         // A two-terminal part reports under its own name too — the current into its first pin —, as a
                         // primitive does: a generator is `G1` as well as `G1.positive`, so `current G1` reads either.
-                        if (terminals.size() == 2 && !terminals.containsKey("+")) {
+                        if (terminals.size() == 2 && !terminals.containsKey(ObjectDefinition.PRIMITIVE_POSITIVE)) {
                             currents.computeIfAbsent(part, ignored -> new double[samples])[index] = terminals.values().iterator().next();
                         }
                     });
+                }
+                if (sample.powers() != null) {
+                    int index = done;
+                    sample.powers().forEach((part, power) ->
+                            powers.computeIfAbsent(ColumnNames.partPower(part), ignored -> new double[samples])[index] = power);
                 }
                 levels.add(digital ? solver.levels() : Map.of());
                 done++;
@@ -95,24 +110,22 @@ public final class TransientRun {
                 progress.report((double) done / samples, "Stepping the circuit");
             }
         }
-        return new TransientRun(times, voltages, currents, levels);
+        return new TransientRun(times, voltages, currents, powers, levels);
     }
 
     /**
      * The parts a transient reports the current of without being asked for every part: whatever owns a branch of
-     * its own — a source, a generator, an inductor, an ammeter —, not a branch inside a model, and every diode.
+     * its own — a source, a generator —, not a branch inside a model.
      */
     private static Set<String> partsWithCurrentsOfTheirOwn(Netlist netlist) {
         Set<String> parts = new LinkedHashSet<>();
-        netlist.branches().stream().filter(branch -> !branch.contains(":")).forEach(parts::add);
-        netlist.elements().stream().filter(element -> element.type() == CircuitElementType.DIODE)
-                .forEach(element -> parts.add(element.id()));
+        netlist.branches().stream().filter(Netlist.Branch::partCurrent).map(Netlist.Branch::name).forEach(parts::add);
         return parts;
     }
 
     /** One instant of a circuit, solved by other means — its operating point —, read the way a run is. */
     static TransientRun instant(Map<String, double[]> voltages, Map<String, double[]> currents) {
-        return new TransientRun(new double[]{0}, voltages, currents, List.of(Map.of()));
+        return new TransientRun(new double[]{0}, voltages, currents, Map.of(), List.of(Map.of()));
     }
 
     public int samples() {
@@ -133,8 +146,13 @@ public final class TransientRun {
         return currents;
     }
 
+    /** Each traced part's power, sample by sample, in watts, by {@link ColumnNames#partPower}. */
+    public Map<String, double[]> powers() {
+        return powers;
+    }
+
     /** Every digital node's level at each sample; empty maps for a circuit with none. */
-    public List<Map<String, Object>> levels() {
+    public List<Map<String, LogicLevel>> levels() {
         return levels;
     }
 

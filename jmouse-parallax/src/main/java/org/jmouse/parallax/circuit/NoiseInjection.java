@@ -16,7 +16,6 @@ final class NoiseInjection implements Device {
 
     private final List<Device> noisy;
     private final double       interval;
-    private final double       temperature;
     private final long         seed;
     private long               readAt = Long.MIN_VALUE;
     private List<NoiseCurrent> currents = List.of();
@@ -25,14 +24,12 @@ final class NoiseInjection implements Device {
     private double[]           drawnAtNext = new double[0];
 
     /**
-     * @param noisy       the devices whose noise is injected
-     * @param interval    the time between two samples, seconds: the band is half its inverse
-     * @param temperature the bench's temperature, kelvin
+     * @param noisy    the devices whose noise is injected
+     * @param interval the time between two samples, seconds: the band is half its inverse
      */
-    NoiseInjection(List<Device> noisy, double interval, double temperature, long seed) {
+    NoiseInjection(List<Device> noisy, double interval, long seed) {
         this.noisy = List.copyOf(noisy);
         this.interval = interval;
-        this.temperature = temperature;
         this.seed = seed;
     }
 
@@ -69,7 +66,7 @@ final class NoiseInjection implements Device {
     }
 
     private List<NoiseCurrent> read(double[] state) {
-        return noisy.stream().flatMap(device -> device.noise(state, temperature).stream()).toList();
+        return noisy.stream().flatMap(device -> device.noise(state).stream()).toList();
     }
 
     /** Every source's values at this instant and the next, drawn once: a step is stamped many times between two instants. */

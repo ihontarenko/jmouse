@@ -1,5 +1,10 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.parallax.component.ComponentModel;
+import org.jmouse.parallax.component.ComponentVocabulary;
+import org.jmouse.parallax.component.ModelLanguage;
+import org.jmouse.parallax.component.PinQuantities;
+
 import org.jmouse.formula.Differentiation;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;
@@ -8,12 +13,15 @@ import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Substitution;
 import org.jmouse.formula.Symbols;
-import org.jmouse.formula.el.FormulaLanguage;
+import org.jmouse.parallax.component.ComponentModel.EquationKind;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.stream.Stream;
+import java.util.function.IntPredicate;
 
 /**
  * A model's {@code equations} compiled for one unit: every line a jMF formula over the unit's pin voltages, its
@@ -32,45 +40,6 @@ import java.util.Map;
  * equation written out so may not read {@code current(…)} itself.</p>
  */
 final class ModelEquations {
-
-    /** The call a written {@code d(q)/dt} reaches the solver as: not a name, so an author can never write it. */
-    static final String RATE    = "d/dt";
-
-    /**
-     * A noise current an equation adds, {@code noise(density)}: nothing to the solution, to a noise analysis a random
-     * current along the equation of that one-sided power spectral density, A²/Hz — a junction's {@code 2 * q * I}.
-     */
-    static final String NOISE   = "noise";
-
-    /**
-     * The state a model's own heat is kept in, kelvin above the bench: a model that declares it heats itself on a
-     * realistic bench. On an ideal bench it is nought everywhere but in its own rate equation — so every drift it would
-     * move is computed once, as the bench's temperature is, not on every Newton iteration.
-     */
-    static final String HEATING = "heating";
-
-    /** The bench's flag a model reads to know it is realistic. */
-    static final String REALISTIC = "realistic";
-
-    /** SPICE's spellings, read as calls only to be refused with what this language writes instead. */
-    private static final Map<String, String> BORROWED = Map.of(
-            "V", "a pin's name is its voltage — write 'anode - j', not V(anode, j), and 'output', not V(output).",
-            "I", "a current is written on the left: 'current anode -> j = …', or read as 'anode.current'.",
-            "ddt", "a rate is written d(q)/dt, not ddt(q).");
-
-    /**
-     * The language every model expression is read in: jMF, with the solver's rate — {@code d(q)/dt}, recognised in the
-     * tree — and noise, a pin's members, and SPICE's spellings, read only to be refused.
-     */
-    static final FormulaLanguage LANGUAGE = FormulaLanguage.standard()
-            .withHostCalls(NOISE, PinQuantities.CURRENT, PinQuantities.VOLTAGE)
-            .withHostCalls(BORROWED.keySet().toArray(String[]::new))
-            .withRate("t", RATE);
-
-    /** The name a model's expressions read the simulated time by. */
-    static final String TIME = "time";
-
-    enum Kind { CURRENT, VOLTAGE, STATE }
 
     /** What one position of the argument array holds; the parameters follow the last of them. */
     sealed interface Argument {
@@ -139,7 +108,7 @@ final class ModelEquations {
      * from one tape — a diode's diffusion exponential, read by its current and by its charge, computed once. It is the
      * formula itself where the equation reads no charge, and null where the written-out tape would not become code.
      */
-    record Equation(Kind kind, String positive, String negative, String state, Compiled formula, Compiled linearized) {
+    record Equation(EquationKind kind, String positive, String negative, String state, Compiled formula, Compiled linearized) {
 
         Equation copy() {
             Compiled copied = formula.copy();
@@ -153,8 +122,7 @@ final class ModelEquations {
      * {@code name} is only in the messages, and is part of it so that they keep naming the model they are about.
      */
     private record Form(String name, List<String> formulas, Map<String, String> locals, List<ComponentModel.Equation> equations,
-                        List<String> states, List<String> parameterNames, List<String> pinNames, List<String> internalNodes,
-                        boolean selfHeating) {
+                        List<String> states, List<String> parameterNames, List<String> pinNames, List<String> internalNodes) {
     }
 
     /** How many forms are kept: a catalogue's worth of models, and the drafts of the one being written. */
@@ -165,7 +133,7 @@ final class ModelEquations {
      * and every slider move builds it again — a voltage multiplier's twenty-four diodes compiled one diode
      * twenty-four times on each move.
      */
-    private static final Map<Form, ModelEquations> COMPILED = java.util.Collections.synchronizedMap(
+    private static final Map<Form, ModelEquations> COMPILED = Collections.synchronizedMap(
             new LinkedHashMap<>(16, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<Form, ModelEquations> eldest) {
@@ -176,6 +144,8 @@ final class ModelEquations {
     private final ComponentModel model;
     private final List<Argument> layout = new ArrayList<>();
     private final List<String>   nodes;
+    /** The pins among {@link #nodes}: what a pin's current may be asked of. */
+    private final List<String>   pins;
     private final List<String>   parameterNames;
     private final double[]       parameterValues;
     private final List<Equation> equations = new ArrayList<>();
@@ -183,6 +153,18 @@ final class ModelEquations {
     private final List<Noise>    noises  = new ArrayList<>();
     /** How many voltage equations there are: each has a branch current, laid out after the node voltages. */
     private final int branchCount;
+    /**
+     * Whether every equation and every charge is linear in the unit's unknowns — its node voltages, branch currents,
+     * charge rates and continuous states: no partial by one of them reads one of them. Proved once from the formulas,
+     * so a model written as a capacitance behind a resistance is solved as the linear part it is, in one solve a step,
+     * however its values move with the time, the temperature or its discrete states.
+     */
+    private final boolean linear;
+    /**
+     * Whether any equation or charge reads the time — a generator's signal, a timer's ramp. The time always has its
+     * place among the arguments; this says whether anything is read from it.
+     */
+    private final boolean readsTime;
 
     /**
      * The model's equations for one unit with these parameter values: compiled once per form, and copied for every
@@ -191,7 +173,7 @@ final class ModelEquations {
     static ModelEquations of(ComponentModel model, Map<String, Double> parameters, List<String> pinNames, List<String> internalNodes) {
         Form form = new Form(model.name(), model.formulas(), model.locals(), model.equations(),
                 model.states().stream().map(ComponentModel.State::name).toList(), List.copyOf(parameters.keySet()),
-                List.copyOf(pinNames), List.copyOf(internalNodes), selfHeating(parameters));
+                List.copyOf(pinNames), List.copyOf(internalNodes));
         ModelEquations compiled = COMPILED.get(form);
         if (compiled == null) {
             compiled = new ModelEquations(model, parameters, pinNames, internalNodes);
@@ -204,9 +186,12 @@ final class ModelEquations {
     private ModelEquations(ModelEquations compiled, Map<String, Double> parameters) {
         this.model = compiled.model;
         this.nodes = compiled.nodes;
+        this.pins = compiled.pins;
         this.parameterNames = compiled.parameterNames;
         this.parameterValues = parameters.values().stream().mapToDouble(Double::doubleValue).toArray();
         this.branchCount = compiled.branchCount;
+        this.linear = compiled.linear;
+        this.readsTime = compiled.readsTime;
         this.layout.addAll(compiled.layout);
         compiled.equations.forEach(equation -> equations.add(equation.copy()));
         compiled.charges.forEach(charge -> charges.add(charge.copy()));
@@ -220,14 +205,15 @@ final class ModelEquations {
         List<String> allNodes = new ArrayList<>(pinNames);
         allNodes.addAll(internalNodes);
         this.nodes = List.copyOf(allNodes);
+        this.pins = List.copyOf(pinNames);
 
         requireDistinctFromNodes(parameterNames, "parameter");
         requireDistinctFromNodes(List.copyOf(model.locals().keySet()), "let");
         requireDistinctFromNodes(model.states().stream().map(ComponentModel.State::name).toList(), "state");
-        List<Formula.Definition> library = new ArrayList<>(LANGUAGE.definitions(libraryText(model)));
+        List<Formula.Definition> library = new ArrayList<>(ModelLanguage.LANGUAGE.definitions(ModelLanguage.libraryText(model)));
         library.addAll(locals(library));
 
-        this.branchCount = (int) model.equations().stream().filter(equation -> kindOf(equation) == Kind.VOLTAGE).count();
+        this.branchCount = (int) model.equations().stream().filter(equation -> equation.kind() == EquationKind.VOLTAGE).count();
         // Bind every equation first: the charges it finds decide how many slots the table reserves.
         List<Formula> chargeFormulas = new ArrayList<>();
         List<Formula> parsedEquations = new ArrayList<>();
@@ -241,14 +227,16 @@ final class ModelEquations {
                             + "' is not a pin or a node of the model.");
                 }
             }
-            Formula parsed = PinQuantities.bind(read(model.name(), equation.formula(), equation.line(), library), pinNames,
+            Formula parsed = PinQuantities.bind(ModelLanguage.read(model.name(), equation.formula(), equation.line(), library), pinNames,
                     written -> model.name() + ", line " + equation.line() + ": '" + written + "'");
             readsCurrents.add(PinQuantities.readsCurrent(parsed));
             int index = parsedEquations.size();
             parsedEquations.add(parsed);
-            Formula rates = Substitution.replaceHostCalls(parsed, call -> NOISE.equals(call.name())
-                    ? noise(call, equation, noiseDensities.computeIfAbsent(index, ignored -> new ArrayList<>()))
-                    : rate(call, chargeFormulas, equation.line()));
+            Formula rates = Substitution.replaceHostCalls(parsed, call -> switch (call.name()) {
+                case ModelLanguage.NOISE -> noise(call, equation, noiseDensities.computeIfAbsent(index, ignored -> new ArrayList<>()));
+                case ModelLanguage.RATE -> rate(call, chargeFormulas, equation.line());
+                default -> call;
+            });
             rightSides.add(Substitution.bindHostNames(rates, this::nodeVoltage));
         }
         bindPinCurrents(rightSides, readsCurrents);
@@ -257,23 +245,19 @@ final class ModelEquations {
         int coefficientSlot = nodes.size() + branchCount + chargeFormulas.size();
         List<Formula> writtenOut = new ArrayList<>();
         for (Formula parsed : parsedEquations) {
-            Formula rates = Substitution.replaceHostCalls(parsed, call -> NOISE.equals(call.name()) ? new Formula.Constant(0)
-                    : writtenRate(call, chargeFormulas, coefficientSlot));
+            Formula rates = Substitution.replaceHostCalls(parsed, call -> switch (call.name()) {
+                case ModelLanguage.NOISE -> new Formula.Constant(0);
+                case ModelLanguage.RATE -> writtenRate(call, chargeFormulas, coefficientSlot);
+                default -> call;
+            });
             writtenOut.add(Substitution.bindHostNames(rates, this::nodeVoltage));
         }
         bindPinCurrents(writtenOut, readsCurrents);
 
-        // On an ideal bench its own heat is nought: wherever it is read but in its own rate equation.
-        if (!selfHeating(parameters)) {
-            for (int index = 0; index < model.equations().size(); index++) {
-                if (!HEATING.equals(model.equations().get(index).state())) {
-                    rightSides.set(index, withoutHeating(rightSides.get(index)));
-                    writtenOut.set(index, withoutHeating(writtenOut.get(index)));
-                }
-            }
-            chargeFormulas.replaceAll(ModelEquations::withoutHeating);
-            noiseDensities.values().forEach(densities -> densities.replaceAll(pair -> pair.stream().map(ModelEquations::withoutHeating).toList()));
-        }
+        List<String> continuousStates = model.states().stream().filter(state -> !state.discrete())
+                .map(ComponentModel.State::name).toList();
+        this.linear = linearIn(nodes.size() + branchCount + chargeFormulas.size(), continuousStates, rightSides, chargeFormulas);
+        this.readsTime = Stream.concat(rightSides.stream(), chargeFormulas.stream()).anyMatch(formula -> formula.dependsOn(ComponentVocabulary.TIME));
 
         nodes.forEach(node -> layout.add(new Argument.NodeVoltage(node)));
         for (int branch = 0; branch < branchCount; branch++) {
@@ -295,29 +279,18 @@ final class ModelEquations {
             names.add(state.name());
         });
         layout.add(new Argument.Time());
-        names.add(TIME);
+        names.add(ComponentVocabulary.TIME);
         Symbols table = Symbols.withSlots(reserved, names, parameterNames);
 
         for (Formula charge : chargeFormulas) {
             charges.add(compile(charge, table, slot -> true));
         }
-        // On an ideal bench the rate equation of its own heat is left out with the state; the rest keep their order.
-        boolean[] leftOut = new boolean[model.equations().size()];
-        int[] position = new int[model.equations().size()];
-        int kept = 0;
-        for (int index = 0; index < leftOut.length; index++) {
-            leftOut[index] = !selfHeating(parameters) && HEATING.equals(model.equations().get(index).state());
-            position[index] = leftOut[index] ? -1 : kept++;
-        }
         noiseDensities.forEach((equation, densities) -> densities.forEach(density ->
-                noises.add(new Noise(position[equation], compile(density.get(0), table, slot -> false),
+                noises.add(new Noise(equation, compile(density.get(0), table, slot -> false),
                         compile(density.get(1), table, slot -> false)))));
         int firstRate = nodes.size() + branchCount;
         int afterHistories = coefficientSlot + 1 + chargeFormulas.size();
         for (int index = 0; index < model.equations().size(); index++) {
-            if (leftOut[index]) {
-                continue;
-            }
             ComponentModel.Equation equation = model.equations().get(index);
             Formula rightSide = rightSides.get(index);
             Compiled formula = compile(rightSide, table, slot -> true);
@@ -330,19 +303,57 @@ final class ModelEquations {
                     linearized = null;
                 }
             }
-            equations.add(new Equation(Kind.valueOf(equation.kind().name()), equation.positive(), equation.negative(),
+            equations.add(new Equation(equation.kind(), equation.positive(), equation.negative(),
                     equation.state(), formula, linearized));
         }
     }
 
-    /** Whether the bench is realistic, so that a model that heats itself does. */
-    private static boolean selfHeating(Map<String, Double> parameters) {
-        return parameters.getOrDefault(REALISTIC, 0.0) != 0;
+    /**
+     * Whether every formula is linear in the unknowns — the slots below {@code unknownSlots} and the continuous states:
+     * each partial by one of them reads none of them. A formula the differentiation cannot take apart is not proved
+     * linear, and the model stays nonlinear: solved by Newton, as before.
+     */
+    private static boolean linearIn(int unknownSlots, List<String> states, List<Formula> rightSides, List<Formula> charges) {
+        List<Formula> formulas = new ArrayList<>(rightSides);
+        formulas.addAll(charges);
+        try {
+            for (Formula formula : formulas) {
+                for (int slot : formula.slots()) {
+                    if (slot < unknownSlots && readsUnknown(Differentiation.derivative(formula, new Formula.Slot(slot, "slot " + slot)),
+                            unknownSlots, states)) {
+                        return false;
+                    }
+                }
+                for (String state : states) {
+                    if (formula.dependsOn(state) && readsUnknown(Differentiation.derivative(formula, state), unknownSlots, states)) {
+                        return false;
+                    }
+                }
+            }
+        } catch (RuntimeException notDifferentiable) {
+            return false;
+        }
+        return true;
     }
 
-    /** A formula with its model's own heat read as nought, inside the locals it calls as well. */
-    private static Formula withoutHeating(Formula formula) {
-        return Substitution.bindHostNames(formula, name -> HEATING.equals(name) ? new Formula.Constant(0) : null);
+    private static boolean readsUnknown(Formula partial, int unknownSlots, List<String> states) {
+        return partial.slots().stream().anyMatch(slot -> slot < unknownSlots) || states.stream().anyMatch(partial::dependsOn);
+    }
+
+    /** Whether every equation and charge is linear in the unit's unknowns: solved in one step, no Newton. */
+    boolean linear() {
+        return linear;
+    }
+
+    /** Whether any of its equations or charges reads the time. */
+    boolean readsTime() {
+        return readsTime;
+    }
+
+    /** Where a parameter's value stands in {@link #arguments()}; -1 for a parameter the unit does not have. */
+    int parameterPosition(String name) {
+        int index = parameterNames.indexOf(name);
+        return index < 0 ? -1 : layout.size() + index;
     }
 
     /** Every {@code current(pin)} in the right sides, written out of the other equations. */
@@ -350,14 +361,13 @@ final class ModelEquations {
         List<Formula> unbound = List.copyOf(rightSides);
         for (int index = 0; index < rightSides.size(); index++) {
             int line = model.equations().get(index).line();
-            rightSides.set(index, Substitution.bindHostNames(unbound.get(index), name -> PinQuantities.pinOf(name) != null
-                    ? currentInto(PinQuantities.pinOf(name), unbound, readsCurrents, line) : null));
+            rightSides.set(index, PinQuantities.bindCurrents(unbound.get(index), pins, pin -> currentInto(pin, unbound, readsCurrents, line)));
         }
     }
 
     /** A charge's rate written out: coefficient · q − history, both read from slots the device fills each step. */
     private Formula writtenRate(Formula.HostCall call, List<Formula> chargeFormulas, int coefficientSlot) {
-        Formula charge = Substitution.bindHostNames(call.arguments().getFirst(), this::nodeVoltage);
+        Formula charge = chargeOf(call.arguments().getFirst(), 0);
         int index = chargeFormulas.indexOf(charge);
         Formula scaled = new Formula.Binary(Formula.Operator.MULTIPLY, new Formula.Slot(coefficientSlot, "rate coefficient"), charge);
         return new Formula.Binary(Formula.Operator.SUBTRACT, scaled,
@@ -409,18 +419,24 @@ final class ModelEquations {
         model.locals().forEach((name, formula) -> text.append(name).append(" = ").append(formula).append('\n'));
         List<Formula.Definition> definitions;
         try {
-            definitions = LANGUAGE.definitions(text.toString(), library).stream()
+            definitions = ModelLanguage.LANGUAGE.definitions(text.toString(), library).stream()
                     .map(definition -> new Formula.Definition(definition.name(), definition.parameters(),
-                            refuseBorrowed(model.name() + ": ", definition.body())))
+                            ModelLanguage.refuseBorrowed(model.name() + ": ", definition.body())))
                     .toList();
         } catch (FormulaException failure) {
             throw new IllegalArgumentException(model.name() + ": " + failure.getMessage(), failure);
         }
         List<Formula.Definition> bound = new ArrayList<>();
         for (Formula.Definition definition : definitions) {
-            Formula rates = Substitution.replaceHostCalls(definition.body(), call -> {
-                throw new IllegalArgumentException(model.name() + ": write d(q)/dt in the current it adds to, not in 'local "
-                        + definition.name() + "'.");
+            // A pin's current and voltage are read in a let as in an equation; only a rate belongs where it adds a current.
+            Formula members = PinQuantities.bind(definition.body(), pins,
+                    written -> model.name() + ", let " + definition.name() + ": '" + written + "'");
+            Formula rates = Substitution.replaceHostCalls(members, call -> {
+                if (PinQuantities.isCurrent(call)) {
+                    return call;
+                }
+                throw new IllegalArgumentException(model.name() + ": write " + (ModelLanguage.NOISE.equals(call.name()) ? "noise(…)" : "d(q)/dt")
+                        + " in the current it adds to, not in 'let " + definition.name() + "'.");
             });
             Formula body = Substitution.bindHostNames(rates, this::nodeVoltage);
             bound.add(new Formula.Definition(definition.name(), definition.parameters(), body));
@@ -485,11 +501,11 @@ final class ModelEquations {
             throw new IllegalArgumentException(model.name() + ", line " + line + ": a rate is the rate of one charge: d(q)/dt.");
         }
         Formula charge = call.arguments().getFirst();
-        if (charge.mentionsHostCall()) {
+        if (holdsRate(charge)) {
             throw new IllegalArgumentException(model.name() + ", line " + line + ": a charge cannot hold another d(…)/dt.");
         }
-        // The charge is compiled on its own, so its pins are read as voltages here, not by the right side it sits in.
-        chargeFormulas.add(Substitution.bindHostNames(charge, this::nodeVoltage));
+        // The charge is compiled on its own, so its names are bound here, not by the right side it sits in.
+        chargeFormulas.add(chargeOf(charge, line));
         // The rates follow the node voltages and the branch currents; the table is laid out once every charge is known.
         return new Formula.Slot(nodes.size() + branchCount + chargeFormulas.size() - 1, "d(q" + chargeFormulas.size() + ")/dt");
     }
@@ -503,7 +519,7 @@ final class ModelEquations {
             throw new IllegalArgumentException(model.name() + ", line " + equation.line()
                     + ": noise(…) takes a density in A²/Hz and, if it has 1/f noise, its corner frequency in Hz.");
         }
-        if (kindOf(equation) != Kind.CURRENT) {
+        if (equation.kind() != EquationKind.CURRENT) {
             throw new IllegalArgumentException(model.name() + ", line " + equation.line()
                     + ": noise(…) is a current; write it in a current equation.");
         }
@@ -511,10 +527,6 @@ final class ModelEquations {
         densities.add(List.of(Substitution.bindHostNames(call.arguments().getFirst(), this::nodeVoltage),
                 Substitution.bindHostNames(corner, this::nodeVoltage)));
         return new Formula.Constant(0);
-    }
-
-    private static Kind kindOf(ComponentModel.Equation equation) {
-        return Kind.valueOf(equation.kind().name());
     }
 
     /**
@@ -526,7 +538,7 @@ final class ModelEquations {
         int branch = 0;
         for (int index = 0; index < model.equations().size(); index++) {
             ComponentModel.Equation equation = model.equations().get(index);
-            Kind kind = kindOf(equation);
+            EquationKind kind = equation.kind();
             Formula through = switch (kind) {
                 case VOLTAGE -> new Formula.Slot(nodes.size() + branch, "current of branch " + branch++);
                 case CURRENT -> rightSides.get(index);
@@ -535,10 +547,57 @@ final class ModelEquations {
             if (through == null || !pin.equals(equation.positive()) && !pin.equals(equation.negative())) {
                 continue;
             }
-            if (kind == Kind.CURRENT && readsCurrents.get(index)) {
+            if (kind == EquationKind.CURRENT && readsCurrents.get(index)) {
                 throw new IllegalArgumentException(model.name() + ", line " + line + ": current(" + pin + ") needs line "
                         + equation.line() + ", which reads a pin's current itself; write that line without current(…).");
             }
+            if (pin.equals(equation.positive())) {
+                sum = new Formula.Binary(Formula.Operator.ADD, sum, through);
+            }
+            if (pin.equals(equation.negative())) {
+                sum = new Formula.Binary(Formula.Operator.SUBTRACT, sum, through);
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * A charge with its names bound: a pin's name to its voltage, a pin's current to the branch currents of the
+     * {@code voltage} equations on it — so a winding writes its flux as what it is, {@code d(L * terminal_one.current)/dt},
+     * and needs no node carrying its current as a voltage. A current a {@code current} equation carries is refused: it
+     * is a function of the very rates the charge decides.
+     */
+    private Formula chargeOf(Formula written, int line) {
+        return PinQuantities.bindCurrents(Substitution.bindHostNames(written, this::nodeVoltage), pins, pin -> branchCurrentInto(pin, line));
+    }
+
+    /** Whether a charge holds a rate of its own, inside the definitions it calls too. */
+    private static boolean holdsRate(Formula charge) {
+        boolean[] holds = {false};
+        Substitution.replaceHostCalls(charge, call -> {
+            holds[0] |= ModelLanguage.RATE.equals(call.name());
+            return call;
+        });
+        return holds[0];
+    }
+
+    /** The current into a pin through the {@code voltage} equations on it: the branch currents, signed; refused for any other. */
+    private Formula branchCurrentInto(String pin, int line) {
+        Formula sum = new Formula.Constant(0);
+        int branch = 0;
+        for (ComponentModel.Equation equation : model.equations()) {
+            EquationKind kind = equation.kind();
+            boolean touches = pin.equals(equation.positive()) || pin.equals(equation.negative());
+            if (kind == EquationKind.CURRENT && touches) {
+                throw new IllegalArgumentException(model.name() + ", line " + line + ": a charge reads " + pin
+                        + ".current only where a voltage equation carries it; line " + equation.line()
+                        + " carries it as a current, which the charge's own rate decides.");
+            }
+            if (kind != EquationKind.VOLTAGE) {
+                continue;
+            }
+            Formula through = new Formula.Slot(nodes.size() + branch, "current of branch " + branch);
+            branch++;
             if (pin.equals(equation.positive())) {
                 sum = new Formula.Binary(Formula.Operator.ADD, sum, through);
             }
@@ -564,36 +623,8 @@ final class ModelEquations {
         }
     }
 
-    /**
-     * A model's expression as jMF reads it — every {@code d(q)/dt} already the solver's rate, recognised in the tree —,
-     * with SPICE's spellings ({@code V(a, b)}, {@code I(…)}, {@code ddt(q)}) refused saying what to write instead.
-     *
-     * @throws IllegalArgumentException when it does not read, naming the model, the line and the text
-     */
-    static Formula read(String model, String text, int line, List<Formula.Definition> library) {
-        String where = model + (line > 0 ? ", line " + line : "") + ": ";
-        Formula parsed;
-        try {
-            parsed = LANGUAGE.parse(text, library);
-        } catch (RuntimeException failure) {
-            throw new IllegalArgumentException(where + failure.getMessage() + " — in: " + text, failure);
-        }
-        return refuseBorrowed(where, parsed);
-    }
-
-    /** {@code parsed}, refused where it calls one of SPICE's spellings. */
-    private static Formula refuseBorrowed(String where, Formula parsed) {
-        return Substitution.replaceHostCalls(parsed, call -> {
-            String instead = BORROWED.get(call.name());
-            if (instead != null) {
-                throw new IllegalArgumentException(where + instead);
-            }
-            return call;
-        });
-    }
-
     /** The formula and its exact partial derivatives by every slot {@code differentiated} admits and every state it reads. */
-    private Compiled compile(Formula formula, Symbols table, java.util.function.IntPredicate differentiated) {
+    private Compiled compile(Formula formula, Symbols table, IntPredicate differentiated) {
         String source = formula.toString();
         RealFunction value = RealCompiler.compile(formula, table, source);
         List<Integer> slots = formula.slots().stream().filter(differentiated::test).toList();
@@ -619,12 +650,5 @@ final class ModelEquations {
         return new Compiled(value, symbols, partials.toArray(RealFunction[]::new), tape, new double[symbols.length]);
     }
 
-    /** The jMF definitions a model's equations may call, as one text. */
-    static String libraryText(ComponentModel model) {
-        StringBuilder text = new StringBuilder();
-        for (String definitions : model.formulas()) {
-            text.append(definitions).append('\n');
-        }
-        return text.toString();
-    }
+
 }

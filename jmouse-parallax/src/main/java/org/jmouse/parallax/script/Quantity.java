@@ -27,7 +27,13 @@ public record Quantity(double value, String unit, String written) {
             "V", "A", "Ohm", "F", "H", "Hz", "s", "W", "J", "K", "S", "C", "g", "m", "Pa", "N");
 
     /** Units that stand on their own and take no prefix. */
-    private static final Set<String> STANDALONE = Set.of("%", "deg", "rad", "dB", "ppm", "degC");
+    private static final Set<String> STANDALONE = Set.of("%", "deg", "rad", "dB", "ppm", "degC", "div", "bit");
+
+    /**
+     * A number and, after it, whatever is written: a unit or nothing. The tail must be a unit, or the text is not a
+     * quantity but an expression — {@code 1 / (1 / f)} is not «1» with the unit «/ (1 / f)», and {@code 2pi} is not 2.
+     */
+    private static final Pattern WRITTEN = Pattern.compile("^([+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?)\\s*(.*)$");
 
     /** One factor of a compound unit: the operator in front of it, then the symbol and its power. */
     private static final Pattern UNIT_FACTOR = Pattern.compile("([*/]?)([^*/]+)");
@@ -52,6 +58,34 @@ public record Quantity(double value, String unit, String written) {
         }
         return scaleOf(text).map(scale -> new Quantity(number * scale.factor(), scale.baseUnit(),
                 format(number) + (text.equals("%") ? "" : " ") + text));
+    }
+
+    /**
+     * A value as a datasheet or a part line writes it — {@code 2.52 nA}, {@code 0.3 V/µs}, {@code 52.4%}, {@code 25} —;
+     * empty for text that is not a number with, at most, its unit: an expression, evaluated as one. The one reader of a
+     * written value, so that {@code 90 deg} is π/2 and {@code 100 ppm/K} is 10⁻⁴ per kelvin wherever it is written.
+     */
+    public static Optional<Quantity> parse(String text) {
+        Matcher matcher = WRITTEN.matcher(text == null ? "" : text.strip());
+        if (!matcher.matches()) {
+            return Optional.empty();
+        }
+        return of(Double.parseDouble(matcher.group(1)), matcher.group(2));
+    }
+
+    /**
+     * The value in SI of text that must be a number with, at most, its unit.
+     *
+     * @throws IllegalArgumentException for anything else
+     */
+    public static double valueOf(String text) {
+        return parse(text).map(Quantity::value).orElseThrow(() -> new IllegalArgumentException(
+                "'" + text + "' is not a value: a value is a number and, at most, its unit"));
+    }
+
+    /** Whether the text is a number with, at most, a unit after it. */
+    public static boolean isQuantity(String text) {
+        return parse(text).isPresent();
     }
 
     /** Whether a word is a unit this language reads: {@code kOhm}, {@code V/us}, {@code %}. */
@@ -115,6 +149,9 @@ public record Quantity(double value, String unit, String written) {
     private static Optional<Scale> simpleScaleOf(String unit) {
         if (unit.equals("%")) {
             return Optional.of(new Scale(0.01, "%"));
+        }
+        if (unit.equals("ppm")) {
+            return Optional.of(new Scale(1e-6, "ppm"));
         }
         if (STANDALONE.contains(unit)) {
             return Optional.of(new Scale(unit.equals("deg") ? Math.PI / 180 : 1, unit.equals("deg") ? "rad" : unit));

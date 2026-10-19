@@ -225,6 +225,16 @@ public final class CompiledObject {
     }
 
     /**
+     * A value as a part line writes it: a quantity with its unit ({@code 10 kΩ}, {@code 50 ppm/K}) read in SI, or an
+     * expression of the parameters ({@code P}, {@code 2 * R}) evaluated at their values — the one reader of what a part
+     * sets, so a display, a meter and the solver never read one setting two ways.
+     */
+    public double value(String written) {
+        return org.jmouse.parallax.script.Quantity.parse(written).map(org.jmouse.parallax.script.Quantity::value)
+                .orElseGet(() -> constant(written));
+    }
+
+    /**
      * What one evaluation of this object's heaviest expression costs, in elementary evaluations — known once its
      * expressions were bound, which compiling a definition does. A computation's estimate is per evaluation; this is
      * what turns it into a cost when the expression is itself an integral or a sum.

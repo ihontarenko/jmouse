@@ -2,8 +2,8 @@ package org.jmouse.parallax.store.catalogue;
 
 import org.jmouse.parallax.owner.ParallaxOwner;
 import org.jmouse.parallax.script.ExperienceDocument;
-import org.jmouse.parallax.circuit.ComponentDocuments;
-import org.jmouse.parallax.circuit.ComponentModel;
+import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectKind;

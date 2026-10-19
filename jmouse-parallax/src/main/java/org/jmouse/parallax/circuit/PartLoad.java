@@ -11,9 +11,8 @@ import java.util.Map;
  * @param power       the average power it took from the circuit, in watts; negative for a source that delivered it
  * @param terminals   the current into each of its terminals at the last sample, in amperes, by terminal: "+" and "−"
  *                    for a two-terminal part, the pin names of a model
- * @param temperature how warm it is now, in °C: it moves towards the bench temperature plus its power times its
- *                    thermal resistance, at its own thermal time constant ({@link PartThermal}); NaN for a part that
- *                    is not warmed (a source, a capacitor)
+ * @param temperature how warm it is now, in °C, as its component's {@code heat} law makes it ({@link PartHeat}); NaN
+ *                    for a part that does not warm (a source, a capacitor)
  * @param maximum     the temperature its component lets it reach, °C; NaN when it sets none
  * @param rating      the power its component rates it for, W; NaN when it states none
  * @param failure     how it failed — {@code open} or {@code short} — on a realistic bench; null while it works
@@ -53,6 +52,19 @@ public record PartLoad(double power, Map<String, Double> terminals, double tempe
             return "overheated";
         }
         return STRESSES.stream().filter(stress -> displays.getOrDefault(stress, 0.0) >= 100).findFirst().orElse(null);
+    }
+
+    /**
+     * Which limit it is past now, whatever the bench: {@link #breaking()}'s causes — too hot, a stress figure at 100 % —
+     * or, short of those, {@code overloaded}: taking more than its rating, which on a realistic bench heats it towards
+     * its limit rather than failing it at once. Null while it is within all of them. The one verdict the sheet marks.
+     */
+    public String past() {
+        String breaking = breaking();
+        if (breaking != null) {
+            return breaking;
+        }
+        return Double.isFinite(rating) && rating > 0 && power > rating ? "overloaded" : null;
     }
 
     /** A part that knows no limits. */

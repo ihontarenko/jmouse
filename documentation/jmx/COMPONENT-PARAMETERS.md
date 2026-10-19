@@ -18,8 +18,9 @@ Generated from `BE/src/main/resources/catalogue/electronics/components/**/*.jmx`
   SPICE parameter carries its SPICE name in the meaning (`IS:`, `BF:`), so an imported `.model` maps by that name.
 - **Figures on the sheet** (`display`) are computed on every sample and shown beside the part; `overvoltage` and
   `overcurrent` at 100 % or more are a failure cause on a realistic bench.
-- **States** are unknowns the model carries: `heating` (kelvin above the bench) is solved with the circuit on a
-  realistic bench and removed entirely on an ideal one.
+- **States** are unknowns the model carries (a latch, a flux). A part's own heat is not one of them: on a realistic
+  bench the engine warms every part from the power its equations dissipate, through its `thermal_resistance` over its
+  `thermal_time_constant`, and its equations read that as `temperature`.
 
 ## Families
 
@@ -681,7 +682,6 @@ _Adjustable precision shunt reference, 2.495 V to 36 V, 1 mA to 100 mA_
 
 **Pins:** `ref` (reference input), `anode` (anode), `cathode` (cathode)
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench
 
 ### `integrated/timers/`
 
@@ -779,7 +779,6 @@ _Aluminium electrolytic capacitor: capacitance, ESR, leakage_
 
 **Figures on the sheet:** `overvoltage` [%] — of its rated voltage; `charge` [%] — of rating
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench
 
 #### Inductor — `inductor`
 
@@ -832,7 +831,6 @@ _Power inductor: inductance, winding resistance, core saturation_
 
 **Pins:** `terminal_one` (first terminal), `terminal_two` (second terminal)
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench
 
 #### Resistor — `resistor`
 
@@ -874,7 +872,6 @@ _Two coupled windings: self and mutual inductance, leakage, winding resistance_
 
 **Pins:** `primary_one` (primary, dotted end), `primary_two` (primary), `secondary_one` (secondary, dotted end), `secondary_two` (secondary)
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench
 
 ### `semiconductors/diodes/`
 
@@ -1072,7 +1069,6 @@ _Optocoupler, phototransistor output, CTR 50 … 600 %, 5 kV isolation_
 
 **Pins:** `anode` (LED anode), `cathode` (LED cathode), `emitter` (phototransistor emitter), `collector` (phototransistor collector)
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench
 
 ### `semiconductors/thyristors/`
 
@@ -1097,7 +1093,7 @@ _Sensitive-gate thyristor, 30 V, 0.8 A, IGT 200 µA_
 
 **Pins:** `cathode` (cathode), `gate` (gate), `anode` (anode)
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench; `conducting` (discrete) — latched on: written by the behaviour, read by the equations
+**States:** `conducting` (discrete) — latched on: written by the behaviour, read by the equations
 
 #### BT136 — `bt136`
 
@@ -1120,7 +1116,7 @@ _Triac, 600 V, 4 A, logic-level-sensitive gate_
 
 **Pins:** `main_terminal_one` (MT1, the gate's reference), `main_terminal_two` (MT2, the tab), `gate` (gate)
 
-**States:** `heating` (continuous) — how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench; `conducting` (discrete) — latched on: written by the behaviour, read by the equations
+**States:** `conducting` (discrete) — latched on: written by the behaviour, read by the equations
 
 ### `semiconductors/transistors/`
 
@@ -1760,7 +1756,7 @@ These are not component parameters: a component may not declare them. The bench 
 
 | Name | Meaning |
 |---|---|
-| `temperature` | the bench's temperature in kelvin, 25 °C unless set (`bench for 1 ms at 85 °C`); every model writes its drift against its own `T_nominal` |
+| `temperature` | the part's own temperature in kelvin: the bench's, 25 °C unless set (`bench for 1 ms at 85 °C`), and on a realistic bench raised by its own heat; every model writes its drift against its own `T_nominal` |
 | `realistic` | 0 on an ideal bench, 1 on a realistic one (`bench for 1 ms realistic`): self-heating, an instrument's burden, a shunt's drop, burning out past `T_maximum` |
 | `tolerance_corner` | −1, 0 or +1: every `tolerance` and every `*_spread` is taken at its low end, its value, or its high end |
 | `time` | the circuit's time, for generators and behaviour |
@@ -1772,7 +1768,6 @@ Every component may also carry:
 |---|---|
 | `meta failure open\|short` | what it becomes when it burns out |
 | `power_rating`, `thermal_resistance`, `thermal_time_constant`, `T_maximum` | its heat: temperature = bench + P·Rθ over the time constant; past `T_maximum` on a realistic bench it fails |
-| `state heating` | for a model: the junction's (body's, winding's) own temperature rise, fed back into every drift |
 | `noise(density[, corner])` | in a current equation: a noise source for noise analysis and the transient noise of a realistic bench |
 
 ## Alphabetical index

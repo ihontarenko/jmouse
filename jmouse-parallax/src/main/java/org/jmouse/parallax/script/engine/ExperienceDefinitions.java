@@ -18,6 +18,21 @@ import org.jmouse.parallax.object.ObjectDefinition;
  */
 public final class ExperienceDefinitions {
 
+    /**
+     * A parameter with a range as the slider it is: value, bounds, step and listed values in SI, a bare number in its
+     * range read in the unit its value is written in ({@code C = 1 µF in 1 nF .. 10}). The one reading of a parameter's
+     * range, for a circuit's sliders and a live part's control alike.
+     */
+    /** A part line as a circuit reads it ({@link EngineSelection}); {@code what} names where it is written, for the messages. */
+    public static org.jmouse.parallax.object.ObjectDefinition.CircuitElement element(org.jmouse.parallax.script.Block.Part part, String what) {
+        return EngineSelection.element(part, what);
+    }
+
+    public static org.jmouse.parallax.object.ParameterDefinition slider(org.jmouse.parallax.script.Block.Parameter parameter) {
+        return ObjectDocumentReader.slider(parameter);
+    }
+
+
     private ExperienceDefinitions() {
     }
 

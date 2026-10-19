@@ -34,7 +34,6 @@ import org.jmouse.parallax.object.ObjectDefinition.ProbabilityDistribution;
 import org.jmouse.parallax.object.ObjectDefinition.Program;
 import org.jmouse.parallax.object.ObjectDefinition.Region;
 import org.jmouse.parallax.object.ObjectDefinition.Sequence;
-import org.jmouse.parallax.object.ObjectDefinition.SourceWaveform;
 import org.jmouse.parallax.object.ObjectDefinition.SurfaceGluing;
 import org.jmouse.parallax.object.ObjectDefinition.Symbol;
 import org.jmouse.parallax.object.ObjectDefinition.Value;
@@ -507,7 +506,7 @@ final class DefinitionWriter {
     }
 
     /**
-     * {@code R1 resistor (in, 0) resistance = R}, {@code V1 voltage-source (in, 0) waveform = step, U_output = U};
+     * {@code R1 resistor (in, 0) resistance = R}, {@code V1 voltage-source (in, 0) U_output = U};
      * a model is connected by pin name and its overrides are its settings:
      * {@code U1 lm358@3 (inp = ref, out = out) gain = 2}.
      */
@@ -526,15 +525,9 @@ final class DefinitionWriter {
             Primitive primitive = Primitive.of(element.type());
             reference = primitive.reference();
             connections = element.positive() + ", " + element.negative();
-            if (element.waveform() != SourceWaveform.DC) {
-                settings.add(DefinitionWords.WAVEFORM + " = " + DefinitionWords.word(element.waveform()));
-            }
             settings.add(primitive.valueSetting() + " = " + element.value());
         }
         new TreeMap<>(element.overrides()).forEach((name, value) -> settings.add(name + " = " + value));
-        if (element.frequency() != null && !element.frequency().isBlank()) {
-            settings.add(DefinitionWords.FREQUENCY + " = " + element.frequency());
-        }
         String symbol = element.symbol() == null ? "" : " symbol " + element.symbol();
         return (element.id() + " " + reference + " (" + connections + ") " + String.join(", ", settings)).strip() + symbol;
     }

@@ -1,0 +1,20 @@
+# The physical constants, once, for every document: a model writes `boltzmann`, never its digits. The engine's own
+# copy (PhysicalConstants) holds the same numbers. Pulled in with `use constants` — or through a library that uses it,
+# as smooth-transitions does.
+
+functions "Physical constants" as constants {
+    meta {
+        summary "Boltzmann's constant, the elementary charge, 0 °C in kelvin"
+    }
+
+    formulas {
+        # Boltzmann's constant, J/K (exact since 2019)
+        boltzmann = 1.380649e-23
+
+        # The elementary charge, C (exact since 2019)
+        elementary_charge = 1.602176634e-19
+
+        # 0 °C in kelvin
+        zero_celsius = 273.15
+    }
+}

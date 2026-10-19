@@ -1,7 +1,11 @@
+# An inductor as it is: the voltage across it is the rate of the flux it links, its inductance times the current
+# through it. Its current is the branch current of that voltage equation — an unknown of its own, as SPICE's L has —,
+# and the flux reads it as terminal_one.current. Linear at any one temperature, it is integrated as every charge is.
+
 component "Inductor" as inductor type inductor {
     meta {
         designator L
-        summary "Two-terminal inductor"
+        summary "Two-terminal inductor: the flux its current links"
         category circuits
     }
     parameters {
@@ -14,5 +18,8 @@ component "Inductor" as inductor type inductor {
     symbol uses inductor-symbol {
         a terminal_one
         b terminal_two
+    }
+    equations {
+        voltage terminal_one -> terminal_two = d(inductance * terminal_one.current)/dt
     }
 }

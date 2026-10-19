@@ -11,6 +11,12 @@ component "Voltage source" as voltage-source type voltage-source {
         positive analog 1 "positive terminal"
         negative analog 2 "negative terminal"
     }
+    # An ideal source: its positive pin held U_output above its negative one, whatever is drawn from it. A circuit starts
+    # from rest, so it is switched on at the start.
+    equations {
+        voltage positive -> negative = U_output
+    }
+
     symbol uses voltage-source-symbol {
         a positive
         b negative

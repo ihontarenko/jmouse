@@ -70,25 +70,29 @@ final class ObjectDocumentReader {
     private static List<ParameterDefinition> sliders(ExperienceDocument document) {
         List<ParameterDefinition> sliders = new ArrayList<>();
         for (Block.Parameter parameter : document.parameters()) {
-            if (parameter.range().isEmpty()) {
-                continue;
+            if (parameter.range().isPresent()) {
+                sliders.add(slider(parameter));
             }
-            String what = "parameter '" + parameter.name() + "'";
-            String unit = sliderUnit(parameter);
-            double value = parameter.quantity().map(Quantity::value)
-                    .orElseGet(() -> Notation.parseNumber(parameter.value().text(), what));
-            Block.Range range = parameter.range().get();
-            double step = parameter.step()
-                    .map(written -> Notation.parseInUnit(written.text(), "the step of " + what, unit)).orElse(0.0);
-            String shown = shownUnit(unit);
-            sliders.add(new ParameterDefinition(parameter.name(), sliderLabel(parameter.description(), shown), value,
-                    Notation.parseInUnit(range.minimum().text(), "the minimum of " + what, unit),
-                    Notation.parseInUnit(range.maximum().text(), "the maximum of " + what, unit), step,
-                    parameter.has(Block.ParameterFlag.ANIMATE), shown,
-                    unit.isEmpty() ? 1 : Quantity.of(1, unit).map(Quantity::value).orElse(1.0),
-                    parameter.values().stream().map(written -> Notation.parseInUnit(written.text(), "a value of " + what, unit)).toList()));
         }
         return sliders;
+    }
+
+    /** One parameter with a range as its slider: value, range, step and values in SI, shown in the unit it is written in. */
+    static ParameterDefinition slider(Block.Parameter parameter) {
+        String what = "parameter '" + parameter.name() + "'";
+        String unit = sliderUnit(parameter);
+        double value = parameter.quantity().map(Quantity::value)
+                .orElseGet(() -> Notation.parseNumber(parameter.value().text(), what));
+        Block.Range range = parameter.range().get();
+        double step = parameter.step()
+                .map(written -> Notation.parseInUnit(written.text(), "the step of " + what, unit)).orElse(0.0);
+        String shown = shownUnit(unit);
+        return new ParameterDefinition(parameter.name(), sliderLabel(parameter.description(), shown), value,
+                Notation.parseInUnit(range.minimum().text(), "the minimum of " + what, unit),
+                Notation.parseInUnit(range.maximum().text(), "the maximum of " + what, unit), step,
+                parameter.has(Block.ParameterFlag.ANIMATE), shown,
+                unit.isEmpty() ? 1 : Quantity.of(1, unit).map(Quantity::value).orElse(1.0),
+                parameter.values().stream().map(written -> Notation.parseInUnit(written.text(), "a value of " + what, unit)).toList());
     }
 
     /** The unit a slider's value is written in, prefix included; empty for a plain number. */

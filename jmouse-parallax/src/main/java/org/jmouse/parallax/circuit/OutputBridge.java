@@ -5,7 +5,8 @@ import org.jmouse.formula.Complex;
 /**
  * A digital output on an analog node: a source that moves between the supply rails over the family's edge time and
  * holds the pin there through the family's output resistance, drawing what it sources from VCC and what it sinks into
- * GND. A released output (Z) still has its pin capacitance; an unknown one (X) sits at mid-rail.
+ * GND. Its pin's capacitance is an ordinary capacitor beside it ({@link EventSimulation#pinCapacitances}), there when the
+ * output is released (Z) too; an unknown one (X) sits at mid-rail.
  */
 final class OutputBridge implements Device {
 
@@ -16,25 +17,17 @@ final class OutputBridge implements Device {
     private final int pin;
     private final int supply;
     private final int ground;
-    private final double resistance;
-    private final double referenceSupply;
+    /** The family whose output law it pulls by, and whose edge it moves over. */
+    private final LogicFamily family;
     private final double edge;
-    private final double capacitance;
-    private int slot = -1;
 
-    OutputBridge(DigitalDriver driver, int pin, int supply, int ground, double resistance, double referenceSupply, double edge, double capacitance) {
+    OutputBridge(DigitalDriver driver, int pin, int supply, int ground, LogicFamily family) {
         this.driver = driver;
         this.pin = pin;
         this.supply = supply;
         this.ground = ground;
-        this.resistance = resistance;
-        this.referenceSupply = referenceSupply;
-        this.edge = edge;
-        this.capacitance = capacitance;
-    }
-
-    void slot(int slot) {
-        this.slot = slot;
+        this.family = family;
+        this.edge = family.edge();
     }
 
     /** Its pull follows the rails it is powered from, read from the guess. */
@@ -45,57 +38,22 @@ final class OutputBridge implements Device {
 
     @Override
     public void stamp(Assembly assembly) {
-        if (capacitance > 0 && assembly.isTransient()) {
-            double conductance = capacitiveConductance(assembly);
-            assembly.conductance(pin, ground, conductance);
-            assembly.current(pin, ground, -history(assembly, conductance));
-        }
-        if (driver.level.equals(DigitalDriver.RELEASED)) {
+        if (driver.level() == LogicLevel.RELEASED) {
             return;
         }
         double share = shown(assembly.isTransient() ? assembly.time() : Double.POSITIVE_INFINITY);
-        double rails = Math.max(assembly.voltage(supply) - assembly.voltage(ground), 0.5);
-        double conductance = 1 / (resistance * Math.pow(referenceSupply / rails, 1.5));
+        double conductance = conductance(assembly.voltage(supply) - assembly.voltage(ground));
         // The pin is pulled towards (1 − s)·GND + s·VCC: the current enters the pin and leaves VCC (share s) and GND.
         stampPull(assembly, conductance, share);
     }
 
     @Override
-    public void accept(Assembly assembly, double[] state) {
-        if (capacitance > 0) {
-            double conductance = capacitiveConductance(assembly);
-            double across = (pin == Netlist.GROUND ? 0 : state[pin])
-                    - (ground == Netlist.GROUND ? 0 : state[ground]);
-            assembly.rememberCompanion(slot, conductance * across - history(assembly, conductance));
-        }
-    }
-
-    /** The pin capacitance's companion conductance over the assembly's step. */
-    private double capacitiveConductance(Assembly assembly) {
-        double conductance = capacitance / assembly.step();
-        if (assembly.integration() == Assembly.Integration.TRAPEZOIDAL) {
-            conductance *= 2;
-        }
-        return conductance;
-    }
-
-    private double history(Assembly assembly, double conductance) {
-        double previous = assembly.previousVoltage(pin) - assembly.previousVoltage(ground);
-        double value = conductance * previous;
-        return assembly.integration() == Assembly.Integration.TRAPEZOIDAL
-                ? value + assembly.companion(slot) : value;
-    }
-
-    @Override
     public void stampPhasor(PhasorAssembly assembly) {
-        if (capacitance > 0) {
-            assembly.admittance(pin, ground, new Complex(0, assembly.angular() * capacitance));
-        }
-        if (driver.level.equals(DigitalDriver.RELEASED)) {
+        if (driver.level() == LogicLevel.RELEASED) {
             return;
         }
-        double share = DigitalDriver.fraction(driver.level);
-        double conductance = 1 / resistance;
+        double share = driver.level().fraction();
+        double conductance = conductance(operating(assembly, supply) - operating(assembly, ground));
         for (int row = 0; row < PULL_TERMINALS; row++) {
             for (int column = 0; column < PULL_TERMINALS; column++) {
                 assembly.add(pullTerminal(row), pullTerminal(column),
@@ -104,11 +62,23 @@ final class OutputBridge implements Device {
         }
     }
 
+    /**
+     * How strongly it pulls across these rails: its family's {@code output_resistance(supply)} — one law, the family
+     * document's, for the transient and the small signal alike.
+     */
+    private double conductance(double rails) {
+        return 1 / family.outputResistance(rails);
+    }
+
+    private static double operating(PhasorAssembly assembly, int node) {
+        return node == Netlist.GROUND ? 0 : assembly.operatingValue(node);
+    }
+
     /** How far the output has moved from its previous level to its present one. */
     private double shown(double time) {
-        double from = DigitalDriver.fraction(driver.previous.equals(DigitalDriver.RELEASED) ? driver.level : driver.previous);
-        double to = DigitalDriver.fraction(driver.level);
-        double progress = Math.clamp((time - driver.changedAt) / edge, 0, 1);
+        double from = (driver.previous() == LogicLevel.RELEASED ? driver.level() : driver.previous()).fraction();
+        double to = driver.level().fraction();
+        double progress = Math.clamp((time - driver.changedAt()) / edge, 0, 1);
         return from + (to - from) * progress;
     }
 

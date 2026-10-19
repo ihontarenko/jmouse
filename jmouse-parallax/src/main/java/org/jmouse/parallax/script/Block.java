@@ -192,6 +192,27 @@ public sealed interface Block {
     }
 
     /**
+     * {@code heat { d(heating)/dt = (power * thermal_resistance - heating) / thermal_time_constant; temperature = ambient
+     * + heating }}: how a part warms — the law of its own temperature, as physics, not as code. Each {@code d(x)/dt} is
+     * a thermal state that starts at nought; {@code let} names a value; {@code temperature = …} is the part's own
+     * temperature, kelvin, which its equations read as {@code temperature}. It reads {@code power} — what the part's
+     * equations dissipate, which the engine derives — {@code ambient}, the bench's temperature, and the part's
+     * parameters. The engine advances it after every accepted step, outside Newton, as slow as heat is.
+     *
+     * @param lines       the rates and the lets, in the order written
+     * @param temperature the right side of {@code temperature = …}
+     */
+    record Heat(List<Equation> lines, SourceText temperature) implements Block {
+        public Heat {
+            lines = List.copyOf(lines);
+        }
+
+        public String name() {
+            return "heat";
+        }
+    }
+
+    /**
      * {@code image { over X in a .. b, Y in c .. d; start u = …; stop when …; hit when … crosses 0 where …; value = … }}:
      * a picture in which every pixel is one run of the system — started from the pixel, stepped until it stops or hits,
      * and shaded by what it hit.

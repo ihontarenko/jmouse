@@ -1,16 +1,18 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.parallax.component.ComponentModel;
+import org.jmouse.parallax.component.ComponentVocabulary;
+import org.jmouse.parallax.component.ModelLanguage;
+
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.MathematicalConstant;
 import org.jmouse.formula.MathematicalFunction;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.RealFunction;
-import org.jmouse.formula.Substitution;
 import org.jmouse.formula.Symbols;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,12 +101,18 @@ final class SourceSignal {
             return Optional.empty();
         }
         ComponentModel.Equation equation = model.equations().getFirst();
-        List<Formula.Definition> library = ModelEquations.LANGUAGE.definitions(ModelEquations.libraryText(model));
-        Formula formula = ModelEquations.read(model.name(), equation.formula(), equation.line(), library);
+        // Its lets are definitions of nothing, as a model's are: a generator may name a part of its signal.
+        StringBuilder definitions = new StringBuilder(ModelLanguage.libraryText(model));
+        model.locals().forEach((name, expression) -> definitions.append(name).append(" = ").append(expression).append('\n'));
+        List<Formula.Definition> library = ModelLanguage.LANGUAGE.definitions(definitions.toString());
+        Formula written = ModelLanguage.read(model.name(), equation.formula(), equation.line(), library);
+        // A current is written through the part, positive to negative; a source is driven by what it pushes out of its
+        // positive pin — the same current, the other way.
+        Formula formula = equation.kind() == ComponentModel.EquationKind.CURRENT ? new Formula.Negation(written) : written;
         if (formula.mentionsHostCall()) {
             return Optional.empty();
         }
-        List<String> names = List.of(ModelEquations.TIME);
+        List<String> names = List.of(ComponentVocabulary.TIME);
         List<String> parameterNames = List.copyOf(parameters.keySet());
         for (String pin : model.pins().stream().map(ComponentModel.Pin::name).toList()) {
             if (formula.dependsOn(pin)) {
@@ -124,25 +132,17 @@ final class SourceSignal {
                 positivePin(model), negativePin(model)));
     }
 
-    /** Whether a model is shaped as a generator; what it reads on the right is checked when it is compiled. */
-    static boolean isGenerator(ComponentModel model) {
-        // An ideal ammeter is a voltage of 0 between two pins too, but it is a short to be read, not a source to hold a node.
-        if (model.isInstrument() || model.equations().size() != 1 || model.pins().size() != 2 || !model.states().isEmpty() || model.behaviour() != null
-                || !model.nodes().isEmpty() || !model.digitalNodes().isEmpty() || !model.locals().isEmpty()) {
-            return false;
-        }
-        ComponentModel.Equation equation = model.equations().getFirst();
-        List<String> pins = model.pins().stream().map(ComponentModel.Pin::name).toList();
-        return equation.kind() == ComponentModel.EquationKind.VOLTAGE && pins.contains(equation.positive())
-                && pins.contains(equation.negative()) && !equation.positive().equals(equation.negative());
+    /**
+     * What a generator is to the solver: an ideal voltage source for a {@code voltage a -> b = …}, an ideal current
+     * source for a {@code current a -> b = …}.
+     */
+    static Netlist.Element.Kind kindOf(ComponentModel model) {
+        return model.generatesVoltage() ? Netlist.Element.Kind.VOLTAGE_SOURCE : Netlist.Element.Kind.CURRENT_SOURCE;
     }
 
-    /** The current into each of its pins, by the generator's own pin names: what its wires on a sheet are drawn to. */
-    Map<String, Double> terminalCurrents(double intoPositive) {
-        Map<String, Double> currents = new LinkedHashMap<>();
-        currents.put(positiveTerminal, intoPositive);
-        currents.put(negativeTerminal, -intoPositive);
-        return currents;
+    /** Whether a model is shaped as a generator ({@link ComponentModel#isGenerator}). */
+    static boolean isGenerator(ComponentModel model) {
+        return model.isGenerator();
     }
 
     /** Its own pins, positive first: the terminals its current is reported into. */
@@ -152,11 +152,11 @@ final class SourceSignal {
 
     /** The pin the equation holds above the other. */
     static String positivePin(ComponentModel model) {
-        return model.equations().getFirst().positive();
+        return model.generatorPositive();
     }
 
     static String negativePin(ComponentModel model) {
-        return model.equations().getFirst().negative();
+        return model.generatorNegative();
     }
 
     double valueAt(double time) {
@@ -167,16 +167,10 @@ final class SourceSignal {
     }
 
     /**
-     * The first edge after {@code from} and no later than {@code to}, or NaN when the span has none. Found as the
-     * instant just after the jump, so the level read there is already the new one.
-     */
-    double firstEdge(double from, double to, double resolution) {
-        return firstEdge(from, to, resolution, SCAN_PIECES);
-    }
-
-    /**
-     * The same within one step no longer than {@link #maximumStep()}, which cannot hold two edges of one function: one
-     * reading at its end, the one at its start kept from the step before.
+     * The first edge after {@code from} and no later than {@code to} within one step no longer than
+     * {@link #maximumStep()}, which cannot hold two edges of one function — one reading at its end, the one at its start
+     * kept from the step before —, or NaN when the step has none. Found as the instant just after the jump, so the level
+     * read there is already the new one.
      */
     double edgeWithinStep(double from, double to, double resolution) {
         if (edges.isEmpty() || !(to > from)) {
@@ -199,6 +193,7 @@ final class SourceSignal {
         return first;
     }
 
+    /** The first edge in a span of any length, scanned in {@code pieces}: a pulse narrower than a piece can be missed. */
     private double firstEdge(double from, double to, double resolution, int pieces) {
         if (edges.isEmpty() || !(to > from)) {
             return Double.NaN;
@@ -221,23 +216,6 @@ final class SourceSignal {
             }
         }
         return first;
-    }
-
-    /** Every edge in {@code (0, duration]}, scanned in spans of {@code span}: what a whole transient lands on. */
-    List<Double> edges(double duration, double span, double resolution) {
-        List<Double> found = new ArrayList<>();
-        double from = 0;
-        while (from < duration) {
-            double to = Math.min(duration, from + span);
-            double edge = firstEdge(from, to, resolution);
-            if (Double.isNaN(edge)) {
-                from = to;
-            } else {
-                found.add(edge);
-                from = edge;
-            }
-        }
-        return found;
     }
 
     private double sampled(RealFunction edge, double time) {

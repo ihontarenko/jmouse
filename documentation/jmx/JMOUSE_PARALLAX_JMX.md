@@ -166,8 +166,71 @@ refused saying how a rate is written.
 
 Behaviour, heat and drift are written in jMX, never coded per component: heat from `power_rating`,
 `thermal_resistance`, `thermal_time_constant`, `T_maximum` and `meta failure open|short`; drift from a
-parameter against `T_nominal` and `temperature` (the bench's, in kelvin). A new component gets all of it
-by writing those lines — a datasheet part needs only `extends <base>` and its own numbers.
+parameter against `T_nominal` and `temperature`. A new component gets all of it by writing those lines — a
+datasheet part needs only `extends <base>` and its own numbers.
+
+**A component writes its physics; the engine only defines and integrates.** `temperature` in a part's
+equations is the part's *own*, in kelvin. How it gets there is a law, and a law is physics, so it is jMX — the
+`heat` block:
+
+```
+heat {
+    d(heating)/dt = (power * thermal_resistance - heating) / thermal_time_constant
+    temperature = ambient + heating
+}
+```
+
+`d(x)/dt` lines are thermal states (starting at nought), `let` names a value, `temperature = …` is what the
+part's equations read. The law reads `power`, `ambient` (the bench, K) and the part's parameters. It is written
+**once**, in the shared document `heat` (`catalogue/electronics/functions/heat.jmx`): a part that gives a
+`thermal_resistance` warms by it unless it writes its own `heat { … }` (a junction → case → heatsink as two
+states), inherits one through `extends`, or names another `functions` document holding one with `use`.
+
+`power` is not a law but a definition, so it is the engine's and never written by hand: the current of every
+equation times the voltage it flows across, a capacitance's charging current left out. The engine advances the law
+by backward Euler, outside the circuit's Newton, once a tenth of a millisecond of circuit time has gathered — heat
+moves in seconds. On a realistic bench the part's equations and displays read the temperature it makes; on an
+ideal bench it is only shown. A second, hand-written power would be a second truth that drifts from the first.
+
+**The engine proves a model linear when it is**: no partial of an equation or a charge by a voltage, a
+current, a charge rate or a state reads one of those. Such a part — an electrolytic, a transformer, a meter, a
+generator — is solved in one step like a resistor, however its values move with `temperature`, `time` or its
+discrete states; Newton runs only for the parts that need it. A linear part that reads no time and no discrete
+state is **affine**: its conductances, capacitances and constant are found once (again only when its own
+temperature moves) and every step is stamped from them, as SPICE stamps an R or a C — no tape is run.
+
+**Every part is its document — the primitives too.** `resistor`, `capacitor`, `inductor`, `voltage-source`,
+`current-source` and `diode` write their physics as any component does:
+
+```
+current terminal_one -> terminal_two = (terminal_one - terminal_two) / R_now + noise(4 * boltzmann * temperature / R_now)
+current terminal_one -> terminal_two = d(C_now * (terminal_one - terminal_two))/dt
+voltage terminal_one -> terminal_two = d(inductance * terminal_one.current)/dt
+voltage positive -> negative = U_output
+```
+
+with `R_now = resistance * (1 + tolerance_corner * tolerance) * (1 + temperature_coefficient * (temperature - T_nominal))`
+— the tolerance a bench's corner picks, the drift its temperature moves. A part written in pin order,
+`R1 resistor (a, b) resistance = 10 kΩ`, is its document's model with its pins in order and its value as the
+document's first parameter. The engine keeps devices of its own only for what it adds itself: a node's leak to
+ground, a failed part's stand-ins, a logic pin's capacitance, and the ideal source a generator's equation drives.
+
+**A charge may read a current where a voltage equation carries it**: a flux is `d(L * terminal_one.current)/dt`,
+the current that very branch's unknown — a winding needs no node carrying its current as a voltage. A `let` reads
+`pin.current` as an equation does.
+
+**How a part fails is its document's**: `meta { failure open }` — nothing conducts —, `failure short` — every pin
+together —, or `failure short drain source` — the pins named, the rest open. A MOSFET shorts drain to source, an op-amp
+its supply to ground.
+
+**A logic family writes its laws** as formulas of the supply its part runs from — `input_low(supply)`,
+`input_high(supply)`, `output_resistance(supply)`, `delay_scale(supply)` — with the figures `minimum_supply`, `edge`,
+`input_capacitance` and `output_capacitance`. CMOS writes shares of the supply, TTL fixed volts; a family that leaves
+one out is refused, and nothing is assumed in its place.
+
+**One reader of a written value** (`script/Quantity`): `90 deg` is π/2, `100 ppm/K` is 10⁻⁴ per kelvin, `1 %` is 0.01 —
+on a part line as in `parameters`. The physical constants are the shared `constants` document's (`boltzmann`,
+`elementary_charge`, `zero_celsius`), pulled in by `use` — `use` is transitive, so a library that uses them brings them.
 
 ## Symbols (`symbol`) and how parts are drawn
 

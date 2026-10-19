@@ -10,7 +10,7 @@ component "BS250" as bs250 type mosfet {
         source "Diodes Inc. BS250P datasheet, electrical characteristics (limits only)"
         package "TO-92"
         category circuits
-        failure short
+        failure short drain source
     }
     extends p-mosfet
 
@@ -29,6 +29,10 @@ component "BS250" as bs250 type mosfet {
         resistance_temperature_exponent = 1.5 "RDS(on) rises when hot"
         V_breakdown = 50 V                    "drain-source avalanche: BVDSS is at least 45 V"
         I_breakdown = 100 uA                  "avalanche current at V_breakdown"
+        V_drain_source_maximum = 45 V          "VDS"
+        V_gate_source_maximum = 20 V          "VGS, either way"
+        I_drain_maximum = 230 mA                "ID"
+        V_threshold_spread = 1.1 V            "VGS(th) -1 ... -3.5 V"
     }
 
     pins {

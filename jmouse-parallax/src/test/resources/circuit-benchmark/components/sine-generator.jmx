@@ -3,6 +3,7 @@
 
 component "Sine generator" as sine-generator type generator {
     meta {
+        designator G
         summary "An ideal sine voltage: offset + amplitude · sin(2π · frequency · time + phase)"
         category circuits
     }

@@ -5,8 +5,10 @@
 # `.model D (…)` becomes, the numbers of the model set on it. A part that sets the same numbers as a deck gives the
 # same curve, so this is also the reference a datasheet part is checked against.
 #
-# What it does not represent: the temperature drift of VJ, CJO, BV and RS (SPICE's TCV, TRS …), noise, and a series
-# resistance of exactly zero — SPICE drops the node then; here it is a milliohm.
+# Its junction has a temperature of its own, T_junction: the bench's, and on a realistic bench raised by the heat the
+# power it dissipates gives through thermal_resistance, over thermal_time_constant — the engine keeps that heat after
+# every step, so a diode that heats conducts more and heats further. Every drift reads it. What it does not represent: the temperature drift of
+# VJ and CJO, and a series resistance of exactly zero — SPICE drops the node then; here it is a milliohm.
 
 component "Diode" as diode type diode {
     meta {
@@ -34,12 +36,16 @@ component "Diode" as diode type diode {
         I_breakdown = 1 mA                    "IBV: current at V_breakdown"
         T_nominal = 300.15 K                  "TNOM: the temperature the figures above are measured at"
         saturation_temperature_exponent = 3   "XTI: how steeply I_saturation follows the temperature"
+        breakdown_temperature_coefficient = 0 "TCV: BV moves by this share per kelvin"
+        resistance_temperature_coefficient = 0 "TRS: RS moves by this share per kelvin"
         E_gap = 1.11 V                        "EG: band gap, in volts"
         area = 1                              "area factor: multiplies the currents and the capacitance, divides RS"
         power_rating = 0.5 W                  "what it is rated for"
         thermal_resistance = 300 K/W          "kelvin above the bench per watt it takes"
         thermal_time_constant = 1 s           "how fast it warms to that"
         T_maximum = 175 °C                    "past this it fails on a realistic bench"
+        V_reverse_maximum = 1e6 V             "VRRM: the reverse voltage it is rated to block; none is a megavolt"
+        I_forward_maximum = 1e6 A             "IF: the current it is rated to carry, either way; none is a megaampere"
     }
 
     pins {
@@ -51,6 +57,11 @@ component "Diode" as diode type diode {
         j                                     "the junction, behind the series resistance"
     }
 
+    display {
+        overvoltage = 100 * max(0, cathode - anode) / V_reverse_maximum unit % "of VRRM"
+        overcurrent = 100 * abs(anode.current) / I_forward_maximum unit % "of its rated current"
+    }
+
     symbol uses diode-symbol {
         a anode
         b cathode
@@ -58,15 +69,22 @@ component "Diode" as diode type diode {
 
     equations {
         let V_diode : voltage = j - cathode
-        let I_saturation_now : current = area * junction_saturation(I_saturation, temperature, T_nominal, saturation_temperature_exponent, emission_coefficient, E_gap)
-        let I_recombination_now : current = area * junction_saturation(I_recombination, temperature, T_nominal, saturation_temperature_exponent, recombination_emission_coefficient, E_gap)
-        let I_diffusion : current = high_injection(junction_current(V_diode, I_saturation_now, emission_coefficient, temperature), area * I_knee)
-        let I_generation : current = junction_current(V_diode, I_recombination_now, recombination_emission_coefficient, temperature) * recombination_factor(V_diode, V_junction, grading_coefficient)
-        let I_reverse_breakdown : current = breakdown_current(V_diode, V_breakdown, area * I_breakdown, emission_coefficient, temperature)
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let R_series_now : resistance = R_series * (1 + resistance_temperature_coefficient * (T_junction - T_nominal))
+        let V_breakdown_now : voltage = V_breakdown * (1 + breakdown_temperature_coefficient * (T_junction - T_nominal))
+        let I_saturation_now : current = area * junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, emission_coefficient, E_gap)
+        let I_recombination_now : current = area * junction_saturation(I_recombination, T_junction, T_nominal, saturation_temperature_exponent, recombination_emission_coefficient, E_gap)
+        let I_diffusion : current = high_injection(junction_current(V_diode, I_saturation_now, emission_coefficient, T_junction), area * I_knee)
+        let I_generation : current = junction_current(V_diode, I_recombination_now, recombination_emission_coefficient, T_junction) * recombination_factor(V_diode, V_junction, grading_coefficient)
+        let I_reverse_breakdown : current = breakdown_current(V_diode, V_breakdown_now, area * I_breakdown, emission_coefficient, T_junction)
         let Q_junction : charge = depletion_charge(V_diode, area * C_junction_zero_bias, V_junction, grading_coefficient, forward_bias_coefficient) + transit_time * I_diffusion
 
-        current anode -> j = (anode - j) * area / R_series
-        current j -> cathode = I_diffusion + I_generation - I_reverse_breakdown + d(Q_junction)/dt
+        let I_through : current = (anode - j) * area / R_series_now
+
+        current anode -> j = I_through
+        # Shot noise, 2qI: what the junction current carries as a noise analysis sees it; nothing to the solution.
+        current j -> cathode = I_diffusion + I_generation - I_reverse_breakdown + d(Q_junction)/dt + noise(2 * elementary_charge * abs(I_diffusion + I_generation))
     }
 
     expect "the ideal law at SPICE's defaults" from "IS 1e-14, N 1: V = N·Vt·ln(I/IS + 1) ≈ 0.656 V at 1 mA, 300 K" {

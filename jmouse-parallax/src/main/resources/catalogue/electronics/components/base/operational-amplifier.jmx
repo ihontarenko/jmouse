@@ -24,7 +24,7 @@ component "Operational amplifier" as operational-amplifier type opamp {
         summary "Op-amp macromodel: gain, two poles, slew rate, offset, bias currents, CMRR, PSRR, input range, output limits"
         source "behavioural macromodel; the figures a datasheet's electrical table gives"
         category circuits
-        failure short
+        failure short Vcc GND
     }
     use smooth-transitions
 
@@ -89,12 +89,12 @@ component "Operational amplifier" as operational-amplifier type opamp {
     }
 
     state {
-        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
         gain_stage_voltage = 0 continuous     "the gain stage, before the output is held between the rails"
     }
 
     equations {
-        let T_junction : temperature = temperature + heating
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
         # Below about a volt of supply the quiescent current falls away; the knee is that volt.
         let V_supply_knee : voltage = 1
         let V_offset_now : voltage = V_input_offset + tolerance_corner * V_offset_spread + V_offset_drift * (T_junction - T_nominal)
@@ -141,8 +141,5 @@ component "Operational amplifier" as operational-amplifier type opamp {
         let G_noise : conductance = 1
         current noise_input -> GND = G_noise * (noise_input - GND) + noise(V_noise ^ 2, noise_corner)
         current Vcc -> GND = I_quiescent * (1 + supply_current_coefficient * ((Vcc - GND) - V_supply_nominal)) * tanh((Vcc - GND) / V_supply_knee)
-
-        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
-        d(heating)/dt = (realistic * ((Vcc - GND) * I_quiescent * tanh((Vcc - GND) / V_supply_knee) + (Vcc - output) * I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source) + (output - GND) * I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)) * thermal_resistance - heating) / thermal_time_constant
     }
 }

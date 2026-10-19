@@ -18,7 +18,7 @@ circuit "PWM from a 555 and output filter" as pwm-filter-lab {
         C = 1 µF in 0.1 .. 10 step 0.1 "Filter capacitance"
     }
     parts {
-        V1 voltage-source (vcc, 0) waveform = step, U_output = U
+        V1 voltage-source (vcc, 0) U_output = U
         R1 resistor (vcc, discharge) resistance = 1000
         P1 potentiometer (a = charge, w = discharge, b = drain) resistance = RP
         D1 1n4148 (anode = charge, cathode = timing)

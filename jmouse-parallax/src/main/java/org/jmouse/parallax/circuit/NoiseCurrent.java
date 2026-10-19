@@ -16,6 +16,4 @@ record NoiseCurrent(int positive, int negative, double density, double corner) {
         return density * (1 + corner / frequency);
     }
 
-    /** Boltzmann's constant, J/K. */
-    static final double BOLTZMANN = 1.380649e-23;
 }

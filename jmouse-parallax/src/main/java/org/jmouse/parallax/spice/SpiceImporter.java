@@ -1,10 +1,12 @@
 package org.jmouse.parallax.spice;
 
+import org.jmouse.parallax.component.PhysicalConstants;
+
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.Simplification;
 import org.jmouse.formula.Substitution;
-import org.jmouse.parallax.circuit.ComponentDocuments;
-import org.jmouse.parallax.circuit.ComponentModel;
+import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -37,8 +39,8 @@ import java.util.Set;
  *     SPICE's current flows from the first node through the source to the second, jMX's source pushes its value out of
  *     its first pin.</li>
  *     <li>{@code SIN(…)} → {@code sine-generator}, the phase in radians. {@code PULSE(…)} → a {@code voltage-source}
- *     {@code waveform = step} when it rises once from 0 and stays, else {@code square-generator} with the duty taken at
- *     half height.</li>
+ *     when it rises once from 0 and stays — a jMX circuit starts from rest, so every source is switched on at the
+ *     start —, else {@code square-generator} with the duty taken at half height.</li>
  *     <li>{@code D}, {@code Q}, {@code M} and their {@code .model} → the component the model's name names when the
  *     library holds one of that device, else the engine's own {@code diode} for a diode model that writes only
  *     {@code IS}, else the device's carrier ({@link SpiceModelCarriers}) — the model's parameters set on it by the
@@ -471,9 +473,9 @@ final class SpiceImporter {
                         + " is made an ideal step"));
             }
             return Optional.of(source.voltage()
-                    ? id + " voltage-source (" + positive + ", " + negative + ") waveform = step, U_output = "
+                    ? id + " voltage-source (" + positive + ", " + negative + ") U_output = "
                       + value(placement.value(pulse.pulsed()), "V")
-                    : id + " current-source (" + negative + ", " + positive + ") waveform = step, I_output = "
+                    : id + " current-source (" + negative + ", " + positive + ") I_output = "
                       + value(placement.value(pulse.pulsed()), "A"));
         }
         if (!source.voltage()) {
@@ -647,7 +649,7 @@ final class SpiceImporter {
         if (formula instanceof Formula.Constant constant) {
             return new Formula.Constant(parameter.toJmx(constant.value()));
         }
-        return new Formula.Binary(Formula.Operator.ADD, formula, new Formula.Constant(273.15));
+        return new Formula.Binary(Formula.Operator.ADD, formula, new Formula.Constant(PhysicalConstants.ZERO_CELSIUS));
     }
 
     /** The engine's own diode is SPICE's with nothing but {@code IS}: emission 1, no resistance, no charge. */

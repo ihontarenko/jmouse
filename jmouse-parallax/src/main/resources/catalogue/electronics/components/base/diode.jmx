@@ -5,9 +5,9 @@
 # `.model D (…)` becomes, the numbers of the model set on it. A part that sets the same numbers as a deck gives the
 # same curve, so this is also the reference a datasheet part is checked against.
 #
-# Its junction has a temperature of its own, T_junction: the bench's, and on a realistic bench raised by the heating the
-# power it dissipates gives through thermal_resistance, over thermal_time_constant — solved with the circuit, so a diode
-# that heats conducts more and heats further. Every drift reads it. What it does not represent: the temperature drift of
+# Its junction has a temperature of its own, T_junction: the bench's, and on a realistic bench raised by the heat the
+# power it dissipates gives through thermal_resistance, over thermal_time_constant — the engine keeps that heat after
+# every step, so a diode that heats conducts more and heats further. Every drift reads it. What it does not represent: the temperature drift of
 # VJ and CJO, and a series resistance of exactly zero — SPICE drops the node then; here it is a milliohm.
 
 component "Diode" as diode type diode {
@@ -62,10 +62,6 @@ component "Diode" as diode type diode {
         overcurrent = 100 * abs(anode.current) / I_forward_maximum unit % "of its rated current"
     }
 
-    state {
-        heating = 0 continuous                "how far its own heat has raised the junction above the bench, kelvin; 0 on an ideal bench"
-    }
-
     symbol uses diode-symbol {
         a anode
         b cathode
@@ -73,7 +69,8 @@ component "Diode" as diode type diode {
 
     equations {
         let V_diode : voltage = j - cathode
-        let T_junction : temperature = temperature + heating
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
         let R_series_now : resistance = R_series * (1 + resistance_temperature_coefficient * (T_junction - T_nominal))
         let V_breakdown_now : voltage = V_breakdown * (1 + breakdown_temperature_coefficient * (T_junction - T_nominal))
         let I_saturation_now : current = area * junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, emission_coefficient, E_gap)
@@ -87,10 +84,7 @@ component "Diode" as diode type diode {
 
         current anode -> j = I_through
         # Shot noise, 2qI: what the junction current carries as a noise analysis sees it; nothing to the solution.
-        current j -> cathode = I_diffusion + I_generation - I_reverse_breakdown + d(Q_junction)/dt + noise(2 * 1.602176634e-19 * abs(I_diffusion + I_generation))
-
-        # The heat: what it dissipates, through its thermal resistance, over its time constant, on a realistic bench.
-        d(heating)/dt = (realistic * (anode - cathode) * I_through * thermal_resistance - heating) / thermal_time_constant
+        current j -> cathode = I_diffusion + I_generation - I_reverse_breakdown + d(Q_junction)/dt + noise(2 * elementary_charge * abs(I_diffusion + I_generation))
     }
 
     expect "the ideal law at SPICE's defaults" from "IS 1e-14, N 1: V = N·Vt·ln(I/IS + 1) ≈ 0.656 V at 1 mA, 300 K" {

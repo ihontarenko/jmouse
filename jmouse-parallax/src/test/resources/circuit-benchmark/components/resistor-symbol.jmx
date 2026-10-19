@@ -4,10 +4,10 @@ symbol "Resistor" as resistor-symbol {
         category circuits
         tags electronics, schematic
     }
-    size 60 x 40
-    path "M-30 0H-16V-7H16V7H-16V0M16 0H30"
-    pin a at -30, 0
-    pin b at 30, 0
+    size 80 x 40
+    path "M-40 0H-16V-7H16V7H-16V0M16 0H40"
+    pin a at -40, 0
+    pin b at 40, 0
     label name at 0, -26
     label value at 0, 32
 }

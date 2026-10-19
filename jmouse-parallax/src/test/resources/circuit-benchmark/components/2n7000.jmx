@@ -9,7 +9,7 @@ component "2N7000" as 2n7000 type mosfet {
         source "onsemi 2N7000/2N7002/NDS7002A datasheet NDS7002A/D, Rev. 11"
         package "TO-92"
         category circuits
-        failure short
+        failure short drain source
     }
     extends n-mosfet
 
@@ -33,6 +33,10 @@ component "2N7000" as 2n7000 type mosfet {
         thermal_resistance = 312 K/W          "kelvin above the bench per watt it takes"
         thermal_time_constant = 2 s           "how fast it warms to that"
         T_maximum = 150 °C                    "past this it fails on a realistic bench"
+        V_threshold_spread = 0.9 V            "VGS(th) 0.8 ... 3 V"
+        V_drain_source_maximum = 60 V          "VDS"
+        V_gate_source_maximum = 20 V          "VGS, either way"
+        I_drain_maximum = 500 mA                "ID 200 mA continuous, 500 mA pulsed"
     }
 
     pins {

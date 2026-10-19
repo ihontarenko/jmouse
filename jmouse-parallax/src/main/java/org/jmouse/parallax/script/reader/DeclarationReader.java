@@ -499,6 +499,37 @@ final class DeclarationReader {
     }
 
     /**
+     * {@code heat { d(heating)/dt = …; let name = …; temperature = … }}: the law of a part's own temperature — rates and
+     * lets as in {@code equations}, and the one line that says what the temperature is.
+     */
+    Block.Heat heat() {
+        List<Equation> lines = new ArrayList<>();
+        SourceText temperature = null;
+        Reading.Line first = null;
+        for (Reading.Line line : reading.blockLines("heat")) {
+            first = first == null ? line : first;
+            if (line.value(0).equals("temperature") && line.value(1).equals("=")) {
+                if (temperature != null) {
+                    throw line.refusal("a heat law says what the temperature is once");
+                }
+                requireEquals(line, 1);
+                temperature = line.text(2);
+                continue;
+            }
+            Equation equation = equation(line);
+            if (equation.form() != EquationForm.DERIVATIVE && equation.form() != EquationForm.LOCAL) {
+                throw line.refusal("a heat law is d(x)/dt = …, let name = … and temperature = …");
+            }
+            lines.add(equation);
+        }
+        if (temperature == null) {
+            throw first == null ? new IllegalArgumentException("a heat law needs 'temperature = …'")
+                    : first.refusal("a heat law needs 'temperature = …': the part's own temperature, kelvin");
+        }
+        return new Block.Heat(lines, temperature);
+    }
+
+    /**
      * {@code d(x)/dt = …}, {@code x_next = …}, {@code x_start = …}, {@code current a -> b = …} (a current from pin a to
      * pin b through the part), {@code voltage a -> b = …} (a branch holding pin a at that voltage above pin b),
      * {@code 0 = …}, {@code let name = …} or {@code let name : current = …} ({@code local} is the same word).

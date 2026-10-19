@@ -1,6 +1,10 @@
 package org.jmouse.parallax.circuit;
 
-import org.jmouse.parallax.circuit.ComponentModel.PinNature;
+import org.jmouse.parallax.component.ComponentModel;
+import org.jmouse.parallax.component.ComponentVocabulary;
+import org.jmouse.parallax.component.ModelLanguage;
+
+import org.jmouse.parallax.component.ComponentModel.PinNature;
 import org.jmouse.el.evaluation.BasicValuesChain;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -14,7 +18,6 @@ import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Substitution;
 import org.jmouse.formula.Symbols;
-import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.script.el.DeclaredFunctions;
 import org.jmouse.script.el.ScriptExtension;
 import org.jmouse.script.el.budget.ScriptBudget;
@@ -22,7 +25,6 @@ import org.jmouse.script.el.budget.ScriptExecution;
 import org.jmouse.script.el.node.FunctionDeclarationNode;
 import org.jmouse.script.el.node.HandlerNode;
 import org.jmouse.script.el.node.ScriptNode;
-import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ import java.util.stream.IntStream;
  */
 final class EventSimulation {
 
-    private static final String  SCOPE   = "__emulator";
+    private static final String  SCOPE   = "__simulator";
     private static final int     DELTAS  = 10_000;
     private static final double  INSTANT = 1e-15;
 
@@ -62,9 +64,9 @@ final class EventSimulation {
 
     private final List<Unit> units = new ArrayList<>();
     private final Map<String, List<DigitalDriver>> driversByNode = new LinkedHashMap<>();
-    private final Map<String, Object> nodeLevels = new LinkedHashMap<>();
+    private final Map<String, LogicLevel> nodeLevels = new LinkedHashMap<>();
     private final List<OutputBridge> bridges = new ArrayList<>();
-    private final List<Netlist.Element> inputCapacitances = new ArrayList<>();
+    private final List<Netlist.Element> pinCapacitances = new ArrayList<>();
     private final StandardExtensionContainer extensions = new StandardExtensionContainer();
     /** One conversion for every handler run: building it registers every converter, which cost more than the handler. */
     private final ExpressionLanguageConversion conversion = new ExpressionLanguageConversion();
@@ -72,10 +74,10 @@ final class EventSimulation {
 
     EventSimulation(Netlist netlist) {
         extensions.importExtension(new ScriptExtension());
-        extensions.importExtension(new EmulatorExtension());
+        extensions.importExtension(new SimulatorExtension());
         netlist.digitalNodes().forEach(node -> {
             driversByNode.put(node, new ArrayList<>());
-            nodeLevels.put(node, DigitalDriver.RELEASED);
+            nodeLevels.put(node, LogicLevel.RELEASED);
         });
         for (Netlist.ModelUnit modelUnit : netlist.units()) {
             Unit unit = new Unit(modelUnit, this);
@@ -102,9 +104,18 @@ final class EventSimulation {
         return bridges;
     }
 
-    /** Input-pin capacitances on analog nodes, as ordinary solver capacitors. */
-    List<Netlist.Element> inputCapacitances() {
-        return inputCapacitances;
+    /**
+     * Every digital pin's capacitance on an analog node, input and output alike, as an ordinary solver capacitor — one
+     * integration, one step control, for a pin as for any capacitor in the circuit.
+     */
+    List<Netlist.Element> pinCapacitances() {
+        return pinCapacitances;
+    }
+
+    private void addPinCapacitance(String id, int node, int ground, double capacitance) {
+        if (capacitance > 0) {
+            pinCapacitances.add(new Netlist.Element(id, Netlist.Element.Kind.CAPACITOR, node, ground, capacitance));
+        }
     }
 
     /** t = 0: inputs read, {@code start} handlers run, everything they drive at once applied. */
@@ -145,12 +156,12 @@ final class EventSimulation {
         double next = Double.POSITIVE_INFINITY;
         for (Unit unit : units) {
             for (DigitalDriver driver : unit.drivers.values()) {
-                Double due = driver.pending.higherKey(time + INSTANT);
+                Double due = driver.dueAfter(time + INSTANT);
                 if (due != null) {
                     next = Math.min(next, due);
                 }
-                if (driver.changedAt + unit.edge > time + INSTANT && unit.edge > 0) {
-                    next = Math.min(next, driver.changedAt + unit.edge);
+                if (driver.changedAt() + unit.edge > time + INSTANT && unit.edge > 0) {
+                    next = Math.min(next, driver.changedAt() + unit.edge);
                 }
             }
             for (double due : unit.timers.values()) {
@@ -203,7 +214,7 @@ final class EventSimulation {
     }
 
     /** The level of every digital node, for the datasets. */
-    Map<String, Object> levels() {
+    Map<String, LogicLevel> levels() {
         return nodeLevels;
     }
 
@@ -253,16 +264,17 @@ final class EventSimulation {
         return events;
     }
 
-    private static Object resolve(List<DigitalDriver> drivers) {
-        Object level = DigitalDriver.RELEASED;
+    /** A node's level from its drivers: the one level they agree on, unknown where two disagree, released where none drives. */
+    private static LogicLevel resolve(List<DigitalDriver> drivers) {
+        LogicLevel level = LogicLevel.RELEASED;
         for (DigitalDriver driver : drivers) {
-            if (driver.level.equals(DigitalDriver.RELEASED)) {
+            if (driver.level() == LogicLevel.RELEASED) {
                 continue;
             }
-            if (level.equals(DigitalDriver.RELEASED)) {
-                level = driver.level;
-            } else if (!level.equals(driver.level)) {
-                return DigitalDriver.UNKNOWN;
+            if (level == LogicLevel.RELEASED) {
+                level = driver.level();
+            } else if (level != driver.level()) {
+                return LogicLevel.UNKNOWN;
             }
         }
         return level;
@@ -293,7 +305,7 @@ final class EventSimulation {
             changed = true;
         }
         for (Unit unit : units) {
-            changed |= unit.drivers.values().stream().anyMatch(driver -> !driver.pending.isEmpty() || driver.changedAt == now);
+            changed |= unit.drivers.values().stream().anyMatch(driver -> driver.hasPending() || driver.changedAt() == now);
         }
         return changed;
     }
@@ -316,7 +328,7 @@ final class EventSimulation {
         final EventSimulation simulation;
         final Map<String, Object> discrete = new LinkedHashMap<>();
         final Map<String, DigitalDriver> drivers = new LinkedHashMap<>();
-        final Map<String, Object> inputs = new LinkedHashMap<>();
+        final Map<String, LogicLevel> inputs = new LinkedHashMap<>();
         final Map<String, Double> lastChange = new HashMap<>();
         final Map<String, Double> timers = new LinkedHashMap<>();
         final List<Periodic> periodics = new ArrayList<>();
@@ -325,11 +337,10 @@ final class EventSimulation {
         /** Each handler's argument — the input or expression it listens to — read once, not at every event. */
         final Map<HandlerNode, String> handlerArguments = new IdentityHashMap<>();
         final ScriptNode script;
+        /** The logic family its digital pins follow, compiled from its document; null for a part with no digital pin. */
+        final LogicFamily family;
+        /** Its outputs' transition time: the family's; nought for a part with no family. */
         final double edge;
-        final double inputLow;
-        final double inputHigh;
-        final double delayReference;
-        final double delayExponent;
         /** The analog nodes of its supply and ground pins, found once: read at every candidate step. */
         final int powerNode;
         final int groundNode;
@@ -345,12 +356,8 @@ final class EventSimulation {
             this.simulation = simulation;
             this.powerNode = rail(model, PinNature.POWER);
             this.groundNode = rail(model, PinNature.GROUND);
-            ComponentModel family = model.family();
-            this.edge = familyValue(family, "edge", 5e-9);
-            this.inputLow = familyValue(family, "input_low", 0.3);
-            this.inputHigh = familyValue(family, "input_high", 0.7);
-            this.delayReference = familyValue(family, "delay_reference", 4.5);
-            this.delayExponent = familyValue(family, "delay_exponent", 0);
+            this.family = model.family() == null ? null : LogicFamily.of(model.family());
+            this.edge = family == null ? 0 : family.edge();
             this.argumentNodes = IntStream.concat(
                     model.pins().values().stream().mapToInt(binding -> binding.pin().nature() == PinNature.DIGITAL ? DIGITAL_PIN : binding.analog()),
                     model.internalNodes().values().stream().mapToInt(Integer::intValue)).toArray();
@@ -362,7 +369,7 @@ final class EventSimulation {
             }
             model.internalDigitalNodes().forEach((name, node) -> {
                 drivers.put(name, new DigitalDriver(label, name, node));
-                inputs.put(name, DigitalDriver.UNKNOWN);
+                inputs.put(name, LogicLevel.UNKNOWN);
             });
             model.pins().forEach((name, binding) -> {
                 if (binding.pin().nature() != PinNature.DIGITAL) {
@@ -372,17 +379,15 @@ final class EventSimulation {
                     DigitalDriver driver = new DigitalDriver(label, name, binding.isDigitalNode() ? binding.digitalNode() : null);
                     drivers.put(name, driver);
                     if (!binding.isDigitalNode()) {
-                        simulation.bridges.add(new OutputBridge(driver, binding.analog(), powerNode, groundNode,
-                                familyValue(family, "output_resistance", 50), delayReference, edge,
-                                familyValue(family, "output_capacitance", 0)));
+                        simulation.bridges.add(new OutputBridge(driver, binding.analog(), powerNode, groundNode, family));
+                        simulation.addPinCapacitance(label + "." + name + ".Cout", binding.analog(), groundNode,
+                                family.outputCapacitance());
                     }
                 } else {
-                    inputs.put(name, DigitalDriver.UNKNOWN);
-                    double capacitance = familyValue(family, "input_capacitance", 0);
-                    if (!binding.isDigitalNode() && capacitance > 0) {
-                        simulation.inputCapacitances.add(new Netlist.Element(label + "." + name + ".Cin",
-                                CircuitElementType.CAPACITOR,
-                                binding.analog(), groundNode, capacitance, -1));
+                    inputs.put(name, LogicLevel.UNKNOWN);
+                    if (!binding.isDigitalNode()) {
+                        simulation.addPinCapacitance(label + "." + name + ".Cin", binding.analog(), groundNode,
+                                family.inputCapacitance());
                     }
                 }
             });
@@ -406,7 +411,7 @@ final class EventSimulation {
                         case "start", "rising", "falling", "change", "timer" -> {
                         }
                         default -> throw new IllegalArgumentException(model.model().name() + ": 'on " + handler.getEvent()
-                                + "' is not an event of the emulator — start, rising, falling, change, above, below, every, timer.");
+                                + "' is not an event of the simulator — start, rising, falling, change, above, below, every, timer.");
                     }
                 }
             }
@@ -421,12 +426,7 @@ final class EventSimulation {
             discrete.clear();
             discrete.putAll(copy(earlier.discrete));
             drivers.forEach((name, driver) -> {
-                DigitalDriver before = earlier.drivers.get(name);
-                driver.level = before.level;
-                driver.previous = before.previous;
-                driver.changedAt = before.changedAt;
-                driver.pending.clear();
-                driver.pending.putAll(before.pending);
+                driver.continueFrom(earlier.drivers.get(name));
             });
             inputs.clear();
             inputs.putAll(earlier.inputs);
@@ -476,9 +476,9 @@ final class EventSimulation {
             model.pins().forEach((name, binding) -> context.setValue(name, pinValue(name, binding, state)));
             model.internalNodes().forEach((name, node) -> context.setValue(name, voltage(node, state)));
             model.internalDigitalNodes().forEach((name, node) -> context.setValue(name,
-                    simulation.nodeLevels.getOrDefault(node, DigitalDriver.UNKNOWN)));
-            context.setValue("X", DigitalDriver.UNKNOWN);
-            context.setValue("Z", DigitalDriver.RELEASED);
+                    simulation.nodeLevels.getOrDefault(node, LogicLevel.UNKNOWN).scriptValue()));
+            context.setValue("X", LogicLevel.UNKNOWN.scriptValue());
+            context.setValue("Z", LogicLevel.RELEASED.scriptValue());
             context.setValue("time", simulation.now);
             context.setValue(SCOPE, new Scope(this, state));
             DeclaredFunctions.of(functions).installInto(context);
@@ -502,9 +502,9 @@ final class EventSimulation {
         Object pinValue(String name, Netlist.PinBinding binding, double[] state) {
             if (binding.pin().nature() == PinNature.DIGITAL) {
                 if (binding.pin().output()) {
-                    return drivers.get(name).level;
+                    return drivers.get(name).level().scriptValue();
                 }
-                return inputs.get(name);
+                return inputs.get(name).scriptValue();
             }
             return voltage(binding.analog(), state);
         }
@@ -513,19 +513,19 @@ final class EventSimulation {
         List<Event> readInputs(double[] state, boolean initial) {
             List<Event> events = new ArrayList<>();
             for (String name : List.copyOf(inputs.keySet())) {
-                Object level = inputLevel(name, state);
-                Object held = inputs.get(name);
+                LogicLevel level = inputLevel(name, state);
+                LogicLevel held = inputs.get(name);
                 if (initial) {
                     inputs.put(name, level);
                     continue;
                 }
-                if (!level.equals(held)) {
+                if (level != held) {
                     inputs.put(name, level);
                     lastChange.put(name, simulation.now);
                     events.add(new Event(this, "change", name));
-                    if (Objects.equals(level, 1)) {
+                    if (level == LogicLevel.HIGH) {
                         events.add(new Event(this, "rising", name));
-                    } else if (Objects.equals(level, 0)) {
+                    } else if (level == LogicLevel.LOW) {
                         events.add(new Event(this, "falling", name));
                     }
                 }
@@ -536,14 +536,14 @@ final class EventSimulation {
         boolean inputsWouldChange(double[] state) {
             for (String name : inputs.keySet()) {
                 Netlist.PinBinding binding = model.pins().get(name);
-                if (binding != null && !binding.isDigitalNode() && !inputLevel(name, state).equals(inputs.get(name))) {
+                if (binding != null && !binding.isDigitalNode() && inputLevel(name, state) != inputs.get(name)) {
                     return true;
                 }
             }
             return false;
         }
 
-        private Object inputLevel(String name, double[] state) {
+        private LogicLevel inputLevel(String name, double[] state) {
             Netlist.PinBinding binding = model.pins().get(name);
             if (binding == null) {
                 return digitalNodeLevel(model.internalDigitalNodes().get(name));
@@ -554,25 +554,25 @@ final class EventSimulation {
             double ground = voltage(groundNode, state);
             double supply = voltage(powerNode, state) - ground;
             double value = voltage(binding.analog(), state) - ground;
-            if (supply < 0.5) {
-                return DigitalDriver.UNKNOWN;
+            if (!family.powers(supply)) {
+                return LogicLevel.UNKNOWN;
             }
-            if (value >= inputHigh * supply) {
-                return 1;
+            if (value >= family.inputHigh(supply)) {
+                return LogicLevel.HIGH;
             }
-            if (value <= inputLow * supply) {
-                return 0;
+            if (value <= family.inputLow(supply)) {
+                return LogicLevel.LOW;
             }
-            Object previous = inputs.get(name);
+            LogicLevel previous = inputs.get(name);
             // Between the thresholds an input holds what it last was: what a slow edge does on a real part is not
             // promised, and holding is the reading that keeps a clean edge clean.
-            return previous == null ? DigitalDriver.UNKNOWN : previous;
+            return previous == null ? LogicLevel.UNKNOWN : previous;
         }
 
         /** What an input on a digital node reads: the node's resolved level, a released node read as unknown. */
-        private Object digitalNodeLevel(String node) {
-            Object level = simulation.nodeLevels.getOrDefault(node, DigitalDriver.RELEASED);
-            return level.equals(DigitalDriver.RELEASED) ? DigitalDriver.UNKNOWN : level;
+        private LogicLevel digitalNodeLevel(String node) {
+            LogicLevel level = simulation.nodeLevels.getOrDefault(node, LogicLevel.RELEASED);
+            return level == LogicLevel.RELEASED ? LogicLevel.UNKNOWN : level;
         }
 
         void watch(double[] state, double time) {
@@ -659,15 +659,15 @@ final class EventSimulation {
          * lays them —; a digital pin's name is its level, as the behaviour writes it, so a discrete state keeps its name.
          */
         private RealFunction compile(String expression) {
-            Formula parsed = ModelEquations.read(model.model().name(), expression, 0,
-                    ModelEquations.LANGUAGE.definitions(ModelEquations.libraryText(model.model())));
+            Formula parsed = ModelLanguage.read(model.model().name(), expression, 0,
+                    ModelLanguage.LANGUAGE.definitions(ModelLanguage.libraryText(model.model())));
             List<String> nodes = new ArrayList<>(model.pins().keySet());
             nodes.addAll(model.internalNodes().keySet());
             Formula bound = Substitution.bindHostNames(Substitution.replaceHostCalls(parsed, call -> {
                 throw new IllegalArgumentException(model.model().name() + ": an event reads voltages, not the rate d(…)/dt.");
             }), name -> discrete.containsKey(name) || !nodes.contains(name) ? null : new Formula.Slot(nodes.indexOf(name), name));
             List<String> names = new ArrayList<>(discrete.keySet());
-            names.add(ModelEquations.TIME);
+            names.add(ComponentVocabulary.TIME);
             return RealCompiler.compile(bound, Symbols.withSlots(nodes.size(), names, List.copyOf(model.parameters().keySet())),
                     expression);
         }
@@ -689,22 +689,19 @@ final class EventSimulation {
                 into[position++] = node == DIGITAL_PIN ? 0 : voltage(node, state);
             }
             for (Object value : discrete.values()) {
-                into[position++] = ModelDevice.numeric(value);
+                into[position++] = UnitArguments.numeric(value);
             }
             into[position] = time;
             return into;
         }
 
+        /** How much slower its delays are at this supply than as it writes them: its family's law; 1 without a family. */
         double delayScale(double supply) {
-            return delayExponent == 0 || supply <= 0 ? 1 : Math.pow(delayReference / supply, delayExponent);
+            return family == null ? 1 : family.delayScale(supply);
         }
 
         private static double voltage(int node, double[] state) {
             return node == Netlist.GROUND || node >= state.length ? 0 : state[node];
-        }
-
-        private static double familyValue(ComponentModel family, String name, double fallback) {
-            return family == null ? fallback : family.parameter(name).map(ComponentModel.Parameter::value).orElse(fallback);
         }
 
         private static String argumentOf(HandlerNode handler) {
@@ -770,17 +767,17 @@ final class EventSimulation {
         }
     }
 
-    /** What the emulator's functions reach while a handler runs. */
+    /** What the simulator's functions reach while a handler runs. */
     private record Scope(Unit unit, double[] state) {
     }
 
-    // ── the emulator's functions ─────────────────────────────────────────────────────────────────────────────────
+    // ── the simulator's functions ─────────────────────────────────────────────────────────────────────────────────
 
     /**
      * What a behaviour may call besides jMS's own vocabulary: {@code drive}, {@code schedule}, {@code since},
      * {@code V}, {@code item}, {@code with} and the family's {@code delay_scale}. Nothing reaches outside the unit.
      */
-    private static final class EmulatorExtension implements Extension {
+    private static final class SimulatorExtension implements Extension {
         @Override
         public List<Function> getFunctions() {
             return List.of(
@@ -791,7 +788,7 @@ final class EventSimulation {
                             throw new IllegalArgumentException(scope.unit().model.model().name() + ": drive('" + pin + "') names no digital output or internal node.");
                         }
                         double delay = arguments.size() > 2 ? number(arguments.get(2)) : 0;
-                        driver.schedule(scope.unit().simulation.now + Math.max(delay, 0), DigitalDriver.normalized(arguments.get(1)));
+                        driver.schedule(scope.unit().simulation.now + Math.max(delay, 0), LogicLevel.of(arguments.get(1)));
                         return null;
                     }),
                     function("schedule", (arguments, scope) -> {

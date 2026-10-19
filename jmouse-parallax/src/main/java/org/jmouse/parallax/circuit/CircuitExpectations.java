@@ -1,5 +1,7 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.parallax.component.ComponentModel;
+
 import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitExpectation;

@@ -51,20 +51,18 @@ final class DefinitionWords {
      * setting that carries its value.
      */
     enum Primitive {
-        RESISTOR(CircuitElementType.RESISTOR, "resistor", "resistance"),
-        CAPACITOR(CircuitElementType.CAPACITOR, "capacitor", "capacitance"),
-        INDUCTOR(CircuitElementType.INDUCTOR, "inductor", "inductance"),
-        DIODE(CircuitElementType.DIODE, "diode", "I_saturation"),
-        VOLTAGE_SOURCE(CircuitElementType.VOLTAGE_SOURCE, "voltage-source", "U_output"),
-        CURRENT_SOURCE(CircuitElementType.CURRENT_SOURCE, "current-source", "I_output");
+        RESISTOR(CircuitElementType.RESISTOR, "resistance"),
+        CAPACITOR(CircuitElementType.CAPACITOR, "capacitance"),
+        INDUCTOR(CircuitElementType.INDUCTOR, "inductance"),
+        DIODE(CircuitElementType.DIODE, "I_saturation"),
+        VOLTAGE_SOURCE(CircuitElementType.VOLTAGE_SOURCE, "U_output"),
+        CURRENT_SOURCE(CircuitElementType.CURRENT_SOURCE, "I_output");
 
         private final CircuitElementType type;
-        private final String             reference;
         private final String             valueSetting;
 
-        Primitive(CircuitElementType type, String reference, String valueSetting) {
+        Primitive(CircuitElementType type, String valueSetting) {
             this.type = type;
-            this.reference = reference;
             this.valueSetting = valueSetting;
         }
 
@@ -74,7 +72,7 @@ final class DefinitionWords {
 
         /** The component the part is: the slug of its model in the catalogue. */
         String reference() {
-            return reference;
+            return type.primitiveComponent();
         }
 
         /** The setting its value is written in: {@code resistance = R}. */
@@ -88,7 +86,7 @@ final class DefinitionWords {
         }
 
         static Optional<Primitive> ofReference(String reference) {
-            return Arrays.stream(values()).filter(primitive -> primitive.reference.equals(reference)).findFirst();
+            return Arrays.stream(values()).filter(primitive -> primitive.reference().equals(reference)).findFirst();
         }
     }
 }

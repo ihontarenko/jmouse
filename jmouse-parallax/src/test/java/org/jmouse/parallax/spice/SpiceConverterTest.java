@@ -40,8 +40,16 @@ class SpiceConverterTest {
 
     private static final Map<String, String> EXTRA = new HashMap<>();
 
+    /**
+     * The library's own catalogue, by slug — never a copy of it, which drifts from the documents the engine ships —,
+     * and under {@code spice/components/} only the datasheet parts a product ships rather than the library (1N4148,
+     * 2N2222, 2N7000).
+     */
+    private static final Map<String, String> CATALOGUE = catalogue();
+
     private static final ComponentLibrary LIBRARY = reference -> EXTRA.containsKey(reference)
-            ? Optional.of(EXTRA.get(reference)) : resource("spice/components/" + reference + ".jmx");
+            ? Optional.of(EXTRA.get(reference))
+            : resource("spice/components/" + reference + ".jmx").or(() -> Optional.ofNullable(CATALOGUE.get(reference)));
 
     private final SpiceConverter converter = new SpiceConverter(LIBRARY);
 
@@ -159,8 +167,8 @@ class SpiceConverterTest {
                 """, null);
         List<String> notes = imported.notes();
         assertTrue(notes.stream().anyMatch(note -> note.startsWith("line 2:") && note.contains("no file of that name was given")), notes.toString());
-        assertTrue(notes.stream().anyMatch(note -> note.startsWith("line 4:") && note.contains("E1 (a voltage-controlled voltage source)")),
-                notes.toString());
+        // The catalogue has a voltage-controlled voltage source, so E1 comes across as one rather than being left out.
+        assertTrue(imported.source().contains("E1 voltage-controlled-voltage-source"), imported.source());
         assertTrue(notes.stream().anyMatch(note -> note.startsWith("line 3:") && note.contains("AC")), notes.toString());
         assertTrue(notes.stream().anyMatch(note -> note.contains("'1M' is read as SPICE reads it, a thousandth")), notes.toString());
         assertTrue(notes.stream().anyMatch(note -> note.startsWith("line 6:") && note.contains("AC sweep")), notes.toString());
@@ -191,12 +199,12 @@ class SpiceConverterTest {
         assertTrue(diode.contains(".model 1n4148 D(IS=2.52e-9 N=1.752 RS=0.568"), diode);
         assertTrue(diode.contains("TNOM=27"), diode);
 
-        String potentiometer = converter.exportDocument(resource("spice/components/potentiometer.jmx").orElseThrow()).text();
+        String potentiometer = converter.exportDocument(LIBRARY.source("potentiometer").orElseThrow()).text();
         assertTrue(potentiometer.contains(".subckt potentiometer a w b params: position=0.5 resistance=10000"), potentiometer);
         assertTrue(potentiometer.contains("B1 a w I="), potentiometer);
         assertTrue(potentiometer.contains("V(a)"), potentiometer);
 
-        SpiceConverter.SpiceExport ammeter = converter.exportDocument(resource("spice/components/ammeter.jmx").orElseThrow());
+        SpiceConverter.SpiceExport ammeter = converter.exportDocument(LIBRARY.source("ammeter").orElseThrow());
         assertTrue(ammeter.text().contains("B1 in out V=0"), ammeter.text());
         assertTrue(ammeter.notes().stream().anyMatch(note -> note.contains("ideal bench")), ammeter.notes().toString());
 
@@ -322,6 +330,24 @@ class SpiceConverterTest {
             }
         }
         return maximum;
+    }
+
+    private static Map<String, String> catalogue() {
+        java.util.regex.Pattern slug = java.util.regex.Pattern.compile("(?m)^[a-z_]+\s+\"[^\"]*\"\s+as\s+([A-Za-z0-9-]+)");
+        Map<String, String> documents = new HashMap<>();
+        try (java.util.stream.Stream<java.nio.file.Path> files = java.nio.file.Files.walk(java.nio.file.Path.of(
+                SpiceConverterTest.class.getClassLoader().getResource("catalogue").toURI()))) {
+            for (java.nio.file.Path file : files.filter(path -> path.toString().endsWith(".jmx")).toList()) {
+                String text = java.nio.file.Files.readString(file);
+                java.util.regex.Matcher matcher = slug.matcher(text);
+                if (matcher.find()) {
+                    documents.put(matcher.group(1), text);
+                }
+            }
+        } catch (IOException | java.net.URISyntaxException unreadable) {
+            throw new IllegalStateException(unreadable);
+        }
+        return documents;
     }
 
     private static Optional<String> resource(String path) {

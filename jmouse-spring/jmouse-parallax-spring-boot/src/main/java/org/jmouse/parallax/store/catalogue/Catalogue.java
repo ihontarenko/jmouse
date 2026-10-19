@@ -303,7 +303,7 @@ public class Catalogue {
     public CompiledObject compileVariant(MathematicalObject object, ObjectDefinition.Circuit circuit,
                                          Map<String, Double> values) {
         if (!(definitionOf(object) instanceof ObjectDefinition.Circuit)) {
-            throw ParallaxProblem.invalid("Only a circuit can be varied in the emulator.");
+            throw ParallaxProblem.invalid("Only a circuit can be varied in the simulator.");
         }
         return compileChecked(circuit, parametersOf(object), values, componentModels.forCircuit(object));
     }

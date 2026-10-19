@@ -40,6 +40,9 @@ component "2N2222A" as 2n2222 type bjt {
         thermal_resistance = 200 K/W          "kelvin above the bench per watt it takes"
         thermal_time_constant = 2 s           "how fast it warms to that"
         T_maximum = 150 °C                    "past this it fails on a realistic bench"
+        beta_forward_spread = 0.5             "hFE 100 ... 300 at 150 mA: about half either way"
+        V_collector_emitter_maximum = 40 V     "VCEO"
+        I_collector_maximum = 600 mA            "IC, continuous"
     }
 
     pins {

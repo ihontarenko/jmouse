@@ -1,20 +1,21 @@
 package org.jmouse.parallax.spice;
 
+import org.jmouse.parallax.component.PhysicalConstants;
+
 import org.jmouse.el.node.Trivia;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.MathematicalConstant;
 import org.jmouse.formula.Simplification;
 import org.jmouse.formula.Substitution;
 import org.jmouse.formula.el.FormulaLanguage;
-import org.jmouse.parallax.circuit.ComponentDocuments;
-import org.jmouse.parallax.circuit.ComponentModel;
-import org.jmouse.parallax.circuit.Quantities;
+import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentModel;
+import org.jmouse.parallax.script.Quantity;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.SourceText;
-import org.jmouse.spice.SpiceNumbers;
 import org.jmouse.spice.SpiceParseException;
 import org.jmouse.spice.SpicePosition;
 import org.jmouse.spice.node.SpiceArgument;
@@ -45,8 +46,9 @@ import java.util.function.Function;
  * <h2>What each jMX part becomes</h2>
  * <ul>
  *     <li>{@code resistor}, {@code capacitor}, {@code inductor} → {@code R}, {@code C}, {@code L}.</li>
- *     <li>{@code voltage-source} → {@code V … DC}; {@code waveform = step} → a {@code PULSE} that rises from 0 at time 0
- *     in a thousand-millionth of the run and stays. {@code current-source} → {@code I} with its nodes swapped (see
+ *     <li>{@code voltage-source} → a {@code PULSE} that rises from 0 at time 0 in a thousand-millionth of the run and
+ *     stays: a jMX circuit starts from rest and every source is switched on at the start, where a SPICE {@code DC}
+ *     source would start the run at its operating point. {@code current-source} → {@code I} with its nodes swapped (see
  *     {@link SpiceImporter}).</li>
  *     <li>A generator — one {@code voltage positive -> negative} equation of the time and its parameters — →
  *     {@code SIN(…)} when its equation is the sine's, {@code PULSE(…)} when it is the square's (its edges a millionth
@@ -284,8 +286,8 @@ final class SpiceExporter {
     /** A setting as a formula: a quantity in SI, or the jMF expression over the parameters. */
     private static Formula setting(SourceText text) {
         String written = text.text();
-        if (Quantities.isQuantity(written)) {
-            return new Formula.Constant(Quantities.parse(written));
+        if (Quantity.isQuantity(written)) {
+            return new Formula.Constant(Quantity.valueOf(written));
         }
         return formula(written, text.line());
     }
@@ -293,8 +295,6 @@ final class SpiceExporter {
     private List<SpiceStatement> primitive(String id, String reference, String positive, String negative,
                                            Map<String, Formula> settings, Scope scope, int line) {
         Map<String, Formula> rest = new LinkedHashMap<>(settings);
-        Formula waveform = rest.remove("waveform");
-        boolean step = waveform instanceof Formula.Variable word && word.name().equals("step");
         SpiceStatement statement = switch (reference) {
             case "resistor" -> new SpiceElement.Passive(elementName('R', id), positive, negative,
                     value(required(rest, "resistance", id, line), scope), List.of(), SpicePosition.NONE);
@@ -310,9 +310,9 @@ final class SpiceExporter {
                         SpicePosition.NONE);
             }
             case "voltage-source" -> source(elementName('V', id), positive, negative,
-                    value(required(rest, "U_output", id, line), scope), step);
+                    value(required(rest, "U_output", id, line), scope));
             case "current-source" -> source(elementName('I', id), negative, positive,
-                    value(required(rest, "I_output", id, line), scope), step);
+                    value(required(rest, "I_output", id, line), scope));
             default -> null;
         };
         if (statement == null) {
@@ -334,11 +334,11 @@ final class SpiceExporter {
         return value;
     }
 
-    /** {@code DC v}, or for a step a pulse that rises from 0 at time 0 and stays past the end of any run. */
-    private SpiceElement.Source source(String name, String positive, String negative, SpiceValue value, boolean step) {
-        if (!step) {
-            return new SpiceElement.Source(name, positive, negative, value, true, null, List.of(), SpicePosition.NONE);
-        }
+    /**
+     * A source as it is in a jMX circuit, which starts from rest: a pulse that rises from 0 at time 0 and stays past the
+     * end of any run. A {@code DC} card would start the SPICE run at its operating point instead.
+     */
+    private SpiceElement.Source source(String name, String positive, String negative, SpiceValue value) {
         SpiceValue edge = SpiceValue.number(span * STEP_EDGE);
         SpiceValue forever = SpiceValue.number(1e30);
         SpiceWaveform pulse = new SpiceWaveform(SpiceWaveform.Kind.PULSE,
@@ -395,9 +395,15 @@ final class SpiceExporter {
                 document.block(Block.Symbol.class).map(Block.Symbol::uses).orElse(List.of())));
     }
 
-    /** The {@code type} a component is solved as by the engine itself: one of its primitives, with no behaviour of its own. */
+    /**
+     * The primitive a component is written to SPICE as: a primitive the engine still supplies, or a primitive's own
+     * document — {@code resistor}, {@code capacitor} — whose equations, on the ideal nominal bench a deck runs on, are
+     * exactly its card ({@code resistance} at no corner and no drift). A component of that type with physics of its own,
+     * a thermistor, is no primitive here and is written as what it is.
+     */
     private static Optional<String> primitiveType(ExperienceDocument document) {
-        return ComponentDocuments.primitiveOf(document) == null ? Optional.empty() : document.type();
+        boolean primitiveDocument = org.jmouse.parallax.object.ObjectDefinition.CircuitElementType.ofComponent(document.slug()).isPresent();
+        return primitiveDocument || ComponentDocuments.primitiveOf(document) != null ? document.type() : Optional.empty();
     }
 
     /** Each of the component's parameters at this part: the part's setting, else the component's own value. */
@@ -428,7 +434,7 @@ final class SpiceExporter {
                         SpiceAnalyzer.evaluate(folded, Map.of())))));
             } else if (parameter.temperature()) {
                 parameters.add(SpiceParameter.of(parameter.spice(), value(new Formula.Binary(Formula.Operator.SUBTRACT,
-                        value, new Formula.Constant(273.15)), scope)));
+                        value, new Formula.Constant(PhysicalConstants.ZERO_CELSIUS)), scope)));
             } else {
                 parameters.add(SpiceParameter.of(parameter.spice(), value(value, scope)));
             }
@@ -694,7 +700,7 @@ final class SpiceExporter {
         }
         return switch (name) {
             case "time" -> "time";
-            case "temperature" -> "(temper + 273.15)";
+            case "temperature" -> "(temper + " + PhysicalConstants.ZERO_CELSIUS + ")";
             default -> throw new SpiceExpressions.Untranslatable("'" + name + "' is neither a node, a parameter nor "
                     + "the time");
         };
@@ -774,8 +780,8 @@ final class SpiceExporter {
 
     private static double seconds(SourceText text) {
         String written = text.text();
-        if (Quantities.isQuantity(written)) {
-            return Quantities.parse(written);
+        if (Quantity.isQuantity(written)) {
+            return Quantity.valueOf(written);
         }
         throw new SpiceParseException(new SpicePosition(text.line(), text.column()), "the transient's span is a time: '"
                 + written + "'");

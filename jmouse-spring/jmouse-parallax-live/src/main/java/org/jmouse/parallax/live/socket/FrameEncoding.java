@@ -107,12 +107,15 @@ final class FrameEncoding {
         return buffer.flip();
     }
 
-    /** Each part as [watts, °C, { terminal: amperes into it }], a number that is not known as null. */
+    /**
+     * Each part as [watts, °C, { terminal: amperes into it }, maximum °C, rating W, failure, displays, cause, past] — a
+     * number that is not known as null; {@code past} is the limit it is past now ({@link PartLoad#past}).
+     */
     private static Map<String, List<Object>> parts(LiveCircuitSession.Frame frame) {
         Map<String, List<Object>> parts = new LinkedHashMap<>();
         frame.parts().forEach((part, load) -> parts.put(part, java.util.Arrays.asList(known(load.power()),
                 known(load.temperature()), load.terminals(), known(load.maximum()), known(load.rating()), load.failure(),
-                load.displays(), load.cause())));
+                load.displays(), load.cause(), load.past())));
         return parts;
     }
 

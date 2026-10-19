@@ -18,7 +18,7 @@ import java.util.Map;
 final class TraceWindow {
 
     /** A closed stretch: the terminals' mean currents, as a traced sample's terminals, and the rest of the stretch. */
-    record Closed(Map<String, Map<String, Double>> terminals, LiveCircuitSolver.Window window) {
+    record Closed(Map<String, Map<String, Double>> terminals, SampleWindow window) {
     }
 
     private final double[] voltageAreas;
@@ -76,7 +76,7 @@ final class TraceWindow {
                     .put(terminals[column], Math.sqrt(Math.max(0, currentSquares[column] / duration)));
         }
         clear();
-        return new Closed(currentMeans, new LiveCircuitSolver.Window(means, rms, currentRms));
+        return new Closed(currentMeans, new SampleWindow(means, rms, currentRms));
     }
 
     /** Forgets what it took in: a sample read at its instant stands for itself. */

@@ -178,6 +178,7 @@ public final class DocumentReader {
             case "outputs" -> declarations.outputs();
             case "state" -> declarations.state();
             case "equations" -> declarations.equations();
+            case "heat" -> declarations.heat();
             case "image" -> declarations.image();
             case "display" -> declarations.display();
             case "measure" -> declarations.measure();

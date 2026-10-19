@@ -1,7 +1,7 @@
 package org.jmouse.parallax.spice;
 
 import org.jmouse.parallax.Dataset;
-import org.jmouse.parallax.circuit.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.DefinitionCompiler;
 import org.jmouse.parallax.script.ExperienceDocument;

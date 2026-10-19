@@ -28,9 +28,6 @@ final class CircuitSolver {
             "The circuit has no unique solution: a node that nothing ties to node 0, or a loop of voltage sources.";
 
     private static final int    NEWTON_ITERATIONS   = 300;
-    /** How short the line search lets a Newton step become before it takes it anyway. */
-    private static final double SMALLEST_FRACTION   = 1.0 / 1024;
-    private static final double VOLTAGE_TOLERANCE   = 1e-6;
     private static final int    SOURCE_STEPS        = 20;
     /** The conductance gmin stepping starts every node with, and the last it withdraws. */
     private static final double LARGEST_SHUNT       = 1e-2;
@@ -40,29 +37,33 @@ final class CircuitSolver {
     /** The one linear system every Newton iteration of this solve assembles into. */
     private final SparseSystem    system;
     private final List<Device>    devices;
-    private final boolean         nonlinear;
-    private final EventSimulation events;
+    private final CircuitNewton   newton;
 
     CircuitSolver(Netlist netlist) {
+        this(netlist, new SparseSystem(netlist.size()), List.copyOf(Device.of(netlist, new EventSimulation(netlist), Device::of)));
+    }
+
+    private CircuitSolver(Netlist netlist, SparseSystem system, List<Device> devices) {
         this.netlist = netlist;
-        this.system = new SparseSystem(netlist.size());
-        this.events = new EventSimulation(netlist);
-        List<Device> built = new ArrayList<>();
-        for (Netlist.Element element : netlist.elements()) {
-            built.add(Device.of(element, built.size()));
+        this.system = system;
+        this.devices = devices;
+        this.newton = new CircuitNewton(netlist, devices.stream().anyMatch(Device::nonlinear), CircuitNewton.Settling.OPERATING_POINT);
+    }
+
+    /**
+     * The same circuit with one source held at a value — a sweep's next point: the same system and the same devices but
+     * that source's, which is built again at the value. Nothing else is rebuilt; the points of a sweep are solved one
+     * after another, never at once.
+     */
+    CircuitSolver withSourceValue(String id, double value) {
+        Netlist changed = netlist.withValue(id, value);
+        List<Device> swapped = new ArrayList<>(devices);
+        for (int index = 0; index < changed.elements().size(); index++) {
+            if (changed.elements().get(index).id().equals(id)) {
+                swapped.set(index, Device.of(changed.elements().get(index), index));
+            }
         }
-        for (Netlist.ModelUnit unit : netlist.units()) {
-            built.add(new ModelDevice(unit, events.discrete(unit.label())));
-        }
-        for (Netlist.Element capacitor : events.inputCapacitances()) {
-            built.add(new Device.Capacitor(capacitor, built.size()));
-        }
-        for (OutputBridge bridge : events.bridges()) {
-            bridge.slot(built.size());
-            built.add(bridge);
-        }
-        this.devices = List.copyOf(built);
-        this.nonlinear = devices.stream().anyMatch(Device::nonlinear) || !events.bridges().isEmpty();
+        return new CircuitSolver(changed, system, List.copyOf(swapped));
     }
 
     List<Device> devices() {
@@ -70,7 +71,7 @@ final class CircuitSolver {
     }
 
     boolean nonlinear() {
-        return nonlinear;
+        return newton.nonlinear();
     }
 
     double[] operatingPoint() {
@@ -124,8 +125,8 @@ final class CircuitSolver {
     }
 
     /** Every device's noise current at the operating point. */
-    List<NoiseCurrent> noiseSources(double[] operatingPoint, double temperature) {
-        return devices.stream().flatMap(device -> device.noise(operatingPoint, temperature).stream()).toList();
+    List<NoiseCurrent> noiseSources(double[] operatingPoint) {
+        return devices.stream().flatMap(device -> device.noise(operatingPoint).stream()).toList();
     }
 
     /**
@@ -165,27 +166,26 @@ final class CircuitSolver {
 
     /** The same, every node held to ground by {@code shunt} siemens as well. */
     private double[] newton(Assembly assembly, double[] start, double shunt) {
-        double[] plain = newton(assembly, start, false, shunt);
-        return plain != null || !nonlinear ? plain : newton(assembly, start, true, shunt);
+        Stamped stamped = new Stamped(shunt);
+        double[] plain = newton.solve(assembly, start, NEWTON_ITERATIONS, false, stamped);
+        return plain != null || !newton.nonlinear() ? plain : newton.solve(assembly, start, NEWTON_ITERATIONS, true, stamped);
     }
 
     /**
-     * One Newton–Raphson run. With {@code searching}, a line search: a step is kept only where the equations hold better
-     * than where it started; otherwise it is halved, back towards the point it left. A saturating model — an op-amp's
-     * slew, s / √(1 + s²) — sends a full Newton step from s to −s³ once |s| > 1, and plain Newton bounced further out
-     * every iteration. Not the first resort: where a diode is off, its rows are a few picosiemens, and the residual they
-     * give is too rough a measure for a circuit plain Newton solves at once.
+     * The circuit at a guess: every device stamped, and every node held to ground by {@code shunt} siemens while gmin is
+     * stepped. Singular where Newton started, the circuit itself has no unique solution; singular later, at a guess
+     * Newton wandered to, it is a run that did not settle — the line search may still find the answer.
      */
-    private double[] newton(Assembly assembly, double[] start, boolean searching, double shunt) {
-        if (netlist.size() == 0) {
-            return new double[0];
+    private final class Stamped implements CircuitNewton.Linearization {
+
+        private final double shunt;
+
+        Stamped(double shunt) {
+            this.shunt = shunt;
         }
-        double[] guess = start;
-        double[] accepted = null;
-        double[] direction = null;
-        double acceptedResidual = Double.POSITIVE_INFINITY;
-        double fraction = 1;
-        for (int iteration = 0; iteration < NEWTON_ITERATIONS; iteration++) {
+
+        @Override
+        public void assemble(Assembly assembly, double[] guess, int iteration) {
             assembly.begin(guess);
             for (Device device : devices) {
                 device.stamp(assembly);
@@ -195,62 +195,12 @@ final class CircuitSolver {
                     assembly.conductance(node, Netlist.GROUND, shunt);
                 }
             }
-            if (searching) {
-                double residual = assembly.residual();
-                if (accepted != null && !(residual < acceptedResidual) && fraction > SMALLEST_FRACTION) {
-                    fraction /= 2;
-                    guess = along(accepted, direction, fraction);
-                    continue;
-                }
-                accepted = guess;
-                acceptedResidual = residual;
-                fraction = 1;
-            }
-            double[] next = assembly.solve();
-            if (next == null) {
-                // Singular where Newton started: the circuit itself has no unique solution. Singular later, at a guess
-                // Newton wandered to, it is a run that did not settle — the line search may still find the answer.
-                if (iteration == 0) {
-                    throw new IllegalArgumentException(UNSOLVABLE + unconstrained(assembly.unconstrained()));
-                }
-                return null;
-            }
-            if (!nonlinear) {
-                return next;
-            }
-            if (iteration > 0 && settled(guess, next)) {
-                return next;
-            }
-            for (double value : next) {
-                if (!Double.isFinite(value)) {
-                    return null;
-                }
-            }
-            double[] stepped = damped(guess, next);
-            if (searching) {
-                if (direction == null) {
-                    direction = new double[stepped.length];
-                }
-                for (int index = 0; index < stepped.length; index++) {
-                    direction[index] = stepped[index] - guess[index];
-                }
-            }
-            guess = stepped;
         }
-        return null;
-    }
 
-    /** The point a share of the way along a Newton step. */
-    private static double[] along(double[] from, double[] direction, double fraction) {
-        double[] point = new double[from.length];
-        for (int index = 0; index < from.length; index++) {
-            point[index] = from[index] + direction[index] * fraction;
+        @Override
+        public void singularAtStart(Assembly assembly) {
+            throw new IllegalArgumentException(UNSOLVABLE + unconstrained(assembly.unconstrained()));
         }
-        return point;
-    }
-
-    private double[] damped(double[] guess, double[] next) {
-        return NewtonSteps.limited(guess, next, netlist.nodes().size(), netlist.branches().size());
     }
 
     /** Names an unknown whose row or column is empty — the usual reason a system has no unique solution. */
@@ -264,18 +214,8 @@ final class CircuitSolver {
         }
         index -= netlist.nodes().size();
         if (index < netlist.branches().size()) {
-            return "the current of " + netlist.branches().get(index);
+            return "the current of " + netlist.branches().get(index).name();
         }
         return netlist.states().get(index - netlist.branches().size());
-    }
-
-    private boolean settled(double[] guess, double[] next) {
-        for (int index = 0; index < next.length; index++) {
-            double tolerance = VOLTAGE_TOLERANCE * (1 + Math.abs(next[index]));
-            if (Math.abs(next[index] - guess[index]) > tolerance) {
-                return false;
-            }
-        }
-        return true;
     }
 }

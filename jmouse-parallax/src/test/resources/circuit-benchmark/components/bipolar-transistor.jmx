@@ -29,6 +29,7 @@ component "Bipolar transistor" as bipolar-transistor type bjt {
         polarity = 1                          "1 for NPN, -1 for PNP"
         I_saturation = 0.1 fA                 "IS: transport saturation current"
         beta_forward = 100                    "BF: ideal forward current gain"
+        beta_forward_spread = 0               "how far BF spreads from part to part, as a share: a bench's tolerance corners use it"
         emission_coefficient = 1              "NF: forward emission coefficient"
         V_early = 1 MV                        "VAF: forward Early voltage (none is a megavolt here)"
         I_knee = 1000000000 A                 "IKF: forward high-injection knee (none is a gigaampere here)"
@@ -67,6 +68,8 @@ component "Bipolar transistor" as bipolar-transistor type bjt {
         thermal_resistance = 250 K/W          "kelvin above the bench per watt it takes"
         thermal_time_constant = 2 s           "how fast it warms to that"
         T_maximum = 150 °C                    "past this it fails on a realistic bench"
+        V_collector_emitter_maximum = 1e6 V   "VCEO: the collector-emitter voltage it is rated for; none is a megavolt"
+        I_collector_maximum = 1e6 A           "IC: the collector current it is rated for; none is a megaampere"
     }
 
     pins {
@@ -83,21 +86,29 @@ component "Bipolar transistor" as bipolar-transistor type bjt {
 
     symbol uses npn-transistor-symbol
 
+    display {
+        overvoltage = 100 * abs(collector - emitter) / V_collector_emitter_maximum unit % "of VCEO"
+        overcurrent = 100 * abs(collector.current) / I_collector_maximum unit % "of its rated IC"
+    }
+
     equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let beta_now : ratio = beta_forward * (1 + tolerance_corner * beta_forward_spread)
         let V_be : voltage = polarity * (bi - ei)
         let V_bc : voltage = polarity * (bi - ci)
         let V_bx : voltage = polarity * (base - ci)
         let V_ce : voltage = polarity * (ci - ei)
-        let warmth : ratio = temperature / T_nominal
+        let warmth : ratio = T_junction / T_nominal
         let gain_drift : ratio = warmth ^ beta_temperature_exponent
-        let I_saturation_now : current = junction_saturation(I_saturation, temperature, T_nominal, saturation_temperature_exponent, 1, E_gap)
-        let I_leakage_base_emitter_now : current = junction_saturation(I_leakage_base_emitter, temperature, T_nominal, saturation_temperature_exponent, leakage_emission_base_emitter, E_gap) / gain_drift
-        let I_leakage_base_collector_now : current = junction_saturation(I_leakage_base_collector, temperature, T_nominal, saturation_temperature_exponent, leakage_emission_base_collector, E_gap) / gain_drift
+        let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, 1, E_gap)
+        let I_leakage_base_emitter_now : current = junction_saturation(I_leakage_base_emitter, T_junction, T_nominal, saturation_temperature_exponent, leakage_emission_base_emitter, E_gap) / gain_drift
+        let I_leakage_base_collector_now : current = junction_saturation(I_leakage_base_collector, T_junction, T_nominal, saturation_temperature_exponent, leakage_emission_base_collector, E_gap) / gain_drift
 
-        let forward : current = junction_current(V_be, I_saturation_now, emission_coefficient, temperature)
-        let reverse : current = junction_current(V_bc, I_saturation_now, emission_coefficient_reverse, temperature)
-        let leakage_emitter : current = junction_current(V_be, I_leakage_base_emitter_now, leakage_emission_base_emitter, temperature)
-        let leakage_collector : current = junction_current(V_bc, I_leakage_base_collector_now, leakage_emission_base_collector, temperature)
+        let forward : current = junction_current(V_be, I_saturation_now, emission_coefficient, T_junction)
+        let reverse : current = junction_current(V_bc, I_saturation_now, emission_coefficient_reverse, T_junction)
+        let leakage_emitter : current = junction_current(V_be, I_leakage_base_emitter_now, leakage_emission_base_emitter, T_junction)
+        let leakage_collector : current = junction_current(V_bc, I_leakage_base_collector_now, leakage_emission_base_collector, T_junction)
 
         # The normalised base charge: the Early effect (q1) and high injection (q2)
         let early : ratio = 1 / (1 - V_bc / V_early - V_be / V_early_reverse)
@@ -112,13 +123,14 @@ component "Bipolar transistor" as bipolar-transistor type bjt {
 
         let R_base_high : resistance = if(R_base_minimum > 0, R_base_minimum, R_base)
         let R_base_now : resistance = R_base_high + (R_base - R_base_high) / base_charge
-        let avalanche : current = I_breakdown * limit_exponential((V_ce - V_breakdown) / thermal_voltage(temperature))
+        let avalanche : current = I_breakdown * limit_exponential((V_ce - V_breakdown) / thermal_voltage(T_junction))
 
         current base -> bi = (base - bi) / R_base_now
         current collector -> ci = (collector - ci) / R_collector
         current ei -> emitter = (ei - emitter) / R_emitter
-        current ci -> ei = polarity * (transport + avalanche)
-        current bi -> ei = polarity * (forward / (beta_forward * gain_drift) + leakage_emitter + d(Q_base_emitter)/dt)
+        # Shot noise, 2qI, of the collector and the base currents: nothing to the solution, all of a noise analysis.
+        current ci -> ei = polarity * (transport + avalanche) + noise(2 * elementary_charge * abs(transport))
+        current bi -> ei = polarity * (forward / (beta_now * gain_drift) + leakage_emitter + d(Q_base_emitter)/dt) + noise(2 * elementary_charge * abs(forward / (beta_now * gain_drift) + leakage_emitter))
         current bi -> ci = polarity * (reverse / (beta_reverse * gain_drift) + leakage_collector + d(Q_base_collector)/dt)
         current base -> ci = polarity * d(Q_base_external)/dt
     }

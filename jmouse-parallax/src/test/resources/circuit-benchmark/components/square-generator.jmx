@@ -4,6 +4,7 @@
 
 component "Square generator" as square-generator type generator {
     meta {
+        designator G
         summary "An ideal square voltage: high for the duty's share of every period, low for the rest"
         category circuits
     }

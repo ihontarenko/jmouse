@@ -1,8 +1,14 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentModel;
+
+import org.jmouse.parallax.script.Quantity;
+import org.jmouse.parallax.script.engine.ExperienceDefinitions;
+
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.SourceText;
-import org.jmouse.parallax.circuit.ComponentModel.Expectation;
+import org.jmouse.parallax.component.ComponentModel.Expectation;
 import org.jmouse.parallax.ComputationProgress;
 import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ComponentLibrary;
@@ -12,7 +18,6 @@ import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
-import org.jmouse.parallax.object.ObjectDefinition.SourceWaveform;
 import org.jmouse.parallax.verification.ConsistencyCheck;
 
 import java.util.ArrayList;
@@ -123,11 +128,11 @@ public final class ComponentCheck implements ConsistencyCheck {
             rest = rest.subList(0, afterAt);
         }
         if (kind.equals("final") && !rest.isEmpty() && rest.getFirst().equals("levels")) {
-            Map<String, Object> last = run.levels().getLast();
+            Map<String, LogicLevel> last = run.levels().getLast();
             List<String> levels = new ArrayList<>();
             for (String node : rest.subList(1, rest.size())) {
                 if (!node.equals(",")) {
-                    levels.add(String.valueOf(last.getOrDefault(node, "Z")));
+                    levels.add(String.valueOf(last.getOrDefault(node, LogicLevel.RELEASED).scriptValue()));
                 }
             }
             return new Measurement(Double.NaN, "[" + String.join(",", levels) + "]");
@@ -228,55 +233,25 @@ public final class ComponentCheck implements ConsistencyCheck {
             throw new IllegalArgumentException("bench fixture '" + part.reference() + "' needs " + required
                     + " = <quantity>, for example " + required + " = " + (forward ? "10 mA" : "20 V"));
         }
-        double value = Quantities.parse(setting.text());
+        double value = Quantity.valueOf(setting.text());
         if (!Double.isFinite(value) || value <= 0) {
             throw new IllegalArgumentException("bench fixture '" + part.reference() + "' needs a positive finite " + required);
         }
         if (forward) {
             return List.of(new CircuitElement("I1", CircuitElementType.CURRENT_SOURCE,
-                            "anode", "0", number(value), SourceWaveform.DC, null, null, null, null),
+                            "anode", "0", number(value), null, null, null),
                     new CircuitElement("U1", CircuitElementType.MODEL,
-                            null, null, null, null, null, SELF, Map.of(anode, "anode", cathode, "0"), Map.of()));
+                            null, null, null, SELF, Map.of(anode, "anode", cathode, "0"), Map.of()));
         }
         return List.of(new CircuitElement("V1", CircuitElementType.VOLTAGE_SOURCE,
-                        "cathode", "0", number(value), SourceWaveform.DC, null, null, null, null),
+                        "cathode", "0", number(value), null, null, null),
                 new CircuitElement("U1", CircuitElementType.MODEL,
-                        null, null, null, null, null, SELF, Map.of(anode, "0", cathode, "cathode"), Map.of()));
+                        null, null, null, SELF, Map.of(anode, "0", cathode, "cathode"), Map.of()));
     }
 
+    /** A bench part line, read as a circuit's is: one reader of a part line, never a second. */
     private static CircuitElement element(Block.Part part) {
-        Character primitive = ComponentDocuments.PRIMITIVES.get(part.reference());
-        if (primitive == null) {
-            Map<String, String> overrides = new LinkedHashMap<>();
-            part.settings().forEach((name, value) -> overrides.put(name, number(Quantities.parse(value.text()))));
-            return new CircuitElement(part.id(), CircuitElementType.MODEL, null, null, null, null, null,
-                    part.reference(), part.named(), overrides);
-        }
-        if (part.positional().size() != 2) {
-            throw new IllegalArgumentException("bench part '" + part.id() + "': a " + part.reference()
-                    + " is connected by its two pins in order: (a, b)");
-        }
-        String positive = part.positional().get(0);
-        String negative = part.positional().get(1);
-        String value = part.settings().entrySet().stream()
-                .filter(setting -> !setting.getKey().equals("waveform") && !setting.getKey().equals("frequency"))
-                .map(setting -> number(Quantities.parse(setting.getValue().text()))).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("bench part '" + part.id() + "': a "
-                        + part.reference() + " needs its value, for example resistance = 10 kOhm"));
-        return switch (primitive) {
-            case 'V', 'I' -> {
-                SourceText waveform = part.settings().get("waveform");
-                SourceText frequency = part.settings().get("frequency");
-                yield new CircuitElement(part.id(), primitive == 'V' ? CircuitElementType.VOLTAGE_SOURCE
-                        : CircuitElementType.CURRENT_SOURCE, positive, negative, value,
-                        waveform == null ? SourceWaveform.DC : SourceWaveform.valueOf(waveform.text().toUpperCase(Locale.ROOT)),
-                        frequency == null ? null : number(Quantities.parse(frequency.text())), null, null, null);
-            }
-            case 'R' -> new CircuitElement(part.id(), CircuitElementType.RESISTOR, positive, negative, value, null, null, null, null, null);
-            case 'C' -> new CircuitElement(part.id(), CircuitElementType.CAPACITOR, positive, negative, value, null, null, null, null, null);
-            case 'L' -> new CircuitElement(part.id(), CircuitElementType.INDUCTOR, positive, negative, value, null, null, null, null, null);
-            default -> new CircuitElement(part.id(), CircuitElementType.DIODE, positive, negative, value, null, null, null, null, null);
-        };
+        return ExperienceDefinitions.element(part, "bench part '" + part.id() + "'");
     }
 
     private static double[] signal(List<String> words, TransientRun run) {
@@ -292,7 +267,7 @@ public final class ComponentCheck implements ConsistencyCheck {
         if (signal.size() == 2 && signal.getFirst().equals("level")) {
             double[] values = new double[run.samples()];
             for (int sample = 0; sample < values.length; sample++) {
-                values[sample] = DigitalDriver.fraction(run.levels().get(sample).getOrDefault(signal.get(1), "Z"));
+                values[sample] = run.levels().get(sample).getOrDefault(signal.get(1), LogicLevel.RELEASED).fraction();
             }
             return values;
         }
@@ -326,15 +301,9 @@ public final class ComponentCheck implements ConsistencyCheck {
         }
         Map<String, double[]> currents = new LinkedHashMap<>();
         for (int branch = 0; branch < netlist.branches().size(); branch++) {
-            currents.put(netlist.branches().get(branch), new double[]{state[netlist.nodes().size() + branch]});
+            currents.put(netlist.branches().get(branch).name(), new double[]{state[netlist.nodes().size() + branch]});
         }
-        for (Device device : solver.devices()) {
-            if (device instanceof Device.Diode diode) {
-                currents.putIfAbsent(diode.element().id(), new double[]{diode.current(state)});
-            } else if (device instanceof Device.Resistor resistor) {
-                currents.putIfAbsent(resistor.element().id(), new double[]{resistor.current(state)});
-            }
-        }
+        PartReadings.currents(solver.devices(), state).forEach((column, current) -> currents.putIfAbsent(column, new double[]{current}));
         return TransientRun.instant(voltages, currents);
     }
 
@@ -403,7 +372,7 @@ public final class ComponentCheck implements ConsistencyCheck {
 
     /** A quantity written as words: its number, then its unit however it was spaced — {@code 2.5 V}, {@code 1 k Hz}. */
     private static double quantity(List<String> words) {
-        return Quantities.parse(words.getFirst() + " " + String.join("", words.subList(1, words.size())));
+        return Quantity.valueOf(words.getFirst() + " " + String.join("", words.subList(1, words.size())));
     }
 
     private static String number(double value) {

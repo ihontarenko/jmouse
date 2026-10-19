@@ -6,7 +6,7 @@ component "N-channel MOSFET" as n-mosfet type mosfet {
         designator Q
         summary "N-channel MOSFET, the level-1 model at its defaults"
         category circuits
-        failure short
+        failure short drain source
     }
     extends mos-transistor
 

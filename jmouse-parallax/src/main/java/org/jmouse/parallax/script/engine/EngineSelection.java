@@ -16,7 +16,6 @@ import org.jmouse.parallax.script.SourceText;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;
 import org.jmouse.formula.el.FormulaLanguage;
-import org.jmouse.parallax.circuit.Quantities;
 import org.jmouse.parallax.dimension.PolytopeSkeleton;
 import org.jmouse.parallax.fractal.FractalComputations;
 import org.jmouse.parallax.script.engine.DefinitionWords.Primitive;
@@ -27,7 +26,6 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 import org.jmouse.parallax.object.ObjectDefinition.GeometricElement;
 import org.jmouse.parallax.object.ObjectDefinition.GeometricElementType;
-import org.jmouse.parallax.object.ObjectDefinition.SourceWaveform;
 import org.jmouse.parallax.object.ObjectDefinition.SurfaceGluing;
 
 import java.math.BigDecimal;
@@ -754,8 +752,17 @@ public final class EngineSelection {
                         .toList());
     }
 
-    /** A part connected in pin order is a two-terminal primitive; one connected by pin name is a model. */
     private CircuitElement element(Part part) {
+        return element(part, what);
+    }
+
+    /**
+     * A part line as every reader of one takes it — a circuit, and a component's datasheet bench alike: connected in
+     * pin order it is a two-terminal primitive, connected by pin name a model; every setting is read in SI.
+     *
+     * @param what the document it is written in, for the messages
+     */
+    static CircuitElement element(Part part, String what) {
         Map<String, String> settings = new LinkedHashMap<>();
         part.settings().forEach((name, value) -> settings.put(name, inSi(value.text())));
         String frequency = settings.remove(DefinitionWords.FREQUENCY);
@@ -765,7 +772,7 @@ public final class EngineSelection {
             if (frequency != null) {
                 settings.put(DefinitionWords.FREQUENCY, frequency);
             }
-            return new CircuitElement(part.id(), CircuitElementType.MODEL, null, null, value, SourceWaveform.DC, null,
+            return new CircuitElement(part.id(), CircuitElementType.MODEL, null, null, value,
                     part.reference(), part.named(), settings, part.symbol().orElse(null));
         }
         Primitive primitive = Primitive.ofReference(part.reference()).orElseThrow(() -> new IllegalArgumentException(
@@ -782,13 +789,17 @@ public final class EngineSelection {
             throw new IllegalArgumentException(what + ": part '" + part.id() + "' alternates, so it is a generator: '"
                     + part.id() + " " + (waveform != null && waveform.equals("square") ? "square-generator (positive = …, negative = …) "
                     + "high = …, frequency = …, duty = …" : "sine-generator (positive = …, negative = …) amplitude = …, frequency = …")
-                    + "'. A voltage-source is constant or switched on at the start.");
+                    + "'. A voltage-source is constant.");
+        }
+        if (waveform != null) {
+            // 'step' and 'dc' were one thing: every circuit starts from rest, so every source is switched on at the start.
+            throw new IllegalArgumentException(what + ": part '" + part.id() + "' writes 'waveform = " + waveform + "', which is gone: "
+                    + "a circuit starts from rest, so a source is switched on at the start — leave the word out.");
         }
         // What is left are its component's other parameters — a load's power_rating, a part's tolerance —, checked
         // against that component when the circuit is compiled, where the catalogue is at hand.
         return new CircuitElement(part.id(), primitive.type(), part.positional().get(0), part.positional().get(1), value,
-                waveform == null ? SourceWaveform.DC : DefinitionWords.constant(SourceWaveform.class, waveform, "a waveform"),
-                null, null, null, settings, part.symbol().orElse(null));
+                null, null, settings, part.symbol().orElse(null));
     }
 
     /**
@@ -797,10 +808,10 @@ public final class EngineSelection {
      * written. The text of the document keeps the value as it was written.
      */
     private static String inSi(String value) {
-        if (!Quantities.isQuantity(value)) {
+        if (!Quantity.isQuantity(value)) {
             return value;
         }
-        return BigDecimal.valueOf(Quantities.parse(value)).stripTrailingZeros().toPlainString();
+        return BigDecimal.valueOf(Quantity.valueOf(value)).stripTrailingZeros().toPlainString();
     }
 
     /** {@code analysis transient for 0.01 s}, or {@code from 1 ms to 10 ms} for a span that does not start at 0. */

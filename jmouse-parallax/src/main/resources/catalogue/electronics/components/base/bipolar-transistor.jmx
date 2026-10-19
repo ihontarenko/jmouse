@@ -91,12 +91,9 @@ component "Bipolar transistor" as bipolar-transistor type bjt {
         overcurrent = 100 * abs(collector.current) / I_collector_maximum unit % "of its rated IC"
     }
 
-    state {
-        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
-    }
-
     equations {
-        let T_junction : temperature = temperature + heating
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
         let beta_now : ratio = beta_forward * (1 + tolerance_corner * beta_forward_spread)
         let V_be : voltage = polarity * (bi - ei)
         let V_bc : voltage = polarity * (bi - ci)
@@ -132,12 +129,9 @@ component "Bipolar transistor" as bipolar-transistor type bjt {
         current collector -> ci = (collector - ci) / R_collector
         current ei -> emitter = (ei - emitter) / R_emitter
         # Shot noise, 2qI, of the collector and the base currents: nothing to the solution, all of a noise analysis.
-        current ci -> ei = polarity * (transport + avalanche) + noise(2 * 1.602176634e-19 * abs(transport))
-        current bi -> ei = polarity * (forward / (beta_now * gain_drift) + leakage_emitter + d(Q_base_emitter)/dt) + noise(2 * 1.602176634e-19 * abs(forward / (beta_now * gain_drift) + leakage_emitter))
+        current ci -> ei = polarity * (transport + avalanche) + noise(2 * elementary_charge * abs(transport))
+        current bi -> ei = polarity * (forward / (beta_now * gain_drift) + leakage_emitter + d(Q_base_emitter)/dt) + noise(2 * elementary_charge * abs(forward / (beta_now * gain_drift) + leakage_emitter))
         current bi -> ci = polarity * (reverse / (beta_reverse * gain_drift) + leakage_collector + d(Q_base_collector)/dt)
         current base -> ci = polarity * d(Q_base_external)/dt
-
-        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
-        d(heating)/dt = (realistic * ((collector - emitter) * (collector - ci) / R_collector + (base - emitter) * (base - bi) / R_base_now) * thermal_resistance - heating) / thermal_time_constant
     }
 }

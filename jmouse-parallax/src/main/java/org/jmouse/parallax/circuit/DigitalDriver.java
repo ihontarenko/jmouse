@@ -13,18 +13,14 @@ import java.util.TreeMap;
  */
 final class DigitalDriver {
 
-    /** The levels a digital signal takes. A number 0 or 1, or one of these. */
-    static final String UNKNOWN = "X";
-    static final String RELEASED = "Z";
-
     final String unit;
     final String pin;
     final String digitalNode;
 
-    Object level = RELEASED;
-    Object previous = RELEASED;
-    double changedAt = Double.NEGATIVE_INFINITY;
-    final TreeMap<Double, Object> pending = new TreeMap<>();
+    private LogicLevel level = LogicLevel.RELEASED;
+    private LogicLevel previous = LogicLevel.RELEASED;
+    private double changedAt = Double.NEGATIVE_INFINITY;
+    private final TreeMap<Double, LogicLevel> pending = new TreeMap<>();
 
     DigitalDriver(String unit, String pin, String digitalNode) {
         this.unit = unit;
@@ -32,7 +28,30 @@ final class DigitalDriver {
         this.digitalNode = digitalNode;
     }
 
-    void schedule(double time, Object value) {
+    LogicLevel level() {
+        return level;
+    }
+
+    LogicLevel previous() {
+        return previous;
+    }
+
+    /** Whether a transaction is still scheduled on it. */
+    boolean hasPending() {
+        return !pending.isEmpty();
+    }
+
+    /** When the first transaction after {@code time} is due; null for none. */
+    Double dueAfter(double time) {
+        return pending.higherKey(time);
+    }
+
+    /** When it last changed level; minus infinity while it never has. */
+    double changedAt() {
+        return changedAt;
+    }
+
+    void schedule(double time, LogicLevel value) {
         pending.tailMap(time, true).clear();
         pending.put(time, value);
     }
@@ -41,8 +60,8 @@ final class DigitalDriver {
     boolean applyDue(double time) {
         boolean changed = false;
         while (!pending.isEmpty() && pending.firstKey() <= time) {
-            Map.Entry<Double, Object> transaction = pending.pollFirstEntry();
-            if (!transaction.getValue().equals(level)) {
+            Map.Entry<Double, LogicLevel> transaction = pending.pollFirstEntry();
+            if (transaction.getValue() != level) {
                 previous = level;
                 level = transaction.getValue();
                 changedAt = transaction.getKey();
@@ -52,20 +71,12 @@ final class DigitalDriver {
         return changed;
     }
 
-    /** A level written by a script: anything at or above ½ is 1, below is 0, and X and Z stay themselves. */
-    static Object normalized(Object value) {
-        if (value instanceof Number number) {
-            return number.doubleValue() >= 0.5 ? 1 : 0;
-        }
-        if (value instanceof Boolean flag) {
-            return flag ? 1 : 0;
-        }
-        String text = String.valueOf(value);
-        return text.equalsIgnoreCase(RELEASED) ? RELEASED : UNKNOWN;
-    }
-
-    /** The level as a fraction of the supply: 0, 1, or ½ for an unknown one. */
-    static double fraction(Object level) {
-        return level instanceof Integer integer ? integer : 0.5;
+    /** Takes over where {@code earlier} — the same output in an earlier build of the circuit — stands. */
+    void continueFrom(DigitalDriver earlier) {
+        level = earlier.level;
+        previous = earlier.previous;
+        changedAt = earlier.changedAt;
+        pending.clear();
+        pending.putAll(earlier.pending);
     }
 }

@@ -17,6 +17,9 @@ final class PhasorAssembly {
     private final Complex[]   injected;
     private final double      angular;
     private final double[]    operatingPoint;
+    /** The matrix factored ({@link #factor}) and where each factored row came from; null until solved, and after a stamp. */
+    private Complex[][]       factors;
+    private int[]             pivots;
 
     PhasorAssembly(int size, double angular, double[] operatingPoint) {
         this.matrix = new Complex[size][size];
@@ -43,6 +46,7 @@ final class PhasorAssembly {
     /** Adds to one entry of the matrix; a row or column of node 0 is dropped. */
     void add(int row, int column, Complex value) {
         if (row != Netlist.GROUND && column != Netlist.GROUND) {
+            factors = null;
             matrix[row][column] = matrix[row][column].add(value);
         }
     }
@@ -53,6 +57,7 @@ final class PhasorAssembly {
     }
 
     void admittance(int positive, int negative, Complex admittance) {
+        factors = null;
         if (positive != Netlist.GROUND) {
             matrix[positive][positive] = matrix[positive][positive].add(admittance);
         }
@@ -66,6 +71,7 @@ final class PhasorAssembly {
     }
 
     void branch(int positive, int negative, int branch) {
+        factors = null;
         if (positive != Netlist.GROUND) {
             matrix[positive][branch] = matrix[positive][branch].add(Complex.ONE);
             matrix[branch][positive] = matrix[branch][positive].add(Complex.ONE);
@@ -74,10 +80,6 @@ final class PhasorAssembly {
             matrix[negative][branch] = matrix[negative][branch].subtract(Complex.ONE);
             matrix[branch][negative] = matrix[branch][negative].subtract(Complex.ONE);
         }
-    }
-
-    void branchCoefficient(int branch, Complex coefficient) {
-        matrix[branch][branch] = matrix[branch][branch].add(coefficient);
     }
 
     void branchRightSide(int branch, double value) {
@@ -99,13 +101,42 @@ final class PhasorAssembly {
         }
     }
 
-    /** Gauss–Jordan elimination with partial pivoting, over the complex numbers. */
+    /**
+     * The response to the excitations as they stand. The matrix is factored once — LU with partial pivoting — and kept
+     * until a device stamps into it again, so a noise analysis that drives one source after another pays one
+     * factorization per frequency, not one per source.
+     */
     Complex[] solve() {
+        if (factors == null) {
+            factor();
+        }
         int size = matrix.length;
-        Complex[][] working = new Complex[size][size + 1];
+        Complex[] solution = new Complex[size];
         for (int row = 0; row < size; row++) {
-            System.arraycopy(matrix[row], 0, working[row], 0, size);
-            working[row][size] = injected[row];
+            Complex sum = injected[pivots[row]];
+            for (int column = 0; column < row; column++) {
+                sum = sum.subtract(factors[row][column].multiply(solution[column]));
+            }
+            solution[row] = sum;
+        }
+        for (int row = size - 1; row >= 0; row--) {
+            Complex sum = solution[row];
+            for (int column = row + 1; column < size; column++) {
+                sum = sum.subtract(factors[row][column].multiply(solution[column]));
+            }
+            solution[row] = sum.divide(factors[row][row]);
+        }
+        return solution;
+    }
+
+    /** Doolittle LU of the matrix, rows swapped for the largest pivot; refuses a singular one. */
+    private void factor() {
+        int size = matrix.length;
+        Complex[][] working = new Complex[size][];
+        int[] order = new int[size];
+        for (int row = 0; row < size; row++) {
+            working[row] = matrix[row].clone();
+            order[row] = row;
         }
         for (int column = 0; column < size; column++) {
             int pivot = column;
@@ -120,19 +151,18 @@ final class PhasorAssembly {
             Complex[] swap = working[pivot];
             working[pivot] = working[column];
             working[column] = swap;
-            for (int row = 0; row < size; row++) {
-                if (row != column) {
-                    Complex factor = working[row][column].divide(working[column][column]);
-                    for (int inner = column; inner <= size; inner++) {
-                        working[row][inner] = working[row][inner].subtract(factor.multiply(working[column][inner]));
-                    }
+            int swapped = order[pivot];
+            order[pivot] = order[column];
+            order[column] = swapped;
+            for (int row = column + 1; row < size; row++) {
+                Complex factor = working[row][column].divide(working[column][column]);
+                working[row][column] = factor;
+                for (int inner = column + 1; inner < size; inner++) {
+                    working[row][inner] = working[row][inner].subtract(factor.multiply(working[column][inner]));
                 }
             }
         }
-        Complex[] solution = new Complex[size];
-        for (int row = 0; row < size; row++) {
-            solution[row] = working[row][size].divide(working[row][row]);
-        }
-        return solution;
+        factors = working;
+        pivots = order;
     }
 }

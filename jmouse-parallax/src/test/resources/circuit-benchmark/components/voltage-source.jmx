@@ -1,6 +1,7 @@
 component "Voltage source" as voltage-source type voltage-source {
     meta {
-        summary "Two-terminal voltage source: constant, a step, a sine or a square — drawn as alternating when it alternates"
+        designator V
+        summary "Two-terminal voltage source: constant, or switched on at the start. A sine or a square is a generator — sine-generator, square-generator"
         category circuits
     }
     parameters {
@@ -10,7 +11,13 @@ component "Voltage source" as voltage-source type voltage-source {
         positive analog 1 "positive terminal"
         negative analog 2 "negative terminal"
     }
-    symbol uses voltage-source-symbol, alternating-source-symbol {
+    # An ideal source: its positive pin held U_output above its negative one, whatever is drawn from it. A circuit starts
+    # from rest, so it is switched on at the start.
+    equations {
+        voltage positive -> negative = U_output
+    }
+
+    symbol uses voltage-source-symbol {
         a positive
         b negative
     }

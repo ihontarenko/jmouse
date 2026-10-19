@@ -1,0 +1,145 @@
+# The operational amplifier every op-amp part is a member of: a behavioural macromodel, since SPICE has no `.model`
+# for an op-amp — a vendor ships a `.subckt`. A datasheet part writes `family operational-amplifier` and its numbers.
+#
+# What the effects are for:
+#   open_loop_gain, gain_bandwidth   a dominant pole: the closed-loop bandwidth of any gain
+#   second_pole                      the phase margin — a follower rings, a fast part needs compensation
+#   slew_rate                        the largest rate the output can follow: a big step is a ramp
+#   V_input_offset                   the output of a high-gain stage is never at zero
+#   I_input_bias, I_input_offset     the inputs' currents — an error through a large source resistance
+#   R_input                          the differential input resistance
+#   common_mode_rejection            the inputs' common level leaks into the output
+#   supply_rejection                 the supply's change leaks into the output
+#   V_common_mode_low/_high          where the inputs stop working; past the low limit some parts (TL07x) reverse
+#   V_output_headroom, V_output_low  how close the output gets to each rail
+#   I_output_source, I_output_sink   the output's short-circuit current
+#
+# The supply pins are Vcc and GND even on a dual-supply part, where GND is the negative rail: the circuits already
+# written name them so. Noise: V_noise and I_noise at the inputs, with a 1/f corner. Not represented: input
+# capacitance, the output's dependence on load beyond its resistance and current limit, temperature drift of the offset.
+
+component "Operational amplifier" as operational-amplifier type opamp {
+    meta {
+        designator U
+        summary "Op-amp macromodel: gain, two poles, slew rate, offset, bias currents, CMRR, PSRR, input range, output limits"
+        source "behavioural macromodel; the figures a datasheet's electrical table gives"
+        category circuits
+        failure short Vcc GND
+    }
+    use smooth-transitions
+
+    parameters {
+        open_loop_gain = 100000               "DC open-loop gain, as a ratio (100 dB)"
+        gain_bandwidth = 1 MHz                "unity-gain bandwidth"
+        second_pole = 0 Hz                    "the second pole; 0 means none"
+        slew_rate = 1 V/us                    "slew rate"
+        V_input_offset = 0 V per unit         "input offset voltage"
+        I_input_bias = 0 A                    "input bias current: positive flows out of the inputs (PNP stage), negative into them (NPN)"
+        V_offset_spread = 0 V                 "the offset a part may have, either way: a bench's tolerance corners use it"
+        V_offset_drift = 0                    "how the offset moves per kelvin, V/K; none by default, its sign is the part's own"
+        bias_doubling = 1e9 K                 "the input current doubles every this many kelvin: about 10 K for a JFET input; none is a gigakelvin"
+        T_nominal = 298.15 K                  "the temperature the figures above are measured at"
+        I_input_offset = 0 A                  "the difference between the two inputs' bias currents"
+        R_input = 1 TOhm                      "differential input resistance"
+        C_input_differential = 0 F            "capacitance between the inputs"
+        C_input_common = 0 F                  "capacitance from each input to the negative rail"
+        supply_current_coefficient = 0        "the share per volt the supply current rises above V_supply_nominal"
+        common_mode_rejection = 1e12          "CMRR, as a ratio; none by default — its error is an offset of unknown sign"
+        supply_rejection = 1e12               "PSRR, as a ratio; none by default — its error is an offset of unknown sign"
+        V_supply_nominal = 15 V               "the supply span the offset is given at"
+        V_common_mode_low = -0.3 V            "the inputs work down to this far above the negative rail (negative: below it)"
+        V_common_mode_high = 0 V              "the inputs work up to this far below the positive rail"
+        phase_reversal = 0                    "1: past the low limit the output swings the other way"
+        V_noise = 0                           "input voltage noise density, V/√Hz (white)"
+        I_noise = 0                           "input current noise density into each input, A/√Hz (white)"
+        noise_corner = 0 Hz                   "below this frequency 1/f noise rises over the white; 0 for none"
+        I_quiescent = 1 mA                    "supply current per unit"
+        R_output = 50 Ohm                     "output resistance"
+        I_output_source = 40 mA               "output short-circuit current, sourcing"
+        I_output_sink = 40 mA                 "output short-circuit current, sinking"
+        V_output_headroom = 1.5 V             "the output stays this far below the positive rail"
+        V_output_low = 1.5 V                  "the output reaches this close to the negative rail"
+        recovery = 1e6 1/s                    "how fast the gain stage comes back out of saturation"
+        thermal_resistance = 120 K/W          "kelvin above the bench per watt it takes"
+        thermal_time_constant = 5 s           "how fast it warms to that"
+        T_maximum = 150 °C                    "past this it fails on a realistic bench"
+        V_supply_maximum = 1e6 V              "the supply span it is rated for; none is a megavolt"
+    }
+
+    pins {
+        output analog output 1
+        inverting_input analog input 2        "inverting"
+        non_inverting_input analog input 3    "non-inverting"
+        Vcc power 7                           "positive supply"
+        GND ground 4                          "negative supply, or ground on a single supply"
+    }
+
+    symbol uses operational-amplifier-symbol {
+        positive_supply Vcc
+        negative_supply GND
+    }
+
+    nodes {
+        delayed                               "the gain stage behind the second pole"
+        noise_input                           "the input voltage noise, one volt above GND per volt of noise"
+    }
+
+    display {
+        overvoltage = 100 * abs(Vcc - GND) / V_supply_maximum unit % "of its rated supply"
+    }
+
+    state {
+        gain_stage_voltage = 0 continuous     "the gain stage, before the output is held between the rails"
+    }
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        # Below about a volt of supply the quiescent current falls away; the knee is that volt.
+        let V_supply_knee : voltage = 1
+        let V_offset_now : voltage = V_input_offset + tolerance_corner * V_offset_spread + V_offset_drift * (T_junction - T_nominal)
+        let I_bias_now : current = I_input_bias * 2 ^ ((T_junction - T_nominal) / bias_doubling)
+        let high : voltage = GND + V_output_low + soft_positive_part((Vcc - GND) - V_output_headroom - V_output_low, 0.02)
+        let low : voltage = GND + V_output_low
+
+        # How far either input stands past the range: the input stage gives up as soon as one input leaves it, over about a
+        # volt — not at once, since a sharper edge leaves Newton jumping across it. 0 inside, towards 1 a volt past.
+        let V_common : voltage = (non_inverting_input + inverting_input) / 2
+        let V_lowest : voltage = soft_minimum(non_inverting_input, inverting_input, 0.01)
+        let V_highest : voltage = 0 - soft_minimum(0 - non_inverting_input, 0 - inverting_input, 0.01)
+        let past_low : voltage = soft_positive_part(GND + V_common_mode_low - V_lowest, 0.1)
+        let past_high : voltage = soft_positive_part(V_highest - (Vcc - V_common_mode_high), 0.1)
+        let lost : ratio = (past_low + past_high) / sqrt(1 + (past_low + past_high) ^ 2)
+        let reversed : ratio = phase_reversal * past_low / sqrt(1 + past_low ^ 2)
+
+        let common_mode_error : voltage = (V_common - (Vcc + GND) / 2) / common_mode_rejection
+        let supply_error : voltage = ((Vcc - GND) - V_supply_nominal) / supply_rejection
+        let input : voltage = (non_inverting_input - inverting_input) + V_offset_now + (noise_input - GND) + common_mode_error + supply_error
+        let error : voltage = input * (1 - lost - reversed) - gain_stage_voltage / open_loop_gain
+
+        # A dominant pole at gain_bandwidth / open_loop_gain whose rate saturates at slew_rate: bandwidth and slew rate
+        # from one equation. The saturation is algebraic, not tanh: far from the answer tanh is flat to the last digit
+        # and leaves Newton nothing to stand on. The second term keeps the stage from winding up past the rails.
+        let slew_ratio : ratio = 2 * pi * gain_bandwidth * error / slew_rate
+        d(gain_stage_voltage)/dt = slew_rate * slew_ratio / sqrt(1 + slew_ratio ^ 2) - recovery * (gain_stage_voltage - soft_clamp(gain_stage_voltage, low - 0.5, high + 0.5, 0.05))
+
+        # The second pole as an RC the gain stage drives: with no pole its time is 0 and `delayed` is the stage itself.
+        let pole_time : time = if(second_pole > 0, 1 / (2 * pi * second_pole), 0)
+        let R_pole : resistance = 1000000
+        current delayed -> GND = (delayed - gain_stage_voltage) / R_pole + d(pole_time * (delayed - GND) / R_pole)/dt
+        let target : voltage = soft_clamp(delayed, low, high, 0.02)
+        let drive : current = (target - output) / R_output
+
+        current Vcc -> output = I_output_source * tanh(soft_positive_part(drive, 0.0001) / I_output_source)
+        current output -> GND = I_output_sink * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_sink)
+        current non_inverting_input -> inverting_input = (non_inverting_input - inverting_input) / R_input + d(C_input_differential * (non_inverting_input - inverting_input))/dt
+        current non_inverting_input -> GND = d(C_input_common * (non_inverting_input - GND))/dt
+        current inverting_input -> GND = d(C_input_common * (inverting_input - GND))/dt
+        current Vcc -> non_inverting_input = I_bias_now + I_input_offset / 2 + noise(I_noise ^ 2, noise_corner)
+        current Vcc -> inverting_input = I_bias_now - I_input_offset / 2 + noise(I_noise ^ 2, noise_corner)
+        # The input voltage noise: a noise current of V_noise² A²/Hz through one siemens is V_noise V/√Hz on noise_input.
+        let G_noise : conductance = 1
+        current noise_input -> GND = G_noise * (noise_input - GND) + noise(V_noise ^ 2, noise_corner)
+        current Vcc -> GND = I_quiescent * (1 + supply_current_coefficient * ((Vcc - GND) - V_supply_nominal)) * tanh((Vcc - GND) / V_supply_knee)
+    }
+}

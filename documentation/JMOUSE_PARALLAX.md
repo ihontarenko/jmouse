@@ -97,14 +97,38 @@ org.jmouse.parallax.verification
 ├── ConsistencyCheck      SPI   code · description · appliesTo(definition) · check(compiled) → CheckResult(outcome, measured, tolerance, detail)
 └── StandardChecks              all(): seven independent cross-checks of the model, and a component against its datasheet
 
-org.jmouse.parallax.circuit  the netlist engine behind `component` and `circuit` documents
-├── ComponentDocuments          a component / family jMX document → ComponentModel (meta, parameters in SI, pins, equations, measure, display, leads)
-├── ModelEquations              a model's equations compiled per unit: pin names as voltages, d(q)/dt, pin.current, the exact Jacobian
-├── PartExpression              one expression over a part (measure, display): pin voltages, pin.current, states, parameters, power, time
-└── ComponentCheck              a ConsistencyCheck (COMPONENT_DATASHEET), not a representation: every `expect` built on its bench, simulated, measured, PASS / FAIL
+The circuit engine is three layers, each reading only the ones below it:
 
-org.jmouse.parallax.object.ComponentHierarchy
-                                a circuit's component tree resolved and flattened; Assembly reports a part made of parts by its own pins
+org.jmouse.parallax.component   a component / family jMX document → ComponentModel; knows no circuit
+├── ComponentDocuments          the document read and built once per text (and the texts it uses): meta, parameters in SI,
+│                               pins, equations, heat, measure, display, leads
+├── ComponentModel              what a component is: its pins, parameters, equations, states, behaviour, failure, its
+│                               generator shape
+├── ModelLanguage · PinQuantities   the language a component's expressions are written in: d(q)/dt, noise(…), pin.current
+├── DimensionCheck              every equation's units checked when the document is read
+└── ComponentVocabulary · PhysicalConstants   the names the engine gives every document (temperature, realistic,
+                                tolerance_corner, time, power) and the physical constants
+
+org.jmouse.parallax.circuit.elaboration   a written circuit → the circuit as it is simulated, built once
+├── ElaboratedCircuit           bench applied, subcircuits flattened, primitives bound as their documents' models,
+│                               every component read; what a netlist, a part's limits, displays and instruments read
+├── BenchConditioning           a bench's temperature, corner, tolerances, offsets and failures written onto the parts
+├── ComponentHierarchy          a circuit's component tree resolved and flattened; Assembly reports a part made of parts
+├── PartParameters              the one resolver of a part's parameters, for its equations and its readings alike
+└── CircuitPartitions           the circuit cut where an ideal voltage source holds a node: pieces solved apart
+
+org.jmouse.parallax.circuit     the engine: what is solved, how, and what is read off it
+├── Netlist                     every unknown numbered; the engine's own elements (leaks, stand-ins, generators)
+├── Device · ModelDevice        what each element stamps; a model unit as UnitLayout + UnitArguments + UnitLine,
+│                               linearized by an AffineLinearization (constant coefficients) or a TapedLinearization
+├── CircuitNewton · CircuitSolver · TransientStepper   Newton (one loop), the operating point and small signal, the
+│                               transient's step control
+├── LiveIntegrator              one piece running: the stepper read by PartIndex, PartLedger (energy, heat),
+│                               NodeEnvelope, TraceRecorder, MeterRecorder
+├── LiveCircuitSolver · LiveCircuitSession   the pieces together; the probes, the frames, a part's failure
+├── PartExpression              one expression over a part (measure, display): pin voltages, pin.current, states, parameters, power, time
+├── CircuitComputations         the representations of a circuit, one per analysis, as every domain's computations are
+└── ComponentCheck              a ConsistencyCheck (COMPONENT_DATASHEET), not a representation: every `expect` built on its bench, simulated, measured, PASS / FAIL
 
 org.jmouse.parallax.script        jMX itself — ExperienceReader, Kind (which blocks a kind may hold), Block (what each block reads as)
 ├── reader/                     DocumentReader, DeclarationReader, CircuitReader, SymbolReader, GraphReader, …: the truth about the syntax

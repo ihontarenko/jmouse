@@ -59,7 +59,7 @@ component "Ceramic capacitor" as ceramic-capacitor type capacitor {
 
     expect "charged faster than its nominal value would" from "DC bias: 20 V through 100 Ω — a nominal 10 µF reaches 7.9 V in 0.5 ms" {
         bench for 0.5 ms {
-            V1 voltage-source (input, 0) waveform = step, U_output = 20 V
+            V1 voltage-source (input, 0) U_output = 20 V
             R1 resistor (input, terminal_one) resistance = 100 Ohm
             U1 self (terminal_one = terminal_one, terminal_two = 0)
         }

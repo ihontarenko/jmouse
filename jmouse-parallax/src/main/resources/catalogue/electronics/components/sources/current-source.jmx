@@ -11,6 +11,12 @@ component "Current source" as current-source type current-source {
         positive analog 1 "positive terminal"
         negative analog 2 "negative terminal"
     }
+    # An ideal source: I_output pushed out of its positive pin, whatever the voltage across it — through the part, from
+    # its negative pin to its positive one.
+    equations {
+        current positive -> negative = 0 - I_output
+    }
+
     symbol uses current-source-symbol {
         a positive
         b negative

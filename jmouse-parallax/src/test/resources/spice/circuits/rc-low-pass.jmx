@@ -12,7 +12,7 @@ circuit "RC low-pass filter" as rc-low-pass {
         C = 1 µF in 1 nF .. 10 µF step 1 nF "Capacitance"
     }
     parts {
-        V1 voltage-source (in, 0) waveform = step, U_output = U
+        V1 voltage-source (in, 0) U_output = U
         R1 resistor (in, out) resistance = R
         C1 capacitor (out, 0) capacitance = C
     }

@@ -27,6 +27,8 @@ component "1N4148" as 1n4148 type diode {
         thermal_resistance = 350 K/W          "kelvin above the bench per watt it takes"
         thermal_time_constant = 1 s           "how fast it warms to that"
         T_maximum = 200 °C                    "past this it fails on a realistic bench"
+        V_reverse_maximum = 100 V             "VRRM"
+        I_forward_maximum = 300 mA            "IF, continuous"
     }
 
     pins {

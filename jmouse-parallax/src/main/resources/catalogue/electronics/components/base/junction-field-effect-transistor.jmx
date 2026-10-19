@@ -59,15 +59,12 @@ component "Junction FET" as junction-field-effect-transistor type jfet {
 
     symbol uses n-channel-jfet-symbol
 
-    state {
-        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
-    }
-
     # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
     type transconductance_coefficient = current / voltage ^ 2
 
     equations {
-        let T_junction : temperature = temperature + heating
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
         let V_gs : voltage = polarity * (gate - si)
         let V_gd : voltage = polarity * (gate - di)
         let V_ds : voltage = polarity * (di - si)
@@ -89,8 +86,5 @@ component "Junction FET" as junction-field-effect-transistor type jfet {
         current di -> si = polarity * if(V_ds >= 0, channel, 0 - channel)
         current gate -> si = polarity * (junction_current(V_gs, I_saturation_now, emission_coefficient, T_junction) + d(Q_gate_source)/dt)
         current gate -> di = polarity * (junction_current(V_gd, I_saturation_now, emission_coefficient, T_junction) + d(Q_gate_drain)/dt)
-
-        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
-        d(heating)/dt = (realistic * ((drain - source) * (drain - di) / R_drain) * thermal_resistance - heating) / thermal_time_constant
     }
 }

@@ -1,6 +1,8 @@
 package org.jmouse.parallax.circuit;
 
-import org.jmouse.parallax.object.CompiledObject;
+import org.jmouse.parallax.component.ComponentModel;
+import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
+
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
@@ -19,13 +21,8 @@ import java.util.Map;
  */
 public final class PartDisplays {
 
-    private static final Map<CircuitElementType, String> PRIMITIVE_COMPONENTS = Map.of(
-            CircuitElementType.RESISTOR, "resistor", CircuitElementType.CAPACITOR, "capacitor",
-            CircuitElementType.INDUCTOR, "inductor", CircuitElementType.DIODE, "diode",
-            CircuitElementType.VOLTAGE_SOURCE, "voltage-source", CircuitElementType.CURRENT_SOURCE, "current-source");
-
     /** A primitive's terminals as its current is reported when they are not named after its component's pins. */
-    private static final List<String> PRIMITIVE_TERMINALS = List.of("+", "−");
+    private static final List<String> PRIMITIVE_TERMINALS = List.of(ObjectDefinition.PRIMITIVE_POSITIVE, ObjectDefinition.PRIMITIVE_NEGATIVE);
 
     /**
      * One figure of one part: its expression, the node each pin reads, and the terminal each pin's current may be
@@ -41,12 +38,11 @@ public final class PartDisplays {
         this.figures = List.copyOf(figures);
     }
 
-    public static PartDisplays of(CompiledObject object) {
+    /** What every part of a circuit shows, each figure compiled over the part as it stands on the bench. */
+    static PartDisplays of(ElaboratedCircuit circuit) {
         List<Figure> figures = new ArrayList<>();
-        if (object.definition() instanceof ObjectDefinition.Circuit circuit) {
-            for (CircuitElement element : circuit.elements()) {
-                figuresOf(object, element, figures);
-            }
+        for (CircuitElement element : circuit.writtenParts()) {
+            figuresOf(circuit, element, figures);
         }
         return new PartDisplays(figures);
     }
@@ -55,19 +51,10 @@ public final class PartDisplays {
         return figures.isEmpty();
     }
 
-    private static void figuresOf(CompiledObject object, CircuitElement element, List<Figure> into) {
+    private static void figuresOf(ElaboratedCircuit circuit, CircuitElement element, List<Figure> into) {
         boolean primitive = element.type() != CircuitElementType.MODEL;
-        String reference = primitive ? PRIMITIVE_COMPONENTS.get(element.type()) : element.component();
-        if (reference == null) {
-            return;
-        }
-        ComponentModel model;
-        try {
-            model = ComponentDocuments.read(object.componentSource(reference), reference, object.library());
-        } catch (IllegalArgumentException unreadable) {
-            return;
-        }
-        if (model.displays().isEmpty()) {
+        ComponentModel model = circuit.componentOf(element).orElse(null);
+        if (model == null || model.displays().isEmpty()) {
             return;
         }
         // A primitive's first terminal is its component's first pin, its second the second.
@@ -82,7 +69,7 @@ public final class PartDisplays {
         }
         model.displays().forEach((name, expression) -> {
             try {
-                into.add(new Figure(element.id(), name, PartExpression.of(object, element, model, expression), pinNodes,
+                into.add(new Figure(element.id(), name, PartExpression.of(circuit, element, model, expression), pinNodes,
                         terminals));
             } catch (IllegalArgumentException unwritten) {
                 throw new IllegalArgumentException(unwritten.getMessage() + " (its display '" + name + "')", unwritten);
@@ -114,16 +101,56 @@ public final class PartDisplays {
         return shown;
     }
 
+    /**
+     * Every stress figure ({@link PartLoad#STRESSES}) at its worst over these samples: a limit is broken at the moment it
+     * is passed, never on average — a 25 V capacitor on a sine of 50 V peak is at 200 %, though its mean voltage is
+     * nought. Each sample's node voltages are read, and the part's currents where the sample traced them, else the
+     * frame's.
+     */
+    public Map<String, Map<String, Double>> worstStresses(List<LiveSample> samples, List<String> order,
+                                                          Map<String, PartLoad> loads, Map<String, Map<String, Double>> states) {
+        Map<String, Map<String, Double>> worst = new LinkedHashMap<>();
+        for (Figure figure : figures) {
+            if (!PartLoad.STRESSES.contains(figure.name())) {
+                continue;
+            }
+            List<String> pins = figure.expression().pins();
+            int[] nodes = figure.pinNodes().stream().mapToInt(node -> node == null ? -1 : order.indexOf(node)).toArray();
+            PartLoad load = loads.get(figure.part());
+            Map<String, Double> partStates = states.getOrDefault(figure.part(), Map.of());
+            double power = load == null || Double.isNaN(load.power()) ? 0 : load.power();
+            double highest = Double.NEGATIVE_INFINITY;
+            double[] pinVoltages = new double[pins.size()];
+            for (LiveSample sample : samples) {
+                for (int index = 0; index < pins.size(); index++) {
+                    pinVoltages[index] = nodes[index] < 0 ? 0 : sample.voltages()[nodes[index]];
+                }
+                Map<String, Double> traced = sample.terminals() == null ? null : sample.terminals().get(figure.part());
+                Map<String, Double> currents = traced != null ? pinCurrents(traced, pins, figure.terminals())
+                        : pinCurrents(load == null ? Map.of() : load.terminals(), pins, figure.terminals());
+                double value = figure.expression().read(pinVoltages, currents, partStates, power, sample.time());
+                if (Double.isFinite(value)) {
+                    highest = Math.max(highest, value);
+                }
+            }
+            if (highest > Double.NEGATIVE_INFINITY) {
+                worst.computeIfAbsent(figure.part(), ignored -> new LinkedHashMap<>()).put(figure.name(), highest);
+            }
+        }
+        return worst;
+    }
+
     /** The current into each pin, reported under the pin's own name or its primitive terminal. */
     private static Map<String, Double> pinCurrents(PartLoad load, List<String> pins, List<String> terminals) {
+        return load == null ? new LinkedHashMap<>() : pinCurrents(load.terminals(), pins, terminals);
+    }
+
+    private static Map<String, Double> pinCurrents(Map<String, Double> reported, List<String> pins, List<String> terminals) {
         Map<String, Double> currents = new LinkedHashMap<>();
-        if (load == null) {
-            return currents;
-        }
         for (int index = 0; index < pins.size(); index++) {
-            Double current = load.terminals().get(pins.get(index));
+            Double current = reported.get(pins.get(index));
             if (current == null) {
-                current = load.terminals().get(terminals.get(index));
+                current = reported.get(terminals.get(index));
             }
             if (current != null) {
                 currents.put(pins.get(index), current);

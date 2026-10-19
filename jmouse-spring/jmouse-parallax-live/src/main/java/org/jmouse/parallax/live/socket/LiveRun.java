@@ -655,7 +655,7 @@ final class LiveRun {
             Map<String, String> overrides = new LinkedHashMap<>(element.overrides());
             overrides.put(parameter, Double.toString(value));
             return new ObjectDefinition.CircuitElement(element.id(), element.type(), element.positive(), element.negative(),
-                    element.value(), element.waveform(), element.frequency(), element.component(), element.pins(),
+                    element.value(), element.component(), element.pins(),
                     overrides, element.symbol());
         }).toList();
         return new ObjectDefinition.Circuit(elements, circuit.time(), circuit.layout(), circuit.conditions());

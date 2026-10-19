@@ -177,7 +177,7 @@ public class Computing {
                     : catalogue.requireReadableUnchecked(request.objectId());
             if (request.definition() != null) {
                 if (!(request.definition() instanceof ObjectDefinition.Circuit circuit)) {
-                    throw ParallaxProblem.invalid("Only a circuit can be varied in the emulator.");
+                    throw ParallaxProblem.invalid("Only a circuit can be varied in the simulator.");
                 }
                 compiled = catalogue.compileVariant(object, circuit, request.values());
             } else {
@@ -215,7 +215,7 @@ public class Computing {
         identity.put("format", FORMAT_VERSION);
         identity.put("definition", definition);
         if (definition instanceof ObjectDefinition.Circuit) {
-            identity.put("componentSources", org.jmouse.parallax.object.ComponentHierarchy.sources(compiled));
+            identity.put("componentSources", org.jmouse.parallax.circuit.elaboration.ComponentHierarchy.sources(compiled));
         }
         identity.put("parameters", compiled.parameterValues());
         identity.put("integerValues", compiled.exactIntegerValues());

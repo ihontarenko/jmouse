@@ -23,7 +23,7 @@ component "MOS transistor" as mos-transistor type mosfet {
         summary "Level-1 MOSFET: square-law channel, channel-length modulation, series resistances, body diode, gate and junction capacitances"
         source "MOS level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
         category circuits
-        failure short
+        failure short drain source
     }
     use smooth-transitions, junctions
 
@@ -80,15 +80,12 @@ component "MOS transistor" as mos-transistor type mosfet {
         overcurrent = 100 * abs(drain.current) / I_drain_maximum unit % "of its rated ID"
     }
 
-    state {
-        heating = 0 continuous                "how far its own heat has raised it above the bench, kelvin; 0 on an ideal bench"
-    }
-
     # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
     type transconductance_coefficient = current / voltage ^ 2
 
     equations {
-        let T_junction : temperature = temperature + heating
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
         let warmth : ratio = T_junction / T_nominal
         let V_gs : voltage = polarity * (gi - si)
         let V_gd : voltage = polarity * (gi - di)
@@ -113,13 +110,10 @@ component "MOS transistor" as mos-transistor type mosfet {
         current drain -> di = (drain - di) / (R_drain * resistance_drift)
         current si -> source = (si - source) / (R_source * resistance_drift)
         # The channel's thermal noise, 8/3 · kT · gm, with gm = √(2 · KP · ID) in saturation: nothing to the solution.
-        current di -> si = polarity * (if(V_ds >= 0, channel, 0 - channel) + avalanche) + noise(8 / 3 * 1.380649e-23 * T_junction * sqrt(2 * beta * soft_positive_part(channel, 1e-15)))
+        current di -> si = polarity * (if(V_ds >= 0, channel, 0 - channel) + avalanche) + noise(8 / 3 * boltzmann * T_junction * sqrt(2 * beta * soft_positive_part(channel, 1e-15)))
         current source -> di = polarity * (body + d(Q_bulk_drain)/dt)
         current gate -> gi = (gate - gi) / R_gate
         current gi -> si = polarity * d(C_gate_source * V_gs)/dt
         current gi -> di = polarity * d(C_gate_drain * V_gd)/dt
-
-        # Its own heat, on a realistic bench: the power it dissipates, through thermal_resistance, over thermal_time_constant.
-        d(heating)/dt = (realistic * ((drain - source) * (drain - di) / (R_drain * resistance_drift)) * thermal_resistance - heating) / thermal_time_constant
     }
 }

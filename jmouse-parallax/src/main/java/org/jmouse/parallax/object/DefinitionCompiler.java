@@ -1,7 +1,7 @@
 package org.jmouse.parallax.object;
 
 import org.jmouse.formula.FormulaException;
-import org.jmouse.parallax.circuit.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.object.ObjectDefinition.AffineTransformation;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.Program;

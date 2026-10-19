@@ -2,13 +2,16 @@ package org.jmouse.parallax.circuit;
 
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
-import org.jmouse.parallax.script.ExperienceNotation;
 import org.jmouse.parallax.script.ExperienceParseException;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
+
+import org.jmouse.parallax.object.ParameterDefinition;
+import org.jmouse.parallax.script.Quantity;
+import org.jmouse.parallax.script.engine.ExperienceDefinitions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,26 +54,27 @@ public final class LiveControls {
                 if (!parameter.has(Block.ParameterFlag.LIVE) || parameter.range().isEmpty()) {
                     continue;
                 }
-                Optional<Double> minimum = number(parameter.range().get().minimum().text());
-                Optional<Double> maximum = number(parameter.range().get().maximum().text());
+                ParameterDefinition slider;
+                try {
+                    slider = ExperienceDefinitions.slider(parameter);
+                } catch (IllegalArgumentException unreadable) {
+                    continue;
+                }
                 String overridden = element.overrides().get(parameter.name());
                 // A part line that drives the setting with the circuit's own parameter — `position = P` — makes that
                 // parameter's slider the control. Falling back to the component's default here put a second wiper on
                 // the bench at 0.5, which moved nothing the reader could see.
-                if (overridden != null && number(overridden).isEmpty()) {
+                Optional<Double> set = Optional.ofNullable(overridden).flatMap(written -> Quantity.parse(written).map(Quantity::value));
+                if (overridden != null && set.isEmpty()) {
                     continue;
                 }
-                Optional<Double> written = Optional.ofNullable(overridden).flatMap(LiveControls::number)
-                        .or(() -> number(parameter.value().text()));
-                if (minimum.isEmpty() || maximum.isEmpty() || written.isEmpty()) {
-                    continue;
-                }
-                double step = parameter.step().flatMap(text -> number(text.text())).orElse((maximum.get() - minimum.get()) / 100);
-                boolean whole = parameter.has(Block.ParameterFlag.INTEGER) && minimum.get() == 0 && maximum.get() == 1;
+                double value = set.orElse(slider.defaultValue());
+                double step = slider.step() > 0 ? slider.step() : (slider.maximum() - slider.minimum()) / 100;
+                boolean whole = parameter.has(Block.ParameterFlag.INTEGER) && slider.minimum() == 0 && slider.maximum() == 1;
                 Kind kind = whole ? (button ? Kind.MOMENTARY : Kind.TOGGLE) : Kind.SLIDER;
                 String label = parameter.description().isBlank() ? parameter.name() : parameter.description();
-                controls.add(new LiveControl(element.id(), parameter.name(), label, minimum.get(), maximum.get(), step,
-                        written.get(), kind));
+                controls.add(new LiveControl(element.id(), parameter.name(), label, slider.minimum(), slider.maximum(), step,
+                        value, kind));
             }
         }
         return controls;
@@ -80,14 +84,6 @@ public final class LiveControls {
         try {
             return Optional.of(ExperienceReader.readOne(source, "component"));
         } catch (ExperienceParseException unreadable) {
-            return Optional.empty();
-        }
-    }
-
-    private static Optional<Double> number(String text) {
-        try {
-            return Optional.of(Double.parseDouble(ExperienceNotation.normalize(text).source().replace(" ", "")));
-        } catch (NumberFormatException notANumber) {
             return Optional.empty();
         }
     }

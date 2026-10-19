@@ -1,5 +1,7 @@
 package org.jmouse.parallax.circuit;
 
+import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
+
 import org.jmouse.formula.Complex;
 import org.jmouse.parallax.Computation;
 import org.jmouse.parallax.ComputationProgress;
@@ -8,7 +10,6 @@ import org.jmouse.parallax.Dataset;
 import org.jmouse.parallax.RepresentationKind;
 import org.jmouse.parallax.SettingSpecification;
 import org.jmouse.parallax.object.CompiledObject;
-import org.jmouse.parallax.object.ComponentHierarchy;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 
@@ -26,11 +27,6 @@ public final class CircuitComputations {
 
     /** The unit of a digital node's column: 1, 0, −1 for unknown, −2 released — a viewer draws it as a timing lane. */
     public static final String LEVEL_UNIT = "level";
-
-    /** What a circuit's column holds: a node's voltage, a part's or a pin's current, a part's power. */
-    static final String VOLTS = "V";
-    static final String AMPERES = "A";
-    static final String WATTS = "W";
 
     private CircuitComputations() {
     }
@@ -67,13 +63,14 @@ public final class CircuitComputations {
          * every model pin, for a sheet that draws them all.
          */
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
-            Netlist netlist = Netlist.of(object);
+            ElaboratedCircuit elaborated = ElaboratedCircuit.of(object);
+            Netlist netlist = Netlist.of(elaborated);
             boolean levels = settings.flag("levels");
             if (levels && netlist.digitalNodes().isEmpty()) {
                 throw new IllegalArgumentException("The circuit has no digital nodes to show the logic levels of.");
             }
             boolean everyPart = settings.flag("parts") && !levels;
-            TransientRun run = TransientRun.of(object, settings.integer("samples"), everyPart, progress);
+            TransientRun run = TransientRun.of(elaborated, settings.integer("samples"), everyPart, progress);
             float[] times = floats(run.times());
             if (levels) {
                 return logicLevels(times, netlist.digitalNodes(), run.levels());
@@ -84,56 +81,38 @@ public final class CircuitComputations {
             run.voltages().forEach((node, voltages) -> {
                 columns.add(node);
                 values.add(floats(voltages));
-                units.add(VOLTS);
+                units.add(ColumnNames.VOLTS);
             });
             run.currents().forEach((column, currents) -> {
                 // Asked for no more than the parts with a current of their own: those, by the part's name alone.
                 if (everyPart || !column.contains(".")) {
                     columns.add(column);
                     values.add(floats(currents));
-                    units.add(AMPERES);
+                    units.add(ColumnNames.AMPERES);
                 }
+            });
+            run.powers().forEach((column, powers) -> {
+                columns.add(column);
+                values.add(floats(powers));
+                units.add(ColumnNames.WATTS);
             });
             return new Dataset.TimeSeries("t", times, columns, values, units);
         }
 
         /** One column per digital node, named as the node and in the unit `level`: what the event solver held it at, sample by sample. */
-        private static Dataset.TimeSeries logicLevels(float[] times, List<String> digitalNodes, List<Map<String, Object>> held) {
+        private static Dataset.TimeSeries logicLevels(float[] times, List<String> digitalNodes, List<Map<String, LogicLevel>> held) {
             List<String> columns = new ArrayList<>();
             List<float[]> values = new ArrayList<>();
             for (String node : digitalNodes) {
                 columns.add(node);
                 float[] levels = new float[times.length];
                 for (int sample = 0; sample < times.length; sample++) {
-                    Object level = held.get(sample).getOrDefault(node, DigitalDriver.RELEASED);
-                    levels[sample] = level instanceof Number number ? number.floatValue()
-                            : DigitalDriver.UNKNOWN.equals(level) ? -1 : -2;
+                    levels[sample] = held.get(sample).getOrDefault(node, LogicLevel.RELEASED).datasetValue();
                 }
                 values.add(levels);
             }
             return new Dataset.TimeSeries("t", times, columns, values, Collections.nCopies(columns.size(), LEVEL_UNIT));
         }
-    }
-
-    /**
-     * Whether a branch is a part's own current — a source's, an inductor's —, not one held inside a model (`U1: voltage
-     * a -> b`), whose part reports its pins' currents instead.
-     */
-    private static boolean isPartBranch(String branch) {
-        return !branch.contains(":");
-    }
-
-    /**
-     * The column a terminal's current is reported in, in amperes: the part itself (`R1`) for a two-terminal part —
-     * the current into its first terminal; its second carries the same back and has none (null) —, `U1.output` for
-     * a model's pin. The transient and the live trace share it.
-     */
-    static String partCurrentColumn(String part, String terminal) {
-        return switch (terminal) {
-            case "+" -> part;
-            case "−" -> null;
-            default -> part + "." + terminal;
-        };
     }
 
     /**
@@ -172,10 +151,7 @@ public final class CircuitComputations {
             Netlist netlist = Netlist.of(object);
             CircuitSolver solver = new CircuitSolver(netlist);
             double[] operatingPoint = smallSignalBias(solver, netlist);
-            Circuit circuit = (Circuit) object.definition();
-            double celsius = circuit.conditions() != null ? circuit.conditions().temperature()
-                    : ObjectDefinition.BenchConditions.NOMINAL_TEMPERATURE;
-            List<NoiseCurrent> sources = solver.noiseSources(operatingPoint, celsius + 273.15);
+            List<NoiseCurrent> sources = solver.noiseSources(operatingPoint);
             int points = settings.integer("points");
             int nodes = netlist.nodes().size();
             float[] frequencies = new float[points];
@@ -373,15 +349,17 @@ public final class CircuitComputations {
             Complex[] solution = solver.phasors(frequency, operatingPoint);
             double omega = 2 * Math.PI * frequency;
             List<Dataset.Feature> features = new ArrayList<>();
-            for (Netlist.Element element : netlist.elements()) {
-                Complex voltage = nodePhasor(solution, element.positive()).subtract(nodePhasor(solution, element.negative()));
-                Complex current = switch (element.type()) {
-                    case RESISTOR -> voltage.divide(Complex.of(element.value()));
-                    case CAPACITOR -> voltage.multiply(new Complex(0, omega * element.value()));
-                    case INDUCTOR -> element.branch() >= 0 ? solution[element.branch()] : voltage.divide(new Complex(0, omega * element.value()));
-                    case VOLTAGE_SOURCE -> element.branch() >= 0 ? solution[element.branch()] : null;
-                    default -> null;
-                };
+            // Every part says the phasor across it and through it, from the admittance it stamped — a generator and a
+            // model alike.
+            for (Device device : solver.devices()) {
+                if (device.part() == null) {
+                    continue;
+                }
+                Complex voltage = device.phasorVoltage(solution);
+                Complex current = device.phasorCurrent(solution, omega, operatingPoint);
+                if (voltage == null) {
+                    continue;
+                }
                 if (current == null || !voltage.isFinite() || !current.isFinite()) {
                     continue;
                 }
@@ -391,18 +369,14 @@ public final class CircuitComputations {
                 facts.put("current_real", current.real());
                 facts.put("current_imaginary", current.imaginary());
                 facts.put("frequency", frequency);
-                facts.put("source", element.type() == ObjectDefinition.CircuitElementType.VOLTAGE_SOURCE || element.type() == ObjectDefinition.CircuitElementType.CURRENT_SOURCE);
-                features.add(new Dataset.Feature(new double[]{voltage.real(), voltage.imaginary()}, voltage.modulus(), element.id(), facts));
+                facts.put("source", device.source());
+                features.add(new Dataset.Feature(new double[]{voltage.real(), voltage.imaginary()}, voltage.modulus(), device.part(), facts));
             }
             return new Dataset.FeaturePoints(features);
         }
-
-        private static Complex nodePhasor(Complex[] solution, int node) {
-            return node == Netlist.GROUND ? Complex.ZERO : solution[node];
-        }
     }
 
-    /** The DC state: node voltages, branch currents, diode currents and the power every resistor dissipates. */
+    /** The DC state: node voltages, every part's currents and the power every part takes. */
     public static class OperatingPoint implements Computation {
 
         public RepresentationKind kind() {
@@ -431,29 +405,26 @@ public final class CircuitComputations {
             Map<String, String> units = new LinkedHashMap<>();
             for (int node = 0; node < netlist.nodes().size(); node++) {
                 values.put(netlist.nodes().get(node), state[node]);
-                units.put(netlist.nodes().get(node), VOLTS);
+                units.put(netlist.nodes().get(node), ColumnNames.VOLTS);
             }
             for (int branch = 0; branch < netlist.branches().size(); branch++) {
-                if (isPartBranch(netlist.branches().get(branch))) {
-                    values.put(netlist.branches().get(branch), state[netlist.nodes().size() + branch]);
-                    units.put(netlist.branches().get(branch), AMPERES);
+                Netlist.Branch own = netlist.branches().get(branch);
+                if (own.partCurrent()) {
+                    values.put(own.name(), state[netlist.nodes().size() + branch]);
+                    units.put(own.name(), ColumnNames.AMPERES);
                 }
             }
-            for (Device device : solver.devices()) {
-                if (device instanceof Device.Diode diode) {
-                    values.put(diode.element().id(), diode.current(state));
-                    units.put(diode.element().id(), AMPERES);
+            PartReadings.currents(solver.devices(), state).forEach((column, current) -> {
+                if (values.putIfAbsent(column, current) == null) {
+                    units.put(column, ColumnNames.AMPERES);
                 }
-            }
-            for (Netlist.Element element : netlist.elements()) {
-                if (element.type() == ObjectDefinition.CircuitElementType.RESISTOR && !Netlist.isSolverElement(element.id())) {
-                    double across = voltage(state, element.positive()) - voltage(state, element.negative());
-                    values.put(element.id(), across * across / element.value());
-                    units.put(element.id(), WATTS);
-                }
-            }
+            });
+            PartReadings.powers(solver.devices(), state).forEach((column, power) -> {
+                values.put(column, power);
+                units.put(column, ColumnNames.WATTS);
+            });
             Map<String, String> notes = new LinkedHashMap<>();
-            notes.put("units", "a node in volts, a source's or a diode's current in amperes, a resistor's power in watts");
+            notes.put("units", "a node in volts; a part's current in amperes (R1, U1.pin), its power in watts (R1.power)");
             return new Dataset.Measurements(values, notes, units);
         }
     }
@@ -501,17 +472,23 @@ public final class CircuitComputations {
             int points = settings.integer("points");
             float[] axis = new float[points];
             double[][] states = new double[points][];
-            CircuitSolver solver = null;
+            List<Map<String, Double>> currents = new ArrayList<>(points);
+            // One solver for the whole sweep — its system's ordering, its compiled models —, the swept source alone
+            // held at each value in turn.
+            CircuitSolver solver = new CircuitSolver(netlist);
             for (int point = 0; point < points; point++) {
                 double value = from + (to - from) * point / (points - 1);
                 axis[point] = (float) value;
-                solver = new CircuitSolver(netlist.withValue(source.id(), value));
+                solver = solver.withSourceValue(source.id(), value);
                 states[point] = point == 0 ? solver.operatingPoint() : solver.operatingPoint(states[point - 1]);
+                // Read while the point's own linearization stands: a junction's current read off the last point's line
+                // was that point's current, at every point.
+                currents.add(PartReadings.currents(solver.devices(), states[point]));
                 if (point % 64 == 0) {
                     progress.report((double) point / points, "Sweeping " + source.id());
                 }
             }
-            return series(source.id(), axis, netlist, solver, states);
+            return series(source.id(), axis, netlist, states, currents);
         }
 
         /**
@@ -528,6 +505,7 @@ public final class CircuitComputations {
             int points = settings.integer("points");
             float[] axis = new float[points];
             double[][] states = new double[points][];
+            List<Map<String, Double>> currents = new ArrayList<>(points);
             Netlist netlist = null;
             CircuitSolver solver = null;
             int shape = -1;
@@ -546,16 +524,17 @@ public final class CircuitComputations {
                 solver = new CircuitSolver(netlist);
                 boolean continued = point > 0 && states[point - 1].length == netlist.size();
                 states[point] = continued ? solver.operatingPoint(states[point - 1]) : solver.operatingPoint();
+                currents.add(PartReadings.currents(solver.devices(), states[point]));
                 if (point % 16 == 0) {
                     progress.report((double) point / points, "Sweeping " + parameter);
                 }
             }
-            return series(parameter, axis, netlist, solver, states);
+            return series(parameter, axis, netlist, states, currents);
         }
 
         private static Netlist.Element sweptSource(Netlist netlist, String id) {
             return netlist.elements().stream()
-                    .filter(element -> element.type().isSource())
+                    .filter(element -> element.kind().isSource())
                     .filter(element -> id == null || id.isBlank() || element.id().equals(id.strip()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException(id == null || id.isBlank()
@@ -565,32 +544,35 @@ public final class CircuitComputations {
     }
 
     /** Node voltages, own-current branches and diode currents along an axis — time or a swept value. */
-    private static Dataset series(String axisName, float[] axis, Netlist netlist, CircuitSolver solver, double[][] states) {
+    private static Dataset series(String axisName, float[] axis, Netlist netlist, double[][] states,
+                                  List<Map<String, Double>> currents) {
         List<String> columns = new ArrayList<>();
         List<float[]> values = new ArrayList<>();
         List<String> units = new ArrayList<>();
         for (int node = 0; node < netlist.nodes().size(); node++) {
             columns.add(netlist.nodes().get(node));
             values.add(column(states, node));
-            units.add(VOLTS);
+            units.add(ColumnNames.VOLTS);
         }
         for (int branch = 0; branch < netlist.branches().size(); branch++) {
-            if (isPartBranch(netlist.branches().get(branch))) {
-                columns.add(netlist.branches().get(branch));
+            Netlist.Branch own = netlist.branches().get(branch);
+            if (own.partCurrent()) {
+                columns.add(own.name());
                 values.add(column(states, netlist.nodes().size() + branch));
-                units.add(AMPERES);
+                units.add(ColumnNames.AMPERES);
             }
         }
-        for (Device device : solver.devices()) {
-            if (device instanceof Device.Diode diode) {
-                float[] currents = new float[states.length];
-                for (int sample = 0; sample < states.length; sample++) {
-                    currents[sample] = (float) diode.current(states[sample]);
-                }
-                columns.add(diode.element().id());
-                values.add(currents);
-                units.add(AMPERES);
+        for (String column : currents.isEmpty() ? List.<String>of() : List.copyOf(currents.getFirst().keySet())) {
+            if (columns.contains(column)) {
+                continue;
             }
+            float[] series = new float[states.length];
+            for (int sample = 0; sample < states.length; sample++) {
+                series[sample] = (float) currents.get(sample).getOrDefault(column, Double.NaN).doubleValue();
+            }
+            columns.add(column);
+            values.add(series);
+            units.add(ColumnNames.AMPERES);
         }
         return new Dataset.TimeSeries(axisName, axis, columns, values, units);
     }
@@ -614,9 +596,5 @@ public final class CircuitComputations {
             column[sample] = (float) states[sample][index];
         }
         return column;
-    }
-
-    private static double voltage(double[] state, int node) {
-        return node == Netlist.GROUND ? 0 : state[node];
     }
 }

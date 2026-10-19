@@ -6,7 +6,7 @@ component "P-channel MOSFET" as p-mosfet type mosfet {
         designator Q
         summary "P-channel MOSFET, the level-1 model at its defaults"
         category circuits
-        failure short
+        failure short drain source
     }
     extends mos-transistor
 

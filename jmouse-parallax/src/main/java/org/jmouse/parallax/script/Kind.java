@@ -40,7 +40,7 @@ public enum Kind {
     CIRCUIT("circuit", Role.COMPUTABLE, Blocks.CIRCUIT),
     SYMBOL("symbol", Role.DRAWING, Set.of("meta")),
     FAMILY("family", Role.SHARED, Set.of("meta", "parameters", "formulas")),
-    FUNCTIONS("functions", Role.SHARED, Set.of("meta", "formulas")),
+    FUNCTIONS("functions", Role.SHARED, Set.of("meta", "formulas", "heat")),
     CATEGORY("category", Role.CATALOGUE, Set.of("meta")),
     COLLECTION("collection", Role.CATALOGUE, Set.of("meta", "items", "section")),
     COURSE("course", Role.CATALOGUE, Set.of("meta", "lesson", "step")),
@@ -112,7 +112,7 @@ public enum Kind {
         static final Set<String> EVOLVING = with(MATHEMATICS, "state", "equations");
 
         static final Set<String> COMPONENT = Set.of("meta", "parameters", "formulas", "pins", "nodes", "state",
-                "equations", "behaviour", "symbol", "parts", "nets", "view", "expect", "display", "measure", "leads");
+                "equations", "heat", "behaviour", "symbol", "parts", "nets", "view", "expect", "display", "measure", "leads");
 
         static final Set<String> CIRCUIT = Set.of("meta", "parameters", "formulas", "sheet", "parts", "nets", "layout",
                 "ports", "probes", "analysis", "symbol", "view", "expect");

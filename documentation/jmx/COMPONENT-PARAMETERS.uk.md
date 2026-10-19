@@ -18,8 +18,9 @@ English: [COMPONENT-PARAMETERS.md](COMPONENT-PARAMETERS.md).
   SPICE має своє SPICE-ім'я на початку значення (`IS:`, `BF:`) — за ним зіставляється імпортована `.model`.
 - **Показники на схемі** (`display`) обчислюються на кожному відліку й показуються біля деталі; `overvoltage` і
   `overcurrent` від 100 % — причина відмови на реалістичному стенді.
-- **Стани** — невідомі, які несе модель: `heating` (кельвіни понад стенд) розв'язується разом зі схемою на
-  реалістичному стенді й повністю прибирається на ідеальному.
+- **Стани** — невідомі, які несе модель (засувка, потік). Власне тепло деталі до них не належить: на реалістичному
+  стенді рушій гріє кожну деталь потужністю, яку розсіюють її рівняння, через її `thermal_resistance` за її
+  `thermal_time_constant`, і її рівняння читають це як `temperature`.
 - Примітки з файлів (даташитні цифри й позначення) наведено мовою оригіналу; значення кожного параметра —
   українською.
 
@@ -683,7 +684,6 @@ _Adjustable precision shunt reference, 2.495 V to 36 V, 1 mA to 100 mA_
 
 **Виводи:** `ref`, `anode`, `cathode`
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді
 
 ### `integrated/timers/`
 
@@ -781,7 +781,6 @@ _Aluminium electrolytic capacitor: capacitance, ESR, leakage_
 
 **Показники на схемі:** `overvoltage` [%] — відсоток допустимої напруги; `charge` [%] — заряд у відсотках від номінальної напруги
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді
 
 #### Inductor — `inductor`
 
@@ -834,7 +833,6 @@ _Power inductor: inductance, winding resistance, core saturation_
 
 **Виводи:** `terminal_one`, `terminal_two`
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді
 
 #### Resistor — `resistor`
 
@@ -876,7 +874,6 @@ _Two coupled windings: self and mutual inductance, leakage, winding resistance_
 
 **Виводи:** `primary_one`, `primary_two`, `secondary_one`, `secondary_two`
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді
 
 ### `semiconductors/diodes/`
 
@@ -1074,7 +1071,6 @@ _Optocoupler, phototransistor output, CTR 50 … 600 %, 5 kV isolation_
 
 **Виводи:** `anode`, `cathode`, `emitter`, `collector`
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді
 
 ### `semiconductors/thyristors/`
 
@@ -1099,7 +1095,7 @@ _Sensitive-gate thyristor, 30 V, 0.8 A, IGT 200 µA_
 
 **Виводи:** `cathode`, `gate`, `anode`
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді; `conducting` (discrete) — увімкнено й засувкою утримано: пише поведінка, читають рівняння
+**Стани:** `conducting` (discrete) — увімкнено й засувкою утримано: пише поведінка, читають рівняння
 
 #### BT136 — `bt136`
 
@@ -1122,7 +1118,7 @@ _Triac, 600 V, 4 A, logic-level-sensitive gate_
 
 **Виводи:** `main_terminal_one`, `main_terminal_two`, `gate`
 
-**Стани:** `heating` (continuous) — перегрів власним теплом понад стенд, кельвіни; 0 на ідеальному стенді; `conducting` (discrete) — увімкнено й засувкою утримано: пише поведінка, читають рівняння
+**Стани:** `conducting` (discrete) — увімкнено й засувкою утримано: пише поведінка, читають рівняння
 
 ### `semiconductors/transistors/`
 
@@ -1762,7 +1758,7 @@ _Two-terminal voltage source: constant, or switched on at the start. A sine or a
 
 | Ім'я | Значення |
 |---|---|
-| `temperature` | температура стенда в кельвінах, 25 °C якщо не задано (`bench for 1 ms at 85 °C`); кожна модель пише свій дрейф відносно власної `T_nominal` |
+| `temperature` | власна температура деталі в кельвінах: стенда, 25 °C якщо не задано (`bench for 1 ms at 85 °C`), а на реалістичному стенді ще й піднята її власним теплом; кожна модель пише свій дрейф відносно власної `T_nominal` |
 | `realistic` | 0 на ідеальному стенді, 1 на реалістичному (`bench for 1 ms realistic`): саморозігрів, навантаження приладу, падіння на шунті, вигорання вище `T_maximum` |
 | `tolerance_corner` | −1, 0 або +1: кожен `tolerance` і кожен `*_spread` береться на нижній межі, на номіналі або на верхній межі |
 | `time` | час схеми — для генераторів і поведінки |
@@ -1774,7 +1770,6 @@ _Two-terminal voltage source: constant, or switched on at the start. A sine or a
 |---|---|
 | `meta failure open\|short` | чим стає після вигорання: обрив чи коротке замикання |
 | `power_rating`, `thermal_resistance`, `thermal_time_constant`, `T_maximum` | його тепло: температура = стенд + P·Rθ із теплою сталою часу; вище `T_maximum` на реалістичному стенді — відмова |
-| `state heating` | для моделі: власний перегрів переходу (корпусу, обмотки), що входить у кожен дрейф |
 | `noise(density[, corner])` | у рівнянні струму: джерело шуму для аналізу шуму й перехідного шуму реалістичного стенда |
 
 ## Абетковий покажчик

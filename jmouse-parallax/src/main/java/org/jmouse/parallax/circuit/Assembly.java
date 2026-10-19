@@ -2,7 +2,6 @@ package org.jmouse.parallax.circuit;
 
 import org.jmouse.parallax.numerics.SparseSystem;
 
-import java.util.Arrays;
 
 /**
  * The modified-nodal system being assembled for one Newton iteration, and everything a device needs to stamp itself
@@ -21,7 +20,6 @@ final class Assembly {
     private final int        size;
     private final boolean    transientAnalysis;
     private final double[]   companion;
-    private final double[]   junctions;
     private final double[]   previous;
     private final double     time;
     private final double     step;
@@ -32,15 +30,13 @@ final class Assembly {
     private final SparseSystem system;
     private double[]   guess;
 
-    private Assembly(SparseSystem system, int devices, boolean transientAnalysis, double[] previous, double[] companion,
+    private Assembly(SparseSystem system, boolean transientAnalysis, double[] previous, double[] companion,
                      double time, double step, Integration integration, double sourceScale) {
         this.system = system;
         this.size = system.size();
         this.transientAnalysis = transientAnalysis;
         this.previous = previous;
         this.companion = companion;
-        this.junctions = new double[devices];
-        Arrays.fill(junctions, Double.NaN);
         this.time = time;
         this.step = step;
         this.integration = integration;
@@ -49,12 +45,12 @@ final class Assembly {
 
     /** The DC state: capacitors open, inductors shorted, every source at its constant part times {@code scale}. */
     static Assembly operatingPoint(SparseSystem system, int devices, double scale) {
-        return new Assembly(system, devices, false, new double[system.size()], new double[devices], 0, 0, null, scale);
+        return new Assembly(system, false, new double[system.size()], new double[devices], 0, 0, null, scale);
     }
 
     /** One transient step from the accepted state {@code previous} to {@code time}, {@code step} later. */
     static Assembly transientStep(SparseSystem system, double[] previous, double[] companion, double time, double step, Integration integration) {
-        return new Assembly(system, companion.length, true, previous, companion, time, step, integration, 1);
+        return new Assembly(system, true, previous, companion, time, step, integration, 1);
     }
 
     /** Starts an iteration at the given guess with an empty system. */
@@ -201,15 +197,6 @@ final class Assembly {
         companion[slot] = value;
     }
 
-    /** The device's own memory between Newton iterations: a junction's last limited voltage, NaN before the first. */
-    double junction(int slot) {
-        return junctions[slot];
-    }
-
-    void rememberJunction(int slot, double voltage) {
-        junctions[slot] = voltage;
-    }
-
     /** A conductance between two nodes. */
     void conductance(int positive, int negative, double conductance) {
         if (positive != Netlist.GROUND) {
@@ -244,11 +231,6 @@ final class Assembly {
             system.add(negative, branch, -1);
             system.add(branch, negative, -1);
         }
-    }
-
-    /** Adds to a branch row's own coefficient: V(+) − V(−) + coefficient · I = right side. */
-    void branchCoefficient(int branch, double coefficient) {
-        system.add(branch, branch, coefficient);
     }
 
     void branchRightSide(int branch, double value) {

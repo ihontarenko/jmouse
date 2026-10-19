@@ -1148,10 +1148,60 @@ public sealed interface ObjectDefinition {
      * @param offsets     a DC value added to a source, by element id, as a jMF expression
      * @param realistic   whether a part that overheats past its component's {@code T_maximum} fails, as its component
      *                    says it fails ({@code failure open|short}); an ideal bench only warns
-     * @param failures    the parts that have failed, by id, and how: {@code open} or {@code short}
+     * @param failures    the parts that have failed, by id, and how, as their components say they fail
      */
     record BenchConditions(double temperature, int corner, Map<String, Tolerance> tolerances, Map<String, String> offsets,
-                           boolean realistic, Map<String, String> failures) {
+                           boolean realistic, Map<String, Failure> failures) {
+
+        /**
+         * How a part fails, as its component writes it: {@code failure open} — nothing conducts any more —, or
+         * {@code failure short collector emitter} — those pins tied together, the rest left open; a short naming no pins
+         * ties every pin together.
+         *
+         * @param kind how it fails
+         * @param pins the pins a short ties, in the component's names; empty for every pin, and for an open part
+         */
+        public record Failure(Kind kind, List<String> pins) {
+
+            /** The two ways a part fails, as a component writes them: {@code open} and {@code short}. */
+            public enum Kind {
+                OPEN, SHORT;
+
+                /** As a component writes it, and as a reading reports it. */
+                public String keyword() {
+                    return name().toLowerCase(java.util.Locale.ROOT);
+                }
+
+                /** The kind a component writes; refused for any other word. */
+                public static Kind of(String keyword) {
+                    for (Kind kind : values()) {
+                        if (kind.keyword().equals(keyword)) {
+                            return kind;
+                        }
+                    }
+                    throw new IllegalArgumentException("A part fails 'open' or 'short', not '" + keyword + "'.");
+                }
+            }
+
+            /** A part that names no way to fail fails open. */
+            public static final Failure OPEN = new Failure(Kind.OPEN, List.of());
+
+            public Failure {
+                pins = pins == null ? List.of() : List.copyOf(pins);
+                if (kind == Kind.OPEN && !pins.isEmpty()) {
+                    throw new IllegalArgumentException("An open part conducts nowhere: 'failure open' names no pins.");
+                }
+            }
+
+            /** A failure as a component's header writes it: {@code open}, {@code short}, {@code short drain source}. */
+            public static Failure of(List<String> words) {
+                return new Failure(Kind.of(words.getFirst()), words.subList(1, words.size()));
+            }
+
+            public boolean shorts() {
+                return kind == Kind.SHORT;
+            }
+        }
 
         /** An ideal bench: nothing fails. */
         public BenchConditions(double temperature, int corner, Map<String, Tolerance> tolerances, Map<String, String> offsets) {
@@ -1159,8 +1209,8 @@ public sealed interface ObjectDefinition {
         }
 
         /** These conditions with one more part failed. */
-        public BenchConditions withFailure(String part, String failure) {
-            Map<String, String> all = new LinkedHashMap<>(failures);
+        public BenchConditions withFailure(String part, Failure failure) {
+            Map<String, Failure> all = new LinkedHashMap<>(failures);
             all.put(part, failure);
             return new BenchConditions(temperature, corner, tolerances, offsets, realistic, all);
         }
@@ -1173,10 +1223,6 @@ public sealed interface ObjectDefinition {
          */
         public record Tolerance(double percent, double coefficient) {
 
-            /** What a part has when nothing is said: a 1 % resistor at 100 ppm/°C, a 10 % capacitor at 200. */
-            public static Tolerance defaultFor(CircuitElementType type) {
-                return type == CircuitElementType.RESISTOR ? new Tolerance(1, 100) : new Tolerance(10, 200);
-            }
 
             public Tolerance {
                 if (!Double.isFinite(percent) || percent < 0 || percent > 30 || !Double.isFinite(coefficient)
@@ -1204,11 +1250,6 @@ public sealed interface ObjectDefinition {
             }
             offsets = Map.copyOf(given);
             failures = failures == null ? Map.of() : Map.copyOf(failures);
-            failures.values().forEach(failure -> {
-                if (!failure.equals("open") && !failure.equals("short")) {
-                    throw new IllegalArgumentException("A part fails 'open' or 'short', not '" + failure + "'.");
-                }
-            });
         }
 
         /** Whether these conditions change nothing: what a circuit without any is run under. */
@@ -1216,26 +1257,21 @@ public sealed interface ObjectDefinition {
             return temperature == NOMINAL_TEMPERATURE && corner == 0 && offsets.isEmpty() && !realistic && failures.isEmpty();
         }
 
-        /** A part's tolerance: its own, or the default of its kind. */
-        public Tolerance toleranceOf(CircuitElement element) {
-            return tolerances.getOrDefault(element.id(), Tolerance.defaultFor(element.type()));
-        }
     }
 
     /**
-     * One two-terminal element. {@code value} is ohms, farads, henries, volts or amperes by type — for a diode, its
-     * saturation current in amperes, the anode being the positive terminal; a source's
-     * {@code frequency} (hertz) matters only to a sine or a square wave.
+     * One part of a circuit. A part written in pin order is a primitive, joining {@code positive} to {@code negative},
+     * its {@code value} its component's first parameter (ohms, farads, henries, volts, amperes; a diode's saturation
+     * current); a model names its {@code component} and connects its {@code pins}. Every circuit starts from rest, so a
+     * source is switched on at the start; a sine or a square is a generator, a model of its own.
      */
     record CircuitElement(String id, CircuitElementType type, String positive, String negative, String value,
-                          SourceWaveform waveform, String frequency, String component, Map<String, String> pins,
-                          Map<String, String> overrides, String symbol) {
+                          String component, Map<String, String> pins, Map<String, String> overrides, String symbol) {
 
         /** An element drawn with its component's default symbol. */
         public CircuitElement(String id, CircuitElementType type, String positive, String negative, String value,
-                              SourceWaveform waveform, String frequency, String component, Map<String, String> pins,
-                              Map<String, String> overrides) {
-            this(id, type, positive, negative, value, waveform, frequency, component, pins, overrides, null);
+                              String component, Map<String, String> pins, Map<String, String> overrides) {
+            this(id, type, positive, negative, value, component, pins, overrides, null);
         }
 
         public CircuitElement {
@@ -1263,9 +1299,6 @@ public sealed interface ObjectDefinition {
             }
             if (type != CircuitElementType.MODEL && (value == null || value.isBlank())) {
                 throw new IllegalArgumentException("Element '" + id + "' has a value.");
-            }
-            if (waveform == null) {
-                waveform = SourceWaveform.DC;
             }
         }
 
@@ -1296,14 +1329,11 @@ public sealed interface ObjectDefinition {
                 case MODEL -> null;
             };
         }
-    }
 
-    /**
-     * How a primitive source's value changes in time: constant, or switched on at the start. A sine, a square or any
-     * other signal is a generator component — its voltage an equation of the time in its own jMX document.
-     */
-    enum SourceWaveform {
-        DC, STEP
+        /** The primitive a component stands for, by its slug or its {@code type}: {@code resistor} is a RESISTOR. */
+        public static java.util.Optional<CircuitElementType> ofComponent(String component) {
+            return java.util.Arrays.stream(values()).filter(type -> type != MODEL && type.primitiveComponent().equals(component)).findFirst();
+        }
     }
 
     enum SurfaceGluing { NONE, CYLINDER, TORUS, MOBIUS, KLEIN_BOTTLE, PROJECTIVE_PLANE, SPHERE }
