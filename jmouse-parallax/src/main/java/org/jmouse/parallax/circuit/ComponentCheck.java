@@ -83,7 +83,8 @@ public final class ComponentCheck implements ConsistencyCheck {
             verdicts.add(expectation.title() + ": " + verdict + (expectation.reference() == null ? "" : " — " + expectation.reference()));
         }
         int total = model.expectations().size();
-        String detail = (total - failed) + " of " + total + " expectations met. " + String.join("; ", verdicts);
+        // One verdict a line: glued with "; " they read as one paragraph, and a reference may hold a ";" of its own.
+        String detail = (total - failed) + " of " + total + " expectations met.\n" + String.join("\n", verdicts);
         return new CheckResult(failed == 0 ? ConsistencyCheck.Outcome.PASSED : ConsistencyCheck.Outcome.FAILED, (double) failed,
                 0.0, detail);
     }

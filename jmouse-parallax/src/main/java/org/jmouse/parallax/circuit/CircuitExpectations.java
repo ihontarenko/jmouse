@@ -51,7 +51,8 @@ public final class CircuitExpectations implements ConsistencyCheck {
             }
             verdicts.add(expectation.title() + ": " + verdict + (expectation.reference() == null ? "" : " — " + expectation.reference()));
         }
-        String detail = (expectations.size() - failed) + " of " + expectations.size() + " expectations met. " + String.join("; ", verdicts);
+        // One verdict a line, as a component check writes them.
+        String detail = (expectations.size() - failed) + " of " + expectations.size() + " expectations met.\n" + String.join("\n", verdicts);
         return new CheckResult(failed == 0 ? Outcome.PASSED : Outcome.FAILED, (double) failed, 0.0, detail);
     }
 
