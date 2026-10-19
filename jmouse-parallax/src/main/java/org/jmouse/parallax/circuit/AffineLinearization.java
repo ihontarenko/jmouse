@@ -113,7 +113,6 @@ final class AffineLinearization implements UnitLinearization {
                 prepare();
             }
         }
-        line.takeGuess(assembly);
         boolean freshTangent = coefficient != tangentCoefficient;
         double[] jacobian = line.jacobian;
         for (int position = 0; position < layout.stamps.length; position++) {
@@ -145,12 +144,10 @@ final class AffineLinearization implements UnitLinearization {
                     constant += rates[index] * (coefficient * charge[index] - carried);
                 }
             }
-            double linear = 0;
-            for (int index = 0; index < locals.length; index++) {
-                linear += tangent[index] * line.guess[locals[index]];
-            }
-            line.values[position] = linear + constant;
-            line.linearParts[position] = linear;
+            // An affine line is the same line at every point: kept at x = 0, where its value is its constant — no
+            // pass over the unknowns on any attempt, and the guess it is read from stays nought.
+            line.values[position] = constant;
+            line.linearParts[position] = 0;
         }
         tangentCoefficient = coefficient;
     }

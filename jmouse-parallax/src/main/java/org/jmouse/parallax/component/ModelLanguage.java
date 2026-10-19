@@ -60,6 +60,22 @@ public final class ModelLanguage {
         return refuseBorrowed(where, parsed);
     }
 
+    /**
+     * An expression a component reads itself by — an instrument's {@code measure}, a {@code display} figure —, in the same
+     * language as its equations, refused where it writes what only an equation may: a charge's rate adds a current, and
+     * a noise current runs along one.
+     */
+    public static Formula readings(String model, String text, List<Formula.Definition> library) {
+        Formula read = read(model, text, 0, library);
+        return Substitution.replaceHostCalls(read, call -> {
+            if (RATE.equals(call.name()) || NOISE.equals(call.name())) {
+                throw new IllegalArgumentException(model + ": '" + text + "' reads the part, it adds nothing to it — "
+                        + (RATE.equals(call.name()) ? "d(q)/dt" : "noise(…)") + " belongs in an equation.");
+            }
+            return call;
+        });
+    }
+
     /** {@code parsed}, refused where it calls one of SPICE's spellings. */
     public static Formula refuseBorrowed(String where, Formula parsed) {
         return Substitution.replaceHostCalls(parsed, call -> {

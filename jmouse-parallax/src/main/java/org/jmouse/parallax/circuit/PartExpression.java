@@ -12,7 +12,6 @@ import org.jmouse.formula.Formula;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Symbols;
-import org.jmouse.formula.el.FormulaLanguage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +25,6 @@ import java.util.Map;
  * instrument, so a meter nobody has thought of yet is written in its own document.
  */
 final class PartExpression {
-
-    /** jMF with {@code current(pin)} read as a host call. */
-    private static final FormulaLanguage LANGUAGE = FormulaLanguage.standard().withHostCalls(PinQuantities.CALLS);
 
     private final String part;
     private final RealFunction function;
@@ -68,8 +64,9 @@ final class PartExpression {
         names.addAll(parameters.keySet());
         try {
             // The component's own definitions — its libraries', the constants among them — read here as in its equations.
-            List<Formula.Definition> library = LANGUAGE.definitions(ModelLanguage.libraryText(model));
-            Formula members = PinQuantities.bind(LANGUAGE.parse(expression, library), pins, written -> model.name() + ": '" + written + "'");
+            List<Formula.Definition> library = ModelLanguage.LANGUAGE.definitions(ModelLanguage.libraryText(model));
+            Formula read = ModelLanguage.readings(model.name(), expression, library);
+            Formula members = PinQuantities.bind(read, pins, written -> model.name() + ": '" + written + "'");
             Formula bound = PinQuantities.bindCurrents(members, pins, pin -> new Formula.Slot(pins.indexOf(pin), pin + ".current"));
             RealFunction function = RealCompiler.compile(bound, Symbols.withSlots(pins.size(), names, List.of()), expression);
             return new PartExpression(element.id(), function, pinNodes, pins, states,

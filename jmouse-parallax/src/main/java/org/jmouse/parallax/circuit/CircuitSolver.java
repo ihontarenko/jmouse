@@ -40,7 +40,7 @@ final class CircuitSolver {
     private final CircuitNewton   newton;
 
     CircuitSolver(Netlist netlist) {
-        this(netlist, new SparseSystem(netlist.size()), List.copyOf(Device.of(netlist, new EventSimulation(netlist), Device::of)));
+        this(netlist, new SparseSystem(netlist.size()), List.copyOf(Device.of(netlist, new EventSimulation(netlist))));
     }
 
     private CircuitSolver(Netlist netlist, SparseSystem system, List<Device> devices) {

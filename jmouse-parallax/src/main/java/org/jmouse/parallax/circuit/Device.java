@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * One element as the solver sees it: what it adds to the system. Every analysis — operating point, transient, small
@@ -152,14 +151,14 @@ sealed interface Device permits Device.Resistor, Device.Capacitor, Device.Voltag
     }
 
     /**
-     * Every device a netlist is solved with, in the one order every solver builds them: its elements, each by
-     * {@code primitive} (given its slot), its models' units, its digital pins' capacitances, its digital outputs. A
-     * solver that builds them otherwise would stamp another circuit.
+     * Every device a netlist is solved with, in the one order every solver builds them: its engine elements (given each
+     * its slot), its models' units, its digital pins' capacitances, its digital outputs. A solver that builds them
+     * otherwise would stamp another circuit.
      */
-    static List<Device> of(Netlist netlist, EventSimulation events, BiFunction<Netlist.Element, Integer, Device> primitive) {
+    static List<Device> of(Netlist netlist, EventSimulation events) {
         List<Device> built = new ArrayList<>();
         for (Netlist.Element element : netlist.elements()) {
-            built.add(primitive.apply(element, built.size()));
+            built.add(of(element, built.size()));
         }
         for (Netlist.ModelUnit unit : netlist.units()) {
             built.add(new ModelDevice(unit, events.discrete(unit.label())));

@@ -84,7 +84,7 @@ final class LiveIntegrator {
         boolean realistic = bench != null && bench.realistic();
         Netlist netlist = Netlist.of(piece);
         EventSimulation events = new EventSimulation(netlist);
-        List<Device> devices = Device.of(netlist, events, Device::of);
+        List<Device> devices = Device.of(netlist, events);
         // A realistic bench is noisy: every device's noise, injected as currents (none on an ideal bench, whose answers
         // stay the textbook's).
         if (realistic) {

@@ -174,7 +174,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 continue;
             }
             ComponentModel model = elaborated.model(element.component());
-            if (SourceSignal.isGenerator(model)) {
+            if (model.isGenerator()) {
                 Optional<SourceSignal> signal = SourceSignal.of(model, elaborated.parameters(model, element, ""));
                 if (signal.isPresent()) {
                     generators.put(element, signal.get());
@@ -215,8 +215,8 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 branches.add(new Branch(element.id(), true));
             }
             elements.add(new Element(element.id(), kind, element.id(),
-                    nodeNumber(numbers, element.pins().get(SourceSignal.positivePin(model))),
-                    nodeNumber(numbers, element.pins().get(SourceSignal.negativePin(model))), 1, branch, signal,
+                    nodeNumber(numbers, element.pins().get(model.generatorPositive())),
+                    nodeNumber(numbers, element.pins().get(model.generatorNegative())), 1, branch, signal,
                     Element.PRIMITIVE_TERMINALS));
         });
 

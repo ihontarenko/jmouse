@@ -97,7 +97,12 @@ org.jmouse.parallax.verification
 ├── ConsistencyCheck      SPI   code · description · appliesTo(definition) · check(compiled) → CheckResult(outcome, measured, tolerance, detail)
 └── StandardChecks              all(): seven independent cross-checks of the model, and a component against its datasheet
 
-The circuit engine is three layers, each reading only the ones below it:
+```
+
+The circuit engine is three layers, each reading only the ones below it — how a circuit travels through them, from the
+browser to Newton and back, is drawn step by step in [`parallax/`](parallax/README.md):
+
+```
 
 org.jmouse.parallax.component   a component / family jMX document → ComponentModel; knows no circuit
 ├── ComponentDocuments          the document read and built once per text (and the texts it uses): meta, parameters in SI,

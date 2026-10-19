@@ -9,8 +9,8 @@
  *   <li><strong>What is solved</strong> — {@code Netlist}, the {@code Device}s (a model unit as
  *       {@code ModelDevice} over {@code UnitLayout}, {@code UnitArguments}, {@code UnitLine} and a
  *       {@code UnitLinearization}), {@code ModelEquations}, {@code SourceSignal}, {@code PartHeat}, the digital side
- *       ({@code EventSimulation}, {@code DigitalDriver}, {@code LogicLevel}, {@code LogicFamily},
- *       {@code OutputBridge}).</li>
+ *       ({@code EventSimulation}, {@code DigitalUnit}, {@code DigitalEvent}, {@code SimulatorFunctions},
+ *       {@code DigitalDriver}, {@code LogicLevel}, {@code LogicFamily}, {@code OutputBridge}).</li>
  *   <li><strong>How</strong> — {@code Assembly}, {@code CircuitNewton}, {@code CircuitSolver} (operating point, small
  *       signal), {@code TransientStepper} (the transient's step control).</li>
  *   <li><strong>What is read</strong> — {@code PartIndex} (the one rule of what a part is), {@code PartLedger},

@@ -447,10 +447,10 @@ final class ModelDevice implements Device {
         return Device.phasorAt(solution, bindings.get(0).analog()).subtract(Device.phasorAt(solution, bindings.get(1).analog()));
     }
 
-    /** A generator drives the circuit: a voltage of the time between its two pins ({@link SourceSignal#isGenerator}). */
+    /** A generator drives the circuit: a voltage of the time between its two pins ({@link ComponentModel#isGenerator}). */
     @Override
     public boolean source() {
-        return SourceSignal.isGenerator(unit.model());
+        return unit.model().isGenerator();
     }
 
     private double coefficient(Assembly assembly) {

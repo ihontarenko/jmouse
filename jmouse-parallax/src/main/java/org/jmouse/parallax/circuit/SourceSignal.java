@@ -97,7 +97,7 @@ final class SourceSignal {
      * behaviour, no internal node, and a right side that reads nothing but the time and the parameters.
      */
     static Optional<SourceSignal> of(ComponentModel model, Map<String, Double> parameters) {
-        if (!isGenerator(model)) {
+        if (!model.isGenerator()) {
             return Optional.empty();
         }
         ComponentModel.Equation equation = model.equations().getFirst();
@@ -129,7 +129,7 @@ final class SourceSignal {
             edges.add(RealCompiler.compile(edge, table, model.name() + " edge"));
         }
         return Optional.of(new SourceSignal(RealCompiler.compile(formula, table, equation.formula()), edges, arguments,
-                positivePin(model), negativePin(model)));
+                model.generatorPositive(), model.generatorNegative()));
     }
 
     /**
@@ -140,24 +140,13 @@ final class SourceSignal {
         return model.generatesVoltage() ? Netlist.Element.Kind.VOLTAGE_SOURCE : Netlist.Element.Kind.CURRENT_SOURCE;
     }
 
-    /** Whether a model is shaped as a generator ({@link ComponentModel#isGenerator}). */
-    static boolean isGenerator(ComponentModel model) {
-        return model.isGenerator();
-    }
 
     /** Its own pins, positive first: the terminals its current is reported into. */
     String[] pinNames() {
         return new String[]{positiveTerminal, negativeTerminal};
     }
 
-    /** The pin the equation holds above the other. */
-    static String positivePin(ComponentModel model) {
-        return model.generatorPositive();
-    }
 
-    static String negativePin(ComponentModel model) {
-        return model.generatorNegative();
-    }
 
     double valueAt(double time) {
         synchronized (arguments) {
