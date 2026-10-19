@@ -1,0 +1,51 @@
+# The AND gate every such logic part is a member of: its rule, Y = A · B, and its delay. Its thresholds, its output's
+# strength and how it slows at a low supply are its family's — 74HC CMOS unless a part says otherwise. An unknown
+# input gives an unknown output unless the other input decides it alone.
+
+component "AND gate" as and-gate type gate {
+    meta {
+        designator U
+        summary "A two-input AND gate: high only while both inputs are high"
+        source "the gate's function table: Y = A · B"
+        category circuits
+        failure short Vcc GND
+    }
+    use cmos-hc
+
+    parameters {
+        propagation_delay = 10 ns         "input to output at the family's nominal supply"
+    }
+
+    pins {
+        a digital input 1           "input A"
+        b digital input 2           "input B"
+        GND ground 3
+        output digital output 4     "output Y"
+        Vcc power 5
+    }
+
+    symbol uses and-gate-symbol
+
+    behaviour {
+        function level()
+            if a == 0 or b == 0 then
+                return 0
+            elseif a == 1 and b == 1 then
+                return 1
+            end
+            return X
+        end
+
+        function show()
+            drive('output', level(), propagation_delay * delay_scale(Vcc - GND))
+        end
+
+        on start do
+            show()
+        end
+
+        on change 'a, b' do
+            show()
+        end
+    }
+}

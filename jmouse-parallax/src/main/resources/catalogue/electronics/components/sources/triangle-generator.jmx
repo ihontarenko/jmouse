@@ -1,0 +1,30 @@
+# An ideal triangle voltage: it rises from the low level to the high one over the first half of every period and falls
+# back over the second. Its corners are where the slope turns — the engine finds them in the `mod` of this equation.
+
+component "Triangle generator" as triangle-generator type generator {
+    meta {
+        designator G
+        summary "An ideal triangle voltage: a straight rise and an equal straight fall between two levels"
+        category circuits
+    }
+
+    parameters {
+        high = 5 V                  "the level at the top of every rise"
+        low = 0 V                   "the level at the bottom of every fall"
+        frequency = 1 kHz           "how many periods a second"
+    }
+
+    pins {
+        positive analog 1  "positive terminal"
+        negative analog 2  "negative terminal"
+    }
+
+    symbol uses triangle-source-symbol {
+        a positive
+        b negative
+    }
+
+    equations {
+        voltage positive -> negative = low + (high - low) * (1 - abs(2 * mod(frequency * time, 1) - 1))
+    }
+}

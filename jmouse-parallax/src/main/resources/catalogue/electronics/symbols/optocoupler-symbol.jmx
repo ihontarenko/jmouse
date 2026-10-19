@@ -1,0 +1,15 @@
+symbol "Optocoupler" as optocoupler-symbol {
+    meta {
+        summary "An optocoupler, as drawn on a schematic: an LED and a phototransistor in one package, light between them"
+        category circuits
+        tags electronics, schematic
+    }
+    size 100 x 80
+    path "M-36-30H36V30H-36ZM-50-20H-20V-6M-20 6V20H-50M-28-6H-12L-20 6ZM-28 6H-12M-6-5H6M2-8L6-5L2-2M-6 5H6M2 2L6 5L2 8M14-12V12M14-5L28-14V-20H50M14 5L28 14V20H50M22 13L28 14L25 9"
+    pin anode at -50, -20
+    pin cathode at -50, 20
+    pin collector at 50, -20
+    pin emitter at 50, 20
+    label name at 0, -40
+    label value at 0, 44
+}

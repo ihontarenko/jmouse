@@ -1,0 +1,16 @@
+symbol "AND gate" as and-gate-symbol {
+    meta {
+        summary "A two-input AND gate, as drawn on a schematic (ANSI)"
+        category circuits
+        tags electronics, schematic, logic
+    }
+    size 80 x 60
+    path "M-20-20H0A20 20 0 0 1 0 20H-20ZM-40-10H-20M-40 10H-20M20 0H40M-10-20V-30M-10 20V30"
+    pin a at -40, -10
+    pin b at -40, 10
+    pin output at 40, 0
+    pin Vcc at -10, -30
+    pin GND at -10, 30
+    label name at 14, -30
+    label value at 14, 36
+}

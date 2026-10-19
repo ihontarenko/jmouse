@@ -1,0 +1,64 @@
+# The relay every relay part is a member of. Its coil is a winding — resistance and inductance, its current carried as
+# a voltage on a node of its own, as a transformer's is — and its armature a latch, as a thyristor's is: pulled in once
+# the coil's current passes what the pull-in voltage drives through it, let go once it falls below what the drop-out
+# voltage does. Between the two it stays where it was: that gap is why a relay does not chatter. One changeover contact,
+# resting on normally-closed. A part writes its coil and its contacts' figures. Not represented: the milliseconds the
+# armature takes to travel, contact bounce, the contacts' arcing.
+
+component "Relay" as relay type relay {
+    meta {
+        designator K
+        summary "An electromagnetic relay: a coil that pulls a changeover contact in above one voltage and lets it go below another"
+        source "behavioural: a winding, a latch with hysteresis and two contacts"
+        category circuits
+        failure open
+    }
+
+    parameters {
+        R_coil = 400 Ohm                      "coil resistance"
+        L_coil = 1 H                          "coil inductance"
+        V_pull_in = 9 V                       "the coil voltage it pulls in at"
+        V_drop_out = 1.2 V                    "the coil voltage it lets go below"
+        R_contact = 100 mOhm                  "contact resistance"
+        R_open = 100 MOhm                     "resistance across an open contact"
+    }
+
+    pins {
+        coil_one analog 1                     "coil"
+        coil_two analog 2                     "coil"
+        common analog 3                       "the changeover contact's arm"
+        normally_open analog 4                "made while the coil holds the armature"
+        normally_closed analog 5              "made while the armature rests"
+    }
+
+    nodes {
+        coil_current                          "a node whose voltage above coil_two is the coil current, one volt per ampere"
+    }
+
+    symbol uses relay-symbol
+
+    state {
+        energized = 0 discrete                "the armature pulled in: written by the behaviour, read by the contacts"
+    }
+
+    equations {
+        let R_carrier : resistance = 1
+        let I_coil : current = (coil_current - coil_two) / R_carrier
+        voltage coil_current -> coil_two = R_carrier * coil_one.current
+        voltage coil_one -> coil_two = R_coil * coil_one.current + d(L_coil * I_coil)/dt
+
+        current common -> normally_open = (common - normally_open) / (energized * R_contact + (1 - energized) * R_open)
+        current common -> normally_closed = (common - normally_closed) / ((1 - energized) * R_contact + energized * R_open)
+    }
+
+    behaviour {
+        # Either way round: a relay's coil pulls whichever way its current runs.
+        on above 'abs(coil_current - coil_two) - V_pull_in / R_coil' do
+            energized = 1
+        end
+
+        on below 'abs(coil_current - coil_two) - V_drop_out / R_coil' when energized > 0 do
+            energized = 0
+        end
+    }
+}

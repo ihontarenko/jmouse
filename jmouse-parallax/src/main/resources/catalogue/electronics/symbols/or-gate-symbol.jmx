@@ -1,0 +1,16 @@
+symbol "OR gate" as or-gate-symbol {
+    meta {
+        summary "A two-input OR gate, as drawn on a schematic (ANSI)"
+        category circuits
+        tags electronics, schematic, logic
+    }
+    size 80 x 60
+    path "M-24-20H-4Q14-20 22 0Q14 20-4 20H-24Q-12 0-24-20ZM-40-10H-19.5M-40 10H-19.5M22 0H40M-10-20V-30M-10 20V30"
+    pin a at -40, -10
+    pin b at -40, 10
+    pin output at 40, 0
+    pin Vcc at -10, -30
+    pin GND at -10, 30
+    label name at 14, -30
+    label value at 14, 36
+}
