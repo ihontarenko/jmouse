@@ -37,6 +37,9 @@ public final class CircuitComputations {
      */
     public static class TransientResponse implements Computation {
 
+        /** The divisions across the bench's oscilloscope screen: its time base times this is what it shows. */
+        private static final int SCREEN_DIVISIONS = 10;
+
         public RepresentationKind kind() {
             return RepresentationKind.TRANSIENT_RESPONSE;
         }
@@ -50,7 +53,9 @@ public final class CircuitComputations {
                     SettingSpecification.flag("parts", false, "Every part's current too, for a sheet that shows them"),
                     SettingSpecification.flag("levels", false, "The digital nodes' logic levels instead of the analog columns"),
                     SettingSpecification.vector("window", List.of(), 2, 0, 1e6,
-                            "From and to, seconds: only this stretch, sampled finely — a zoom into an edge; none is the whole run"));
+                            "From and to, seconds: only this stretch, sampled finely — a zoom into an edge; none is the whole run"),
+                    SettingSpecification.flag("screen", false,
+                            "What the bench's oscilloscope opens on: the probed voltages over the last screen of its time base"));
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -72,11 +77,18 @@ public final class CircuitComputations {
                 throw new IllegalArgumentException("The circuit has no digital nodes to show the logic levels of.");
             }
             boolean everyPart = settings.flag("parts") && !levels;
+            boolean screen = settings.flag("screen") && !levels;
             double[] window = settings.vectorOr("window", null);
+            if (screen && window == null) {
+                window = lastScreen((Circuit) object.definition(), netlist.duration());
+            }
             TransientRun run = TransientRun.of(elaborated, settings.integer("samples"), everyPart, window, progress);
             float[] times = floats(run.times());
             if (levels) {
                 return logicLevels(times, netlist.digitalNodes(), run.levels());
+            }
+            if (screen) {
+                return probedVoltages(times, (Circuit) object.definition(), run);
             }
             List<String> columns = new ArrayList<>();
             List<float[]> values = new ArrayList<>();
@@ -102,6 +114,52 @@ public final class CircuitComputations {
                 units.add(ColumnNames.WATTS);
             });
             return new Dataset.TimeSeries("t", times, columns, values, units, Dataset.TimeSeries.AxisScale.LINEAR, peaks);
+        }
+
+        /**
+         * The last screen of the circuit's time base, from and to — what the bench's oscilloscope shows once the run
+         * has gone on —; null for the whole run when the circuit names no time base or the run is shorter than a screen.
+         */
+        private static double[] lastScreen(Circuit circuit, double duration) {
+            Double perDivision = circuit.timePerDivision();
+            if (perDivision == null || perDivision * SCREEN_DIVISIONS >= duration) {
+                return null;
+            }
+            return new double[]{duration - perDivision * SCREEN_DIVISIONS, duration};
+        }
+
+        /**
+         * The voltages the circuit's probes read, each named as its channel reads it — `out`, `a - b` against a
+         * reference —, in the probes' order; every node when it probes none. A switch node probed among them is one
+         * trace of the screen, not the solid band every node of a switcher drawn over its whole run made.
+         */
+        private static Dataset.TimeSeries probedVoltages(float[] times, Circuit circuit, TransientRun run) {
+            List<String> columns = new ArrayList<>();
+            List<float[]> values = new ArrayList<>();
+            for (ObjectDefinition.BenchProbe probe : circuit.probes()) {
+                if (!probe.measure().equals("voltage") || probe.target() == null) {
+                    continue;
+                }
+                double[] voltages = run.voltage(probe.target());
+                boolean against = probe.reference() != null && !probe.reference().equals(Circuit.GROUND);
+                if (against) {
+                    double[] reference = run.voltage(probe.reference());
+                    double[] difference = new double[voltages.length];
+                    for (int sample = 0; sample < difference.length; sample++) {
+                        difference[sample] = voltages[sample] - reference[sample];
+                    }
+                    voltages = difference;
+                }
+                columns.add(against ? probe.target() + " - " + probe.reference() : probe.target());
+                values.add(floats(voltages));
+            }
+            if (columns.isEmpty()) {
+                run.voltages().forEach((node, voltages) -> {
+                    columns.add(node);
+                    values.add(floats(voltages));
+                });
+            }
+            return new Dataset.TimeSeries("t", times, columns, values, Collections.nCopies(columns.size(), ColumnNames.VOLTS));
         }
 
         /** One column per digital node, named as the node and in the unit `level`: what the event solver held it at, sample by sample. */
