@@ -39,7 +39,7 @@ component "Transformer" as transformer type transformer {
         secondary_current                     "the same for the secondary"
     }
 
-    symbol uses transformer-symbol
+    symbol uses transformer-symbol, transformer-air-core-symbol
 
     equations {
         # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps

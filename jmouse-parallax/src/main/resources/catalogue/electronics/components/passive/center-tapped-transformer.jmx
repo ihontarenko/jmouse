@@ -1,0 +1,91 @@
+# A transformer whose secondary is tapped in its middle: one primary and two equal secondary halves, all three on one
+# core. Each winding's voltage is its resistance's drop plus the rate of the flux it links — its own inductance times
+# its current, and the mutual inductance M = k · √(Li · Lj) times each other winding's —, as the two-winding transformer
+# writes it. The halves are in series, the tap between them: across the whole secondary twice a half's voltage, and
+# from either end to the tap one half, in opposite phase — what a two-diode full-wave rectifier is built on. The
+# `_one` pins and the tap are the dotted ends. Not represented: the core's saturation and losses, the windings'
+# capacitance.
+
+component "Transformer with a centre tap" as center-tapped-transformer type transformer {
+    meta {
+        designator T
+        summary "A primary and two equal secondary halves on one core: a centre-tapped secondary"
+        source "coupled inductors as in Berkeley SPICE3 / ngspice 47 (three L, their K lines)"
+        category circuits
+        failure open
+    }
+
+    parameters {
+        L_primary = 10 H                      "primary inductance"
+        L_half = 25 mH                        "each secondary half's inductance: turns ratio √(L_primary / L_half) = 20 to one half"
+        coupling = 0.999                      "K between every pair of windings: 1 is a perfect core"
+        R_primary = 10 Ohm                    "primary winding resistance"
+        R_half = 0.05 Ohm                     "each secondary half's winding resistance"
+        copper_temperature_coefficient = 0.00393 "copper: the windings' resistance rises 0.393 % per kelvin"
+        T_nominal = 298.15 K                  "the temperature the resistances are given at"
+        power_rating = 10 W                   "what it is rated for"
+        thermal_resistance = 10 K/W           "kelvin above the bench per watt it takes"
+        thermal_time_constant = 300 s         "how fast it warms to that"
+        T_maximum = 120 °C                    "past this it fails on a realistic bench"
+    }
+
+    pins {
+        primary_one analog 1                  "primary, dotted end"
+        primary_two analog 2                  "primary"
+        secondary_one analog 3                "secondary, the first half's dotted end"
+        center_tap analog 4                   "the tap between the halves: the second half's dotted end"
+        secondary_two analog 5                "secondary, the second half's other end"
+    }
+
+    nodes {
+        primary_current                       "a node whose voltage above primary_two is the primary current, one volt per ampere"
+        first_half_current                    "the same for the first secondary half"
+        second_half_current                   "the same for the second secondary half"
+    }
+
+    symbol uses center-tapped-transformer-symbol
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_winding : temperature = temperature
+        let warming : ratio = 1 + copper_temperature_coefficient * (T_winding - T_nominal)
+        # A flux is a charge the equations differentiate, and a charge reads voltages, not currents: each winding's
+        # current is carried as a voltage on a node of its own.
+        let R_carrier : resistance = 1
+        let M_primary_half : inductance = coupling * sqrt(L_primary * L_half)
+        let M_halves : inductance = coupling * L_half
+        let I_primary : current = (primary_current - primary_two) / R_carrier
+        let I_first : current = (first_half_current - center_tap) / R_carrier
+        let I_second : current = (second_half_current - secondary_two) / R_carrier
+        voltage primary_current -> primary_two = R_carrier * primary_one.current
+        voltage first_half_current -> center_tap = R_carrier * secondary_one.current
+        voltage second_half_current -> secondary_two = R_carrier * center_tap.current
+        voltage primary_one -> primary_two = R_primary * warming * primary_one.current + d(L_primary * I_primary + M_primary_half * (I_first + I_second))/dt
+        voltage secondary_one -> center_tap = R_half * warming * secondary_one.current + d(L_half * I_first + M_halves * I_second + M_primary_half * I_primary)/dt
+        voltage center_tap -> secondary_two = R_half * warming * center_tap.current + d(L_half * I_second + M_halves * I_first + M_primary_half * I_primary)/dt
+    }
+
+    expect "each half twenty to one: 325 V peak in, about 16 V peak out" from "turns ratio √(L_primary / L_half) = 20 per half, into 100 Ω each" {
+        bench for 60 ms {
+            V1 sine-generator (positive = input, negative = 0) amplitude = 325 V, frequency = 50 Hz
+            U1 self (primary_one = input, primary_two = 0, secondary_one = top, center_tap = 0, secondary_two = bottom)
+            R1 resistor (top, 0) resistance = 100 Ohm
+            R2 resistor (bottom, 0) resistance = 100 Ohm
+        }
+        measure maximum top after 40 ms
+        within 15 V .. 16.4 V
+    }
+
+    # Each end through 1 kΩ to one node: halves in opposite phase cancel there and it stays at the tap; in phase it
+    # would swing the whole 16 V.
+    expect "the halves swing in opposite phase" from "the tap between two halves in series: one end rises as the other falls" {
+        bench for 60 ms {
+            V1 sine-generator (positive = input, negative = 0) amplitude = 325 V, frequency = 50 Hz
+            U1 self (primary_one = input, primary_two = 0, secondary_one = top, center_tap = 0, secondary_two = bottom)
+            R1 resistor (top, middle) resistance = 1 kOhm
+            R2 resistor (bottom, middle) resistance = 1 kOhm
+        }
+        measure maximum middle after 40 ms
+        within -0.3 V .. 0.3 V
+    }
+}
