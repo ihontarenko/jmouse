@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 
 /**
  * 🔢 What a column read by a native query comes back as, turned into the type the store means.
@@ -86,6 +86,11 @@ public final class NativeValues {
     /**
      * 🕰️ An instant, or {@code null} for none.
      *
+     * <p>A {@code DATETIME} column of a native query comes back as a {@link LocalDateTime}: the stored moment, read in the
+     * zone Hibernate stores in ({@code hibernate.jdbc.time_zone}), written out as the JVM's wall clock — so it is turned
+     * back through the JVM's zone. Read as UTC, every native timestamp on a machine three hours east of it stood three
+     * hours in the future: a worker "started in 3 hours".</p>
+     *
      * @param value the column
      * @return the instant
      */
@@ -94,7 +99,7 @@ public final class NativeValues {
             case null -> null;
             case Instant instant -> instant;
             case Timestamp timestamp -> timestamp.toInstant();
-            case LocalDateTime local -> local.toInstant(ZoneOffset.UTC);
+            case LocalDateTime local -> local.atZone(ZoneId.systemDefault()).toInstant();
             case OffsetDateTime offset -> offset.toInstant();
             default -> throw new IllegalStateException(
                     "A timestamp column came back as " + value.getClass().getName());
