@@ -4,6 +4,8 @@ import org.jmouse.parallax.component.ComponentModel;
 
 import org.jmouse.parallax.circuit.ModelEquations.Compiled;
 
+import java.util.Arrays;
+
 /**
  * The line of a unit whose equations are affine in its unknowns and read no time and no discrete state — a resistance,
  * a capacitance, a meter, a winding: each equation is f₀ + D·x + Σ R·rate, each charge q₀ + Q·x, with every coefficient
@@ -36,6 +38,9 @@ final class AffineLinearization implements UnitLinearization {
     /** Each charge's value with every unknown at nought, and its partials by its locals. */
     private double[]   charge;
     private final double[][] chargePartials;
+    /** Each charge's partials again, by the system column they multiply — only the unknowns it reads, read every step. */
+    private final int[][]    chargeColumns;
+    private final double[][] chargeSlopes;
     /** The temperature the coefficients were found at, and the coefficient the tangents were last built for. */
     private double     temperature = Double.NaN;
     private double     tangentCoefficient = Double.NaN;
@@ -49,8 +54,13 @@ final class AffineLinearization implements UnitLinearization {
         this.history = history;
         this.ownHeat = ownHeat;
         this.chargePartials = new double[layout.charges()][];
+        this.chargeColumns = new int[layout.charges()][];
+        this.chargeSlopes = new double[layout.charges()][];
         for (int index = 0; index < layout.charges(); index++) {
             chargePartials[index] = new double[layout.chargeLocals[index].length];
+            chargeColumns[index] = Arrays.stream(layout.chargeLocals[index]).filter(local -> local != UnitLayout.NONE)
+                    .map(local -> layout.unitColumns[local]).toArray();
+            chargeSlopes[index] = new double[chargeColumns[index].length];
         }
     }
 
@@ -70,6 +80,12 @@ final class AffineLinearization implements UnitLinearization {
             Compiled formula = equations.charges().get(index);
             charge[index] = formula.evaluateWithPartials(atZero);
             System.arraycopy(formula.derivatives(), 0, chargePartials[index], 0, chargePartials[index].length);
+            int column = 0;
+            for (int inner = 0; inner < layout.chargeLocals[index].length; inner++) {
+                if (layout.chargeLocals[index][inner] != UnitLayout.NONE) {
+                    chargeSlopes[index][column++] = chargePartials[index][inner];
+                }
+            }
         }
         UnitLayout.EquationStamp[] stamps = layout.stamps;
         value = new double[stamps.length];
@@ -155,24 +171,20 @@ final class AffineLinearization implements UnitLinearization {
     /** A charge at a state: q₀ + Q · x. */
     private double chargeAt(int index, double[] state) {
         double stored = charge[index];
-        int[] locals = layout.chargeLocals[index];
-        for (int inner = 0; inner < locals.length; inner++) {
-            if (locals[inner] != UnitLayout.NONE) {
-                stored += chargePartials[index][inner] * state[layout.unitColumns[locals[inner]]];
-            }
+        int[] columns = chargeColumns[index];
+        double[] slopes = chargeSlopes[index];
+        for (int column = 0; column < columns.length; column++) {
+            stored += slopes[column] * state[columns[column]];
         }
         return stored;
     }
 
     @Override
-    public double chargeTruncation(double[] solution, double[] predicted) {
+    public void charges(double[] state, double time, double[] into) {
         ensurePrepared();
-        double largest = 0;
         for (int index = 0; index < layout.charges(); index++) {
-            double stored = chargeAt(index, solution);
-            largest = Math.max(largest, Truncation.share(stored - chargeAt(index, predicted), stored, Truncation.CHARGE));
+            into[index] = chargeAt(index, state);
         }
-        return largest;
     }
 
     /** f₀ + D · x: a capacitance's charging current, which only stores, is left out exactly. */
@@ -193,17 +205,5 @@ final class AffineLinearization implements UnitLinearization {
             }
             into[position] = current;
         }
-    }
-
-    /** Stateless, each charge is q₀ + Q·x: nothing else of the arguments is read. */
-    @Override
-    public boolean acceptFromCoefficients(double[] state, double coefficient, boolean trapezoidal) {
-        if (layout.hasStates || value == null) {
-            return false;
-        }
-        for (int index = 0; index < layout.charges(); index++) {
-            history.accept(index, chargeAt(index, state), coefficient, trapezoidal);
-        }
-        return true;
     }
 }

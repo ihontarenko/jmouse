@@ -181,9 +181,21 @@ public sealed interface Dataset {
      * transient. {@code units} says what each column holds, in the order of {@code columns} — "V", "A", "W", or "" for a
      * plain number: a circuit's columns are named as the circuit names them (a node `out`, a part `R1`, a pin
      * `U1.output`), so the unit is what tells a voltage from a current, never a notation around the name.
+     *
+     * <p>{@code peaks}, by column, holds what happened between the samples where the source saw it: a sample is one
+     * instant, and a transistor's overshoot a nanosecond long between two samples 25 ns apart is in neither. A column
+     * it leaves out has none; a series that is not a run through time has none at all.</p>
      */
     record TimeSeries(String axis, float[] axisValues, List<String> columns, List<float[]> values, List<String> units,
-                      AxisScale axisScale) implements Dataset {
+                      AxisScale axisScale, Map<String, Band> peaks) implements Dataset {
+
+        /**
+         * The lowest and highest value a column reached over each sample's interval — from the sample before to this one
+         * —, over every step the engine took between: what a peak-detecting oscilloscope keeps. The first sample's
+         * interval is its own instant.
+         */
+        public record Band(float[] lows, float[] highs) {
+        }
 
         /**
          * How the axis is read: evenly, or in decades — a frequency response. Declared by what computed the series, never
@@ -202,6 +214,16 @@ public sealed interface Dataset {
                 throw new IllegalArgumentException("A series has a unit for every column: " + columns.size() + " columns, "
                         + units.size() + " units.");
             }
+            peaks = peaks == null ? Map.of() : Map.copyOf(peaks);
+            if (!columns.containsAll(peaks.keySet())) {
+                throw new IllegalArgumentException("A series keeps peaks only for its own columns.");
+            }
+        }
+
+        /** Columns with their units, on an axis read as {@code axisScale} says, without peaks. */
+        public TimeSeries(String axis, float[] axisValues, List<String> columns, List<float[]> values, List<String> units,
+                          AxisScale axisScale) {
+            this(axis, axisValues, columns, values, units, axisScale, Map.of());
         }
 
         /** Columns of plain numbers. */
@@ -215,7 +237,8 @@ public sealed interface Dataset {
         }
 
         public long elementCount() {
-            return axisValues.length + values.stream().mapToLong(column -> column.length).sum();
+            return axisValues.length + values.stream().mapToLong(column -> column.length).sum()
+                    + peaks.values().stream().mapToLong(band -> band.lows().length + band.highs().length).sum();
         }
     }
 

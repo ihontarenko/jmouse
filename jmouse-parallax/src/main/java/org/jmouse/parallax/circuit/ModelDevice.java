@@ -216,8 +216,7 @@ final class ModelDevice implements Device {
         arguments.fill(arguments.values, state, 0);
         arguments.clearRates(arguments.values);
         for (int charge = 0; charge < layout.charges(); charge++) {
-            history.chargePrevious[charge] = equations.charges().get(charge).evaluate(arguments.values);
-            history.ratePrevious[charge] = 0;
+            history.start(charge, equations.charges().get(charge).evaluate(arguments.values));
         }
         for (int position = 0; position < layout.stamps.length; position++) {
             if (layout.stamps[position].kind() == EquationKind.STATE) {
@@ -226,11 +225,27 @@ final class ModelDevice implements Device {
         }
     }
 
-    /** A model's charges, measured as charges, and its continuous states, as themselves. */
+    /** What it carries from step to step: its charges' history and its continuous states' rates. */
     @Override
-    public double truncation(double[] solution, double[] predicted) {
-        double largest = linearization.chargeTruncation(solution, predicted);
-        for (int row : unit.stateRows().values()) {
+    public boolean stores() {
+        return layout.charges() > 0 || layout.hasStates;
+    }
+
+    /** Its charges, at the attempt's solution, once: the error and the acceptance both read them. */
+    @Override
+    public void measure(double[] solution, double time) {
+        if (layout.charges() > 0) {
+            readOwnTemperature();
+            linearization.charges(solution, time, history.measured);
+        }
+    }
+
+    /** A model's charges, measured as charges against their own history, and its continuous states, as themselves. */
+    @Override
+    public double truncation(double[] solution, Prediction prediction) {
+        double largest = history.chargeTruncation(prediction);
+        double[] predicted = prediction.values();
+        for (int row : layout.stateRows) {
             largest = Math.max(largest, Truncation.share(solution[row] - predicted[row], solution[row], Truncation.STATE));
         }
         return largest;
@@ -305,15 +320,16 @@ final class ModelDevice implements Device {
     public void accept(Assembly assembly, double[] state) {
         double coefficient = coefficient(assembly);
         boolean trapezoidal = assembly.integration() == Assembly.Integration.TRAPEZOIDAL;
-        readOwnTemperature();
-        if (linearization.acceptFromCoefficients(state, coefficient, trapezoidal)) {
+        history.accept(coefficient, trapezoidal);
+        if (!layout.hasStates) {
             return;
         }
+        // A state's rate reads the charges' rates over the step just taken.
+        readOwnTemperature();
         double[] values = arguments.values;
         arguments.fill(values, state, assembly.time());
         for (int charge = 0; charge < layout.charges(); charge++) {
-            double value = equations.charges().get(charge).evaluate(values);
-            values[layout.rateSymbols[charge]] = history.accept(charge, value, coefficient, trapezoidal);
+            values[layout.rateSymbols[charge]] = history.ratePrevious[charge];
         }
         for (int position = 0; position < layout.stamps.length; position++) {
             if (layout.stamps[position].kind() == EquationKind.STATE) {

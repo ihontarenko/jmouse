@@ -57,10 +57,10 @@ public final class CircuitComputations {
         }
 
         /**
-         * Worked out by the live engine, keeping no readings ({@link TransientRun}): one engine for the bench, the
-         * computed graph and the datasheet checks. Columns: every node's voltage, then the current of every part that
-         * carries one of its own (a source, a generator, an inductor, a diode) — or, with `parts`, of every part and
-         * every model pin, for a sheet that draws them all.
+         * Worked out by the live engine, keeping only each node's peaks ({@link TransientRun}): one engine for the bench,
+         * the computed graph and the datasheet checks. Columns: every node's voltage, with its peaks between the samples,
+         * then the current of every part that carries one of its own (a source, a generator, an inductor, a diode) — or,
+         * with `parts`, of every part and every model pin, for a sheet that draws them all.
          */
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
             ElaboratedCircuit elaborated = ElaboratedCircuit.of(object);
@@ -78,10 +78,12 @@ public final class CircuitComputations {
             List<String> columns = new ArrayList<>();
             List<float[]> values = new ArrayList<>();
             List<String> units = new ArrayList<>();
+            Map<String, Dataset.TimeSeries.Band> peaks = new LinkedHashMap<>();
             run.voltages().forEach((node, voltages) -> {
                 columns.add(node);
                 values.add(floats(voltages));
                 units.add(ColumnNames.VOLTS);
+                peaks.put(node, new Dataset.TimeSeries.Band(floats(run.lows().get(node)), floats(run.highs().get(node))));
             });
             run.currents().forEach((column, currents) -> {
                 // Asked for no more than the parts with a current of their own: those, by the part's name alone.
@@ -96,7 +98,7 @@ public final class CircuitComputations {
                 values.add(floats(powers));
                 units.add(ColumnNames.WATTS);
             });
-            return new Dataset.TimeSeries("t", times, columns, values, units);
+            return new Dataset.TimeSeries("t", times, columns, values, units, Dataset.TimeSeries.AxisScale.LINEAR, peaks);
         }
 
         /** One column per digital node, named as the node and in the unit `level`: what the event solver held it at, sample by sample. */

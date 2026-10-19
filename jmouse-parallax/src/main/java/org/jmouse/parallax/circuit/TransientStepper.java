@@ -42,10 +42,8 @@ final class TransientStepper {
          * @param solution the state at its end
          * @param at       its end, seconds
          * @param duration how long it was
-         * @param landing  whether it landed on an edge: it held the level before the jump all along, and its end is the
-         *                 level after
          */
-        void accepted(double[] solution, double at, double duration, boolean landing);
+        void accepted(double[] solution, double at, double duration);
     }
 
     private final Netlist             netlist;
@@ -59,14 +57,14 @@ final class TransientStepper {
     /** The devices whose stamp does not read the Newton guess, stamped once per attempt; and those that do. */
     private final List<Device>        linearDevices;
     private final List<Device>        nonlinearDevices;
+    /** The devices that carry something from step to step ({@link Device#stores}): all a step's error and acceptance read. */
+    private final List<Device>        storingDevices;
     private final boolean             nonlinear;
     private final boolean             digital;
     /** Newton on this piece's system, settling as a transient step does. */
     private final CircuitNewton       newton;
     /** The generators' signals, whose edges a step lands on when it would cross one. */
     private final List<SourceSignal>  signals;
-    /** The sample interval: a long step stops one of them short of an edge. */
-    private final double              interval;
     /** The longest step the devices allow — a generator's edges —; infinite when none limits it. */
     private final double              deviceMaximumStep;
     /** The longest step now: the devices' limit, and the stretch the caller allows. */
@@ -84,11 +82,6 @@ final class TransientStepper {
     private double   time;
     private double   step;
     private boolean  restart = true;
-    /**
-     * Whether the last step landed on an edge: it was solved with the level after the jump, so what lies inside it is the
-     * level before — held, not a ramp drawn between its ends.
-     */
-    private boolean  landedOnEdge;
 
     /**
      * @param interval the time between two samples: the longest step is one, until the caller allows more
@@ -101,11 +94,11 @@ final class TransientStepper {
         this.invariantDevices = this.devices.stream().filter(device -> !device.nonlinear() && device.invariant()).toList();
         this.linearDevices = this.devices.stream().filter(device -> !device.nonlinear() && !device.invariant()).toList();
         this.nonlinearDevices = this.devices.stream().filter(Device::nonlinear).toList();
+        this.storingDevices = this.devices.stream().filter(Device::stores).toList();
         this.nonlinear = !nonlinearDevices.isEmpty();
         this.newton = new CircuitNewton(netlist, nonlinear, CircuitNewton.Settling.TRANSIENT);
         this.digital = events.active();
         this.signals = netlist.elements().stream().map(Netlist.Element::signal).filter(Objects::nonNull).toList();
-        this.interval = interval;
         double limit = Double.POSITIVE_INFINITY;
         for (Device device : this.devices) {
             limit = Math.min(limit, device.maximumStep());
@@ -179,10 +172,6 @@ final class TransientStepper {
         return companion;
     }
 
-    boolean landedOnEdge() {
-        return landedOnEdge;
-    }
-
     List<Device> devices() {
         return devices;
     }
@@ -206,13 +195,8 @@ final class TransientStepper {
         if (back >= -minimumStep || earlier == null) {
             return state;
         }
-        if (landedOnEdge && back > -earlierStep) {
-            return earlier;
-        }
-        if (oldest != null && back >= -(earlierStep + oldestStep)) {
-            return parabola(oldest, oldestStep, earlier, earlierStep, state, back);
-        }
-        return extrapolated(earlier, earlierStep, state, back);
+        boolean throughThree = oldest != null && back >= -(earlierStep + oldestStep);
+        return Prediction.ahead(state, earlier, earlierStep, throughThree ? oldest : null, oldestStep, back).values();
     }
 
     /**
@@ -231,50 +215,48 @@ final class TransientStepper {
             if (landsOnStop) {
                 attempt = stop - time;
             }
-            // A generator's edge inside the step: the step ends on it, the level after the jump already in force, and the
-            // next one restarts as after any switch. Located to the resolution a timer's edge is, never finer: an edge a
-            // rounding error after a sample is that sample's, not a step of its own.
-            double signalEdge = firstSignalEdge(time, time + attempt);
-            // A long step does not go straight onto an edge: it stops one sample short, and a short one lands. The step
-            // that lands is solved with the level after the jump, so a sample inside it is read off a ramp — a square
-            // wave drawn with slanted sides as long as the step was. One sample long, it is as before steps were free.
-            double approach = signalEdge - interval;
-            if (!Double.isNaN(signalEdge) && approach - time > crossingResolution) {
-                attempt = Math.min(attempt, approach - time);
-            } else if (!Double.isNaN(signalEdge) && signalEdge - time > crossingResolution) {
-                if (signalEdge < time + attempt - crossingResolution) {
-                    attempt = signalEdge - time;
-                }
-                // The step lands where it ends: the time is set from the stop, so the stop is the edge.
-                stop = time + attempt;
+            // A generator's edge inside the step, located to the shortest step. The step ends at the last
+            // instant before the jump, solved with the level before it — an ordinary step, held to the error test like
+            // any other —, and the jump is carried by the next, as short as the edge is located to: SPICE's breakpoint.
+            // Solved with the level after the jump instead, the step that landed was a ramp as long as itself — up to a
+            // whole sample —, and a transistor switched by it turned within that one implicit step: its gate charge, its
+            // Miller plateau and the drain's overshoot were there at a fine sample interval and gone at a coarse one.
+            SourceSignal.Edge edge = firstSignalEdge(time, time + attempt);
+            boolean carriesJump = false;
+            if (edge != null && edge.before() - time > crossingResolution) {
+                attempt = edge.before() - time;
+                stop = edge.before();
                 landsOnStop = true;
                 stopIsEdge = true;
-            } else if (!Double.isNaN(signalEdge)) {
-                // An edge nearer than a step may land is this step's to carry, as a step that lands on one does: its
-                // jump is not held to the smoothness test, and the next step restarts. Crossed as a smooth step, the jump
-                // failed the test at every length, and the step shrank towards the edge until the run gave up.
-                stop = time + attempt;
-                landsOnStop = true;
-                stopIsEdge = true;
+            } else if (edge != null) {
+                // The jump is at this step's start: it ends at the new level, by backward Euler from where the last one
+                // left off, and is not held to the smoothness test — crossed as a smooth step, the jump failed the test
+                // at every length, and the step shrank towards the edge until the run gave up.
+                carriesJump = true;
             }
             if (attempt <= 0) {
                 throw new IllegalArgumentException("The circuit cannot advance past t = " + time + " s.");
             }
 
-            Assembly.Integration integration = restart ? Assembly.Integration.BACKWARD_EULER : Assembly.Integration.TRAPEZOIDAL;
+            boolean fresh = restart || carriesJump;
+            Assembly.Integration integration = fresh ? Assembly.Integration.BACKWARD_EULER : Assembly.Integration.TRAPEZOIDAL;
             double[] companionTrial = companion.clone();
             Assembly assembly = Assembly.transientStep(system, state, companionTrial, time + attempt, attempt, integration);
-            boolean quadratic = !restart && earlier != null && oldest != null;
-            double[] predicted = earlier == null || restart ? state : quadratic
-                    ? parabola(oldest, oldestStep, earlier, earlierStep, state, attempt) : extrapolated(earlier, earlierStep, state, attempt);
+            boolean quadratic = !fresh && earlier != null && oldest != null;
+            Prediction prediction = fresh ? Prediction.ahead(state, null, 0, null, 0, attempt)
+                    : Prediction.ahead(state, earlier, earlierStep, oldest, oldestStep, attempt);
             boolean mayCut = !unsettledOnce && attempt / UNSETTLED_CUT >= minimumStep;
-            double[] solution = newton(assembly, predicted, mayCut);
+            double[] solution = newton(assembly, prediction.values(), mayCut);
             unsettledOnce |= solution == null;
-            boolean landsOnEdge = landsOnStop && stopIsEdge;
+            if (solution != null) {
+                for (Device device : storingDevices) {
+                    device.measure(solution, time + attempt);
+                }
+            }
             // Through three points the prediction misses by about thirteen times the trapezoidal rule's own error (Milne);
             // through two it is a coarser bound and is taken as it is.
-            double error = solution == null || earlier == null || restart || landsOnEdge ? 0
-                    : truncationRatio(solution, predicted) / (quadratic ? MILNE : 1);
+            double error = solution == null || earlier == null || fresh ? 0
+                    : truncationRatio(solution, prediction) / (quadratic ? MILNE : 1);
             double order = quadratic ? 3 : 2;
             boolean accurate = solution != null && error <= 1;
             // A crossing inside the step: aim the next attempt just past it, on the line between the step's ends —
@@ -290,19 +272,19 @@ final class TransientStepper {
                 }
                 continue;
             }
-            for (Device device : devices) {
+            for (Device device : storingDevices) {
                 device.accept(assembly, solution);
             }
             companion = companionTrial;
-            listener.accepted(solution, time + attempt, attempt, landsOnEdge);
+            listener.accepted(solution, time + attempt, attempt);
             oldest = restart ? null : earlier;
             oldestStep = earlierStep;
             earlier = state;
             earlierStep = attempt;
             state = solution;
             time = landsOnStop ? stop : time + attempt;
-            restart = landsOnEdge;
-            landedOnEdge = landsOnEdge;
+            // Before a jump or just past one, the next step starts afresh and short.
+            restart = landsOnStop && stopIsEdge || carriesJump;
             if (digital && events.advance(state, time)) {
                 restart = true;
             }
@@ -311,11 +293,15 @@ final class TransientStepper {
         }
     }
 
-    private double firstSignalEdge(double from, double to) {
-        double first = Double.NaN;
+    /**
+     * The first generator's edge within a step, or null; located to the shortest step, so that a sample at the edge's
+     * own instant reads the level before it, as SPICE reads a breakpoint, never a share of the jump.
+     */
+    private SourceSignal.Edge firstSignalEdge(double from, double to) {
+        SourceSignal.Edge first = null;
         for (SourceSignal signal : signals) {
-            double edge = signal.edgeWithinStep(from, to, crossingResolution);
-            if (!Double.isNaN(edge) && (Double.isNaN(first) || edge < first)) {
+            SourceSignal.Edge edge = signal.edgeWithinStep(from, to, minimumStep);
+            if (edge != null && (first == null || edge.after() < first.after())) {
                 first = edge;
             }
         }
@@ -397,10 +383,10 @@ final class TransientStepper {
      * (see {@link Truncation}). At most 1 is accurate. The error of the prediction grows with a power of the step,
      * which is what {@link #stepFactor} inverts.
      */
-    private double truncationRatio(double[] solution, double[] predicted) {
+    private double truncationRatio(double[] solution, Prediction prediction) {
         double largest = 0;
-        for (Device device : devices) {
-            largest = Math.max(largest, device.truncation(solution, predicted));
+        for (Device device : storingDevices) {
+            largest = Math.max(largest, device.truncation(solution, prediction));
         }
         return largest;
     }
@@ -415,27 +401,5 @@ final class TransientStepper {
             return GROWTH;
         }
         return Math.max(0.2, Math.min(GROWTH, 0.9 * Math.pow(error, -1 / order)));
-    }
-
-    /** The value at {@code step} past now on the parabola through the last three accepted states. */
-    private static double[] parabola(double[] oldest, double oldestStep, double[] earlier, double earlierStep, double[] state, double step) {
-        double near = earlierStep;
-        double far = earlierStep + oldestStep;
-        double atState = (step + near) * (step + far) / (near * far);
-        double atEarlier = -step * (step + far) / (near * oldestStep);
-        double atOldest = step * (step + near) / (far * oldestStep);
-        double[] result = new double[state.length];
-        for (int index = 0; index < result.length; index++) {
-            result[index] = atState * state[index] + atEarlier * earlier[index] + atOldest * oldest[index];
-        }
-        return result;
-    }
-
-    private static double[] extrapolated(double[] earlier, double earlierStep, double[] state, double step) {
-        double[] result = new double[state.length];
-        for (int index = 0; index < result.length; index++) {
-            result[index] = state[index] + (state[index] - earlier[index]) * step / earlierStep;
-        }
-        return result;
     }
 }

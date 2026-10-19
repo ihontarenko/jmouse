@@ -178,20 +178,14 @@ final class TapedLinearization implements UnitLinearization {
         }
     }
 
+    /** Each charge evaluated at the state: the arguments are the linearization's, and the next one fills them again. */
     @Override
-    public double chargeTruncation(double[] solution, double[] predicted) {
-        if (layout.charges() == 0) {
-            return 0;
+    public void charges(double[] state, double time, double[] into) {
+        double[] values = arguments.values;
+        arguments.fill(values, state, time);
+        for (int charge = 0; charge < into.length; charge++) {
+            into[charge] = equations.charges().get(charge).evaluate(values);
         }
-        double largest = 0;
-        arguments.fill(arguments.values, solution, 0);
-        arguments.fill(arguments.predicted, predicted, 0);
-        for (Compiled formula : equations.charges()) {
-            double stored = formula.evaluate(arguments.values);
-            double error = stored - formula.evaluate(arguments.predicted);
-            largest = Math.max(largest, Truncation.share(error, stored, Truncation.CHARGE));
-        }
-        return largest;
     }
 
     /**
@@ -215,10 +209,5 @@ final class TapedLinearization implements UnitLinearization {
             }
             into[position] = layout.stamps[position].formula().evaluate(arguments.dissipative);
         }
-    }
-
-    @Override
-    public boolean acceptFromCoefficients(double[] state, double coefficient, boolean trapezoidal) {
-        return false;
     }
 }

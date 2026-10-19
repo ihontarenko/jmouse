@@ -64,9 +64,6 @@ final class LiveIntegrator {
     private int                    traceEvery;
     /** The stretch since the last traced sample, while the trace keeps one sample in several; null while it keeps each. */
     private TraceRecorder          trace;
-    /** Where the step being taken started: what a step that lands on an edge held, for the energy of the first such step. */
-    private double[]               stepStart;
-    private double                 stepStartTime;
     /** What the ledger takes from each accepted step. */
     private final TransientStepper.AcceptedStep gathering;
 
@@ -93,7 +90,7 @@ final class LiveIntegrator {
         this.stepper = new TransientStepper(netlist, devices, events, sampleInterval);
         this.parts = new PartIndex(stepper.devices());
         this.ledger = new PartLedger(parts, stepper.devices().size(), realistic);
-        this.gathering = (solution, end, duration, landing) -> ledger.accepted(solution, end, duration, landing, stepStart, stepStartTime);
+        this.gathering = ledger::accepted;
         this.nodeCount = netlist.nodes().size();
         this.envelope = new NodeEnvelope(nodeCount);
         this.meters = new MeterRecorder(parts);
@@ -172,6 +169,11 @@ final class LiveIntegrator {
         ledger.keepNoEnergy();
     }
 
+    /** Stops keeping the parts' energy, and keeps each node's peaks and mean: the samples carry those with the solution. */
+    synchronized void keepNoEnergy() {
+        ledger.keepNoEnergy();
+    }
+
     /** The next {@code count} samples, the first at the time the last call ended. */
     synchronized List<LiveSample> advance(int count) {
         if (count < 1 || count > 256) {
@@ -224,8 +226,6 @@ final class LiveIntegrator {
         long steps = 0;
         long allowed = STEPS_PER_SAMPLE * Math.max(1, samples);
         while (stepper.time() < at - stepper.minimumStep()) {
-            stepStart = stepper.state();
-            stepStartTime = stepper.time();
             read(stepper.step(gathering));
             if (++steps > allowed) {
                 throw new IllegalArgumentException("The circuit needs too many steps near t = " + stepper.time() + " s.");
@@ -235,13 +235,12 @@ final class LiveIntegrator {
 
     /** What every reader takes of a step just accepted, {@code duration} long. */
     private void read(double duration) {
-        boolean landed = stepper.landedOnEdge();
         double now = stepper.time();
         if (trace != null) {
-            trace.take(landed ? stepper.earlier() : stepper.state(), stepper.companion(), landed ? now - duration : now, duration);
+            trace.take(stepper.state(), stepper.companion(), now, duration);
         }
         if (readings) {
-            envelope.take(stepper.earlier(), stepper.state(), duration, landed);
+            envelope.take(stepper.earlier(), stepper.state(), duration);
             if (!meters.idle()) {
                 meters.take(stepper.state(), stepper.companion(), now);
             }
@@ -271,7 +270,7 @@ final class LiveIntegrator {
         Map<String, MeteredPart> measured = read && readings && !meters.idle() ? meters.at(at, state, companion, now) : null;
         double[] voltages = Arrays.copyOf(stepper.valuesAt(at), nodeCount);
         SampleEnvelope peaks = read && readings
-                ? envelope.read(voltages, at, stepper.earlier(), state, now, stepper.landedOnEdge()) : null;
+                ? envelope.read(voltages, at, state, now) : null;
         return new LiveSample(at, voltages, terminals, measured, window, peaks, powers);
     }
 

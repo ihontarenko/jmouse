@@ -14,6 +14,8 @@ import org.jmouse.formula.Symbols;
 import org.jmouse.parallax.numerics.NewtonSolver;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,33 @@ final class PartHeat {
     private static final int NEWTON_ITERATIONS = 8;
     /** How closely a step of the law is solved, kelvin: far below anything a drift can show. */
     private static final double SETTLED = 1e-9;
+
+    /**
+     * A law compiled for one list of parameter names: its states, their rates and the temperature they make, all read
+     * from one argument array — states, then power and ambient, then the parameters. The values are arguments, so every
+     * part that warms by the same law with the same parameters shares it.
+     */
+    private record CompiledLaw(String[] states, RealFunction[] rates, RealFunction temperature) {
+    }
+
+    /** What decides a compiled law: the law, and the names of the parameters its part is read with. */
+    private record LawForm(ComponentModel.Heat law, List<String> parameterNames) {
+    }
+
+    /** How many compiled laws are kept: a catalogue's worth, as {@link ModelEquations} keeps its forms. */
+    private static final int KEPT_LAWS = 256;
+
+    /**
+     * The laws compiled so far. A law was parsed and compiled for every part on every run before — two hundred resistors
+     * of a ladder compiled the one shared law two hundred times.
+     */
+    private static final Map<LawForm, CompiledLaw> COMPILED = Collections.synchronizedMap(
+            new LinkedHashMap<>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<LawForm, CompiledLaw> eldest) {
+                    return size() > KEPT_LAWS;
+                }
+            });
 
     private final String[] states;
     private final RealFunction[] rates;
@@ -70,29 +99,40 @@ final class PartHeat {
         if (law == null || resistance == null || !(resistance > 0)) {
             return null;
         }
+        List<String> parameterNames = parameters.keySet().stream().filter(name -> !name.equals(ComponentVocabulary.TEMPERATURE)).toList();
+        LawForm form = new LawForm(law, parameterNames);
+        CompiledLaw compiled = COMPILED.get(form);
+        if (compiled == null) {
+            compiled = compile(law, parameterNames);
+            COMPILED.put(form, compiled);
+        }
+        int count = compiled.states().length;
+        double[] arguments = new double[count + 2 + parameterNames.size()];
+        arguments[count + 1] = ambient;
+        for (int index = 0; index < parameterNames.size(); index++) {
+            arguments[count + 2 + index] = parameters.get(parameterNames.get(index));
+        }
+        return new PartHeat(compiled.states(), compiled.rates(), compiled.temperature(), arguments);
+    }
+
+    /** The law read and compiled over its states, power, ambient and these parameters, in that order. */
+    private static CompiledLaw compile(ComponentModel.Heat law, List<String> parameterNames) {
         List<String> stateNames = List.copyOf(law.rates().keySet());
         List<String> names = new ArrayList<>(stateNames);
         names.add(ComponentVocabulary.POWER);
         names.add(AMBIENT);
-        List<String> parameterNames = parameters.keySet().stream().filter(name -> !name.equals(ComponentVocabulary.TEMPERATURE)).toList();
         names.addAll(parameterNames);
         Symbols symbols = Symbols.of(List.of(), names);
         List<Formula.Definition> library = definitions(law);
-        int count = stateNames.size();
-        RealFunction[] rates = new RealFunction[count];
-        for (int index = 0; index < count; index++) {
+        RealFunction[] rates = new RealFunction[stateNames.size()];
+        for (int index = 0; index < rates.length; index++) {
             String text = law.rates().get(stateNames.get(index));
             Formula rate = ModelLanguage.read(law.source() + ", heat", text, 0, library);
             rates[index] = compile(law, rate, symbols, text);
         }
         RealFunction temperature = compile(law, ModelLanguage.read(law.source() + ", heat", law.temperature(), 0, library),
                 symbols, law.temperature());
-        double[] arguments = new double[names.size()];
-        arguments[count + 1] = ambient;
-        for (int index = 0; index < parameterNames.size(); index++) {
-            arguments[count + 2 + index] = parameters.get(parameterNames.get(index));
-        }
-        return new PartHeat(stateNames.toArray(String[]::new), rates, temperature, arguments);
+        return new CompiledLaw(stateNames.toArray(String[]::new), rates, temperature);
     }
 
     /** The definitions the law may call: its document's formulas, then its own lets, each a definition of nothing. */

@@ -16,8 +16,8 @@ sealed interface UnitLinearization permits AffineLinearization, TapedLinearizati
     /** The line at the assembly's guess, for this iteration and the ones after it may stand for. */
     void linearize(Assembly assembly, double coefficient, boolean trapezoidal, boolean transientAnalysis);
 
-    /** The largest share of its allowed error any charge used over a step: the stored charge against the predicted one. */
-    double chargeTruncation(double[] solution, double[] predicted);
+    /** Each charge at a solved state, into {@code into}. */
+    void charges(double[] state, double time, double[] into);
 
     /**
      * Each current equation's current at a solved state with every charge's rate at nought — what it dissipates: a
@@ -25,11 +25,4 @@ sealed interface UnitLinearization permits AffineLinearization, TapedLinearizati
      * places are left as they are.
      */
     void dissipatedCurrents(double[] state, double time, double[] into);
-
-    /**
-     * Takes an accepted step into the unit's history from the coefficients alone, when they are all it needs.
-     *
-     * @return false when the step is to be taken from the arguments, as a unit with states takes it
-     */
-    boolean acceptFromCoefficients(double[] state, double coefficient, boolean trapezoidal);
 }

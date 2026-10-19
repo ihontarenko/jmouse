@@ -35,8 +35,8 @@ current there.
    PartLedger.accepted                                     ┌──────────────────────────────────────┐
      each device's power ONCE                              │ NodeEnvelope.take   peaks, integrals  │
        → its heat energy                                   │ TraceRecorder.take  terminal columns  │
-       → its part's energy (a step that landed on          │ MeterRecorder.take  metered parts     │
-         an edge: the power before it)                     └──────────────────────────────────────┘
+       → its part's energy                                  │ MeterRecorder.take  metered parts     │
+                                                           └──────────────────────────────────────┘
      every 0.1 ms on a realistic bench: advance heat
 ```
 
@@ -51,6 +51,11 @@ Samples are read off the solution — on the parabola through the last three acc
 to land on them: a calm stretch between two edges is a few long steps, not one per sample. A step brings its
 **start** into the peaks; its end belongs to the next interval. The peaks of a difference a probe reads across a part
 are kept as the difference's own: the lowest of one node less the highest of the other is a band twice as wide.
+
+A computed transient keeps the peaks too (`LiveCircuitSolver.solutionWithPeaks`, no part's energy): `TransientRun`
+carries each node's lows and highs, and the dataset `TimeSeries.peaks` holds them by column. A graph fills only what
+went past the straight line between two samples; the computed oscilloscope takes them as the live one takes its peak
+detection. A switch's overshoot a nanosecond long, between samples 25 ns apart, is in no sample — it is in the peaks.
 
 ## The pieces together — LiveCircuitSolver
 

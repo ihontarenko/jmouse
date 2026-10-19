@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * The discrete half of a circuit: every model's {@code behaviour} run as events, every digital node resolved from
@@ -38,6 +39,8 @@ final class EventSimulation {
     static final ScriptBudget BUDGET = ScriptBudget.builder().steps(200_000).loopIterations(100_000).recursionDepth(64).build();
 
     private final List<DigitalUnit> units = new ArrayList<>();
+    /** The same units by label: every model device asks for its own, and four hundred of them searched the list. */
+    private final Map<String, DigitalUnit> unitsByLabel = new LinkedHashMap<>();
     private final Map<String, List<DigitalDriver>> driversByNode = new LinkedHashMap<>();
     final Map<String, LogicLevel> nodeLevels = new LinkedHashMap<>();
     final List<OutputBridge> bridges = new ArrayList<>();
@@ -57,6 +60,7 @@ final class EventSimulation {
         for (Netlist.ModelUnit modelUnit : netlist.units()) {
             DigitalUnit unit = new DigitalUnit(modelUnit, this);
             units.add(unit);
+            unitsByLabel.put(unit.label, unit);
             unit.drivers.values().forEach(driver -> {
                 if (driver.digitalNode != null) {
                     driversByNode.get(driver.digitalNode).add(driver);
@@ -71,7 +75,11 @@ final class EventSimulation {
 
     /** The discrete states of one unit, shared with its {@link ModelDevice}. */
     Map<String, Object> discrete(String label) {
-        return units.stream().filter(unit -> unit.label.equals(label)).findFirst().map(unit -> unit.discrete).orElseThrow();
+        DigitalUnit unit = unitsByLabel.get(label);
+        if (unit == null) {
+            throw new NoSuchElementException("No unit '" + label + "' in the event simulation.");
+        }
+        return unit.discrete;
     }
 
     /** The devices that put digital outputs onto analog nodes. */

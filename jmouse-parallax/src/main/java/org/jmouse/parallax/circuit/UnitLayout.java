@@ -66,6 +66,8 @@ final class UnitLayout {
     final boolean    stepIndependent;
     /** Whether any equation is a state's rate. */
     final boolean    hasStates;
+    /** Each continuous state's row in the system, as the unit declares them — read on every step, so never a map. */
+    final int[]      stateRows;
     /** Where {@code temperature} stands among the arguments; -1 for a unit that does not read it. */
     final int        temperaturePosition;
     /**
@@ -186,6 +188,7 @@ final class UnitLayout {
             readsCharge[position] = Arrays.stream(stamps[position].partialCharge()).anyMatch(charge -> charge != NONE);
         }
         this.hasStates = Arrays.stream(stamps).anyMatch(stamp -> stamp.kind() == EquationKind.STATE);
+        this.stateRows = unit.stateRows().values().stream().mapToInt(Integer::intValue).toArray();
         this.temperaturePosition = equations.parameterPosition(ComponentVocabulary.TEMPERATURE);
 
         List<String> analogPins = new ArrayList<>();

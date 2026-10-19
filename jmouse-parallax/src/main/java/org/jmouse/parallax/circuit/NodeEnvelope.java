@@ -43,13 +43,13 @@ final class NodeEnvelope {
     }
 
     /**
-     * One accepted step: its start into every node's and every difference's peaks, and its stretch into the integrals —
-     * held at its start where it landed on an edge, along the line between its ends otherwise.
+     * One accepted step: its start into every node's and every difference's peaks, and its stretch into the integrals,
+     * along the line between its ends.
      */
-    void take(double[] start, double[] end, double duration, boolean landedOnEdge) {
+    void take(double[] start, double[] end, double duration) {
         for (int node = 0; node < nodeLows.length; node++) {
             nodeLows[node] = Math.min(nodeLows[node], start[node]);
-            nodeIntegrals[node] += (landedOnEdge ? start[node] : (start[node] + end[node]) / 2) * duration;
+            nodeIntegrals[node] += (start[node] + end[node]) / 2 * duration;
             nodeHighs[node] = Math.max(nodeHighs[node], start[node]);
         }
         for (int pair = 0; pair < differences.size(); pair++) {
@@ -62,13 +62,12 @@ final class NodeEnvelope {
     /**
      * The peaks since the last read sample, this sample's own voltages among them, and the next ones begun from them: an
      * interval holds both its ends. Begun empty, the interval a square wave falls in saw only the low level after the
-     * fall — the step that lands on an edge ends at the new level — and its high half vanished from the peaks.
+     * fall — the step that carries an edge ends at the new level — and its high half vanished from the peaks.
      *
-     * @param voltages   the sample's own node voltages, at {@code at}
-     * @param start      the last accepted step's start, and {@code end} its end, at {@code endTime}
-     * @param landedOnEdge whether that step landed on an edge
+     * @param voltages the sample's own node voltages, at {@code at}
+     * @param end      the last accepted step's end, at {@code endTime}
      */
-    SampleEnvelope read(double[] voltages, double at, double[] start, double[] end, double endTime, boolean landedOnEdge) {
+    SampleEnvelope read(double[] voltages, double at, double[] end, double endTime) {
         double[] lows = new double[voltages.length];
         double[] highs = new double[voltages.length];
         double[] means = new double[voltages.length];
@@ -76,7 +75,7 @@ final class NodeEnvelope {
             lows[node] = Math.min(nodeLows[node], voltages[node]);
             highs[node] = Math.max(nodeHighs[node], voltages[node]);
             // The integral at the sample, taken back from the step's end along the line to the sample's value.
-            double integral = nodeIntegrals[node] - (landedOnEdge ? start[node] : (end[node] + voltages[node]) / 2) * (endTime - at);
+            double integral = nodeIntegrals[node] - (end[node] + voltages[node]) / 2 * (endTime - at);
             means[node] = Double.isNaN(markedTime) || !(at > markedTime) ? voltages[node] : (integral - markedIntegrals[node]) / (at - markedTime);
             markedIntegrals[node] = integral;
         }

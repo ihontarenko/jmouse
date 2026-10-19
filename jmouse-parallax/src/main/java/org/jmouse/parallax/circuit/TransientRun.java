@@ -15,9 +15,10 @@ import java.util.Set;
 
 /**
  * A circuit's transient worked out at once — what a computed graph, an object page and a datasheet check read —, by the
- * one engine the live bench runs ({@link LiveCircuitSolver}, keeping no screen readings): SPICE's step control, the
+ * one engine the live bench runs ({@link LiveCircuitSolver}, keeping no part's energy): SPICE's step control, the
  * cut into pieces, models compiled to code. Samples are evenly spaced from 0 to the circuit's duration, both ends
- * included; each is read off the solution, never forcing a step to land on it.
+ * included; each is read off the solution, never forcing a step to land on it. Each node's peaks over every sample's
+ * interval are kept with it: what the steps between two samples went through, which no sample shows.
  *
  * <p>What it holds is named as the circuit names it: a node's voltage by the node, a part's current by
  * {@link ColumnNames#partCurrent} ({@code V1}, {@code D1}, {@code U1.output}), a digital node's level by
@@ -30,14 +31,20 @@ public final class TransientRun {
 
     private final double[]                  times;
     private final Map<String, double[]>     voltages;
+    /** Each node's lowest and highest voltage over each sample's interval, by node; empty for an instant. */
+    private final Map<String, double[]>     lows;
+    private final Map<String, double[]>     highs;
     private final Map<String, double[]>     currents;
     private final Map<String, double[]>     powers;
     private final List<Map<String, LogicLevel>> levels;
 
-    private TransientRun(double[] times, Map<String, double[]> voltages, Map<String, double[]> currents,
-                         Map<String, double[]> powers, List<Map<String, LogicLevel>> levels) {
+    private TransientRun(double[] times, Map<String, double[]> voltages, Map<String, double[]> lows,
+                         Map<String, double[]> highs, Map<String, double[]> currents, Map<String, double[]> powers,
+                         List<Map<String, LogicLevel>> levels) {
         this.times = times;
         this.voltages = voltages;
+        this.lows = lows;
+        this.highs = highs;
         this.currents = currents;
         this.powers = powers;
         this.levels = levels;
@@ -62,13 +69,26 @@ public final class TransientRun {
         }
         Netlist netlist = Netlist.of(elaborated);
         double duration = netlist.duration();
-        LiveCircuitSolver solver = new LiveCircuitSolver(elaborated, duration / (samples - 1)).solutionOnly();
+        LiveCircuitSolver solver = new LiveCircuitSolver(elaborated, duration / (samples - 1)).solutionWithPeaks();
         solver.trace(1);
         solver.traceOnly(everyPart ? null : partsWithCurrentsOfTheirOwn(netlist));
         List<String> nodes = solver.nodes();
         double[] times = new double[samples];
         Map<String, double[]> voltages = new LinkedHashMap<>();
-        nodes.forEach(node -> voltages.put(node, new double[samples]));
+        Map<String, double[]> lows = new LinkedHashMap<>();
+        Map<String, double[]> highs = new LinkedHashMap<>();
+        // Each node's columns by the solver's node order: filled sample by sample, never looked up by name.
+        double[][] nodeColumns = new double[nodes.size()][];
+        double[][] lowColumns = new double[nodes.size()][];
+        double[][] highColumns = new double[nodes.size()][];
+        for (int node = 0; node < nodes.size(); node++) {
+            nodeColumns[node] = new double[samples];
+            lowColumns[node] = new double[samples];
+            highColumns[node] = new double[samples];
+            voltages.put(nodes.get(node), nodeColumns[node]);
+            lows.put(nodes.get(node), lowColumns[node]);
+            highs.put(nodes.get(node), highColumns[node]);
+        }
         Map<String, double[]> currents = new LinkedHashMap<>();
         Map<String, double[]> powers = new LinkedHashMap<>();
         List<Map<String, LogicLevel>> levels = new ArrayList<>(samples);
@@ -79,8 +99,12 @@ public final class TransientRun {
             int count = digital ? 1 : Math.min(CHUNK, samples - done);
             for (LiveSample sample : solver.advance(count)) {
                 times[done] = sample.time();
-                for (int node = 0; node < nodes.size(); node++) {
-                    voltages.get(nodes.get(node))[done] = sample.voltages()[node];
+                double[] sampled = sample.voltages();
+                SampleEnvelope envelope = sample.envelope();
+                for (int node = 0; node < nodeColumns.length; node++) {
+                    nodeColumns[node][done] = sampled[node];
+                    lowColumns[node][done] = envelope == null ? sampled[node] : envelope.lows()[node];
+                    highColumns[node][done] = envelope == null ? sampled[node] : envelope.highs()[node];
                 }
                 if (sample.terminals() != null) {
                     int index = done;
@@ -110,7 +134,7 @@ public final class TransientRun {
                 progress.report((double) done / samples, "Stepping the circuit");
             }
         }
-        return new TransientRun(times, voltages, currents, powers, levels);
+        return new TransientRun(times, voltages, lows, highs, currents, powers, levels);
     }
 
     /**
@@ -125,7 +149,7 @@ public final class TransientRun {
 
     /** One instant of a circuit, solved by other means — its operating point —, read the way a run is. */
     static TransientRun instant(Map<String, double[]> voltages, Map<String, double[]> currents) {
-        return new TransientRun(new double[]{0}, voltages, currents, Map.of(), List.of(Map.of()));
+        return new TransientRun(new double[]{0}, voltages, Map.of(), Map.of(), currents, Map.of(), List.of(Map.of()));
     }
 
     public int samples() {
@@ -139,6 +163,16 @@ public final class TransientRun {
     /** Every analog node's voltage, by node, in the engine's order. */
     public Map<String, double[]> voltages() {
         return voltages;
+    }
+
+    /** Each node's lowest voltage over each sample's interval, by node; none for an instant. */
+    public Map<String, double[]> lows() {
+        return lows;
+    }
+
+    /** Each node's highest voltage over each sample's interval, by node; none for an instant. */
+    public Map<String, double[]> highs() {
+        return highs;
     }
 
     /** Every part's current, by its column. */

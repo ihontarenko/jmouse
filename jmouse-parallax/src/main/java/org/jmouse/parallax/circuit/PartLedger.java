@@ -22,8 +22,6 @@ final class PartLedger {
     private final PartIndex parts;
     /** The devices it reads — every device of a part, and every one that warms —, by place among the devices. */
     private final int[]     read;
-    /** Each read device's power at the end of the last accepted step, NaN before the first. */
-    private final double[]  lastPower;
     /** Each read device's heat, or null; and the energy it took since its heat was last advanced. */
     private final PartHeat[] heats;
     private final double[]  heatEnergy;
@@ -51,8 +49,6 @@ final class PartLedger {
         }
         this.read = Arrays.copyOf(read, count);
         this.warms = warms;
-        this.lastPower = new double[count];
-        Arrays.fill(lastPower, Double.NaN);
         this.heats = new PartHeat[count];
         for (int index = 0; index < count; index++) {
             heats[index] = parts.device(this.read[index]).heat();
@@ -77,7 +73,7 @@ final class PartLedger {
      *
      * @param before the state the step started from, read when no power was known at its start
      */
-    void accepted(double[] solution, double at, double duration, boolean landing, double[] before, double beforeTime) {
+    void accepted(double[] solution, double at, double duration) {
         for (int index = 0; index < read.length; index++) {
             Device device = parts.device(read[index]);
             boolean heated = heats[index] != null && (heatFeedsBack || keepsEnergy);
@@ -91,10 +87,8 @@ final class PartLedger {
                 heatEnergy[index] += power * duration;
             }
             if (counted) {
-                double held = !landing ? power : Double.isNaN(lastPower[index]) ? device.power(before, beforeTime) : lastPower[index];
-                energy[part] += held * duration;
+                energy[part] += power * duration;
             }
-            lastPower[index] = power;
         }
         if (keepsEnergy) {
             energyTime += duration;

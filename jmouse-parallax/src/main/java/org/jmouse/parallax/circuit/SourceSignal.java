@@ -13,6 +13,8 @@ import org.jmouse.formula.Symbols;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +39,38 @@ final class SourceSignal {
     private static final int BISECTIONS = 60;
     /** How many times the shortest stretch between edges is longer than a step may be. */
     private static final double EDGE_SHARE = 2.5;
+
+    /**
+     * A generator's signal compiled for one list of parameter names — its value and its edge functions over the time and
+     * the parameters —, or none where the model turned out not to be an ideal source. The values are arguments, so every
+     * generator of one document shares it.
+     */
+    private record CompiledSignal(RealFunction value, List<RealFunction> edges) {
+    }
+
+    /** What decides a compiled signal: what the model writes of it, and the names of its parameters. */
+    private record SignalForm(String name, List<String> formulas, Map<String, String> locals, ComponentModel.Equation equation,
+                              List<String> pinNames, List<String> parameterNames) {
+    }
+
+    /** How many compiled signals are kept, as {@link ModelEquations} keeps its forms. */
+    private static final int KEPT_SIGNALS = 256;
+
+    /** The signals compiled so far: a netlist is built for every run and every piece, and read its generators each time. */
+    private static final Map<SignalForm, Optional<CompiledSignal>> COMPILED = Collections.synchronizedMap(
+            new LinkedHashMap<>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<SignalForm, Optional<CompiledSignal>> eldest) {
+                    return size() > KEPT_SIGNALS;
+                }
+            });
+
+    /**
+     * Where a signal jumps: the last instant at its old level and the first at its new, no further apart than the edge
+     * was located to.
+     */
+    record Edge(double before, double after) {
+    }
 
     private final RealFunction value;
     private final List<RealFunction> edges;
@@ -100,6 +134,27 @@ final class SourceSignal {
         if (!model.isGenerator()) {
             return Optional.empty();
         }
+        List<String> parameterNames = List.copyOf(parameters.keySet());
+        SignalForm form = new SignalForm(model.name(), model.formulas(), model.locals(), model.equations().getFirst(),
+                model.pins().stream().map(ComponentModel.Pin::name).toList(), parameterNames);
+        Optional<CompiledSignal> compiled = COMPILED.get(form);
+        if (compiled == null) {
+            compiled = compile(model, parameterNames);
+            COMPILED.put(form, compiled);
+        }
+        if (compiled.isEmpty()) {
+            return Optional.empty();
+        }
+        double[] arguments = new double[1 + parameterNames.size()];
+        for (int index = 0; index < parameterNames.size(); index++) {
+            arguments[1 + index] = parameters.get(parameterNames.get(index));
+        }
+        return Optional.of(new SourceSignal(compiled.get().value(), compiled.get().edges(), arguments,
+                model.generatorPositive(), model.generatorNegative()));
+    }
+
+    /** The generator's signal read and compiled over the time and these parameters; none where it reads a pin or a host call. */
+    private static Optional<CompiledSignal> compile(ComponentModel model, List<String> parameterNames) {
         ComponentModel.Equation equation = model.equations().getFirst();
         // Its lets are definitions of nothing, as a model's are: a generator may name a part of its signal.
         StringBuilder definitions = new StringBuilder(ModelLanguage.libraryText(model));
@@ -113,23 +168,17 @@ final class SourceSignal {
             return Optional.empty();
         }
         List<String> names = List.of(ComponentVocabulary.TIME);
-        List<String> parameterNames = List.copyOf(parameters.keySet());
         for (String pin : model.pins().stream().map(ComponentModel.Pin::name).toList()) {
             if (formula.dependsOn(pin)) {
                 return Optional.empty();
             }
         }
         Symbols table = Symbols.of(names, parameterNames);
-        double[] arguments = new double[1 + parameterNames.size()];
-        for (int index = 0; index < parameterNames.size(); index++) {
-            arguments[1 + index] = parameters.get(parameterNames.get(index));
-        }
         List<RealFunction> edges = new ArrayList<>();
         for (Formula edge : edgeFunctions(formula)) {
             edges.add(RealCompiler.compile(edge, table, model.name() + " edge"));
         }
-        return Optional.of(new SourceSignal(RealCompiler.compile(formula, table, equation.formula()), edges, arguments,
-                model.generatorPositive(), model.generatorNegative()));
+        return Optional.of(new CompiledSignal(RealCompiler.compile(formula, table, equation.formula()), List.copyOf(edges)));
     }
 
     /**
@@ -158,14 +207,13 @@ final class SourceSignal {
     /**
      * The first edge after {@code from} and no later than {@code to} within one step no longer than
      * {@link #maximumStep()}, which cannot hold two edges of one function — one reading at its end, the one at its start
-     * kept from the step before —, or NaN when the step has none. Found as the instant just after the jump, so the level
-     * read there is already the new one.
+     * kept from the step before —, or null when the step has none.
      */
-    double edgeWithinStep(double from, double to, double resolution) {
+    Edge edgeWithinStep(double from, double to, double resolution) {
         if (edges.isEmpty() || !(to > from)) {
-            return Double.NaN;
+            return null;
         }
-        double first = Double.NaN;
+        Edge first = null;
         synchronized (arguments) {
             for (int index = 0; index < edges.size(); index++) {
                 RealFunction edge = edges.get(index);
@@ -174,8 +222,8 @@ final class SourceSignal {
                 lastTime[index] = to;
                 lastValue[index] = after;
                 if (changesSign(before, after)) {
-                    double found = root(edge, from, to, before, resolution);
-                    first = Double.isNaN(first) ? found : Math.min(first, found);
+                    Edge found = root(edge, from, to, before, resolution);
+                    first = first == null || found.after() < first.after() ? found : first;
                 }
             }
         }
@@ -196,7 +244,7 @@ final class SourceSignal {
                     double at = index == pieces ? to : from + piece * index;
                     double after = sampled(edge, at);
                     if (changesSign(before, after)) {
-                        double found = root(edge, at - piece, at, before, resolution);
+                        double found = root(edge, at - piece, at, before, resolution).after();
                         first = Double.isNaN(first) ? found : Math.min(first, found);
                         break;
                     }
@@ -216,8 +264,8 @@ final class SourceSignal {
         return (before < 0 && after >= 0) || (before >= 0 && after < 0);
     }
 
-    /** Bisection to the instant the sign changes, answering the later end: the jump has happened there. */
-    private double root(RealFunction edge, double low, double high, double atLow, double resolution) {
+    /** Bisection to the instant the sign changes: the two ends that hold it between them. */
+    private Edge root(RealFunction edge, double low, double high, double atLow, double resolution) {
         double lowSign = atLow;
         for (int iteration = 0; iteration < BISECTIONS && high - low > resolution; iteration++) {
             double middle = (low + high) / 2;
@@ -229,7 +277,7 @@ final class SourceSignal {
                 lowSign = atMiddle;
             }
         }
-        return high;
+        return new Edge(low, high);
     }
 
     /**

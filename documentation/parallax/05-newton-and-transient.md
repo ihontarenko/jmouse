@@ -59,17 +59,21 @@ linearization does not depend on its bias, so it is taken at rest.
  t ──────────────────●───────────────────────────────────────────────────────────────────●──── t + h
                      │                                                                    │
  1  h = min(step, maximumStep, the next digital event)
- 2  a generator's edge inside?  far: stop one sample short of it · near: land exactly on it
- 3  integration = backward Euler after an edge (restart), else trapezoidal
- 4  predict x(t+h): a parabola through the last three accepted points (or a line through two)
+ 2  a generator's edge inside?  far: end at the last instant BEFORE the jump · near: this step carries the jump
+ 3  integration = backward Euler after an edge or carrying one (restart), else trapezoidal
+ 4  predict x(t+h): a parabola through the last three accepted points (or a line through two) — a Prediction,
+    kept as its weights on those points as well as its values
  5  Newton from the prediction                                ── no answer → h / 8, once; then longer Newton
+    settled → every storing device MEASURES what it stores at the solution, once (Device.measure)
  6  local error = what the devices STORE moved off the prediction  (Truncation)
+       a model's charge is predicted from its own accepted charges by the same weights — never evaluated again
        charge, flux:   |Δq| / (7 · (1e-3·|q| + 1e-14 C))
        a model state:  |Δs| / (7 · (1e-3·|s| + 1e-4))
        three points:   ÷ 10 (Milne: corrector − predictor ≈ 13 trapezoidal errors)
  7  error > 1, or a digital input crossed its threshold inside → retry shorter
        h · max(0.2, min(2, 0.9 · error^(−1/order)))     never blind halving
- 8  accept: every device accepts (charges, rates, companions), the ledger takes the step (power → energy, heat),
+ 8  accept: every device that stores something accepts what it measured (charges, rates, companions), the ledger
+    takes the step (power → energy, heat),
     the stepper moves on, the event simulation advances (a crossing may restart the integration)
 ```
 
@@ -77,8 +81,22 @@ What decides `maximumStep`: one sample interval while every sample is traced; up
 the engine was matched against ngspice at) when a trace keeps one sample in several; and a generator's own
 `maximumStep` — under half the shortest stretch between two of its edges, so no step holds two.
 
-A step that **lands on an edge** is solved with the level after the jump; what lies inside it is the level before —
-held, not a ramp. Readers know (`landedOnEdge`).
+A generator's edge is a **breakpoint**, as in SPICE:
+
+```
+        level before                     │ jump │            level after
+ ────●──────────────────────────────●│      │●──●───●─────●──────────●─────────────────
+     ordinary step, error-tested     ▲        ▲  short steps, growing as the error allows
+                                     │        └ the step that CARRIES the jump: backward Euler,
+                                     │          4 × the crossing resolution, not error-tested
+                                     └ ends at the last instant before the jump (Edge.before)
+```
+
+The landing step is an ordinary step with the old level, so a sample at the edge's own instant reads the level before
+it, as SPICE reads a breakpoint. ⚠️ It used to be solved with the level after the jump over its whole length — up to a
+sample —, which made every ideal edge a ramp one step long: a transistor switched by it turned inside that one implicit
+step, and its gate charge, Miller plateau and overshoot (10.64 V on the 10 V `nmos-switch` drain) were there at 5 ns
+samples and gone at 25 ns. Readers had to hold the level before it (`landedOnEdge`); they no longer do.
 
 ### How a generator's edges are found
 
@@ -91,8 +109,8 @@ held, not a ramp. Readers know (`landedOnEdge`).
  mod(x, p)        →  sin(πx/p)
 ```
 
-A sign change of an edge function between the step's ends is an edge; it is bisected to the step's resolution and the
-step lands just after it. `mod(frequency·time, 1) < duty` gets both of a square's edges from one comparison.
+A sign change of an edge function between the step's ends is an edge; it is bisected to the shortest step
+(`SourceSignal.Edge`: the last instant before, the first after), and the step lands on the instant before it. `mod(frequency·time, 1) < duty` gets both of a square's edges from one comparison.
 
 ## Digital parts — the event simulation
 

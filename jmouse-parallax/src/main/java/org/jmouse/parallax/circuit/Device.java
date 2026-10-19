@@ -52,8 +52,25 @@ sealed interface Device permits Device.Resistor, Device.Capacitor, Device.Voltag
     default void begin(double[] state) {
     }
 
+    /**
+     * A transient attempt Newton settled on, before its error is judged: whatever the device stores, evaluated at the
+     * solution once — what {@link #truncation} judges and, if the step is taken, {@link #accept} carries on. Called for
+     * every settled attempt of a device that {@link #stores}, always before those two.
+     */
+    default void measure(double[] solution, double time) {
+    }
+
     /** Called once a transient point is accepted, so a device can carry what it needs into the next step. */
     default void accept(Assembly assembly, double[] state) {
+    }
+
+    /**
+     * Whether it carries anything from one step to the next — a charge, a state, a companion current —: what
+     * {@link #measure} evaluates, {@link #truncation} judges and {@link #accept} takes. A device that stores nothing is passed over by both on
+     * every step; in a ladder that is every resistor.
+     */
+    default boolean stores() {
+        return false;
     }
 
     default boolean nonlinear() {
@@ -70,9 +87,10 @@ sealed interface Device permits Device.Resistor, Device.Capacitor, Device.Voltag
 
     /**
      * How much of its allowed local error a transient step used, from the step's solution and the prediction it is
-     * measured against (see {@link Truncation}); 0 for a device that stores nothing.
+     * measured against (see {@link Truncation}); 0 for a device that stores nothing. What it stores is predicted by the
+     * prediction's own polynomial from its accepted history, or read at the predicted state where that is the same.
      */
-    default double truncation(double[] solution, double[] predicted) {
+    default double truncation(double[] solution, Prediction prediction) {
         return 0;
     }
 
@@ -252,9 +270,15 @@ sealed interface Device permits Device.Resistor, Device.Capacitor, Device.Voltag
             return phasorAcross(solution, element).multiply(new Complex(0, angular * element.value()));
         }
 
-        public double truncation(double[] solution, double[] predicted) {
+        @Override
+        public boolean stores() {
+            return true;
+        }
+
+        public double truncation(double[] solution, Prediction prediction) {
+            // Its charge is C · v: predicted from its voltages, it is the polynomial through its own charges.
             double across = across(solution, element);
-            double expected = across(predicted, element);
+            double expected = across(prediction.values(), element);
             return Truncation.share(element.value() * (across - expected), element.value() * across, Truncation.CHARGE);
         }
 

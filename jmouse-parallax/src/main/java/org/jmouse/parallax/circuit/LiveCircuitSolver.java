@@ -99,6 +99,15 @@ public final class LiveCircuitSolver {
     }
 
     /**
+     * Keeps each node's peaks and means with the solution, and no part's energy: a computed transient, whose graph draws
+     * what happened between its samples — a switch's overshoot a nanosecond long, between samples 25 ns apart.
+     */
+    public LiveCircuitSolver solutionWithPeaks() {
+        pieces.forEach(LiveIntegrator::keepNoEnergy);
+        return this;
+    }
+
+    /**
      * The circuit with new values, going on from where {@code previous} is — every piece from its own state.
      *
      * @throws IllegalArgumentException when it cannot go on: its pieces are not the ones it had

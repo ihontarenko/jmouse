@@ -4,9 +4,9 @@ import java.util.Map;
 
 /**
  * The argument arrays a model unit's compiled equations read — each unknown's value at its position, the charges' rates,
- * the time, the discrete states, then the parameters —, and how a state is written into them. Three of them: the one
- * every linearization reads, one for the prediction a truncation compares with, and one a dissipated current is read
- * with, its rates at nought. One unit's alone: its equations are evaluated by one thread at a time.
+ * the time, the discrete states, then the parameters —, and how a state is written into them. Two of them: the one
+ * every linearization reads — and a measurement at a solution —, and one a dissipated current is read with, its rates
+ * at nought. One unit's alone: its equations are evaluated by one thread at a time.
  */
 final class UnitArguments {
 
@@ -14,7 +14,6 @@ final class UnitArguments {
     private final UnitLayout          layout;
     private final Map<String, Object> discrete;
     final double[] values;
-    final double[] predicted;
     final double[] dissipative;
 
     UnitArguments(ModelEquations equations, UnitLayout layout, Map<String, Object> discrete) {
@@ -22,7 +21,6 @@ final class UnitArguments {
         this.layout = layout;
         this.discrete = discrete;
         this.values = equations.arguments();
-        this.predicted = equations.arguments();
         this.dissipative = equations.arguments();
     }
 
@@ -74,7 +72,6 @@ final class UnitArguments {
     /** The unit's own temperature, kelvin, into every array its equations are read with. */
     void temperature(double kelvin) {
         values[layout.temperaturePosition] = kelvin;
-        predicted[layout.temperaturePosition] = kelvin;
         dissipative[layout.temperaturePosition] = kelvin;
     }
 
