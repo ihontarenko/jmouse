@@ -8,6 +8,10 @@
 #   IS, N            the body diode (drain–bulk junction, the bulk being the source): freewheeling in a half-bridge
 #   CBD, PB, MJ, FC  that junction's depletion capacitance — Coss, falling as VDS rises
 #   CGSO, CGDO       the gate overlap capacitances — Ciss, and Crss: the Miller plateau of a switching gate
+#   C_gate_drain_zero_bias, V_gate_drain_potential, gate_drain_grading
+#                    not SPICE level 1: a power MOSFET's gate–drain capacitance is a depletion layer while the drain
+#                    sits above the gate — small at high VDS — and the full oxide once it falls below it. That climb is
+#                    most of the datasheet's Qgd, and with CGDO alone the Miller plateau came out a fraction as long.
 #   V_breakdown      drain–source avalanche: not part of level 1, but where an inductive kick stops
 #
 # The channel is the whole device: W = L = 1, so KP is the part's β and CGSO, CGDO are farads — an exported deck writes
@@ -44,6 +48,9 @@ component "MOS transistor" as mos-transistor type mosfet {
         forward_bias_coefficient = 0.5        "FC: past FC·PB the depletion capacitance goes on as a straight line"
         C_gate_source = 0 F                   "CGSO: gate–source overlap capacitance (W = 1)"
         C_gate_drain = 0 F                    "CGDO: gate–drain overlap capacitance (W = 1)"
+        C_gate_drain_zero_bias = 0 F          "not SPICE: the gate–drain depletion capacitance at zero bias, and its value with the drain below the gate"
+        V_gate_drain_potential = 1 V          "not SPICE: that depletion's potential"
+        gate_drain_grading = 0.5              "not SPICE: that depletion's grading: how fast it falls as the drain rises above the gate"
         R_gate = 1 mOhm                       "RG: the gate's internal resistance, which with Ciss sets how fast it switches"
         body_transit_time = 0 s               "the body diode's transit time: its stored charge, the reverse recovery of a freewheeling diode"
         T_nominal = 300.15 K                  "TNOM: the temperature the figures above are measured at"
@@ -103,6 +110,9 @@ component "MOS transistor" as mos-transistor type mosfet {
 
         let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
         let body : current = junction_current(V_bd, I_saturation_now, emission_coefficient, T_junction)
+        # Above the drain the gate faces the oxide alone: a constant capacitance; below it, a depletion layer that thins
+        # as the drain rises. Zero by default: level 1's overlap capacitance is all there is.
+        let Q_gate_drain : charge = C_gate_drain * V_gd + depletion_charge(min(V_gd, 0), C_gate_drain_zero_bias, V_gate_drain_potential, gate_drain_grading, forward_bias_coefficient) + C_gate_drain_zero_bias * max(V_gd, 0)
         let Q_bulk_drain : charge = depletion_charge(V_bd, C_bulk_drain, V_junction, grading_coefficient, forward_bias_coefficient) + body_transit_time * body
         let avalanche : current = I_breakdown * limit_exponential((V_ds - V_breakdown) / thermal_voltage(T_junction))
         let resistance_drift : ratio = warmth ^ resistance_temperature_exponent
@@ -114,6 +124,6 @@ component "MOS transistor" as mos-transistor type mosfet {
         current source -> di = polarity * (body + d(Q_bulk_drain)/dt)
         current gate -> gi = (gate - gi) / R_gate
         current gi -> si = polarity * d(C_gate_source * V_gs)/dt
-        current gi -> di = polarity * d(C_gate_drain * V_gd)/dt
+        current gi -> di = polarity * d(Q_gate_drain)/dt
     }
 }
