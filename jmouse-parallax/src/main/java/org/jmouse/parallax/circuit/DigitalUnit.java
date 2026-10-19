@@ -127,27 +127,44 @@ final class DigitalUnit {
     }
 
     /** Takes over the discrete life of the same unit in an earlier build of the circuit. */
-    void continueFrom(DigitalUnit earlier) {
-        if (!label.equals(earlier.label) || !drivers.keySet().equals(earlier.drivers.keySet())
-                || watches.size() != earlier.watches.size() || periodics.size() != earlier.periodics.size()) {
+    /**
+     * Where a unit stands, kept apart from it: its discrete states, its drivers, its inputs, when each changed, its
+     * timers, the sign of each watched expression and when each periodic event is next due.
+     */
+    record Snapshot(String label, Map<String, Object> discrete, Map<String, DigitalDriver.Snapshot> drivers,
+                    Map<String, LogicLevel> inputs, Map<String, Double> lastChange, Map<String, Double> timers,
+                    double[] watchSigns, double[] periodicNext) {
+    }
+
+    Snapshot snapshot() {
+        Map<String, DigitalDriver.Snapshot> driven = new LinkedHashMap<>();
+        drivers.forEach((name, driver) -> driven.put(name, driver.snapshot()));
+        return new Snapshot(label, EventSimulation.copy(discrete), driven, new LinkedHashMap<>(inputs),
+                new HashMap<>(lastChange), new LinkedHashMap<>(timers),
+                watches.stream().mapToDouble(watch -> watch.sign).toArray(),
+                periodics.stream().mapToDouble(periodic -> periodic.next).toArray());
+    }
+
+    /** Takes over where the same unit stood — in an earlier build of the circuit, or earlier in this run. */
+    void continueFrom(Snapshot earlier) {
+        if (!label.equals(earlier.label()) || !drivers.keySet().equals(earlier.drivers().keySet())
+                || watches.size() != earlier.watchSigns().length || periodics.size() != earlier.periodicNext().length) {
             throw new IllegalArgumentException("The circuit's parts changed; it starts again.");
         }
         discrete.clear();
-        discrete.putAll(EventSimulation.copy(earlier.discrete));
-        drivers.forEach((name, driver) -> {
-            driver.continueFrom(earlier.drivers.get(name));
-        });
+        discrete.putAll(EventSimulation.copy(earlier.discrete()));
+        drivers.forEach((name, driver) -> driver.continueFrom(earlier.drivers().get(name)));
         inputs.clear();
-        inputs.putAll(earlier.inputs);
+        inputs.putAll(earlier.inputs());
         lastChange.clear();
-        lastChange.putAll(earlier.lastChange);
+        lastChange.putAll(earlier.lastChange());
         timers.clear();
-        timers.putAll(earlier.timers);
+        timers.putAll(earlier.timers());
         for (int index = 0; index < watches.size(); index++) {
-            watches.get(index).sign = earlier.watches.get(index).sign;
+            watches.get(index).sign = earlier.watchSigns()[index];
         }
         for (int index = 0; index < periodics.size(); index++) {
-            periodics.get(index).next = earlier.periodics.get(index).next;
+            periodics.get(index).next = earlier.periodicNext()[index];
         }
     }
 

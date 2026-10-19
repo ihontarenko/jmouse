@@ -1,6 +1,7 @@
 package org.jmouse.parallax.circuit;
 
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
@@ -71,12 +72,20 @@ final class DigitalDriver {
         return changed;
     }
 
-    /** Takes over where {@code earlier} — the same output in an earlier build of the circuit — stands. */
-    void continueFrom(DigitalDriver earlier) {
-        level = earlier.level;
-        previous = earlier.previous;
-        changedAt = earlier.changedAt;
+    /** Where an output stands, kept apart from it: its level, the one before, when it changed, what is scheduled. */
+    record Snapshot(LogicLevel level, LogicLevel previous, double changedAt, SortedMap<Double, LogicLevel> pending) {
+    }
+
+    Snapshot snapshot() {
+        return new Snapshot(level, previous, changedAt, new TreeMap<>(pending));
+    }
+
+    /** Takes over where the same output stood — in an earlier build of the circuit, or earlier in this run. */
+    void continueFrom(Snapshot earlier) {
+        level = earlier.level();
+        previous = earlier.previous();
+        changedAt = earlier.changedAt();
         pending.clear();
-        pending.putAll(earlier.pending);
+        pending.putAll(earlier.pending());
     }
 }

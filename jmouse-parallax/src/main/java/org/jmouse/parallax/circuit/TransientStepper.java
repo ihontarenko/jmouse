@@ -122,22 +122,33 @@ final class TransientStepper {
     }
 
     /**
-     * Goes on from where {@code previous} is — the same time, node voltages, device memories and digital life —, the
-     * integration restarting as at a switch edge.
+     * Where the integration stands, kept apart from it: its time, its unknowns and companions, its nodes, its digital
+     * life. Taking one copies a few arrays — cheap enough for every frame of a live run.
+     */
+    record Snapshot(double time, double[] state, double[] companion, List<String> nodes, EventSimulation.Snapshot events) {
+    }
+
+    Snapshot snapshot() {
+        return new Snapshot(time, state.clone(), companion.clone(), netlist.nodes(), digital ? events.snapshot() : null);
+    }
+
+    /**
+     * Goes on from where it stood — the same time, node voltages, companions and digital life —, the integration
+     * restarting as at a switch edge: each device takes its history from the state, as at the start.
      *
      * @throws IllegalArgumentException when the piece's parts are not the ones it had
      */
-    void continueFrom(TransientStepper previous) {
-        if (digital != previous.digital || state.length != previous.state.length
-                || companion.length != previous.companion.length || !netlist.nodes().equals(previous.netlist.nodes())) {
+    void continueFrom(Snapshot previous) {
+        if (digital != (previous.events() != null) || state.length != previous.state().length
+                || companion.length != previous.companion().length || !netlist.nodes().equals(previous.nodes())) {
             throw new IllegalArgumentException("The circuit changed its parts; it starts again.");
         }
         if (digital) {
-            events.continueFrom(previous.events);
+            events.continueFrom(previous.events());
         }
-        state = previous.state.clone();
-        companion = previous.companion.clone();
-        time = previous.time;
+        state = previous.state().clone();
+        companion = previous.companion().clone();
+        time = previous.time();
         restart = true;
         earlier = null;
         oldest = null;

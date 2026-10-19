@@ -59,18 +59,32 @@ public final class TransientRun {
      *                  sample cost more than solving them
      */
     public static TransientRun of(CompiledObject object, int samples, boolean everyPart, ComputationProgress progress) {
-        return of(ElaboratedCircuit.of(object), samples, everyPart, progress);
+        return of(ElaboratedCircuit.of(object), samples, everyPart, null, progress);
     }
 
-    /** The same, of a circuit already elaborated. */
-    static TransientRun of(ElaboratedCircuit elaborated, int samples, boolean everyPart, ComputationProgress progress) {
+    /**
+     * The same, of a circuit already elaborated, over the whole run or over a {@code window} of it — its first and last
+     * instant, seconds; null for the whole. A window is reached by solving the run up to it, reading nothing, and is
+     * sampled as finely as {@code samples} across it make: a switch's edge a few nanoseconds long, inside a run of
+     * milliseconds, drawn as it happens and not as a line between two samples.
+     */
+    static TransientRun of(ElaboratedCircuit elaborated, int samples, boolean everyPart, double[] window,
+                           ComputationProgress progress) {
         if (samples < 2) {
             throw new IllegalArgumentException("A transient has at least two samples.");
         }
         Netlist netlist = Netlist.of(elaborated);
         double duration = netlist.duration();
-        LiveCircuitSolver solver = new LiveCircuitSolver(elaborated, duration / (samples - 1)).solutionWithPeaks();
+        double from = window == null ? 0 : window[0];
+        double to = window == null ? duration : Math.min(window[1], duration);
+        if (!(from >= 0) || !(to > from)) {
+            throw new IllegalArgumentException("A window runs forward from 0 within the circuit's " + duration + " s.");
+        }
+        LiveCircuitSolver solver = new LiveCircuitSolver(elaborated, (to - from) / (samples - 1)).solutionWithPeaks();
         solver.trace(1);
+        if (from > 0) {
+            solver.skipTo(from);
+        }
         solver.traceOnly(everyPart ? null : partsWithCurrentsOfTheirOwn(netlist));
         List<String> nodes = solver.nodes();
         double[] times = new double[samples];

@@ -127,6 +127,43 @@ public final class LiveCircuitSolver {
         for (int index = 0; index < split.size(); index++) {
             continued.add(LiveIntegrator.continuing(split.get(index), previous.pieces.get(index), sampleInterval));
         }
+        return continued(continued, sampleInterval, elaborated, previous);
+    }
+
+    /**
+     * Where the whole circuit stands, kept apart from it: every piece's {@link LiveIntegrator.Snapshot}. A live run takes
+     * one every frame — a few arrays copied —, so that a capture can go back to just before an edge it saw.
+     */
+    record Checkpoint(double time, List<LiveIntegrator.Snapshot> pieces) {
+    }
+
+    synchronized Checkpoint checkpoint() {
+        List<LiveIntegrator.Snapshot> snapshots = pieces.stream().map(LiveIntegrator::snapshot).toList();
+        return new Checkpoint(snapshots.getFirst().time(), snapshots);
+    }
+
+    /**
+     * The circuit going on from a checkpoint of {@code previous}'s run, sampled every {@code sampleInterval}: what a
+     * capture replays an edge with, finely, while the run itself goes on.
+     *
+     * @throws IllegalArgumentException when the circuit's parts are not the ones the checkpoint has
+     */
+    static LiveCircuitSolver continuing(CompiledObject object, Checkpoint checkpoint, LiveCircuitSolver previous,
+                                               double sampleInterval) {
+        ElaboratedCircuit elaborated = ElaboratedCircuit.of(object);
+        List<ElaboratedCircuit> split = CircuitPartitions.of(elaborated);
+        if (split.size() != checkpoint.pieces().size()) {
+            throw new IllegalArgumentException("The circuit changed its parts; it starts again.");
+        }
+        List<LiveIntegrator> continued = new ArrayList<>();
+        for (int index = 0; index < split.size(); index++) {
+            continued.add(LiveIntegrator.continuing(split.get(index), checkpoint.pieces().get(index), sampleInterval));
+        }
+        return continued(continued, sampleInterval, elaborated, previous);
+    }
+
+    private static LiveCircuitSolver continued(List<LiveIntegrator> continued, double sampleInterval, ElaboratedCircuit elaborated,
+                                               LiveCircuitSolver previous) {
         LiveCircuitSolver solver = new LiveCircuitSolver(continued, sampleInterval, elaborated);
         solver.keepFailedFrom(previous);
         solver.warmedAt = previous.warmedAt;
@@ -454,6 +491,11 @@ public final class LiveCircuitSolver {
             highs[pair] = kept ? own.differenceHighs()[owner.place()] : Double.NaN;
         }
         return new double[][]{lows, highs};
+    }
+
+    /** Goes on to {@code time} reading nothing, every piece alike, and samples from there ({@link LiveIntegrator#skipTo}). */
+    public synchronized void skipTo(double time) {
+        pieces.forEach(piece -> piece.skipTo(time));
     }
 
     /** Reads every part's terminal currents on every {@code every}-th sample as well; 0 reads none. */

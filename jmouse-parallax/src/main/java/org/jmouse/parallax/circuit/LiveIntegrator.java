@@ -60,6 +60,10 @@ final class LiveIntegrator {
     /** The parts whose terminal currents a traced sample carries; null for every part. */
     private Set<String>            tracedParts;
     private long                   sampleIndex;
+    /** The time of sample 0: nought, or where a window of the run begins ({@link #skipTo}). */
+    private double                 origin;
+    /** The longest step the samples allow, as the trace set it: what {@link #skipTo} gives back once it has arrived. */
+    private double                 allowance;
     /** Every how many samples the current into each part's terminals is read as well; 0 reads none. */
     private int                    traceEvery;
     /** The stretch since the last traced sample, while the trace keeps one sample in several; null while it keeps each. */
@@ -95,6 +99,7 @@ final class LiveIntegrator {
         this.envelope = new NodeEnvelope(nodeCount);
         this.meters = new MeterRecorder(parts);
         this.interval = sampleInterval;
+        this.allowance = sampleInterval;
     }
 
     /**
@@ -106,14 +111,43 @@ final class LiveIntegrator {
      * @throws IllegalArgumentException when the circuit cannot be continued — its topology changed
      */
     static LiveIntegrator continuing(ElaboratedCircuit piece, LiveIntegrator previous, double sampleInterval) {
-        LiveIntegrator next = new LiveIntegrator(piece, sampleInterval);
+        Snapshot snapshot;
+        long sampleIndex;
         synchronized (previous) {
-            next.stepper.continueFrom(previous.stepper);
-            next.ledger.continueFrom(previous.ledger);
-            next.sampleIndex = sampleInterval == previous.interval ? previous.sampleIndex
-                    : (long) Math.ceil(previous.stepper.time() / sampleInterval - 1e-9);
+            snapshot = previous.snapshot();
+            sampleIndex = sampleInterval == previous.interval ? previous.sampleIndex : -1;
+        }
+        LiveIntegrator next = continuing(piece, snapshot, sampleInterval);
+        if (sampleIndex >= 0) {
+            next.sampleIndex = sampleIndex;
         }
         return next;
+    }
+
+    /**
+     * The piece going on from a snapshot of itself ({@link #snapshot}): the first sample is the first instant of the
+     * grid at or after where the snapshot stands.
+     *
+     * @throws IllegalArgumentException when the circuit cannot be continued — its topology changed
+     */
+    static LiveIntegrator continuing(ElaboratedCircuit piece, Snapshot snapshot, double sampleInterval) {
+        LiveIntegrator next = new LiveIntegrator(piece, sampleInterval);
+        next.stepper.continueFrom(snapshot.stepper());
+        next.ledger.continueFrom(snapshot.heats());
+        next.sampleIndex = (long) Math.ceil(snapshot.stepper().time() / sampleInterval - 1e-9);
+        return next;
+    }
+
+    /** Where the piece stands, kept apart from it: the integration and every part's heat. */
+    record Snapshot(TransientStepper.Snapshot stepper, double[][] heats) {
+
+        double time() {
+            return stepper.time();
+        }
+    }
+
+    synchronized Snapshot snapshot() {
+        return new Snapshot(stepper.snapshot(), ledger.snapshot());
     }
 
     /** The node names, in the order a sample reports them. */
@@ -139,7 +173,8 @@ final class LiveIntegrator {
         }
         traceEvery = every;
         // Every sample traced, steps keep to the sample, as they always did; one in several, to what accuracy needs.
-        stepper.allow(every > 1 ? Math.max(interval, Math.min(interval * every, ACCURATE_STEP)) : interval);
+        allowance = every > 1 ? Math.max(interval, Math.min(interval * every, ACCURATE_STEP)) : interval;
+        stepper.allow(allowance);
         trace = every > 1 ? new TraceRecorder(parts, nodeCount) : null;
     }
 
@@ -181,7 +216,7 @@ final class LiveIntegrator {
         }
         List<LiveSample> output = new ArrayList<>(count);
         for (int index = 0; index < count; index++) {
-            double at = sampleIndex * interval;
+            double at = sampleTime(sampleIndex);
             reach(at, 1);
             output.add(sampleAt(at, traceEvery > 0 && sampleIndex % traceEvery == 0, true));
             sampleIndex++;
@@ -206,19 +241,47 @@ final class LiveIntegrator {
             if (next >= end) {
                 break;
             }
-            double at = next * interval;
+            double at = sampleTime(next);
             reach(at, next - sampleIndex + 1);
             sampleIndex = next;
             traced.add(sampleAt(at, true, false));
             sampleIndex++;
         }
         if (sampleIndex < end) {
-            reach((end - 1) * interval, end - sampleIndex);
+            reach(sampleTime(end - 1), end - sampleIndex);
             sampleIndex = end;
         }
         // What the unread samples went through is no read sample's peak.
         envelope.forget();
         return traced;
+    }
+
+    /**
+     * Goes on, reading nothing, to {@code time}, and samples from there: sample 0 is then at {@code time}. The steps on
+     * the way are as long as accuracy allows — SPICE's TMAX —, not as the samples would make them, and the last lands
+     * on {@code time} exactly: a window of a run is reached at the cost of solving the run, not of sampling it.
+     */
+    synchronized void skipTo(double time) {
+        long steps = 0;
+        while (time - stepper.time() > stepper.minimumStep()) {
+            stepper.allow(Math.min(ACCURATE_STEP, time - stepper.time()));
+            stepper.step(gathering);
+            if (++steps > STEPS_PER_SAMPLE * 1000L) {
+                throw new IllegalArgumentException("The circuit needs too many steps near t = " + stepper.time() + " s.");
+            }
+        }
+        stepper.allow(allowance);
+        origin = time;
+        sampleIndex = 0;
+        // What the skipped stretch went through is no sample's peak.
+        envelope.forget();
+        if (trace != null) {
+            trace.clear();
+        }
+    }
+
+    private double sampleTime(long index) {
+        return origin + index * interval;
     }
 
     /** Steps until the integration has passed {@code at}, allowed so many steps for each of the samples it goes through. */

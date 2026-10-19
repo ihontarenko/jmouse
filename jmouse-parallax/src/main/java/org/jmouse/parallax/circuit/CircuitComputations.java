@@ -48,7 +48,9 @@ public final class CircuitComputations {
         public List<SettingSpecification> settings() {
             return List.of(SettingSpecification.integer("samples", 1000, 50, 100_000, "Time steps"),
                     SettingSpecification.flag("parts", false, "Every part's current too, for a sheet that shows them"),
-                    SettingSpecification.flag("levels", false, "The digital nodes' logic levels instead of the analog columns"));
+                    SettingSpecification.flag("levels", false, "The digital nodes' logic levels instead of the analog columns"),
+                    SettingSpecification.vector("window", List.of(), 2, 0, 1e6,
+                            "From and to, seconds: only this stretch, sampled finely — a zoom into an edge; none is the whole run"));
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -70,7 +72,8 @@ public final class CircuitComputations {
                 throw new IllegalArgumentException("The circuit has no digital nodes to show the logic levels of.");
             }
             boolean everyPart = settings.flag("parts") && !levels;
-            TransientRun run = TransientRun.of(elaborated, settings.integer("samples"), everyPart, progress);
+            double[] window = settings.vectorOr("window", null);
+            TransientRun run = TransientRun.of(elaborated, settings.integer("samples"), everyPart, window, progress);
             float[] times = floats(run.times());
             if (levels) {
                 return logicLevels(times, netlist.digitalNodes(), run.levels());

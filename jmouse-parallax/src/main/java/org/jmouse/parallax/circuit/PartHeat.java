@@ -14,6 +14,7 @@ import org.jmouse.formula.Symbols;
 import org.jmouse.parallax.numerics.NewtonSolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -185,10 +186,22 @@ final class PartHeat {
         return temperature() - arguments[powerPosition + 1];
     }
 
+    /** Its states where they stand, kept apart from it. */
+    double[] snapshot() {
+        return Arrays.copyOf(arguments, states.length);
+    }
+
     /** Goes on from where {@code previous} — the same law of the part it replaces — had brought its states. */
     void continueFrom(PartHeat previous) {
-        if (previous != null && previous.states.length == states.length) {
-            System.arraycopy(previous.arguments, 0, arguments, 0, states.length);
+        if (previous != null) {
+            continueFrom(previous.snapshot());
+        }
+    }
+
+    /** Goes on from states the same law had reached: of the part it replaces, or of itself earlier in the run. */
+    void continueFrom(double[] earlier) {
+        if (earlier != null && earlier.length == states.length) {
+            System.arraycopy(earlier, 0, arguments, 0, states.length);
             temperatureNow = temperature.evaluate(arguments);
         }
     }

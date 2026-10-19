@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * <pre>
  * int32    header length in bytes
- * bytes    header, UTF-8 JSON: { type: "frame", channels: [names in order], channelUnits: [each one's unit, "V", "A"
+ * bytes    header, UTF-8 JSON: { type: "frame" or "capture", channels: [names in order], channelUnits: [each one's unit, "V", "A"
  *                                    or "W"], levels: { node: volts }, load, played,
  *                                    parts: { part: [watts, °C, { terminal: amperes into it }, °C maximum, W rating,
  *                                                    "open" | "short" | null, { indicator: figure }] },
@@ -43,14 +43,16 @@ final class FrameEncoding {
     }
 
     /**
+     * @param type     "frame", a frame of the run; "capture", a stretch replayed finely
      * @param interval the time between samples
      * @param load     the share of the frame's wall time the server spent computing it
      * @param played   the speed the server plays at: the one asked for, or the one it holds while it cannot keep up
      */
-    static ByteBuffer encode(LiveCircuitSession.Frame frame, double interval, double load, double played, ObjectMapper mapper) {
+    static ByteBuffer encode(String type, LiveCircuitSession.Frame frame, double interval, double load, double played,
+                             ObjectMapper mapper) {
         List<String> channels = List.copyOf(frame.channels().keySet());
         Map<String, Object> header = new LinkedHashMap<>();
-        header.put("type", "frame");
+        header.put("type", type);
         header.put("channels", channels);
         header.put("channelUnits", channels.stream().map(channel -> frame.units().getOrDefault(channel, "V")).toList());
         header.put("levels", frame.levels());

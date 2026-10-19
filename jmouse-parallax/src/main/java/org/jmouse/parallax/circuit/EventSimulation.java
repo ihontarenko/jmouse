@@ -115,23 +115,31 @@ final class EventSimulation {
         settle(state, events);
     }
 
+    /** The discrete half where it stands, kept apart from it: every unit's, the node levels and the clock. */
+    record Snapshot(List<DigitalUnit.Snapshot> units, Map<String, LogicLevel> nodeLevels, double now) {
+    }
+
+    Snapshot snapshot() {
+        return new Snapshot(units.stream().map(DigitalUnit::snapshot).toList(), new LinkedHashMap<>(nodeLevels), now);
+    }
+
     /**
-     * Goes on from where {@code previous} is: the same circuit with other values — a wiper moved, a switch closed —
-     * keeps every discrete thing it had: each unit's states, its drivers with their pending transactions, its inputs,
-     * timers and periods, the sign of each watched expression, the node levels and the clock.
+     * Goes on from where it stood: the same circuit with other values — a wiper moved, a switch closed —, or the same
+     * circuit earlier in its run, keeps every discrete thing it had: each unit's states, its drivers with their pending
+     * transactions, its inputs, timers and periods, the sign of each watched expression, the node levels and the clock.
      *
      * @throws IllegalArgumentException when the two do not have the same units, drivers and handlers
      */
-    void continueFrom(EventSimulation previous) {
-        if (units.size() != previous.units.size()) {
+    void continueFrom(Snapshot previous) {
+        if (units.size() != previous.units().size()) {
             throw new IllegalArgumentException("The circuit's parts changed; it starts again.");
         }
         for (int index = 0; index < units.size(); index++) {
-            units.get(index).continueFrom(previous.units.get(index));
+            units.get(index).continueFrom(previous.units().get(index));
         }
         nodeLevels.clear();
-        nodeLevels.putAll(previous.nodeLevels);
-        now = previous.now;
+        nodeLevels.putAll(previous.nodeLevels());
+        now = previous.now();
     }
 
     /** The next instant something discrete is due, after {@code time}; infinity when nothing is. */

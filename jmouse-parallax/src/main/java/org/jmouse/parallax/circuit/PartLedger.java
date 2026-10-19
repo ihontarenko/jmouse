@@ -126,11 +126,20 @@ final class PartLedger {
     }
 
     /** Goes on as warm as {@code previous} left each device: the same netlist builds its devices in the same order. */
-    void continueFrom(PartLedger previous) {
-        int count = Math.min(read.length, previous.read.length);
+    /** Each warming device's heat states where they stand, by device; null for one that does not warm. */
+    double[][] snapshot() {
+        double[][] states = new double[heats.length][];
+        for (int index = 0; index < heats.length; index++) {
+            states[index] = heats[index] == null ? null : heats[index].snapshot();
+        }
+        return states;
+    }
+
+    void continueFrom(double[][] previous) {
+        int count = Math.min(heats.length, previous.length);
         for (int index = 0; index < count; index++) {
-            if (heats[index] != null && previous.heats[index] != null) {
-                heats[index].continueFrom(previous.heats[index]);
+            if (heats[index] != null) {
+                heats[index].continueFrom(previous[index]);
             }
         }
     }

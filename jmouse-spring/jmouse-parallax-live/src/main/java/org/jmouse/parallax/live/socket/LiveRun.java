@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 /**
@@ -40,6 +41,8 @@ import java.util.function.Function;
  *                       it plays, the more of its samples a frame traces for the sheet
  * → set     { part, parameter, value }  or  { parameter, value } for the circuit's own   ← changed { continued, controls }
  * → restart { source } or { definition }, [interval], [probes] — the edited circuit, run at once with its probes   ← started
+ * → capture { from, to, samples } — a stretch the run passed, replayed from where it stood just before and sampled
+ *                       finely; the run goes on   ← capture, binary like a frame, its header's type "capture"
  *                                                                                ← problem { message }
  * </pre>
  */
@@ -87,7 +90,7 @@ final class LiveRun {
     /** What a reader sends; every field but {@code type} belongs to some messages only. */
     record Message(String type, String objectId, String source, ObjectDefinition definition, Map<String, Double> values,
                    Double interval, Double speed, List<LiveCircuitSession.Probe> probes, String part,
-                   String parameter, Double value, Boolean gapless) {
+                   String parameter, Double value, Boolean gapless, Double from, Double to, Integer samples) {
     }
 
     private final LiveCircuits     circuits;
@@ -128,6 +131,8 @@ final class LiveRun {
     private double                      frameCost = Double.NaN;
     /** Samples this run is behind its speed by, a fraction of one carried from frame to frame. */
     private double                      due;
+    /** Whether a capture is being replayed: one at a time — an edge found while it runs is let go. */
+    private final AtomicBoolean         capturing = new AtomicBoolean();
     /** Every how many samples the session traces the whole circuit now. */
     private int                         tracedEvery = 1;
 
@@ -166,6 +171,7 @@ final class LiveRun {
             case "acquire" -> acquire(message.gapless());
             case "set" -> set(message);
             case "restart" -> restart(message);
+            case "capture" -> capture(message);
             default -> throw ParallaxProblem.invalid("'" + message.type() + "' is not something a running circuit does.");
         }
     }
@@ -307,6 +313,8 @@ final class LiveRun {
         // The share of the frame's period spent on it, encoding included: what the reader is shown as the server's load.
         long spent = System.nanoTime() - began;
         sendFrame(joined, spent / (FRAME_MILLISECONDS * 1e6));
+        // Where the run stands, for a capture to go back to: a few arrays, every frame.
+        session.checkpoint();
         govern(new FrameCost(read, readNanos, passed, passNanos, spent));
     }
 
@@ -633,7 +641,44 @@ final class LiveRun {
     }
 
     private void sendFrame(LiveCircuitSession.Frame frame, double load) {
-        output.binary(FrameEncoding.encode(frame, interval, load, played, mapper));
+        output.binary(FrameEncoding.encode("frame", frame, interval, load, played, mapper));
+    }
+
+    /**
+     * A stretch the run has passed, replayed finely from the checkpoint before it ({@link LiveCircuitSession#capture})
+     * and sent as one binary message; the run goes on meanwhile. Refused — as a problem the reader reads — when the
+     * stretch is older than the run keeps or not yet run; the run is not paused for that. Replayed on its own thread
+     * ({@link LiveCircuits#replays}), one at a time, while the run goes on.
+     */
+    private void capture(Message message) {
+        if (message.from() == null || message.to() == null || message.samples() == null) {
+            throw ParallaxProblem.invalid("A capture names its stretch, from and to, and its samples.");
+        }
+        LiveCircuitSession running;
+        double speed;
+        synchronized (this) {
+            requireSession();
+            running = session;
+            speed = played;
+        }
+        if (!capturing.compareAndSet(false, true)) {
+            reply(Map.of("type", "capture-refused", "message", "Still capturing the edge before; this one is let go."));
+            return;
+        }
+        circuits.replays().execute(() -> {
+            try {
+                LiveCircuitSession.Frame captured = running.capture(message.from(), message.to(), message.samples());
+                double step = (message.to() - message.from()) / (message.samples() - 1);
+                output.binary(FrameEncoding.encode("capture", captured, step, 0, speed, mapper));
+            } catch (IllegalArgumentException refused) {
+                reply(Map.of("type", "capture-refused", "message", refused.getMessage()));
+            } catch (RuntimeException defect) {
+                LOGGER.error("A capture failed", defect);
+                reply(Map.of("type", "capture-refused", "message", "The capture failed on an internal error: " + defect));
+            } finally {
+                capturing.set(false);
+            }
+        });
     }
 
     private void reply(Map<String, Object> message) {

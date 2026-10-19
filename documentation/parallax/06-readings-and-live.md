@@ -57,6 +57,20 @@ carries each node's lows and highs, and the dataset `TimeSeries.peaks` holds the
 went past the straight line between two samples; the computed oscilloscope takes them as the live one takes its peak
 detection. A switch's overshoot a nanosecond long, between samples 25 ns apart, is in no sample — it is in the peaks.
 
+The peaks say THAT something happened between two samples, never its shape. The shape comes from sampling the stretch
+finely, which costs nothing like sampling the whole run finely:
+
+```
+ computed transient, zoomed     TRANSIENT_RESPONSE { window [from, to], samples } — TransientRun.of(…, window):
+                                LiveIntegrator.skipTo(from) solves the run up to it reading nothing (steps up to
+                                10 µs, the last landing on `from`), then samples the window as finely as asked.
+                                The computed oscilloscope asks for it when fewer than 400 samples cross the
+                                screen, and draws it in place of the response's own samples there.
+ live run, "Capture edges"      the run keeps real time on a coarse stream (10 µs a sample, every one read); a
+                                checkpoint is kept every frame; each edge the trigger finds in the stream is
+                                replayed on the server from the checkpoint before it, finely, and shown instead.
+```
+
 ## The pieces together — LiveCircuitSolver
 
 Each piece samples at the same instants, so a sample of the whole is the pieces' samples placed in the whole
@@ -69,7 +83,15 @@ circuit's node order. A part the cut split between two pieces (a supply both use
  levels() every digital node's LogicLevel
  continuing(object, previous)   the same circuit with new values, from now: state, histories, digital life, heat
                                 carried; the integration restarts as at an edge. A topology change starts again.
+ checkpoint()                   where the run stands, kept apart from it — each piece's Snapshot: the stepper's
+                                time, unknowns, companions and digital life, every part's heat. A few arrays
+                                copied: cheap enough for every frame.
+ continuing(object, checkpoint, previous, interval)   the same circuit going on from a checkpoint.
 ```
+
+Every layer has `snapshot()` and `continueFrom(Snapshot)` — `TransientStepper`, `EventSimulation`, `DigitalUnit`,
+`DigitalDriver`, `PartHeat`, `PartLedger`. A moved slider, a new sample interval and a capture going back are one
+mechanism: going on from a snapshot. Going on from another solver is going on from its snapshot.
 
 ## The session — what a person watches
 
@@ -87,6 +109,9 @@ circuit's node order. A part the cut split between two pieces (a supply both use
                 the run goes on from where it was with the part failed, cooling by its own heat law
  PartDisplays   each part's `display` figures (a capacitor's charge, a lamp's glow), each an expression of
                 the same language an instrument reads; stresses at their worst over the frame
+ checkpoint()   the run's last 64 checkpoints, one a frame; any change of the circuit or the probes forgets them
+ capture(from, to, samples)   a stretch the run passed, replayed from the last checkpoint before it — a solver of
+                its own, equipped with the same probes, read by the same FrameReader —; the run goes on
 ```
 
 A frame (`LiveCircuitSession.Frame`) is then encoded by the live module (page 01).

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -39,6 +40,16 @@ public class LiveCircuits implements LiveActivity {
     private final ParallaxPlaces           places;
     private final ScheduledExecutorService clock = Executors.newScheduledThreadPool(STEPPING_THREADS, runnable -> {
         Thread thread = new Thread(runnable, "live-circuit");
+        thread.setDaemon(true);
+        return thread;
+    });
+
+    /**
+     * Where captures are replayed, all sockets together, one at a time: apart from the stepping threads, so a stretch of
+     * eighty thousand samples replayed finely never holds a running circuit's frames.
+     */
+    private final ExecutorService replays = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "live-capture");
         thread.setDaemon(true);
         return thread;
     });
@@ -127,8 +138,13 @@ public class LiveCircuits implements LiveActivity {
         return clock;
     }
 
+    ExecutorService replays() {
+        return replays;
+    }
+
     @PreDestroy
     void stop() {
         clock.shutdownNow();
+        replays.shutdownNow();
     }
 }

@@ -6,6 +6,9 @@ import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
 import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ObjectDefinition;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +23,17 @@ import java.util.stream.Collectors;
  * ({@link #restart}). On a realistic bench a part past its limit fails and the run goes on with it failed
  * ({@link PartFailures}). What a frame reads off the samples is the {@link FrameReader}'s. Every method is synchronised:
  * frames are produced by one thread while changes arrive on another.</p>
+ *
+ * <p>It keeps where the run stood a moment ago ({@link #checkpoint}), and a stretch the run has passed can be
+ * {@link #capture}d again from there, as finely as asked, while the run goes on: an edge a few nanoseconds long, seen in
+ * a stream sampled every ten microseconds, drawn as it happened.</p>
  */
 public final class LiveCircuitSession {
+
+    /** How many checkpoints are kept: a frame each, so about two seconds of a run. */
+    private static final int KEPT_CHECKPOINTS = 64;
+    /** How many samples a capture has at most. */
+    private static final int CAPTURED_SAMPLES = 200_000;
 
     /**
      * What a probe reads: a voltage between two nodes, the current through a part, the power a part takes, or what an
@@ -113,6 +125,8 @@ public final class LiveCircuitSession {
     private int               traceEvery;
     /** What the probes read off a frame's samples, built for the probes and the solver as they are now. */
     private FrameReader       reader;
+    /** Where the run stood at its last frames, oldest first; emptied by any change, which the past did not have. */
+    private final Deque<LiveCircuitSolver.Checkpoint> checkpoints = new ArrayDeque<>();
 
     public LiveCircuitSession(LiveCircuitSolver solver, List<Probe> probes) {
         this.solver = solver;
@@ -155,13 +169,87 @@ public final class LiveCircuitSession {
      * meter and the differences whose peaks they show; and reads its instruments again over the circuit it now runs.
      */
     private void equipSolver() {
-        List<String> order = solver.nodes();
-        solver.meter(probes.stream().filter(probe -> probe.quantity() != Quantity.VOLTAGE).map(Probe::part).collect(Collectors.toSet()));
-        solver.difference(probes.stream().filter(probe -> FrameReader.watchesDifference(probe, order))
+        equip(solver);
+        reader = new FrameReader(probes, instrumentReadings(probes), solver.nodes());
+        checkpoints.clear();
+    }
+
+    /** Tells a solver of this circuit what the probes need read: the parts they meter, the differences they show. */
+    private void equip(LiveCircuitSolver target) {
+        List<String> order = target.nodes();
+        target.meter(probes.stream().filter(probe -> probe.quantity() != Quantity.VOLTAGE).map(Probe::part).collect(Collectors.toSet()));
+        target.difference(probes.stream().filter(probe -> FrameReader.watchesDifference(probe, order))
                 .map(probe -> new NodeDifference(
                         NodeReference.of(order, probe.positive()).solverIndex(), NodeReference.of(order, probe.negative()).solverIndex()))
                 .toList());
-        reader = new FrameReader(probes, instrumentReadings(probes), order);
+    }
+
+    /**
+     * Keeps where the run stands now, for a capture to go back to: a few arrays copied, cheap enough for every frame.
+     * Only a session that knows its circuit can replay it.
+     */
+    public synchronized void checkpoint() {
+        if (given == null) {
+            return;
+        }
+        checkpoints.addLast(solver.checkpoint());
+        while (checkpoints.size() > KEPT_CHECKPOINTS) {
+            checkpoints.removeFirst();
+        }
+    }
+
+    /**
+     * A stretch the run has passed, from {@code from} to {@code to}, measured again on {@code samples} samples: replayed
+     * from the last checkpoint before it — the run itself goes on untouched —, solved to {@code from} as fast as accuracy
+     * allows, and sampled finely across it. The frame carries the probes' channels and peaks only.
+     *
+     * <p>Only the replay's preparing holds the session: the replay itself runs on a solver of its own, so the run's
+     * frames go on while a stretch of eighty thousand samples is computed. Held all through, it stopped them for a tenth
+     * of a second at every edge, and the bench stuttered.</p>
+     *
+     * @throws IllegalArgumentException when the stretch is older than the checkpoints kept, or not yet run
+     */
+    public Frame capture(double from, double to, int samples) {
+        return prepareReplay(from, to, samples).run();
+    }
+
+    /** A replay ready to run: its own solver, equipped as the run's, and its own reader of the same probes. */
+    private record Replay(LiveCircuitSolver solver, FrameReader reader, double from, int samples) {
+
+        Frame run() {
+            solver.skipTo(from);
+            List<LiveSample> captured = new ArrayList<>(samples);
+            while (captured.size() < samples) {
+                captured.addAll(solver.advance(Math.min(256, samples - captured.size())));
+            }
+            double[] time = captured.stream().mapToDouble(LiveSample::time).toArray();
+            return new Frame(time, reader.channels(captured), reader.units(), Map.of(), Map.of(), Trace.EMPTY, captured.size(),
+                    reader.peaks(captured));
+        }
+    }
+
+    private synchronized Replay prepareReplay(double from, double to, int samples) {
+        if (given == null) {
+            throw new IllegalArgumentException("This run cannot be replayed: it does not know its circuit.");
+        }
+        if (!(to > from) || samples < 2 || samples > CAPTURED_SAMPLES) {
+            throw new IllegalArgumentException("Capture a stretch forward in time, on 2…" + CAPTURED_SAMPLES + " samples.");
+        }
+        if (to > solver.time()) {
+            throw new IllegalArgumentException("That stretch has not been run yet.");
+        }
+        LiveCircuitSolver.Checkpoint start = null;
+        for (LiveCircuitSolver.Checkpoint candidate : checkpoints) {
+            if (candidate.time() <= from) {
+                start = candidate;
+            }
+        }
+        if (start == null) {
+            throw new IllegalArgumentException("That stretch is older than the run keeps; capture a later edge.");
+        }
+        LiveCircuitSolver replay = LiveCircuitSolver.continuing(failures.applyTo(given), start, solver, (to - from) / (samples - 1));
+        equip(replay);
+        return new Replay(replay, new FrameReader(probes, instrumentReadings(probes), replay.nodes()), from, samples);
     }
 
     /**
