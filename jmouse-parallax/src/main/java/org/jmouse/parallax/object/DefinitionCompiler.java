@@ -2,6 +2,7 @@ package org.jmouse.parallax.object;
 
 import org.jmouse.formula.FormulaException;
 import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.component.ComponentVocabulary;
 import org.jmouse.parallax.object.ObjectDefinition.AffineTransformation;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.Program;
@@ -213,14 +214,18 @@ public final class DefinitionCompiler {
         }
     }
 
-    /** A primitive may set any parameter its component declares, and nothing else. */
+    /**
+     * A primitive may set any parameter its component declares, and the bench's own figures — temperature, realistic,
+     * the tolerance corner — which every part reads and a bench other than nominal gives each of them.
+     */
     private static void checkPrimitiveOverrides(CompiledObject compiled, ObjectDefinition.CircuitElement element) {
         String reference = element.type().primitiveComponent();
         Set<String> declared = new HashSet<>();
         ComponentDocuments.read(compiled.componentSource(reference), reference, compiled.library())
                 .parameters().forEach(parameter -> declared.add(parameter.name()));
+        Set<String> bench = ComponentVocabulary.nominalBench().keySet();
         element.overrides().forEach((name, expression) -> {
-            if (!declared.contains(name)) {
+            if (!declared.contains(name) && !bench.contains(name)) {
                 throw new IllegalArgumentException("Part '" + element.id() + "': '" + reference + "' has no parameter '" + name
                         + "'; it has " + String.join(", ", new TreeSet<>(declared)) + ".");
             }
