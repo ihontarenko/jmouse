@@ -787,7 +787,7 @@ public class Catalogue {
         if (!(defined.definition() instanceof ObjectDefinition.Component written)) {
             return Optional.of("only a component is drawn with a symbol");
         }
-        return componentModels.bindingProblem(ComponentSources.readComponent(written.source()), symbol);
+        return componentModels.bindingProblem(written.source(), symbol);
     }
 
     private static DefinedObject.RelationKind relationKind(String kind) {

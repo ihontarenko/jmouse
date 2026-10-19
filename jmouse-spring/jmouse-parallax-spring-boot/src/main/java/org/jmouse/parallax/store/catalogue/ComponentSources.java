@@ -37,11 +37,12 @@ final class ComponentSources {
     /**
      * The component pin each port of a symbol is, in the symbol's port order; a port that is no pin is left out.
      *
+     * @param pins  the component's pins, its base's included: a part that `extends` one and writes none of its own
+     *              has them all from it, and read from its own text alone it had none and was drawn as a box
      * @param ports the ports the symbol draws
      */
-    static Map<String, String> pinsByPort(ExperienceDocument component, List<String> ports) {
+    static Map<String, String> pinsByPort(ExperienceDocument component, Set<String> pins, List<String> ports) {
         Map<String, String> written = writtenPorts(component);
-        Set<String> pins = pinNames(component);
         Map<String, String> bound = new LinkedHashMap<>();
         for (String port : ports) {
             String pin = written.getOrDefault(port, port);
@@ -56,9 +57,8 @@ final class ComponentSources {
      * Why a symbol cannot draw the component — a mapped port it does not draw, a mapped pin the component does not
      * have, a pin left without a port — or empty when every pin lands on a port of its own.
      */
-    static Optional<String> bindingProblem(ExperienceDocument component, String symbolSlug, List<String> ports) {
+    static Optional<String> bindingProblem(ExperienceDocument component, Set<String> pins, String symbolSlug, List<String> ports) {
         Map<String, String> written = writtenPorts(component);
-        Set<String> pins = pinNames(component);
         for (Map.Entry<String, String> entry : written.entrySet()) {
             if (!ports.contains(entry.getKey())) {
                 return Optional.of("'" + component.slug() + "' maps port '" + entry.getKey() + "', which "
@@ -69,7 +69,7 @@ final class ComponentSources {
                         + entry.getValue() + "', which is not one of its pins");
             }
         }
-        Map<String, String> bound = pinsByPort(component, ports);
+        Map<String, String> bound = pinsByPort(component, pins, ports);
         Set<String> landed = new LinkedHashSet<>(bound.values());
         if (landed.size() != bound.size()) {
             return Optional.of("'" + component.slug() + "' puts one pin on two ports of " + symbolSlug);
@@ -147,11 +147,6 @@ final class ComponentSources {
         return component.block(Block.Symbol.class).map(Block.Symbol::ports).orElse(Map.of());
     }
 
-    private static Set<String> pinNames(ExperienceDocument component) {
-        Set<String> names = new LinkedHashSet<>();
-        component.block(Block.Pins.class).ifPresent(pins -> pins.pins().forEach(pin -> names.add(pin.name())));
-        return names;
-    }
 
     static ExperienceDocument readComponent(String source) {
         try {

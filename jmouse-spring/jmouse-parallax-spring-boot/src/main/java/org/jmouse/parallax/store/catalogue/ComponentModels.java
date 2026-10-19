@@ -15,9 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Resolves component references within a circuit's catalogue or workspace boundary: {@code lm358} is the head revision
@@ -137,7 +140,7 @@ public class ComponentModels {
         MathematicalObject symbol = variants.isEmpty() ? null : readableSymbol(variants.getFirst()).orElse(null);
         String drawing = symbol == null ? null : drawingOf(symbol);
         Map<String, String> ports = drawing == null ? Map.of()
-                : ComponentSources.pinsByPort(document, portsOf(drawing));
+                : ComponentSources.pinsByPort(document, pinNames(model), portsOf(drawing));
         return new ModelView(model.name(), model.kind(), model.units(),
                 model.pins().stream().map(pin -> new PinView(pin.name(), pin.numbers(), pin.shared(), pin.nature().name(),
                         pin.output(), pin.description())).toList(),
@@ -154,8 +157,15 @@ public class ComponentModels {
      * Why a symbol cannot draw a component — see {@link ComponentSources#bindingProblem} — or empty when every pin of
      * the component lands on a port of the symbol.
      */
-    Optional<String> bindingProblem(ExperienceDocument component, MathematicalObject symbol) {
-        return ComponentSources.bindingProblem(component, symbol.getSlug(), portsOf(drawingOf(symbol)));
+    Optional<String> bindingProblem(String source, MathematicalObject symbol) {
+        ExperienceDocument component = ComponentSources.readComponent(source);
+        ComponentModel model = ComponentDocuments.read(source, component.slug(), forEditing());
+        return ComponentSources.bindingProblem(component, pinNames(model), symbol.getSlug(), portsOf(drawingOf(symbol)));
+    }
+
+    /** A model's pins, those of the base it extends included. */
+    private static Set<String> pinNames(ComponentModel model) {
+        return model.pins().stream().map(pin -> pin.name()).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public ComponentLibrary forCircuit(MathematicalObject circuit) {
