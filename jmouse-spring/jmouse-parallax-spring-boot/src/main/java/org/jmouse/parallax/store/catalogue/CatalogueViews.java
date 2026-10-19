@@ -42,7 +42,9 @@ public final class CatalogueViews {
                                 String category,
                                 int ambientDimension, String formulaLatex, Notation notation, boolean featured,
                                 MathematicalObject.Status status, Origin origin, Set<String> tags,
-                                RepresentationKind primaryRepresentation, int definitionRevision, Instant updatedAt) {
+                                RepresentationKind primaryRepresentation, int definitionRevision, Instant updatedAt,
+                                /** Why its text no longer reads, when the language moved on since it was saved; null when it reads. */
+                                String problem) {
     }
 
     public record PropertyView(String key, String label, String value) {

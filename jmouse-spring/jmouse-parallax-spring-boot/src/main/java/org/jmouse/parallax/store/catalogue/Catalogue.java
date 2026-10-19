@@ -843,7 +843,17 @@ public class Catalogue {
     // ── Internals: views ─────────────────────────────────────────────────────────────────────────────────────────
 
     ObjectSummary summary(MathematicalObject object) {
-        DefinedObject defined = documentOf(object);
+        DefinedObject defined;
+        try {
+            defined = documentOf(object);
+        } catch (ParallaxProblem.Invalid unreadable) {
+            // A text the language has moved on from since it was saved is still the object: listed from its index, with
+            // the reason, so it can be opened and mended. Read whole, one such text refused every list it was in.
+            return new ObjectSummary(object.getId(), object.getSlug(), object.getTitle(), object.getSummary(), object.getKind(),
+                    object.getKind().nature(), object.getCategoryCode(), 0, null, null, object.isFeatured(), object.getStatus(),
+                    CatalogueViews.Origin.of(object), Set.copyOf(object.getTags()), null, object.getRevision(),
+                    object.getUpdatedAt(), unreadable.getMessage());
+        }
         List<DefinedObject.Representation> representations = representationsOf(defined);
         RepresentationKind primary = representations.stream().filter(DefinedObject.Representation::primary).findFirst()
                 .or(() -> representations.stream().findFirst()).map(DefinedObject.Representation::kind).orElse(null);
@@ -851,7 +861,7 @@ public class Catalogue {
                 object.getKind().nature(), object.getCategoryCode(), defined.definition().ambientDimension(),
                 defined.formulaLatex(), notations.describe(defined.definition(), defined.formulaLatex()),
                 object.isFeatured(), object.getStatus(), CatalogueViews.Origin.of(object), Set.copyOf(object.getTags()), primary,
-                object.getRevision(), object.getUpdatedAt());
+                object.getRevision(), object.getUpdatedAt(), null);
     }
 
     private ObjectDetail detail(MathematicalObject object) {

@@ -111,7 +111,7 @@ public class Subjects {
         ObjectSummary summary = new ObjectSummary(null, null, title, description, definition.objectKind(),
                 definition.objectKind().nature(), null,
                 definition.ambientDimension(), notation.latex(), notation, false, null, null,
-                Set.of(), applicable.isEmpty() ? null : applicable.getFirst(), 0, null);
+                Set.of(), applicable.isEmpty() ? null : applicable.getFirst(), 0, null, null);
         return new ObjectDetail(summary, null, definition, 0, parameters, List.of(), List.of(), applicable, List.of(),
                 List.of(), null, 0, source, 0, false, null);
     }
