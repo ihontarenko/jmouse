@@ -11,7 +11,7 @@
    │  requireSolvable()                      a circuit with nothing to solve is refused here
    │
    ├─ BenchConditioning.apply                the bench written onto the parts
-   │     every part      ← overrides temperature (K), realistic, tolerance_corner   (when not nominal)
+   │     every part      ← overrides temperature (K), realistic, tolerance_corner, detail   (when not nominal)
    │     a part given    ← its own tolerance and temperature_coefficient
    │       its own spread
    │     an offset       ← a DC source of its own: in series with a voltage source (through node offset_N),
@@ -44,7 +44,7 @@ stand-ins — a conductance the bench wrote — and the engine adds its own late
 limit all read a part through it, so none can read another part than the solver solves:
 
 ```
- 1. the bench's figures as a nominal bench sets them   temperature = 298.15 K, realistic = 0, tolerance_corner = 0
+ 1. the bench's figures as a nominal bench sets them   temperature = 298.15 K, realistic = 0, tolerance_corner = 0, detail = 1
  2. the component's own parameters                     resistance = 1000, tolerance = 0.01, …
  3. a primitive's written value                        R1 resistor (a, b) 4k7  →  resistance = 4700
  4. what the part overrides                            Vos = 2 mV       every unit's

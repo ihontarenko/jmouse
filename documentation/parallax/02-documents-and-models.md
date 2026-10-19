@@ -46,6 +46,8 @@ And it reads, beside the document's own names, the names the engine gives every 
  temperature        the part's temperature, kelvin — the bench's, raised by its own heat on a realistic bench
  realistic          1 on a realistic bench, 0 on an ideal one
  tolerance_corner   −1, 0 or +1: which corner of its spread the part stands at
+ detail             the bench's level of detail: 0 draft, 1 standard, 2 precise — what it changes is the document's
+                    to say: `let stored : ratio = min(detail, 1)` times a junction's charge leaves it out of a draft
  time               the circuit's time, seconds
  power              what a heat law and an instrument read: the power the part takes, watts
 ```

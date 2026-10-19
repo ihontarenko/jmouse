@@ -14,6 +14,8 @@ import java.util.Map;
  *       own heat.</li>
  *   <li>{@link #REALISTIC} — 1 on a realistic bench, 0 on an ideal one.</li>
  *   <li>{@link #TOLERANCE_CORNER} — which corner of its spread a part stands at: −1, 0 or +1.</li>
+ *   <li>{@link #DETAIL} — the bench's level of detail: 0 draft, 1 standard, 2 precise; what it changes is the
+ *       document's to say.</li>
  *   <li>{@link #TIME} — the circuit's time, seconds.</li>
  *   <li>{@link #POWER} — what a heat law and an instrument read: the power the part takes, watts.</li>
  * </ul>
@@ -23,6 +25,7 @@ public final class ComponentVocabulary {
     public static final String TEMPERATURE      = "temperature";
     public static final String REALISTIC        = "realistic";
     public static final String TOLERANCE_CORNER = "tolerance_corner";
+    public static final String DETAIL           = "detail";
     public static final String TIME             = "time";
     public static final String POWER            = "power";
 
@@ -38,12 +41,13 @@ public final class ComponentVocabulary {
         figures.put(TEMPERATURE, PhysicalConstants.kelvin(BenchConditions.NOMINAL_TEMPERATURE));
         figures.put(REALISTIC, 0.0);
         figures.put(TOLERANCE_CORNER, 0.0);
+        figures.put(DETAIL, (double) BenchConditions.Detail.STANDARD.figure());
         return figures;
     }
 
     /** Whether a name is one the engine gives, which a document may not declare. */
     public static boolean isReserved(String name) {
-        return name.equals(TEMPERATURE) || name.equals(REALISTIC) || name.equals(TOLERANCE_CORNER)
+        return name.equals(TEMPERATURE) || name.equals(REALISTIC) || name.equals(TOLERANCE_CORNER) || name.equals(DETAIL)
                 || name.equals(TIME) || name.equals(POWER);
     }
 }

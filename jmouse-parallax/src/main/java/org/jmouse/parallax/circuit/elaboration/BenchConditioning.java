@@ -116,7 +116,8 @@ public final class BenchConditioning {
      * bench is realistic (1) or ideal (0) — an instrument's document decides from that how much it loads what it measures.
      */
     private static CircuitElement onTheBench(CircuitElement element, BenchConditions conditions) {
-        if (conditions.temperature() == BenchConditions.NOMINAL_TEMPERATURE && !conditions.realistic() && conditions.corner() == 0) {
+        if (conditions.temperature() == BenchConditions.NOMINAL_TEMPERATURE && !conditions.realistic() && conditions.corner() == 0
+                && conditions.detail() == BenchConditions.Detail.STANDARD) {
             return element;
         }
         Map<String, String> overrides = new LinkedHashMap<>(element.overrides() == null ? Map.of() : element.overrides());
@@ -128,6 +129,9 @@ public final class BenchConditioning {
         }
         if (conditions.corner() != 0) {
             overrides.put(ComponentVocabulary.TOLERANCE_CORNER, Integer.toString(conditions.corner()));
+        }
+        if (conditions.detail() != BenchConditions.Detail.STANDARD) {
+            overrides.put(ComponentVocabulary.DETAIL, Integer.toString(conditions.detail().figure()));
         }
         return new CircuitElement(element.id(), element.type(), element.positive(), element.negative(), element.value(),
                 element.component(), element.pins(), overrides, element.symbol());

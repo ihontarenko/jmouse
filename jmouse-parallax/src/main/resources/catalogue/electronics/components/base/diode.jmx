@@ -71,14 +71,18 @@ component "Diode" as diode type diode {
         let V_diode : voltage = j - cathode
         # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
         let T_junction : temperature = temperature
+        # On a draft bench (detail 0) the junctions store no charge: no capacitance, no transit time — the
+        # switching is instant and the run cheap. From standard on, all of it.
+        let stored : ratio = min(detail, 1)
         let R_series_now : resistance = R_series * (1 + resistance_temperature_coefficient * (T_junction - T_nominal))
         let V_breakdown_now : voltage = V_breakdown * (1 + breakdown_temperature_coefficient * (T_junction - T_nominal))
         let I_saturation_now : current = area * junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, emission_coefficient, E_gap)
         let I_recombination_now : current = area * junction_saturation(I_recombination, T_junction, T_nominal, saturation_temperature_exponent, recombination_emission_coefficient, E_gap)
         let I_diffusion : current = high_injection(junction_current(V_diode, I_saturation_now, emission_coefficient, T_junction), area * I_knee)
-        let I_generation : current = junction_current(V_diode, I_recombination_now, recombination_emission_coefficient, T_junction) * recombination_factor(V_diode, V_junction, grading_coefficient)
+        # Recombination in the depletion layer: a few percent of a forward current, left out of a draft as well.
+        let I_generation : current = stored * junction_current(V_diode, I_recombination_now, recombination_emission_coefficient, T_junction) * recombination_factor(V_diode, V_junction, grading_coefficient)
         let I_reverse_breakdown : current = breakdown_current(V_diode, V_breakdown_now, area * I_breakdown, emission_coefficient, T_junction)
-        let Q_junction : charge = depletion_charge(V_diode, area * C_junction_zero_bias, V_junction, grading_coefficient, forward_bias_coefficient) + transit_time * I_diffusion
+        let Q_junction : charge = stored * (depletion_charge(V_diode, area * C_junction_zero_bias, V_junction, grading_coefficient, forward_bias_coefficient) + transit_time * I_diffusion)
 
         let I_through : current = (anode - j) * area / R_series_now
 

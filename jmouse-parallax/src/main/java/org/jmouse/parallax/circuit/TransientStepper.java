@@ -63,6 +63,8 @@ final class TransientStepper {
     private final boolean             digital;
     /** Newton on this piece's system, settling as a transient step does. */
     private final CircuitNewton       newton;
+    /** How finely this piece is solved: the bench's level of detail. */
+    private final Precision           precision;
     /** The generators' signals, whose edges a step lands on when it would cross one. */
     private final List<SourceSignal>  signals;
     /** The longest step the devices allow — a generator's edges —; infinite when none limits it. */
@@ -86,7 +88,7 @@ final class TransientStepper {
     /**
      * @param interval the time between two samples: the longest step is one, until the caller allows more
      */
-    TransientStepper(Netlist netlist, List<Device> devices, EventSimulation events, double interval) {
+    TransientStepper(Netlist netlist, List<Device> devices, EventSimulation events, double interval, Precision precision) {
         this.netlist = netlist;
         this.system = new SparseSystem(netlist.size());
         this.events = events;
@@ -96,7 +98,8 @@ final class TransientStepper {
         this.nonlinearDevices = this.devices.stream().filter(Device::nonlinear).toList();
         this.storingDevices = this.devices.stream().filter(Device::stores).toList();
         this.nonlinear = !nonlinearDevices.isEmpty();
-        this.newton = new CircuitNewton(netlist, nonlinear, CircuitNewton.Settling.TRANSIENT);
+        this.precision = precision;
+        this.newton = new CircuitNewton(netlist, nonlinear, precision.settling());
         this.digital = events.active();
         this.signals = netlist.elements().stream().map(Netlist.Element::signal).filter(Objects::nonNull).toList();
         double limit = Double.POSITIVE_INFINITY;
@@ -267,7 +270,7 @@ final class TransientStepper {
             // Through three points the prediction misses by about thirteen times the trapezoidal rule's own error (Milne);
             // through two it is a coarser bound and is taken as it is.
             double error = solution == null || earlier == null || fresh ? 0
-                    : truncationRatio(solution, prediction) / (quadratic ? MILNE : 1);
+                    : truncationRatio(solution, prediction) / (quadratic ? MILNE : 1) / precision.errorBudget();
             double order = quadratic ? 3 : 2;
             boolean accurate = solution != null && error <= 1;
             // A crossing inside the step: aim the next attempt just past it, on the line between the step's ends —

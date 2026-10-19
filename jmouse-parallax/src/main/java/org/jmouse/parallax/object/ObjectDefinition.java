@@ -1151,7 +1151,38 @@ public sealed interface ObjectDefinition {
      * @param failures    the parts that have failed, by id, and how, as their components say they fail
      */
     record BenchConditions(double temperature, int corner, Map<String, Tolerance> tolerances, Map<String, String> offsets,
-                           boolean realistic, Map<String, Failure> failures) {
+                           boolean realistic, Map<String, Failure> failures, Detail detail) {
+
+        /**
+         * How much of the physics a run computes, and how finely: each part's equations read it as {@code detail}
+         * (0, 1, 2) and decide what it changes — a diode without its junction's charge on a draft bench —, and the engine
+         * solves to the precision it names. Datasheet checks and the comparison with SPICE run at {@link #STANDARD}.
+         */
+        public enum Detail {
+            /** Fast and rough: the effects a document reserves for detail left out, a looser error per step. */
+            DRAFT(0),
+            /** What every check is held to: the documents' full physics at SPICE's own tolerances. */
+            STANDARD(1),
+            /** Finer: an error per step ten times tighter, and whatever a document adds at this level. */
+            PRECISE(2);
+
+            private final int figure;
+
+            Detail(int figure) {
+                this.figure = figure;
+            }
+
+            /** What a part's equations read as {@code detail}. */
+            public int figure() {
+                return figure;
+            }
+        }
+
+        /** These conditions at the level of detail every check runs at. */
+        public BenchConditions(double temperature, int corner, Map<String, Tolerance> tolerances, Map<String, String> offsets,
+                               boolean realistic, Map<String, Failure> failures) {
+            this(temperature, corner, tolerances, offsets, realistic, failures, Detail.STANDARD);
+        }
 
         /**
          * How a part fails, as its component writes it: {@code failure open} — nothing conducts any more —, or
@@ -1212,7 +1243,7 @@ public sealed interface ObjectDefinition {
         public BenchConditions withFailure(String part, Failure failure) {
             Map<String, Failure> all = new LinkedHashMap<>(failures);
             all.put(part, failure);
-            return new BenchConditions(temperature, corner, tolerances, offsets, realistic, all);
+            return new BenchConditions(temperature, corner, tolerances, offsets, realistic, all, detail);
         }
 
         public static final double NOMINAL_TEMPERATURE = 25;
@@ -1250,11 +1281,13 @@ public sealed interface ObjectDefinition {
             }
             offsets = Map.copyOf(given);
             failures = failures == null ? Map.of() : Map.copyOf(failures);
+            detail = detail == null ? Detail.STANDARD : detail;
         }
 
         /** Whether these conditions change nothing: what a circuit without any is run under. */
         public boolean nominal() {
-            return temperature == NOMINAL_TEMPERATURE && corner == 0 && offsets.isEmpty() && !realistic && failures.isEmpty();
+            return temperature == NOMINAL_TEMPERATURE && corner == 0 && offsets.isEmpty() && !realistic && failures.isEmpty()
+                    && detail == Detail.STANDARD;
         }
 
     }

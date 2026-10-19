@@ -1759,6 +1759,7 @@ These are not component parameters: a component may not declare them. The bench 
 | `temperature` | the part's own temperature in kelvin: the bench's, 25 °C unless set (`bench for 1 ms at 85 °C`), and on a realistic bench raised by its own heat; every model writes its drift against its own `T_nominal` |
 | `realistic` | 0 on an ideal bench, 1 on a realistic one (`bench for 1 ms realistic`): self-heating, an instrument's burden, a shunt's drop, burning out past `T_maximum` |
 | `tolerance_corner` | −1, 0 or +1: every `tolerance` and every `*_spread` is taken at its low end, its value, or its high end |
+| `detail` | the bench's level of detail — 0 draft, 1 standard (every check), 2 precise; the junction bases multiply their stored charge by `min(detail, 1)`, so a draft switches instantly |
 | `time` | the circuit's time, for generators and behaviour |
 | per-part conditions | a bench may give any part its own tolerance and ppm/°C, and any source an offset (`BenchConditions`) |
 

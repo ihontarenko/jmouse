@@ -25,13 +25,6 @@ import java.util.Set;
 final class LiveIntegrator {
 
     private static final int    STEPS_PER_SAMPLE = 2000;
-    /**
-     * The longest step accuracy allows once a trace keeps one sample in several, as SPICE's TMAX is its print step: the
-     * interval the engine was matched against ngspice at. The error control alone lets a slow exponential take long
-     * steps whose error gathers where a comparator turns — a 555 ran 0.4 % fast with steps up to 2.5 ms. Tied to the
-     * oscilloscope's interval instead, a 200 ns screen stepped a 2 Hz sine five million times a second.
-     */
-    private static final double ACCURATE_STEP    = 1e-5;
 
     /**
      * What one part did since the last reading: its average power, its current now, how warm it is, and its states now.
@@ -46,6 +39,8 @@ final class LiveIntegrator {
     }
 
     private final TransientStepper stepper;
+    /** How finely the bench asks this piece to be solved. */
+    private final Precision        precision;
     private final PartIndex        parts;
     private final PartLedger       ledger;
     private final NodeEnvelope     envelope;
@@ -91,7 +86,8 @@ final class LiveIntegrator {
         if (realistic) {
             devices.add(new NoiseInjection(devices, sampleInterval, 1));
         }
-        this.stepper = new TransientStepper(netlist, devices, events, sampleInterval);
+        this.precision = Precision.of(bench);
+        this.stepper = new TransientStepper(netlist, devices, events, sampleInterval, precision);
         this.parts = new PartIndex(stepper.devices());
         this.ledger = new PartLedger(parts, stepper.devices().size(), realistic);
         this.gathering = ledger::accepted;
@@ -173,7 +169,7 @@ final class LiveIntegrator {
         }
         traceEvery = every;
         // Every sample traced, steps keep to the sample, as they always did; one in several, to what accuracy needs.
-        allowance = every > 1 ? Math.max(interval, Math.min(interval * every, ACCURATE_STEP)) : interval;
+        allowance = every > 1 ? Math.max(interval, Math.min(interval * every, precision.accurateStep())) : interval;
         stepper.allow(allowance);
         trace = every > 1 ? new TraceRecorder(parts, nodeCount) : null;
     }
@@ -264,7 +260,7 @@ final class LiveIntegrator {
     synchronized void skipTo(double time) {
         long steps = 0;
         while (time - stepper.time() > stepper.minimumStep()) {
-            stepper.allow(Math.min(ACCURATE_STEP, time - stepper.time()));
+            stepper.allow(Math.min(precision.accurateStep(), time - stepper.time()));
             stepper.step(gathering);
             if (++steps > STEPS_PER_SAMPLE * 1000L) {
                 throw new IllegalArgumentException("The circuit needs too many steps near t = " + stepper.time() + " s.");

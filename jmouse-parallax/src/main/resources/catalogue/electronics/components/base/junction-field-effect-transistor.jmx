@@ -78,8 +78,11 @@ component "Junction FET" as junction-field-effect-transistor type jfet {
         let channel : current = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
 
         let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
-        let Q_gate_source : charge = depletion_charge(V_gs, C_gate_source, V_junction, 0.5, forward_bias_coefficient)
-        let Q_gate_drain : charge = depletion_charge(V_gd, C_gate_drain, V_junction, 0.5, forward_bias_coefficient)
+        # On a draft bench (detail 0) the junctions store no charge: no capacitance, no transit time — the
+        # switching is instant and the run cheap. From standard on, all of it.
+        let stored : ratio = min(detail, 1)
+        let Q_gate_source : charge = stored * depletion_charge(V_gs, C_gate_source, V_junction, 0.5, forward_bias_coefficient)
+        let Q_gate_drain : charge = stored * depletion_charge(V_gd, C_gate_drain, V_junction, 0.5, forward_bias_coefficient)
 
         current drain -> di = (drain - di) / R_drain
         current si -> source = (si - source) / R_source
