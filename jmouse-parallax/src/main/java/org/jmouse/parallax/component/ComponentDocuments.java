@@ -373,7 +373,8 @@ public final class ComponentDocuments {
             }
             List<String> choices = parameter.values().stream().map(choice -> TextValues.unquoted(choice.text())).toList();
             try {
-                texts.put(parameter.name(), new TextParameter(TextValues.unquoted(parameter.value().text()), choices));
+                texts.put(parameter.name(), new TextParameter(TextValues.unquoted(parameter.value().text()), choices,
+                        parameter.description()));
             } catch (IllegalArgumentException refused) {
                 throw new IllegalArgumentException("parameter '" + parameter.name() + "': " + refused.getMessage(), refused);
             }

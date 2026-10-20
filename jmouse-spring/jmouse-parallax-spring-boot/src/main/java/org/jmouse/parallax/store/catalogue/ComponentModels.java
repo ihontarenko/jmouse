@@ -67,6 +67,8 @@ public class ComponentModels {
     public record PinView(String name, java.util.Map<String, Integer> numbers, boolean shared, String nature,
                           boolean output, String description) { }
     public record ParameterView(String name, double value, boolean perUnit, String description) { }
+    /** A text parameter: its words, the only words a part may write when it lists them, and what it is. */
+    public record TextView(String name, String value, List<String> choices, String description) { }
 
     /**
      * A component as an editor and a schematic need it.
@@ -85,7 +87,7 @@ public class ComponentModels {
      *                        sets on its own; empty for a component
      */
     public record ModelView(String name, String kind, List<String> units, List<PinView> pins,
-                            List<ParameterView> parameters, List<String> symbol, String symbolReference,
+                            List<ParameterView> parameters, List<TextView> texts, List<String> symbol, String symbolReference,
                             List<String> symbolVariants, String symbolDrawing, Map<String, String> symbolPorts,
                             List<MeasureView> measures, Map<String, LeadView> leads, Map<String, String> displayUnits,
                             Map<String, String> displayCaptions,
@@ -168,7 +170,9 @@ public class ComponentModels {
                 model.pins().stream().map(pin -> new PinView(pin.name(), pin.numbers(), pin.shared(), pin.nature().name(),
                         pin.output(), pin.description())).toList(),
                 model.parameters().stream().map(parameter -> new ParameterView(parameter.name(), parameter.value(),
-                        parameter.perUnit(), parameter.description())).toList(), model.symbol(),
+                        parameter.perUnit(), parameter.description())).toList(),
+                model.texts().entrySet().stream().map(written -> new TextView(written.getKey(), written.getValue().value(),
+                        written.getValue().choices(), written.getValue().description())).toList(), model.symbol(),
                 symbol == null ? null : symbol.getSlug(), variants, drawing, ports,
                 model.measures().entrySet().stream().map(measure -> new MeasureView(measure.getKey(), measure.getValue().unit(), measure.getValue().signal())).toList(),
                 model.leads().entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,
@@ -209,7 +213,7 @@ public class ComponentModels {
         }, port.direction().equals("output"), null)).toList();
         List<ParameterView> parameters = sheet.parameters().stream()
                 .map(parameter -> new ParameterView(parameter.name(), parameter.defaultValue(), false, parameter.label())).toList();
-        return new ModelView(sheet.title(), SHEET_KIND, List.of(), pins, parameters, symbol, null, List.of(), null, Map.of(),
+        return new ModelView(sheet.title(), SHEET_KIND, List.of(), pins, parameters, List.of(), symbol, null, List.of(), null, Map.of(),
                 List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR, sheet.parameters());
     }
 

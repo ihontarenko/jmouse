@@ -7,13 +7,15 @@ import java.util.stream.Collectors;
  * A component's text parameter: the words it holds unless a part writes others, and — when it declares them — the only
  * words a part may write: {@code operation = "write" in ["write", "read", "write-read"]}.
  *
- * @param value   the words, unquoted
- * @param choices what a part may write over it; empty for any text
+ * @param value       the words, unquoted
+ * @param choices     what a part may write over it; empty for any text
+ * @param description what it is, as the document says; empty when it says nothing
  */
-public record TextParameter(String value, List<String> choices) {
+public record TextParameter(String value, List<String> choices, String description) {
 
     public TextParameter {
         choices = List.copyOf(choices);
+        description = description == null ? "" : description;
         if (!choices.isEmpty() && !choices.contains(value)) {
             throw new IllegalArgumentException("\"" + value + "\" is not one of its choices " + listed(choices));
         }
