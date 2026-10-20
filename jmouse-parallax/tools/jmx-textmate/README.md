@@ -18,6 +18,10 @@ What it colours:
   `vertices`, `edges`, `points`, `items` and a course's `step "…" { }`; a `graph`'s `clock t from … to … speed … loop`,
   `panes rows|columns|grid { name plane|space|circuit|values … }` (`x`, `y`, `z`, `uses`, `over`, `camera`) and `lines`
   (a line's name, a label `"… {value} …"`, `until`, `at`, `in pane`, `color n`, `hidden`);
+- a living symbol: `input name [range]`, elements (`path`, `box`, `circle`, `line`, `group`) with their names, placing
+  words (`at`, `size`, `radius`, `from`, `to`, `pivot`) and braces of their own, properties marked `live` or `animate`
+  (`live rotate = between(-30 deg, 0 deg, closed)`), `live when <condition> { … }` layers, `hide`, and the input bindings
+  in `symbol uses … { closed = pressed }`;
 - values with their units as one token pair — `2.52 nA`, `0.3 V/us`, `2 mA/V^2`, `3 1/s`, `10 kOhm`, `10 kΩ`,
   `52.4%`, `90 deg`, `25 °C` — ranges `a .. b`, tolerances `+- 5%` and the imaginary unit after a number (`1.5i`).
 

@@ -1827,6 +1827,24 @@
               "include": "#comment"
             },
             {
+              "comment": "closed = pressed: what one of the symbol's inputs is drawn from, an expression over the part.",
+              "begin": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(=)",
+              "beginCaptures": {
+                "1": {
+                  "name": "variable.parameter.input.jmx"
+                },
+                "2": {
+                  "name": "keyword.operator.assignment.jmx"
+                }
+              },
+              "end": "(?=[;#}]|$)",
+              "patterns": [
+                {
+                  "include": "#formula"
+                }
+              ]
+            },
+            {
               "match": "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)",
               "captures": {
                 "1": {
@@ -1958,8 +1976,50 @@
       ]
     },
     "drawing": {
-      "comment": "size W x H, path \"…\", pin NAME at x, y [\"label\"], label NAME at x, y.",
+      "comment": "size W x H, path \"…\", pin NAME at x, y [\"label\"], label NAME at x, y — and a living drawing: input NAME [range], elements with properties, live when layers, hide.",
       "patterns": [
+        {
+          "include": "#living-layer"
+        },
+        {
+          "include": "#living-element-block"
+        },
+        {
+          "include": "#living-property"
+        },
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*\\b(input)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.drawing.jmx"
+            },
+            "2": {
+              "name": "variable.parameter.input.jmx"
+            }
+          }
+        },
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*\\b(hide)\\b",
+          "captures": {
+            "1": {
+              "name": "keyword.other.drawing.jmx"
+            }
+          }
+        },
+        {
+          "match": "(?:^|(?<=[;{]))[ \\t]*\\b(?:(live)[ \\t]+)?(box|circle|line|group)\\b(?:[ \\t]+(?!(?:(?:at|size|radius|from|to|pivot))\\b)([A-Za-z_][A-Za-z0-9_]*))?",
+          "captures": {
+            "1": {
+              "name": "storage.modifier.live.jmx"
+            },
+            "2": {
+              "name": "keyword.other.drawing.jmx"
+            },
+            "3": {
+              "name": "entity.name.tag.element.jmx"
+            }
+          }
+        },
         {
           "match": "(?:^|(?<=[;{]))[ \\t]*\\b(size)\\b",
           "captures": {
@@ -1969,15 +2029,25 @@
           }
         },
         {
-          "match": "(?:^|(?<=[;{]))[ \\t]*\\b(path)[ \\t]*(\"[^\"]*\"|'[^']*')",
+          "match": "(?:^|(?<=[;{]))[ \\t]*\\b(?:(live)[ \\t]+)?(path)(?:[ \\t]+([A-Za-z_][A-Za-z0-9_]*))?[ \\t]*(\"[^\"]*\"|'[^']*')",
           "captures": {
             "1": {
-              "name": "keyword.other.drawing.jmx"
+              "name": "storage.modifier.live.jmx"
             },
             "2": {
+              "name": "keyword.other.drawing.jmx"
+            },
+            "3": {
+              "name": "entity.name.tag.element.jmx"
+            },
+            "4": {
               "name": "string.quoted.path.jmx"
             }
           }
+        },
+        {
+          "match": "\\b((?:at|size|radius|from|to|pivot))\\b",
+          "name": "keyword.other.placing.jmx"
         },
         {
           "match": "(?:^|(?<=[;{]))[ \\t]*\\b(pin|label)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)[ \\t]+(at)\\b",
@@ -2010,6 +2080,125 @@
         {
           "match": "-",
           "name": "keyword.operator.jmx"
+        }
+      ]
+    },
+    "living-layer": {
+      "comment": "live when <condition> { … }: a layer drawn while its condition on the inputs holds.",
+      "name": "meta.block.living-layer.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(live)[ \\t]+(when)\\b([^{#]*)(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.modifier.live.jmx"
+        },
+        "2": {
+          "name": "keyword.control.when.jmx"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#formula"
+            }
+          ]
+        },
+        "4": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#drawing"
+        }
+      ]
+    },
+    "living-element-block": {
+      "comment": "[live] path|box|circle|line|group [name] [placing] { properties and elements }: an element with braces of its own.",
+      "name": "meta.block.living-element.jmx",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*\\b(?:(live)[ \\t]+)?(path|box|circle|line|group)\\b([^{#\\n]*)(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.modifier.live.jmx"
+        },
+        "2": {
+          "name": "keyword.other.drawing.jmx"
+        },
+        "3": {
+          "patterns": [
+            {
+              "match": "\\b((?:at|size|radius|from|to|pivot))\\b",
+              "name": "keyword.other.placing.jmx"
+            },
+            {
+              "match": "\"[^\"]*\"|'[^']*'",
+              "name": "string.quoted.path.jmx"
+            },
+            {
+              "include": "#quantity"
+            },
+            {
+              "match": "\\bx\\b",
+              "name": "keyword.operator.by.jmx"
+            },
+            {
+              "match": "[A-Za-z_][A-Za-z0-9_]*",
+              "name": "entity.name.tag.element.jmx"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.comma.jmx"
+            },
+            {
+              "match": "-",
+              "name": "keyword.operator.jmx"
+            }
+          ]
+        },
+        "4": {
+          "name": "punctuation.section.block.begin.jmx"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.jmx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#drawing"
+        }
+      ]
+    },
+    "living-property": {
+      "comment": "[live|animate] rotate = between(-30 deg, 0 deg, closed): a property, marked as it changes, and its value in jMF.",
+      "begin": "(?:^|(?<=[;{]))[ \\t]*(?:\\b(live|animate)[ \\t]+)?\\b((?:rotate|move|scale|opacity|visible|fill|stroke|glow|level|dash|thickness))[ \\t]*(=)",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.modifier.live.jmx"
+        },
+        "2": {
+          "name": "variable.other.property.jmx"
+        },
+        "3": {
+          "name": "keyword.operator.assignment.jmx"
+        }
+      },
+      "end": "(?=[;#}]|$)",
+      "patterns": [
+        {
+          "include": "#formula"
         }
       ]
     },

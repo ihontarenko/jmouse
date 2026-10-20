@@ -44,6 +44,10 @@ const OUTPUT_TYPES = ["scalar", "series", "curve", "surface", "volume", "field",
   "matrix", "table", "signal", "logic", "density"];
 /** Capability.java: what `without` may withhold. */
 const CAPABILITIES = ["play", "run", "interact", "resample", "probe", "sweep", "check", "execute"];
+/** SymbolReader: the words that place a drawing's element. */
+const ELEMENT_PLACING = ["at", "size", "radius", "from", "to", "pivot"];
+/** LivingDrawing: the properties an element is drawn with. */
+const LIVING_PROPERTIES = ["rotate", "move", "scale", "opacity", "visible", "fill", "stroke", "glow", "level", "dash", "thickness"];
 /** ComponentCheck: what `measure` reads. */
 const MEASUREMENTS = ["operating", "final", "levels", "maximum", "minimum", "average", "frequency", "duty", "time"];
 
@@ -622,6 +626,13 @@ addRules({
         patterns: [
           include("comment"),
           {
+            comment: "closed = pressed: what one of the symbol's inputs is drawn from, an expression over the part.",
+            begin: `${LINE}(${NAME})[ \\t]*(=)`,
+            beginCaptures: { "1": { name: "variable.parameter.input.jmx" }, "2": { name: "keyword.operator.assignment.jmx" } },
+            end: LINE_END,
+            patterns: [include("formula")]
+          },
+          {
             match: `${LINE}(${NAME})[ \\t]+(${NAME})`,
             captures: { "1": { name: "entity.name.tag.port.jmx" }, "2": { name: "variable.other.pin.jmx" } }
           }
@@ -672,16 +683,41 @@ addRules({
     patterns: [include("comment"), include("drawing")]
   },
   "drawing": {
-    comment: "size W x H, path \"…\", pin NAME at x, y [\"label\"], label NAME at x, y.",
+    comment: "size W x H, path \"…\", pin NAME at x, y [\"label\"], label NAME at x, y — and a living drawing: input NAME [range], elements with properties, live when layers, hide.",
     patterns: [
+      include("living-layer"),
+      include("living-element-block"),
+      include("living-property"),
+      {
+        match: `${LINE}\\b(input)[ \\t]+(${NAME})`,
+        captures: { "1": { name: "keyword.other.drawing.jmx" }, "2": { name: "variable.parameter.input.jmx" } }
+      },
+      {
+        match: `${LINE}\\b(hide)\\b`,
+        captures: { "1": { name: "keyword.other.drawing.jmx" } }
+      },
+      {
+        match: `${LINE}\\b(?:(live)[ \\t]+)?(box|circle|line|group)\\b(?:[ \\t]+(?!(?:${words(ELEMENT_PLACING)})\\b)(${NAME}))?`,
+        captures: {
+          "1": { name: "storage.modifier.live.jmx" },
+          "2": { name: "keyword.other.drawing.jmx" },
+          "3": { name: "entity.name.tag.element.jmx" }
+        }
+      },
       {
         match: `${LINE}\\b(size)\\b`,
         captures: { "1": { name: "keyword.other.drawing.jmx" } }
       },
       {
-        match: `${LINE}\\b(path)[ \\t]*("[^"]*"|'[^']*')`,
-        captures: { "1": { name: "keyword.other.drawing.jmx" }, "2": { name: "string.quoted.path.jmx" } }
+        match: `${LINE}\\b(?:(live)[ \\t]+)?(path)(?:[ \\t]+(${NAME}))?[ \\t]*("[^"]*"|'[^']*')`,
+        captures: {
+          "1": { name: "storage.modifier.live.jmx" },
+          "2": { name: "keyword.other.drawing.jmx" },
+          "3": { name: "entity.name.tag.element.jmx" },
+          "4": { name: "string.quoted.path.jmx" }
+        }
       },
+      { match: `\\b(${words(ELEMENT_PLACING)})\\b`, name: "keyword.other.placing.jmx" },
       {
         match: `${LINE}\\b(pin|label)[ \\t]+(${NAME})[ \\t]+(at)\\b`,
         captures: {
@@ -696,6 +732,55 @@ addRules({
       { match: ",", name: "punctuation.separator.comma.jmx" },
       { match: "-", name: "keyword.operator.jmx" }
     ]
+  },
+  "living-layer": {
+    comment: "live when <condition> { … }: a layer drawn while its condition on the inputs holds.",
+    name: "meta.block.living-layer.jmx",
+    begin: `${LINE}\\b(live)[ \\t]+(when)\\b([^{#]*)(\\{)`,
+    beginCaptures: {
+      "1": { name: "storage.modifier.live.jmx" },
+      "2": { name: "keyword.control.when.jmx" },
+      "3": { patterns: [include("formula")] },
+      "4": blockBegin
+    },
+    end: "\\}",
+    endCaptures: blockEnd,
+    patterns: [include("comment"), include("drawing")]
+  },
+  "living-element-block": {
+    comment: "[live] path|box|circle|line|group [name] [placing] { properties and elements }: an element with braces of its own.",
+    name: "meta.block.living-element.jmx",
+    begin: `${LINE}\\b(?:(live)[ \\t]+)?(path|box|circle|line|group)\\b([^{#\\n]*)(\\{)`,
+    beginCaptures: {
+      "1": { name: "storage.modifier.live.jmx" },
+      "2": { name: "keyword.other.drawing.jmx" },
+      "3": {
+        patterns: [
+          { match: `\\b(${words(ELEMENT_PLACING)})\\b`, name: "keyword.other.placing.jmx" },
+          { match: "\"[^\"]*\"|'[^']*'", name: "string.quoted.path.jmx" },
+          include("quantity"),
+          { match: "\\bx\\b", name: "keyword.operator.by.jmx" },
+          { match: NAME, name: "entity.name.tag.element.jmx" },
+          { match: ",", name: "punctuation.separator.comma.jmx" },
+          { match: "-", name: "keyword.operator.jmx" }
+        ]
+      },
+      "4": blockBegin
+    },
+    end: "\\}",
+    endCaptures: blockEnd,
+    patterns: [include("comment"), include("drawing")]
+  },
+  "living-property": {
+    comment: "[live|animate] rotate = between(-30 deg, 0 deg, closed): a property, marked as it changes, and its value in jMF.",
+    begin: `${LINE}(?:\\b(live|animate)[ \\t]+)?\\b(${words(LIVING_PROPERTIES)})[ \\t]*(=)`,
+    beginCaptures: {
+      "1": { name: "storage.modifier.live.jmx" },
+      "2": { name: "variable.other.property.jmx" },
+      "3": { name: "keyword.operator.assignment.jmx" }
+    },
+    end: LINE_END,
+    patterns: [include("formula")]
   },
   "parts-block": braceBlock("parts", "parts", [include("part-line")]),
   "part-line": {
