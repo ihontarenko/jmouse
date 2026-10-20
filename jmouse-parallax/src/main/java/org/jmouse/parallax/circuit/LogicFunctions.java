@@ -35,6 +35,9 @@ import java.util.function.LongBinaryOperator;
  *   <li>{@code row_of(value, width)} — a number as a row of that many levels.</li>
  * </ul>
  *
+ * <p>{@code known(value)} — whether a value is a number at all: what a behaviour asks before counting on, rather than
+ * comparing a number with {@code X}.</p>
+ *
  * <h3>An unknown stays unknown</h3>
  * <p>A level a part cannot know — an input left floating, a bus with a bit released — reaches the behaviour as {@code X}
  * or {@code Z}. Whatever is worked out from it is {@code X} too, as a real register holds garbage after a clock edge with
@@ -72,6 +75,7 @@ final class LogicFunctions implements Extension {
                     return shifted;
                 }),
                 function("value_of", 1, (arguments) -> DigitalUnit.busValue(Arrays.asList(DigitalUnit.arrayOf(arguments.get(0))))),
+                function("known", 1, (arguments) -> arguments.get(0) instanceof Number),
                 function("row_of", 2, (arguments) -> {
                     int width = index(wholeOf(arguments.get(1), "row_of"), "row_of");
                     Object value = arguments.get(0);

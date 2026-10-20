@@ -105,7 +105,15 @@ final class DigitalUnit {
         this.argumentsBefore = newArguments();
         this.script = model.model().behaviour();
         if (script != null) {
-            script.getFunctions().forEach(function -> functions.put(function.getName(), function));
+            script.getFunctions().forEach(function -> {
+                // A function the language already has would win the call and leave the part's own unheard — refused
+                // here, by name, rather than failing at the first event with a message about something else.
+                if (simulation.extensions.getFunction(function.getName()) != null) {
+                    throw new IllegalArgumentException(model.model().name() + ": function '" + function.getName()
+                            + "' is the language's own; give the part's another name.");
+                }
+                functions.put(function.getName(), function);
+            });
             for (HandlerNode handler : script.getHandlers()) {
                 String argument = argumentOf(handler);
                 handlerArguments.put(handler, argument);
