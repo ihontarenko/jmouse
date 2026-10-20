@@ -7,7 +7,6 @@ import org.jmouse.el.type.ValueType;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 🔌 Core extension point for the view engine.
@@ -91,20 +90,6 @@ public interface Extension {
      */
     default List<Filter> getFilters() {
         return Collections.emptyList();
-    }
-
-    /**
-     * Returns the words that end an expression where it could otherwise go on: the words a language writes after an
-     * expression on the same line — {@code R = 10 kOhm in 1 .. 100 log} ends its value at {@code in}, and {@code log}
-     * ends its range —, so that an operator parser, juxtaposition included, does not read them as operands.
-     *
-     * <p>A boundary ends an expression only where it could continue, after a complete operand: at the start of one it is
-     * an ordinary name, so {@code log(x)} is still a call.</p>
-     *
-     * @return the words, or an empty set
-     */
-    default Set<String> getExpressionBoundaries() {
-        return Collections.emptySet();
     }
 
     /**

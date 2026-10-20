@@ -48,7 +48,7 @@ public class QuantityParser implements Parser {
             return Optional.empty();
         }
         TokenCursor.Savepoint afterNumber = cursor.savepoint();
-        if (atUnit(cursor, context)) {
+        if (atUnit(cursor)) {
             boolean joined = SourceReading.touches(cursor, cursor.lookAt(-1), cursor.current());
             String unit = SourceReading.touchingWord(cursor, SEPARATORS);
             Optional<Quantity> quantity = Quantity.of(Double.parseDouble(number.get()), unit);
@@ -91,12 +91,12 @@ public class QuantityParser implements Parser {
         return token != null && token.type() instanceof BasicToken basic && NUMBERS.contains(basic);
     }
 
-    /** Whether a unit may begin where the cursor stands: a word, not a separator, a text or a language's boundary. */
-    private static boolean atUnit(TokenCursor cursor, ParserContext context) {
+    /** Whether a unit may begin where the cursor stands: a word, not a separator or a text. */
+    private static boolean atUnit(TokenCursor cursor) {
         if (!cursor.hasNext() || cursor.isCurrent(BasicToken.T_EOL, BasicToken.T_NEW_LINE, BasicToken.T_STRING)) {
             return false;
         }
         Token token = cursor.current();
-        return !SEPARATORS.contains(token.value()) && !context.endsExpression(cursor);
+        return !SEPARATORS.contains(token.value());
     }
 }

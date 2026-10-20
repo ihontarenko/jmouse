@@ -1,7 +1,6 @@
 package org.jmouse.el;
 
 import org.jmouse.el.extension.CoreExtension;
-import org.jmouse.el.extension.Extension;
 import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.DefaultLexer;
@@ -16,7 +15,6 @@ import org.jmouse.el.parser.QuantityParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,12 +63,6 @@ class QuantityParserTest {
     private static Read read(String text) {
         StandardExtensionContainer extensions = new StandardExtensionContainer();
         extensions.importExtension(new CoreExtension());
-        extensions.importExtension(new Extension() {
-            @Override
-            public Set<String> getExpressionBoundaries() {
-                return Set.of("in");
-            }
-        });
         ParserContext context = new DefaultParserContext(extensions);
         TokenCursor cursor = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer()))
                 .tokenize(new StringSource("quantity", text));
