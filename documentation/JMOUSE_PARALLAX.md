@@ -583,6 +583,33 @@ expect "forward voltage falls as it warms" from "VF temperature coefficient, abo
     range) or part settings. A DC sweep is a few such points: `operating out with V_in = 3 V`.
 - the criterion — `near 6.86 kHz +- 5%`, `within 26 V .. 30 V` (either end may be left open), `is 1`.
 
+### Digital parts: buses, bus lines and inherited protocols
+
+```text
+pins {
+    output[0..7] digital output 15, 1, 2, 3, 4, 5, 6, 7    ← a bus: pins output_0 … output_7, read and driven as one number
+    sda digital bidirectional open-drain 5                 ← drives its line and reads it back; a driven 1 lets it go
+    scl digital input 6
+}
+state {
+    memory[256] = 255 discrete                             ← a row of states: item(memory, i), with(memory, i, v)
+}
+```
+
+| Rule | What it means |
+|---|---|
+| Direction | `input` reads its line, `output` drives it, `bidirectional` does both: a bus line a part talks and listens on. In a handler a pin that reads is its LINE (what another part pulls it to), an output alone is what it drives. |
+| `open-drain` | A 1 driven on the pin is released (Z), for a pull-up to raise: I²C's lines, a wired-OR interrupt. |
+| A bus is digital | `channel[0..7] analog …` is refused: a voltage has no bits. Write analog pins one by one. |
+| Equations reach a digital pin | A digital pin an equation names (a pull-up written as a current, `current Vcc -> port_a_0 = …`) puts its node in the analog solver, whatever else is on the net. |
+| Row slots in figures | A row state's slot is `name_index` in a `display` or `measure` figure (`cell_5 = shown_5`), as a bus's bits are `pin_index`. |
+| Inherited behaviour | A part that `extends` a base with a `behaviour` keeps it even when it writes its own: both sets of handlers run, the base's discrete states are the part's, and a function the part writes again replaces the base's. So a protocol is written once — `base/i2c-target.jmx` — and each chip writes only its hooks (`own_address`, `received(value, index)`, `transmitted(index)`, `stopped()`). |
+| Names that clash | A function named like a state, parameter or pin is refused (an assignment would write one and an equation read the other); so is a function named like one of the language's; so is a parameter named `value` (a part line's shown text). |
+
+Instruments that drive buses from the bench: `i2c-controller` (write, read, or write and read back; the last byte read on a data bus), `spi-controller` (mode 0, up to four bytes) and `lcd-driver` (an HD44780 over 8 bits), each with `repeat_every`.
+
+A symbol may draw characters: `live glyph c0 at x, y size 7 x 12 { live character = cell_0 }` draws the printable ASCII character of the code — the cells of `lcd-1602-symbol`.
+
 ### A circuit
 
 ```jmx
@@ -901,6 +928,8 @@ One socket = one `LiveRun`.
 | in (JSON text, `type`) | `start` · `pause` · `resume` · `step` · `reset` · `probes` · `pace` (`speed`, a share of real time) · `sample` (`interval`) · `set` (a live part or a parameter, from now) · `restart` (an edited text, at once, with `probes`) |
 | out (JSON text) | `started` · `changed` (`continued`, `controls`, `time`) · `problem` (`message`) |
 | out (binary) | `frame` — `FrameEncoding`: int32 header length, JSON header (`channels`, `channelUnits`, `levels`, `load`, `parts`, `trace`, `traceUnits`), padding to 8, float64 first time and step, int32 count, float32 readings per channel, then the traced moments (float64 times, float32 columns) |
+
+A probe of quantity `LEVEL` is a logic analyser's channel: on a digital node it reads the event solver's level on every sample (1, 0, −1 unknown, −2 let go; `channelUnits` says `level`), on an analog node the voltage, for the analyser's own thresholds. An oscilloscope probe on a digital node, clipped to ground, is read as a level rather than refused. The browser's analyser (`@jmouse/parallax/logic`) keeps a channel as its edges and decodes I²C, SPI and UART from them; a decoder is a registry entry.
 
 ## Wiring checklist for a host
 
