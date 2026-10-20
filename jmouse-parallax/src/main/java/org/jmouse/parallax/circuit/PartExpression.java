@@ -14,8 +14,11 @@ import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Symbols;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -27,6 +30,9 @@ import java.util.stream.Stream;
  * instrument, so a meter nobody has thought of yet is written in its own document.
  */
 final class PartExpression {
+
+    /** A name in an expression: what a pin, a state, a slot or a parameter is written as. */
+    private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
 
     private final String part;
     private final RealFunction function;
@@ -57,9 +63,12 @@ final class PartExpression {
             String key = wiredKey(element, model, pin);
             return key == null ? ObjectDefinition.Circuit.GROUND : element.pins().get(key);
         }).toList();
-        // A row state is read slot by slot — `ddram_5` —; a display cannot take a whole row.
+        // A row state is read slot by slot — `ddram_5` —; a display cannot take a whole row. Only the slots the expression
+        // names are bound: a 256-byte memory would otherwise be 256 arguments of every figure the part shows.
+        Set<String> named = new HashSet<>();
+        IDENTIFIER.matcher(expression).results().forEach(match -> named.add(match.group()));
         List<String> states = model.states().stream().flatMap(state -> state.initial() instanceof Object[] row
-                ? IntStream.range(0, row.length).mapToObj(index -> slotName(state.name(), index))
+                ? IntStream.range(0, row.length).mapToObj(index -> slotName(state.name(), index)).filter(named::contains)
                 : Stream.of(state.name())).toList();
         Map<String, Double> parameters = circuit.parameters(model, element, "");
         // The arguments: each pin's current in a slot of its own, by the pin's position; then each pin's voltage by its

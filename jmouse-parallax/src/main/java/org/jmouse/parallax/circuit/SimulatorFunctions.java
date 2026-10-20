@@ -21,8 +21,8 @@ final class SimulatorFunctions {
     }
 
     /**
-     * What a behaviour may call besides jMS's own vocabulary: {@code drive}, {@code schedule}, {@code since},
-     * {@code V}, {@code item}, {@code with} and the family's {@code delay_scale}. Nothing reaches outside the unit.
+     * What a behaviour may call besides jMS's own vocabulary: {@code drive}, {@code schedule}, {@code since}, {@code item},
+     * {@code with}, {@code levels}, {@code pin_voltage} and the family's {@code delay_scale}. Nothing reaches outside the unit.
      */
     static final class Functions implements Extension {
         @Override
@@ -44,7 +44,11 @@ final class SimulatorFunctions {
                         copy[(int) number(arguments.get(1))] = arguments.get(2);
                         return copy;
                     }),
-                    function("delay_scale", (arguments, scope) -> scope.unit().delayScale(number(arguments.get(0)))));
+                    function("delay_scale", (arguments, scope) -> scope.unit().delayScale(number(arguments.get(0)))),
+                    // A bus as the row of its bits' levels, each as it stands — for value_of(levels('port_a'), 0).
+                    function("levels", (arguments, scope) -> scope.unit().busLevels(String.valueOf(arguments.get(0)), scope.state())),
+                    // An analog pin's voltage by its name: one of eight inputs chosen by a number, 'channel_' ~ index.
+                    function("pin_voltage", (arguments, scope) -> scope.unit().analogPinVoltage(String.valueOf(arguments.get(0)), scope.state())));
         }
 
         private interface Body {

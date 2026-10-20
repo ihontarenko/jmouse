@@ -7,7 +7,9 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.script.el.node.FunctionDeclarationNode;
 import org.jmouse.script.el.node.ScriptNode;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -30,7 +32,8 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
  * every part of a logic family shares.</p>
  */
 public record ComponentModel(String name, boolean family, String kind, Map<String, List<String>> header,
-                             List<String> units, List<Parameter> parameters, List<Pin> pins, Map<String, List<String>> buses,
+                             List<String> units, List<Parameter> parameters, Map<String, String> texts, List<Pin> pins,
+                             Map<String, List<String>> buses,
                              List<String> nodes, List<String> digitalNodes,
                              List<String> symbol, List<SubcircuitLine> subcircuit, List<String> formulas, List<State> states,
                              Map<String, String> locals, Map<String, ValueType> localTypes, List<Equation> equations,
@@ -43,6 +46,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         header = Map.copyOf(header);
         units = List.copyOf(units);
         parameters = List.copyOf(parameters);
+        // Its text parameters, by name, in the order written: what a behaviour reads as words — a message, a label.
+        texts = orderedCopy(texts);
         pins = List.copyOf(pins);
         // Each bus of pins, its bits in order, the first the least significant: what a behaviour reads as one number.
         buses = orderedCopy(buses);
@@ -89,7 +94,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
 
     /** This model with another heat law: the one a part warms by when it writes none of its own. */
     ComponentModel withHeat(Heat law) {
-        return new ComponentModel(name, family, kind, header, units, parameters, pins, buses, nodes, digitalNodes, symbol, subcircuit,
+        return new ComponentModel(name, family, kind, header, units, parameters, texts, pins, buses, nodes, digitalNodes, symbol, subcircuit,
                 formulas, states, locals, localTypes, equations, behaviour, expectations, displays, measures, leads,
                 displayUnits, displayCaptions, law);
     }
@@ -117,7 +122,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         base.parameters.forEach(parameter -> merged.put(parameter.name(), parameter));
         parameters.forEach(parameter -> merged.put(parameter.name(), parameter));
         return new ComponentModel(name, false, kind.isEmpty() ? base.kind : kind, header,
-                units.isEmpty() ? base.units : units, List.copyOf(merged.values()), pins.isEmpty() ? base.pins : pins,
+                units.isEmpty() ? base.units : units, List.copyOf(merged.values()), byName(base.texts, texts),
+                pins.isEmpty() ? base.pins : pins,
                 pins.isEmpty() ? base.buses : buses,
                 behaves ? nodes : base.nodes, behaves ? digitalNodes : base.digitalNodes,
                 symbol.isEmpty() ? base.symbol : symbol, behaves ? subcircuit : base.subcircuit,
@@ -257,15 +263,49 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
     }
 
     /**
-     * Whether its equations carry a current into this pin or read its voltage. A digital pin they reach — an I/O pin with
-     * a pull-up written as a current — puts its node in the analog solver, whatever else sits on that net: a level alone
-     * has no voltage to read and takes no current.
+     * The names its equations carry a current between or read. A digital pin among them — an I/O pin with a pull-up
+     * written as a current — puts its node in the analog solver, whatever else sits on that net: a level alone has no
+     * voltage to read and takes no current. Worked out once per model by whoever asks often.
      */
-    public boolean equationsReach(String pin) {
-        Pattern named = Pattern.compile("\\b" + Pattern.quote(pin) + "\\b");
-        return equations.stream().anyMatch(equation -> pin.equals(equation.positive()) || pin.equals(equation.negative())
-                || (equation.formula() != null && named.matcher(equation.formula()).find()));
+    public Set<String> namesReachedByEquations() {
+        Set<String> names = new HashSet<>();
+        for (Equation equation : equations) {
+            if (equation.positive() != null) {
+                names.add(equation.positive());
+            }
+            if (equation.negative() != null) {
+                names.add(equation.negative());
+            }
+            if (equation.formula() != null) {
+                IDENTIFIER.matcher(equation.formula()).results().forEach(match -> names.add(match.group()));
+            }
+        }
+        return names;
     }
+
+    /**
+     * The states its equations read, by name: every single state, and of a row only the slots the equations name —
+     * {@code registers_12}, a register's bits feeding a pull-up — as {@code row_index}, the way a display reads them.
+     */
+    public List<String> equationStateNames() {
+        Set<String> reached = namesReachedByEquations();
+        List<String> names = new ArrayList<>();
+        for (State state : states) {
+            if (state.initial() instanceof Object[] row) {
+                for (int index = 0; index < row.length; index++) {
+                    if (reached.contains(state.name() + "_" + index)) {
+                        names.add(state.name() + "_" + index);
+                    }
+                }
+            } else {
+                names.add(state.name());
+            }
+        }
+        return names;
+    }
+
+    /** A name in a formula: what a pin, a state or a parameter is written as. */
+    private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
 
     /**
      * {@code name = 2.52 nA [per unit] ["what it is"]}.

@@ -215,6 +215,7 @@ public final class ComponentDocuments {
         List<State> states = document.block(Block.State.class).map(block -> block.variables().stream()
                 .map(variable -> new State(variable.name(), initialOf(variable, document),
                         variable.discrete(), variable.description())).toList()).orElse(List.of());
+        requireDistinctSlots(document, states, pins, parameters);
         Map<String, List<String>> buses = new LinkedHashMap<>();
         document.block(Block.Pins.class).ifPresent(block -> block.buses().forEach(bus -> buses.put(bus.name(), bus.pins())));
         Map<String, String> locals = new LinkedHashMap<>();
@@ -238,12 +239,35 @@ public final class ComponentDocuments {
             }
         }));
         return new ComponentModel(document.title(), document.kind() == Kind.FAMILY, document.type().orElse(""),
-                header(document, library), units, parameters, pins, buses, nodes, digitalNodes, symbol(document, buses),
+                header(document, library), units, parameters, texts(document), pins, buses, nodes, digitalNodes, symbol(document, buses),
                 subcircuit(document, pins), formulas(document, library), states, locals, localTypes, equations,
                 document.block(Block.Behaviour.class).map(Block.Behaviour::script).orElse(null),
                 expectations(document, values), displays(document), measures(document), leads(document, pins),
                 document.block(Block.Display.class).map(Block.Display::units).orElse(Map.of()),
                 document.block(Block.Display.class).map(Block.Display::captions).orElse(Map.of()), heatOf(document, library));
+    }
+
+    /**
+     * A row state's slots are read by their own names — {@code shown_5} —, so none of them may be the name of a state, a
+     * pin or a parameter of the part: one name, two values, and the figure would read whichever came last.
+     */
+    private static void requireDistinctSlots(ExperienceDocument document, List<State> states, List<Pin> pins,
+                                             List<Parameter> parameters) {
+        Set<String> names = new HashSet<>();
+        states.forEach(state -> names.add(state.name()));
+        pins.forEach(pin -> names.add(pin.name()));
+        parameters.forEach(parameter -> names.add(parameter.name()));
+        for (State state : states) {
+            if (state.initial() instanceof Object[] row) {
+                for (int index = 0; index < row.length; index++) {
+                    String slot = state.name() + "_" + index;
+                    if (names.contains(slot)) {
+                        throw new IllegalArgumentException(document.title() + ": '" + slot + "' is a slot of the row '"
+                                + state.name() + "' and also a name of its own; give one of them another name.");
+                    }
+                }
+            }
+        }
     }
 
     /** How each pin's lead looks, as written; a pin the component does not have is refused. */
@@ -340,11 +364,22 @@ public final class ComponentDocuments {
         };
     }
 
+    /** Each text parameter by name, unquoted: {@code first_line = "Hello"} is {@code first_line → Hello}. */
+    private static Map<String, String> texts(ExperienceDocument document) {
+        Map<String, String> texts = new LinkedHashMap<>();
+        document.parameters().stream().filter(parameter -> parameter.has(Block.ParameterFlag.TEXT))
+                .forEach(parameter -> texts.put(parameter.name(), TextValues.unquoted(parameter.value().text())));
+        return texts;
+    }
+
     /** Each parameter in SI; an expression is computed from the parameters written before it. */
     private static List<Parameter> parameters(ExperienceDocument document) {
         List<Parameter> parameters = new ArrayList<>();
         Map<String, Double> known = new LinkedHashMap<>();
         for (Block.Parameter parameter : document.parameters()) {
+            if (parameter.has(Block.ParameterFlag.TEXT)) {
+                continue;
+            }
             if (parameter.name().equals(ComponentVocabulary.REALISTIC)) {
                 throw new IllegalArgumentException("'realistic' is the bench's — 1 on a realistic bench, 0 on an ideal one —, "
                         + "given to every component's equations; it cannot be a parameter.");
@@ -403,8 +438,7 @@ public final class ComponentDocuments {
                 pin.attributes(), pin.description());
     }
 
-    /** A number, {@code X}, {@code Z}, or a list of them: what a state starts as. */
-    /** Where a state starts: its value, or — a row of states — that value in every slot. */
+    /** Where a state starts: a number, {@code X}, {@code Z} or a list of them — or, a row of states, that value in every slot. */
     private static Object initialOf(Block.StateVariable variable, ExperienceDocument document) {
         Object value = initial(variable.initial().text(), document);
         if (variable.length() == 0) {

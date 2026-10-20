@@ -199,6 +199,14 @@ final class TransientStepper {
         return digital ? Map.copyOf(events.levels()) : Map.of();
     }
 
+    /**
+     * The levels as they stood at {@code at}, a moment within the last accepted step: a sample interpolated there sees
+     * the edges that came before it and not the ones after. Now's levels when nothing changed since.
+     */
+    Map<String, LogicLevel> levelsAt(double at) {
+        return digital && events.changedAfter(at) ? Map.copyOf(events.levelsAt(at)) : levels();
+    }
+
     /** How many times a digital node's level has changed so far: unchanged, {@link #levels()} would answer the same. */
     long levelChanges() {
         return digital ? events.levelChanges() : 0;
@@ -296,6 +304,7 @@ final class TransientStepper {
             }
             companion = companionTrial;
             listener.accepted(solution, time + attempt, attempt);
+            double started = time;
             oldest = restart ? null : earlier;
             oldestStep = earlierStep;
             earlier = state;
@@ -306,6 +315,10 @@ final class TransientStepper {
             restart = landsOnStop && stopIsEdge || carriesJump;
             if (digital && events.advance(state, time)) {
                 restart = true;
+            }
+            if (digital) {
+                // A sample is read between this step's start and its end: no reader rolls a level back past the start.
+                events.forgetChangesUpTo(started);
             }
             step = restart ? Math.min(maximumStep, crossingResolution * 4) : Math.min(attempt * stepFactor(error, order), maximumStep);
             return attempt;

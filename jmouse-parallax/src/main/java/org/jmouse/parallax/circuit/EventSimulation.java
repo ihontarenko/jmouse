@@ -7,7 +7,9 @@ import org.jmouse.script.el.ScriptExtension;
 import org.jmouse.script.el.budget.ScriptBudget;
 import org.jmouse.script.el.node.HandlerNode;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,15 @@ final class EventSimulation {
     final Map<String, LogicLevel> nodeLevels = new LinkedHashMap<>();
     /** Counts every change of a node's level: a reader copies the levels again only when it moved. */
     private long levelChanges;
+    /**
+     * The recent changes of node levels, oldest first: what a sample read between two steps rolls back to see the levels as
+     * they stood at its own instant. Kept only until a reader says it has passed them ({@link #forgetChangesUpTo}).
+     */
+    private final ArrayDeque<LevelChange> recentChanges = new ArrayDeque<>();
+
+    /** One node's level changing at an instant, and what it was before. */
+    record LevelChange(double time, String node, LogicLevel previous) {
+    }
     final List<OutputBridge> bridges = new ArrayList<>();
     private final List<Netlist.Element> pinCapacitances = new ArrayList<>();
     final StandardExtensionContainer extensions = new StandardExtensionContainer();
@@ -142,6 +153,7 @@ final class EventSimulation {
         }
         nodeLevels.clear();
         nodeLevels.putAll(previous.nodeLevels());
+        recentChanges.clear();
         levelChanges++;
         now = previous.now();
     }
@@ -208,6 +220,32 @@ final class EventSimulation {
         return levelChanges;
     }
 
+    /** The levels as they stood at {@code time}: now's, with every change made after it rolled back, newest first. */
+    Map<String, LogicLevel> levelsAt(double time) {
+        Map<String, LogicLevel> levels = new LinkedHashMap<>(nodeLevels);
+        Iterator<LevelChange> newestFirst = recentChanges.descendingIterator();
+        while (newestFirst.hasNext()) {
+            LevelChange change = newestFirst.next();
+            if (change.time() <= time) {
+                break;
+            }
+            levels.put(change.node(), change.previous());
+        }
+        return levels;
+    }
+
+    /** Whether any level changed after {@code time}: if none did, the levels at that time are now's. */
+    boolean changedAfter(double time) {
+        return !recentChanges.isEmpty() && recentChanges.peekLast().time() > time;
+    }
+
+    /** Lets go of the changes a reader will not roll back again: those at or before {@code time}. */
+    void forgetChangesUpTo(double time) {
+        while (!recentChanges.isEmpty() && recentChanges.peekFirst().time() <= time) {
+            recentChanges.removeFirst();
+        }
+    }
+
     // ── one instant ──────────────────────────────────────────────────────────────────────────────────────────────
 
     private boolean settle(double[] state, List<DigitalEvent> initial) {
@@ -243,7 +281,11 @@ final class EventSimulation {
             }
         }
         for (String node : touchedNodes) {
-            if (nodeLevels.put(node, resolve(driversByNode.get(node))) != nodeLevels.get(node)) {
+            LogicLevel previous = nodeLevels.get(node);
+            LogicLevel resolved = resolve(driversByNode.get(node));
+            if (resolved != previous) {
+                nodeLevels.put(node, resolved);
+                recentChanges.addLast(new LevelChange(now, node, previous));
                 levelChanges++;
             }
         }
@@ -299,9 +341,12 @@ final class EventSimulation {
         return changed;
     }
 
+    /**
+     * The states as they stand, apart from the map they are kept in. A row is a value no function changes in place —
+     * {@code with}, {@code shift_in} and the rest give a new one —, so the copy shares the rows: a 256-byte memory is not
+     * cloned for every edge a handler runs on.
+     */
     static Map<String, Object> copy(Map<String, Object> state) {
-        Map<String, Object> copy = new LinkedHashMap<>();
-        state.forEach((name, value) -> copy.put(name, value instanceof Object[] array ? array.clone() : value));
-        return copy;
+        return new LinkedHashMap<>(state);
     }
 }

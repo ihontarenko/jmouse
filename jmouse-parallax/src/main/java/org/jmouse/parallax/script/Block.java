@@ -31,7 +31,11 @@ public sealed interface Block {
     }
 
     /** What a parameter is besides its value; {@code EXACT} keeps an integer as written, to any number of digits. */
-    enum ParameterFlag { LOG, INTEGER, ANIMATE, LIVE, PER_UNIT, EXACT }
+    /**
+     * What a parameter is besides its value. {@code TEXT} is not written as a word: a value in quotes —
+     * {@code first_line = "Hello"} — makes it, and a text has no range, step or unit.
+     */
+    enum ParameterFlag { LOG, INTEGER, ANIMATE, LIVE, PER_UNIT, EXACT, TEXT }
 
     /**
      * {@code R = 10 kOhm in 100 Ohm .. 1 MOhm log "resistance"}.
@@ -130,17 +134,17 @@ public sealed interface Block {
         }
     }
 
-    /** {@code x = 1 continuous "…"}; a discrete state is written only by behaviour. Initial values may be {@code X}. */
     /**
      * One state: {@code x = 1 continuous}, {@code stored = X discrete}, or a row of them — {@code memory[256] = 0
-     * discrete}, every slot starting at that value, read with {@code item(memory, i)} and written with {@code with}.
+     * discrete}, every slot starting at that value, read with {@code item(memory, i)} and written with {@code with}. A
+     * discrete state is written only by behaviour; an initial value may be {@code X}.
      *
      * @param length how many slots a row has; 0 for a single value
      */
     record StateVariable(String name, SourceText initial, boolean discrete, Optional<Range> range, String description, int length) {
         public StateVariable {
             if (length < 0) {
-                throw new IllegalArgumentException("A row of states has a positive length.");
+                throw new IllegalArgumentException("A row of states cannot have a negative length.");
             }
         }
     }

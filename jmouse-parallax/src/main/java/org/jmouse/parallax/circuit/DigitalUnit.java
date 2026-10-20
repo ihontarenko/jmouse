@@ -21,11 +21,13 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 /** A unit's discrete life: its script, states, drivers, inputs, watched expressions, periods and timers. */
@@ -39,6 +41,8 @@ final class DigitalUnit {
     final Map<String, Object> discrete = new LinkedHashMap<>();
     final Map<String, DigitalDriver> drivers = new LinkedHashMap<>();
     final Map<String, LogicLevel> inputs = new LinkedHashMap<>();
+    /** The bus each bit belongs to, by the bit's pin: read on every input change, so worked out once. */
+    private final Map<String, String> busByPin = new HashMap<>();
     final Map<String, Double> lastChange = new HashMap<>();
     final Map<String, Double> timers = new LinkedHashMap<>();
     final List<Periodic> periodics = new ArrayList<>();
@@ -62,6 +66,7 @@ final class DigitalUnit {
 
     DigitalUnit(Netlist.ModelUnit model, EventSimulation simulation) {
         this.model = model;
+        model.model().buses().forEach((bus, bits) -> bits.forEach(bit -> busByPin.put(bit, bus)));
         this.label = model.label();
         this.simulation = simulation;
         this.powerNode = rail(model, PinNature.POWER);
@@ -216,6 +221,8 @@ final class DigitalUnit {
         DefaultEvaluationContext context = new DefaultEvaluationContext(new BasicValuesChain(), simulation.extensions,
                 simulation.conversion);
         model.parameters().forEach(context::setValue);
+        // A text parameter is read as its words: a message to write, a label to show.
+        model.texts().forEach(context::setValue);
         Map<String, Object> working = EventSimulation.copy(before);
         working.forEach(context::setValue);
         model.pins().forEach((name, binding) -> context.setValue(name, pinValue(name, binding, state)));
@@ -251,6 +258,10 @@ final class DigitalUnit {
      * any bit is not a level the number can hold.
      */
     static Object busValue(List<?> levels) {
+        if (levels.size() > LogicFunctions.MAXIMUM_WIDTH) {
+            throw new IllegalArgumentException("A bus or a row is read as a number of at most " + LogicFunctions.MAXIMUM_WIDTH
+                    + " bits, not " + levels.size() + ".");
+        }
         long value = 0;
         boolean released = true;
         boolean known = true;
@@ -285,6 +296,9 @@ final class DigitalUnit {
             throw new IllegalArgumentException(model.model().name() + ": drive('" + target + "') names no digital output, internal node or bus.");
         }
         boolean isRow = (value != null && value.getClass().isArray()) || value instanceof List<?>;
+        if (value instanceof Number number) {
+            requireFits(target, number, bits.size());
+        }
         Object[] row = isRow ? arrayOf(value) : null;
         if (row != null && row.length != bits.size()) {
             throw new IllegalArgumentException(model.model().name() + ": bus '" + target + "' has " + bits.size() + " bits, the row driven on it "
@@ -300,6 +314,16 @@ final class DigitalUnit {
         }
     }
 
+    /** A number driven onto a bus: whole, and within its width — unsigned, or negative in two's complement. */
+    private void requireFits(String bus, Number number, int width) {
+        double value = number.doubleValue();
+        double largest = Math.pow(2, width);
+        if (value != Math.rint(value) || value >= largest || value < -largest / 2) {
+            throw new IllegalArgumentException(model.model().name() + ": bus '" + bus + "' has " + width
+                    + " bits; " + number + " is not a whole number they hold.");
+        }
+    }
+
     /** The level one bit of a bus is driven to: a number's bit, a row's slot, or the one level the whole bus is given. */
     private static LogicLevel bitLevel(Object value, Object[] row, int position) {
         if (row != null) {
@@ -309,6 +333,28 @@ final class DigitalUnit {
             return ((number.longValue() >>> position) & 1) == 1 ? LogicLevel.HIGH : LogicLevel.LOW;
         }
         return LogicLevel.of(value);
+    }
+
+    /** A bus's bits as a row, each level as a handler reads its pin. */
+    Object[] busLevels(String bus, double[] state) {
+        List<String> bits = model.model().buses().get(bus);
+        if (bits == null) {
+            throw new IllegalArgumentException(model.model().name() + ": levels('" + bus + "') names no bus.");
+        }
+        Object[] row = new Object[bits.size()];
+        for (int position = 0; position < row.length; position++) {
+            row[position] = pinValue(bits.get(position), model.pins().get(bits.get(position)), state);
+        }
+        return row;
+    }
+
+    /** An analog pin's voltage now, by the pin's name. */
+    double analogPinVoltage(String pin, double[] state) {
+        Netlist.PinBinding binding = model.pins().get(pin);
+        if (binding == null || binding.pin().nature() == PinNature.DIGITAL) {
+            throw new IllegalArgumentException(model.model().name() + ": pin_voltage('" + pin + "') names no analog pin.");
+        }
+        return voltage(binding.analog(), state);
     }
 
     Object pinValue(String name, Netlist.PinBinding binding, double[] state) {
@@ -326,20 +372,21 @@ final class DigitalUnit {
     /** Digital inputs: a digital node's resolved level, or an analog node through the family thresholds. */
     List<DigitalEvent> readInputs(double[] state, boolean initial) {
         List<DigitalEvent> events = new ArrayList<>();
-        for (String name : List.copyOf(inputs.keySet())) {
+        Set<String> busesChanged = new HashSet<>();
+        for (Map.Entry<String, LogicLevel> input : inputs.entrySet()) {
+            String name = input.getKey();
             LogicLevel level = inputLevel(name, state);
-            LogicLevel held = inputs.get(name);
             if (initial) {
-                inputs.put(name, level);
+                input.setValue(level);
                 continue;
             }
-            if (level != held) {
-                inputs.put(name, level);
+            if (level != input.getValue()) {
+                input.setValue(level);
                 lastChange.put(name, simulation.now);
                 events.add(new DigitalEvent(this, DigitalEvent.Kind.CHANGE, name));
-                // A bit of a bus changing changes the bus: 'on change "address"' hears any of its bits.
-                String bus = busOf(name);
-                if (bus != null && events.stream().noneMatch(event -> event.kind() == DigitalEvent.Kind.CHANGE && event.subject().equals(bus))) {
+                // A bit of a bus changing changes the bus: 'on change "address"' hears any of its bits, once.
+                String bus = busByPin.get(name);
+                if (bus != null && busesChanged.add(bus)) {
                     events.add(new DigitalEvent(this, DigitalEvent.Kind.CHANGE, bus));
                 }
                 if (level == LogicLevel.HIGH) {
@@ -352,15 +399,6 @@ final class DigitalUnit {
         return events;
     }
 
-    /** The bus a pin is a bit of, or null. */
-    private String busOf(String pin) {
-        for (Map.Entry<String, List<String>> bus : model.model().buses().entrySet()) {
-            if (bus.getValue().contains(pin)) {
-                return bus.getKey();
-            }
-        }
-        return null;
-    }
 
     boolean inputsWouldChange(double[] state) {
         for (String name : inputs.keySet()) {

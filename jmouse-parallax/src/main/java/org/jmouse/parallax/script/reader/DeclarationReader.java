@@ -23,6 +23,7 @@ import org.jmouse.parallax.script.QuantityType;
 import org.jmouse.parallax.script.SourceText;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -136,6 +137,9 @@ final class DeclarationReader {
             throw line.refusal("a parameter is 'name = value [unit] [in minimum .. maximum] [step s] [flags] [\"description\"]'");
         }
         String name = line.value(0);
+        if (line.isString(2)) {
+            return textParameter(line, name);
+        }
         int valueEnd = firstMarker(line, 2);
         Values.Written value = Values.written(line, 2, valueEnd);
         Optional<Range> range = Optional.empty();
@@ -184,6 +188,20 @@ final class DeclarationReader {
             }
         }
         return new Parameter(name, value.expression(), value.quantity(), range, step, flags, description, listed);
+    }
+
+    /**
+     * {@code first_line = "Hello, Parallax!" "what the first line says"}: a text, as written in its quotes, then an optional
+     * description. A text is not a number: no unit, no range, no step.
+     */
+    private Parameter textParameter(Reading.Line line, String name) {
+        if (line.size() > 4 || (line.size() == 4 && !line.isString(3))) {
+            throw line.refusal(Math.min(3, line.size() - 1),
+                    "a text parameter is 'name = \"text\" [\"description\"]': a text has no unit, range or step");
+        }
+        String description = line.size() == 4 ? reading.literal(line.get(3)) : "";
+        return new Parameter(name, line.text(2, 3), Optional.empty(), Optional.empty(), Optional.empty(),
+                EnumSet.of(ParameterFlag.TEXT), description);
     }
 
     /** The first parameter marker at depth zero after {@code from}, or the description, or the end of the line. */
@@ -388,6 +406,10 @@ final class DeclarationReader {
         Map<String, String> units = new LinkedHashMap<>();
         Map<String, String> captions = new LinkedHashMap<>();
         for (Reading.Line line : reading.blockLines("display")) {
+            if (line.size() > 1 && line.value(1).equals("[")) {
+                displayRow(line, figures);
+                continue;
+            }
             int unit = line.indexOf(2, "unit");
             boolean captioned = line.size() > 3 && line.isString(line.size() - 1);
             int end = captioned ? line.size() - 1 : line.size();
@@ -407,6 +429,27 @@ final class DeclarationReader {
             }
         }
         return new Block.Display(figures, units, captions);
+    }
+
+    /**
+     * {@code cell[32] = shown}: one figure for each slot of a row state — {@code cell_0 = shown_0} … {@code cell_31 =
+     * shown_31} —, what a display of many cells shows: a symbol's inputs named as its figures.
+     */
+    private void displayRow(Reading.Line line, Map<String, SourceText> figures) {
+        if (line.size() != 6 || !line.value(3).equals("]") || !line.value(4).equals("=") || !line.value(2).matches("\\d+")) {
+            throw line.refusal("a row of figures is 'name[count] = row': 'cell[32] = shown', one figure for each slot");
+        }
+        String name = line.value(0);
+        String row = line.value(5);
+        int count = Integer.parseInt(line.value(2));
+        SourceText written = line.text(5, 6);
+        for (int index = 0; index < count; index++) {
+            String figure = name + "_" + index;
+            if (figures.containsKey(figure)) {
+                throw line.refusal("'" + figure + "' is displayed twice");
+            }
+            figures.put(figure, new SourceText(row + "_" + index, written.line(), written.column(), written.offset()));
+        }
     }
 
     /**
@@ -626,8 +669,9 @@ final class DeclarationReader {
 
     /**
      * {@code q[0..7] digital output 15, 1, 2, 3, 4, 5, 6, 7 "parallel outputs"}: a pin for each bit — {@code q_0} …
-     * {@code q_7}, in the order the range is written —, each with its package number, all of one nature. A bus takes as
-     * many numbers as it has bits, or none; the bits of one bus are never split across units.
+     * {@code q_7} —, each with its package number in the order the range is written, all of one nature. Bit k is always
+     * {@code q_k}, the least significant first, whichever way the range runs. A bus takes as many numbers as it has bits,
+     * or none; the bits of one bus are never split across units.
      */
     private Block.Bus bus(Reading.Line line, List<Pin> pins) {
         String name = line.value(0);
@@ -658,6 +702,11 @@ final class DeclarationReader {
             List<Integer> number = template.numbers().isEmpty() ? List.of() : List.of(template.numbers().get(position));
             pins.add(new Pin(bit, number, template.nature(), template.direction(), template.attributes(), template.description()));
             bits.add(bit);
+        }
+        if (step < 0) {
+            // q_k is bit k however the range is written: q[7..0] lists its package numbers from q_7 down, and q_0 is still
+            // the least significant bit, as a data sheet and every HDL read it.
+            Collections.reverse(bits);
         }
         return new Block.Bus(name, bits);
     }

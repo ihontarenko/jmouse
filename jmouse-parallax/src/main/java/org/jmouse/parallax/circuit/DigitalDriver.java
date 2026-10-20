@@ -61,7 +61,7 @@ final class DigitalDriver {
 
     void schedule(double time, LogicLevel value) {
         pending.tailMap(time, true).clear();
-        pending.put(time, openDrain && value == LogicLevel.HIGH ? LogicLevel.RELEASED : value);
+        pending.put(time, value);
     }
 
     /** Applies every transaction due by {@code time}; true when the level changed. */
@@ -69,14 +69,23 @@ final class DigitalDriver {
         boolean changed = false;
         while (!pending.isEmpty() && pending.firstKey() <= time) {
             Map.Entry<Double, LogicLevel> transaction = pending.pollFirstEntry();
-            if (transaction.getValue() != level) {
+            LogicLevel applied = applied(transaction.getValue());
+            if (applied != level) {
                 previous = level;
-                level = transaction.getValue();
+                level = applied;
                 changedAt = transaction.getKey();
                 changed = true;
             }
         }
         return changed;
+    }
+
+    /**
+     * What the pin does with a level asked of it: an open-drain pin lets the line go where a 1 is asked — decided when the
+     * level lands, so a transaction kept from an earlier build of the circuit obeys the pin as it is now.
+     */
+    private LogicLevel applied(LogicLevel asked) {
+        return openDrain && asked == LogicLevel.HIGH ? LogicLevel.RELEASED : asked;
     }
 
     /** Where an output stands, kept apart from it: its level, the one before, when it changed, what is scheduled. */

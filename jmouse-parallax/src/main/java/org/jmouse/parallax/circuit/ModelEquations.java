@@ -172,7 +172,7 @@ final class ModelEquations {
      */
     static ModelEquations of(ComponentModel model, Map<String, Double> parameters, List<String> pinNames, List<String> internalNodes) {
         Form form = new Form(model.name(), model.formulas(), model.locals(), model.equations(),
-                model.states().stream().map(ComponentModel.State::name).toList(), List.copyOf(parameters.keySet()),
+                model.equationStateNames(), List.copyOf(parameters.keySet()),
                 List.copyOf(pinNames), List.copyOf(internalNodes));
         ModelEquations compiled = COMPILED.get(form);
         if (compiled == null) {
@@ -274,9 +274,9 @@ final class ModelEquations {
         }
         int reserved = layout.size();
         List<String> names = new ArrayList<>();
-        model.states().forEach(state -> {
-            layout.add(new Argument.StateValue(state.name()));
-            names.add(state.name());
+        model.equationStateNames().forEach(state -> {
+            layout.add(new Argument.StateValue(state));
+            names.add(state);
         });
         layout.add(new Argument.Time());
         names.add(ComponentVocabulary.TIME);

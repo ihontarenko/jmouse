@@ -192,14 +192,18 @@ final class LiveIntegrator {
         return stepper.levels();
     }
 
-    /** The levels a read sample carries: copied again only when a node's level moved, else the copy before shared. */
-    private Map<String, LogicLevel> levelsNow() {
+    /**
+     * The levels a sample read at {@code at} carries, as they stood then. Between edges they are the same map from one
+     * sample to the next — copied again only when a level moved; a sample before an edge of its step sees it rolled back.
+     */
+    private Map<String, LogicLevel> levelsAt(double at) {
         long changes = stepper.levelChanges();
         if (sampledLevels == null || changes != sampledLevelChanges) {
             sampledLevels = stepper.levels();
             sampledLevelChanges = changes;
         }
-        return sampledLevels.isEmpty() ? null : sampledLevels;
+        Map<String, LogicLevel> levels = at < stepper.time() ? stepper.levelsAt(at) : sampledLevels;
+        return levels.isEmpty() ? null : levels;
     }
 
     /** Traces only these parts' terminal currents from now on; null traces every part. */
@@ -345,7 +349,7 @@ final class LiveIntegrator {
         double[] voltages = Arrays.copyOf(stepper.valuesAt(at), nodeCount);
         SampleEnvelope peaks = read && readings
                 ? envelope.read(voltages, at, state, now) : null;
-        Map<String, LogicLevel> levels = read && readings ? levelsNow() : null;
+        Map<String, LogicLevel> levels = read && readings ? levelsAt(at) : null;
         return new LiveSample(at, voltages, terminals, measured, window, peaks, powers, levels);
     }
 

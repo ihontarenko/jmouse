@@ -2,10 +2,12 @@ package org.jmouse.parallax.circuit.elaboration;
 
 import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.component.ComponentVocabulary;
+import org.jmouse.parallax.component.TextValues;
 
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
@@ -42,6 +44,10 @@ public final class PartParameters {
         element.overrides().forEach((key, expression) -> {
             int dot = key.indexOf('.');
             String name = dot < 0 ? key : key.substring(dot + 1);
+            if (model.texts().containsKey(name)) {
+                // A text is not a number: it is the part's, read by its behaviour, never by its equations (texts()).
+                return;
+            }
             if (!values.containsKey(name)) {
                 throw new IllegalArgumentException("'" + element.id() + "': " + model.name() + " has no parameter '" + name
                         + "' to override.");
@@ -51,6 +57,28 @@ public final class PartParameters {
             }
         });
         return values;
+    }
+
+    /**
+     * The part's text parameters: the component's, with what the part writes over them — {@code first_line = "Bye"} —, the
+     * words alone.
+     *
+     * @throws IllegalArgumentException when a part writes a text parameter without quotes
+     */
+    public static Map<String, String> texts(ComponentModel model, CircuitElement element) {
+        Map<String, String> texts = new LinkedHashMap<>(model.texts());
+        if (element.overrides() != null) {
+            element.overrides().forEach((name, written) -> {
+                if (texts.containsKey(name)) {
+                    if (!TextValues.isText(written)) {
+                        throw new IllegalArgumentException(element.id() + ": its " + name + " is a text, written in quotes: "
+                                + name + " = \"…\"");
+                    }
+                    texts.put(name, TextValues.unquoted(written));
+                }
+            });
+        }
+        return texts;
     }
 
     private static double read(CircuitElement element, String name, String expression, ToDoubleFunction<String> reading) {

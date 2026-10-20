@@ -3,6 +3,7 @@ package org.jmouse.parallax.object;
 import org.jmouse.formula.FormulaException;
 import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
 import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.component.TextValues;
 import org.jmouse.parallax.component.ComponentVocabulary;
 import org.jmouse.parallax.object.ObjectDefinition.AffineTransformation;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
@@ -220,7 +221,8 @@ public final class DefinitionCompiler {
     private static void checkCircuit(CompiledObject compiled, Circuit circuit) {
         for (ObjectDefinition.CircuitElement element : circuit.elements()) {
             if (element.type() == ObjectDefinition.CircuitElementType.MODEL) {
-                element.overrides().values().forEach(compiled::constant);
+                // A text — `first_line = "Bye"` — is words for the part's behaviour, not a formula to compile.
+                element.overrides().values().stream().filter(written -> !TextValues.isText(written)).forEach(compiled::constant);
                 compiled.componentSource(element.component());
                 continue;
             }

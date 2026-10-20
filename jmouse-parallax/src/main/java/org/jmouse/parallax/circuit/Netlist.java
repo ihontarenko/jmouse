@@ -2,6 +2,7 @@ package org.jmouse.parallax.circuit;
 
 import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
+import org.jmouse.parallax.circuit.elaboration.PartParameters;
 
 import org.jmouse.parallax.component.ComponentModel.Pin;
 import org.jmouse.parallax.component.ComponentModel.PinNature;
@@ -13,6 +14,7 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -117,12 +119,14 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
      *                   names them terminal_one and terminal_two
      */
     record ModelUnit(String label, String part, ComponentModel model, ComponentModel family, Map<String, Double> parameters,
+                     Map<String, String> texts,
                      Map<String, PinBinding> pins, Map<String, Integer> internalNodes, Map<String, String> internalDigitalNodes,
                      List<Integer> voltageBranches, Map<String, Integer> stateRows, Map<String, String> reportedAs) {
 
         ModelUnit {
             // In their written order: a unit's states are reported, and its parameters laid out, as the document has them.
             parameters = Collections.unmodifiableMap(new LinkedHashMap<>(parameters));
+            texts = Collections.unmodifiableMap(new LinkedHashMap<>(texts));
             stateRows = Collections.unmodifiableMap(new LinkedHashMap<>(stateRows));
         }
     }
@@ -139,13 +143,16 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
         // Which circuit nodes are analog: any node an engine element or a non-digital pin touches.
         Set<String> analog = new LinkedHashSet<>();
         Set<String> touched = new LinkedHashSet<>();
+        // The names each model's equations reach, worked out once per model of the build.
+        Map<ComponentModel, Set<String>> reached = new IdentityHashMap<>();
         for (CircuitElement element : circuit.elements()) {
             if (element.type() == CircuitElementType.MODEL) {
                 ComponentModel model = elaborated.model(element.component());
+                Set<String> reachedByEquations = reached.computeIfAbsent(model, ComponentModel::namesReachedByEquations);
                 element.pins().forEach((key, node) -> {
                     Pin pin = pinOf(model, element.id(), key);
                     touched.add(node);
-                    if (pin.nature() != PinNature.DIGITAL || model.equationsReach(pin.name())) {
+                    if (pin.nature() != PinNature.DIGITAL || reachedByEquations.contains(pin.name())) {
                         analog.add(node);
                     }
                 });
@@ -181,7 +188,8 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                     continue;
                 }
             }
-            drafts.addAll(unitsOf(elaborated, element, model, numbers, digitalNodes));
+            drafts.addAll(unitsOf(elaborated, element, model, numbers, digitalNodes,
+                    reached.computeIfAbsent(model, ComponentModel::namesReachedByEquations)));
         }
 
         List<Branch> branches = new ArrayList<>();
@@ -244,7 +252,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                     states.add(draft.label() + "." + state.name());
                 }
             }
-            units.add(new ModelUnit(draft.label(), draft.part(), draft.model(), draft.family(), draft.parameters(),
+            units.add(new ModelUnit(draft.label(), draft.part(), draft.model(), draft.family(), draft.parameters(), draft.texts(),
                     bindings(draft, numbers), draft.internal(), draft.internalDigital(), voltageBranches.get(index), stateRows,
                     draft.reportedAs()));
         }
@@ -267,7 +275,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
      * inventing private nodes for it would make the whole circuit impossible to solve.
      */
     private static List<UnitDraft> unitsOf(ElaboratedCircuit elaborated, CircuitElement element, ComponentModel model,
-                                           Map<String, Integer> numbers, List<String> digitalNodes) {
+                                           Map<String, Integer> numbers, List<String> digitalNodes, Set<String> reached) {
         // Only a part with digital pins reads a logic family; any other names the component it is a member of.
         ComponentModel family = model.familyName().filter(name -> model.hasDigitalPins())
                 .map(name -> elaborated.family(name).orElseThrow(() -> new IllegalArgumentException(
@@ -289,7 +297,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 String node = element.pins().get(key);
                 if (node == null) {
                     node = label + "." + pin.name();
-                    if (pin.nature() == PinNature.DIGITAL && !model.equationsReach(pin.name())) {
+                    if (pin.nature() == PinNature.DIGITAL && !reached.contains(pin.name())) {
                         digitalNodes.add(node);
                     } else {
                         numbers.put(node, numbers.size());
@@ -310,6 +318,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 internalDigital.put(node, name);
             }
             drafts.add(new UnitDraft(label, element.id(), model, family, elaborated.parameters(model, element, unit),
+                    PartParameters.texts(model, element),
                     connections, internal, internalDigital, elaborated.reportedAs(element.id())));
         }
         return drafts;
@@ -332,7 +341,8 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
     }
 
     private record UnitDraft(String label, String part, ComponentModel model, ComponentModel family,
-                             Map<String, Double> parameters, Map<String, String> connections, Map<String, Integer> internal,
+                             Map<String, Double> parameters, Map<String, String> texts, Map<String, String> connections,
+                             Map<String, Integer> internal,
                              Map<String, String> internalDigital, Map<String, String> reportedAs) {
     }
 

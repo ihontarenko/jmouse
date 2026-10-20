@@ -48,7 +48,7 @@ final class UnitArguments {
             into[layout.timePosition] = time;
         }
         for (int index = 0; index < layout.discretePositions.length; index++) {
-            into[layout.discretePositions[index]] = numeric(discrete.get(layout.discreteNames[index]));
+            into[layout.discretePositions[index]] = discreteValue(index);
         }
     }
 
@@ -59,10 +59,17 @@ final class UnitArguments {
         }
     }
 
+    /** The value the equations read at one discrete position: a single state, or one slot of a row. */
+    private double discreteValue(int index) {
+        Object value = discrete.get(layout.discreteNames[index]);
+        int slot = layout.discreteSlots[index];
+        return numeric(slot == UnitLayout.NONE ? value : ((Object[]) value)[slot]);
+    }
+
     /** Whether every discrete state is still what the arguments last read. */
     boolean discreteUnchanged() {
         for (int index = 0; index < layout.discretePositions.length; index++) {
-            if (numeric(discrete.get(layout.discreteNames[index])) != values[layout.discretePositions[index]]) {
+            if (discreteValue(index) != values[layout.discretePositions[index]]) {
                 return false;
             }
         }

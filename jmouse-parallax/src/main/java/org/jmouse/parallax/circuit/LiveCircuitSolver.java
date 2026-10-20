@@ -82,6 +82,10 @@ public final class LiveCircuitSolver {
         }
     }
 
+    /** The levels last merged, and the pieces' maps they were merged from. */
+    private List<Map<String, LogicLevel>> mergedFrom;
+    private Map<String, LogicLevel> merged;
+
     /** The level every digital node stands at now, over all the pieces. */
     public synchronized Map<String, LogicLevel> levels() {
         Map<String, LogicLevel> levels = new LinkedHashMap<>();
@@ -332,14 +336,9 @@ public final class LiveCircuitSolver {
             Map<String, Map<String, Double>> terminals = null;
             Map<String, MeteredPart> metered = null;
             Map<String, Double> powers = null;
-            Map<String, LogicLevel> levels = null;
+            Map<String, LogicLevel> levels = mergedLevels(byPiece, index);
             for (int piece = 0; piece < byPiece.size(); piece++) {
                 LiveSample own = byPiece.get(piece).get(index);
-                // Each digital node lives in one piece: the pieces' levels side by side are the circuit's.
-                if (own.levels() != null) {
-                    levels = levels == null ? new LinkedHashMap<>() : levels;
-                    levels.putAll(own.levels());
-                }
                 for (int node = 0; node < own.voltages().length; node++) {
                     voltages[placement[piece][node]] = own.voltages()[node];
                 }
@@ -368,6 +367,34 @@ public final class LiveCircuitSolver {
                     assembled(mergedWindow(byPiece, index)), mergedEnvelope(byPiece, index), powers, levels));
         }
         return merged;
+    }
+
+    /**
+     * The pieces' levels at one sample as the circuit's — each digital node lives in one piece, so they stand side by
+     * side. A piece passes the same map from sample to sample between its edges, so the merge before is reused while
+     * every piece's map is the one it was made from.
+     */
+    private Map<String, LogicLevel> mergedLevels(List<List<LiveSample>> byPiece, int index) {
+        boolean unchanged = mergedFrom != null && mergedFrom.size() == byPiece.size();
+        List<Map<String, LogicLevel>> owns = new ArrayList<>(byPiece.size());
+        for (int piece = 0; piece < byPiece.size(); piece++) {
+            Map<String, LogicLevel> own = byPiece.get(piece).get(index).levels();
+            owns.add(own);
+            unchanged = unchanged && own == mergedFrom.get(piece);
+        }
+        if (unchanged) {
+            return merged;
+        }
+        Map<String, LogicLevel> levels = null;
+        for (Map<String, LogicLevel> own : owns) {
+            if (own != null) {
+                levels = levels == null ? new LinkedHashMap<>() : levels;
+                levels.putAll(own);
+            }
+        }
+        mergedFrom = owns;
+        merged = levels;
+        return levels;
     }
 
     /** The pieces' peaks at one sample as the whole circuit's, each node where its piece has it; none unless every piece read them. */

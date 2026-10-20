@@ -45,7 +45,10 @@ final class UnitLayout {
     final int[]      columns;
     final int        timePosition;
     final int[]      discretePositions;
+    /** The discrete state each position reads: a single state's name, or — a slot — its row's. */
     final String[]   discreteNames;
+    /** The slot of the row each position reads, or {@link #NONE} for a single state. */
+    final int[]      discreteSlots;
     /** Each charge's rate position among the arguments, and where its history and the integration's coefficient go. */
     final int[]      rateSymbols;
     final int[]      historyPositions;
@@ -89,6 +92,7 @@ final class UnitLayout {
         int time = NONE;
         List<Integer> discreteAt = new ArrayList<>();
         List<String> discreteNamed = new ArrayList<>();
+        List<Integer> discreteSlotted = new ArrayList<>();
         for (int position = 0; position < layout.size(); position++) {
             columns[position] = NOT_AN_UNKNOWN;
             switch (layout.get(position)) {
@@ -106,6 +110,13 @@ final class UnitLayout {
                     } else if (discrete.containsKey(state.state())) {
                         discreteAt.add(position);
                         discreteNamed.add(state.state());
+                        discreteSlotted.add(NONE);
+                    } else if (slotOf(state.state(), discrete) != NONE) {
+                        // registers_12: slot 12 of the row registers.
+                        String row = state.state().substring(0, state.state().lastIndexOf('_'));
+                        discreteAt.add(position);
+                        discreteNamed.add(row);
+                        discreteSlotted.add(slotOf(state.state(), discrete));
                     }
                 }
                 case ModelEquations.Argument.ChargeRate rate -> rateSymbols[rate.charge()] = position;
@@ -119,6 +130,7 @@ final class UnitLayout {
         this.timePosition = time;
         this.discretePositions = discreteAt.stream().mapToInt(Integer::intValue).toArray();
         this.discreteNames = discreteNamed.toArray(String[]::new);
+        this.discreteSlots = discreteSlotted.stream().mapToInt(Integer::intValue).toArray();
 
         this.unitColumns = Arrays.stream(columns).filter(column -> column >= 0).distinct().toArray();
         int[] localOf = new int[columns.length];
@@ -217,5 +229,19 @@ final class UnitLayout {
             return binding.isDigitalNode() ? Netlist.GROUND : binding.analog();
         }
         return unit.internalNodes().get(name);
+    }
+
+    /** The slot a name like {@code registers_12} reads of a row state, or {@link #NONE} when it names no slot. */
+    static int slotOf(String name, Map<String, Object> discrete) {
+        int underscore = name.lastIndexOf('_');
+        if (underscore < 1 || underscore == name.length() - 1) {
+            return NONE;
+        }
+        String index = name.substring(underscore + 1);
+        if (!index.chars().allMatch(Character::isDigit) || !(discrete.get(name.substring(0, underscore)) instanceof Object[] row)) {
+            return NONE;
+        }
+        int slot = Integer.parseInt(index);
+        return slot < row.length ? slot : NONE;
     }
 }
