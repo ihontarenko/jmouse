@@ -105,7 +105,7 @@ final class LineCodecs {
         if (quantity.unit().isEmpty()) {
             return "";
         }
-        return Units.shown(quantity.written().replaceFirst("^[-+0-9.eE]+\\s*", ""));
+        return Units.shown(quantity.writtenUnit());
     }
 
     /** A text in quotes; one holding a double quote is written in single quotes. */

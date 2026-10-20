@@ -98,7 +98,7 @@ final class ObjectDocumentReader {
 
     /** The unit a slider's value is written in, prefix included; empty for a plain number. */
     private static String sliderUnit(Block.Parameter parameter) {
-        return parameter.quantity().map(Notation::writtenUnit).orElse("");
+        return parameter.quantity().map(Quantity::writtenUnit).orElse("");
     }
 
     /**

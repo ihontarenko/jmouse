@@ -1,12 +1,18 @@
 package org.jmouse.parallax.script.engine;
 
+import org.jmouse.formula.Complex;
+import org.jmouse.formula.ComplexCompiler;
+import org.jmouse.formula.Formula;
+import org.jmouse.formula.FormulaException;
+import org.jmouse.formula.RealCompiler;
+import org.jmouse.formula.Symbols;
+import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.units.Quantity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 /**
  * How values are spelled in jMX text, in both directions: numbers that read back to the same {@code double}, texts in
@@ -16,17 +22,6 @@ import java.util.regex.Pattern;
  * definition keeps as numbers — bounds, weights, coefficients — are formatted here.</p>
  */
 final class Notation {
-
-    private static final Pattern COMPLEX = Pattern.compile(
-            "\\s*([+-]?\\s*[0-9.]+(?:[eE][+-]?\\d+)?)\\s*([+-])\\s*([0-9.]+(?:[eE][+-]?\\d+)?)\\s*\\*?\\s*i\\s*");
-
-    private static final Pattern NUMBER_WITH_UNIT = Pattern.compile("\\s*([+-]?[0-9.]+(?:[eE][+-]?\\d+)?)\\s*(\\S*)\\s*");
-
-    /** {@code -3 pi / 4}: an optional minus, an optional whole multiple, {@code pi}, an optional whole divisor. */
-    private static final Pattern MULTIPLE_OF_PI = Pattern.compile("\\s*(-)?\\s*(\\d+)?\\s*\\*?\\s*pi\\s*(?:/\\s*(\\d+))?\\s*");
-
-    /** The number a quantity was written with, and the unit after it: {@code 4.7 nF}, {@code 52.4%}. */
-    private static final Pattern WRITTEN_QUANTITY = Pattern.compile("\\s*[+-]?[0-9.]+(?:[eE][+-]?\\d+)?\\s*(.*)");
 
     private Notation() {
     }
@@ -58,27 +53,20 @@ final class Notation {
     }
 
     /**
-     * A number as written, refused with what it belongs to when it is not one. A multiple or a simple fraction of π is
-     * a number too — {@code pi}, {@code -pi}, {@code 2 pi}, {@code pi / 2}, {@code 3 pi / 4} — computed as
-     * {@code (multiple · π) / divisor}, so {@code 2 pi} is exactly the {@code double} {@code 6.283185307179586}.
+     * A number as written, refused with what it belongs to when it is not one. A number is read as written, so it
+     * comes back as the {@code double} {@link #number} wrote; anything else is a constant expression jMF folds —
+     * {@code pi}, {@code 2 pi}, {@code 3 pi / 4}, {@code 1/3} —, so {@code 2 pi} is exactly {@code 6.283185307179586}.
      */
     static double parseNumber(String text, String what) {
-        try {
-            return Double.parseDouble(text.strip());
-        } catch (NumberFormatException notANumber) {
-            Matcher multiple = MULTIPLE_OF_PI.matcher(text);
-            if (multiple.matches()) {
-                return multipleOfPi(multiple);
-            }
+        Optional<Quantity> plain = Quantity.parse(text).filter(quantity -> quantity.unit().isEmpty());
+        if (plain.isPresent()) {
+            return plain.get().value();
+        }
+        Formula constant = constant(text, what + " must be a number, not '" + text + "'.");
+        if (constant.mentionsImaginaryUnit()) {
             throw new IllegalArgumentException(what + " must be a number, not '" + text + "'.");
         }
-    }
-
-    private static double multipleOfPi(Matcher multiple) {
-        double factor = multiple.group(2) == null ? 1 : Double.parseDouble(multiple.group(2));
-        double divisor = multiple.group(3) == null ? 1 : Double.parseDouble(multiple.group(3));
-        double magnitude = factor * Math.PI / divisor;
-        return multiple.group(1) == null ? magnitude : -magnitude;
+        return RealCompiler.fold(constant);
     }
 
     /** A whole number as written. */
@@ -100,23 +88,15 @@ final class Notation {
      * number without a unit is taken as already in the base unit.
      */
     static double parseQuantity(String text, String what, String baseUnit) {
-        Matcher matcher = NUMBER_WITH_UNIT.matcher(text);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(what + " must be a number, not '" + text + "'.");
+        Optional<Quantity> written = Quantity.parse(text);
+        if (written.isEmpty()) {
+            return parseNumber(text, what);
         }
-        double number = parseNumber(matcher.group(1), what);
-        String unit = matcher.group(2);
-        if (unit.isEmpty()) {
-            return number;
+        Quantity quantity = written.get();
+        if (!quantity.unit().isEmpty() && !quantity.unit().equals(baseUnit)) {
+            throw new IllegalArgumentException(what + " is in " + baseUnit + ", not '" + quantity.writtenUnit() + "'.");
         }
-        return Quantity.of(number, unit).filter(quantity -> quantity.unit().equals(baseUnit)).map(Quantity::value)
-                .orElseThrow(() -> new IllegalArgumentException(what + " is in " + baseUnit + ", not '" + unit + "'."));
-    }
-
-    /** The unit a quantity was written in, prefix included: {@code nF} for {@code 4.7 nF}; empty for a plain number. */
-    static String writtenUnit(Quantity quantity) {
-        Matcher matcher = WRITTEN_QUANTITY.matcher(quantity.written());
-        return matcher.matches() ? matcher.group(1).strip() : "";
+        return quantity.value();
     }
 
     /**
@@ -131,20 +111,19 @@ final class Notation {
         }
         Quantity scale = Quantity.of(1, unit)
                 .orElseThrow(() -> new IllegalArgumentException(what + " is in '" + unit + "', which is not a unit."));
-        Matcher matcher = NUMBER_WITH_UNIT.matcher(text);
-        if (matcher.matches() && !matcher.group(2).isEmpty()) {
+        if (Quantity.parse(text).filter(quantity -> !quantity.unit().isEmpty()).isPresent()) {
             return parseQuantity(text, what, scale.unit());
         }
         return parseNumber(text, what) * scale.value();
     }
 
-    /** An angle in degrees, written {@code 60 deg} or as a bare number of degrees. */
+    /** An angle in degrees, written {@code 60 deg} or as a bare number of degrees, kept as the number written. */
     static double parseDegrees(String text, String what) {
-        Matcher matcher = NUMBER_WITH_UNIT.matcher(text);
-        if (!matcher.matches() || !(matcher.group(2).isEmpty() || matcher.group(2).equals("deg"))) {
-            throw new IllegalArgumentException(what + " is a number of degrees, '60 deg', not '" + text + "'.");
-        }
-        return parseNumber(matcher.group(1), what);
+        return Quantity.parse(text)
+                .filter(quantity -> quantity.writtenUnit().isEmpty() || quantity.writtenUnit().equals("deg"))
+                .map(Quantity::writtenNumber)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        what + " is a number of degrees, '60 deg', not '" + text + "'."));
     }
 
     // ─── complex numbers ────────────────────────────────────────────────────────────────────────────
@@ -155,15 +134,25 @@ final class Notation {
         return number(real) + " " + sign + " " + number(Math.abs(imaginary)) + " i";
     }
 
-    /** The real and imaginary parts of {@code a + b i} or {@code a - b i}. */
+    /** The real and imaginary parts of a constant complex number: {@code a + b i}, {@code a - b i}, {@code 2 pi i}. */
     static double[] parseComplex(String text, String what) {
-        Matcher matcher = COMPLEX.matcher(text);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(what + " is a complex number 'a + b i', not '" + text + "'.");
+        Formula constant = constant(text, what + " is a complex number 'a + b i', not '" + text + "'.");
+        Complex value = ComplexCompiler.compile(constant, Symbols.of(), text).evaluate(new Complex[0]);
+        return new double[] {value.real(), value.imaginary()};
+    }
+
+    /** A formula that names nothing but jMF's constants, refused with {@code refusal} otherwise. */
+    private static Formula constant(String text, String refusal) {
+        Formula formula;
+        try {
+            formula = FormulaLanguage.standard().parse(text);
+        } catch (FormulaException unreadable) {
+            throw new IllegalArgumentException(refusal, unreadable);
         }
-        double real = parseNumber(matcher.group(1).replace(" ", ""), what);
-        double imaginary = parseNumber(matcher.group(3), what);
-        return new double[] {real, matcher.group(2).equals("-") ? -imaginary : imaginary};
+        if (!formula.variables().isEmpty()) {
+            throw new IllegalArgumentException(refusal);
+        }
+        return formula;
     }
 
     // ─── texts ──────────────────────────────────────────────────────────────────────────────────────

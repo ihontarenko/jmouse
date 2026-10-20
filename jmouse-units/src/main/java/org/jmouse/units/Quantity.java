@@ -81,6 +81,18 @@ public record Quantity(double value, String unit, String written) {
         return Units.read(text).isPresent();
     }
 
+    /** The number as written, before its unit's scale: {@code 60} for {@code 60 deg}, {@code 4.7} for {@code 4.7 nF}. */
+    public double writtenNumber() {
+        Matcher matcher = WRITTEN.matcher(written.strip());
+        return matcher.matches() ? Double.parseDouble(matcher.group(1)) : value;
+    }
+
+    /** The unit as written, prefix included: {@code nF} for {@code 4.7 nF}; empty for a plain number. */
+    public String writtenUnit() {
+        Matcher matcher = WRITTEN.matcher(written.strip());
+        return matcher.matches() ? matcher.group(2).strip() : "";
+    }
+
     /** What the value measures; empty for a plain number's unit that names nothing, such as {@code div}. */
     public Optional<Dimension> dimension() {
         return unit.isEmpty() ? Optional.of(Dimension.NONE) : Units.read(unit).flatMap(CompoundUnit::dimension);
