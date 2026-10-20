@@ -761,7 +761,7 @@ public class Catalogue {
                             || !(pin.get("x") instanceof Number x) || !(pin.get("y") instanceof Number y)
                             || !Double.isFinite(x.doubleValue()) || !Double.isFinite(y.doubleValue())
                             || Math.abs(x.doubleValue()) > 80 || Math.abs(y.doubleValue()) > 60) {
-                        throw ParallaxProblem.invalid("Each pin needs a unique name and a position on the symbol sheet.");
+                        throw ParallaxProblem.invalid("Each pin needs a unique name and a position within 80 across and 60 up or down of the symbol's centre.");
                     }
                 }
             }

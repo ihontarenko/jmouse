@@ -1,0 +1,79 @@
+symbol "Seven-segment display" as seven-segment-symbol {
+    meta {
+        summary "A seven-segment digit and its point, cathodes common: each segment lights red as its own current flows"
+        category circuits
+        tags electronics, schematic, display
+    }
+    size 120 x 120
+    input light_a 0 .. 100
+    input light_b 0 .. 100
+    input light_c 0 .. 100
+    input light_d 0 .. 100
+    input light_e 0 .. 100
+    input light_f 0 .. 100
+    input light_g 0 .. 100
+    input light_point 0 .. 100
+
+    path "M-30-50H50V50H-30Z"
+    path "M10 50V60"
+    path "M-50 -49H-30"
+    path "M-50 -35H-30"
+    path "M-50 -21H-30"
+    path "M-50 -7H-30"
+    path "M-50 7H-30"
+    path "M-50 21H-30"
+    path "M-50 35H-30"
+    path "M-50 49H-30"
+    live path glow_a "M-2-44H22V-40H-2Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_a, 0, 100))
+        live glow = 6 * share(light_a, 0, 100)
+    }
+    live path glow_b "M24-38H28V-4H24Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_b, 0, 100))
+        live glow = 6 * share(light_b, 0, 100)
+    }
+    live path glow_c "M24 4H28V38H24Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_c, 0, 100))
+        live glow = 6 * share(light_c, 0, 100)
+    }
+    live path glow_d "M-2 40H22V44H-2Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_d, 0, 100))
+        live glow = 6 * share(light_d, 0, 100)
+    }
+    live path glow_e "M-8 4H-4V38H-8Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_e, 0, 100))
+        live glow = 6 * share(light_e, 0, 100)
+    }
+    live path glow_f "M-8-38H-4V-4H-8Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_f, 0, 100))
+        live glow = 6 * share(light_f, 0, 100)
+    }
+    live path glow_g "M-2-2H22V2H-2Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_g, 0, 100))
+        live glow = 6 * share(light_g, 0, 100)
+    }
+    live path glow_point "M32 40H36V44H32Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_point, 0, 100))
+        live glow = 6 * share(light_point, 0, 100)
+    }
+
+    pin segment_a at -50, -49
+    pin segment_b at -50, -35
+    pin segment_c at -50, -21
+    pin segment_d at -50, -7
+    pin segment_e at -50, 7
+    pin segment_f at -50, 21
+    pin segment_g at -50, 35
+    pin segment_point at -50, 49
+    pin cathode at 10, 60
+    label name at 10, -58
+    label value at 60, 56
+}

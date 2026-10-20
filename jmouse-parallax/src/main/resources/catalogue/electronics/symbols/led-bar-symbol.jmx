@@ -1,0 +1,79 @@
+symbol "LED bar" as led-bar-symbol {
+    meta {
+        summary "Eight LEDs in a row, cathodes common: each segment lights red as its own current flows"
+        category circuits
+        tags electronics, schematic, display
+    }
+    size 160 x 100
+    input light_0 0 .. 100
+    input light_1 0 .. 100
+    input light_2 0 .. 100
+    input light_3 0 .. 100
+    input light_4 0 .. 100
+    input light_5 0 .. 100
+    input light_6 0 .. 100
+    input light_7 0 .. 100
+
+    path "M-80-26H80V26H-80Z"
+    path "M-70 26V36H70V26M0 36V50"
+    path "M-70-26V-50"
+    path "M-50-26V-50"
+    path "M-30-26V-50"
+    path "M-10-26V-50"
+    path "M10-26V-50"
+    path "M30-26V-50"
+    path "M50-26V-50"
+    path "M70-26V-50"
+    live path glow_0 "M-76-20H-64V20H-76Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_0, 0, 100))
+        live glow = 6 * share(light_0, 0, 100)
+    }
+    live path glow_1 "M-56-20H-44V20H-56Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_1, 0, 100))
+        live glow = 6 * share(light_1, 0, 100)
+    }
+    live path glow_2 "M-36-20H-24V20H-36Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_2, 0, 100))
+        live glow = 6 * share(light_2, 0, 100)
+    }
+    live path glow_3 "M-16-20H-4V20H-16Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_3, 0, 100))
+        live glow = 6 * share(light_3, 0, 100)
+    }
+    live path glow_4 "M4-20H16V20H4Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_4, 0, 100))
+        live glow = 6 * share(light_4, 0, 100)
+    }
+    live path glow_5 "M24-20H36V20H24Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_5, 0, 100))
+        live glow = 6 * share(light_5, 0, 100)
+    }
+    live path glow_6 "M44-20H56V20H44Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_6, 0, 100))
+        live glow = 6 * share(light_6, 0, 100)
+    }
+    live path glow_7 "M64-20H76V20H64Z" {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_7, 0, 100))
+        live glow = 6 * share(light_7, 0, 100)
+    }
+
+    pin anode_0 at -70, -50
+    pin anode_1 at -50, -50
+    pin anode_2 at -30, -50
+    pin anode_3 at -10, -50
+    pin anode_4 at 10, -50
+    pin anode_5 at 30, -50
+    pin anode_6 at 50, -50
+    pin anode_7 at 70, -50
+    pin cathode at 0, 50
+    label name at 90, -40
+    label value at 90, 44
+}
