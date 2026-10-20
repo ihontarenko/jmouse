@@ -24,13 +24,14 @@ class DataMapExamplesTest {
     private static final String EXAMPLES = "jmd/examples";
 
     @Test
-    void everyExampleReadsAndWritesBackTheSame() throws IOException, URISyntaxException {
+    void everyExampleWritesBackAsItsFile() throws IOException, URISyntaxException {
         Map<String, String> examples = examples();
         assertFalse(examples.isEmpty());
         examples.forEach((path, text) -> {
             DataMap dataMap = DataMapReader.read(path, text);
-            String written = DataMapWriter.write(dataMap);
-            assertEquals(written, DataMapWriter.write(DataMapReader.read(path, written)), path);
+            // The examples are written as the writer writes, so reading one and writing it back gives the file itself,
+            // its comments included.
+            assertEquals(text.replace("\r\n", "\n"), DataMapWriter.write(dataMap), path);
         });
     }
 

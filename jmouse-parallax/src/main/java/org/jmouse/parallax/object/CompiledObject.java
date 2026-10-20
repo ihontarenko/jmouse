@@ -1,5 +1,6 @@
 package org.jmouse.parallax.object;
 
+import org.jmouse.datamap.Quantity;
 import org.jmouse.formula.Complex;
 import org.jmouse.formula.ComplexCompiler;
 import org.jmouse.formula.Differentiation;
@@ -261,7 +262,7 @@ public final class CompiledObject {
      * sets, so a display, a meter and the solver never read one setting two ways.
      */
     public double value(String written) {
-        return org.jmouse.datamap.Quantity.parse(written).map(org.jmouse.datamap.Quantity::value)
+        return Quantity.parse(written).map(Quantity::value)
                 .orElseGet(() -> constant(written));
     }
 

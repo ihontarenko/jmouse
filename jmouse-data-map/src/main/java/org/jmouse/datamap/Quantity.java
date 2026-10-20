@@ -61,8 +61,11 @@ public record Quantity(double value, String unit, String written) {
         if (text.isEmpty()) {
             return Optional.of(plain(number));
         }
+        // ⚠️ Written with the unit as the author wrote it — °C, not degC; µs, not us —: the symbols are read for the
+        // scale, and a document written back says what it said.
+        String authored = unitText.strip();
         return scaleOf(text).map(scale -> new Quantity(number * scale.factor(), scale.baseUnit(),
-                format(number) + (text.equals("%") ? "" : " ") + text));
+                format(number) + (text.equals("%") ? "" : " ") + authored));
     }
 
     /**

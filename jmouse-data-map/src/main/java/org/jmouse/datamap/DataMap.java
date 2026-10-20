@@ -28,20 +28,32 @@ public final class DataMap {
     private final String title;
     private final List<DataMapField> fields;
     private final List<DataMapEntry> entries;
+    private final DataMapComments comments;
     private final Map<String, DataMapEntry> index;
 
     /**
-     * @param slug    the name it is known by
-     * @param fields  the lines of the map itself
-     * @param entries its blocks, in the order written
+     * @param slug     the name it is known by
+     * @param fields   the lines of the map itself
+     * @param entries  its blocks, in the order written
+     * @param comments what the author wrote above the document's first line
      * @throws IllegalArgumentException when two entries share an id
      */
-    public DataMap(String slug, String title, List<DataMapField> fields, List<DataMapEntry> entries) {
+    public DataMap(String slug, String title, List<DataMapField> fields, List<DataMapEntry> entries,
+                   DataMapComments comments) {
         this.slug = slug;
         this.title = title;
         this.fields = List.copyOf(fields);
         this.entries = List.copyOf(entries);
+        this.comments = comments;
         this.index = indexOf(this.entries);
+    }
+
+    public DataMap(String slug, String title, List<DataMapField> fields, List<DataMapEntry> entries) {
+        this(slug, title, fields, entries, DataMapComments.NONE);
+    }
+
+    public DataMapComments comments() {
+        return comments;
     }
 
     public String slug() {

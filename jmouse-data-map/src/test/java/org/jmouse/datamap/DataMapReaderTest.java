@@ -1,6 +1,6 @@
 package org.jmouse.datamap;
 
-import org.jmouse.el.language.line.LineSyntaxException;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -124,7 +124,7 @@ class DataMapReaderTest {
 
     @Test
     void refusesSayingWhere() {
-        LineSyntaxException twice = assertThrows(LineSyntaxException.class, () -> DataMapReader.read("broken.jmd", """
+        DataMapSyntaxException twice = assertThrows(DataMapSyntaxException.class, () -> DataMapReader.read("broken.jmd", """
                 map "Broken" as broken {
                     one {
                     }
@@ -134,15 +134,15 @@ class DataMapReaderTest {
                 """));
         assertEquals(4, twice.line());
 
-        LineSyntaxException unclosed = assertThrows(LineSyntaxException.class,
+        DataMapSyntaxException unclosed = assertThrows(DataMapSyntaxException.class,
                 () -> DataMapReader.read("broken.jmd", "map \"Broken\" as broken {\n    value 5 V\n"));
         assertTrue(unclosed.detail().contains("'}'"), unclosed.detail());
 
-        LineSyntaxException noValue = assertThrows(LineSyntaxException.class,
+        DataMapSyntaxException noValue = assertThrows(DataMapSyntaxException.class,
                 () -> DataMapReader.read("broken.jmd", "map \"Broken\" as broken {\n    value 5 V sticks\n}\n"));
         assertEquals(2, noValue.line());
 
-        LineSyntaxException joinedRange = assertThrows(LineSyntaxException.class,
+        DataMapSyntaxException joinedRange = assertThrows(DataMapSyntaxException.class,
                 () -> DataMapReader.read("broken.jmd", "map \"Broken\" as broken {\n    value 2..6\n}\n"));
         assertTrue(joinedRange.detail().contains("2 V .. 6 V"), joinedRange.detail());
     }

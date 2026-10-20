@@ -5,6 +5,8 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.TokenizableSource;
 
+import java.util.Set;
+
 /**
  * Reads positions and raw text back out of a {@link TokenCursor}. 📖
  *
@@ -156,5 +158,57 @@ public final class SourceReading {
      */
     public static String hyphenatedName(TokenCursor cursor, Token.Type... nameTokens) {
         return joinedName(cursor, BasicToken.T_MINUS, nameTokens);
+    }
+
+    /**
+     * Reads a word as a person sees it: the run of tokens written with nothing between them —
+     * {@code 74hc595}, {@code so-16}, {@code 2.2µs}, {@code °C}, {@code ../logic/hc.jmd#levels}.
+     *
+     * <p>⚠️ <strong>The boundary is the source, not the token types.</strong> The expression lexer cuts
+     * {@code 74hc595.jmd#link-a} into seven tokens of five kinds, and a word made of units, part numbers
+     * and paths has no grammar of token kinds to describe it; what makes it one word is that nobody
+     * pressed the space bar inside it.</p>
+     *
+     * <p>⚠️ <strong>{@code separators} is a parameter, for the same reason {@code nameTokens} is
+     * one</strong>: which characters end a word even with no blank before them — {@code a, b} is two
+     * words, not {@code a,} — is every language's own call. They are compared by text, because the lexer
+     * gives {@code =} the type it gives {@code eq}, and {@code eq} is a word. A quoted string and a line
+     * break end a word too.</p>
+     *
+     * @param cursor     the cursor, positioned on the first token of the word; left after its last
+     * @param separators the texts that end a word where they touch it
+     * @return the word as written
+     */
+    public static String touchingWord(TokenCursor cursor, Set<String> separators) {
+        Token first = cursor.next();
+        Token last  = first;
+
+        while (cursor.hasNext() && touches(cursor, last, cursor.lookAt(0)) && !endsWord(cursor.lookAt(0), separators)
+                && !endsWord(last, separators)) {
+            last = cursor.next();
+        }
+
+        return text(cursor, first, last);
+    }
+
+    /**
+     * Whether nothing at all is written between two tokens, so that a reader sees them as one word.
+     *
+     * @param cursor the cursor both were read from, for its source
+     * @param before the earlier token
+     * @param after  the later one
+     * @return {@code true} when {@code after} begins where {@code before} ends
+     */
+    public static boolean touches(TokenCursor cursor, Token before, Token after) {
+        if (before == null || after == null || cursor.source() == null) {
+            return false;
+        }
+
+        return before.offset() + before.value().length() == after.offset();
+    }
+
+    private static boolean endsWord(Token token, Set<String> separators) {
+        return token.type() == BasicToken.T_STRING || token.type() == BasicToken.T_NEW_LINE
+                || token.type() == BasicToken.T_EOL || separators.contains(token.value());
     }
 }
