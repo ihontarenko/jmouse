@@ -3,7 +3,6 @@ package org.jmouse.parallax.circuit;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentModel;
 
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.engine.ExperienceDefinitions;
 
 import org.jmouse.parallax.script.Block;
@@ -18,6 +17,7 @@ import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 import org.jmouse.parallax.verification.ConsistencyCheck;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.HashSet;

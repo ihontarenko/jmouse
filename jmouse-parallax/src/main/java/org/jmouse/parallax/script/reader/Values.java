@@ -3,8 +3,8 @@ package org.jmouse.parallax.script.reader;
 import org.jmouse.parallax.script.Amount;
 import org.jmouse.parallax.script.Block.Range;
 import org.jmouse.parallax.script.ExperienceNotation;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.List;

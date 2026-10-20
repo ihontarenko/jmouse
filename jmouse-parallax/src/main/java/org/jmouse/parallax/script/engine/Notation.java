@@ -1,6 +1,6 @@
 package org.jmouse.parallax.script.engine;
 
-import org.jmouse.datamap.Quantity;
+import org.jmouse.units.Quantity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

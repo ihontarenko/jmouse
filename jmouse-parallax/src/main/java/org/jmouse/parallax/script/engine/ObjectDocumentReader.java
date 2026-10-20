@@ -4,7 +4,6 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.Meta;
 import org.jmouse.parallax.script.Meta.MetaValue;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.RepresentationKind;
 import org.jmouse.parallax.script.engine.DefinedObject.Preset;
 import org.jmouse.parallax.script.engine.DefinedObject.Property;
@@ -13,6 +12,8 @@ import org.jmouse.parallax.script.engine.DefinedObject.RelationKind;
 import org.jmouse.parallax.script.engine.DefinedObject.Representation;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ParameterDefinition;
+import org.jmouse.units.Quantity;
+import org.jmouse.units.Units;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -86,7 +87,7 @@ final class ObjectDocumentReader {
         Block.Range range = parameter.range().get();
         double step = parameter.step()
                 .map(written -> Notation.parseInUnit(written.text(), "the step of " + what, unit)).orElse(0.0);
-        String shown = shownUnit(unit);
+        String shown = Units.shown(unit);
         return new ParameterDefinition(parameter.name(), sliderLabel(parameter.description(), shown), value,
                 Notation.parseInUnit(range.minimum().text(), "the minimum of " + what, unit),
                 Notation.parseInUnit(range.maximum().text(), "the maximum of " + what, unit), step,
@@ -103,19 +104,13 @@ final class ObjectDocumentReader {
     /**
      * {@code "Input voltage"} in volts is labelled «Input voltage, V»; a slider without a description keeps its name.
      *
-     * @param unit the unit the slider shows its numbers in, as {@link #shownUnit} prints it
+     * @param unit the unit the slider shows its numbers in, as {@link Units#shown} prints it
      */
     private static String sliderLabel(String description, String unit) {
         if (unit.isEmpty() || description.isBlank()) {
             return description;
         }
         return description + ", " + unit;
-    }
-
-    /** A written unit as a reader sees it: {@code uF} as {@code µF}, {@code kOhm} as {@code kΩ}. */
-    private static String shownUnit(String unit) {
-        String shown = unit.length() > 1 && unit.charAt(0) == 'u' ? "µ" + unit.substring(1) : unit;
-        return shown.replace("Ohm", "Ω");
     }
 
     // ─── meta ───────────────────────────────────────────────────────────────────────────────────────

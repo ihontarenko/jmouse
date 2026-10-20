@@ -1,7 +1,7 @@
 package org.jmouse.parallax.script;
 
-import org.jmouse.datamap.Quantity;
 import org.jmouse.script.el.node.ScriptNode;
+import org.jmouse.units.Quantity;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

@@ -2,7 +2,7 @@ package org.jmouse.parallax.script.engine;
 
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.ParameterFlag;
-import org.jmouse.datamap.Quantity;
+import org.jmouse.units.Quantity;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

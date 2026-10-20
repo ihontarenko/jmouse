@@ -2,11 +2,11 @@ package org.jmouse.datamap.parser;
 
 import org.jmouse.datamap.DataMapSyntaxException;
 import org.jmouse.datamap.DataMapValue;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.support.SourceReading;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.List;

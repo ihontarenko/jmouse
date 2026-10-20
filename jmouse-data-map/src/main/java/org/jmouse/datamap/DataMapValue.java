@@ -1,5 +1,7 @@
 package org.jmouse.datamap;
 
+import org.jmouse.units.Quantity;
+
 import java.util.List;
 import java.util.stream.Collectors;
 

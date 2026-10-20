@@ -1,6 +1,7 @@
 package org.jmouse.parallax.script;
 
 import org.jmouse.el.type.ValueType;
+import org.jmouse.units.Dimension;
 
 import java.util.Objects;
 

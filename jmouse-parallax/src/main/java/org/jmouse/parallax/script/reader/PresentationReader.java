@@ -5,8 +5,8 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Capability;
 import org.jmouse.parallax.script.Meta;
 import org.jmouse.parallax.script.Meta.MetaValue;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

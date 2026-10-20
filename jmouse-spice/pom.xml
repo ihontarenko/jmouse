@@ -67,6 +67,12 @@
             <artifactId>jmouse-el</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- The SI factors SPICE's own prefix letters stand for -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-units</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

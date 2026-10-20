@@ -35,7 +35,7 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-data-map</artifactId>
+      <artifactId>jmouse-units</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>

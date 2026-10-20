@@ -7,7 +7,6 @@ import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
 import org.jmouse.el.type.ValueType;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.component.ComponentModel.Criterion;
 import org.jmouse.parallax.component.ComponentModel.Equation;
@@ -22,6 +21,7 @@ import org.jmouse.parallax.component.ComponentModel.SubcircuitLine;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.ObjectDefinition.BenchConditions;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.Arrays;

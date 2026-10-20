@@ -57,13 +57,19 @@
     </properties>
 
     <!--
-        jMouse's language framework and nothing else: the line reader a jMD document is read with.
+        jMouse's language framework (the lexer, StatementsParser and the extension a jMD document is read with) and the units
+        a value is written in.
         What an entry means — a data sheet's parameter, a library's mapping — is the consumer's; this module knows the document.
     -->
     <dependencies>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-el</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-units</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,6 +1,5 @@
 package org.jmouse.parallax.object;
 
-import org.jmouse.datamap.Quantity;
 import org.jmouse.formula.Complex;
 import org.jmouse.formula.ComplexCompiler;
 import org.jmouse.formula.Differentiation;
@@ -12,6 +11,7 @@ import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Symbols;
 
 import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
+import org.jmouse.units.Quantity;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

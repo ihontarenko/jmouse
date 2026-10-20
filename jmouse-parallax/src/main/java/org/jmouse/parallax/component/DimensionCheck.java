@@ -3,8 +3,8 @@ package org.jmouse.parallax.component;
 import org.jmouse.el.type.ValueType;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.MathematicalFunction;
-import org.jmouse.parallax.script.Dimension;
 import org.jmouse.parallax.script.QuantityType;
+import org.jmouse.units.Dimension;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,6 +1,5 @@
-package org.jmouse.parallax.script;
+package org.jmouse.units;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,11 +34,6 @@ public record Dimension(int mass, int length, int time, int current, int tempera
     public static final Dimension FREQUENCY = NONE.over(TIME);
     public static final Dimension FORCE = MASS.times(LENGTH).over(TIME.power(2));
 
-    /** Unit symbols as a datasheet writes them, without a prefix, and the dimension each stands for. */
-    private static final Map<String, Dimension> UNITS = units();
-
-    private static final String PREFIXES = "fpnuµμmkMGT";
-
     public Dimension times(Dimension other) {
         return new Dimension(mass + other.mass, length + other.length, time + other.time, current + other.current,
                 temperature + other.temperature);
@@ -71,93 +65,7 @@ public record Dimension(int mass, int length, int time, int current, int tempera
      * {@code %} —; empty for one this cannot name ({@code div}, {@code bit}), which a check then leaves alone.
      */
     public static Optional<Dimension> ofUnit(String unit) {
-        if (unit == null || unit.isBlank()) {
-            return Optional.empty();
-        }
-        String written = unit.replace(" ", "").replace("·", "*");
-        Dimension result = NONE;
-        int position = 0;
-        boolean dividing = false;
-        while (position <= written.length()) {
-            int next = nextOperator(written, position);
-            String factor = written.substring(position, next);
-            if (!(factor.equals("1") && position == 0)) {
-                Optional<Dimension> measured = ofFactor(factor);
-                if (measured.isEmpty()) {
-                    return Optional.empty();
-                }
-                result = dividing ? result.over(measured.get()) : result.times(measured.get());
-            }
-            if (next >= written.length()) {
-                break;
-            }
-            dividing = written.charAt(next) == '/';
-            position = next + 1;
-        }
-        return Optional.of(result);
-    }
-
-    private static int nextOperator(String written, int from) {
-        for (int index = from; index < written.length(); index++) {
-            if (written.charAt(index) == '/' || written.charAt(index) == '*') {
-                return index;
-            }
-        }
-        return written.length();
-    }
-
-    /** One unit with its prefix and its power: {@code mV}, {@code s^2}, {@code m²}. */
-    private static Optional<Dimension> ofFactor(String factor) {
-        int exponent = 1;
-        String symbol = factor;
-        if (symbol.endsWith("²")) {
-            exponent = 2;
-            symbol = symbol.substring(0, symbol.length() - 1);
-        } else if (symbol.endsWith("³")) {
-            exponent = 3;
-            symbol = symbol.substring(0, symbol.length() - 1);
-        } else if (symbol.contains("^")) {
-            try {
-                exponent = Integer.parseInt(symbol.substring(symbol.indexOf('^') + 1));
-            } catch (NumberFormatException unreadable) {
-                return Optional.empty();
-            }
-            symbol = symbol.substring(0, symbol.indexOf('^'));
-        }
-        Dimension measured = UNITS.get(symbol);
-        if (measured == null && symbol.length() > 1 && PREFIXES.indexOf(symbol.charAt(0)) >= 0) {
-            measured = UNITS.get(symbol.substring(1));
-        }
-        int raised = exponent;
-        return Optional.ofNullable(measured).map(dimension -> dimension.power(raised));
-    }
-
-    private static Map<String, Dimension> units() {
-        Map<String, Dimension> units = new LinkedHashMap<>();
-        units.put("V", VOLTAGE);
-        units.put("A", CURRENT);
-        units.put("Ohm", RESISTANCE);
-        units.put("Ω", RESISTANCE);
-        units.put("S", CONDUCTANCE);
-        units.put("F", CAPACITANCE);
-        units.put("H", INDUCTANCE);
-        units.put("Wb", FLUX);
-        units.put("C", CHARGE);
-        units.put("W", POWER);
-        units.put("J", ENERGY);
-        units.put("Hz", FREQUENCY);
-        units.put("s", TIME);
-        units.put("K", TEMPERATURE);
-        units.put("°C", TEMPERATURE);
-        units.put("degC", TEMPERATURE);
-        units.put("g", MASS);
-        units.put("m", LENGTH);
-        units.put("N", FORCE);
-        units.put("Pa", FORCE.over(LENGTH.power(2)));
-        for (String ratio : new String[] {"%", "ppm", "dB", "rad", "deg", "°"}) {
-            units.put(ratio, NONE);
-        }
-        return Map.copyOf(units);
+        return Units.read(unit).flatMap(CompoundUnit::dimension);
     }
 
     /** The quantities a reader knows by name, and the unit each is written in. */

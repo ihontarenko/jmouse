@@ -10,7 +10,6 @@ import org.jmouse.formula.Substitution;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentModel;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -27,6 +26,7 @@ import org.jmouse.spice.node.SpiceStatement;
 import org.jmouse.spice.node.SpiceValue;
 import org.jmouse.spice.node.SpiceWaveform;
 import org.jmouse.spice.printer.SpicePrinter;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

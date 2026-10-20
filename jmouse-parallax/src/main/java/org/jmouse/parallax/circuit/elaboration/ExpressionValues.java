@@ -3,7 +3,7 @@ package org.jmouse.parallax.circuit.elaboration;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.Symbols;
 import org.jmouse.formula.el.FormulaLanguage;
-import org.jmouse.datamap.Quantity;
+import org.jmouse.units.Quantity;
 
 import java.util.List;
 import java.util.Map;

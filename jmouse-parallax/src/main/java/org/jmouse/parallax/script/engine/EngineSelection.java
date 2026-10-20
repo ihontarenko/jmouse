@@ -11,7 +11,6 @@ import org.jmouse.parallax.script.Block.StateVariable;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;
@@ -27,6 +26,7 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 import org.jmouse.parallax.object.ObjectDefinition.GeometricElement;
 import org.jmouse.parallax.object.ObjectDefinition.GeometricElementType;
 import org.jmouse.parallax.object.ObjectDefinition.SurfaceGluing;
+import org.jmouse.units.Quantity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

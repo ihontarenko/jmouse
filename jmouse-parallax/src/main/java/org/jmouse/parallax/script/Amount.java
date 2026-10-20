@@ -1,6 +1,6 @@
 package org.jmouse.parallax.script;
 
-import org.jmouse.datamap.Quantity;
+import org.jmouse.units.Quantity;
 
 import java.util.Optional;
 

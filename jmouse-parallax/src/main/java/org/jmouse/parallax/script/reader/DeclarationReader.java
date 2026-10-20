@@ -17,10 +17,10 @@ import org.jmouse.parallax.script.Block.PinNature;
 import org.jmouse.parallax.script.Block.Range;
 import org.jmouse.parallax.script.Block.StateVariable;
 import org.jmouse.el.type.ValueType;
-import org.jmouse.parallax.script.Dimension;
 import org.jmouse.parallax.script.ElectricalTypes;
 import org.jmouse.parallax.script.QuantityType;
 import org.jmouse.parallax.script.SourceText;
+import org.jmouse.units.Dimension;
 
 import java.util.ArrayList;
 import java.util.Collections;

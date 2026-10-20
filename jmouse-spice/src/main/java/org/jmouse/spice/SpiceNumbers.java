@@ -1,5 +1,7 @@
 package org.jmouse.spice;
 
+import org.jmouse.units.SiPrefix;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Locale;
@@ -60,7 +62,7 @@ public final class SpiceNumbers {
     static double scale(String suffix) {
         String lower = suffix.toLowerCase(Locale.ROOT);
         if (lower.startsWith("meg")) {
-            return 1e6;
+            return SiPrefix.MEGA.factor();
         }
         if (lower.startsWith("mil")) {
             return 25.4e-6;
@@ -68,17 +70,19 @@ public final class SpiceNumbers {
         if (lower.isEmpty()) {
             return 1;
         }
-        return switch (lower.charAt(0)) {
-            case 't' -> 1e12;
-            case 'g' -> 1e9;
-            case 'k' -> 1e3;
-            case 'm' -> 1e-3;
-            case 'u', 'µ', 'μ' -> 1e-6;
-            case 'n' -> 1e-9;
-            case 'p' -> 1e-12;
-            case 'f' -> 1e-15;
-            default -> 1;
+        // SPICE's letters, which ignore case — 'm' and 'M' are both a thousandth —, onto the SI factors.
+        SiPrefix prefix = switch (lower.charAt(0)) {
+            case 't' -> SiPrefix.TERA;
+            case 'g' -> SiPrefix.GIGA;
+            case 'k' -> SiPrefix.KILO;
+            case 'm' -> SiPrefix.MILLI;
+            case 'u', 'µ', 'μ' -> SiPrefix.MICRO;
+            case 'n' -> SiPrefix.NANO;
+            case 'p' -> SiPrefix.PICO;
+            case 'f' -> SiPrefix.FEMTO;
+            default -> null;
         };
+        return prefix == null ? 1 : prefix.factor();
     }
 
     /** Significant digits a number is written with: a datasheet's figure survives, the last bit of a product does not. */

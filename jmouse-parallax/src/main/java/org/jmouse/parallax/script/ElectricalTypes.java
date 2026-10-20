@@ -3,6 +3,7 @@ package org.jmouse.parallax.script;
 import org.jmouse.el.extension.CoreExtension;
 import org.jmouse.el.extension.Extension;
 import org.jmouse.el.type.ValueType;
+import org.jmouse.units.Dimension;
 
 import java.util.LinkedHashMap;
 import java.util.List;

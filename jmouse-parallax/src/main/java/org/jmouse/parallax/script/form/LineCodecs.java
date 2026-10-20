@@ -5,8 +5,9 @@ import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
-import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
+import org.jmouse.units.Quantity;
+import org.jmouse.units.Units;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,11 +105,7 @@ final class LineCodecs {
         if (quantity.unit().isEmpty()) {
             return "";
         }
-        String unit = quantity.written().replaceFirst("^[-+0-9.eE]+\\s*", "");
-        if (unit.length() > 1 && unit.charAt(0) == 'u') {
-            unit = "µ" + unit.substring(1);
-        }
-        return unit.replace("Ohm", "Ω");
+        return Units.shown(quantity.written().replaceFirst("^[-+0-9.eE]+\\s*", ""));
     }
 
     /** A text in quotes; one holding a double quote is written in single quotes. */
