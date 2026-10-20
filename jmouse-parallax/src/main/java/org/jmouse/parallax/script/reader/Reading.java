@@ -195,6 +195,24 @@ final class Reading {
         return new Line(tokens, atEnd() ? source.length() : cursor.current().offset());
     }
 
+    /** The one word after a statement's own: {@code extends base-slug}. */
+    String wordAfter(Token keyword, String what) {
+        Line line = line();
+        if (line.isEmpty()) {
+            throw refusal(keyword, "'" + what + "' takes a name");
+        }
+        return line.joinedWord(0);
+    }
+
+    /** The names after a statement's own word, separated by commas: {@code units A, B}. */
+    List<String> namesAfter(Token keyword, String what) {
+        List<String> names = line().names(0);
+        if (names.isEmpty()) {
+            throw refusal(keyword, "'" + what + "' takes names separated by commas");
+        }
+        return names;
+    }
+
     /** {@code { line … }}: every non-blank line; the cursor ends after the closing brace. Nested braces are refused. */
     List<Line> blockLines(String block) {
         expect(BasicToken.T_OPEN_CURLY, "'{' to open " + block);

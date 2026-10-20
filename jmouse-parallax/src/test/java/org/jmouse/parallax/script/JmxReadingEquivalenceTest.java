@@ -8,7 +8,7 @@ import org.jmouse.el.lexer.ExpressionSplitter;
 import org.jmouse.el.lexer.SyntaxErrorException;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.parser.DefaultParserContext;
-import org.jmouse.parallax.script.reader.DocumentReader;
+import org.jmouse.parallax.script.reader.HandWrittenDocumentReader;
 import org.jmouse.script.el.ScriptExtension;
 import org.jmouse.script.el.lexer.ScriptRecognizer;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ class JmxReadingEquivalenceTest {
         StandardExtensionContainer extensions = new StandardExtensionContainer();
         extensions.importExtension(new ScriptExtension());
         extensions.importExtension(new ElectricalTypes());
-        return new DocumentReader(cursor, new DefaultParserContext(extensions), normalized, documentName).documents();
+        return new HandWrittenDocumentReader(cursor, new DefaultParserContext(extensions), normalized, documentName).documents();
     }
 
     /** Broken variants of a text: its last brace gone, and one line at a time deleted or begun with a stray word. */
