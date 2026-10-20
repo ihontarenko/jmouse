@@ -4,7 +4,7 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.Meta;
 import org.jmouse.parallax.script.Meta.MetaValue;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.RepresentationKind;
 import org.jmouse.parallax.script.engine.DefinedObject.Preset;
 import org.jmouse.parallax.script.engine.DefinedObject.Property;

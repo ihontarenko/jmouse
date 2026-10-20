@@ -1,5 +1,7 @@
 package org.jmouse.parallax.script;
 
+import org.jmouse.datamap.Quantity;
+
 import java.util.Optional;
 
 /**

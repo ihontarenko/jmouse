@@ -7,7 +7,7 @@ import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ParameterDefinition;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 
 import java.util.ArrayList;
 import java.util.Arrays;

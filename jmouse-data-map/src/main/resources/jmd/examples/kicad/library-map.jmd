@@ -1,0 +1,37 @@
+# A library map: which jMX component a KiCad symbol stands for, and which of its pins is which.
+# A symbol the map does not name is imported as a part without a model — never guessed.
+map "KiCad symbols as jMX components" as kicad-library {
+
+    resistor "Resistor" {
+        symbol "Device:R"
+        component resistor
+        pins 1 = a, 2 = b
+        value resistance
+    }
+
+    capacitor "Capacitor, unpolarised" {
+        symbol "Device:C"
+        component capacitor
+        pins 1 = a, 2 = b
+        value capacitance
+    }
+
+    polarised-capacitor "Capacitor, polarised" {
+        symbol "Device:C_Polarized"
+        component capacitor
+        pins 1 = a, 2 = b
+        value capacitance
+    }
+
+    diode "Diode" {
+        symbol "Device:D"
+        component 1n4148
+        pins 1 = k, 2 = a
+    }
+
+    shift-register "74HC595" {
+        symbol "74xx:74HC595"
+        component 74hc595
+        data-sheet ../parts/74hc595.jmd#pins
+    }
+}

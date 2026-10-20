@@ -219,6 +219,21 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-data-map</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-kicad-parser</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-kicad</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parallax</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
@@ -380,6 +395,11 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-java-index-store</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-java-index-jpa</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>

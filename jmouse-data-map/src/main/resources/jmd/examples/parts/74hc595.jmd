@@ -1,0 +1,35 @@
+# A data sheet in jMD: Texas Instruments SN74HC595, revision SCLS041I.
+# Every value says where it was read, so a reviewer can open the PDF at that page and table.
+map "74HC595 — 8-bit shift register with output latches" as 74hc595 {
+    manufacturer "Texas Instruments"
+    document "https://www.ti.com/lit/ds/symlink/sn74hc595.pdf"
+    revision "SCLS041I"
+    package so-16
+
+    pins "Pin map" source page 3 table "5 Pin Functions" {
+        map 14 = data, 11 = shift-clock, 12 = latch-clock, 10 = clear, 13 = output-enable, 9 = serial-out
+        outputs 15 = q-a, 1 = q-b, 2 = q-c, 3 = q-d, 4 = q-e, 5 = q-f, 6 = q-g, 7 = q-h
+        power 16 = supply, 8 = ground
+    }
+
+    supply-voltage "Supply voltage" source page 5 table "6.3 Recommended Operating Conditions" {
+        range 2 V .. 6 V
+        nominal 5 V
+    }
+
+    operating-temperature "Operating free-air temperature" source page 5 table "6.3 Recommended Operating Conditions" {
+        range -40 °C .. 85 °C
+    }
+
+    switching "Switching characteristics at 4.5 V" source page 6 table "6.7 Switching Characteristics" {
+        shift-clock-frequency-maximum 31 MHz
+        propagation-delay-typical 17 ns
+        propagation-delay-maximum 38 ns
+        output-transition-maximum 15 ns
+    }
+
+    levels "Input and output levels" {
+        family ../logic/hc.jmd#levels
+        high-input-minimum ../logic/hc.jmd#levels/high-input-minimum
+    }
+}

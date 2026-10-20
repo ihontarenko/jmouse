@@ -3,7 +3,7 @@ package org.jmouse.parallax.circuit;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentModel;
 
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.engine.ExperienceDefinitions;
 
 import org.jmouse.parallax.script.Block;

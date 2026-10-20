@@ -261,7 +261,7 @@ public final class CompiledObject {
      * sets, so a display, a meter and the solver never read one setting two ways.
      */
     public double value(String written) {
-        return org.jmouse.parallax.script.Quantity.parse(written).map(org.jmouse.parallax.script.Quantity::value)
+        return org.jmouse.datamap.Quantity.parse(written).map(org.jmouse.datamap.Quantity::value)
                 .orElseGet(() -> constant(written));
     }
 

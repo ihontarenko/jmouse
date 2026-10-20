@@ -5,7 +5,7 @@ import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
 
 import java.util.ArrayList;

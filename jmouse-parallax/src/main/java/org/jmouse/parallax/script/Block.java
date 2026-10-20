@@ -1,5 +1,6 @@
 package org.jmouse.parallax.script;
 
+import org.jmouse.datamap.Quantity;
 import org.jmouse.script.el.node.ScriptNode;
 
 import java.util.Collections;

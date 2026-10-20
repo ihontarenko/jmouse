@@ -1,0 +1,12 @@
+# The 74HC family's input and output levels at a 4.5 V supply, as Texas Instruments' HC data sheets give them.
+map "74HC family — logic levels at 4.5 V" as hc {
+    family hc
+    supply 4.5 V
+
+    levels "Input and output levels" source page 5 table "6.5 Electrical Characteristics" {
+        high-input-minimum 3.15 V
+        low-input-maximum 1.35 V
+        high-output-minimum 4.4 V
+        low-output-maximum 0.1 V
+    }
+}

@@ -62,6 +62,12 @@
             <artifactId>jmouse-formula</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- jMD and the value as a datasheet writes it (Quantity): a jMX value is read with it -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-data-map</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- SPICE, the language: jMX circuits and components are converted to and from it (org.jmouse.parallax.spice) -->
         <dependency>
             <groupId>org.jmouse</groupId>

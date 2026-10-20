@@ -11,7 +11,7 @@ import org.jmouse.parallax.script.Block.StateVariable;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;

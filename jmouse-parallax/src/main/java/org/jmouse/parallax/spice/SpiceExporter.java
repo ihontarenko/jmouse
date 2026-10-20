@@ -10,7 +10,7 @@ import org.jmouse.formula.Substitution;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentModel;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;

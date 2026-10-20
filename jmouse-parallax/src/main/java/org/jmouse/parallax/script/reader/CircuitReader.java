@@ -13,7 +13,7 @@ import org.jmouse.parallax.script.Block.Point;
 import org.jmouse.parallax.script.Block.Port;
 import org.jmouse.parallax.script.Block.PortDirection;
 import org.jmouse.parallax.script.Block.Probe;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
 
 import java.util.ArrayList;

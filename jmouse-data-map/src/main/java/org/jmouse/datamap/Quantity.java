@@ -1,4 +1,4 @@
-package org.jmouse.parallax.script;
+package org.jmouse.datamap;
 
 import java.util.Locale;
 import java.util.Map;
@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 
 /**
  * A value as a datasheet writes it — {@code 4.7 nF}, {@code 0.3 V/us}, {@code 100 kOhm}, {@code 52.4%} — kept with its
- * unit. jMC read the same text and threw the unit away; jMX keeps it, so an interface can print {@code 10 kΩ}, scale a
- * slider logarithmically and refuse to add volts to seconds.
+ * unit, so an interface can print {@code 10 kΩ}, scale a slider logarithmically and refuse to add volts to seconds. jMD
+ * writes a datasheet's values with it, and jMX a circuit's.
  *
  * @param value the value in SI: {@code 4.7 nF} is {@code 4.7e-9}
  * @param unit  the base unit without its prefix ({@code F}, {@code V/s}, {@code %}); empty for a plain number
@@ -21,6 +21,11 @@ public record Quantity(double value, String unit, String written) {
     private static final Map<Character, Double> PREFIXES = Map.ofEntries(
             Map.entry('f', 1e-15), Map.entry('p', 1e-12), Map.entry('n', 1e-9), Map.entry('u', 1e-6),
             Map.entry('m', 1e-3), Map.entry('k', 1e3), Map.entry('M', 1e6), Map.entry('G', 1e9), Map.entry('T', 1e12));
+
+    /** The symbols a datasheet writes a unit with, as the reader spells them. */
+    private static final Map<Character, String> UNIT_SYMBOLS = Map.ofEntries(
+            Map.entry('Ω', "Ohm"), Map.entry('µ', "u"), Map.entry('μ', "u"), Map.entry('°', "deg"),
+            Map.entry('²', "^2"), Map.entry('³', "^3"), Map.entry('·', "*"), Map.entry('×', "*"));
 
     /** Units a prefix may stand in front of. */
     private static final Set<String> PREFIXABLE = Set.of(
@@ -94,11 +99,16 @@ public record Quantity(double value, String unit, String written) {
     }
 
     /**
-     * A unit as the reader reads it: {@code µF} as {@code uF}, {@code kΩ} as {@code kOhm}. Text cut out of a document
-     * is the author's ({@link SourceText}), so a range bound written {@code 10 µF} arrives with its {@code µ}.
+     * A unit as the reader reads it: {@code µF} as {@code uF}, {@code kΩ} as {@code kOhm}, {@code °C} as
+     * {@code degC}. Text cut out of a document is the author's, so a range bound written {@code 10 µF} arrives with its
+     * {@code µ}.
      */
     private static String asRead(String unitText) {
-        return ExperienceNotation.normalize(unitText).source().strip();
+        StringBuilder read = new StringBuilder(unitText.length());
+        for (char symbol : unitText.strip().toCharArray()) {
+            read.append(UNIT_SYMBOLS.getOrDefault(symbol, String.valueOf(symbol)));
+        }
+        return read.toString();
     }
 
     private record Scale(double factor, String baseUnit) {

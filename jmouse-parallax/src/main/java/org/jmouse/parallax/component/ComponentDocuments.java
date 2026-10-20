@@ -7,7 +7,7 @@ import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
 import org.jmouse.el.type.ValueType;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.component.ComponentModel.Criterion;
 import org.jmouse.parallax.component.ComponentModel.Equation;

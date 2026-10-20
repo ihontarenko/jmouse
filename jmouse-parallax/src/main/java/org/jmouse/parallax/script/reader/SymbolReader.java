@@ -8,7 +8,7 @@ import org.jmouse.parallax.script.Block.SymbolLabel;
 import org.jmouse.parallax.script.Block.SymbolMotion;
 import org.jmouse.parallax.script.Block.SymbolPin;
 import org.jmouse.parallax.script.Block.SymbolProperty;
-import org.jmouse.parallax.script.Quantity;
+import org.jmouse.datamap.Quantity;
 import org.jmouse.parallax.script.SourceText;
 
 import java.math.BigDecimal;
