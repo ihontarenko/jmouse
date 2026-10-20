@@ -1,17 +1,22 @@
 package org.jmouse.formula.el;
 
-import org.jmouse.formula.MathematicalConstant;
-import org.jmouse.formula.FormulaException;
-import org.jmouse.formula.Formula;
 import org.jmouse.el.ExpressionLanguage;
+import org.jmouse.el.StringSource;
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.lexer.DefaultLexer;
 import org.jmouse.el.lexer.DefaultTokenizer;
 import org.jmouse.el.lexer.ExpressionRecognizer;
 import org.jmouse.el.lexer.ExpressionSplitter;
-import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.Expression;
+import org.jmouse.el.lexer.Lexer;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.BasicNode;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.formula.Formula;
+import org.jmouse.formula.FormulaException;
+import org.jmouse.formula.MathematicalConstant;
 import org.jmouse.formula.MathematicalFunction;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.Symbols;
@@ -22,35 +27,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * jMF — jMouse Formula: the mathematical dialect of jME. It is a jME {@link ExpressionLanguage} assembled from a
- * formula container (power on {@code ^}, the formula grammar, the mathematical functions) and a lexer that keeps
- * {@code b+2.5} from reading as {@code b} and {@code +2.5}. Parsing is jME's; the result is translated into the
- * immutable {@link Formula} tree that jMF compiles, differentiates and prints.
+ * formula container (power on {@code ^}, the formula grammar, the mathematical functions) and a lexer in the
+ * mathematical dialect, which has no type suffixes and no step operators. A document's statements are read by
+ * {@link FormulaDocumentParser}, their expressions by jME; the result is translated into the immutable {@link Formula}
+ * tree that jMF compiles, differentiates and prints.
  *
- * <p>The standard instance is shared and thread-safe for parsing, and caches what it has parsed.
+ * <p>The standard instance is shared and thread-safe for parsing, and caches the documents it has read.
  */
 public final class FormulaLanguage {
 
     private static final FormulaLanguage STANDARD = new FormulaLanguage();
     private static final int MAXIMUM_LENGTH = 16000;
 
-    private final ExpressionLanguage  language;
+    /** The parts every derived language shares: how text becomes statements, and what it has read. */
+    private record Reading(ExpressionLanguage language, Lexer lexer, ParserContext context,
+                           FormulaDocumentParser document, Map<String, List<FormulaStatement>> statements) {
+    }
+
+    private final Reading             reading;
     private final Set<String>         hostCalls;
     private final Map<String, String> rates;
 
     public FormulaLanguage() {
         FormulaExtensionContainer extensions = new FormulaExtensionContainer();
         DefaultParserContext context = new DefaultParserContext(extensions);
-        this.language = new ExpressionLanguage(extensions, new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(ExpressionSplitter.Dialect.MATHEMATICS), new ExpressionRecognizer())), context, ExpressionParser.class);
+        Lexer lexer = new DefaultLexer(new DefaultTokenizer(
+                new ExpressionSplitter(ExpressionSplitter.Dialect.MATHEMATICS), new ExpressionRecognizer()));
+        this.reading = new Reading(new ExpressionLanguage(extensions, lexer, context, ExpressionParser.class), lexer,
+                context, new FormulaDocumentParser(), new ConcurrentHashMap<>());
         this.hostCalls = Set.of();
         this.rates = Map.of();
     }
 
-    private FormulaLanguage(ExpressionLanguage language, Set<String> hostCalls, Map<String, String> rates) {
-        this.language = language;
+    private FormulaLanguage(Reading reading, Set<String> hostCalls, Map<String, String> rates) {
+        this.reading = reading;
         this.hostCalls = Set.copyOf(hostCalls);
         this.rates = Map.copyOf(rates);
     }
@@ -67,7 +81,7 @@ public final class FormulaLanguage {
     public FormulaLanguage withRate(String variable, String hostCall) {
         Map<String, String> declared = new LinkedHashMap<>(rates);
         declared.put(RATE_OPERATOR + variable, hostCall);
-        return new FormulaLanguage(language, hostCalls, declared);
+        return new FormulaLanguage(reading, hostCalls, declared);
     }
 
     /** The {@code d} of {@code d(f)/dt}, both above and in front of the variable below. */
@@ -81,7 +95,7 @@ public final class FormulaLanguage {
     public FormulaLanguage withHostCalls(String... names) {
         Set<String> declared = new LinkedHashSet<>(hostCalls);
         declared.addAll(List.of(names));
-        return new FormulaLanguage(language, declared, rates);
+        return new FormulaLanguage(reading, declared, rates);
     }
 
     public static FormulaLanguage standard() {
@@ -90,12 +104,12 @@ public final class FormulaLanguage {
 
     /** The jME language underneath, for evaluating a formula with jME's own evaluator. */
     public ExpressionLanguage expressionLanguage() {
-        return language;
+        return reading.language();
     }
 
     /** A jME evaluation context that already knows the named constants (pi, e, tau, phi). */
     public EvaluationContext newContext() {
-        EvaluationContext context = language.newContext();
+        EvaluationContext context = reading.language().newContext();
         for (MathematicalConstant constant : MathematicalConstant.values()) {
             context.setValue(constant.symbol(), constant.value());
         }
@@ -124,20 +138,21 @@ public final class FormulaLanguage {
      * document — no equation, another left side, the name on both sides — is not solved for it.
      */
     public Optional<String> solvedFor(String source, String name) {
-        FormulaStatements.Document document = FormulaStatements.split(FormulaNotation.normalize(source));
-        Optional<String[]> sides = FormulaStatements.equationSides(document.expression());
-        if (sides.isEmpty() || !sides.get()[0].strip().equals(name)) {
+        List<FormulaStatement> statements = statements(source);
+        if (!(statements.getLast() instanceof FormulaStatement.Assignment equation)
+                || !equation.left().text().equals(name)) {
             return Optional.empty();
         }
         StringBuilder solved = new StringBuilder();
-        for (FormulaStatements.Definition definition : document.definitions()) {
-            solved.append(definition.name());
-            if (!definition.parameters().isEmpty()) {
-                solved.append('(').append(String.join(", ", definition.parameters())).append(')');
+        for (FormulaStatement.Assignment definition : definitions(statements.subList(0, statements.size() - 1), source)) {
+            FormulaStatement.Head head = definition.head().orElseThrow();
+            solved.append(head.name());
+            if (!head.parameters().isEmpty()) {
+                solved.append('(').append(String.join(", ", head.parameters())).append(')');
             }
-            solved.append(" = ").append(definition.body()).append("; ");
+            solved.append(" = ").append(definition.right().text()).append("; ");
         }
-        solved.append(sides.get()[1].strip());
+        solved.append(equation.right().text());
         String candidate = solved.toString();
         if (parse(candidate).variables().contains(name)) {
             return Optional.empty();
@@ -151,30 +166,20 @@ public final class FormulaLanguage {
      * name hides the library's.
      */
     public Formula parse(String source, List<Formula.Definition> library) {
-        if (source == null || source.isBlank()) {
-            throw new FormulaException("A formula is required.", source, -1);
-        }
-        if (source.length() > MAXIMUM_LENGTH) {
-            throw new FormulaException("A formula is at most " + MAXIMUM_LENGTH + " characters long.", source, -1);
-        }
-        String normalized = FormulaNotation.normalize(source);
-        FormulaStatements.Document document = FormulaStatements.split(normalized);
+        List<FormulaStatement> statements = statements(source);
         Map<String, Formula.Definition> definitions = new LinkedHashMap<>();
         library.forEach(definition -> definitions.put(definition.name(), definition));
-        for (FormulaStatements.Definition statement : document.definitions()) {
-            requireDefinable(statement.name(), source);
+        for (FormulaStatement.Assignment statement : definitions(statements.subList(0, statements.size() - 1), source)) {
             // Each body sees only what is defined before it, so a definition can never reach itself.
             requireNotSelfReferring(statement, source);
-            Formula body = expression(statement.body(), definitions, source);
-            Formula.Definition definition = new Formula.Definition(statement.name(), statement.parameters(), body);
+            Formula.Definition definition = definition(statement, definitions, source);
             definitions.put(definition.name(), definition);
         }
-        Optional<String[]> sides = FormulaStatements.equationSides(document.expression());
-        if (sides.isPresent()) {
-            return new Formula.Equation(expression(sides.get()[0], definitions, source),
-                    expression(sides.get()[1], definitions, source));
-        }
-        return expression(document.expression(), definitions, source);
+        return switch (statements.getLast()) {
+            case FormulaStatement.Assignment equation -> new Formula.Equation(
+                    translate(equation.left(), definitions, source), translate(equation.right(), definitions, source));
+            case FormulaStatement.Plain plain -> translate(plain.expression(), definitions, source);
+        };
     }
 
     /** Every definition a document makes, in order, for a library others will call. */
@@ -187,44 +192,96 @@ public final class FormulaLanguage {
      * Only the document's own definitions are returned.
      */
     public List<Formula.Definition> definitions(String source, List<Formula.Definition> library) {
-        String normalized = FormulaNotation.normalize(source);
-        FormulaStatements.Document document = FormulaStatements.split(normalized + ";0");
         Map<String, Formula.Definition> definitions = new LinkedHashMap<>();
         library.forEach(definition -> definitions.put(definition.name(), definition));
         Map<String, Formula.Definition> own = new LinkedHashMap<>();
-        for (FormulaStatements.Definition statement : document.definitions()) {
-            requireDefinable(statement.name(), source);
-            Formula body = expression(statement.body(), definitions, source);
-            Formula.Definition definition = new Formula.Definition(statement.name(), statement.parameters(), body);
-            definitions.put(statement.name(), definition);
-            own.put(statement.name(), definition);
+        for (FormulaStatement.Assignment statement : definitions(library(source), source)) {
+            Formula.Definition definition = definition(statement, definitions, source);
+            definitions.put(definition.name(), definition);
+            own.put(definition.name(), definition);
         }
         return List.copyOf(own.values());
     }
 
-    private Formula expression(String text, Map<String, Formula.Definition> definitions, String source) {
-        if (text.isBlank()) {
-            throw new FormulaException("A side of the formula is empty.", source, -1);
+    /** A formula document's statements: at least one, the last of them the formula. */
+    private List<FormulaStatement> statements(String source) {
+        List<FormulaStatement> statements = source == null ? List.of() : library(source);
+        if (statements.isEmpty()) {
+            throw new FormulaException("A formula is required.", source, -1);
         }
-        Expression parsed;
+        return statements;
+    }
+
+    /** A library's statements, read once per text: an empty library, or one of comments alone, defines nothing. */
+    private List<FormulaStatement> library(String source) {
+        if (source.isBlank()) {
+            return List.of();
+        }
+        if (source.length() > MAXIMUM_LENGTH) {
+            throw new FormulaException("A formula is at most " + MAXIMUM_LENGTH + " characters long.", source, -1);
+        }
+        String normalized = FormulaNotation.normalize(source);
+        List<FormulaStatement> statements = reading.statements().get(normalized);
+        if (statements == null) {
+            statements = read(normalized, source);
+            reading.statements().put(normalized, statements);
+        }
+        return statements;
+    }
+
+    private List<FormulaStatement> read(String normalized, String source) {
+        Node root;
         try {
-            parsed = language.compile(text);
+            TokenCursor cursor = reading.lexer().tokenize(new StringSource("FORMULA", normalized));
+            root = BasicNode.forToken(cursor.current());
+            reading.document().parse(cursor, root, reading.context());
+        } catch (FormulaException refusal) {
+            throw new FormulaException(refusal.getMessage(), source, refusal.position());
         } catch (RuntimeException exception) {
             throw new FormulaException("The formula does not parse: " + exception.getMessage(), source, -1);
         }
-        return new FormulaTranslator(Map.copyOf(definitions), hostCalls, rates, source).translate(parsed);
+        return root.getFirst().getChildren().stream()
+                .map(node -> ((FormulaDocumentParser.FormulaStatementNode) node).statement()).toList();
+    }
+
+    /** These statements as definitions: each is {@code name = …} or {@code name(parameters) = …}. */
+    private static List<FormulaStatement.Assignment> definitions(List<FormulaStatement> statements, String source) {
+        return statements.stream().map(statement -> {
+            if (statement instanceof FormulaStatement.Assignment assignment && assignment.head().isPresent()) {
+                requireDefinable(assignment.head().get().name(), source);
+                return assignment;
+            }
+            throw new FormulaException("'" + written(statement) + "' is neither a definition nor the last statement; "
+                    + "only the last one is the formula itself.", source, statement.offset());
+        }).toList();
+    }
+
+    private static String written(FormulaStatement statement) {
+        return switch (statement) {
+            case FormulaStatement.Assignment assignment -> assignment.left().text() + " = " + assignment.right().text();
+            case FormulaStatement.Plain plain -> plain.expression().text();
+        };
+    }
+
+    private Formula.Definition definition(FormulaStatement.Assignment statement,
+                                          Map<String, Formula.Definition> definitions, String source) {
+        FormulaStatement.Head head = statement.head().orElseThrow();
+        return new Formula.Definition(head.name(), head.parameters(), translate(statement.right(), definitions, source));
+    }
+
+    private Formula translate(FormulaStatement.Side side, Map<String, Formula.Definition> definitions, String source) {
+        return new FormulaTranslator(Map.copyOf(definitions), hostCalls, rates, source).translate(side.expression());
     }
 
     /**
      * Recursion is impossible by construction — a body sees only earlier definitions — but an author who writes
      * it deserves to hear that rather than that the name is unknown.
      */
-    private static void requireNotSelfReferring(FormulaStatements.Definition statement, String source) {
-        Pattern ownName = Pattern.compile("(?<![A-Za-z0-9_\\p{IsGreek}])" + Pattern.quote(statement.name())
-                + "(?![A-Za-z0-9_\\p{IsGreek}])");
-        if (ownName.matcher(statement.body()).find()) {
-            throw new FormulaException(statement.name() + " cannot call itself; jMF definitions are not recursive, "
-                    + "and a sum or a product usually says the same thing.", source, source.indexOf(statement.body()));
+    private static void requireNotSelfReferring(FormulaStatement.Assignment statement, String source) {
+        String name = statement.head().orElseThrow().name();
+        if (statement.right().names().contains(name)) {
+            throw new FormulaException(name + " cannot call itself; jMF definitions are not recursive, "
+                    + "and a sum or a product usually says the same thing.", source, statement.offset());
         }
     }
 
