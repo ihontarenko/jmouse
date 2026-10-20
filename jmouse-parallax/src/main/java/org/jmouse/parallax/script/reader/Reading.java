@@ -234,6 +234,21 @@ final class Reading {
         return SourceReading.touchingWord(cursor, SEPARATORS);
     }
 
+    /** That the token {@code at} of the line is {@code =} with a right side after it. */
+    void requireEqualsAhead(int at) {
+        TokenCursor line = lineView();
+        if (!line.checkValueAt(at, "=") || at + 1 >= line.remaining()) {
+            throw refusalAhead(Math.min(at, line.remaining() - 1), "'=' and a right side are expected here");
+        }
+    }
+
+    /** That nothing is left on the line after what a statement read. */
+    void requireLineEnd() {
+        if (!atLineEnd()) {
+            throw refusal("'" + cursor.current().value() + "' is not part of this line: it has said all it says");
+        }
+    }
+
     /** Steps to the end of the line. */
     void skipLine() {
         while (!atLineEnd()) {
@@ -294,17 +309,35 @@ final class Reading {
      * the lines declare, in order. The cursor ends after the closing brace.
      */
     <T> List<T> lines(String block, JmxLineParser<T> parser) {
+        List<TokenCursor.Savepoint> starts = lineStarts(block);
+        TokenCursor.Savepoint after = cursor.savepoint();
         List<T> declared = new ArrayList<>();
-        body(block, () -> {
-            if (cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-                throw refusal("'" + block + "' holds lines, not a nested '{ … }'");
-            }
+        for (TokenCursor.Savepoint start : starts) {
+            cursor.restore(start);
             JmxLineParser.LineNode<?> node = (JmxLineParser.LineNode<?>) parser.parse(cursor, context);
             @SuppressWarnings("unchecked")
             T line = (T) node.declared();
             declared.add(line);
-        });
+        }
+        cursor.restore(after);
         return declared;
+    }
+
+    /**
+     * Where each line of a block of lines begins, its body walked by the engine's statement reader before any line is
+     * read: a block that is never closed, or that holds a brace, is refused for that before what its lines say — the
+     * missing brace is the mistake, and the line it swallowed only its symptom. The cursor ends after the block.
+     */
+    List<TokenCursor.Savepoint> lineStarts(String block) {
+        List<TokenCursor.Savepoint> starts = new ArrayList<>();
+        body(block, () -> {
+            if (cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
+                throw refusal("'" + block + "' holds lines, not a nested '{ … }'");
+            }
+            starts.add(cursor.savepoint());
+            skipLine();
+        });
+        return starts;
     }
 
     /** A line of a block that holds lines: a brace there opens nothing. */

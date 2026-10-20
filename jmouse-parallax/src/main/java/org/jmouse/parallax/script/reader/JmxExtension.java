@@ -35,7 +35,7 @@ public final class JmxExtension implements Extension {
                 declaration("units", keyword -> new DocumentStatement.Units(reading.namesAfter(keyword, "units"))),
                 declaration("use", keyword -> new DocumentStatement.Uses(reading.namesAfter(keyword, "use"))),
                 declaration("type", keyword -> {
-                    declarations.type(reading.line());
+                    declarations.type();
                     return new DocumentStatement.TypeDeclaration();
                 }),
                 JmxStatementParser.meta(keyword -> new DocumentStatement.MetaBlock(presentation.meta())),

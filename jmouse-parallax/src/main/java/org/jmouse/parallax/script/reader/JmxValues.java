@@ -10,10 +10,13 @@ import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.QuantityParser;
 import org.jmouse.formula.el.FormulaExtensionContainer;
+import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceParseException;
 import org.jmouse.parallax.script.SourceText;
 import org.jmouse.units.Quantity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,9 +54,16 @@ final class JmxValues {
         SourceText expression = expression(next);
         TokenCursor.Savepoint end = cursor.savepoint();
         cursor.restore(start);
+        Token first = cursor.current();
+        // The number ends where its unit begins: one token, or two when its sign stands apart (- 5 V).
+        Token unitStart = cursor.lookAt(cursor.isCurrent(BasicToken.T_MINUS, BasicToken.T_PLUS) ? 2 : 1);
         Optional<Quantity> quantity = quantities.read(bounded(next), context).map(QuantityLiteralNode::getQuantity)
                 .filter(ignored -> cursor.position() == end.getPosition());
         cursor.restore(end);
+        if (quantity.isPresent() && !quantity.get().unit().isEmpty()) {
+            // A number with its unit keeps the number as its expression and the unit in its quantity.
+            expression = reading.text(first.offset(), unitStart.offset());
+        }
         return new Values.Written(expression, quantity);
     }
 
@@ -67,6 +77,10 @@ final class JmxValues {
         if (reading.atLineEnd() || reading.cursor.isCurrent(BasicToken.T_STRING)) {
             throw reading.refusal(first, "a value is missing");
         }
+        if (reading.cursor.isCurrent(BasicToken.T_OPEN_BRACKET)) {
+            listed(next);
+            return reading.text(first.offset(), reading.cursor.endOfRead());
+        }
         try {
             context.getParser(ExpressionParser.class).parse(bounded(next), context);
         } catch (ExperienceParseException refusal) {
@@ -75,6 +89,96 @@ final class JmxValues {
             throw reading.refusal(first, "'" + reading.lineFrom(first) + "' is not a value: " + unreadable.getMessage());
         }
         return reading.text(first.offset(), reading.cursor.endOfRead());
+    }
+
+    /**
+     * {@code [a, b, c]} — values listed in brackets, each an expression or a list itself, as a matrix's rows are:
+     * {@code [[1, 2], [2, 4]]}. jMF has no lists; they are jMX's, and what reads the value reads them.
+     *
+     * @param next the words the line's grammar may write after the list
+     * @return each listed value as written
+     */
+    List<SourceText> listed(Set<String> next) {
+        reading.cursor.next();
+        List<SourceText> listed = new ArrayList<>();
+        listed.add(expression(next));
+        while (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
+            reading.cursor.next();
+            listed.add(expression(next));
+        }
+        reading.expect(BasicToken.T_CLOSE_BRACKET, "']' to close the listed values");
+        return listed;
+    }
+
+    /**
+     * {@code minimum .. maximum}, each bound an expression.
+     *
+     * @param next the words the line's grammar may write after the range
+     */
+    Block.Range range(Set<String> next) {
+        Token from = reading.cursor.current();
+        SourceText minimum = expression(next);
+        if (!reading.cursor.isCurrent(BasicToken.T_DOUBLE_DOT)) {
+            throw reading.refusal(from, "a range is written 'minimum .. maximum'");
+        }
+        reading.cursor.next();
+        return new Block.Range(minimum, expression(next));
+    }
+
+    /**
+     * {@code (a, b, c)}: each coordinate an expression. A single expression — or one in parentheses around the whole
+     * of it, {@code (x + 1)} — is one coordinate.
+     *
+     * @param next the words the line's grammar may write after the tuple
+     */
+    List<SourceText> tuple(Set<String> next) {
+        TokenCursor view = bounded(next);
+        int close = closingOf(view);
+        boolean whole = close >= 0
+                && (close + 1 >= view.remaining() || view.lookAt(close + 1).type() == BasicToken.T_STRING);
+        if (!whole || !hasCommaInside(view, close)) {
+            return List.of(expression(next));
+        }
+        reading.cursor.next();
+        List<SourceText> coordinates = new ArrayList<>();
+        coordinates.add(expression(next));
+        while (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
+            reading.cursor.next();
+            coordinates.add(expression(next));
+        }
+        reading.expect(BasicToken.T_CLOSE_PAREN, "')' to close the coordinates");
+        return coordinates;
+    }
+
+    /** The offset of the parenthesis closing the one the view stands on; -1 when it stands on none, or it never closes. */
+    private static int closingOf(TokenCursor view) {
+        if (!view.isCurrent(BasicToken.T_OPEN_PAREN)) {
+            return -1;
+        }
+        int depth = 0;
+        for (int offset = 0; offset < view.remaining(); offset++) {
+            if (view.lookAt(offset).type() == BasicToken.T_OPEN_PAREN) {
+                depth++;
+            } else if (view.lookAt(offset).type() == BasicToken.T_CLOSE_PAREN && --depth == 0) {
+                return offset;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean hasCommaInside(TokenCursor view, int close) {
+        int depth = 0;
+        for (int offset = 0; offset < close; offset++) {
+            Token.Type type = view.lookAt(offset).type();
+            if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
+                depth++;
+            } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
+                depth--;
+            } else if (depth == 1 && type == BasicToken.T_COMMA) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The cursor, ending at the line's end and at its grammar's next words outside parentheses, unless called. */

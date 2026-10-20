@@ -2,45 +2,60 @@ package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.type.ValueType;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.Equation;
 import org.jmouse.parallax.script.Block.EquationForm;
-import org.jmouse.parallax.script.Block.Input;
-import org.jmouse.parallax.script.Block.InternalNode;
-import org.jmouse.parallax.script.Block.Output;
-import org.jmouse.parallax.script.Block.OutputType;
 import org.jmouse.parallax.script.Block.Pin;
-import org.jmouse.parallax.script.Block.PinDirection;
-import org.jmouse.parallax.script.Block.PinNature;
-import org.jmouse.parallax.script.Block.Range;
-import org.jmouse.parallax.script.Block.StateVariable;
-import org.jmouse.el.type.ValueType;
 import org.jmouse.parallax.script.ElectricalTypes;
+import org.jmouse.parallax.script.ExperienceParseException;
 import org.jmouse.parallax.script.QuantityType;
 import org.jmouse.parallax.script.SourceText;
 import org.jmouse.units.Dimension;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-/** The declaration blocks every computable kind shares: parameters, inputs, outputs, state, equations, pins, nodes. */
+/**
+ * The declaration blocks every computable kind shares: parameters, inputs, outputs, state, display, measure, leads,
+ * image, equations, heat, pins, nodes — and the {@code type} statement. Each block's lines are read by its
+ * {@link JmxLineParser}; a block gathers what they declare and holds them to the rules that span lines.
+ */
 final class DeclarationReader {
 
     private final Reading reading;
     /** The quantities the document being read named with {@code type}, by name; forgotten at the next document. */
     private final Map<String, ValueType> types = new LinkedHashMap<>();
     private final ParameterLineParser parameterLines;
+    private final InputLineParser inputLines;
+    private final OutputLineParser outputLines;
+    private final StateLineParser stateLines;
+    private final DisplayLineParser displayLines;
+    private final MeasureLineParser measureLines;
+    private final LeadLineParser leadLines;
+    private final ImageLineParser imageLines;
+    private final EquationLineParser equationLines;
+    private final PinLineParser pinLines;
+    private final NodeLineParser nodeLines;
 
     DeclarationReader(Reading reading) {
         this.reading = reading;
-        this.parameterLines = new ParameterLineParser(reading, new JmxValues(reading));
+        JmxValues values = new JmxValues(reading);
+        this.parameterLines = new ParameterLineParser(reading, values);
+        this.inputLines = new InputLineParser(reading, values);
+        this.outputLines = new OutputLineParser(reading, values);
+        this.stateLines = new StateLineParser(reading, values);
+        this.displayLines = new DisplayLineParser(reading, values);
+        this.measureLines = new MeasureLineParser(reading, values);
+        this.leadLines = new LeadLineParser(reading);
+        this.imageLines = new ImageLineParser(reading, values);
+        this.equationLines = new EquationLineParser(reading, values, this);
+        this.pinLines = new PinLineParser(reading);
+        this.nodeLines = new NodeLineParser(reading);
     }
 
     /** A new document begins: the types the last one named are not its. */
@@ -48,63 +63,76 @@ final class DeclarationReader {
         types.clear();
     }
 
+    // ─── types ──────────────────────────────────────────────────────────────────────────────────────
+
     /**
      * {@code type power_density = power / area}: a quantity the document names, built from the known ones — jMX's
      * electrical quantities, the core's, and the document's own named earlier — by {@code *}, {@code /} and whole
      * powers ({@code current ^ 2}, {@code 1 / time}). What it says is a dimension; a {@code let} may then be typed by it.
      */
-    void type(Reading.Line line) {
-        if (line.size() < 3 || !line.value(1).equals("=")) {
-            throw line.refusal("a type is 'type name = power / area': a name, '=', and known types joined by * and /");
+    void type() {
+        TokenCursor line = reading.lineView();
+        Token first = reading.cursor.current();
+        if (line.remaining() < 3 || !line.checkValueAt(1, "=")) {
+            throw reading.refusal(first, "a type is 'type name = power / area': a name, '=', and known types joined by * and /");
         }
-        String name = line.value(0);
+        String name = line.valueAt(0);
         if (resolveType(name).isPresent()) {
-            throw line.refusal(0, "'" + name + "' is already a type");
+            throw reading.refusalAhead(0, "'" + name + "' is already a type");
         }
         types.put(name, new QuantityType(name, "", typeExpression(line, 2)));
+        reading.skipLine();
     }
 
     /** What a written type name is: the document's own first, then jMX's and the core's. */
-    private Optional<ValueType> resolveType(String name) {
+    Optional<ValueType> resolveType(String name) {
         return Optional.ofNullable(types.get(name)).or(() -> ElectricalTypes.find(name));
     }
 
+    /** Every type a document may name, its own and the known ones, in order. */
+    List<String> knownTypeNames() {
+        List<String> names = new ArrayList<>(types.keySet());
+        names.addAll(ElectricalTypes.names());
+        return names.stream().sorted().toList();
+    }
+
     /** {@code power / area}, {@code voltage * time}, {@code current ^ 2}, {@code 1 / time}: the product the words make. */
-    private Dimension typeExpression(Reading.Line line, int from) {
+    private Dimension typeExpression(TokenCursor line, int from) {
         Dimension result = Dimension.NONE;
         boolean dividing = false;
         int at = from;
-        while (at < line.size()) {
-            String word = line.value(at);
+        int length = line.remaining();
+        while (at < length) {
+            String word = line.valueAt(at);
             Dimension factor;
             if (word.equals("1") && at == from) {
                 factor = Dimension.NONE;
             } else {
-                ValueType named = resolveType(word).orElseThrow(() -> line.refusal(from, "'" + word
+                ValueType named = resolveType(word).orElseThrow(() -> reading.refusalAhead(from, "'" + word
                         + "' is not a type here. Known types: " + String.join(", ", knownTypeNames())));
                 if (!(named instanceof QuantityType quantity)) {
-                    throw line.refusal(from, "'" + word + "' is not a quantity, so it measures nothing a type can be built of");
+                    throw reading.refusalAhead(from, "'" + word + "' is not a quantity, so it measures nothing a type can be built of");
                 }
                 factor = quantity.dimension();
             }
             at++;
-            if (at < line.size() && line.value(at).equals("^")) {
+            if (at < length && line.checkValueAt(at, "^")) {
                 int exponent;
                 try {
-                    exponent = Integer.parseInt(line.value(at + 1));
+                    exponent = Integer.parseInt(line.valueAt(at + 1));
                 } catch (RuntimeException notWhole) {
-                    throw line.refusal(Math.min(at + 1, line.size() - 1), "a type's power is a whole number: current ^ 2");
+                    throw reading.refusalAhead(Math.min(at + 1, length - 1), "a type's power is a whole number: current ^ 2");
                 }
                 factor = factor.power(exponent);
                 at += 2;
             }
             result = dividing ? result.over(factor) : result.times(factor);
-            if (at >= line.size()) {
+            if (at >= length) {
                 break;
             }
-            String operator = line.value(at);
+            String operator = line.valueAt(at);
             if (!operator.equals("*") && !operator.equals("/")) {
-                throw line.refusal(at, "types are joined by * and /, not '" + operator + "'");
+                throw reading.refusalAhead(at, "types are joined by * and /, not '" + operator + "'");
             }
             dividing = operator.equals("/");
             at++;
@@ -112,243 +140,64 @@ final class DeclarationReader {
         return result;
     }
 
-    private List<String> knownTypeNames() {
-        List<String> names = new ArrayList<>(types.keySet());
-        names.addAll(ElectricalTypes.names());
-        return names.stream().sorted().toList();
-    }
-
-    // ─── parameters ─────────────────────────────────────────────────────────────────────────────────
+    // ─── blocks of lines ────────────────────────────────────────────────────────────────────────────
 
     Block.Parameters parameters() {
         return new Block.Parameters(reading.lines("parameters", parameterLines));
     }
 
-    // ─── inputs ─────────────────────────────────────────────────────────────────────────────────────
-
     Block.Inputs inputs() {
-        return new Block.Inputs(reading.blockLines("inputs").stream().map(this::input).toList());
+        return new Block.Inputs(reading.lines("inputs", inputLines));
     }
-
-    /** {@code x in -3 .. 3}, {@code n in 0 .. 500 integer}, {@code (z) in -2 - 2 i .. 2 + 2 i}, {@code (x, y) in -1 .. 1}. */
-    private Input input(Reading.Line line) {
-        List<String> names = new ArrayList<>();
-        int index;
-        boolean parenthesised = line.value(0).equals("(");
-        if (parenthesised) {
-            int close = line.closing(0);
-            for (int at = 1; at < close; at++) {
-                if (!line.value(at).equals(",")) {
-                    names.add(line.value(at));
-                }
-            }
-            index = close + 1;
-        } else {
-            names.add(line.value(0));
-            index = 1;
-        }
-        Optional<Range> range = Optional.empty();
-        Optional<SourceText> step = Optional.empty();
-        boolean integer = false;
-        boolean periodic = false;
-        String description = "";
-        while (index < line.size()) {
-            String word = line.value(index);
-            if (line.isString(index)) {
-                description = reading.literal(line.get(index));
-                index++;
-            } else if (word.equals("in")) {
-                int end = endOfInputPart(line, index + 1);
-                range = Optional.of(Values.range(line, index + 1, end));
-                index = end;
-            } else if (word.equals("step")) {
-                int end = endOfInputPart(line, index + 1);
-                step = Optional.of(line.text(index + 1, end));
-                index = end;
-            } else if (word.equals("integer")) {
-                integer = true;
-                index++;
-            } else if (word.equals("periodic")) {
-                periodic = true;
-                index++;
-            } else {
-                throw line.refusal(index, "'" + word + "' is not part of an input: expected in, step, integer, periodic or a description");
-            }
-        }
-        return new Input(names, range, step, integer, periodic, parenthesised && names.size() == 1, description);
-    }
-
-    private static int endOfInputPart(Reading.Line line, int from) {
-        int index = line.indexOf(from, "step", "integer", "periodic");
-        for (int at = from; at < line.size(); at++) {
-            if (line.isString(at)) {
-                return index < 0 ? at : Math.min(index, at);
-            }
-        }
-        return index < 0 ? line.size() : index;
-    }
-
-    // ─── outputs ────────────────────────────────────────────────────────────────────────────────────
 
     Block.Outputs outputs() {
-        return new Block.Outputs(reading.blockLines("outputs").stream().map(this::output).toList());
+        return new Block.Outputs(reading.lines("outputs", outputLines));
     }
-
-    /**
-     * {@code z : surface = A sin(k x)}, {@code trace : curve = (sin(t), cos(t))}, {@code boundary : surface where …},
-     * {@code estimate : series "…"}, {@code mean = mu}.
-     */
-    private Output output(Reading.Line line) {
-        String name = line.value(0);
-        int index = 1;
-        Optional<OutputType> type = Optional.empty();
-        Optional<String> gluing = Optional.empty();
-        if (line.value(index).equals(":")) {
-            String word = line.value(index + 1);
-            type = Optional.of(outputType(line, index + 1, word));
-            index += 2;
-            if (line.value(index).equals("glued")) {
-                gluing = Optional.of(line.value(index + 1));
-                index += 2;
-            }
-        }
-        int descriptionAt = line.size();
-        String description = "";
-        if (line.isString(line.size() - 1) && line.size() - 1 >= index) {
-            descriptionAt = line.size() - 1;
-            description = reading.literal(line.get(descriptionAt));
-        }
-        if (index >= descriptionAt) {
-            if (type.isEmpty()) {
-                throw line.refusal("output '" + name + "' needs a type ('" + name + " : series') or a value");
-            }
-            return new Output(name, type, gluing, List.of(), Optional.empty(), description);
-        }
-        String word = line.value(index);
-        if (word.equals("=")) {
-            return new Output(name, type, gluing, Values.tuple(line, index + 1, descriptionAt), Optional.empty(), description);
-        }
-        if (word.equals("where")) {
-            return new Output(name, type, gluing, List.of(), Optional.of(line.text(index + 1, descriptionAt)), description);
-        }
-        throw line.refusal(index, "an output is 'name [: type] = expression', 'name : type where equation' or 'name : type'");
-    }
-
-    private static OutputType outputType(Reading.Line line, int index, String word) {
-        try {
-            return OutputType.valueOf(word.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException unknown) {
-            throw line.refusal(index, "'" + word + "' is not an output type: " + Arrays.stream(OutputType.values())
-                    .map(type -> type.name().toLowerCase(Locale.ROOT)).collect(Collectors.joining(", ")));
-        }
-    }
-
-    // ─── state ──────────────────────────────────────────────────────────────────────────────────────
 
     Block.State state() {
-        return new Block.State(reading.blockLines("state").stream().map(this::stateVariable).toList());
+        return new Block.State(reading.lines("state", stateLines));
     }
 
-    /** {@code x = 1 continuous "…"}, {@code stored = X discrete}, {@code memory[256] = 0 discrete}. */
-    private StateVariable stateVariable(Reading.Line line) {
-        // A row of states writes its length after its name: the rest of the line reads on as for one state.
-        int length = 0;
-        int equals = 1;
-        if (line.size() > 4 && line.value(1).equals("[")) {
-            if (!line.value(2).matches("\\d+") || !line.value(3).equals("]")) {
-                throw line.refusal("a row of states is 'name[length] = initial discrete', as 'memory[256] = 0 discrete'");
-            }
-            length = Integer.parseInt(line.value(2));
-            if (length < 1 || length > 65536) {
-                throw line.refusal("a row of states has 1 to 65536 slots, not " + length);
-            }
-            equals = 4;
-        }
-        int nature = line.indexOf(equals + 1, "continuous", "discrete");
-        if (line.size() < equals + 3 || !line.value(equals).equals("=") || nature < 0) {
-            throw line.refusal("a state is 'name = initial continuous|discrete [\"description\"]'");
-        }
-        if (length > 0 && !line.value(nature).equals("discrete")) {
-            throw line.refusal(nature, "a row of states is discrete: the equations read numbers, not rows");
-        }
-        boolean described = line.isString(line.size() - 1);
-        String description = described ? reading.literal(line.get(line.size() - 1)) : "";
-        int end = described ? line.size() - 1 : line.size();
-        Optional<Range> range = Optional.empty();
-        if (nature + 1 < end) {
-            if (!line.value(nature + 1).equals("in")) {
-                throw line.refusal(nature + 1, "after continuous or discrete comes 'in minimum .. maximum' or a description");
-            }
-            range = Optional.of(Values.range(line, nature + 2, end));
-        }
-        return new StateVariable(line.value(0), line.text(equals + 1, nature), line.value(nature).equals("discrete"), range, description, length);
+    Block.Equations equations() {
+        return new Block.Equations(reading.lines("equations", equationLines));
     }
 
-    // ─── equations ──────────────────────────────────────────────────────────────────────────────────
+    Block.Nodes nodes() {
+        return new Block.Nodes(reading.lines("nodes", nodeLines));
+    }
 
     /**
      * {@code display { level = terminal_one - terminal_two;  charge = 100 * (terminal_one - terminal_two) / voltage_rating unit % }}:
      * a name, then the expression it shows — and, with {@code unit}, a figure written beside the part as well as drawn,
-     * with an optional caption in quotes saying what it is of: {@code charge = … unit % "of the rated voltage"}. A figure
-     * without a unit may have a caption too ({@code taken = acknowledged "1 when the target took the last byte"}): the
-     * quoted text is never part of the expression.
+     * with an optional caption in quotes saying what it is of. A row, {@code cell[32] = shown}, is a figure for each slot.
      */
     Block.Display display() {
         Map<String, SourceText> figures = new LinkedHashMap<>();
         Map<String, String> units = new LinkedHashMap<>();
         Map<String, String> captions = new LinkedHashMap<>();
-        for (Reading.Line line : reading.blockLines("display")) {
-            if (line.size() > 1 && line.value(1).equals("[")) {
-                displayRow(line, figures, captions);
+        for (DisplayLineParser.Figure figure : reading.lines("display", displayLines)) {
+            if (figure.count() == 0) {
+                put(figures, figure.name(), figure.expression(), figure.first());
+                figure.unit().ifPresent(unit -> units.put(figure.name(), unit));
+                figure.caption().ifPresent(caption -> captions.put(figure.name(), caption));
                 continue;
             }
-            int unit = line.indexOf(2, "unit");
-            boolean captioned = line.size() > 3 && line.isString(line.size() - 1);
-            int end = captioned ? line.size() - 1 : line.size();
-            if (line.size() < 3 || !line.value(1).equals("=") || (unit >= 0 && unit != end - 2)) {
-                throw line.refusal("a display line is 'name = expression [unit U] [\"caption\"]': "
-                        + "'charge = 100 * (terminal_one - terminal_two) / voltage_rating unit % \"of the rated voltage\"'");
-            }
-            if (figures.containsKey(line.value(0))) {
-                throw line.refusal("'" + line.value(0) + "' is displayed twice");
-            }
-            figures.put(line.value(0), line.text(2, unit >= 0 ? unit : end));
-            if (unit >= 0) {
-                units.put(line.value(0), line.value(unit + 1));
-            }
-            if (captioned) {
-                captions.put(line.value(0), line.words(line.size() - 1, line.size()).getFirst());
+            SourceText written = figure.expression();
+            for (int index = 0; index < figure.count(); index++) {
+                String name = figure.name() + "_" + index;
+                put(figures, name, new SourceText(written.text() + "_" + index, written.line(), written.column(),
+                        written.offset()), figure.first());
+                figure.caption().ifPresent(caption -> captions.put(name, caption));
             }
         }
         return new Block.Display(figures, units, captions);
     }
 
-    /**
-     * {@code cell[32] = shown ["caption"]}: one figure for each slot of a row state — {@code cell_0 = shown_0} …
-     * {@code cell_31 = shown_31} —, what a display of many cells shows: a symbol's inputs named as its figures. The
-     * caption, when written, is each figure's.
-     */
-    private void displayRow(Reading.Line line, Map<String, SourceText> figures, Map<String, String> captions) {
-        boolean captioned = line.size() == 7 && line.isString(6);
-        if ((line.size() != 6 && !captioned) || !line.value(3).equals("]") || !line.value(4).equals("=")
-                || !line.value(2).matches("\\d+")) {
-            throw line.refusal("a row of figures is 'name[count] = row [\"caption\"]': 'cell[32] = shown', one figure for each slot");
+    private void put(Map<String, SourceText> figures, String name, SourceText expression, Token first) {
+        if (figures.containsKey(name)) {
+            throw reading.refusal(first, "'" + name + "' is displayed twice");
         }
-        String caption = captioned ? line.words(6, 7).getFirst() : null;
-        String name = line.value(0);
-        String row = line.value(5);
-        int count = Integer.parseInt(line.value(2));
-        SourceText written = line.text(5, 6);
-        for (int index = 0; index < count; index++) {
-            String figure = name + "_" + index;
-            if (figures.containsKey(figure)) {
-                throw line.refusal("'" + figure + "' is displayed twice");
-            }
-            figures.put(figure, new SourceText(row + "_" + index, written.line(), written.column(), written.offset()));
-            if (caption != null) {
-                captions.put(figure, caption);
-            }
-        }
+        figures.put(name, expression);
     }
 
     /**
@@ -356,18 +205,13 @@ final class DeclarationReader {
      * what that comes out in, and {@code signal} when it is a signal a bench reads as DC, AC or RMS.
      */
     Block.Measure measure() {
-        Map<String, Block.MeasureFigure> figures = new LinkedHashMap<>();
         Token open = reading.cursor.current();
-        for (Reading.Line line : reading.blockLines("measure")) {
-            int unit = line.indexOf(2, "unit");
-            boolean signal = line.value(line.size() - 1).equals("signal");
-            if (line.size() < 3 || !line.value(1).equals("=") || unit < 3 || unit != line.size() - (signal ? 3 : 2)) {
-                throw line.refusal("a measure line is 'name = expression unit U [signal]': 'reading = plus - minus unit V signal'");
+        Map<String, Block.MeasureFigure> figures = new LinkedHashMap<>();
+        for (MeasureLineParser.Measured measured : reading.lines("measure", measureLines)) {
+            if (figures.containsKey(measured.name())) {
+                throw reading.refusal(measured.first(), "'" + measured.name() + "' is measured twice");
             }
-            if (figures.containsKey(line.value(0))) {
-                throw line.refusal("'" + line.value(0) + "' is measured twice");
-            }
-            figures.put(line.value(0), new Block.MeasureFigure(line.text(2, unit), line.value(unit + 1), signal));
+            figures.put(measured.name(), measured.figure());
         }
         if (figures.isEmpty()) {
             throw reading.refusal(open, "a measure block names what the instrument reads: 'reading = plus - minus unit V'");
@@ -378,20 +222,11 @@ final class DeclarationReader {
     /** {@code leads { plus red stripes black }}: a pin, its lead's colour, and optionally {@code stripes} and theirs. */
     Block.Leads leads() {
         Map<String, Block.LeadLook> looks = new LinkedHashMap<>();
-        for (Reading.Line line : reading.blockLines("leads")) {
-            boolean striped = line.size() == 4 && line.value(2).equals("stripes");
-            if (line.size() != 2 && !striped) {
-                throw line.refusal("a lead is 'pin colour [stripes colour]': 'plus red stripes black'");
+        for (LeadLineParser.Lead lead : reading.lines("leads", leadLines)) {
+            if (looks.containsKey(lead.pin())) {
+                throw reading.refusal(lead.first(), "'" + lead.pin() + "' has its lead described twice");
             }
-            for (int at : striped ? new int[]{1, 3} : new int[]{1}) {
-                if (!Block.LEAD_COLOURS.contains(line.value(at))) {
-                    throw line.refusal(at, "a lead is " + String.join(", ", Block.LEAD_COLOURS) + ", not '" + line.value(at) + "'");
-                }
-            }
-            if (looks.containsKey(line.value(0))) {
-                throw line.refusal("'" + line.value(0) + "' has its lead described twice");
-            }
-            looks.put(line.value(0), new Block.LeadLook(line.value(1), striped ? line.value(3) : null));
+            looks.put(lead.pin(), lead.look());
         }
         return new Block.Leads(looks);
     }
@@ -401,63 +236,27 @@ final class DeclarationReader {
      * variable, {@code stop when …} (any number), {@code hit when … crosses 0 [where …]}, {@code value = …}.
      */
     Block.Image image() {
-        String horizontal = null;
-        String vertical = null;
-        Block.Range horizontalRange = null;
-        Block.Range verticalRange = null;
+        Token open = reading.cursor.current();
+        ImageLineParser.Over over = null;
         Map<String, SourceText> starts = new LinkedHashMap<>();
         List<SourceText> stops = new ArrayList<>();
-        SourceText crossing = null;
-        Optional<SourceText> where = Optional.empty();
+        ImageLineParser.Hit hit = null;
         SourceText value = null;
-        Token open = reading.cursor.current();
-        for (Reading.Line line : reading.blockLines("image")) {
-            switch (line.value(0)) {
-                case "over" -> {
-                    int comma = line.indexOf(1, ",");
-                    if (comma < 0 || !line.value(2).equals("in") || !line.value(comma + 2).equals("in")) {
-                        throw line.refusal("the picture spans two axes: 'over X in a .. b, Y in c .. d'");
-                    }
-                    horizontal = line.value(1);
-                    horizontalRange = Values.range(line, 3, comma);
-                    vertical = line.value(comma + 1);
-                    verticalRange = Values.range(line, comma + 3, line.size());
-                }
-                case "start" -> {
-                    requireEquals(line, 2);
-                    starts.put(line.value(1), line.text(3));
-                }
-                case "stop" -> {
-                    if (!line.value(1).equals("when")) {
-                        throw line.refusal(1, "a run ends 'stop when condition'");
-                    }
-                    stops.add(line.text(2));
-                }
-                case "hit" -> {
-                    int crosses = line.indexOf(2, "crosses");
-                    if (!line.value(1).equals("when") || crosses < 0 || crosses + 1 >= line.size() || !line.value(crosses + 1).equals("0")) {
-                        throw line.refusal("a hit is 'hit when expression crosses 0 [where condition]'");
-                    }
-                    crossing = line.text(2, crosses);
-                    int whereAt = line.indexOf(crosses + 2, "where");
-                    where = whereAt < 0 ? Optional.empty() : Optional.of(line.text(whereAt + 1));
-                }
-                case "value" -> {
-                    requireEquals(line, 1);
-                    value = line.text(2);
-                }
-                default -> throw line.refusal("an image holds 'over', 'start', 'stop when', 'hit when' and 'value ='");
+        for (ImageLineParser.Statement statement : reading.lines("image", imageLines)) {
+            switch (statement) {
+                case ImageLineParser.Over written -> over = written;
+                case ImageLineParser.Start start -> starts.put(start.variable(), start.value());
+                case ImageLineParser.Stop stop -> stops.add(stop.condition());
+                case ImageLineParser.Hit written -> hit = written;
+                case ImageLineParser.Value written -> value = written.value();
             }
         }
-        if (horizontal == null || crossing == null || value == null || starts.isEmpty() || stops.isEmpty()) {
+        if (over == null || hit == null || value == null || starts.isEmpty() || stops.isEmpty()) {
             throw reading.refusal(open, "an image needs 'over', a 'start' for every state variable, at least one "
                     + "'stop when', a 'hit when' and a 'value'");
         }
-        return new Block.Image(horizontal, horizontalRange, vertical, verticalRange, starts, stops, crossing, where, value);
-    }
-
-    Block.Equations equations() {
-        return new Block.Equations(reading.blockLines("equations").stream().map(this::equation).toList());
+        return new Block.Image(over.horizontal(), over.horizontalRange(), over.vertical(), over.verticalRange(), starts,
+                stops, hit.crossing(), hit.where(), value);
     }
 
     /**
@@ -467,195 +266,45 @@ final class DeclarationReader {
     Block.Heat heat() {
         List<Equation> lines = new ArrayList<>();
         SourceText temperature = null;
-        Reading.Line first = null;
-        for (Reading.Line line : reading.blockLines("heat")) {
+        Token first = null;
+        List<TokenCursor.Savepoint> starts = reading.lineStarts("heat");
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            Token line = reading.cursor.current();
             first = first == null ? line : first;
-            if (line.value(0).equals("temperature") && line.value(1).equals("=")) {
+            if (equationLines.atTemperature()) {
                 if (temperature != null) {
-                    throw line.refusal("a heat law says what the temperature is once");
+                    throw reading.refusal(line, "a heat law says what the temperature is once");
                 }
-                requireEquals(line, 1);
-                temperature = line.text(2);
+                temperature = equationLines.temperature();
                 continue;
             }
-            Equation equation = equation(line);
+            Equation equation = equationLines.read();
             if (equation.form() != EquationForm.DERIVATIVE && equation.form() != EquationForm.LOCAL) {
-                throw line.refusal("a heat law is d(x)/dt = …, let name = … and temperature = …");
+                throw reading.refusal(line, "a heat law is d(x)/dt = …, let name = … and temperature = …");
             }
             lines.add(equation);
         }
+        reading.cursor.restore(after);
         if (temperature == null) {
             throw first == null ? new IllegalArgumentException("a heat law needs 'temperature = …'")
-                    : first.refusal("a heat law needs 'temperature = …': the part's own temperature, kelvin");
+                    : reading.refusal(first, "a heat law needs 'temperature = …': the part's own temperature, kelvin");
         }
         return new Block.Heat(lines, temperature);
     }
 
     /**
-     * {@code d(x)/dt = …}, {@code x_next = …}, {@code x_start = …}, {@code current a -> b = …} (a current from pin a to
-     * pin b through the part), {@code voltage a -> b = …} (a branch holding pin a at that voltage above pin b),
-     * {@code 0 = …}, {@code let name = …} or {@code let name : current = …} ({@code local} is the same word).
+     * {@code pins { out analog output 1 "output"; q[0..7] digital output 15, 1, 2, … }}: every pin, and every bus with
+     * the pins of its bits.
      */
-    Equation equation(Reading.Line line) {
-        String head = line.value(0);
-        if (head.equals("let") || head.equals("local")) {
-            if (!line.value(2).equals(":")) {
-                requireEquals(line, 2);
-                return new Equation(EquationForm.LOCAL, line.value(1), null, null, line.text(3));
-            }
-            String typeName = line.value(3);
-            ValueType type = resolveType(typeName).orElseThrow(() -> line.refusal(3, "'" + typeName
-                    + "' is not a type here. Known types: " + String.join(", ", knownTypeNames())));
-            requireEquals(line, 4);
-            return new Equation(EquationForm.LOCAL, line.value(1), null, null, line.text(5), type);
-        }
-        if (head.equals("d") && line.value(1).equals("(") && line.value(3).equals(")") && line.value(4).equals("/")) {
-            if (!line.value(5).equals("dt")) {
-                throw line.refusal(5, "a derivative is written d(x)/dt = …");
-            }
-            requireEquals(line, 6);
-            return new Equation(EquationForm.DERIVATIVE, line.value(2), null, null, line.text(7));
-        }
-        if (head.equals("current") || head.equals("voltage")) {
-            int equals = line.indexOf(1, "=");
-            String[] pins = equals < 0 ? new String[0] : String.join("", line.words(1, equals)).split("->", -1);
-            if (pins.length != 2 || !pins[0].matches("[A-Za-z_][A-Za-z0-9_]*") || !pins[1].matches("[A-Za-z_][A-Za-z0-9_]*")) {
-                throw line.refusal(1, "a branch is written '" + head + " a -> b = …', from one pin to another");
-            }
-            requireEquals(line, equals);
-            return new Equation(head.equals("current") ? EquationForm.CURRENT : EquationForm.VOLTAGE, null,
-                    pins[0], pins[1], line.text(equals + 1));
-        }
-        if ((head.equals("I") || head.equals("V")) && line.value(1).equals("(")) {
-            throw line.refusal("a branch is written '" + (head.equals("I") ? "current" : "voltage") + " a -> b = …', not "
-                    + head + "(a, b) = …");
-        }
-        if (head.equals("0") && line.value(1).equals("=")) {
-            return new Equation(EquationForm.IMPLICIT, null, null, null, line.text(2));
-        }
-        if (line.value(1).equals("=") && line.get(0).type() == BasicToken.T_IDENTIFIER) {
-            if (head.endsWith("_next") && head.length() > 5) {
-                return new Equation(EquationForm.NEXT, head.substring(0, head.length() - 5), null, null, line.text(2));
-            }
-            if (head.endsWith("_start") && head.length() > 6) {
-                return new Equation(EquationForm.START, head.substring(0, head.length() - 6), null, null, line.text(2));
-            }
-        }
-        throw line.refusal("an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, "
-                + "voltage a -> b = …, 0 = … or let name [: type] = …");
-    }
-
-    private static void requireEquals(Reading.Line line, int at) {
-        if (!line.value(at).equals("=") || at + 1 >= line.size()) {
-            throw line.refusal(Math.min(at, line.size() - 1), "'=' and a right side are expected here");
-        }
-    }
-
-    // ─── pins and internal nodes ────────────────────────────────────────────────────────────────────
-
     Block.Pins pins() {
         List<Pin> pins = new ArrayList<>();
         List<Block.Bus> buses = new ArrayList<>();
-        for (Reading.Line line : reading.blockLines("pins")) {
-            if (line.size() > 1 && line.value(1).equals("[")) {
-                buses.add(bus(line, pins));
-            } else {
-                pins.add(pin(line, line.value(0), 1));
-            }
+        for (PinLineParser.Declared declared : reading.lines("pins", pinLines)) {
+            pins.addAll(declared.pins());
+            declared.bus().ifPresent(buses::add);
         }
         return new Block.Pins(pins, buses);
-    }
-
-    /**
-     * {@code q[0..7] digital output 15, 1, 2, 3, 4, 5, 6, 7 "parallel outputs"}: a pin for each bit — {@code q_0} …
-     * {@code q_7} —, each with its package number in the order the range is written, all of one nature. Bit k is always
-     * {@code q_k}, the least significant first, whichever way the range runs. A bus takes as many numbers as it has bits,
-     * or none; the bits of one bus are never split across units.
-     */
-    private Block.Bus bus(Reading.Line line, List<Pin> pins) {
-        String name = line.value(0);
-        int range = line.indexOf(2, "..");
-        if (range != 3 || line.size() < 6 || !line.value(5).equals("]") || !line.value(2).matches("\\d+") || !line.value(4).matches("\\d+")) {
-            throw line.refusal("a bus is written 'name[first..last] nature …', as 'q[0..7] digital output 15, 1, 2, …'");
-        }
-        int first = Integer.parseInt(line.value(2));
-        int last = Integer.parseInt(line.value(4));
-        int width = Math.abs(last - first) + 1;
-        if (width < 2 || width > 32) {
-            throw line.refusal("a bus has 2 to 32 bits, not " + width);
-        }
-        Pin template = pin(line, name, 6);
-        if (template.nature() != PinNature.DIGITAL) {
-            // A bus is read and driven as one number of levels; a voltage has no bits to make one of.
-            throw line.refusal("bus '" + name + "' is " + template.nature().name().toLowerCase() + ": a bus is digital — "
-                    + "write analog pins one by one, as 'channel_0 analog 1'");
-        }
-        if (!template.numbers().isEmpty() && template.numbers().size() != width) {
-            throw line.refusal("bus '" + name + "' has " + width + " bits and " + template.numbers().size()
-                    + " package numbers: write one number for each bit, in the order of its bits, or none");
-        }
-        int step = last >= first ? 1 : -1;
-        List<String> bits = new ArrayList<>();
-        for (int position = 0; position < width; position++) {
-            String bit = name + "_" + (first + position * step);
-            List<Integer> number = template.numbers().isEmpty() ? List.of() : List.of(template.numbers().get(position));
-            pins.add(new Pin(bit, number, template.nature(), template.direction(), template.attributes(), template.description()));
-            bits.add(bit);
-        }
-        if (step < 0) {
-            // q_k is bit k however the range is written: q[7..0] lists its package numbers from q_7 down, and q_0 is still
-            // the least significant bit, as a data sheet and every HDL read it.
-            Collections.reverse(bits);
-        }
-        return new Block.Bus(name, bits);
-    }
-
-    /** {@code out analog output 1 7 "output"}, {@code clk digital input 3 11 edge}: its words from {@code from} on. */
-    private Pin pin(Reading.Line line, String name, int from) {
-        List<Integer> numbers = new ArrayList<>();
-        List<String> attributes = new ArrayList<>();
-        PinNature nature = null;
-        PinDirection direction = PinDirection.INPUT;
-        String description = "";
-        for (int index = from; index < line.size(); index++) {
-            String word = line.value(index);
-            if (line.isString(index)) {
-                description = reading.literal(line.get(index));
-            } else if (word.matches("\\d+")) {
-                numbers.add(Integer.parseInt(word));
-            } else if (!word.equals(",")) {
-                // A comma only parts numbers — '15, 1, 2' is three of them —; every other word says something, and
-                // may be hyphenated: 'open-drain' is one word.
-                word = line.joinedWord(index);
-                index = line.joinedEnd(index) - 1;
-                switch (word) {
-                    case "analog" -> nature = PinNature.ANALOG;
-                    case "digital" -> nature = PinNature.DIGITAL;
-                    case "power" -> nature = PinNature.POWER;
-                    case "ground" -> nature = PinNature.GROUND;
-                    case "output" -> direction = PinDirection.OUTPUT;
-                    case "input" -> direction = PinDirection.INPUT;
-                    case "bidirectional" -> direction = PinDirection.BIDIRECTIONAL;
-                    default -> attributes.add(word);
-                }
-            }
-        }
-        if (nature == null) {
-            throw line.refusal("pin '" + name + "' needs a nature: analog, digital, power or ground");
-        }
-        return new Pin(name, numbers, nature, direction, attributes, description);
-    }
-
-    Block.Nodes nodes() {
-        return new Block.Nodes(reading.blockLines("nodes").stream().map(line -> {
-            boolean digital = line.value(0).equals("digital");
-            int nameAt = digital ? 1 : 0;
-            if (line.size() <= nameAt || line.size() > nameAt + 2
-                    || (line.size() == nameAt + 2 && !line.isString(nameAt + 1))) {
-                throw line.refusal("an internal node is '[digital] name [\"description\"]'");
-            }
-            String description = line.size() == nameAt + 2 ? reading.literal(line.get(nameAt + 1)) : "";
-            return new InternalNode(line.value(nameAt), digital, description);
-        }).toList());
     }
 }

@@ -88,7 +88,7 @@ final class ParameterLineParser extends JmxLineParser<Parameter> {
                     listed = listed(word);
                     range = Optional.of(new Range(listed.getFirst(), listed.getLast()));
                 } else {
-                    range = Optional.of(range());
+                    range = Optional.of(values.range(AFTER_IN));
                 }
             } else if (word.value().equals("step")) {
                 cursor.next();
@@ -108,28 +108,10 @@ final class ParameterLineParser extends JmxLineParser<Parameter> {
         return new Parameter(name, value.expression(), value.quantity(), range, step, flags, description, listed);
     }
 
-    /** {@code minimum .. maximum}, each an expression. */
-    private Range range() {
-        Token from = reading.cursor.current();
-        SourceText minimum = values.expression(AFTER_IN);
-        if (!reading.cursor.isCurrent(BasicToken.T_DOUBLE_DOT)) {
-            throw reading.refusal(from, "a range is written 'minimum .. maximum'");
-        }
-        reading.cursor.next();
-        return new Range(minimum, values.expression(AFTER_IN));
-    }
 
     /** {@code [a, b, c]}: at least two values, each an expression. */
     private List<SourceText> listed(Token in) {
-        TokenCursor cursor = reading.cursor;
-        cursor.next();
-        List<SourceText> listed = new ArrayList<>();
-        listed.add(values.expression(AFTER_IN));
-        while (cursor.isCurrent(BasicToken.T_COMMA)) {
-            cursor.next();
-            listed.add(values.expression(AFTER_IN));
-        }
-        reading.expect(BasicToken.T_CLOSE_BRACKET, "']' to close the listed values");
+        List<SourceText> listed = values.listed(AFTER_IN);
         if (listed.size() < 2) {
             throw reading.refusal(in, "a slider over listed values lists at least two: 'in [1, 3, 7]'");
         }
