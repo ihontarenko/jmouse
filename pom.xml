@@ -95,6 +95,8 @@
         <module>jmouse-el</module>
         <module>jmouse-formula</module>
         <module>jmouse-spice</module>
+        <module>jmouse-kicad-parser</module>
+        <module>jmouse-kicad</module>
         <module>jmouse-parallax</module>
         <module>jmouse-transaction</module>
         <module>jmouse-jdbc</module>
