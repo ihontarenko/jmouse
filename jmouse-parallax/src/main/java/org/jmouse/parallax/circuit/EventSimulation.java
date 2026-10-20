@@ -43,6 +43,8 @@ final class EventSimulation {
     private final Map<String, DigitalUnit> unitsByLabel = new LinkedHashMap<>();
     private final Map<String, List<DigitalDriver>> driversByNode = new LinkedHashMap<>();
     final Map<String, LogicLevel> nodeLevels = new LinkedHashMap<>();
+    /** Counts every change of a node's level: a reader copies the levels again only when it moved. */
+    private long levelChanges;
     final List<OutputBridge> bridges = new ArrayList<>();
     private final List<Netlist.Element> pinCapacitances = new ArrayList<>();
     final StandardExtensionContainer extensions = new StandardExtensionContainer();
@@ -140,6 +142,7 @@ final class EventSimulation {
         }
         nodeLevels.clear();
         nodeLevels.putAll(previous.nodeLevels());
+        levelChanges++;
         now = previous.now();
     }
 
@@ -200,6 +203,11 @@ final class EventSimulation {
         return nodeLevels;
     }
 
+    /** How many times a node's level has changed: the same count means the same levels. */
+    long levelChanges() {
+        return levelChanges;
+    }
+
     // ── one instant ──────────────────────────────────────────────────────────────────────────────────────────────
 
     private boolean settle(double[] state, List<DigitalEvent> initial) {
@@ -235,7 +243,9 @@ final class EventSimulation {
             }
         }
         for (String node : touchedNodes) {
-            nodeLevels.put(node, resolve(driversByNode.get(node)));
+            if (nodeLevels.put(node, resolve(driversByNode.get(node))) != nodeLevels.get(node)) {
+                levelChanges++;
+            }
         }
         for (DigitalUnit unit : units) {
             events.addAll(unit.readInputs(state, false));

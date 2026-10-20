@@ -1,7 +1,7 @@
-# An SPI controller for the bench: it selects its target, clocks up to four bytes out on MOSI and as many in on MISO,
-# and lets the target go — one transaction at a set moment and a set clock, in mode 0: the clock idles low, both sides
-# change their data as it falls and read it as it rises. The last byte read stands on its data outputs; the one before it
-# is its display too, since a converter answers in two.
+# An SPI controller for the bench: it selects its target, once or over and over, clocks up to four bytes out on MOSI and
+# as many in on MISO, and lets the target go — one transaction at a set moment and a set clock, in mode 0: the clock
+# idles low, both sides change their data as it falls and read it as it rises. The last byte read stands on its data
+# outputs; the one before it is its display too, since a converter answers in two.
 
 component "SPI controller" as spi-controller type controller {
     meta {
@@ -20,6 +20,7 @@ component "SPI controller" as spi-controller type controller {
         fourth = 0 in 0 .. 255 step 1 integer     "the fourth byte sent"
         clock_frequency = 1 MHz                   "SCK"
         start_at = 10 us                          "when the target is selected"
+        repeat_every = 0 s                        "the transaction again this long after it began; 0 runs it once"
     }
 
     pins {
@@ -75,6 +76,9 @@ component "SPI controller" as spi-controller type controller {
             drive('mosi', 0)
             drive('data', 0)
             schedule('select', start_at)
+            if repeat_every > 0 then
+                schedule('repeat', start_at + repeat_every)
+            end
         end
 
         on timer 'select' do
@@ -117,6 +121,11 @@ component "SPI controller" as spi-controller type controller {
 
         on timer 'release' do
             drive('cs', 1)
+        end
+
+        on timer 'repeat' do
+            schedule('select', 0)
+            schedule('repeat', repeat_every)
         end
     }
 }

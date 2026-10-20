@@ -199,6 +199,11 @@ final class TransientStepper {
         return digital ? Map.copyOf(events.levels()) : Map.of();
     }
 
+    /** How many times a digital node's level has changed so far: unchanged, {@link #levels()} would answer the same. */
+    long levelChanges() {
+        return digital ? events.levelChanges() : 0;
+    }
+
     /**
      * The state at a time the integration has passed: on the parabola through the last three accepted points, or the
      * line through the last two. The solver steps as its error allows and stops only at edges and events — a sample is

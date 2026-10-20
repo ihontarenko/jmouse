@@ -324,7 +324,7 @@ public final class LiveCircuitSolver {
             }
             return byPiece.getFirst().stream()
                     .map(sample -> new LiveSample(sample.time(), sample.voltages(), assembled(sample.terminals()), sample.metered(),
-                            assembled(sample.window()), withDifferences(sample.envelope()), sample.powers())).toList();
+                            assembled(sample.window()), withDifferences(sample.envelope()), sample.powers(), sample.levels())).toList();
         }
         List<LiveSample> merged = new ArrayList<>(count);
         for (int index = 0; index < count; index++) {
@@ -332,8 +332,14 @@ public final class LiveCircuitSolver {
             Map<String, Map<String, Double>> terminals = null;
             Map<String, MeteredPart> metered = null;
             Map<String, Double> powers = null;
+            Map<String, LogicLevel> levels = null;
             for (int piece = 0; piece < byPiece.size(); piece++) {
                 LiveSample own = byPiece.get(piece).get(index);
+                // Each digital node lives in one piece: the pieces' levels side by side are the circuit's.
+                if (own.levels() != null) {
+                    levels = levels == null ? new LinkedHashMap<>() : levels;
+                    levels.putAll(own.levels());
+                }
                 for (int node = 0; node < own.voltages().length; node++) {
                     voltages[placement[piece][node]] = own.voltages()[node];
                 }
@@ -359,7 +365,7 @@ public final class LiveCircuitSolver {
                 }
             }
             merged.add(new LiveSample(byPiece.getFirst().get(index).time(), voltages, assembled(terminals), metered,
-                    assembled(mergedWindow(byPiece, index)), mergedEnvelope(byPiece, index), powers));
+                    assembled(mergedWindow(byPiece, index)), mergedEnvelope(byPiece, index), powers, levels));
         }
         return merged;
     }

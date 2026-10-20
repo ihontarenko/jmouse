@@ -1,7 +1,7 @@
-# An I²C controller for the bench: it drives one transaction onto SCL and SDA — a write, a read, or a write and then a
-# read of what was written — at a set moment and a set clock, as a bus analyser's "send" button does. Both lines are open
-# drain, so the bus wants its pull-ups. The last byte it read stands on its data outputs, where an LED bar or a check can
-# see it; whether the target acknowledged is its display.
+# An I²C controller for the bench: it drives a transaction onto SCL and SDA, once or over and over — a write, a read, or
+# a write and then a read of what was written — at a set moment and a set clock, as a bus analyser's "send" button does.
+# Both lines are open drain, so the bus wants its pull-ups. The last byte it read stands on its data outputs, where an
+# LED bar or a check can see it; whether the target acknowledged is its display.
 #
 # A transaction is planned as a row of steps, then clocked out a quarter of a bit at a time. The steps:
 #   0 … 255  send this byte          -1  read a byte and ACK it     -2  read a byte and NACK it (the last)
@@ -26,6 +26,7 @@ component "I²C controller" as i2c-controller type controller {
         clock_frequency = 100 kHz                      "SCL: 100 kHz standard mode, 400 kHz fast mode"
         start_at = 20 us                               "when the transaction begins"
         pause = 100 us                                 "between the write and the read back: an EEPROM's write cycle wants 5 ms"
+        repeat_every = 0 s                             "the whole transaction again this long after it began; 0 runs it once"
     }
 
     pins {
@@ -188,11 +189,21 @@ component "I²C controller" as i2c-controller type controller {
             end
         end
 
+        # Every repetition starts from the write again, counted from the moment the first transaction began.
+        on timer 'repeat' do
+            round = 0
+            schedule('begin', 0)
+            schedule('repeat', repeat_every)
+        end
+
         on start do
             drive('scl', 1)
             drive('sda', 1)
             drive('data', 0)
             schedule('begin', start_at)
+            if repeat_every > 0 then
+                schedule('repeat', start_at + repeat_every)
+            end
         end
 
         on timer 'begin' do

@@ -39,11 +39,12 @@ public final class LiveCircuitSession {
     private static final int CAPTURED_SAMPLES = 200_000;
 
     /**
-     * What a probe reads: a voltage between two nodes, the current through a part, the power a part takes, or what an
-     * instrument part reads — its own `measure`, in its own unit.
+     * What a probe reads: a voltage between two nodes, the current through a part, the power a part takes, what an
+     * instrument part reads — its own `measure`, in its own unit —, or a logic analyser's channel: a digital node's level
+     * (1, 0, −1 unknown, −2 let go), or an analog node's voltage for the analyser to read through its thresholds.
      */
     public enum Quantity {
-        VOLTAGE(ColumnNames.VOLTS), CURRENT(ColumnNames.AMPERES), POWER(ColumnNames.WATTS), READING(null);
+        VOLTAGE(ColumnNames.VOLTS), CURRENT(ColumnNames.AMPERES), POWER(ColumnNames.WATTS), READING(null), LEVEL(CircuitComputations.LEVEL_UNIT);
 
         private final String unit;
 
@@ -155,10 +156,14 @@ public final class LiveCircuitSession {
     }
 
     public synchronized void probe(List<Probe> probes) {
+        // A digital net has a level and no voltage: an oscilloscope's tip on one reads the level, as a logic channel does.
+        probes = probes.stream().map(this::onDigitalNode).toList();
         for (Probe probe : probes) {
             if (probe.quantity() == Quantity.VOLTAGE) {
                 requireNode(probe.positive());
                 requireNode(probe.negative());
+            } else if (probe.quantity() == Quantity.LEVEL) {
+                requireLevelNode(probe.positive());
             } else if (probe.part() == null || probe.part().isBlank()) {
                 throw new IllegalArgumentException("A " + probe.quantity().name().toLowerCase() + " probe names its part.");
             }
@@ -189,7 +194,7 @@ public final class LiveCircuitSession {
     /** Tells a solver of this circuit what the probes need read: the parts they meter, the differences they show. */
     private void equip(LiveCircuitSolver target) {
         List<String> order = target.nodes();
-        target.meter(probes.stream().filter(probe -> probe.quantity() != Quantity.VOLTAGE).map(Probe::part).collect(Collectors.toSet()));
+        target.meter(probes.stream().filter(LiveCircuitSession::readsPart).map(Probe::part).collect(Collectors.toSet()));
         target.difference(probes.stream().filter(probe -> FrameReader.watchesDifference(probe, order))
                 .map(probe -> new NodeDifference(
                         NodeReference.of(order, probe.positive()).solverIndex(), NodeReference.of(order, probe.negative()).solverIndex()))
@@ -419,7 +424,8 @@ public final class LiveCircuitSession {
             displays = PartDisplays.of(solver.elaborated());
         }
         solver.trace(traceEvery);
-        probes = probes.stream().filter(probe -> probe.quantity() != Quantity.VOLTAGE || known(probe.positive()) && known(probe.negative())).toList();
+        probes = probes.stream().filter(probe -> probe.quantity() != Quantity.VOLTAGE || known(probe.positive()) && known(probe.negative()))
+                .filter(probe -> probe.quantity() != Quantity.LEVEL || knownLevel(probe.positive())).toList();
         Map<String, FrameReader.InstrumentReading> instruments = instrumentReadings(probes);
         probes = probes.stream().filter(probe -> probe.quantity() != Quantity.READING || instruments.containsKey(probe.channel())).toList();
         equipSolver();
@@ -467,5 +473,30 @@ public final class LiveCircuitSession {
         if (!known(node)) {
             throw new IllegalArgumentException("The circuit has no node '" + node + "' to probe.");
         }
+    }
+
+    /** A voltage probe whose tip is on a digital node and whose clip is on ground, as the level probe it can only be. */
+    private Probe onDigitalNode(Probe probe) {
+        boolean grounded = probe.negative() == null || NodeReference.of(solver.nodes(), probe.negative()) == NodeReference.GROUND;
+        if (probe.quantity() == Quantity.VOLTAGE && grounded && !known(probe.positive()) && solver.levels().containsKey(probe.positive())) {
+            return new Probe(probe.channel(), Quantity.LEVEL, probe.positive(), probe.negative(), null, null);
+        }
+        return probe;
+    }
+
+    /** Whether a logic channel can read this node: a digital one the event solver keeps, or an analog one's voltage. */
+    private boolean knownLevel(String node) {
+        return known(node) || solver.levels().containsKey(node);
+    }
+
+    private void requireLevelNode(String node) {
+        if (!knownLevel(node)) {
+            throw new IllegalArgumentException("The circuit has no node '" + node + "' for a logic channel to read.");
+        }
+    }
+
+    /** Whether a probe reads a part — its current, its power, its instrument's figure — and so the part is metered. */
+    private static boolean readsPart(Probe probe) {
+        return probe.quantity() == Quantity.CURRENT || probe.quantity() == Quantity.POWER || probe.quantity() == Quantity.READING;
     }
 }

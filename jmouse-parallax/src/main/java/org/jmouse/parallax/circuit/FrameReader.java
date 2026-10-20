@@ -55,17 +55,30 @@ final class FrameReader {
                 && !(NodeReference.of(order, probe.positive()) instanceof NodeReference.Absent);
     }
 
-    /** A voltage probe's node among the samples' values; a probe on a part reads no node. */
+    /** A voltage or logic probe's node among the samples' values; a probe on a part, or on a digital node, reads none. */
     private NodeReference nodeOf(Probe probe, String node) {
-        return probe.quantity() == Quantity.VOLTAGE ? NodeReference.of(order, node) : NodeReference.ABSENT;
+        boolean onNode = probe.quantity() == Quantity.VOLTAGE || probe.quantity() == Quantity.LEVEL;
+        return onNode && node != null ? NodeReference.of(order, node) : NodeReference.ABSENT;
+    }
+
+    /** Whether a logic probe reads a digital node's level rather than an analog node's voltage. */
+    private boolean readsLevel(int probe) {
+        return probes.get(probe).quantity() == Quantity.LEVEL && positives[probe] instanceof NodeReference.Absent;
     }
 
     /** Each probe's unit: an instrument's own, or its quantity's. */
     Map<String, String> units() {
         Map<String, String> units = new LinkedHashMap<>();
-        for (Probe probe : probes) {
+        for (int index = 0; index < probes.size(); index++) {
+            Probe probe = probes.get(index);
             InstrumentReading reading = instruments.get(probe.channel());
-            units.put(probe.channel(), probe.quantity() == Quantity.READING ? reading == null ? "" : reading.unit() : probe.quantity().unit());
+            String unit = switch (probe.quantity()) {
+                case READING -> reading == null ? "" : reading.unit();
+                // An analog node read by a logic channel arrives as its voltage, for the analyser's thresholds.
+                case LEVEL -> readsLevel(index) ? Quantity.LEVEL.unit() : Quantity.VOLTAGE.unit();
+                default -> probe.quantity().unit();
+            };
+            units.put(probe.channel(), unit);
         }
         return units;
     }
@@ -86,10 +99,17 @@ final class FrameReader {
                     case CURRENT -> current(sample, probes.get(probe));
                     case POWER -> power(sample, probes.get(probe));
                     case READING -> reading(sample, probes.get(probe), instrumentNodes[probe]);
+                    case LEVEL -> readsLevel(probe) ? level(sample, probes.get(probe).positive()) : positives[probe].in(sample.voltages());
                 };
             }
         }
         return channels;
+    }
+
+    /** A digital node's level at a sample, as a dataset writes one: 1, 0, −1 unknown, −2 let go. */
+    private static double level(LiveSample sample, String node) {
+        LogicLevel level = sample.levels() == null ? null : sample.levels().get(node);
+        return (level == null ? LogicLevel.UNKNOWN : level).datasetValue();
     }
 
     /** Every probe's channel, read on no samples: what a frame that passed its samples unread carries. */

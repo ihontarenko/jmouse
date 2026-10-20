@@ -379,7 +379,9 @@ final class DeclarationReader {
     /**
      * {@code display { level = terminal_one - terminal_two;  charge = 100 * (terminal_one - terminal_two) / voltage_rating unit % }}:
      * a name, then the expression it shows — and, with {@code unit}, a figure written beside the part as well as drawn,
-     * with an optional caption in quotes saying what it is of: {@code charge = … unit % "of the rated voltage"}.
+     * with an optional caption in quotes saying what it is of: {@code charge = … unit % "of the rated voltage"}. A figure
+     * without a unit may have a caption too ({@code taken = acknowledged "1 when the target took the last byte"}): the
+     * quoted text is never part of the expression.
      */
     Block.Display display() {
         Map<String, SourceText> figures = new LinkedHashMap<>();
@@ -387,15 +389,16 @@ final class DeclarationReader {
         Map<String, String> captions = new LinkedHashMap<>();
         for (Reading.Line line : reading.blockLines("display")) {
             int unit = line.indexOf(2, "unit");
-            boolean captioned = unit >= 0 && unit == line.size() - 3 && line.isString(line.size() - 1);
-            if (line.size() < 3 || !line.value(1).equals("=") || (unit >= 0 && unit != line.size() - (captioned ? 3 : 2))) {
-                throw line.refusal("a display line is 'name = expression [unit U [\"caption\"]]': "
+            boolean captioned = line.size() > 3 && line.isString(line.size() - 1);
+            int end = captioned ? line.size() - 1 : line.size();
+            if (line.size() < 3 || !line.value(1).equals("=") || (unit >= 0 && unit != end - 2)) {
+                throw line.refusal("a display line is 'name = expression [unit U] [\"caption\"]': "
                         + "'charge = 100 * (terminal_one - terminal_two) / voltage_rating unit % \"of the rated voltage\"'");
             }
             if (figures.containsKey(line.value(0))) {
                 throw line.refusal("'" + line.value(0) + "' is displayed twice");
             }
-            figures.put(line.value(0), line.text(2, unit >= 0 ? unit : line.size()));
+            figures.put(line.value(0), line.text(2, unit >= 0 ? unit : end));
             if (unit >= 0) {
                 units.put(line.value(0), line.value(unit + 1));
             }

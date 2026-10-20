@@ -63,6 +63,9 @@ final class LiveIntegrator {
     private int                    traceEvery;
     /** The stretch since the last traced sample, while the trace keeps one sample in several; null while it keeps each. */
     private TraceRecorder          trace;
+    /** The digital levels the last read sample carried, and the count of changes they were copied at. */
+    private Map<String, LogicLevel> sampledLevels;
+    private long                   sampledLevelChanges;
     /** What the ledger takes from each accepted step. */
     private final TransientStepper.AcceptedStep gathering;
 
@@ -187,6 +190,16 @@ final class LiveIntegrator {
     /** The level every digital node of this piece stands at now; none when the piece has no digital part. */
     synchronized Map<String, LogicLevel> levels() {
         return stepper.levels();
+    }
+
+    /** The levels a read sample carries: copied again only when a node's level moved, else the copy before shared. */
+    private Map<String, LogicLevel> levelsNow() {
+        long changes = stepper.levelChanges();
+        if (sampledLevels == null || changes != sampledLevelChanges) {
+            sampledLevels = stepper.levels();
+            sampledLevelChanges = changes;
+        }
+        return sampledLevels.isEmpty() ? null : sampledLevels;
     }
 
     /** Traces only these parts' terminal currents from now on; null traces every part. */
@@ -332,7 +345,8 @@ final class LiveIntegrator {
         double[] voltages = Arrays.copyOf(stepper.valuesAt(at), nodeCount);
         SampleEnvelope peaks = read && readings
                 ? envelope.read(voltages, at, state, now) : null;
-        return new LiveSample(at, voltages, terminals, measured, window, peaks, powers);
+        Map<String, LogicLevel> levels = read && readings ? levelsNow() : null;
+        return new LiveSample(at, voltages, terminals, measured, window, peaks, powers, levels);
     }
 
     /** The heat of every part that warms, by part name: the first unit's for a part of several. */
