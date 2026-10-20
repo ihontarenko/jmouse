@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,6 +54,9 @@ final class CircuitMeasurement {
     private static final double CORNER_DROP = 3;
 
     private final String kind;
+    private static final String FIGURE = "figure";
+    private static final String FIGURES = "figures";
+
     private final List<String> signal;
     private final Map<String, List<String>> clauses;
 
@@ -60,6 +64,38 @@ final class CircuitMeasurement {
         this.kind = kind;
         this.signal = signal;
         this.clauses = clauses;
+    }
+
+    /**
+     * The display figures the measurement reads — {@code figure U1.reading}, or {@code figures U1.cell_0, U1.cell_1} —,
+     * each {@code PART.name} written as one word however the line split it; none for any other signal.
+     */
+    private Set<String> figureNames() {
+        if (signal.isEmpty() || !(signal.getFirst().equals(FIGURE) || signal.getFirst().equals(FIGURES))) {
+            return Set.of();
+        }
+        Set<String> names = new LinkedHashSet<>();
+        StringBuilder name = new StringBuilder();
+        for (String word : signal.subList(1, signal.size())) {
+            if (word.equals(",")) {
+                names.add(name.toString());
+                name.setLength(0);
+            } else {
+                name.append(word);
+            }
+        }
+        names.add(name.toString());
+        names.remove("");
+        if (names.isEmpty() || (signal.getFirst().equals(FIGURE) && names.size() > 1)) {
+            throw new IllegalArgumentException("'figure' reads one display figure, 'figure U1.reading'; several are "
+                    + "'final figures U1.cell_0, U1.cell_1'");
+        }
+        return names;
+    }
+
+    /** A figure as a list of them is compared: a whole number without a point. */
+    private static String written(double value) {
+        return value == Math.rint(value) && Math.abs(value) < 1e15 ? Long.toString((long) value) : Double.toString(value);
     }
 
     /** The words of a {@code measure} line read into a kind, a signal and its clauses; nothing is computed yet. */
@@ -94,7 +130,7 @@ final class CircuitMeasurement {
             case "gain", "phase" -> new Measurement(smallSignal(measured), null);
             case "corner" -> new Measurement(corner(measured), null);
             case "final", "maximum", "minimum", "average", "rms", "value", "frequency", "duty" ->
-                    overTheRun(TransientRun.of(measured, samples, true, ComputationProgress.NONE));
+                    overTheRun(TransientRun.of(measured, samples, true, figureNames(), ComputationProgress.NONE));
             default -> throw new IllegalArgumentException("'" + kind + "' is not a measurement: operating, final, maximum, "
                     + "minimum, average, rms, value, frequency, duty, gain, phase, corner");
         };
@@ -102,6 +138,14 @@ final class CircuitMeasurement {
 
     private Measurement overTheRun(TransientRun run) {
         double[] times = run.times();
+        if (kind.equals("final") && !signal.isEmpty() && signal.getFirst().equals(FIGURES)) {
+            List<String> shown = new ArrayList<>();
+            for (String name : figureNames()) {
+                double[] values = run.figure(name);
+                shown.add(written(values[values.length - 1]));
+            }
+            return new Measurement(Double.NaN, "[" + String.join(",", shown) + "]");
+        }
         if (kind.equals("final") && !signal.isEmpty() && signal.getFirst().equals("levels")) {
             Map<String, LogicLevel> last = run.levels().getLast();
             List<String> levels = new ArrayList<>();
@@ -161,6 +205,9 @@ final class CircuitMeasurement {
                         + (run.samples() == 1 ? ": a power is measured over a run, 'average power " + signal.get(1) + "'" : ""));
             }
             return values;
+        }
+        if (!signal.isEmpty() && signal.getFirst().equals(FIGURE)) {
+            return run.figure(figureNames().iterator().next());
         }
         if (signal.size() == 2 && signal.getFirst().equals("level")) {
             double[] values = new double[run.samples()];

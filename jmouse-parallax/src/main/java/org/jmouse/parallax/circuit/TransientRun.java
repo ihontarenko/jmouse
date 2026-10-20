@@ -7,6 +7,7 @@ import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ObjectDefinition;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,10 +38,12 @@ public final class TransientRun {
     private final Map<String, double[]>     currents;
     private final Map<String, double[]>     powers;
     private final List<Map<String, LogicLevel>> levels;
+    /** The display figures it was asked to read, by `PART.name`, a value at every sample; NaN where none is shown. */
+    private final Map<String, double[]>     figures;
 
     private TransientRun(double[] times, Map<String, double[]> voltages, Map<String, double[]> lows,
                          Map<String, double[]> highs, Map<String, double[]> currents, Map<String, double[]> powers,
-                         List<Map<String, LogicLevel>> levels) {
+                         List<Map<String, LogicLevel>> levels, Map<String, double[]> figures) {
         this.times = times;
         this.voltages = voltages;
         this.lows = lows;
@@ -48,6 +51,7 @@ public final class TransientRun {
         this.currents = currents;
         this.powers = powers;
         this.levels = levels;
+        this.figures = figures;
     }
 
     /**
@@ -59,7 +63,16 @@ public final class TransientRun {
      *                  sample cost more than solving them
      */
     public static TransientRun of(CompiledObject object, int samples, boolean everyPart, ComputationProgress progress) {
-        return of(ElaboratedCircuit.of(object), samples, everyPart, null, progress);
+        return of(ElaboratedCircuit.of(object), samples, everyPart, null, Set.of(), progress);
+    }
+
+    /**
+     * The same, reading as well the display figures named — `U1.cell_0`, `F1.reading` — at every sample, as the bench
+     * shows them: what a check of a display or an instrument measures.
+     */
+    public static TransientRun of(CompiledObject object, int samples, boolean everyPart, Set<String> figures,
+                                  ComputationProgress progress) {
+        return of(ElaboratedCircuit.of(object), samples, everyPart, null, figures, progress);
     }
 
     /**
@@ -70,6 +83,11 @@ public final class TransientRun {
      */
     static TransientRun of(ElaboratedCircuit elaborated, int samples, boolean everyPart, double[] window,
                            ComputationProgress progress) {
+        return of(elaborated, samples, everyPart, window, Set.of(), progress);
+    }
+
+    private static TransientRun of(ElaboratedCircuit elaborated, int samples, boolean everyPart, double[] window,
+                                   Set<String> figureNames, ComputationProgress progress) {
         if (samples < 2) {
             throw new IllegalArgumentException("A transient has at least two samples.");
         }
@@ -107,10 +125,21 @@ public final class TransientRun {
         Map<String, double[]> powers = new LinkedHashMap<>();
         List<Map<String, LogicLevel>> levels = new ArrayList<>(samples);
         boolean digital = !solver.levels().isEmpty();
+        PartDisplays displays = figureNames.isEmpty() ? null : PartDisplays.of(elaborated);
+        for (String name : figureNames) {
+            int dot = name.indexOf('.');
+            if (dot < 0 || displays == null || !displays.shows(name.substring(0, dot), name.substring(dot + 1))) {
+                throw new IllegalArgumentException("'" + name + "' is no part's display figure: a figure is 'PART.name', "
+                        + "as its component's display block names it");
+            }
+        }
+        Map<String, double[]> figures = new LinkedHashMap<>();
+        figureNames.forEach(name -> figures.put(name, new double[samples]));
         int done = 0;
         while (done < samples) {
             // A digital node's level is the engine's state between samples, read after each one; analog alone, a chunk.
-            int count = digital ? 1 : Math.min(CHUNK, samples - done);
+            // A figure reads the states between samples too.
+            int count = digital || displays != null ? 1 : Math.min(CHUNK, samples - done);
             for (LiveSample sample : solver.advance(count)) {
                 times[done] = sample.time();
                 double[] sampled = sample.voltages();
@@ -142,13 +171,32 @@ public final class TransientRun {
                             powers.computeIfAbsent(ColumnNames.partPower(part), ignored -> new double[samples])[index] = power);
                 }
                 levels.add(digital ? solver.levels() : Map.of());
+                if (displays != null) {
+                    readFigures(displays, solver, nodes, sample, figures, done);
+                }
                 done++;
             }
             if (done % CHUNK == 0) {
                 progress.report((double) done / samples, "Stepping the circuit");
             }
         }
-        return new TransientRun(times, voltages, lows, highs, currents, powers, levels);
+        return new TransientRun(times, voltages, lows, highs, currents, powers, levels, figures);
+    }
+
+    /** The figures asked for at one sample, read as the bench reads them: over the sample's voltages and the parts' states. */
+    private static void readFigures(PartDisplays displays, LiveCircuitSolver solver, List<String> nodes, LiveSample sample,
+                                    Map<String, double[]> into, int index) {
+        Map<String, PartLoad> loads = solver.loads();
+        Map<String, Double> voltages = new HashMap<>();
+        for (int node = 0; node < nodes.size(); node++) {
+            voltages.put(nodes.get(node), sample.voltages()[node]);
+        }
+        Map<String, Map<String, Double>> shown = displays.read(voltages, loads, List.of(sample), solver.states(), sample.time());
+        into.forEach((name, column) -> {
+            int dot = name.indexOf('.');
+            Double value = dot < 0 ? null : shown.getOrDefault(name.substring(0, dot), Map.of()).get(name.substring(dot + 1));
+            column[index] = value == null ? Double.NaN : value;
+        });
     }
 
     /**
@@ -163,7 +211,7 @@ public final class TransientRun {
 
     /** One instant of a circuit, solved by other means — its operating point —, read the way a run is. */
     static TransientRun instant(Map<String, double[]> voltages, Map<String, double[]> currents) {
-        return new TransientRun(new double[]{0}, voltages, Map.of(), Map.of(), currents, Map.of(), List.of(Map.of()));
+        return new TransientRun(new double[]{0}, voltages, Map.of(), Map.of(), currents, Map.of(), List.of(Map.of()), Map.of());
     }
 
     public int samples() {
@@ -200,6 +248,19 @@ public final class TransientRun {
     }
 
     /** Every digital node's level at each sample; empty maps for a circuit with none. */
+    /**
+     * A display figure at every sample, by `PART.name`.
+     *
+     * @throws IllegalArgumentException for a figure the run was not asked to read
+     */
+    public double[] figure(String name) {
+        double[] values = figures.get(name);
+        if (values == null) {
+            throw new IllegalArgumentException("'" + name + "' was not read: a figure is 'PART.name', as its component's display names it");
+        }
+        return values;
+    }
+
     public List<Map<String, LogicLevel>> levels() {
         return levels;
     }

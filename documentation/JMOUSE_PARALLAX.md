@@ -572,7 +572,9 @@ expect "forward voltage falls as it warms" from "VF temperature coefficient, abo
   component under test (`U1 self (in = top, out = load)`, settings override its parameters). `X1 forward current = …`
   and `X1 reverse voltage = …` are whole two-terminal benches on their own.
 - `measure` (`CircuitMeasurement`) — of a signal: a node (`load`), a difference (`out - ret`), a part's current
-  (`current V1`) or power (`power R1`), a digital level (`level clock`); `final levels a, b` for digital nodes.
+  (`current V1`) or power (`power R1`), a digital level (`level clock`), a part's display figure as the bench shows it
+  (`figure LCD1.cell_15`, `figure F1.reading`); `final levels a, b` for digital nodes, `final figures LCD1.cell_0, LCD1.cell_1`
+  for several figures (`is [72,101]`). A figure no part's `display` names is refused.
   - over the run: `final`, `maximum`, `minimum`, `average`, `rms`, `frequency … above|below <level>`,
     `duty … above|below <level>`, each optionally `after <time>` (refused past the run's end); `value out at 2 ms`, the
     value at a moment;

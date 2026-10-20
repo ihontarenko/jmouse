@@ -51,6 +51,11 @@ public final class PartDisplays {
         return figures.isEmpty();
     }
 
+    /** Whether a part shows a figure of that name. */
+    public boolean shows(String part, String name) {
+        return figures.stream().anyMatch(figure -> figure.part().equals(part) && figure.name().equals(name));
+    }
+
     private static void figuresOf(ElaboratedCircuit circuit, CircuitElement element, List<Figure> into) {
         boolean primitive = element.type() != CircuitElementType.MODEL;
         ComponentModel model = circuit.componentOf(element).orElse(null);
