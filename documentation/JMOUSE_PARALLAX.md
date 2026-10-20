@@ -111,8 +111,9 @@ org.jmouse.parallax.component   a component / family jMX document → ComponentM
 │                               generator shape
 ├── ModelLanguage · PinQuantities   the language a component's expressions are written in: d(q)/dt, noise(…), pin.current
 ├── DimensionCheck              every equation's units checked when the document is read
-└── ComponentVocabulary · PhysicalConstants   the names the engine gives every document (temperature, realistic,
-                                tolerance_corner, detail, time, power) and the physical constants
+└── ComponentVocabulary · TemperatureScale   the names the engine gives every document (temperature, realistic,
+                                tolerance_corner, detail, time, power), and °C ↔ K; the physical constants are
+                                the catalogue's `constants` document, never the engine's
 
 org.jmouse.parallax.circuit.elaboration   a written circuit → the circuit as it is simulated, built once
 ├── ElaboratedCircuit           bench applied, subcircuits flattened, primitives bound as their documents' models,

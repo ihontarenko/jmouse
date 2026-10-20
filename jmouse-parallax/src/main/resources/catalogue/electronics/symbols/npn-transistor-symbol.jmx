@@ -5,7 +5,26 @@ symbol "NPN transistor" as npn-transistor-symbol {
         tags electronics, schematic
     }
     size 80 x 80
-    path "M-40 0H-10M-10-14V14M-10-6L20-20V-40M-10 6L20 20V40M6.18 17.41L14 17.2L9.14 11.07"
+    input conduction
+    input failed
+
+    live group body {
+        path "M-40 0H-10M-10-14V14M-10-6L20-20V-40M-10 6L20 20V40M6.18 17.41L14 17.2L9.14 11.07"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live path channel "M20-40V-20L-10-6M-10 6L20 20V40" {
+        stroke = positive
+        live opacity = smooth(conduction, 80 ms)
+        live glow = 6 * conduction
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin base at -40, 0
     pin collector at 20, -40
     pin emitter at 20, 40

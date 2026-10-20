@@ -1,24 +1,57 @@
 symbol "Operational amplifier" as operational-amplifier-symbol {
     meta {
-        summary "Operational amplifier, as drawn on a schematic: inputs on the left, output on the right, supply top and bottom"
+        summary "Operational amplifier, as drawn on a schematic: a gauge shows where its output stands between its supplies, the higher input lights, and the body warms when the output is pinned at a rail"
         category circuits
         tags electronics, schematic
     }
     # The triangle's slanted sides cross x = 0 at y = ±15; the supply leads leave from there, so the rails come in from
     # above and below and never cross the signal path, as on every datasheet's drawing.
     size 80 x 60
+    input swing 0 .. 1
+    input lead -1 .. 1
+    input saturated 0 .. 1
+    input failed
+
+    # Where the output stands between its supplies: a gauge inside the body, empty at the negative rail, full at the
+    # positive one.
+    live box output_level at 4, 0 size 4 x 22 {
+        live level = swing
+        live fill = if(saturated > 0.5, warm, positive)
+    }
+
+    # The body warms when the output is pinned at a rail: no longer amplifying, it is comparing.
+    live path triangle "M-20-30V30L20 0Z" {
+        live stroke = if(failed > 0.5, burned, if(saturated > 0.5, warm, signal))
+    }
+
+    live group body {
+        path "M-40-20H-20"
+        path "M-40 20H-20"
+        path "M20 0H40"
+        path "M0-15V-30"
+        path "M0 15V30"
+        path "M4-24H8M6-26V-22"
+        path "M4 24H8"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The higher input lights: the way the output is being driven.
+    live path inverting_sign "M-15-20H-9" {
+        live stroke = if(failed > 0.5, burned, if(lead < -0.5, positive, signal))
+    }
+
+    live path non_inverting_sign "M-15 20H-9M-12 17V23" {
+        live stroke = if(failed > 0.5, burned, if(lead > 0.5, positive, signal))
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     # Each stroke its own shape, so the symbol editor takes and moves one at a time: the body, the four leads, the input
     # signs and the supply signs.
-    path "M-20-30V30L20 0Z"
-    path "M-40-20H-20"
-    path "M-40 20H-20"
-    path "M20 0H40"
-    path "M0-15V-30"
-    path "M0 15V30"
-    path "M-15-20H-9"
-    path "M-15 20H-9M-12 17V23"
-    path "M4-24H8M6-26V-22"
-    path "M4 24H8"
     pin inverting_input at -40, -20
     pin non_inverting_input at -40, 20
     pin output at 40, 0

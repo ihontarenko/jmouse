@@ -1,16 +1,20 @@
 # A transformer whose secondary is tapped in its middle: one primary and two equal secondary halves, all three on one
-# core. Each winding's voltage is its resistance's drop plus the rate of the flux it links — its own inductance times
-# its current, and the mutual inductance M = k · √(Li · Lj) times each other winding's —, as the two-winding transformer
-# writes it. The halves are in series, the tap between them: across the whole secondary twice a half's voltage, and
-# from either end to the tap one half, in opposite phase — what a two-diode full-wave rectifier is built on. The
-# `_one` pins and the tap are the dotted ends. Not represented: the core's saturation and losses, the windings'
-# capacitance.
+# core. The state is the flux each winding links — its own inductance times its current, and the mutual inductance
+# M = k · √(Li · Lj) times each other winding's —, as the two-winding transformer writes it; the currents are read back
+# through the inductance matrix's inverse, which for two equal halves splits into their sum and their difference. The
+# halves are in series, the tap between them: across the whole secondary twice a half's voltage, and from either end to
+# the tap one half, in opposite phase — what a two-diode full-wave rectifier is built on. The `_one` pins and the tap
+# are the dotted ends.
+#
+# What a real one has besides, as the two-winding transformer has it: each winding's copper in series, the core's iron
+# loss across the primary's flux (R_core), each winding's self-capacitance and the capacitance between primary and
+# secondary. The figures are a small mains transformer's. Not represented: the core's saturation and hysteresis loop.
 
 component "Transformer with a centre tap" as center-tapped-transformer type transformer {
     meta {
         designator T
-        summary "A primary and two equal secondary halves on one core: a centre-tapped secondary"
-        source "coupled inductors as in Berkeley SPICE3 / ngspice 47 (three L, their K lines)"
+        summary "A primary and two equal secondary halves on one core: a centre-tapped secondary, with core loss and winding capacitance"
+        source "coupled inductors as in Berkeley SPICE3 / ngspice 47 (three L, their K lines), with the core loss and capacitances of a small mains transformer"
         category circuits
         failure open
     }
@@ -21,6 +25,10 @@ component "Transformer with a centre tap" as center-tapped-transformer type tran
         coupling = 0.999                      "K between every pair of windings: 1 is a perfect core"
         R_primary = 10 Ohm                    "primary winding resistance"
         R_half = 0.05 Ohm                     "each secondary half's winding resistance"
+        R_core = 100 kOhm                     "core loss across the primary: about half a watt at 230 V, a small mains core's no-load loss"
+        C_primary = 1 nF                      "the primary's self-capacitance"
+        C_half = 1 nF                         "each secondary half's self-capacitance"
+        C_interwinding = 200 pF               "between primary and secondary, across their insulation"
         copper_temperature_coefficient = 0.00393 "copper: the windings' resistance rises 0.393 % per kelvin"
         T_nominal = 298.15 K                  "the temperature the resistances are given at"
         power_rating = 10 W                   "what it is rated for"
@@ -38,31 +46,53 @@ component "Transformer with a centre tap" as center-tapped-transformer type tran
     }
 
     nodes {
-        primary_current                       "a node whose voltage above primary_two is the primary current, one volt per ampere"
-        first_half_current                    "the same for the first secondary half"
-        second_half_current                   "the same for the second secondary half"
+        primary_winding                       "behind the primary's copper"
+        first_half_winding                    "behind the first secondary half's copper"
+        second_half_winding                   "behind the second secondary half's copper"
     }
 
-    symbol uses center-tapped-transformer-symbol
+    state {
+        flux_primary = 0 continuous           "the flux the primary links, in webers"
+        flux_first = 0 continuous             "the flux the first secondary half links"
+        flux_second = 0 continuous            "the flux the second secondary half links"
+    }
+
+    symbol uses center-tapped-transformer-symbol {
+        failed = failed
+    }
 
     equations {
         # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
         let T_winding : temperature = temperature
         let warming : ratio = 1 + copper_temperature_coefficient * (T_winding - T_nominal)
-        # A flux is a charge the equations differentiate, and a charge reads voltages, not currents: each winding's
-        # current is carried as a voltage on a node of its own.
-        let R_carrier : resistance = 1
-        let M_primary_half : inductance = coupling * sqrt(L_primary * L_half)
-        let M_halves : inductance = coupling * L_half
-        let I_primary : current = (primary_current - primary_two) / R_carrier
-        let I_first : current = (first_half_current - center_tap) / R_carrier
-        let I_second : current = (second_half_current - secondary_two) / R_carrier
-        voltage primary_current -> primary_two = R_carrier * primary_one.current
-        voltage first_half_current -> center_tap = R_carrier * secondary_one.current
-        voltage second_half_current -> secondary_two = R_carrier * center_tap.current
-        voltage primary_one -> primary_two = R_primary * warming * primary_one.current + d(L_primary * I_primary + M_primary_half * (I_first + I_second))/dt
-        voltage secondary_one -> center_tap = R_half * warming * secondary_one.current + d(L_half * I_first + M_halves * I_second + M_primary_half * I_primary)/dt
-        voltage center_tap -> secondary_two = R_half * warming * center_tap.current + d(L_half * I_second + M_halves * I_first + M_primary_half * I_primary)/dt
+        # On a draft bench (detail 0) the windings store no charge, as a junction stores none there.
+        let stored : ratio = min(detail, 1)
+        # The inductance matrix inverted. The halves' difference links only their own leakage, L_half · (1 − k) · (I1 − I2);
+        # their sum and the primary solve as two windings, whose determinant is L_primary · L_half · (1 − k) · (1 + 2k).
+        let L_mutual_scale : inductance = sqrt(L_primary * L_half)
+        let spread : ratio = (1 - coupling) * (1 + 2 * coupling)
+        let I_primary : current = ((1 + coupling) * flux_primary / L_primary - coupling * (flux_first + flux_second) / L_mutual_scale) / spread
+        let I_halves_sum : current = ((flux_first + flux_second) / L_half - 2 * coupling * flux_primary / L_mutual_scale) / spread
+        let I_halves_difference : current = (flux_first - flux_second) / (L_half * (1 - coupling))
+        let I_first : current = (I_halves_sum + I_halves_difference) / 2
+        let I_second : current = (I_halves_sum - I_halves_difference) / 2
+
+        current primary_one -> primary_winding = (primary_one - primary_winding) / (R_primary * warming)
+        d(flux_primary)/dt = primary_winding - primary_two
+        current primary_winding -> primary_two = I_primary + (primary_winding - primary_two) / R_core
+        current primary_one -> primary_two = d(stored * C_primary * (primary_one - primary_two))/dt
+
+        current secondary_one -> first_half_winding = (secondary_one - first_half_winding) / (R_half * warming)
+        d(flux_first)/dt = first_half_winding - center_tap
+        current first_half_winding -> center_tap = I_first
+        current secondary_one -> center_tap = d(stored * C_half * (secondary_one - center_tap))/dt
+
+        current center_tap -> second_half_winding = (center_tap - second_half_winding) / (R_half * warming)
+        d(flux_second)/dt = second_half_winding - secondary_two
+        current second_half_winding -> secondary_two = I_second
+        current center_tap -> secondary_two = d(stored * C_half * (center_tap - secondary_two))/dt
+
+        current primary_one -> secondary_one = d(stored * C_interwinding * (primary_one - secondary_one))/dt
     }
 
     expect "each half twenty to one: 325 V peak in, about 16 V peak out" from "turns ratio √(L_primary / L_half) = 20 per half, into 100 Ω each" {

@@ -1,13 +1,31 @@
 symbol "Battery" as battery-symbol {
     meta {
-        summary "Battery, as drawn on a schematic"
+        summary "Battery, as drawn on a schematic: a gauge under it shows how full it is"
         category circuits
         tags electronics, schematic
     }
     size 80 x 40
-    path "M-40 0H-9M-9-15V15M-2-8V8M5-15V15M12-8V8M12 0H40"
+    input state_of_charge
+    input failed
+
+    live group body {
+        path "M-40 0H-9M-9-15V15M-2-8V8M5-15V15M12-8V8M12 0H40"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live box charge at 0, 22 size 28 x 6 {
+        live level = state_of_charge
+        live fill = curve(state_of_charge, 0 -> hot, 0.2 -> warm, 0.5 -> positive)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin a at -40, 0
     pin b at 40, 0
     label name at 0, -26
-    label value at 0, 32
+    label value at 0, 36
 }

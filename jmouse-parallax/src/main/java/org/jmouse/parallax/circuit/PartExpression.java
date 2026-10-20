@@ -51,16 +51,19 @@ final class PartExpression {
      */
     static PartExpression of(ElaboratedCircuit circuit, CircuitElement element, ComponentModel model, String expression) {
         List<String> pins = model.pins().stream().map(ComponentModel.Pin::name).toList();
-        List<String> pinNodes = pins.stream().map(pin -> element.pins() == null ? ObjectDefinition.Circuit.GROUND
-                : element.pins().getOrDefault(pin, ObjectDefinition.Circuit.GROUND)).toList();
+        List<String> pinNodes = model.pins().stream().map(pin -> {
+            String key = wiredKey(element, model, pin);
+            return key == null ? ObjectDefinition.Circuit.GROUND : element.pins().get(key);
+        }).toList();
         List<String> states = model.states().stream().map(ComponentModel.State::name).toList();
         Map<String, Double> parameters = circuit.parameters(model, element, "");
         // The arguments: each pin's current in a slot of its own, by the pin's position; then each pin's voltage by its
-        // name, the states, the power, the time and the parameters.
+        // name, the states, the power, the time, whether it failed and the parameters.
         List<String> names = new ArrayList<>(pins);
         names.addAll(states);
         names.add(ComponentVocabulary.POWER);
         names.add(ComponentVocabulary.TIME);
+        names.add(ComponentVocabulary.FAILED);
         names.addAll(parameters.keySet());
         try {
             // The component's own definitions — its libraries', the constants among them — read here as in its equations.
@@ -74,6 +77,29 @@ final class PartExpression {
         } catch (RuntimeException unreadable) {
             throw new IllegalArgumentException(model.name() + ": '" + expression + "' does not read: " + unreadable.getMessage(), unreadable);
         }
+    }
+
+    /**
+     * How a part wires one of its component's pins, as the key of its pin map: the pin's own name, or — on a part of
+     * several blocks, a pin each block has — the drawn block's, `A.output`. The drawn block is the first one wired: a
+     * dual comparator is drawn as one symbol, and its figures read that block, not a name no block is wired by. Null for
+     * a pin the part leaves unwired.
+     */
+    static String wiredKey(CircuitElement element, ComponentModel model, ComponentModel.Pin pin) {
+        Map<String, String> wired = element.pins();
+        if (wired == null) {
+            return null;
+        }
+        if (wired.containsKey(pin.name()) || pin.shared() || model.units().isEmpty()) {
+            return wired.containsKey(pin.name()) ? pin.name() : null;
+        }
+        for (String unit : model.units()) {
+            boolean drawn = wired.keySet().stream().anyMatch(key -> key.startsWith(unit + "."));
+            if (drawn) {
+                return wired.containsKey(unit + "." + pin.name()) ? unit + "." + pin.name() : null;
+            }
+        }
+        return null;
     }
 
     String part() {
@@ -95,18 +121,18 @@ final class PartExpression {
      * currents, states and power, and the time.
      */
     double read(double[] pinVoltages, MeteredPart metered, double time) {
-        return metered == null ? read(pinVoltages, Map.of(), Map.of(), Double.NaN, time)
-                : read(pinVoltages, metered.terminals(), metered.states(), metered.power(), time);
+        return metered == null ? read(pinVoltages, Map.of(), Map.of(), Double.NaN, time, false)
+                : read(pinVoltages, metered.terminals(), metered.states(), metered.power(), time, false);
     }
 
     /**
      * Its value from what is known of the part: the voltage of each pin, the current into each pin and each state by
-     * name — NaN for one not given —, its power and the time. A part that heats itself reports its own
+     * name — NaN for one not given —, its power, the time and whether it has failed. A part that heats itself reports its own
      * {@code temperature} with its states ({@link ModelDevice#stateValues}); it is read in place of the bench's.
      */
     double read(double[] pinVoltages, Map<String, Double> pinCurrents, Map<String, Double> stateValues, double power,
-                double time) {
-        double[] arguments = new double[pins.size() * 2 + states.size() + 2 + parameters.length];
+                double time, boolean failed) {
+        double[] arguments = new double[pins.size() * 2 + states.size() + 3 + parameters.length];
         int position = 0;
         for (String pin : pins) {
             Double current = pinCurrents.get(pin);
@@ -121,6 +147,7 @@ final class PartExpression {
         }
         arguments[position++] = power;
         arguments[position++] = time;
+        arguments[position++] = failed ? 1 : 0;
         System.arraycopy(parameters, 0, arguments, position, parameters.length);
         Double ownTemperature = stateValues.get(ComponentVocabulary.TEMPERATURE);
         if (ownTemperature != null) {

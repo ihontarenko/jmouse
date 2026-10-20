@@ -1,22 +1,44 @@
-# The relay every relay part is a member of. Its coil is a winding — resistance and inductance, its current carried as
-# a voltage on a node of its own, as a transformer's is — and its armature a latch, as a thyristor's is: pulled in once
-# the coil's current passes what the pull-in voltage drives through it, let go once it falls below what the drop-out
+# The relay every relay part is a member of. Its armature is a latch, as a thyristor's is: pulled in once the current in
+# the coil's inductance passes what the pull-in voltage drives through it, let go once it falls below what the drop-out
 # voltage does. Between the two it stays where it was: that gap is why a relay does not chatter. One changeover contact,
-# resting on normally-closed. A part writes its coil and its contacts' figures. Not represented: the milliseconds the
-# armature takes to travel, contact bounce, the contacts' arcing.
+# resting on normally-closed.
+#
+# The coil is a real winding, not an ideal inductor, because what it does when its current is cut is the very thing a
+# relay driver is built around:
+#
+#   coil_one ── R_coil ── winding ──┬── L_coil ──┬── coil_two
+#       │      copper               └── R_core ──┘     │
+#       └──────────────── C_winding ───────────────────┘
+#
+#   - R_coil, the copper, in series;
+#   - L_coil, the inductance, whose current — the ampere-turns — is what pulls the armature;
+#   - R_core across the inductance: the eddy currents and hysteresis of the solid iron core and frame. A relay's iron is
+#     not laminated, so at the tens of kilohertz a cut-off coil rings at it takes most of the energy within a few periods;
+#   - C_winding across the whole coil: the capacitance between its turns and layers. With L_coil it sets the frequency the
+#     coil rings at once nothing else holds it — the collector of a transistor that let go without a flyback diode.
+#
+# An ideal R + L (as this relay was until 2026-10-20) has none of the last two: cut off, it rang at whatever the next
+# transistor's few picofarads made of it — 170 kHz — with a Q of thousands, for over a millisecond. A real coil rings an
+# order lower and is quiet in two or three periods. A part writes its coil's figures; the datasheet of a hobby relay
+# gives the copper only, so the other three are measured typical values for its size, and say so.
+#
+# Not represented: the milliseconds the armature takes to travel, the inductance rising as the armature closes the gap,
+# contact bounce, the contacts' arcing.
 
 component "Relay" as relay type relay {
     meta {
         designator K
         summary "An electromagnetic relay: a coil that pulls a changeover contact in above one voltage and lets it go below another"
-        source "behavioural: a winding, a latch with hysteresis and two contacts"
+        source "behavioural armature: a latch with hysteresis and two contacts; the coil a winding with its core losses and self-capacitance"
         category circuits
         failure open
     }
 
     parameters {
-        R_coil = 400 Ohm                      "coil resistance"
+        R_coil = 400 Ohm                      "coil resistance: the copper"
         L_coil = 1 H                          "coil inductance"
+        R_core = 300 kOhm                     "core loss: the iron's eddy currents and hysteresis, as a resistance across the inductance"
+        C_winding = 100 pF                    "winding self-capacitance, between its turns and layers"
         V_pull_in = 9 V                       "the coil voltage it pulls in at"
         V_drop_out = 1.2 V                    "the coil voltage it lets go below"
         R_contact = 100 mOhm                  "contact resistance"
@@ -32,20 +54,30 @@ component "Relay" as relay type relay {
     }
 
     nodes {
-        coil_current                          "a node whose voltage above coil_two is the coil current, one volt per ampere"
+        winding                               "between the coil's copper and its inductance"
+        coil_current                          "a node whose voltage above coil_two is the inductance's current, one volt per ampere: what the armature's events read"
     }
 
-    symbol uses relay-symbol
+    symbol uses relay-symbol {
+        energized = energized
+    }
 
     state {
         energized = 0 discrete                "the armature pulled in: written by the behaviour, read by the contacts"
+        I_inductance = 0 continuous           "the current in the coil's inductance: its ampere-turns, which hold the armature"
     }
 
     equations {
+        # On a draft bench (detail 0) the winding stores no charge between its turns, as a junction stores none there.
+        let stored : ratio = min(detail, 1)
         let R_carrier : resistance = 1
-        let I_coil : current = (coil_current - coil_two) / R_carrier
-        voltage coil_current -> coil_two = R_carrier * coil_one.current
-        voltage coil_one -> coil_two = R_coil * coil_one.current + d(L_coil * I_coil)/dt
+        let V_inductance : voltage = winding - coil_two
+
+        current coil_one -> winding = (coil_one - winding) / R_coil
+        d(I_inductance)/dt = V_inductance / L_coil
+        current winding -> coil_two = I_inductance + V_inductance / R_core
+        current coil_one -> coil_two = d(stored * C_winding * (coil_one - coil_two))/dt
+        voltage coil_current -> coil_two = R_carrier * I_inductance
 
         current common -> normally_open = (common - normally_open) / (energized * R_contact + (1 - energized) * R_open)
         current common -> normally_closed = (common - normally_closed) / ((1 - energized) * R_contact + energized * R_open)

@@ -1,6 +1,6 @@
 package org.jmouse.parallax.spice;
 
-import org.jmouse.parallax.component.PhysicalConstants;
+import org.jmouse.parallax.component.TemperatureScale;
 
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.Simplification;
@@ -649,7 +649,7 @@ final class SpiceImporter {
         if (formula instanceof Formula.Constant constant) {
             return new Formula.Constant(parameter.toJmx(constant.value()));
         }
-        return new Formula.Binary(Formula.Operator.ADD, formula, new Formula.Constant(PhysicalConstants.ZERO_CELSIUS));
+        return new Formula.Binary(Formula.Operator.ADD, formula, new Formula.Constant(TemperatureScale.ZERO_CELSIUS));
     }
 
     /** The engine's own diode is SPICE's with nothing but {@code IS}: emission 1, no resistance, no charge. */

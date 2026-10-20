@@ -79,6 +79,12 @@ component "Operational amplifier" as operational-amplifier type opamp {
     }
 
     symbol uses operational-amplifier-symbol {
+        failed = failed
+        # Where the output stands between the supplies; which input is higher, past ten millivolts; and how near the
+        # output is pinned at a rail — within a twentieth of the supply it counts as there.
+        swing = min(1, max(0, (output - GND) / (Vcc - GND)))
+        lead = max(-1, min(1, (non_inverting_input - inverting_input) / 0.01))
+        saturated = max(0, 1 - min(output - GND, Vcc - output) / (0.05 * (Vcc - GND)))
         positive_supply Vcc
         negative_supply GND
     }

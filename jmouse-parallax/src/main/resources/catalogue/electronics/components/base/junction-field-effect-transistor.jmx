@@ -46,6 +46,11 @@ component "Junction FET" as junction-field-effect-transistor type jfet {
         T_maximum = 150 °C                    "past this it fails on a realistic bench"
     }
 
+    display {
+        # how far the gate is from pinching the channel off: none at the pinch-off, full at no bias
+        conduction = min(1, max(0, 1 - (gate - source) / V_threshold))
+    }
+
     pins {
         source analog 1                       "source"
         gate analog input 2                   "gate"
@@ -57,7 +62,9 @@ component "Junction FET" as junction-field-effect-transistor type jfet {
         si                                    "the intrinsic source, behind the source resistance"
     }
 
-    symbol uses n-channel-jfet-symbol
+    symbol uses n-channel-jfet-symbol {
+        failed = failed
+    }
 
     # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
     type transconductance_coefficient = current / voltage ^ 2

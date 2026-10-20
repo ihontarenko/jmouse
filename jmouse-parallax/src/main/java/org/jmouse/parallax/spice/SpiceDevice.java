@@ -1,6 +1,6 @@
 package org.jmouse.parallax.spice;
 
-import org.jmouse.parallax.component.PhysicalConstants;
+import org.jmouse.parallax.component.TemperatureScale;
 
 import org.jmouse.parallax.spice.SpiceNetlist.ModelType;
 
@@ -72,12 +72,12 @@ public enum SpiceDevice {
 
         /** A jMX value as SPICE writes it. */
         public double toSpice(double jmxValue) {
-            return temperature ? Math.rint((jmxValue - PhysicalConstants.ZERO_CELSIUS) * 1e9) / 1e9 : jmxValue;
+            return temperature ? Math.rint((jmxValue - TemperatureScale.ZERO_CELSIUS) * 1e9) / 1e9 : jmxValue;
         }
 
         /** A SPICE value as jMX writes it. */
         public double toJmx(double spiceValue) {
-            return temperature ? Math.rint((spiceValue + PhysicalConstants.ZERO_CELSIUS) * 1e9) / 1e9 : spiceValue;
+            return temperature ? Math.rint((spiceValue + TemperatureScale.ZERO_CELSIUS) * 1e9) / 1e9 : spiceValue;
         }
     }
 

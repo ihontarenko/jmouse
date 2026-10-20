@@ -18,6 +18,7 @@ import java.util.Map;
  *       document's to say.</li>
  *   <li>{@link #TIME} — the circuit's time, seconds.</li>
  *   <li>{@link #POWER} — what a heat law and an instrument read: the power the part takes, watts.</li>
+ *   <li>{@link #FAILED} — what a display or a symbol binding reads: 1 once the part has failed on a realistic bench, else 0.</li>
  * </ul>
  */
 public final class ComponentVocabulary {
@@ -28,6 +29,7 @@ public final class ComponentVocabulary {
     public static final String DETAIL           = "detail";
     public static final String TIME             = "time";
     public static final String POWER            = "power";
+    public static final String FAILED           = "failed";
 
     private ComponentVocabulary() {
     }
@@ -38,7 +40,7 @@ public final class ComponentVocabulary {
      */
     public static Map<String, Double> nominalBench() {
         Map<String, Double> figures = new LinkedHashMap<>();
-        figures.put(TEMPERATURE, PhysicalConstants.kelvin(BenchConditions.NOMINAL_TEMPERATURE));
+        figures.put(TEMPERATURE, TemperatureScale.kelvin(BenchConditions.NOMINAL_TEMPERATURE));
         figures.put(REALISTIC, 0.0);
         figures.put(TOLERANCE_CORNER, 0.0);
         figures.put(DETAIL, (double) BenchConditions.Detail.STANDARD.figure());
@@ -48,6 +50,6 @@ public final class ComponentVocabulary {
     /** Whether a name is one the engine gives, which a document may not declare. */
     public static boolean isReserved(String name) {
         return name.equals(TEMPERATURE) || name.equals(REALISTIC) || name.equals(TOLERANCE_CORNER) || name.equals(DETAIL)
-                || name.equals(TIME) || name.equals(POWER);
+                || name.equals(TIME) || name.equals(POWER) || name.equals(FAILED);
     }
 }

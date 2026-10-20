@@ -260,10 +260,20 @@ public final class ComponentDocuments {
         return measures;
     }
 
-    /** What the component shows on its symbol while it runs, by indicator name, as written. */
+    /**
+     * What the component shows on its symbol while it runs, by name, as written: its {@code display} figures, and what
+     * its {@code symbol uses} line binds each input of its symbols to — both read the same way, so a symbol input and an
+     * indicator are fed alike, and one name cannot be both.
+     */
     private static Map<String, String> displays(ExperienceDocument document) {
         Map<String, String> displays = new LinkedHashMap<>();
         document.block(Block.Display.class).ifPresent(display -> display.figures().forEach((name, expression) -> displays.put(name, expression.text())));
+        document.block(Block.Symbol.class).ifPresent(symbol -> symbol.bindings().forEach((input, expression) -> {
+            if (displays.putIfAbsent(input, expression.text()) != null) {
+                throw new IllegalArgumentException("'" + input + "' is both displayed and bound to a symbol input: "
+                        + "a symbol input of that name reads the display figure without a binding");
+            }
+        }));
         return displays;
     }
 

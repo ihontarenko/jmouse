@@ -3,7 +3,7 @@ package org.jmouse.parallax.circuit;
 import org.jmouse.parallax.circuit.elaboration.CircuitPartitions;
 import org.jmouse.parallax.circuit.elaboration.ComponentHierarchy;
 import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
-import org.jmouse.parallax.component.PhysicalConstants;
+import org.jmouse.parallax.component.TemperatureScale;
 import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ObjectDefinition.BenchConditions;
 
@@ -255,7 +255,7 @@ public final class LiveCircuitSolver {
             double temperature = Double.NaN;
             if (heat != null) {
                 heat.advance(0, seconds);
-                temperature = PhysicalConstants.celsius(heat.temperature());
+                temperature = TemperatureScale.celsius(heat.temperature());
             }
             PartLimits limit = limits.get(name);
             loads.put(name, new PartLoad(0, Map.of(), temperature, limit == null ? Double.NaN : limit.maximum(),

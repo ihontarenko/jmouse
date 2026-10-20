@@ -1,6 +1,6 @@
 package org.jmouse.parallax.circuit;
 
-import org.jmouse.parallax.component.PhysicalConstants;
+import org.jmouse.parallax.component.TemperatureScale;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -141,7 +141,7 @@ final class PartIndex {
             for (int device : devicesOfPart[part]) {
                 PartHeat heat = devices.get(device).heat();
                 if (heat != null) {
-                    double celsius = PhysicalConstants.celsius(heat.temperature());
+                    double celsius = TemperatureScale.celsius(heat.temperature());
                     hottest = Double.isNaN(hottest) ? celsius : Math.max(hottest, celsius);
                 }
             }

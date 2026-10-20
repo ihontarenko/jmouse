@@ -1,11 +1,20 @@
 symbol "Switch" as switch-symbol {
     meta {
-        summary "Switch, as drawn on a schematic"
+        summary "Switch, as drawn on a schematic: its lever lies on the far contact while it is closed"
         category circuits
         tags electronics, schematic
     }
     size 80 x 40
-    path "M-40 0H-13M-13 0L11-14M13 0H40M-15 0A2 2 0 1 0-11 0A2 2 0 1 0-15 0M11 0A2 2 0 1 0 15 0A2 2 0 1 0 11 0"
+    input closed
+
+    path "M-40 0H-13M13 0H40"
+    path "M-15 0A2 2 0 1 0-11 0A2 2 0 1 0-15 0M11 0A2 2 0 1 0 15 0A2 2 0 1 0 11 0"
+
+    live group lever pivot -13, 0 {
+        path "M-13 0H13"
+        live rotate = between(-30 deg, 0 deg, smooth(closed, 60 ms))
+    }
+
     pin a at -40, 0
     pin b at 40, 0
     label name at 0, -26

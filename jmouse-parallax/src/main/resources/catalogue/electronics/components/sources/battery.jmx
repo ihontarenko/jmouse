@@ -37,6 +37,8 @@ component "Battery" as battery type source {
     }
 
     symbol uses battery-symbol {
+        failed = failed
+        state_of_charge = state_of_charge
         a positive
         b negative
     }

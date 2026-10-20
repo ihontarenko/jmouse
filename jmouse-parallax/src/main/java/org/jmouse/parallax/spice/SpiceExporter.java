@@ -1,6 +1,6 @@
 package org.jmouse.parallax.spice;
 
-import org.jmouse.parallax.component.PhysicalConstants;
+import org.jmouse.parallax.component.TemperatureScale;
 
 import org.jmouse.el.node.Trivia;
 import org.jmouse.formula.Formula;
@@ -434,7 +434,7 @@ final class SpiceExporter {
                         SpiceAnalyzer.evaluate(folded, Map.of())))));
             } else if (parameter.temperature()) {
                 parameters.add(SpiceParameter.of(parameter.spice(), value(new Formula.Binary(Formula.Operator.SUBTRACT,
-                        value, new Formula.Constant(PhysicalConstants.ZERO_CELSIUS)), scope)));
+                        value, new Formula.Constant(TemperatureScale.ZERO_CELSIUS)), scope)));
             } else {
                 parameters.add(SpiceParameter.of(parameter.spice(), value(value, scope)));
             }
@@ -700,7 +700,7 @@ final class SpiceExporter {
         }
         return switch (name) {
             case "time" -> "time";
-            case "temperature" -> "(temper + " + PhysicalConstants.ZERO_CELSIUS + ")";
+            case "temperature" -> "(temper + " + TemperatureScale.ZERO_CELSIUS + ")";
             default -> throw new SpiceExpressions.Untranslatable("'" + name + "' is neither a node, a parameter nor "
                     + "the time");
         };

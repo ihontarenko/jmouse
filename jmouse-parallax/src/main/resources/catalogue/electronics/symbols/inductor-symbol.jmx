@@ -5,7 +5,19 @@ symbol "Inductor" as inductor-symbol {
         tags electronics, schematic
     }
     size 80 x 40
-    path "M-40 0H-18C-18-16-6-16-6 0C-6-16 6-16 6 0C6-16 18-16 18 0H40"
+    input failed
+
+    live group body {
+        path "M-40 0H-18C-18-16-6-16-6 0C-6-16 6-16 6 0C6-16 18-16 18 0H40"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin a at -40, 0
     pin b at 40, 0
     label name at 0, -26

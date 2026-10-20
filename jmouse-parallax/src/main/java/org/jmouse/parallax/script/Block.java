@@ -405,6 +405,61 @@ public sealed interface Block {
     }
 
     /**
+     * {@code input closed}, {@code input current 0 .. 20 mA}: a figure a symbol is drawn from, which the component that
+     * uses the symbol binds ({@code symbol uses switch-symbol { closed = pressed }}); 0 … 1 unless a range is written.
+     *
+     * @param range the range as written, empty for the default 0 … 1
+     */
+    record SymbolInput(String name, double low, double high, Optional<SourceText> range) {
+    }
+
+    /**
+     * How a value of a drawing changes: {@code STILL} never; {@code LIVE} — written {@code live} — with the circuit, as
+     * it reads the symbol's inputs; {@code ANIMATED} — written {@code animate} — in time by itself, on the wall clock.
+     */
+    enum SymbolMotion {
+        STILL, LIVE, ANIMATED
+    }
+
+    /**
+     * {@code live rotate = between(-30 deg, 0 deg, smooth(closed, 60 ms))}: one property of a drawn element and the
+     * values it is written as — {@code move = 0, between(-6, 0, pressed)} is two. Each value is the text as written and
+     * the same text in jMF, quantities in SI ({@code 60 ms} → {@code 0.06}) and {@code ->} as a comma.
+     */
+    record SymbolProperty(String name, SourceText written, List<String> formulas, SymbolMotion motion) {
+        public SymbolProperty {
+            formulas = List.copyOf(formulas);
+        }
+    }
+
+    /**
+     * One element of a drawing: a {@code path}, {@code box}, {@code circle} or {@code line}, a {@code group} of
+     * elements, or a {@code when} layer shown while its condition holds. A plain unnamed {@code path "…"} is not one —
+     * it stays in {@link Symbol#paths()}.
+     *
+     * @param shape      {@code path}, {@code box}, {@code circle}, {@code line}, {@code group} or {@code when}
+     * @param name       how it is addressed ({@code hide halo}), empty when it has none
+     * @param live       whether it was written {@code live}: something in it changes
+     * @param path       the SVG path data of a {@code path}, empty otherwise
+     * @param geometry   its points and sizes by word: {@code at → [x, y]}, {@code size → [w, h]}, {@code radius → [r]},
+     *                   {@code from}, {@code to}, {@code pivot}
+     * @param condition  a {@code when}'s condition, as a property named {@code when}; null for any other element
+     * @param properties what it is drawn with, in the order written
+     * @param hidden     the elements a {@code when} hides while it holds
+     * @param children   the elements of a {@code group} or a {@code when}
+     */
+    record SymbolElement(String shape, String name, boolean live, String path, Map<String, List<Double>> geometry,
+                         SymbolProperty condition, List<SymbolProperty> properties, List<String> hidden,
+                         List<SymbolElement> children, int line) {
+        public SymbolElement {
+            geometry = orderedCopy(geometry);
+            properties = List.copyOf(properties);
+            hidden = List.copyOf(hidden);
+            children = List.copyOf(children);
+        }
+    }
+
+    /**
      * {@code display { level = terminal_one - terminal_two }}: what a component shows on its symbol while it runs — each a
      * jMF expression over its pins' voltages, its parameters and {@code power}, drawn in the symbol's indicator of
      * that name. A figure with a unit is written beside the part, followed by its caption when it has one: what the
@@ -483,10 +538,15 @@ public sealed interface Block {
      * @param sides  side → pins and their words, as written ({@code left → [d, clk edge]})
      * @param upright the paths that stay upright however the part is turned — a meter's letter —, written
      *               {@code path "…" upright}
+     * @param inputs   a drawing's {@code input} lines: what it is drawn from
+     * @param elements a drawing's named, shaped, grouped and conditional elements
+     * @param bindings a reference's {@code input = expression} lines: what feeds each input of the symbols it uses —
+     *                 a jMF expression over the part, read while it runs as a {@code display} figure is
      */
     record Symbol(List<String> uses, Map<String, String> ports, Optional<String> shape, Map<String, List<String>> sides,
                   double width, double height, List<String> paths, List<SymbolPin> pins, List<SymbolLabel> labels,
-                  List<SymbolIndicator> indicators, List<String> upright)
+                  List<SymbolIndicator> indicators, List<String> upright, List<SymbolInput> inputs,
+                  List<SymbolElement> elements, Map<String, SourceText> bindings)
             implements Block {
         public Symbol {
             uses = List.copyOf(uses);
@@ -496,6 +556,9 @@ public sealed interface Block {
             pins = List.copyOf(pins);
             labels = List.copyOf(labels);
             upright = upright == null ? List.of() : List.copyOf(upright);
+            inputs = inputs == null ? List.of() : List.copyOf(inputs);
+            elements = elements == null ? List.of() : List.copyOf(elements);
+            bindings = bindings == null ? Map.of() : orderedCopy(bindings);
         }
 
         public String name() {

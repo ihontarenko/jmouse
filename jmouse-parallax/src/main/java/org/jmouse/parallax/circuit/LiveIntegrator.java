@@ -263,7 +263,8 @@ final class LiveIntegrator {
             stepper.allow(Math.min(precision.accurateStep(), time - stepper.time()));
             stepper.step(gathering);
             if (++steps > STEPS_PER_SAMPLE * 1000L) {
-                throw new IllegalArgumentException("The circuit needs too many steps near t = " + stepper.time() + " s.");
+                throw new IllegalArgumentException("The circuit needs too many steps near t = "
+                        + Moments.written(stepper.time()) + ".");
             }
         }
         stepper.allow(allowance);
@@ -287,7 +288,8 @@ final class LiveIntegrator {
         while (stepper.time() < at - stepper.minimumStep()) {
             read(stepper.step(gathering));
             if (++steps > allowed) {
-                throw new IllegalArgumentException("The circuit needs too many steps near t = " + stepper.time() + " s.");
+                throw new IllegalArgumentException("The circuit needs too many steps near t = "
+                        + Moments.written(stepper.time()) + ".");
             }
         }
     }

@@ -840,8 +840,9 @@ public final class EngineSelection {
                 .map(label -> new SymbolDrawing.Label(label.subject(), label.x(), label.y())).toList();
         List<SymbolDrawing.Indicator> indicators = drawn.indicators().stream().map(indicator -> new SymbolDrawing.Indicator(
                 indicator.name(), indicator.left(), indicator.top(), indicator.right(), indicator.bottom())).toList();
-        return new ObjectDefinition.Symbol(new SymbolDrawing(drawn.width(), drawn.height(), drawn.paths(), pins, labels, indicators, drawn.upright())
-                .toJson());
+        return new ObjectDefinition.Symbol(new SymbolDrawing(drawn.width(), drawn.height(), drawn.paths(), pins, labels,
+                indicators, drawn.upright(), LivingDrawing.inputs(drawn.inputs()),
+                LivingDrawing.elements(what, drawn.inputs(), drawn.elements())).toJson());
     }
 
     // ─── graphs ─────────────────────────────────────────────────────────────────────────────────────

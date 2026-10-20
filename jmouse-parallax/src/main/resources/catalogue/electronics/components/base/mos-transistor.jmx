@@ -80,9 +80,13 @@ component "MOS transistor" as mos-transistor type mosfet {
         si                                    "the intrinsic source, behind the source resistance"
     }
 
-    symbol uses n-channel-mosfet-symbol
+    symbol uses n-channel-mosfet-symbol {
+        failed = failed
+    }
 
     display {
+        # how far the gate has opened the channel: its overdrive past the threshold, full at 2 V
+        conduction = min(1, max(0, (polarity * (gate - source) - abs(V_threshold)) / 2))
         overvoltage = 100 * max(abs(drain - source) / V_drain_source_maximum, abs(gate - source) / V_gate_source_maximum) unit % "of VDS or VGS"
         overcurrent = 100 * abs(drain.current) / I_drain_maximum unit % "of its rated ID"
     }

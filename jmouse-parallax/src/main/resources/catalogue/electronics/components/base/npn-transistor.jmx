@@ -14,7 +14,9 @@ component "NPN transistor" as npn-transistor type bjt {
         polarity = 1                          "NPN"
     }
 
-    symbol uses npn-transistor-symbol
+    symbol uses npn-transistor-symbol {
+        failed = failed
+    }
 
     expect "on: 10 µA of base drives a milliampere" from "BF 100 at the defaults" {
         bench for 1 ms {

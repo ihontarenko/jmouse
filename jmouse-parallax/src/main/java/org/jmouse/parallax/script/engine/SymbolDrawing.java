@@ -1,9 +1,13 @@
 package org.jmouse.parallax.script.engine;
 
-import java.util.ArrayList;
+import org.jmouse.parallax.script.Block.SymbolMotion;
+
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A symbol's drawing — {@code {"version": 1, "width": 60, "height": 40, "paths": ["M…"], "pins": [{"name": "a",
@@ -11,21 +15,80 @@ import java.util.Map;
  * {@link org.jmouse.parallax.object.ObjectDefinition.Symbol} carries — and the same drawing as jMX lines:
  * {@code size 60 x 40}, {@code path "M…"}, {@code pin a at -30, 0}, {@code label name at 0, -26}.
  *
- * <p>The JSON is read by a reader of its own, small because the document is: this module carries no JSON library,
- * and the drawing is the one JSON a definition holds. Writing gives the canonical form — keys in the order above,
- * coordinates as decimals, a size only when one is written — so two equal drawings are equal texts.</p>
+ * <p>The drawing is turned into a tree of ordered maps and lists here and into text by {@link JsonText}. The tree is
+ * canonical — keys in the order above, coordinates as decimals, a size only when one is written, an empty list left
+ * out — so two equal drawings are equal texts.</p>
  *
- * @param width  the drawing's extent across, centred on the origin; 0 when not written
- * @param height the drawing's extent down, centred on the origin; 0 when not written
- * @param labels where the part's name and value are printed
- * @param upright paths that stay upright however the part is turned — a meter's letter —, {@code "upright": […]} in the
- *                JSON, written only when there are any
+ * @param width    the drawing's extent across, centred on the origin; 0 when not written
+ * @param height   the drawing's extent down, centred on the origin; 0 when not written
+ * @param labels   where the part's name and value are printed
+ * @param upright  paths that stay upright however the part is turned — a meter's letter —, {@code "upright": […]} in
+ *                 the JSON
+ * @param inputs   what a living drawing is drawn from ({@link LivingDrawing})
+ * @param elements a living drawing's elements
  */
 record SymbolDrawing(double width, double height, List<String> paths, List<Pin> pins, List<Label> labels,
-                     List<Indicator> indicators, List<String> upright) {
+                     List<Indicator> indicators, List<String> upright, List<Input> inputs, List<Element> elements) {
+
+    /** The only drawing version there is. */
+    static final int VERSION = 1;
+
+    /** The words an element is placed by, in the order they are written. */
+    static final List<String> GEOMETRY = List.of("at", "size", "radius", "from", "to", "pivot");
+
+    /** Where a pin meets the drawing, and the text printed beside it; an empty label prints nothing. */
+    record Pin(String name, double x, double y, String label) {
+    }
+
+    /** Where a part's {@code name} or {@code value} is printed, the text centred on the point. */
+    record Label(String subject, double x, double y) {
+    }
 
     /** Where a part's live figure of this name is drawn: a box in the symbol's coordinates. */
     record Indicator(String name, double left, double top, double right, double bottom) {
+    }
+
+    /**
+     * What a living drawing is drawn from: {@code input current 0 .. 20 mA}.
+     *
+     * @param range the range as written, empty for the default 0 … 1
+     */
+    record Input(String name, double low, double high, String range) {
+    }
+
+    /**
+     * A property's value: as written, as expression trees ({@link LivingDrawing}) — one per value, {@code move} has two
+     * —, and how it moves: {@code still}, {@code live} or {@code animated} in the JSON.
+     */
+    record Value(String written, List<Object> expressions, SymbolMotion motion) {
+        Value {
+            expressions = List.copyOf(expressions);
+        }
+    }
+
+    /**
+     * An element of a living drawing ({@link org.jmouse.parallax.script.Block.SymbolElement}): its shape, name, mark,
+     * path data, geometry by word, a {@code when}'s condition (null otherwise), properties, what a layer hides and what a
+     * group or a layer holds.
+     */
+    record Element(String shape, String name, boolean live, String path, Map<String, List<Double>> geometry,
+                   Value condition, Map<String, Value> properties, List<String> hidden, List<Element> children) {
+        Element {
+            geometry = Collections.unmodifiableMap(new LinkedHashMap<>(geometry));
+            properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
+            hidden = List.copyOf(hidden);
+            children = List.copyOf(children);
+        }
+    }
+
+    SymbolDrawing {
+        paths = List.copyOf(paths);
+        pins = List.copyOf(pins);
+        labels = List.copyOf(labels);
+        indicators = indicators == null ? List.of() : List.copyOf(indicators);
+        upright = upright == null ? List.of() : List.copyOf(upright);
+        inputs = inputs == null ? List.of() : List.copyOf(inputs);
+        elements = elements == null ? List.of() : List.copyOf(elements);
     }
 
     SymbolDrawing(double width, double height, List<String> paths, List<Pin> pins, List<Label> labels) {
@@ -36,293 +99,195 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
         this(width, height, paths, pins, labels, indicators, List.of());
     }
 
-    /** The only drawing version there is. */
-    static final int VERSION = 1;
-
-    SymbolDrawing {
-        paths = List.copyOf(paths);
-        pins = List.copyOf(pins);
-        labels = List.copyOf(labels);
-        indicators = indicators == null ? List.of() : List.copyOf(indicators);
-        upright = upright == null ? List.of() : List.copyOf(upright);
+    SymbolDrawing(double width, double height, List<String> paths, List<Pin> pins, List<Label> labels,
+                  List<Indicator> indicators, List<String> upright) {
+        this(width, height, paths, pins, labels, indicators, upright, List.of(), List.of());
     }
 
-    /** Where a pin meets the drawing, and the text printed beside it; an empty label prints nothing. */
-    record Pin(String name, double x, double y, String label) {
-    }
-
-    /** Where a part's {@code name} or {@code value} is printed, the text centred on the point. */
-    record Label(String subject, double x, double y) {
-    }
-
-    // ─── JSON ───────────────────────────────────────────────────────────────────────────────────────
+    // ─── reading ────────────────────────────────────────────────────────────────────────────────────
 
     /** The drawing a symbol definition holds. */
     static SymbolDrawing fromJson(String json) {
-        Object document = new JsonReading(json).document();
-        if (!(document instanceof Map<?, ?> drawing)) {
-            throw new IllegalArgumentException("A symbol drawing is a JSON object.");
-        }
-        if (!(drawing.get("version") instanceof Double version) || version != VERSION) {
+        Fields drawing = Fields.of(JsonText.read(json), "A symbol drawing");
+        if (drawing.number("version", -1) != VERSION) {
             throw new IllegalArgumentException("A symbol drawing is version " + VERSION + ".");
         }
-        double width = drawing.get("width") instanceof Double written ? written : 0;
-        double height = drawing.get("height") instanceof Double written ? written : 0;
-        List<String> paths = texts(drawing.get("paths"));
-        List<Pin> pins = new ArrayList<>();
-        if (drawing.get("pins") instanceof List<?> written) {
-            for (Object entry : written) {
-                if (!(entry instanceof Map<?, ?> pin) || !(pin.get("name") instanceof String name)
-                        || !(pin.get("x") instanceof Double x) || !(pin.get("y") instanceof Double y)) {
-                    throw new IllegalArgumentException("A symbol pin is {\"name\": …, \"x\": …, \"y\": …}.");
-                }
-                pins.add(new Pin(name, x, y, pin.get("label") instanceof String label ? label : ""));
-            }
-        }
-        List<Label> labels = new ArrayList<>();
-        if (drawing.get("labels") instanceof List<?> written) {
-            for (Object entry : written) {
-                if (!(entry instanceof Map<?, ?> label) || !(label.get("subject") instanceof String subject)
-                        || !(label.get("x") instanceof Double x) || !(label.get("y") instanceof Double y)) {
-                    throw new IllegalArgumentException("A symbol label is {\"subject\": …, \"x\": …, \"y\": …}.");
-                }
-                labels.add(new Label(subject, x, y));
-            }
-        }
-        List<Indicator> indicators = new ArrayList<>();
-        if (drawing.get("indicators") instanceof List<?> written) {
-            for (Object entry : written) {
-                if (!(entry instanceof Map<?, ?> indicator) || !(indicator.get("name") instanceof String name)
-                        || !(indicator.get("left") instanceof Double left) || !(indicator.get("top") instanceof Double top)
-                        || !(indicator.get("right") instanceof Double right) || !(indicator.get("bottom") instanceof Double bottom)) {
-                    throw new IllegalArgumentException("A symbol indicator is {\"name\": …, \"left\": …, \"top\": …, \"right\": …, \"bottom\": …}.");
-                }
-                indicators.add(new Indicator(name, left, top, right, bottom));
-            }
-        }
-        return new SymbolDrawing(width, height, paths, pins, labels, indicators, texts(drawing.get("upright")));
+        return new SymbolDrawing(drawing.number("width", 0), drawing.number("height", 0), drawing.texts("paths"),
+                drawing.objects("pins", "A symbol pin", pin -> new Pin(pin.text("name"), pin.number("x"), pin.number("y"),
+                        pin.text("label", ""))),
+                drawing.objects("labels", "A symbol label", label -> new Label(label.text("subject"), label.number("x"),
+                        label.number("y"))),
+                drawing.objects("indicators", "A symbol indicator", indicator -> new Indicator(indicator.text("name"),
+                        indicator.number("left"), indicator.number("top"), indicator.number("right"), indicator.number("bottom"))),
+                drawing.texts("upright"),
+                drawing.objects("inputs", "A symbol input", input -> new Input(input.text("name"), input.number("low"),
+                        input.number("high"), input.text("range", ""))),
+                drawing.objects("elements", "A symbol element", SymbolDrawing::element));
     }
 
-    /** A JSON array of path texts; nothing when the key is not written. */
-    private static List<String> texts(Object written) {
-        List<String> texts = new ArrayList<>();
-        if (written instanceof List<?> items) {
-            for (Object item : items) {
-                texts.add(String.valueOf(item));
-            }
-        }
-        return texts;
+    private static Element element(Fields element) {
+        Map<String, List<Double>> geometry = new LinkedHashMap<>();
+        GEOMETRY.stream().filter(element::has).forEach(word -> geometry.put(word, element.numbers(word)));
+        Map<String, Value> properties = new LinkedHashMap<>();
+        element.fields("properties").entries().forEach((name, value) ->
+                properties.put(String.valueOf(name), value(Fields.of(value, "A symbol value"))));
+        return new Element(element.text("shape"), element.text("name", ""), element.truth("live"), element.text("path", ""),
+                geometry, element.has("when") ? value(element.fields("when")) : null, properties, element.texts("hide"),
+                element.objects("children", "A symbol element", SymbolDrawing::element));
     }
+
+    private static Value value(Fields value) {
+        return new Value(value.text("written"), value.list("values"), SymbolMotion.valueOf(value.text("motion").toUpperCase(Locale.ROOT)));
+    }
+
+    /** One JSON object's fields, read by kind; a refusal names what the object is. */
+    private record Fields(Map<?, ?> entries, String what) {
+
+        static Fields of(Object value, String what) {
+            if (!(value instanceof Map<?, ?> entries)) {
+                throw new IllegalArgumentException(what + " is a JSON object.");
+            }
+            return new Fields(entries, what);
+        }
+
+        boolean has(String key) {
+            return entries.get(key) != null;
+        }
+
+        double number(String key) {
+            if (!(entries.get(key) instanceof Double number)) {
+                throw new IllegalArgumentException(what + " has a number \"" + key + "\".");
+            }
+            return number;
+        }
+
+        double number(String key, double fallback) {
+            return has(key) ? number(key) : fallback;
+        }
+
+        String text(String key) {
+            if (!(entries.get(key) instanceof String text)) {
+                throw new IllegalArgumentException(what + " has a text \"" + key + "\".");
+            }
+            return text;
+        }
+
+        String text(String key, String fallback) {
+            return has(key) ? text(key) : fallback;
+        }
+
+        boolean truth(String key) {
+            return Boolean.TRUE.equals(entries.get(key));
+        }
+
+        List<Object> list(String key) {
+            if (!has(key)) {
+                return List.of();
+            }
+            if (!(entries.get(key) instanceof List<?> items)) {
+                throw new IllegalArgumentException(what + " has an array \"" + key + "\".");
+            }
+            return List.copyOf(items);
+        }
+
+        List<String> texts(String key) {
+            return list(key).stream().map(String::valueOf).toList();
+        }
+
+        List<Double> numbers(String key) {
+            return list(key).stream().map(item -> {
+                if (!(item instanceof Double number)) {
+                    throw new IllegalArgumentException(what + " has numbers in \"" + key + "\".");
+                }
+                return number;
+            }).toList();
+        }
+
+        Fields fields(String key) {
+            return has(key) ? Fields.of(entries.get(key), what + "'s \"" + key + "\"") : new Fields(Map.of(), what);
+        }
+
+        <T> List<T> objects(String key, String itemWhat, Function<Fields, T> reader) {
+            return list(key).stream().map(item -> reader.apply(Fields.of(item, itemWhat))).toList();
+        }
+    }
+
+    // ─── writing ────────────────────────────────────────────────────────────────────────────────────
 
     /** The canonical JSON of this drawing. */
     String toJson() {
-        StringBuilder json = new StringBuilder("{\"version\":").append(VERSION);
+        JsonObject drawing = new JsonObject().put("version", VERSION);
         if (width > 0 || height > 0) {
-            json.append(",\"width\":").append(width).append(",\"height\":").append(height);
+            drawing.put("width", width).put("height", height);
         }
-        json.append(",\"paths\":[").append(String.join(",", paths.stream().map(SymbolDrawing::quoted).toList())).append(']');
-        if (!upright.isEmpty()) {
-            json.append(",\"upright\":[").append(String.join(",", upright.stream().map(SymbolDrawing::quoted).toList())).append(']');
-        }
-        if (!pins.isEmpty()) {
-            json.append(",\"pins\":[").append(String.join(",", pins.stream().map(SymbolDrawing::pinJson).toList())).append(']');
-        }
-        if (!labels.isEmpty()) {
-            json.append(",\"labels\":[").append(String.join(",", labels.stream().map(label -> "{\"subject\":"
-                    + quoted(label.subject()) + ",\"x\":" + label.x() + ",\"y\":" + label.y() + "}").toList())).append(']');
-        }
-        if (!indicators.isEmpty()) {
-            json.append(",\"indicators\":[").append(String.join(",", indicators.stream().map(indicator -> "{\"name\":"
-                    + quoted(indicator.name()) + ",\"left\":" + indicator.left() + ",\"top\":" + indicator.top()
-                    + ",\"right\":" + indicator.right() + ",\"bottom\":" + indicator.bottom() + "}").toList())).append(']');
-        }
-        return json.append('}').toString();
+        return JsonText.write(drawing.put("paths", paths)
+                .putUnlessEmpty("upright", upright)
+                .putUnlessEmpty("pins", pins.stream().map(SymbolDrawing::pinTree).toList())
+                .putUnlessEmpty("labels", labels.stream().map(label -> new JsonObject().put("subject", label.subject())
+                        .put("x", label.x()).put("y", label.y()).entries()).toList())
+                .putUnlessEmpty("indicators", indicators.stream().map(indicator -> new JsonObject().put("name", indicator.name())
+                        .put("left", indicator.left()).put("top", indicator.top()).put("right", indicator.right())
+                        .put("bottom", indicator.bottom()).entries()).toList())
+                .putUnlessEmpty("inputs", inputs.stream().map(SymbolDrawing::inputTree).toList())
+                .putUnlessEmpty("elements", elements.stream().map(SymbolDrawing::elementTree).toList())
+                .entries());
     }
 
-    private static String pinJson(Pin pin) {
-        String label = pin.label().isEmpty() ? "" : ",\"label\":" + quoted(pin.label());
-        return "{\"name\":" + quoted(pin.name()) + ",\"x\":" + pin.x() + ",\"y\":" + pin.y() + label + "}";
+    private static Map<String, Object> pinTree(Pin pin) {
+        return new JsonObject().put("name", pin.name()).put("x", pin.x()).put("y", pin.y())
+                .putUnlessEmpty("label", pin.label()).entries();
     }
 
-    private static String quoted(String text) {
-        StringBuilder quoted = new StringBuilder("\"");
-        for (char character : text.toCharArray()) {
-            switch (character) {
-                case '"' -> quoted.append("\\\"");
-                case '\\' -> quoted.append("\\\\");
-                case '\n' -> quoted.append("\\n");
-                case '\r' -> quoted.append("\\r");
-                case '\t' -> quoted.append("\\t");
-                default -> {
-                    if (character < 0x20) {
-                        quoted.append(String.format("\\u%04x", (int) character));
-                    } else {
-                        quoted.append(character);
-                    }
-                }
-            }
-        }
-        return quoted.append('"').toString();
+    private static Map<String, Object> inputTree(Input input) {
+        return new JsonObject().put("name", input.name()).put("low", input.low()).put("high", input.high())
+                .putUnlessEmpty("range", input.range()).entries();
     }
 
-    /** One pass over a JSON text: objects, arrays, texts, numbers (as {@code Double}), truth values and null. */
-    private static final class JsonReading {
+    private static Map<String, Object> elementTree(Element element) {
+        JsonObject tree = new JsonObject().put("shape", element.shape()).putUnlessEmpty("name", element.name());
+        if (element.live()) {
+            tree.put("live", true);
+        }
+        tree.putUnlessEmpty("path", element.path());
+        element.geometry().forEach(tree::put);
+        if (element.condition() != null) {
+            tree.put("when", valueTree(element.condition()));
+        }
+        if (!element.properties().isEmpty()) {
+            JsonObject properties = new JsonObject();
+            element.properties().forEach((name, value) -> properties.put(name, valueTree(value)));
+            tree.put("properties", properties.entries());
+        }
+        return tree.putUnlessEmpty("hide", element.hidden())
+                .putUnlessEmpty("children", element.children().stream().map(SymbolDrawing::elementTree).toList())
+                .entries();
+    }
 
-        private final String json;
-        private int position;
+    private static Map<String, Object> valueTree(Value value) {
+        return new JsonObject().put("written", value.written()).put("values", value.expressions())
+                .put("motion", value.motion().name().toLowerCase(Locale.ROOT)).entries();
+    }
 
-        JsonReading(String json) {
-            this.json = json;
+    /** A JSON object being built: its entries in the order they are put, an empty list or text left out on request. */
+    private static final class JsonObject {
+
+        private final Map<String, Object> entries = new LinkedHashMap<>();
+
+        JsonObject put(String key, Object value) {
+            entries.put(key, value);
+            return this;
         }
 
-        Object document() {
-            Object value = value();
-            skipWhitespace();
-            if (position != json.length()) {
-                throw refusal("text after the end of the document");
-            }
-            return value;
+        JsonObject putUnlessEmpty(String key, List<?> items) {
+            return items.isEmpty() ? this : put(key, items);
         }
 
-        private Object value() {
-            skipWhitespace();
-            if (position >= json.length()) {
-                throw refusal("a value is missing");
-            }
-            char character = json.charAt(position);
-            return switch (character) {
-                case '{' -> object();
-                case '[' -> array();
-                case '"' -> text();
-                case 't' -> literal("true", Boolean.TRUE);
-                case 'f' -> literal("false", Boolean.FALSE);
-                case 'n' -> literal("null", null);
-                default -> number();
-            };
+        JsonObject putUnlessEmpty(String key, String text) {
+            return text.isEmpty() ? this : put(key, text);
         }
 
-        private Map<String, Object> object() {
-            Map<String, Object> object = new LinkedHashMap<>();
-            position++;
-            skipWhitespace();
-            if (consume('}')) {
-                return object;
-            }
-            do {
-                skipWhitespace();
-                String key = text();
-                skipWhitespace();
-                expect(':');
-                object.put(key, value());
-                skipWhitespace();
-            } while (consume(','));
-            expect('}');
-            return object;
-        }
-
-        private List<Object> array() {
-            List<Object> array = new ArrayList<>();
-            position++;
-            skipWhitespace();
-            if (consume(']')) {
-                return array;
-            }
-            do {
-                array.add(value());
-                skipWhitespace();
-            } while (consume(','));
-            expect(']');
-            return array;
-        }
-
-        private String text() {
-            expect('"');
-            StringBuilder text = new StringBuilder();
-            while (position < json.length()) {
-                char character = json.charAt(position++);
-                if (character == '"') {
-                    return text.toString();
-                }
-                if (character != '\\') {
-                    text.append(character);
-                    continue;
-                }
-                if (position >= json.length()) {
-                    break;
-                }
-                char escaped = json.charAt(position++);
-                switch (escaped) {
-                    case 'n' -> text.append('\n');
-                    case 'r' -> text.append('\r');
-                    case 't' -> text.append('\t');
-                    case 'b' -> text.append('\b');
-                    case 'f' -> text.append('\f');
-                    case 'u' -> text.append(unicodeEscape());
-                    default -> text.append(escaped);
-                }
-            }
-            throw refusal("a text is never closed");
-        }
-
-        /** The character of a unicode escape, its four hexadecimal digits next. */
-        private char unicodeEscape() {
-            if (position + 4 > json.length()) {
-                throw refusal("a \\u escape has four hexadecimal digits");
-            }
-            try {
-                char character = (char) Integer.parseInt(json.substring(position, position + 4), 16);
-                position += 4;
-                return character;
-            } catch (NumberFormatException notHexadecimal) {
-                throw refusal("a \\u escape has four hexadecimal digits");
-            }
-        }
-
-        private Double number() {
-            int start = position;
-            while (position < json.length() && "+-0123456789.eE".indexOf(json.charAt(position)) >= 0) {
-                position++;
-            }
-            if (start == position) {
-                throw refusal("'" + json.charAt(position) + "' does not start a value");
-            }
-            try {
-                return Double.parseDouble(json.substring(start, position));
-            } catch (NumberFormatException notANumber) {
-                throw refusal("'" + json.substring(start, position) + "' is not a number");
-            }
-        }
-
-        private Object literal(String word, Object value) {
-            if (!json.startsWith(word, position)) {
-                throw refusal("expected " + word);
-            }
-            position += word.length();
-            return value;
-        }
-
-        private void skipWhitespace() {
-            while (position < json.length() && Character.isWhitespace(json.charAt(position))) {
-                position++;
-            }
-        }
-
-        private boolean consume(char character) {
-            if (position < json.length() && json.charAt(position) == character) {
-                position++;
-                return true;
-            }
-            return false;
-        }
-
-        private void expect(char character) {
-            if (!consume(character)) {
-                throw refusal("expected '" + character + "'");
-            }
-        }
-
-        private IllegalArgumentException refusal(String detail) {
-            return new IllegalArgumentException("The symbol drawing is not valid JSON at " + position + ": " + detail + ".");
+        Map<String, Object> entries() {
+            return entries;
         }
     }
 }

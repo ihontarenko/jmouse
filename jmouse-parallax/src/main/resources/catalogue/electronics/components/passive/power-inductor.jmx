@@ -4,13 +4,23 @@
 # it rises steeply and the DCR and that small L_air are what still hold it. The floor is physics, not a convenience:
 # without it the incremental inductance went to L · sech²(I / I_sat), 10⁻²² of L at 50 A, the equation stopped being
 # a differential one, and no step a solver could take settled the circuit.
-# Not represented: core losses, hysteresis, the winding's capacitance.
+#
+# The state is the winding's current; its rate is the voltage behind the copper over the inductance the core gives at
+# that current — the flux law above, differentiated: dΦ/dI = L_air + (L − L_air) · sech²(I / I_saturation).
+#
+#   terminal_one ── R_winding ── winding ──┬── L(I) ──┬── terminal_two
+#        │                                 └─ R_core ─┘       │
+#        └───────────────────── C_winding ────────────────────┘
+#
+# R_core is the ferrite's loss at the frequencies a converter switches at, as a resistance across the inductance; C_winding
+# the capacitance between its turns, which sets its self-resonance. A datasheet gives the self-resonant frequency
+# (SRF) — C_winding = 1 / ((2π · SRF)² · L) — and a Q or a core-loss curve. Not represented: the hysteresis loop.
 
 component "Power inductor" as power-inductor type inductor {
     meta {
         designator L
-        summary "Power inductor: inductance, winding resistance, core saturation"
-        source "the figures a power inductor's datasheet gives: L, DCR, ISAT"
+        summary "Power inductor: inductance, winding resistance, core saturation, core loss and self-resonance"
+        source "the figures a power inductor's datasheet gives: L, DCR, ISAT, SRF, Q"
         category circuits
         failure open
     }
@@ -20,6 +30,8 @@ component "Power inductor" as power-inductor type inductor {
         I_saturation = 2 A                    "ISAT: past it the core saturates and the inductance falls away"
         saturated_inductance = 5 uH           "what is left once the core is saturated: the winding's air-core inductance. An approximation — a datasheet gives ISAT as a 30 % drop, not this floor"
         R_winding = 50 mOhm                   "DCR: the winding's resistance"
+        C_winding = 1 pF                      "the capacitance between its turns: with 100 µH, a self-resonance near 16 MHz, as a datasheet's SRF gives"
+        R_core = 2 kOhm                       "the ferrite's loss as a resistance across the inductance: a Q of about 30 at 100 kHz"
         copper_temperature_coefficient = 0.00393 "copper: the winding's resistance rises 0.393 % per kelvin"
         saturation_temperature_coefficient = -0.004 "a ferrite core saturates earlier when hot, about 0.4 % per kelvin"
         T_nominal = 298.15 K                  "the temperature the figures are given at"
@@ -34,7 +46,16 @@ component "Power inductor" as power-inductor type inductor {
         terminal_two analog 2                 "second terminal"
     }
 
+    nodes {
+        winding                               "behind the copper: where the inductance begins"
+    }
+
+    state {
+        I_winding = 0 continuous              "the current in the inductance"
+    }
+
     symbol uses inductor-symbol {
+        failed = failed
         a terminal_one
         b terminal_two
     }
@@ -44,9 +65,14 @@ component "Power inductor" as power-inductor type inductor {
         let T_winding : temperature = temperature
         let R_winding_now : resistance = R_winding * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
         let I_saturation_now : current = I_saturation * (1 + saturation_temperature_coefficient * (T_winding - T_nominal))
-        # The flux the winding's current links, read as the current of this very branch: terminal_one.current.
-        let I_winding : current = terminal_one.current
-        voltage terminal_one -> terminal_two = R_winding_now * I_winding + d(saturated_inductance * I_winding + (inductance - saturated_inductance) * I_saturation_now * tanh(I_winding / I_saturation_now))/dt
+        # On a draft bench (detail 0) the winding stores no charge between its turns, as a junction stores none there.
+        let stored : ratio = min(detail, 1)
+        let L_incremental : inductance = saturated_inductance + (inductance - saturated_inductance) / cosh(I_winding / I_saturation_now) ^ 2
+
+        current terminal_one -> winding = (terminal_one - winding) / R_winding_now
+        d(I_winding)/dt = (winding - terminal_two) / L_incremental
+        current winding -> terminal_two = I_winding + (winding - terminal_two) / R_core
+        current terminal_one -> terminal_two = d(stored * C_winding * (terminal_one - terminal_two))/dt
     }
 
     expect "a ramp of V / L below saturation" from "1 V across 100 µH: 0.5 A after 50 µs" {

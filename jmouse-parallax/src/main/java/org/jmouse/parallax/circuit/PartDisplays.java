@@ -62,10 +62,15 @@ public final class PartDisplays {
         List<String> pinNodes = new ArrayList<>();
         List<String> terminals = new ArrayList<>();
         for (int index = 0; index < pins.size(); index++) {
-            String node = !primitive ? element.pins().get(pins.get(index))
-                    : index == 0 ? element.positive() : index == 1 ? element.negative() : null;
-            pinNodes.add(node);
-            terminals.add(primitive && index < PRIMITIVE_TERMINALS.size() ? PRIMITIVE_TERMINALS.get(index) : pins.get(index));
+            if (primitive) {
+                pinNodes.add(index == 0 ? element.positive() : index == 1 ? element.negative() : null);
+                terminals.add(index < PRIMITIVE_TERMINALS.size() ? PRIMITIVE_TERMINALS.get(index) : pins.get(index));
+                continue;
+            }
+            // On a part of several blocks, the drawn block's pin: what its symbol shows.
+            String key = PartExpression.wiredKey(element, model, model.pins().get(index));
+            pinNodes.add(key == null ? null : element.pins().get(key));
+            terminals.add(key == null ? pins.get(index) : key);
         }
         model.displays().forEach((name, expression) -> {
             try {
@@ -78,11 +83,16 @@ public final class PartDisplays {
     }
 
     /**
-     * Every figure at a moment: the node voltages then, each part's terminal currents, power and states, and the time. A
-     * figure reading what its part does not report — a current not metered — is NaN, and so not shown.
+     * Every figure over a frame: the frame's mean node voltages, each part's mean terminal currents over the samples that
+     * traced them, its power and states, and the time. A figure is read from means, never from the frame's last instant:
+     * an LED driven at 1 kHz shows the brightness it has on average, not whichever half of a period the frame ended in. A
+     * part the samples did not trace reads its currents at the last sample. A figure reading what its part does not
+     * report — a current not metered — is NaN, and so not shown.
      */
     public Map<String, Map<String, Double>> read(Map<String, Double> voltages, Map<String, PartLoad> loads,
-                                                 Map<String, Map<String, Double>> states, double time) {
+                                                 List<LiveSample> samples, Map<String, Map<String, Double>> states,
+                                                 double time) {
+        Map<String, Map<String, Double>> meanCurrents = meanTerminals(samples);
         Map<String, Map<String, Double>> shown = new LinkedHashMap<>();
         for (Figure figure : figures) {
             List<String> pins = figure.expression().pins();
@@ -92,8 +102,10 @@ public final class PartDisplays {
                 pinVoltages[index] = node == null || node.equals(ObjectDefinition.Circuit.GROUND) ? 0 : voltages.getOrDefault(node, 0.0);
             }
             PartLoad load = loads.get(figure.part());
-            double value = figure.expression().read(pinVoltages, pinCurrents(load, pins, figure.terminals()), states.getOrDefault(figure.part(), Map.of()),
-                    load == null || Double.isNaN(load.power()) ? 0 : load.power(), time);
+            Map<String, Double> terminals = meanCurrents.getOrDefault(figure.part(), load == null ? Map.of() : load.terminals());
+            double value = figure.expression().read(pinVoltages, pinCurrents(terminals, pins, figure.terminals()),
+                    states.getOrDefault(figure.part(), Map.of()), load == null || Double.isNaN(load.power()) ? 0 : load.power(),
+                    time, load != null && load.failure() != null);
             if (Double.isFinite(value)) {
                 shown.computeIfAbsent(figure.part(), ignored -> new LinkedHashMap<>()).put(figure.name(), value);
             }
@@ -128,7 +140,8 @@ public final class PartDisplays {
                 Map<String, Double> traced = sample.terminals() == null ? null : sample.terminals().get(figure.part());
                 Map<String, Double> currents = traced != null ? pinCurrents(traced, pins, figure.terminals())
                         : pinCurrents(load == null ? Map.of() : load.terminals(), pins, figure.terminals());
-                double value = figure.expression().read(pinVoltages, currents, partStates, power, sample.time());
+                double value = figure.expression().read(pinVoltages, currents, partStates, power, sample.time(),
+                        load != null && load.failure() != null);
                 if (Double.isFinite(value)) {
                     highest = Math.max(highest, value);
                 }
@@ -140,11 +153,25 @@ public final class PartDisplays {
         return worst;
     }
 
-    /** The current into each pin, reported under the pin's own name or its primitive terminal. */
-    private static Map<String, Double> pinCurrents(PartLoad load, List<String> pins, List<String> terminals) {
-        return load == null ? new LinkedHashMap<>() : pinCurrents(load.terminals(), pins, terminals);
+    /** Each part's mean current into each terminal over the samples that traced it; empty when none did. */
+    private static Map<String, Map<String, Double>> meanTerminals(List<LiveSample> samples) {
+        Map<String, Map<String, Double>> sums = new LinkedHashMap<>();
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (LiveSample sample : samples) {
+            if (sample.terminals() == null) {
+                continue;
+            }
+            sample.terminals().forEach((part, terminals) -> {
+                Map<String, Double> sum = sums.computeIfAbsent(part, ignored -> new LinkedHashMap<>());
+                terminals.forEach((terminal, current) -> sum.merge(terminal, current, Double::sum));
+                counts.merge(part, 1, Integer::sum);
+            });
+        }
+        sums.forEach((part, sum) -> sum.replaceAll((terminal, total) -> total / counts.get(part)));
+        return sums;
     }
 
+    /** The current into each pin, reported under the pin's own name or its primitive terminal. */
     private static Map<String, Double> pinCurrents(Map<String, Double> reported, List<String> pins, List<String> terminals) {
         Map<String, Double> currents = new LinkedHashMap<>();
         for (int index = 0; index < pins.size(); index++) {

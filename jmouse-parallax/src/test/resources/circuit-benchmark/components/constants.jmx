@@ -1,5 +1,5 @@
-# The physical constants, once, for every document: a model writes `boltzmann`, never its digits. The engine's own
-# copy (PhysicalConstants) holds the same numbers. Pulled in with `use constants` — or through a library that uses it,
+# The physical constants, once, for every document: a model writes `boltzmann`, never its digits. They are here only:
+# the engine holds none of its own. Pulled in with `use constants` — or through a library that uses it,
 # as smooth-transitions does.
 
 functions "Physical constants" as constants {

@@ -1,11 +1,47 @@
 symbol "Optocoupler" as optocoupler-symbol {
     meta {
-        summary "An optocoupler, as drawn on a schematic: an LED and a phototransistor in one package, light between them"
+        summary "Optocoupler, as drawn on a schematic: its LED lights with the current it is given, its light crosses the barrier, and the phototransistor conducts with what it receives"
         category circuits
         tags electronics, schematic
     }
     size 100 x 80
-    path "M-36-30H36V30H-36ZM-50-20H-20V-6M-20 6V20H-50M-28-6H-12L-20 6ZM-28 6H-12M-6-5H6M2-8L6-5L2-2M-6 5H6M2 2L6 5L2 8M14-12V12M14-5L28-14V-20H50M14 5L28 14V20H50M22 13L28 14L25 9"
+    input light 0 .. 1
+    input conduction 0 .. 1
+    input failed
+
+    # The LED lights with its current against its rating — infrared in a PC817, drawn red so it can be seen — and its
+    # rays across the barrier with it. Drawn under the outline, so the outline stays as drawn.
+    live path led "M-28-6H-12L-20 6Z" {
+        stroke = clear
+        fill = red
+        live opacity = curve(light, 0 -> 0, 0.01 -> 0.35, 0.1 -> 0.75, 1 -> 0.95)
+        live glow = curve(light, 0 -> 0, 0.1 -> 5, 1 -> 9)
+    }
+
+    live group body {
+        path "M-36-30H36V30H-36ZM-50-20H-20V-6M-20 6V20H-50M-28-6H-12L-20 6ZM-28 6H-12M14-12V12M14-5L28-14V-20H50M14 5L28 14V20H50M22 13L28 14L25 9"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live path rays "M-6-5H6M2-8L6-5L2-2M-6 5H6M2 2L6 5L2 8" {
+        live stroke = if(failed > 0.5, burned, if(light > 0.01, red, signal))
+        live glow = curve(light, 0 -> 0, 0.1 -> 3, 1 -> 6)
+    }
+
+    # The phototransistor carries what the light lets through: its channel lit with the collector current against its
+    # rating, as an eye takes a light (`seen`).
+    live path channel "M14-5L28-14V-20M14 5L28 14V20" {
+        stroke = positive
+        live opacity = seen(conduction)
+        live glow = 9 * seen(conduction)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin anode at -50, -20
     pin cathode at -50, 20
     pin collector at 50, -20

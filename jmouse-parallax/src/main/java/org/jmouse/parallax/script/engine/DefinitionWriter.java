@@ -534,8 +534,48 @@ final class DefinitionWriter {
 
     /** The drawing as the lines of a {@code symbol} document: its size, its paths, its pins, its labels. */
     private static WrittenDefinition symbol(Symbol symbol) {
-        List<TextBlock> lines = drawingLines(symbol.drawing()).stream().map(TextBlock::statement).toList();
+        List<TextBlock> lines = new ArrayList<>(drawingLines(symbol.drawing()).stream().map(TextBlock::statement).toList());
+        lines.addAll(livingBlocks(symbol.drawing()));
         return new WrittenDefinition("symbol", Optional.empty(), List.of(), List.of(), lines);
+    }
+
+    /**
+     * A living drawing's {@code input} lines and elements, after its plain lines. Kept apart from {@link #drawingLines}:
+     * those are the lines a canvas redraws, and these it leaves as written.
+     */
+    static List<TextBlock> livingBlocks(String json) {
+        SymbolDrawing drawing = SymbolDrawing.fromJson(json);
+        List<TextBlock> blocks = new ArrayList<>();
+        drawing.inputs().forEach(input -> blocks.add(TextBlock.statement("input " + input.name()
+                + (input.range().isEmpty() ? "" : " " + input.range()))));
+        drawing.elements().forEach(element -> blocks.add(elementBlock(element)));
+        return blocks;
+    }
+
+    private static TextBlock elementBlock(SymbolDrawing.Element element) {
+        StringBuilder opening = new StringBuilder(element.live() ? "live " : "").append(element.shape());
+        if (element.condition() != null) {
+            opening.append(' ').append(element.condition().written());
+        }
+        if (!element.name().isEmpty()) {
+            opening.append(' ').append(element.name());
+        }
+        if (!element.path().isEmpty()) {
+            opening.append(' ').append(Notation.text(element.path()));
+        }
+        element.geometry().forEach((word, numbers) -> opening.append(' ').append(word).append(' ').append(String.join(
+                word.equals("size") ? " x " : ", ", numbers.stream().map(Notation::number).toList())));
+        List<String> lines = new ArrayList<>();
+        element.properties().forEach((name, value) -> lines.add(switch (value.motion()) {
+            case LIVE -> "live ";
+            case ANIMATED -> "animate ";
+            case STILL -> "";
+        } + name + " = " + value.written()));
+        if (!element.hidden().isEmpty()) {
+            lines.add("hide " + String.join(", ", element.hidden()));
+        }
+        element.children().forEach(child -> lines.add(elementBlock(child).render("").stripTrailing()));
+        return lines.isEmpty() ? TextBlock.statement(opening.toString()) : TextBlock.braced(opening.toString(), lines);
     }
 
     /** A drawing as its lines, in the order a symbol document writes them: size, paths, pins, labels. */

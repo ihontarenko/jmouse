@@ -31,6 +31,8 @@ component "Resistor" as resistor type resistor {
         terminal_two analog 2 "second terminal"
     }
     symbol uses resistor-symbol {
+        failed = failed
+        load = power / power_rating
         a terminal_one
         b terminal_two
     }

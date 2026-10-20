@@ -95,7 +95,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
     /**
      * This part as a member of the component it names as its family: the family's physics — its formulas, nodes,
      * states, equations, behaviour and parts — unless the part writes behaviour of its own; the family's parameters
-     * with the part's values over them by name; the part's own pins, drawing, displays and leads where it writes them,
+     * with the part's values over them by name, and so its displays; the part's own pins, drawing and leads where it writes them,
      * else the family's. What the part states of itself (its header and expectations) is never inherited.
      *
      * @param behaves whether the part's document writes behaviour of its own
@@ -111,9 +111,16 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
                 behaves ? formulas : base.formulas, behaves ? states : base.states, behaves ? locals : base.locals,
                 behaves ? localTypes : base.localTypes,
                 behaves ? equations : base.equations, behaves ? behaviour : base.behaviour, expectations,
-                displays.isEmpty() ? base.displays : displays, measures.isEmpty() ? base.measures : measures,
-                leads.isEmpty() ? base.leads : leads, displayUnits.isEmpty() ? base.displayUnits : displayUnits,
-                displayCaptions.isEmpty() ? base.displayCaptions : displayCaptions, heat == null ? base.heat : heat);
+                byName(base.displays, displays), measures.isEmpty() ? base.measures : measures,
+                leads.isEmpty() ? base.leads : leads, byName(base.displayUnits, displayUnits),
+                byName(base.displayCaptions, displayCaptions), heat == null ? base.heat : heat);
+    }
+
+    /** The family's entries with the part's over them by name: what a part displays adds to what its family does. */
+    private static <V> Map<String, V> byName(Map<String, V> family, Map<String, V> own) {
+        Map<String, V> merged = new LinkedHashMap<>(family);
+        merged.putAll(own);
+        return merged;
     }
 
     /** One header value, such as the summary or the family. */

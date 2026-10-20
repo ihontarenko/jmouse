@@ -32,6 +32,8 @@ component "Capacitor" as capacitor type capacitor {
 
     # Drawn plain, or as an electrolytic — the polarized drawing, its "+" on terminal_one — by a part's `symbol` choice.
     symbol uses capacitor-symbol, polarized-capacitor-symbol {
+        failed = failed
+        charge = (terminal_one - terminal_two) / voltage_rating
         a terminal_one
         b terminal_two
     }

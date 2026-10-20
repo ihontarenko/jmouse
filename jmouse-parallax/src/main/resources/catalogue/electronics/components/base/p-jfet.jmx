@@ -14,5 +14,7 @@ component "P-channel JFET" as p-jfet type jfet {
         polarity = -1                         "p-channel"
     }
 
-    symbol uses p-channel-jfet-symbol
+    symbol uses p-channel-jfet-symbol {
+        failed = failed
+    }
 }

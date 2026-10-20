@@ -63,6 +63,12 @@ component "Diode" as diode type diode {
     }
 
     symbol uses diode-symbol {
+        failed = failed
+        # Forward: the current against its rating. Reversed: the voltage against what it can hold — its VRRM, or its
+        # breakdown where that comes first —, and past that the current it breaks down with, against its IBV.
+        forward = max(0, anode.current) / I_forward_maximum
+        reverse = max(0, cathode - anode) / min(V_reverse_maximum, V_breakdown)
+        breakdown = max(0, 0 - anode.current) / I_breakdown
         a anode
         b cathode
     }

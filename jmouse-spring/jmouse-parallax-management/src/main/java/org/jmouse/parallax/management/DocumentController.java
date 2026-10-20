@@ -6,6 +6,7 @@ import org.jmouse.parallax.script.form.LanguageSchema;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ParameterDefinition;
 import org.jmouse.parallax.store.document.DocumentEditing;
+import org.jmouse.parallax.store.document.DocumentEditing.DrawnSymbol;
 import org.jmouse.parallax.store.document.DocumentEditing.EditedDocument;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -74,5 +75,11 @@ public class DocumentController {
     @PublicEndpoint("changing a text the caller sent; nothing is read from or written to the catalogue")
     public EditedDocument drawing(@RequestBody DrawingRequest request) {
         return editing.patchSymbol(request.source(), request.drawing(), request.title(), request.category());
+    }
+
+    @PostMapping("/symbol")
+    @PublicEndpoint("reading a text the caller sent; nothing is read from or written to the catalogue")
+    public DrawnSymbol symbol(@RequestBody SourceRequest request) {
+        return editing.symbol(request.source());
     }
 }

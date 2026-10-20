@@ -43,6 +43,8 @@ component "Electrolytic capacitor" as electrolytic-capacitor type capacitor {
     }
 
     symbol uses polarized-capacitor-symbol {
+        failed = failed
+        charge = (positive - negative) / voltage_rating
         a positive
         b negative
     }

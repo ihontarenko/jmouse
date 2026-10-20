@@ -16,7 +16,9 @@ component "P-channel MOSFET" as p-mosfet type mosfet {
         transconductance = 0.1 A/V^2          "KP: the whole channel"
     }
 
-    symbol uses p-channel-mosfet-symbol
+    symbol uses p-channel-mosfet-symbol {
+        failed = failed
+    }
 
     expect "on: the gate 5 V below the source sources the load's current" from "KP 0.1 A/V², VTO -1 V: deep in the linear region" {
         bench for 1 ms {

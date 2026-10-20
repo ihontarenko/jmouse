@@ -42,6 +42,28 @@ public class DocumentEditing {
     public record EditedDocument(String source, DocumentForm form) {
     }
 
+    /**
+     * What a symbol text draws — its drawing JSON, every living value read — or why it is refused, at its line: what a
+     * symbol editor previews a living symbol by while it is written.
+     */
+    public record DrawnSymbol(String drawing, DocumentForm.Refusal refusal) {
+    }
+
+    public DrawnSymbol symbol(String source) {
+        requireText(source);
+        try {
+            if (!(documents.read(source, "document").definition() instanceof ObjectDefinition.Symbol symbol)) {
+                throw ParallaxProblem.invalidDocument("This text is not a symbol.", 1, 0);
+            }
+            return new DrawnSymbol(symbol.drawing(), null);
+        } catch (ParallaxProblem.Invalid refused) {
+            Object line = refused.details().get("line");
+            Object column = refused.details().get("column");
+            return new DrawnSymbol(null, new DocumentForm.Refusal(line instanceof Integer number ? number : 1,
+                    column instanceof Integer number ? number : 0, refused.getMessage()));
+        }
+    }
+
     public EditedDocument form(String source) {
         return new EditedDocument(requireText(source), checked(source));
     }

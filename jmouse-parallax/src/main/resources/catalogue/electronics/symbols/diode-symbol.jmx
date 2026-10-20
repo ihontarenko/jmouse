@@ -1,11 +1,44 @@
 symbol "Diode" as diode-symbol {
     meta {
-        summary "Diode, as drawn on a schematic"
+        summary "Diode, as drawn on a schematic: lit inside while it conducts, its bar thickening as it blocks, hot in breakdown"
         category circuits
         tags electronics, schematic
     }
     size 80 x 40
-    path "M-40 0H-12V-12L12 0-12 12V0M12-12V12M12 0H40"
+    input forward 0 .. 1
+    input reverse 0 .. 1
+    input breakdown 0 .. 1
+    input failed
+
+    # Conducting, the current runs the way the triangle points: it fills with the current against its rating, as an
+    # eye takes a light (`seen`): a lesson's 10 mA through a 1 A part reads plainly. Drawn under the outline, so the
+    # outline stays as drawn.
+    live path die "M-12-12L12 0-12 12Z" {
+        stroke = clear
+        fill = positive
+        live opacity = seen(forward)
+        live glow = 9 * seen(forward)
+    }
+
+    live group body {
+        path "M-40 0H-12V-12L12 0-12 12V0M12 0H40"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # Blocking, the bar holds the reverse voltage: it thickens in the colour of − as the voltage nears what it is rated to
+    # hold, and burns hot once it breaks down — past that a rectifier is not rectifying.
+    live path bar "M12-12V12" {
+        live stroke = if(failed > 0.5, burned, if(breakdown > 0.05, hot, if(reverse > 0.005, negative, signal)))
+        live thickness = curve(reverse, 0 -> 1, 0.05 -> 1.6, 1 -> 2.6)
+        live glow = curve(breakdown, 0 -> 0, 1 -> 6)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin a at -40, 0
     pin b at 40, 0
     label name at 0, -26

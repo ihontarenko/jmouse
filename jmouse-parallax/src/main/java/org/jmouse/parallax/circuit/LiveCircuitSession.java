@@ -30,7 +30,10 @@ import java.util.stream.Collectors;
  */
 public final class LiveCircuitSession {
 
-    /** How many checkpoints are kept: a frame each, so about two seconds of a run. */
+    /**
+     * How many checkpoints are kept: the newest a frame apart, the older ones thinned to reach far back
+     * ({@link #thinCheckpoints}).
+     */
     private static final int KEPT_CHECKPOINTS = 64;
     /** How many samples a capture has at most. */
     private static final int CAPTURED_SAMPLES = 200_000;
@@ -171,6 +174,15 @@ public final class LiveCircuitSession {
     private void equipSolver() {
         equip(solver);
         reader = new FrameReader(probes, instrumentReadings(probes), solver.nodes());
+    }
+
+    /**
+     * Lets the checkpoints go once the circuit is another: other values, a part failed, a new text. Replayed from them,
+     * the past would be computed as a circuit it never was. Other probes or another sample interval change nothing of
+     * what the circuit did, so they keep them — dropped then, zooming the time base into a stretch of the past lost the
+     * very checkpoints that stretch is replayed from.
+     */
+    private void forgetPast() {
         checkpoints.clear();
     }
 
@@ -193,9 +205,33 @@ public final class LiveCircuitSession {
             return;
         }
         checkpoints.addLast(solver.checkpoint());
-        while (checkpoints.size() > KEPT_CHECKPOINTS) {
-            checkpoints.removeFirst();
+        if (checkpoints.size() > KEPT_CHECKPOINTS) {
+            thinCheckpoints();
         }
+    }
+
+    /**
+     * Lets one checkpoint go so that the rest reach as far back as before: the one whose going leaves the smallest gap
+     * against how old it is. The newest stay a frame apart and the older ones space out, so a fixed number of them
+     * reaches as far back as a screen can be dragged — dropped oldest first, they reached two seconds of wall time, and a
+     * stretch of the past looked at closely could not be replayed. The oldest is kept: it is how far the reach goes.
+     */
+    private void thinCheckpoints() {
+        List<LiveCircuitSolver.Checkpoint> kept = new ArrayList<>(checkpoints);
+        double now = kept.getLast().time();
+        int dropped = -1;
+        double smallest = Double.POSITIVE_INFINITY;
+        for (int index = 1; index < kept.size() - 1; index++) {
+            double gap = kept.get(index + 1).time() - kept.get(index - 1).time();
+            double age = Math.max(now - kept.get(index).time(), Double.MIN_NORMAL);
+            if (gap / age < smallest) {
+                smallest = gap / age;
+                dropped = index;
+            }
+        }
+        kept.remove(dropped);
+        checkpoints.clear();
+        checkpoints.addAll(kept);
     }
 
     /**
@@ -288,7 +324,7 @@ public final class LiveCircuitSession {
     }
 
     /**
-     * The loads with what each part's symbol shows over the frame: a figure read from its mean levels at its last moment,
+     * The loads with what each part's symbol shows over the frame: a figure read from the frame's mean levels and mean currents,
      * a stress at its worst over the frame's samples ({@link PartDisplays#worstStresses}).
      */
     private Map<String, PartLoad> shown(Map<String, PartLoad> loads, Map<String, Double> levels,
@@ -297,7 +333,7 @@ public final class LiveCircuitSession {
             return loads;
         }
         double lastTime = samples.isEmpty() ? Double.NaN : samples.getLast().time();
-        Map<String, Map<String, Double>> figures = displays.read(levels, loads, solver.states(), lastTime);
+        Map<String, Map<String, Double>> figures = displays.read(levels, loads, samples, solver.states(), lastTime);
         displays.worstStresses(samples, solver.nodes(), loads, solver.states()).forEach((part, worst) ->
                 figures.computeIfAbsent(part, ignored -> new LinkedHashMap<>()).putAll(worst));
         Map<String, PartLoad> shown = new LinkedHashMap<>(loads);
@@ -324,6 +360,7 @@ public final class LiveCircuitSession {
         }
         solver.trace(traceEvery);
         equipSolver();
+        forgetPast();
     }
 
     /**
@@ -343,6 +380,7 @@ public final class LiveCircuitSession {
             }
             solver.trace(traceEvery);
             equipSolver();
+            forgetPast();
             return true;
         } catch (IllegalArgumentException cannotContinue) {
             restart(object);
@@ -363,6 +401,7 @@ public final class LiveCircuitSession {
             solver = LiveCircuitSolver.continuing(object, solver, interval);
         } catch (IllegalArgumentException cannotContinue) {
             solver = new LiveCircuitSolver(object, interval);
+            forgetPast();
         }
         solver.trace(traceEvery);
         equipSolver();
@@ -384,6 +423,7 @@ public final class LiveCircuitSession {
         Map<String, FrameReader.InstrumentReading> instruments = instrumentReadings(probes);
         probes = probes.stream().filter(probe -> probe.quantity() != Quantity.READING || instruments.containsKey(probe.channel())).toList();
         equipSolver();
+        forgetPast();
     }
 
     /**

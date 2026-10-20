@@ -1,25 +1,53 @@
-# An inductor as it is: the voltage across it is the rate of the flux it links, its inductance times the current
-# through it. Its current is the branch current of that voltage equation — an unknown of its own, as SPICE's L has —,
-# and the flux reads it as terminal_one.current. Linear at any one temperature, it is integrated as every charge is.
+# An inductor as it is: a winding — its inductance, the copper it is wound of, the capacitance between its turns and the
+# loss in its core. The state is the current in the inductance; its rate is the voltage the copper leaves across the
+# inductance, over the inductance:
+#
+#   terminal_one ──┬── R_winding ── L ──┬── terminal_two
+#                  ├────── R_loss ──────┤
+#                  └──── C_winding ─────┘
+#
+# The last two are what a coil does when its current is cut: with nothing else to hold it, the current rings through
+# its own capacitance at its self-resonance, √(L / C_winding) the impedance there, and the core and the copper take that
+# energy within a few periods — `quality` of them. An ideal inductor (as this one was until 2026-10-20) has neither: cut
+# off, it rang on whatever picofarads the circuit offered, with a Q of thousands, or drove its voltage without limit. At
+# the frequencies a circuit works at, far below the self-resonance, both are invisible: 1 mH with 10 pF resonates at
+# 1.6 MHz.
+#
+# Written in pin order on a sheet — L1 inductor (a, b) inductance = 10 mH — the first pin is a, the second b. Linear at
+# any one temperature, it is integrated as every charge and state is.
 
 component "Inductor" as inductor type inductor {
     meta {
         designator L
-        summary "Two-terminal inductor: the flux its current links"
+        summary "Two-terminal inductor: its flux, winding resistance, self-capacitance and core loss"
         category circuits
     }
     parameters {
         inductance = 1 mH "inductance"
+        R_winding = 0 Ohm                     "the copper's resistance (DCR); 0 leaves it to the circuit"
+        C_winding = 10 pF                     "the capacitance between its turns: with the inductance, its self-resonance"
+        quality = 10                          "how many periods its self-resonance rings for before it is spent: the Q its core and copper give there"
     }
     pins {
         terminal_one analog 1 "first terminal"
         terminal_two analog 2 "second terminal"
     }
+    state {
+        I_inductance = 0 continuous           "the current in the inductance"
+    }
     symbol uses inductor-symbol {
+        failed = failed
         a terminal_one
         b terminal_two
     }
     equations {
-        voltage terminal_one -> terminal_two = d(inductance * terminal_one.current)/dt
+        # On a draft bench (detail 0) the winding stores no charge between its turns, as a junction stores none there.
+        let stored : ratio = min(detail, 1)
+        # The loss, as a resistance across the winding, that spends its self-resonance in `quality` periods.
+        let R_loss : resistance = quality * sqrt(inductance / C_winding)
+        let V_across : voltage = terminal_one - terminal_two
+
+        d(I_inductance)/dt = (V_across - R_winding * I_inductance) / inductance
+        current terminal_one -> terminal_two = I_inductance + V_across / R_loss + d(stored * C_winding * V_across)/dt
     }
 }

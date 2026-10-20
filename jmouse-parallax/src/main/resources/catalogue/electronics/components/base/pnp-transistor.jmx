@@ -14,7 +14,9 @@ component "PNP transistor" as pnp-transistor type bjt {
         polarity = -1                         "PNP"
     }
 
-    symbol uses pnp-transistor-symbol
+    symbol uses pnp-transistor-symbol {
+        failed = failed
+    }
 
     expect "on: 10 µA drawn out of the base drives a milliampere" from "BF 100 at the defaults" {
         bench for 1 ms {

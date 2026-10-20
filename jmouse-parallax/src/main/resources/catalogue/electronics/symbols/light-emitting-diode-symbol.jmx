@@ -1,11 +1,35 @@
 symbol "Light-emitting diode" as light-emitting-diode-symbol {
     meta {
-        summary "Light-emitting diode, as drawn on a schematic"
+        summary "Light-emitting diode, as drawn on a schematic: its die lights in its own colour as current flows, and chars once it has burned out"
         category circuits
         tags electronics, schematic
     }
     size 80 x 40
-    path "M-40 0H-12V-10L10 0-12 10V0M10-10V10M10 0H40M0-13L8-21M4-21H8V-17M11-12L19-20M15-20H19V-16"
+    input light 0 .. 100
+    input wavelength 380 nm .. 950 nm
+    input failed
+
+    live path die "M-12-10L10 0-12 10Z" {
+        live fill = curve(wavelength, 380 nm -> violet, 450 nm -> blue, 495 nm -> green, 570 nm -> yellow, 590 nm -> orange, 620 nm -> red, 750 nm -> clear)
+        live opacity = curve(light, 0 -> 0, 2 -> 0.3, 100 -> 0.95)
+        live glow = 9 * share(light, 0, 100)
+    }
+
+    live group body {
+        path "M-40 0H-12V-10L10 0-12 10V0M10-10V10M10 0H40"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live path rays "M0-13L8-21M4-21H8V-17M11-12L19-20M15-20H19V-16" {
+        live stroke = if(light > 2, curve(wavelength, 380 nm -> violet, 450 nm -> blue, 495 nm -> green, 570 nm -> yellow, 590 nm -> orange, 620 nm -> red, 750 nm -> signal), signal)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin a at -40, 0
     pin b at 40, 0
     label name at 0, -26

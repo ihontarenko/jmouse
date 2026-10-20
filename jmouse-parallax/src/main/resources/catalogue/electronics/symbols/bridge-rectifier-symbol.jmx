@@ -1,11 +1,57 @@
 symbol "Bridge rectifier" as bridge-rectifier-symbol {
     meta {
-        summary "Four diodes in a diamond, every one pointing to the + corner: the alternating inputs at the sides"
+        summary "Bridge rectifier, as drawn on a schematic: the pair of diodes that carries the current lights — one diagonal on each half of the mains"
         category circuits
         tags electronics, schematic
     }
     size 120 x 120
-    path "M-60 0H-40M40 0H60M0-60V-40M0 40V60M-40 0L0-40L40 0L0 40ZM-20 -10.1L-15.05 -24.95L-29.9 -20ZM-10.1 -20L-20 -29.9M29.9 -20L15.05 -24.95L20 -10.1ZM20 -29.9L10.1 -20M-10.1 20L-24.95 15.05L-20 29.9ZM-20 10.1L-29.9 20M20 29.9L24.95 15.05L10.1 20ZM29.9 20L20 10.1M6-56H12M9-59V-53M6 56H12"
+    input pair_a 0 .. 1
+    input pair_b 0 .. 1
+    input failed
+
+    # Which pair carries the current: current into ac1 runs through the upper left diode to + and back from − through the
+    # lower right one to ac2 (pair a); current into ac2 takes the other diagonal (pair b). On an alternating input the two
+    # light in turn — what a bridge is. Each with its current against the rating, as an eye takes a light
+    # (`seen`). Drawn under the outlines.
+    live path pair_a_upper "M-20 -10.1L-15.05 -24.95L-29.9 -20Z" {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_a)
+        live glow = 9 * seen(pair_a)
+    }
+
+    live path pair_a_lower "M20 29.9L24.95 15.05L10.1 20Z" {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_a)
+        live glow = 9 * seen(pair_a)
+    }
+
+    live path pair_b_upper "M29.9 -20L15.05 -24.95L20 -10.1Z" {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_b)
+        live glow = 9 * seen(pair_b)
+    }
+
+    live path pair_b_lower "M-10.1 20L-24.95 15.05L-20 29.9Z" {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_b)
+        live glow = 9 * seen(pair_b)
+    }
+
+    live group body {
+        path "M-60 0H-40M40 0H60M0-60V-40M0 40V60M-40 0L0-40L40 0L0 40ZM-20 -10.1L-15.05 -24.95L-29.9 -20ZM-10.1 -20L-20 -29.9M29.9 -20L15.05 -24.95L20 -10.1ZM20 -29.9L10.1 -20M-10.1 20L-24.95 15.05L-20 29.9ZM-20 10.1L-29.9 20M20 29.9L24.95 15.05L10.1 20ZM29.9 20L20 10.1M6-56H12M9-59V-53M6 56H12"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
     pin a at -60, 0
     pin b at 60, 0
     pin p at 0, -60

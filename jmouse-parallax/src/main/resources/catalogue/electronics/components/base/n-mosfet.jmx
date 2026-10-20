@@ -16,7 +16,9 @@ component "N-channel MOSFET" as n-mosfet type mosfet {
         transconductance = 0.1 A/V^2          "KP: the whole channel"
     }
 
-    symbol uses n-channel-mosfet-symbol
+    symbol uses n-channel-mosfet-symbol {
+        failed = failed
+    }
 
     expect "on: 5 V of gate drive sinks the load's current" from "KP 0.1 A/V², VTO 1 V: deep in the linear region" {
         bench for 1 ms {

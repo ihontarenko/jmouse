@@ -249,7 +249,7 @@ final class TransientStepper {
                 carriesJump = true;
             }
             if (attempt <= 0) {
-                throw new IllegalArgumentException("The circuit cannot advance past t = " + time + " s.");
+                throw new IllegalArgumentException("The circuit cannot advance past t = " + Moments.written(time) + ".");
             }
 
             boolean fresh = restart || carriesJump;
@@ -282,7 +282,7 @@ final class TransientStepper {
                 step = crossingUnresolved ? Math.max(crossingResolution / 2, share * attempt + crossingResolution / 2)
                         : solution == null ? attempt / UNSETTLED_CUT : attempt * stepFactor(error, order);
                 if (step < minimumStep) {
-                    throw new IllegalArgumentException("The circuit does not settle at t = " + time + " s.");
+                    throw new IllegalArgumentException("The circuit does not settle at t = " + Moments.written(time) + ".");
                 }
                 continue;
             }

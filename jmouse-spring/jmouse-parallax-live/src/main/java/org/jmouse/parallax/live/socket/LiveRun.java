@@ -383,31 +383,44 @@ final class LiveRun {
     }
 
     /**
-     * The parts' loads over the whole frame: each piece's average power and temperature weighted by how many samples it
-     * covered; the terminal currents as the last piece left them.
+     * The parts' loads over the whole frame. Power and every display figure average over the pieces, each weighted by how
+     * many samples it covered — a frame's last piece may be a few hundred samples, a quarter of a 1 kHz period, and a
+     * figure read from it alone flickers between the extremes. A stress figure is the worst piece's, since a limit is
+     * broken at the moment it is passed. The terminal currents, how warm a part is, its limits and whether it failed are
+     * as the last piece left them.
      */
     private static Map<String, PartLoad> joinedLoads(List<LiveCircuitSession.Frame> pieces) {
-        Map<String, double[]> sums = new LinkedHashMap<>();
-        Map<String, Map<String, Double>> terminals = new LinkedHashMap<>();
+        Map<String, Double> powers = new LinkedHashMap<>();
+        Map<String, Map<String, Double>> figures = new LinkedHashMap<>();
+        Map<String, Map<String, Double>> figureWeights = new LinkedHashMap<>();
         Map<String, PartLoad> last = new LinkedHashMap<>();
         double samples = 0;
         for (LiveCircuitSession.Frame piece : pieces) {
             double weight = piece.covered();
             samples += weight;
             piece.parts().forEach((part, load) -> {
-                double[] sum = sums.computeIfAbsent(part, ignored -> new double[2]);
-                sum[0] += load.power() * weight;
-                terminals.put(part, load.terminals());
+                powers.merge(part, load.power() * weight, Double::sum);
+                Map<String, Double> partFigures = figures.computeIfAbsent(part, ignored -> new LinkedHashMap<>());
+                Map<String, Double> partWeights = figureWeights.computeIfAbsent(part, ignored -> new LinkedHashMap<>());
+                load.displays().forEach((name, value) -> {
+                    if (PartLoad.STRESSES.contains(name)) {
+                        partFigures.merge(name, value, Math::max);
+                    } else {
+                        partFigures.merge(name, value * weight, Double::sum);
+                        partWeights.merge(name, weight, Double::sum);
+                    }
+                });
                 last.put(part, load);
             });
         }
         Map<String, PartLoad> joined = new LinkedHashMap<>();
         double total = samples;
-        // Power averages over the pieces; how warm a part is, its limits and whether it failed are as the last piece left it.
-        sums.forEach((part, sum) -> {
+        powers.forEach((part, power) -> {
             PartLoad latest = last.get(part);
-            joined.put(part, new PartLoad(sum[0] / total, terminals.get(part), latest.temperature(), latest.maximum(),
-                    latest.rating(), latest.failure(), latest.displays(), latest.cause()));
+            Map<String, Double> displays = new LinkedHashMap<>(figures.get(part));
+            figureWeights.get(part).forEach((name, weight) -> displays.computeIfPresent(name, (ignored, sum) -> sum / weight));
+            joined.put(part, new PartLoad(power / total, latest.terminals(), latest.temperature(), latest.maximum(),
+                    latest.rating(), latest.failure(), displays, latest.cause()));
         });
         return joined;
     }

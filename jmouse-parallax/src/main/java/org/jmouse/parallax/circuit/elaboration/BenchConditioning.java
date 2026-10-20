@@ -1,7 +1,7 @@
 package org.jmouse.parallax.circuit.elaboration;
 
 import org.jmouse.parallax.component.ComponentVocabulary;
-import org.jmouse.parallax.component.PhysicalConstants;
+import org.jmouse.parallax.component.TemperatureScale;
 import org.jmouse.parallax.object.ObjectDefinition.BenchConditions;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
@@ -122,7 +122,7 @@ public final class BenchConditioning {
         }
         Map<String, String> overrides = new LinkedHashMap<>(element.overrides() == null ? Map.of() : element.overrides());
         if (conditions.temperature() != BenchConditions.NOMINAL_TEMPERATURE) {
-            overrides.put(ComponentVocabulary.TEMPERATURE, Double.toString(PhysicalConstants.kelvin(conditions.temperature())));
+            overrides.put(ComponentVocabulary.TEMPERATURE, Double.toString(TemperatureScale.kelvin(conditions.temperature())));
         }
         if (conditions.realistic()) {
             overrides.put(ComponentVocabulary.REALISTIC, "1");
