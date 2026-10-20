@@ -2,6 +2,7 @@ package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.WeightedMap;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -12,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Blocks only some kinds have: an iterated function system's maps, a Lindenmayer system's axiom, rules and turtle, a
@@ -21,96 +24,139 @@ import java.util.Optional;
 final class StructureReader {
 
     private final Reading reading;
+    private final JmxValues values;
+    private final PresentationReader presentation;
 
-    StructureReader(Reading reading) {
+    /**
+     * @param presentation reads the assignments and the camera a turtle or a lesson's step writes, as a preset does
+     */
+    StructureReader(Reading reading, PresentationReader presentation) {
         this.reading = reading;
+        this.values = new JmxValues(reading);
+        this.presentation = presentation;
+    }
+
+    /** Each line of a block of lines, read where it stands once the block's structure is known. */
+    private void eachLine(String block, Consumer<Token> line) {
+        List<TokenCursor.Savepoint> starts = reading.lineStarts(block);
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            line.accept(reading.cursor.current());
+        }
+        reading.cursor.restore(after);
     }
 
     /** {@code 0.85 : (0.85 x + 0.04 y, -0.04 x + 0.85 y + 1.6)}. */
     Block.Maps maps() {
-        return new Block.Maps(reading.blockLines("maps").stream().map(line -> {
-            int colon = line.indexOf(0, ":");
-            if (colon < 1) {
-                throw line.refusal("a map is 'weight : (x expression, y expression)'");
+        List<WeightedMap> maps = new ArrayList<>();
+        eachLine("maps", first -> {
+            if (reading.lineView().offsetOf(0, ":") < 1) {
+                throw reading.refusal(first, "a map is 'weight : (x expression, y expression)'");
             }
-            return new WeightedMap(line.text(0, colon), Values.tuple(line, colon + 1, line.size()));
-        }).toList());
+            SourceText weight = values.expression(Set.of(":"));
+            reading.cursor.next();
+            maps.add(new WeightedMap(weight, values.tuple(Set.of())));
+        });
+        return new Block.Maps(maps);
     }
 
     /** {@code axiom "F--F--F"}. */
     Block.Axiom axiom(Token keyword) {
-        Reading.Line line = reading.line();
-        if (line.size() != 1 || !line.isString(0)) {
+        TokenCursor line = reading.lineView();
+        if (line.remaining() != 1 || !reading.isString(line.lookAt(0))) {
             throw reading.refusal(keyword, "an axiom is 'axiom \"symbols\"'");
         }
-        return new Block.Axiom(reading.literal(line.get(0)));
+        return new Block.Axiom(reading.literal(reading.cursor.next()));
     }
 
     /** {@code F -> "F+F--F+F"}. */
     Block.Rules rules() {
         Map<String, String> rules = new LinkedHashMap<>();
-        for (Reading.Line line : reading.blockLines("rules")) {
-            int arrow = line.indexOf(0, "->");
-            if (arrow < 1 || arrow != line.size() - 2 || !line.isString(line.size() - 1)) {
-                throw line.refusal("a rule is 'symbol -> \"replacement\"'");
+        eachLine("rules", first -> {
+            TokenCursor line = reading.lineView();
+            int arrow = line.offsetOf(0, "->");
+            int length = line.remaining();
+            if (arrow < 1 || arrow != length - 2 || !reading.isString(line.lookAt(length - 1))) {
+                throw reading.refusal(first, "a rule is 'symbol -> \"replacement\"'");
             }
-            rules.put(String.join("", line.words(0, arrow)), reading.literal(line.get(line.size() - 1)));
-        }
+            StringBuilder symbol = new StringBuilder();
+            for (int offset = 0; offset < arrow; offset++) {
+                symbol.append(reading.isString(line.lookAt(offset)) ? reading.literal(line.lookAt(offset)) : line.valueAt(offset));
+            }
+            rules.put(symbol.toString(), reading.literal(line.lookAt(length - 1)));
+        });
         return new Block.Rules(rules);
     }
 
-    Block.Turtle turtle(PresentationReader presentation) {
+    Block.Turtle turtle() {
         return new Block.Turtle(presentation.assignments("turtle"));
     }
 
-    /** A construction's statements, each as written. */
+    /**
+     * A construction's statements, each its whole line as written — {@code A = point(ax, 0) "A"} is a statement of the
+     * construction's own language, labelled, not one expression of jMF's.
+     */
     Block.Steps steps() {
-        return new Block.Steps(reading.blockLines("steps").stream().map(line -> line.text(0)).toList());
+        List<SourceText> steps = new ArrayList<>();
+        eachLine("steps", first -> {
+            TokenCursor line = reading.lineView();
+            steps.add(reading.text(first.offset(), line.lookAt(line.remaining()).offset()));
+            reading.skipLine();
+        });
+        return new Block.Steps(steps);
     }
 
     /** {@code vertices = cartesian(-1, 1, dimension)}. */
     Block.Vertices vertices(Token keyword) {
-        Reading.Line line = reading.line();
-        if (line.size() < 2 || !line.value(0).equals("=")) {
+        if (reading.lineView().remaining() < 2 || !reading.cursor.checkValueAt(0, "=")) {
             throw reading.refusal(keyword, "vertices are 'vertices = expression'");
         }
-        return new Block.Vertices(line.text(1));
+        reading.cursor.next();
+        return new Block.Vertices(restOfLine());
     }
 
     /** {@code edges where hamming(first, second) = 1}, or written out: {@code edges = [[0, 1], [1, 2]]}. */
     Block.Edges edges(Token keyword) {
-        Reading.Line line = reading.line();
-        if (line.size() >= 2 && line.value(0).equals("where")) {
-            return new Block.Edges(Optional.of(line.text(1)), Optional.empty());
+        boolean twoTokensAtLeast = reading.lineView().remaining() >= 2;
+        if (twoTokensAtLeast && reading.cursor.checkValueAt(0, "where")) {
+            reading.cursor.next();
+            return new Block.Edges(Optional.of(restOfLine()), Optional.empty());
         }
-        if (line.size() >= 2 && line.value(0).equals("=")) {
-            return new Block.Edges(Optional.empty(), Optional.of(line.text(1)));
+        if (twoTokensAtLeast && reading.cursor.checkValueAt(0, "=")) {
+            reading.cursor.next();
+            return new Block.Edges(Optional.empty(), Optional.of(restOfLine()));
         }
         throw reading.refusal(keyword, "edges are 'edges where condition on first and second' or 'edges = [[0, 1], …]'");
     }
 
-    /** {@code points { (0, 0), (1, 2) }}: points separated by commas or lines. */
+    /** {@code points { (0, 0), (1, 2) }}: points separated by commas or lines, each its coordinates. */
     Block.PointList points() {
         List<List<SourceText>> points = new ArrayList<>();
-        for (Reading.Line line : reading.blockLines("points")) {
-            int start = 0;
-            List<Integer> commas = new ArrayList<>(line.commas(0, line.size()));
-            commas.add(line.size());
-            for (int comma : commas) {
-                if (comma > start) {
-                    points.add(Values.tuple(line, start, comma));
+        eachLine("points", first -> {
+            while (!reading.atLineEnd()) {
+                if (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
+                    reading.cursor.next();
+                    continue;
                 }
-                start = comma + 1;
+                points.add(values.tuple(Set.of(",")));
             }
-        }
+        });
         return new Block.PointList(points);
+    }
+
+    /** The rest of the line, read as one expression of jMF's: a construction's statement, a condition, a list. */
+    private SourceText restOfLine() {
+        SourceText expression = values.expression(JmxValues.LINE);
+        reading.requireLineEnd();
+        return expression;
     }
 
     // ─── catalogue ──────────────────────────────────────────────────────────────────────────────────
 
     /** {@code items lorenz, rossler, logistic-map}. */
     Block.Items items(Token keyword) {
-        List<String> references = reading.line().names(0);
+        List<String> references = names();
         if (references.isEmpty()) {
             throw reading.refusal(keyword, "items are 'items reference, reference, …'");
         }
@@ -124,12 +170,13 @@ final class StructureReader {
     Block.Section section(Token keyword) {
         Token title = reading.expect(BasicToken.T_STRING, "the section's title in quotes: 'section \"Ordinary\" { items … }'");
         List<String> references = new ArrayList<>();
-        for (Reading.Line line : reading.blockLines("section")) {
-            if (!line.value(0).equals("items") || line.isString(0)) {
-                throw line.refusal("a section holds 'items reference, reference, …'");
+        eachLine("section", first -> {
+            if (!reading.cursor.checkValueAt(0, "items")) {
+                throw reading.refusal(first, "a section holds 'items reference, reference, …'");
             }
-            references.addAll(line.names(1));
-        }
+            reading.cursor.next();
+            references.addAll(names());
+        });
         if (references.isEmpty()) {
             throw reading.refusal(keyword, "section \"" + reading.literal(title) + "\" holds no items");
         }
@@ -141,27 +188,34 @@ final class StructureReader {
      * step "Orbit" { … } }}.
      */
     Block.Lesson lesson(Token keyword) {
-        Reading.Line head = reading.line();
-        if (head.isEmpty() || !head.isString(0)) {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor head = reading.lineView();
+        if (head.remaining() == 0 || !reading.isString(head.lookAt(0))) {
             throw reading.refusal(keyword, "a lesson is 'lesson \"Title\" [as slug] { … }'");
         }
-        String title = reading.literal(head.get(0));
+        String title = reading.literal(cursor.next());
         String slug = ExperienceDocument.slugOf(title);
-        if (head.size() > 1) {
-            if (head.size() < 3 || !head.value(1).equals("as")) {
-                throw head.refusal(1, "after a lesson's title comes 'as slug', then '{'");
+        if (!reading.atLineEnd()) {
+            TokenCursor rest = reading.lineView();
+            if (rest.remaining() < 2 || !rest.checkValueAt(0, "as")) {
+                throw reading.refusal(cursor.current(), "after a lesson's title comes 'as slug', then '{'");
             }
-            slug = head.joinedWord(2);
+            cursor.next();
+            slug = reading.joinedWord();
+            reading.skipLine();
         }
         LessonFields fields = new LessonFields();
         List<Block.CourseStep> steps = new ArrayList<>();
         reading.body("'{' to open lesson \"" + title + "\"",
                 () -> reading.refusal(keyword, "lesson \"" + title + "\" is opened with '{' and never closed"),
                 () -> {
+                    if (reading.cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
+                        throw reading.refusal("'lesson' holds lines, not a nested '{ … }'");
+                    }
                     if (reading.atWord("step")) {
                         steps.add(courseStep(reading.cursor.next()));
                     } else {
-                        fields.read(reading.lineOf("lesson"));
+                        fields.read();
                     }
                 });
         return new Block.Lesson(title, slug, fields.summary, fields.minutes, fields.object, steps);
@@ -173,22 +227,29 @@ final class StructureReader {
         Optional<Integer> minutes = Optional.empty();
         Optional<String>  object  = Optional.empty();
 
-        void read(Reading.Line line) {
-            String key = line.value(0);
+        void read() {
+            Token first = reading.cursor.current();
+            String key = first.value();
             switch (key) {
                 case "summary" -> {
-                    requireUnwritten(line, key, summary);
-                    summary = Optional.of(text(line, 1));
+                    requireUnwritten(first, key, summary);
+                    reading.cursor.next();
+                    summary = Optional.of(text(first));
+                    reading.skipLine();
                 }
                 case "minutes" -> {
-                    requireUnwritten(line, key, minutes);
-                    minutes = Optional.of(wholeNumber(line, 1));
+                    requireUnwritten(first, key, minutes);
+                    reading.cursor.next();
+                    minutes = Optional.of(wholeNumber(first));
                 }
                 case "object" -> {
-                    requireUnwritten(line, key, object);
-                    object = Optional.of(word(line, 1));
+                    requireUnwritten(first, key, object);
+                    reading.cursor.next();
+                    object = Optional.of(word(first));
+                    reading.skipLine();
                 }
-                default -> throw line.refusal("a lesson holds summary, minutes, object and its steps, not '" + key + "'");
+                default -> throw reading.refusal(first, "a lesson holds summary, minutes, object and its steps, not '"
+                        + key + "'");
             }
         }
     }
@@ -201,12 +262,11 @@ final class StructureReader {
     Block.CourseStep courseStep(Token keyword) {
         Token title = reading.expect(BasicToken.T_STRING, "the step's title in quotes");
         StepFields fields = new StepFields();
-        for (Reading.Line line : reading.blockLines("step")) {
-            int index = 0;
-            while (index < line.size()) {
-                index = fields.read(line, index);
+        eachLine("step", first -> {
+            while (!reading.atLineEnd()) {
+                fields.read(first);
             }
-        }
+        });
         return new Block.CourseStep(reading.literal(title), fields.object, fields.view, fields.values, fields.camera,
                 fields.narration, fields.task);
     }
@@ -220,51 +280,53 @@ final class StructureReader {
         Optional<String>               narration = Optional.empty();
         Optional<Block.Task>           task      = Optional.empty();
 
-        /** Reads the field that starts at {@code index}; returns where the next one starts. */
-        int read(Reading.Line line, int index) {
-            String key = line.value(index);
+        /** Reads the field the cursor stands on; the line's first token is where a field written twice is refused. */
+        void read(Token first) {
+            TokenCursor cursor = reading.cursor;
+            Token keyword = cursor.next();
+            String key = keyword.value();
             switch (key) {
                 case "object" -> {
-                    requireUnwritten(line, key, object);
-                    object = Optional.of(word(line, index + 1));
-                    return line.joinedEnd(index + 1);
+                    requireUnwritten(first, key, object);
+                    object = Optional.of(word(keyword));
                 }
                 case "view" -> {
-                    requireUnwritten(line, key, view);
-                    if (index + 1 >= line.size()) {
-                        throw line.refusal(index, "'view' names a representation: 'view contours'");
+                    requireUnwritten(first, key, view);
+                    if (reading.atLineEnd()) {
+                        throw reading.refusal(keyword, "'view' names a representation: 'view contours'");
                     }
-                    view = Optional.of(new Block.Representation(line.value(index + 1), false, line.text(index + 2)));
-                    return line.size();
+                    String name = cursor.next().value();
+                    int start = reading.cursor.endOfRead();
+                    TokenCursor rest = reading.lineView();
+                    SourceText settings = reading.text(start, rest.lookAt(rest.remaining()).offset());
+                    reading.skipLine();
+                    view = Optional.of(new Block.Representation(name, false, settings));
                 }
                 case "values" -> {
                     if (!values.isEmpty()) {
-                        throw line.refusal(index, "'values' is written twice in this step");
+                        throw reading.refusal(keyword, "'values' is written twice in this step");
                     }
-                    values.putAll(PresentationReader.assignments(line, index + 1, "values"));
-                    return line.size();
+                    values.putAll(presentation.assignmentsOnLine("values"));
                 }
                 case "camera" -> {
-                    requireUnwritten(line, key, camera);
-                    camera = Optional.of(PresentationReader.camera(line, index + 1));
-                    return line.size();
+                    requireUnwritten(first, key, camera);
+                    camera = Optional.of(presentation.camera());
                 }
                 case "narration" -> {
-                    requireUnwritten(line, key, narration);
-                    narration = Optional.of(text(line, index + 1));
-                    return index + 2;
+                    requireUnwritten(first, key, narration);
+                    narration = Optional.of(text(keyword));
                 }
                 case "task" -> {
-                    requireUnwritten(line, key, task);
-                    String question = text(line, index + 1);
-                    if (line.value(index + 2).equals("answer") && !line.isString(index + 2)) {
-                        task = Optional.of(new Block.Task(question, Optional.of(text(line, index + 3))));
-                        return index + 4;
+                    requireUnwritten(first, key, task);
+                    String question = text(keyword);
+                    if (!reading.atLineEnd() && cursor.checkValueAt(0, "answer")) {
+                        Token answer = cursor.next();
+                        task = Optional.of(new Block.Task(question, Optional.of(text(answer))));
+                    } else {
+                        task = Optional.of(new Block.Task(question, Optional.empty()));
                     }
-                    task = Optional.of(new Block.Task(question, Optional.empty()));
-                    return index + 2;
                 }
-                default -> throw line.refusal(index, "a step holds object, view, values, camera, narration and task, "
+                default -> throw reading.refusal(keyword, "a step holds object, view, values, camera, narration and task, "
                         + "not '" + key + "'");
             }
         }
@@ -272,7 +334,7 @@ final class StructureReader {
 
     /** {@code objects explicit_surface, parametric_surface}. */
     Block.ObjectKinds objectKinds(Token keyword) {
-        List<String> kinds = reading.line().names(0);
+        List<String> kinds = names();
         if (kinds.isEmpty()) {
             throw reading.refusal(keyword, "objects are 'objects kind, kind, …'");
         }
@@ -281,7 +343,7 @@ final class StructureReader {
 
     /** {@code representations surface, normals, curvature}. */
     Block.Representations representations(Token keyword) {
-        List<String> representations = reading.line().names(0);
+        List<String> representations = names();
         if (representations.isEmpty()) {
             throw reading.refusal(keyword, "representations are 'representations name, name, …'");
         }
@@ -290,39 +352,59 @@ final class StructureReader {
 
     /** {@code opens wave}. */
     Block.Opens opens(Token keyword) {
-        Reading.Line line = reading.line();
-        if (line.size() < 1 || line.joinedEnd(0) != line.size()) {
+        if (reading.atLineEnd()) {
             throw reading.refusal(keyword, "'opens' names one object: 'opens wave'");
         }
-        return new Block.Opens(line.joinedWord(0));
+        String object = reading.joinedWord();
+        if (!reading.atLineEnd()) {
+            throw reading.refusal(keyword, "'opens' names one object: 'opens wave'");
+        }
+        return new Block.Opens(object);
     }
 
     // ─── values inside a catalogue line ─────────────────────────────────────────────────────────────
 
-    private String text(Reading.Line line, int index) {
-        if (!line.isString(index)) {
-            throw line.refusal(Math.max(0, index - 1), "'" + line.value(index - 1) + "' takes a text in quotes");
+    /** Names separated by commas, each one word, to the end of the line. */
+    private List<String> names() {
+        List<String> names = new ArrayList<>();
+        while (!reading.atLineEnd()) {
+            if (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
+                reading.cursor.next();
+                continue;
+            }
+            names.add(reading.joinedWord());
         }
-        return reading.literal(line.get(index));
+        return names;
     }
 
-    private static String word(Reading.Line line, int index) {
-        if (index >= line.size() || line.isString(index)) {
-            throw line.refusal(Math.max(0, index - 1), "'" + line.value(index - 1) + "' names an object: 'object wave'");
+    /** The text in quotes after a key. */
+    private String text(Token key) {
+        if (reading.atLineEnd() || !reading.cursor.isCurrent(BasicToken.T_STRING)) {
+            throw reading.refusal(key, "'" + key.value() + "' takes a text in quotes");
         }
-        return line.joinedWord(index);
+        return reading.literal(reading.cursor.next());
     }
 
-    private static int wholeNumber(Reading.Line line, int index) {
-        if (index + 1 != line.size() || !line.value(index).matches("\\d+")) {
-            throw line.refusal(Math.max(0, index - 1), "'" + line.value(index - 1) + "' takes a whole number");
+    /** The object a key names: one word. */
+    private String word(Token key) {
+        if (reading.atLineEnd() || reading.cursor.isCurrent(BasicToken.T_STRING)) {
+            throw reading.refusal(key, "'" + key.value() + "' names an object: 'object wave'");
         }
-        return Integer.parseInt(line.value(index));
+        return reading.joinedWord();
     }
 
-    private static void requireUnwritten(Reading.Line line, String key, Optional<?> field) {
+    /** The whole number after a key, alone on the rest of its line. */
+    private int wholeNumber(Token key) {
+        TokenCursor rest = reading.lineView();
+        if (rest.remaining() != 1 || !rest.valueAt(0).matches("\\d+")) {
+            throw reading.refusal(key, "'" + key.value() + "' takes a whole number");
+        }
+        return Integer.parseInt(reading.cursor.next().value());
+    }
+
+    private void requireUnwritten(Token first, String key, Optional<?> field) {
         if (field.isPresent()) {
-            throw line.refusal("'" + key + "' is written twice here");
+            throw reading.refusal(first, "'" + key + "' is written twice here");
         }
     }
 }

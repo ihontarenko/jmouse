@@ -95,6 +95,30 @@ final class JmxValues {
     }
 
     /**
+     * A number with at most its unit that fills everything up to where the grammar takes over — {@code 4.5 V},
+     * {@code 25} —, read by the engine's {@link QuantityParser} alone: a value that is data, not a formula, such as a
+     * meta field's. Empty, the cursor where it was, when what stands there is anything else.
+     *
+     * @param until where the line's grammar takes over after the value
+     */
+    Optional<Quantity> literal(Boundary until) {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor.Savepoint start = cursor.savepoint();
+        TokenCursor view = bounded(until);
+        Optional<Quantity> read = quantities.read(view, context).map(QuantityLiteralNode::getQuantity);
+        if (read.isEmpty() || view.hasNext()) {
+            cursor.restore(start);
+            return Optional.empty();
+        }
+        return read;
+    }
+
+    /** A boundary at a place in the source: the value ends where the token starting there, or after it, stands. */
+    static Boundary at(int offset) {
+        return (token, after, depth) -> token.offset() >= offset;
+    }
+
+    /**
      * A plain number where the cursor stands — {@code 240}, {@code -0.5}, {@code - 5} —, read by the engine's
      * {@link QuantityParser}; empty, the cursor where it was, when no number without a unit stands there.
      */

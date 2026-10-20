@@ -27,7 +27,7 @@ public final class JmxExtension implements Extension {
         CircuitReader circuits = new CircuitReader(reading);
         SymbolReader symbols = new SymbolReader(reading);
         PresentationReader presentation = new PresentationReader(reading);
-        StructureReader structures = new StructureReader(reading);
+        StructureReader structures = new StructureReader(reading, presentation);
         GraphReader graphs = new GraphReader(reading, circuits);
         ScriptBlocks scripts = new ScriptBlocks(reading);
         List<JmxStatementParser> statements = List.of(
@@ -74,7 +74,7 @@ public final class JmxExtension implements Extension {
                 block("maps", keyword -> structures.maps()),
                 block("axiom", structures::axiom),
                 block("rules", keyword -> structures.rules()),
-                block("turtle", keyword -> structures.turtle(presentation)),
+                block("turtle", keyword -> structures.turtle()),
                 block("steps", keyword -> structures.steps()),
                 block("vertices", structures::vertices),
                 block("edges", structures::edges),
