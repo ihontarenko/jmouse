@@ -254,6 +254,32 @@ public interface TokenCursor extends Streamable<Token> {
     }
 
     /**
+     * Returns the offset of the first token, at or after {@code from}, written as one of these texts outside parentheses
+     * and brackets opened from {@code from} on, before the cursor's end; {@code -1} when there is none. On a view that
+     * ends with a line, that is a search of the line: where {@code crosses} stands in
+     * {@code hit when f(x, y) crosses 0}, where {@code ..} stands inside {@code q[0..7]} searched from its first bit.
+     *
+     * @param from   the offset to start at
+     * @param values the texts looked for
+     * @return the offset, or {@code -1}
+     */
+    default int offsetOf(int from, String... values) {
+        int depth = 0;
+        for (int offset = from; offset < remaining(); offset++) {
+            Token.Type type = lookAt(offset).type();
+            if (depth == 0 && checkValueAt(offset, values)) {
+                return offset;
+            }
+            if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
+                depth++;
+            } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
+                depth--;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Returns the current token without consuming it.
      * Alias for peek().
      *

@@ -200,11 +200,21 @@ public final class SourceReading {
      * @return {@code true} when {@code after} begins where {@code before} ends
      */
     public static boolean touches(TokenCursor cursor, Token before, Token after) {
-        if (before == null || after == null || cursor.source() == null) {
+        TokenizableSource source = cursor.source();
+        if (before == null || after == null || source == null || after.offset() <= before.offset()) {
             return false;
         }
 
-        return before.offset() + before.value().length() == after.offset();
+        // ⚠️ Measured on the source between the two starts, not from the first token's length: a token can be shorter
+        // than what it was read from — the lexer takes the 'c' of 24c02 for a Java type suffix and hands back 24 —, and
+        // its length would put a gap where the author wrote none.
+        int end = Math.min(after.offset(), source.length());
+        for (int position = before.offset(); position < end; position++) {
+            if (Character.isWhitespace(source.charAt(position))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean endsWord(Token token, Set<String> separators) {
