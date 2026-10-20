@@ -84,8 +84,10 @@ public final class ComponentHierarchy {
         writtenCircuit.requireSolvable();
         CompiledObject object = conditioned(written, writtenCircuit);
         Circuit circuit = (Circuit) object.definition();
+        // A project's blocks report as subcircuits do — after them, so a subcircuit inside a block adds up first.
+        List<Assembly> blocks = blockAssemblies(written.unfoldedBlocks(), circuit);
         if (!hasSubcircuitPart(object)) {
-            return new Expansion(object, circuit, List.of());
+            return new Expansion(object, circuit, blocks);
         }
         Builder builder = built(object);
         Circuit flattened = new Circuit(builder.elements, circuit.time());
@@ -95,8 +97,31 @@ public final class ComponentHierarchy {
                 assemblies.add(new Assembly(top.id(), top.pins(), members));
             }
         });
+        assemblies.addAll(blocks);
         return new Expansion(DefinitionCompiler.compile(flattened, object.parameters(), object.parameterValues(), object.library()),
                 circuit, assemblies);
+    }
+
+    /**
+     * Each block a project's sheet was placed with, as a part made of the parts it became: its power is theirs, and its
+     * pins carry what crosses its edge. A member that is itself a subcircuit reports through its own pins.
+     */
+    private static List<Assembly> blockAssemblies(List<SheetHierarchy.UnfoldedBlock> blocks, Circuit circuit) {
+        if (blocks.isEmpty()) {
+            return List.of();
+        }
+        Map<String, CircuitElement> byId = new LinkedHashMap<>();
+        circuit.elements().forEach(element -> byId.put(element.id(), element));
+        return blocks.stream().map(block -> {
+            Map<String, Map<String, String>> members = new LinkedHashMap<>();
+            block.members().forEach(member -> {
+                CircuitElement element = byId.get(member);
+                if (element != null) {
+                    members.put(member, terminalNets(element));
+                }
+            });
+            return new Assembly(block.block(), block.pins(), members);
+        }).toList();
     }
 
     /** The circuit with its bench conditions applied, each part's tolerance as its component writes it. */

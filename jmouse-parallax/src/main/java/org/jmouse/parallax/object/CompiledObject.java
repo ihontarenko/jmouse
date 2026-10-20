@@ -10,6 +10,8 @@ import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Symbols;
 
+import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,6 +32,10 @@ public final class CompiledObject {
     private final double[] parameterValues;
     private final ComponentLibrary library;
     private final Map<String, BigInteger> exactIntegerValues;
+    /** The definition as it was written, before its sheets were unfolded — what other values are unfolded from again. */
+    private final ObjectDefinition written;
+    /** The blocks the written circuit unfolded; empty for anything that places no sheet. */
+    private final List<SheetHierarchy.UnfoldedBlock> unfoldedBlocks;
     /** The heaviest expression bound so far, in elementary evaluations per evaluation ({@link Formula#evaluationWeight()}). */
     private final AtomicLong evaluationWeight = new AtomicLong(1);
 
@@ -39,11 +45,20 @@ public final class CompiledObject {
 
     CompiledObject(ObjectDefinition definition, List<ParameterDefinition> parameters, double[] parameterValues,
                    ComponentLibrary library) {
-        this(definition, parameters, parameterValues, library, Map.of());
+        this(definition, parameters, parameterValues, library, Map.of(), definition, List.of());
+    }
+
+    /** A circuit whose sheets were unfolded: what it runs as, and what it was written as. */
+    CompiledObject(ObjectDefinition definition, List<ParameterDefinition> parameters, double[] parameterValues,
+                   ComponentLibrary library, ObjectDefinition written, List<SheetHierarchy.UnfoldedBlock> unfoldedBlocks) {
+        this(definition, parameters, parameterValues, library, Map.of(), written, unfoldedBlocks);
     }
 
     private CompiledObject(ObjectDefinition definition, List<ParameterDefinition> parameters, double[] parameterValues,
-                           ComponentLibrary library, Map<String, BigInteger> exactIntegerValues) {
+                           ComponentLibrary library, Map<String, BigInteger> exactIntegerValues, ObjectDefinition written,
+                           List<SheetHierarchy.UnfoldedBlock> unfoldedBlocks) {
+        this.written = written;
+        this.unfoldedBlocks = List.copyOf(unfoldedBlocks);
         this.library = library;
         this.definition = definition;
         this.parameters = List.copyOf(parameters);
@@ -109,7 +124,7 @@ public final class CompiledObject {
             }
             parsed.put(name, new BigInteger(value));
         });
-        return new CompiledObject(definition, parameters, parameterValues, library, parsed);
+        return new CompiledObject(definition, parameters, parameterValues, library, parsed, written, unfoldedBlocks);
     }
 
     /** The same object with some parameters set differently — a sweep point, a timeline frame. */
@@ -122,12 +137,28 @@ public final class CompiledObject {
             }
             values[index] = parameters.get(index).clamp(value);
         });
-        return new CompiledObject(definition, parameters, values, library, exactIntegerValues);
+        if (!unfoldedBlocks.isEmpty()) {
+            // A placed sheet's numbers are worked out over these values: it is unfolded again from what was written.
+            Map<String, Double> named = new LinkedHashMap<>();
+            for (int index = 0; index < parameterNames.size(); index++) {
+                named.put(parameterNames.get(index), values[index]);
+            }
+            return DefinitionCompiler.compile(written, parameters, named, library);
+        }
+        return new CompiledObject(definition, parameters, values, library, exactIntegerValues, written, unfoldedBlocks);
     }
 
     /** The same parameters, values and library over another definition — a part of a circuit split for solving. */
     public CompiledObject withDefinition(ObjectDefinition replacement) {
-        return new CompiledObject(replacement, parameters, parameterValues, library, exactIntegerValues);
+        return new CompiledObject(replacement, parameters, parameterValues, library, exactIntegerValues, written, unfoldedBlocks);
+    }
+
+    /**
+     * The blocks this circuit's sheets were unfolded from — an inner block before the block that places it —, each
+     * with the parts it became; empty when it places no sheet.
+     */
+    public List<SheetHierarchy.UnfoldedBlock> unfoldedBlocks() {
+        return unfoldedBlocks;
     }
 
     /** The models this object's circuit may reference. */

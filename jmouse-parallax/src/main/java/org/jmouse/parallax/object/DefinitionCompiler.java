@@ -68,9 +68,13 @@ public final class DefinitionCompiler {
         ParameterDefinition.requireKnown(parameters, values);
         double[] resolved = ParameterDefinition.resolve(parameters, values);
         // A project's sheets placed as blocks are unfolded first: whatever reads the circuit after this reads one sheet.
-        ObjectDefinition unfolded = definition instanceof Circuit circuit
-                ? SheetHierarchy.flatten(circuit, valuesByName(parameters, resolved), library) : definition;
-        CompiledObject compiled = new CompiledObject(unfolded, parameters, resolved, library);
+        CompiledObject compiled;
+        if (definition instanceof Circuit circuit) {
+            SheetHierarchy.Unfolded unfolded = SheetHierarchy.unfold(circuit, valuesByName(parameters, resolved), library);
+            compiled = new CompiledObject(unfolded.circuit(), parameters, resolved, library, definition, unfolded.blocks());
+        } else {
+            compiled = new CompiledObject(definition, parameters, resolved, library);
+        }
         checkExpressions(compiled);
         return compiled;
     }

@@ -10,6 +10,7 @@ import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectKind;
+import org.jmouse.parallax.object.ParameterDefinition;
 import org.jmouse.parallax.jpa.catalogue.MathematicalObject;
 import org.jmouse.parallax.jpa.catalogue.ObjectStore;
 import org.jmouse.parallax.problem.ParallaxProblem;
@@ -80,13 +81,15 @@ public class ComponentModels {
      * @param displayUnits    the unit of each display figure written beside the part, by figure
      * @param displayCaptions what such a figure is of, written after it ("of the rated voltage"), by figure
      * @param designator      what a part of it is called on a sheet before its number ({@code meta designator R}), or null
+     * @param sheetParameters a sheet's sliders as the sheet declares them — range, step, unit —, which each of its blocks
+     *                        sets on its own; empty for a component
      */
     public record ModelView(String name, String kind, List<String> units, List<PinView> pins,
                             List<ParameterView> parameters, List<String> symbol, String symbolReference,
                             List<String> symbolVariants, String symbolDrawing, Map<String, String> symbolPorts,
                             List<MeasureView> measures, Map<String, LeadView> leads, Map<String, String> displayUnits,
                             Map<String, String> displayCaptions,
-                            String designator) { }
+                            String designator, List<ParameterDefinition> sheetParameters) { }
     /** A lead's look: one of the lead colours, and the colour of its stripes or null. */
     public record LeadView(String colour, String stripes) { }
     /** One figure an instrument reads ({@code reading = plus - minus unit V signal}): its name, its unit, whether it is a signal. */
@@ -170,7 +173,7 @@ public class ComponentModels {
                 model.measures().entrySet().stream().map(measure -> new MeasureView(measure.getKey(), measure.getValue().unit(), measure.getValue().signal())).toList(),
                 model.leads().entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,
                         lead -> new LeadView(lead.getValue().colour(), lead.getValue().stripes()), (one, other) -> one, java.util.LinkedHashMap::new)),
-                model.displayUnits(), model.displayCaptions(), model.headerValue("designator").orElse(null));
+                model.displayUnits(), model.displayCaptions(), model.headerValue("designator").orElse(null), List.of());
     }
 
     /**
@@ -207,7 +210,7 @@ public class ComponentModels {
         List<ParameterView> parameters = sheet.parameters().stream()
                 .map(parameter -> new ParameterView(parameter.name(), parameter.defaultValue(), false, parameter.label())).toList();
         return new ModelView(sheet.title(), SHEET_KIND, List.of(), pins, parameters, symbol, null, List.of(), null, Map.of(),
-                List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR);
+                List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR, sheet.parameters());
     }
 
     /**

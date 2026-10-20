@@ -65,19 +65,42 @@ public final class SheetHierarchy {
     }
 
     /**
-     * The circuit with every placed sheet unfolded into its parts, however deep; the circuit itself when it places none.
+     * A block of the circuit as it was unfolded: the parts it became, so what it carries can be read off them — its
+     * pins carry what crosses its edge, as a part made of a subcircuit does ({@link ComponentHierarchy.Assembly}).
+     *
+     * @param block   the block as the unfolded circuit names it ({@code S1}, one deeper {@code S1_S2})
+     * @param pins    each of its pins — a port of its sheet — → the net it is wired to
+     * @param members every part it became, however deep, by the unfolded circuit's names
+     */
+    public record UnfoldedBlock(String block, Map<String, String> pins, List<String> members) {
+        public UnfoldedBlock {
+            pins = Map.copyOf(pins);
+            members = List.copyOf(members);
+        }
+    }
+
+    /** The circuit with its sheets unfolded, and the blocks it unfolded — an inner block before the block that places it. */
+    public record Unfolded(Circuit circuit, List<UnfoldedBlock> blocks) {
+        public Unfolded {
+            blocks = List.copyOf(blocks);
+        }
+    }
+
+    /**
+     * The circuit with every placed sheet unfolded into its parts, however deep; the circuit itself, and no blocks, when
+     * it places none.
      *
      * @param values the circuit's parameter values, which a block's settings are written over
      */
-    public static Circuit flatten(Circuit circuit, Map<String, Double> values, ComponentLibrary library) {
+    public static Unfolded unfold(Circuit circuit, Map<String, Double> values, ComponentLibrary library) {
         if (circuit.elements().stream().noneMatch(element -> sheetSource(element, library).isPresent())) {
-            return circuit;
+            return new Unfolded(circuit, List.of());
         }
         Unfolding unfolding = new Unfolding(library, circuit.elements());
         for (CircuitElement element : circuit.elements()) {
             unfolding.add(element, values, new LinkedHashSet<>());
         }
-        return circuit.withElements(unfolding.elements);
+        return new Unfolded(circuit.withElements(unfolding.elements), unfolding.blocks);
     }
 
     /**
@@ -133,6 +156,7 @@ public final class SheetHierarchy {
 
         private final ComponentLibrary library;
         private final List<CircuitElement> elements = new ArrayList<>();
+        private final List<UnfoldedBlock> blocks = new ArrayList<>();
         private final Set<String> ids = new HashSet<>();
 
         Unfolding(ComponentLibrary library, List<CircuitElement> top) {
@@ -163,9 +187,13 @@ public final class SheetHierarchy {
                 }
             });
             Map<String, Double> sheetValues = sheetValues(element, sheet.parameters(), values, reference);
+            int first = elements.size();
             for (CircuitElement part : placed.elements()) {
                 add(placedPart(element, boundary, part, sheetValues), sheetValues, path);
             }
+            // Its pins are the nets its ports are wired to; what it became is everything added since, however deep.
+            blocks.add(new UnfoldedBlock(element.id(), element.pins(),
+                    elements.subList(first, elements.size()).stream().map(CircuitElement::id).toList()));
             path.remove(reference);
         }
 
