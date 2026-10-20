@@ -13,6 +13,7 @@ import org.jmouse.el.type.ValueType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -79,7 +80,8 @@ public class StandardExtensionContainer implements ExtensionContainer {
      * 🔍 Retrieves a registered parser by its class type.
      *
      * @param type the class type of the parser
-     * @return the {@link Parser} instance, or {@code null} if not found
+     * @return the {@link Parser} instance
+     * @throws ExtensionException when no parser of that type is registered
      */
     @Override
     public Parser getParser(Class<? extends Parser> type) {
@@ -90,6 +92,11 @@ public class StandardExtensionContainer implements ExtensionContainer {
         }
 
         return parser;
+    }
+
+    @Override
+    public <P extends Parser> Optional<P> findParser(Class<P> type) {
+        return Optional.ofNullable(parsers.get(type)).map(type::cast);
     }
 
     @Override

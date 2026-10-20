@@ -8,6 +8,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.type.ValueType;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DefaultParserContext implements ParserContext {
 
@@ -52,6 +53,11 @@ public class DefaultParserContext implements ParserContext {
     @Override
     public Parser getParser(Class<? extends Parser> type) {
         return extensions.getParser(type);
+    }
+
+    @Override
+    public <P extends Parser> Optional<P> findParser(Class<P> type) {
+        return extensions.findParser(type);
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.jmouse.el.type.ValueType;
 import org.jmouse.core.Sorter;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 🛠️ Manages various extensions used in the view engine, including functions, tests, filters, operators, and parsers.
@@ -43,9 +44,19 @@ public interface ExtensionContainer {
      * 🔍 Retrieves a registered expression parser by its class type.
      *
      * @param type the class type of the parser
-     * @return the {@link Parser} instance, or {@code null} if not found
+     * @return the {@link Parser} instance
+     * @throws ExtensionException when no parser of that type is registered
      */
     Parser getParser(Class<? extends Parser> type);
+
+    /**
+     * 🔍 A registered parser by its class type, when the language registers one: a parser may read a construct only
+     * some of the languages built on it have, such as a number with its unit.
+     *
+     * @param type the class type of the parser
+     * @return the parser, or empty when none of that type is registered
+     */
+    <P extends Parser> Optional<P> findParser(Class<P> type);
 
     default Parser getParser(TokenCursor cursor) {
         return null;

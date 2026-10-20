@@ -51,18 +51,18 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
         }
     }
 
-    /** Whether the cursor is on a keyword spelled as a name, alone between a call's parentheses or commas. */
     /**
      * A number with its unit — {@code 10 kOhm}, {@code 2.2µs} — when the context has a {@link QuantityParser}: a
      * language with units registers one, a formula does not, so {@code 2 m} stays twice {@code m} there. Empty, the
      * cursor where it was, for a number written without a unit.
      */
     private static Optional<Node> quantity(TokenCursor cursor, ParserContext context) {
-        if (!(context.getParser(QuantityParser.class) instanceof QuantityParser quantities)) {
+        Optional<QuantityParser> quantities = context.findParser(QuantityParser.class);
+        if (quantities.isEmpty()) {
             return Optional.empty();
         }
         TokenCursor.Savepoint start = cursor.savepoint();
-        Optional<QuantityLiteralNode> read = quantities.read(cursor, context)
+        Optional<QuantityLiteralNode> read = quantities.get().read(cursor, context)
                 .filter(node -> !node.getQuantity().unit().isEmpty());
         if (read.isEmpty()) {
             cursor.restore(start);
@@ -75,6 +75,7 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
                 && cursor.isNext(T_OPEN_PAREN);
     }
 
+    /** Whether the cursor is on a keyword spelled as a name, alone between a call's parentheses or commas. */
     private static boolean isWordArgument(TokenCursor cursor) {
         return WORD.matcher(cursor.current().value()).matches()
                 && cursor.isPrevious(T_OPEN_PAREN, T_COMMA) && cursor.isNext(T_CLOSE_PAREN, T_COMMA);
