@@ -8,9 +8,12 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * What each part shows on its symbol while it runs, as its component writes it ({@code display { level = … }}): every
@@ -18,6 +21,10 @@ import java.util.Map;
  * can never disagree about what a component may say —, read at a moment from the circuit's node voltages and the
  * part's load. Nothing here knows any component: a capacitor's charge, a lamp's glow and anything a new component
  * writes are all one expression each.
+ *
+ * <p>A figure written as the bare name of a row state — {@code screen = framebuffer} — is a picture: the row's bytes,
+ * handed on whole as hexadecimal, for a symbol's {@code bitmap} to draw. A figure that reads only discrete states and
+ * parameters is a moment ({@link PartExpression#moment}), never to be averaged with another frame's.</p>
  */
 public final class PartDisplays {
 
@@ -32,23 +39,30 @@ public final class PartDisplays {
                           List<String> terminals) {
     }
 
-    private final List<Figure> figures;
+    /** A picture of one part: the row state it shows, and how many bytes that row holds. */
+    private record Picture(String part, String name, String row, int length) {
+    }
 
-    private PartDisplays(List<Figure> figures) {
+    private final List<Figure> figures;
+    private final List<Picture> pictures;
+
+    private PartDisplays(List<Figure> figures, List<Picture> pictures) {
         this.figures = List.copyOf(figures);
+        this.pictures = List.copyOf(pictures);
     }
 
     /** What every part of a circuit shows, each figure compiled over the part as it stands on the bench. */
     static PartDisplays of(ElaboratedCircuit circuit) {
         List<Figure> figures = new ArrayList<>();
+        List<Picture> pictures = new ArrayList<>();
         for (CircuitElement element : circuit.writtenParts()) {
-            figuresOf(circuit, element, figures);
+            figuresOf(circuit, element, figures, pictures);
         }
-        return new PartDisplays(figures);
+        return new PartDisplays(figures, pictures);
     }
 
     public boolean isEmpty() {
-        return figures.isEmpty();
+        return figures.isEmpty() && pictures.isEmpty();
     }
 
     /** Whether a part shows a figure of that name. */
@@ -56,7 +70,34 @@ public final class PartDisplays {
         return figures.stream().anyMatch(figure -> figure.part().equals(part) && figure.name().equals(name));
     }
 
-    private static void figuresOf(ElaboratedCircuit circuit, CircuitElement element, List<Figure> into) {
+    /** The figures of a part that are values at a moment, by name. */
+    public Set<String> momentsOf(String part) {
+        Set<String> moments = new LinkedHashSet<>();
+        figures.stream().filter(figure -> figure.part().equals(part) && figure.expression().moment())
+                .forEach(figure -> moments.add(figure.name()));
+        return moments;
+    }
+
+    /**
+     * Every picture as it stands: each part's rows read slot by slot from its states, two hexadecimal digits a byte; a
+     * slot not known — X, Z, a value outside a byte — is 00, an unlit stretch rather than a hole.
+     */
+    public Map<String, Map<String, String>> pictures(Map<String, Map<String, Double>> states) {
+        Map<String, Map<String, String>> shown = new LinkedHashMap<>();
+        HexFormat hexadecimal = HexFormat.of();
+        for (Picture picture : pictures) {
+            Map<String, Double> partStates = states.getOrDefault(picture.part(), Map.of());
+            byte[] bytes = new byte[picture.length()];
+            for (int index = 0; index < bytes.length; index++) {
+                Double value = partStates.get(PartExpression.slotName(picture.row(), index));
+                bytes[index] = value == null || !(value >= 0 && value <= 255) ? 0 : (byte) value.intValue();
+            }
+            shown.computeIfAbsent(picture.part(), ignored -> new LinkedHashMap<>()).put(picture.name(), hexadecimal.formatHex(bytes));
+        }
+        return shown;
+    }
+
+    private static void figuresOf(ElaboratedCircuit circuit, CircuitElement element, List<Figure> into, List<Picture> pictures) {
         boolean primitive = element.type() != CircuitElementType.MODEL;
         ComponentModel model = circuit.componentOf(element).orElse(null);
         if (model == null || model.displays().isEmpty()) {
@@ -78,6 +119,11 @@ public final class PartDisplays {
             terminals.add(key == null ? pins.get(index) : key);
         }
         model.displays().forEach((name, expression) -> {
+            ComponentModel.State row = rowNamed(model, expression.strip());
+            if (row != null) {
+                pictures.add(new Picture(element.id(), name, row.name(), ((Object[]) row.initial()).length));
+                return;
+            }
             try {
                 into.add(new Figure(element.id(), name, PartExpression.of(circuit, element, model, expression), pinNodes,
                         terminals));
@@ -85,6 +131,12 @@ public final class PartDisplays {
                 throw new IllegalArgumentException(unwritten.getMessage() + " (its display '" + name + "')", unwritten);
             }
         });
+    }
+
+    /** The row state a figure names whole, or null when it names none. */
+    private static ComponentModel.State rowNamed(ComponentModel model, String written) {
+        return model.states().stream().filter(state -> state.name().equals(written) && state.initial() instanceof Object[])
+                .findFirst().orElse(null);
     }
 
     /**

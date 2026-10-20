@@ -110,14 +110,15 @@ final class FrameEncoding {
     }
 
     /**
-     * Each part as [watts, °C, { terminal: amperes into it }, maximum °C, rating W, failure, displays, cause, past] — a
-     * number that is not known as null; {@code past} is the limit it is past now ({@link PartLoad#past}).
+     * Each part as [watts, °C, { terminal: amperes into it }, maximum °C, rating W, failure, displays, cause, past,
+     * pictures] — a number that is not known as null; {@code past} is the limit it is past now ({@link PartLoad#past});
+     * {@code pictures} each picture's bytes in hexadecimal, by figure.
      */
     private static Map<String, List<Object>> parts(LiveCircuitSession.Frame frame) {
         Map<String, List<Object>> parts = new LinkedHashMap<>();
         frame.parts().forEach((part, load) -> parts.put(part, java.util.Arrays.asList(known(load.power()),
                 known(load.temperature()), load.terminals(), known(load.maximum()), known(load.rating()), load.failure(),
-                load.displays(), load.cause(), load.past())));
+                load.displays(), load.cause(), load.past(), load.pictures())));
         return parts;
     }
 

@@ -759,9 +759,10 @@ public class Catalogue {
                     if (!(entry instanceof Map<?, ?> pin) || !(pin.get("name") instanceof String name)
                             || !name.matches("[A-Za-z_][A-Za-z_0-9]{0,31}") || !names.add(name)
                             || !(pin.get("x") instanceof Number x) || !(pin.get("y") instanceof Number y)
-                            || !Double.isFinite(x.doubleValue()) || !Double.isFinite(y.doubleValue())
-                            || Math.abs(x.doubleValue()) > 80 || Math.abs(y.doubleValue()) > 60) {
-                        throw ParallaxProblem.invalid("Each pin needs a unique name and a position within 80 across and 60 up or down of the symbol's centre.");
+                            || !Double.isFinite(x.doubleValue()) || !Double.isFinite(y.doubleValue())) {
+                        // Where a pin stands is the drawing's: a display's screen is wide, and its pins with it. It was capped at
+                        // 80 across and 60 up or down until 2026-10-20, a bound nothing that draws or routes a part relied on.
+                        throw ParallaxProblem.invalid("Each pin needs a unique name and a position.");
                     }
                 }
             }

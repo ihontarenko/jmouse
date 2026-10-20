@@ -41,10 +41,13 @@ final class PartExpression {
     private final List<String> pins;
     private final List<String> states;
     private final double[] parameters;
+    /** Whether it reads only what changes in steps — discrete states, parameters —, so it is a value at a moment. */
+    private final boolean moment;
 
     private PartExpression(String part, RealFunction function, List<String> pinNodes, List<String> pins, List<String> states,
-                           double[] parameters) {
+                           double[] parameters, boolean moment) {
         this.part = part;
+        this.moment = moment;
         this.function = function;
         this.pinNodes = List.copyOf(pinNodes);
         this.pins = List.copyOf(pins);
@@ -87,7 +90,7 @@ final class PartExpression {
             Formula bound = PinQuantities.bindCurrents(members, pins, pin -> new Formula.Slot(pins.indexOf(pin), pin + ".current"));
             RealFunction function = RealCompiler.compile(bound, Symbols.withSlots(pins.size(), names, List.of()), expression);
             return new PartExpression(element.id(), function, pinNodes, pins, states,
-                    parameters.values().stream().mapToDouble(Double::doubleValue).toArray());
+                    parameters.values().stream().mapToDouble(Double::doubleValue).toArray(), readsOnlySteps(model, named, pins));
         } catch (RuntimeException unreadable) {
             throw new IllegalArgumentException(model.name() + ": '" + expression + "' does not read: " + unreadable.getMessage(), unreadable);
         }
@@ -114,6 +117,25 @@ final class PartExpression {
             }
         }
         return null;
+    }
+
+    /**
+     * Whether an expression reads nothing that moves continuously: no pin's voltage or current, no power, no time, no
+     * continuous state — only discrete states, their slots and parameters. Such a figure — a character, a count — is a
+     * value at a moment: averaged with another, a space and an 'l' make a 'T'.
+     */
+    private static boolean readsOnlySteps(ComponentModel model, Set<String> named, List<String> pins) {
+        if (named.contains(ComponentVocabulary.POWER) || named.contains(ComponentVocabulary.TIME) || named.contains("current")
+                || pins.stream().anyMatch(named::contains)) {
+            return false;
+        }
+        return model.states().stream().filter(state -> !state.discrete())
+                .noneMatch(state -> named.contains(state.name()));
+    }
+
+    /** Whether it is a value at a moment ({@link #readsOnlySteps}), never to be averaged over a frame. */
+    boolean moment() {
+        return moment;
     }
 
     /** The name one slot of a row state is read by: the row's name and the slot's index, `ddram_5`. */

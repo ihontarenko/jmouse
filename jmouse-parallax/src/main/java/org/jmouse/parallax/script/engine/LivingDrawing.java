@@ -51,12 +51,16 @@ final class LivingDrawing {
             Map.entry("rotate", Set.of(1)), Map.entry("move", Set.of(2)), Map.entry("scale", Set.of(1, 2)),
             Map.entry("opacity", Set.of(1)), Map.entry("visible", Set.of(1)), Map.entry("fill", Set.of(1)),
             Map.entry("stroke", Set.of(1)), Map.entry("glow", Set.of(1)), Map.entry("level", Set.of(1)),
-            Map.entry("dash", Set.of(1)), Map.entry("thickness", Set.of(1)), Map.entry("character", Set.of(1)));
+            Map.entry("dash", Set.of(1)), Map.entry("thickness", Set.of(1)), Map.entry("character", Set.of(1)),
+            Map.entry("pixels", Set.of(1)), Map.entry("columns", Set.of(1)), Map.entry("rows", Set.of(1)),
+            Map.entry("invert", Set.of(1)));
 
     private static final FormulaLanguage LANGUAGE = FormulaLanguage.standard().withHostCalls(FUNCTIONS.toArray(String[]::new));
 
     private final String what;
     private final Set<String> inputs = new HashSet<>();
+    /** The inputs that are pictures: read by a bitmap's `pixels` alone, never as a number. */
+    private final Set<String> pictures = new HashSet<>();
     private final Set<String> names = new HashSet<>();
 
     private LivingDrawing(String what) {
@@ -66,7 +70,7 @@ final class LivingDrawing {
     /** A drawing's inputs as the browser reads them. */
     static List<SymbolDrawing.Input> inputs(List<SymbolInput> inputs) {
         return inputs.stream().map(input -> new SymbolDrawing.Input(input.name(), input.low(), input.high(),
-                input.range().map(range -> range.text().strip()).orElse(""))).toList();
+                input.range().map(range -> range.text().strip()).orElse(""), input.picture())).toList();
     }
 
     /**
@@ -84,6 +88,9 @@ final class LivingDrawing {
                         + "drawn in; name it otherwise ('failed' rather than 'burned')");
             }
             drawing.inputs.add(input.name());
+            if (input.picture()) {
+                drawing.pictures.add(input.name());
+            }
         }
         drawing.collectNames(elements);
         return elements.stream().map(drawing::element).toList();
@@ -142,6 +149,7 @@ final class LivingDrawing {
                     new TreeSet<>(counts).stream().map(String::valueOf).toList()) + " value(s), not " + property.formulas().size());
         }
         Read read = read(element, property);
+        requirePictureWhereDrawn(element, property, read);
         SymbolMotion moves = read.value().motion();
         if (moves != property.motion()) {
             String line = property.name() + " = " + read.value().written();
@@ -152,6 +160,23 @@ final class LivingDrawing {
             });
         }
         return read.value();
+    }
+
+    /**
+     * A bitmap's `pixels` is one picture input, as it is — a row of bytes has no arithmetic —, and a picture is read
+     * nowhere else: a number would be read from it.
+     */
+    private void requirePictureWhereDrawn(SymbolElement element, SymbolProperty property, Read read) {
+        boolean drawsPixels = property.name().equals("pixels");
+        if (drawsPixels && !(element.shape().equals("bitmap") && read.value().expressions().size() == 1
+                && read.value().expressions().getFirst() instanceof String name && pictures.contains(name))) {
+            throw refusal(element, "'pixels' is a bitmap's, and is one picture input as it is: 'live pixels = screen' with "
+                    + "'input screen picture'");
+        }
+        if (!drawsPixels && read.inputs().stream().anyMatch(pictures::contains)) {
+            throw refusal(element, "'" + property.name() + "' reads a picture input as a number; a picture is drawn by a "
+                    + "bitmap's 'pixels' alone");
+        }
     }
 
     /** A value read: its trees and how they move, and the inputs it follows, for a refusal to name. */

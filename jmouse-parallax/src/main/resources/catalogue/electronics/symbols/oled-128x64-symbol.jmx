@@ -1,0 +1,36 @@
+symbol "128×64 OLED module" as oled-128x64-symbol {
+    meta {
+        summary "A 0.96-inch monochrome OLED module on I²C: its screen shows the controller's display memory, two units a pixel"
+        category circuits
+        tags electronics, schematic, display
+    }
+    size 300 x 200
+    input screen picture
+    input lit 0 .. 1
+    input inverted 0 .. 1
+    input mirrored_columns 0 .. 1
+    input mirrored_rows 0 .. 1
+    input matrix_rows 32 .. 64
+
+    path "M-150-80H150V90H-150Z"
+    path "M-129-55H129V75H-129Z"
+    path "M-40 -80V-100"
+    path "M-20 -80V-100"
+    path "M0 -80V-100"
+    path "M20 -80V-100"
+    live bitmap screen at 0, 10 size 256 x 128 {
+        live pixels = screen
+        columns = 128
+        live rows = matrix_rows
+        live invert = inverted > 0.5
+        live visible = lit > 0.5
+        live scale = 1 - 2 * mirrored_columns, 1 - 2 * mirrored_rows
+    }
+
+    pin GND at -40, -100
+    pin Vcc at -20, -100
+    pin scl at 0, -100
+    pin sda at 20, -100
+    label name at 180, -40
+    label value at 180, 40
+}

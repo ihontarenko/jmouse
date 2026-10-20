@@ -465,10 +465,12 @@ public sealed interface Block {
     /**
      * {@code input closed}, {@code input current 0 .. 20 mA}: a figure a symbol is drawn from, which the component that
      * uses the symbol binds ({@code symbol uses switch-symbol { closed = pressed }}); 0 … 1 unless a range is written.
+     * {@code input screen picture} is a picture — a row of bytes a {@code bitmap} draws —, not a number.
      *
-     * @param range the range as written, empty for the default 0 … 1
+     * @param range   the range as written, empty for the default 0 … 1 and for a picture
+     * @param picture whether it is a picture
      */
-    record SymbolInput(String name, double low, double high, Optional<SourceText> range) {
+    record SymbolInput(String name, double low, double high, Optional<SourceText> range, boolean picture) {
     }
 
     /**

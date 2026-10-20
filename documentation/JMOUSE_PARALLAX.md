@@ -641,6 +641,20 @@ HD44780 over 8 bits; `first_line`, `second_label`, `columns`).
 
 A symbol may draw characters: `live glyph c0 at x, y size 7 x 12 { live character = cell_0 }` draws the printable ASCII character of the code — the cells of `lcd-1602-symbol`.
 
+A symbol may draw a screen of pixels: `input screen picture` declares an input that is a row of bytes, not a number, and
+`live bitmap panel at x, y size w x h { live pixels = screen; columns = 128; live rows = matrix_rows; live invert = inverted > 0.5 }`
+draws it as one image — the bytes page-major, as SSD1306, SH1106, PCD8544 and ST7565 keep them: a page a row of
+`columns` bytes, each byte eight pixels down one column, its lowest bit on top. `pixels` names one picture input and
+nothing else; a picture input read as a number anywhere is refused. The lit pixels are the instrument ink over the screen
+colour, so the panel follows the theme (`oled-128x64-symbol`, the `ssd1306` component).
+
+**What a display figure is.** A figure written as the bare name of a row state — `screen = memory` — is a **picture**:
+the frame carries the row's bytes as hexadecimal (`PartLoad.pictures`), and a symbol's `bitmap` draws them. A figure
+that reads only discrete states and parameters — a character, a count, a register — is a **moment**
+(`PartLoad.moments`): when the live socket joins pieces of a frame it takes the last value, never the mean (averaged, a
+space and an 'l' once made a 'T'). Every other figure is a signal and is averaged over the frame. A symbol's pins
+stand wherever its drawing puts them: the store no longer caps them at 80 across and 60 up or down.
+
 ### A circuit
 
 ```jmx

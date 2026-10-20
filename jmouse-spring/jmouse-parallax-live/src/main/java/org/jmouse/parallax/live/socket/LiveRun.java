@@ -383,11 +383,12 @@ final class LiveRun {
     }
 
     /**
-     * The parts' loads over the whole frame. Power and every display figure average over the pieces, each weighted by how
+     * The parts' loads over the whole frame. Power and every signal figure average over the pieces, each weighted by how
      * many samples it covered — a frame's last piece may be a few hundred samples, a quarter of a 1 kHz period, and a
      * figure read from it alone flickers between the extremes. A stress figure is the worst piece's, since a limit is
-     * broken at the moment it is passed. The terminal currents, how warm a part is, its limits and whether it failed are
-     * as the last piece left them.
+     * broken at the moment it is passed. A moment figure — a character, a count — and a picture are as the last piece left
+     * them: averaged, a space and an 'l' made a 'T'. The terminal currents, how warm a part is, its limits and whether
+     * it failed are as the last piece left them too.
      */
     private static Map<String, PartLoad> joinedLoads(List<LiveCircuitSession.Frame> pieces) {
         Map<String, Double> powers = new LinkedHashMap<>();
@@ -403,7 +404,9 @@ final class LiveRun {
                 Map<String, Double> partFigures = figures.computeIfAbsent(part, ignored -> new LinkedHashMap<>());
                 Map<String, Double> partWeights = figureWeights.computeIfAbsent(part, ignored -> new LinkedHashMap<>());
                 load.displays().forEach((name, value) -> {
-                    if (PartLoad.STRESSES.contains(name)) {
+                    if (load.moments().contains(name)) {
+                        partFigures.put(name, value);
+                    } else if (PartLoad.STRESSES.contains(name)) {
                         partFigures.merge(name, value, Math::max);
                     } else {
                         partFigures.merge(name, value * weight, Double::sum);
@@ -420,7 +423,7 @@ final class LiveRun {
             Map<String, Double> displays = new LinkedHashMap<>(figures.get(part));
             figureWeights.get(part).forEach((name, weight) -> displays.computeIfPresent(name, (ignored, sum) -> sum / weight));
             joined.put(part, new PartLoad(power / total, latest.terminals(), latest.temperature(), latest.maximum(),
-                    latest.rating(), latest.failure(), displays, latest.cause()));
+                    latest.rating(), latest.failure(), displays, latest.moments(), latest.pictures(), latest.cause()));
         });
         return joined;
     }

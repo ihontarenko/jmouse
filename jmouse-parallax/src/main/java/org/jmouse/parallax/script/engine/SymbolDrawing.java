@@ -49,11 +49,12 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
     }
 
     /**
-     * What a living drawing is drawn from: {@code input current 0 .. 20 mA}.
+     * What a living drawing is drawn from: {@code input current 0 .. 20 mA}, or {@code input screen picture}.
      *
-     * @param range the range as written, empty for the default 0 … 1
+     * @param range   the range as written, empty for the default 0 … 1 and for a picture
+     * @param picture whether it is a picture: a row of bytes, in hexadecimal
      */
-    record Input(String name, double low, double high, String range) {
+    record Input(String name, double low, double high, String range, boolean picture) {
     }
 
     /**
@@ -121,7 +122,7 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
                         indicator.number("left"), indicator.number("top"), indicator.number("right"), indicator.number("bottom"))),
                 drawing.texts("upright"),
                 drawing.objects("inputs", "A symbol input", input -> new Input(input.text("name"), input.number("low"),
-                        input.number("high"), input.text("range", ""))),
+                        input.number("high"), input.text("range", ""), input.truth("picture"))),
                 drawing.objects("elements", "A symbol element", SymbolDrawing::element));
     }
 
@@ -239,8 +240,13 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
     }
 
     private static Map<String, Object> inputTree(Input input) {
-        return new JsonObject().put("name", input.name()).put("low", input.low()).put("high", input.high())
-                .putUnlessEmpty("range", input.range()).entries();
+        JsonObject tree = new JsonObject().put("name", input.name()).put("low", input.low()).put("high", input.high())
+                .putUnlessEmpty("range", input.range());
+        // Written only for a picture: every number input's tree stays as it was.
+        if (input.picture()) {
+            tree.put("picture", true);
+        }
+        return tree.entries();
     }
 
     private static Map<String, Object> elementTree(Element element) {

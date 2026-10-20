@@ -10,8 +10,10 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -341,11 +343,15 @@ public final class LiveCircuitSession {
         Map<String, Map<String, Double>> figures = displays.read(levels, loads, samples, solver.states(), lastTime);
         displays.worstStresses(samples, solver.nodes(), loads, solver.states()).forEach((part, worst) ->
                 figures.computeIfAbsent(part, ignored -> new LinkedHashMap<>()).putAll(worst));
+        Map<String, Map<String, String>> pictures = displays.pictures(solver.states());
+        Set<String> showing = new LinkedHashSet<>(figures.keySet());
+        showing.addAll(pictures.keySet());
         Map<String, PartLoad> shown = new LinkedHashMap<>(loads);
-        figures.forEach((part, values) -> {
+        for (String part : showing) {
             PartLoad load = shown.get(part);
-            shown.put(part, (load != null ? load : new PartLoad(0, Map.of(), Double.NaN)).showing(values));
-        });
+            shown.put(part, (load != null ? load : new PartLoad(0, Map.of(), Double.NaN))
+                    .showing(figures.getOrDefault(part, Map.of()), displays.momentsOf(part), pictures.getOrDefault(part, Map.of())));
+        }
         return shown;
     }
 
