@@ -45,6 +45,9 @@ public class FormulaOperatorParser extends OperatorParser {
         Expression left = unary(cursor, context);
         while (cursor.hasNext()) {
             Token token = cursor.peek();
+            if (context.endsExpression(token)) {
+                break;
+            }
             Operator operator = context.getOperator(token.type());
             boolean implicit = operator == null && STARTS_PRIMARY.contains(token.type());
             if (implicit) {

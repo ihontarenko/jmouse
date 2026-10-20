@@ -145,6 +145,16 @@ public interface ExtensionContainer {
      *
      * @param extension the extension to import
      */
+    /**
+     * Whether a word ends an expression where it could otherwise go on; see {@link Extension#getExpressionBoundaries()}.
+     *
+     * @param word the word the cursor stands on after a complete operand
+     * @return {@code true} when an imported extension declared it a boundary
+     */
+    boolean isExpressionBoundary(String word);
+
+    void addExpressionBoundary(String word);
+
     default void importExtension(Extension extension) {
         extension.getTagParsers().forEach(this::addTagParser);
         extension.getFunctions().forEach(this::addFunction);
@@ -153,6 +163,7 @@ public interface ExtensionContainer {
         extension.getOperators().forEach(this::addOperator);
         extension.getParsers().forEach(this::addParser);
         extension.getTypes().forEach(this::addType);
+        extension.getExpressionBoundaries().forEach(this::addExpressionBoundary);
         getAttributeResolvers().addAll(extension.getAttributeResolvers());
         Sorter.sort(getAttributeResolvers());
     }

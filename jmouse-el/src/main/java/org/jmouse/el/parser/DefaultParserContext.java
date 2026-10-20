@@ -105,6 +105,16 @@ public class DefaultParserContext implements ParserContext {
     }
 
     @Override
+    public boolean isExpressionBoundary(String word) {
+        return extensions.isExpressionBoundary(word);
+    }
+
+    @Override
+    public void addExpressionBoundary(String word) {
+        extensions.addExpressionBoundary(word);
+    }
+
+    @Override
     public ValueType getType(String name) {
         return extensions.getType(name);
     }

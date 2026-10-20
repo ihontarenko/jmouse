@@ -48,7 +48,8 @@ public class OperatorParser implements Parser {
             Token    token    = cursor.peek();
             Operator operator = context.getOperator(token.type());
 
-            if (operator == null || precedence > operator.getPrecedence()) {
+            // A word the language writes after an expression ends it, even one that is an operator elsewhere.
+            if (operator == null || precedence > operator.getPrecedence() || context.endsExpression(token)) {
                 break;
             }
 

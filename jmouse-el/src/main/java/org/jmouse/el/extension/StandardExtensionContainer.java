@@ -13,6 +13,8 @@ import org.jmouse.el.type.ValueType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -34,6 +36,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
     private final ObjectContainer<String, Filter>                  filters;
     private final ObjectContainer<String, ValueType>               types;
     private final List<AttributeResolver>                          attributeResolvers;
+    private final Set<String>                                      expressionBoundaries;
 
     /**
      * 🛠️ Constructs an empty {@code StandardExtensionContainer}.
@@ -47,6 +50,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
         filters = new FilterContainer();
         operators = new OperatorContainer();
         types = new TypeContainer();
+        expressionBoundaries = ConcurrentHashMap.newKeySet();
     }
 
     @Override
@@ -213,6 +217,16 @@ public class StandardExtensionContainer implements ExtensionContainer {
     @Override
     public void addType(ValueType type) {
         types.register(type);
+    }
+
+    @Override
+    public boolean isExpressionBoundary(String word) {
+        return expressionBoundaries.contains(word);
+    }
+
+    @Override
+    public void addExpressionBoundary(String word) {
+        expressionBoundaries.add(word);
     }
 
 }
