@@ -215,24 +215,7 @@ final class Reading {
 
     /** {@code { line … }}: every non-blank line; the cursor ends after the closing brace. Nested braces are refused. */
     List<Line> blockLines(String block) {
-        expect(BasicToken.T_OPEN_CURLY, "'{' to open " + block);
-        List<Line> lines = new ArrayList<>();
-        while (true) {
-            skipBlank();
-            if (atEnd()) {
-                throw refusal("'" + block + "' is opened with '{' and never closed");
-            }
-            if (cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                return lines;
-            }
-            if (cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-                throw refusal("'" + block + "' holds lines, not a nested '{ … }'");
-            }
-            Line line = line();
-            if (!line.isEmpty()) {
-                lines.add(line);
-            }
-        }
+        return new BlockLinesParser(this, block).lines(context);
     }
 
     /** The source between a block's braces, as written, for a body another language reads (jMF definitions). */

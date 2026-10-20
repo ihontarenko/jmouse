@@ -41,7 +41,6 @@ public class StatementsParser implements Parser {
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         open(cursor);
 
-        AutodetectFirstParser parser    = (AutodetectFirstParser) context.getParser(AutodetectFirstParser.class);
         BasicNode             container = BasicNode.forToken(cursor.current());
         List<Trivia>          pending   = new ArrayList<>();
 
@@ -49,7 +48,7 @@ public class StatementsParser implements Parser {
 
         while (!isClosed(cursor)) {
             int        position   = cursor.position();
-            Expression expression = (Expression) parser.parse(cursor, context);
+            Expression expression = statement(cursor, context);
 
             if (expression == null) {
                 Token current = cursor.current();
@@ -86,6 +85,22 @@ public class StatementsParser implements Parser {
         parent.add(container);
 
         close(cursor);
+    }
+
+    /**
+     * Reads one statement where the cursor stands — by default whichever parser of the context supports it.
+     *
+     * <p>⚠️ <strong>Overridden by a dialect whose statements are not the context's to choose.</strong> A language read
+     * through the same context as jMS — jMX, whose blocks hold lines of their own — would otherwise have every line
+     * offered to jMS's parsers first. Everything else {@code parse} does — trivia, the no-progress guard, a trailing
+     * comment kept on its line — still applies to what this returns.</p>
+     *
+     * @param cursor  the cursor, positioned where a statement begins
+     * @param context the parser context
+     * @return the statement, or {@code null} when nothing reads it
+     */
+    protected Expression statement(TokenCursor cursor, ParserContext context) {
+        return (Expression) context.getParser(AutodetectFirstParser.class).parse(cursor, context);
     }
 
     /**
