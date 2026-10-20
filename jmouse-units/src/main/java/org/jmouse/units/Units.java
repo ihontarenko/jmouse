@@ -70,9 +70,17 @@ public final class Units {
     public static String asRead(String written) {
         StringBuilder read = new StringBuilder(written.length());
         for (char symbol : written.strip().toCharArray()) {
-            read.append(SYMBOLS.getOrDefault(symbol, String.valueOf(symbol)));
+            read.append(symbol(symbol).orElse(String.valueOf(symbol)));
         }
         return read.toString();
+    }
+
+    /**
+     * What a symbol a datasheet writes a unit with is read as — Ω is {@code Ohm}, µ is {@code u}, ° is {@code deg} —;
+     * empty for any other character. A language whose values carry units reads them from here.
+     */
+    public static Optional<String> symbol(char character) {
+        return Optional.ofNullable(SYMBOLS.get(character));
     }
 
     /** A unit as a reader is shown it: {@code uF} as {@code µF}, {@code kOhm} as {@code kΩ}. */

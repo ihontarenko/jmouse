@@ -1,9 +1,12 @@
 package org.jmouse.parallax.script;
 
+import org.jmouse.formula.el.FormulaNotation;
+import org.jmouse.units.Units;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * What an author writes and jMS's ASCII lexer does not read, turned into what it does before the lexer sees the text:
@@ -23,10 +26,26 @@ public final class ExperienceNotation {
     /** Starts a placeholder for a long text: a control character no author writes. */
     public static final char LONG_TEXT_MARK = '\u0001';
 
-    private static final Map<Character, String> REPLACEMENTS = Map.ofEntries(
-            Map.entry('Ω', "Ohm"), Map.entry('µ', "u"), Map.entry('μ', "u"), Map.entry('±', "+-"),
-            Map.entry('−', "-"), Map.entry('–', "-"), Map.entry('²', "^2"), Map.entry('³', "^3"),
-            Map.entry('×', "*"), Map.entry('·', "*"), Map.entry('°', "deg"), Map.entry('π', "pi"));
+    /** The one symbol that is jMX's own: a tolerance, {@code ±5 %}. */
+    private static final char PLUS_MINUS = '±';
+    private static final String PLUS_MINUS_READ = "+-";
+
+    /**
+     * What a character is read as: a superscript digit is a power — the first of a run writes the {@code ^} —; a
+     * symbol of jMF's notation ({@code −}, {@code ≤}, {@code ∧}) is jMF's word for it, a unit's ({@code Ω},
+     * {@code µ}, {@code °}) the unit table's — expressions in jMX are jMF's, and values carry units, so neither table is
+     * kept again here —; {@code ±} is a tolerance.
+     */
+    private static String replacement(char character, boolean afterSuperscript) {
+        int digit = FormulaNotation.superscriptDigit(character);
+        if (digit >= 0) {
+            return (afterSuperscript ? "" : "^") + digit;
+        }
+        if (character == PLUS_MINUS) {
+            return PLUS_MINUS_READ;
+        }
+        return FormulaNotation.symbol(character).or(() -> Units.symbol(character)).orElse(String.valueOf(character));
+    }
 
     private ExperienceNotation() {
     }
@@ -90,7 +109,7 @@ public final class ExperienceNotation {
                 }
                 index = end - 1;
             } else {
-                String replacement = REPLACEMENTS.getOrDefault(character, String.valueOf(character));
+                String replacement = replacement(character, index > 0 && FormulaNotation.superscriptDigit(text.charAt(index - 1)) >= 0);
                 normalized.append(replacement);
                 origins.record(index, replacement.length());
             }
