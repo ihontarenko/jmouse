@@ -3,6 +3,7 @@ package org.jmouse.formula.el;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.literal.QuantityLiteralNode;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.FunctionParser;
 import org.jmouse.el.parser.LiteralParser;
@@ -10,7 +11,9 @@ import org.jmouse.el.parser.ParseException;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.PrimaryExpressionParser;
 import org.jmouse.el.parser.PropertyParser;
+import org.jmouse.el.parser.QuantityParser;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static org.jmouse.el.lexer.BasicToken.T_CLOSE_PAREN;
@@ -27,7 +30,7 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
         if (CursorMatcher.function().matches(cursor)) {
             parent.add(context.getParser(FunctionParser.class).parse(cursor, context));
         } else if (CursorMatcher.literal().matches(cursor)) {
-            parent.add(context.getParser(LiteralParser.class).parse(cursor, context));
+            parent.add(quantity(cursor, context).orElseGet(() -> context.getParser(LiteralParser.class).parse(cursor, context)));
         } else if (cursor.isCurrent(T_IDENTIFIER)) {
             parent.add(context.getParser(PropertyParser.class).parse(cursor, context));
         } else if (isWordArgument(cursor) || isWordWithMember(cursor)) {
@@ -45,6 +48,24 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
     }
 
     /** Whether the cursor is on a keyword spelled as a name, alone between a call's parentheses or commas. */
+    /**
+     * A number with its unit — {@code 10 kOhm}, {@code 2.2µs} — when the context has a {@link QuantityParser}: a
+     * language with units registers one, a formula does not, so {@code 2 m} stays twice {@code m} there. Empty, the
+     * cursor where it was, for a number written without a unit.
+     */
+    private static Optional<Node> quantity(TokenCursor cursor, ParserContext context) {
+        if (!(context.getParser(QuantityParser.class) instanceof QuantityParser quantities)) {
+            return Optional.empty();
+        }
+        TokenCursor.Savepoint start = cursor.savepoint();
+        Optional<QuantityLiteralNode> read = quantities.read(cursor, context)
+                .filter(node -> !node.getQuantity().unit().isEmpty());
+        if (read.isEmpty()) {
+            cursor.restore(start);
+        }
+        return read.map(Node.class::cast);
+    }
+
     private static boolean isWordArgument(TokenCursor cursor) {
         return WORD.matcher(cursor.current().value()).matches()
                 && cursor.isPrevious(T_OPEN_PAREN, T_COMMA) && cursor.isNext(T_CLOSE_PAREN, T_COMMA);
