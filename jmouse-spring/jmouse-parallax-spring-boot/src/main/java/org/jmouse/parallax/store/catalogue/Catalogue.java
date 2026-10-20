@@ -461,7 +461,26 @@ public class Catalogue {
         if (object.isCatalogue() && object.getStatus() == MathematicalObject.Status.PUBLISHED) {
             throw ParallaxProblem.conflict("A published catalogue object is archived, not deleted: links to it are out there.");
         }
+        requireUnplaced(object);
         objects.remove(object);
+    }
+
+    /**
+     * Refuses to delete a sheet another circuit of its owner still places: that circuit would stop reading. The blocks
+     * are named, so the reader knows what to remove first.
+     */
+    private void requireUnplaced(MathematicalObject object) {
+        if (object.getKind() != ObjectKind.CIRCUIT || object.owner().isEmpty()) {
+            return;
+        }
+        List<String> placing = sheets(object.owner().get()).stream()
+                .flatMap(sheet -> sheet.blocks().stream().filter(block -> block.sheet().equals(object.getSlug()))
+                        .map(block -> block.block() + " in “" + sheet.title() + "”"))
+                .toList();
+        if (!placing.isEmpty()) {
+            throw ParallaxProblem.conflict("“" + object.getTitle() + "” is placed by " + String.join(", ", placing)
+                    + ": remove those blocks first.");
+        }
     }
 
     // ── The shipped catalogue ────────────────────────────────────────────────────────────────────────────────────
