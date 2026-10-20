@@ -294,7 +294,7 @@ public final class ScriptBinder {
         if (!call && !isStep(statement)) {
             throw new ScriptBindException(at, ("'%s' computes a value and does nothing with it; a "
                     + "statement is a call, an assignment, a step such as counter++, or one of "
-                    + "if / for / let / const / return").formatted(statement.toSource()));
+                    + "if / for / let / final let / return").formatted(statement.toSource()));
         }
     }
 
