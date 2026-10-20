@@ -646,7 +646,13 @@ A symbol may draw a screen of pixels: `input screen picture` declares an input t
 draws it as one image — the bytes page-major, as SSD1306, SH1106, PCD8544 and ST7565 keep them: a page a row of
 `columns` bytes, each byte eight pixels down one column, its lowest bit on top. `pixels` names one picture input and
 nothing else; a picture input read as a number anywhere is refused. The lit pixels are the instrument ink over the screen
-colour, so the panel follows the theme (`oled-128x64-symbol`, the `ssd1306` component).
+colour, so the panel follows the theme. A memory wider than its panel says so with `stride` (bytes a page holds) and
+`first_column` (the memory column at the panel's left edge): the SH1106 keeps 132 columns and shows 2 … 129.
+
+The library's `base/i2c-oled-controller` is the I²C OLED controller written once on `i2c-target`: the control byte
+(Co, D/C#), the commands SSD1306 and SH1106 share, the display figures; a member writes `chip_arguments`,
+`chip_command`, `chip_argument` and `advance`. Symbols: `oled-128x64-symbol` (128-column panels), `lcd-84x48-symbol`
+(the PCD8544, Nokia 5110).
 
 **What a display figure is.** A figure written as the bare name of a row state — `screen = memory` — is a **picture**:
 the frame carries the row's bytes as hexadecimal (`PartLoad.pictures`), and a symbol's `bitmap` draws them. A figure

@@ -53,7 +53,7 @@ final class LivingDrawing {
             Map.entry("stroke", Set.of(1)), Map.entry("glow", Set.of(1)), Map.entry("level", Set.of(1)),
             Map.entry("dash", Set.of(1)), Map.entry("thickness", Set.of(1)), Map.entry("character", Set.of(1)),
             Map.entry("pixels", Set.of(1)), Map.entry("columns", Set.of(1)), Map.entry("rows", Set.of(1)),
-            Map.entry("invert", Set.of(1)));
+            Map.entry("invert", Set.of(1)), Map.entry("stride", Set.of(1)), Map.entry("first_column", Set.of(1)));
 
     private static final FormulaLanguage LANGUAGE = FormulaLanguage.standard().withHostCalls(FUNCTIONS.toArray(String[]::new));
 

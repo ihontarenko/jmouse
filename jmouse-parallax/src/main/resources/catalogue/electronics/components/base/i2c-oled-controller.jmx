@@ -1,0 +1,153 @@
+# The I²C OLED controller every such chip is a member of — SSD1306, SH1106: written once, on the I²C target. After its
+# address a controller sends a control byte: D/C# says whether the bytes after it are commands or display data, Co
+# whether only one byte follows before the next control byte. The display memory is pages of `memory_columns` bytes,
+# each byte eight pixels down one column, its lowest bit on top; the panel shows `rows` rows of it from
+# `first_column` on. The commands every member answers alike are here: on and off, normal and inverse, the column
+# remap, the scan direction, the page and the column's two nibbles. A member writes only what is its own:
+#   chip_arguments(code)               how many arguments a command of its own takes (0: none, or not its own)
+#   chip_command(code)                 a command of its own that takes none
+#   chip_argument(code, index, value)  an argument of a command of its own
+#   advance()                          the address pointer after a data byte: page addressing here
+# The panel lights when it is on and its panel voltage is there (`pump`): a member says how that is made and whether
+# it is there from reset.
+
+component "I²C OLED controller" as i2c-oled-controller type display {
+    meta {
+        designator DS
+        summary "The I²C protocol and the shared commands of a monochrome OLED controller: control byte, display memory in pages"
+        source "Solomon Systech SSD1306 rev. 1.1 (2008) §8.1.5.2, §8.7, table 9; Sino Wealth SH1106 V2.3 (2008) — the commands the two share"
+        category circuits
+        failure short Vcc GND
+    }
+    extends i2c-target
+    use cmos-hc
+
+    parameters {
+        address = 60 in [60, 61]            "0111 100: 3Ch with SA0 low, 3Dh with its jumper moved"
+        rows = 64 in [32, 64]               "the panel's rows: 64 on a 128×64 module, 32 on a 128×32 one"
+        memory_columns = 128 in [128, 132]  "how many columns a page of the display memory holds"
+        first_column = 0 in 0 .. 4 step 1 integer   "the memory column the panel's left edge shows"
+    }
+
+    state {
+        memory[1056] = 0 discrete           "the display memory: up to 132 columns by eight pages, each byte eight pixels down"
+        control_next = 1 discrete           "1 when the next byte is a control byte"
+        data_mode = 0 discrete              "D/C# of the last control byte: 1 display data, 0 commands"
+        single = 0 discrete                 "Co of the last control byte: 1 when one byte follows before the next control byte"
+        pending = 0 discrete                "a command waiting for its arguments"
+        arguments_left = 0 discrete         "how many arguments it still waits for"
+        argument_index = 0 discrete         "which of its arguments comes next"
+        display_on = 0 discrete             "AFh turned it on, AEh off"
+        pump = 0 discrete                   "1 while the panel voltage is made"
+        inverted = 0 discrete               "A7h: a lit bit dark, a dark one lit"
+        remapped = 0 discrete               "A1h: the last column drawn at the left"
+        scanned_back = 0 discrete           "C8h: the rows drawn bottom to top"
+        column = 0 discrete                 "the column the next data byte goes to"
+        page = 0 discrete                   "the page the next data byte goes to"
+    }
+
+    display {
+        screen = memory                     "the display memory, as the panel shows it"
+        lit = display_on * pump             "1 while the panel lights: on, with its panel voltage"
+        inverted = inverted                 "1 while it shows inverted"
+        mirrored_columns = remapped
+        mirrored_rows = scanned_back
+        matrix_rows = rows
+        memory_columns = memory_columns
+        column_offset = first_column
+        cursor_column = column              "the column the next data byte goes to"
+        cursor_page = page                  "the page the next data byte goes to"
+    }
+
+    behaviour {
+        final let CONTINUES = 7             # Co: the control byte's top bit
+        final let DATA = 6                  # D/C#: 1 display data, 0 commands
+        # The commands every member shares, by their codes.
+        final let DISPLAY_OFF = 174         # AEh; AFh is on
+        final let NORMAL = 166              # A6h; A7h is inverse
+        final let SEGMENT_REMAP = 160       # A0h; A1h is remapped
+        final let SCAN_UP = 192             # C0h; C8h scans down
+        final let SCAN_DOWN = 200
+        final let PAGE_FIRST = 176          # B0h–B7h: the page
+        final let PAGE_LAST = 183
+        final let LOW_COLUMN_LAST = 15      # 00h–0Fh: the column's low nibble
+        final let HIGH_COLUMN_LAST = 31     # 10h–1Fh: its high nibble
+        final let CONTRAST = 129            # 81h + level: not modelled
+        final let MULTIPLEX = 168           # A8h + ratio: the panel's rows are the parameter
+        final let OFFSET = 211              # D3h + rows
+        final let CLOCK = 213               # D5h + divider
+        final let PRECHARGE = 217           # D9h + periods
+        final let COM_PINS = 218            # DAh + configuration
+        final let DESELECT_LEVEL = 219      # DBh + level
+
+        function chip_arguments(code)
+            return 0
+        end
+
+        function chip_command(code)
+        end
+
+        function chip_argument(code, index, value)
+        end
+
+        # Page addressing: on along the page, back to its first column past the last.
+        function advance()
+            column = (column + 1) % memory_columns
+        end
+
+        # How many arguments a command takes after its code: the shared ones here, the member's own from it.
+        function arguments_of(code)
+            if code in [CONTRAST, MULTIPLEX, OFFSET, CLOCK, PRECHARGE, COM_PINS, DESELECT_LEVEL] then
+                return 1
+            end
+            return chip_arguments(code)
+        end
+
+        function command(code)
+            if arguments_left > 0 then
+                chip_argument(pending, argument_index, code)
+                argument_index = argument_index + 1
+                arguments_left = arguments_left - 1
+            elseif code == DISPLAY_OFF or code == DISPLAY_OFF + 1 then
+                display_on = bit(code, 0)
+            elseif code == NORMAL or code == NORMAL + 1 then
+                inverted = bit(code, 0)
+            elseif code == SEGMENT_REMAP or code == SEGMENT_REMAP + 1 then
+                remapped = bit(code, 0)
+            elseif code == SCAN_UP or code == SCAN_DOWN then
+                scanned_back = bit(code, 3)
+            elseif code >= PAGE_FIRST and code <= PAGE_LAST then
+                page = code - PAGE_FIRST
+            elseif code <= LOW_COLUMN_LAST then
+                column = bit_or(bit_and(column, 240), code) % memory_columns
+            elseif code <= HIGH_COLUMN_LAST then
+                column = bit_or(bit_and(column, 15), shift_left(low_bits(code, 4), 4, 8)) % memory_columns
+            elseif arguments_of(code) > 0 then
+                pending = code
+                arguments_left = arguments_of(code)
+                argument_index = 0
+            else
+                chip_command(code)
+            end
+        end
+
+        # The first byte after the address is a control byte; with Co set, so is every other one.
+        function received(value, index)
+            if index == 0 or control_next == 1 then
+                single = bit(value, CONTINUES)
+                data_mode = bit(value, DATA)
+                control_next = 0
+                return
+            end
+            if data_mode == 1 then
+                memory = with(memory, page * memory_columns + column, value)
+                advance()
+            else
+                command(value)
+            end
+            if single == 1 then
+                control_next = 1
+            end
+        end
+    }
+}
