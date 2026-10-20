@@ -393,7 +393,9 @@ position. Representative ones:
 ## Gotchas
 
 - ⚠️ **`not`, `ne`, `eq`, `gt`, `lt`, `ge`, `le`, `and`, `or` are operator words in jME's lexer** and cannot be
-  variable names. `not` in particular is an alias of `!=`, so a logical negation is written `!` or `¬`.
+  variable names. `not` is the logical negation, as `!` and `¬` are (`not x > 0` is `not (x > 0)`); inequality is
+  `!=`, `ne` or `neq`. A factorial is the mark alone: `n!`, never `n not`. (Until 2026-10-20 `not` was an alias of
+  `!=`.)
 - ⚠️ **`e` is Euler's number and `i` the imaginary unit** — neither can be a parameter or an index.
 - ⚠️ **A one-argument call of an unknown name is a product**: `rho(x - 1)` is `rho * (x - 1)`. That is what makes
   `a(b + c)` work; a typo such as `sni(x)` is still caught, by the symbol table.

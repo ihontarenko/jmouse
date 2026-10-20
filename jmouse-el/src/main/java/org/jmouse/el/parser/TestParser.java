@@ -20,8 +20,9 @@ public class TestParser implements Parser {
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         boolean negated = false;
 
-        if (cursor.isCurrent(BasicToken.T_NE)) {
-            cursor.ensure(BasicToken.T_NE);
+        // 'x is not empty': 'not' is the negation, as it is everywhere else in the language.
+        if (cursor.isCurrent(BasicToken.T_NEGATE)) {
+            cursor.ensure(BasicToken.T_NEGATE);
             negated = true;
         }
 

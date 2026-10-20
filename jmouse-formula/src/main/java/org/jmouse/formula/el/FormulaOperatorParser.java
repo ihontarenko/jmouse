@@ -30,6 +30,8 @@ import java.util.Set;
 public class FormulaOperatorParser extends OperatorParser {
 
     private static final int POWER_PRECEDENCE = 800;
+    /** The postfix mark of a factorial; the word `not` reads as the same token and is a negation. */
+    private static final String FACTORIAL_MARK = "!";
     private static final int RELATION_PRECEDENCE = 300;
     private static final Set<Token.Type> STARTS_PRIMARY = Set.of(BasicToken.T_IDENTIFIER, BasicToken.T_OPEN_PAREN,
             BasicToken.T_NUMERIC, BasicToken.T_INT, BasicToken.T_LONG, BasicToken.T_FLOAT, BasicToken.T_DOUBLE);
@@ -101,7 +103,8 @@ public class FormulaOperatorParser extends OperatorParser {
     /** A primary expression and the factorials that follow it: `n!`, `(n + 1)!`, `3!!` as (3!)!. */
     private Expression primary(TokenCursor cursor, ParserContext context) {
         Expression primary = (Expression) context.getParser(PrimaryExpressionParser.class).parse(cursor, context);
-        while (cursor.isCurrent(BasicToken.T_NEGATE)) {
+        // Only the mark is a factorial: 'not' shares its token, and 'n not' is no factorial.
+        while (cursor.isCurrent(BasicToken.T_NEGATE) && FACTORIAL_MARK.equals(cursor.peek().value())) {
             cursor.next();
             primary = new FactorialNode(primary);
         }

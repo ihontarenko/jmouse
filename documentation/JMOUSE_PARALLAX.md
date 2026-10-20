@@ -614,7 +614,7 @@ the only words a part may write; a default outside its own list is refused when 
 writes a text in quotes, and its `{expression}` is worked out over the circuit's parameters as a number override is —
 `bytes = "{pattern} 0"` follows the slider `pattern` —; `\{` is a brace.
 
-**What a behaviour calls**, besides jMS (`|` filters, `~` joins texts, `%`, `!` is `not` — ⚠️ jME's `not` is `!=`):
+**What a behaviour calls**, besides jMS (`|` filters, `~` joins texts, `%`, `!` or `not` negates, `ne` is not-equal):
 
 | Function | Does |
 |---|---|

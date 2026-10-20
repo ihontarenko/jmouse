@@ -120,7 +120,7 @@ component "I²C target" as i2c-target type interface {
         # Eight bits are in: an address that is ours and answered, or a data byte for the chip — acknowledged either way.
         function byte_in()
             if phase == ADDRESSING then
-                if shift_right(shift, 1) != own_address() or !acknowledges() then
+                if shift_right(shift, 1) != own_address() or not acknowledges() then
                     forget()
                     return
                 end
@@ -151,7 +151,7 @@ component "I²C target" as i2c-target type interface {
         end
 
         on rising 'scl' when phase != IDLE do
-            if !known(sda) then
+            if not known(sda) then
                 forget()
             elseif phase == READ_FROM then
                 if bits < 8 then

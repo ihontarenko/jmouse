@@ -39,9 +39,9 @@ language is a second grammar that agrees for about a month.
    meant is refused at load because it would otherwise evaluate and throw its answer away. They get
    different scopes, because that is the mistake this language expects people to make.
 
-Words that are **operators** rather than control keywords: `and`, `or`, `not`, `is`, `in`. ⚠️ `not` in
-particular — it is the engine's second spelling of `!=` and the partner of `is`, never a prefix.
-Negation is `!`.
+Words that are **operators** rather than control keywords: `and`, `or`, `not`, `is`, `in`. `not` is the
+negation — `not ready`, `x is not empty` —, the word for `!`. ⚠️ Until 2026-10-20 it was a spelling of `!=`;
+inequality is `!=`, `ne` or `neq`.
 
 Scope name: `source.jms`. A fixture covering every construction lives in the module's tests, as
 `GameShapedFixture`.

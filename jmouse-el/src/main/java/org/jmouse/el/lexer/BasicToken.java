@@ -30,7 +30,7 @@ public enum BasicToken implements Token.Type {
     // Both are read as equality, but a document written back as `x = 5` reads as an assignment to anyone
     // with SQL or Java behind them, and these documents are read by people who are not writing code.
     T_EQ(1010, "==", "=", "eq", "equals"),
-    T_NE(1020, "!=", "<>", "not", "ne", "neq"),
+    T_NE(1020, "!=", "<>", "ne", "neq"),
     T_GT(1030, ">", "gt"),
     T_GE(1040, ">=", "gte", "ge"),
     T_LT(1050, "<", "lt"),
@@ -66,7 +66,7 @@ public enum BasicToken implements Token.Type {
     T_DOT(2060, "."),
     T_DOUBLE_DOT(2065, ".."),
     T_COMMA(2070, ","),
-    T_NEGATE(2080, "!"),
+    T_NEGATE(2080, "!", "not"),
     T_QUESTION(2090, "?"),
     T_BACKSLASH(2100, "\\"),
     T_VERTICAL_SLASH(2110, "|"),

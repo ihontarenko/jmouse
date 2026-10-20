@@ -172,7 +172,7 @@ All aliases are interchangeable tokens:
 
 ```
 a == b   a = b    a eq b    a equals b
-a != b   a <> b   a ne b    a neq b
+a != b   a <> b   a ne b    a neq b      // ⚠️ never 'not': 'not' is the negation
 a > b    a gt b
 a >= b   a gte b  a ge b
 a < b    a lt b
@@ -184,7 +184,8 @@ a <= b   a lte b  a le b
 ```
 a and b   a && b
 a or b    a || b
-!a
+!a        not a
+x is not empty      // a test, negated
 a ^ b       // XOR
 ```
 

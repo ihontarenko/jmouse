@@ -54,6 +54,7 @@ Function, Filter, Test and Operator are different contracts. A test answers a pr
 
 - Share the configured language, not mutable evaluation scopes. A context contains mutable variables and auxiliary object state.
 - Do not reuse a document-specific lexer to compile a sliced generic expression: domain keywords may be perfectly valid property names in that expression.
+- `not` is the logical negation, the word for `!` (`not ready`, `x is not empty`); inequality is `!=`, `<>`, `ne` or `neq`. ⚠️ Until 2026-10-20 `not` lexed as `T_NE` — a document older than that writing `a not b` must be rewritten `a ne b`.
 - LogicalCalculator deliberately treats null as false and Boolean as itself; arbitrary objects do not acquire implicit truthiness.
 - SourceWriting and SourceReading are a paired contract. Do not introduce Java-style escaping in a writer unless the reader actually decodes it.
 
@@ -426,7 +427,7 @@ Top-level public types in production source, excluding smoke/example drivers. Li
 
 | Type | Responsibility / contract |
 |---|---|
-| [NegateUnaryOperation](../jmouse-el/src/main/java/org/jmouse/el/node/expression/unary/NegateUnaryOperation.java) | Implements/extends `UnaryOperation`. Operations: `evaluate`, `toSource`, `toString`. |
+| [NegateUnaryOperation](../jmouse-el/src/main/java/org/jmouse/el/node/expression/unary/NegateUnaryOperation.java) | `!x` and `not x`. Implements/extends `UnaryOperation`. Operations: `evaluate`, `toSource`, `toString`. |
 | [PostfixUnaryOperation](../jmouse-el/src/main/java/org/jmouse/el/node/expression/unary/PostfixUnaryOperation.java) | Represents a postfix unary operation in the Abstract Syntax Tree (AST). |
 | [PrefixUnaryOperation](../jmouse-el/src/main/java/org/jmouse/el/node/expression/unary/PrefixUnaryOperation.java) | Represents a prefix unary operation in the Abstract Syntax Tree (AST). |
 

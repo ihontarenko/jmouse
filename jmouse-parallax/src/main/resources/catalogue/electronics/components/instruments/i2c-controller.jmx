@@ -181,7 +181,7 @@ component "I²C controller" as i2c-controller type controller {
             elseif quarter == 1 then
                 drive('scl', 1)
             elseif quarter == 2 then
-                if bits < 8 and !sending then
+                if bits < 8 and not sending then
                     # A line nobody holds at a level reads as the pull-up leaves it.
                     incoming = incoming * 2 + level_or(sda, 1)
                 elseif bits == 8 and sending then
@@ -191,7 +191,7 @@ component "I²C controller" as i2c-controller type controller {
                 drive('scl', 0)
                 bits = bits + 1
                 if bits == 9 then
-                    if !sending then
+                    if not sending then
                         last_read = incoming
                         drive('data', incoming)
                         incoming = 0

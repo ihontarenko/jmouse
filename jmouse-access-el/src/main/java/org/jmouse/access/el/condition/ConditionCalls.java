@@ -262,7 +262,7 @@ final class ConditionCalls {
             return true;
         }
 
-        return previous.type() == BasicToken.T_NE
+        return previous.type() == BasicToken.T_NEGATE
                && position > 1
                && tokens.get(position - 2).type() == BasicToken.T_IS;
     }
