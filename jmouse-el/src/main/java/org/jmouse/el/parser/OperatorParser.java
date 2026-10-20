@@ -49,7 +49,7 @@ public class OperatorParser implements Parser {
             Operator operator = context.getOperator(token.type());
 
             // A word the language writes after an expression ends it, even one that is an operator elsewhere.
-            if (operator == null || precedence > operator.getPrecedence() || context.endsExpression(token)) {
+            if (operator == null || precedence > operator.getPrecedence() || context.endsExpression(cursor)) {
                 break;
             }
 

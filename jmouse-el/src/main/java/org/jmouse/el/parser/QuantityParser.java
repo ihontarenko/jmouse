@@ -97,6 +97,6 @@ public class QuantityParser implements Parser {
             return false;
         }
         Token token = cursor.current();
-        return !SEPARATORS.contains(token.value()) && !context.endsExpression(token);
+        return !SEPARATORS.contains(token.value()) && !context.endsExpression(cursor);
     }
 }
