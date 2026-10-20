@@ -3,7 +3,6 @@ package org.jmouse.formula.el;
 import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.el.parser.Parser;
-import org.jmouse.formula.el.FormulaOperatorParser.Juxtaposition;
 
 /**
  * A jME container assembled for formulas from {@link FormulaCoreExtension} alone — jME's core extension is not
@@ -12,19 +11,9 @@ import org.jmouse.formula.el.FormulaOperatorParser.Juxtaposition;
  */
 public class FormulaExtensionContainer extends StandardExtensionContainer {
 
-    private final FormulaOperatorParser operatorParser;
+    private final FormulaOperatorParser operatorParser = new FormulaOperatorParser();
 
-    /** Formulas as mathematics writes them: {@code 2 pi f} is a product. */
     public FormulaExtensionContainer() {
-        this(Juxtaposition.MULTIPLIES);
-    }
-
-    /**
-     * @param juxtaposition what two operands side by side mean: a language whose lines go on after a value —
-     *                      {@code R = 10 kOhm in 1 .. 100} — chooses {@link Juxtaposition#ENDS_EXPRESSION}
-     */
-    public FormulaExtensionContainer(Juxtaposition juxtaposition) {
-        this.operatorParser = new FormulaOperatorParser(juxtaposition);
         importExtension(new FormulaCoreExtension());
     }
 

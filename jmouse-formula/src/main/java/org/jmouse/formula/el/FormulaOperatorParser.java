@@ -22,9 +22,7 @@ import java.util.Set;
  * <ul>
  *   <li>a leading minus negates: {@code -x^2} is {@code -(x^2)}, {@code 2 * -x} is allowed;</li>
  *   <li>power ({@code ^} or {@code **}) is right-associative: {@code x^y^2} is {@code x^(y^2)};</li>
- *   <li>juxtaposition multiplies: {@code 2x}, {@code 3(x + 1)}, {@code (x + 1)(x - 1)} — unless the container that
- *   chose this parser chose {@link Juxtaposition#ENDS_EXPRESSION}, for a language that writes its own words after
- *   an expression;</li>
+ *   <li>juxtaposition multiplies: {@code 2x}, {@code 3(x + 1)}, {@code (x + 1)(x - 1)};</li>
  *   <li>a trailing {@code !} is a factorial, a leading one negates a condition: {@code n!}, {@code !(x > 0)};</li>
  *   <li>which operators exist is FormulaCoreExtension's to say; this parser only orders them.</li>
  * </ul>
@@ -38,24 +36,6 @@ public class FormulaOperatorParser extends OperatorParser {
     private static final Set<Token.Type> STARTS_PRIMARY = Set.of(BasicToken.T_IDENTIFIER, BasicToken.T_OPEN_PAREN,
             BasicToken.T_NUMERIC, BasicToken.T_INT, BasicToken.T_LONG, BasicToken.T_FLOAT, BasicToken.T_DOUBLE);
 
-    /** What two operands written side by side mean. */
-    public enum Juxtaposition {
-        /** Their product: {@code 2 pi f} — formulas, as mathematics writes them. */
-        MULTIPLIES,
-        /** The end of the expression: {@code 10 kOhm in 1 .. 100} — a language whose lines go on after a value. */
-        ENDS_EXPRESSION
-    }
-
-    private final Juxtaposition juxtaposition;
-
-    public FormulaOperatorParser() {
-        this(Juxtaposition.MULTIPLIES);
-    }
-
-    public FormulaOperatorParser(Juxtaposition juxtaposition) {
-        this.juxtaposition = juxtaposition;
-    }
-
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         parent.add(expression(cursor, context, 0));
@@ -66,8 +46,7 @@ public class FormulaOperatorParser extends OperatorParser {
         while (cursor.hasNext()) {
             Token token = cursor.peek();
             Operator operator = context.getOperator(token.type());
-            boolean implicit = operator == null && juxtaposition == Juxtaposition.MULTIPLIES
-                    && STARTS_PRIMARY.contains(token.type());
+            boolean implicit = operator == null && STARTS_PRIMARY.contains(token.type());
             if (implicit) {
                 operator = MathematicOperator.MULTIPLY;
             }

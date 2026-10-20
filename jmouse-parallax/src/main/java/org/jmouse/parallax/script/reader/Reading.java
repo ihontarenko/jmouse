@@ -199,8 +199,14 @@ final class Reading {
 
     /** Whether the line ends where the cursor stands: a line break, a {@code ;}, a brace, a comment, the text's end. */
     boolean atLineEnd() {
-        return atEnd() || cursor.isCurrent(BasicToken.T_NEW_LINE, BasicToken.T_SEMICOLON, BasicToken.T_OPEN_CURLY,
-                BasicToken.T_CLOSE_CURLY, BasicToken.T_HASH);
+        return atEnd() || endsLine(cursor.current());
+    }
+
+    /** Whether a token ends a line: a line break, a {@code ;}, a brace, a comment, the text's end. */
+    static boolean endsLine(Token token) {
+        return token.type() == BasicToken.T_NEW_LINE || token.type() == BasicToken.T_SEMICOLON
+                || token.type() == BasicToken.T_OPEN_CURLY || token.type() == BasicToken.T_CLOSE_CURLY
+                || token.type() == BasicToken.T_HASH || token.type() == BasicToken.T_EOL;
     }
 
     /** Where what has been read ends in the source: the next token's start, or the text's end. */

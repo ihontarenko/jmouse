@@ -33,7 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * same refusal at the same place.
  *
  * <p>The documents are this module's catalogue and test resources, and every directory named in the system property
- * {@code jmx.catalogues} (separated by {@code ;}) — a product's catalogue lives outside this repository.</p>
+ * {@code jmx.catalogues} (separated by {@code ;}) — a product's catalogue lives outside this repository. Run it over
+ * the electronics catalogue of Parallax and the archived mathematics one too: the mathematics writes juxtaposition
+ * ({@code 0 .. 2 pi step 0.01}) where the electronics never does.</p>
  */
 class JmxReadingEquivalenceTest {
 
