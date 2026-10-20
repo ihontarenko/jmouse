@@ -1,6 +1,7 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.ScopeValues;
 import org.jmouse.el.evaluation.ScopedChain;
 import org.jmouse.el.node.Expression;
 
@@ -49,37 +50,42 @@ public final class Lambda implements Function {
     public Object execute(Arguments arguments, EvaluationContext context) {
         ScopedChain chain = context.getScopedChain();
 
-        chain.push();  // enter new scope
+        ScopeValues frame = chain.push();  // enter new scope
 
-        int index = 0;
+        try {
+            int index = 0;
 
-        for (String parameter : parameters) {
-            Object value = arguments.get(index);
-
-            if (value == null) {
-                value = getDefault(parameter);
+            for (String parameter : parameters) {
+                Object value = arguments.get(index);
 
                 if (value == null) {
-                    throw new IllegalLambdaExecutionException(
-                            "Lambda function '%s' requires parameter '%s'"
-                                    .formatted(getName(), parameter));
+                    value = getDefault(parameter);
+
+                    if (value == null) {
+                        throw new IllegalLambdaExecutionException(
+                                "Lambda function '%s' requires parameter '%s'"
+                                        .formatted(getName(), parameter));
+                    }
                 }
+
+                // ⚠️ Declared in this call's own scope, never assigned through the chain: ScopedChain#setValue
+                // writes into the first scope that already holds the name, so a parameter called like a variable
+                // of its caller — 'index' in both — overwrote the caller's and left it changed after the call.
+                frame.set(parameter, value);
+
+                index++;
             }
 
-            chain.setValue(parameter, value);
+            Object result = null;
 
-            index++;
+            if (body != null) {
+                result = body.evaluate(context);
+            }
+
+            return result;
+        } finally {
+            chain.pop();  // restore previous scope, however the body was left
         }
-
-        Object result = null;
-
-        if (body != null) {
-            result = body.evaluate(context);
-        }
-
-        chain.pop();  // restore previous scope
-
-        return result;
     }
 
     public void setName(String name) {
