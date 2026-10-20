@@ -1,19 +1,20 @@
 package org.jmouse.parallax.script.engine;
 
+import org.jmouse.formula.AffineForm;
+import org.jmouse.formula.Formula;
+import org.jmouse.formula.FormulaException;
+import org.jmouse.formula.el.FormulaLanguage;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * One row of an affine map written out as the formula it is. With numeric coefficients (an IFS map):
  * {@code -0.04 x + 0.85 y + 1.6}. A zero term is left out, a coefficient of one is not written, and a row with no
- * terms at all is {@code 0}; reading accepts exactly what writing produces, so every coefficient reads back as the
- * same {@code double}.
+ * terms at all is {@code 0}. Reading is jMF's: the row is parsed as a formula and its coefficients are taken from the
+ * tree ({@link AffineForm}), so every coefficient written reads back as the same {@code double}.
  */
 final class AffineRows {
-
-    private static final Pattern TERM = Pattern.compile("([+-]?)([0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)?([a-z])?");
 
     private AffineRows() {
     }
@@ -65,27 +66,25 @@ final class AffineRows {
      * @throws IllegalArgumentException when the row is not a sum of numbers times the given variables
      */
     static double[] read(String written, List<String> variables) {
+        Formula row;
+        try {
+            row = FormulaLanguage.standard().parse(written);
+        } catch (FormulaException unreadable) {
+            throw new IllegalArgumentException("'" + written + "' is not an affine row such as '0.85 x + 0.04 y + 1.6': "
+                    + unreadable.getMessage(), unreadable);
+        }
+        for (String name : row.variables()) {
+            if (!variables.contains(name)) {
+                throw new IllegalArgumentException("'" + name + "' is not a variable of '" + written + "'.");
+            }
+        }
+        AffineForm affine = AffineForm.of(row, variables).orElseThrow(() -> new IllegalArgumentException(
+                "'" + written + "' is not an affine row such as '0.85 x + 0.04 y + 1.6'."));
         double[] coefficients = new double[variables.size() + 1];
-        String compact = written.replace(" ", "").replace("*", "");
-        if (compact.equals("0")) {
-            return coefficients;
+        for (int index = 0; index < variables.size(); index++) {
+            coefficients[index] = affine.coefficients().get(index);
         }
-        Matcher matcher = TERM.matcher(compact);
-        int position = 0;
-        while (position < compact.length()) {
-            if (!matcher.find(position) || matcher.start() != position || matcher.end() == position
-                    || (matcher.group(2) == null && matcher.group(3) == null)) {
-                throw new IllegalArgumentException("'" + written + "' is not an affine row such as '0.85 x + 0.04 y + 1.6'.");
-            }
-            double magnitude = matcher.group(2) == null ? 1 : Double.parseDouble(matcher.group(2));
-            double value = matcher.group(1).equals("-") ? -magnitude : magnitude;
-            int slot = matcher.group(3) == null ? variables.size() : variables.indexOf(matcher.group(3));
-            if (slot < 0) {
-                throw new IllegalArgumentException("'" + matcher.group(3) + "' is not a variable of '" + written + "'.");
-            }
-            coefficients[slot] += value;
-            position = matcher.end();
-        }
+        coefficients[variables.size()] = affine.translation();
         return coefficients;
     }
 }
