@@ -58,20 +58,19 @@ final class DocumentParser extends AbstractParser {
         Kind kind = Kind.ofKeyword(head.value()).orElseThrow();
         declarations.forgetTypes();
         String title = reading.literal(cursor.next());
-        Reading.Line rest = reading.line();
         String slug = ExperienceDocument.slugOf(title);
         Optional<String> type = Optional.empty();
-        int index = 0;
-        while (index < rest.size()) {
-            String word = rest.value(index);
-            if (word.equals("as") && index + 1 < rest.size()) {
-                slug = rest.joinedWord(index + 1);
-                index = rest.joinedEnd(index + 1);
-            } else if (word.equals("type") && index + 1 < rest.size()) {
-                type = Optional.of(rest.joinedWord(index + 1));
-                index = rest.joinedEnd(index + 1);
+        while (!reading.atLineEnd()) {
+            Token word = cursor.current();
+            boolean named = reading.lineView().remaining() > 1;
+            if (word.value().equals("as") && named) {
+                cursor.next();
+                slug = reading.joinedWord();
+            } else if (word.value().equals("type") && named) {
+                cursor.next();
+                type = Optional.of(reading.joinedWord());
             } else {
-                throw rest.refusal(index, "after the title come 'as slug' and 'type role', then '{'");
+                throw reading.refusal(word, "after the title come 'as slug' and 'type role', then '{'");
             }
         }
         if (!slug.matches(SLUG)) {

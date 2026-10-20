@@ -190,13 +190,22 @@ final class JmxValues {
      * @param next the words the line's grammar may write after the range
      */
     Block.Range range(Set<String> next) {
+        return range(words(next));
+    }
+
+    /**
+     * {@code minimum .. maximum}, each bound an expression.
+     *
+     * @param until where the line's grammar takes over after the range
+     */
+    Block.Range range(Boundary until) {
         Token from = reading.cursor.current();
-        SourceText minimum = expression(next);
+        SourceText minimum = expression(until);
         if (!reading.cursor.isCurrent(BasicToken.T_DOUBLE_DOT)) {
             throw reading.refusal(from, "a range is written 'minimum .. maximum'");
         }
         reading.cursor.next();
-        return new Block.Range(minimum, expression(next));
+        return new Block.Range(minimum, expression(until));
     }
 
     /**

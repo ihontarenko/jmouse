@@ -249,6 +249,24 @@ final class Reading {
         }
     }
 
+    /** Names separated by commas, each one word — {@code units A, B}, {@code items lorenz, logistic-map} —, to the line's end. */
+    List<String> names() {
+        return namesBefore(Integer.MAX_VALUE);
+    }
+
+    /** Names separated by commas, up to a place in the source or the line's end. */
+    List<String> namesBefore(int end) {
+        List<String> names = new ArrayList<>();
+        while (!atLineEnd() && cursor.current().offset() < end) {
+            if (cursor.isCurrent(BasicToken.T_COMMA)) {
+                cursor.next();
+                continue;
+            }
+            names.add(joinedWord());
+        }
+        return names;
+    }
+
     /** Steps to the end of the line. */
     void skipLine() {
         while (!atLineEnd()) {
@@ -268,16 +286,17 @@ final class Reading {
 
     /** The one word after a statement's own: {@code extends base-slug}. */
     String wordAfter(Token keyword, String what) {
-        Line line = line();
-        if (line.isEmpty()) {
+        if (atLineEnd()) {
             throw refusal(keyword, "'" + what + "' takes a name");
         }
-        return line.joinedWord(0);
+        String word = joinedWord();
+        skipLine();
+        return word;
     }
 
     /** The names after a statement's own word, separated by commas: {@code units A, B}. */
     List<String> namesAfter(Token keyword, String what) {
-        List<String> names = line().names(0);
+        List<String> names = names();
         if (names.isEmpty()) {
             throw refusal(keyword, "'" + what + "' takes names separated by commas");
         }

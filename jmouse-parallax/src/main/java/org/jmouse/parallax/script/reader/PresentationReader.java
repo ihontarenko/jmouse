@@ -133,25 +133,7 @@ final class PresentationReader {
     /** {@code key a, b, c}: names after the key, each one word. */
     private List<String> namesAfterKey() {
         reading.cursor.next();
-        return names();
-    }
-
-    /** Names separated by commas, to the end of the line. */
-    private List<String> names() {
-        return namesBefore(Integer.MAX_VALUE);
-    }
-
-    /** Names separated by commas, up to a place in the source or the end of the line. */
-    private List<String> namesBefore(int end) {
-        List<String> names = new ArrayList<>();
-        while (!reading.atLineEnd() && reading.cursor.current().offset() < end) {
-            if (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
-                reading.cursor.next();
-                continue;
-            }
-            names.add(reading.joinedWord());
-        }
-        return names;
+        return reading.names();
     }
 
     /** {@code key "one", "other"}: texts in quotes, separated by commas. */
@@ -239,7 +221,7 @@ final class PresentationReader {
         reading.cursor.restore(start);
         int comma = line.offsetOf(0, ",");
         if (comma >= 0 && comma < to) {
-            return new MetaValue.Names(namesBefore(end));
+            return new MetaValue.Names(reading.namesBefore(end));
         }
         return new MetaValue.Text(reading.text(first.offset(), end).text());
     }
@@ -296,7 +278,7 @@ final class PresentationReader {
             case "without" -> {
                 cursor.next();
                 EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
-                for (String name : names()) {
+                for (String name : reading.names()) {
                     capabilities.add(Capability.ofKeyword(name).orElseThrow(() -> reading.refusal(first, "'" + name
                             + "' is not a capability: play, run, interact, resample, probe, sweep, check or execute")));
                 }

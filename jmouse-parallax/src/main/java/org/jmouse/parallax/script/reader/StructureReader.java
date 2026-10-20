@@ -156,7 +156,7 @@ final class StructureReader {
 
     /** {@code items lorenz, rossler, logistic-map}. */
     Block.Items items(Token keyword) {
-        List<String> references = names();
+        List<String> references = reading.names();
         if (references.isEmpty()) {
             throw reading.refusal(keyword, "items are 'items reference, reference, …'");
         }
@@ -175,7 +175,7 @@ final class StructureReader {
                 throw reading.refusal(first, "a section holds 'items reference, reference, …'");
             }
             reading.cursor.next();
-            references.addAll(names());
+            references.addAll(reading.names());
         });
         if (references.isEmpty()) {
             throw reading.refusal(keyword, "section \"" + reading.literal(title) + "\" holds no items");
@@ -334,7 +334,7 @@ final class StructureReader {
 
     /** {@code objects explicit_surface, parametric_surface}. */
     Block.ObjectKinds objectKinds(Token keyword) {
-        List<String> kinds = names();
+        List<String> kinds = reading.names();
         if (kinds.isEmpty()) {
             throw reading.refusal(keyword, "objects are 'objects kind, kind, …'");
         }
@@ -343,7 +343,7 @@ final class StructureReader {
 
     /** {@code representations surface, normals, curvature}. */
     Block.Representations representations(Token keyword) {
-        List<String> representations = names();
+        List<String> representations = reading.names();
         if (representations.isEmpty()) {
             throw reading.refusal(keyword, "representations are 'representations name, name, …'");
         }
@@ -363,19 +363,6 @@ final class StructureReader {
     }
 
     // ─── values inside a catalogue line ─────────────────────────────────────────────────────────────
-
-    /** Names separated by commas, each one word, to the end of the line. */
-    private List<String> names() {
-        List<String> names = new ArrayList<>();
-        while (!reading.atLineEnd()) {
-            if (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
-                reading.cursor.next();
-                continue;
-            }
-            names.add(reading.joinedWord());
-        }
-        return names;
-    }
 
     /** The text in quotes after a key. */
     private String text(Token key) {

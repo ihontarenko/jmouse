@@ -1,5 +1,6 @@
 package org.jmouse.parallax.script.reader;
 
+import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.parallax.script.Block;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The blocks of a {@code graph}: its clock, its panes and its lines.
@@ -76,41 +78,50 @@ final class GraphReader {
         return new Block.GraphCheck(reading.literal(title), measure, criterion, written, reading.lineOf(keyword));
     }
 
-    /** {@code clock t [from a to b] [speed s] [loop]}. */
+    /** {@code clock t [in a .. b] [speed s] [loop]}. */
     Block.Clock clock(Token keyword) {
-        Reading.Line line = reading.line();
-        if (line.isEmpty()) {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor line = reading.lineView();
+        int length = line.remaining();
+        if (length == 0) {
             throw reading.refusal(keyword, "a clock names the parameter it moves: 'clock t in 0 .. 1 speed 1 loop'");
         }
-        String parameter = line.value(0);
-        int end = line.size();
-        boolean loop = line.value(end - 1).equals("loop");
+        String parameter = line.valueAt(0);
+        int end = length;
+        boolean loop = line.checkValueAt(end - 1, "loop");
         if (loop) {
             end--;
         }
-        double speed = 1;
-        int speedAt = line.indexOf(1, "speed");
-        if (speedAt >= 0) {
-            speed = Values.quantity(line, speedAt + 1, end);
-            if (!(speed > 0)) {
-                throw line.refusal(speedAt, "a clock's speed is above zero");
-            }
-            end = speedAt;
-        }
+        int speedAt = line.offsetOf(1, "speed");
+        int rangeEnd = speedAt >= 0 && speedAt < end ? speedAt : end;
+        Token in = line.lookAt(1);
+        int rangeEndAt = line.lookAt(rangeEnd).offset();
+        int endAt = line.lookAt(end).offset();
+        cursor.next();
         Optional<Range> range = Optional.empty();
-        if (end > 1) {
-            if (!line.value(1).equals("in")) {
-                throw line.refusal(1, "a clock's range is 'in a .. b'");
+        if (rangeEnd > 1) {
+            if (!in.value().equals("in") || reading.isString(in)) {
+                throw reading.refusal(in, "a clock's range is 'in a .. b'");
             }
-            range = Optional.of(Values.range(line, 2, end));
+            cursor.next();
+            range = Optional.of(values.range(JmxValues.at(rangeEndAt)));
         }
+        double speed = 1;
+        if (speedAt >= 0 && speedAt < end) {
+            Token speedWord = cursor.next();
+            speed = values.quantity(JmxValues.at(endAt));
+            if (!(speed > 0)) {
+                throw reading.refusal(speedWord, "a clock's speed is above zero");
+            }
+        }
+        reading.skipLine();
         return new Block.Clock(parameter, range, speed, loop);
     }
 
     /** {@code panes [rows|columns|grid] { name kind … }}. */
     Block.Panes panes(Token keyword) {
         PaneLayout layout = PaneLayout.ROWS;
-        if (!reading.at(org.jmouse.el.lexer.BasicToken.T_OPEN_CURLY)) {
+        if (!reading.at(BasicToken.T_OPEN_CURLY)) {
             Token word = reading.cursor.next();
             layout = switch (word.value()) {
                 case "rows" -> PaneLayout.ROWS;
@@ -120,143 +131,165 @@ final class GraphReader {
             };
         }
         List<Pane> panes = new ArrayList<>();
-        for (Reading.Line line : reading.blockLines("panes")) {
-            Pane pane = pane(line);
+        List<TokenCursor.Savepoint> starts = reading.lineStarts("panes");
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            Token first = reading.cursor.current();
+            Pane pane = pane();
             if (panes.stream().anyMatch(existing -> existing.name().equals(pane.name()))) {
-                throw line.refusal("the pane '" + pane.name() + "' is written twice");
+                throw reading.refusal(first, "the pane '" + pane.name() + "' is written twice");
             }
             panes.add(pane);
         }
+        reading.cursor.restore(after);
         if (panes.isEmpty()) {
             throw reading.refusal(keyword, "'panes' names at least one pane");
         }
         return new Block.Panes(layout, panes);
     }
 
-    private Pane pane(Reading.Line line) {
-        if (line.size() < 2) {
-            throw line.refusal("a pane is 'name kind …': plane, space, circuit or values");
+    /** {@code name kind …}: a plane's or a space's axes, a circuit pane's circuit and window, a space's camera. */
+    private Pane pane() {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor line = reading.lineView();
+        Token first = cursor.current();
+        if (line.remaining() < 2) {
+            throw reading.refusal(first, "a pane is 'name kind …': plane, space, circuit or values");
         }
         PaneKind kind;
         try {
-            kind = PaneKind.valueOf(line.value(1).toUpperCase(Locale.ROOT));
+            kind = PaneKind.valueOf(line.valueAt(1).toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException unknown) {
-            throw line.refusal(1, "'" + line.value(1) + "' is not a pane: plane, space, circuit or values");
+            throw reading.refusalAhead(1, "'" + line.valueAt(1) + "' is not a pane: plane, space, circuit or values");
         }
+        String name = cursor.next().value();
+        cursor.next();
         Map<String, Range> axes = new LinkedHashMap<>();
         Optional<String> uses = Optional.empty();
         Optional<Range> over = Optional.empty();
         Optional<String> camera = Optional.empty();
-        int index = 2;
-        while (index < line.size()) {
-            String word = line.value(index);
-            if (AXES.contains(word)) {
-                int end = nextWord(line, index + 1);
-                axes.put(word, Values.range(line, index + 1, end));
-                index = end;
-            } else if (word.equals("uses") && kind == PaneKind.CIRCUIT) {
-                uses = Optional.of(line.joinedWord(index + 1));
-                index = line.joinedEnd(index + 1);
-            } else if (word.equals("over") && kind == PaneKind.CIRCUIT) {
-                int end = nextWord(line, index + 1);
-                over = Optional.of(Values.range(line, index + 1, end));
-                index = end;
-            } else if (word.equals("camera") && kind == PaneKind.SPACE) {
-                camera = Optional.of(line.value(index + 1));
-                index += 2;
+        while (!reading.atLineEnd()) {
+            Token word = cursor.next();
+            if (AXES.contains(word.value())) {
+                axes.put(word.value(), values.range(PANE_WORDS));
+            } else if (word.value().equals("uses") && kind == PaneKind.CIRCUIT) {
+                uses = Optional.of(reading.joinedWord());
+            } else if (word.value().equals("over") && kind == PaneKind.CIRCUIT) {
+                over = Optional.of(values.range(PANE_WORDS));
+            } else if (word.value().equals("camera") && kind == PaneKind.SPACE) {
+                camera = Optional.of(cursor.next().value());
             } else {
-                throw line.refusal(index, "'" + word + "' is not part of a " + kind.name().toLowerCase(Locale.ROOT) + " pane");
+                throw reading.refusal(word, "'" + word.value() + "' is not part of a "
+                        + kind.name().toLowerCase(Locale.ROOT) + " pane");
             }
         }
         if (kind == PaneKind.CIRCUIT && uses.isEmpty()) {
-            throw line.refusal("a circuit pane names the circuit it plays: 'uses <slug>'");
+            throw reading.refusal(first, "a circuit pane names the circuit it plays: 'uses <slug>'");
         }
-        return new Pane(line.value(0), kind, axes, uses, over, camera, reading.lineOf(line.first()));
-    }
-
-    /** Where an axis range ends: at the next axis word or the end of the line. */
-    private static int nextWord(Reading.Line line, int from) {
-        int next = line.indexOf(from, "x", "y", "z", "uses", "over", "camera");
-        return next < 0 ? line.size() : next;
+        return new Pane(name, kind, axes, uses, over, camera, reading.lineOf(first));
     }
 
     /** {@code lines { name expression [until u] [at p] [from circuit] [in pane] [color n] [hidden] }}. */
     Block.Lines lines() {
         List<GraphLine> lines = new ArrayList<>();
-        for (Reading.Line line : reading.blockLines("lines")) {
-            GraphLine read = line(line);
+        List<TokenCursor.Savepoint> starts = reading.lineStarts("lines");
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            Token first = reading.cursor.current();
+            GraphLine read = line();
             if (lines.stream().anyMatch(existing -> existing.name().equals(read.name()))) {
-                throw line.refusal("the line '" + read.name() + "' is written twice");
+                throw reading.refusal(first, "the line '" + read.name() + "' is written twice");
             }
             lines.add(read);
         }
+        reading.cursor.restore(after);
         return new Block.Lines(lines);
     }
 
     /**
-     * The words after the expression are read from the end, so an expression may hold anything jMF writes: what is
+     * The words after the expression are found from the end, so an expression may hold anything jMF writes: what is
      * fixed in shape ({@code hidden}, {@code color n}, {@code in pane}) first, then {@code at} and {@code until}, whose
-     * expressions run to the next word.
+     * expressions run to the next word. Each expression is then read by jMF's grammar up to where its word stands.
      */
-    private GraphLine line(Reading.Line line) {
-        if (line.size() < 2) {
-            throw line.refusal("a line is 'name expression', as 'sum y = sin(x)'");
+    private GraphLine line() {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor line = reading.lineView();
+        Token first = cursor.current();
+        int length = line.remaining();
+        if (length < 2) {
+            throw reading.refusal(first, "a line is 'name expression', as 'sum y = sin(x)'");
         }
-        int end = line.size();
-        boolean hidden = line.value(end - 1).equals("hidden");
+        int end = length;
+        boolean hidden = line.checkValueAt(end - 1, "hidden");
         if (hidden) {
             end--;
         }
         Optional<Integer> color = Optional.empty();
-        if (end >= 3 && line.value(end - 2).equals("color")) {
-            int written = Values.number(line.value(end - 1)).map(Double::intValue)
-                    .orElseThrow(() -> line.refusal("a colour is a number, 1 to 6"));
-            if (written < 1 || written > 6) {
-                throw line.refusal(end - 1, "a colour is 1 to 6");
+        if (end >= 3 && line.checkValueAt(end - 2, "color")) {
+            Token written = line.lookAt(end - 1);
+            int number = Values.number(written.value()).map(Double::intValue)
+                    .orElseThrow(() -> reading.refusal(first, "a colour is a number, 1 to 6"));
+            if (number < 1 || number > 6) {
+                throw reading.refusal(written, "a colour is 1 to 6");
             }
-            color = Optional.of(written);
+            color = Optional.of(number);
             end -= 2;
         }
         Optional<String> pane = Optional.empty();
-        if (end >= 4 && line.value(end - 2).equals("in")) {
-            pane = Optional.of(line.value(end - 1));
+        if (end >= 4 && line.checkValueAt(end - 2, "in")) {
+            pane = Optional.of(line.valueAt(end - 1));
             end -= 2;
         }
         Optional<String> from = Optional.empty();
-        if (end >= 4 && line.value(end - 2).equals("from")) {
-            from = Optional.of(line.value(end - 1));
+        if (end >= 4 && line.checkValueAt(end - 2, "from")) {
+            from = Optional.of(line.valueAt(end - 1));
             end -= 2;
         }
-        Optional<SourceText> at = Optional.empty();
         int atIndex = lastIndexOf(line, end, "at");
+        int atEnd = end;
         if (atIndex > 1) {
-            at = Optional.of(line.text(atIndex + 1, end));
             end = atIndex;
         }
-        Optional<SourceText> until = Optional.empty();
         int untilIndex = lastIndexOf(line, end, "until");
+        int untilEnd = end;
         if (untilIndex > 1) {
-            until = Optional.of(line.text(untilIndex + 1, end));
             end = untilIndex;
         }
-        boolean label = line.isString(1) && end == 2;
-        SourceText quoted = line.text(1, 2);
-        SourceText expression = label ? new SourceText(reading.literal(line.get(1)), quoted.line(), quoted.column(), quoted.offset())
-                : line.text(1, end);
+        // What a graph's line draws is the graph's own language — tuples, a curve's ranges, polygon((0, 0), …) —, not
+        // one expression of jMF's: it is cut out as written, between the words found.
+        String name = line.valueAt(0);
+        Token quote = line.lookAt(1);
+        boolean label = reading.isString(quote) && end == 2;
+        SourceText quoted = reading.text(quote.offset(), line.lookAt(2).offset());
+        SourceText expression = label
+                ? new SourceText(reading.literal(quote), quoted.line(), quoted.column(), quoted.offset())
+                : reading.text(quote.offset(), line.lookAt(end).offset());
         if (expression.text().isBlank()) {
-            throw line.refusal("the line '" + line.value(0) + "' has no expression");
+            throw reading.refusal(first, "the line '" + name + "' has no expression");
         }
-        return new GraphLine(line.value(0), expression, label, until, at, from, pane, color, hidden, reading.lineOf(line.first()));
+        Optional<SourceText> until = untilIndex > 1
+                ? Optional.of(reading.text(line.lookAt(untilIndex + 1).offset(), line.lookAt(untilEnd).offset()))
+                : Optional.empty();
+        Optional<SourceText> at = atIndex > 1
+                ? Optional.of(reading.text(line.lookAt(atIndex + 1).offset(), line.lookAt(atEnd).offset()))
+                : Optional.empty();
+        reading.skipLine();
+        return new GraphLine(name, expression, label, until, at, from, pane, color, hidden, reading.lineOf(first));
     }
 
-    /** The last token at depth zero before {@code end} whose word is {@code word}, or −1. */
-    private static int lastIndexOf(Reading.Line line, int end, String word) {
+    /** The last token at depth zero before {@code end} whose word is {@code word}, or -1. */
+    private static int lastIndexOf(TokenCursor line, int end, String word) {
         int found = -1;
-        int index = line.indexOf(1, word);
+        int index = line.offsetOf(1, word);
         while (index >= 0 && index < end) {
             found = index;
-            index = line.indexOf(index + 1, word);
+            index = line.offsetOf(index + 1, word);
         }
         return found;
     }
+
+    /** Where an axis's or a window's range ends: at the next word of a pane. */
+    private static final Set<String> PANE_WORDS = Set.of("x", "y", "z", "uses", "over", "camera");
 }
