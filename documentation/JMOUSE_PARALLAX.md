@@ -612,7 +612,7 @@ state {
 compiled as a formula, read by the behaviour as a text. `operation = "write" in ["write", "read", "write-read"]` lists
 the only words a part may write; a default outside its own list is refused when the document is read. A part line
 writes a text in quotes, and its `{expression}` is worked out over the circuit's parameters as a number override is —
-`bytes = "{pattern} 0"` follows the slider `pattern` —; `{` is a brace.
+`bytes = "{pattern} 0"` follows the slider `pattern` —; `\{` is a brace.
 
 **What a behaviour calls**, besides jMS (`|` filters, `~` joins texts, `%`, `!` is `not` — ⚠️ jME's `not` is `!=`):
 
