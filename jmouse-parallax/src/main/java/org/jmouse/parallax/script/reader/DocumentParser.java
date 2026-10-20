@@ -110,7 +110,7 @@ final class DocumentParser extends AbstractParser {
                     }
                     // A symbol's drawing is written as lines of its own, not as a block: `rect …`, `line …`, `pin …`.
                     if (drawing != null && symbols.atDrawingLine()) {
-                        drawing.read(reading.line());
+                        drawing.read();
                     } else {
                         gather(body, statement(kind, written, context));
                     }

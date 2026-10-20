@@ -1,6 +1,9 @@
 package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.BoundedTokenCursor.Boundary;
+import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.SymbolElement;
 import org.jmouse.parallax.script.Block.SymbolInput;
@@ -8,6 +11,7 @@ import org.jmouse.parallax.script.Block.SymbolLabel;
 import org.jmouse.parallax.script.Block.SymbolMotion;
 import org.jmouse.parallax.script.Block.SymbolPin;
 import org.jmouse.parallax.script.Block.SymbolProperty;
+import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.SourceText;
 import org.jmouse.units.Quantity;
 
@@ -49,7 +53,7 @@ final class SymbolReader {
     /** The words that open a drawing's elements. */
     private static final Set<String> ELEMENT_SHAPES = Set.of("path", "box", "circle", "line", "glyph", "bitmap", "group");
 
-    /** The words a living drawing adds to {@link org.jmouse.parallax.script.Kind#DRAWING_LINES}. */
+    /** The words a living drawing adds to {@link Kind#DRAWING_LINES}. */
     private static final Set<String> LIVING_LINES = Set.of("input", "live", "box", "circle", "line", "glyph", "bitmap", "group");
 
     /** The words that place an element, each followed by its value. */
@@ -64,23 +68,33 @@ final class SymbolReader {
     /** The most tokens a unit after a number is read from inside a drawing's expression. */
     private static final int LONGEST_UNIT = 3;
 
+    /** A point's x ends at its comma. */
+    private static final Boundary COMMA = (token, after, depth) -> depth == 0 && token.type() == BasicToken.T_COMMA;
+
     private final Reading reading;
+    private final JmxValues values;
 
     SymbolReader(Reading reading) {
         this.reading = reading;
+        this.values = new JmxValues(reading);
     }
 
     /** The block after the word {@code symbol}. */
     Block.Symbol symbol() {
-        Reading.Line header = reading.line();
-        if (!header.isEmpty() && header.value(0).equals("uses")) {
-            return reference(header);
+        if (!reading.atLineEnd() && reading.cursor.checkValueAt(0, "uses")) {
+            return reference();
         }
-        if (!header.isEmpty()) {
-            return shape(header);
+        if (!reading.atLineEnd()) {
+            return shape();
         }
         Drawing drawing = new Drawing();
-        reading.blockLines("symbol").forEach(drawing::read);
+        List<TokenCursor.Savepoint> starts = reading.lineStarts("symbol");
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            drawing.read();
+        }
+        reading.cursor.restore(after);
         return drawing.symbol();
     }
 
@@ -88,90 +102,118 @@ final class SymbolReader {
      * {@code uses resistor-symbol, fuse-symbol}, then in braces when there are any: port lines ({@code a terminal_one})
      * and input bindings ({@code closed = pressed}).
      */
-    private Block.Symbol reference(Reading.Line header) {
-        List<String> variants = variants(header);
+    private Block.Symbol reference() {
+        List<String> variants = variants();
         Map<String, String> ports = new LinkedHashMap<>();
         Map<String, SourceText> bindings = new LinkedHashMap<>();
         if (reading.cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-            for (Reading.Line line : reading.blockLines("symbol uses")) {
-                if (line.size() >= 2 && line.value(1).equals("=")) {
-                    if (line.size() < 3) {
-                        throw line.refusal(1, "an input binding is 'input = expression': 'closed = pressed'");
-                    }
-                    if (bindings.put(line.value(0), line.text(2, line.size())) != null) {
-                        throw line.refusal("input '" + line.value(0) + "' is bound twice");
-                    }
-                    continue;
-                }
-                int portEnd = line.joinedEnd(0);
-                if (portEnd >= line.size() || line.joinedEnd(portEnd) != line.size()) {
-                    throw line.refusal("a line here is 'port pin' — the symbol's port, then the component's pin it is — "
-                            + "or 'input = expression' — what one of the symbol's inputs is drawn from");
-                }
-                String port = line.joinedWord(0);
-                if (ports.put(port, line.joinedWord(portEnd)) != null) {
-                    throw line.refusal("port '" + port + "' is mapped twice");
-                }
+            List<TokenCursor.Savepoint> starts = reading.lineStarts("symbol uses");
+            TokenCursor.Savepoint after = reading.cursor.savepoint();
+            for (TokenCursor.Savepoint start : starts) {
+                reading.cursor.restore(start);
+                portOrBinding(ports, bindings);
             }
+            reading.cursor.restore(after);
         }
         return new Block.Symbol(variants, ports, Optional.empty(), Map.of(), 0, 0, List.of(), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(), bindings);
     }
 
-    /** {@code uses a-symbol, b-symbol}: one slug between commas, none twice. */
-    private static List<String> variants(Reading.Line header) {
-        List<Integer> ends = new ArrayList<>(header.commas(1, header.size()));
-        ends.add(header.size());
-        List<String> variants = new ArrayList<>();
-        int from = 1;
-        for (int end : ends) {
-            if (from >= end || header.joinedEnd(from) != end) {
-                throw header.refusal(Math.min(from, header.size() - 1),
-                        "a symbol reference is 'symbol uses slug[, slug…]': the symbols this part may be drawn with, "
-                                + "the default first");
+    private void portOrBinding(Map<String, String> ports, Map<String, SourceText> bindings) {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor line = reading.lineView();
+        Token first = cursor.current();
+        if (line.remaining() >= 2 && line.checkValueAt(1, "=")) {
+            if (line.remaining() < 3) {
+                throw reading.refusalAhead(1, "an input binding is 'input = expression': 'closed = pressed'");
             }
-            String slug = header.joinedWord(from);
+            String input = cursor.next().value();
+            cursor.next();
+            if (bindings.put(input, values.expression(JmxValues.LINE)) != null) {
+                throw reading.refusal(first, "input '" + input + "' is bound twice");
+            }
+            reading.requireLineEnd();
+            return;
+        }
+        String shape = "a line here is 'port pin' — the symbol's port, then the component's pin it is — "
+                + "or 'input = expression' — what one of the symbol's inputs is drawn from";
+        String port = reading.joinedWord();
+        if (reading.atLineEnd()) {
+            throw reading.refusal(first, shape);
+        }
+        String pin = reading.joinedWord();
+        if (!reading.atLineEnd()) {
+            throw reading.refusal(first, shape);
+        }
+        if (ports.put(port, pin) != null) {
+            throw reading.refusal(first, "port '" + port + "' is mapped twice");
+        }
+    }
+
+    /** {@code uses a-symbol, b-symbol}: one slug between commas, none twice. */
+    private List<String> variants() {
+        TokenCursor cursor = reading.cursor;
+        String shape = "a symbol reference is 'symbol uses slug[, slug…]': the symbols this part may be drawn with, "
+                + "the default first";
+        Token uses = cursor.next();
+        List<String> variants = new ArrayList<>();
+        Token previous = uses;
+        while (true) {
+            if (reading.atLineEnd() || cursor.isCurrent(BasicToken.T_COMMA)) {
+                throw reading.refusal(reading.atLineEnd() ? previous : cursor.current(), shape);
+            }
+            Token from = cursor.current();
+            String slug = reading.joinedWord();
+            if (!reading.atLineEnd() && !cursor.isCurrent(BasicToken.T_COMMA)) {
+                throw reading.refusal(from, shape);
+            }
             if (variants.contains(slug)) {
-                throw header.refusal(from, "'" + slug + "' is named twice");
+                throw reading.refusal(from, "'" + slug + "' is named twice");
             }
             variants.add(slug);
-            from = end + 1;
+            if (reading.atLineEnd()) {
+                return variants;
+            }
+            previous = cursor.next();
         }
-        return variants;
     }
 
     /** {@code box { left d, clk edge;  right q }}: a shape and the pins on each of its sides. */
-    private Block.Symbol shape(Reading.Line header) {
-        String shape = header.joinedWord(0);
+    private Block.Symbol shape() {
+        Token first = reading.cursor.current();
+        String shape = reading.joinedWord();
         if (!SHAPES.contains(shape)) {
-            throw header.refusal("'" + shape + "' is not a shape: a part is drawn as 'symbol box { … }', "
+            throw reading.refusal(first, "'" + shape + "' is not a shape: a part is drawn as 'symbol box { … }', "
                     + "'symbol triangle { … }', or from a symbol document with 'symbol uses <slug> { port pin … }'");
         }
+        reading.skipLine();
         Map<String, List<String>> sides = new LinkedHashMap<>();
-        for (Reading.Line line : reading.blockLines("symbol")) {
-            List<String> words = new ArrayList<>(line.words(1, line.size()));
-            sides.put(line.value(0), List.copyOf(splitByCommas(words)));
+        List<TokenCursor.Savepoint> starts = reading.lineStarts("symbol");
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            String side = reading.cursor.next().value();
+            List<String> entries = new ArrayList<>();
+            StringBuilder entry = new StringBuilder();
+            // d, clk edge → ["d", "clk edge"]: each pin with the words that follow it.
+            while (!reading.atLineEnd()) {
+                Token token = reading.cursor.next();
+                String word = reading.isString(token) ? reading.literal(token) : token.value();
+                if (word.equals(",")) {
+                    entries.add(entry.toString().strip());
+                    entry.setLength(0);
+                } else {
+                    entry.append(entry.isEmpty() ? "" : " ").append(word);
+                }
+            }
+            if (!entry.isEmpty()) {
+                entries.add(entry.toString().strip());
+            }
+            sides.put(side, List.copyOf(entries));
         }
+        reading.cursor.restore(after);
         return new Block.Symbol(List.of(), Map.of(), Optional.of(shape), sides, 0, 0, List.of(), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(), Map.of());
-    }
-
-    /** {@code d, clk edge} → {@code ["d", "clk edge"]}: each pin with the words that follow it. */
-    private static List<String> splitByCommas(List<String> words) {
-        List<String> entries = new ArrayList<>();
-        StringBuilder entry = new StringBuilder();
-        for (String word : words) {
-            if (word.equals(",")) {
-                entries.add(entry.toString().strip());
-                entry.setLength(0);
-            } else {
-                entry.append(entry.isEmpty() ? "" : " ").append(word);
-            }
-        }
-        if (!entry.isEmpty()) {
-            entries.add(entry.toString().strip());
-        }
-        return entries;
     }
 
     /** The lines of a drawn symbol, collected one at a time. */
@@ -189,93 +231,118 @@ final class SymbolReader {
 
         /** Whether a word opens a drawing line. */
         static boolean opens(String word) {
-            return org.jmouse.parallax.script.Kind.DRAWING_LINES.contains(word) || LIVING_LINES.contains(word);
+            return Kind.DRAWING_LINES.contains(word) || LIVING_LINES.contains(word);
         }
 
-        void read(Reading.Line line) {
-            switch (line.value(0)) {
+        /** The drawing line the cursor stands on, and an element's braces after it when it has them. */
+        void read() {
+            TokenCursor cursor = reading.cursor;
+            TokenCursor line = reading.lineView();
+            Token first = cursor.current();
+            int length = line.remaining();
+            switch (first.value()) {
                 case "size" -> {
-                    int by = line.indexOf(1, "x");
-                    if (by < 0) {
-                        throw line.refusal("a size is 'size width x height'");
+                    if (line.offsetOf(1, "x") < 0) {
+                        throw reading.refusal(first, "a size is 'size width x height'");
                     }
-                    width = Values.quantity(line, 1, by);
-                    height = Values.quantity(line, by + 1, line.size());
+                    cursor.next();
+                    width = values.quantity(JmxValues.words(Set.of("x")));
+                    cursor.next();
+                    height = values.quantity(JmxValues.LINE);
                 }
                 case "path" -> {
-                    boolean plain = line.size() == 2 && line.isString(1);
-                    boolean standing = line.size() == 3 && line.isString(1) && "upright".equals(line.value(2));
-                    if ((plain || standing) && !reading.cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-                        (standing ? upright : paths).add(reading.literal(line.get(1)));
+                    boolean plain = length == 2 && reading.isString(line.lookAt(1));
+                    boolean standing = length == 3 && reading.isString(line.lookAt(1)) && line.checkValueAt(2, "upright");
+                    boolean opened = cursor.lookAt(length).type() == BasicToken.T_OPEN_CURLY;
+                    if ((plain || standing) && !opened) {
+                        (standing ? upright : paths).add(reading.literal(line.lookAt(1)));
+                        reading.skipLine();
                     } else {
-                        elements.add(element(line));
+                        elements.add(element());
                     }
                 }
                 case "pin" -> {
-                    int at = line.indexOf(2, "at");
-                    if (at != 2) {
-                        throw line.refusal("a symbol pin is 'pin name at x, y [\"label\"]'");
+                    if (line.offsetOf(2, "at") != 2) {
+                        throw reading.refusal(first, "a symbol pin is 'pin name at x, y [\"label\"]'");
                     }
-                    if (pins.stream().anyMatch(pin -> pin.pin().equals(line.value(1)))) {
-                        throw line.refusal("pin '" + line.value(1) + "' is drawn twice");
+                    String name = line.valueAt(1);
+                    if (pins.stream().anyMatch(pin -> pin.pin().equals(name))) {
+                        throw reading.refusal(first, "pin '" + name + "' is drawn twice");
                     }
-                    int labelAt = line.isString(line.size() - 1) ? line.size() - 1 : line.size();
-                    double[] point = point(line, at + 1, labelAt);
-                    String label = labelAt < line.size() ? reading.literal(line.get(labelAt)) : "";
-                    pins.add(new SymbolPin(line.value(1), point[0], point[1], label));
+                    boolean labelled = reading.isString(line.lookAt(length - 1));
+                    String label = labelled ? reading.literal(line.lookAt(length - 1)) : "";
+                    int labelAt = labelled ? line.lookAt(length - 1).offset() : -1;
+                    cursor.shift(3);
+                    double[] point = point(labelAt);
+                    reading.skipLine();
+                    pins.add(new SymbolPin(name, point[0], point[1], label));
                 }
                 case "label" -> {
-                    int at = line.indexOf(2, "at");
-                    if (at != 2 || !LABEL_SUBJECTS.contains(line.value(1))) {
-                        throw line.refusal("a label is 'label name at x, y' or 'label value at x, y'");
+                    if (line.offsetOf(2, "at") != 2 || !LABEL_SUBJECTS.contains(line.valueAt(1))) {
+                        throw reading.refusal(first, "a label is 'label name at x, y' or 'label value at x, y'");
                     }
-                    double[] point = point(line, at + 1, line.size());
-                    labels.add(new SymbolLabel(line.value(1), point[0], point[1]));
+                    String subject = line.valueAt(1);
+                    cursor.shift(3);
+                    double[] point = point(-1);
+                    labels.add(new SymbolLabel(subject, point[0], point[1]));
                 }
                 case "indicator" -> {
-                    int from = line.indexOf(2, "from");
-                    int to = line.indexOf(from + 1, "to");
+                    int from = line.offsetOf(2, "from");
+                    int to = line.offsetOf(from + 1, "to");
                     if (from != 2 || to < 0) {
-                        throw line.refusal("an indicator is 'indicator name from x, y to x, y'");
+                        throw reading.refusal(first, "an indicator is 'indicator name from x, y to x, y'");
                     }
-                    double[] first = point(line, from + 1, to);
-                    double[] second = point(line, to + 1, line.size());
-                    indicators.add(new Block.SymbolIndicator(line.value(1), Math.min(first[0], second[0]), Math.min(first[1], second[1]),
-                            Math.max(first[0], second[0]), Math.max(first[1], second[1])));
+                    String name = line.valueAt(1);
+                    int toAt = line.lookAt(to).offset();
+                    cursor.shift(3);
+                    double[] start = point(toAt);
+                    cursor.next();
+                    double[] end = point(-1);
+                    indicators.add(new Block.SymbolIndicator(name, Math.min(start[0], end[0]), Math.min(start[1], end[1]),
+                            Math.max(start[0], end[0]), Math.max(start[1], end[1])));
                 }
-                case "input" -> inputs.add(input(line));
-                case "live", "box", "circle", "line", "glyph", "bitmap", "group" -> elements.add(element(line));
-                default -> throw line.refusal("'" + line.value(0) + "' is not part of a drawing: size, path, box, circle, "
-                        + "line, glyph, group, live, input, pin, label or indicator");
+                case "input" -> inputs.add(input());
+                case "live", "box", "circle", "line", "glyph", "bitmap", "group" -> elements.add(element());
+                default -> throw reading.refusal(first, "'" + first.value() + "' is not part of a drawing: size, path, box, "
+                        + "circle, line, glyph, group, live, input, pin, label or indicator");
             }
         }
 
-        /** {@code input closed}, {@code input current 0 .. 20 mA}. */
-        private SymbolInput input(Reading.Line line) {
-            if (line.size() < 2 || line.isString(1)) {
-                throw line.refusal("an input is 'input name [low .. high]' or 'input name picture': 'input closed', "
-                        + "'input current 0 .. 20 mA', 'input screen picture'");
+        /** {@code input closed}, {@code input current 0 .. 20 mA}, {@code input screen picture}. */
+        private SymbolInput input() {
+            TokenCursor cursor = reading.cursor;
+            TokenCursor line = reading.lineView();
+            Token first = cursor.current();
+            int length = line.remaining();
+            if (length < 2 || reading.isString(line.lookAt(1))) {
+                throw reading.refusal(first, "an input is 'input name [low .. high]' or 'input name picture': "
+                        + "'input closed', 'input current 0 .. 20 mA', 'input screen picture'");
             }
-            String name = line.value(1);
+            String name = line.valueAt(1);
             if (inputs.stream().anyMatch(input -> input.name().equals(name))) {
-                throw line.refusal(1, "input '" + name + "' is declared twice");
+                throw reading.refusalAhead(1, "input '" + name + "' is declared twice");
             }
-            if (line.size() == 2) {
+            if (length == 2) {
+                reading.skipLine();
                 return new SymbolInput(name, 0, 1, Optional.empty(), false);
             }
-            if (line.size() == 3 && line.value(2).equals("picture")) {
+            if (length == 3 && line.checkValueAt(2, "picture")) {
+                reading.skipLine();
                 return new SymbolInput(name, 0, 1, Optional.empty(), true);
             }
-            int dots = line.indexOf(2, "..");
-            if (dots < 0) {
-                throw line.refusal(2, "an input's range is 'low .. high': 'input current 0 .. 20 mA'");
+            if (line.offsetOf(2, "..") < 0) {
+                throw reading.refusalAhead(2, "an input's range is 'low .. high': 'input current 0 .. 20 mA'");
             }
-            double low = Values.quantity(line, 2, dots);
-            double high = Values.quantity(line, dots + 1, line.size());
+            Token rangeStart = line.lookAt(2);
+            int endAt = line.lookAt(length).offset();
+            cursor.shift(2);
+            double low = values.quantity(JmxValues.words(Set.of("..")));
+            cursor.next();
+            double high = values.quantity(JmxValues.LINE);
             if (!(high > low)) {
-                throw line.refusal(2, "an input's range runs from a lower to a higher value");
+                throw reading.refusal(rangeStart, "an input's range runs from a lower to a higher value");
             }
-            return new SymbolInput(name, low, high, Optional.of(line.text(2, line.size())), false);
+            return new SymbolInput(name, low, high, Optional.of(reading.text(rangeStart.offset(), endAt)), false);
         }
 
         /**
@@ -283,145 +350,155 @@ final class SymbolReader {
          * {@code [live] shape [name] [at x, y] [size w x h] [radius r] [from x, y] [to x, y] [pivot x, y] ["path data"]}
          * or {@code live when <condition>}.
          */
-        private SymbolElement element(Reading.Line line) {
-            boolean live = line.value(0).equals("live");
+        private SymbolElement element() {
+            TokenCursor cursor = reading.cursor;
+            TokenCursor line = reading.lineView();
+            Token first = cursor.current();
+            boolean live = line.checkValueAt(0, "live");
             int position = live ? 1 : 0;
-            boolean opened = reading.cursor.isCurrent(BasicToken.T_OPEN_CURLY);
-            String shape = line.value(position);
+            boolean opened = cursor.lookAt(line.remaining()).type() == BasicToken.T_OPEN_CURLY;
+            String shape = line.valueAt(position);
             if (shape.equals("when")) {
-                return layer(line, live, position, opened);
+                return layer(first, live, position, opened);
             }
             if (!ELEMENT_SHAPES.contains(shape)) {
-                throw line.refusal(position, "'" + shape + "' is not an element: path, box, circle, line, glyph, group or 'live when'");
+                throw reading.refusalAhead(position, "'" + shape + "' is not an element: path, box, circle, line, glyph, "
+                        + "group or 'live when'");
             }
-            return shaped(line, live, shape, position + 1, opened);
+            cursor.shift(position + 1);
+            return shaped(first, live, shape, opened);
         }
 
         /** {@code live when <condition> { … }}: a layer drawn while its condition holds. */
-        private SymbolElement layer(Reading.Line line, boolean live, int position, boolean opened) {
+        private SymbolElement layer(Token first, boolean live, int position, boolean opened) {
+            TokenCursor line = reading.lineView();
             if (!live) {
-                throw line.refusal(position, "a layer shown on a condition is always 'live when <condition> { … }'");
+                throw reading.refusalAhead(position, "a layer shown on a condition is always 'live when <condition> { … }'");
             }
-            if (line.size() <= position + 1 || !opened) {
-                throw line.refusal(position, "a layer is 'live when <condition> { … }': the condition, then its elements in braces");
+            if (line.remaining() <= position + 1 || !opened) {
+                throw reading.refusalAhead(position, "a layer is 'live when <condition> { … }': the condition, then its "
+                        + "elements in braces");
             }
-            SymbolProperty condition = property(line, "when", position + 1, line.size(), SymbolMotion.LIVE);
+            reading.cursor.shift(position + 1);
+            SymbolProperty condition = property(first, "when", SymbolMotion.LIVE);
             Body body = body();
             return new SymbolElement("when", "", true, "", Map.of(), condition, body.properties, body.hidden,
-                    body.children, line.first().lineNumber());
+                    body.children, first.lineNumber());
         }
 
         /** A shape or a group, placed by the words after it, with what its braces hold. */
-        private SymbolElement shaped(Reading.Line line, boolean live, String shape, int from, boolean opened) {
-            Placing placing = placing(line, shape, from);
+        private SymbolElement shaped(Token first, boolean live, String shape, boolean opened) {
+            Placing placing = placing(first, shape);
             Body body = opened ? body() : new Body();
             if (!shape.equals("group") && !body.children.isEmpty()) {
-                throw line.refusal("only a group or a 'live when' holds other elements");
+                throw reading.refusal(first, "only a group or a 'live when' holds other elements");
             }
             if (!body.hidden.isEmpty()) {
-                throw line.refusal("'hide' stands only in a 'live when' layer");
+                throw reading.refusal(first, "'hide' stands only in a 'live when' layer");
             }
             if (shape.equals("group") && !opened) {
-                throw line.refusal("a group holds its elements in braces: 'group lever pivot -13, 0 { … }'");
+                throw reading.refusal(first, "a group holds its elements in braces: 'group lever pivot -13, 0 { … }'");
             }
             return new SymbolElement(shape, placing.name(), live, placing.path(), placing.geometry(), null, body.properties,
-                    List.of(), body.children, line.first().lineNumber());
+                    List.of(), body.children, first.lineNumber());
         }
 
         /** What an element's line says after its shape: its name, a path's data, and where it stands. */
         private record Placing(String name, String path, Map<String, List<Double>> geometry) {
         }
 
-        private Placing placing(Reading.Line line, String shape, int from) {
-            int position = from;
+        private Placing placing(Token first, String shape) {
+            TokenCursor cursor = reading.cursor;
             String name = "";
-            if (position < line.size() && !line.isString(position) && !GEOMETRY_WORDS.contains(line.value(position))) {
-                name = line.value(position);
-                position++;
+            if (!reading.atLineEnd() && !cursor.isCurrent(BasicToken.T_STRING) && !GEOMETRY_WORDS.contains(cursor.current().value())) {
+                name = cursor.next().value();
             }
             String path = "";
             Map<String, List<Double>> geometry = new LinkedHashMap<>();
-            while (position < line.size()) {
-                if (line.isString(position)) {
+            while (!reading.atLineEnd()) {
+                Token token = cursor.current();
+                if (reading.isString(token)) {
                     if (!shape.equals("path") || !path.isEmpty()) {
-                        throw line.refusal(position, "only a path carries path data, once");
+                        throw reading.refusal(token, "only a path carries path data, once");
                     }
-                    path = reading.literal(line.get(position));
-                    position++;
+                    path = reading.literal(cursor.next());
                     continue;
                 }
-                String word = line.value(position);
+                String word = token.value();
                 if (!GEOMETRY_WORDS.contains(word) || geometry.containsKey(word)) {
-                    throw line.refusal(position, "'" + word + "' does not place a " + shape
+                    throw reading.refusal(token, "'" + word + "' does not place a " + shape
                             + ": it is placed with at, size, radius, from, to and pivot, each once");
                 }
-                int end = nextGeometryWord(line, position + 1);
-                geometry.put(word, geometryValue(line, word, position + 1, end));
-                position = end;
+                cursor.next();
+                geometry.put(word, geometryValue(word));
             }
-            requireGeometry(line, shape, path, geometry);
+            requireGeometry(first, shape, path, geometry);
             return new Placing(name, path, geometry);
         }
 
-        private static int nextGeometryWord(Reading.Line line, int from) {
-            for (int index = from; index < line.size(); index++) {
-                if (line.isString(index) || GEOMETRY_WORDS.contains(line.value(index))) {
-                    return index;
+        /** {@code at x, y}, {@code size w x h}, {@code radius r}: up to the next geometry word, a path's data, or the end. */
+        private List<Double> geometryValue(String word) {
+            TokenCursor line = reading.lineView();
+            Token from = reading.cursor.current();
+            int end = line.remaining();
+            for (int offset = 0; offset < line.remaining(); offset++) {
+                if (reading.isString(line.lookAt(offset)) || GEOMETRY_WORDS.contains(line.valueAt(offset))) {
+                    end = offset;
+                    break;
                 }
             }
-            return line.size();
-        }
-
-        /** {@code at x, y}, {@code size w x h}, {@code radius r}. */
-        private List<Double> geometryValue(Reading.Line line, String word, int from, int to) {
+            int endAt = line.lookAt(end).offset();
             return switch (word) {
-                case "radius" -> List.of(Values.quantity(line, from, to));
+                case "radius" -> List.of(values.quantity(JmxValues.at(endAt)));
                 case "size" -> {
-                    int by = line.indexOf(from, "x");
-                    if (by < 0 || by >= to) {
-                        throw line.refusal(from, "a size is 'size width x height'");
+                    int by = line.offsetOf(0, "x");
+                    if (by < 0 || by >= end) {
+                        throw reading.refusal(from, "a size is 'size width x height'");
                     }
-                    yield List.of(Values.quantity(line, from, by), Values.quantity(line, by + 1, to));
+                    double sizeWidth = values.quantity(JmxValues.words(Set.of("x")));
+                    reading.cursor.next();
+                    yield List.of(sizeWidth, values.quantity(JmxValues.at(endAt)));
                 }
                 default -> {
-                    double[] point = point(line, from, to);
+                    double[] point = point(endAt);
                     yield List.of(point[0], point[1]);
                 }
             };
         }
 
-        private static void requireGeometry(Reading.Line line, String shape, String path, Map<String, List<Double>> geometry) {
+        private void requireGeometry(Token first, String shape, String path, Map<String, List<Double>> geometry) {
             switch (shape) {
                 case "path" -> {
                     if (path.isEmpty()) {
-                        throw line.refusal("a path is 'path [name] \"SVG path data\"'");
+                        throw reading.refusal(first, "a path is 'path [name] \"SVG path data\"'");
                     }
                 }
                 case "box" -> {
                     if (!geometry.containsKey("at") || !geometry.containsKey("size")) {
-                        throw line.refusal("a box is 'box [name] at x, y size width x height', placed by its centre");
+                        throw reading.refusal(first, "a box is 'box [name] at x, y size width x height', placed by its centre");
                     }
                 }
                 case "glyph" -> {
                     if (!geometry.containsKey("at") || !geometry.containsKey("size")) {
-                        throw line.refusal("a glyph is 'glyph [name] at x, y size width x height': a character cell, placed by its centre, "
-                                + "whose character is its 'character' property");
+                        throw reading.refusal(first, "a glyph is 'glyph [name] at x, y size width x height': a character cell, "
+                                + "placed by its centre, whose character is its 'character' property");
                     }
                 }
                 case "bitmap" -> {
                     if (!geometry.containsKey("at") || !geometry.containsKey("size")) {
-                        throw line.refusal("a bitmap is 'bitmap [name] at x, y size width x height': a screen of pixels, placed by its "
-                                + "centre, whose 'pixels' is a picture input and whose 'columns' and 'rows' say its matrix");
+                        throw reading.refusal(first, "a bitmap is 'bitmap [name] at x, y size width x height': a screen of "
+                                + "pixels, placed by its centre, whose 'pixels' is a picture input and whose 'columns' and "
+                                + "'rows' say its matrix");
                     }
                 }
                 case "circle" -> {
                     if (!geometry.containsKey("at") || !geometry.containsKey("radius")) {
-                        throw line.refusal("a circle is 'circle [name] at x, y radius r'");
+                        throw reading.refusal(first, "a circle is 'circle [name] at x, y radius r'");
                     }
                 }
                 case "line" -> {
                     if (!geometry.containsKey("from") || !geometry.containsKey("to")) {
-                        throw line.refusal("a line is 'line [name] from x, y to x, y'");
+                        throw reading.refusal(first, "a line is 'line [name] from x, y to x, y'");
                     }
                 }
                 default -> {
@@ -441,54 +518,101 @@ final class SymbolReader {
             Body body = new Body();
             reading.body("'{' to open the element",
                     () -> reading.refusal("an element is opened with '{' and never closed"),
-                    () -> bodyLine(body, reading.line()));
+                    () -> bodyLine(body));
             return body;
         }
 
         /** One line of an element's braces: a property, a {@code hide}, or an element inside a group. */
-        private void bodyLine(Body body, Reading.Line line) {
-            if (line.isEmpty()) {
+        private void bodyLine(Body body) {
+            TokenCursor cursor = reading.cursor;
+            TokenCursor line = reading.lineView();
+            Token first = cursor.current();
+            if (line.remaining() == 0) {
                 throw reading.refusal("braces open only after an element: 'group lever { … }'");
             }
-            int equals = line.indexOf(0, "=");
-            if (equals == 1 || (equals == 2 && MOTIONS.containsKey(line.value(0)))) {
-                SymbolMotion motion = equals == 1 ? SymbolMotion.STILL : MOTIONS.get(line.value(0));
-                String name = line.value(equals - 1);
+            int equals = line.offsetOf(0, "=");
+            if (equals == 1 || (equals == 2 && MOTIONS.containsKey(line.valueAt(0)))) {
+                SymbolMotion motion = equals == 1 ? SymbolMotion.STILL : MOTIONS.get(line.valueAt(0));
+                String name = line.valueAt(equals - 1);
                 if (body.properties.stream().anyMatch(property -> property.name().equals(name))) {
-                    throw line.refusal(equals - 1, "'" + name + "' is written twice here");
+                    throw reading.refusalAhead(equals - 1, "'" + name + "' is written twice here");
                 }
-                body.properties.add(property(line, name, equals + 1, line.size(), motion));
-            } else if (line.value(0).equals("hide")) {
-                if (line.size() < 2) {
-                    throw line.refusal("'hide' names the elements it hides: 'hide halo'");
+                cursor.shift(equals + 1);
+                body.properties.add(property(first, name, motion));
+            } else if (line.checkValueAt(0, "hide")) {
+                if (line.remaining() < 2) {
+                    throw reading.refusal(first, "'hide' names the elements it hides: 'hide halo'");
                 }
-                line.names(1).forEach(body.hidden::add);
+                cursor.next();
+                body.hidden.addAll(reading.names());
             } else {
-                body.children.add(element(line));
+                body.children.add(element());
             }
         }
 
-        /** A property's values, as written and as jMF, split at the commas outside parentheses. */
-        private SymbolProperty property(Reading.Line line, String name, int from, int to, SymbolMotion motion) {
-            if (from >= to) {
-                throw line.refusal(Math.max(0, from - 1), "'" + name + "' has no value");
+        /** A property's values to the end of the line, as written and as jMF, split at the commas outside parentheses. */
+        private SymbolProperty property(Token first, String name, SymbolMotion motion) {
+            TokenCursor cursor = reading.cursor;
+            if (reading.atLineEnd()) {
+                throw reading.refusal(cursor.lookAt(-1), "'" + name + "' has no value");
             }
+            int start = cursor.current().offset();
             List<String> formulas = new ArrayList<>();
-            int start = from;
-            for (int comma : line.commas(from, to)) {
-                formulas.add(formula(line, start, comma));
-                start = comma + 1;
+            List<Token> segment = new ArrayList<>();
+            int depth = 0;
+            while (!reading.atLineEnd()) {
+                Token token = cursor.next();
+                if (token.type() == BasicToken.T_OPEN_PAREN || token.type() == BasicToken.T_OPEN_BRACKET) {
+                    depth++;
+                } else if (token.type() == BasicToken.T_CLOSE_PAREN || token.type() == BasicToken.T_CLOSE_BRACKET) {
+                    depth--;
+                } else if (depth == 0 && token.type() == BasicToken.T_COMMA) {
+                    formulas.add(formula(segment, token));
+                    segment = new ArrayList<>();
+                    continue;
+                }
+                segment.add(token);
             }
-            formulas.add(formula(line, start, to));
-            return new SymbolProperty(name, line.text(from, to), formulas, motion);
+            Token end = cursor.lookAt(0);
+            formulas.add(formula(segment, end));
+            return new SymbolProperty(name, reading.text(start, reading.cursor.endOfRead()), formulas, motion);
         }
 
-        private double[] point(Reading.Line line, int from, int to) {
-            List<Integer> commas = line.commas(from, to);
-            if (commas.size() != 1) {
-                throw line.refusal(from, "a point is 'x, y'");
+        /**
+         * {@code x, y} up to a place in the source — or to the line's end, for {@code -1} —, each a number with at most
+         * its unit.
+         */
+        private double[] point(int end) {
+            Token from = reading.cursor.current();
+            TokenCursor line = reading.lineView();
+            int limit = line.remaining();
+            if (end >= 0) {
+                for (int offset = 0; offset < line.remaining(); offset++) {
+                    if (line.lookAt(offset).offset() >= end) {
+                        limit = offset;
+                        break;
+                    }
+                }
             }
-            return new double[] {Values.quantity(line, from, commas.getFirst()), Values.quantity(line, commas.getFirst() + 1, to)};
+            int commas = 0;
+            int depth = 0;
+            for (int offset = 0; offset < limit; offset++) {
+                Token.Type type = line.lookAt(offset).type();
+                if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
+                    depth++;
+                } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
+                    depth--;
+                } else if (depth == 0 && type == BasicToken.T_COMMA) {
+                    commas++;
+                }
+            }
+            if (commas != 1) {
+                throw reading.refusal(from, "a point is 'x, y'");
+            }
+            int endAt = line.lookAt(limit).offset();
+            double x = values.quantity(COMMA);
+            reading.cursor.next();
+            return new double[] {x, values.quantity(JmxValues.at(endAt))};
         }
 
         Block.Symbol symbol() {
@@ -500,31 +624,38 @@ final class SymbolReader {
     /**
      * A drawing's expression as jMF: every number followed by a unit in SI ({@code 60 ms} → {@code 0.06},
      * {@code -30 deg} → {@code -0.5236}) and {@code ->} — {@code curve(current, 0 mA -> 0, 20 mA -> 1)} — a comma.
+     *
+     * @param tokens the expression's tokens
+     * @param after  the token after them, where the last one's written text ends
      */
-    private String formula(Reading.Line line, int from, int to) {
+    private String formula(List<Token> tokens, Token after) {
         StringBuilder formula = new StringBuilder();
-        int index = from;
-        while (index < to) {
-            if (line.isString(index)) {
-                throw line.refusal(index, "a drawing's value is a number, an input, a word such as 'burned' or an "
+        int index = 0;
+        while (index < tokens.size()) {
+            Token token = tokens.get(index);
+            if (reading.isString(token)) {
+                throw reading.refusal(token, "a drawing's value is a number, an input, a word such as 'burned' or an "
                         + "expression of them — not a text in quotes");
             }
-            String value = line.value(index);
-            Optional<Double> number = Values.number(value);
+            Optional<Double> number = Values.number(token.value());
             if (number.isPresent()) {
-                int unitTokens = unitAfter(line, index + 1, to);
+                int unitTokens = unitAfter(tokens, index + 1);
                 if (unitTokens > 0) {
-                    String unit = String.join("", line.words(index + 1, index + 1 + unitTokens));
-                    double inSi = Quantity.of(number.get(), unit).orElseThrow().value();
+                    StringBuilder unit = new StringBuilder();
+                    for (Token unitToken : tokens.subList(index + 1, index + 1 + unitTokens)) {
+                        unit.append(reading.isString(unitToken) ? reading.literal(unitToken) : unitToken.value());
+                    }
+                    double inSi = Quantity.of(number.get(), unit.toString()).orElseThrow().value();
                     formula.append('(').append(new BigDecimal(inSi, SI_DIGITS).stripTrailingZeros().toPlainString()).append(") ");
                     index += 1 + unitTokens;
                     continue;
                 }
             }
-            if (value.equals("->")) {
+            if (token.value().equals("->")) {
                 formula.append(", ");
             } else {
-                formula.append(line.text(index, index + 1).text());
+                Token next = index + 1 < tokens.size() ? tokens.get(index + 1) : after;
+                formula.append(reading.text(token.offset(), next.offset()).text());
                 if (!formula.isEmpty() && !Character.isWhitespace(formula.charAt(formula.length() - 1))) {
                     formula.append(' ');
                 }
@@ -535,10 +666,14 @@ final class SymbolReader {
     }
 
     /** How many tokens after a number make its unit, the longest reading first; 0 when none does. */
-    private static int unitAfter(Reading.Line line, int from, int to) {
-        for (int tokens = Math.min(LONGEST_UNIT, to - from); tokens >= 1; tokens--) {
-            if (Quantity.isUnit(String.join("", line.words(from, from + tokens)))) {
-                return tokens;
+    private int unitAfter(List<Token> tokens, int from) {
+        for (int count = Math.min(LONGEST_UNIT, tokens.size() - from); count >= 1; count--) {
+            StringBuilder unit = new StringBuilder();
+            for (Token token : tokens.subList(from, from + count)) {
+                unit.append(reading.isString(token) ? reading.literal(token) : token.value());
+            }
+            if (Quantity.isUnit(unit.toString())) {
+                return count;
             }
         }
         return 0;
