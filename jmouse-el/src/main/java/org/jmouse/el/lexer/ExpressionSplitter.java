@@ -22,18 +22,54 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ExpressionSplitter.class);
 
-    private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
-            "[^\\S\\r\\n]*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
-            "|(?<NUMBER>(?<!\\d)([+-]?\\d+(\\.\\d+)?([Ee][+-]?\\d+)?[FLIDSBClfidsbc]?))" +
-            // ⚠️ The character classes below must NOT exclude '|'. They used to read [^'|\n\r], which
-            // looks like alternation and is not: inside a character class the pipe is a literal, so the
-            // effect was to forbid the one character quoting exists to protect. `'a|b'` failed to parse
-            // anywhere in the language — and a value like "3300|mΩ" is ordinary data, not an edge case.
-            "|(?<STRING>'[^'\\n\\r]*'|\"[^\"\\n\\r]*\")" +
-            "|(?<OPERATOR>\\?\\?|->|\\.\\.|<=|>=|!=|==|&&|\\|\\||-=|\\+=|\\+\\+|--|\\*\\*|[-+*/%^><=!])" +
-            "|(?<NL>[\\n\\r]+)" +
-            "|(?<OTHER>\\S))"
-    );
+    /**
+     * What a language's numbers and operators look like, where languages built on the engine differ.
+     *
+     * <p>⚠️ A number never carries a sign. Whether {@code -} negates or subtracts is decided by what stands
+     * before it — {@code b-2.5} subtracts, {@code -2.5} negates — and only the parser knows that; a lexer that
+     * glued the sign on read {@code b-2.5} as {@code b} followed by the number {@code -2.5}.</p>
+     *
+     * @param typedNumbers  whether a letter ending a number is a Java type suffix — {@code 3d} a double,
+     *                      {@code 2L} a long. Only a letter that ends the word is one: {@code 24c02} is a number and
+     *                      a name. Mathematics has none: there {@code 2d} is two times {@code d}.
+     * @param stepOperators whether {@code ++} and {@code --} are operators of their own. Mathematics has no
+     *                      steps: there {@code 2--1} is two minus minus one.
+     */
+    public record Dialect(boolean typedNumbers, boolean stepOperators) {
+
+        /** jME's own: typed numbers and step operators, as Java writes them. */
+        public static final Dialect PROGRAMMING = new Dialect(true, true);
+
+        /** A formula's: no type suffixes and no steps. */
+        public static final Dialect MATHEMATICS = new Dialect(false, false);
+    }
+
+    private final Pattern expressionPattern;
+
+    public ExpressionSplitter() {
+        this(Dialect.PROGRAMMING);
+    }
+
+    public ExpressionSplitter(Dialect dialect) {
+        this.expressionPattern = expressionPattern(dialect);
+    }
+
+    private static Pattern expressionPattern(Dialect dialect) {
+        String typeSuffix = dialect.typedNumbers() ? "(?:[FLIDSBClfidsbc](?![A-Za-z0-9_]))?" : "";
+        String steps = dialect.stepOperators() ? "\\+\\+|--|" : "";
+        return Pattern.compile(
+                "[^\\S\\r\\n]*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
+                "|(?<NUMBER>(?<!\\d)(\\d+(\\.\\d+)?([Ee][+-]?\\d+)?" + typeSuffix + "))" +
+                // ⚠️ The character classes below must NOT exclude '|'. They used to read [^'|\n\r], which
+                // looks like alternation and is not: inside a character class the pipe is a literal, so the
+                // effect was to forbid the one character quoting exists to protect. `'a|b'` failed to parse
+                // anywhere in the language — and a value like "3300|mΩ" is ordinary data, not an edge case.
+                "|(?<STRING>'[^'\\n\\r]*'|\"[^\"\\n\\r]*\")" +
+                "|(?<OPERATOR>\\?\\?|->|\\.\\.|<=|>=|!=|==|&&|\\|\\||-=|\\+=|" + steps + "\\*\\*|[-+*/%^><=!])" +
+                "|(?<NL>[\\n\\r]+)" +
+                "|(?<OTHER>\\S))"
+        );
+    }
 
     public static final String IDENTIFIER = "IDENTIFIER";
     public static final String NUMBER     = "NUMBER";
@@ -69,7 +105,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
 
         // Create a sub-sequence of the text for processing.
         CharSequence segment = text.subSequence(offset, length);
-        Matcher      matcher = EXPRESSION_PATTERN.matcher(segment);
+        Matcher      matcher = expressionPattern.matcher(segment);
         int          index   = 0;
 
         while (matcher.find(index)) {

@@ -11,7 +11,7 @@ import static org.jmouse.el.extension.calculator.operation.OperationType.*;
  * <p>
  * Supports binary operations (PLUS, MINUS, MULTIPLY, DIVIDE, MODULUS, EXPONENTIAL)
  * where the left operand is an {@link Double} and the right operand is any {@link Number},
- * as well as unary operations (INCREMENT, DECREMENT).
+ * as well as unary operations (INCREMENT, DECREMENT, NEGATE).
  * </p>
  */
 public class DoubleOperationHandler implements OperationHandler<Double, Number> {
@@ -65,6 +65,7 @@ public class DoubleOperationHandler implements OperationHandler<Double, Number> 
             case EXPONENTIAL -> Math.pow(x, (int) y);
             case INCREMENT   -> x + 1;
             case DECREMENT   -> x - 1;
+            case NEGATE      -> -x;
         };
     }
 

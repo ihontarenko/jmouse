@@ -11,7 +11,7 @@ import static org.jmouse.el.extension.calculator.operation.OperationType.*;
  * <p>
  * Supports binary operations (PLUS, MINUS, MULTIPLY, DIVIDE, MODULUS, EXPONENTIAL)
  * where the left operand is an {@link Character} and the right operand is any {@link Number},
- * as well as unary operations (INCREMENT, DECREMENT).
+ * as well as unary operations (INCREMENT, DECREMENT, NEGATE).
  * </p>
  */
 public class CharacterOperationHandler implements OperationHandler<Character, Number> {
@@ -62,6 +62,7 @@ public class CharacterOperationHandler implements OperationHandler<Character, Nu
             case EXPONENTIAL -> Math.pow(x, y);
             case INCREMENT   -> (char) (x + 1);
             case DECREMENT   -> (char) (x - 1);
+            case NEGATE      -> throw new IllegalOperationException("a character has no sign to change");
         };
     }
 

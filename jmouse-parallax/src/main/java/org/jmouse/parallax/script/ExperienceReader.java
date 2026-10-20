@@ -32,6 +32,13 @@ import java.util.Map;
 public final class ExperienceReader {
 
     /**
+     * A document's numbers are a formula's — {@code 2d} is two times {@code d}, and a part number such as {@code 3d} or
+     * {@code 24c02} is not a typed Java literal —, but its behaviour is jMS, which counts with {@code ++} and
+     * {@code --}.
+     */
+    static final ExpressionSplitter.Dialect DIALECT = new ExpressionSplitter.Dialect(false, true);
+
+    /**
      * Documents already read, by name and text: reading is a pure function of the text, and a circuit reads the same
      * component models every time it is built — on every run, every edit and every moved slider. Bounded, least recently
      * used first out.
@@ -56,7 +63,7 @@ public final class ExperienceReader {
      */
     public static List<ExperienceDocument> read(String source, String documentName) {
         ExperienceNotation.Normalized normalized = ExperienceNotation.normalize(source);
-        Lexer lexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), new ScriptRecognizer()));
+        Lexer lexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(DIALECT), new ScriptRecognizer()));
         TokenCursor cursor;
         try {
             cursor = lexer.tokenize(new StringSource(documentName, normalized.source()));

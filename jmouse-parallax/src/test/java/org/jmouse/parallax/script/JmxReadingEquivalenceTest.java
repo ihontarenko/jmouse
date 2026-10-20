@@ -81,7 +81,7 @@ class JmxReadingEquivalenceTest {
         ExperienceNotation.Normalized normalized = ExperienceNotation.normalize(source);
         TokenCursor cursor;
         try {
-            cursor = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), new ScriptRecognizer()))
+            cursor = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(ExperienceReader.DIALECT), new ScriptRecognizer()))
                     .tokenize(new StringSource(documentName, normalized.source()));
         } catch (SyntaxErrorException failure) {
             throw new ExperienceParseException(documentName, 0, 0, failure.getMessage());

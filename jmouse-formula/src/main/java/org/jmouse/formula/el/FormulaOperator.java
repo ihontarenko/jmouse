@@ -9,15 +9,14 @@ import org.jmouse.formula.MathematicalFunction;
 
 /**
  * The operators jMF adds to jME. {@code ^} is registered on jME's caret token, so in a formula container it
- * replaces XOR: in mathematics a caret is a power. {@code NEGATE} and {@code FACTORIAL} are never registered — they
- * only name the operators of a {@link NegationNode} and a {@link FactorialNode}, because a leading minus and a
- * trailing {@code !} are parsed, not looked up.
+ * replaces XOR: in mathematics a caret is a power. {@code FACTORIAL} is never registered — it only
+ * names the operator of a {@link FactorialNode}, because a trailing {@code !} is parsed, not looked up; a leading
+ * minus is jME's own negation.
  */
 public enum FormulaOperator implements Operator {
 
     DIVIDE(BasicToken.T_DIVIDE, "DIVIDE", 700, FormulaOperator::divide),
     POWER(BasicToken.T_CARET, "POWER", 800, operands -> Math.pow(number(operands[0]), number(operands[1]))),
-    NEGATE(BasicToken.T_MINUS, "NEGATE", 900, operands -> -number(operands[0])),
     FACTORIAL(BasicToken.T_NEGATE, "FACTORIAL", 1000,
             operands -> MathematicalFunction.FACTORIAL.real().apply(new double[]{number(operands[0])}));
 

@@ -45,6 +45,7 @@ public class BigIntegerOperationHandler implements OperationHandler<BigInteger, 
             // unary operations
             case INCREMENT   -> x.add(BigInteger.ONE);
             case DECREMENT   -> x.subtract(BigInteger.ONE);
+            case NEGATE      -> x.negate();
         };
     }
 

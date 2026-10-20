@@ -22,7 +22,12 @@ public enum UnaryCalculator implements Calculator<Object> {
     /**
      * Decrement operator ({@code --}), decreases a value by 1.
      */
-    DECREMENT(new DecrementOperation());
+    DECREMENT(new DecrementOperation()),
+
+    /**
+     * Arithmetic negation ({@code -x}), changes a number's sign and keeps its type.
+     */
+    NEGATE(operand -> MathematicCalculator.CALCULATION.unary(OperationType.NEGATE, operand));
 
     private final UnaryOperator<Object> operation;
 

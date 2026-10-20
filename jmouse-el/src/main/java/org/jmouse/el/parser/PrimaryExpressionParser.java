@@ -5,7 +5,9 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.PropertyNode;
 import org.jmouse.el.node.expression.unary.NegateUnaryOperation;
+import org.jmouse.el.node.expression.unary.NegativeUnaryOperation;
 import org.jmouse.el.node.expression.unary.PostfixUnaryOperation;
 import org.jmouse.el.node.expression.unary.PrefixUnaryOperation;
 
@@ -37,10 +39,17 @@ public class PrimaryExpressionParser implements Parser {
         } else if (cursor.isCurrent(T_NEGATE)) {
             cursor.next();
             left = new NegateUnaryOperation((Expression) parse(cursor, context));
+        } else if (cursor.isCurrent(T_MINUS)) {
+            // A sign is the parser's, not the number's: here, where an operand is expected, a minus negates.
+            cursor.next();
+            left = new NegativeUnaryOperation((Expression) parse(cursor, context));
+        } else if (cursor.isCurrent(T_PLUS)) {
+            cursor.next();
+            left = parse(cursor, context);
         } else if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             Token token = cursor.peek();
             cursor.next();
-            left = new PrefixUnaryOperation((Expression) parse(cursor, context), context.getOperator(token.type()));
+            left = new PrefixUnaryOperation(variable(token, parse(cursor, context)), context.getOperator(token.type()));
         } else if (cursor.matchesSequence(T_IDENTIFIER)) {
             left = context.getParser(PropertyParser.class).parse(cursor, context);
         } else if (cursor.isCurrent(T_OPEN_BRACKET)) {
@@ -56,7 +65,7 @@ public class PrimaryExpressionParser implements Parser {
         }
 
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
-            left = new PostfixUnaryOperation((Expression) left, context.getOperator(cursor.peek().type()));
+            left = new PostfixUnaryOperation(variable(cursor.peek(), left), context.getOperator(cursor.peek().type()));
             cursor.next();
         }
 
@@ -69,6 +78,18 @@ public class PrimaryExpressionParser implements Parser {
         }
 
         parent.add(left);
+    }
+
+    /**
+     * What a step operator changes: a variable. {@code --10} has nothing to change, and used to read as
+     * {@code 10}; Java refuses it, and so does this.
+     */
+    private static Expression variable(Token step, Node operand) {
+        if (!(operand instanceof PropertyNode property)) {
+            throw new ParseException("'%s' changes a variable, and %s is not one".formatted(step.value(),
+                    operand instanceof Expression expression ? "'" + expression.toSource() + "'" : "what follows"));
+        }
+        return property;
     }
 
 }

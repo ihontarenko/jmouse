@@ -8,6 +8,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
+import org.jmouse.el.node.expression.unary.NegativeUnaryOperation;
 import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.PrimaryExpressionParser;
@@ -68,7 +69,7 @@ public class FormulaOperatorParser extends OperatorParser {
     private Expression powerOperand(TokenCursor cursor, ParserContext context) {
         if (cursor.isCurrent(BasicToken.T_MINUS)) {
             cursor.next();
-            return new NegationNode(powerOperand(cursor, context));
+            return new NegativeUnaryOperation(powerOperand(cursor, context));
         }
         if (cursor.isCurrent(BasicToken.T_PLUS)) {
             cursor.next();
@@ -91,7 +92,7 @@ public class FormulaOperatorParser extends OperatorParser {
         }
         if (cursor.isCurrent(BasicToken.T_MINUS)) {
             cursor.next();
-            return new NegationNode(expression(cursor, context, POWER_PRECEDENCE));
+            return new NegativeUnaryOperation(expression(cursor, context, POWER_PRECEDENCE));
         }
         if (cursor.isCurrent(BasicToken.T_PLUS)) {
             cursor.next();

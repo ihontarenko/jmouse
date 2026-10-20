@@ -12,6 +12,7 @@ import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.node.expression.LiteralNode;
 import org.jmouse.el.node.expression.PropertyNode;
 import org.jmouse.el.node.expression.TernaryNode;
+import org.jmouse.el.node.expression.unary.NegativeUnaryOperation;
 import org.jmouse.formula.Differentiation;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;
@@ -70,7 +71,7 @@ public final class FormulaTranslator {
 
     public Formula translate(Expression expression) {
         return switch (expression) {
-            case NegationNode negation -> new Formula.Negation(translate(negation.getOperand()));
+            case NegativeUnaryOperation negation -> new Formula.Negation(translate(negation.getOperand()));
             case NotNode not -> new Formula.Not(translate(not.getOperand()));
             case FactorialNode factorial -> Formula.call(MathematicalFunction.FACTORIAL, translate(factorial.getOperand()));
             case BinaryOperation binary -> binary(binary);
@@ -179,7 +180,7 @@ public final class FormulaTranslator {
             }
             return new Formula.HostCall(rates.get(variable), arguments);
         }
-        if (above instanceof NegationNode negation) {
+        if (above instanceof NegativeUnaryOperation negation) {
             Formula operand = over(negation.getOperand(), variable);
             return operand == null ? null : new Formula.Negation(operand);
         }

@@ -4,6 +4,10 @@ import org.jmouse.formula.MathematicalConstant;
 import org.jmouse.formula.FormulaException;
 import org.jmouse.formula.Formula;
 import org.jmouse.el.ExpressionLanguage;
+import org.jmouse.el.lexer.DefaultLexer;
+import org.jmouse.el.lexer.DefaultTokenizer;
+import org.jmouse.el.lexer.ExpressionRecognizer;
+import org.jmouse.el.lexer.ExpressionSplitter;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.parser.DefaultParserContext;
@@ -40,7 +44,7 @@ public final class FormulaLanguage {
     public FormulaLanguage() {
         FormulaExtensionContainer extensions = new FormulaExtensionContainer();
         DefaultParserContext context = new DefaultParserContext(extensions);
-        this.language = new ExpressionLanguage(extensions, new FormulaLexer(), context, ExpressionParser.class);
+        this.language = new ExpressionLanguage(extensions, new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(ExpressionSplitter.Dialect.MATHEMATICS), new ExpressionRecognizer())), context, ExpressionParser.class);
         this.hostCalls = Set.of();
         this.rates = Map.of();
     }

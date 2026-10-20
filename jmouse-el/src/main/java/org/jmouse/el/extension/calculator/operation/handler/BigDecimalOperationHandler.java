@@ -44,6 +44,7 @@ public class BigDecimalOperationHandler implements OperationHandler<BigDecimal, 
             // unary operations
             case INCREMENT   -> x.add(BigDecimal.ONE);
             case DECREMENT   -> x.subtract(BigDecimal.ONE);
+            case NEGATE      -> x.negate();
         };
     }
 
