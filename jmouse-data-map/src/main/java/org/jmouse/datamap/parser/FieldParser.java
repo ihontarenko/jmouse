@@ -20,7 +20,7 @@ public class FieldParser extends AbstractParser {
         if (DataMapValueReading.atValueEnd(cursor)) {
             throw new DataMapSyntaxException(cursor, "'" + field.getName() + "' has no value");
         }
-        field.setValue(DataMapValueReading.value(cursor));
+        field.setValue(DataMapValueReading.value(cursor, context));
         if (DataMapReading.atSource(cursor)) {
             field.setSource(DataMapReading.citation(cursor));
         }

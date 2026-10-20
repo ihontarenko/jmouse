@@ -205,7 +205,8 @@ public class CoreExtension implements Extension {
                 new ParametersParser(),
                 new BeanAccessParser(),
                 new VariableAliasParser(),
-                new PlaceholderParser()
+                new PlaceholderParser(),
+                new QuantityParser()
         );
     }
 

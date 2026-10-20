@@ -6,7 +6,9 @@ import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.support.SourceReading;
-import org.jmouse.units.Quantity;
+import org.jmouse.el.node.expression.literal.QuantityLiteralNode;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.QuantityParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +36,12 @@ final class DataMapValueReading {
     }
 
     /** The value from where the cursor stands. */
-    static DataMapValue value(TokenCursor cursor) {
+    static DataMapValue value(TokenCursor cursor, ParserContext context) {
         List<DataMapValue> items = new ArrayList<>();
-        items.add(item(cursor));
+        items.add(item(cursor, context));
         while (atText(cursor, COMMA)) {
             cursor.next();
-            items.add(item(cursor));
+            items.add(item(cursor, context));
         }
         return items.size() == 1 ? items.getFirst() : new DataMapValue.Sequence(items);
     }
@@ -49,61 +51,46 @@ final class DataMapValueReading {
         return DataMapReading.atLineEnd(cursor) || DataMapReading.atSource(cursor);
     }
 
-    private static DataMapValue item(TokenCursor cursor) {
+    private static DataMapValue item(TokenCursor cursor, ParserContext context) {
         requireValue(cursor);
-        if (cursor.isCurrent(BasicToken.T_STRING)) {
-            return rangeFrom(cursor, new DataMapValue.Text(DataMapReading.text(cursor.next())));
+        if (!cursor.isCurrent(BasicToken.T_STRING)) {
+            TokenCursor.Savepoint start = cursor.savepoint();
+            String name = DataMapReading.word(cursor);
+            if (atText(cursor, ASSIGN)) {
+                cursor.next();
+                return new DataMapValue.Assignment(name, rangeOrBound(cursor, context));
+            }
+            cursor.restore(start);
         }
-        Token first = cursor.lookAt(0);
-        String word = DataMapReading.word(cursor);
-        if (atText(cursor, ASSIGN)) {
-            cursor.next();
-            return new DataMapValue.Assignment(word, rangeOrBound(cursor));
-        }
-        return rangeFrom(cursor, bound(cursor, first, word));
+        return rangeOrBound(cursor, context);
     }
 
-    private static DataMapValue rangeOrBound(TokenCursor cursor) {
-        requireValue(cursor);
-        if (cursor.isCurrent(BasicToken.T_STRING)) {
-            return rangeFrom(cursor, new DataMapValue.Text(DataMapReading.text(cursor.next())));
-        }
-        Token first = cursor.lookAt(0);
-        return rangeFrom(cursor, bound(cursor, first, DataMapReading.word(cursor)));
-    }
-
-    /** A bound already read, and the range it begins when {@code ..} follows it. */
-    private static DataMapValue rangeFrom(TokenCursor cursor, DataMapValue from) {
+    /** A bound, and the range it begins when {@code ..} follows it. */
+    private static DataMapValue rangeOrBound(TokenCursor cursor, ParserContext context) {
+        DataMapValue from = bound(cursor, context);
         if (!atRange(cursor)) {
             return from;
         }
         cursor.next();
-        requireValue(cursor);
-        if (cursor.isCurrent(BasicToken.T_STRING)) {
-            return new DataMapValue.Range(from, new DataMapValue.Text(DataMapReading.text(cursor.next())));
-        }
-        Token first = cursor.lookAt(0);
-        return new DataMapValue.Range(from, bound(cursor, first, DataMapReading.word(cursor)));
+        return new DataMapValue.Range(from, bound(cursor, context));
     }
 
     /**
-     * A bound whose first word is read: a number with its unit, written joined ({@code 2.2µs}) or apart
-     * ({@code 19 ns}); a link; a word.
+     * A text; a number with its unit, written joined ({@code 2.2µs}) or apart ({@code 19 ns}), read by the engine's
+     * {@link QuantityParser}; a link; a word.
      */
-    private static DataMapValue bound(TokenCursor cursor, Token first, String word) {
-        Optional<Quantity> joined = Quantity.parse(word);
-        if (joined.isPresent()) {
-            if (joined.get().unit().isEmpty() && DataMapReading.atWord(cursor) && !atRange(cursor)
-                    && !DataMapReading.atSource(cursor)) {
-                TokenCursor.Savepoint beforeUnit = cursor.savepoint();
-                Optional<Quantity> apart = Quantity.parse(word + " " + DataMapReading.word(cursor));
-                if (apart.isPresent()) {
-                    return new DataMapValue.Measure(apart.get());
-                }
-                cursor.restore(beforeUnit);
-            }
-            return new DataMapValue.Measure(joined.get());
+    private static DataMapValue bound(TokenCursor cursor, ParserContext context) {
+        requireValue(cursor);
+        if (cursor.isCurrent(BasicToken.T_STRING)) {
+            return new DataMapValue.Text(DataMapReading.text(cursor.next()));
         }
+        Optional<QuantityLiteralNode> quantity = ((QuantityParser) context.getParser(QuantityParser.class))
+                .read(cursor, context);
+        if (quantity.isPresent()) {
+            return new DataMapValue.Measure(quantity.get().getQuantity());
+        }
+        Token first = cursor.lookAt(0);
+        String word = DataMapReading.word(cursor);
         int link = word.indexOf(LINK);
         if (link >= 0) {
             return link(cursor, first, word, link);

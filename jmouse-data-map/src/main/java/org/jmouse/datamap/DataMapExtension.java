@@ -8,6 +8,7 @@ import org.jmouse.el.extension.Extension;
 import org.jmouse.el.language.parser.StatementsParser;
 import org.jmouse.el.parser.AutodetectFirstParser;
 import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.QuantityParser;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * <p>⚠️ <strong>The whole of a jMD reader's vocabulary, deliberately without {@code CoreExtension}.</strong> A jMD
  * value is a word, a number with its unit, a text or a link — never an expression — so the engine's operators,
  * functions, filters and expression parsers would only be places for a document to mean something it does not say.
+ * The engine's {@link QuantityParser} reads a value's number and unit, as every language with units does.
  * The engine's {@link StatementsParser} and {@link AutodetectFirstParser} are listed because they are not anyone's
  * but {@code CoreExtension}'s otherwise, and a container they were never added to answers {@code null}.</p>
  */
@@ -30,7 +32,8 @@ public class DataMapExtension implements Extension {
                 new DataMapDocumentParser(),
                 new EntryParser(),
                 new FieldParser(),
-                new UnreadableLineParser()
+                new UnreadableLineParser(),
+                new QuantityParser()
         );
     }
 }
