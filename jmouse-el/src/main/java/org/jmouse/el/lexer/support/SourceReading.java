@@ -188,7 +188,16 @@ public final class SourceReading {
             last = cursor.next();
         }
 
-        return text(cursor, first, last);
+        // ⚠️ Cut to where the next token starts, not to where the last one's value ends: a token can be shorter than
+        // what it was read from — 3d is lexed as a double, 3 —, and its length would drop the 'd' of scaling-3d.
+        TokenizableSource source = cursor.source();
+        if (source == null) {
+            return text(cursor, first, last);
+        }
+        // Where the cursor stands now — a token, a view's end, or the text's end, each at its own offset.
+        Token next = cursor.lookAt(0);
+        int end = next == null || next == last ? source.length() : next.offset();
+        return source.subSequence(Math.max(0, first.offset()), Math.min(end, source.length())).toString().strip();
     }
 
     /**
