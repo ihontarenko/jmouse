@@ -39,6 +39,14 @@ component "I²C target" as i2c-target type interface {
         power Vcc, GND
     }
 
+    # What every check of an I²C chip stands on: a 5 V supply and the bus's two pull-ups. A chip's expectation names it,
+    # 'bench i2c-bus for 1 ms { … }', and writes only its controller and itself.
+    bench i2c-bus {
+        V1 voltage-source (Vcc, 0) U_output = 5 V
+        R1 resistor (Vcc, scl) resistance = 4.7 kOhm
+        R2 resistor (Vcc, sda) resistance = 4.7 kOhm
+    }
+
     state {
         phase = 0 discrete           "where the transaction stands: IDLE, ADDRESSING, WRITTEN_TO or READ_FROM"
         bits = 0 discrete            "bits of the byte clocked so far; ACKNOWLEDGING while the ninth clock is"

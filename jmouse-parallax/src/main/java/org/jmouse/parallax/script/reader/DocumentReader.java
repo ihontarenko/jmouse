@@ -190,6 +190,7 @@ public final class DocumentReader {
             case "run" -> run();
             case "view" -> presentation.view();
             case "expect" -> circuits.expectation(keyword);
+            case "bench" -> circuits.sharedBench(keyword);
             case "symbol" -> symbols.symbol();
             case "parts" -> circuits.parts();
             case "nets" -> circuits.nets();
@@ -282,7 +283,7 @@ public final class DocumentReader {
         }
         if (document.kind() == Kind.COMPONENT) {
             for (Block.Expectation expectation : document.blocks(Block.Expectation.class)) {
-                if (expectation.bench().isEmpty()) {
+                if (expectation.bench().isEmpty() && expectation.sharedBench() == null) {
                     throw new ExperienceParseException(reading.document(), expectation.line(), 0, "expectation '"
                             + expectation.title() + "' of a component needs a bench: 'bench for 3 ms { parts }'");
                 }

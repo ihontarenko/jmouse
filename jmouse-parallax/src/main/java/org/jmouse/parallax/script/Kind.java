@@ -112,7 +112,7 @@ public enum Kind {
         static final Set<String> EVOLVING = with(MATHEMATICS, "state", "equations");
 
         static final Set<String> COMPONENT = Set.of("meta", "parameters", "formulas", "pins", "nodes", "state",
-                "equations", "heat", "behaviour", "symbol", "parts", "nets", "view", "expect", "display", "measure", "leads");
+                "equations", "heat", "behaviour", "symbol", "parts", "nets", "view", "expect", "bench", "display", "measure", "leads");
 
         static final Set<String> CIRCUIT = Set.of("meta", "parameters", "formulas", "sheet", "parts", "nets", "layout",
                 "ports", "probes", "analysis", "symbol", "view", "expect");

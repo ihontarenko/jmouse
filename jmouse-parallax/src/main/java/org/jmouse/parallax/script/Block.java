@@ -251,6 +251,20 @@ public sealed interface Block {
         }
     }
 
+    /**
+     * {@code bench i2c-bus { parts }}: parts a component's expectations share — a supply, the bus's pull-ups —, written
+     * once; inherited by the parts that extend it.
+     */
+    record Bench(String title, List<Part> parts) implements Block {
+        public Bench {
+            parts = List.copyOf(parts);
+        }
+
+        public String name() {
+            return "bench";
+        }
+    }
+
     /** {@code behaviour { … }}: jMS handlers and functions, parsed by jMS. */
     record Behaviour(ScriptNode script) implements Block {
         public String name() {
@@ -356,8 +370,15 @@ public sealed interface Block {
      * @param realistic   whether the bench is a realistic one — its instruments load what they read, as real ones do
      * @param measure     the words of the measurement, as written
      */
-    record Expectation(String title, String reference, List<Part> bench, double duration, Double temperature,
-                       boolean realistic, List<String> measure, Criterion criterion, int line) implements Block {
+    /**
+     * {@code expect …}: its bench — the parts it writes, over the shared bench it names ({@code bench i2c-bus for 1 ms})
+     * when it names one —, the measurement and what it must come to.
+     *
+     * @param sharedBench the component's or its base's {@code bench} it stands on; null for a bench of its own alone
+     */
+    record Expectation(String title, String reference, List<Part> bench, String sharedBench, double duration,
+                       Double temperature, boolean realistic, List<String> measure, Criterion criterion, int line)
+            implements Block {
         public Expectation {
             bench = List.copyOf(bench);
             measure = List.copyOf(measure);

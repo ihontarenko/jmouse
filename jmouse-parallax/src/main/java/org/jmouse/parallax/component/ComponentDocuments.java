@@ -242,7 +242,7 @@ public final class ComponentDocuments {
                 header(document, library), units, parameters, texts(document), pins, buses, nodes, digitalNodes, symbol(document, buses),
                 subcircuit(document, pins), formulas(document, library), states, locals, localTypes, equations,
                 document.block(Block.Behaviour.class).map(Block.Behaviour::script).orElse(null),
-                expectations(document, values), displays(document), measures(document), leads(document, pins),
+                expectations(document, values), benches(document), displays(document), measures(document), leads(document, pins),
                 document.block(Block.Display.class).map(Block.Display::units).orElse(Map.of()),
                 document.block(Block.Display.class).map(Block.Display::captions).orElse(Map.of()), heatOf(document, library));
     }
@@ -587,9 +587,20 @@ public final class ComponentDocuments {
         }
     }
 
+    /** The benches its expectations share, by name: one name, one bench. */
+    private static Map<String, List<Block.Part>> benches(ExperienceDocument document) {
+        Map<String, List<Block.Part>> benches = new LinkedHashMap<>();
+        for (Block.Bench bench : document.blocks(Block.Bench.class)) {
+            if (benches.put(bench.title(), bench.parts()) != null) {
+                throw new IllegalArgumentException(document.title() + ": bench '" + bench.title() + "' is written twice");
+            }
+        }
+        return benches;
+    }
+
     private static List<Expectation> expectations(ExperienceDocument document, Map<String, Double> values) {
         return document.blocks(Block.Expectation.class).stream().map(expectation -> new Expectation(expectation.title(),
-                expectation.reference(), expectation.bench(), expectation.duration(), expectation.temperature(),
+                expectation.reference(), expectation.bench(), expectation.sharedBench(), expectation.duration(), expectation.temperature(),
                 expectation.realistic(), expectation.measure(),
                 criterion(expectation.criterion(), values, document), expectation.line())).toList();
     }

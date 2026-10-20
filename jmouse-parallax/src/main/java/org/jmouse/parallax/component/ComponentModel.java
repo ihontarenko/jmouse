@@ -38,7 +38,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
                              List<String> symbol, List<SubcircuitLine> subcircuit, List<String> formulas, List<State> states,
                              Map<String, String> locals, Map<String, ValueType> localTypes, List<Equation> equations,
                              ScriptNode behaviour,
-                             List<Expectation> expectations, Map<String, String> displays, Map<String, Measure> measures,
+                             List<Expectation> expectations, Map<String, List<Block.Part>> benches,
+                             Map<String, String> displays, Map<String, Measure> measures,
                              Map<String, LeadLook> leads, Map<String, String> displayUnits,
                              Map<String, String> displayCaptions, Heat heat) {
 
@@ -61,6 +62,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         localTypes = orderedCopy(localTypes);
         equations = List.copyOf(equations);
         expectations = List.copyOf(expectations);
+        // The benches its expectations share, by name: a base's reach the parts that extend it.
+        benches = orderedCopy(benches);
         displays = orderedCopy(displays);
         measures = orderedCopy(measures);
         leads = orderedCopy(leads);
@@ -95,7 +98,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
     /** This model with another heat law: the one a part warms by when it writes none of its own. */
     ComponentModel withHeat(Heat law) {
         return new ComponentModel(name, family, kind, header, units, parameters, texts, pins, buses, nodes, digitalNodes, symbol, subcircuit,
-                formulas, states, locals, localTypes, equations, behaviour, expectations, displays, measures, leads,
+                formulas, states, locals, localTypes, equations, behaviour, expectations, benches, displays, measures, leads,
                 displayUnits, displayCaptions, law);
     }
 
@@ -130,7 +133,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
                 behaves ? formulas : base.formulas, behaves ? statesOver(base) : base.states, behaves ? locals : base.locals,
                 behaves ? localTypes : base.localTypes,
                 behaves ? equations : base.equations, behaves ? behaviourOver(base.behaviour) : base.behaviour, expectations,
-                byName(base.displays, displays), measures.isEmpty() ? base.measures : measures,
+                byName(base.benches, benches), byName(base.displays, displays), measures.isEmpty() ? base.measures : measures,
                 leads.isEmpty() ? base.leads : leads, byName(base.displayUnits, displayUnits),
                 byName(base.displayCaptions, displayCaptions), heat == null ? base.heat : heat);
     }
@@ -372,7 +375,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
      *
      * @param temperature the bench's temperature in °C ({@code bench for 1 ms at 85 °C}); null for 25 °C
      */
-    public record Expectation(String title, String reference, List<Block.Part> bench,
+    public record Expectation(String title, String reference, List<Block.Part> bench, String sharedBench,
                               double duration, Double temperature, boolean realistic, List<String> measure, Criterion criterion,
                               int line) {
         public Expectation {

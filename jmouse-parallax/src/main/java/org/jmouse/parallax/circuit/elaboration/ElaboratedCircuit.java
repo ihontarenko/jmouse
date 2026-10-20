@@ -139,6 +139,11 @@ public final class ElaboratedCircuit {
         return PartParameters.resolve(model, element, unit, this::value);
     }
 
+    /** A part's text parameters, its overrides' braces read over the circuit's parameters as its numbers are. */
+    public Map<String, String> texts(ComponentModel model, CircuitElement element) {
+        return PartParameters.texts(model, element, this::value);
+    }
+
     /**
      * Every part as written, on the bench: its own readings — instruments, displays, limits — are read over these. A
      * failed part is there as it was written, its readings what they were.

@@ -62,11 +62,11 @@ public final class PartParameters {
 
     /**
      * The part's text parameters: the component's, with what the part writes over them — {@code first_line = "Bye"} —, the
-     * words alone.
+     * words alone, every {@code {expression}} in an override read as a number override is.
      *
      * @throws IllegalArgumentException when a part writes a text parameter without quotes
      */
-    public static Map<String, String> texts(ComponentModel model, CircuitElement element) {
+    public static Map<String, String> texts(ComponentModel model, CircuitElement element, ToDoubleFunction<String> reading) {
         Map<String, String> texts = new LinkedHashMap<>();
         model.texts().forEach((name, parameter) -> texts.put(name, parameter.value()));
         if (element.overrides() != null) {
@@ -80,7 +80,7 @@ public final class PartParameters {
                             + name + " = \"…\"");
                 }
                 try {
-                    texts.put(name, parameter.accepted(TextValues.unquoted(written), name));
+                    texts.put(name, parameter.accepted(TextValues.interpolated(written, reading), name));
                 } catch (IllegalArgumentException refused) {
                     throw new IllegalArgumentException(element.id() + ": " + refused.getMessage(), refused);
                 }

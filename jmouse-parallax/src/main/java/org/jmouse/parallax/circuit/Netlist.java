@@ -2,7 +2,6 @@ package org.jmouse.parallax.circuit;
 
 import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
-import org.jmouse.parallax.circuit.elaboration.PartParameters;
 
 import org.jmouse.parallax.component.ComponentModel.Pin;
 import org.jmouse.parallax.component.ComponentModel.PinNature;
@@ -318,7 +317,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 internalDigital.put(node, name);
             }
             drafts.add(new UnitDraft(label, element.id(), model, family, elaborated.parameters(model, element, unit),
-                    PartParameters.texts(model, element),
+                    elaborated.texts(model, element),
                     connections, internal, internalDigital, elaborated.reportedAs(element.id())));
         }
         return drafts;

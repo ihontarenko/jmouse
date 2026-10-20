@@ -516,6 +516,7 @@ final class CircuitReader {
         }
         reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open the expectation");
         List<Part> bench = List.of();
+        String sharedBench = null;
         double duration = 0;
         Double temperature = null;
         boolean realistic = false;
@@ -532,9 +533,15 @@ final class CircuitReader {
             if (reading.atWord("bench")) {
                 reading.cursor.next();
                 Reading.Line header = reading.line();
-                if (!header.isEmpty()) {
-                    if (!header.value(0).equals("for")) {
-                        throw header.refusal("a bench is 'bench [for duration] [at temperature] [realistic] { parts }'");
+                int start = 0;
+                if (!header.isEmpty() && !header.value(0).equals("for")) {
+                    // A shared bench named first: 'bench i2c-bus for 1 ms { … }' adds these parts to it.
+                    sharedBench = header.joinedWord(0);
+                    start = header.joinedEnd(0);
+                }
+                if (header.size() > start) {
+                    if (!header.value(start).equals("for")) {
+                        throw header.refusal("a bench is 'bench [shared] [for duration] [at temperature] [realistic] { parts }'");
                     }
                     // A realistic bench is the line's last word: its instruments load what they read.
                     int end = header.size();
@@ -542,8 +549,8 @@ final class CircuitReader {
                         realistic = true;
                         end--;
                     }
-                    int at = header.indexOf(1, "at");
-                    duration = Values.quantity(header, 1, at < 0 || at >= end ? end : at);
+                    int at = header.indexOf(start + 1, "at");
+                    duration = Values.quantity(header, start + 1, at < 0 || at >= end ? end : at);
                     if (at >= 0 && at < end) {
                         temperature = Values.quantity(header, at + 1, end);
                     }
@@ -560,8 +567,17 @@ final class CircuitReader {
             throw reading.refusal(keyword, "expectation '" + reading.literal(title)
                     + "' needs a measure and a criterion (near, within or is)");
         }
-        return new Block.Expectation(reading.literal(title), reference, bench, duration, temperature, realistic, measure, criterion,
+        return new Block.Expectation(reading.literal(title), reference, bench, sharedBench, duration, temperature, realistic, measure, criterion,
                 reading.lineOf(keyword));
+    }
+
+    /** {@code bench i2c-bus { parts }}: parts written once, for every expectation that names the bench. */
+    Block.Bench sharedBench(Token keyword) {
+        Reading.Line header = reading.line();
+        if (header.isEmpty() || header.joinedEnd(0) != header.size()) {
+            throw reading.refusal(keyword, "a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'");
+        }
+        return new Block.Bench(header.joinedWord(0), partLines("bench"));
     }
 
     /** {@code near 6.86 kHz +- 5%}, {@code within 26 V .. 30 V}, {@code is 1}. */

@@ -452,7 +452,7 @@ final class DeclarationReader {
         Map<String, String> captions = new LinkedHashMap<>();
         for (Reading.Line line : reading.blockLines("display")) {
             if (line.size() > 1 && line.value(1).equals("[")) {
-                displayRow(line, figures);
+                displayRow(line, figures, captions);
                 continue;
             }
             int unit = line.indexOf(2, "unit");
@@ -477,13 +477,17 @@ final class DeclarationReader {
     }
 
     /**
-     * {@code cell[32] = shown}: one figure for each slot of a row state — {@code cell_0 = shown_0} … {@code cell_31 =
-     * shown_31} —, what a display of many cells shows: a symbol's inputs named as its figures.
+     * {@code cell[32] = shown ["caption"]}: one figure for each slot of a row state — {@code cell_0 = shown_0} …
+     * {@code cell_31 = shown_31} —, what a display of many cells shows: a symbol's inputs named as its figures. The
+     * caption, when written, is each figure's.
      */
-    private void displayRow(Reading.Line line, Map<String, SourceText> figures) {
-        if (line.size() != 6 || !line.value(3).equals("]") || !line.value(4).equals("=") || !line.value(2).matches("\\d+")) {
-            throw line.refusal("a row of figures is 'name[count] = row': 'cell[32] = shown', one figure for each slot");
+    private void displayRow(Reading.Line line, Map<String, SourceText> figures, Map<String, String> captions) {
+        boolean captioned = line.size() == 7 && line.isString(6);
+        if ((line.size() != 6 && !captioned) || !line.value(3).equals("]") || !line.value(4).equals("=")
+                || !line.value(2).matches("\\d+")) {
+            throw line.refusal("a row of figures is 'name[count] = row [\"caption\"]': 'cell[32] = shown', one figure for each slot");
         }
+        String caption = captioned ? line.words(6, 7).getFirst() : null;
         String name = line.value(0);
         String row = line.value(5);
         int count = Integer.parseInt(line.value(2));
@@ -494,6 +498,9 @@ final class DeclarationReader {
                 throw line.refusal("'" + figure + "' is displayed twice");
             }
             figures.put(figure, new SourceText(row + "_" + index, written.line(), written.column(), written.offset()));
+            if (caption != null) {
+                captions.put(figure, caption);
+            }
         }
     }
 

@@ -20,6 +20,7 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 import org.jmouse.parallax.verification.ConsistencyCheck;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,7 +109,7 @@ public final class ComponentCheck implements ConsistencyCheck {
         if (!(expectation.duration() > 0)) {
             throw new IllegalArgumentException("the bench says how long it runs: 'bench for 2 ms { … }'");
         }
-        List<Block.Part> parts = expectation.bench();
+        List<Block.Part> parts = benchParts(expectation, model);
         if (parts.stream().anyMatch(part -> FIXTURES.contains(part.reference()))) {
             if (parts.size() != 1) {
                 throw new IllegalArgumentException("a standard bench fixture is the whole bench, not one part among others");
@@ -117,6 +118,32 @@ public final class ComponentCheck implements ConsistencyCheck {
         }
         List<CircuitElement> elements = parts.stream().map(ComponentCheck::element).toList();
         return atTemperature(new Circuit(elements, new Interval(0, expectation.duration())), expectation);
+    }
+
+    /**
+     * The parts an expectation runs on: the shared bench it names — the component's own, or a base's — and then its own,
+     * none of them labelled twice.
+     */
+    private static List<Block.Part> benchParts(Expectation expectation, ComponentModel model) {
+        if (expectation.sharedBench() == null) {
+            return expectation.bench();
+        }
+        List<Block.Part> shared = model.benches().get(expectation.sharedBench());
+        if (shared == null) {
+            throw new IllegalArgumentException("there is no bench '" + expectation.sharedBench() + "' to stand on; "
+                    + (model.benches().isEmpty() ? "it declares none: 'bench name { parts }'" : "its benches are " + model.benches().keySet()));
+        }
+        Set<String> labels = new HashSet<>();
+        shared.forEach(part -> labels.add(part.id()));
+        for (Block.Part part : expectation.bench()) {
+            if (!labels.add(part.id())) {
+                throw new IllegalArgumentException(part.id() + " is a part of bench '" + expectation.sharedBench()
+                        + "' already; give this one another label");
+            }
+        }
+        List<Block.Part> parts = new ArrayList<>(shared);
+        parts.addAll(expectation.bench());
+        return parts;
     }
 
     /**

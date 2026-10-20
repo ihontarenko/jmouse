@@ -221,8 +221,18 @@ public final class DefinitionCompiler {
     private static void checkCircuit(CompiledObject compiled, Circuit circuit) {
         for (ObjectDefinition.CircuitElement element : circuit.elements()) {
             if (element.type() == ObjectDefinition.CircuitElementType.MODEL) {
-                // A text — `first_line = "Bye"` — is words for the part's behaviour, not a formula to compile.
-                element.overrides().values().stream().filter(written -> !TextValues.isText(written)).forEach(compiled::constant);
+                // A text — `first_line = "Bye"` — is words for the part's behaviour; only the expressions in its braces
+                // — `bytes = "{pattern} 0"` — are compiled, as any number override is.
+                for (String written : element.overrides().values()) {
+                    if (TextValues.isText(written)) {
+                        TextValues.interpolated(written, expression -> {
+                            compiled.constant(expression);
+                            return 0;
+                        });
+                    } else {
+                        compiled.constant(written);
+                    }
+                }
                 compiled.componentSource(element.component());
                 continue;
             }

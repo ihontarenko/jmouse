@@ -7,7 +7,9 @@ import org.jmouse.el.extension.Function;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.LongBinaryOperator;
+import java.util.regex.Pattern;
 
 /**
  * The arithmetic of a digital part's behaviour: a register, a counter, a bus read as a number, a byte on a wire. Each is
@@ -40,7 +42,10 @@ import java.util.function.LongBinaryOperator;
  *   <li>{@code value_of(row)} — the number the row makes, unknown if any slot is; {@code value_of(row, otherwise)} — a
  *       slot not known read as {@code otherwise}, as a bus with a floating line is read by a part that reads it anyway;</li>
  *   <li>{@code row_of(value, width)} — a number as a row of that many levels;</li>
- *   <li>{@code filled(value, length)} — a row of that many slots, each the value: memory erased, a screen of spaces.</li>
+ *   <li>{@code filled(value, length)} — a row of that many slots, each the value: memory erased, a screen of spaces;</li>
+ *   <li>{@code bytes_of(text)} — the bytes a text writes, decimal or {@code 0x} hexadecimal, parted by spaces or commas
+ *       ({@code "0x60, 128 0"}): what a bench instrument is told to send. Empty for a blank text; a word that is not a
+ *       byte is refused, naming it.</li>
  * </ul>
  *
  * <h3>Levels</h3>
@@ -61,6 +66,9 @@ final class LogicFunctions implements Extension {
 
     /** What a bit operation gives when an operand is not known: the unknown level, as a behaviour writes it. */
     static final Object UNKNOWN = LogicLevel.UNKNOWN.scriptValue();
+
+    /** What parts the bytes of a written list: spaces, commas, or both. */
+    private static final Pattern BYTE_SEPARATOR = Pattern.compile("[\\s,]+");
 
     /** The widest value a behaviour works on: room for a 62-bit register without reaching the sign. */
     static final int MAXIMUM_WIDTH = 62;
@@ -124,6 +132,7 @@ final class LogicFunctions implements Extension {
                     }
                     return row;
                 }),
+                function("bytes_of", 1, 1, (arguments) -> bytesOf(String.valueOf(arguments.get(0)))),
                 function("filled", 2, 2, (arguments) -> {
                     Object[] row = new Object[length(arguments.get(1), "filled")];
                     Arrays.fill(row, arguments.get(0));
@@ -219,6 +228,34 @@ final class LogicFunctions implements Extension {
 
     private static int width(Object argument, String function) {
         return index(wholeOf(argument, function), function);
+    }
+
+    /** The bytes a text writes, in the order written. */
+    private static Object[] bytesOf(String text) {
+        String written = text.strip();
+        if (written.isEmpty()) {
+            return new Object[0];
+        }
+        String[] words = BYTE_SEPARATOR.split(written);
+        Object[] bytes = new Object[words.length];
+        for (int index = 0; index < words.length; index++) {
+            bytes[index] = byteOf(words[index]);
+        }
+        return bytes;
+    }
+
+    private static int byteOf(String word) {
+        String lowered = word.toLowerCase(Locale.ROOT);
+        int value;
+        try {
+            value = lowered.startsWith("0x") ? Integer.parseInt(lowered.substring(2), 16) : Integer.parseInt(lowered);
+        } catch (NumberFormatException unreadable) {
+            throw new IllegalArgumentException("bytes_of reads bytes in decimal or 0x hexadecimal, and '" + word + "' is neither.");
+        }
+        if (value < 0 || value > 255) {
+            throw new IllegalArgumentException("bytes_of reads bytes, 0 to 255, and " + word + " is not one.");
+        }
+        return value;
     }
 
     /** A slot of a row: from 0 to one short of its length. */

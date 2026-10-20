@@ -3,7 +3,7 @@
 # Both lines are open drain, so the bus wants its pull-ups. The last byte it read stands on its data outputs, where an
 # LED bar or a check can see it; whether the target acknowledged is its display.
 #
-# What it sends is one text of bytes, written in decimal and parted by spaces or commas: `bytes = "3 90"` writes a
+# What it sends is one text of bytes, decimal or 0x hexadecimal, parted by spaces or commas: `bytes = "3 90"` writes a
 # register, then a byte into it. A read sends the first of them — the register it starts from — then turns the bus round
 # with a repeated START and reads `count` bytes; with no bytes at all it reads from where the target's pointer stands.
 #
@@ -22,7 +22,7 @@ component "I²C controller" as i2c-controller type controller {
 
     parameters {
         address = 80 in 8 .. 119 step 1 integer        "the target's 7-bit address"
-        bytes = "0 165"                                "the bytes after the address, 0 to 255 each, up to 16: a register, then what is written into it"
+        bytes = "0 165"                                "the bytes after the address, up to 16, decimal or 0x hexadecimal: a register, then what is written into it"
         operation = "write" in ["write", "read", "write-read"]   "a write, a read, or a write and then a read back from its first byte"
         count = 1 in 1 .. 8 step 1 integer             "how many bytes a read takes"
         clock_frequency = 100 kHz                      "SCL: 100 kHz standard mode, 400 kHz fast mode"
@@ -78,21 +78,11 @@ component "I²C controller" as i2c-controller type controller {
             planned = planned + 1
         end
 
-        # The bytes it was given, as written words, each checked: a number outside a byte would go out as something else.
+        # The bytes it was told to send, read once a transaction.
         function written_bytes()
-            let words = bytes | trim
-            if words == '' then
-                return []
-            end
-            let written = words | split('[ ,]+')
+            let written = bytes_of(bytes)
             if written | length > MOST_BYTES then
                 refuse('bytes holds ' ~ (written | length) ~ ' bytes; it sends up to ' ~ MOST_BYTES)
-            end
-            for word in written do
-                let value = word | int
-                if value < 0 or value > 255 then
-                    refuse('bytes holds ' ~ word ~ ', and a byte is 0 to 255')
-                end
             end
             return written
         end
@@ -100,8 +90,8 @@ component "I²C controller" as i2c-controller type controller {
         function plan_write()
             add_step(START)
             add_step(address * 2)
-            for word in written_bytes() do
-                add_step(word | int)
+            for value in written_bytes() do
+                add_step(value)
             end
             add_step(STOP)
         end
@@ -112,7 +102,7 @@ component "I²C controller" as i2c-controller type controller {
             add_step(START)
             if written | length > 0 then
                 add_step(address * 2)
-                add_step(written | first | int)
+                add_step(written | first)
                 add_step(REPEATED_START)
             end
             add_step(address * 2 + 1)

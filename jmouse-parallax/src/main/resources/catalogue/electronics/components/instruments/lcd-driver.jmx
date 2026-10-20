@@ -2,7 +2,8 @@
 # bus. It initializes the controller — 8-bit, two lines, display on, cleared, entry to the right —, writes its first
 # line, and then every `update_every` writes the second: its label and a four-digit count of the updates. Both texts are
 # parameters, so a part line says what the display shows. Each byte is put on the bus with RS, E is raised and let fall,
-# and the driver waits out the controller's execution time before the next one rather than reading the busy flag.
+# and the driver waits out the controller's execution time before the next one rather than reading the busy flag. An
+# update that falls due while a burst is still on the bus waits for it to end; it never cuts one short.
 
 component "LCD driver" as lcd-driver type controller {
     meta {
@@ -16,7 +17,7 @@ component "LCD driver" as lcd-driver type controller {
     parameters {
         first_line = "Hello, Parallax!"     "what the first line says"
         second_label = "Updates:"           "what the second line says before the count"
-        columns = 16                        "how many characters a line of the display holds"
+        columns = 16 in 8 .. 40 step 1 integer   "how many characters a line of the display holds: 40 is all an HD44780 line has"
         start_at = 1 ms                     "when it begins: a real module wants 40 ms after power-up"
         update_every = 200 ms               "how often it writes the second line again"
         bit_time = 1 us                     "how long RS and the data stand before E rises, and E stays high"
@@ -39,12 +40,14 @@ component "LCD driver" as lcd-driver type controller {
     }
 
     state {
-        bytes[48] = 0 discrete            "the bytes of this burst, in order"
-        characters[48] = 0 discrete       "1 where the byte is a character (RS high), 0 where it is a command"
+        bytes[96] = 0 discrete            "the bytes of this burst, in order: room for two lines of 40 and the commands"
+        characters[96] = 0 discrete       "1 where the byte is a character (RS high), 0 where it is a command"
         planned = 0 discrete              "how many bytes the burst has"
         cursor = 0 discrete               "the byte being written"
-        phase = 0 discrete                "0 the lines set, 1 E high, 2 E fallen"
+        phase = 0 discrete                "what the next tick does to the byte: SET_LINES, RAISE_ENABLE or LOWER_ENABLE"
         updates = 0 discrete              "how many times the second line was written"
+        on_the_bus = 0 discrete           "1 while a burst is being written"
+        waiting = 0 discrete              "1 when an update fell due while a burst was being written"
     }
 
     display {
@@ -52,6 +55,11 @@ component "LCD driver" as lcd-driver type controller {
     }
 
     behaviour {
+        # The three steps of writing one byte.
+        final let SET_LINES = 0
+        final let RAISE_ENABLE = 1
+        final let LOWER_ENABLE = 2
+
         # The instructions of table 6, each built from its bits.
         function clear_display()
             return 1
@@ -120,9 +128,10 @@ component "LCD driver" as lcd-driver type controller {
         end
 
         function start_burst(initializing)
+            on_the_bus = 1
             planned = 0
             cursor = 0
-            phase = 0
+            phase = SET_LINES
             if initializing == 1 then
                 plan_initialization()
             end
@@ -153,28 +162,43 @@ component "LCD driver" as lcd-driver type controller {
         end
 
         on timer 'update' do
-            start_burst(0)
             schedule('update', update_every)
+            if on_the_bus == 1 then
+                waiting = 1
+            else
+                start_burst(0)
+            end
+        end
+
+        # The burst's last byte is executed: an update that fell due meanwhile goes now.
+        on timer 'written' do
+            on_the_bus = 0
+            if waiting == 1 then
+                waiting = 0
+                start_burst(0)
+            end
         end
 
         on timer 'tick' do
             let value = item(bytes, cursor)
             let character = item(characters, cursor)
-            if phase == 0 then
+            if phase == SET_LINES then
                 drive('register_select', character)
                 drive('data', value)
-                phase = 1
+                phase = RAISE_ENABLE
                 schedule('tick', bit_time)
-            elseif phase == 1 then
+            elseif phase == RAISE_ENABLE then
                 drive('enable', 1)
-                phase = 2
+                phase = LOWER_ENABLE
                 schedule('tick', bit_time)
             else
                 drive('enable', 0)
-                phase = 0
+                phase = SET_LINES
                 cursor = cursor + 1
                 if cursor < planned then
                     schedule('tick', wait_after(value, character))
+                else
+                    schedule('written', wait_after(value, character))
                 end
             end
         end
