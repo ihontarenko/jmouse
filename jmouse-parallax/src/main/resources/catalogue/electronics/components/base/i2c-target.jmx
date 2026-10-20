@@ -1,0 +1,161 @@
+# The I²C target every such chip is a member of: the bus protocol, written once. It listens on SCL and SDA — both open
+# drain, raised by the bus's pull-ups —, hears a START and a STOP, shifts in eight bits on every rising SCL, answers
+# its own address with an ACK and leaves every other alone, and shifts a byte out when the controller reads.
+#
+# A chip says only what it does with the bytes, by writing again the functions the protocol calls:
+#   own_address()        its 7-bit address, from its parameter and its address pins
+#   received(value, n)   the n-th byte written to it in this transaction, 0 the first after the address
+#   transmitted(n)       the n-th byte it answers a read with
+#   stopped()            the transaction is over — an EEPROM starts its write cycle here
+# Clock stretching, arbitration and the 10-bit address are not modelled: a target here is always ready.
+
+component "I²C target" as i2c-target type interface {
+    meta {
+        designator U
+        summary "The I²C bus protocol of a target: address, ACK, bytes in and out, START and STOP"
+        source "NXP UM10204, I²C-bus specification and user manual, rev. 7.0 (2021): §3.1 bit transfer, START and STOP, byte format, ACK, 7-bit addressing"
+        category circuits
+        failure short Vcc GND
+    }
+    use cmos-hc
+
+    parameters {
+        address = 8 in 8 .. 119 step 1 integer   "its 7-bit address (the reserved ones excluded)"
+        data_hold = 300 ns                       "SDA changes this long after SCL falls: tHD;DAT"
+    }
+
+    pins {
+        scl digital input 1                      "serial clock, driven by the controller"
+        sda digital bidirectional open-drain 2   "serial data: pulled low to send a 0 or an ACK, else let go"
+        GND ground 3
+        Vcc power 4
+    }
+
+    symbol box {
+        left scl, sda
+        power Vcc, GND
+    }
+
+    state {
+        phase = 0 discrete           "0 not addressed, 1 hearing the address, 2 written to, 3 read from"
+        bits = 0 discrete            "bits of the byte clocked so far; 9 while the ACK is clocked"
+        shift = 0 discrete           "the byte coming in, most significant bit first"
+        outgoing = 0 discrete        "the byte going out"
+        position = 0 discrete        "bytes passed in this transaction since the address"
+        selection = 0 discrete       "the address byte that chose it: its last bit says whether it is read or written"
+    }
+
+    behaviour {
+        function own_address()
+            return address
+        end
+
+        function received(value, index)
+        end
+
+        function transmitted(index)
+            return 255
+        end
+
+        function stopped()
+        end
+
+        function release()
+            drive('sda', 1, data_hold)
+        end
+
+        # The next byte out: asked of the chip, its first bit put on the line at once.
+        function send_next()
+            outgoing = transmitted(position)
+            position = position + 1
+            bits = 0
+            drive('sda', bit(outgoing, 7), data_hold)
+        end
+
+        # The ninth clock is over: the next byte begins.
+        function next_byte()
+            bits = 0
+            shift = 0
+            if phase == 1 then
+                if bit(selection, 0) == 1 then
+                    phase = 3
+                    send_next()
+                else
+                    phase = 2
+                    release()
+                end
+            else
+                release()
+            end
+        end
+
+        # Eight bits are in: the address is ours or not; a data byte goes to the chip. Either way it is acknowledged.
+        function byte_in()
+            if phase == 1 then
+                if shift_right(shift, 1) != own_address() then
+                    phase = 0
+                    bits = 0
+                    return
+                end
+                selection = shift
+            else
+                received(shift, position)
+                position = position + 1
+            end
+            bits = 9
+            drive('sda', 0, data_hold)
+        end
+
+        # SDA falling while SCL is high: a START, or a repeated one.
+        on falling 'sda' when scl == 1 do
+            phase = 1
+            bits = 0
+            shift = 0
+            position = 0
+            release()
+        end
+
+        # SDA rising while SCL is high: a STOP.
+        on rising 'sda' when scl == 1 do
+            if phase != 0 then
+                stopped()
+            end
+            phase = 0
+            bits = 0
+            release()
+        end
+
+        on rising 'scl' when phase != 0 do
+            if phase == 3 then
+                if bits < 8 then
+                    bits = bits + 1
+                elseif bits == 8 then
+                    # The controller's ACK: a high here is its NACK, the last byte it wanted.
+                    bits = 9
+                    if sda == 1 then
+                        phase = 0
+                    end
+                end
+            elseif bits < 8 then
+                shift = shift * 2 + sda
+                bits = bits + 1
+            end
+        end
+
+        on falling 'scl' when phase != 0 do
+            if phase == 3 then
+                if bits < 8 then
+                    drive('sda', bit(outgoing, 7 - bits), data_hold)
+                elseif bits == 8 then
+                    release()
+                else
+                    send_next()
+                end
+            elseif bits == 8 then
+                byte_in()
+            elseif bits == 9 then
+                next_byte()
+            end
+        end
+    }
+}

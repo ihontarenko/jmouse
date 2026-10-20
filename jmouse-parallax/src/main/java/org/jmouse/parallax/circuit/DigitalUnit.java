@@ -85,17 +85,21 @@ final class DigitalUnit {
             if (binding.pin().nature() != PinNature.DIGITAL) {
                 return;
             }
+            // A bidirectional pin is both: a driver on its line and an input reading it back. Its capacitance is the
+            // output's, which already includes the input stage on the same pad.
             if (binding.pin().output()) {
-                DigitalDriver driver = new DigitalDriver(label, name, binding.isDigitalNode() ? binding.digitalNode() : null);
+                DigitalDriver driver = new DigitalDriver(label, name, binding.isDigitalNode() ? binding.digitalNode() : null,
+                        binding.pin().openDrain());
                 drivers.put(name, driver);
                 if (!binding.isDigitalNode()) {
                     simulation.bridges.add(new OutputBridge(driver, binding.analog(), powerNode, groundNode, family));
                     simulation.addPinCapacitance(label + "." + name + ".Cout", binding.analog(), groundNode,
                             family.outputCapacitance());
                 }
-            } else {
+            }
+            if (binding.pin().reads()) {
                 inputs.put(name, LogicLevel.UNKNOWN);
-                if (!binding.isDigitalNode()) {
+                if (!binding.isDigitalNode() && !binding.pin().output()) {
                     simulation.addPinCapacitance(label + "." + name + ".Cin", binding.analog(), groundNode,
                             family.inputCapacitance());
                 }
@@ -111,6 +115,13 @@ final class DigitalUnit {
                 if (simulation.extensions.getFunction(function.getName()) != null) {
                     throw new IllegalArgumentException(model.model().name() + ": function '" + function.getName()
                             + "' is the language's own; give the part's another name.");
+                }
+                // A function and a state, parameter or pin of one name: an assignment writes the one and an equation
+                // reads the other, and neither says so — most easily met where a base's behaviour is inherited.
+                if (discrete.containsKey(function.getName()) || model.parameters().containsKey(function.getName())
+                        || model.pins().containsKey(function.getName())) {
+                    throw new IllegalArgumentException(model.model().name() + ": function '" + function.getName()
+                            + "' has the name of one of its states, parameters or pins; give one of them another name.");
                 }
                 functions.put(function.getName(), function);
             });
@@ -302,10 +313,12 @@ final class DigitalUnit {
 
     Object pinValue(String name, Netlist.PinBinding binding, double[] state) {
         if (binding.pin().nature() == PinNature.DIGITAL) {
-            if (binding.pin().output()) {
-                return drivers.get(name).level().scriptValue();
+            // A pin that reads is its line — a bidirectional one hears what another part pulls it to —; an output alone
+            // is what it drives.
+            if (binding.pin().reads()) {
+                return inputs.get(name).scriptValue();
             }
-            return inputs.get(name).scriptValue();
+            return drivers.get(name).level().scriptValue();
         }
         return voltage(binding.analog(), state);
     }

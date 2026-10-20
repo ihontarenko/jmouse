@@ -12,6 +12,7 @@ import org.jmouse.parallax.script.Block.OutputType;
 import org.jmouse.parallax.script.Block.Parameter;
 import org.jmouse.parallax.script.Block.ParameterFlag;
 import org.jmouse.parallax.script.Block.Pin;
+import org.jmouse.parallax.script.Block.PinDirection;
 import org.jmouse.parallax.script.Block.PinNature;
 import org.jmouse.parallax.script.Block.Range;
 import org.jmouse.parallax.script.Block.StateVariable;
@@ -638,6 +639,11 @@ final class DeclarationReader {
             throw line.refusal("a bus has 2 to 32 bits, not " + width);
         }
         Pin template = pin(line, name, 6);
+        if (template.nature() != PinNature.DIGITAL) {
+            // A bus is read and driven as one number of levels; a voltage has no bits to make one of.
+            throw line.refusal("bus '" + name + "' is " + template.nature().name().toLowerCase() + ": a bus is digital — "
+                    + "write analog pins one by one, as 'channel_0 analog 1'");
+        }
         if (!template.numbers().isEmpty() && template.numbers().size() != width) {
             throw line.refusal("bus '" + name + "' has " + width + " bits and " + template.numbers().size()
                     + " package numbers: write one number for each bit, in the order of its bits, or none");
@@ -647,7 +653,7 @@ final class DeclarationReader {
         for (int position = 0; position < width; position++) {
             String bit = name + "_" + (first + position * step);
             List<Integer> number = template.numbers().isEmpty() ? List.of() : List.of(template.numbers().get(position));
-            pins.add(new Pin(bit, number, template.nature(), template.output(), template.attributes(), template.description()));
+            pins.add(new Pin(bit, number, template.nature(), template.direction(), template.attributes(), template.description()));
             bits.add(bit);
         }
         return new Block.Bus(name, bits);
@@ -658,7 +664,7 @@ final class DeclarationReader {
         List<Integer> numbers = new ArrayList<>();
         List<String> attributes = new ArrayList<>();
         PinNature nature = null;
-        boolean output = false;
+        PinDirection direction = PinDirection.INPUT;
         String description = "";
         for (int index = from; index < line.size(); index++) {
             String word = line.value(index);
@@ -667,14 +673,18 @@ final class DeclarationReader {
             } else if (word.matches("\\d+")) {
                 numbers.add(Integer.parseInt(word));
             } else if (!word.equals(",")) {
-                // A comma only parts numbers — '15, 1, 2' is three of them —; every other word says something.
+                // A comma only parts numbers — '15, 1, 2' is three of them —; every other word says something, and
+                // may be hyphenated: 'open-drain' is one word.
+                word = line.joinedWord(index);
+                index = line.joinedEnd(index) - 1;
                 switch (word) {
                     case "analog" -> nature = PinNature.ANALOG;
                     case "digital" -> nature = PinNature.DIGITAL;
                     case "power" -> nature = PinNature.POWER;
                     case "ground" -> nature = PinNature.GROUND;
-                    case "output" -> output = true;
-                    case "input" -> output = false;
+                    case "output" -> direction = PinDirection.OUTPUT;
+                    case "input" -> direction = PinDirection.INPUT;
+                    case "bidirectional" -> direction = PinDirection.BIDIRECTIONAL;
                     default -> attributes.add(word);
                 }
             }
@@ -682,7 +692,7 @@ final class DeclarationReader {
         if (nature == null) {
             throw line.refusal("pin '" + name + "' needs a nature: analog, digital, power or ground");
         }
-        return new Pin(name, numbers, nature, output, attributes, description);
+        return new Pin(name, numbers, nature, direction, attributes, description);
     }
 
     Block.Nodes nodes() {

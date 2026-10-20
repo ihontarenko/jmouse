@@ -1,0 +1,230 @@
+# An I²C controller for the bench: it drives one transaction onto SCL and SDA — a write, a read, or a write and then a
+# read of what was written — at a set moment and a set clock, as a bus analyser's "send" button does. Both lines are open
+# drain, so the bus wants its pull-ups. The last byte it read stands on its data outputs, where an LED bar or a check can
+# see it; whether the target acknowledged is its display.
+#
+# A transaction is planned as a row of steps, then clocked out a quarter of a bit at a time. The steps:
+#   0 … 255  send this byte          -1  read a byte and ACK it     -2  read a byte and NACK it (the last)
+#   -3       a repeated START        -4  STOP                        -5  START
+# It never waits for a target that stretches the clock, and it is the only controller it expects on the bus.
+
+component "I²C controller" as i2c-controller type controller {
+    meta {
+        designator BUS
+        summary "Drives one I²C transaction — write, read, or write then read — and shows the last byte it read"
+        source "NXP UM10204, I²C-bus specification and user manual, rev. 7.0 (2021): §3.1, a controller's view of a transfer"
+        category circuits
+    }
+    use cmos-hc
+
+    parameters {
+        address = 80 in 8 .. 119 step 1 integer        "the target's 7-bit address"
+        register = 0 in 0 .. 255 step 1 integer        "the first byte after the address: a register, a memory word, a command"
+        payload = 165 in 0 .. 255 step 1 integer       "the byte a write sends after it"
+        operation = 0 in 0 .. 2 step 1 integer         "0 writes, 1 reads, 2 writes and then reads back"
+        count = 1 in 1 .. 8 step 1 integer             "how many bytes a read takes"
+        clock_frequency = 100 kHz                      "SCL: 100 kHz standard mode, 400 kHz fast mode"
+        start_at = 20 us                               "when the transaction begins"
+        pause = 100 us                                 "between the write and the read back: an EEPROM's write cycle wants 5 ms"
+    }
+
+    pins {
+        scl digital bidirectional open-drain 1         "serial clock"
+        sda digital bidirectional open-drain 2         "serial data"
+        data[0..7] digital output 3, 4, 5, 6, 7, 8, 9, 10   "the last byte read, D0 the least significant bit"
+        GND ground 11
+        Vcc power 12
+    }
+
+    symbol box {
+        left scl, sda
+        right data
+        power Vcc, GND
+    }
+
+    state {
+        plan[16] = 0 discrete         "the steps of this transaction"
+        planned = 0 discrete          "how many steps are planned"
+        cursor = 0 discrete           "the step being clocked out"
+        quarter = 0 discrete          "which quarter of the bit or condition it is in"
+        bits = 0 discrete             "bits of the present byte clocked; 8 is the ACK clock"
+        incoming = 0 discrete         "the byte being read"
+        round = 0 discrete            "0 the first transaction, 1 the read that follows a write"
+        acknowledged = 0 discrete     "whether the last byte sent was acknowledged"
+        last_read = 0 discrete        "the last byte read"
+    }
+
+    display {
+        taken = acknowledged          "1 when the target took the last byte sent"
+        byte_read = last_read         "the last byte read"
+    }
+
+    behaviour {
+        function add_step(step)
+            plan = with(plan, planned, step)
+            planned = planned + 1
+        end
+
+        function plan_write()
+            add_step(-5)
+            add_step(address * 2)
+            add_step(register)
+            add_step(payload)
+            add_step(-4)
+        end
+
+        # A read names its register first, then turns the bus round with a repeated START.
+        function plan_read()
+            add_step(-5)
+            add_step(address * 2)
+            add_step(register)
+            add_step(-3)
+            add_step(address * 2 + 1)
+            for index in 1..count do
+                if index == count then
+                    add_step(-2)
+                else
+                    add_step(-1)
+                end
+            end
+            add_step(-4)
+        end
+
+        function quarter_time()
+            return 1 / (4 * clock_frequency)
+        end
+
+        function next_step()
+            cursor = cursor + 1
+            quarter = 0
+        end
+
+        # START: SDA falls while SCL is high, then SCL falls.
+        function start_condition()
+            if quarter == 0 then
+                drive('sda', 0)
+            else
+                drive('scl', 0)
+                next_step()
+                return
+            end
+            quarter = quarter + 1
+        end
+
+        # A repeated START: SDA let go, SCL raised, then SDA falls under it and SCL follows.
+        function repeated_start()
+            if quarter == 0 then
+                drive('sda', 1)
+            elseif quarter == 1 then
+                drive('scl', 1)
+            elseif quarter == 2 then
+                drive('sda', 0)
+            else
+                drive('scl', 0)
+                next_step()
+                return
+            end
+            quarter = quarter + 1
+        end
+
+        # STOP: SDA low, SCL raised, then SDA let go under it.
+        function stop_condition()
+            if quarter == 0 then
+                drive('sda', 0)
+            elseif quarter == 1 then
+                drive('scl', 1)
+            else
+                drive('sda', 1)
+                next_step()
+                return
+            end
+            quarter = quarter + 1
+        end
+
+        # One bit of a byte, a quarter at a time: SDA set while SCL is low, SCL raised, SDA read, SCL lowered.
+        function byte_quarter(step)
+            let sending = step >= 0
+            if quarter == 0 then
+                if bits < 8 and sending then
+                    drive('sda', bit(step, 7 - bits))
+                elseif bits == 8 and step == -1 then
+                    drive('sda', 0)
+                else
+                    drive('sda', 1)
+                end
+            elseif quarter == 1 then
+                drive('scl', 1)
+            elseif quarter == 2 then
+                if bits < 8 and !sending then
+                    incoming = incoming * 2 + sda
+                elseif bits == 8 and sending then
+                    acknowledged = 1 - sda
+                end
+            else
+                drive('scl', 0)
+                bits = bits + 1
+                if bits == 9 then
+                    if !sending then
+                        last_read = incoming
+                        drive('data', incoming)
+                        incoming = 0
+                    end
+                    bits = 0
+                    next_step()
+                    return
+                end
+            end
+            if quarter == 3 then
+                quarter = 0
+            else
+                quarter = quarter + 1
+            end
+        end
+
+        function finish()
+            if operation == 2 and round == 0 then
+                round = 1
+                schedule('begin', pause)
+            end
+        end
+
+        on start do
+            drive('scl', 1)
+            drive('sda', 1)
+            drive('data', 0)
+            schedule('begin', start_at)
+        end
+
+        on timer 'begin' do
+            planned = 0
+            cursor = 0
+            quarter = 0
+            bits = 0
+            incoming = 0
+            if operation == 1 or round == 1 then
+                plan_read()
+            else
+                plan_write()
+            end
+            schedule('tick', quarter_time())
+        end
+
+        on timer 'tick' do
+            let step = item(plan, cursor)
+            if step == -5 then
+                start_condition()
+            elseif step == -3 then
+                repeated_start()
+            elseif step == -4 then
+                stop_condition()
+            else
+                byte_quarter(step)
+            end
+            if cursor < planned then
+                schedule('tick', quarter_time())
+            else
+                finish()
+            end
+        end
+    }
+}

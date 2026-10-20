@@ -368,11 +368,14 @@ public sealed interface Block {
 
     enum PinNature { ANALOG, DIGITAL, POWER, GROUND }
 
+    /** Which way a pin works: {@code input} reads its line, {@code output} drives it, {@code bidirectional} does both. */
+    enum PinDirection { INPUT, OUTPUT, BIDIRECTIONAL }
+
     /**
-     * {@code out analog output 1 7 "output"}: the package numbers per unit, its nature, whether it drives, and the
-     * remaining words ({@code edge}, {@code bubble}).
+     * {@code out analog output 1 7 "output"}: the package numbers per unit, its nature, its direction, and the
+     * remaining words ({@code edge}, {@code bubble}, {@code open-drain}).
      */
-    record Pin(String name, List<Integer> numbers, PinNature nature, boolean output, List<String> attributes,
+    record Pin(String name, List<Integer> numbers, PinNature nature, PinDirection direction, List<String> attributes,
                String description) {
         public Pin {
             numbers = List.copyOf(numbers);

@@ -145,7 +145,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 element.pins().forEach((key, node) -> {
                     Pin pin = pinOf(model, element.id(), key);
                     touched.add(node);
-                    if (pin.nature() != PinNature.DIGITAL) {
+                    if (pin.nature() != PinNature.DIGITAL || model.equationsReach(pin.name())) {
                         analog.add(node);
                     }
                 });
@@ -289,7 +289,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
                 String node = element.pins().get(key);
                 if (node == null) {
                     node = label + "." + pin.name();
-                    if (pin.nature() == PinNature.DIGITAL) {
+                    if (pin.nature() == PinNature.DIGITAL && !model.equationsReach(pin.name())) {
                         digitalNodes.add(node);
                     } else {
                         numbers.put(node, numbers.size());

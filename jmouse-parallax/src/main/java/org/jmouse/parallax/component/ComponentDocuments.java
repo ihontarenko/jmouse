@@ -15,6 +15,7 @@ import org.jmouse.parallax.component.ComponentModel.EquationKind;
 import org.jmouse.parallax.component.ComponentModel.Expectation;
 import org.jmouse.parallax.component.ComponentModel.Parameter;
 import org.jmouse.parallax.component.ComponentModel.Pin;
+import org.jmouse.parallax.component.ComponentModel.PinDirection;
 import org.jmouse.parallax.component.ComponentModel.PinNature;
 import org.jmouse.parallax.component.ComponentModel.State;
 import org.jmouse.parallax.component.ComponentModel.SubcircuitLine;
@@ -55,6 +56,9 @@ public final class ComponentDocuments {
 
     /** The parameter that says a part warms at all: kelvin above the bench per watt. */
     public static final String THERMAL_RESISTANCE = "thermal_resistance";
+
+    /** The setting a part line shows its part with, never handed to the model: no parameter may take its name. */
+    private static final String PART_VALUE = "value";
 
     /** How many built models are kept: a catalogue's worth, and the drafts of the ones being written. */
     private static final int KEPT_MODELS = 512;
@@ -350,6 +354,12 @@ public final class ComponentDocuments {
                         + "equations — it cannot be a parameter. Name the temperature a figure is measured at T_nominal, "
                         + "and write the drift against it: I_saturation * (temperature / T_nominal)^3.");
             }
+            if (parameter.name().equals(PART_VALUE)) {
+                // 'U1 24c02 (…) value = 2 Kbit' is the text the part is shown with: a parameter of that name would be
+                // taken off every part line as that text and never reach the model.
+                throw new IllegalArgumentException("'value' is what a part line shows beside its part — 'U1 lm358 (…) "
+                        + "value = LM358' —, so it cannot be a parameter; name what it holds.");
+            }
             if (ComponentVocabulary.isReserved(parameter.name())) {
                 throw new IllegalArgumentException("'" + parameter.name() + "' is a name the engine gives every component's "
                         + "equations; it cannot be a parameter.");
@@ -389,7 +399,7 @@ public final class ComponentDocuments {
             throw new IllegalArgumentException(document.title() + ": pin '" + pin.name() + "' needs one number for each unit ("
                     + String.join(", ", units) + ") or one for all");
         }
-        return new Pin(pin.name(), byUnit, shared, PinNature.valueOf(pin.nature().name()), pin.output(),
+        return new Pin(pin.name(), byUnit, shared, PinNature.valueOf(pin.nature().name()), PinDirection.valueOf(pin.direction().name()),
                 pin.attributes(), pin.description());
     }
 

@@ -1,8 +1,10 @@
 package org.jmouse.parallax.component;
 
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.type.ValueType;
 import org.jmouse.parallax.object.ObjectDefinition.BenchConditions;
 import org.jmouse.parallax.script.Block;
+import org.jmouse.script.el.node.FunctionDeclarationNode;
 import org.jmouse.script.el.node.ScriptNode;
 
 import java.util.Collections;
@@ -11,6 +13,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 
 /**
@@ -101,6 +106,10 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
      * with the part's values over them by name, and so its displays; the part's own pins, drawing and leads where it writes them,
      * else the family's. What the part states of itself (its header and expectations) is never inherited.
      *
+     * <p>A base's {@code behaviour} is the one exception to "the part's own physics": it is inherited even by a part
+     * that writes its own ({@link #behaviourOver}), with the discrete states it keeps — so a protocol is written once, in
+     * the base, and each part writes only what it does with what the protocol hands it.</p>
+     *
      * @param behaves whether the part's document writes behaviour of its own
      */
     ComponentModel memberOf(ComponentModel base, boolean behaves) {
@@ -112,12 +121,48 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
                 pins.isEmpty() ? base.buses : buses,
                 behaves ? nodes : base.nodes, behaves ? digitalNodes : base.digitalNodes,
                 symbol.isEmpty() ? base.symbol : symbol, behaves ? subcircuit : base.subcircuit,
-                behaves ? formulas : base.formulas, behaves ? states : base.states, behaves ? locals : base.locals,
+                behaves ? formulas : base.formulas, behaves ? statesOver(base) : base.states, behaves ? locals : base.locals,
                 behaves ? localTypes : base.localTypes,
-                behaves ? equations : base.equations, behaves ? behaviour : base.behaviour, expectations,
+                behaves ? equations : base.equations, behaves ? behaviourOver(base.behaviour) : base.behaviour, expectations,
                 byName(base.displays, displays), measures.isEmpty() ? base.measures : measures,
                 leads.isEmpty() ? base.leads : leads, byName(base.displayUnits, displayUnits),
                 byName(base.displayCaptions, displayCaptions), heat == null ? base.heat : heat);
+    }
+
+    /**
+     * The behaviour a part runs over its base's: the base's handlers, then its own, every one of them heard; a function
+     * it writes again replaces the base's of that name, so the base's handlers call the part's — the way a protocol
+     * written once in a base hands each byte to what the part does with it.
+     */
+    private ScriptNode behaviourOver(ScriptNode inherited) {
+        if (inherited == null) {
+            return behaviour;
+        }
+        if (behaviour == null) {
+            return inherited;
+        }
+        Set<String> rewritten = behaviour.getFunctions().stream().map(FunctionDeclarationNode::getName).collect(Collectors.toSet());
+        ScriptNode merged = new ScriptNode();
+        merged.setName(behaviour.getName());
+        for (Expression expression : inherited.getExpressions()) {
+            boolean replaced = expression instanceof FunctionDeclarationNode function && rewritten.contains(function.getName());
+            if (!replaced) {
+                merged.addExpression(expression);
+            }
+        }
+        behaviour.getExpressions().forEach(merged::addExpression);
+        return merged;
+    }
+
+    /** The part's states over the discrete ones a behaving base keeps its protocol in: the base's by name, the part's over them. */
+    private List<State> statesOver(ComponentModel base) {
+        if (base.behaviour == null) {
+            return states;
+        }
+        Map<String, State> merged = new LinkedHashMap<>();
+        base.states.stream().filter(State::discrete).forEach(state -> merged.put(state.name(), state));
+        states.forEach(state -> merged.put(state.name(), state));
+        return List.copyOf(merged.values());
     }
 
     /** The family's entries with the part's over them by name: what a part displays adds to what its family does. */
@@ -212,6 +257,17 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
     }
 
     /**
+     * Whether its equations carry a current into this pin or read its voltage. A digital pin they reach — an I/O pin with
+     * a pull-up written as a current — puts its node in the analog solver, whatever else sits on that net: a level alone
+     * has no voltage to read and takes no current.
+     */
+    public boolean equationsReach(String pin) {
+        Pattern named = Pattern.compile("\\b" + Pattern.quote(pin) + "\\b");
+        return equations.stream().anyMatch(equation -> pin.equals(equation.positive()) || pin.equals(equation.negative())
+                || (equation.formula() != null && named.matcher(equation.formula()).find()));
+    }
+
+    /**
      * {@code name = 2.52 nA [per unit] ["what it is"]}.
      *
      * @param unit the unit its value was written in — {@code nA}, {@code K/W} —; empty when it was written without one,
@@ -221,18 +277,40 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
     }
 
     /**
-     * A pin: its package number in every block ({@code ""} for a single block or a shared pin), its nature, whether it
-     * is an output, and the words on it ({@code active-low}).
+     * A pin: its package number in every block ({@code ""} for a single block or a shared pin), its nature, its
+     * direction, and the words on it ({@code active-low}, {@code open-drain}).
      */
-    public record Pin(String name, Map<String, Integer> numbers, boolean shared, PinNature nature, boolean output,
+    public record Pin(String name, Map<String, Integer> numbers, boolean shared, PinNature nature, PinDirection direction,
                       List<String> attributes, String description) {
+
+        /** The word that makes a driving pin pull only low: a 1 driven on it lets the line go. */
+        public static final String OPEN_DRAIN = "open-drain";
+
         public Pin {
             numbers = Map.copyOf(numbers);
             attributes = List.copyOf(attributes);
         }
+
+        /** Whether it drives its line: an output, or a bidirectional pin. */
+        public boolean output() {
+            return direction != PinDirection.INPUT;
+        }
+
+        /** Whether it reads its line: an input, or a bidirectional pin. */
+        public boolean reads() {
+            return direction != PinDirection.OUTPUT;
+        }
+
+        /** Whether it only pulls low, as I²C's lines and a wired-OR interrupt do. */
+        public boolean openDrain() {
+            return attributes.contains(OPEN_DRAIN);
+        }
     }
 
     public enum PinNature { ANALOG, DIGITAL, POWER, GROUND }
+
+    /** Which way a pin works: it reads its line, drives it, or both — a bus line a part both talks and listens on. */
+    public enum PinDirection { INPUT, OUTPUT, BIDIRECTIONAL }
 
     /**
      * A state variable. A continuous one is an unknown of the solver with a {@code d(x)/dt} equation; a discrete one

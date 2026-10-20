@@ -17,16 +17,23 @@ final class DigitalDriver {
     final String unit;
     final String pin;
     final String digitalNode;
+    /** It only pulls low: a 1 driven on it lets the line go, for a pull-up to raise. */
+    private final boolean openDrain;
 
     private LogicLevel level = LogicLevel.RELEASED;
     private LogicLevel previous = LogicLevel.RELEASED;
     private double changedAt = Double.NEGATIVE_INFINITY;
     private final TreeMap<Double, LogicLevel> pending = new TreeMap<>();
 
-    DigitalDriver(String unit, String pin, String digitalNode) {
+    DigitalDriver(String unit, String pin, String digitalNode, boolean openDrain) {
         this.unit = unit;
         this.pin = pin;
         this.digitalNode = digitalNode;
+        this.openDrain = openDrain;
+    }
+
+    DigitalDriver(String unit, String pin, String digitalNode) {
+        this(unit, pin, digitalNode, false);
     }
 
     LogicLevel level() {
@@ -54,7 +61,7 @@ final class DigitalDriver {
 
     void schedule(double time, LogicLevel value) {
         pending.tailMap(time, true).clear();
-        pending.put(time, value);
+        pending.put(time, openDrain && value == LogicLevel.HIGH ? LogicLevel.RELEASED : value);
     }
 
     /** Applies every transaction due by {@code time}; true when the level changed. */

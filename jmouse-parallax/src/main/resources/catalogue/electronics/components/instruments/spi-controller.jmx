@@ -1,0 +1,122 @@
+# An SPI controller for the bench: it selects its target, clocks up to four bytes out on MOSI and as many in on MISO,
+# and lets the target go — one transaction at a set moment and a set clock, in mode 0: the clock idles low, both sides
+# change their data as it falls and read it as it rises. The last byte read stands on its data outputs; the one before it
+# is its display too, since a converter answers in two.
+
+component "SPI controller" as spi-controller type controller {
+    meta {
+        designator BUS
+        summary "Drives one SPI transaction in mode 0 — up to four bytes each way — and shows the last two bytes read"
+        source "Motorola SPI block guide, V04.01: mode 0 (CPOL 0, CPHA 0) — data valid on the rising clock edge, shifted on the falling one, most significant bit first"
+        category circuits
+    }
+    use cmos-hc
+
+    parameters {
+        count = 3 in 1 .. 4 step 1 integer        "how many bytes the transaction is"
+        first = 1 in 0 .. 255 step 1 integer      "the first byte sent"
+        second = 128 in 0 .. 255 step 1 integer   "the second byte sent"
+        third = 0 in 0 .. 255 step 1 integer      "the third byte sent"
+        fourth = 0 in 0 .. 255 step 1 integer     "the fourth byte sent"
+        clock_frequency = 1 MHz                   "SCK"
+        start_at = 10 us                          "when the target is selected"
+    }
+
+    pins {
+        sck digital output 1                      "serial clock"
+        mosi digital output 2                     "controller out, target in"
+        miso digital input 3                      "controller in, target out"
+        cs digital output 4                       "chip select, active low"
+        data[0..7] digital output 5, 6, 7, 8, 9, 10, 11, 12   "the last byte read, D0 the least significant bit"
+        GND ground 13
+        Vcc power 14
+    }
+
+    symbol box {
+        left sck, mosi, miso, cs bubble
+        right data
+        power Vcc, GND
+    }
+
+    state {
+        clocked = 0 discrete          "bits clocked so far"
+        incoming = 0 discrete         "the byte being read"
+        previous_read = 0 discrete    "the byte read before the last one"
+        last_read = 0 discrete        "the last byte read"
+    }
+
+    display {
+        word_read = previous_read * 256 + last_read   "the last two bytes read, as one number"
+    }
+
+    behaviour {
+        function half_period()
+            return 1 / (2 * clock_frequency)
+        end
+
+        function sent_byte(index)
+            if index == 0 then
+                return first
+            elseif index == 1 then
+                return second
+            elseif index == 2 then
+                return third
+            end
+            return fourth
+        end
+
+        function put_bit()
+            drive('mosi', bit(sent_byte(floor(clocked / 8)), 7 - mod(clocked, 8)))
+        end
+
+        on start do
+            drive('cs', 1)
+            drive('sck', 0)
+            drive('mosi', 0)
+            drive('data', 0)
+            schedule('select', start_at)
+        end
+
+        on timer 'select' do
+            clocked = 0
+            incoming = 0
+            drive('cs', 0)
+            put_bit()
+            schedule('rise', half_period())
+        end
+
+        # The rising edge: the target's bit is read. A MISO no target drives yet is read as 0 — a target's "don't care"
+        # bits before its answer, which a real controller reads as whatever the line floats at.
+        on timer 'rise' do
+            drive('sck', 1)
+            if miso == 1 then
+                incoming = incoming * 2 + 1
+            else
+                incoming = incoming * 2
+            end
+            schedule('fall', half_period())
+        end
+
+        # The falling edge: a byte is complete every eighth one, and the next bit goes out.
+        on timer 'fall' do
+            drive('sck', 0)
+            clocked = clocked + 1
+            if mod(clocked, 8) == 0 then
+                previous_read = last_read
+                last_read = incoming
+                drive('data', incoming)
+                incoming = 0
+            end
+            if clocked < 8 * count then
+                put_bit()
+                schedule('rise', half_period())
+            else
+                schedule('release', half_period())
+            end
+        end
+
+        on timer 'release' do
+            drive('cs', 1)
+        end
+    }
+}
