@@ -67,7 +67,7 @@ component "SPI controller" as spi-controller type controller {
         end
 
         function put_bit()
-            drive('mosi', bit(sent_byte(floor(clocked / 8)), 7 - mod(clocked, 8)))
+            drive('mosi', bit(sent_byte(floor(clocked / 8)), 7 - clocked % 8))
         end
 
         on start do
@@ -105,7 +105,7 @@ component "SPI controller" as spi-controller type controller {
         on timer 'fall' do
             drive('sck', 0)
             clocked = clocked + 1
-            if mod(clocked, 8) == 0 then
+            if clocked % 8 == 0 then
                 previous_read = last_read
                 last_read = incoming
                 drive('data', incoming)

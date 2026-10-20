@@ -57,7 +57,7 @@ component "LCD driver" as lcd-driver type controller {
         end
 
         function add_line(characters, count)
-            for index in 0..(count - 1) do
+            for index in 0..count - 1 do
                 add_step(256 + item(characters, index))
             end
         end
@@ -66,10 +66,10 @@ component "LCD driver" as lcd-driver type controller {
         function plan_second_line()
             add_step(192)
             add_line(second_label, 12)
-            add_step(256 + 48 + mod(floor(updates / 1000), 10))
-            add_step(256 + 48 + mod(floor(updates / 100), 10))
-            add_step(256 + 48 + mod(floor(updates / 10), 10))
-            add_step(256 + 48 + mod(updates, 10))
+            add_step(256 + 48 + floor(updates / 1000) % 10)
+            add_step(256 + 48 + floor(updates / 100) % 10)
+            add_step(256 + 48 + floor(updates / 10) % 10)
+            add_step(256 + 48 + updates % 10)
         end
 
         function start_burst(initializing)
@@ -118,7 +118,7 @@ component "LCD driver" as lcd-driver type controller {
             let step = item(plan, cursor)
             if phase == 0 then
                 drive('register_select', floor(step / 256))
-                drive('data', mod(step, 256))
+                drive('data', step % 256)
                 phase = 1
                 schedule('tick', bit_time)
             elseif phase == 1 then

@@ -175,11 +175,7 @@ component "I²C controller" as i2c-controller type controller {
                     return
                 end
             end
-            if quarter == 3 then
-                quarter = 0
-            else
-                quarter = quarter + 1
-            end
+            quarter = (quarter + 1) % 4
         end
 
         function finish()
