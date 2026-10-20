@@ -113,7 +113,7 @@ public class Subjects {
                 definition.ambientDimension(), notation.latex(), notation, false, null, null,
                 Set.of(), applicable.isEmpty() ? null : applicable.getFirst(), 0, null, null);
         return new ObjectDetail(summary, null, definition, 0, parameters, List.of(), List.of(), applicable, List.of(),
-                List.of(), null, 0, source, 0, false, null);
+                List.of(), null, 0, source, 0, false, null, false);
     }
 
     private static ObjectFiles.ReadObject infer(ComputationSubject.Inline inline) {

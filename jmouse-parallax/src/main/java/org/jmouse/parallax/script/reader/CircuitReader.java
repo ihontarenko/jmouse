@@ -22,12 +22,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Circuits, and everything else that is a netlist: a circuit's parts, a component's internal parts and an
  * expectation's bench are written in one notation — {@code ID reference [unit U] (connections) [settings] [place …]}.
  */
 final class CircuitReader {
+
+    /** The layout marks that name the net they are: {@code ground agnd}, {@code label vp}, {@code port FB}, {@code global vcc}. */
+    private static final Set<String> NAMING_MARKS = Set.of("ground", "label", "port", "global");
 
     private final Reading reading;
 
@@ -169,7 +173,7 @@ final class CircuitReader {
             String id = line.joinedWord(0);
             int next = line.joinedEnd(0);
             if (line.size() < next + 2) {
-                throw line.refusal("a layout line is 'ID at x, y', 'ID ground [net] at x, y', 'ID label NET at x, y', 'ID common at x, y', 'ID junction at x, y' or 'ID wire from to to'");
+                throw line.refusal("a layout line is 'ID at x, y', 'ID ground [net] at x, y', 'ID label|port|global NET at x, y', 'ID common at x, y', 'ID junction at x, y' or 'ID wire from to to'");
             }
             if (!ids.add(id)) {
                 throw line.refusal("'" + id + "' is laid out twice");
@@ -181,13 +185,14 @@ final class CircuitReader {
                 items.add(new Block.LayoutItem(id, Optional.empty(), Optional.empty(), placement(line, next + 1)));
             } else if ((word.equals("ground") || word.equals("common") || word.equals("junction")) && line.value(next + 1).equals("at")) {
                 items.add(new Block.LayoutItem(id, Optional.of(word), Optional.empty(), placement(line, next + 2)));
-            } else if ((word.equals("ground") || word.equals("label")) && line.size() > next + 2 && line.value(next + 2).equals("at")) {
+            } else if (NAMING_MARKS.contains(word) && line.size() > next + 2 && line.value(next + 2).equals("at")) {
                 // Another ground: the mark is the net it names, kept apart from node 0 by the engine. A label is a net's
                 // flag, as KiCad draws a power port: every label of one net is that net, with no wire drawn between them —
-                // the ±15 V rails reach an op-amp's supply pins without crossing the sheet.
+                // the ±15 V rails reach an op-amp's supply pins without crossing the sheet. A port draws a net the sheet
+                // hands to its parent, a global one a net every sheet of the project shares.
                 items.add(new Block.LayoutItem(id, Optional.of(word), Optional.of(line.value(next + 1)), placement(line, next + 3)));
             } else {
-                throw line.refusal(next, "after '" + id + "' comes 'at x, y', 'ground [net] at', 'label NET at', 'common at', 'junction at' or 'wire'");
+                throw line.refusal(next, "after '" + id + "' comes 'at x, y', 'ground [net] at', 'label|port|global NET at', 'common at', 'junction at' or 'wire'");
             }
         }
         return new Block.Layout(items, wires);
@@ -286,6 +291,7 @@ final class CircuitReader {
     Block.Nets nets() {
         return new Block.Nets(reading.blockLines("nets").stream().map(line -> {
             boolean ground = false;
+            boolean global = false;
             List<Point> route = new ArrayList<>();
             int index = 1;
             while (index < line.size()) {
@@ -293,9 +299,12 @@ final class CircuitReader {
                 if (word.equals("ground")) {
                     ground = true;
                     index++;
+                } else if (word.equals("global")) {
+                    global = true;
+                    index++;
                 } else if (word.equals("route")) {
                     index++;
-                    while (index < line.size() && !line.value(index).equals("ground")) {
+                    while (index < line.size() && !line.value(index).equals("ground") && !line.value(index).equals("global")) {
                         int comma = line.indexOf(index, ",");
                         if (comma < 0) {
                             throw line.refusal(index, "a route is 'route x,y x,y …'");
@@ -305,10 +314,10 @@ final class CircuitReader {
                         index = yEnd;
                     }
                 } else {
-                    throw line.refusal(index, "a net line is 'name [ground] [route x,y …]'");
+                    throw line.refusal(index, "a net line is 'name [ground] [global] [route x,y …]'");
                 }
             }
-            return new Net(line.value(0), ground, route);
+            return new Net(line.value(0), ground, global, route);
         }).toList());
     }
 

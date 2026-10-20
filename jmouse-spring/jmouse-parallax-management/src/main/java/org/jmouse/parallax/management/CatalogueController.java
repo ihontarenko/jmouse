@@ -11,12 +11,14 @@ import org.jmouse.parallax.object.ObjectKind;
 import org.jmouse.parallax.object.ObjectNature;
 import org.jmouse.parallax.problem.ParallaxProblem;
 import org.jmouse.parallax.store.catalogue.Catalogue;
+import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.CategoryView;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.InstrumentView;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.ObjectDetail;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.ObjectSummary;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.RevisionSource;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.RevisionView;
+import org.jmouse.parallax.store.catalogue.CatalogueViews.SheetView;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
 import org.jmouse.parallax.store.catalogue.Instruments;
 import org.jmouse.parallax.store.catalogue.ObjectDraft;
@@ -160,6 +162,16 @@ public class CatalogueController {
         return catalogue.revisions(objectId);
     }
 
+    /**
+     * The sheet a path of blocks reaches from this circuit ({@code ?path=S1,S2}), as that instance is run within it:
+     * its parts, nets and layout under the names the circuit's live run reports.
+     */
+    @GetMapping("/catalogue/objects/{objectId}/sheet")
+    @PublicEndpoint("ObjectAccess decides per object, as for the object itself; the sheets are read with the circuit's own components")
+    public SheetHierarchy.PlacedSheet placedSheet(@PathVariable String objectId, @RequestParam List<String> path) {
+        return catalogue.placedSheet(objectId, path);
+    }
+
     /** One revision's text: what {@code slug@revision} resolves to. */
     @GetMapping("/catalogue/objects/{objectId}/revisions/{revision}")
     @PublicEndpoint("ObjectAccess decides per object, as for the object itself")
@@ -210,6 +222,12 @@ public class CatalogueController {
                                                     @RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "48") int size) {
         return catalogue.ownedObjects(OwnerAddressArgumentResolver.ownerOf(owner), page, size);
+    }
+
+    /** The circuits one owner holds as the sheets of one design — a project's tree: ports, globals, and the blocks. */
+    @GetMapping(ParallaxManagementRoutes.OWNER + "/sheets")
+    public List<SheetView> ownedSheets(@OwnerAddress String owner) {
+        return catalogue.sheets(OwnerAddressArgumentResolver.ownerOf(owner));
     }
 
     /** A new object that belongs to one owner rather than to the shared catalogue. */

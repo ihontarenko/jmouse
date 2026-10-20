@@ -618,8 +618,11 @@ public sealed interface Block {
     record Point(double x, double y) {
     }
 
-    /** {@code out route 300,200 380,200}, {@code gnd ground}: what belongs to a node itself. */
-    record Net(String net, boolean ground, List<Point> route) {
+    /**
+     * {@code out route 300,200 380,200}, {@code gnd ground}, {@code vcc global}: what belongs to a node itself. A
+     * global net is one name across every sheet of a project — the rails a power symbol draws.
+     */
+    record Net(String net, boolean ground, boolean global, List<Point> route) {
         public Net {
             route = List.copyOf(route);
         }

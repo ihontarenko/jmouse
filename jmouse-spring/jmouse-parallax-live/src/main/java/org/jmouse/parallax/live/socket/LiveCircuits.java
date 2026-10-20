@@ -99,7 +99,9 @@ public class LiveCircuits implements LiveActivity {
                             List<ParameterDefinition> parameters, Map<String, Double> values) {
         CompiledObject compiled = parameters == null ? catalogue.compileVariant(object, circuit, values)
                 : Catalogue.compileChecked(circuit, parameters, values, components.forCircuit(object));
-        return new Prepared(object, circuit, compiled, LiveControls.of(circuit, components.forCircuit(object)));
+        // The controls are read off the circuit as it runs: a switch inside a placed sheet is a live part too.
+        return new Prepared(object, circuit, compiled,
+                LiveControls.of((ObjectDefinition.Circuit) compiled.definition(), components.forCircuit(object)));
     }
 
     /** The circuit as the object is saved, when the reader runs it unchanged. */

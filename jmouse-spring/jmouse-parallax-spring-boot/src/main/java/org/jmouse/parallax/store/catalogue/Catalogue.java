@@ -11,6 +11,7 @@ import org.jmouse.parallax.script.engine.ExperienceDefinitions;
 import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.DefinitionCompiler;
+import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectKind;
 import org.jmouse.parallax.object.ObjectNature;
@@ -32,6 +33,8 @@ import org.jmouse.parallax.store.catalogue.CatalogueViews.RelatedView;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.RepresentationView;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.RevisionSource;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.RevisionView;
+import org.jmouse.parallax.store.catalogue.CatalogueViews.SheetBlockView;
+import org.jmouse.parallax.store.catalogue.CatalogueViews.SheetView;
 import org.jmouse.parallax.event.ObjectCreated;
 import org.jmouse.parallax.event.ObjectStatusChanged;
 import org.jmouse.parallax.store.formula.FormulaNotations;
@@ -52,6 +55,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -197,6 +201,58 @@ public class Catalogue {
     public ParallaxPage<ObjectSummary> ownedObjects(ParallaxOwner owner, int page, int size) {
         authority.require(ParallaxCapability.SCENE_READ, places.requireOwner(owner));
         return ParallaxPage.of(objects.owned(owner, page, size), this::summary);
+    }
+
+    /**
+     * The circuits one owner holds as the sheets of one design: each with its ports, its global nets and the blocks it
+     * places the others with. A part counts as a block only when it names another circuit of the same owner — a
+     * component, or a circuit somewhere else, is just a part.
+     */
+    @Transactional(readOnly = true)
+    public List<SheetView> sheets(ParallaxOwner owner) {
+        authority.require(ParallaxCapability.SCENE_READ, places.requireOwner(owner));
+        List<MathematicalObject> circuits = objects.owned(owner, ObjectKind.CIRCUIT);
+        Set<String> slugs = circuits.stream().map(MathematicalObject::getSlug).collect(Collectors.toSet());
+        return circuits.stream().map(circuit -> sheet(circuit, slugs)).toList();
+    }
+
+    /**
+     * The sheet a path of blocks reaches from a circuit, as that instance is run within it — what the circuit's bench
+     * draws when it is opened inside a block, so the live run's names reach the sheet's parts.
+     */
+    @Transactional(readOnly = true)
+    public SheetHierarchy.PlacedSheet placedSheet(String circuitId, List<String> path) {
+        MathematicalObject object = objectAccess.requireReadable(circuitId);
+        if (!(definitionOf(object) instanceof ObjectDefinition.Circuit circuit)) {
+            throw ParallaxProblem.invalid("Only a circuit places sheets.");
+        }
+        Map<String, Double> values = new LinkedHashMap<>();
+        parametersOf(object).forEach(parameter -> values.put(parameter.name(), parameter.defaultValue()));
+        try {
+            return SheetHierarchy.placed(circuit, values, componentModels.forCircuit(object), path);
+        } catch (IllegalArgumentException refused) {
+            throw ParallaxProblem.invalid(refused.getMessage());
+        }
+    }
+
+    private SheetView sheet(MathematicalObject object, Set<String> sheets) {
+        ObjectDefinition.Circuit circuit;
+        try {
+            if (!(definitionOf(object) instanceof ObjectDefinition.Circuit read)) {
+                return new SheetView(object.getId(), object.getSlug(), object.getTitle(), object.getUpdatedAt(), List.of(),
+                        List.of(), List.of(), "Its text is no longer a circuit.");
+            }
+            circuit = read;
+        } catch (IllegalArgumentException | ParallaxProblem unreadable) {
+            return new SheetView(object.getId(), object.getSlug(), object.getTitle(), object.getUpdatedAt(), List.of(),
+                    List.of(), List.of(), unreadable.getMessage());
+        }
+        List<SheetBlockView> blocks = circuit.elements().stream()
+                .filter(element -> element.type() == ObjectDefinition.CircuitElementType.MODEL && sheets.contains(element.component()))
+                .map(element -> new SheetBlockView(element.id(), element.component())).toList();
+        return new SheetView(object.getId(), object.getSlug(), object.getTitle(), object.getUpdatedAt(),
+                circuit.boundary().ports().stream().map(ObjectDefinition.SheetPort::net).toList(),
+                List.copyOf(circuit.boundary().globals()), blocks, null);
     }
 
     /** Readable objects by slug, in the order asked, summarised; a slug the reader cannot open is left out. */
@@ -890,7 +946,7 @@ public class Catalogue {
                 computations.applicableTo(defined.definition(), defined.parameters()), presetViews, relatedViews,
                 CatalogueViews.ownerOf(object),
                 object.getVersion(), source, object.getRevision(), object.isShippedUpdatePending(),
-                ExperienceDefinitions.explain(source, defined));
+                ExperienceDefinitions.explain(source, defined), objectAccess.canWrite(object));
     }
 
     static String describe(FormulaException exception) {

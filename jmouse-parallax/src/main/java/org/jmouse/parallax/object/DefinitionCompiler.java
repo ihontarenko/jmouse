@@ -1,6 +1,7 @@
 package org.jmouse.parallax.object;
 
 import org.jmouse.formula.FormulaException;
+import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentVocabulary;
 import org.jmouse.parallax.object.ObjectDefinition.AffineTransformation;
@@ -35,6 +36,7 @@ import org.jmouse.parallax.object.ObjectDefinition.VectorField;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,10 +66,21 @@ public final class DefinitionCompiler {
                                          Map<String, Double> values, ComponentLibrary library) {
         requireDistinctNames(definition, parameters);
         ParameterDefinition.requireKnown(parameters, values);
-        CompiledObject compiled = new CompiledObject(definition, parameters, ParameterDefinition.resolve(parameters, values),
-                library);
+        double[] resolved = ParameterDefinition.resolve(parameters, values);
+        // A project's sheets placed as blocks are unfolded first: whatever reads the circuit after this reads one sheet.
+        ObjectDefinition unfolded = definition instanceof Circuit circuit
+                ? SheetHierarchy.flatten(circuit, valuesByName(parameters, resolved), library) : definition;
+        CompiledObject compiled = new CompiledObject(unfolded, parameters, resolved, library);
         checkExpressions(compiled);
         return compiled;
+    }
+
+    private static Map<String, Double> valuesByName(List<ParameterDefinition> parameters, double[] resolved) {
+        Map<String, Double> values = new LinkedHashMap<>();
+        for (int index = 0; index < parameters.size(); index++) {
+            values.put(parameters.get(index).name(), resolved[index]);
+        }
+        return values;
     }
 
     /**

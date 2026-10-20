@@ -42,6 +42,14 @@ public class ObjectAccess {
         return authority.permits(ParallaxCapability.SCENE_READ, placeOf(object));
     }
 
+    /** Whether the reader may write the object's next revision — the same rule {@link #requireWritable} enforces. */
+    public boolean canWrite(MathematicalObject object) {
+        if (object.isCatalogue()) {
+            return authority.permitsGlobally(ParallaxCapability.CATALOGUE_WRITE);
+        }
+        return authority.permits(ParallaxCapability.SCENE_WRITE, placeOf(object));
+    }
+
     public void requireWritable(MathematicalObject object) {
         if (object.isCatalogue()) {
             authority.requireGlobally(ParallaxCapability.CATALOGUE_WRITE);

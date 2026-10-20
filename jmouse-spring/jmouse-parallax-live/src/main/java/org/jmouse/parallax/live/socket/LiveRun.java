@@ -591,7 +591,12 @@ final class LiveRun {
                     .findFirst().orElseThrow(() -> ParallaxProblem.invalid("'" + message.part() + "' has no live '"
                             + message.parameter() + "'."));
             double value = Math.max(control.minimum(), Math.min(control.maximum(), message.value()));
-            circuit = withOverride(circuit, control.part(), control.parameter(), value);
+            // A live part inside a placed sheet (S1_SW1) is a part of the circuit only once its sheets are unfolded: the
+            // run goes on from the unfolded circuit then, which keeps every part's setting.
+            boolean written = circuit.elements().stream().anyMatch(element -> element.id().equals(control.part()));
+            ObjectDefinition.Circuit target = written ? circuit
+                    : (ObjectDefinition.Circuit) circuits.prepare(object, circuit, parameters, values).compiled().definition();
+            circuit = withOverride(target, control.part(), control.parameter(), value);
         } else {
             Map<String, Double> changed = new HashMap<>(values);
             changed.put(message.parameter(), message.value());
@@ -736,6 +741,6 @@ final class LiveRun {
                     element.value(), element.component(), element.pins(),
                     overrides, element.symbol());
         }).toList();
-        return new ObjectDefinition.Circuit(elements, circuit.time(), circuit.layout(), circuit.conditions());
+        return circuit.withElements(elements);
     }
 }

@@ -2,7 +2,10 @@ package org.jmouse.parallax.store.catalogue;
 
 import org.jmouse.parallax.owner.ParallaxOwner;
 import org.jmouse.parallax.script.ExperienceDocument;
+import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
 import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.script.engine.DefinedObject;
+import org.jmouse.parallax.script.engine.ExperienceDefinitions;
 import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.ObjectDefinition;
@@ -33,6 +36,12 @@ import java.util.stream.Collectors;
  * show them.</p>
  */
 public class ComponentModels {
+
+    /** What a sheet placed as a block is, among the kinds a palette groups by. */
+    public static final String SHEET_KIND = "sheet";
+
+    /** What a sheet's block is called on its parent before its number, as KiCad names a sheet symbol. */
+    private static final String SHEET_DESIGNATOR = "S";
 
     private final ObjectStore objects;
     private final ObjectAccess objectAccess;
@@ -89,7 +98,11 @@ public class ComponentModels {
     public record SymbolView(String slug, String title, String summary, String origin, ParallaxOwner owner,
                              String drawing) { }
 
-    /** References an editor may offer, with their scope for the circuit being edited. */
+    /**
+     * References an editor may offer, with their scope for the circuit being edited: every component, pinned to its
+     * revision, and every circuit somebody owns as a sheet — by its slug alone, since the sheets of one project follow
+     * each other's latest text. A sheet is offered only beside circuits of its own owner.
+     */
     public List<ReferenceView> list() {
         List<ReferenceView> result = new ArrayList<>();
         objects.findByKind(ObjectKind.COMPONENT).stream()
@@ -97,6 +110,10 @@ public class ComponentModels {
                 .forEach(object -> result.add(new ReferenceView(object.getSlug() + "@" + object.getRevision(),
                         object.getTitle(), "component", CatalogueViews.Origin.of(object).name(), CatalogueViews.ownerOf(object),
                         object.getStatus().name())));
+        objects.findByKind(ObjectKind.CIRCUIT).stream()
+                .filter(object -> !object.isCatalogue() && objectAccess.canRead(object))
+                .forEach(object -> result.add(new ReferenceView(object.getSlug(), object.getTitle(), SHEET_KIND,
+                        CatalogueViews.Origin.of(object).name(), CatalogueViews.ownerOf(object), object.getStatus().name())));
         return result;
     }
 
@@ -131,6 +148,9 @@ public class ComponentModels {
                     .flatMap(model -> sourceAt(model, revision));
         }
         String text = source.orElseThrow(() -> ParallaxProblem.notFound("The component model"));
+        if (SheetHierarchy.isSheetSource(text)) {
+            return sheetBlock(text, reference);
+        }
         // Read as the editor reads it, components included: a part that `extends diode` takes its displays, pins and
         // parameters from the diode, and through the shared documents alone the base was not found and silently left
         // out — the 1N4148 reached the sheet without its "overvoltage … of VRRM".
@@ -151,6 +171,43 @@ public class ComponentModels {
                 model.leads().entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,
                         lead -> new LeadView(lead.getValue().colour(), lead.getValue().stripes()), (one, other) -> one, java.util.LinkedHashMap::new)),
                 model.displayUnits(), model.displayCaptions(), model.headerValue("designator").orElse(null));
+    }
+
+    /**
+     * A sheet as a part on its parent sheet: a box whose pins are the sheet's ports — what it takes in on the left,
+     * what it gives out on the right; with outputs named nowhere, the second half of its ports — and whose parameters
+     * are the sheet's sliders, which the block may set.
+     */
+    private static ModelView sheetBlock(String text, String reference) {
+        DefinedObject sheet = ExperienceDefinitions.read(text, reference);
+        if (!(sheet.definition() instanceof ObjectDefinition.Circuit circuit)) {
+            throw ParallaxProblem.notFound("The component model");
+        }
+        List<ObjectDefinition.SheetPort> ports = circuit.boundary().ports();
+        List<String> left = new ArrayList<>();
+        List<String> right = new ArrayList<>();
+        boolean outputsNamed = ports.stream().anyMatch(port -> port.direction().equals("output"));
+        for (int index = 0; index < ports.size(); index++) {
+            ObjectDefinition.SheetPort port = ports.get(index);
+            boolean out = outputsNamed ? port.direction().equals("output") : index >= (ports.size() + 1) / 2;
+            (out ? right : left).add(port.net());
+        }
+        List<String> symbol = new ArrayList<>(List.of("box"));
+        if (!left.isEmpty()) {
+            symbol.add("left " + String.join(", ", left));
+        }
+        if (!right.isEmpty()) {
+            symbol.add("right " + String.join(", ", right));
+        }
+        List<PinView> pins = ports.stream().map(port -> new PinView(port.net(), Map.of(), false, switch (port.direction()) {
+            case "power" -> "POWER";
+            case "ground" -> "GROUND";
+            default -> "ANALOG";
+        }, port.direction().equals("output"), null)).toList();
+        List<ParameterView> parameters = sheet.parameters().stream()
+                .map(parameter -> new ParameterView(parameter.name(), parameter.defaultValue(), false, parameter.label())).toList();
+        return new ModelView(sheet.title(), SHEET_KIND, List.of(), pins, parameters, symbol, null, List.of(), null, Map.of(),
+                List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR);
     }
 
     /**
@@ -184,8 +241,10 @@ public class ComponentModels {
         ComponentLibrary components = reference -> {
             int separator = reference.lastIndexOf('@');
             if (separator < 0) {
+                // A bare slug is a component's head — or a sheet of the same project, placed as a block: a project's
+                // sheets follow each other's latest text, since they are edited together.
                 return objects.findBySlug(reference)
-                        .filter(model -> model.getKind() == ObjectKind.COMPONENT && visible.test(model))
+                        .filter(model -> placeable(model) && visible.test(model))
                         .flatMap(model -> sourceAt(model, model.getRevision()));
             }
             if (separator < 1 || separator == reference.length() - 1) {
@@ -229,6 +288,11 @@ public class ComponentModels {
             }
         }
         return ports;
+    }
+
+    /** What a part may name by its slug alone: a component, or a circuit somebody owns — a sheet of their project. */
+    private static boolean placeable(MathematicalObject model) {
+        return model.getKind() == ObjectKind.COMPONENT || (model.getKind() == ObjectKind.CIRCUIT && !model.isCatalogue());
     }
 
     private boolean visibleFrom(MathematicalObject circuit, MathematicalObject model) {

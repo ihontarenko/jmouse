@@ -72,6 +72,8 @@ public final class CatalogueViews {
      *                              this object
      * @param explanation           the structure and what is derived from it, each with its line; null for a formula
      *                              that is not saved
+     * @param writable              whether the reader may write its next revision — the rule {@code ObjectAccess}
+     *                              enforces on a save, told beforehand so an interface offers editing only where it holds
      */
     public record ObjectDetail(ObjectSummary summary, String description, ObjectDefinition definition,
                                int definitionRevision, List<ParameterDefinition> parameters,
@@ -79,7 +81,24 @@ public final class CatalogueViews {
                                List<RepresentationKind> applicableRepresentations, List<PresetView> presets,
                                List<RelatedView> related, ParallaxOwner owner, long version, String source,
                                int sourceRevision, boolean shippedUpdatePending,
-                               org.jmouse.parallax.script.engine.ObjectExplanation explanation) {
+                               org.jmouse.parallax.script.engine.ObjectExplanation explanation, boolean writable) {
+    }
+
+    /**
+     * One sheet of an owner's — a project's — circuits, as the project's tree shows it: what it hands its parent, and
+     * the blocks it places other sheets with. A sheet no other sheet places is a top of the hierarchy.
+     *
+     * @param ports    the nets it hands to the sheet that places it, in the order written
+     * @param globals  the nets it shares with every sheet of the project
+     * @param blocks   the sheets it places, block by block, in the order its parts are written
+     * @param problem  why its text does not read, or null; such a sheet places nothing that can be seen
+     */
+    public record SheetView(String id, String slug, String title, Instant updatedAt, List<String> ports,
+                            List<String> globals, List<SheetBlockView> blocks, String problem) {
+    }
+
+    /** A block on a sheet: the part that places another sheet, and that sheet's slug. */
+    public record SheetBlockView(String block, String sheet) {
     }
 
     /** One saved revision of an object's text; {@code writtenBy} is null for the shipped catalogue. */

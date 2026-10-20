@@ -650,6 +650,61 @@ circuit "Bridge rectifier supply" as bridge-supply {
 
 A terminal is `PART.pin` — a model's pin by name, `positive`/`negative` on a two-terminal primitive.
 
+| Label mark | Means |
+|---|---|
+| `ID label vp at x, y` | a net's label on this sheet: every label of one name is one net, terminal `ID.label` |
+| `ID port FB at x, y` | a net the sheet hands to the sheet that places it — it draws a line of `ports` |
+| `ID global vcc at x, y` | a net that is one name across every sheet of the design — it draws a `nets` line marked `global` |
+
+The marks only draw; what joins is the net names in `parts`, the `ports` block and the `nets` block.
+
+### Sheets: a circuit placed as a block
+
+A circuit may place another circuit of the same owner as a part, as KiCad places a hierarchical sheet. The placed
+circuit says what crosses its edge:
+
+```jmx
+circuit "Divider stage" as psu-divider {
+    parts {
+        R1 resistor (IN, mid) resistance = R_top
+        R2 resistor (mid, 0) resistance = 10 kΩ
+        R3 resistor (vbus, 0) resistance = 1 kΩ
+    }
+    ports {
+        input IN
+        output mid
+    }
+    nets {
+        vbus global
+    }
+}
+
+circuit "Divider chain" as psu-top {
+    parts {
+        V1 voltage-source (in, 0) U_output = 8 V
+        S1 psu-divider (IN = in, mid = half)
+        S2 psu-divider (IN = half, mid = quarter) R_top = 30 kΩ
+    }
+}
+```
+
+- **`ports`** — `input|output|power|ground|analog NET`: the nets the block's pins are. A port left unwired is the
+  instance's own net.
+- **`nets { NET global }`** — one net across the design, whichever sheet names it, the top one included.
+- Every other net of a placed sheet is the instance's own: `S1.mid` and `S2.mid` never meet. Node `0` is everybody's.
+- A part of a placed sheet runs as `S1_R1` (one deeper `S1_S2_R1`), its values worked out over the sheet's parameters —
+  their defaults, or what the block sets (`R_top = 30 kΩ`, written over the parent's parameters).
+- `SheetHierarchy.flatten` unfolds the sheets where a circuit is compiled (`DefinitionCompiler.compile`), so the
+  engine, the checks and every analysis see one flat circuit. A sheet that places itself, a port the sheet does not
+  have and a setting that is not its parameter are refused with what is wrong.
+- A sheet is named by its slug alone (`psu-divider`, never `@revision`): the sheets of one design follow each other's
+  latest text. `ComponentModels` resolves a bare slug to an owned circuit as well as a component, and describes it as a
+  `box` whose pins are its ports (kind `sheet`, designator `S`).
+
+Routes: `GET /owners/{type}/{id}/sheets` — an owner's circuits with their ports, global nets and blocks (the design's
+tree); `GET /catalogue/objects/{id}/sheet?path=S1,S2` — the sheet those blocks reach, as that instance runs inside the
+circuit (`SheetHierarchy.placed`: parts, nets and layout under the run's names), which a bench draws over the run.
+
 **`probes`** — the oscilloscope's channels `CH1`…`CH4` and logic levels: `CH1 node [against ref] [scale]`
 (`CH2 a against b 10 V/div`), `L1 level clock`. A meter written as a probe (`A1 current R1`, `M1 power RL`,
 `M1 voltage p`) is refused with its part line; a display mode on a channel is refused too — a meter's display is

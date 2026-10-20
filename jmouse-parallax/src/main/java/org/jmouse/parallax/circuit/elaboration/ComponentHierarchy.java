@@ -7,12 +7,7 @@ import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.component.ComponentVocabulary;
-import org.jmouse.parallax.circuit.elaboration.PartParameters;
 import org.jmouse.parallax.component.ComponentModel.SubcircuitLine;
-import org.jmouse.parallax.script.Quantity;
-import org.jmouse.formula.RealCompiler;
-import org.jmouse.formula.Symbols;
-import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
@@ -289,13 +284,7 @@ public final class ComponentHierarchy {
         }
 
         private static double value(String expression, Map<String, Double> parameters) {
-            if (Quantity.isQuantity(expression)) {
-                return Quantity.valueOf(expression);
-            }
-            List<String> names = List.copyOf(parameters.keySet());
-            double[] values = names.stream().mapToDouble(parameters::get).toArray();
-            return RealCompiler.compile(FormulaLanguage.standard().parse(expression),
-                    Symbols.of(List.of(), names), expression).evaluate(values);
+            return ExpressionValues.valueOf(expression, parameters);
         }
     }
 }

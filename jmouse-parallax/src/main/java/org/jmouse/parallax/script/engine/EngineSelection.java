@@ -33,12 +33,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 import java.util.regex.Pattern;
 
 import static org.jmouse.parallax.script.engine.DefinitionWords.AXES;
@@ -703,7 +705,17 @@ public final class EngineSelection {
         return new ObjectDefinition.Circuit(elements, transientSpan(),
                 document.block(Block.Layout.class).map(EngineSelection::layout).orElse(null), null,
                 probes.map(EngineSelection::probes).orElse(List.of()), circuitExpectations(),
-                probes.flatMap(Block.Probes::timePerDivision).map(Quantity::value).orElse(null));
+                probes.flatMap(Block.Probes::timePerDivision).map(Quantity::value).orElse(null), sheetBoundary());
+    }
+
+    /** What crosses the circuit's edge as a sheet of a project: its {@code ports}, and its {@code nets} marked global. */
+    private ObjectDefinition.SheetBoundary sheetBoundary() {
+        List<ObjectDefinition.SheetPort> ports = document.block(Block.Ports.class).map(Block.Ports::ports).orElse(List.of())
+                .stream().map(port -> new ObjectDefinition.SheetPort(port.net(), port.direction().name().toLowerCase(Locale.ROOT)))
+                .toList();
+        Set<String> globals = document.block(Block.Nets.class).map(Block.Nets::nets).orElse(List.of()).stream()
+                .filter(Block.Net::global).map(Block.Net::net).collect(Collectors.toCollection(LinkedHashSet::new));
+        return new ObjectDefinition.SheetBoundary(ports, globals);
     }
 
     /**

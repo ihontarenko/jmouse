@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -773,13 +774,13 @@ public sealed interface ObjectDefinition {
      *                   circuit run as it is written
      * @param probes     what a bench measures it with — its {@code probes} block: the oscilloscope's channels and the
      *                   meters —; like the layout, nothing in it changes what is computed
-     */
-    /**
      * @param timePerDivision the time base the oscilloscope opens on, seconds a division — the {@code probes} block's
      *                        {@code time 5 ms/div}; null when the circuit names none and the bench chooses
+     * @param boundary   what crosses the circuit's edge when it is a sheet of a project: its ports and its global nets
      */
     record Circuit(List<CircuitElement> elements, Interval time, SchematicLayout layout, BenchConditions conditions,
-                   List<BenchProbe> probes, List<CircuitExpectation> expectations, Double timePerDivision)
+                   List<BenchProbe> probes, List<CircuitExpectation> expectations, Double timePerDivision,
+                   SheetBoundary boundary)
             implements ObjectDefinition {
 
         public static final String GROUND = "0";
@@ -827,7 +828,19 @@ public sealed interface ObjectDefinition {
             this(elements, time, layout, conditions, probes, expectations, null);
         }
 
+        /** A circuit that is no sheet of a project: nothing crosses its edge. */
+        public Circuit(List<CircuitElement> elements, Interval time, SchematicLayout layout, BenchConditions conditions,
+                       List<BenchProbe> probes, List<CircuitExpectation> expectations, Double timePerDivision) {
+            this(elements, time, layout, conditions, probes, expectations, timePerDivision, SheetBoundary.NONE);
+        }
+
+        /** The same circuit made of other parts — flattened, conditioned —, everything else about it kept. */
+        public Circuit withElements(List<CircuitElement> replaced) {
+            return new Circuit(replaced, time, layout, conditions, probes, expectations, timePerDivision, boundary);
+        }
+
         public Circuit {
+            boundary = boundary == null ? SheetBoundary.NONE : boundary;
             if (timePerDivision != null && !(timePerDivision > 0)) {
                 throw new IllegalArgumentException("A time base is a positive time a division.");
             }
@@ -856,6 +869,67 @@ public sealed interface ObjectDefinition {
 
         public int ambientDimension() {
             return 2;
+        }
+    }
+
+    /**
+     * What crosses a sheet's edge, as KiCad has it: a <em>port</em> is a net the sheet hands to its parent — the
+     * hierarchical label, a pin of the sheet's block on the parent sheet (its {@code ports} block) —, a <em>global</em>
+     * net is one name across every sheet of the project (a {@code nets} line marked {@code global}: the rails). Every
+     * other net of a sheet is its own, kept apart in each instance; node {@value Circuit#GROUND} is everybody's.
+     *
+     * @param ports   the nets handed to the parent, in the order written
+     * @param globals the nets that are one net across the project
+     */
+    record SheetBoundary(List<SheetPort> ports, Set<String> globals) {
+
+        public static final SheetBoundary NONE = new SheetBoundary(List.of(), Set.of());
+
+        public SheetBoundary {
+            ports = ports == null ? List.of() : List.copyOf(ports);
+            globals = globals == null ? Set.of() : Collections.unmodifiableSet(new LinkedHashSet<>(globals));
+            Set<String> named = new HashSet<>();
+            for (SheetPort port : ports) {
+                if (!named.add(port.net())) {
+                    throw new IllegalArgumentException("Port '" + port.net() + "' is written twice.");
+                }
+                if (globals.contains(port.net())) {
+                    throw new IllegalArgumentException("Net '" + port.net() + "' is a port and a global net at once: "
+                            + "a global net already reaches every sheet.");
+                }
+            }
+            if (globals.contains(Circuit.GROUND)) {
+                throw new IllegalArgumentException("Node 0 is every sheet's already: it is not written as a global net.");
+            }
+        }
+
+        public boolean isPort(String net) {
+            return ports.stream().anyMatch(port -> port.net().equals(net));
+        }
+
+        @JsonIgnore
+        public boolean isEmpty() {
+            return ports.isEmpty() && globals.isEmpty();
+        }
+    }
+
+    /**
+     * A net a sheet hands to its parent, and which way its signal goes — what the block's pin is drawn as on the parent.
+     *
+     * @param direction {@code input}, {@code output}, {@code power}, {@code ground} or {@code analog}
+     */
+    record SheetPort(String net, String direction) {
+
+        public static final Set<String> DIRECTIONS = Set.of("input", "output", "power", "ground", "analog");
+
+        public SheetPort {
+            if (net == null || !net.matches("[A-Za-z_][A-Za-z0-9_]{0,31}")) {
+                throw new IllegalArgumentException("A port is named like a net: VIN, FB, clock.");
+            }
+            direction = direction == null ? "analog" : direction;
+            if (!DIRECTIONS.contains(direction)) {
+                throw new IllegalArgumentException("A port is input, output, power, ground or analog, not '" + direction + "'.");
+            }
         }
     }
 
@@ -913,13 +987,15 @@ public sealed interface ObjectDefinition {
         private static final Set<String> TEXTS = Set.of("name", "value", "readings");
 
         /**
-         * The marks a sheet places besides its parts: an earth, the circuit's 0 V, a junction, and a net's label — the
-         * flag that is its net wherever it stands, so one net reaches across the sheet without a wire drawn.
+         * The marks a sheet places besides its parts: an earth, the circuit's 0 V, a junction, and the three labels of a
+         * net — {@code label} is the flag that is its net wherever it stands on this sheet, so one net reaches across
+         * the sheet without a wire drawn; {@code port} draws a net the sheet hands to its parent (its {@code ports}
+         * block); {@code global} draws a net that is one name across the whole project.
          */
-        private static final Set<String> MARKS = Set.of("ground", "common", "junction", "label");
+        private static final Set<String> MARKS = Set.of("ground", "common", "junction", "label", "port", "global");
 
-        /** The mark that must name its net. */
-        private static final String LABEL = "label";
+        /** The marks that must name their net. */
+        private static final Set<String> NAMED = Set.of("label", "port", "global");
 
         public PlacedItem(String id, String mark, String net, double x, double y, double rotation, boolean mirrored) {
             this(id, mark, net, x, y, rotation, mirrored, Map.of(), List.of());
@@ -937,10 +1013,11 @@ public sealed interface ObjectDefinition {
                 throw new IllegalArgumentException("A placed item is named like a part: R1, GND1, J1.");
             }
             if (mark != null && !MARKS.contains(mark)) {
-                throw new IllegalArgumentException("A mark is 'ground', 'common', 'junction' or 'label', not '" + mark + "'.");
+                throw new IllegalArgumentException("A mark is 'ground', 'common', 'junction', 'label', 'port' or 'global', not '"
+                        + mark + "'.");
             }
-            if (LABEL.equals(mark) && (net == null || net.isBlank())) {
-                throw new IllegalArgumentException("A label names the net it is: '" + id + " label vp at x, y'.");
+            if (mark != null && NAMED.contains(mark) && (net == null || net.isBlank())) {
+                throw new IllegalArgumentException("A " + mark + " names the net it is: '" + id + " " + mark + " vp at x, y'.");
             }
         }
     }

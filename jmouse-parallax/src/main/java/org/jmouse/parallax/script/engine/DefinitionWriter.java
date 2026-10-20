@@ -403,6 +403,12 @@ final class DefinitionWriter {
         String analysis = analysis(circuit.time());
         List<TextBlock> blocks = new ArrayList<>();
         blocks.add(TextBlock.braced("parts", parts));
+        if (!circuit.boundary().ports().isEmpty()) {
+            blocks.add(TextBlock.braced("ports", circuit.boundary().ports().stream().map(DefinitionWriter::port).toList()));
+        }
+        if (!circuit.boundary().globals().isEmpty()) {
+            blocks.add(TextBlock.braced("nets", circuit.boundary().globals().stream().map(net -> net + " global").toList()));
+        }
         if (circuit.layout() != null) {
             blocks.add(TextBlock.braced("layout", layoutLines(circuit.layout())));
         }
@@ -494,6 +500,27 @@ final class DefinitionWriter {
         }
         if (!item.shows().isEmpty()) {
             line.append(" shows ").append(String.join(" ", item.shows()));
+        }
+        return line.toString();
+    }
+
+    /** {@code input VIN}: a net a sheet hands to its parent, and which way it goes. */
+    static String port(ObjectDefinition.SheetPort port) {
+        return port.direction() + " " + port.net();
+    }
+
+    /** {@code vcc global}, {@code agnd ground route 300,200 380,200}: a {@code nets} line as the reader takes it back. */
+    static String net(org.jmouse.parallax.script.Block.Net net) {
+        StringBuilder line = new StringBuilder(net.net());
+        if (net.ground()) {
+            line.append(" ground");
+        }
+        if (net.global()) {
+            line.append(" global");
+        }
+        if (!net.route().isEmpty()) {
+            line.append(" route ").append(String.join(" ", net.route().stream()
+                    .map(point -> Notation.number(point.x()) + "," + Notation.number(point.y())).toList()));
         }
         return line.toString();
     }

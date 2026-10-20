@@ -64,6 +64,9 @@ final class CanvasTexts {
         if (circuit.layout() != null) {
             text = layout(text, current.layout(), circuit.layout());
         }
+        if (!circuit.boundary().equals(current.boundary())) {
+            text = boundary(text, circuit.boundary());
+        }
         if (!circuit.probes().equals(current.probes()) || !Objects.equals(circuit.timePerDivision(), current.timePerDivision())) {
             text = probes(text, current, circuit);
         }
@@ -90,6 +93,49 @@ final class CanvasTexts {
             now.put(wire.id(), wire);
         }
         return keyedLines(source, "layout", lines, key -> Objects.equals(was.get(key), now.get(key)));
+    }
+
+    /**
+     * What crosses the sheet's edge, as the canvas drew it with its port and global labels. The {@code ports} block is
+     * the sheet's interface and is written whole — its lines start with a direction, so no word keys them —, or goes
+     * when the sheet hands nothing to a parent. In {@code nets} only the {@code global} word moves: a net's ground mark
+     * and route stay as written.
+     */
+    private static String boundary(String source, ObjectDefinition.SheetBoundary boundary) {
+        String text = source;
+        int ports = statementOf(text, "ports");
+        if (ports >= 0) {
+            text = DocumentForms.apply(text, edit(FormEdit.Action.REMOVE_STATEMENT, ports, 0, Map.of()));
+        }
+        if (!boundary.ports().isEmpty()) {
+            text = ensureBlock(text, "ports");
+            for (ObjectDefinition.SheetPort port : boundary.ports()) {
+                text = DocumentForms.apply(text, edit(FormEdit.Action.ADD_LINE, statementOf(text, "ports"), 0,
+                        Map.of("line", DefinitionWriter.port(port))));
+            }
+        }
+
+        List<Block.Net> written = ExperienceReader.readOne(text, "document").block(Block.Nets.class)
+                .map(Block.Nets::nets).orElse(List.of());
+        Map<String, Block.Net> nets = new LinkedHashMap<>();
+        written.forEach(net -> nets.put(net.net(), new Block.Net(net.net(), net.ground(), boundary.globals().contains(net.net()),
+                net.route())));
+        boundary.globals().forEach(global -> nets.putIfAbsent(global, new Block.Net(global, false, true, List.of())));
+        // A net line that says nothing once its global word is gone goes with it.
+        nets.values().removeIf(net -> !net.ground() && !net.global() && net.route().isEmpty());
+        if (nets.isEmpty() && statementOf(text, "nets") < 0) {
+            return text;
+        }
+        Map<String, Block.Net> before = new HashMap<>();
+        written.forEach(net -> before.put(net.net(), net));
+        Map<String, String> lines = new LinkedHashMap<>();
+        nets.forEach((name, net) -> lines.put(name, DefinitionWriter.net(net)));
+        text = keyedLines(text, "nets", lines, name -> nets.get(name).equals(before.get(name)));
+        int netsStatement = statementOf(text, "nets");
+        if (nets.isEmpty() && netsStatement >= 0) {
+            text = DocumentForms.apply(text, edit(FormEdit.Action.REMOVE_STATEMENT, netsStatement, 0, Map.of()));
+        }
+        return text;
     }
 
     /**

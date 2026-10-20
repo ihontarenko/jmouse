@@ -229,6 +229,20 @@ public class ObjectStore {
     }
 
     /**
+     * 📋 Every object of one kind an owner holds, by title — a project's sheets.
+     *
+     * @param owner the owner
+     * @param kind  the kind
+     * @return the objects
+     */
+    public List<MathematicalObject> owned(ParallaxOwner owner, ObjectKind kind) {
+        return entityManager.createQuery("select object from MathematicalObject object where object.ownerType = :ownerType"
+                        + " and object.ownerId = :ownerId and object.kind = :kind order by object.title", MathematicalObject.class)
+                .setParameter("ownerType", owner.type()).setParameter("ownerId", owner.id()).setParameter("kind", kind)
+                .getResultList();
+    }
+
+    /**
      * ❓ Whether any object, catalogue or owned, is filed in a category.
      *
      * @param categoryCode the category

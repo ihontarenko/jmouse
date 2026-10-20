@@ -144,6 +144,7 @@ public final class ParallaxAccessRules {
                 .method(CatalogueController.class, "saveInstrument", catalogueWrite)
                 .method(CatalogueController.class, "changeStatus", cataloguePublish)
                 .method(CatalogueController.class, "ownedObjects", aboutOwner(sceneRead))
+                .method(CatalogueController.class, "ownedSheets", aboutOwner(sceneRead))
                 .method(CatalogueController.class, "createOwned", aboutOwner(sceneWrite))
 
                 // Every other computation route decides per object and per job, inside its service.
