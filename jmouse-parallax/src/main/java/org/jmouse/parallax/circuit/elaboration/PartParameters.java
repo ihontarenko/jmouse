@@ -2,6 +2,7 @@ package org.jmouse.parallax.circuit.elaboration;
 
 import org.jmouse.parallax.component.ComponentModel;
 import org.jmouse.parallax.component.ComponentVocabulary;
+import org.jmouse.parallax.component.TextParameter;
 import org.jmouse.parallax.component.TextValues;
 
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
@@ -66,15 +67,22 @@ public final class PartParameters {
      * @throws IllegalArgumentException when a part writes a text parameter without quotes
      */
     public static Map<String, String> texts(ComponentModel model, CircuitElement element) {
-        Map<String, String> texts = new LinkedHashMap<>(model.texts());
+        Map<String, String> texts = new LinkedHashMap<>();
+        model.texts().forEach((name, parameter) -> texts.put(name, parameter.value()));
         if (element.overrides() != null) {
             element.overrides().forEach((name, written) -> {
-                if (texts.containsKey(name)) {
-                    if (!TextValues.isText(written)) {
-                        throw new IllegalArgumentException(element.id() + ": its " + name + " is a text, written in quotes: "
-                                + name + " = \"…\"");
-                    }
-                    texts.put(name, TextValues.unquoted(written));
+                TextParameter parameter = model.texts().get(name);
+                if (parameter == null) {
+                    return;
+                }
+                if (!TextValues.isText(written)) {
+                    throw new IllegalArgumentException(element.id() + ": its " + name + " is a text, written in quotes: "
+                            + name + " = \"…\"");
+                }
+                try {
+                    texts.put(name, parameter.accepted(TextValues.unquoted(written), name));
+                } catch (IllegalArgumentException refused) {
+                    throw new IllegalArgumentException(element.id() + ": " + refused.getMessage(), refused);
                 }
             });
         }

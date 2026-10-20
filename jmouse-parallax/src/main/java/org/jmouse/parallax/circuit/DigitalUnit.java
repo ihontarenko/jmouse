@@ -6,13 +6,16 @@ import org.jmouse.parallax.component.ComponentVocabulary;
 import org.jmouse.parallax.component.ModelLanguage;
 import org.jmouse.el.evaluation.BasicValuesChain;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.node.Expression;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Substitution;
 import org.jmouse.formula.Symbols;
 import org.jmouse.script.el.DeclaredFunctions;
+import org.jmouse.script.el.budget.ScriptBudgetExceededException;
 import org.jmouse.script.el.budget.ScriptExecution;
+import org.jmouse.script.el.node.DeclarationNode;
 import org.jmouse.script.el.node.FunctionDeclarationNode;
 import org.jmouse.script.el.node.HandlerNode;
 import org.jmouse.script.el.node.ScriptNode;
@@ -22,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +50,10 @@ final class DigitalUnit {
     final List<Periodic> periodics = new ArrayList<>();
     final List<Watch> watches = new ArrayList<>();
     final Map<String, FunctionDeclarationNode> functions = new LinkedHashMap<>();
-    /** Each handler's argument — the input or expression it listens to — read once, not at every event. */
-    final Map<HandlerNode, String> handlerArguments = new IdentityHashMap<>();
+    /** The behaviour's own names — its `final let` lines — bound in every handler before it runs, in written order. */
+    private final List<DeclarationNode> constants = new ArrayList<>();
+    /** Its handlers, each with what it listens to read once rather than at every event, in written order. */
+    private final List<Listener> listeners = new ArrayList<>();
     final ScriptNode script;
     /** The logic family its digital pins follow, compiled from its document; null for a part with no digital pin. */
     final LogicFamily family;
@@ -114,43 +118,79 @@ final class DigitalUnit {
         this.argumentsBefore = newArguments();
         this.script = model.model().behaviour();
         if (script != null) {
-            script.getFunctions().forEach(function -> {
-                // A function the language already has would win the call and leave the part's own unheard — refused
-                // here, by name, rather than failing at the first event with a message about something else.
-                if (simulation.extensions.getFunction(function.getName()) != null) {
-                    throw new IllegalArgumentException(model.model().name() + ": function '" + function.getName()
-                            + "' is the language's own; give the part's another name.");
-                }
-                // A function and a state, parameter or pin of one name: an assignment writes the one and an equation
-                // reads the other, and neither says so — most easily met where a base's behaviour is inherited.
-                if (discrete.containsKey(function.getName()) || model.parameters().containsKey(function.getName())
-                        || model.pins().containsKey(function.getName())) {
-                    throw new IllegalArgumentException(model.model().name() + ": function '" + function.getName()
-                            + "' has the name of one of its states, parameters or pins; give one of them another name.");
-                }
-                functions.put(function.getName(), function);
-            });
-            for (HandlerNode handler : script.getHandlers()) {
-                String argument = argumentOf(handler);
-                handlerArguments.put(handler, argument);
-                DigitalEvent.Kind kind = DigitalEvent.Kind.of(handler.getEvent(), model.model().name());
-                switch (kind) {
-                    case ABOVE, BELOW -> watches.add(new Watch(kind, argument, compile(argument)));
-                    case EVERY -> {
-                        double period = compile(argument).evaluate(arguments(newArguments(), new double[0], 0));
-                        if (!(period > 0)) {
-                            throw new IllegalArgumentException(model.model().name() + ": 'every " + argument + "' is not a positive period.");
+            for (Expression statement : script.getExpressions()) {
+                switch (statement) {
+                    case FunctionDeclarationNode function -> {
+                        // A function the language already has would win the call and leave the part's own unheard —
+                        // refused here, by name, rather than failing at the first event with a message about something else.
+                        if (simulation.extensions.getFunction(function.getName()) != null) {
+                            throw new IllegalArgumentException(model.model().name() + ": function '" + function.getName()
+                                    + "' is the language's own; give the part's another name.");
                         }
-                        periodics.add(new Periodic(argument, period, 0));
+                        requireOwnName(function.getName(), "function");
+                        functions.put(function.getName(), function);
                     }
-                    case START, RISING, FALLING, CHANGE, TIMER -> {
+                    case DeclarationNode declaration when declaration.getKind() == DeclarationNode.Kind.FINAL -> {
+                        requireOwnName(declaration.getName(), "constant");
+                        constants.add(declaration);
                     }
+                    case HandlerNode handler -> listeners.add(listen(handler));
+                    default -> throw new IllegalArgumentException(model.model().name() + ": a behaviour holds functions, "
+                            + "'on' handlers and 'final let' constants; '" + statement.toSource() + "' is none of them — "
+                            + "what a part remembers between events is a state.");
                 }
             }
         }
     }
 
-    /** Takes over the discrete life of the same unit in an earlier build of the circuit. */
+    /**
+     * A function or constant named like a state, parameter, pin or another of the behaviour's own: an assignment writes
+     * the one and an equation reads the other, and neither says so — most easily met where a base's behaviour is inherited.
+     */
+    private void requireOwnName(String name, String what) {
+        boolean taken = discrete.containsKey(name) || model.parameters().containsKey(name) || model.texts().containsKey(name)
+                || model.pins().containsKey(name) || functions.containsKey(name)
+                || constants.stream().anyMatch(constant -> constant.getName().equals(name));
+        if (taken) {
+            throw new IllegalArgumentException(model.model().name() + ": " + what + " '" + name + "' has the name of one of "
+                    + "its states, parameters, pins, functions or constants; give one of them another name.");
+        }
+    }
+
+    /** A handler and what it listens to, compiled for the events that are watched or periodic. */
+    private Listener listen(HandlerNode handler) {
+        String argument = argumentOf(handler);
+        DigitalEvent.Kind kind = DigitalEvent.Kind.of(handler.getEvent(), model.model().name());
+        switch (kind) {
+            case ABOVE, BELOW -> watches.add(new Watch(kind, argument, compile(argument)));
+            case EVERY -> {
+                double period = compile(argument).evaluate(arguments(newArguments(), new double[0], 0));
+                if (!(period > 0)) {
+                    throw new IllegalArgumentException(model.model().name() + ": 'every " + argument + "' is not a positive period.");
+                }
+                periodics.add(new Periodic(argument, period, 0));
+            }
+            case START, RISING, FALLING, CHANGE, TIMER -> {
+            }
+        }
+        return new Listener(handler, kind, argument, Set.copyOf(Arrays.asList(argument.split("[,\\s]+"))));
+    }
+
+    /** One handler: the event it answers, its argument as written, and — for an edge or a change — the inputs it names. */
+    private record Listener(HandlerNode handler, DigitalEvent.Kind kind, String argument, Set<String> inputs) {
+
+        boolean answers(DigitalEvent event) {
+            if (kind != event.kind()) {
+                return false;
+            }
+            return switch (kind) {
+                case START -> true;
+                case RISING, FALLING, CHANGE -> inputs.contains(event.subject());
+                case ABOVE, BELOW, EVERY, TIMER -> argument.equals(event.subject());
+            };
+        }
+    }
+
     /**
      * Where a unit stands, kept apart from it: its discrete states, its drivers, its inputs, when each changed, its
      * timers, the sign of each watched expression and when each periodic event is next due.
@@ -199,18 +239,9 @@ final class DigitalUnit {
 
     List<HandlerNode> handlersFor(DigitalEvent event) {
         List<HandlerNode> selected = new ArrayList<>();
-        for (HandlerNode handler : script.getHandlers()) {
-            if (!handler.getEvent().equals(event.kind().keyword())) {
-                continue;
-            }
-            String argument = handlerArguments.get(handler);
-            boolean matches = switch (event.kind()) {
-                case START -> true;
-                case RISING, FALLING, CHANGE -> Arrays.stream(argument.split("[,\\s]+")).anyMatch(event.subject()::equals);
-                case ABOVE, BELOW, EVERY, TIMER -> argument.equals(event.subject());
-            };
-            if (matches) {
-                selected.add(handler);
+        for (Listener listener : listeners) {
+            if (listener.answers(event)) {
+                selected.add(listener.handler());
             }
         }
         return selected;
@@ -236,10 +267,18 @@ final class DigitalUnit {
         context.setValue("time", simulation.now);
         context.setValue(EventSimulation.SCOPE, new SimulatorFunctions.Scope(this, state));
         DeclaredFunctions.of(functions).installInto(context);
+        // The behaviour's constants, after everything they may be written over: a parameter, a text, another constant.
+        constants.forEach(constant -> constant.evaluate(context));
         ScriptExecution execution = ScriptExecution.begin(label, EventSimulation.BUDGET);
         execution.installInto(context);
         try {
             handler.evaluate(context);
+        } catch (ScriptBudgetExceededException exhausted) {
+            // It names the part already, and is answered as a budget, not as a mistake in the document.
+            throw exhausted;
+        } catch (RuntimeException failure) {
+            // Whatever a handler cannot go on from — a refusal, a final name written, a slot past a row — names the part.
+            throw new IllegalArgumentException(label + ": " + failure.getMessage(), failure);
         } finally {
             ScriptExecution.clear(context);
         }

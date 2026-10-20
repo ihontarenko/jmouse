@@ -364,11 +364,20 @@ public final class ComponentDocuments {
         };
     }
 
-    /** Each text parameter by name, unquoted: {@code first_line = "Hello"} is {@code first_line → Hello}. */
-    private static Map<String, String> texts(ExperienceDocument document) {
-        Map<String, String> texts = new LinkedHashMap<>();
-        document.parameters().stream().filter(parameter -> parameter.has(Block.ParameterFlag.TEXT))
-                .forEach(parameter -> texts.put(parameter.name(), TextValues.unquoted(parameter.value().text())));
+    /** Each text parameter by name, unquoted, with its choices: {@code first_line = "Hello"} is {@code first_line → Hello}. */
+    private static Map<String, TextParameter> texts(ExperienceDocument document) {
+        Map<String, TextParameter> texts = new LinkedHashMap<>();
+        for (Block.Parameter parameter : document.parameters()) {
+            if (!parameter.has(Block.ParameterFlag.TEXT)) {
+                continue;
+            }
+            List<String> choices = parameter.values().stream().map(choice -> TextValues.unquoted(choice.text())).toList();
+            try {
+                texts.put(parameter.name(), new TextParameter(TextValues.unquoted(parameter.value().text()), choices));
+            } catch (IllegalArgumentException refused) {
+                throw new IllegalArgumentException("parameter '" + parameter.name() + "': " + refused.getMessage(), refused);
+            }
+        }
         return texts;
     }
 

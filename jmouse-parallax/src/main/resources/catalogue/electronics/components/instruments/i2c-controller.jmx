@@ -3,10 +3,13 @@
 # Both lines are open drain, so the bus wants its pull-ups. The last byte it read stands on its data outputs, where an
 # LED bar or a check can see it; whether the target acknowledged is its display.
 #
-# A transaction is planned as a row of steps, then clocked out a quarter of a bit at a time. The steps:
-#   0 … 255  send this byte          -1  read a byte and ACK it     -2  read a byte and NACK it (the last)
-#   -3       a repeated START        -4  STOP                        -5  START
-# It never waits for a target that stretches the clock, and it is the only controller it expects on the bus.
+# What it sends is one text of bytes, written in decimal and parted by spaces or commas: `bytes = "3 90"` writes a
+# register, then a byte into it. A read sends the first of them — the register it starts from — then turns the bus round
+# with a repeated START and reads `count` bytes; with no bytes at all it reads from where the target's pointer stands.
+#
+# A transaction is planned as a row of steps, then clocked out a quarter of a bit at a time. A repetition that falls due
+# while one is still on the bus waits for its STOP, as a controller's queue would; it never cuts a transfer short. It
+# never waits for a target that stretches the clock, and it is the only controller it expects on the bus.
 
 component "I²C controller" as i2c-controller type controller {
     meta {
@@ -19,9 +22,8 @@ component "I²C controller" as i2c-controller type controller {
 
     parameters {
         address = 80 in 8 .. 119 step 1 integer        "the target's 7-bit address"
-        register = 0 in 0 .. 255 step 1 integer        "the first byte after the address: a register, a memory word, a command"
-        payload = 165 in 0 .. 255 step 1 integer       "the byte a write sends after it"
-        operation = 0 in 0 .. 2 step 1 integer         "0 writes, 1 reads, 2 writes and then reads back"
+        bytes = "0 165"                                "the bytes after the address, 0 to 255 each, up to 16: a register, then what is written into it"
+        operation = "write" in ["write", "read", "write-read"]   "a write, a read, or a write and then a read back from its first byte"
         count = 1 in 1 .. 8 step 1 integer             "how many bytes a read takes"
         clock_frequency = 100 kHz                      "SCL: 100 kHz standard mode, 400 kHz fast mode"
         start_at = 20 us                               "when the transaction begins"
@@ -44,13 +46,15 @@ component "I²C controller" as i2c-controller type controller {
     }
 
     state {
-        plan[16] = 0 discrete         "the steps of this transaction"
+        plan[24] = 0 discrete         "the steps of this transaction: a byte to send, or one of the conditions below"
         planned = 0 discrete          "how many steps are planned"
         cursor = 0 discrete           "the step being clocked out"
         quarter = 0 discrete          "which quarter of the bit or condition it is in"
         bits = 0 discrete             "bits of the present byte clocked; 8 is the ACK clock"
         incoming = 0 discrete         "the byte being read"
-        round = 0 discrete            "0 the first transaction, 1 the read that follows a write"
+        reading_back = 0 discrete     "1 during the read that follows a write"
+        on_the_bus = 0 discrete       "1 from a transaction's START to its last STOP"
+        waiting = 0 discrete          "1 when a repetition fell due while a transaction was on the bus"
         acknowledged = 0 discrete     "whether the last byte sent was acknowledged"
         last_read = 0 discrete        "the last byte read"
     }
@@ -61,34 +65,65 @@ component "I²C controller" as i2c-controller type controller {
     }
 
     behaviour {
+        # The steps that are not a byte to send.
+        final let READ_AND_ACKNOWLEDGE = -1
+        final let READ_THE_LAST = -2  # read and NACK it: the target lets go of the bus
+        final let REPEATED_START = -3
+        final let STOP = -4
+        final let START = -5
+        final let MOST_BYTES = 16
+
         function add_step(step)
             plan = with(plan, planned, step)
             planned = planned + 1
         end
 
+        # The bytes it was given, as written words, each checked: a number outside a byte would go out as something else.
+        function written_bytes()
+            let words = bytes | trim
+            if words == '' then
+                return []
+            end
+            let written = words | split('[ ,]+')
+            if written | length > MOST_BYTES then
+                refuse('bytes holds ' ~ (written | length) ~ ' bytes; it sends up to ' ~ MOST_BYTES)
+            end
+            for word in written do
+                let value = word | int
+                if value < 0 or value > 255 then
+                    refuse('bytes holds ' ~ word ~ ', and a byte is 0 to 255')
+                end
+            end
+            return written
+        end
+
         function plan_write()
-            add_step(-5)
+            add_step(START)
             add_step(address * 2)
-            add_step(register)
-            add_step(payload)
-            add_step(-4)
+            for word in written_bytes() do
+                add_step(word | int)
+            end
+            add_step(STOP)
         end
 
         # A read names its register first, then turns the bus round with a repeated START.
         function plan_read()
-            add_step(-5)
-            add_step(address * 2)
-            add_step(register)
-            add_step(-3)
+            let written = written_bytes()
+            add_step(START)
+            if written | length > 0 then
+                add_step(address * 2)
+                add_step(written | first | int)
+                add_step(REPEATED_START)
+            end
             add_step(address * 2 + 1)
             for index in 1..count do
                 if index == count then
-                    add_step(-2)
+                    add_step(READ_THE_LAST)
                 else
-                    add_step(-1)
+                    add_step(READ_AND_ACKNOWLEDGE)
                 end
             end
-            add_step(-4)
+            add_step(STOP)
         end
 
         function quarter_time()
@@ -148,7 +183,7 @@ component "I²C controller" as i2c-controller type controller {
             if quarter == 0 then
                 if bits < 8 and sending then
                     drive('sda', bit(step, 7 - bits))
-                elseif bits == 8 and step == -1 then
+                elseif bits == 8 and step == READ_AND_ACKNOWLEDGE then
                     drive('sda', 0)
                 else
                     drive('sda', 1)
@@ -157,9 +192,10 @@ component "I²C controller" as i2c-controller type controller {
                 drive('scl', 1)
             elseif quarter == 2 then
                 if bits < 8 and !sending then
-                    incoming = incoming * 2 + sda
+                    # A line nobody holds at a level reads as the pull-up leaves it.
+                    incoming = incoming * 2 + level_or(sda, 1)
                 elseif bits == 8 and sending then
-                    acknowledged = 1 - sda
+                    acknowledged = 1 - level_or(sda, 1)
                 end
             else
                 drive('scl', 0)
@@ -178,18 +214,44 @@ component "I²C controller" as i2c-controller type controller {
             quarter = (quarter + 1) % 4
         end
 
+        function begin()
+            on_the_bus = 1
+            planned = 0
+            cursor = 0
+            quarter = 0
+            bits = 0
+            incoming = 0
+            if operation == 'read' or reading_back == 1 then
+                plan_read()
+            else
+                plan_write()
+            end
+            schedule('tick', quarter_time())
+        end
+
+        # The last STOP is out: a write's read back follows, else the bus is free — for a repetition that waited.
         function finish()
-            if operation == 2 and round == 0 then
-                round = 1
+            if operation == 'write-read' and reading_back == 0 then
+                reading_back = 1
                 schedule('begin', pause)
+                return
+            end
+            reading_back = 0
+            on_the_bus = 0
+            if waiting == 1 then
+                waiting = 0
+                begin()
             end
         end
 
-        # Every repetition starts from the write again, counted from the moment the first transaction began.
+        # Every repetition is counted from the moment the first transaction began.
         on timer 'repeat' do
-            round = 0
-            schedule('begin', 0)
             schedule('repeat', repeat_every)
+            if on_the_bus == 1 then
+                waiting = 1
+            else
+                begin()
+            end
         end
 
         on start do
@@ -203,26 +265,16 @@ component "I²C controller" as i2c-controller type controller {
         end
 
         on timer 'begin' do
-            planned = 0
-            cursor = 0
-            quarter = 0
-            bits = 0
-            incoming = 0
-            if operation == 1 or round == 1 then
-                plan_read()
-            else
-                plan_write()
-            end
-            schedule('tick', quarter_time())
+            begin()
         end
 
         on timer 'tick' do
             let step = item(plan, cursor)
-            if step == -5 then
+            if step == START then
                 start_condition()
-            elseif step == -3 then
+            elseif step == REPEATED_START then
                 repeated_start()
-            elseif step == -4 then
+            elseif step == STOP then
                 stop_condition()
             else
                 byte_quarter(step)

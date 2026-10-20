@@ -32,7 +32,7 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
  * every part of a logic family shares.</p>
  */
 public record ComponentModel(String name, boolean family, String kind, Map<String, List<String>> header,
-                             List<String> units, List<Parameter> parameters, Map<String, String> texts, List<Pin> pins,
+                             List<String> units, List<Parameter> parameters, Map<String, TextParameter> texts, List<Pin> pins,
                              Map<String, List<String>> buses,
                              List<String> nodes, List<String> digitalNodes,
                              List<String> symbol, List<SubcircuitLine> subcircuit, List<String> formulas, List<State> states,
@@ -46,7 +46,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         header = Map.copyOf(header);
         units = List.copyOf(units);
         parameters = List.copyOf(parameters);
-        // Its text parameters, by name, in the order written: what a behaviour reads as words — a message, a label.
+        // Its text parameters, by name, in the order written: what a behaviour reads as words — a message, a label, a mode.
         texts = orderedCopy(texts);
         pins = List.copyOf(pins);
         // Each bus of pins, its bits in order, the first the least significant: what a behaviour reads as one number.

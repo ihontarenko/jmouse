@@ -194,14 +194,59 @@ final class DeclarationReader {
      * {@code first_line = "Hello, Parallax!" "what the first line says"}: a text, as written in its quotes, then an optional
      * description. A text is not a number: no unit, no range, no step.
      */
+    /**
+     * {@code name = "text" [in ["one", "other"]] ["description"]}: a text has no unit, range or step, but may be one of a
+     * list — what a part line may write over it, and what an editor offers.
+     */
     private Parameter textParameter(Reading.Line line, String name) {
-        if (line.size() > 4 || (line.size() == 4 && !line.isString(3))) {
-            throw line.refusal(Math.min(3, line.size() - 1),
-                    "a text parameter is 'name = \"text\" [\"description\"]': a text has no unit, range or step");
+        String shape = "a text parameter is 'name = \"text\" [in [\"one\", \"other\"]] [\"description\"]'";
+        List<SourceText> choices = List.of();
+        int index = 3;
+        if (index < line.size() && line.value(index).equals("in")) {
+            if (!line.value(index + 1).equals("[")) {
+                throw line.refusal(index, shape + ": its choices are a list of texts in brackets");
+            }
+            int close = index + 2;
+            while (close < line.size() && !line.value(close).equals("]")) {
+                close++;
+            }
+            if (close == line.size()) {
+                throw line.refusal(index + 1, shape + ": the list of choices is not closed");
+            }
+            choices = new ArrayList<>();
+            int start = index + 2;
+            for (int comma : line.commas(index + 2, close)) {
+                choices.add(textChoice(line, start, comma, shape));
+                start = comma + 1;
+            }
+            choices.add(textChoice(line, start, close, shape));
+            if (choices.size() < 2) {
+                throw line.refusal(index, shape + ": a list of choices names at least two");
+            }
+            String written = line.text(2, 3).text();
+            if (choices.stream().noneMatch(choice -> choice.text().equals(written))) {
+                throw line.refusal(2, written + " is not one of its own choices");
+            }
+            index = close + 1;
         }
-        String description = line.size() == 4 ? reading.literal(line.get(3)) : "";
+        String description = "";
+        if (index < line.size() && line.isString(index)) {
+            description = reading.literal(line.get(index));
+            index++;
+        }
+        if (index < line.size()) {
+            throw line.refusal(index, shape + ": a text has no unit, range or step");
+        }
         return new Parameter(name, line.text(2, 3), Optional.empty(), Optional.empty(), Optional.empty(),
-                EnumSet.of(ParameterFlag.TEXT), description);
+                EnumSet.of(ParameterFlag.TEXT), description, choices);
+    }
+
+    /** One choice of a text parameter: a single text between two commas, or a comma and the closing bracket. */
+    private static SourceText textChoice(Reading.Line line, int start, int end, String shape) {
+        if (end - start != 1 || !line.isString(start)) {
+            throw line.refusal(Math.min(start, line.size() - 1), shape + ": each choice is one text in quotes");
+        }
+        return line.text(start, end);
     }
 
     /** The first parameter marker at depth zero after {@code from}, or the description, or the end of the line. */

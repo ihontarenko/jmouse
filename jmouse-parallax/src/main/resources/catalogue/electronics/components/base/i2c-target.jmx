@@ -4,10 +4,13 @@
 #
 # A chip says only what it does with the bytes, by writing again the functions the protocol calls:
 #   own_address()        its 7-bit address, from its parameter and its address pins
+#   acknowledges()       whether it answers its address now — an EEPROM busy writing does not
 #   received(value, n)   the n-th byte written to it in this transaction, 0 the first after the address
 #   transmitted(n)       the n-th byte it answers a read with
 #   stopped()            the transaction is over — an EEPROM starts its write cycle here
-# Clock stretching, arbitration and the 10-bit address are not modelled: a target here is always ready.
+# Clock stretching, arbitration and the 10-bit address are not modelled. A bit sampled while SDA is at no level a chip
+# can read loses the transaction: the target lets go of the bus and waits for the next START, as a real one would
+# after it lost count of the clock.
 
 component "I²C target" as i2c-target type interface {
     meta {
@@ -37,8 +40,8 @@ component "I²C target" as i2c-target type interface {
     }
 
     state {
-        phase = 0 discrete           "0 not addressed, 1 hearing the address, 2 written to, 3 read from"
-        bits = 0 discrete            "bits of the byte clocked so far; 9 while the ACK is clocked"
+        phase = 0 discrete           "where the transaction stands: IDLE, ADDRESSING, WRITTEN_TO or READ_FROM"
+        bits = 0 discrete            "bits of the byte clocked so far; ACKNOWLEDGING while the ninth clock is"
         shift = 0 discrete           "the byte coming in, most significant bit first"
         outgoing = 0 discrete        "the byte going out"
         position = 0 discrete        "bytes passed in this transaction since the address"
@@ -46,8 +49,18 @@ component "I²C target" as i2c-target type interface {
     }
 
     behaviour {
+        final let IDLE = 0             # not addressed: it only listens for a START
+        final let ADDRESSING = 1       # a START was heard; the address byte is coming in
+        final let WRITTEN_TO = 2       # its address was heard with the write bit
+        final let READ_FROM = 3        # its address was heard with the read bit
+        final let ACKNOWLEDGING = 9    # the count of bits while the ninth clock — the ACK — is on the bus
+
         function own_address()
             return address
+        end
+
+        function acknowledges()
+            return true
         end
 
         function received(value, index)
@@ -64,6 +77,13 @@ component "I²C target" as i2c-target type interface {
             drive('sda', 1, data_hold)
         end
 
+        # The transaction is lost or not ours: the bus is let go of until the next START.
+        function forget()
+            phase = IDLE
+            bits = 0
+            release()
+        end
+
         # The next byte out: asked of the chip, its first bit put on the line at once.
         function send_next()
             outgoing = transmitted(position)
@@ -76,12 +96,12 @@ component "I²C target" as i2c-target type interface {
         function next_byte()
             bits = 0
             shift = 0
-            if phase == 1 then
+            if phase == ADDRESSING then
                 if bit(selection, 0) == 1 then
-                    phase = 3
+                    phase = READ_FROM
                     send_next()
                 else
-                    phase = 2
+                    phase = WRITTEN_TO
                     release()
                 end
             else
@@ -89,12 +109,11 @@ component "I²C target" as i2c-target type interface {
             end
         end
 
-        # Eight bits are in: the address is ours or not; a data byte goes to the chip. Either way it is acknowledged.
+        # Eight bits are in: an address that is ours and answered, or a data byte for the chip — acknowledged either way.
         function byte_in()
-            if phase == 1 then
-                if shift_right(shift, 1) != own_address() then
-                    phase = 0
-                    bits = 0
+            if phase == ADDRESSING then
+                if shift_right(shift, 1) != own_address() or !acknowledges() then
+                    forget()
                     return
                 end
                 selection = shift
@@ -102,13 +121,13 @@ component "I²C target" as i2c-target type interface {
                 received(shift, position)
                 position = position + 1
             end
-            bits = 9
+            bits = ACKNOWLEDGING
             drive('sda', 0, data_hold)
         end
 
         # SDA falling while SCL is high: a START, or a repeated one.
         on falling 'sda' when scl == 1 do
-            phase = 1
+            phase = ADDRESSING
             bits = 0
             shift = 0
             position = 0
@@ -117,23 +136,23 @@ component "I²C target" as i2c-target type interface {
 
         # SDA rising while SCL is high: a STOP.
         on rising 'sda' when scl == 1 do
-            if phase != 0 then
+            if phase != IDLE then
                 stopped()
             end
-            phase = 0
-            bits = 0
-            release()
+            forget()
         end
 
-        on rising 'scl' when phase != 0 do
-            if phase == 3 then
+        on rising 'scl' when phase != IDLE do
+            if !known(sda) then
+                forget()
+            elseif phase == READ_FROM then
                 if bits < 8 then
                     bits = bits + 1
                 elseif bits == 8 then
                     # The controller's ACK: a high here is its NACK, the last byte it wanted.
-                    bits = 9
+                    bits = ACKNOWLEDGING
                     if sda == 1 then
-                        phase = 0
+                        phase = IDLE
                     end
                 end
             elseif bits < 8 then
@@ -142,8 +161,8 @@ component "I²C target" as i2c-target type interface {
             end
         end
 
-        on falling 'scl' when phase != 0 do
-            if phase == 3 then
+        on falling 'scl' when phase != IDLE do
+            if phase == READ_FROM then
                 if bits < 8 then
                     drive('sda', bit(outgoing, 7 - bits), data_hold)
                 elseif bits == 8 then
@@ -153,7 +172,7 @@ component "I²C target" as i2c-target type interface {
                 end
             elseif bits == 8 then
                 byte_in()
-            elseif bits == 9 then
+            elseif bits == ACKNOWLEDGING then
                 next_byte()
             end
         end

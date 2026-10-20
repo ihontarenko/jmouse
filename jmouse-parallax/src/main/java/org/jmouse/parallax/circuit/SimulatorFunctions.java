@@ -21,8 +21,9 @@ final class SimulatorFunctions {
     }
 
     /**
-     * What a behaviour may call besides jMS's own vocabulary: {@code drive}, {@code schedule}, {@code since}, {@code item},
-     * {@code with}, {@code levels}, {@code pin_voltage} and the family's {@code delay_scale}. Nothing reaches outside the unit.
+     * What a behaviour may call besides jMS's own vocabulary and the arithmetic of {@link LogicFunctions}: {@code drive},
+     * {@code schedule}, {@code since}, {@code levels}, {@code pin_voltage}, the family's {@code delay_scale}, and
+     * {@code refuse(message)} — what a part says of a setting it cannot work with, which stops the run.
      */
     static final class Functions implements Extension {
         @Override
@@ -38,16 +39,13 @@ final class SimulatorFunctions {
                     }),
                     function("since", (arguments, scope) ->
                             scope.unit().simulation.now - scope.unit().lastChange.getOrDefault(String.valueOf(arguments.get(0)), Double.NEGATIVE_INFINITY)),
-                    function("item", (arguments, scope) -> DigitalUnit.arrayOf(arguments.get(0))[(int) number(arguments.get(1))]),
-                    function("with", (arguments, scope) -> {
-                        Object[] copy = DigitalUnit.arrayOf(arguments.get(0)).clone();
-                        copy[(int) number(arguments.get(1))] = arguments.get(2);
-                        return copy;
-                    }),
                     function("delay_scale", (arguments, scope) -> scope.unit().delayScale(number(arguments.get(0)))),
                     // A bus as the row of its bits' levels, each as it stands — for value_of(levels('port_a'), 0).
                     function("levels", (arguments, scope) -> scope.unit().busLevels(String.valueOf(arguments.get(0)), scope.state())),
                     // An analog pin's voltage by its name: one of eight inputs chosen by a number, 'channel_' ~ index.
+                    function("refuse", (arguments, scope) -> {
+                        throw new IllegalArgumentException(String.valueOf(arguments.get(0)));
+                    }),
                     function("pin_voltage", (arguments, scope) -> scope.unit().analogPinVoltage(String.valueOf(arguments.get(0)), scope.state())));
         }
 

@@ -33,6 +33,9 @@ import java.util.function.LongBinaryOperator;
  * the part. A number cannot: one unknown bit makes the whole number unknown, and shifting it keeps it so for ever. A
  * row is a value: every function gives a new one and none changes the row it is given.</p>
  * <ul>
+ *   <li>{@code item(row, index)} — the slot at that index, 0 the first; {@code with(row, index, value)} — the row with
+ *       that slot written. An index past the row is refused; an index not known reads {@code X}, and a write to one
+ *       leaves every slot {@code X}, since any of them may have been written;</li>
  *   <li>{@code shift_in(row, level)} — the row moved up by one, the level in its first slot, the last slot dropped;</li>
  *   <li>{@code value_of(row)} — the number the row makes, unknown if any slot is; {@code value_of(row, otherwise)} — a
  *       slot not known read as {@code otherwise}, as a bus with a floating line is read by a part that reads it anyway;</li>
@@ -103,6 +106,21 @@ final class LogicFunctions implements Extension {
                     Object[] row = new Object[width];
                     for (int position = 0; position < width; position++) {
                         row[position] = value instanceof Number ? (int) ((wholeOf(value, "row_of") >>> position) & 1) : levelOf(value);
+                    }
+                    return row;
+                }),
+                function("item", 2, 2, (arguments) -> {
+                    Object[] row = rowOf(arguments.get(0), "item");
+                    Object index = arguments.get(1);
+                    return index instanceof Number ? row[slot(row, index, "item")] : UNKNOWN;
+                }),
+                function("with", 3, 3, (arguments) -> {
+                    Object[] row = rowOf(arguments.get(0), "with").clone();
+                    Object index = arguments.get(1);
+                    if (index instanceof Number) {
+                        row[slot(row, index, "with")] = arguments.get(2);
+                    } else {
+                        Arrays.fill(row, UNKNOWN);
                     }
                     return row;
                 }),
@@ -201,6 +219,15 @@ final class LogicFunctions implements Extension {
 
     private static int width(Object argument, String function) {
         return index(wholeOf(argument, function), function);
+    }
+
+    /** A slot of a row: from 0 to one short of its length. */
+    private static int slot(Object[] row, Object argument, String function) {
+        long slot = wholeOf(argument, function);
+        if (slot < 0 || slot >= row.length) {
+            throw new IllegalArgumentException(function + " reaches slots 0 to " + (row.length - 1) + " of this row, not " + slot + ".");
+        }
+        return (int) slot;
     }
 
     /** A row's length: from 1 up. */
