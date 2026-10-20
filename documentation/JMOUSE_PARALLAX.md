@@ -602,11 +602,40 @@ state {
 | `open-drain` | A 1 driven on the pin is released (Z), for a pull-up to raise: I²C's lines, a wired-OR interrupt. |
 | A bus is digital | `channel[0..7] analog …` is refused: a voltage has no bits. Write analog pins one by one. |
 | Equations reach a digital pin | A digital pin an equation names (a pull-up written as a current, `current Vcc -> port_a_0 = …`) puts its node in the analog solver, whatever else is on the net. |
-| Row slots in figures | A row state's slot is `name_index` in a `display` or `measure` figure (`cell_5 = shown_5`), as a bus's bits are `pin_index`. |
-| Inherited behaviour | A part that `extends` a base with a `behaviour` keeps it even when it writes its own: both sets of handlers run, the base's discrete states are the part's, and a function the part writes again replaces the base's. So a protocol is written once — `base/i2c-target.jmx` — and each chip writes only its hooks (`own_address`, `received(value, index)`, `transmitted(index)`, `stopped()`). |
-| Names that clash | A function named like a state, parameter or pin is refused (an assignment would write one and an equation read the other); so is a function named like one of the language's; so is a parameter named `value` (a part line's shown text). |
+| Bus order | `q[0..7]` and `q[7..0]` are the same bus: `q_k` is always bit k, whichever way the range is written. |
+| Row slots | A row state's slot is `name_index` in a `display`, a `measure` and an equation (`registers_12` is the MCP23017's GPPUA, read by its pull-up currents); only the slots a figure names are bound. `cell[32] = shown ["caption"]` in a `display` is the 32 figures `cell_k = shown_k`. |
+| Inherited behaviour | A part that `extends` a base with a `behaviour` keeps it even when it writes its own: both sets of handlers run, the base's discrete states are the part's, and a function the part writes again replaces the base's. So a protocol is written once — `base/i2c-target.jmx` — and each chip writes only its hooks (`own_address`, `acknowledges`, `received(value, index)`, `transmitted(index)`, `stopped()`). |
+| Constants | A behaviour's top-level `final let NAME = …` is a constant every handler and function reads — a phase, a register's address —, inherited with the behaviour; it may read the parameters. Any other top-level statement is refused: what a part remembers between events is a `state`. |
+| Names that clash | A function or constant named like a state, parameter, text, pin, function or constant is refused (an assignment would write one and an equation read the other); so is a function named like one of the language's; so is a parameter named `value` (a part line's shown text). |
 
-Instruments that drive buses from the bench: `i2c-controller` (write, read, or write and read back; the last byte read on a data bus), `spi-controller` (mode 0, up to four bytes) and `lcd-driver` (an HD44780 over 8 bits), each with `repeat_every`.
+**Text parameters.** `first_line = "Hello, Parallax!" "what the first line says"` is words, not a number: never
+compiled as a formula, read by the behaviour as a text. `operation = "write" in ["write", "read", "write-read"]` lists
+the only words a part may write; a default outside its own list is refused when the document is read. A part line
+writes a text in quotes, and its `{expression}` is worked out over the circuit's parameters as a number override is —
+`bytes = "{pattern} 0"` follows the slider `pattern` —; `{` is a brace.
+
+**What a behaviour calls**, besides jMS (`|` filters, `~` joins texts, `%`, `!` is `not` — ⚠️ jME's `not` is `!=`):
+
+| Function | Does |
+|---|---|
+| `drive(pin or bus, level or number[, delay])`, `schedule(name, delay)`, `since(pin)` | outputs, timers (`on timer 'name'`), how long an input has stood |
+| `bit`, `with_bit`, `bit_and`, `bit_or`, `bit_xor`, `bit_not(v, width)`, `shift_left(v, n, width)`, `shift_right`, `low_bits(v, width)` | whole numbers in two's complement; an unknown operand gives X |
+| `item(row, i)`, `with(row, i, v)`, `filled(v, n)`, `row_of(number, width)`, `shift_in(row, level)`, `value_of(row[, otherwise])` | rows; a slot past the row is refused; an unknown index reads X, a write to one leaves the whole row X |
+| `known(v)`, `level_or(level, otherwise)` | asked before counting on a level: an open address pin read as 0, a released line as its pull-up leaves it |
+| `levels(bus)`, `pin_voltage(name)` | a bus as the row of its levels (`value_of(levels('data'), 0)`); an analog pin's voltage by name (`'channel_' ~ i`) |
+| `bytes_of(text)` | the bytes a text writes, decimal or `0x`, parted by spaces or commas; a word that is not a byte is refused |
+| `refuse(message)` | a setting the part cannot work with: the run stops, naming the part |
+
+Every failure inside a handler names its part (`U1: 'LIMIT' is final …`).
+
+**Shared benches.** A component — or a base — declares the parts its checks stand on once:
+`bench i2c-bus { V1 …; R1 …; R2 … }`, and an expectation names it: `bench i2c-bus for 1 ms { B1 …; U1 self … }`. Its
+own parts are added to the shared ones; an unknown name or a label written twice is refused.
+
+Instruments that drive buses from the bench, each with `repeat_every` (a repetition due mid-transfer waits for it):
+`i2c-controller` (`bytes = "3 90"`, `operation = "write" | "read" | "write-read"`, `count` bytes read; a read sends
+the first byte as its register), `spi-controller` (mode 0, `bytes = "1 128 0"`, as many read) and `lcd-driver` (an
+HD44780 over 8 bits; `first_line`, `second_label`, `columns`).
 
 A symbol may draw characters: `live glyph c0 at x, y size 7 x 12 { live character = cell_0 }` draws the printable ASCII character of the code — the cells of `lcd-1602-symbol`.
 
