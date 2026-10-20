@@ -8,7 +8,8 @@ import org.jmouse.el.lexer.ExpressionSplitter;
 import org.jmouse.el.lexer.SyntaxErrorException;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.parser.DefaultParserContext;
-import org.jmouse.parallax.script.reader.HandWrittenDocumentReader;
+import org.jmouse.parallax.script.legacy.DocumentReader;
+import org.jmouse.parallax.script.legacy.ExperienceNotation;
 import org.jmouse.script.el.ScriptExtension;
 import org.jmouse.script.el.lexer.ScriptRecognizer;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ class JmxReadingEquivalenceTest {
                 () -> differing.isEmpty() ? "" : describe(differing.getFirst()));
     }
 
-    /** The hand-written reader, as ExperienceReader read with it before the engine's parsers. */
+    /** The hand-written reader, frozen as it was before any of it moved onto the engine (the legacy package). */
     private static List<ExperienceDocument> byHand(String source, String documentName) {
         ExperienceNotation.Normalized normalized = ExperienceNotation.normalize(source);
         TokenCursor cursor;
@@ -88,7 +89,7 @@ class JmxReadingEquivalenceTest {
         StandardExtensionContainer extensions = new StandardExtensionContainer();
         extensions.importExtension(new ScriptExtension());
         extensions.importExtension(new ElectricalTypes());
-        return new HandWrittenDocumentReader(cursor, new DefaultParserContext(extensions), normalized, documentName).documents();
+        return new DocumentReader(cursor, new DefaultParserContext(extensions), normalized, documentName).documents();
     }
 
     /** Broken variants of a text: its last brace gone, and one line at a time deleted or begun with a stray word. */
