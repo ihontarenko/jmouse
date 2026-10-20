@@ -25,7 +25,7 @@ public final class Declarations {
      *
      * @param name     the name
      * @param type     its type; {@code null} for an untyped declaration, which takes anything
-     * @param constant whether it may not be written again — a {@code const}, a {@code parameter}
+     * @param constant whether it may not be written again — a {@code final let}, a {@code parameter}
      * @param refusal  what a write to it is refused with, when it is constant
      */
     public record Declaration(String name, ValueType type, boolean constant, String refusal) {

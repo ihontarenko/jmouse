@@ -58,7 +58,7 @@ public final class StatementMatcher {
         return new LoopMatcher();
     }
 
-    /** {@code let slot = …}, {@code const limit = …} */
+    /** {@code let slot = …}, {@code final let limit = …} */
     public static Matcher<TokenCursor> declaration() {
         return new DeclarationMatcher();
     }
@@ -117,7 +117,8 @@ public final class StatementMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return checkAt(cursor, 0, T_LET, T_CONST) && checkAt(cursor, 1, StatementToken.nameTokens());
+            return (checkAt(cursor, 0, T_LET) && checkAt(cursor, 1, StatementToken.nameTokens()))
+                    || (checkAt(cursor, 0, T_FINAL) && checkAt(cursor, 1, T_LET) && checkAt(cursor, 2, StatementToken.nameTokens()));
         }
     }
 

@@ -9,9 +9,11 @@ import org.jmouse.el.lexer.Token;
 /**
  * Represents the ".." range operator ({@code T_DOUBLE_DOT}).
  * <p>
- * Example:
+ * Its bounds are whole arithmetic expressions: it binds looser than {@code + - * / % **}, so {@code 0 .. n - 1} is
+ * {@code 0 .. (n - 1)} and {@code 2 .. 4 + 5} is {@code 2 .. 9}; tighter than {@code ~}, the comparisons and {@code in},
+ * so {@code x in 1 .. n} tests membership in the range.
  * <pre>{@code
- *     2 .. 4 + 5
+ *     for index in 0 .. count - 1 do … end
  * }</pre>
  *
  * @author Ivan Hontarenko
@@ -19,9 +21,9 @@ import org.jmouse.el.lexer.Token;
 public enum RangeOperator implements Operator {
 
     /**
-     * Test operator ({@code ..}), used for applying tests to values.
+     * The range operator ({@code ..}): every whole number from its left bound to its right one.
      */
-    RANGE(new RangeCalculator(), BasicToken.T_DOUBLE_DOT, "..", 650);
+    RANGE(new RangeCalculator(), BasicToken.T_DOUBLE_DOT, "..", 575);
 
     private final Calculator<Object> calculator;
     private final Token.Type         type;

@@ -44,7 +44,7 @@ public class AssignmentNode extends AbstractExpression {
     public Object evaluate(EvaluationContext context) {
         Object evaluated = value.evaluate(context);
 
-        // A declared name is written where it was declared, as its type admits it — and never when it is a constant.
+        // A declared name is written where it was declared, as its type admits it — and never when it is final.
         if (Declarations.of(context).find(context.getScopedChain(), path) != null) {
             return Declarations.assign(context, path, evaluated);
         }

@@ -34,7 +34,8 @@ public enum StatementToken implements Token.Type {
 
     /** {@code let} — and {@code local}, its other spelling: one keyword, one meaning. */
     T_LET(13000, "let", "local"),
-    T_CONST(13010, "const"),
+    /** {@code final} — before {@code let}, a name that is never written again: {@code final let limit = 10}. */
+    T_FINAL(13010, "final"),
     T_RETURN(13100, "return"),
     T_FOR(13200, "for");
 

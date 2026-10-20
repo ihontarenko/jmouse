@@ -8,8 +8,8 @@ import org.jmouse.el.type.ValueType;
 import org.jmouse.script.el.Declarations;
 
 /**
- * {@code let count : int = 1} or {@code const limit = 10} — a name bound for the rest of a body, with an optional type
- * every value written to it must be, and, for a constant, no second write.
+ * {@code let count : int = 1} or {@code final let limit = 10} — a name bound for the rest of a body, with an optional
+ * type every value written to it must be, and, when final, no second write.
  *
  * <p>⚠️ <strong>Binds in the current scope, not through {@code context.setValue}</strong>: {@code setValue} walks the
  * chain looking for a scope that already holds the name and writes there, so a declaration would quietly overwrite an
@@ -26,7 +26,7 @@ public class DeclarationNode extends AbstractExpression {
         /** This body's; may be assigned again — with a value of its type. */
         LET("let", false, false),
         /** This body's; may not be assigned again. */
-        CONST("const", true, false),
+        FINAL("final let", true, false),
         /**
          * The document's: bound once per context, in its outermost scope, and kept across events — what a handler
          * remembers between one dispatch and the next. Written again freely.
@@ -105,7 +105,7 @@ public class DeclarationNode extends AbstractExpression {
     public Object evaluate(EvaluationContext context) {
         Declarations.Declaration declaration = new Declarations.Declaration(name, type, kind.isConstant(),
                 kind == Kind.PARAMETER ? "is a parameter: the host gives it, and the document cannot write it."
-                        : "is a constant; it cannot be assigned again.");
+                        : "is final: it cannot be assigned again.");
         Declarations declarations = Declarations.of(context);
         ScopeValues scope = kind.isOfTheDocument() ? outermost(context) : context.getScopedChain().peek();
 

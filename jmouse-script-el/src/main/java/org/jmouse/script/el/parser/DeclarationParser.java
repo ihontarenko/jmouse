@@ -37,8 +37,9 @@ public class DeclarationParser extends AbstractParser {
         if (contextual != null) {
             node.setKind(contextual);
             cursor.next();
-        } else if (cursor.consumeIf(StatementToken.T_CONST)) {
-            node.setKind(DeclarationNode.Kind.CONST);
+        } else if (cursor.consumeIf(StatementToken.T_FINAL)) {
+            cursor.ensure(StatementToken.T_LET);
+            node.setKind(DeclarationNode.Kind.FINAL);
         } else {
             cursor.ensure(StatementToken.T_LET);
         }
@@ -47,8 +48,8 @@ public class DeclarationParser extends AbstractParser {
 
         if (cursor.consumeIf(BasicToken.T_EQ)) {
             node.setValue(Expressions.read(cursor, context));
-        } else if (node.getKind() == DeclarationNode.Kind.CONST) {
-            throw new ParseException("The constant '" + node.getName() + "' needs a value: const "
+        } else if (node.getKind() == DeclarationNode.Kind.FINAL) {
+            throw new ParseException("The final '" + node.getName() + "' needs a value: final let "
                     + node.getName() + " = …");
         }
 
