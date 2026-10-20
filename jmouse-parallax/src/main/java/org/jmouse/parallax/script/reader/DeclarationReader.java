@@ -9,8 +9,6 @@ import org.jmouse.parallax.script.Block.Input;
 import org.jmouse.parallax.script.Block.InternalNode;
 import org.jmouse.parallax.script.Block.Output;
 import org.jmouse.parallax.script.Block.OutputType;
-import org.jmouse.parallax.script.Block.Parameter;
-import org.jmouse.parallax.script.Block.ParameterFlag;
 import org.jmouse.parallax.script.Block.Pin;
 import org.jmouse.parallax.script.Block.PinDirection;
 import org.jmouse.parallax.script.Block.PinNature;
@@ -25,29 +23,24 @@ import org.jmouse.units.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /** The declaration blocks every computable kind shares: parameters, inputs, outputs, state, equations, pins, nodes. */
 final class DeclarationReader {
 
-    private static final List<String> PARAMETER_MARKERS = List.of("in", "step", "log", "integer", "animate", "live", "per", "exact");
-
-    /** The parameter flags written as one word, each its {@link ParameterFlag} in lower case; {@code per unit} is two. */
-    private static final List<String> SINGLE_WORD_FLAGS = List.of("log", "integer", "animate", "live", "exact");
-
     private final Reading reading;
     /** The quantities the document being read named with {@code type}, by name; forgotten at the next document. */
     private final Map<String, ValueType> types = new LinkedHashMap<>();
+    private final ParameterLineParser parameterLines;
 
     DeclarationReader(Reading reading) {
         this.reading = reading;
+        this.parameterLines = new ParameterLineParser(reading, new JmxValues(reading));
     }
 
     /** A new document begins: the types the last one named are not its. */
@@ -128,153 +121,7 @@ final class DeclarationReader {
     // ─── parameters ─────────────────────────────────────────────────────────────────────────────────
 
     Block.Parameters parameters() {
-        return new Block.Parameters(reading.blockLines("parameters").stream().map(this::parameter).toList());
-    }
-
-    /** {@code name = value [unit] [in a .. b] [step s] [log] [integer] [animate] [live] [per unit] ["description"]}. */
-    Parameter parameter(Reading.Line line) {
-        if (line.size() < 3 || !line.value(1).equals("=")) {
-            throw line.refusal("a parameter is 'name = value [unit] [in minimum .. maximum] [step s] [flags] [\"description\"]'");
-        }
-        String name = line.value(0);
-        if (line.isString(2)) {
-            return textParameter(line, name);
-        }
-        int valueEnd = firstMarker(line, 2);
-        Values.Written value = Values.written(line, 2, valueEnd);
-        Optional<Range> range = Optional.empty();
-        Optional<SourceText> step = Optional.empty();
-        Set<ParameterFlag> flags = EnumSet.noneOf(ParameterFlag.class);
-        String description = "";
-        List<SourceText> listed = List.of();
-        int index = valueEnd;
-        while (index < line.size()) {
-            String word = line.value(index);
-            if (line.isString(index)) {
-                description = reading.literal(line.get(index));
-                index++;
-            } else if (word.equals("in")) {
-                int end = firstMarker(line, index + 1, "in");
-                if (line.value(index + 1).equals("[") && line.value(end - 1).equals("]")) {
-                    // `in [1, 3, 7, 19, 49]` — a jME list: the values a slider stops at, from the first to the last.
-                    listed = new ArrayList<>();
-                    int start = index + 2;
-                    for (int comma : line.commas(index + 2, end - 1)) {
-                        listed.add(line.text(start, comma));
-                        start = comma + 1;
-                    }
-                    listed.add(line.text(start, end - 1));
-                    if (listed.size() < 2) {
-                        throw line.refusal(index, "a slider over listed values lists at least two: 'in [1, 3, 7]'");
-                    }
-                    range = Optional.of(new Range(listed.getFirst(), listed.getLast()));
-                } else {
-                    range = Optional.of(Values.range(line, index + 1, end));
-                }
-                index = end;
-            } else if (word.equals("step")) {
-                int end = firstMarker(line, index + 1, "step");
-                step = Optional.of(line.text(index + 1, end));
-                index = end;
-            } else if (word.equals("per") && line.value(index + 1).equals("unit")) {
-                flags.add(ParameterFlag.PER_UNIT);
-                index += 2;
-            } else if (SINGLE_WORD_FLAGS.contains(word)) {
-                flags.add(ParameterFlag.valueOf(word.toUpperCase(Locale.ROOT)));
-                index++;
-            } else {
-                throw line.refusal(index, "'" + word + "' is not part of a parameter: expected in, step, log, integer, "
-                        + "exact, animate, live, per unit or a description");
-            }
-        }
-        return new Parameter(name, value.expression(), value.quantity(), range, step, flags, description, listed);
-    }
-
-    /**
-     * {@code first_line = "Hello, Parallax!" "what the first line says"}: a text, as written in its quotes, then an optional
-     * description. A text is not a number: no unit, no range, no step.
-     */
-    /**
-     * {@code name = "text" [in ["one", "other"]] ["description"]}: a text has no unit, range or step, but may be one of a
-     * list — what a part line may write over it, and what an editor offers.
-     */
-    private Parameter textParameter(Reading.Line line, String name) {
-        String shape = "a text parameter is 'name = \"text\" [in [\"one\", \"other\"]] [\"description\"]'";
-        List<SourceText> choices = List.of();
-        int index = 3;
-        if (index < line.size() && line.value(index).equals("in")) {
-            if (!line.value(index + 1).equals("[")) {
-                throw line.refusal(index, shape + ": its choices are a list of texts in brackets");
-            }
-            int close = index + 2;
-            while (close < line.size() && !line.value(close).equals("]")) {
-                close++;
-            }
-            if (close == line.size()) {
-                throw line.refusal(index + 1, shape + ": the list of choices is not closed");
-            }
-            choices = new ArrayList<>();
-            int start = index + 2;
-            for (int comma : line.commas(index + 2, close)) {
-                choices.add(textChoice(line, start, comma, shape));
-                start = comma + 1;
-            }
-            choices.add(textChoice(line, start, close, shape));
-            if (choices.size() < 2) {
-                throw line.refusal(index, shape + ": a list of choices names at least two");
-            }
-            String written = line.text(2, 3).text();
-            if (choices.stream().noneMatch(choice -> choice.text().equals(written))) {
-                throw line.refusal(2, written + " is not one of its own choices");
-            }
-            index = close + 1;
-        }
-        String description = "";
-        if (index < line.size() && line.isString(index)) {
-            description = reading.literal(line.get(index));
-            index++;
-        }
-        if (index < line.size()) {
-            throw line.refusal(index, shape + ": a text has no unit, range or step");
-        }
-        return new Parameter(name, line.text(2, 3), Optional.empty(), Optional.empty(), Optional.empty(),
-                EnumSet.of(ParameterFlag.TEXT), description, choices);
-    }
-
-    /** One choice of a text parameter: a single text between two commas, or a comma and the closing bracket. */
-    private static SourceText textChoice(Reading.Line line, int start, int end, String shape) {
-        if (end - start != 1 || !line.isString(start)) {
-            throw line.refusal(Math.min(start, line.size() - 1), shape + ": each choice is one text in quotes");
-        }
-        return line.text(start, end);
-    }
-
-    /** The first parameter marker at depth zero after {@code from}, or the description, or the end of the line. */
-    private int firstMarker(Reading.Line line, int from, String... besides) {
-        for (int index = from; index < line.size(); index++) {
-            if (line.isString(index)) {
-                return index;
-            }
-            String word = line.value(index);
-            if (PARAMETER_MARKERS.contains(word) && !List.of(besides).contains(word) && !line.value(index + 1).equals("(")
-                    && depthAt(line, from, index) == 0) {
-                return index;
-            }
-        }
-        return line.size();
-    }
-
-    private static int depthAt(Reading.Line line, int from, int at) {
-        int depth = 0;
-        for (int index = from; index < at; index++) {
-            String value = line.value(index);
-            if (value.equals("(") || value.equals("[")) {
-                depth++;
-            } else if (value.equals(")") || value.equals("]")) {
-                depth--;
-            }
-        }
-        return depth;
+        return new Block.Parameters(reading.lines("parameters", parameterLines));
     }
 
     // ─── inputs ─────────────────────────────────────────────────────────────────────────────────────

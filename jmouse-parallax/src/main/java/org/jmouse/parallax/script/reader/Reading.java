@@ -197,6 +197,26 @@ final class Reading {
         return new Line(tokens, atEnd() ? source.length() : cursor.current().offset());
     }
 
+    /** Whether the line ends where the cursor stands: a line break, a {@code ;}, a brace, a comment, the text's end. */
+    boolean atLineEnd() {
+        return atEnd() || cursor.isCurrent(BasicToken.T_NEW_LINE, BasicToken.T_SEMICOLON, BasicToken.T_OPEN_CURLY,
+                BasicToken.T_CLOSE_CURLY, BasicToken.T_HASH);
+    }
+
+    /** Where what has been read ends in the source: the next token's start, or the text's end. */
+    int endOfRead() {
+        return atEnd() ? source.length() : cursor.current().offset();
+    }
+
+    /** The rest of the line from a token, as written, for a refusal to quote. */
+    String lineFrom(Token token) {
+        int end = token.offset();
+        while (end < source.length() && source.charAt(end) != '\n') {
+            end++;
+        }
+        return text(token.offset(), end).text();
+    }
+
     /** The one word after a statement's own: {@code extends base-slug}. */
     String wordAfter(Token keyword, String what) {
         Line line = line();
@@ -233,6 +253,24 @@ final class Reading {
     /** The same, with its own words for a missing opening brace and for a body never closed. */
     void body(String opening, Supplier<ExperienceParseException> unclosed, BlockBodyParser.Statement statement) {
         new BlockBodyParser(this, opening, unclosed, statement).read(context);
+    }
+
+    /**
+     * {@code { line … }} read by the engine's statement reader, each line by the block's {@link JmxLineParser}; what
+     * the lines declare, in order. The cursor ends after the closing brace.
+     */
+    <T> List<T> lines(String block, JmxLineParser<T> parser) {
+        List<T> declared = new ArrayList<>();
+        body(block, () -> {
+            if (cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
+                throw refusal("'" + block + "' holds lines, not a nested '{ … }'");
+            }
+            JmxLineParser.LineNode<?> node = (JmxLineParser.LineNode<?>) parser.parse(cursor, context);
+            @SuppressWarnings("unchecked")
+            T line = (T) node.declared();
+            declared.add(line);
+        });
+        return declared;
     }
 
     /** A line of a block that holds lines: a brace there opens nothing. */
