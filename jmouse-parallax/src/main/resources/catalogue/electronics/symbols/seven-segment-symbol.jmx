@@ -14,66 +14,66 @@ symbol "Seven-segment display" as seven-segment-symbol {
     input light_g 0 .. 100
     input light_point 0 .. 100
 
-    path "M-30-50H50V50H-30Z"
-    path "M10 50V60"
-    path "M-50 -49H-30"
-    path "M-50 -35H-30"
-    path "M-50 -21H-30"
-    path "M-50 -7H-30"
-    path "M-50 7H-30"
-    path "M-50 21H-30"
-    path "M-50 35H-30"
-    path "M-50 49H-30"
-    live path glow_a "M-2-44H22V-40H-2Z" {
+    path "M-40-50H40V50H-40Z"
+    path "M0 50V60"
+    path "M-60 -40H-40"
+    path "M-60 -20H-40"
+    path "M-60 0H-40"
+    path "M-60 20H-40"
+    path "M60 -40H40"
+    path "M60 -20H40"
+    path "M60 0H40"
+    path "M60 20H40"
+    live path glow_a "M-12-36H12V-32H-12Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_a, 0, 100))
         live glow = 6 * share(light_a, 0, 100)
     }
-    live path glow_b "M24-38H28V-4H24Z" {
+    live path glow_b "M14-30H18V-4H14Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_b, 0, 100))
         live glow = 6 * share(light_b, 0, 100)
     }
-    live path glow_c "M24 4H28V38H24Z" {
+    live path glow_c "M14 4H18V30H14Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_c, 0, 100))
         live glow = 6 * share(light_c, 0, 100)
     }
-    live path glow_d "M-2 40H22V44H-2Z" {
+    live path glow_d "M-12 32H12V36H-12Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_d, 0, 100))
         live glow = 6 * share(light_d, 0, 100)
     }
-    live path glow_e "M-8 4H-4V38H-8Z" {
+    live path glow_e "M-18 4H-14V30H-18Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_e, 0, 100))
         live glow = 6 * share(light_e, 0, 100)
     }
-    live path glow_f "M-8-38H-4V-4H-8Z" {
+    live path glow_f "M-18-30H-14V-4H-18Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_f, 0, 100))
         live glow = 6 * share(light_f, 0, 100)
     }
-    live path glow_g "M-2-2H22V2H-2Z" {
+    live path glow_g "M-12-2H12V2H-12Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_g, 0, 100))
         live glow = 6 * share(light_g, 0, 100)
     }
-    live path glow_point "M32 40H36V44H32Z" {
+    live path glow_point "M22 32H26V36H22Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_point, 0, 100))
         live glow = 6 * share(light_point, 0, 100)
     }
 
-    pin segment_a at -50, -49
-    pin segment_b at -50, -35
-    pin segment_c at -50, -21
-    pin segment_d at -50, -7
-    pin segment_e at -50, 7
-    pin segment_f at -50, 21
-    pin segment_g at -50, 35
-    pin segment_point at -50, 49
-    pin cathode at 10, 60
-    label name at 10, -58
-    label value at 60, 56
+    pin segment_a at -60, -40
+    pin segment_b at -60, -20
+    pin segment_c at -60, 0
+    pin segment_d at -60, 20
+    pin segment_e at 60, -40
+    pin segment_f at 60, -20
+    pin segment_g at 60, 0
+    pin segment_point at 60, 20
+    pin cathode at 0, 60
+    label name at 0, -58
+    label value at 50, 58
 }

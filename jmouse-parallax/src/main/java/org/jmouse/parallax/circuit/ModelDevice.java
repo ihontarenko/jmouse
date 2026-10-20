@@ -160,6 +160,13 @@ final class ModelDevice implements Device {
                 stateValues.put(name, number.doubleValue());
             } else if (value instanceof Boolean flag) {
                 stateValues.put(name, flag ? 1.0 : 0.0);
+            } else if (value instanceof Object[] row) {
+                // A row's slots, each under its name and index — `ddram_5` —, as a bus's bits are its pin's name and index.
+                for (int index = 0; index < row.length; index++) {
+                    if (row[index] instanceof Number number) {
+                        stateValues.put(PartExpression.slotName(name, index), number.doubleValue());
+                    }
+                }
             }
         });
         return stateValues;

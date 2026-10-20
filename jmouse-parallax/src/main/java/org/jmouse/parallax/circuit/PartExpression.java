@@ -16,6 +16,8 @@ import org.jmouse.formula.Symbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * One expression a component writes over itself, compiled once for one part of a circuit and read at any moment: each
@@ -55,7 +57,10 @@ final class PartExpression {
             String key = wiredKey(element, model, pin);
             return key == null ? ObjectDefinition.Circuit.GROUND : element.pins().get(key);
         }).toList();
-        List<String> states = model.states().stream().map(ComponentModel.State::name).toList();
+        // A row state is read slot by slot — `ddram_5` —; a display cannot take a whole row.
+        List<String> states = model.states().stream().flatMap(state -> state.initial() instanceof Object[] row
+                ? IntStream.range(0, row.length).mapToObj(index -> slotName(state.name(), index))
+                : Stream.of(state.name())).toList();
         Map<String, Double> parameters = circuit.parameters(model, element, "");
         // The arguments: each pin's current in a slot of its own, by the pin's position; then each pin's voltage by its
         // name, the states, the power, the time, whether it failed and the parameters.
@@ -100,6 +105,11 @@ final class PartExpression {
             }
         }
         return null;
+    }
+
+    /** The name one slot of a row state is read by: the row's name and the slot's index, `ddram_5`. */
+    static String slotName(String row, int index) {
+        return row + "_" + index;
     }
 
     String part() {

@@ -1,0 +1,138 @@
+# A character-LCD driver for the bench: what a microcontroller's few lines of firmware do to an HD44780 on an 8-bit
+# bus. It initializes the controller — 8-bit, two lines, display on, cleared, entry to the right —, writes its first
+# line, and then every `update_every` writes the second: a label and a four-digit count of the updates. Each byte is put
+# on the bus with RS, E is raised and let fall, and the driver waits out the controller's execution time before the next
+# one rather than reading the busy flag.
+
+component "LCD driver" as lcd-driver type controller {
+    meta {
+        designator BUS
+        summary "Drives an HD44780 LCD on an 8-bit bus: initializes it, writes a line, and counts updates on the second"
+        source "Hitachi HD44780U data sheet (ADE-207-272(Z)): instruction table 6, bus write timing (E pulse 230 ns minimum, data latched on its falling edge), execution times at 270 kHz"
+        category circuits
+    }
+    use cmos-hc
+
+    parameters {
+        start_at = 1 ms                     "when it begins: a real module wants 40 ms after power-up"
+        update_every = 200 ms               "how often it writes the second line again"
+        bit_time = 1 us                     "how long RS and the data stand before E rises, and E stays high"
+        settle = 50 us                      "how long it waits after a byte: more than the controller's 37 µs"
+        clear_settle = 2 ms                 "how long it waits after a clear: more than 1.52 ms"
+    }
+
+    pins {
+        register_select digital output 1    "RS"
+        read_write digital output 2         "R/W, held low: the driver only writes"
+        enable digital output 3             "E"
+        data[0..7] digital output 4, 5, 6, 7, 8, 9, 10, 11   "DB0 to DB7"
+        GND ground 12
+        Vcc power 13
+    }
+
+    symbol box {
+        right register_select, read_write, enable, data
+        power Vcc, GND
+    }
+
+    # A step of the plan is a byte and what it is: 0 … 255 a command, 256 … 511 a character (256 + its code).
+    state {
+        first_line = [72, 101, 108, 108, 111, 44, 32, 80, 97, 114, 97, 108, 108, 97, 120, 33] discrete   "Hello, Parallax!"
+        second_label = [85, 112, 100, 97, 116, 101, 115, 58, 32, 32, 32, 32] discrete   "Updates:    "
+        plan[48] = 0 discrete             "the bytes of this burst, in order"
+        planned = 0 discrete              "how many there are"
+        cursor = 0 discrete               "the byte being written"
+        phase = 0 discrete                "0 the lines set, 1 E high, 2 E fallen"
+        updates = 0 discrete              "how many times the second line was written"
+    }
+
+    display {
+        update_count = updates            "how many times the second line was written"
+    }
+
+    behaviour {
+        function add_step(step)
+            plan = with(plan, planned, step)
+            planned = planned + 1
+        end
+
+        function add_line(characters, count)
+            for index in 0..(count - 1) do
+                add_step(256 + item(characters, index))
+            end
+        end
+
+        # The second line: its label, then the count in four digits.
+        function plan_second_line()
+            add_step(192)
+            add_line(second_label, 12)
+            add_step(256 + 48 + mod(floor(updates / 1000), 10))
+            add_step(256 + 48 + mod(floor(updates / 100), 10))
+            add_step(256 + 48 + mod(floor(updates / 10), 10))
+            add_step(256 + 48 + mod(updates, 10))
+        end
+
+        function start_burst(initializing)
+            planned = 0
+            cursor = 0
+            phase = 0
+            if initializing == 1 then
+                add_step(56)
+                add_step(12)
+                add_step(1)
+                add_step(6)
+                add_step(128)
+                add_line(first_line, 16)
+            end
+            plan_second_line()
+            updates = updates + 1
+            schedule('tick', 0)
+        end
+
+        function wait_after(step)
+            if step == 1 or step == 2 then
+                return clear_settle
+            end
+            return settle
+        end
+
+        on start do
+            drive('register_select', 0)
+            drive('read_write', 0)
+            drive('enable', 0)
+            drive('data', 0)
+            schedule('initialize', start_at)
+        end
+
+        on timer 'initialize' do
+            start_burst(1)
+            schedule('update', update_every)
+        end
+
+        on timer 'update' do
+            start_burst(0)
+            schedule('update', update_every)
+        end
+
+        on timer 'tick' do
+            let step = item(plan, cursor)
+            if phase == 0 then
+                drive('register_select', floor(step / 256))
+                drive('data', mod(step, 256))
+                phase = 1
+                schedule('tick', bit_time)
+            elseif phase == 1 then
+                drive('enable', 1)
+                phase = 2
+                schedule('tick', bit_time)
+            else
+                drive('enable', 0)
+                phase = 0
+                cursor = cursor + 1
+                if cursor < planned then
+                    schedule('tick', wait_after(step))
+                end
+            end
+        end
+    }
+}

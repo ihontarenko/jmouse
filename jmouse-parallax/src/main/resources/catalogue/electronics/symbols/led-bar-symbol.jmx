@@ -4,7 +4,7 @@ symbol "LED bar" as led-bar-symbol {
         category circuits
         tags electronics, schematic, display
     }
-    size 160 x 100
+    size 180 x 120
     input light_0 0 .. 100
     input light_1 0 .. 100
     input light_2 0 .. 100
@@ -14,66 +14,66 @@ symbol "LED bar" as led-bar-symbol {
     input light_6 0 .. 100
     input light_7 0 .. 100
 
-    path "M-80-26H80V26H-80Z"
-    path "M-70 26V36H70V26M0 36V50"
-    path "M-70-26V-50"
-    path "M-50-26V-50"
-    path "M-30-26V-50"
-    path "M-10-26V-50"
-    path "M10-26V-50"
-    path "M30-26V-50"
-    path "M50-26V-50"
-    path "M70-26V-50"
-    live path glow_0 "M-76-20H-64V20H-76Z" {
+    path "M-90-40H70V40H-90Z"
+    path "M-80 26V32H60V26M-20 32V60"
+    path "M-80-40V-60"
+    path "M-60-40V-60"
+    path "M-40-40V-60"
+    path "M-20-40V-60"
+    path "M0-40V-60"
+    path "M20-40V-60"
+    path "M40-40V-60"
+    path "M60-40V-60"
+    live path glow_0 "M-86-30H-74V20H-86Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_0, 0, 100))
         live glow = 6 * share(light_0, 0, 100)
     }
-    live path glow_1 "M-56-20H-44V20H-56Z" {
+    live path glow_1 "M-66-30H-54V20H-66Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_1, 0, 100))
         live glow = 6 * share(light_1, 0, 100)
     }
-    live path glow_2 "M-36-20H-24V20H-36Z" {
+    live path glow_2 "M-46-30H-34V20H-46Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_2, 0, 100))
         live glow = 6 * share(light_2, 0, 100)
     }
-    live path glow_3 "M-16-20H-4V20H-16Z" {
+    live path glow_3 "M-26-30H-14V20H-26Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_3, 0, 100))
         live glow = 6 * share(light_3, 0, 100)
     }
-    live path glow_4 "M4-20H16V20H4Z" {
+    live path glow_4 "M-6-30H6V20H-6Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_4, 0, 100))
         live glow = 6 * share(light_4, 0, 100)
     }
-    live path glow_5 "M24-20H36V20H24Z" {
+    live path glow_5 "M14-30H26V20H14Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_5, 0, 100))
         live glow = 6 * share(light_5, 0, 100)
     }
-    live path glow_6 "M44-20H56V20H44Z" {
+    live path glow_6 "M34-30H46V20H34Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_6, 0, 100))
         live glow = 6 * share(light_6, 0, 100)
     }
-    live path glow_7 "M64-20H76V20H64Z" {
+    live path glow_7 "M54-30H66V20H54Z" {
         fill = red
         live opacity = 0.12 + 0.88 * seen(share(light_7, 0, 100))
         live glow = 6 * share(light_7, 0, 100)
     }
 
-    pin anode_0 at -70, -50
-    pin anode_1 at -50, -50
-    pin anode_2 at -30, -50
-    pin anode_3 at -10, -50
-    pin anode_4 at 10, -50
-    pin anode_5 at 30, -50
-    pin anode_6 at 50, -50
-    pin anode_7 at 70, -50
-    pin cathode at 0, 50
-    label name at 90, -40
-    label value at 90, 44
+    pin anode_0 at -80, -60
+    pin anode_1 at -60, -60
+    pin anode_2 at -40, -60
+    pin anode_3 at -20, -60
+    pin anode_4 at 0, -60
+    pin anode_5 at 20, -60
+    pin anode_6 at 40, -60
+    pin anode_7 at 60, -60
+    pin cathode at -20, 60
+    label name at 100, -30
+    label value at 100, 30
 }

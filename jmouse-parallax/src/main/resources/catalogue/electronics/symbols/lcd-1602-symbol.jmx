@@ -1,0 +1,177 @@
+symbol "16×2 character LCD" as lcd-1602-symbol {
+    meta {
+        summary "A 16×2 character LCD module: its window shows the 32 characters its controller holds on screen"
+        category circuits
+        tags electronics, schematic, display
+    }
+    size 180 x 120
+    input cell_0 0 .. 255
+    input cell_1 0 .. 255
+    input cell_2 0 .. 255
+    input cell_3 0 .. 255
+    input cell_4 0 .. 255
+    input cell_5 0 .. 255
+    input cell_6 0 .. 255
+    input cell_7 0 .. 255
+    input cell_8 0 .. 255
+    input cell_9 0 .. 255
+    input cell_10 0 .. 255
+    input cell_11 0 .. 255
+    input cell_12 0 .. 255
+    input cell_13 0 .. 255
+    input cell_14 0 .. 255
+    input cell_15 0 .. 255
+    input cell_16 0 .. 255
+    input cell_17 0 .. 255
+    input cell_18 0 .. 255
+    input cell_19 0 .. 255
+    input cell_20 0 .. 255
+    input cell_21 0 .. 255
+    input cell_22 0 .. 255
+    input cell_23 0 .. 255
+    input cell_24 0 .. 255
+    input cell_25 0 .. 255
+    input cell_26 0 .. 255
+    input cell_27 0 .. 255
+    input cell_28 0 .. 255
+    input cell_29 0 .. 255
+    input cell_30 0 .. 255
+    input cell_31 0 .. 255
+
+    path "M-90-40H70V40H-90Z"
+    path "M-80 -40V-60"
+    path "M-60 -40V-60"
+    path "M-40 -40V-60"
+    path "M-20 -40V-60"
+    path "M0 -40V-60"
+    path "M20 -40V-60"
+    path "M40 -40V-60"
+    path "M60 -40V-60"
+    path "M-80 40V60"
+    path "M-60 40V60"
+    path "M-40 40V60"
+    path "M-20 40V60"
+    path "M0 40V60"
+    path "M20 40V60"
+    path "M40 40V60"
+    path "M60 40V60"
+    box window at -10, -4 size 140 x 36 {
+        fill = green
+        opacity = 0.25
+    }
+    live glyph character_0 at -70, -12 size 7 x 12 {
+        live character = cell_0
+    }
+    live glyph character_1 at -62, -12 size 7 x 12 {
+        live character = cell_1
+    }
+    live glyph character_2 at -54, -12 size 7 x 12 {
+        live character = cell_2
+    }
+    live glyph character_3 at -46, -12 size 7 x 12 {
+        live character = cell_3
+    }
+    live glyph character_4 at -38, -12 size 7 x 12 {
+        live character = cell_4
+    }
+    live glyph character_5 at -30, -12 size 7 x 12 {
+        live character = cell_5
+    }
+    live glyph character_6 at -22, -12 size 7 x 12 {
+        live character = cell_6
+    }
+    live glyph character_7 at -14, -12 size 7 x 12 {
+        live character = cell_7
+    }
+    live glyph character_8 at -6, -12 size 7 x 12 {
+        live character = cell_8
+    }
+    live glyph character_9 at 2, -12 size 7 x 12 {
+        live character = cell_9
+    }
+    live glyph character_10 at 10, -12 size 7 x 12 {
+        live character = cell_10
+    }
+    live glyph character_11 at 18, -12 size 7 x 12 {
+        live character = cell_11
+    }
+    live glyph character_12 at 26, -12 size 7 x 12 {
+        live character = cell_12
+    }
+    live glyph character_13 at 34, -12 size 7 x 12 {
+        live character = cell_13
+    }
+    live glyph character_14 at 42, -12 size 7 x 12 {
+        live character = cell_14
+    }
+    live glyph character_15 at 50, -12 size 7 x 12 {
+        live character = cell_15
+    }
+    live glyph character_16 at -70, 4 size 7 x 12 {
+        live character = cell_16
+    }
+    live glyph character_17 at -62, 4 size 7 x 12 {
+        live character = cell_17
+    }
+    live glyph character_18 at -54, 4 size 7 x 12 {
+        live character = cell_18
+    }
+    live glyph character_19 at -46, 4 size 7 x 12 {
+        live character = cell_19
+    }
+    live glyph character_20 at -38, 4 size 7 x 12 {
+        live character = cell_20
+    }
+    live glyph character_21 at -30, 4 size 7 x 12 {
+        live character = cell_21
+    }
+    live glyph character_22 at -22, 4 size 7 x 12 {
+        live character = cell_22
+    }
+    live glyph character_23 at -14, 4 size 7 x 12 {
+        live character = cell_23
+    }
+    live glyph character_24 at -6, 4 size 7 x 12 {
+        live character = cell_24
+    }
+    live glyph character_25 at 2, 4 size 7 x 12 {
+        live character = cell_25
+    }
+    live glyph character_26 at 10, 4 size 7 x 12 {
+        live character = cell_26
+    }
+    live glyph character_27 at 18, 4 size 7 x 12 {
+        live character = cell_27
+    }
+    live glyph character_28 at 26, 4 size 7 x 12 {
+        live character = cell_28
+    }
+    live glyph character_29 at 34, 4 size 7 x 12 {
+        live character = cell_29
+    }
+    live glyph character_30 at 42, 4 size 7 x 12 {
+        live character = cell_30
+    }
+    live glyph character_31 at 50, 4 size 7 x 12 {
+        live character = cell_31
+    }
+
+    pin ground at -80, -60
+    pin supply at -60, -60
+    pin contrast at -40, -60
+    pin register_select at -20, -60
+    pin read_write at 0, -60
+    pin enable at 20, -60
+    pin backlight_anode at 40, -60
+    pin backlight_cathode at 60, -60
+    pin data_0 at -80, 60
+    pin data_1 at -60, 60
+    pin data_2 at -40, 60
+    pin data_3 at -20, 60
+    pin data_4 at 0, 60
+    pin data_5 at 20, 60
+    pin data_6 at 40, 60
+    pin data_7 at 60, 60
+    label name at 100, -30
+    label value at 100, 30
+}

@@ -47,10 +47,10 @@ final class SymbolReader {
     private static final List<String> LABEL_SUBJECTS = List.of("name", "value");
 
     /** The words that open a drawing's elements. */
-    private static final Set<String> ELEMENT_SHAPES = Set.of("path", "box", "circle", "line", "group");
+    private static final Set<String> ELEMENT_SHAPES = Set.of("path", "box", "circle", "line", "glyph", "group");
 
     /** The words a living drawing adds to {@link org.jmouse.parallax.script.Kind#DRAWING_LINES}. */
-    private static final Set<String> LIVING_LINES = Set.of("input", "live", "box", "circle", "line", "group");
+    private static final Set<String> LIVING_LINES = Set.of("input", "live", "box", "circle", "line", "glyph", "group");
 
     /** The words that place an element, each followed by its value. */
     private static final Set<String> GEOMETRY_WORDS = Set.of("at", "size", "radius", "from", "to", "pivot");
@@ -244,9 +244,9 @@ final class SymbolReader {
                             Math.max(first[0], second[0]), Math.max(first[1], second[1])));
                 }
                 case "input" -> inputs.add(input(line));
-                case "live", "box", "circle", "line", "group" -> elements.add(element(line));
+                case "live", "box", "circle", "line", "glyph", "group" -> elements.add(element(line));
                 default -> throw line.refusal("'" + line.value(0) + "' is not part of a drawing: size, path, box, circle, "
-                        + "line, group, live, input, pin, label or indicator");
+                        + "line, glyph, group, live, input, pin, label or indicator");
             }
         }
 
@@ -288,7 +288,7 @@ final class SymbolReader {
                 return layer(line, live, position, opened);
             }
             if (!ELEMENT_SHAPES.contains(shape)) {
-                throw line.refusal(position, "'" + shape + "' is not an element: path, box, circle, line, group or 'live when'");
+                throw line.refusal(position, "'" + shape + "' is not an element: path, box, circle, line, glyph, group or 'live when'");
             }
             return shaped(line, live, shape, position + 1, opened);
         }
@@ -396,6 +396,12 @@ final class SymbolReader {
                 case "box" -> {
                     if (!geometry.containsKey("at") || !geometry.containsKey("size")) {
                         throw line.refusal("a box is 'box [name] at x, y size width x height', placed by its centre");
+                    }
+                }
+                case "glyph" -> {
+                    if (!geometry.containsKey("at") || !geometry.containsKey("size")) {
+                        throw line.refusal("a glyph is 'glyph [name] at x, y size width x height': a character cell, placed by its centre, "
+                                + "whose character is its 'character' property");
                     }
                 }
                 case "circle" -> {
