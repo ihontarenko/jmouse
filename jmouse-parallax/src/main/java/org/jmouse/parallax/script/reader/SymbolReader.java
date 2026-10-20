@@ -438,36 +438,33 @@ final class SymbolReader {
 
         /** The lines between an element's braces; the cursor ends after the closing one. */
         private Body body() {
-            reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open the element");
             Body body = new Body();
-            while (true) {
-                reading.skipBlank();
-                if (reading.atEnd()) {
-                    throw reading.refusal("an element is opened with '{' and never closed");
+            reading.body("'{' to open the element",
+                    () -> reading.refusal("an element is opened with '{' and never closed"),
+                    () -> bodyLine(body, reading.line()));
+            return body;
+        }
+
+        /** One line of an element's braces: a property, a {@code hide}, or an element inside a group. */
+        private void bodyLine(Body body, Reading.Line line) {
+            if (line.isEmpty()) {
+                throw reading.refusal("braces open only after an element: 'group lever { … }'");
+            }
+            int equals = line.indexOf(0, "=");
+            if (equals == 1 || (equals == 2 && MOTIONS.containsKey(line.value(0)))) {
+                SymbolMotion motion = equals == 1 ? SymbolMotion.STILL : MOTIONS.get(line.value(0));
+                String name = line.value(equals - 1);
+                if (body.properties.stream().anyMatch(property -> property.name().equals(name))) {
+                    throw line.refusal(equals - 1, "'" + name + "' is written twice here");
                 }
-                if (reading.cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                    return body;
+                body.properties.add(property(line, name, equals + 1, line.size(), motion));
+            } else if (line.value(0).equals("hide")) {
+                if (line.size() < 2) {
+                    throw line.refusal("'hide' names the elements it hides: 'hide halo'");
                 }
-                Reading.Line line = reading.line();
-                if (line.isEmpty()) {
-                    throw reading.refusal("braces open only after an element: 'group lever { … }'");
-                }
-                int equals = line.indexOf(0, "=");
-                if (equals == 1 || (equals == 2 && MOTIONS.containsKey(line.value(0)))) {
-                    SymbolMotion motion = equals == 1 ? SymbolMotion.STILL : MOTIONS.get(line.value(0));
-                    String name = line.value(equals - 1);
-                    if (body.properties.stream().anyMatch(property -> property.name().equals(name))) {
-                        throw line.refusal(equals - 1, "'" + name + "' is written twice here");
-                    }
-                    body.properties.add(property(line, name, equals + 1, line.size(), motion));
-                } else if (line.value(0).equals("hide")) {
-                    if (line.size() < 2) {
-                        throw line.refusal("'hide' names the elements it hides: 'hide halo'");
-                    }
-                    line.names(1).forEach(body.hidden::add);
-                } else {
-                    body.children.add(element(line));
-                }
+                line.names(1).forEach(body.hidden::add);
+            } else {
+                body.children.add(element(line));
             }
         }
 

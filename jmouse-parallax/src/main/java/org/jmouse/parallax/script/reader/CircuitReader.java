@@ -514,22 +514,29 @@ final class CircuitReader {
             reading.cursor.next();
             reference = reading.literal(reading.expect(BasicToken.T_STRING, "where the expectation comes from, in quotes"));
         }
-        reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open the expectation");
+        ExpectationBody body = new ExpectationBody();
+        reading.body("'{' to open the expectation",
+                () -> reading.refusal(keyword, "expectation '" + reading.literal(title) + "' is never closed"),
+                body::read);
+        if (body.measure.isEmpty() || body.criterion == null) {
+            throw reading.refusal(keyword, "expectation '" + reading.literal(title)
+                    + "' needs a measure and a criterion (near, within or is)");
+        }
+        return new Block.Expectation(reading.literal(title), reference, body.bench, body.sharedBench, body.duration,
+                body.temperature, body.realistic, body.measure, body.criterion, reading.lineOf(keyword));
+    }
+
+    /** What an expectation's braces say, gathered statement by statement: its bench, its measure, its criterion. */
+    private final class ExpectationBody {
         List<Part> bench = List.of();
-        String sharedBench = null;
-        double duration = 0;
-        Double temperature = null;
-        boolean realistic = false;
+        String sharedBench;
+        double duration;
+        Double temperature;
+        boolean realistic;
         List<String> measure = List.of();
-        Criterion criterion = null;
-        while (true) {
-            reading.skipBlank();
-            if (reading.atEnd()) {
-                throw reading.refusal(keyword, "expectation '" + reading.literal(title) + "' is never closed");
-            }
-            if (reading.cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                break;
-            }
+        Criterion criterion;
+
+        void read() {
             if (reading.atWord("bench")) {
                 reading.cursor.next();
                 Reading.Line header = reading.line();
@@ -563,12 +570,6 @@ final class CircuitReader {
                 criterion = criterion(reading.line());
             }
         }
-        if (measure.isEmpty() || criterion == null) {
-            throw reading.refusal(keyword, "expectation '" + reading.literal(title)
-                    + "' needs a measure and a criterion (near, within or is)");
-        }
-        return new Block.Expectation(reading.literal(title), reference, bench, sharedBench, duration, temperature, realistic, measure, criterion,
-                reading.lineOf(keyword));
     }
 
     /** {@code bench i2c-bus { parts }}: parts written once, for every expectation that names the bench. */

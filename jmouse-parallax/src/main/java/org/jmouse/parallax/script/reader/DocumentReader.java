@@ -1,7 +1,6 @@
 package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.BasicNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -31,8 +30,7 @@ public final class DocumentReader {
 
     /** Every document of the text, in order. */
     public List<ExperienceDocument> documents() {
-        Node holder = BasicNode.forToken(reading.cursor.current());
-        reading.context.getParser(JmxFileParser.class).parse(reading.cursor, holder, reading.context);
-        return holder.getChildren().stream().map(node -> ((DocumentNode) node).document()).toList();
+        Node file = reading.context.getParser(JmxFileParser.class).parse(reading.cursor, reading.context);
+        return file.getChildren().stream().map(node -> ((DocumentNode) node).document()).toList();
     }
 }

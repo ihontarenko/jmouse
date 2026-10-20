@@ -153,26 +153,17 @@ final class StructureReader {
             }
             slug = head.joinedWord(2);
         }
-        reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open lesson \"" + title + "\"");
         LessonFields fields = new LessonFields();
         List<Block.CourseStep> steps = new ArrayList<>();
-        while (true) {
-            reading.skipBlank();
-            if (reading.atEnd()) {
-                throw reading.refusal(keyword, "lesson \"" + title + "\" is opened with '{' and never closed");
-            }
-            if (reading.cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                break;
-            }
-            if (reading.atWord("step")) {
-                steps.add(courseStep(reading.cursor.next()));
-                continue;
-            }
-            Reading.Line line = reading.line();
-            if (!line.isEmpty()) {
-                fields.read(line);
-            }
-        }
+        reading.body("'{' to open lesson \"" + title + "\"",
+                () -> reading.refusal(keyword, "lesson \"" + title + "\" is opened with '{' and never closed"),
+                () -> {
+                    if (reading.atWord("step")) {
+                        steps.add(courseStep(reading.cursor.next()));
+                    } else {
+                        fields.read(reading.lineOf("lesson"));
+                    }
+                });
         return new Block.Lesson(title, slug, fields.summary, fields.minutes, fields.object, steps);
     }
 

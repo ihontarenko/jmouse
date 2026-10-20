@@ -77,8 +77,7 @@ final class DocumentParser extends AbstractParser {
         if (!slug.matches(SLUG)) {
             throw reading.refusal(head, "'" + slug + "' is not a slug: lowercase words and digits joined by hyphens");
         }
-        reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open " + kind.keyword() + " \"" + title + "\"");
-        Body body = body(kind, head, context);
+        Body body = body(kind, title, head, context);
         ExperienceDocument document = new ExperienceDocument(kind, title, slug, type, body.meta, body.base,
                 body.units, body.uses, body.blocks, reading.lineOf(head));
         rules.validate(document, head);
@@ -99,35 +98,29 @@ final class DocumentParser extends AbstractParser {
         List<Block>      blocks = new ArrayList<>();
     }
 
-    private Body body(Kind kind, Token head, ParserContext context) {
+    private Body body(Kind kind, String title, Token head, ParserContext context) {
         Body body = new Body();
         Set<String> written = new HashSet<>();
         SymbolReader.Drawing drawing = kind == Kind.SYMBOL ? symbols.drawing() : null;
-        while (true) {
-            reading.skipBlank();
-            if (reading.atEnd()) {
-                throw reading.refusal(head, kind.keyword() + " \"…\" is opened with '{' and never closed");
-            }
-            if (reading.cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                break;
-            }
-            if (atDocument(reading)) {
-                throw reading.refusal("a " + kind.keyword() + " does not hold other documents: one object is one file, "
-                        + "and a collection lists them by slug");
-            }
-            // A symbol's drawing is written as lines of its own, not as a block: `rect …`, `line …`, `pin …`.
-            if (drawing != null && symbols.atDrawingLine()) {
-                drawing.read(reading.line());
-                continue;
-            }
-            gather(body, statement(kind, written, context));
-        }
+        reading.body("'{' to open " + kind.keyword() + " \"" + title + "\"",
+                () -> reading.refusal(head, kind.keyword() + " \"…\" is opened with '{' and never closed"),
+                () -> {
+                    if (atDocument(reading)) {
+                        throw reading.refusal("a " + kind.keyword() + " does not hold other documents: one object is "
+                                + "one file, and a collection lists them by slug");
+                    }
+                    // A symbol's drawing is written as lines of its own, not as a block: `rect …`, `line …`, `pin …`.
+                    if (drawing != null && symbols.atDrawingLine()) {
+                        drawing.read(reading.line());
+                    } else {
+                        gather(body, statement(kind, written, context));
+                    }
+                });
         if (drawing != null) {
             body.blocks.add(drawing.symbol());
         }
         return body;
     }
-
     /** The statement the cursor stands on, read by the parser of its word. */
     private DocumentStatement statement(Kind kind, Set<String> written, ParserContext context) {
         Token keyword = reading.cursor.current();

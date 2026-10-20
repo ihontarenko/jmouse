@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * One reading of one text: the cursor over its tokens, the text itself, and how to say where something is wrong.
@@ -215,7 +216,30 @@ final class Reading {
 
     /** {@code { line … }}: every non-blank line; the cursor ends after the closing brace. Nested braces are refused. */
     List<Line> blockLines(String block) {
-        return new BlockLinesParser(this, block).lines(context);
+        List<Line> lines = new ArrayList<>();
+        body(block, () -> lines.add(lineOf(block)));
+        return lines;
+    }
+
+    /**
+     * {@code { statement … }}, each statement read by the block's grammar, read by the engine's statement reader; the
+     * cursor ends after the closing brace.
+     */
+    void body(String block, BlockBodyParser.Statement statement) {
+        body("'{' to open " + block, () -> refusal("'" + block + "' is opened with '{' and never closed"), statement);
+    }
+
+    /** The same, with its own words for a missing opening brace and for a body never closed. */
+    void body(String opening, Supplier<ExperienceParseException> unclosed, BlockBodyParser.Statement statement) {
+        new BlockBodyParser(this, opening, unclosed, statement).read(context);
+    }
+
+    /** A line of a block that holds lines: a brace there opens nothing. */
+    Line lineOf(String block) {
+        if (cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
+            throw refusal("'" + block + "' holds lines, not a nested '{ … }'");
+        }
+        return line();
     }
 
     /** The source between a block's braces, as written, for a body another language reads (jMF definitions). */

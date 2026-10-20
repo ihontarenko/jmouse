@@ -27,29 +27,25 @@ final class PresentationReader {
     // ─── meta ───────────────────────────────────────────────────────────────────────────────────────
 
     Meta meta() {
-        reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open meta");
-        String summary = null;
-        String description = null;
-        String category = null;
+        MetaFields fields = new MetaFields();
+        reading.body("meta", () -> fields.read(reading.lineOf("meta")));
+        return fields.meta();
+    }
+
+    /** What a {@code meta} block says, gathered line by line. */
+    private final class MetaFields {
+        String summary;
+        String description;
+        String category;
         List<String> tags = List.of();
-        String source = null;
+        String source;
         List<String> authors = List.of();
-        String license = null;
-        List<Meta.Link> links = new ArrayList<>();
-        Map<String, MetaValue> fields = new LinkedHashMap<>();
-        Map<String, String> labels = new LinkedHashMap<>();
-        while (true) {
-            reading.skipBlank();
-            if (reading.atEnd()) {
-                throw reading.refusal("'meta' is opened with '{' and never closed");
-            }
-            if (reading.cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                break;
-            }
-            Reading.Line line = reading.line();
-            if (line.isEmpty()) {
-                continue;
-            }
+        String license;
+        final List<Meta.Link> links = new ArrayList<>();
+        final Map<String, MetaValue> fields = new LinkedHashMap<>();
+        final Map<String, String> labels = new LinkedHashMap<>();
+
+        void read(Reading.Line line) {
             String key = line.value(0);
             switch (key) {
                 case "summary" -> summary = text(line);
@@ -81,7 +77,10 @@ final class PresentationReader {
                 }
             }
         }
-        return new Meta(summary, description, category, tags, source, authors, license, links, fields, labels);
+
+        Meta meta() {
+            return new Meta(summary, description, category, tags, source, authors, license, links, fields, labels);
+        }
     }
 
     /**
@@ -172,21 +171,9 @@ final class PresentationReader {
     // ─── view ───────────────────────────────────────────────────────────────────────────────────────
 
     Block.View view() {
-        reading.expect(BasicToken.T_OPEN_CURLY, "'{' to open view");
         List<Block.ViewItem> items = new ArrayList<>();
-        while (true) {
-            reading.skipBlank();
-            if (reading.atEnd()) {
-                throw reading.refusal("'view' is opened with '{' and never closed");
-            }
-            if (reading.cursor.consumeIf(BasicToken.T_CLOSE_CURLY)) {
-                return new Block.View(items);
-            }
-            Reading.Line line = reading.line();
-            if (!line.isEmpty()) {
-                items.add(viewItem(line));
-            }
-        }
+        reading.body("view", () -> items.add(viewItem(reading.lineOf("view"))));
+        return new Block.View(items);
     }
 
     private Block.ViewItem viewItem(Reading.Line line) {
