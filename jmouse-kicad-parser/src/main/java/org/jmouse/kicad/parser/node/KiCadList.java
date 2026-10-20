@@ -105,6 +105,41 @@ public record KiCadList(List<KiCadNode> items, String closingLeading, KiCadPosit
         return items.stream().anyMatch(item -> item instanceof KiCadAtom atom && atom.value().equals(name));
     }
 
+    /** Its lists of that name, in order. */
+    public List<KiCadList> lists(KiCadName name) {
+        return lists(name.word());
+    }
+
+    /** Its first list of that name. */
+    public Optional<KiCadList> list(KiCadName name) {
+        return list(name.word());
+    }
+
+    /** Its first list of that name, refused when it has none. */
+    public KiCadList requireList(KiCadName name) {
+        return requireList(name.word());
+    }
+
+    /** The word of its list of that name, if it has one. */
+    public Optional<String> wordOf(KiCadName name) {
+        return wordOf(name.word());
+    }
+
+    /** Whether its list of that name says yes. */
+    public boolean says(KiCadName name) {
+        return says(name.word());
+    }
+
+    /** Whether it is a list of that name. */
+    public boolean is(KiCadName name) {
+        return name().equals(name.word());
+    }
+
+    /** A list a program built: its name, then its items. */
+    public static KiCadList of(KiCadName name, KiCadNode... items) {
+        return of(name.word(), items);
+    }
+
     /** The same list with one more item at its end, laid out as KiCad lays it. */
     public KiCadList with(KiCadNode item) {
         List<KiCadNode> more = new ArrayList<>(items);
