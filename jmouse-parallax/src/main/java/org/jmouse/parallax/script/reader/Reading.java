@@ -3,6 +3,7 @@ package org.jmouse.parallax.script.reader;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.lexer.support.SourceReading;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.parallax.script.ExperienceNotation;
 import org.jmouse.parallax.script.ExperienceNotation.Normalized;
@@ -312,8 +313,7 @@ final class Reading {
             if (index + 1 >= tokens.size()) {
                 return false;
             }
-            String between = source.substring(tokens.get(index).offset(), tokens.get(index + 1).offset());
-            return between.chars().noneMatch(Character::isWhitespace) && between.length() >= 1
+            return SourceReading.touches(cursor, tokens.get(index), tokens.get(index + 1))
                     && !SEPARATORS.contains(tokens.get(index).value()) && !SEPARATORS.contains(tokens.get(index + 1).value());
         }
 
