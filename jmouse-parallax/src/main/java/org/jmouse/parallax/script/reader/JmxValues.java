@@ -2,6 +2,7 @@ package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.BoundedTokenCursor;
+import org.jmouse.el.lexer.BoundedTokenCursor.Boundary;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.expression.literal.QuantityLiteralNode;
@@ -26,11 +27,15 @@ import java.util.Set;
  *
  * <p>Where a value ends is the line's grammar to say, not the expression's: in {@code t = 0 in 0 .. 2 pi step 0.01}
  * only the grammar knows {@code step} is its word and {@code pi} a factor. So a value is read through a
- * {@link BoundedTokenCursor} that ends at the words the grammar writes next — outside parentheses, and not where they
- * are called — and at the end of the line; jMF's parser reads it as it reads any formula. The expression is kept as the
- * author wrote it, cut out of the source, for jMF to compile with the document's names.</p>
+ * {@link BoundedTokenCursor} that ends where the grammar says — at the words it writes next ({@link #words}), or at a
+ * shape of its own, {@code /div} after a scale or {@code name =} opening the next setting — and at the end of the line;
+ * jMF's parser reads it as it reads any formula. The expression is kept as the author wrote it, cut out of the source,
+ * for jMF to compile with the document's names.</p>
  */
 final class JmxValues {
+
+    /** Nothing but the end of the line ends the value. */
+    static final Boundary LINE = (token, after, depth) -> false;
 
     private final Reading reading;
     private final ParserContext context;
@@ -43,46 +48,87 @@ final class JmxValues {
         this.context = new DefaultParserContext(formulas);
     }
 
-    /**
-     * A value as written, and the quantity it is when it is a number with at most its unit.
-     *
-     * @param next the words the line's grammar may write after the value
-     */
+    /** A value ends at one of these words, outside parentheses, and not where it is called: {@code log(x)} is a value. */
+    static Boundary words(Set<String> next) {
+        return (token, after, depth) -> depth == 0 && token.type() != BasicToken.T_STRING && next.contains(token.value())
+                && after.type() != BasicToken.T_OPEN_PAREN;
+    }
+
     Values.Written written(Set<String> next) {
+        return written(words(next));
+    }
+
+    /**
+     * A value as written, and the quantity it is when it is a number with at most its unit — then the number alone is
+     * its expression, and the unit is the quantity's.
+     *
+     * @param until where the line's grammar takes over after the value
+     */
+    Values.Written written(Boundary until) {
         TokenCursor cursor = reading.cursor;
         TokenCursor.Savepoint start = cursor.savepoint();
-        SourceText expression = expression(next);
+        SourceText expression = expression(until);
         TokenCursor.Savepoint end = cursor.savepoint();
         cursor.restore(start);
         Token first = cursor.current();
         // The number ends where its unit begins: one token, or two when its sign stands apart (- 5 V).
         Token unitStart = cursor.lookAt(cursor.isCurrent(BasicToken.T_MINUS, BasicToken.T_PLUS) ? 2 : 1);
-        Optional<Quantity> quantity = quantities.read(bounded(next), context).map(QuantityLiteralNode::getQuantity)
+        Optional<Quantity> quantity = quantities.read(bounded(until), context).map(QuantityLiteralNode::getQuantity)
                 .filter(ignored -> cursor.position() == end.getPosition());
         cursor.restore(end);
         if (quantity.isPresent() && !quantity.get().unit().isEmpty()) {
-            // A number with its unit keeps the number as its expression and the unit in its quantity.
             expression = reading.text(first.offset(), unitStart.offset());
         }
         return new Values.Written(expression, quantity);
     }
 
     /**
+     * A value that must be a number with at most its unit — a coordinate, a duration, a threshold —, in SI.
+     *
+     * @param until where the line's grammar takes over after the value
+     */
+    double quantity(Boundary until) {
+        Token from = reading.cursor.current();
+        Values.Written written = written(until);
+        return written.quantity().orElseThrow(() -> reading.refusal(from,
+                "'" + written.expression().text() + "' must be a number with an optional unit")).value();
+    }
+
+    /**
+     * A plain number where the cursor stands — {@code 240}, {@code -0.5}, {@code - 5} —, read by the engine's
+     * {@link QuantityParser}; empty, the cursor where it was, when no number without a unit stands there.
+     */
+    Optional<Double> number() {
+        TokenCursor cursor = reading.cursor;
+        TokenCursor.Savepoint start = cursor.savepoint();
+        Optional<Quantity> read = quantities.read(bounded(LINE), context).map(QuantityLiteralNode::getQuantity);
+        if (read.isEmpty() || !read.get().unit().isEmpty()) {
+            cursor.restore(start);
+            return Optional.empty();
+        }
+        return Optional.of(read.get().value());
+    }
+
+    SourceText expression(Set<String> next) {
+        return expression(words(next));
+    }
+
+    /**
      * One expression from where the cursor stands, as written; the cursor is left where it ends.
      *
-     * @param next the words the line's grammar may write after the expression
+     * @param until where the line's grammar takes over after the expression
      */
-    SourceText expression(Set<String> next) {
+    SourceText expression(Boundary until) {
         Token first = reading.cursor.current();
         if (reading.atLineEnd() || reading.cursor.isCurrent(BasicToken.T_STRING)) {
             throw reading.refusal(first, "a value is missing");
         }
         if (reading.cursor.isCurrent(BasicToken.T_OPEN_BRACKET)) {
-            listed(next);
+            listed(until);
             return reading.text(first.offset(), reading.cursor.endOfRead());
         }
         try {
-            context.getParser(ExpressionParser.class).parse(bounded(next), context);
+            context.getParser(ExpressionParser.class).parse(bounded(until), context);
         } catch (ExperienceParseException refusal) {
             throw refusal;
         } catch (RuntimeException unreadable) {
@@ -91,20 +137,24 @@ final class JmxValues {
         return reading.text(first.offset(), reading.cursor.endOfRead());
     }
 
+    List<SourceText> listed(Set<String> next) {
+        return listed(words(next));
+    }
+
     /**
      * {@code [a, b, c]} — values listed in brackets, each an expression or a list itself, as a matrix's rows are:
      * {@code [[1, 2], [2, 4]]}. jMF has no lists; they are jMX's, and what reads the value reads them.
      *
-     * @param next the words the line's grammar may write after the list
+     * @param until where the line's grammar takes over after the list
      * @return each listed value as written
      */
-    List<SourceText> listed(Set<String> next) {
+    List<SourceText> listed(Boundary until) {
         reading.cursor.next();
         List<SourceText> listed = new ArrayList<>();
-        listed.add(expression(next));
+        listed.add(expression(until));
         while (reading.cursor.isCurrent(BasicToken.T_COMMA)) {
             reading.cursor.next();
-            listed.add(expression(next));
+            listed.add(expression(until));
         }
         reading.expect(BasicToken.T_CLOSE_BRACKET, "']' to close the listed values");
         return listed;
@@ -132,7 +182,7 @@ final class JmxValues {
      * @param next the words the line's grammar may write after the tuple
      */
     List<SourceText> tuple(Set<String> next) {
-        TokenCursor view = bounded(next);
+        TokenCursor view = bounded(words(next));
         int close = closingOf(view);
         boolean whole = close >= 0
                 && (close + 1 >= view.remaining() || view.lookAt(close + 1).type() == BasicToken.T_STRING);
@@ -181,10 +231,9 @@ final class JmxValues {
         return false;
     }
 
-    /** The cursor, ending at the line's end and at its grammar's next words outside parentheses, unless called. */
-    private TokenCursor bounded(Set<String> next) {
+    /** The cursor, ending at the line's end and where the grammar says. */
+    private TokenCursor bounded(Boundary until) {
         return new BoundedTokenCursor(reading.cursor, (token, after, depth) -> Reading.endsLine(token)
-                || (depth == 0 && token.type() != BasicToken.T_STRING && next.contains(token.value())
-                    && after.type() != BasicToken.T_OPEN_PAREN));
+                || until.endsAt(token, after, depth));
     }
 }

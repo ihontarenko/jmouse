@@ -1,6 +1,7 @@
 package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.GraphLine;
 import org.jmouse.parallax.script.Block.Pane;
@@ -37,10 +38,12 @@ final class GraphReader {
 
     private final Reading reading;
     private final CircuitReader circuits;
+    private final JmxValues values;
 
     GraphReader(Reading reading, CircuitReader circuits) {
         this.reading = reading;
         this.circuits = circuits;
+        this.values = new JmxValues(reading);
     }
 
     /** {@code expect "title" { measure expression;  near … +- … | within … .. … | is … }}: one claim, checked over the clock. */
@@ -52,14 +55,21 @@ final class GraphReader {
         SourceText measure = null;
         Block.Criterion criterion = null;
         String written = null;
-        for (Reading.Line line : reading.blockLines("expect")) {
-            if (line.value(0).equals("measure")) {
-                measure = line.text(1);
+        List<TokenCursor.Savepoint> starts = reading.lineStarts("expect");
+        TokenCursor.Savepoint after = reading.cursor.savepoint();
+        for (TokenCursor.Savepoint start : starts) {
+            reading.cursor.restore(start);
+            Token first = reading.cursor.current();
+            if (reading.cursor.checkValueAt(0, "measure")) {
+                reading.cursor.next();
+                measure = reading.atLineEnd() ? reading.text(reading.cursor.endOfRead(), reading.cursor.endOfRead())
+                        : values.expression(JmxValues.LINE);
             } else {
-                criterion = circuits.criterion(line);
-                written = line.text(0).text();
+                criterion = circuits.criterion();
+                written = reading.text(first.offset(), reading.cursor.endOfRead()).text();
             }
         }
+        reading.cursor.restore(after);
         if (measure == null || criterion == null) {
             throw reading.refusal(keyword, "expectation '" + reading.literal(title) + "' needs a 'measure' and a criterion (near, within or is)");
         }
