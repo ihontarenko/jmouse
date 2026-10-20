@@ -71,7 +71,20 @@ public class FunctionParser implements Parser {
             cursor.ensure(BasicToken.T_IDENTIFIER);
         }
 
-        FunctionNode function = new FunctionNode(builder.toString());
+        parent.add(call(builder.toString(), cursor, context));
+    }
+
+    /**
+     * A call of a function whose name is already read: its parenthesized arguments, when they follow. Shared with a
+     * dialect that reads the name otherwise — a word its host lexes as a keyword, {@code if(c, a, b)} in jMF.
+     *
+     * @param name    the function's name
+     * @param cursor  the cursor, after the name
+     * @param context the parser context
+     * @return the call
+     */
+    public static FunctionNode call(String name, TokenCursor cursor, ParserContext context) {
+        FunctionNode function = new FunctionNode(name);
 
         if (cursor.isCurrent(BasicToken.T_OPEN_PAREN)) {
             context.setOptions(ParserOptions.withNextParser(ArgumentsParser.class));
@@ -79,6 +92,6 @@ public class FunctionParser implements Parser {
             context.clearOptions();
         }
 
-        parent.add(function);
+        return function;
     }
 }

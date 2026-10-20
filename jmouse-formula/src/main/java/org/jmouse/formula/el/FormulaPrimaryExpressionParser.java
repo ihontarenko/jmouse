@@ -29,6 +29,10 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         if (CursorMatcher.function().matches(cursor)) {
             parent.add(context.getParser(FunctionParser.class).parse(cursor, context));
+        } else if (isWordCall(cursor)) {
+            // A keyword of the host language written as a call is a function of jMF's: if(c, a, b) where a jMS
+            // document's lexer reads `if` as its own word.
+            parent.add(FunctionParser.call(cursor.next().value(), cursor, context));
         } else if (CursorMatcher.literal().matches(cursor)) {
             parent.add(quantity(cursor, context).orElseGet(() -> context.getParser(LiteralParser.class).parse(cursor, context)));
         } else if (cursor.isCurrent(T_IDENTIFIER)) {
@@ -64,6 +68,11 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
             cursor.restore(start);
         }
         return read.map(Node.class::cast);
+    }
+
+    private static boolean isWordCall(TokenCursor cursor) {
+        return cursor.current().type() != T_IDENTIFIER && WORD.matcher(cursor.current().value()).matches()
+                && cursor.isNext(T_OPEN_PAREN);
     }
 
     private static boolean isWordArgument(TokenCursor cursor) {
