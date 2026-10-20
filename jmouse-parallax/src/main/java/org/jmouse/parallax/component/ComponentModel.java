@@ -2,6 +2,7 @@ package org.jmouse.parallax.component;
 
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.type.ValueType;
+import org.jmouse.formula.Formula;
 import org.jmouse.parallax.object.ObjectDefinition.BenchConditions;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.script.el.node.FunctionDeclarationNode;
@@ -16,7 +17,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
 
@@ -272,6 +272,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
      */
     public Set<String> namesReachedByEquations() {
         Set<String> names = new HashSet<>();
+        List<Formula.Definition> library = ModelLanguage.LANGUAGE.definitions(ModelLanguage.libraryText(this));
         for (Equation equation : equations) {
             if (equation.positive() != null) {
                 names.add(equation.positive());
@@ -280,7 +281,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
                 names.add(equation.negative());
             }
             if (equation.formula() != null) {
-                IDENTIFIER.matcher(equation.formula()).results().forEach(match -> names.add(match.group()));
+                // What the formula reads, the definitions it calls included: a pin's voltage and current name the pin.
+                names.addAll(ModelLanguage.read(name, equation.formula(), equation.line(), library).variables());
             }
         }
         return names;
@@ -306,9 +308,6 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         }
         return names;
     }
-
-    /** A name in a formula: what a pin, a state or a parameter is written as. */
-    private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
 
     /**
      * {@code name = 2.52 nA [per unit] ["what it is"]}.

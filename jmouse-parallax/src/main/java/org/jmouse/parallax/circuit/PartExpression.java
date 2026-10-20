@@ -14,11 +14,9 @@ import org.jmouse.formula.RealFunction;
 import org.jmouse.formula.Symbols;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -30,9 +28,6 @@ import java.util.stream.Stream;
  * instrument, so a meter nobody has thought of yet is written in its own document.
  */
 final class PartExpression {
-
-    /** A name in an expression: what a pin, a state, a slot or a parameter is written as. */
-    private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z_0-9]*");
 
     private final String part;
     private final RealFunction function;
@@ -66,31 +61,32 @@ final class PartExpression {
             String key = wiredKey(element, model, pin);
             return key == null ? ObjectDefinition.Circuit.GROUND : element.pins().get(key);
         }).toList();
-        // A row state is read slot by slot — `ddram_5` —; a display cannot take a whole row. Only the slots the expression
-        // names are bound: a 256-byte memory would otherwise be 256 arguments of every figure the part shows.
-        Set<String> named = new HashSet<>();
-        IDENTIFIER.matcher(expression).results().forEach(match -> named.add(match.group()));
-        List<String> states = model.states().stream().flatMap(state -> state.initial() instanceof Object[] row
-                ? IntStream.range(0, row.length).mapToObj(index -> slotName(state.name(), index)).filter(named::contains)
-                : Stream.of(state.name())).toList();
         Map<String, Double> parameters = circuit.parameters(model, element, "");
-        // The arguments: each pin's current in a slot of its own, by the pin's position; then each pin's voltage by its
-        // name, the states, the power, the time, whether it failed and the parameters.
-        List<String> names = new ArrayList<>(pins);
-        names.addAll(states);
-        names.add(ComponentVocabulary.POWER);
-        names.add(ComponentVocabulary.TIME);
-        names.add(ComponentVocabulary.FAILED);
-        names.addAll(parameters.keySet());
         try {
             // The component's own definitions — its libraries', the constants among them — read here as in its equations.
             List<Formula.Definition> library = ModelLanguage.LANGUAGE.definitions(ModelLanguage.libraryText(model));
             Formula read = ModelLanguage.readings(model.name(), expression, library);
+            // What the expression reads, the definitions it calls included: a pin's voltage and current name the pin.
+            Set<String> named = read.variables();
+            // A row state is read slot by slot — `ddram_5` —; a display cannot take a whole row. Only the slots the
+            // expression names are bound: a 256-byte memory would otherwise be 256 arguments of every figure it shows.
+            List<String> states = model.states().stream().flatMap(state -> state.initial() instanceof Object[] row
+                    ? IntStream.range(0, row.length).mapToObj(index -> slotName(state.name(), index)).filter(named::contains)
+                    : Stream.of(state.name())).toList();
+            // The arguments: each pin's current in a slot of its own, by the pin's position; then each pin's voltage by
+            // its name, the states, the power, the time, whether it failed and the parameters.
+            List<String> names = new ArrayList<>(pins);
+            names.addAll(states);
+            names.add(ComponentVocabulary.POWER);
+            names.add(ComponentVocabulary.TIME);
+            names.add(ComponentVocabulary.FAILED);
+            names.addAll(parameters.keySet());
             Formula members = PinQuantities.bind(read, pins, written -> model.name() + ": '" + written + "'");
             Formula bound = PinQuantities.bindCurrents(members, pins, pin -> new Formula.Slot(pins.indexOf(pin), pin + ".current"));
             RealFunction function = RealCompiler.compile(bound, Symbols.withSlots(pins.size(), names, List.of()), expression);
+            boolean moment = !PinQuantities.readsCurrent(members) && readsOnlySteps(model, named, pins);
             return new PartExpression(element.id(), function, pinNodes, pins, states,
-                    parameters.values().stream().mapToDouble(Double::doubleValue).toArray(), readsOnlySteps(model, named, pins));
+                    parameters.values().stream().mapToDouble(Double::doubleValue).toArray(), moment);
         } catch (RuntimeException unreadable) {
             throw new IllegalArgumentException(model.name() + ": '" + expression + "' does not read: " + unreadable.getMessage(), unreadable);
         }
@@ -125,7 +121,7 @@ final class PartExpression {
      * value at a moment: averaged with another, a space and an 'l' make a 'T'.
      */
     private static boolean readsOnlySteps(ComponentModel model, Set<String> named, List<String> pins) {
-        if (named.contains(ComponentVocabulary.POWER) || named.contains(ComponentVocabulary.TIME) || named.contains("current")
+        if (named.contains(ComponentVocabulary.POWER) || named.contains(ComponentVocabulary.TIME)
                 || pins.stream().anyMatch(named::contains)) {
             return false;
         }
