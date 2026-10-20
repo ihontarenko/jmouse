@@ -338,11 +338,27 @@ final class DeclarationReader {
         return new Block.State(reading.blockLines("state").stream().map(this::stateVariable).toList());
     }
 
-    /** {@code x = 1 continuous "…"}, {@code stored = X discrete}. */
+    /** {@code x = 1 continuous "…"}, {@code stored = X discrete}, {@code memory[256] = 0 discrete}. */
     private StateVariable stateVariable(Reading.Line line) {
-        int nature = line.indexOf(2, "continuous", "discrete");
-        if (line.size() < 4 || !line.value(1).equals("=") || nature < 0) {
+        // A row of states writes its length after its name: the rest of the line reads on as for one state.
+        int length = 0;
+        int equals = 1;
+        if (line.size() > 4 && line.value(1).equals("[")) {
+            if (!line.value(2).matches("\\d+") || !line.value(3).equals("]")) {
+                throw line.refusal("a row of states is 'name[length] = initial discrete', as 'memory[256] = 0 discrete'");
+            }
+            length = Integer.parseInt(line.value(2));
+            if (length < 1 || length > 65536) {
+                throw line.refusal("a row of states has 1 to 65536 slots, not " + length);
+            }
+            equals = 4;
+        }
+        int nature = line.indexOf(equals + 1, "continuous", "discrete");
+        if (line.size() < equals + 3 || !line.value(equals).equals("=") || nature < 0) {
             throw line.refusal("a state is 'name = initial continuous|discrete [\"description\"]'");
+        }
+        if (length > 0 && !line.value(nature).equals("discrete")) {
+            throw line.refusal(nature, "a row of states is discrete: the equations read numbers, not rows");
         }
         boolean described = line.isString(line.size() - 1);
         String description = described ? reading.literal(line.get(line.size() - 1)) : "";
@@ -354,7 +370,7 @@ final class DeclarationReader {
             }
             range = Optional.of(Values.range(line, nature + 2, end));
         }
-        return new StateVariable(line.value(0), line.text(2, nature), line.value(nature).equals("discrete"), range, description);
+        return new StateVariable(line.value(0), line.text(equals + 1, nature), line.value(nature).equals("discrete"), range, description, length);
     }
 
     // ─── equations ──────────────────────────────────────────────────────────────────────────────────
@@ -592,24 +608,66 @@ final class DeclarationReader {
     // ─── pins and internal nodes ────────────────────────────────────────────────────────────────────
 
     Block.Pins pins() {
-        return new Block.Pins(reading.blockLines("pins").stream().map(this::pin).toList());
+        List<Pin> pins = new ArrayList<>();
+        List<Block.Bus> buses = new ArrayList<>();
+        for (Reading.Line line : reading.blockLines("pins")) {
+            if (line.size() > 1 && line.value(1).equals("[")) {
+                buses.add(bus(line, pins));
+            } else {
+                pins.add(pin(line, line.value(0), 1));
+            }
+        }
+        return new Block.Pins(pins, buses);
     }
 
-    /** {@code out analog output 1 7 "output"}, {@code clk digital input 3 11 edge}. */
-    private Pin pin(Reading.Line line) {
+    /**
+     * {@code q[0..7] digital output 15, 1, 2, 3, 4, 5, 6, 7 "parallel outputs"}: a pin for each bit — {@code q_0} …
+     * {@code q_7}, in the order the range is written —, each with its package number, all of one nature. A bus takes as
+     * many numbers as it has bits, or none; the bits of one bus are never split across units.
+     */
+    private Block.Bus bus(Reading.Line line, List<Pin> pins) {
         String name = line.value(0);
+        int range = line.indexOf(2, "..");
+        if (range != 3 || line.size() < 6 || !line.value(5).equals("]") || !line.value(2).matches("\\d+") || !line.value(4).matches("\\d+")) {
+            throw line.refusal("a bus is written 'name[first..last] nature …', as 'q[0..7] digital output 15, 1, 2, …'");
+        }
+        int first = Integer.parseInt(line.value(2));
+        int last = Integer.parseInt(line.value(4));
+        int width = Math.abs(last - first) + 1;
+        if (width < 2 || width > 32) {
+            throw line.refusal("a bus has 2 to 32 bits, not " + width);
+        }
+        Pin template = pin(line, name, 6);
+        if (!template.numbers().isEmpty() && template.numbers().size() != width) {
+            throw line.refusal("bus '" + name + "' has " + width + " bits and " + template.numbers().size()
+                    + " package numbers: write one number for each bit, in the order of its bits, or none");
+        }
+        int step = last >= first ? 1 : -1;
+        List<String> bits = new ArrayList<>();
+        for (int position = 0; position < width; position++) {
+            String bit = name + "_" + (first + position * step);
+            List<Integer> number = template.numbers().isEmpty() ? List.of() : List.of(template.numbers().get(position));
+            pins.add(new Pin(bit, number, template.nature(), template.output(), template.attributes(), template.description()));
+            bits.add(bit);
+        }
+        return new Block.Bus(name, bits);
+    }
+
+    /** {@code out analog output 1 7 "output"}, {@code clk digital input 3 11 edge}: its words from {@code from} on. */
+    private Pin pin(Reading.Line line, String name, int from) {
         List<Integer> numbers = new ArrayList<>();
         List<String> attributes = new ArrayList<>();
         PinNature nature = null;
         boolean output = false;
         String description = "";
-        for (int index = 1; index < line.size(); index++) {
+        for (int index = from; index < line.size(); index++) {
             String word = line.value(index);
             if (line.isString(index)) {
                 description = reading.literal(line.get(index));
             } else if (word.matches("\\d+")) {
                 numbers.add(Integer.parseInt(word));
-            } else {
+            } else if (!word.equals(",")) {
+                // A comma only parts numbers — '15, 1, 2' is three of them —; every other word says something.
                 switch (word) {
                     case "analog" -> nature = PinNature.ANALOG;
                     case "digital" -> nature = PinNature.DIGITAL;

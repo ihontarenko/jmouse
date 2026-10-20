@@ -131,7 +131,18 @@ public sealed interface Block {
     }
 
     /** {@code x = 1 continuous "…"}; a discrete state is written only by behaviour. Initial values may be {@code X}. */
-    record StateVariable(String name, SourceText initial, boolean discrete, Optional<Range> range, String description) {
+    /**
+     * One state: {@code x = 1 continuous}, {@code stored = X discrete}, or a row of them — {@code memory[256] = 0
+     * discrete}, every slot starting at that value, read with {@code item(memory, i)} and written with {@code with}.
+     *
+     * @param length how many slots a row has; 0 for a single value
+     */
+    record StateVariable(String name, SourceText initial, boolean discrete, Optional<Range> range, String description, int length) {
+        public StateVariable {
+            if (length < 0) {
+                throw new IllegalArgumentException("A row of states has a positive length.");
+            }
+        }
     }
 
     record State(List<StateVariable> variables) implements Block {
@@ -369,9 +380,28 @@ public sealed interface Block {
         }
     }
 
-    record Pins(List<Pin> pins) implements Block {
+    /**
+     * {@code q[0..7] digital output 15, 1, 2, 3, 4, 5, 6, 7}: pins that are one value, written once — each a pin of its
+     * own ({@code q_0} … {@code q_7}), and together a number a behaviour reads and drives at once, its first pin the
+     * least significant bit.
+     *
+     * @param pins its pins, in the order of its bits
+     */
+    record Bus(String name, List<String> pins) {
+        public Bus {
+            pins = List.copyOf(pins);
+        }
+    }
+
+    /** Every pin, the bits of each bus among them, and the buses they make. */
+    record Pins(List<Pin> pins, List<Bus> buses) implements Block {
         public Pins {
             pins = List.copyOf(pins);
+            buses = List.copyOf(buses);
+        }
+
+        public Pins(List<Pin> pins) {
+            this(pins, List.of());
         }
 
         public String name() {

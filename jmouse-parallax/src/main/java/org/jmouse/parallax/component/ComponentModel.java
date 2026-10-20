@@ -25,7 +25,8 @@ import org.jmouse.parallax.object.ObjectDefinition.CircuitElementType;
  * every part of a logic family shares.</p>
  */
 public record ComponentModel(String name, boolean family, String kind, Map<String, List<String>> header,
-                             List<String> units, List<Parameter> parameters, List<Pin> pins, List<String> nodes, List<String> digitalNodes,
+                             List<String> units, List<Parameter> parameters, List<Pin> pins, Map<String, List<String>> buses,
+                             List<String> nodes, List<String> digitalNodes,
                              List<String> symbol, List<SubcircuitLine> subcircuit, List<String> formulas, List<State> states,
                              Map<String, String> locals, Map<String, ValueType> localTypes, List<Equation> equations,
                              ScriptNode behaviour,
@@ -38,6 +39,8 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         units = List.copyOf(units);
         parameters = List.copyOf(parameters);
         pins = List.copyOf(pins);
+        // Each bus of pins, its bits in order, the first the least significant: what a behaviour reads as one number.
+        buses = orderedCopy(buses);
         nodes = List.copyOf(nodes);
         digitalNodes = List.copyOf(digitalNodes);
         symbol = List.copyOf(symbol);
@@ -81,7 +84,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
 
     /** This model with another heat law: the one a part warms by when it writes none of its own. */
     ComponentModel withHeat(Heat law) {
-        return new ComponentModel(name, family, kind, header, units, parameters, pins, nodes, digitalNodes, symbol, subcircuit,
+        return new ComponentModel(name, family, kind, header, units, parameters, pins, buses, nodes, digitalNodes, symbol, subcircuit,
                 formulas, states, locals, localTypes, equations, behaviour, expectations, displays, measures, leads,
                 displayUnits, displayCaptions, law);
     }
@@ -106,6 +109,7 @@ public record ComponentModel(String name, boolean family, String kind, Map<Strin
         parameters.forEach(parameter -> merged.put(parameter.name(), parameter));
         return new ComponentModel(name, false, kind.isEmpty() ? base.kind : kind, header,
                 units.isEmpty() ? base.units : units, List.copyOf(merged.values()), pins.isEmpty() ? base.pins : pins,
+                pins.isEmpty() ? base.buses : buses,
                 behaves ? nodes : base.nodes, behaves ? digitalNodes : base.digitalNodes,
                 symbol.isEmpty() ? base.symbol : symbol, behaves ? subcircuit : base.subcircuit,
                 behaves ? formulas : base.formulas, behaves ? states : base.states, behaves ? locals : base.locals,

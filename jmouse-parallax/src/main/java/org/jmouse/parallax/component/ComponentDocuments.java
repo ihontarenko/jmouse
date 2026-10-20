@@ -209,8 +209,10 @@ public final class ComponentDocuments {
         document.block(Block.Nodes.class).ifPresent(block -> block.nodes()
                 .forEach(node -> (node.digital() ? digitalNodes : nodes).add(node.name())));
         List<State> states = document.block(Block.State.class).map(block -> block.variables().stream()
-                .map(variable -> new State(variable.name(), initial(variable.initial().text(), document),
+                .map(variable -> new State(variable.name(), initialOf(variable, document),
                         variable.discrete(), variable.description())).toList()).orElse(List.of());
+        Map<String, List<String>> buses = new LinkedHashMap<>();
+        document.block(Block.Pins.class).ifPresent(block -> block.buses().forEach(bus -> buses.put(bus.name(), bus.pins())));
         Map<String, String> locals = new LinkedHashMap<>();
         Map<String, ValueType> localTypes = new LinkedHashMap<>();
         List<Equation> equations = new ArrayList<>();
@@ -232,7 +234,7 @@ public final class ComponentDocuments {
             }
         }));
         return new ComponentModel(document.title(), document.kind() == Kind.FAMILY, document.type().orElse(""),
-                header(document, library), units, parameters, pins, nodes, digitalNodes, symbol(document),
+                header(document, library), units, parameters, pins, buses, nodes, digitalNodes, symbol(document, buses),
                 subcircuit(document, pins), formulas(document, library), states, locals, localTypes, equations,
                 document.block(Block.Behaviour.class).map(Block.Behaviour::script).orElse(null),
                 expectations(document, values), displays(document), measures(document), leads(document, pins),
@@ -392,6 +394,21 @@ public final class ComponentDocuments {
     }
 
     /** A number, {@code X}, {@code Z}, or a list of them: what a state starts as. */
+    /** Where a state starts: its value, or — a row of states — that value in every slot. */
+    private static Object initialOf(Block.StateVariable variable, ExperienceDocument document) {
+        Object value = initial(variable.initial().text(), document);
+        if (variable.length() == 0) {
+            return value;
+        }
+        if (value instanceof Object[]) {
+            throw new IllegalArgumentException(document.title() + ": a row of states '" + variable.name()
+                    + "' starts every slot at one value, not at a list");
+        }
+        Object[] row = new Object[variable.length()];
+        Arrays.fill(row, value);
+        return row;
+    }
+
     private static Object initial(String text, ExperienceDocument document) {
         String written = text.strip();
         if (written.startsWith("[") && written.endsWith("]")) {
@@ -415,13 +432,28 @@ public final class ComponentDocuments {
      * {@code left trig, thr, ctrl}). A part drawn from a symbol document ({@code symbol uses …}) has none: its drawing
      * is that document's.
      */
-    private static List<String> symbol(ExperienceDocument document) {
+    private static List<String> symbol(ExperienceDocument document, Map<String, List<String>> buses) {
         List<String> lines = new ArrayList<>();
         document.block(Block.Symbol.class).ifPresent(symbol -> symbol.shape().ifPresent(shape -> {
             lines.add(shape);
-            symbol.sides().forEach((side, entries) -> lines.add(side + " " + String.join(", ", entries)));
+            symbol.sides().forEach((side, entries) -> lines.add(side + " " + String.join(", ", entries.stream()
+                    .flatMap(entry -> busEntries(entry, buses).stream()).toList())));
         }));
         return lines;
+    }
+
+    /**
+     * One entry of a symbol's side, a bus named in it written out as its bits: {@code right q} draws {@code q_0} … {@code
+     * q_7}, each with the entry's marks ({@code q bubble} draws a bubble on every bit).
+     */
+    private static List<String> busEntries(String entry, Map<String, List<String>> buses) {
+        String[] words = entry.strip().split("\\s+", 2);
+        List<String> bits = buses.get(words[0]);
+        if (bits == null) {
+            return List.of(entry);
+        }
+        String marks = words.length > 1 ? " " + words[1] : "";
+        return bits.stream().map(bit -> bit + marks).toList();
     }
 
     // ─── internal netlist ───────────────────────────────────────────────────────────────────────────

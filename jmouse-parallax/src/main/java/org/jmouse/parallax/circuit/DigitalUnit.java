@@ -200,6 +200,8 @@ final class DigitalUnit {
         Map<String, Object> working = EventSimulation.copy(before);
         working.forEach(context::setValue);
         model.pins().forEach((name, binding) -> context.setValue(name, pinValue(name, binding, state)));
+        // A bus reads as one number, its first pin the least significant bit; one bit not known makes the whole unknown.
+        model.model().buses().forEach((name, bits) -> context.setValue(name, busValue(bits.stream().map(context::getValue).toList())));
         model.internalNodes().forEach((name, node) -> context.setValue(name, voltage(node, state)));
         model.internalDigitalNodes().forEach((name, node) -> context.setValue(name,
                 simulation.nodeLevels.getOrDefault(node, LogicLevel.UNKNOWN).scriptValue()));
@@ -223,6 +225,71 @@ final class DigitalUnit {
             }
         }
         return written;
+    }
+
+    /**
+     * A bus as one value: the number its bits make, bit 0 the first; {@code Z} when every bit is released, {@code X} when
+     * any bit is not a level the number can hold.
+     */
+    static Object busValue(List<?> levels) {
+        long value = 0;
+        boolean released = true;
+        boolean known = true;
+        for (int position = 0; position < levels.size(); position++) {
+            Object level = levels.get(position);
+            released &= LogicLevel.of(level) == LogicLevel.RELEASED;
+            if (level instanceof Number number) {
+                value |= (number.doubleValue() >= 0.5 ? 1L : 0L) << position;
+            } else {
+                known = false;
+            }
+        }
+        if (released) {
+            return LogicLevel.RELEASED.scriptValue();
+        }
+        return known ? LogicFunctions.narrowest(value) : LogicLevel.UNKNOWN.scriptValue();
+    }
+
+    /**
+     * Drives one output or internal node, or a bus of them at once: a number puts its bits on the bus's pins, bit 0 on the
+     * first; a row of levels puts each slot on its pin; {@code X} or {@code Z} puts that level on every pin.
+     */
+    void drive(String target, Object value, double delay) {
+        double at = simulation.now + Math.max(delay, 0);
+        DigitalDriver driver = drivers.get(target);
+        if (driver != null) {
+            driver.schedule(at, LogicLevel.of(value));
+            return;
+        }
+        List<String> bits = model.model().buses().get(target);
+        if (bits == null) {
+            throw new IllegalArgumentException(model.model().name() + ": drive('" + target + "') names no digital output, internal node or bus.");
+        }
+        boolean isRow = (value != null && value.getClass().isArray()) || value instanceof List<?>;
+        Object[] row = isRow ? arrayOf(value) : null;
+        if (row != null && row.length != bits.size()) {
+            throw new IllegalArgumentException(model.model().name() + ": bus '" + target + "' has " + bits.size() + " bits, the row driven on it "
+                    + row.length + ".");
+        }
+        for (int position = 0; position < bits.size(); position++) {
+            DigitalDriver bit = drivers.get(bits.get(position));
+            if (bit == null) {
+                throw new IllegalArgumentException(model.model().name() + ": bus '" + target + "' has an input bit, " + bits.get(position)
+                        + ": only a bus of outputs is driven.");
+            }
+            bit.schedule(at, bitLevel(value, row, position));
+        }
+    }
+
+    /** The level one bit of a bus is driven to: a number's bit, a row's slot, or the one level the whole bus is given. */
+    private static LogicLevel bitLevel(Object value, Object[] row, int position) {
+        if (row != null) {
+            return LogicLevel.of(row[position]);
+        }
+        if (value instanceof Number number) {
+            return ((number.longValue() >>> position) & 1) == 1 ? LogicLevel.HIGH : LogicLevel.LOW;
+        }
+        return LogicLevel.of(value);
     }
 
     Object pinValue(String name, Netlist.PinBinding binding, double[] state) {
@@ -249,6 +316,11 @@ final class DigitalUnit {
                 inputs.put(name, level);
                 lastChange.put(name, simulation.now);
                 events.add(new DigitalEvent(this, DigitalEvent.Kind.CHANGE, name));
+                // A bit of a bus changing changes the bus: 'on change "address"' hears any of its bits.
+                String bus = busOf(name);
+                if (bus != null && events.stream().noneMatch(event -> event.kind() == DigitalEvent.Kind.CHANGE && event.subject().equals(bus))) {
+                    events.add(new DigitalEvent(this, DigitalEvent.Kind.CHANGE, bus));
+                }
                 if (level == LogicLevel.HIGH) {
                     events.add(new DigitalEvent(this, DigitalEvent.Kind.RISING, name));
                 } else if (level == LogicLevel.LOW) {
@@ -257,6 +329,16 @@ final class DigitalUnit {
             }
         }
         return events;
+    }
+
+    /** The bus a pin is a bit of, or null. */
+    private String busOf(String pin) {
+        for (Map.Entry<String, List<String>> bus : model.model().buses().entrySet()) {
+            if (bus.getValue().contains(pin)) {
+                return bus.getKey();
+            }
+        }
+        return null;
     }
 
     boolean inputsWouldChange(double[] state) {

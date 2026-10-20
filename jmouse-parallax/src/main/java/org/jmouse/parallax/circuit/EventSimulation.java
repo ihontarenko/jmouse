@@ -53,6 +53,7 @@ final class EventSimulation {
     EventSimulation(Netlist netlist) {
         extensions.importExtension(new ScriptExtension());
         extensions.importExtension(new SimulatorFunctions.Functions());
+        extensions.importExtension(new LogicFunctions());
         netlist.digitalNodes().forEach(node -> {
             driversByNode.put(node, new ArrayList<>());
             nodeLevels.put(node, LogicLevel.RELEASED);

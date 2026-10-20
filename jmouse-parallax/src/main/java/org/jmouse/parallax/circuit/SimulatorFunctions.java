@@ -29,13 +29,7 @@ final class SimulatorFunctions {
         public List<Function> getFunctions() {
             return List.of(
                     function("drive", (arguments, scope) -> {
-                        String pin = String.valueOf(arguments.get(0));
-                        DigitalDriver driver = scope.unit().drivers.get(pin);
-                        if (driver == null) {
-                            throw new IllegalArgumentException(scope.unit().model.model().name() + ": drive('" + pin + "') names no digital output or internal node.");
-                        }
-                        double delay = arguments.size() > 2 ? number(arguments.get(2)) : 0;
-                        driver.schedule(scope.unit().simulation.now + Math.max(delay, 0), LogicLevel.of(arguments.get(1)));
+                        scope.unit().drive(String.valueOf(arguments.get(0)), arguments.get(1), arguments.size() > 2 ? number(arguments.get(2)) : 0);
                         return null;
                     }),
                     function("schedule", (arguments, scope) -> {
