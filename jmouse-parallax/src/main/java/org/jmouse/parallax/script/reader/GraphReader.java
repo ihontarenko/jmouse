@@ -229,7 +229,7 @@ final class GraphReader {
         Optional<Integer> color = Optional.empty();
         if (end >= 3 && line.checkValueAt(end - 2, "color")) {
             Token written = line.lookAt(end - 1);
-            int number = Values.number(written.value()).map(Double::intValue)
+            int number = JmxValues.number(written.value()).map(Double::intValue)
                     .orElseThrow(() -> reading.refusal(first, "a colour is a number, 1 to 6"));
             if (number < 1 || number > 6) {
                 throw reading.refusal(written, "a colour is 1 to 6");

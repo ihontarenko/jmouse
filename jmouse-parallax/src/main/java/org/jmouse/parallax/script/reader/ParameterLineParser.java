@@ -71,7 +71,7 @@ final class ParameterLineParser extends JmxLineParser<Parameter> {
         if (cursor.isCurrent(BasicToken.T_STRING)) {
             return textParameter(name);
         }
-        Values.Written value = values.written(WORDS);
+        JmxValues.Written value = values.written(WORDS);
         Optional<Range> range = Optional.empty();
         Optional<SourceText> step = Optional.empty();
         Set<ParameterFlag> flags = EnumSet.noneOf(ParameterFlag.class);
@@ -107,7 +107,6 @@ final class ParameterLineParser extends JmxLineParser<Parameter> {
         }
         return new Parameter(name, value.expression(), value.quantity(), range, step, flags, description, listed);
     }
-
 
     /** {@code [a, b, c]}: at least two values, each an expression. */
     private List<SourceText> listed(Token in) {

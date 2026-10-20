@@ -164,43 +164,6 @@ final class Reading {
         return cursor.next();
     }
 
-    /** Line breaks, {@code ;} and comments between declarations. */
-    void skipBlank() {
-        while (!atEnd()) {
-            if (cursor.isCurrent(BasicToken.T_NEW_LINE, BasicToken.T_SEMICOLON, BasicToken.T_SOL)) {
-                cursor.next();
-            } else if (cursor.isCurrent(BasicToken.T_HASH)) {
-                skipComment();
-            } else {
-                return;
-            }
-        }
-    }
-
-    private void skipComment() {
-        while (!atEnd() && !cursor.isCurrent(BasicToken.T_NEW_LINE)) {
-            cursor.next();
-        }
-    }
-
-    /**
-     * The tokens to the end of the line, stopping before a brace or a {@code ;}; a comment ends it. The cursor is left
-     * on whatever stopped it.
-     */
-    Line line() {
-        List<Token> tokens = new ArrayList<>();
-        while (!atEnd() && !cursor.isCurrent(BasicToken.T_NEW_LINE, BasicToken.T_SEMICOLON,
-                BasicToken.T_OPEN_CURLY, BasicToken.T_CLOSE_CURLY)) {
-            if (cursor.isCurrent(BasicToken.T_HASH)) {
-                int end = cursor.current().offset();
-                skipComment();
-                return new Line(tokens, end);
-            }
-            tokens.add(cursor.next());
-        }
-        return new Line(tokens, atEnd() ? source.length() : cursor.current().offset());
-    }
-
     /** Whether the line ends where the cursor stands: a line break, a {@code ;}, a brace, a comment, the text's end. */
     boolean atLineEnd() {
         return cursor.atLineBreak() || endsLine(cursor.current());
@@ -274,7 +237,6 @@ final class Reading {
         }
     }
 
-
     /** The rest of the line from a token, as written, for a refusal to quote. */
     String lineFrom(Token token) {
         int end = token.offset();
@@ -301,13 +263,6 @@ final class Reading {
             throw refusal(keyword, "'" + what + "' takes names separated by commas");
         }
         return names;
-    }
-
-    /** {@code { line … }}: every non-blank line; the cursor ends after the closing brace. Nested braces are refused. */
-    List<Line> blockLines(String block) {
-        List<Line> lines = new ArrayList<>();
-        body(block, () -> lines.add(lineOf(block)));
-        return lines;
     }
 
     /**
@@ -359,14 +314,6 @@ final class Reading {
         return starts;
     }
 
-    /** A line of a block that holds lines: a brace there opens nothing. */
-    Line lineOf(String block) {
-        if (cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-            throw refusal("'" + block + "' holds lines, not a nested '{ … }'");
-        }
-        return line();
-    }
-
     /** The source between a block's braces, as written, for a body another language reads (jMF definitions). */
     SourceText rawBlock(String block) {
         Token open = expect(BasicToken.T_OPEN_CURLY, "'{' to open " + block);
@@ -386,183 +333,5 @@ final class Reading {
             }
         }
         throw refusal(open, "'" + block + "' is never closed");
-    }
-
-    /**
-     * A line of tokens and the offset where it ends, so an expression at its tail is cut to the comment or the line
-     * break and not to the last token's own text (a token can be shorter than what it was read from).
-     */
-    final class Line {
-
-        private final List<Token> tokens;
-        private final int         end;
-
-        Line(List<Token> tokens, int end) {
-            this.tokens = List.copyOf(tokens);
-            this.end = end;
-        }
-
-        boolean isEmpty() {
-            return tokens.isEmpty();
-        }
-
-        int size() {
-            return tokens.size();
-        }
-
-        Token get(int index) {
-            return tokens.get(index);
-        }
-
-        Token first() {
-            return tokens.getFirst();
-        }
-
-        String value(int index) {
-            return index < tokens.size() ? tokens.get(index).value() : "";
-        }
-
-        boolean isString(int index) {
-            return index < tokens.size() && Reading.this.isString(tokens.get(index));
-        }
-
-
-        /**
-         * Whether token {@code index + 1} follows token {@code index} with no space between them, so that the two are
-         * one word: {@code 74hc595}, {@code lm358@3}, {@code voltage-source}.
-         */
-        boolean joined(int index) {
-            if (index + 1 >= tokens.size()) {
-                return false;
-            }
-            return SourceReading.touches(cursor, tokens.get(index), tokens.get(index + 1))
-                    && !SEPARATORS.contains(tokens.get(index).value()) && !SEPARATORS.contains(tokens.get(index + 1).value());
-        }
-
-        /** The run of joined tokens starting at {@code from}, as one word, and where it ends. */
-        String joinedWord(int from) {
-            StringBuilder word = new StringBuilder();
-            int index = from;
-            while (index < tokens.size()) {
-                int stop = index + 1 < tokens.size() ? tokens.get(index + 1).offset() : end;
-                word.append(source, tokens.get(index).offset(), stop);
-                if (!joined(index)) {
-                    break;
-                }
-                index++;
-            }
-            return word.toString().strip();
-        }
-
-        /** Where the run of joined tokens starting at {@code from} ends (exclusive). */
-        int joinedEnd(int from) {
-            int index = from;
-            while (joined(index)) {
-                index++;
-            }
-            return index + 1;
-        }
-
-        /** The words of a range of tokens, strings unquoted. */
-        List<String> words(int from, int to) {
-            return tokens.subList(from, to).stream()
-                    .map(token -> Reading.this.isString(token) ? literal(token) : token.value()).toList();
-        }
-
-        List<String> words() {
-            return words(0, tokens.size());
-        }
-
-        /** Names separated by commas from token {@code from}, each possibly hyphenated or led by digits. */
-        List<String> names(int from) {
-            return names(from, tokens.size());
-        }
-
-        /** Names separated by commas over tokens {@code [from, to)}. */
-        List<String> names(int from, int to) {
-            List<String> names = new ArrayList<>();
-            int index = from;
-            while (index < to) {
-                if (value(index).equals(",")) {
-                    index++;
-                    continue;
-                }
-                names.add(joinedWord(index));
-                index = joinedEnd(index);
-            }
-            return names;
-        }
-
-        /** The source text of tokens {@code [from, to)}, cut out of the source. */
-        SourceText text(int from, int to) {
-            if (from >= to) {
-                int at = from < tokens.size() ? tokens.get(from).offset() : end;
-                return Reading.this.text(at, at);
-            }
-            int stop = to < tokens.size() ? tokens.get(to).offset() : end;
-            return Reading.this.text(tokens.get(from).offset(), stop);
-        }
-
-        SourceText text(int from) {
-            return text(from, tokens.size());
-        }
-
-        /** The first token at parenthesis depth zero, at or after {@code from}, whose word is one of {@code words}. */
-        int indexOf(int from, String... words) {
-            List<String> wanted = List.of(words);
-            int depth = 0;
-            for (int index = from; index < tokens.size(); index++) {
-                Token token = tokens.get(index);
-                if (token.type() == BasicToken.T_OPEN_PAREN || token.type() == BasicToken.T_OPEN_BRACKET) {
-                    depth++;
-                } else if (token.type() == BasicToken.T_CLOSE_PAREN || token.type() == BasicToken.T_CLOSE_BRACKET) {
-                    depth--;
-                } else if (depth == 0 && !Reading.this.isString(token) && wanted.contains(token.value())) {
-                    return index;
-                }
-            }
-            return -1;
-        }
-
-        /** Positions of the commas at depth zero between {@code from} and {@code to}. */
-        List<Integer> commas(int from, int to) {
-            List<Integer> commas = new ArrayList<>();
-            int depth = 0;
-            for (int index = from; index < to; index++) {
-                BasicToken type = tokens.get(index).type() instanceof BasicToken basic ? basic : null;
-                if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
-                    depth++;
-                } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
-                    depth--;
-                } else if (depth == 0 && type == BasicToken.T_COMMA) {
-                    commas.add(index);
-                }
-            }
-            return commas;
-        }
-
-        /** The index of the parenthesis that closes the one at {@code open}. */
-        int closing(int open) {
-            int depth = 0;
-            for (int index = open; index < tokens.size(); index++) {
-                if (tokens.get(index).type() == BasicToken.T_OPEN_PAREN) {
-                    depth++;
-                } else if (tokens.get(index).type() == BasicToken.T_CLOSE_PAREN && --depth == 0) {
-                    return index;
-                }
-            }
-            throw refusal(open, "'(' is never closed on this line");
-        }
-
-        ExperienceParseException refusal(String detail) {
-            return Reading.this.refusal(tokens.isEmpty() ? cursor.current() : tokens.getFirst(), detail);
-        }
-
-        ExperienceParseException refusal(int index, String detail) {
-            if (tokens.isEmpty()) {
-                return refusal(detail);
-            }
-            return Reading.this.refusal(tokens.get(Math.max(0, Math.min(index, tokens.size() - 1))), detail);
-        }
     }
 }

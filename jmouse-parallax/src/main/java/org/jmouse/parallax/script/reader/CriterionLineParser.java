@@ -43,9 +43,9 @@ final class CriterionLineParser extends JmxLineParser<Criterion> {
                 }
                 boolean relative = line.checkValueAt(line.remaining() - 1, "%");
                 cursor.next();
-                Values.Written typical = values.written(TOLERANCE);
+                JmxValues.Written typical = values.written(TOLERANCE);
                 cursor.shift(2);
-                Values.Written tolerance = values.written(JmxValues.LINE);
+                JmxValues.Written tolerance = values.written(JmxValues.LINE);
                 return end(new Criterion(CriterionKind.NEAR, Optional.of(typical.amount()), Optional.of(tolerance.amount()),
                         relative, Optional.empty(), Optional.empty(), null));
             }
@@ -55,12 +55,12 @@ final class CriterionLineParser extends JmxLineParser<Criterion> {
                     throw reading.refusal(first, "'within' is 'within minimum .. maximum'");
                 }
                 cursor.next();
-                Optional<Values.Written> minimum = dots == 1 ? Optional.empty() : Optional.of(values.written(JmxValues.LINE));
+                Optional<JmxValues.Written> minimum = dots == 1 ? Optional.empty() : Optional.of(values.written(JmxValues.LINE));
                 cursor.ensure(BasicToken.T_DOUBLE_DOT);
-                Optional<Values.Written> maximum = reading.atLineEnd() ? Optional.empty()
+                Optional<JmxValues.Written> maximum = reading.atLineEnd() ? Optional.empty()
                         : Optional.of(values.written(JmxValues.LINE));
                 return end(new Criterion(CriterionKind.WITHIN, Optional.empty(), Optional.empty(), false,
-                        minimum.map(Values.Written::amount), maximum.map(Values.Written::amount), null));
+                        minimum.map(JmxValues.Written::amount), maximum.map(JmxValues.Written::amount), null));
             }
             case "is" -> {
                 StringBuilder words = new StringBuilder();

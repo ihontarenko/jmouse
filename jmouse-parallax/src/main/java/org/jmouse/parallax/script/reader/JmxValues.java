@@ -11,6 +11,7 @@ import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.QuantityParser;
 import org.jmouse.formula.el.FormulaExtensionContainer;
+import org.jmouse.parallax.script.Amount;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceParseException;
 import org.jmouse.parallax.script.SourceText;
@@ -37,6 +38,19 @@ final class JmxValues {
     /** Nothing but the end of the line ends the value. */
     static final Boundary LINE = (token, after, depth) -> false;
 
+    /** A value as written and, when it is a number with at most its unit, that number in SI with its unit. */
+    record Written(SourceText expression, Optional<Quantity> quantity) {
+
+        Amount amount() {
+            return new Amount(expression, quantity);
+        }
+    }
+
+    /** A plain number as one token writes it — {@code 3}, {@code -0.5}, {@code 1e-9} —; empty for anything else. */
+    static Optional<Double> number(String written) {
+        return Quantity.parse(written).filter(quantity -> quantity.unit().isEmpty()).map(Quantity::value);
+    }
+
     private final Reading reading;
     private final ParserContext context;
     private final QuantityParser quantities = new QuantityParser();
@@ -54,7 +68,7 @@ final class JmxValues {
                 && after.type() != BasicToken.T_OPEN_PAREN;
     }
 
-    Values.Written written(Set<String> next) {
+    Written written(Set<String> next) {
         return written(words(next));
     }
 
@@ -64,7 +78,7 @@ final class JmxValues {
      *
      * @param until where the line's grammar takes over after the value
      */
-    Values.Written written(Boundary until) {
+    Written written(Boundary until) {
         TokenCursor cursor = reading.cursor;
         TokenCursor.Savepoint start = cursor.savepoint();
         SourceText expression = expression(until);
@@ -79,7 +93,7 @@ final class JmxValues {
         if (quantity.isPresent() && !quantity.get().unit().isEmpty()) {
             expression = reading.text(first.offset(), unitStart.offset());
         }
-        return new Values.Written(expression, quantity);
+        return new Written(expression, quantity);
     }
 
     /**
@@ -89,7 +103,7 @@ final class JmxValues {
      */
     double quantity(Boundary until) {
         Token from = reading.cursor.current();
-        Values.Written written = written(until);
+        Written written = written(until);
         return written.quantity().orElseThrow(() -> reading.refusal(from,
                 "'" + written.expression().text() + "' must be a number with an optional unit")).value();
     }

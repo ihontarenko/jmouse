@@ -637,7 +637,7 @@ final class SymbolReader {
                 throw reading.refusal(token, "a drawing's value is a number, an input, a word such as 'burned' or an "
                         + "expression of them — not a text in quotes");
             }
-            Optional<Double> number = Values.number(token.value());
+            Optional<Double> number = JmxValues.number(token.value());
             if (number.isPresent()) {
                 int unitTokens = unitAfter(tokens, index + 1);
                 if (unitTokens > 0) {

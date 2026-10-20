@@ -1,6 +1,5 @@
 package org.jmouse.parallax.script.reader;
 
-import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.type.ValueType;
@@ -9,7 +8,6 @@ import org.jmouse.parallax.script.Block.Equation;
 import org.jmouse.parallax.script.Block.EquationForm;
 import org.jmouse.parallax.script.Block.Pin;
 import org.jmouse.parallax.script.ElectricalTypes;
-import org.jmouse.parallax.script.ExperienceParseException;
 import org.jmouse.parallax.script.QuantityType;
 import org.jmouse.parallax.script.SourceText;
 import org.jmouse.units.Dimension;

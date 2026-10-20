@@ -113,7 +113,6 @@ final class EquationLineParser extends JmxLineParser<Equation> {
         return expression;
     }
 
-
     /** The words of tokens {@code [from, to)} of the line, written together. */
     private static String joined(TokenCursor line, int from, int to) {
         StringBuilder words = new StringBuilder();
