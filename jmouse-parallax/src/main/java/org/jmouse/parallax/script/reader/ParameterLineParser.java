@@ -143,7 +143,7 @@ final class ParameterLineParser extends JmxLineParser<Parameter> {
     private Parameter textParameter(String name) {
         TokenCursor cursor = reading.cursor;
         Token text = cursor.next();
-        SourceText written = reading.text(text.offset(), reading.endOfRead());
+        SourceText written = reading.text(text.offset(), reading.cursor.endOfRead());
         List<SourceText> choices = List.of();
         if (!reading.atLineEnd() && cursor.current().value().equals("in")) {
             Token in = cursor.next();
@@ -161,7 +161,7 @@ final class ParameterLineParser extends JmxLineParser<Parameter> {
                     throw reading.refusal(choice, TEXT_SHAPE + ": each choice is one text in quotes");
                 }
                 cursor.next();
-                choices.add(reading.text(choice.offset(), reading.endOfRead()));
+                choices.add(reading.text(choice.offset(), reading.cursor.endOfRead()));
                 if (cursor.isCurrent(BasicToken.T_CLOSE_BRACKET)) {
                     cursor.next();
                     break;

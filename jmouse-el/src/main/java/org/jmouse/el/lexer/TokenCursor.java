@@ -205,6 +205,55 @@ public interface TokenCursor extends Streamable<Token> {
     }
 
     /**
+     * Whether the cursor stands at a line break or at the end of the text.
+     *
+     * @return {@code true} when the line it is on has nothing left
+     */
+    default boolean atLineBreak() {
+        return !hasNext() || isCurrent(BasicToken.T_NEW_LINE, BasicToken.T_EOL);
+    }
+
+    /**
+     * Returns where what has been read ends in the source: the start of the token the cursor stands on, or the end of
+     * the text when it stands at the end — so a parser cuts what it read out of the source as written.
+     *
+     * @return the offset in the source
+     */
+    default int endOfRead() {
+        if (!hasNext() || isCurrent(BasicToken.T_EOL)) {
+            TokenizableSource source = source();
+            return source == null ? peek().offset() : source.length();
+        }
+        return peek().offset();
+    }
+
+    /**
+     * Returns the text of the token at the specified lookahead offset — {@code ""} where there is none — without
+     * consuming anything.
+     *
+     * @param offset the offset from the current position (0 means current token)
+     * @return the token's text
+     */
+    default String valueAt(int offset) {
+        Token token = lookAt(offset);
+        return token == null || token.type() == BasicToken.T_EOL ? "" : token.value();
+    }
+
+    /**
+     * Checks whether the token at the specified lookahead offset is written as one of these texts. A dialect matches
+     * its words by text, not by type: the lexer gives {@code =} the type it gives {@code eq}, and a word a language
+     * leaves untyped — {@code step}, {@code discrete} — has no type of its own to check.
+     *
+     * @param offset the offset from the current position (0 means current token)
+     * @param values the texts it may be written as
+     * @return {@code true} when it is written as one of them and is not a text in quotes
+     */
+    default boolean checkValueAt(int offset, String... values) {
+        Token token = lookAt(offset);
+        return token != null && token.type() != BasicToken.T_STRING && List.of(values).contains(token.value());
+    }
+
+    /**
      * Returns the current token without consuming it.
      * Alias for peek().
      *

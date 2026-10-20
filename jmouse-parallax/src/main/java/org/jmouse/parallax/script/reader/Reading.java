@@ -1,6 +1,7 @@
 package org.jmouse.parallax.script.reader;
 
 import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.BoundedTokenCursor;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.support.SourceReading;
@@ -24,6 +25,9 @@ import java.util.function.Supplier;
  * the source, so what jMF compiles is what the author wrote.</p>
  */
 final class Reading {
+
+    /** What ends a joined word even without a space: {@code units A, B} is two names, not {@code "A,"}. */
+    static final Set<String> SEPARATORS = Set.of(",", ";", "=", "(", ")", "[", "]", "{", "}", ":");
 
     final TokenCursor   cursor;
     final ParserContext context;
@@ -199,7 +203,7 @@ final class Reading {
 
     /** Whether the line ends where the cursor stands: a line break, a {@code ;}, a brace, a comment, the text's end. */
     boolean atLineEnd() {
-        return atEnd() || endsLine(cursor.current());
+        return cursor.atLineBreak() || endsLine(cursor.current());
     }
 
     /** Whether a token ends a line: a line break, a {@code ;}, a brace, a comment, the text's end. */
@@ -209,10 +213,34 @@ final class Reading {
                 || token.type() == BasicToken.T_HASH || token.type() == BasicToken.T_EOL;
     }
 
-    /** Where what has been read ends in the source: the next token's start, or the text's end. */
-    int endOfRead() {
-        return atEnd() ? source.length() : cursor.current().offset();
+    // ─── the line the cursor stands on ──────────────────────────────────────────────────────────────
+
+    /**
+     * The cursor, ending where the line does: its {@code remaining()} is how many tokens the line has left, its
+     * {@code lookAt} answers the line's end past them. Reading through it moves the cursor itself.
+     */
+    TokenCursor lineView() {
+        return new BoundedTokenCursor(cursor, (token, next, depth) -> endsLine(token));
     }
+
+    /** A refusal at the token {@code ahead} of the cursor, held to the line: past its end, at its last token. */
+    ExperienceParseException refusalAhead(int ahead, String detail) {
+        int length = lineView().remaining();
+        return refusal(length == 0 ? cursor.current() : cursor.lookAt(Math.max(0, Math.min(ahead, length - 1))), detail);
+    }
+
+    /** Steps over a run of tokens written with nothing between them, and answers it as one word: {@code open-drain}. */
+    String joinedWord() {
+        return SourceReading.touchingWord(cursor, SEPARATORS);
+    }
+
+    /** Steps to the end of the line. */
+    void skipLine() {
+        while (!atLineEnd()) {
+            cursor.next();
+        }
+    }
+
 
     /** The rest of the line from a token, as written, for a refusal to quote. */
     String lineFrom(Token token) {
@@ -346,8 +374,6 @@ final class Reading {
             return index < tokens.size() && Reading.this.isString(tokens.get(index));
         }
 
-        /** What ends a joined word even without a space: {@code units A, B} is two names, not {@code "A,"}. */
-        private static final Set<String> SEPARATORS = Set.of(",", ";", "=", "(", ")", "[", "]", "{", "}", ":");
 
         /**
          * Whether token {@code index + 1} follows token {@code index} with no space between them, so that the two are

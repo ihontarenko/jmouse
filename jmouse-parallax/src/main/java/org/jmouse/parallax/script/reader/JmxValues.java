@@ -74,7 +74,7 @@ final class JmxValues {
         } catch (RuntimeException unreadable) {
             throw reading.refusal(first, "'" + reading.lineFrom(first) + "' is not a value: " + unreadable.getMessage());
         }
-        return reading.text(first.offset(), reading.endOfRead());
+        return reading.text(first.offset(), reading.cursor.endOfRead());
     }
 
     /** The cursor, ending at the line's end and at its grammar's next words outside parentheses, unless called. */
