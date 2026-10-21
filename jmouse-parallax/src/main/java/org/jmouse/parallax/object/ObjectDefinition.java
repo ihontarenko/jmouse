@@ -1398,9 +1398,8 @@ public sealed interface ObjectDefinition {
                 if (component == null || component.isBlank()) {
                     throw new IllegalArgumentException("Model '" + id + "' names the component it is.");
                 }
-                if (pins.isEmpty()) {
-                    throw new IllegalArgumentException("Model '" + id + "' connects its pins to nodes.");
-                }
+                // A model may connect no pin: a sheet placed as a block that reaches its parent through global nets
+                // alone, as a KiCad sheet joined by its power symbols does.
                 positive = null;
                 negative = null;
                 value = value == null ? "" : value;

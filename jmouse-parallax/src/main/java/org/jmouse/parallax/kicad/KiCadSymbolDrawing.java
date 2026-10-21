@@ -85,22 +85,27 @@ public final class KiCadSymbolDrawing {
 
     /** One unit of a symbol as the jMX symbol document jMX's writer makes of it. */
     public static String document(KiCadSymbolDefinition symbol, int unit) {
-        return ExperienceDefinitions.write(object(symbol, unit));
+        return ExperienceDefinitions.write(object(symbol, unit, Map.of()));
     }
 
-    /** One unit of a symbol as a jMX symbol object. */
-    public static DefinedObject object(KiCadSymbolDefinition symbol, int unit) {
+    /**
+     * One unit of a symbol as a jMX symbol object.
+     *
+     * @param pinNames the name each pin is drawn by, by its number, where a component names it — {@code 1} is
+     *                 {@code ref} on a TL431 —; a pin it does not name is {@link #pinName}
+     */
+    public static DefinedObject object(KiCadSymbolDefinition symbol, int unit, Map<String, String> pinNames) {
         String title = symbol.name() + (units(symbol).size() > 1 ? " unit " + unitLetter(unit) : "");
         String summary = firstOf(symbol.property("Description"), symbol.property("ki_description"), symbol.name())
                 + ", drawn as KiCad draws it";
         return new DefinedObject(slugOf(symbol, unit), title, summary, null, "circuits",
                 List.of("electronics", "schematic", "kicad"), false, null,
-                new ObjectDefinition.Symbol(drawing(symbol, unit).toJson()), List.of(), List.of(), List.of(), List.of(),
+                new ObjectDefinition.Symbol(drawing(symbol, unit, pinNames).toJson()), List.of(), List.of(), List.of(), List.of(),
                 List.of());
     }
 
-    /** One unit of a symbol as a drawing. */
-    public static SymbolDrawing drawing(KiCadSymbolDefinition symbol, int unit) {
+    /** One unit of a symbol as a drawing, each pin drawn by the name {@code pinNames} gives its number, else {@link #pinName}. */
+    public static SymbolDrawing drawing(KiCadSymbolDefinition symbol, int unit, Map<String, String> pinNames) {
         Shapes shapes = new Shapes();
         for (KiCadList body : symbol.tree().lists("symbol")) {
             Matcher name = BODY.matcher(body.word(1));
@@ -121,7 +126,7 @@ public final class KiCadSymbolDrawing {
             shapes.pin(pin);
             double[] at = shapes.point(pin.at());
             boolean named = namesShown && !pin.name().equals(KiCadPin.NO_NAME) && !pin.name().isBlank();
-            pins.add(new SymbolDrawing.Pin(pinName(pin), at[0], at[1], named ? pin.name() : ""));
+            pins.add(new SymbolDrawing.Pin(pinNames.getOrDefault(pin.number(), pinName(pin)), at[0], at[1], named ? pin.name() : ""));
         }
         List<SymbolDrawing.Label> labels = new ArrayList<>();
         label(symbol, "Reference", "name", shapes).ifPresent(labels::add);

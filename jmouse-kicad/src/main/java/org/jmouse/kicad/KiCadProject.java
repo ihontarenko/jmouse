@@ -80,6 +80,17 @@ public final class KiCadProject {
         }
     }
 
+    /**
+     * A design of one sheet alone: the boxes it places are not followed, so their pins stand for nets the sheet hands
+     * down — what a sheet is read as on its own, every instance of it the same.
+     *
+     * @param path the path of the instance whose references it is read with: KiCad keeps a sheet's references by the
+     *             path of each place the sheet stands in, {@code /root-uuid/sheet-uuid}
+     */
+    public static KiCadProject single(KiCadSchematic schematic, String path) {
+        return new KiCadProject(List.of(new SheetInstance(path, schematic.name(), schematic, null, null)));
+    }
+
     /** Every sheet instance, the root first and each sheet before the sheets it places. */
     public List<SheetInstance> sheets() {
         return sheets;

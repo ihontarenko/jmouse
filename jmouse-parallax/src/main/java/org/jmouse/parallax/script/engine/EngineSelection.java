@@ -778,7 +778,9 @@ public final class EngineSelection {
         Map<String, String> settings = new LinkedHashMap<>();
         part.settings().forEach((name, value) -> settings.put(name, inSi(value.text())));
         String frequency = settings.remove(DefinitionWords.FREQUENCY);
-        if (!part.named().isEmpty()) {
+        // `()` on what is no primitive connects nothing: a sheet placed as a block that its global nets join.
+        boolean unconnected = part.positional().isEmpty() && Primitive.ofReference(part.reference()).isEmpty();
+        if (!part.named().isEmpty() || unconnected) {
             String value = settings.remove(DefinitionWords.MODEL_VALUE);
             // A model's frequency is one of its parameters (a generator's), not a primitive source's field.
             if (frequency != null) {
