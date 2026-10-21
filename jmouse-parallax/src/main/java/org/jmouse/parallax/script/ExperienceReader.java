@@ -36,7 +36,7 @@ public final class ExperienceReader {
      * {@code 24c02} is not a typed Java literal —, but its behaviour is jMS, which counts with {@code ++} and
      * {@code --}.
      */
-    static final ExpressionSplitter.Dialect DIALECT = new ExpressionSplitter.Dialect(false, true);
+    public static final ExpressionSplitter.Dialect DIALECT = new ExpressionSplitter.Dialect(false, true);
 
     /**
      * Documents already read, by name and text: reading is a pure function of the text, and a circuit reads the same

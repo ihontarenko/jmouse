@@ -1,10 +1,23 @@
 package org.jmouse.parallax.script.engine;
 
+import org.jmouse.el.StringSource;
+import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.DefaultLexer;
+import org.jmouse.el.lexer.DefaultTokenizer;
+import org.jmouse.el.lexer.ExpressionRecognizer;
+import org.jmouse.el.lexer.ExpressionSplitter;
+import org.jmouse.el.lexer.Lexer;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.lexer.support.SourceReading;
+import org.jmouse.parallax.script.ExperienceReader;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Settings as a view writes them — {@code cross_section axis Y offset 0}, {@code gradient_descent start [-1.5, 2]
@@ -53,83 +66,91 @@ final class SettingNotation {
 
     /** The settings written after a representation's name. */
     static Map<String, Object> read(String written) {
+        TokenCursor cursor = tokens(written);
         Map<String, Object> settings = new LinkedHashMap<>();
-        List<String> words = words(written);
-        if (words.size() % 2 != 0) {
-            throw new IllegalArgumentException("Settings are 'name value' pairs: '" + written + "'.");
-        }
-        for (int index = 0; index < words.size(); index += 2) {
-            settings.put(words.get(index), parse(words.get(index + 1)));
+        while (!atEnd(cursor)) {
+            String name = SourceReading.touchingWord(cursor, Set.of());
+            if (atEnd(cursor)) {
+                throw new IllegalArgumentException("Settings are 'name value' pairs: '" + written + "'.");
+            }
+            settings.put(name, value(cursor, Set.of(), written));
         }
         return settings;
     }
 
     /** One written value: a list, a quoted text, a truth value, a number or a bare word. */
     static Object parse(String word) {
-        String text = word.strip();
-        if (text.startsWith("[")) {
-            return Notation.items(text, '[', ']', "A list").stream().map(SettingNotation::parse).toList();
+        TokenCursor cursor = tokens(word);
+        Object value = value(cursor, Set.of(), word);
+        if (!atEnd(cursor)) {
+            throw new IllegalArgumentException("One setting value, not '" + word + "'.");
         }
-        if (text.length() >= 2 && (text.charAt(0) == '"' || text.charAt(0) == '\'')) {
-            return text.substring(1, text.length() - 1);
+        return value;
+    }
+
+    /** The text as jMX's lexer reads it: a word is what nobody pressed the space bar inside. */
+    private static TokenCursor tokens(String written) {
+        TokenCursor cursor = LEXER.tokenize(new StringSource("SETTINGS", written));
+        cursor.consumeIf(BasicToken.T_SOL);
+        return cursor;
+    }
+
+    private static boolean atEnd(TokenCursor cursor) {
+        return !cursor.hasNext() || cursor.isCurrent(BasicToken.T_EOL);
+    }
+
+    /**
+     * The value the cursor stands on: {@code [a, b]} item by item, a text in quotes, or one word read by its shape.
+     *
+     * @param separators what ends a word where it touches it: a list's comma and closing bracket
+     */
+    private static Object value(TokenCursor cursor, Set<String> separators, String written) {
+        if (cursor.isCurrent(BasicToken.T_OPEN_BRACKET)) {
+            cursor.next();
+            List<Object> items = new ArrayList<>();
+            while (!cursor.isCurrent(BasicToken.T_CLOSE_BRACKET)) {
+                if (atEnd(cursor)) {
+                    throw new IllegalArgumentException("A list is never closed: '" + written + "'.");
+                }
+                items.add(value(cursor, LIST_SEPARATORS, written));
+                if (!cursor.consumeIf(BasicToken.T_COMMA) && !cursor.isCurrent(BasicToken.T_CLOSE_BRACKET)) {
+                    throw new IllegalArgumentException("A list's items are separated by commas: '" + written + "'.");
+                }
+            }
+            cursor.next();
+            return List.copyOf(items);
         }
+        if (cursor.isCurrent(BasicToken.T_STRING)) {
+            String quoted = cursor.next().value();
+            return quoted.substring(1, quoted.length() - 1);
+        }
+        return word(SourceReading.touchingWord(cursor, separators));
+    }
+
+    /** A word by its shape: a whole number keeps its size, a decimal is a fraction, true and false are truth values. */
+    private static Object word(String text) {
         if (text.equals("true") || text.equals("false")) {
             return Boolean.valueOf(text);
         }
-        if (text.matches("[+-]?\\d+")) {
+        if (WHOLE.matcher(text).matches()) {
             BigInteger integer = new BigInteger(text);
             if (integer.bitLength() < 32) {
                 return integer.intValue();
             }
             return integer.bitLength() < 64 ? (Object) integer.longValue() : integer;
         }
-        if (text.matches("[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?")) {
+        if (DECIMAL.matcher(text).matches()) {
             return Double.parseDouble(text);
         }
         return text;
     }
 
-    /** The text cut into words: a bracketed list or a quoted text is one word. */
-    private static List<String> words(String written) {
-        List<String> words = new ArrayList<>();
-        int index = 0;
-        while (index < written.length()) {
-            char character = written.charAt(index);
-            if (Character.isWhitespace(character)) {
-                index++;
-                continue;
-            }
-            int end = endOfWord(written, index);
-            words.add(written.substring(index, end));
-            index = end;
-        }
-        return words;
-    }
+    private static final Pattern WHOLE = Pattern.compile("[+-]?\\d+");
+    private static final Pattern DECIMAL = Pattern.compile("[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?");
 
-    private static int endOfWord(String written, int start) {
-        char first = written.charAt(start);
-        if (first == '"' || first == '\'') {
-            int close = written.indexOf(first, start + 1);
-            if (close < 0) {
-                throw new IllegalArgumentException("A text in quotes is never closed: '" + written + "'.");
-            }
-            return close + 1;
-        }
-        if (first == '[') {
-            int depth = 0;
-            for (int index = start; index < written.length(); index++) {
-                if (written.charAt(index) == '[') {
-                    depth++;
-                } else if (written.charAt(index) == ']' && --depth == 0) {
-                    return index + 1;
-                }
-            }
-            throw new IllegalArgumentException("A list is never closed: '" + written + "'.");
-        }
-        int index = start;
-        while (index < written.length() && !Character.isWhitespace(written.charAt(index))) {
-            index++;
-        }
-        return index;
-    }
+    /** What ends a word inside a list where it touches it. */
+    private static final Set<String> LIST_SEPARATORS = Set.of(",", "]");
+
+    private static final Lexer LEXER = new DefaultLexer(new DefaultTokenizer(
+            new ExpressionSplitter(ExperienceReader.DIALECT), new ExpressionRecognizer()));
 }
