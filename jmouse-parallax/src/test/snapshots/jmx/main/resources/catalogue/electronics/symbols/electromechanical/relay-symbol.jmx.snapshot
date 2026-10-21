@@ -1,0 +1,115 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Relay"
+  slug: "relay-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A relay, as drawn on a schematic: its coil, and a changeover contact that leaves normally-closed for normally-open while the coil holds it"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 100.0
+          height: Double 80.0
+          paths: List(1)
+              - "M-50-30H-30V-14M-50 30H-30V14M-38-14H-22V14H-38ZM-38 14L-22-14M-18 3H-13M-9 3H-4M0 3H5M9 3H14M10 40V20M50-30H31V-14M50 10H36V-2M8 20A2 2 0 1 0 12 20A2 2 0 1 0 8 20"
+          pins: List(5)
+              - SymbolPin
+                  pin: "coil_one"
+                  x: Double -50.0
+                  y: Double -30.0
+                  label: ""
+              - SymbolPin
+                  pin: "coil_two"
+                  x: Double -50.0
+                  y: Double 30.0
+                  label: ""
+              - SymbolPin
+                  pin: "common"
+                  x: Double 10.0
+                  y: Double 40.0
+                  label: ""
+              - SymbolPin
+                  pin: "normally_closed"
+                  x: Double 50.0
+                  y: Double -30.0
+                  label: ""
+              - SymbolPin
+                  pin: "normally_open"
+                  x: Double 50.0
+                  y: Double 10.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -46.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 52.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "energized"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(1)
+              - SymbolElement
+                  shape: "group"
+                  name: "armature"
+                  live: true
+                  path: ""
+                  geometry: Map(1)
+                      pivot = List(2)
+                          - Double 10.0
+                          - Double 20.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty rotate LIVE
+                          - HostCall[name=between, arguments=[Constant[value=0], Constant[value=0.38397243544], HostCall[name=smooth, arguments=[Variable[name=energized], Constant[value=0.04]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M10 20L28-14"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 13
+                  line: Integer 12
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/relay-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 94af84c231b24c892a0ee3929cd1e29d
+== line 4 begun with a stray word
+READS b8d8835d5b1be7d7f96ebca2d99da308
+== line 18 deleted
+READS 9417dad08da46342a0b1c913b747b576
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/relay-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta

@@ -1,0 +1,1015 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "16×2 character LCD"
+  slug: "lcd-1602-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A 16×2 character LCD module: its window shows the 32 characters its controller holds on screen"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "display"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 180.0
+          height: Double 120.0
+          paths: List(17)
+              - "M-90-40H70V40H-90Z"
+              - "M-80 -40V-60"
+              - "M-60 -40V-60"
+              - "M-40 -40V-60"
+              - "M-20 -40V-60"
+              - "M0 -40V-60"
+              - "M20 -40V-60"
+              - "M40 -40V-60"
+              - "M60 -40V-60"
+              - "M-80 40V60"
+              - "M-60 40V60"
+              - "M-40 40V60"
+              - "M-20 40V60"
+              - "M0 40V60"
+              - "M20 40V60"
+              - "M40 40V60"
+              - "M60 40V60"
+          pins: List(16)
+              - SymbolPin
+                  pin: "ground"
+                  x: Double -80.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "supply"
+                  x: Double -60.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "contrast"
+                  x: Double -40.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "register_select"
+                  x: Double -20.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "read_write"
+                  x: Double 0.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "enable"
+                  x: Double 20.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "backlight_anode"
+                  x: Double 40.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "backlight_cathode"
+                  x: Double 60.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_0"
+                  x: Double -80.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_1"
+                  x: Double -60.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_2"
+                  x: Double -40.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_3"
+                  x: Double -20.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_4"
+                  x: Double 0.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_5"
+                  x: Double 20.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_6"
+                  x: Double 40.0
+                  y: Double 60.0
+                  label: ""
+              - SymbolPin
+                  pin: "data_7"
+                  x: Double 60.0
+                  y: Double 60.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 100.0
+                  y: Double -30.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 100.0
+                  y: Double 30.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(32)
+              - SymbolInput
+                  name: "cell_0"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[8:18@286] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_1"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[9:18@312] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_2"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[10:18@338] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_3"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[11:18@364] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_4"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[12:18@390] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_5"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[13:18@416] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_6"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[14:18@442] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_7"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[15:18@468] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_8"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[16:18@494] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_9"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[17:18@520] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_10"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[18:19@547] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_11"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[19:19@574] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_12"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[20:19@601] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_13"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[21:19@628] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_14"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[22:19@655] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_15"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[23:19@682] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_16"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[24:19@709] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_17"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[25:19@736] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_18"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[26:19@763] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_19"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[27:19@790] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_20"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[28:19@817] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_21"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[29:19@844] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_22"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[30:19@871] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_23"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[31:19@898] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_24"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[32:19@925] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_25"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[33:19@952] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_26"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[34:19@979] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_27"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[35:19@1006] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_28"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[36:19@1033] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_29"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[37:19@1060] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_30"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[38:19@1087] "0 .. 255"
+                  picture: false
+              - SymbolInput
+                  name: "cell_31"
+                  low: Double 0.0
+                  high: Double 255.0
+                  range: Optional SourceText[39:19@1114] "0 .. 255"
+                  picture: false
+          elements: List(33)
+              - SymbolElement
+                  shape: "box"
+                  name: "window"
+                  live: false
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -10.0
+                          - Double -4.0
+                      size = List(2)
+                          - Double 140.0
+                          - Double 36.0
+                  condition: null
+                  properties: List(2)
+                      - SymbolProperty fill STILL
+                          - Variable[name=green]
+                      - SymbolProperty opacity STILL
+                          - Constant[value=0.25]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 58
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_0"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -70.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_0]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 62
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_1"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -62.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_1]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 65
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_2"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -54.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_2]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 68
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_3"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -46.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_3]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 71
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_4"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -38.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_4]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 74
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_5"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -30.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_5]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 77
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_6"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -22.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_6]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 80
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_7"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -14.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_7]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 83
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_8"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -6.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_8]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 86
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_9"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 2.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_9]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 89
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_10"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 10.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_10]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 92
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_11"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 18.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_11]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 95
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_12"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 26.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_12]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 98
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_13"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 34.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_13]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 101
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_14"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 42.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_14]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 104
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_15"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 50.0
+                          - Double -12.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_15]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 107
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_16"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -70.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_16]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 110
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_17"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -62.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_17]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 113
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_18"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -54.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_18]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 116
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_19"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -46.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_19]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 119
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_20"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -38.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_20]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 122
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_21"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -30.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_21]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 125
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_22"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -22.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_22]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 128
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_23"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -14.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_23]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 131
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_24"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -6.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_24]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 134
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_25"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 2.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_25]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 137
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_26"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 10.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_26]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 140
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_27"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 18.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_27]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 143
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_28"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 26.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_28]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 146
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_29"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 34.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_29]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 149
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_30"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 42.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_30]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 152
+              - SymbolElement
+                  shape: "glyph"
+                  name: "character_31"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 50.0
+                          - Double 4.0
+                      size = List(2)
+                          - Double 7.0
+                          - Double 12.0
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty character LIVE
+                          - Variable[name=cell_31]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 155
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 632813406a4122a81b9c07a1be180204
+== line 4 begun with a stray word
+READS dda3891da468e0718afcf749364e22ec
+== line 11 deleted
+READS b1c11c8c2547bc8309cb6e4c9f6927f4
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 18 deleted
+READS 93200365bd10fc04c234d8308b2fc4b4
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta
+== line 25 deleted
+READS 305f087e41f085de5f01350a844f9a31
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta
+== line 32 deleted
+READS 876e66f832e4034365058838329221ef
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 32:5 'zzz' is not a block of a symbol; it holds meta
+== line 39 deleted
+READS c0463984fdd9347ef5591d880777fcef
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 39:5 'zzz' is not a block of a symbol; it holds meta
+== line 46 deleted
+READS 2483fb0f39f3702c446790c2c0adc756
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 46:5 'zzz' is not a block of a symbol; it holds meta
+== line 53 deleted
+READS b8479b6c669c1e4b39a5c9e02cf8ee35
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 53:5 'zzz' is not a block of a symbol; it holds meta
+== line 60 deleted
+READS 7f30b2f924e2be8ed6b47be4ccfba7bb
+== line 60 begun with a stray word
+READS aa39ce69cbe88251470d6371ace4e6f7
+== line 67 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 158:5 'pin' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 67 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 67:5 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 74 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 74:14 'character' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 74:5 'zzz' is not a block of a symbol; it holds meta
+== line 81 deleted
+READS 3a61c11b0a6ece6088ae6f5e31a85082
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-1602-symbol.jmx 81:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'

@@ -1,0 +1,88 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "USB micro-B receptacle"
+  slug: "usb-micro-b-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A USB micro-B receptacle, as drawn on a schematic: bus power, the data pair, the ID pin and ground on the right, the shield below"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "connector"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 120.0
+          height: Double 140.0
+          paths: List(1)
+              - "M-40-50H20V50H-40ZM20-40H60M20-20H60M20 0H60M20 20H60M20 40H60M-20 50V70"
+          pins: List(6)
+              - SymbolPin
+                  pin: "vbus"
+                  x: Double 60.0
+                  y: Double -40.0
+                  label: "VBUS"
+              - SymbolPin
+                  pin: "data_plus"
+                  x: Double 60.0
+                  y: Double -20.0
+                  label: "D+"
+              - SymbolPin
+                  pin: "data_minus"
+                  x: Double 60.0
+                  y: Double 0.0
+                  label: "D-"
+              - SymbolPin
+                  pin: "id"
+                  x: Double 60.0
+                  y: Double 20.0
+                  label: "ID"
+              - SymbolPin
+                  pin: "ground"
+                  x: Double 60.0
+                  y: Double 40.0
+                  label: "GND"
+              - SymbolPin
+                  pin: "shield"
+                  x: Double -20.0
+                  y: Double 70.0
+                  label: "Shield"
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double -10.0
+                  y: Double -64.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 20.0
+                  y: Double 64.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/connectors/usb-micro-b-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS ba1e034b10646c2a2384206f5b2464c5
+== line 4 begun with a stray word
+READS 650c5a201cd993e3dd7112620154caef
+== line 11 deleted
+READS d8d21b046a1183c8cb9f1de4a63e1e57
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/connectors/usb-micro-b-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

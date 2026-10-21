@@ -1,0 +1,67 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Connector"
+  slug: "connector-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "Connector, as drawn on a schematic"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 60.0
+          height: Double 60.0
+          paths: List(1)
+              - "M-40-20H0M-40 20H0M0-25H15V25H0ZM5-20H10M5 20H10"
+          pins: List(2)
+              - SymbolPin
+                  pin: "first"
+                  x: Double -40.0
+                  y: Double -20.0
+                  label: ""
+              - SymbolPin
+                  pin: "second"
+                  x: Double -40.0
+                  y: Double 20.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 8.0
+                  y: Double -36.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 8.0
+                  y: Double 40.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/connectors/connector-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 00e80f59c97ba4ff0d051bb402d9bb8d
+== line 4 begun with a stray word
+READS 3e87fef2fc79aea0e1799ea8a42b6821
+== line 11 deleted
+READS 28b08511c8a99f5c132685591c8dda14
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/connectors/connector-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

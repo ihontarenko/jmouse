@@ -1,0 +1,67 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Crystal"
+  slug: "crystal-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "Crystal, as drawn on a schematic"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 40.0
+          paths: List(1)
+              - "M-40 0H-13M-13-11V11M13-11V11M13 0H40M-7-14H7V14H-7Z"
+          pins: List(2)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -26.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 32.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/passive/crystal-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS e4ad9ed694ae138379bcbd58a93417a4
+== line 4 begun with a stray word
+READS f4c5db038cd064b4388f92370d28e759
+== line 11 deleted
+READS 013401d8eb78f361fd91ad2dbe6112f5
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/passive/crystal-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

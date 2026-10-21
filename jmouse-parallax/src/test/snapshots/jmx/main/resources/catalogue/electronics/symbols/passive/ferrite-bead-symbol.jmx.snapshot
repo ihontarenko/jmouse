@@ -1,0 +1,100 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Ferrite bead"
+  slug: "ferrite-bead-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A ferrite bead, as drawn on a schematic: a slanted block threaded on the wire"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 40.0
+          paths: List(0)
+          pins: List(2)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -26.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 32.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(1)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-40 0H-8M8 0H40M-16 4L2-14L16-4L-2 14Z"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 11
+                  line: Integer 10
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/passive/ferrite-bead-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS b7250dcd5fcb9399ca86f190deb01bd8
+== line 4 begun with a stray word
+READS 8410db362d30815fa9e284a1ccfe653a
+== line 11 deleted
+READS 3fa03b051fe816961ea40dbdf57d186c
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/passive/ferrite-bead-symbol.jmx 11:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 18 deleted
+READS dc1b5425a4d791a2161773722e4fd8a6
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/passive/ferrite-bead-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta

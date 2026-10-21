@@ -1,0 +1,328 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "LED bar"
+  slug: "led-bar-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "Eight LEDs in a row, cathodes common: each segment lights red as its own current flows"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "display"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 180.0
+          height: Double 120.0
+          paths: List(10)
+              - "M-90-40H70V40H-90Z"
+              - "M-80 26V32H60V26M-20 32V60"
+              - "M-80-40V-60"
+              - "M-60-40V-60"
+              - "M-40-40V-60"
+              - "M-20-40V-60"
+              - "M0-40V-60"
+              - "M20-40V-60"
+              - "M40-40V-60"
+              - "M60-40V-60"
+          pins: List(9)
+              - SymbolPin
+                  pin: "anode_0"
+                  x: Double -80.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_1"
+                  x: Double -60.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_2"
+                  x: Double -40.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_3"
+                  x: Double -20.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_4"
+                  x: Double 0.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_5"
+                  x: Double 20.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_6"
+                  x: Double 40.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "anode_7"
+                  x: Double 60.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "cathode"
+                  x: Double -20.0
+                  y: Double 60.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 100.0
+                  y: Double -30.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 100.0
+                  y: Double 30.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(8)
+              - SymbolInput
+                  name: "light_0"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[8:19@267] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_1"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[9:19@294] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_2"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[10:19@321] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_3"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[11:19@348] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_4"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[12:19@375] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_5"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[13:19@402] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_6"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[14:19@429] "0 .. 100"
+                  picture: false
+              - SymbolInput
+                  name: "light_7"
+                  low: Double 0.0
+                  high: Double 100.0
+                  range: Optional SourceText[15:19@456] "0 .. 100"
+                  picture: false
+          elements: List(8)
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_0"
+                  live: true
+                  path: "M-86-30H-74V20H-86Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_0], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_0], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 27
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_1"
+                  live: true
+                  path: "M-66-30H-54V20H-66Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_1], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_1], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 32
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_2"
+                  live: true
+                  path: "M-46-30H-34V20H-46Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_2], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_2], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 37
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_3"
+                  live: true
+                  path: "M-26-30H-14V20H-26Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_3], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_3], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 42
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_4"
+                  live: true
+                  path: "M-6-30H6V20H-6Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_4], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_4], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 47
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_5"
+                  live: true
+                  path: "M14-30H26V20H14Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_5], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_5], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 52
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_6"
+                  live: true
+                  path: "M34-30H46V20H34Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_6], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_6], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 57
+              - SymbolElement
+                  shape: "path"
+                  name: "glow_7"
+                  live: true
+                  path: "M54-30H66V20H54Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty fill STILL
+                          - Variable[name=red]
+                      - SymbolProperty opacity LIVE
+                          - Binary[operator=ADD, left=Constant[value=0.12], right=Binary[operator=MULTIPLY, left=Constant[value=0.88], right=HostCall[name=seen, arguments=[HostCall[name=share, arguments=[Variable[name=light_7], Constant[value=0], Constant[value=1E+2]]]]]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=6], right=HostCall[name=share, arguments=[Variable[name=light_7], Constant[value=0], Constant[value=1E+2]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 62
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 9437fa3926f8ad8058e494eaa05501d6
+== line 4 begun with a stray word
+READS 8cb60aa3aaf19592eeab405857053cf5
+== line 11 deleted
+READS ab13b971e01414b592769069ea619bb6
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 18 deleted
+READS 832299223dd995479a6602cdd7225a07
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta
+== line 25 deleted
+READS e0fd28cc63af4cde7a2d141e4b8b769e
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta
+== line 32 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 32:9 'fill' is not a block of a symbol; it holds meta
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 32:5 'zzz' is not a block of a symbol; it holds meta
+== line 39 deleted
+READS 6737e38427466cbe380de751c194f7b9
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 39:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 46 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 67:5 'pin' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 46:5 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 53 deleted
+READS 839709f67c6d777e5dba87a0a9f57f8a
+== line 53 begun with a stray word
+READS c7845808560d87b3583ab3bbbee628ef
+== line 60 deleted
+READS c307d9e7056fa949c06eed017fb8fd68
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 60:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 74 deleted
+READS b6e624068ea84b16976cfc0fac9579ef
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/optoelectronics/led-bar-symbol.jmx 74:5 'zzz' is not a block of a symbol; it holds meta

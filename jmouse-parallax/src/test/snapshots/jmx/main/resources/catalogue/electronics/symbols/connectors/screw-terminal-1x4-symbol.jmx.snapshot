@@ -1,0 +1,78 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Screw terminal, 4 contacts"
+  slug: "screw-terminal-1x4-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A terminal block of 4 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "connector"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 180.0
+          paths: List(1)
+              - "M-20 -50H20V90H-20ZM-40 -40H-6M-6 -40A6 6 0 1 0 6 -40A6 6 0 1 0 -6 -40ZM-4 -36L4 -44M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36M-40 80H-6M-6 80A6 6 0 1 0 6 80A6 6 0 1 0 -6 80ZM-4 84L4 76"
+          pins: List(4)
+              - SymbolPin
+                  pin: "pin1"
+                  x: Double -40.0
+                  y: Double -40.0
+                  label: "1"
+              - SymbolPin
+                  pin: "pin2"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: "2"
+              - SymbolPin
+                  pin: "pin3"
+                  x: Double -40.0
+                  y: Double 40.0
+                  label: "3"
+              - SymbolPin
+                  pin: "pin4"
+                  x: Double -40.0
+                  y: Double 80.0
+                  label: "4"
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -64.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 108.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/connectors/screw-terminal-1x4-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 1d0956498a074091f41ffd8d697defe1
+== line 4 begun with a stray word
+READS fb1ca3f96f676f031ebf3eac7d47b653
+== line 11 deleted
+READS 7c60b42e4b7c1a59868e47d4e6ee0597
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/connectors/screw-terminal-1x4-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

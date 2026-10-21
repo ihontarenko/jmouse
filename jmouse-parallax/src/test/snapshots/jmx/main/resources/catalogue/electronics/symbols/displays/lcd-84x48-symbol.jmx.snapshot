@@ -1,0 +1,164 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "84×48 graphic LCD module"
+  slug: "lcd-84x48-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "The Nokia 5110 module: an 84×48 monochrome LCD on SPI, its screen showing the controller's display memory, three units a pixel"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "display"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 280.0
+          height: Double 220.0
+          paths: List(10)
+              - "M-140-100H140V110H-140Z"
+              - "M-127-63H127V83H-127Z"
+              - "M-80 -100V-120"
+              - "M-60 -100V-120"
+              - "M-40 -100V-120"
+              - "M-20 -100V-120"
+              - "M0 -100V-120"
+              - "M20 -100V-120"
+              - "M40 -100V-120"
+              - "M60 -100V-120"
+          pins: List(8)
+              - SymbolPin
+                  pin: "reset"
+                  x: Double -80.0
+                  y: Double -120.0
+                  label: "RST"
+              - SymbolPin
+                  pin: "chip_enable"
+                  x: Double -60.0
+                  y: Double -120.0
+                  label: "CE"
+              - SymbolPin
+                  pin: "data_command"
+                  x: Double -40.0
+                  y: Double -120.0
+                  label: "DC"
+              - SymbolPin
+                  pin: "data_in"
+                  x: Double -20.0
+                  y: Double -120.0
+                  label: "DIN"
+              - SymbolPin
+                  pin: "clock"
+                  x: Double 0.0
+                  y: Double -120.0
+                  label: "CLK"
+              - SymbolPin
+                  pin: "Vcc"
+                  x: Double 20.0
+                  y: Double -120.0
+                  label: "VCC"
+              - SymbolPin
+                  pin: "light"
+                  x: Double 40.0
+                  y: Double -120.0
+                  label: "BL"
+              - SymbolPin
+                  pin: "GND"
+                  x: Double 60.0
+                  y: Double -120.0
+                  label: "GND"
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 170.0
+                  y: Double -40.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 170.0
+                  y: Double 40.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(3)
+              - SymbolInput
+                  name: "screen"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: true
+              - SymbolInput
+                  name: "lit"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[9:15@347] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "inverted"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[10:20@373] "0 .. 1"
+                  picture: false
+          elements: List(1)
+              - SymbolElement
+                  shape: "bitmap"
+                  name: "screen"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double 0.0
+                          - Double 10.0
+                      size = List(2)
+                          - Double 252.0
+                          - Double 144.0
+                  condition: null
+                  properties: List(5)
+                      - SymbolProperty pixels LIVE
+                          - Variable[name=screen]
+                      - SymbolProperty columns STILL
+                          - Constant[value=84]
+                      - SymbolProperty rows STILL
+                          - Constant[value=48]
+                      - SymbolProperty invert LIVE
+                          - Comparison[relation=GREATER, left=Variable[name=inverted], right=Constant[value=0.5]]
+                      - SymbolProperty visible LIVE
+                          - Comparison[relation=GREATER, left=Variable[name=lit], right=Constant[value=0.5]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 22
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-84x48-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 34448d59af608d3661c6effd447f9f9d
+== line 4 begun with a stray word
+READS aa808be6d9bea96c18d3900b34ac8660
+== line 18 deleted
+READS 7c776a56175a3510e756b98d3415f4a1
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-84x48-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta
+== line 25 deleted
+READS 0ab69790b69c56bc11b11773ba2b6dcd
+== line 25 begun with a stray word
+READS c1b0a9abee8796b45b9ba15168e7070d
+== line 32 deleted
+READS 00639302edcd9a5391cde58464dfdb59
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-84x48-symbol.jmx 32:5 'zzz' is not a block of a symbol; it holds meta
+== line 39 deleted
+READS 57e25b8826d187c39940a499163b86ce
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/displays/lcd-84x48-symbol.jmx 39:5 'zzz' is not a block of a symbol; it holds meta

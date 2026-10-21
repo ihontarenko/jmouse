@@ -1,0 +1,83 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "OR gate"
+  slug: "or-gate-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A two-input OR gate, as drawn on a schematic (ANSI)"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "logic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 60.0
+          paths: List(1)
+              - "M-24-20H-4Q14-20 22 0Q14 20-4 20H-24Q-12 0-24-20ZM-40-10H-19.5M-40 10H-19.5M22 0H40M-10-20V-30M-10 20V30"
+          pins: List(5)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double -10.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double -40.0
+                  y: Double 10.0
+                  label: ""
+              - SymbolPin
+                  pin: "output"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "Vcc"
+                  x: Double -10.0
+                  y: Double -30.0
+                  label: ""
+              - SymbolPin
+                  pin: "GND"
+                  x: Double -10.0
+                  y: Double 30.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 14.0
+                  y: Double -30.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 14.0
+                  y: Double 36.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/logic/or-gate-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 449986f93c8c6e421afcad8e8051cd41
+== line 4 begun with a stray word
+READS 6f5c625004ad5aeb9e860f08d84a63f8
+== line 11 deleted
+READS c9f6f092f6b5de805b340513d03269a2
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/logic/or-gate-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
