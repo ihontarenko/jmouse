@@ -6,7 +6,7 @@ footprint "Ceramic disc capacitor, 10 mm disc, 7.5 mm pitch" as disc-capacitor-d
         source "IEC 60286-2 lead spacing, makers' disc sizes"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/radial-packages.jmd#disc-10-7-5 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/radial-packages.sht#disc-10-7-5 and the land pattern rules; regenerate, never edit.
     # Lead ⌀0.6: drill 0.8, pad 1.8, pin 1 square.
     pad "1" through-hole rectangle at -3.75, 0 size 1.8 x 1.8 drill 0.8
     pad "2" through-hole circle at 3.75, 0 size 1.8 x 1.8 drill 0.8

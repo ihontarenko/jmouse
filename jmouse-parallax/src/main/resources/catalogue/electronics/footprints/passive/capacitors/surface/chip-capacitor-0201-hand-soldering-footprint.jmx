@@ -6,7 +6,7 @@ footprint "Chip capacitor 0201 (0603 metric), hand soldering" as chip-capacitor-
         source "IEC 60384-22 dimensions, 0201 (0603 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#capacitor-0201 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#capacitor-0201 and the land pattern rules; regenerate, never edit.
     # Body 0.57…0.63 × 0.27…0.33, terminal 0.1…0.2; fillets toe 0.3, heel 0, side 0.05.
     # Z = 1.297, G = 0.187, X = 0.497; pad 0.55 × 0.5 centred at ±0.35.
     pad "1" surface rounded-rectangle at -0.35, 0 size 0.55 x 0.5 roundness 0.25

@@ -1,7 +1,7 @@
-package org.jmouse.datamap.parser;
+package org.jmouse.sheet.parser;
 
-import org.jmouse.datamap.DataMapSyntaxException;
-import org.jmouse.datamap.DataMapValue;
+import org.jmouse.sheet.SheetSyntaxException;
+import org.jmouse.sheet.SheetValue;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.jmouse.datamap.parser.DataMapReading.ASSIGN;
-import static org.jmouse.datamap.parser.DataMapReading.COMMA;
-import static org.jmouse.datamap.parser.DataMapReading.RANGE;
+import static org.jmouse.sheet.parser.SheetReading.ASSIGN;
+import static org.jmouse.sheet.parser.SheetReading.COMMA;
+import static org.jmouse.sheet.parser.SheetReading.RANGE;
 
 /**
  * Reads a field's value, to the end of its line or to its {@code source}.
@@ -27,38 +27,38 @@ import static org.jmouse.datamap.parser.DataMapReading.RANGE;
  * bound := "text" | number [unit] | word | document#id[/field]
  * </pre>
  */
-final class DataMapValueReading {
+final class SheetValueReading {
 
     private static final char LINK = '#';
     private static final char FIELD_OF_LINK = '/';
 
-    private DataMapValueReading() {
+    private SheetValueReading() {
     }
 
     /** The value from where the cursor stands. */
-    static DataMapValue value(TokenCursor cursor, ParserContext context) {
-        List<DataMapValue> items = new ArrayList<>();
+    static SheetValue value(TokenCursor cursor, ParserContext context) {
+        List<SheetValue> items = new ArrayList<>();
         items.add(item(cursor, context));
         while (atText(cursor, COMMA)) {
             cursor.next();
             items.add(item(cursor, context));
         }
-        return items.size() == 1 ? items.getFirst() : new DataMapValue.Sequence(items);
+        return items.size() == 1 ? items.getFirst() : new SheetValue.Sequence(items);
     }
 
     /** Whether the value ends where the cursor stands: its line ends, or its citation begins. */
     static boolean atValueEnd(TokenCursor cursor) {
-        return DataMapReading.atLineEnd(cursor) || DataMapReading.atSource(cursor);
+        return SheetReading.atLineEnd(cursor) || SheetReading.atSource(cursor);
     }
 
-    private static DataMapValue item(TokenCursor cursor, ParserContext context) {
+    private static SheetValue item(TokenCursor cursor, ParserContext context) {
         requireValue(cursor);
         if (!cursor.isCurrent(BasicToken.T_STRING)) {
             TokenCursor.Savepoint start = cursor.savepoint();
-            String name = DataMapReading.word(cursor);
+            String name = SheetReading.word(cursor);
             if (atText(cursor, ASSIGN)) {
                 cursor.next();
-                return new DataMapValue.Assignment(name, rangeOrBound(cursor, context));
+                return new SheetValue.Assignment(name, rangeOrBound(cursor, context));
             }
             cursor.restore(start);
         }
@@ -66,53 +66,53 @@ final class DataMapValueReading {
     }
 
     /** A bound, and the range it begins when {@code ..} follows it. */
-    private static DataMapValue rangeOrBound(TokenCursor cursor, ParserContext context) {
-        DataMapValue from = bound(cursor, context);
+    private static SheetValue rangeOrBound(TokenCursor cursor, ParserContext context) {
+        SheetValue from = bound(cursor, context);
         if (!atRange(cursor)) {
             return from;
         }
         cursor.next();
-        return new DataMapValue.Range(from, bound(cursor, context));
+        return new SheetValue.Range(from, bound(cursor, context));
     }
 
     /**
      * A text; a number with its unit, written joined ({@code 2.2µs}) or apart ({@code 19 ns}), read by the engine's
      * {@link QuantityParser}; a link; a word.
      */
-    private static DataMapValue bound(TokenCursor cursor, ParserContext context) {
+    private static SheetValue bound(TokenCursor cursor, ParserContext context) {
         requireValue(cursor);
         if (cursor.isCurrent(BasicToken.T_STRING)) {
-            return new DataMapValue.Text(DataMapReading.text(cursor.next()));
+            return new SheetValue.Text(SheetReading.text(cursor.next()));
         }
         Optional<QuantityLiteralNode> quantity = ((QuantityParser) context.getParser(QuantityParser.class))
                 .read(cursor, context);
         if (quantity.isPresent()) {
-            return new DataMapValue.Measure(quantity.get().getQuantity());
+            return new SheetValue.Measure(quantity.get().getQuantity());
         }
         Token first = cursor.lookAt(0);
-        String word = DataMapReading.word(cursor);
+        String word = SheetReading.word(cursor);
         int link = word.indexOf(LINK);
         if (link >= 0) {
             return link(cursor, first, word, link);
         }
         if (word.contains(RANGE)) {
-            throw new DataMapSyntaxException(cursor, first,
+            throw new SheetSyntaxException(cursor, first,
                     "'" + word + "': a range is written with its '..' apart — 2 V .. 6 V");
         }
-        return new DataMapValue.Word(word);
+        return new SheetValue.Word(word);
     }
 
-    /** {@code document.jmd#id} or {@code document.jmd#id/field}. */
-    private static DataMapValue link(TokenCursor cursor, Token first, String word, int mark) {
+    /** {@code document.sht#id} or {@code document.sht#id/field}. */
+    private static SheetValue link(TokenCursor cursor, Token first, String word, int mark) {
         String document = word.substring(0, mark);
         String address = word.substring(mark + 1);
         int slash = address.indexOf(FIELD_OF_LINK);
         String id = slash < 0 ? address : address.substring(0, slash);
         String field = slash < 0 ? "" : address.substring(slash + 1);
         if (document.isEmpty() || id.isEmpty() || (slash >= 0 && field.isEmpty())) {
-            throw new DataMapSyntaxException(cursor, first, "a link is written document.jmd#id or document.jmd#id/field");
+            throw new SheetSyntaxException(cursor, first, "a link is written document.sht#id or document.sht#id/field");
         }
-        return new DataMapValue.Link(document, id, field);
+        return new SheetValue.Link(document, id, field);
     }
 
     /** Whether {@code ..} stands where the cursor does, apart from the words around it. */
@@ -124,12 +124,12 @@ final class DataMapValueReading {
     }
 
     private static boolean atText(TokenCursor cursor, String text) {
-        return !DataMapReading.atLineEnd(cursor) && cursor.lookAt(0).value().equals(text);
+        return !SheetReading.atLineEnd(cursor) && cursor.lookAt(0).value().equals(text);
     }
 
     private static void requireValue(TokenCursor cursor) {
-        if (atValueEnd(cursor) || (!cursor.isCurrent(BasicToken.T_STRING) && !DataMapReading.atWord(cursor))) {
-            throw new DataMapSyntaxException(cursor, "a value is missing here");
+        if (atValueEnd(cursor) || (!cursor.isCurrent(BasicToken.T_STRING) && !SheetReading.atWord(cursor))) {
+            throw new SheetSyntaxException(cursor, "a value is missing here");
         }
     }
 }

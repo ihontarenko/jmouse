@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 
@@ -25,11 +25,11 @@ final class RadialFootprints implements FootprintFamily {
     private static final double PLUS_ARMS = 4;
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        for (DataMapEntry kind : table.entries()) {
+        for (SheetEntry kind : table.entries()) {
             String kindTitle = kind.title().orElse(kind.id());
-            for (DataMapEntry sizeEntry : kind.entries()) {
+            for (SheetEntry sizeEntry : kind.entries()) {
                 PackageTable size = PackageTable.inheriting(kind, sizeEntry);
                 if (size.has("widths")) {
                     for (double width : size.lengths("widths")) {
@@ -100,7 +100,7 @@ final class RadialFootprints implements FootprintFamily {
         String summary = title + ", leads " + number(pitch) + " mm apart"
                 + ("positive".equals(polarity) ? "; pin 1 is the positive lead" : "cathode".equals(polarity) ? "; pin 1 is the cathode" : "");
         List<String> notes = List.of(
-                "Generated from footprint-standards/radial-packages.jmd#" + size.id() + " and the land pattern rules; regenerate, never edit.",
+                "Generated from footprint-standards/radial-packages.sht#" + size.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead ⌀" + number(size.length("lead")) + ": drill " + number(drill) + ", pad " + number(pad) + ", pin 1 square.");
         return new StandardFootprint(slug, title, summary, size.word("folder"), "through-hole", size.standard(),
                 rules.license(), notes, new Block.Footprint(pads, outlines));

@@ -6,7 +6,7 @@ footprint "Chip resistor 1210 (3225 metric)" as chip-resistor-1210-footprint {
         source "IEC 60115-8 dimensions, 1210 (3225 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-1210 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-1210 and the land pattern rules; regenerate, never edit.
     # Body 3…3.2 × 2.45…2.75, terminal 0.25…0.75; fillets toe 0.35, heel 0, side 0.
     # Z = 3.929, G = 1.724, X = 2.77; pad 1.1 × 2.8 centred at ±1.4.
     pad "1" surface rounded-rectangle at -1.4, 0 size 1.1 x 2.8 roundness 0.25

@@ -49,5 +49,5 @@ Three modules, the way files and Parallax are split:
 ## First host
 
 Parallax: entity type `parallax-object` (catalogue objects by slug), the «Catalogue» taxonomy seeded from its
-`taxonomy/catalogue.jmd` — components by the folder they ship in, symbols beside the components drawn with them — and
+`taxonomy/catalogue.sht` — components by the folder they ship in, symbols beside the components drawn with them — and
 «KiCad imports / <library>» filled from the `KiCadDesignImported` event.

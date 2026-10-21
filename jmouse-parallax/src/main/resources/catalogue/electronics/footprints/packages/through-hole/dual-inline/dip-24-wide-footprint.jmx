@@ -6,7 +6,7 @@ footprint "DIP-24, 15.24 mm rows" as dip-24-wide-footprint {
         source "JEDEC MS-011"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/dual-inline-packages.jmd#dip-wide and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/dual-inline-packages.sht#dip-wide and the land pattern rules; regenerate, never edit.
     # Lead 0.56 × 0.38 at most: drill 0.9, pad 1.9, pin 1 square; body 13.97 × 31.75.
     pad "1" through-hole rectangle at -7.62, -13.97 size 1.9 x 1.9 drill 0.9
     pad "2" through-hole circle at -7.62, -11.43 size 1.9 x 1.9 drill 0.9

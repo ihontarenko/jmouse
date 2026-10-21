@@ -1,4 +1,4 @@
-package org.jmouse.datamap;
+package org.jmouse.sheet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * A jMD document: a component's data, or any other table of facts, as entries holding fields.
+ * A sheet document: a component's data, or any other table of facts, as entries holding fields.
  *
  * <pre>
- * map "74HC595 — 8-bit shift register" as 74hc595 {
+ * sheet "74HC595 — 8-bit shift register" as 74hc595 {
  *     revision "SCLS041I"
  *
  *     supply-voltage "Supply voltage" source page 7 table 6.3 {
@@ -22,14 +22,14 @@ import java.util.Optional;
  *
  * <p>An entry's id is unique in its document, however deep it is nested.</p>
  */
-public final class DataMap {
+public final class Sheet {
 
     private final String slug;
     private final String title;
-    private final List<DataMapField> fields;
-    private final List<DataMapEntry> entries;
-    private final DataMapComments comments;
-    private final Map<String, DataMapEntry> index;
+    private final List<SheetField> fields;
+    private final List<SheetEntry> entries;
+    private final SheetComments comments;
+    private final Map<String, SheetEntry> index;
 
     /**
      * @param slug     the name it is known by
@@ -38,8 +38,8 @@ public final class DataMap {
      * @param comments what the author wrote above the document's first line
      * @throws IllegalArgumentException when two entries share an id
      */
-    public DataMap(String slug, String title, List<DataMapField> fields, List<DataMapEntry> entries,
-                   DataMapComments comments) {
+    public Sheet(String slug, String title, List<SheetField> fields, List<SheetEntry> entries,
+                   SheetComments comments) {
         this.slug = slug;
         this.title = title;
         this.fields = List.copyOf(fields);
@@ -48,11 +48,11 @@ public final class DataMap {
         this.index = indexOf(this.entries);
     }
 
-    public DataMap(String slug, String title, List<DataMapField> fields, List<DataMapEntry> entries) {
-        this(slug, title, fields, entries, DataMapComments.NONE);
+    public Sheet(String slug, String title, List<SheetField> fields, List<SheetEntry> entries) {
+        this(slug, title, fields, entries, SheetComments.NONE);
     }
 
-    public DataMapComments comments() {
+    public SheetComments comments() {
         return comments;
     }
 
@@ -64,34 +64,34 @@ public final class DataMap {
         return title;
     }
 
-    public List<DataMapField> fields() {
+    public List<SheetField> fields() {
         return fields;
     }
 
     /** The blocks at the top of the map. */
-    public List<DataMapEntry> entries() {
+    public List<SheetEntry> entries() {
         return entries;
     }
 
     /** The entry of that id, however deep it is nested. */
-    public Optional<DataMapEntry> entry(String id) {
+    public Optional<SheetEntry> entry(String id) {
         return Optional.ofNullable(index.get(id));
     }
 
     /** Every entry, nested ones included, in the order written. */
-    public List<DataMapEntry> allEntries() {
+    public List<SheetEntry> allEntries() {
         return List.copyOf(index.values());
     }
 
-    public Optional<DataMapField> field(String name) {
+    public Optional<SheetField> field(String name) {
         return fields.stream().filter(field -> field.name().equals(name)).findFirst();
     }
 
-    private static Map<String, DataMapEntry> indexOf(List<DataMapEntry> entries) {
-        Map<String, DataMapEntry> index = new LinkedHashMap<>();
-        List<DataMapEntry> pending = new ArrayList<>(entries);
+    private static Map<String, SheetEntry> indexOf(List<SheetEntry> entries) {
+        Map<String, SheetEntry> index = new LinkedHashMap<>();
+        List<SheetEntry> pending = new ArrayList<>(entries);
         while (!pending.isEmpty()) {
-            DataMapEntry entry = pending.removeFirst();
+            SheetEntry entry = pending.removeFirst();
             if (index.putIfAbsent(entry.id(), entry) != null) {
                 throw new IllegalArgumentException("two entries are called '" + entry.id() + "': an id names one entry");
             }

@@ -6,7 +6,7 @@ footprint "Film box capacitor, 5 mm pitch, 3.5 mm wide" as box-capacitor-length-
         source "IEC 60286-2 lead spacing, makers' box sizes"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/radial-packages.jmd#box-5 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/radial-packages.sht#box-5 and the land pattern rules; regenerate, never edit.
     # Lead ⌀0.5: drill 0.7, pad 1.7, pin 1 square.
     pad "1" through-hole rectangle at -2.5, 0 size 1.7 x 1.7 drill 0.7
     pad "2" through-hole circle at 2.5, 0 size 1.7 x 1.7 drill 0.7

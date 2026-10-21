@@ -6,7 +6,7 @@ footprint "SOIC-16, 3.9 mm body" as soic-16-footprint {
         source "JEDEC MS-012"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#soic and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#soic and the land pattern rules; regenerate, never edit.
     # Leads span 5.8…6.2, foot 0.4…1.27, width 0.31…0.51; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 6.915, G = 2.978, X = 0.599; pad 1.95 × 0.6 centred at ±2.45.
     pad "1" surface rounded-rectangle at -2.45, -4.445 size 1.95 x 0.6 roundness 0.25

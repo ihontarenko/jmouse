@@ -6,7 +6,7 @@ footprint "Chip capacitor 0402 (1005 metric)" as chip-capacitor-0402-footprint {
         source "IEC 60384-22 dimensions, 0402 (1005 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#capacitor-0402 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#capacitor-0402 and the land pattern rules; regenerate, never edit.
     # Body 0.95…1.05 × 0.45…0.55, terminal 0.15…0.35; fillets toe 0.2, heel -0.05, side 0.
     # Z = 1.5, G = 0.43, X = 0.6; pad 0.55 × 0.6 centred at ±0.5.
     pad "1" surface rounded-rectangle at -0.5, 0 size 0.55 x 0.6 roundness 0.25

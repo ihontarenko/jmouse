@@ -6,7 +6,7 @@ footprint "QSOP-16, 3.9 mm body" as qsop-16-footprint {
         source "JEDEC MO-137"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#qsop and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#qsop and the land pattern rules; regenerate, never edit.
     # Leads span 5.8…6.2, foot 0.4…1.27, width 0.2…0.3; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 6.915, G = 2.978, X = 0.41; pad 1.95 × 0.45 centred at ±2.45.
     pad "1" surface rounded-rectangle at -2.45, -2.222 size 1.95 x 0.45 roundness 0.25

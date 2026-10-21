@@ -1,6 +1,6 @@
 package org.jmouse.parallax.store.kicad;
 
-import org.jmouse.datamap.DataMapReader;
+import org.jmouse.sheet.SheetReader;
 import org.jmouse.parallax.kicad.KiCadLibraryMap;
 import org.springframework.core.io.ResourceLoader;
 
@@ -30,7 +30,7 @@ public class KiCadLibraryMaps {
         }
         try {
             String text = resource.getContentAsString(StandardCharsets.UTF_8);
-            return KiCadLibraryMap.of(DataMapReader.read(properties.libraryMap(), text));
+            return KiCadLibraryMap.of(SheetReader.read(properties.libraryMap(), text));
         } catch (IOException unreadable) {
             throw new UncheckedIOException("The KiCad library map " + properties.libraryMap() + " cannot be read", unreadable);
         }

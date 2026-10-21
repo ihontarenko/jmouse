@@ -6,7 +6,7 @@ footprint "Axial diode DO-41 (DO-204AL), horizontal, 12.7 mm" as axial-diode-do-
         source "JEDEC DO-204 outlines"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/axial-packages.jmd#diode-do-41 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/axial-packages.sht#diode-do-41 and the land pattern rules; regenerate, never edit.
     # Lead ⌀0.86: drill 1.1, pad 2.1, pin 1 square.
     pad "1" through-hole rectangle at -6.35, 0 size 2.1 x 2.1 drill 1.1
     pad "2" through-hole circle at 6.35, 0 size 2.1 x 2.1 drill 1.1

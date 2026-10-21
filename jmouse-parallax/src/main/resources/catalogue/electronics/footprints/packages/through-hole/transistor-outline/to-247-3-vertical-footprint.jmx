@@ -6,7 +6,7 @@ footprint "TO-247-3, standing" as to-247-3-vertical-footprint {
         source "JEDEC TO-247 AD"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/inline-packages.jmd#to-247 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/inline-packages.sht#to-247 and the land pattern rules; regenerate, never edit.
     # Lead 1.4 × 0.8 at most: drill 1.85, pad 2.85 × 2.85, pin 1 square.
     pad "1" through-hole rectangle at -5.45, 0 size 2.85 x 2.85 drill 1.85
     pad "2" through-hole circle at 0, 0 size 2.85 x 2.85 drill 1.85

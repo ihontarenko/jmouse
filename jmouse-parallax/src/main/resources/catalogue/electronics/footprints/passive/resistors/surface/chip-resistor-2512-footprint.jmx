@@ -6,7 +6,7 @@ footprint "Chip resistor 2512 (6332 metric)" as chip-resistor-2512-footprint {
         source "IEC 60115-8 dimensions, 2512 (6332 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-2512 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-2512 and the land pattern rules; regenerate, never edit.
     # Body 6.25…6.45 × 3.05…3.35, terminal 0.35…0.85; fillets toe 0.35, heel 0, side 0.
     # Z = 7.179, G = 4.774, X = 3.37; pad 1.2 × 3.4 centred at ±3.
     pad "1" surface rounded-rectangle at -3, 0 size 1.2 x 3.4 roundness 0.25

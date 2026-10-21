@@ -1,6 +1,6 @@
 # A library map: which jMX component a KiCad symbol stands for, and which of its pins is which.
 # A symbol the map does not name is imported as a part without a model — never guessed.
-map "KiCad symbols as jMX components" as kicad-library {
+sheet "KiCad symbols as jMX components" as kicad-library {
     resistor "Resistor" {
         symbol "Device:R"
         component resistor
@@ -31,6 +31,6 @@ map "KiCad symbols as jMX components" as kicad-library {
     shift-register "74HC595" {
         symbol "74xx:74HC595"
         component 74hc595
-        data-sheet ../parts/74hc595.jmd#pins
+        data-sheet ../parts/74hc595.sht#pins
     }
 }

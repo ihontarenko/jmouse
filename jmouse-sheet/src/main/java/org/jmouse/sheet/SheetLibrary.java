@@ -1,4 +1,4 @@
-package org.jmouse.datamap;
+package org.jmouse.sheet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,18 +8,18 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * jMD documents by their paths — {@code parts/74hc595.jmd} —, and the links between them resolved. A link names its
- * document relative to the one that links: {@code 74hc595.jmd} beside it, {@code ../logic/74hc595.jmd} elsewhere.
+ * sheet documents by their paths — {@code parts/74hc595.sht} —, and the links between them resolved. A link names its
+ * document relative to the one that links: {@code 74hc595.sht} beside it, {@code ../logic/74hc595.sht} elsewhere.
  */
-public final class DataMapLibrary {
+public final class SheetLibrary {
 
     private static final String SEPARATOR = "/";
     private static final String CURRENT = ".";
     private static final String PARENT = "..";
 
-    private final Map<String, DataMap> documents;
+    private final Map<String, Sheet> documents;
 
-    private DataMapLibrary(Map<String, DataMap> documents) {
+    private SheetLibrary(Map<String, Sheet> documents) {
         this.documents = Collections.unmodifiableMap(documents);
     }
 
@@ -28,33 +28,33 @@ public final class DataMapLibrary {
      *
      * @param texts each document's text by its path, {@code /} separating directories
      */
-    public static DataMapLibrary read(Map<String, String> texts) {
-        Map<String, DataMap> documents = new LinkedHashMap<>();
-        texts.forEach((path, text) -> documents.put(normalized(path), DataMapReader.read(path, text)));
-        return new DataMapLibrary(documents);
+    public static SheetLibrary read(Map<String, String> texts) {
+        Map<String, Sheet> documents = new LinkedHashMap<>();
+        texts.forEach((path, text) -> documents.put(normalized(path), SheetReader.read(path, text)));
+        return new SheetLibrary(documents);
     }
 
-    public static DataMapLibrary of(Map<String, DataMap> documents) {
-        Map<String, DataMap> byPath = new LinkedHashMap<>();
-        documents.forEach((path, dataMap) -> byPath.put(normalized(path), dataMap));
-        return new DataMapLibrary(byPath);
+    public static SheetLibrary of(Map<String, Sheet> documents) {
+        Map<String, Sheet> byPath = new LinkedHashMap<>();
+        documents.forEach((path, sheet) -> byPath.put(normalized(path), sheet));
+        return new SheetLibrary(byPath);
     }
 
-    public Optional<DataMap> document(String path) {
+    public Optional<Sheet> document(String path) {
         return Optional.ofNullable(documents.get(normalized(path)));
     }
 
-    public Map<String, DataMap> documents() {
+    public Map<String, Sheet> documents() {
         return documents;
     }
 
     /** The entry a link names, the link read from the document at {@code from}. */
-    public Optional<DataMapEntry> entry(String from, DataMapValue.Link link) {
-        return document(resolve(from, link.document())).flatMap(dataMap -> dataMap.entry(link.id()));
+    public Optional<SheetEntry> entry(String from, SheetValue.Link link) {
+        return document(resolve(from, link.document())).flatMap(sheet -> sheet.entry(link.id()));
     }
 
     /** The field a link names; empty for a link to an entry, or one that leads nowhere. */
-    public Optional<DataMapField> field(String from, DataMapValue.Link link) {
+    public Optional<SheetField> field(String from, SheetValue.Link link) {
         if (!link.toField()) {
             return Optional.empty();
         }
@@ -64,11 +64,11 @@ public final class DataMapLibrary {
     /** Every link of every document that leads nowhere, as {@code path: link}. */
     public List<String> brokenLinks() {
         List<String> broken = new ArrayList<>();
-        documents.forEach((path, dataMap) -> {
-            List<DataMapValue.Link> links = new ArrayList<>();
-            dataMap.fields().forEach(field -> collect(field.value(), links));
-            dataMap.allEntries().forEach(entry -> entry.fields().forEach(field -> collect(field.value(), links)));
-            for (DataMapValue.Link link : links) {
+        documents.forEach((path, sheet) -> {
+            List<SheetValue.Link> links = new ArrayList<>();
+            sheet.fields().forEach(field -> collect(field.value(), links));
+            sheet.allEntries().forEach(entry -> entry.fields().forEach(field -> collect(field.value(), links)));
+            for (SheetValue.Link link : links) {
                 boolean leads = link.toField() ? field(path, link).isPresent() : entry(path, link).isPresent();
                 if (!leads) {
                     broken.add(path + ": " + link.written());
@@ -78,20 +78,20 @@ public final class DataMapLibrary {
         return broken;
     }
 
-    private static void collect(DataMapValue value, List<DataMapValue.Link> links) {
+    private static void collect(SheetValue value, List<SheetValue.Link> links) {
         switch (value) {
-            case DataMapValue.Link link -> links.add(link);
-            case DataMapValue.Range range -> {
+            case SheetValue.Link link -> links.add(link);
+            case SheetValue.Range range -> {
                 collect(range.from(), links);
                 collect(range.to(), links);
             }
-            case DataMapValue.Assignment assignment -> collect(assignment.value(), links);
-            case DataMapValue.Sequence sequence -> sequence.items().forEach(item -> collect(item, links));
-            case DataMapValue.Text ignored -> {
+            case SheetValue.Assignment assignment -> collect(assignment.value(), links);
+            case SheetValue.Sequence sequence -> sequence.items().forEach(item -> collect(item, links));
+            case SheetValue.Text ignored -> {
             }
-            case DataMapValue.Measure ignored -> {
+            case SheetValue.Measure ignored -> {
             }
-            case DataMapValue.Word ignored -> {
+            case SheetValue.Word ignored -> {
             }
         }
     }

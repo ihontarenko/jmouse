@@ -1,6 +1,6 @@
-# A data sheet in jMD: Texas Instruments SN74HC595, revision SCLS041I.
+# A data sheet as a sheet file: Texas Instruments SN74HC595, revision SCLS041I.
 # Every value says where it was read, so a reviewer can open the PDF at that page and table.
-map "74HC595 — 8-bit shift register with output latches" as 74hc595 {
+sheet "74HC595 — 8-bit shift register with output latches" as 74hc595 {
     manufacturer "Texas Instruments"
     document "https://www.ti.com/lit/ds/symlink/sn74hc595.pdf"
     revision "SCLS041I"
@@ -29,7 +29,7 @@ map "74HC595 — 8-bit shift register with output latches" as 74hc595 {
     }
 
     levels "Input and output levels" {
-        family ../logic/hc.jmd#levels
-        high-input-minimum ../logic/hc.jmd#levels/high-input-minimum
+        family ../logic/hc.sht#levels
+        high-input-minimum ../logic/hc.sht#levels/high-input-minimum
     }
 }

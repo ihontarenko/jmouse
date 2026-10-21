@@ -1,8 +1,8 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapReader;
-import org.jmouse.datamap.DataMapValue;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetReader;
+import org.jmouse.sheet.SheetValue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,9 +25,9 @@ import java.util.List;
 public final class FootprintLibraryGenerator {
 
     /** The package tables, in the order their footprints are written. */
-    static final List<String> TABLES = List.of("chip-packages.jmd", "small-outline-packages.jmd",
-            "dual-inline-packages.jmd", "header-packages.jmd", "axial-packages.jmd", "radial-packages.jmd",
-            "inline-packages.jmd", "hole-packages.jmd");
+    static final List<String> TABLES = List.of("chip-packages.sht", "small-outline-packages.sht",
+            "dual-inline-packages.sht", "header-packages.sht", "axial-packages.sht", "radial-packages.sht",
+            "inline-packages.sht", "hole-packages.sht");
 
     private static final String FOLDER = "footprint-standards/";
 
@@ -48,11 +48,11 @@ public final class FootprintLibraryGenerator {
 
     /** Every footprint the tables list. */
     public static List<StandardFootprint> generate() {
-        LandPatternRules rules = LandPatternRules.of(read("land-pattern-rules.jmd"));
+        LandPatternRules rules = LandPatternRules.of(read("land-pattern-rules.sht"));
         List<StandardFootprint> footprints = new ArrayList<>();
         for (String name : TABLES) {
-            DataMap table = read(name);
-            String form = table.field("form").map(field -> field.value() instanceof DataMapValue.Word(String word) ? word : "")
+            Sheet table = read(name);
+            String form = table.field("form").map(field -> field.value() instanceof SheetValue.Word(String word) ? word : "")
                     .orElseThrow(() -> new IllegalArgumentException("The package table " + name + " names no form"));
             FootprintFamily family = FootprintFamily.of(form)
                     .orElseThrow(() -> new IllegalArgumentException("No footprint family draws the form '" + form + "'"));
@@ -61,12 +61,12 @@ public final class FootprintLibraryGenerator {
         return footprints;
     }
 
-    private static DataMap read(String name) {
+    private static Sheet read(String name) {
         try (InputStream stream = FootprintLibraryGenerator.class.getClassLoader().getResourceAsStream(FOLDER + name)) {
             if (stream == null) {
                 throw new IllegalArgumentException("The package table " + FOLDER + name + " is not on the classpath");
             }
-            return DataMapReader.read(name, new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+            return SheetReader.read(name, new String(stream.readAllBytes(), StandardCharsets.UTF_8));
         } catch (IOException unreadable) {
             throw new UncheckedIOException(unreadable);
         }

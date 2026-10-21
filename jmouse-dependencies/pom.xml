@@ -213,7 +213,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-data-map</artifactId>
+                <artifactId>jmouse-sheet</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>

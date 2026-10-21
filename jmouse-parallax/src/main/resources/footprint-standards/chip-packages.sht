@@ -2,7 +2,7 @@
 # its title). Each family a part kind lands on names the size table it reads: a resistor's thick-film body and a
 # capacitor's ceramic body share a size code and not their terminals. A size is a range — the smallest to the largest
 # part a maker may ship —, and the land pattern rules read its ends.
-map "Chip packages" as chip-packages {
+sheet "Chip packages" as chip-packages {
     description "Two-terminal bodies with end terminals — chips by EIA size and MELF cylinders —, and the part kinds drawn on each."
     form chip
     source "IEC 60115-8 (fixed chip resistors) and IEC 60384-22 (multilayer ceramic chip capacitors), dimension tables"

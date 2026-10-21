@@ -1,4 +1,4 @@
-package org.jmouse.datamap;
+package org.jmouse.sheet;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,11 +10,11 @@ import java.util.Optional;
  * @param above  the comment lines written above it, {@code #} included, in order
  * @param beside the comment at the end of its own line, {@code #} included; empty for none
  */
-public record DataMapComments(List<String> above, Optional<String> beside) {
+public record SheetComments(List<String> above, Optional<String> beside) {
 
-    public static final DataMapComments NONE = new DataMapComments(List.of(), Optional.empty());
+    public static final SheetComments NONE = new SheetComments(List.of(), Optional.empty());
 
-    public DataMapComments {
+    public SheetComments {
         above = List.copyOf(above);
     }
 

@@ -1,7 +1,7 @@
 # Bodies standing over two leads in one row: aluminium cans and round LEDs seen from above as circles, ceramic discs and
 # film boxes as rectangles. A kind writes the name template, the outline, which pin is marked and the folder; a size its
 # body and its pitch — or, for a box family of one length and pitch, every width it is made in.
-map "Radial packages" as radial-packages {
+sheet "Radial packages" as radial-packages {
     description "Bodies standing over two leads in a row."
     form radial
 

@@ -6,7 +6,7 @@ footprint "Chip LED 1206 (3216 metric), hand soldering" as chip-led-1206-hand-so
         source "IEC 60115-8 dimensions, 1206 (3216 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-1206 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-1206 and the land pattern rules; regenerate, never edit.
     # Body 3…3.2 × 1.5…1.7, terminal 0.25…0.65; fillets toe 0.55, heel 0, side 0.05.
     # Z = 4.329, G = 1.89, X = 1.829; pad 1.2 × 1.85 centred at ±1.55.
     pad "1" surface rounded-rectangle at -1.55, 0 size 1.2 x 1.85 roundness 0.25

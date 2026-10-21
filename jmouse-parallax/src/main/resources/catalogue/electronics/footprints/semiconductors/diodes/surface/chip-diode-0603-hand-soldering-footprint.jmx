@@ -6,7 +6,7 @@ footprint "Chip diode 0603 (1608 metric), hand soldering" as chip-diode-0603-han
         source "IEC 60115-8 dimensions, 0603 (1608 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-0603 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-0603 and the land pattern rules; regenerate, never edit.
     # Body 1.5…1.7 × 0.7…0.9, terminal 0.1…0.4; fillets toe 0.55, heel 0, side 0.05.
     # Z = 2.829, G = 0.852, X = 1.029; pad 1 × 1.05 centred at ±0.9.
     pad "1" surface rounded-rectangle at -0.9, 0 size 1 x 1.05 roundness 0.25

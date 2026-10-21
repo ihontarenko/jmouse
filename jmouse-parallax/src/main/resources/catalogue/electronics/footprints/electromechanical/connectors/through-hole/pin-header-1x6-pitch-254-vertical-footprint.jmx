@@ -6,7 +6,7 @@ footprint "Pin header, 2.54 mm pitch, 1 × 6, vertical" as pin-header-1x6-pitch-
         source "IEC 60603-13 grid"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/header-packages.jmd#pin-header and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/header-packages.sht#pin-header and the land pattern rules; regenerate, never edit.
     # Square lead 0.64: drill 1.15, pad 2.15, pin 1 square.
     pad "1" through-hole rectangle at 0, -6.35 size 2.15 x 2.15 drill 1.15
     pad "2" through-hole circle at 0, -3.81 size 2.15 x 2.15 drill 1.15

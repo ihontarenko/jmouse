@@ -3,7 +3,7 @@
 # board; `lead` its width. A member is named `<name>-<leads>` — `soic-8`, `tssop-20` —, its outline's `suffix` after.
 # An outline whose leads skip places (SOT-23) writes them: `left 1 = -1, 2 = 1` in pitches from the middle, and is one
 # footprint named `name`.
-map "Small-outline packages" as small-outline-packages {
+sheet "Small-outline packages" as small-outline-packages {
     description "Gull-wing small-outline packages by JEDEC outline."
     form gull-wing
 

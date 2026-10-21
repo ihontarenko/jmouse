@@ -1,7 +1,7 @@
 # Dual in-line packages by JEDEC outline. A lead is `lead` wide and `thickness` thick at its largest; its hole is
 # drilled for the diagonal. A member is its lead count with its body length; it is named `dip-<leads>`, the outline's
 # `suffix` after.
-map "Dual in-line packages" as dual-inline-packages {
+sheet "Dual in-line packages" as dual-inline-packages {
     description "Dual in-line packages, two rows of holes on a 2.54 mm grid."
     form dual-inline
 

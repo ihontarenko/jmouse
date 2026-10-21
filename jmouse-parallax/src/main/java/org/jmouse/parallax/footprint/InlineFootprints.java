@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 
@@ -20,9 +20,9 @@ import static org.jmouse.parallax.footprint.SmallOutlineFootprints.rowY;
 final class InlineFootprints implements FootprintFamily {
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        for (DataMapEntry entry : table.entries()) {
+        for (SheetEntry entry : table.entries()) {
             footprints.add(footprint(new PackageTable(entry), rules));
         }
         return footprints;
@@ -66,7 +66,7 @@ final class InlineFootprints implements FootprintFamily {
         String summary = leads + "-lead " + outline.title() + " standing upright, through-hole, " + number(pitch)
                 + " mm pitch, the tab at the back";
         List<String> notes = List.of(
-                "Generated from footprint-standards/inline-packages.jmd#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
+                "Generated from footprint-standards/inline-packages.sht#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead " + number(outline.length("lead")) + " × " + number(outline.length("thickness")) + " at most: drill "
                         + number(drill) + ", pad " + number(padWidth) + " × " + number(padHeight) + ", pin 1 square.");
         return new StandardFootprint(slug, title, summary, outline.word("folder"), "through-hole", outline.standard(),

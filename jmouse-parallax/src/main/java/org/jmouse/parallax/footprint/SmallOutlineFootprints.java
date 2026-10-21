@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 
@@ -19,9 +19,9 @@ import static org.jmouse.parallax.footprint.FootprintDrafting.point;
 final class SmallOutlineFootprints implements FootprintFamily {
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        for (DataMapEntry entry : table.entries()) {
+        for (SheetEntry entry : table.entries()) {
             PackageTable outline = new PackageTable(entry);
             if (entry.value("left").isPresent()) {
                 footprints.add(footprint(outline, outline.length("body-length"), laidOut(outline),
@@ -105,7 +105,7 @@ final class SmallOutlineFootprints implements FootprintFamily {
         String summary = leads.size() + "-lead " + outline.title() + ", gull-wing, " + number(pitch) + " mm pitch, body "
                 + number(bodyWidth) + " × " + number(bodyLength) + " mm";
         List<String> notes = List.of(
-                "Generated from footprint-standards/small-outline-packages.jmd#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
+                "Generated from footprint-standards/small-outline-packages.sht#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
                 "Leads span " + number(span.minimum()) + "…" + number(span.maximum()) + ", foot " + number(foot.minimum()) + "…"
                         + number(foot.maximum()) + ", width " + number(lead.minimum()) + "…" + number(lead.maximum())
                         + "; fillets toe " + number(fillets.toe()) + ", heel " + number(fillets.heel()) + ", side " + number(fillets.side()) + ".",

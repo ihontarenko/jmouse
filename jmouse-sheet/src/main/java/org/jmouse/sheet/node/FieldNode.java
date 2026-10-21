@@ -1,7 +1,7 @@
-package org.jmouse.datamap.node;
+package org.jmouse.sheet.node;
 
-import org.jmouse.datamap.DataMapSource;
-import org.jmouse.datamap.DataMapValue;
+import org.jmouse.sheet.SheetSource;
+import org.jmouse.sheet.SheetValue;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpression;
 
@@ -11,8 +11,8 @@ import java.util.Optional;
 public class FieldNode extends AbstractExpression {
 
     private String name;
-    private DataMapValue value;
-    private DataMapSource source;
+    private SheetValue value;
+    private SheetSource source;
 
     public String getName() {
         return name;
@@ -22,19 +22,19 @@ public class FieldNode extends AbstractExpression {
         this.name = name;
     }
 
-    public DataMapValue getValue() {
+    public SheetValue getValue() {
         return value;
     }
 
-    public void setValue(DataMapValue value) {
+    public void setValue(SheetValue value) {
         this.value = value;
     }
 
-    public Optional<DataMapSource> getSource() {
+    public Optional<SheetSource> getSource() {
         return Optional.ofNullable(source);
     }
 
-    public void setSource(DataMapSource source) {
+    public void setSource(SheetSource source) {
         this.source = source;
     }
 

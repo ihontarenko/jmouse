@@ -5,12 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.List;
 
 /**
- * Where a KiCad import reads which catalogue component each KiCad symbol stands for — a jMD library map, the product's
+ * Where a KiCad import reads which catalogue component each KiCad symbol stands for — a sheet library map, the product's
  * own, since it names the product's components —, where it looks up the footprints a design's parts name, and where
  * the part search finds KiCad's installed symbols.
  *
  * <pre>{@code
- * jmouse.parallax.kicad.library-map: classpath:kicad/library-map.jmd
+ * jmouse.parallax.kicad.library-map: classpath:kicad/library-map.sht
  * jmouse.parallax.kicad.footprint-libraries: C:/Program Files/KiCad/8.0/share/kicad/footprints
  * jmouse.parallax.kicad.symbol-libraries: C:/Program Files/KiCad/8.0/share/kicad/symbols
  * }</pre>
@@ -25,7 +25,7 @@ import java.util.List;
 public record KiCadProperties(String libraryMap, List<String> footprintLibraries, List<String> symbolLibraries) {
 
     public KiCadProperties {
-        libraryMap = libraryMap == null || libraryMap.isBlank() ? "classpath:kicad/library-map.jmd" : libraryMap.strip();
+        libraryMap = libraryMap == null || libraryMap.isBlank() ? "classpath:kicad/library-map.sht" : libraryMap.strip();
         footprintLibraries = footprintLibraries == null ? List.of()
                 : footprintLibraries.stream().filter(folder -> !folder.isBlank()).map(String::strip).toList();
         symbolLibraries = symbolLibraries == null ? List.of()

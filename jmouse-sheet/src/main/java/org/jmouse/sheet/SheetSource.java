@@ -1,4 +1,4 @@
-package org.jmouse.datamap;
+package org.jmouse.sheet;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -9,9 +9,9 @@ import java.util.Optional;
  * Where in the original document a value was read: {@code source page 7 table 6.3}. A citation is pairs of a word and
  * what it names, in the order written; which words a citation uses is the author's, not this language's.
  */
-public record DataMapSource(Map<String, String> citation) {
+public record SheetSource(Map<String, String> citation) {
 
-    public DataMapSource {
+    public SheetSource {
         citation = Collections.unmodifiableMap(new LinkedHashMap<>(citation));
     }
 
@@ -25,11 +25,11 @@ public record DataMapSource(Map<String, String> citation) {
         return part("page").filter(page -> page.chars().allMatch(Character::isDigit)).map(Integer::valueOf);
     }
 
-    /** The citation as jMD writes it, the word {@code source} included. */
+    /** The citation as sheet writes it, the word {@code source} included. */
     public String written() {
         StringBuilder written = new StringBuilder("source");
         citation.forEach((word, named) -> written.append(' ').append(word).append(' ')
-                .append(bare(named) ? named : DataMapValue.quoted(named)));
+                .append(bare(named) ? named : SheetValue.quoted(named)));
         return written.toString();
     }
 

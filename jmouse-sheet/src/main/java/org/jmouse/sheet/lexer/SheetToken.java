@@ -1,19 +1,19 @@
-package org.jmouse.datamap.lexer;
+package org.jmouse.sheet.lexer;
 
 import org.jmouse.el.lexer.Token;
 
 /**
- * The words jMD gives a meaning of its own.
+ * The words sheet gives a meaning of its own.
  *
  * <p>⚠️ None of them is reserved. A field may be called {@code map} or {@code source} and a value may be the word
  * {@code as}: a name and a value are read as the words they are written with, whatever kind the lexer gave their
  * tokens. These kinds mark where a word is the language's — the head of a document, a citation — so that only those
  * places read it so.</p>
  */
-public enum DataMapToken implements Token.Type {
+public enum SheetToken implements Token.Type {
 
-    /** {@code map "Title" as slug { … }} — the document, one per file. */
-    T_MAP(10000, "map"),
+    /** {@code sheet "Title" as slug { … }} — the document, one per file. */
+    T_SHEET(10000, "sheet"),
 
     /** {@code as slug} — the name a document is known by. */
     T_AS(10100, "as"),
@@ -24,7 +24,7 @@ public enum DataMapToken implements Token.Type {
     private final int      type;
     private final String[] values;
 
-    DataMapToken(final int type, final String... values) {
+    SheetToken(final int type, final String... values) {
         this.type = type;
         this.values = values;
     }

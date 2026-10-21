@@ -6,7 +6,7 @@ footprint "SOT-323, 1.25 mm body" as sot-323-footprint {
         source "JEDEC MO-203 AA, the makers' tighter outline (Nexperia SOT323)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#sot-323 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#sot-323 and the land pattern rules; regenerate, never edit.
     # Leads span 2…2.2, foot 0.25…0.45, width 0.15…0.3; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 2.929, G = 0.509, X = 0.397; pad 1.2 × 0.4 centred at ±0.85.
     pad "1" surface rounded-rectangle at -0.85, -0.65 size 1.2 x 0.4 roundness 0.25

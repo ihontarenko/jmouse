@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 import org.jmouse.parallax.script.Block.FootprintPad;
@@ -21,9 +21,9 @@ import static org.jmouse.parallax.footprint.FootprintDrafting.number;
 final class HoleFootprints implements FootprintFamily {
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        for (DataMapEntry kind : table.entries()) {
+        for (SheetEntry kind : table.entries()) {
             if (kind.value("diameters").isPresent()) {
                 PackageTable testPoints = new PackageTable(kind);
                 for (double diameter : testPoints.lengths("diameters")) {
@@ -31,7 +31,7 @@ final class HoleFootprints implements FootprintFamily {
                 }
                 continue;
             }
-            for (DataMapEntry screwEntry : kind.entries()) {
+            for (SheetEntry screwEntry : kind.entries()) {
                 PackageTable screw = PackageTable.inheriting(kind, screwEntry);
                 footprints.add(mountingHole(screw, "", null, false, rules));
                 footprints.add(mountingHole(screw, "-pad", "head", false, rules));
@@ -77,7 +77,7 @@ final class HoleFootprints implements FootprintFamily {
         String title = "Mounting hole " + screw.title() + (ring == null ? "" : ", " + how);
         String summary = screw.title() + " screw, " + number(hole) + " mm hole, " + how;
         List<String> notes = List.of(
-                "Generated from footprint-standards/hole-packages.jmd#" + screw.id() + "; regenerate, never edit.",
+                "Generated from footprint-standards/hole-packages.sht#" + screw.id() + "; regenerate, never edit.",
                 "Hole " + number(hole) + " (ISO 273 fine); head ⌀" + number(head)
                         + (ring == null ? "" : ", ring ⌀" + number(pad) + " = head + 2 × " + number(screw.length("head-clearance"))) + ".");
         return new StandardFootprint(slug, title, summary, screw.word("folder"), "through-hole", screw.standard(),
@@ -97,7 +97,7 @@ final class HoleFootprints implements FootprintFamily {
         String slug = PackageTable.named(testPoints.word("name"), words) + "-footprint";
         String title = "Test point, " + number(diameter) + " mm pad";
         String summary = "A bare round pad " + number(diameter) + " mm across, for a probe";
-        List<String> notes = List.of("Generated from footprint-standards/hole-packages.jmd#" + testPoints.id() + "; regenerate, never edit.");
+        List<String> notes = List.of("Generated from footprint-standards/hole-packages.sht#" + testPoints.id() + "; regenerate, never edit.");
         return new StandardFootprint(slug, title, summary, testPoints.word("folder"), "surface", testPoints.standard(), rules.license(), notes,
                 new Block.Footprint(List.of(drafting.roundSurfacePad("1", diameter)), outlines));
     }

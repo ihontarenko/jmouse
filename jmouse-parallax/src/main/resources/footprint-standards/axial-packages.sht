@@ -3,7 +3,7 @@
 # straight lead it keeps out of the body before a bend —, a size its body: `length` and `diameter` at their largest and
 # the lead's diameter. A size is laid flat at every pitch that leaves `bend` free on each side, and stood on end at
 # every standing pitch its body clears.
-map "Axial packages" as axial-packages {
+sheet "Axial packages" as axial-packages {
     description "Cylindrical bodies with a lead out of each end."
     form axial
 

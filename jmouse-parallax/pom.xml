@@ -94,10 +94,10 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        <!-- jMD: the library map a KiCad import reads which component each KiCad symbol stands for -->
+        <!-- sheet: the library map a KiCad import reads which component each KiCad symbol stands for -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-data-map</artifactId>
+            <artifactId>jmouse-sheet</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- KiCad, the model: schematics and symbols are imported to and exported from jMX (org.jmouse.parallax.kicad) -->

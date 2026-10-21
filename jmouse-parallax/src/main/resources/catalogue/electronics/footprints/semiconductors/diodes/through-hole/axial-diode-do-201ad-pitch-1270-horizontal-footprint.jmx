@@ -6,7 +6,7 @@ footprint "Axial diode DO-201AD, horizontal, 12.7 mm" as axial-diode-do-201ad-pi
         source "JEDEC DO-204 outlines"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/axial-packages.jmd#diode-do-201ad and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/axial-packages.sht#diode-do-201ad and the land pattern rules; regenerate, never edit.
     # Lead ⌀1.3: drill 1.5, pad 2.5, pin 1 square.
     pad "1" through-hole rectangle at -6.35, 0 size 2.5 x 2.5 drill 1.5
     pad "2" through-hole circle at 6.35, 0 size 2.5 x 2.5 drill 1.5

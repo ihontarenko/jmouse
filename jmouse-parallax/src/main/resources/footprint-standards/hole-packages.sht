@@ -3,7 +3,7 @@
 # A screw's `hole` is ISO 273's fine clearance; `head` the pan head it is held by (ISO 7045) and `countersunk-head` a
 # countersunk one (DIN 965). Each screw is a bare hole (`mounting-hole-m3`), a plated ring under its head (`-pad`), the
 # ring stitched to the other side by vias (`-pad-via`), and a ring under a countersunk head (`-din-965-pad`).
-map "Holes and pads" as hole-packages {
+sheet "Holes and pads" as hole-packages {
     description "Mounting holes for metric screws, and test points."
     form hole
 

@@ -6,7 +6,7 @@ footprint "Mounting hole M6, a plated ring under a countersunk head" as mounting
         source "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/hole-packages.jmd#screw-m6; regenerate, never edit.
+    # Generated from footprint-standards/hole-packages.sht#screw-m6; regenerate, never edit.
     # Hole 6.4 (ISO 273 fine); head ⌀11.3, ring ⌀12.1 = head + 2 × 0.4.
     pad "1" through-hole circle at 0, 0 size 12.1 x 12.1 drill 6.4
     outline fabrication width 0.1 "M-5.65 0A5.65 5.65 0 1 0 5.65 0A5.65 5.65 0 1 0 -5.65 0Z"

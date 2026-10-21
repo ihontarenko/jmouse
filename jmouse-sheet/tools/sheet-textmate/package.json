@@ -1,0 +1,38 @@
+{
+  "name": "sheet-textmate",
+  "displayName": "jMouse Sheet (.sht, .dsh, .jmt)",
+  "description": "Syntax highlighting for jMouse sheet files — tables of facts: data sheets, package dimensions, library maps, taxonomies.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "sheet",
+        "aliases": [
+          "jMouse Sheet",
+          "sheet"
+        ],
+        "extensions": [
+          ".sht",
+          ".dsh",
+          ".jmt"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sheet",
+        "scopeName": "source.sheet",
+        "path": "./syntaxes/sheet.tmLanguage.json"
+      }
+    ]
+  }
+}

@@ -1,31 +1,31 @@
-package org.jmouse.datamap.parser;
+package org.jmouse.sheet.parser;
 
 import org.jmouse.core.Priority;
-import org.jmouse.datamap.DataMapSyntaxException;
-import org.jmouse.datamap.node.FieldNode;
+import org.jmouse.sheet.SheetSyntaxException;
+import org.jmouse.sheet.node.FieldNode;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.AbstractParser;
 import org.jmouse.el.parser.ParserContext;
 
 /** {@code name value [source …]} — a line that opens no block. */
-@Priority(DataMapParserPriority.FIELD)
+@Priority(SheetParserPriority.FIELD)
 public class FieldParser extends AbstractParser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         FieldNode field = new FieldNode();
-        field.setSpan(DataMapReading.span(cursor));
-        field.setName(DataMapNames.name(cursor, "a field's name"));
-        if (DataMapValueReading.atValueEnd(cursor)) {
-            throw new DataMapSyntaxException(cursor, "'" + field.getName() + "' has no value");
+        field.setSpan(SheetReading.span(cursor));
+        field.setName(SheetNames.name(cursor, "a field's name"));
+        if (SheetValueReading.atValueEnd(cursor)) {
+            throw new SheetSyntaxException(cursor, "'" + field.getName() + "' has no value");
         }
-        field.setValue(DataMapValueReading.value(cursor, context));
-        if (DataMapReading.atSource(cursor)) {
-            field.setSource(DataMapReading.citation(cursor));
+        field.setValue(SheetValueReading.value(cursor, context));
+        if (SheetReading.atSource(cursor)) {
+            field.setSource(SheetReading.citation(cursor));
         }
-        if (!DataMapReading.atLineEnd(cursor)) {
-            throw new DataMapSyntaxException(cursor, "'" + cursor.lookAt(0).value() + "' follows the value of '"
+        if (!SheetReading.atLineEnd(cursor)) {
+            throw new SheetSyntaxException(cursor, "'" + cursor.lookAt(0).value() + "' follows the value of '"
                     + field.getName() + "': a value is one value, or several separated by commas, then at most its source");
         }
         parent.add(field);
@@ -33,6 +33,6 @@ public class FieldParser extends AbstractParser {
 
     @Override
     public boolean supports(TokenCursor cursor) {
-        return DataMapReading.atWord(cursor) && !DataMapReading.opensBlock(cursor);
+        return SheetReading.atWord(cursor) && !SheetReading.opensBlock(cursor);
     }
 }

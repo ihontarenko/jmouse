@@ -1,5 +1,5 @@
 # The 74HC family's input and output levels at a 4.5 V supply, as Texas Instruments' HC data sheets give them.
-map "74HC family — logic levels at 4.5 V" as hc {
+sheet "74HC family — logic levels at 4.5 V" as hc {
     family hc
     supply 4.5 V
 

@@ -96,7 +96,7 @@
         <module>jmouse-formula</module>
         <module>jmouse-spice</module>
         <module>jmouse-units</module>
-        <module>jmouse-data-map</module>
+        <module>jmouse-sheet</module>
         <module>jmouse-kicad-parser</module>
         <module>jmouse-kicad</module>
         <module>jmouse-parallax</module>

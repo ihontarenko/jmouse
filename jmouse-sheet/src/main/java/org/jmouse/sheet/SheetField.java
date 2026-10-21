@@ -1,11 +1,11 @@
-package org.jmouse.datamap;
+package org.jmouse.sheet;
 
 import java.util.Optional;
 
 /** One line of an entry: a name, its value, where the value was read, and what the author wrote about it. */
-public record DataMapField(String name, DataMapValue value, Optional<DataMapSource> source, DataMapComments comments) {
+public record SheetField(String name, SheetValue value, Optional<SheetSource> source, SheetComments comments) {
 
-    public DataMapField(String name, DataMapValue value) {
-        this(name, value, Optional.empty(), DataMapComments.NONE);
+    public SheetField(String name, SheetValue value) {
+        this(name, value, Optional.empty(), SheetComments.NONE);
     }
 }

@@ -162,10 +162,10 @@ public final class SourceReading {
 
     /**
      * Reads a word as a person sees it: the run of tokens written with nothing between them —
-     * {@code 74hc595}, {@code so-16}, {@code 2.2µs}, {@code °C}, {@code ../logic/hc.jmd#levels}.
+     * {@code 74hc595}, {@code so-16}, {@code 2.2µs}, {@code °C}, {@code ../logic/hc.sht#levels}.
      *
      * <p>⚠️ <strong>The boundary is the source, not the token types.</strong> The expression lexer cuts
-     * {@code 74hc595.jmd#link-a} into seven tokens of five kinds, and a word made of units, part numbers
+     * {@code 74hc595.sht#link-a} into seven tokens of five kinds, and a word made of units, part numbers
      * and paths has no grammar of token kinds to describe it; what makes it one word is that nobody
      * pressed the space bar inside it.</p>
      *

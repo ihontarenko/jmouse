@@ -6,7 +6,7 @@ footprint "SSOP-24, 5.3 mm body" as ssop-24-footprint {
         source "JEDEC MO-150"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#ssop and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#ssop and the land pattern rules; regenerate, never edit.
     # Leads span 7.4…8.2, foot 0.55…0.95, width 0.22…0.38; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 8.908, G = 5.104, X = 0.475; pad 1.9 × 0.5 centred at ±3.5.
     pad "1" surface rounded-rectangle at -3.5, -3.575 size 1.9 x 0.5 roundness 0.25

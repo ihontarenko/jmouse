@@ -1,4 +1,4 @@
-package org.jmouse.datamap;
+package org.jmouse.sheet;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,50 +19,50 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** The examples shipped in {@code jmd/examples/} read, write back the same, and link only to what exists. */
-class DataMapExamplesTest {
+class SheetExamplesTest {
 
-    private static final String EXAMPLES = "jmd/examples";
+    private static final String EXAMPLES = "sheet/examples";
 
     @Test
     void everyExampleWritesBackAsItsFile() throws IOException, URISyntaxException {
         Map<String, String> examples = examples();
         assertFalse(examples.isEmpty());
         examples.forEach((path, text) -> {
-            DataMap dataMap = DataMapReader.read(path, text);
+            Sheet sheet = SheetReader.read(path, text);
             // The examples are written as the writer writes, so reading one and writing it back gives the file itself,
             // its comments included.
-            assertEquals(text.replace("\r\n", "\n"), DataMapWriter.write(dataMap), path);
+            assertEquals(text.replace("\r\n", "\n"), SheetWriter.write(sheet), path);
         });
     }
 
     @Test
     void examplesLinkOnlyToWhatExists() throws IOException, URISyntaxException {
-        DataMapLibrary library = DataMapLibrary.read(examples());
+        SheetLibrary library = SheetLibrary.read(examples());
         assertEquals(List.of(), library.brokenLinks());
 
-        DataMapEntry levels = library.document("parts/74hc595.jmd").orElseThrow().entry("levels").orElseThrow();
-        DataMapValue.Link highInput = (DataMapValue.Link) levels.value("high-input-minimum").orElseThrow();
-        DataMapField resolved = library.field("parts/74hc595.jmd", highInput).orElseThrow();
-        assertEquals(3.15, ((DataMapValue.Measure) resolved.value()).quantity().value(), 1e-12);
+        SheetEntry levels = library.document("parts/74hc595.sht").orElseThrow().entry("levels").orElseThrow();
+        SheetValue.Link highInput = (SheetValue.Link) levels.value("high-input-minimum").orElseThrow();
+        SheetField resolved = library.field("parts/74hc595.sht", highInput).orElseThrow();
+        assertEquals(3.15, ((SheetValue.Measure) resolved.value()).quantity().value(), 1e-12);
     }
 
     @Test
     void theLibraryMapNamesSymbolsAndPins() throws IOException, URISyntaxException {
-        DataMap map = DataMapLibrary.read(examples()).document("kicad/library-map.jmd").orElseThrow();
-        DataMapEntry diode = map.allEntries().stream()
-                .filter(entry -> entry.value("symbol").equals(Optional.of(new DataMapValue.Text("Device:D"))))
+        Sheet map = SheetLibrary.read(examples()).document("kicad/library-map.sht").orElseThrow();
+        SheetEntry diode = map.allEntries().stream()
+                .filter(entry -> entry.value("symbol").equals(Optional.of(new SheetValue.Text("Device:D"))))
                 .findFirst().orElseThrow();
-        assertEquals(new DataMapValue.Word("1n4148"), diode.value("component").orElseThrow());
-        DataMapValue.Sequence pins = assertInstanceOf(DataMapValue.Sequence.class, diode.value("pins").orElseThrow());
-        assertTrue(pins.items().contains(new DataMapValue.Assignment("1", new DataMapValue.Word("k"))));
+        assertEquals(new SheetValue.Word("1n4148"), diode.value("component").orElseThrow());
+        SheetValue.Sequence pins = assertInstanceOf(SheetValue.Sequence.class, diode.value("pins").orElseThrow());
+        assertTrue(pins.items().contains(new SheetValue.Assignment("1", new SheetValue.Word("k"))));
     }
 
-    /** Every {@code .jmd} under the examples, by its path relative to them. */
+    /** Every {@code .sht} under the examples, by its path relative to them. */
     private static Map<String, String> examples() throws IOException, URISyntaxException {
-        Path root = Path.of(DataMapExamplesTest.class.getClassLoader().getResource(EXAMPLES).toURI());
+        Path root = Path.of(SheetExamplesTest.class.getClassLoader().getResource(EXAMPLES).toURI());
         Map<String, String> examples = new LinkedHashMap<>();
         try (Stream<Path> files = Files.walk(root)) {
-            for (Path file : files.filter(path -> path.toString().endsWith(".jmd")).sorted().toList()) {
+            for (Path file : files.filter(path -> path.toString().endsWith(".sht")).sorted().toList()) {
                 examples.put(root.relativize(file).toString().replace('\\', '/'), Files.readString(file, StandardCharsets.UTF_8));
             }
         }

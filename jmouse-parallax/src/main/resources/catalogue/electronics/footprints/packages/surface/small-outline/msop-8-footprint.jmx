@@ -6,7 +6,7 @@ footprint "MSOP-8, 3 mm body" as msop-8-footprint {
         source "JEDEC MO-187 AA"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#msop-8 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#msop-8 and the land pattern rules; regenerate, never edit.
     # Leads span 4.75…5.05, foot 0.4…0.7, width 0.22…0.38; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 5.77, G = 2.828, X = 0.475; pad 1.45 × 0.5 centred at ±2.15.
     pad "1" surface rounded-rectangle at -2.15, -0.975 size 1.45 x 0.5 roundness 0.25

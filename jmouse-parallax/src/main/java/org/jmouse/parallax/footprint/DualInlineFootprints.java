@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 
@@ -20,9 +20,9 @@ import static org.jmouse.parallax.footprint.SmallOutlineFootprints.rowY;
 final class DualInlineFootprints implements FootprintFamily {
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        for (DataMapEntry entry : table.entries()) {
+        for (SheetEntry entry : table.entries()) {
             PackageTable outline = new PackageTable(entry);
             for (Map.Entry<Integer, Double> member : outline.members("members").entrySet()) {
                 footprints.add(footprint(outline, member.getKey(), member.getValue(), rules));
@@ -75,7 +75,7 @@ final class DualInlineFootprints implements FootprintFamily {
         String summary = leads + "-lead dual in-line package, through-hole, " + number(pitch) + " mm pitch, rows "
                 + number(row) + " mm apart";
         List<String> notes = List.of(
-                "Generated from footprint-standards/dual-inline-packages.jmd#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
+                "Generated from footprint-standards/dual-inline-packages.sht#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead " + number(outline.length("lead")) + " × " + number(outline.length("thickness")) + " at most: drill "
                         + number(drill) + ", pad " + number(pad) + ", pin 1 square; body " + number(bodyWidth) + " × " + number(bodyLength) + ".");
         return new StandardFootprint(slug, title, summary, outline.word("folder"), "through-hole", outline.standard(),

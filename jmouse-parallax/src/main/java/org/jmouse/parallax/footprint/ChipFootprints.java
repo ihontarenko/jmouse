@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 
@@ -23,14 +23,14 @@ final class ChipFootprints implements FootprintFamily {
     private static final double SMALL_BODY = 1.55;
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        DataMapEntry kinds = table.entry("kinds").orElseThrow(() -> new IllegalArgumentException("The chip table has no kinds"));
-        for (DataMapEntry kindEntry : kinds.entries()) {
+        SheetEntry kinds = table.entry("kinds").orElseThrow(() -> new IllegalArgumentException("The chip table has no kinds"));
+        for (SheetEntry kindEntry : kinds.entries()) {
             PackageTable kind = new PackageTable(kindEntry);
             PackageTable sizes = new PackageTable(table.entry(kind.word("sizes")).orElseThrow(() ->
                     new IllegalArgumentException("The chip kind '" + kind.id() + "' reads a size table that is not there")));
-            for (DataMapEntry sizeEntry : sizes.entry().entries()) {
+            for (SheetEntry sizeEntry : sizes.entry().entries()) {
                 PackageTable size = new PackageTable(sizeEntry);
                 footprints.add(footprint(kind, sizes, size, false, rules));
                 if (!"no".equals(kind.optionalWord("hand-soldering").orElse("yes"))) {
@@ -87,7 +87,7 @@ final class ChipFootprints implements FootprintFamily {
         String summary = kindTitle + ", " + size.title() + " body, " + (handSoldering
                 ? "pads lengthened for a soldering iron" : "reflow pads") + (polarised ? "; pad 1 is the cathode" : "");
         List<String> notes = List.of(
-                "Generated from footprint-standards/chip-packages.jmd#" + size.id() + " and the land pattern rules; regenerate, never edit.",
+                "Generated from footprint-standards/chip-packages.sht#" + size.id() + " and the land pattern rules; regenerate, never edit.",
                 "Body " + number(length.minimum()) + "…" + number(length.maximum()) + " × " + number(width.minimum()) + "…"
                         + number(width.maximum()) + ", terminal " + number(terminal.minimum()) + "…" + number(terminal.maximum())
                         + "; fillets toe " + number(fillets.toe()) + ", heel " + number(fillets.heel()) + ", side " + number(fillets.side()) + ".",

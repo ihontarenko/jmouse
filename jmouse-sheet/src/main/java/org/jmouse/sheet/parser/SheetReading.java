@@ -1,8 +1,8 @@
-package org.jmouse.datamap.parser;
+package org.jmouse.sheet.parser;
 
-import org.jmouse.datamap.DataMapSource;
-import org.jmouse.datamap.DataMapSyntaxException;
-import org.jmouse.datamap.lexer.DataMapToken;
+import org.jmouse.sheet.SheetSource;
+import org.jmouse.sheet.SheetSyntaxException;
+import org.jmouse.sheet.lexer.SheetToken;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
@@ -14,16 +14,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * What every jMD parser agrees on: what a word is, where a line ends, and how a citation is read.
+ * What every sheet parser agrees on: what a word is, where a line ends, and how a citation is read.
  *
  * <ul>
  *     <li>A word is what is written with no blank inside it — {@code 74hc595}, {@code °C},
- *     {@code ../logic/hc.jmd#levels} —, ended where it touches one of {@link #SEPARATORS}.</li>
+ *     {@code ../logic/hc.sht#levels} —, ended where it touches one of {@link #SEPARATORS}.</li>
  *     <li>A line ends at a line break, a {@code ;}, a brace, or a {@code #} standing apart, which begins a comment;
  *     a {@code #} inside a word is a link's.</li>
  * </ul>
  */
-final class DataMapReading {
+final class SheetReading {
 
     /** What ends a word even where it touches it: {@code a, b} is two words, not {@code a,}. */
     static final Set<String> SEPARATORS = Set.of(",", ";", "=", "(", ")", "[", "]", "{", "}", ":");
@@ -32,7 +32,7 @@ final class DataMapReading {
     static final String COMMA = ",";
     static final String RANGE = "..";
 
-    private DataMapReading() {
+    private SheetReading() {
     }
 
     /** The word the cursor stands on, read whole. */
@@ -71,7 +71,7 @@ final class DataMapReading {
     /** Whether the cursor stands on the word {@code source} beginning a citation, not inside a longer word. */
     static boolean atSource(TokenCursor cursor) {
         Token current = cursor.lookAt(0);
-        return current != null && current.type() == DataMapToken.T_SOURCE
+        return current != null && current.type() == SheetToken.T_SOURCE
                 && !SourceReading.touches(cursor, cursor.lookAt(-1), current)
                 && !SourceReading.touches(cursor, current, cursor.lookAt(1));
     }
@@ -90,26 +90,26 @@ final class DataMapReading {
     }
 
     /** {@code source page 7 table "6.3 Recommended"}, to the end of the line; the cursor stands on {@code source}. */
-    static DataMapSource citation(TokenCursor cursor) {
-        Token source = cursor.ensure(DataMapToken.T_SOURCE);
+    static SheetSource citation(TokenCursor cursor) {
+        Token source = cursor.ensure(SheetToken.T_SOURCE);
         Map<String, String> citation = new LinkedHashMap<>();
         while (!atLineEnd(cursor)) {
             if (!atWord(cursor)) {
-                throw new DataMapSyntaxException(cursor, "a source is pairs of a word and what it names: "
+                throw new SheetSyntaxException(cursor, "a source is pairs of a word and what it names: "
                         + "source page 7 table 6.3");
             }
             String word = word(cursor);
             if (atLineEnd(cursor)) {
-                throw new DataMapSyntaxException(cursor, "'" + word + "' in a source names nothing");
+                throw new SheetSyntaxException(cursor, "'" + word + "' in a source names nothing");
             }
             String named = cursor.isCurrent(BasicToken.T_STRING)
                     ? text(cursor.ensure(BasicToken.T_STRING)) : word(cursor);
             citation.put(word, named);
         }
         if (citation.isEmpty()) {
-            throw new DataMapSyntaxException(cursor, source, "a source names where: source page 7 table 6.3");
+            throw new SheetSyntaxException(cursor, source, "a source names where: source page 7 table 6.3");
         }
-        return new DataMapSource(citation);
+        return new SheetSource(citation);
     }
 
     /** A text's words: its quotes taken off and its escapes read — {@code \"} a quote, {@code \\} a backslash. */

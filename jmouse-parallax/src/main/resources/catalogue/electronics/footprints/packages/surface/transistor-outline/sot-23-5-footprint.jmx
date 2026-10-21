@@ -6,7 +6,7 @@ footprint "SOT-23-5, 1.6 mm body" as sot-23-5-footprint {
         source "JEDEC MO-178 AA"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#sot-23-5 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#sot-23-5 and the land pattern rules; regenerate, never edit.
     # Leads span 2.6…3, foot 0.3…0.6, width 0.3…0.5; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 3.715, G = 0.898, X = 0.589; pad 1.4 × 0.6 centred at ±1.15.
     pad "1" surface rounded-rectangle at -1.15, -0.95 size 1.4 x 0.6 roundness 0.25

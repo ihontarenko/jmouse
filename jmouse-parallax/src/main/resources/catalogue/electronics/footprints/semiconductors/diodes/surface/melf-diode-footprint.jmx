@@ -6,7 +6,7 @@ footprint "MELF diode MELF (DO-213AB)" as melf-diode-footprint {
         source "JEDEC DO-213 and the makers' MELF outlines, MELF (DO-213AB)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#melf-full and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#melf-full and the land pattern rules; regenerate, never edit.
     # Body 4.8…5.2 × 2.4…2.6, terminal 0.4…0.6; fillets toe 0.4, heel 0.2, side 0.1.
     # Z = 6.015, G = 3.342, X = 2.829; pad 1.35 × 2.85 centred at ±2.35.
     pad "1" surface rounded-rectangle at -2.35, 0 size 1.35 x 2.85 roundness 0.25

@@ -1,6 +1,6 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
+import org.jmouse.sheet.Sheet;
 
 import java.util.List;
 import java.util.Map;
@@ -29,5 +29,5 @@ public sealed interface FootprintFamily permits ChipFootprints, SmallOutlineFoot
     }
 
     /** The footprints a package table lists, worked out by the rules. */
-    List<StandardFootprint> footprints(DataMap table, LandPatternRules rules);
+    List<StandardFootprint> footprints(Sheet table, LandPatternRules rules);
 }

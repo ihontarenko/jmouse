@@ -6,7 +6,7 @@ footprint "Radial electrolytic capacitor, 16 mm can" as radial-electrolytic-capa
         source "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/radial-packages.jmd#can-16 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/radial-packages.sht#can-16 and the land pattern rules; regenerate, never edit.
     # Lead ⌀0.8: drill 1, pad 2, pin 1 square.
     pad "1" through-hole rectangle at -3.75, 0 size 2 x 2 drill 1
     pad "2" through-hole circle at 3.75, 0 size 2 x 2 drill 1

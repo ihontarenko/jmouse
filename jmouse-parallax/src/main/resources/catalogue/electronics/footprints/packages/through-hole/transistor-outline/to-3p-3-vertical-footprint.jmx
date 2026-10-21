@@ -6,7 +6,7 @@ footprint "TO-3P-3, standing" as to-3p-3-vertical-footprint {
         source "JEITA SC-65"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/inline-packages.jmd#to-3p and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/inline-packages.sht#to-3p and the land pattern rules; regenerate, never edit.
     # Lead 1.2 × 0.7 at most: drill 1.6, pad 2.6 × 2.6, pin 1 square.
     pad "1" through-hole rectangle at -5.45, 0 size 2.6 x 2.6 drill 1.6
     pad "2" through-hole circle at 0, 0 size 2.6 x 2.6 drill 1.6

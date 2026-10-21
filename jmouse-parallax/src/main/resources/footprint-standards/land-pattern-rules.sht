@@ -7,7 +7,7 @@
 # (Z + G) / 4. Through-hole leads: drill = the lead's largest cross-section (a round lead's diameter, a flat or square
 # lead's diagonal) + the allowance, up to the drill step; pad = drill + 2 × ring, narrowed to pitch − gap where
 # neighbours would touch.
-map "Land pattern rules" as land-pattern-rules {
+sheet "Land pattern rules" as land-pattern-rules {
     description "The fillets, drills, rings and drawing lines every footprint of our library is generated with."
     source "IPC-7351B section 3 (land pattern goals), IPC-2222 section 9 (holes)"
     license "CERN-OHL-W-2.0"

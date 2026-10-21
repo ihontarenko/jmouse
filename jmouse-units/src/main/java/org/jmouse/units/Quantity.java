@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * A value as a datasheet writes it — {@code 4.7 nF}, {@code 0.3 V/us}, {@code 100 kOhm}, {@code 52.4%} — kept with its
  * unit, so an interface can print {@code 10 kΩ}, scale a slider logarithmically and refuse to add volts to seconds.
- * jMD writes a datasheet's values with it, and jMX a circuit's; the units are {@link Units}'.
+ * sheet writes a datasheet's values with it, and jMX a circuit's; the units are {@link Units}'.
  *
  * @param value   the value in SI: {@code 4.7 nF} is {@code 4.7e-9}
  * @param unit    the base unit without its prefix ({@code F}, {@code V/s}, {@code %}); empty for a plain number

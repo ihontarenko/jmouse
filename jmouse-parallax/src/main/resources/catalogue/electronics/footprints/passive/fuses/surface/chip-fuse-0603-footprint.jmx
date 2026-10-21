@@ -6,7 +6,7 @@ footprint "Chip fuse 0603 (1608 metric)" as chip-fuse-0603-footprint {
         source "IEC 60115-8 dimensions, 0603 (1608 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-0603 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-0603 and the land pattern rules; regenerate, never edit.
     # Body 1.5…1.7 × 0.7…0.9, terminal 0.1…0.4; fillets toe 0.35, heel 0, side 0.
     # Z = 2.429, G = 0.852, X = 0.929; pad 0.8 × 0.95 centred at ±0.8.
     pad "1" surface rounded-rectangle at -0.8, 0 size 0.8 x 0.95 roundness 0.25

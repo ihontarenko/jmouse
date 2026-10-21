@@ -6,7 +6,7 @@ footprint "Film box capacitor, 22.5 mm pitch, long body, 12 mm wide" as box-capa
         source "IEC 60286-2 lead spacing, makers' box sizes"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/radial-packages.jmd#box-22-5-long and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/radial-packages.sht#box-22-5-long and the land pattern rules; regenerate, never edit.
     # Lead ⌀0.8: drill 1, pad 2, pin 1 square.
     pad "1" through-hole rectangle at -11.25, 0 size 2 x 2 drill 1
     pad "2" through-hole circle at 11.25, 0 size 2 x 2 drill 1

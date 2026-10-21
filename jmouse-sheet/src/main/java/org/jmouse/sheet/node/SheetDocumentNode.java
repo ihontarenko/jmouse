@@ -1,10 +1,10 @@
-package org.jmouse.datamap.node;
+package org.jmouse.sheet.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.ExpressionsNode;
 
-/** {@code map "Title" as slug { … }} — the document; its statements are the map's fields and entries. */
-public class DataMapDocumentNode extends ExpressionsNode {
+/** {@code sheet "Title" as slug { … }} — the document; its statements are the map's fields and entries. */
+public class SheetDocumentNode extends ExpressionsNode {
 
     private String title;
     private String slug;
@@ -32,6 +32,6 @@ public class DataMapDocumentNode extends ExpressionsNode {
 
     @Override
     public String toString() {
-        return "map \"%s\" as %s { … }".formatted(title, slug);
+        return "sheet \"%s\" as %s { … }".formatted(title, slug);
     }
 }

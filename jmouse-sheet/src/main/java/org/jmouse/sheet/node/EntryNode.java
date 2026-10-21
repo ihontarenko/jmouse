@@ -1,6 +1,6 @@
-package org.jmouse.datamap.node;
+package org.jmouse.sheet.node;
 
-import org.jmouse.datamap.DataMapSource;
+import org.jmouse.sheet.SheetSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.ExpressionsNode;
 
@@ -11,7 +11,7 @@ public class EntryNode extends ExpressionsNode {
 
     private String id;
     private String title;
-    private DataMapSource source;
+    private SheetSource source;
 
     public String getId() {
         return id;
@@ -29,11 +29,11 @@ public class EntryNode extends ExpressionsNode {
         this.title = title;
     }
 
-    public Optional<DataMapSource> getSource() {
+    public Optional<SheetSource> getSource() {
         return Optional.ofNullable(source);
     }
 
-    public void setSource(DataMapSource source) {
+    public void setSource(SheetSource source) {
         this.source = source;
     }
 

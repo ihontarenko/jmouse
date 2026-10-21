@@ -6,7 +6,7 @@ footprint "Chip fuse 2512 (6332 metric), hand soldering" as chip-fuse-2512-hand-
         source "IEC 60115-8 dimensions, 2512 (6332 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-2512 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-2512 and the land pattern rules; regenerate, never edit.
     # Body 6.25…6.45 × 3.05…3.35, terminal 0.35…0.85; fillets toe 0.55, heel 0, side 0.05.
     # Z = 7.579, G = 4.774, X = 3.47; pad 1.4 × 3.5 centred at ±3.1.
     pad "1" surface rounded-rectangle at -3.1, 0 size 1.4 x 3.5 roundness 0.25

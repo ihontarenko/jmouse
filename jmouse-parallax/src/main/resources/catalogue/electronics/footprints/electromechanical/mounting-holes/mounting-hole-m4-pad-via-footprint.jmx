@@ -6,7 +6,7 @@ footprint "Mounting hole M4, a plated ring under the head, stitched by vias" as 
         source "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/hole-packages.jmd#screw-m4; regenerate, never edit.
+    # Generated from footprint-standards/hole-packages.sht#screw-m4; regenerate, never edit.
     # Hole 4.3 (ISO 273 fine); head ⌀8, ring ⌀8.8 = head + 2 × 0.4.
     pad "1" through-hole circle at 0, 0 size 8.8 x 8.8 drill 4.3
     pad "1" through-hole circle at 3.275, 0 size 0.8 x 0.8 drill 0.4

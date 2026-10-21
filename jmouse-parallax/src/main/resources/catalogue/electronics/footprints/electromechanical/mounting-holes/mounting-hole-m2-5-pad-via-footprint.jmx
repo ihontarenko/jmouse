@@ -6,7 +6,7 @@ footprint "Mounting hole M2.5, a plated ring under the head, stitched by vias" a
         source "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/hole-packages.jmd#screw-m2-5; regenerate, never edit.
+    # Generated from footprint-standards/hole-packages.sht#screw-m2-5; regenerate, never edit.
     # Hole 2.7 (ISO 273 fine); head ⌀5, ring ⌀5.8 = head + 2 × 0.4.
     pad "1" through-hole circle at 0, 0 size 5.8 x 5.8 drill 2.7
     pad "1" through-hole circle at 2.125, 0 size 0.8 x 0.8 drill 0.4

@@ -1,7 +1,7 @@
 # Transistor outlines whose leads stand in one row, the body upright behind them: `body-width` across the row,
 # `body-depth` front to back, `back` from the leads' line to the body's back face, `tab` the metal tab's thickness at the
 # back (0 for none). Leads `lead` × `thickness` at their largest.
-map "Inline packages" as inline-packages {
+sheet "Inline packages" as inline-packages {
     description "Upright transistor outlines, the leads in one row."
     form inline
 

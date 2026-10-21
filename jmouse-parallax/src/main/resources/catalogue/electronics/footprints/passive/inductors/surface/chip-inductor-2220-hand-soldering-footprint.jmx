@@ -6,7 +6,7 @@ footprint "Chip inductor 2220 (5750 metric), hand soldering" as chip-inductor-22
         source "IEC 60384-22 dimensions, 2220 (5750 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#capacitor-2220 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#capacitor-2220 and the land pattern rules; regenerate, never edit.
     # Body 5.3…6.1 × 4.6…5.4, terminal 0.3…1; fillets toe 0.55, heel 0, side 0.05.
     # Z = 7.208, G = 3.759, X = 5.508; pad 1.7 × 5.55 centred at ±2.75.
     pad "1" surface rounded-rectangle at -2.75, 0 size 1.7 x 5.55 roundness 0.25

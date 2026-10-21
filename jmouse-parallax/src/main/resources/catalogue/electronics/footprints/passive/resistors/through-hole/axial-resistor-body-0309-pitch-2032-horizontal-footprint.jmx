@@ -6,7 +6,7 @@ footprint "Axial resistor DIN 0309, horizontal, 20.32 mm" as axial-resistor-body
         source "IEC 60286-1 bodies, DIN 44051 size codes"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/axial-packages.jmd#resistor-0309 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/axial-packages.sht#resistor-0309 and the land pattern rules; regenerate, never edit.
     # Lead ⌀0.7: drill 0.9, pad 1.9, pin 1 square.
     pad "1" through-hole rectangle at -10.16, 0 size 1.9 x 1.9 drill 0.9
     pad "2" through-hole circle at 10.16, 0 size 1.9 x 1.9 drill 0.9

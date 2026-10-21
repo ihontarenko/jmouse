@@ -1,7 +1,7 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.FootprintOutline;
 
@@ -23,11 +23,11 @@ import static org.jmouse.parallax.footprint.FootprintDrafting.point;
 final class AxialFootprints implements FootprintFamily {
 
     @Override
-    public List<StandardFootprint> footprints(DataMap table, LandPatternRules rules) {
+    public List<StandardFootprint> footprints(Sheet table, LandPatternRules rules) {
         List<StandardFootprint> footprints = new ArrayList<>();
-        for (DataMapEntry kind : table.entries()) {
+        for (SheetEntry kind : table.entries()) {
             String kindTitle = kind.title().orElse(kind.id());
-            for (DataMapEntry sizeEntry : kind.entries()) {
+            for (SheetEntry sizeEntry : kind.entries()) {
                 PackageTable size = PackageTable.inheriting(kind, sizeEntry);
                 double reach = size.length("length") + 2 * size.length("bend");
                 for (double pitch : size.lengths("pitches")) {
@@ -115,7 +115,7 @@ final class AxialFootprints implements FootprintFamily {
         String summary = kindTitle + " " + size.title() + ", body " + number(size.length("length")) + " × ⌀" + number(size.length("diameter"))
                 + " mm, " + how + (cathode(size) ? "; pin 1 is the cathode" : "");
         List<String> notes = List.of(
-                "Generated from footprint-standards/axial-packages.jmd#" + size.id() + " and the land pattern rules; regenerate, never edit.",
+                "Generated from footprint-standards/axial-packages.sht#" + size.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead ⌀" + number(size.length("lead")) + ": drill " + number(drill) + ", pad " + number(pad) + ", pin 1 square.");
         return new StandardFootprint(slug, title + ", " + standing + ", " + number(pitch) + " mm", summary,
                 size.word("folder"), "through-hole", size.standard(), rules.license(), notes, new Block.Footprint(pads, outlines));

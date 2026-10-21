@@ -6,7 +6,7 @@ footprint "Mounting hole M2.5, a plated ring under a countersunk head" as mounti
         source "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/hole-packages.jmd#screw-m2-5; regenerate, never edit.
+    # Generated from footprint-standards/hole-packages.sht#screw-m2-5; regenerate, never edit.
     # Hole 2.7 (ISO 273 fine); head ⌀4.7, ring ⌀5.5 = head + 2 × 0.4.
     pad "1" through-hole circle at 0, 0 size 5.5 x 5.5 drill 2.7
     outline fabrication width 0.1 "M-2.35 0A2.35 2.35 0 1 0 2.35 0A2.35 2.35 0 1 0 -2.35 0Z"

@@ -1,15 +1,15 @@
 package org.jmouse.parallax.footprint;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
-import org.jmouse.datamap.DataMapValue;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
+import org.jmouse.sheet.SheetValue;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * How a package's dimensions become copper, read from {@code footprint-standards/land-pattern-rules.jmd}: every
+ * How a package's dimensions become copper, read from {@code footprint-standards/land-pattern-rules.sht}: every
  * generated footprint follows these, so a change of taste is one edit there and a regeneration.
  *
  * @param license the licence every footprint of our library is published under
@@ -87,9 +87,9 @@ public record LandPatternRules(String license, Map<String, Fillets> fillets, Tol
         return Optional.ofNullable(fillets.get(name));
     }
 
-    public static LandPatternRules of(DataMap map) {
+    public static LandPatternRules of(Sheet map) {
         Map<String, Fillets> fillets = new LinkedHashMap<>();
-        for (DataMapEntry entry : map.entries()) {
+        for (SheetEntry entry : map.entries()) {
             if (entry.value("toe").isPresent()) {
                 PackageTable table = new PackageTable(entry);
                 fillets.put(entry.id(), new Fillets(table.length("toe"), table.length("heel"), table.length("side"),
@@ -97,7 +97,7 @@ public record LandPatternRules(String license, Map<String, Fillets> fillets, Tol
             }
         }
         return new LandPatternRules(
-                map.field("license").map(field -> field.value() instanceof DataMapValue.Text(String text) ? text : field.value().written())
+                map.field("license").map(field -> field.value() instanceof SheetValue.Text(String text) ? text : field.value().written())
                         .orElseThrow(() -> new IllegalArgumentException("The land pattern rules name no licence")),
                 fillets, tolerances(new PackageTable(entry(map, "tolerances"))),
                 throughHole(new PackageTable(entry(map, "through-hole"))), drawing(new PackageTable(entry(map, "drawing"))));
@@ -119,7 +119,7 @@ public record LandPatternRules(String license, Map<String, Fillets> fillets, Tol
                 table.length("pin-notch-radius"));
     }
 
-    private static DataMapEntry entry(DataMap map, String id) {
+    private static SheetEntry entry(Sheet map, String id) {
         return map.entry(id).orElseThrow(() -> new IllegalArgumentException("The land pattern rules have no '" + id + "'"));
     }
 }

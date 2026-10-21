@@ -1,6 +1,6 @@
 # Pin headers and sockets by pitch: square leads on a grid, every row count with every pin count of the ranges. A member
 # is named `<name>-<rows>x<pins>-pitch-<pitch in hundredths of a millimetre>-vertical`.
-map "Header packages" as header-packages {
+sheet "Header packages" as header-packages {
     description "Pin headers and sockets, square leads on a grid."
     form header
 

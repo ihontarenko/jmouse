@@ -1,8 +1,8 @@
 package org.jmouse.parallax.kicad;
 
-import org.jmouse.datamap.DataMap;
-import org.jmouse.datamap.DataMapEntry;
-import org.jmouse.datamap.DataMapValue;
+import org.jmouse.sheet.Sheet;
+import org.jmouse.sheet.SheetEntry;
+import org.jmouse.sheet.SheetValue;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Which jMX component a KiCad symbol stands for, read from a jMD library map: {@code symbol "Device:R"}, its
+ * Which jMX component a KiCad symbol stands for, read from a sheet library map: {@code symbol "Device:R"}, its
  * {@code component}, which of its pins is which ({@code pins 1 = a, 2 = b}) and the parameter its value sets
  * ({@code value resistance}). An entry with no component but a {@code drawing} names only how the part is drawn: it
  * stays a part without a model, drawn with that catalogue symbol, its pins named as the map names them. A symbol the
@@ -57,11 +57,11 @@ public final class KiCadLibraryMap {
         this.drawings = Map.copyOf(drawings);
     }
 
-    /** The map a jMD document holds, entry by entry. */
-    public static KiCadLibraryMap of(DataMap map) {
+    /** The map a sheet document holds, entry by entry. */
+    public static KiCadLibraryMap of(Sheet map) {
         Map<String, Mapping> mappings = new LinkedHashMap<>();
         Map<String, Drawing> drawings = new LinkedHashMap<>();
-        for (DataMapEntry entry : map.entries()) {
+        for (SheetEntry entry : map.entries()) {
             Optional<String> symbol = entry.value("symbol").map(KiCadLibraryMap::word);
             if (symbol.isEmpty()) {
                 continue;
@@ -99,19 +99,19 @@ public final class KiCadLibraryMap {
         return Optional.ofNullable(drawings.get(libraryId));
     }
 
-    private static List<DataMapValue.Assignment> assignments(DataMapValue value) {
+    private static List<SheetValue.Assignment> assignments(SheetValue value) {
         return switch (value) {
-            case DataMapValue.Assignment assignment -> List.of(assignment);
-            case DataMapValue.Sequence sequence -> sequence.items().stream()
-                    .filter(DataMapValue.Assignment.class::isInstance).map(DataMapValue.Assignment.class::cast).toList();
+            case SheetValue.Assignment assignment -> List.of(assignment);
+            case SheetValue.Sequence sequence -> sequence.items().stream()
+                    .filter(SheetValue.Assignment.class::isInstance).map(SheetValue.Assignment.class::cast).toList();
             default -> List.of();
         };
     }
 
-    private static String word(DataMapValue value) {
+    private static String word(SheetValue value) {
         return switch (value) {
-            case DataMapValue.Text text -> text.text();
-            case DataMapValue.Word word -> word.word();
+            case SheetValue.Text text -> text.text();
+            case SheetValue.Word word -> word.word();
             default -> value.written();
         };
     }

@@ -1,0 +1,120 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "jMouse Sheet",
+  "scopeName": "source.sheet",
+  "fileTypes": ["sht", "dsh", "jmt"],
+
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#document" },
+    { "include": "#entry" },
+    { "include": "#field" }
+  ],
+
+  "repository": {
+
+    "comment": {
+      "comment": "`#` to end of line, as in every jMouse language.",
+      "match": "#.*$",
+      "name": "comment.line.number-sign.sheet"
+    },
+
+    "document": {
+      "comment": "sheet \"Title\" as slug { — the one document of a file.",
+      "match": "^\\s*(sheet)\\b\\s*(\"(?:[^\"\\\\]|\\\\.)*\")?\\s*(?:\\b(as)\\b\\s*([a-z0-9][a-z0-9-]*))?",
+      "captures": {
+        "1": { "name": "keyword.control.declaration.sheet" },
+        "2": { "name": "string.quoted.title.sheet" },
+        "3": { "name": "keyword.operator.as.sheet" },
+        "4": { "name": "entity.name.type.slug.sheet" }
+      }
+    },
+
+    "entry": {
+      "comment": "id \"Title\" source page 7 table 6.3 { — a block; its id is unique in the document.",
+      "match": "^\\s*([\\p{L}\\p{N}][\\p{L}\\p{N}_-]*)\\s*(\"(?:[^\"\\\\]|\\\\.)*\")?\\s*((?:\\bsource\\b.*?)?)\\s*(\\{)\\s*(#.*)?$",
+      "captures": {
+        "1": { "name": "entity.name.section.entry.sheet" },
+        "2": { "name": "string.quoted.title.sheet" },
+        "3": { "patterns": [{ "include": "#source" }] },
+        "4": { "name": "punctuation.section.block.begin.sheet" },
+        "5": { "name": "comment.line.number-sign.sheet" }
+      }
+    },
+
+    "field": {
+      "comment": "name value [source …] — a line that opens no block.",
+      "begin": "^\\s*([\\p{L}\\p{N}][\\p{L}\\p{N}_-]*)\\b(?!\\s*(\"[^\"]*\")?\\s*\\{)",
+      "beginCaptures": {
+        "1": { "name": "variable.other.field.sheet" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#source" },
+        { "include": "#value" }
+      ]
+    },
+
+    "source": {
+      "comment": "source page 7 table \"6.3 Recommended\" — where in the original document the value was read.",
+      "begin": "\\b(source)\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.source.sheet" }
+      },
+      "end": "(?=\\{|#|$)",
+      "patterns": [
+        { "match": "\"(?:[^\"\\\\]|\\\\.)*\"", "name": "string.quoted.citation.sheet" },
+        { "match": "\\b([a-z][a-z-]*)\\b", "name": "keyword.other.citation.sheet" },
+        { "match": "\\S+", "name": "constant.other.citation.sheet" }
+      ]
+    },
+
+    "value": {
+      "patterns": [
+        { "include": "#text" },
+        { "include": "#link" },
+        { "include": "#measure" },
+        { "match": "\\.\\.", "name": "keyword.operator.range.sheet" },
+        { "match": "=", "name": "keyword.operator.assignment.sheet" },
+        { "match": ",", "name": "punctuation.separator.sheet" },
+        { "match": "\\b(true|false|yes|no)\\b", "name": "constant.language.sheet" },
+        { "match": "[\\p{L}_][\\p{L}\\p{N}_-]*", "name": "constant.other.word.sheet" }
+      ]
+    },
+
+    "text": {
+      "patterns": [
+        {
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "name": "string.quoted.triple.sheet"
+        },
+        {
+          "match": "\"(?:[^\"\\\\]|\\\\.)*\"",
+          "name": "string.quoted.double.sheet"
+        }
+      ]
+    },
+
+    "link": {
+      "comment": "74hc595.sht#supply-voltage/maximum — another document's entry or field.",
+      "match": "((?:\\.\\.?/)*[\\w./-]+\\.(?:sht|dsh|jmt))(#)([\\w-]+)(?:(/)([\\w-]+))?",
+      "captures": {
+        "1": { "name": "markup.underline.link.document.sheet" },
+        "2": { "name": "punctuation.separator.link.sheet" },
+        "3": { "name": "entity.name.section.entry.sheet" },
+        "5": { "name": "variable.other.field.sheet" }
+      }
+    },
+
+    "measure": {
+      "comment": "6 V, 2.2 µs, -40 °C, 0.35 mm, 25 — a number and, at most, its unit.",
+      "match": "([+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?)(?:\\s*((?:[a-zA-Zµμ°Ω%‰][a-zA-Zµμ°Ω/%‰²³·^0-9]*)))?",
+      "captures": {
+        "1": { "name": "constant.numeric.sheet" },
+        "2": { "name": "keyword.other.unit.sheet" }
+      }
+    }
+  }
+}

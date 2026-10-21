@@ -6,7 +6,7 @@ footprint "SOIC-18, 7.5 mm body" as soic-18-wide-footprint {
         source "JEDEC MS-013"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/small-outline-packages.jmd#soic-wide and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/small-outline-packages.sht#soic-wide and the land pattern rules; regenerate, never edit.
     # Leads span 10…10.65, foot 0.4…1.27, width 0.31…0.51; fillets toe 0.35, heel 0.35, side 0.03.
     # Z = 11.36, G = 7.255, X = 0.599; pad 2.05 × 0.6 centred at ±4.65.
     pad "1" surface rounded-rectangle at -4.65, -5.08 size 2.05 x 0.6 roundness 0.25

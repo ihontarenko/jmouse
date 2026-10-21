@@ -6,7 +6,7 @@ footprint "Chip resistor 2010 (5025 metric)" as chip-resistor-2010-footprint {
         source "IEC 60115-8 dimensions, 2010 (5025 metric)"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/chip-packages.jmd#resistor-2010 and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/chip-packages.sht#resistor-2010 and the land pattern rules; regenerate, never edit.
     # Body 4.9…5.1 × 2.35…2.65, terminal 0.35…0.85; fillets toe 0.35, heel 0, side 0.
     # Z = 5.829, G = 3.424, X = 2.67; pad 1.2 × 2.7 centred at ±2.3.
     pad "1" surface rounded-rectangle at -2.3, 0 size 1.2 x 2.7 roundness 0.25

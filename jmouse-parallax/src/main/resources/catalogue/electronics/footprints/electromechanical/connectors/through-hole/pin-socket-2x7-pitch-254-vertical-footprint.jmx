@@ -6,7 +6,7 @@ footprint "Pin socket, 2.54 mm pitch, 2 × 7, vertical" as pin-socket-2x7-pitch-
         source "IEC 60603-13 grid"
         license "CERN-OHL-W-2.0"
     }
-    # Generated from footprint-standards/header-packages.jmd#pin-socket and the land pattern rules; regenerate, never edit.
+    # Generated from footprint-standards/header-packages.sht#pin-socket and the land pattern rules; regenerate, never edit.
     # Square lead 0.64: drill 1.15, pad 2.15, pin 1 square.
     pad "1" through-hole rectangle at -1.27, -7.62 size 2.15 x 2.15 drill 1.15
     pad "2" through-hole circle at 1.27, -7.62 size 2.15 x 2.15 drill 1.15

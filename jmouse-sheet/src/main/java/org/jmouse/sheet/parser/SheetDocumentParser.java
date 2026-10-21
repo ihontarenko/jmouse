@@ -1,8 +1,8 @@
-package org.jmouse.datamap.parser;
+package org.jmouse.sheet.parser;
 
-import org.jmouse.datamap.DataMapSyntaxException;
-import org.jmouse.datamap.lexer.DataMapToken;
-import org.jmouse.datamap.node.DataMapDocumentNode;
+import org.jmouse.sheet.SheetSyntaxException;
+import org.jmouse.sheet.lexer.SheetToken;
+import org.jmouse.sheet.node.SheetDocumentNode;
 import org.jmouse.el.language.parser.StatementsParser;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
@@ -18,32 +18,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@code map "Title" as slug { … }} — the whole document. The comments above its first line are kept with it, and
+ * {@code sheet "Title" as slug { … }} — the whole document. The comments above its first line are kept with it, and
  * nothing may follow its closing brace.
  */
-public class DataMapDocumentParser implements Parser {
+public class SheetDocumentParser implements Parser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         cursor.consumeIf(BasicToken.T_SOL);
         List<Trivia> above = comments(cursor);
-        DataMapDocumentNode document = new DataMapDocumentNode();
-        if (!cursor.isCurrent(DataMapToken.T_MAP)) {
-            throw new DataMapSyntaxException(cursor, "a jMD document begins with: map \"Title\" as slug {");
+        SheetDocumentNode document = new SheetDocumentNode();
+        if (!cursor.isCurrent(SheetToken.T_SHEET)) {
+            throw new SheetSyntaxException(cursor, "a sheet document begins with: sheet \"Title\" as slug {");
         }
-        document.setSpan(DataMapReading.span(cursor));
-        cursor.ensure(DataMapToken.T_MAP);
+        document.setSpan(SheetReading.span(cursor));
+        cursor.ensure(SheetToken.T_SHEET);
         if (!cursor.isCurrent(BasicToken.T_STRING)) {
-            throw new DataMapSyntaxException(cursor, "the map's title is a text in quotes");
+            throw new SheetSyntaxException(cursor, "the map's title is a text in quotes");
         }
-        document.setTitle(DataMapReading.text(cursor.next()));
-        if (!cursor.isCurrent(DataMapToken.T_AS)) {
-            throw new DataMapSyntaxException(cursor, "after the title comes: as slug");
+        document.setTitle(SheetReading.text(cursor.next()));
+        if (!cursor.isCurrent(SheetToken.T_AS)) {
+            throw new SheetSyntaxException(cursor, "after the title comes: as slug");
         }
-        cursor.ensure(DataMapToken.T_AS);
-        document.setSlug(DataMapNames.name(cursor, "the map's slug"));
+        cursor.ensure(SheetToken.T_AS);
+        document.setSlug(SheetNames.name(cursor, "the map's slug"));
         if (!cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-            throw new DataMapSyntaxException(cursor, "the header ends with the slug, then '{'");
+            throw new SheetSyntaxException(cursor, "the header ends with the slug, then '{'");
         }
         Node body = context.getParser(StatementsParser.class).parse(cursor, context);
         for (Node statement : body.getChildren()) {
@@ -52,7 +52,7 @@ public class DataMapDocumentParser implements Parser {
         document.addLeadingTrivia(above);
         comments(cursor);
         if (cursor.hasNext() && !cursor.isCurrent(BasicToken.T_EOL)) {
-            throw new DataMapSyntaxException(cursor, "a document is one map: nothing follows its closing '}'");
+            throw new SheetSyntaxException(cursor, "a document is one map: nothing follows its closing '}'");
         }
         parent.add(document);
     }
