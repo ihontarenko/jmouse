@@ -2,6 +2,7 @@ package org.jmouse.parallax;
 
 import org.jmouse.parallax.analysis.AnalysisComputations;
 import org.jmouse.parallax.circuit.CircuitComputations;
+import org.jmouse.parallax.circuit.CircuitEngines;
 import org.jmouse.parallax.program.ProgramComputations;
 import org.jmouse.parallax.complex.ComplexComputations;
 import org.jmouse.parallax.dimension.HigherDimensionComputations;
@@ -25,6 +26,14 @@ public final class StandardComputations {
     }
 
     public static List<Computation> all() {
+        return all(CircuitEngines.parallaxOnly());
+    }
+
+    /**
+     * Every computation, the circuits' batch analyses computed by the engines the host offers — SPICE among them where
+     * it has a simulator to run it with.
+     */
+    public static List<Computation> all(CircuitEngines engines) {
         return List.of(
                 new AnalysisComputations.CriticalPoints(),
                 new AnalysisComputations.CrossSection(),
@@ -68,12 +77,12 @@ public final class StandardComputations {
                 new ProbabilityComputations.RandomWalk(),
                 new ProbabilityComputations.Samples(),
                 new ProbabilityComputations.SequenceTerms(),
-                new CircuitComputations.TransientResponse(),
-                new CircuitComputations.FrequencyResponse(),
-                new CircuitComputations.NoiseResponse(),
+                new CircuitComputations.TransientResponse(engines),
+                new CircuitComputations.FrequencyResponse(engines),
+                new CircuitComputations.NoiseResponse(engines),
                 new CircuitComputations.PhasorDiagram(),
-                new CircuitComputations.OperatingPoint(),
-                new CircuitComputations.DirectCurrentSweep(),
+                new CircuitComputations.OperatingPoint(engines),
+                new CircuitComputations.DirectCurrentSweep(engines),
                 new ProgramComputations.Output(),
                 new RegionComputations.Picture(),
                 new ValueComputations.Evaluation()
@@ -83,5 +92,10 @@ public final class StandardComputations {
     /** The registry of every shipped computation; it refuses to exist if a representation has none. */
     public static Computations registry() {
         return new Computations(all());
+    }
+
+    /** The registry of every shipped computation, the circuits computed by the engines the host offers. */
+    public static Computations registry(CircuitEngines engines) {
+        return new Computations(all(engines));
     }
 }

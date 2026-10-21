@@ -1,7 +1,5 @@
 package org.jmouse.parallax.circuit;
 
-import org.jmouse.parallax.circuit.elaboration.ElaboratedCircuit;
-
 import org.jmouse.formula.Complex;
 import org.jmouse.parallax.Computation;
 import org.jmouse.parallax.ComputationProgress;
@@ -18,17 +16,37 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.DoubleFunction;
-import java.util.function.DoubleUnaryOperator;
 
-/** The representations of a lumped circuit, each an ordinary dataset: a circuit is computed like any other object. */
+/**
+ * The representations of a lumped circuit, each an ordinary dataset: a circuit is computed like any other object.
+ *
+ * <p>What is computed is a {@link CircuitEngine}'s: each batch analysis takes the setting {@code engine} — this
+ * library's own, or SPICE where the host supplies it — and the representation here is only what is asked and how it is
+ * shown. The phasor diagram is the library's alone: SPICE has no such analysis.</p>
+ */
 public final class CircuitComputations {
 
     /** The unit of a digital node's column: 1, 0, −1 for unknown, −2 released — a viewer draws it as a timing lane. */
     public static final String LEVEL_UNIT = "level";
 
+    /** The setting that chooses the engine of a batch analysis. */
+    public static final String ENGINE = "engine";
+
     private CircuitComputations() {
+    }
+
+    private static SettingSpecification engineSetting() {
+        return SettingSpecification.choice(ENGINE, CircuitEngineKind.PARALLAX,
+                "What computes it: this library's own engine, or SPICE where the server has a simulator");
+    }
+
+    /** The engine a computation's settings choose, among those the host offers. */
+    private static CircuitEngine engineOf(CircuitEngines engines, ComputationSettings settings) {
+        return engines.engine(settings.choice(ENGINE, CircuitEngineKind.class));
+    }
+
+    private static CircuitEngine.FrequencyRange frequencyRange(ComputationSettings settings) {
+        return new CircuitEngine.FrequencyRange(settings.number("from"), settings.number("to"), settings.integer("points"));
     }
 
     /**
@@ -39,6 +57,16 @@ public final class CircuitComputations {
 
         /** The divisions across the bench's oscilloscope screen: its time base times this is what it shows. */
         private static final int SCREEN_DIVISIONS = 10;
+
+        private final CircuitEngines engines;
+
+        public TransientResponse() {
+            this(CircuitEngines.parallaxOnly());
+        }
+
+        public TransientResponse(CircuitEngines engines) {
+            this.engines = engines;
+        }
 
         public RepresentationKind kind() {
             return RepresentationKind.TRANSIENT_RESPONSE;
@@ -55,7 +83,8 @@ public final class CircuitComputations {
                     SettingSpecification.vector("window", List.of(), 2, 0, 1e6,
                             "From and to, seconds: only this stretch, sampled finely — a zoom into an edge; none is the whole run"),
                     SettingSpecification.flag("screen", false,
-                            "What the bench's oscilloscope opens on: the probed voltages over the last screen of its time base"));
+                            "What the bench's oscilloscope opens on: the probed voltages over the last screen of its time base"),
+                    engineSetting());
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -64,56 +93,21 @@ public final class CircuitComputations {
         }
 
         /**
-         * Worked out by the live engine, keeping only each node's peaks ({@link TransientRun}): one engine for the bench,
-         * the computed graph and the datasheet checks. Columns: every node's voltage, with its peaks between the samples,
-         * then the current of every part that carries one of its own (a source, a generator, an inductor, a diode) — or,
-         * with `parts`, of every part and every model pin, for a sheet that draws them all.
+         * The engine's transient; with {@code screen}, the run's last screen of the circuit's time base, read as the
+         * circuit's probes read it.
          */
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
-            ElaboratedCircuit elaborated = ElaboratedCircuit.of(object);
-            Netlist netlist = Netlist.of(elaborated);
+            Circuit circuit = (Circuit) object.definition();
             boolean levels = settings.flag("levels");
-            if (levels && netlist.digitalNodes().isEmpty()) {
-                throw new IllegalArgumentException("The circuit has no digital nodes to show the logic levels of.");
-            }
-            boolean everyPart = settings.flag("parts") && !levels;
             boolean screen = settings.flag("screen") && !levels;
             double[] window = settings.vectorOr("window", null);
             if (screen && window == null) {
-                window = lastScreen((Circuit) object.definition(), netlist.duration());
+                window = lastScreen(circuit, circuit.time().maximum());
             }
-            TransientRun run = TransientRun.of(elaborated, settings.integer("samples"), everyPart, window, progress);
-            float[] times = floats(run.times());
-            if (levels) {
-                return logicLevels(times, netlist.digitalNodes(), run.levels());
-            }
-            if (screen) {
-                return probedVoltages(times, (Circuit) object.definition(), run);
-            }
-            List<String> columns = new ArrayList<>();
-            List<float[]> values = new ArrayList<>();
-            List<String> units = new ArrayList<>();
-            Map<String, Dataset.TimeSeries.Band> peaks = new LinkedHashMap<>();
-            run.voltages().forEach((node, voltages) -> {
-                columns.add(node);
-                values.add(floats(voltages));
-                units.add(ColumnNames.VOLTS);
-                peaks.put(node, new Dataset.TimeSeries.Band(floats(run.lows().get(node)), floats(run.highs().get(node))));
-            });
-            run.currents().forEach((column, currents) -> {
-                // Asked for no more than the parts with a current of their own: those, by the part's name alone.
-                if (everyPart || !column.contains(".")) {
-                    columns.add(column);
-                    values.add(floats(currents));
-                    units.add(ColumnNames.AMPERES);
-                }
-            });
-            run.powers().forEach((column, powers) -> {
-                columns.add(column);
-                values.add(floats(powers));
-                units.add(ColumnNames.WATTS);
-            });
-            return new Dataset.TimeSeries("t", times, columns, values, units, Dataset.TimeSeries.AxisScale.LINEAR, peaks);
+            CircuitEngine.TransientRequest request = new CircuitEngine.TransientRequest(settings.integer("samples"),
+                    settings.flag("parts"), levels, window);
+            Dataset run = engineOf(engines, settings).transientResponse(object, request, progress);
+            return screen ? probedVoltages(circuit, (Dataset.TimeSeries) run) : run;
         }
 
         /**
@@ -133,57 +127,67 @@ public final class CircuitComputations {
          * reference —, in the probes' order; every node when it probes none. A switch node probed among them is one
          * trace of the screen, not the solid band every node of a switcher drawn over its whole run made.
          */
-        private static Dataset.TimeSeries probedVoltages(float[] times, Circuit circuit, TransientRun run) {
+        private static Dataset.TimeSeries probedVoltages(Circuit circuit, Dataset.TimeSeries run) {
             List<String> columns = new ArrayList<>();
             List<float[]> values = new ArrayList<>();
             for (ObjectDefinition.BenchProbe probe : circuit.probes()) {
                 if (!probe.measure().equals("voltage") || probe.target() == null) {
                     continue;
                 }
-                double[] voltages = run.voltage(probe.target());
+                float[] voltages = voltageOf(run, probe.target());
                 boolean against = probe.reference() != null && !probe.reference().equals(Circuit.GROUND);
                 if (against) {
-                    double[] reference = run.voltage(probe.reference());
-                    double[] difference = new double[voltages.length];
+                    float[] reference = voltageOf(run, probe.reference());
+                    float[] difference = new float[voltages.length];
                     for (int sample = 0; sample < difference.length; sample++) {
                         difference[sample] = voltages[sample] - reference[sample];
                     }
                     voltages = difference;
                 }
                 columns.add(against ? probe.target() + " - " + probe.reference() : probe.target());
-                values.add(floats(voltages));
+                values.add(voltages);
             }
             if (columns.isEmpty()) {
-                run.voltages().forEach((node, voltages) -> {
-                    columns.add(node);
-                    values.add(floats(voltages));
-                });
+                for (int column = 0; column < run.columns().size(); column++) {
+                    if (ColumnNames.VOLTS.equals(run.units().get(column))) {
+                        columns.add(run.columns().get(column));
+                        values.add(run.values().get(column));
+                    }
+                }
             }
-            return new Dataset.TimeSeries("t", times, columns, values, Collections.nCopies(columns.size(), ColumnNames.VOLTS));
+            return new Dataset.TimeSeries("t", run.axisValues(), columns, values,
+                    Collections.nCopies(columns.size(), ColumnNames.VOLTS));
         }
 
-        /** One column per digital node, named as the node and in the unit `level`: what the event solver held it at, sample by sample. */
-        private static Dataset.TimeSeries logicLevels(float[] times, List<String> digitalNodes, List<Map<String, LogicLevel>> held) {
-            List<String> columns = new ArrayList<>();
-            List<float[]> values = new ArrayList<>();
-            for (String node : digitalNodes) {
-                columns.add(node);
-                float[] levels = new float[times.length];
-                for (int sample = 0; sample < times.length; sample++) {
-                    levels[sample] = held.get(sample).getOrDefault(node, LogicLevel.RELEASED).datasetValue();
-                }
-                values.add(levels);
+        /** A node's voltage in a run: its column, or zeros for ground. */
+        private static float[] voltageOf(Dataset.TimeSeries run, String node) {
+            if (node.equals(Circuit.GROUND)) {
+                return new float[run.axisValues().length];
             }
-            return new Dataset.TimeSeries("t", times, columns, values, Collections.nCopies(columns.size(), LEVEL_UNIT));
+            for (int column = 0; column < run.columns().size(); column++) {
+                if (run.columns().get(column).equals(node) && ColumnNames.VOLTS.equals(run.units().get(column))) {
+                    return run.values().get(column);
+                }
+            }
+            throw new IllegalArgumentException("A probe reads '" + node + "', which is no node of the circuit.");
         }
     }
 
     /**
-     * The noise every node carries, V/√Hz over frequency: each device's noise currents at the operating point — a
-     * resistor's 4kT/R, every {@code noise(density)} a model's equations add — driven through the small-signal circuit
-     * one at a time, their powers added. SPICE's {@code .noise}, for every node at once.
+     * The noise every node carries, V/√Hz over frequency: each device's noise sources at the operating point driven
+     * through the small-signal circuit one at a time, their powers added. SPICE's {@code .noise}, for every node at once.
      */
     public static class NoiseResponse implements Computation {
+
+        private final CircuitEngines engines;
+
+        public NoiseResponse() {
+            this(CircuitEngines.parallaxOnly());
+        }
+
+        public NoiseResponse(CircuitEngines engines) {
+            this.engines = engines;
+        }
 
         public RepresentationKind kind() {
             return RepresentationKind.NOISE_RESPONSE;
@@ -197,7 +201,8 @@ public final class CircuitComputations {
             return List.of(
                     SettingSpecification.number("from", 10, 1e-3, 1e9, "Lowest frequency, Hz"),
                     SettingSpecification.number("to", 1e6, 1e-3, 1e9, "Highest frequency, Hz"),
-                    SettingSpecification.integer("points", 100, 10, 2000, "Frequencies"));
+                    SettingSpecification.integer("points", 100, 10, 2000, "Frequencies"),
+                    engineSetting());
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -206,49 +211,22 @@ public final class CircuitComputations {
         }
 
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
-            double from = Math.min(settings.number("from"), settings.number("to"));
-            double to = Math.max(settings.number("from"), settings.number("to"));
-            if (!(from < to)) {
-                throw new IllegalArgumentException("The frequency range needs two different ends.");
-            }
-            Netlist netlist = Netlist.of(object);
-            CircuitSolver solver = new CircuitSolver(netlist);
-            double[] operatingPoint = smallSignalBias(solver, netlist);
-            List<NoiseCurrent> sources = solver.noiseSources(operatingPoint);
-            int points = settings.integer("points");
-            int nodes = netlist.nodes().size();
-            float[] frequencies = new float[points];
-            float[][] densities = new float[nodes][points];
-            double ratio = Math.log10(to / from);
-            for (int point = 0; point < points; point++) {
-                double frequency = from * Math.pow(10, ratio * point / (points - 1));
-                double[] powers = solver.noiseDensities(frequency, operatingPoint, sources);
-                frequencies[point] = (float) frequency;
-                for (int node = 0; node < nodes; node++) {
-                    densities[node][point] = (float) Math.sqrt(powers[node]);
-                }
-            }
-            List<String> columns = new ArrayList<>();
-            List<float[]> values = new ArrayList<>();
-            List<String> units = new ArrayList<>();
-            for (int node = 0; node < nodes; node++) {
-                columns.add(netlist.nodes().get(node) + " noise");
-                values.add(densities[node]);
-                units.add("V/√Hz");
-            }
-            return new Dataset.TimeSeries("f", frequencies, columns, values, units, Dataset.TimeSeries.AxisScale.LOGARITHMIC);
+            return engineOf(engines, settings).noiseResponse(object, frequencyRange(settings), progress);
         }
     }
 
     /** Bode curves: the gain in decibels and the phase in degrees of every node, over log-spaced frequencies. */
     public static class FrequencyResponse implements Computation {
 
-        /** How much higher (or lower) than both neighbours a grid point has to be to be refined as a peak (or a notch), dB. */
-        private static final double EXTREME_MARGIN = 1e-4;
-        private static final int MAXIMUM_REFINED_EXTREMES = 64;
-        private static final double GOLDEN = (Math.sqrt(5) - 1) / 2;
-        /** Each narrows the bracket by 0.618: twenty from a grid step to a 10⁻⁴ share of it. */
-        private static final int GOLDEN_ITERATIONS = 20;
+        private final CircuitEngines engines;
+
+        public FrequencyResponse() {
+            this(CircuitEngines.parallaxOnly());
+        }
+
+        public FrequencyResponse(CircuitEngines engines) {
+            this.engines = engines;
+        }
 
         public RepresentationKind kind() {
             return RepresentationKind.FREQUENCY_RESPONSE;
@@ -262,7 +240,8 @@ public final class CircuitComputations {
             return List.of(
                     SettingSpecification.number("from", 1, 1e-3, 1e9, "Lowest frequency, Hz"),
                     SettingSpecification.number("to", 1e6, 1e-3, 1e9, "Highest frequency, Hz"),
-                    SettingSpecification.integer("points", 200, 10, 5000, "Frequencies"));
+                    SettingSpecification.integer("points", 200, 10, 5000, "Frequencies"),
+                    engineSetting());
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -271,106 +250,7 @@ public final class CircuitComputations {
         }
 
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
-            double from = Math.min(settings.number("from"), settings.number("to"));
-            double to = Math.max(settings.number("from"), settings.number("to"));
-            if (!(from < to)) {
-                throw new IllegalArgumentException("The frequency range needs two different ends.");
-            }
-            Netlist netlist = Netlist.of(object);
-            CircuitSolver solver = new CircuitSolver(netlist);
-            double[] operatingPoint = smallSignalBias(solver, netlist);
-            int points = settings.integer("points");
-            int nodes = netlist.nodes().size();
-            TreeMap<Double, Complex[]> responses = new TreeMap<>();
-            double ratio = Math.log10(to / from);
-            for (int point = 0; point < points; point++) {
-                double frequency = from * Math.pow(10, ratio * point / (points - 1));
-                responses.put(frequency, solver.phasors(frequency, operatingPoint));
-            }
-            refineExtremes(responses, nodes, frequency -> solver.phasors(frequency, operatingPoint));
-            int count = responses.size();
-            float[] frequencies = new float[count];
-            float[][] gains = new float[nodes][count];
-            float[][] phases = new float[nodes][count];
-            int point = 0;
-            for (Map.Entry<Double, Complex[]> entry : responses.entrySet()) {
-                frequencies[point] = entry.getKey().floatValue();
-                for (int node = 0; node < nodes; node++) {
-                    gains[node][point] = (float) gainOf(entry.getValue()[node]);
-                    phases[node][point] = (float) Math.toDegrees(entry.getValue()[node].argument());
-                }
-                point++;
-            }
-            // Each node's gain and phase, named for the node; the unit says which is which.
-            List<String> columns = new ArrayList<>();
-            List<float[]> values = new ArrayList<>();
-            List<String> units = new ArrayList<>();
-            for (int node = 0; node < nodes; node++) {
-                columns.add(netlist.nodes().get(node) + " gain");
-                values.add(gains[node]);
-                units.add("dB");
-                columns.add(netlist.nodes().get(node) + " phase");
-                values.add(phases[node]);
-                units.add("°");
-            }
-            return new Dataset.TimeSeries("f", frequencies, columns, values, units, Dataset.TimeSeries.AxisScale.LOGARITHMIC);
-        }
-
-        static double gainOf(Complex response) {
-            return 20 * Math.log10(Math.max(response.modulus(), 1e-12));
-        }
-
-        /**
-         * Finds every peak and notch the grid only brushed past and adds it: a resonance narrower than the grid's step
-         * falls between two frequencies, and the Bode plot showed a Q of 10 at 19.07 dB instead of 20.01. Around each
-         * interior extreme of a node's gain the frequency of the true extreme is found by golden-section search on the
-         * logarithm of the frequency, and every frequency evaluated on the way joins the response — so the curve is drawn
-         * through the summit, and the points around it are dense where it bends most.
-         */
-        private static void refineExtremes(TreeMap<Double, Complex[]> responses, int nodes, DoubleFunction<Complex[]> respond) {
-            List<Double> grid = new ArrayList<>(responses.keySet());
-            int refined = 0;
-            for (int node = 0; node < nodes && refined < MAXIMUM_REFINED_EXTREMES; node++) {
-                for (int index = 1; index < grid.size() - 1 && refined < MAXIMUM_REFINED_EXTREMES; index++) {
-                    double before = gainOf(responses.get(grid.get(index - 1))[node]);
-                    double here = gainOf(responses.get(grid.get(index))[node]);
-                    double after = gainOf(responses.get(grid.get(index + 1))[node]);
-                    boolean peak = here > before + EXTREME_MARGIN && here > after + EXTREME_MARGIN;
-                    boolean notch = here < before - EXTREME_MARGIN && here < after - EXTREME_MARGIN;
-                    if (!peak && !notch) {
-                        continue;
-                    }
-                    int sign = peak ? 1 : -1;
-                    int column = node;
-                    double low = Math.log(grid.get(index - 1));
-                    double high = Math.log(grid.get(index + 1));
-                    DoubleUnaryOperator height = logarithm -> {
-                        double frequency = Math.exp(logarithm);
-                        Complex[] response = responses.computeIfAbsent(frequency, respond::apply);
-                        return sign * gainOf(response[column]);
-                    };
-                    double first = high - GOLDEN * (high - low);
-                    double second = low + GOLDEN * (high - low);
-                    double firstHeight = height.applyAsDouble(first);
-                    double secondHeight = height.applyAsDouble(second);
-                    for (int iteration = 0; iteration < GOLDEN_ITERATIONS; iteration++) {
-                        if (firstHeight > secondHeight) {
-                            high = second;
-                            second = first;
-                            secondHeight = firstHeight;
-                            first = high - GOLDEN * (high - low);
-                            firstHeight = height.applyAsDouble(first);
-                        } else {
-                            low = first;
-                            first = second;
-                            firstHeight = secondHeight;
-                            second = low + GOLDEN * (high - low);
-                            secondHeight = height.applyAsDouble(second);
-                        }
-                    }
-                    refined++;
-                }
-            }
+            return engineOf(engines, settings).frequencyResponse(object, frequencyRange(settings), progress);
         }
     }
 
@@ -380,7 +260,8 @@ public final class CircuitComputations {
      * named by its id; its facts are the voltage across it (its first terminal against its second) and the current into
      * its first terminal, each as a real and an imaginary part, every source excited at its own value with phase 0 —
      * so the angles between them are the circuit's, whatever the source's amplitude. What a sheet turns into a dial by
-     * every part: how far its current lags its voltage, and how large each is against the others.
+     * every part: how far its current lags its voltage, and how large each is against the others. This library's engine
+     * alone computes it: SPICE has no analysis that reports a part's phasors.
      */
     public static class PhasorDiagram implements Computation {
 
@@ -408,7 +289,7 @@ public final class CircuitComputations {
             }
             Netlist netlist = Netlist.of(object);
             CircuitSolver solver = new CircuitSolver(netlist);
-            double[] operatingPoint = smallSignalBias(solver, netlist);
+            double[] operatingPoint = ParallaxEngine.smallSignalBias(solver, netlist);
             Complex[] solution = solver.phasors(frequency, operatingPoint);
             double omega = 2 * Math.PI * frequency;
             List<Dataset.Feature> features = new ArrayList<>();
@@ -442,6 +323,16 @@ public final class CircuitComputations {
     /** The DC state: node voltages, every part's currents and the power every part takes. */
     public static class OperatingPoint implements Computation {
 
+        private final CircuitEngines engines;
+
+        public OperatingPoint() {
+            this(CircuitEngines.parallaxOnly());
+        }
+
+        public OperatingPoint(CircuitEngines engines) {
+            this.engines = engines;
+        }
+
         public RepresentationKind kind() {
             return RepresentationKind.OPERATING_POINT;
         }
@@ -451,7 +342,7 @@ public final class CircuitComputations {
         }
 
         public List<SettingSpecification> settings() {
-            return List.of();
+            return List.of(engineSetting());
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -460,35 +351,7 @@ public final class CircuitComputations {
         }
 
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
-            Netlist netlist = Netlist.of(object);
-            CircuitSolver solver = new CircuitSolver(netlist);
-            double[] state = solver.operatingPoint();
-            // Named as the circuit names them; the unit says what each is: a node's volts, a part's amperes, a resistor's watts.
-            Map<String, Double> values = new LinkedHashMap<>();
-            Map<String, String> units = new LinkedHashMap<>();
-            for (int node = 0; node < netlist.nodes().size(); node++) {
-                values.put(netlist.nodes().get(node), state[node]);
-                units.put(netlist.nodes().get(node), ColumnNames.VOLTS);
-            }
-            for (int branch = 0; branch < netlist.branches().size(); branch++) {
-                Netlist.Branch own = netlist.branches().get(branch);
-                if (own.partCurrent()) {
-                    values.put(own.name(), state[netlist.nodes().size() + branch]);
-                    units.put(own.name(), ColumnNames.AMPERES);
-                }
-            }
-            PartReadings.currents(solver.devices(), state).forEach((column, current) -> {
-                if (values.putIfAbsent(column, current) == null) {
-                    units.put(column, ColumnNames.AMPERES);
-                }
-            });
-            PartReadings.powers(solver.devices(), state).forEach((column, power) -> {
-                values.put(column, power);
-                units.put(column, ColumnNames.WATTS);
-            });
-            Map<String, String> notes = new LinkedHashMap<>();
-            notes.put("units", "a node in volts; a part's current in amperes (R1, U1.pin), its power in watts (R1.power)");
-            return new Dataset.Measurements(values, notes, units);
+            return engineOf(engines, settings).operatingPoint(object);
         }
     }
 
@@ -497,6 +360,16 @@ public final class CircuitComputations {
      * point starts Newton from the one before, which is how a sweep through a diode's knee stays on its curve.
      */
     public static class DirectCurrentSweep implements Computation {
+
+        private final CircuitEngines engines;
+
+        public DirectCurrentSweep() {
+            this(CircuitEngines.parallaxOnly());
+        }
+
+        public DirectCurrentSweep(CircuitEngines engines) {
+            this.engines = engines;
+        }
 
         public RepresentationKind kind() {
             return RepresentationKind.DC_SWEEP;
@@ -515,7 +388,8 @@ public final class CircuitComputations {
                     SettingSpecification.text("parameter", "", 32, "A parameter of the circuit to sweep instead — a wiper's position, a resistance"),
                     SettingSpecification.number("from", 0, -1e6, 1e6, "First value, V or A"),
                     SettingSpecification.number("to", 5, -1e6, 1e6, "Last value, V or A"),
-                    SettingSpecification.integer("points", 101, 3, 5000, "Points"));
+                    SettingSpecification.integer("points", 101, 3, 5000, "Points"),
+                    engineSetting());
         }
 
         public long estimatedCost(CompiledObject object, ComputationSettings settings) {
@@ -524,140 +398,9 @@ public final class CircuitComputations {
         }
 
         public Dataset compute(CompiledObject object, ComputationSettings settings, ComputationProgress progress) {
-            String parameter = settings.text("parameter");
-            if (parameter != null && !parameter.isBlank()) {
-                return sweepParameter(object, parameter.strip(), settings, progress);
-            }
-            Netlist netlist = Netlist.of(object);
-            Netlist.Element source = sweptSource(netlist, settings.text("source"));
-            double from = settings.number("from");
-            double to = settings.number("to");
-            int points = settings.integer("points");
-            float[] axis = new float[points];
-            double[][] states = new double[points][];
-            List<Map<String, Double>> currents = new ArrayList<>(points);
-            // One solver for the whole sweep — its system's ordering, its compiled models —, the swept source alone
-            // held at each value in turn.
-            CircuitSolver solver = new CircuitSolver(netlist);
-            for (int point = 0; point < points; point++) {
-                double value = from + (to - from) * point / (points - 1);
-                axis[point] = (float) value;
-                solver = solver.withSourceValue(source.id(), value);
-                states[point] = point == 0 ? solver.operatingPoint() : solver.operatingPoint(states[point - 1]);
-                // Read while the point's own linearization stands: a junction's current read off the last point's line
-                // was that point's current, at every point.
-                currents.add(PartReadings.currents(solver.devices(), states[point]));
-                if (point % 64 == 0) {
-                    progress.report((double) point / points, "Sweeping " + source.id());
-                }
-            }
-            return series(source.id(), axis, netlist, states, currents);
+            CircuitEngine.SweepRequest request = new CircuitEngine.SweepRequest(settings.text("source"),
+                    settings.text("parameter"), settings.number("from"), settings.number("to"), settings.integer("points"));
+            return engineOf(engines, settings).directCurrentSweep(object, request, progress);
         }
-
-        /**
-         * The operating point at every value of one of the circuit's parameters: what turning a knob does to the circuit at
-         * rest — a wiper from end to end opening a transistor. The circuit is built again for each value, as a slider moved
-         * there would build it, and each point starts from the one before, so a switch-like curve is followed, not jumped.
-         */
-        private static Dataset sweepParameter(CompiledObject object, String parameter, ComputationSettings settings, ComputationProgress progress) {
-            if (object.parameters().stream().noneMatch(definition -> definition.name().equals(parameter))) {
-                throw new IllegalArgumentException("The circuit has no parameter '" + parameter + "' to sweep.");
-            }
-            double from = settings.number("from");
-            double to = settings.number("to");
-            int points = settings.integer("points");
-            float[] axis = new float[points];
-            double[][] states = new double[points][];
-            List<Map<String, Double>> currents = new ArrayList<>(points);
-            Netlist netlist = null;
-            CircuitSolver solver = null;
-            int shape = -1;
-            for (int point = 0; point < points; point++) {
-                double value = from + (to - from) * point / (points - 1);
-                axis[point] = (float) value;
-                netlist = Netlist.of(object.withParameters(Map.of(parameter, value)));
-                // Every point is read through one netlist's node and branch layout (see series); a parameter that adds
-                // or removes parts mid-sweep would make the columns incomparable, so refuse it rather than misalign.
-                if (shape < 0) {
-                    shape = netlist.size();
-                } else if (netlist.size() != shape) {
-                    throw new IllegalArgumentException("Sweeping '" + parameter
-                            + "' changes the circuit's shape between values; sweep a parameter that does not add or remove parts.");
-                }
-                solver = new CircuitSolver(netlist);
-                boolean continued = point > 0 && states[point - 1].length == netlist.size();
-                states[point] = continued ? solver.operatingPoint(states[point - 1]) : solver.operatingPoint();
-                currents.add(PartReadings.currents(solver.devices(), states[point]));
-                if (point % 16 == 0) {
-                    progress.report((double) point / points, "Sweeping " + parameter);
-                }
-            }
-            return series(parameter, axis, netlist, states, currents);
-        }
-
-        private static Netlist.Element sweptSource(Netlist netlist, String id) {
-            return netlist.elements().stream()
-                    .filter(element -> element.kind().isSource())
-                    .filter(element -> id == null || id.isBlank() || element.id().equals(id.strip()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException(id == null || id.isBlank()
-                            ? "The circuit has no source to sweep; sweep one of its parameters instead."
-                            : "'" + id + "' is not a source of this circuit."));
-        }
-    }
-
-    /** Node voltages, own-current branches and diode currents along an axis — time or a swept value. */
-    private static Dataset series(String axisName, float[] axis, Netlist netlist, double[][] states,
-                                  List<Map<String, Double>> currents) {
-        List<String> columns = new ArrayList<>();
-        List<float[]> values = new ArrayList<>();
-        List<String> units = new ArrayList<>();
-        for (int node = 0; node < netlist.nodes().size(); node++) {
-            columns.add(netlist.nodes().get(node));
-            values.add(column(states, node));
-            units.add(ColumnNames.VOLTS);
-        }
-        for (int branch = 0; branch < netlist.branches().size(); branch++) {
-            Netlist.Branch own = netlist.branches().get(branch);
-            if (own.partCurrent()) {
-                columns.add(own.name());
-                values.add(column(states, netlist.nodes().size() + branch));
-                units.add(ColumnNames.AMPERES);
-            }
-        }
-        for (String column : currents.isEmpty() ? List.<String>of() : List.copyOf(currents.getFirst().keySet())) {
-            if (columns.contains(column)) {
-                continue;
-            }
-            float[] series = new float[states.length];
-            for (int sample = 0; sample < states.length; sample++) {
-                series[sample] = (float) currents.get(sample).getOrDefault(column, Double.NaN).doubleValue();
-            }
-            columns.add(column);
-            values.add(series);
-            units.add(ColumnNames.AMPERES);
-        }
-        return new Dataset.TimeSeries(axisName, axis, columns, values, units);
-    }
-
-    /** Where a small-signal analysis linearizes: a linear circuit's model does not depend on its bias, so rest will do. */
-    static double[] smallSignalBias(CircuitSolver solver, Netlist netlist) {
-        return solver.nonlinear() ? solver.operatingPoint() : new double[netlist.size()];
-    }
-
-    private static float[] floats(double[] values) {
-        float[] narrowed = new float[values.length];
-        for (int index = 0; index < values.length; index++) {
-            narrowed[index] = (float) values[index];
-        }
-        return narrowed;
-    }
-
-    private static float[] column(double[][] states, int index) {
-        float[] column = new float[states.length];
-        for (int sample = 0; sample < states.length; sample++) {
-            column[sample] = (float) states[sample][index];
-        }
-        return column;
     }
 }

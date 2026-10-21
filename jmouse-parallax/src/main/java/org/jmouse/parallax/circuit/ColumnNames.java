@@ -16,6 +16,19 @@ public final class ColumnNames {
     public static final String AMPERES = "A";
     /** The unit of a power column. */
     public static final String WATTS   = "W";
+    /** The unit of a gain column. */
+    public static final String DECIBELS = "dB";
+    /** The unit of a phase column. */
+    public static final String DEGREES = "°";
+    /** The unit of a noise density column. */
+    public static final String NOISE_DENSITY = "V/√Hz";
+
+    /** A node's gain over frequency is its name and this: {@code out gain}. */
+    public static final String GAIN_SUFFIX  = " gain";
+    /** A node's phase over frequency: {@code out phase}. */
+    public static final String PHASE_SUFFIX = " phase";
+    /** A node's noise density over frequency: {@code out noise}. */
+    public static final String NOISE_SUFFIX = " noise";
 
     private static final String POWER_SUFFIX = ".power";
 

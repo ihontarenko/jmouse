@@ -273,7 +273,7 @@ final class CircuitMeasurement {
         double frequency = quantity(clause("at", "the frequency, for example 'at 1 kHz'"));
         Response response = Response.of(circuit);
         Complex phasor = response.at(frequency, signal);
-        return kind.equals("gain") ? CircuitComputations.FrequencyResponse.gainOf(phasor) : Math.toDegrees(phasor.argument());
+        return kind.equals("gain") ? ParallaxEngine.gainOf(phasor) : Math.toDegrees(phasor.argument());
     }
 
     /**
@@ -288,7 +288,7 @@ final class CircuitMeasurement {
         double peak = Double.NEGATIVE_INFINITY;
         for (int point = 0; point < points; point++) {
             frequencies[point] = LOWEST_FREQUENCY * Math.pow(10, (double) point / FREQUENCIES_PER_DECADE);
-            gains[point] = CircuitComputations.FrequencyResponse.gainOf(response.at(frequencies[point], signal));
+            gains[point] = ParallaxEngine.gainOf(response.at(frequencies[point], signal));
             peak = Math.max(peak, gains[point]);
         }
         double level = peak - CORNER_DROP;
@@ -299,7 +299,7 @@ final class CircuitMeasurement {
                 boolean rising = gains[point] > gains[point - 1];
                 for (int bisection = 0; bisection < CORNER_BISECTIONS; bisection++) {
                     double middle = Math.sqrt(low * high);
-                    boolean over = CircuitComputations.FrequencyResponse.gainOf(response.at(middle, signal)) > level;
+                    boolean over = ParallaxEngine.gainOf(response.at(middle, signal)) > level;
                     if (over == rising) {
                         high = middle;
                     } else {
@@ -319,7 +319,7 @@ final class CircuitMeasurement {
         static Response of(CompiledObject circuit) {
             Netlist netlist = Netlist.of(circuit);
             CircuitSolver solver = new CircuitSolver(netlist);
-            return new Response(solver, netlist, CircuitComputations.smallSignalBias(solver, netlist));
+            return new Response(solver, netlist, ParallaxEngine.smallSignalBias(solver, netlist));
         }
 
         /** A node's phasor, or the difference of two — {@code out}, {@code out - reference}. */
