@@ -94,6 +94,8 @@ public final class KiCadSchematicExport {
     private final Map<String, CircuitElement> elements = new LinkedHashMap<>();
     private final Map<String, Optional<Look>> looks = new HashMap<>();
     private final Map<String, Optional<Block.Symbol>> symbols = new HashMap<>();
+    /** Which symbol each library id is drawn with on this sheet: a library id holds one drawing. */
+    private final Map<String, String> drawingOfLibraryId = new HashMap<>();
     /** Where each terminal meets its wires on the KiCad sheet, by {@code id:pin}; a mark's by {@code id:}. */
     private final Map<String, KiCadPoint> terminals = new HashMap<>();
     /** What the drawing joins: terminals, marks and the nets marks name, each led to the one it is joined with. */
@@ -158,16 +160,13 @@ public final class KiCadSchematicExport {
         }
         String reference = element.type() == CircuitElementType.MODEL ? element.component()
                 : element.type().primitiveComponent();
-        Optional<Look> found = look(reference);
+        Optional<Look> found = look(reference, element.symbol());
         if (found.isEmpty()) {
             notes.add(id + ": '" + reference + "' is a sheet placed as a block, or no component this reader may see: a "
                     + "hierarchical sheet is not exported yet, so it is left out with its wires.");
             return;
         }
         Look look = found.get();
-        if (element.symbol() != null && look.drawing() != null) {
-            notes.add(id + " is drawn with its component's own symbol: KiCad keeps one drawing a symbol.");
-        }
         Map<String, String> terminalPins = terminalPins(element, look);
         Set<String> apart = new LinkedHashSet<>();
         placed.stream().filter(item -> item.unit() != null).forEach(item -> apart.add(item.unit()));
@@ -280,7 +279,10 @@ public final class KiCadSchematicExport {
             int angle = inward(drawnPin.x(), -drawnPin.y());
             if (pin.shared() || look.units().isEmpty()) {
                 if (placed.add(pinName)) {
-                    symbol.pin(look.units().isEmpty() ? 1 : 0, typeOf(pin), at, angle, 0, drawnPin.label(),
+                    // A pin every unit shares is the first unit's, as the sheet draws it on the part's own line: in
+                    // every unit (KiCad's unit 0) each unit placed apart carried an unwired copy, and KiCad reads the
+                    // pad from that one.
+                    symbol.pin(1, typeOf(pin), at, angle, 0, drawnPin.label(),
                             look.numbers().getOrDefault(pinName, pinName));
                 }
                 continue;
@@ -661,11 +663,15 @@ public final class KiCadSchematicExport {
 
     // ─── components ─────────────────────────────────────────────────────────────────────────────────
 
-    private Optional<Look> look(String reference) {
-        return looks.computeIfAbsent(reference, this::read);
+    /**
+     * How a component is drawn with one of its symbols: the one a part names when it is drawn with another than the
+     * default ({@code symbol operational-amplifier-wide-symbol}), else its default.
+     */
+    private Optional<Look> look(String reference, String variant) {
+        return looks.computeIfAbsent(reference + "|" + (variant == null ? "" : variant), key -> read(reference, variant));
     }
 
-    private Optional<Look> read(String reference) {
+    private Optional<Look> read(String reference, String variant) {
         Optional<String> source = library.source(reference);
         if (source.isEmpty()) {
             return Optional.empty();
@@ -692,8 +698,18 @@ public final class KiCadSchematicExport {
         // The map's own numbering wins: KiCad's diode is 1 = K where the catalogue's 1 is its anode.
         mapping.ifPresent(found -> found.pins().forEach((number, pin) -> numbers.put(pin, number)));
         Optional<Block.Symbol> uses = document.block(Block.Symbol.class);
-        Block.Symbol drawing = uses.filter(symbol -> !symbol.uses().isEmpty())
-                .flatMap(symbol -> symbol(symbol.uses().getFirst())).orElse(null);
+        // The symbol the part is drawn with: the variant it names when its component offers it, else the default.
+        Optional<String> drawnWith = uses.filter(symbol -> !symbol.uses().isEmpty()).map(symbol ->
+                variant != null && symbol.uses().contains(variant) ? variant : symbol.uses().getFirst());
+        Block.Symbol drawing = drawnWith.flatMap(this::symbol).orElse(null);
+        // KiCad keeps one drawing to a library symbol: the first drawing of a component holds its library id — the one
+        // the library map reads back —, a second, different one of the same component on this sheet a name of its own.
+        if (drawnWith.isPresent()) {
+            String holder = drawingOfLibraryId.putIfAbsent(libraryId, drawnWith.get());
+            if (holder != null && !holder.equals(drawnWith.get())) {
+                libraryId = libraryId + "_" + drawnWith.get();
+            }
+        }
         Map<String, List<String>> sides = new LinkedHashMap<>();
         uses.filter(symbol -> symbol.shape().isPresent()).ifPresent(symbol -> symbol.sides().forEach((side, written) ->
                 sides.put(side, written.stream().map(entry -> entry.strip().split("\\s+")[0]).toList())));
