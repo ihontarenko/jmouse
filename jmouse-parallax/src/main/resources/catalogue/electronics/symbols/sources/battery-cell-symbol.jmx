@@ -1,0 +1,28 @@
+symbol "Battery cell" as battery-cell-symbol {
+    meta {
+        summary "One battery cell, as drawn on a schematic: the long plate is its +, the bar under it as full as its charge"
+        category circuits
+        tags electronics, schematic
+        license "CERN-OHL-W-2.0"
+    }
+    size 80 x 40
+    input state_of_charge
+    input failed
+    live group body {
+        path "M-40 0H-4M-4-15V15M4-8V8M4 0H40"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    live box charge at 0, 22 size 20 x 6 {
+        live level = state_of_charge
+        live fill = curve(state_of_charge, 0 -> hot, 0.2 -> warm, 0.5 -> positive)
+    }
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 36
+}

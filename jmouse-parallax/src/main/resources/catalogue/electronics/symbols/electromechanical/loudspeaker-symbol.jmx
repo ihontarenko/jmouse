@@ -1,0 +1,29 @@
+symbol "Loudspeaker" as loudspeaker-symbol {
+    meta {
+        summary "Loudspeaker, as drawn on a schematic: a magnet box and its cone, sound leaving it as strongly as it is driven"
+        category circuits
+        tags electronics, schematic
+        license "CERN-OHL-W-2.0"
+    }
+    size 80 x 80
+    input level 0 .. 1
+    input failed
+    live group body {
+        path "M-40-20H-16V-10M-40 20H-16V10M-16-10H-6V10H-16ZM-6-10L14-26V26L-6 10"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    live path sound "M20-10A14 14 0 0 1 20 10M26-18A24 24 0 0 1 26 18" {
+        stroke = positive
+        live opacity = seen(level)
+        live glow = 5 * level
+    }
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin a at -40, -20
+    pin b at -40, 20
+    label name at 0, -36
+    label value at 0, 40
+}
