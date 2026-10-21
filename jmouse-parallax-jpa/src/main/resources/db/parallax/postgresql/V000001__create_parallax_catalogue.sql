@@ -84,7 +84,7 @@ CREATE TABLE object_relations (
     CONSTRAINT pk_object_relations PRIMARY KEY (object_id, related_object_id),
     CONSTRAINT ck_object_relations_kind CHECK (relation_kind IN ('GENERALIZES', 'SPECIAL_CASE', 'DEFORMATION_OF',
                                                                  'CONSTRUCTED_FROM', 'DUAL', 'SIMILAR', 'SEE_ALSO',
-                                                                 'USES_SYMBOL')),
+                                                                 'USES_SYMBOL', 'USES_FOOTPRINT')),
     CONSTRAINT fk_object_relations_object FOREIGN KEY (object_id) REFERENCES objects (id) ON DELETE CASCADE,
     CONSTRAINT fk_object_relations_related FOREIGN KEY (related_object_id) REFERENCES objects (id) ON DELETE CASCADE
 );

@@ -64,6 +64,7 @@ ExperienceDocument
                       amplitude = SourceText[12:69@497] "Vm"
                       frequency = SourceText[12:85@513] "50"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "D1"
@@ -75,6 +76,7 @@ ExperienceDocument
                       cathode = "p"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "D3"
@@ -86,6 +88,7 @@ ExperienceDocument
                       cathode = "p"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
               - Part
                   id: "D2"
@@ -97,6 +100,7 @@ ExperienceDocument
                       cathode = "b"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 15
               - Part
                   id: "D4"
@@ -108,6 +112,7 @@ ExperienceDocument
                       cathode = "a"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 16
               - Part
                   id: "RL"
@@ -120,6 +125,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[17:41@728] "R"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 17
       - Layout
           items: List(11)
@@ -362,9 +368,9 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 1:1 circuit "…" is opened with '{' and never closed
 == line 4 deleted
-READS 9b902e83d4c5a38eb6b3a85260c677aa
+READS 1ef4da334d8f0d6b42790bf8897943ec
 == line 4 begun with a stray word
-READS c983c7881c65c68e5b4831004a6e8c4a
+READS 3bb59b6b6affb57769f112202ca26e22
 == line 11 deleted
 REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 11:9 'AC1' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
 == line 11 begun with a stray word
@@ -374,17 +380,17 @@ REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 18:12 'parts' 
 == line 18 begun with a stray word
 REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 19:12 'parts' holds lines, not a nested '{ … }'
 == line 25 deleted
-READS 1a01dc43ea8ed6f99aa297731df2fd96
+READS a7faba3ed460cdf9e92d5ca450931695
 == line 25 begun with a stray word
-READS ef8d414d86509c6465af2788fdf45490
+READS 84a4bc0385fd85c790572bd1f06d23ee
 == line 32 deleted
-READS 3ed9c4bf38c0c43172a4a20d52d34e4f
+READS 397a5b8e746b0c3bb64347d1824c293a
 == line 32 begun with a stray word
-READS b4ea46f765c93c4e36c201b639cf0eaa
+READS b0bd1637d83b52761f1cccbad41c3e81
 == line 39 deleted
-READS 9154beec238644a6b5112c0e9ab2b4f8
+READS e6e8e51cfce8e5e391e7fc198adbbea0
 == line 39 begun with a stray word
-READS 17c901220ba8d10d07646daef86c6e7f
+READS eb9b2addf7ae29400a60084a4bbaee96
 == line 46 deleted
 REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 46:9 'transient_response' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
 == line 46 begun with a stray word

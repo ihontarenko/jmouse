@@ -59,4 +59,9 @@ public interface KiCadCatalogue {
      * block's pin, {@code 7} is {@code B.output} —; empty when the component numbers none.
      */
     Map<String, String> pinsByNumber(String component);
+
+    /** The footprint a component's own {@code footprint} line names; empty when it names none. */
+    default Optional<String> footprintOf(String component) {
+        return Optional.empty();
+    }
 }

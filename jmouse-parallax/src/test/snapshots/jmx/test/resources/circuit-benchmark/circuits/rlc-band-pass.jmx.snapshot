@@ -32,6 +32,7 @@ ExperienceDocument
                       amplitude = SourceText[11:69@628] "1"
                       frequency = SourceText[11:84@643] "1591.55"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "L1"
@@ -44,6 +45,7 @@ ExperienceDocument
                   settings: Map(1)
                       inductance = SourceText[12:47@697] "0.01"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "C1"
@@ -56,6 +58,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[13:50@751] "1e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "R1"
@@ -68,6 +71,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[14:43@798] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -77,6 +81,6 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/circuits/rlc-band-pass.jmx 5:1 circuit "…" is opened with '{' and never closed
 == line 11 deleted
-READS c613ffa7947a797d7fa8cb99d1d1dc9e
+READS 1d7229504e3a03a32708174d470c1ca7
 == line 11 begun with a stray word
-READS 7dc95c11a7270a581513b64e055ec638
+READS 31f664cac85b1136c4765bd44c5697f1

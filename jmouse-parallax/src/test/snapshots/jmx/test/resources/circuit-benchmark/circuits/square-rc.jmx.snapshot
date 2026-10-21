@@ -33,6 +33,7 @@ ExperienceDocument
                       low = SourceText[10:75@454] "0"
                       frequency = SourceText[10:90@469] "10000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "R1"
@@ -45,6 +46,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[11:44@518] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "C1"
@@ -57,6 +59,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[12:45@567] "10e-9"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "D1"
@@ -68,6 +71,7 @@ ExperienceDocument
                       cathode = "clamp"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "R2"
@@ -80,6 +84,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[14:45@666] "10000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -93,6 +98,6 @@ REFUSED src/test/resources/circuit-benchmark/circuits/square-rc.jmx 4:5 a docume
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/square-rc.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS a38ea8b73b500aac62e2f3ab3ec3387e
+READS b2b7eddb8021b05bdd6068e4fd2297d8
 == line 11 begun with a stray word
-READS 7488d5ea1bda61471bbc9110d31e18ee
+READS bb3a3e04cd55083b6acef0ccb277d2a2

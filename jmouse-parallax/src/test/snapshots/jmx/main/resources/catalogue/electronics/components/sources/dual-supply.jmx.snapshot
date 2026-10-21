@@ -172,6 +172,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[42:48@1970] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 42
               - Part
                   id: "R2"
@@ -184,6 +185,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[43:49@2025] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 43
               - Part
                   id: "U1"
@@ -196,6 +198,7 @@ ExperienceDocument
                       negative = "minus"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 44
           sharedBench: null
           duration: Double 0.001
@@ -240,6 +243,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[52:48@2341] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 52
               - Part
                   id: "R2"
@@ -252,6 +256,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[53:49@2396] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 53
               - Part
                   id: "U1"
@@ -264,6 +269,7 @@ ExperienceDocument
                       negative = "minus"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 54
           sharedBench: null
           duration: Double 0.001
@@ -306,6 +312,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[62:48@2728] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 62
               - Part
                   id: "R2"
@@ -318,6 +325,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[63:49@2783] "5 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 63
               - Part
                   id: "U1"
@@ -330,6 +338,7 @@ ExperienceDocument
                       negative = "minus"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 64
           sharedBench: null
           duration: Double 0.001
@@ -372,6 +381,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[72:48@3125] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 72
               - Part
                   id: "R2"
@@ -384,6 +394,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[73:49@3180] "5 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 73
               - Part
                   id: "U1"
@@ -396,6 +407,7 @@ ExperienceDocument
                       negative = "minus"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 74
           sharedBench: null
           duration: Double 0.001
@@ -427,33 +439,33 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.jmx 7:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 8f14cde5c59b4fa0541737685192d7b7
+READS cafdf32ddf59519dfe5431f332848bc6
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 920d0cf9e961cf8536d2e3a42a94b035
+READS dedbee1177ccc35cce8366d918d030f5
 == line 11 begun with a stray word
-READS b1e04c29d2e255bb47e6551af038060d
+READS 0fb8f9b1e8dc70c0ad580bd3cf849955
 == line 18 deleted
-READS 461317c8b05bcc50c02ebf212e7d6288
+READS 7dd7183a3ebce4fd5dcfc4cecbaa28ca
 == line 18 begun with a stray word
-READS ba74612fa0e7547c5730c476ba1cd4c5
+READS 31c3a6972a406fd836019faa1a765e42
 == line 25 deleted
-READS 1ef9e6220a56e4e6955c46e9ecbcf9e7
+READS 066b6cffd7be7dbeb752cb5432661cba
 == line 25 begun with a stray word
-READS 81ed321712637dc80669637a5e69d950
+READS b3881817a93f5814788e3ea16b6d627f
 == line 32 deleted
-READS 6ba4b182145218df40c0c0bb12fa3e9d
+READS 2292a5ac1f1d4d5c07ae62fb42105611
 == line 32 begun with a stray word
-READS 9df0d166cfa335eddd1deb6d5c30d346
+READS cbfc6b60cbea3dacabf6dde0c74052e3
 == line 46 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.jmx 40:5 expectation 'holds both rails' needs a measure and a criterion (near, within or is)
 == line 46 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.jmx 46:9 'zzz' is not a criterion: near, within or is
 == line 53 deleted
-READS 8940bc2ea5beac250b820ca42d72f6ce
+READS f9658cbcbb1242eb0c962504f135d535
 == line 53 begun with a stray word
-READS 61cd2c988b75215e5c23d00f117e775f
+READS 6231eb3787399d4698b3faeace5eab02
 == line 60 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.jmx 60:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 60 begun with a stray word
@@ -463,6 +475,6 @@ REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.
 == line 67 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/dual-supply.jmx 67:9 'zzz' is not a criterion: near, within or is
 == line 74 deleted
-READS 663892abacff018824686a2ea9f7e0d5
+READS 2bb40431b2280103160224a38f282c1d
 == line 74 begun with a stray word
-READS 5cce515bfdcd4899483beef15e452459
+READS 760d26454c869f79cf6f110a07b6ed24

@@ -67,6 +67,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[21:57@721] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 21
               - Part
                   id: "I1"
@@ -79,6 +80,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[22:52@776] "10 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 22
               - Part
                   id: "U1"
@@ -91,6 +93,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
           sharedBench: null
           duration: Double 0.001
@@ -127,7 +130,7 @@ REFUSED src/test/resources/circuit-benchmark/components/npn-transistor.jmx 4:5 a
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/npn-transistor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 8205ccf0fec1a36863328a41a5eb1fb9
+READS 4eb2450b36a207cd963e3ddcebcac9a1
 == line 11 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/npn-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted

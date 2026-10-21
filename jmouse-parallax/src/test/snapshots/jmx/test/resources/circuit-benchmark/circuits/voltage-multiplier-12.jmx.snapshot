@@ -32,6 +32,7 @@ ExperienceDocument
                       amplitude = SourceText[10:70@526] "10"
                       frequency = SourceText[10:86@542] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "CA1"
@@ -44,6 +45,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[11:46@592] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "DA1"
@@ -55,6 +57,7 @@ ExperienceDocument
                       cathode = "n1"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "DB1"
@@ -66,6 +69,7 @@ ExperienceDocument
                       cathode = "b1"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "CB1"
@@ -78,6 +82,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[14:45@732] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
               - Part
                   id: "CA2"
@@ -90,6 +95,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[15:46@782] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 15
               - Part
                   id: "DA2"
@@ -101,6 +107,7 @@ ExperienceDocument
                       cathode = "n2"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 16
               - Part
                   id: "DB2"
@@ -112,6 +119,7 @@ ExperienceDocument
                       cathode = "b2"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 17
               - Part
                   id: "CB2"
@@ -124,6 +132,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[18:46@924] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 18
               - Part
                   id: "CA3"
@@ -136,6 +145,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[19:46@974] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 19
               - Part
                   id: "DA3"
@@ -147,6 +157,7 @@ ExperienceDocument
                       cathode = "n3"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 20
               - Part
                   id: "DB3"
@@ -158,6 +169,7 @@ ExperienceDocument
                       cathode = "b3"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 21
               - Part
                   id: "CB3"
@@ -170,6 +182,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[22:46@1116] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 22
               - Part
                   id: "CA4"
@@ -182,6 +195,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[23:46@1166] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "DA4"
@@ -193,6 +207,7 @@ ExperienceDocument
                       cathode = "n4"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "DB4"
@@ -204,6 +219,7 @@ ExperienceDocument
                       cathode = "b4"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
               - Part
                   id: "CB4"
@@ -216,6 +232,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[26:46@1308] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 26
               - Part
                   id: "CA5"
@@ -228,6 +245,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[27:46@1358] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 27
               - Part
                   id: "DA5"
@@ -239,6 +257,7 @@ ExperienceDocument
                       cathode = "n5"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 28
               - Part
                   id: "DB5"
@@ -250,6 +269,7 @@ ExperienceDocument
                       cathode = "b5"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 29
               - Part
                   id: "CB5"
@@ -262,6 +282,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[30:46@1500] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 30
               - Part
                   id: "CA6"
@@ -274,6 +295,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[31:46@1550] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 31
               - Part
                   id: "DA6"
@@ -285,6 +307,7 @@ ExperienceDocument
                       cathode = "n6"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 32
               - Part
                   id: "DB6"
@@ -296,6 +319,7 @@ ExperienceDocument
                       cathode = "b6"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 33
               - Part
                   id: "CB6"
@@ -308,6 +332,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[34:46@1692] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 34
               - Part
                   id: "CA7"
@@ -320,6 +345,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[35:46@1742] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 35
               - Part
                   id: "DA7"
@@ -331,6 +357,7 @@ ExperienceDocument
                       cathode = "n7"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 36
               - Part
                   id: "DB7"
@@ -342,6 +369,7 @@ ExperienceDocument
                       cathode = "b7"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 37
               - Part
                   id: "CB7"
@@ -354,6 +382,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[38:46@1884] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 38
               - Part
                   id: "CA8"
@@ -366,6 +395,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[39:46@1934] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 39
               - Part
                   id: "DA8"
@@ -377,6 +407,7 @@ ExperienceDocument
                       cathode = "n8"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 40
               - Part
                   id: "DB8"
@@ -388,6 +419,7 @@ ExperienceDocument
                       cathode = "b8"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 41
               - Part
                   id: "CB8"
@@ -400,6 +432,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[42:46@2076] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 42
               - Part
                   id: "CA9"
@@ -412,6 +445,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[43:46@2126] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 43
               - Part
                   id: "DA9"
@@ -423,6 +457,7 @@ ExperienceDocument
                       cathode = "n9"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 44
               - Part
                   id: "DB9"
@@ -434,6 +469,7 @@ ExperienceDocument
                       cathode = "b9"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 45
               - Part
                   id: "CB9"
@@ -446,6 +482,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[46:46@2268] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 46
               - Part
                   id: "CA10"
@@ -458,6 +495,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[47:48@2320] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 47
               - Part
                   id: "DA10"
@@ -469,6 +507,7 @@ ExperienceDocument
                       cathode = "n10"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 48
               - Part
                   id: "DB10"
@@ -480,6 +519,7 @@ ExperienceDocument
                       cathode = "b10"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 49
               - Part
                   id: "CB10"
@@ -492,6 +532,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[50:48@2469] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 50
               - Part
                   id: "CA11"
@@ -504,6 +545,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[51:49@2522] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 51
               - Part
                   id: "DA11"
@@ -515,6 +557,7 @@ ExperienceDocument
                       cathode = "n11"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 52
               - Part
                   id: "DB11"
@@ -526,6 +569,7 @@ ExperienceDocument
                       cathode = "b11"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 53
               - Part
                   id: "CB11"
@@ -538,6 +582,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[54:49@2673] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 54
               - Part
                   id: "CA12"
@@ -550,6 +595,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[55:49@2726] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 55
               - Part
                   id: "DA12"
@@ -561,6 +607,7 @@ ExperienceDocument
                       cathode = "n12"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 56
               - Part
                   id: "DB12"
@@ -572,6 +619,7 @@ ExperienceDocument
                       cathode = "b12"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 57
               - Part
                   id: "CB12"
@@ -584,6 +632,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[58:49@2877] "1e-7"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 58
               - Part
                   id: "RL"
@@ -596,6 +645,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[59:43@2924] "1000000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -609,33 +659,33 @@ REFUSED src/test/resources/circuit-benchmark/circuits/voltage-multiplier-12.jmx 
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/voltage-multiplier-12.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 41c09b7558b05aed4d800d8479250a2d
+READS 3f4554399bdf3c741af1c08068f589e0
 == line 11 begun with a stray word
-READS cfe92a8e02d8a13729985d9253b42bdc
+READS 826a47bf5e60c4e67a6e275d131a9b2a
 == line 18 deleted
-READS ffd2319be830d44d6eb739944e4236d6
+READS 2a1ec926f77ab0055cf84bf1aa972220
 == line 18 begun with a stray word
-READS a6a0f079361c2a022371908caef44838
+READS 47f094f6ecd524d0c83c6bec9a3aa8cf
 == line 25 deleted
-READS 18782769c406f04ed0f512e2cc3feef7
+READS c8573ee7a6703cd321bd419632d19fbf
 == line 25 begun with a stray word
-READS 58a718fe2c6a042e5da82363a36fdcb1
+READS a29c93a0b0382e2374437f0e43183e5a
 == line 32 deleted
-READS 279b846b5577bf63d40b833cac15d63f
+READS c63a8d603b5914a40639cb8f3aaf7e2e
 == line 32 begun with a stray word
-READS 74aacfe2b4d8642909e413389e9541e7
+READS c7f106c3cfe798752cc60bd1233ba29c
 == line 39 deleted
-READS 266e9e38be1888ca85bc70d1ec099b83
+READS 79d7d89412385977ebe142dbf33ba500
 == line 39 begun with a stray word
-READS 4443c644a8c5294f95f7245bacebfe0b
+READS 557423d0fd365b4b8d324605caca7c59
 == line 46 deleted
-READS 453ae1bbc783941eeb55a6dae3c6e9a4
+READS 9a977297df471c914c3c48a6b4b4088f
 == line 46 begun with a stray word
-READS 3b79689288dd9894819438500867268c
+READS 2a1ca88626bb607b3c1958ba7eaf388b
 == line 53 deleted
-READS 259f2b3593f39748fe609242f5ea5922
+READS 949974ade5b6f23179b567a1669e2bc5
 == line 53 begun with a stray word
-READS b3d2ff54eb062b2df309a859c31fbfb6
+READS cd9c154f02e7cda04bb8271e3ef230f0
 == line 60 deleted
 REFUSED src/test/resources/circuit-benchmark/circuits/voltage-multiplier-12.jmx 4:1 circuit "…" is opened with '{' and never closed
 == line 60 begun with a stray word

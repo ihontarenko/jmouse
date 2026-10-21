@@ -353,6 +353,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[80:52@4995] "1 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 80
               - Part
                   id: "U1"
@@ -364,6 +365,7 @@ ExperienceDocument
                       terminal_two = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 81
           sharedBench: null
           duration: Double 5.0E-5
@@ -407,6 +409,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[89:52@5344] "1 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 89
               - Part
                   id: "U1"
@@ -418,6 +421,7 @@ ExperienceDocument
                       terminal_two = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 90
           sharedBench: null
           duration: Double 2.5E-4
@@ -450,49 +454,49 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 19:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS acb65be805abb8369e08970a5cb0163f
+READS 4b085abedcc63794f3d898773584086a
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS f9b6cf924e91f21925415f08982762c9
+READS 03857f0546d96720fc75a913acf4dba1
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 25 deleted
-READS 07924166de1017c8b2ad7a61337957ba
+READS 8cd78d61eacf1a2322ccce53a6917ad8
 == line 25 begun with a stray word
-READS 7d20891dc34e17e09c9c75512892651f
+READS a9c18f2bf2ed975b25f71e2cf075b464
 == line 32 deleted
-READS 084b89752242bb88b1ca6af9390badeb
+READS 116f6639a06f7c7b90e24d3eac4dcb41
 == line 32 begun with a stray word
-READS 867740bc95f3b52deace2492b9542839
+READS 25f5aca68cb045dd87fdb75f77d032c5
 == line 39 deleted
-READS 19b78886747de45651e1e2d61d0a860b
+READS 7c4b8deced8119a79cd5a06cab147c8b
 == line 39 begun with a stray word
-READS f5c4a1f631fb7dd1e53ffe1bea0d22b8
+READS 75464042b9de6cc7555ec23635629e81
 == line 46 deleted
-READS f77a08d5109bac42b6ccc06f8a279dad
+READS 3ff7d031d3e68965b7569155411399e8
 == line 46 begun with a stray word
-READS 330121f00a817f72b2a672b96addadec
+READS 148cbae945a139275fc4c259683af801
 == line 53 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:9 'I_winding' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 deleted
-READS 66d78b2fae79d278e9c0d6ba51f7fc67
+READS 85af846624ad7890dd53491c65c6ca23
 == line 60 begun with a stray word
-READS ff48d26f9f52a5dbd5d81146fa2bac48
+READS d0c4a893ab916878ac08931806e85da1
 == line 67 deleted
-READS f53456cc780d51abd241e6ccf7ae2e82
+READS affd50a6e36d200c21e45415ebf43913
 == line 67 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 67:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 74 deleted
-READS 8d09ea6d3db3746860e8c6d8733cf733
+READS b34868cba5f2700bdefad915f8059e70
 == line 74 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 81 deleted
-READS f782921eab0898833e53338b39da68e8
+READS 7aa56e6b1df134a0fa36766004655542
 == line 81 begun with a stray word
-READS f6f9c4a553b871609a39c76bbd3bde6d
+READS c06d29a1965bd685b5257eaac036cbf5
 == line 88 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 88:13 'V1' is not a criterion: near, within or is
 == line 88 begun with a stray word

@@ -54,6 +54,8 @@ public final class KiCadSchematicExport {
 
     /** What a component made from a KiCad symbol writes as its source: {@code KiCad symbol Device:LED}. */
     private static final String KICAD_SOURCE = "KiCad symbol ";
+    /** How an imported footprint's source names the KiCad footprint it was read from. */
+    private static final String KICAD_FOOTPRINT_SOURCE = "KiCad footprint ";
 
     /** How a net joins what names it, among the drawing's keys. */
     private static final String NET = "net:";
@@ -82,7 +84,7 @@ public final class KiCadSchematicExport {
     private record Look(String reference, String libraryId, String title, String designator, List<String> units,
                         Map<String, ComponentModel.Pin> pins, List<String> pinOrder, Block.Symbol drawing,
                         Map<String, String> ports, Map<String, List<String>> sides, Map<String, String> numbers,
-                        Optional<String> valueParameter, Map<String, Double> defaults) {
+                        Optional<String> valueParameter, Map<String, Double> defaults, Optional<String> footprint) {
     }
 
     private final String slug;
@@ -94,6 +96,8 @@ public final class KiCadSchematicExport {
     private final Map<String, CircuitElement> elements = new LinkedHashMap<>();
     private final Map<String, Optional<Look>> looks = new HashMap<>();
     private final Map<String, Optional<Block.Symbol>> symbols = new HashMap<>();
+    /** Each footprint's KiCad library id, by its slug. */
+    private final Map<String, String> footprintLibraryIds = new HashMap<>();
     /** Which symbol each library id is drawn with on this sheet: a library id holds one drawing. */
     private final Map<String, String> drawingOfLibraryId = new HashMap<>();
     /** Where each terminal meets its wires on the KiCad sheet, by {@code id:pin}; a mark's by {@code id:}. */
@@ -239,7 +243,7 @@ public final class KiCadSchematicExport {
         List<String> numbers = new ArrayList<>();
         own.values().forEach(pin -> numbers.add(look.numbers().getOrDefault(pin, pin)));
         schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(libraryId, placement, kicadUnit, element.id(),
-                value(element, look), Map.of("Footprint", ""), numbers.stream().distinct().toList(),
+                value(element, look), Map.of("Footprint", footprintOf(element, look)), numbers.stream().distinct().toList(),
                 labelPoint(look, item, placement, "name", -1), labelPoint(look, item, placement, "value", 1)));
     }
 
@@ -718,7 +722,22 @@ public final class KiCadSchematicExport {
         return Optional.of(new Look(reference, libraryId, document.title(), designatorOf(document),
                 List.copyOf(model.units()), pins, List.copyOf(pins.keySet()), drawing,
                 uses.map(Block.Symbol::ports).orElse(Map.of()), sides, numbers,
-                mapping.flatMap(KiCadLibraryMap.Mapping::value), defaults));
+                mapping.flatMap(KiCadLibraryMap.Mapping::value), defaults,
+                document.block(Block.FootprintUse.class).map(Block.FootprintUse::footprint)));
+    }
+
+    /** The KiCad footprint a part sits on: the one its own line names, else its component's; empty when neither does. */
+    private String footprintOf(CircuitElement element, Look look) {
+        return Optional.ofNullable(element.footprint()).or(look::footprint).map(this::footprintLibraryId).orElse("");
+    }
+
+    /** A footprint as KiCad names it: the library id it was imported from, else the slug in this product's library. */
+    private String footprintLibraryId(String footprint) {
+        return footprintLibraryIds.computeIfAbsent(footprint, slug -> library.source(slug)
+                .map(source -> ExperienceReader.read(source, slug + ".jmx").getFirst().meta().source())
+                .filter(written -> written != null && written.startsWith(KICAD_FOOTPRINT_SOURCE))
+                .map(written -> written.substring(KICAD_FOOTPRINT_SOURCE.length()).strip())
+                .orElse(OWN_LIBRARY + ":" + slug));
     }
 
     private Optional<Block.Symbol> symbol(String slug) {

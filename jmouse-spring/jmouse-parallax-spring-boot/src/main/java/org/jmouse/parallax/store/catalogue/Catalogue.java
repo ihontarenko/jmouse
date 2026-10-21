@@ -699,6 +699,7 @@ public class Catalogue {
         }
         if (defined.definition() instanceof ObjectDefinition.Circuit circuit) {
             validatePartSymbols(circuit);
+            validatePartFootprints(circuit);
         }
         CompiledObject compiled;
         try {
@@ -745,6 +746,25 @@ public class Catalogue {
                 throw ParallaxProblem.invalid("Part '" + element.id() + "' is drawn with '" + element.symbol() + "', which '"
                         + component + "' does not offer; its symbols are " + (variants.isEmpty() ? "none" : String.join(", ", variants)) + ".");
             }
+        }
+    }
+
+    /**
+     * A part that names its own footprint ({@code U4 ne5532 (…) footprint dip-8-footprint}) sits on a footprint that
+     * exists and has a pad for every pin number of its component.
+     */
+    private void validatePartFootprints(ObjectDefinition.Circuit circuit) {
+        for (ObjectDefinition.CircuitElement element : circuit.elements()) {
+            if (element.footprint() == null) {
+                continue;
+            }
+            MathematicalObject footprint = objects.findBySlug(element.footprint())
+                    .filter(candidate -> candidate.getKind() == ObjectKind.FOOTPRINT)
+                    .orElseThrow(() -> ParallaxProblem.invalid("Part '" + element.id() + "' sits on '" + element.footprint()
+                            + "', which is no footprint."));
+            componentModels.partFootprintProblem(ExperienceDefinitions.componentOf(element), footprint).ifPresent(problem -> {
+                throw ParallaxProblem.invalid("Part '" + element.id() + "': " + problem + ".");
+            });
         }
     }
 
@@ -802,7 +822,7 @@ public class Catalogue {
      * The relations a text implies: its {@code meta} relation fields, the catalogue components a circuit pins
      * ({@code CONSTRUCTED_FROM}), and the symbols a component is drawn with ({@code USES_SYMBOL}) — the ones its
      * {@code symbol uses} line names, each checked to draw every pin of the component —, and the footprint its
-     * {@code footprint} line names, checked to have a pad for every pin number and not indexed.
+     * {@code footprint} line names, checked to have a pad for every pin number ({@code USES_FOOTPRINT}).
      */
     private List<MathematicalObject.Relation> relationsOf(MathematicalObject object, DefinedObject defined,
                                                           RelationIndexing indexing) {
@@ -838,11 +858,10 @@ public class Catalogue {
                     if (indexing == RelationIndexing.NOW) {
                         throw ParallaxProblem.invalid(problem.get() + ".");
                     }
-                    LOGGER.warn("Object '{}' cannot land on '{}': {}.", object.getSlug(), related.getSlug(), problem.get());
+                    LOGGER.warn("Object '{}' cannot land on '{}': {}; the relation is left out.", object.getSlug(),
+                            related.getSlug(), problem.get());
+                    continue;
                 }
-                // Checked, not indexed: object_relations admits the kinds its CHECK names, and that list grows only
-                // with a schema rebuilt from its first migration. The footprint's users are read from the texts.
-                continue;
             }
             if (relatedIds.add(related.getId())) {
                 relations.add(new MathematicalObject.Relation(related.getId(), relation.kind().name(), relations.size()));

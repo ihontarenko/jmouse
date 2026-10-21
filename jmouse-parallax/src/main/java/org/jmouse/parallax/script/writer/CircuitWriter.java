@@ -35,6 +35,7 @@ final class CircuitWriter {
             line.append(' ').append(String.join(", ", settings));
         }
         part.symbol().ifPresent(symbol -> line.append(" symbol ").append(symbol));
+        part.footprint().ifPresent(footprint -> line.append(" footprint ").append(footprint));
         return line.toString();
     }
 

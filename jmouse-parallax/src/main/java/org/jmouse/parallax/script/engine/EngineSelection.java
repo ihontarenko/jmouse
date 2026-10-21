@@ -790,7 +790,7 @@ public final class EngineSelection {
                 settings.put(DefinitionWords.FREQUENCY, frequency);
             }
             return new CircuitElement(part.id(), CircuitElementType.MODEL, null, null, value,
-                    part.reference(), part.named(), settings, part.symbol().orElse(null));
+                    part.reference(), part.named(), settings, part.symbol().orElse(null), part.footprint().orElse(null));
         }
         Primitive primitive = Primitive.ofReference(part.reference()).orElseThrow(() -> new IllegalArgumentException(
                 what + ": part '" + part.id() + "' is connected in pin order, so it is one of " + String.join(", ",

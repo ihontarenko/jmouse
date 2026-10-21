@@ -151,6 +151,28 @@ public class ObjectStore {
      * @param kind the kind
      * @return the objects
      */
+    /**
+     * The objects whose texts name this one by a relation of that kind — the components landing on a footprint.
+     *
+     * @param relatedObjectId the object named
+     * @param relationKind    the relation, as indexed ({@code USES_FOOTPRINT})
+     * @return the naming objects, each once
+     */
+    public List<MathematicalObject> findRelating(String relatedObjectId, String relationKind) {
+        return entityManager.createQuery("""
+                        select distinct object from MathematicalObject object join object.relations relation
+                        where relation.relatedObjectId = :related and relation.kind = :kind""", MathematicalObject.class)
+                .setParameter("related", relatedObjectId)
+                .setParameter("kind", relationKind)
+                .getResultList();
+    }
+
+    /**
+     * Every object of one kind.
+     *
+     * @param kind the kind
+     * @return the objects
+     */
     public List<MathematicalObject> findByKind(ObjectKind kind) {
         return entityManager.createQuery(
                         "select object from MathematicalObject object where object.kind = :kind", MathematicalObject.class)

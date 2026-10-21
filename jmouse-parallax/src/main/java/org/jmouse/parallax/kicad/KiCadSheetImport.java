@@ -86,7 +86,7 @@ public final class KiCadSheetImport {
      *                   ({@link KiCadComponentStub}) where the catalogue has none
      */
     public record Sheet(ObjectDefinition.Circuit circuit, Set<SymbolUse> symbols, Set<KiCadSymbolDefinition> components,
-                        List<String> notes) {
+                        List<String> notes, Map<String, String> footprints) {
     }
 
     /** A unit of a KiCad symbol the sheet draws with KiCad's own drawing, its pins named as the part names them. */
@@ -108,6 +108,8 @@ public final class KiCadSheetImport {
     private final List<SchematicWire> wires = new ArrayList<>();
     private final Set<SymbolUse> symbols = new LinkedHashSet<>();
     private final Set<KiCadSymbolDefinition> components = new LinkedHashSet<>();
+    /** Each part's KiCad footprint, by the part's id: the library id its {@code Footprint} property names. */
+    private final Map<String, String> partFootprints = new LinkedHashMap<>();
     /** The parts of each symbol the library map names no component for, by what was made for them: one note each. */
     private final Map<String, List<String>> unmapped = new LinkedHashMap<>();
     /** The rails KiCad's power symbols name, by net, with the voltage their value says: {@code +48V} is 48. */
@@ -167,7 +169,7 @@ public final class KiCadSheetImport {
         ObjectDefinition.Circuit circuit = new ObjectDefinition.Circuit(sheet.elements, new Interval(0, TIME),
                 new ObjectDefinition.SchematicLayout(sheet.items, sheet.wires), null, sheet.railProbes(), List.of(), null,
                 boundary);
-        return new Sheet(circuit, sheet.symbols, sheet.components, sheet.notes);
+        return new Sheet(circuit, sheet.symbols, sheet.components, sheet.notes, Map.copyOf(sheet.partFootprints));
     }
 
     // ─── parts ──────────────────────────────────────────────────────────────────────────────────────
@@ -218,6 +220,10 @@ public final class KiCadSheetImport {
             }
         }
         Map<String, KiCadPoint> points = unitPoints.get(first);
+        String footprintLibraryId = first.property("Footprint").strip();
+        if (!footprintLibraryId.isEmpty()) {
+            partFootprints.put(id, footprintLibraryId);
+        }
         Map<String, String> overrides = new LinkedHashMap<>();
         Optional<KiCadCatalogue.PartDrawing> drawn = Optional.empty();
         String component;

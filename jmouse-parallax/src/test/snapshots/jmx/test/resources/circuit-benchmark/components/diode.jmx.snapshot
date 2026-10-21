@@ -573,6 +573,7 @@ ExperienceDocument
                   settings: Map(1)
                       current = SourceText[92:34@6489] "1 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 92
           sharedBench: null
           duration: Double 0.001
@@ -615,6 +616,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[100:55@6732] "1 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 100
               - Part
                   id: "U1"
@@ -626,6 +628,7 @@ ExperienceDocument
                       cathode = "cathode"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 101
           sharedBench: null
           duration: Double 0.001
@@ -657,50 +660,50 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 13:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 1f4ed42991c59583315d848cf671daff
+READS 51578b71b4734dbd3d81bc204fc1beb7
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 7b625f5bb165f967047157aa58ae6fb5
+READS 0f63d7139ceb735c0c1869a7b0c07bb0
 == line 11 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 18 deleted
-READS 335230bdbc709283a829ca9453621342
+READS eccba4825a0fcb7c797d86512f991025
 == line 18 begun with a stray word
-READS f458052190aa0fc02cb9dcc271616c4f
+READS 91cd006bb052e471de5ca499b5a888b6
 == line 25 deleted
-READS ee8d804e3a9bc6c49954c70058f928fc
+READS 02a023fbff678c7eea82489161c98938
 == line 25 begun with a stray word
-READS 7056acb06a3227bca330e2427205760a
+READS 3111f12e837cf2963fd4168b43e3ca89
 == line 32 deleted
-READS 360338f21c9653fdbca76fbb03e46c89
+READS 17cd0c6e9a33b447788291fdc291cc34
 == line 32 begun with a stray word
-READS 56ca4e6c169cddda9954f7897a4a42d3
+READS 1d47800a11476db64a40f9616a13c55e
 == line 39 deleted
-READS f202b53db8d18edf0f5726cc84b83ab2
+READS ee35c5d641d6c5dcf4993c6d426d1cb9
 == line 39 begun with a stray word
-READS c731bac3d61cd94fcc89866bcebc81d9
+READS 0d8b0c596f4e3b164848f53cf7b45467
 == line 46 deleted
-READS ef47b26e5b5eb46dd7859e7bd3904dde
+READS f6b7b96fcc5211e3846770603a6a03d9
 == line 46 begun with a stray word
-READS 0d765d2d025c6d648691b27f3d8789a9
+READS ee0658b737b05cb1261b9c00b4511ecf
 == line 53 deleted
-READS 583defb0f9ab131d2a88eb1e44ce5535
+READS b4cc796fd3082e907e693dcb674b3092
 == line 53 begun with a stray word
-READS 72e690348bede95dc71722a4f90707cd
+READS ba3dca0efc3e0f5e48ff8f76bf14ab52
 == line 60 deleted
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 60:9 'overvoltage' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
-READS a33482781af66f98d0c5d2545d7395c3
+READS 0ea0fc788bee047a6291be6fbdb6a74c
 == line 67 begun with a stray word
-READS a798b40cc1965b51f7c03b2f112bcef0
+READS c45396e50fed02ea28f057b58c64f16a
 == line 74 deleted
-READS c5551c27ce0dd53d43228cc49eb62c79
+READS f3a2cc0662c349bc29f3b9e29d05809d
 == line 74 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 81 deleted
-READS 34d420b2dec11f9c77832f8f0cb57d8a
+READS ede6378ccca356cc664a6efc8b46c8f3
 == line 81 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 81:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

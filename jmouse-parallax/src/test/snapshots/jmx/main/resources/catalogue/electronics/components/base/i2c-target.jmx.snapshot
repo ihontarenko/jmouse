@@ -123,6 +123,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[45:47@2385] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 45
               - Part
                   id: "R1"
@@ -135,6 +136,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[46:45@2433] "4.7 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 46
               - Part
                   id: "R2"
@@ -147,6 +149,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[47:45@2486] "4.7 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 47
       - State
           variables: List(6)
@@ -199,45 +202,45 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 15:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS cf49a0c1cd49bc8e82a82b0a5aa15b0c
+READS 15b68ab08f4677cf8b06aa9d464974fb
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 561c1fe630035062588eb61adac57fe7
+READS 9be32f6c41e2b6400204660afdfe224a
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 18 deleted
-READS 06583cea3e28404012120b20234d46cb
+READS 1310bc5b75ad8d8a1d6e9f62571513ba
 == line 18 begun with a stray word
-READS 7ea86a47be8bf23626dccb0a8a038337
+READS 504c12266b95d700fee9a236eb6dc97c
 == line 25 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 25:9 'address' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 deleted
-READS 46509bfaced9746286b5cf0f1a097ca1
+READS 415eaa081517f5eaaabc3b2f1b560b07
 == line 32 begun with a stray word
-READS e5d696868cae705b5ee403c8876eec3e
+READS 82b0c494a99585210d19606495480357
 == line 39 deleted
-READS 3b237809759ef059a6e52f2ca4652feb
+READS 8d307e54a49bccff04b0b04b1cd78c76
 == line 39 begun with a stray word
-READS 1cd3b43a2a629667b52e425db558369a
+READS 201601247693b687bc844d0a1f352ca0
 == line 46 deleted
-READS 47d52feb49cb7f33404ef4740175d7ae
+READS 9ae92f5819107736aa5f1f9b37baec40
 == line 46 begun with a stray word
-READS ad30d54d8d7c77ea9b2d96e8cdececa0
+READS 42a0532a5d0c890acc7b7d64fb512bc0
 == line 53 deleted
-READS bcb4937af83f2d00e03b7f6cc66f8c52
+READS 8bac86a6ef1ee739709a22dea39fb057
 == line 53 begun with a stray word
-READS ddd3dccfcc231a4599b5e970dd51c4c2
+READS d7db59540aeb900fb0d252246e2a492f
 == line 60 deleted
-READS 597e89575d1d2c32140d186bf6a6f89a
+READS a2decc53cfbc36be8b1cab61c2a58bf3
 == line 60 begun with a stray word
-READS b57f9100498cceda1aa203138bdb5789
+READS 35c17750536e130fa8411e2505aeec41
 == line 67 deleted
-READS 5c0f2e599c63c36fe1b39b038d46f0b3
+READS 829a624862c5905897ef559ac49f3e77
 == line 67 begun with a stray word
-READS 38999993fb2fcb483ab40425405b738c
+READS 6e0e3963fb69ff50ed3fe136a3d63a93
 == line 74 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 74:9 in 'behaviour': Unexpected token 0610:3705:0074 [T_END] at 611
 == line 74 begun with a stray word

@@ -161,16 +161,15 @@ public class ComponentModels {
     }
 
     /**
-     * One footprint and the components that name it: every component the reader may see whose head text says
-     * {@code footprint <slug>}, read through the document cache.
+     * One footprint and the components that name it: every component the reader may see whose {@code footprint} line
+     * names it, as the catalogue indexed it.
      */
     @Transactional(readOnly = true)
     public FootprintDetail footprint(String slug) {
         MathematicalObject footprint = readableFootprint(slug).orElseThrow(() -> ParallaxProblem.notFound("The footprint"));
-        DefinedObject.Relation named = new DefinedObject.Relation(slug, DefinedObject.RelationKind.USES_FOOTPRINT);
-        List<ComponentUse> usedBy = objects.findByKind(ObjectKind.COMPONENT).stream()
+        List<ComponentUse> usedBy = objects.findRelating(footprint.getId(), DefinedObject.RelationKind.USES_FOOTPRINT.name())
+                .stream()
                 .filter(objectAccess::canRead)
-                .filter(component -> names(component, named))
                 .sorted(Comparator.comparing(MathematicalObject::getTitle))
                 .map(component -> new ComponentUse(component.getSlug(), component.getTitle()))
                 .toList();
@@ -293,6 +292,14 @@ public class ComponentModels {
                 + String.join(", ", pads));
     }
 
+    /**
+     * Why a part of a circuit cannot sit on the footprint its line names: the component it is cannot be read, or one of
+     * its pin numbers is no pad of the footprint. Empty for a component the reader cannot see — the compiler names it.
+     */
+    Optional<String> partFootprintProblem(String componentReference, MathematicalObject footprint) {
+        return forEditing().source(componentReference).flatMap(source -> footprintProblem(source, footprint));
+    }
+
     /** A model's pins, those of the base it extends included. */
     private static Set<String> pinNames(ComponentModel model) {
         return model.pins().stream().map(pin -> pin.name()).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -356,15 +363,6 @@ public class ComponentModels {
     private Optional<MathematicalObject> readableFootprint(String slug) {
         return objects.findBySlug(slug)
                 .filter(candidate -> candidate.getKind() == ObjectKind.FOOTPRINT && objectAccess.canRead(candidate));
-    }
-
-    /** Whether a component's head text names a relation; a text that no longer reads names nothing. */
-    private boolean names(MathematicalObject component, DefinedObject.Relation relation) {
-        try {
-            return definedObject(component).relations().contains(relation);
-        } catch (IllegalArgumentException | ParallaxProblem unreadable) {
-            return false;
-        }
     }
 
     private FootprintView footprintView(MathematicalObject footprint) {

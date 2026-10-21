@@ -92,6 +92,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[25:51@1026] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
               - Part
                   id: "R1"
@@ -104,6 +105,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[26:49@1079] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 26
               - Part
                   id: "U1"
@@ -116,6 +118,7 @@ ExperienceDocument
                       source = "Vdd"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 27
           sharedBench: null
           duration: Double 0.001
@@ -151,13 +154,13 @@ REFUSED src/main/resources/catalogue/electronics/components/base/p-mosfet.jmx 4:
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/p-mosfet.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 15b85a69bf119ba48c806e512ab491c1
+READS 69e337701f0063c98839093b45feb6e1
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/p-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
-READS 72629bee90b01edac8c082fa5cde1bc7
+READS 0f7b04d33b734c30710e3bb785b17885
 == line 25 begun with a stray word
-READS 5d8022b4bff232c7e3152e10bcf599fc
+READS 68bed281a70eb13a4c50b54e1ee736fb
 == line 32 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/p-mosfet.jmx 4:1 component "…" is opened with '{' and never closed
 == line 32 begun with a stray word

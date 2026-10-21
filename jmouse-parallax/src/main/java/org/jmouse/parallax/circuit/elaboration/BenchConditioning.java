@@ -100,7 +100,7 @@ public final class BenchConditioning {
         overrides.put("tolerance", Double.toString(own.percent() / 100));
         overrides.put("temperature_coefficient", Double.toString(own.coefficient() * 1e-6));
         return onTheBench(new CircuitElement(element.id(), element.type(), element.positive(), element.negative(), element.value(),
-                element.component(), element.pins(), overrides, element.symbol()), conditions);
+                element.component(), element.pins(), overrides, element.symbol(), element.footprint()), conditions);
     }
 
     /** What a failed part's stand-ins are named after it: `R1_failed_1`. */
@@ -134,7 +134,7 @@ public final class BenchConditioning {
             overrides.put(ComponentVocabulary.DETAIL, Integer.toString(conditions.detail().figure()));
         }
         return new CircuitElement(element.id(), element.type(), element.positive(), element.negative(), element.value(),
-                element.component(), element.pins(), overrides, element.symbol());
+                element.component(), element.pins(), overrides, element.symbol(), element.footprint());
     }
 
     /** How far apart a failed-open part leaves its pins, and how close a failed-short one ties them, in ohms. */

@@ -232,6 +232,7 @@ ExperienceDocument
                   settings: Map(1)
                       current = SourceText[44:34@1970] "10 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 44
           sharedBench: null
           duration: Double 0.001
@@ -272,6 +273,7 @@ ExperienceDocument
                   settings: Map(1)
                       current = SourceText[52:34@2236] "10 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 52
           sharedBench: null
           duration: Double 0.001
@@ -312,6 +314,7 @@ ExperienceDocument
                   settings: Map(1)
                       voltage = SourceText[60:34@2458] "20 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 60
           sharedBench: null
           duration: Double 0.001
@@ -355,6 +358,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[68:55@2699] "100 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 68
               - Part
                   id: "U1"
@@ -366,6 +370,7 @@ ExperienceDocument
                       cathode = "cathode"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 69
           sharedBench: null
           duration: Double 0.001
@@ -409,6 +414,7 @@ ExperienceDocument
                       amplitude = SourceText[77:76@3018] "10 V"
                       frequency = SourceText[77:94@3036] "50 Hz"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 77
               - Part
                   id: "U1"
@@ -420,6 +426,7 @@ ExperienceDocument
                       cathode = "output"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 78
               - Part
                   id: "C1"
@@ -432,6 +439,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[79:52@3147] "100 uF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 79
               - Part
                   id: "R1"
@@ -444,6 +452,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[80:50@3203] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 80
           sharedBench: null
           duration: Double 0.04
@@ -482,15 +491,15 @@ REFUSED src/test/resources/spice/components/1n4148.jmx 4:5 a document opens with
 == line 4 begun with a stray word
 REFUSED src/test/resources/spice/components/1n4148.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 62986871e5055190e3d960b284c2f3d7
+READS 1f89dbb4a30491adea2231e9bcca60d0
 == line 11 begun with a stray word
-READS 899a16fb96d706576faaf51432addeba
+READS dd37b3d4d8ba7034c5b65436eeb7ff38
 == line 18 deleted
-READS 0a4109f163dd0fa64dd83f3581a9d407
+READS b7eda956ae4021cd133c3045c0dadafd
 == line 18 begun with a stray word
-READS a53db18efa97722743b299de4e4e5b4f
+READS 61a7c60a37f9adacbb221e5e89772b0c
 == line 25 deleted
-READS ae84dbc736ad6472eb53ebeb93f6a3e2
+READS 01604489e16d8d21fd756d7406b69ad3
 == line 25 begun with a stray word
 REFUSED src/test/resources/spice/components/1n4148.jmx 25:9 a parameter is 'name = value [unit] [in minimum .. maximum] [step s] [flags] ["description"]'
 == line 32 deleted
@@ -498,9 +507,9 @@ REFUSED src/test/resources/spice/components/1n4148.jmx 32:9 'anode' is not a blo
 == line 32 begun with a stray word
 REFUSED src/test/resources/spice/components/1n4148.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 39 deleted
-READS 12e69d6b13981e7d8eec646f843872d6
+READS 90a5935caefe77e4b7ab4ab13a8cb80d
 == line 39 begun with a stray word
-READS 7b7617c408b9c73686eec287c6d24a74
+READS e84ada0b9e7eceec6766046521c1065d
 == line 46 deleted
 REFUSED src/test/resources/spice/components/1n4148.jmx 42:5 expectation 'forward voltage at 10 mA' needs a measure and a criterion (near, within or is)
 == line 46 begun with a stray word
@@ -512,7 +521,7 @@ REFUSED src/test/resources/spice/components/1n4148.jmx 53:9 a part is 'ID compon
 == line 60 deleted
 REFUSED src/test/resources/spice/components/1n4148.jmx 58:0 expectation 'reverse current at 20 V' of a component needs a bench: 'bench for 3 ms { parts }'
 == line 60 begun with a stray word
-READS 73c072985d0b0239f165be0259a1e7ac
+READS 4142e10f5c6cac3c99071857fa4e3166
 == line 67 deleted
 REFUSED src/test/resources/spice/components/1n4148.jmx 67:13 'I1' is not a criterion: near, within or is
 == line 67 begun with a stray word

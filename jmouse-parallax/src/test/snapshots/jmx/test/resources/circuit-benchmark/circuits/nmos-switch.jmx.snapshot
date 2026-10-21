@@ -33,6 +33,7 @@ ExperienceDocument
                       low = SourceText[10:79@485] "0"
                       frequency = SourceText[10:94@500] "100000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "R1"
@@ -45,6 +46,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[11:48@554] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "V1"
@@ -57,6 +59,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[12:50@607] "10"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "R2"
@@ -69,6 +72,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[13:50@659] "47"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "Q1"
@@ -81,6 +85,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -94,6 +99,6 @@ REFUSED src/test/resources/circuit-benchmark/circuits/nmos-switch.jmx 4:5 a docu
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/nmos-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 0408e49cc7399d43a713967bffad86ca
+READS 51101ac7205f79ec04c242536ee667e3
 == line 11 begun with a stray word
-READS 0d404c38699db2bb68de243d9e320019
+READS dbc04314c7f58759093bb259af6484a3

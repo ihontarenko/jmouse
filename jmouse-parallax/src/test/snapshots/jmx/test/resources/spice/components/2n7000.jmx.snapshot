@@ -577,6 +577,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[74:52@4575] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 74
               - Part
                   id: "V2"
@@ -589,6 +590,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[75:51@4630] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 75
               - Part
                   id: "R1"
@@ -601,6 +603,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[76:51@4685] "18.8 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 76
               - Part
                   id: "C1"
@@ -613,6 +616,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[77:51@4744] "1 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 77
               - Part
                   id: "U1"
@@ -625,6 +629,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 78
           sharedBench: null
           duration: Double 0.001
@@ -667,6 +672,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[86:52@5077] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 86
               - Part
                   id: "V2"
@@ -679,6 +685,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[87:51@5132] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 87
               - Part
                   id: "R1"
@@ -691,6 +698,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[88:51@5187] "18.8 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 88
               - Part
                   id: "C1"
@@ -703,6 +711,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[89:51@5246] "1 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 89
               - Part
                   id: "U1"
@@ -715,6 +724,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 90
           sharedBench: null
           duration: Double 0.001
@@ -757,6 +767,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[98:52@5558] "4.5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 98
               - Part
                   id: "V2"
@@ -769,6 +780,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[99:51@5614] "4.5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 99
               - Part
                   id: "R1"
@@ -781,6 +793,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[100:51@5670] "58 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 100
               - Part
                   id: "C1"
@@ -793,6 +806,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[101:51@5727] "1 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 101
               - Part
                   id: "U1"
@@ -805,6 +819,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 102
           sharedBench: null
           duration: Double 0.001
@@ -847,6 +862,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[110:53@6018] "48 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 110
               - Part
                   id: "U1"
@@ -859,6 +875,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 111
           sharedBench: null
           duration: Double 0.001
@@ -902,6 +919,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[119:53@6303] "10 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 119
               - Part
                   id: "U1"
@@ -914,6 +932,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 120
           sharedBench: null
           duration: Double 0.001
@@ -956,6 +975,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[128:51@6604] "1 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 128
               - Part
                   id: "R1"
@@ -968,6 +988,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[129:52@6659] "1 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 129
               - Part
                   id: "C1"
@@ -980,6 +1001,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[130:52@6716] "1 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 130
               - Part
                   id: "U1"
@@ -992,6 +1014,7 @@ ExperienceDocument
                       source = "source"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 131
           sharedBench: null
           duration: Double 0.001
@@ -1023,50 +1046,50 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/spice/components/2n7000.jmx 5:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 50ccd2fbcb55182738e4737c7f626fba
+READS dcbbc3ffb0e7e2906dd89b5691b17ac5
 == line 4 begun with a stray word
 REFUSED src/test/resources/spice/components/2n7000.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS b9a4cfe39900936d818d9e6f81a818b4
+READS 613bf02df2e38f60b855dec2657571c3
 == line 11 begun with a stray word
-READS 8fc6ad52731b88e8b9cd6de63e9293be
+READS 61955aba40f1969ed35c788893188b63
 == line 18 deleted
-READS 48bd4d9509c804563f63adaf8e4f8eba
+READS c4b66fb585e1d54bb2a6a4f105281f2d
 == line 18 begun with a stray word
-READS 645ea53a6268810a106eae45f81f1a54
+READS 4ee43f8495e094f11dc7c4c1fb727660
 == line 25 deleted
-READS 4ede9054234b97c8d1f294a70b340ee6
+READS 069f0b235c9b7354242a916a448f24c5
 == line 25 begun with a stray word
-READS 14fb5dbe8651dd8f82a98259cef634ab
+READS 7a9e230cbfc163297d90cde640294fe2
 == line 32 deleted
-READS 04df7fd1148d39b4be363d59e55ae738
+READS 1acc65d4af614bd40e208f7ae2a142e6
 == line 32 begun with a stray word
-READS 531f77fb7ab4ae65a9acb05e1166d26d
+READS 57b9262b54a94033f2adbcb3ce1f03d7
 == line 39 deleted
 REFUSED src/test/resources/spice/components/2n7000.jmx 40:10 'parameters' holds lines, not a nested '{ … }'
 == line 39 begun with a stray word
 REFUSED src/test/resources/spice/components/2n7000.jmx 41:10 'parameters' holds lines, not a nested '{ … }'
 == line 53 deleted
-READS 5c8a5280be047bc72d9e65ec67dc8040
+READS ef01fdc35deb01537a75521dc9680c0b
 == line 53 begun with a stray word
 REFUSED src/test/resources/spice/components/2n7000.jmx 53:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 60 deleted
-READS 7baab0c6cc86298f1273da92a640b053
+READS 638c80c6753164554343dd44c1026a61
 == line 60 begun with a stray word
 REFUSED src/test/resources/spice/components/2n7000.jmx 60:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 67 deleted
-READS afdf9854f916171734104d1abcd9931d
+READS dd11dee59d1febe2378f4fdc7e064d26
 == line 67 begun with a stray word
 REFUSED src/test/resources/spice/components/2n7000.jmx 67:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 74 deleted
-READS 8d00e477758096fb16c58e5de4c8adfe
+READS 24a64199f1cb59e8ccf1d4359df53975
 == line 74 begun with a stray word
-READS 623a4938771016c099dfcb918af03913
+READS faa46935b7fc7b12fc75519ee0302255
 == line 81 deleted
 REFUSED src/test/resources/spice/components/2n7000.jmx 72:5 expectation 'on-state voltage at 500 mA and 10 V gate drive' needs a measure and a criterion (near, within or is)
 == line 81 begun with a stray word
 REFUSED src/test/resources/spice/components/2n7000.jmx 81:9 'zzz' is not a criterion: near, within or is
 == line 88 deleted
-READS a13c8f7aa267ae8d948aab59357ceeba
+READS 628dc523d5ee9a2700cf2993a9de4d85
 == line 88 begun with a stray word
-READS 0ce301b1f5e9fa176f09f7abc8541912
+READS 79f8ef7efb083361c9ead4e5def254a4

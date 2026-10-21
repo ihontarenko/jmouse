@@ -68,6 +68,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[23:57@775] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "I1"
@@ -80,6 +81,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[24:52@831] "10 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "U1"
@@ -92,6 +94,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
           sharedBench: null
           duration: Double 0.001
@@ -128,14 +131,14 @@ REFUSED src/main/resources/catalogue/electronics/components/base/npn-transistor.
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/npn-transistor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 31db4a5a09354ab77c1cb874623c06c0
+READS bd9ced8746ee1f61fdc346fe3c80b551
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/npn-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 deleted
-READS 7ab83e97fc66b18319009fb40d8d12e9
+READS 3c21d7d2ed5cd4dbbee6497eb11cb2c9
 == line 18 begun with a stray word
-READS 7d64b17b4215ff334523a80d0815409d
+READS 0aa0bfe50d15edbcc335853f11e01202
 == line 25 deleted
-READS e7191c08c54cc53dad236e3938c6f18d
+READS c9af25bc49b5e5381fe6e24adaba63ec
 == line 25 begun with a stray word
-READS 9d48bf433f4e0e4012d61ce4dd56051f
+READS 0612e2493d70049f86ae1ff06f1ea3ff

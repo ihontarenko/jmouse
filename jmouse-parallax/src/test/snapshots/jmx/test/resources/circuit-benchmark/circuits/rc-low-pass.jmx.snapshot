@@ -31,6 +31,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[10:46@465] "5"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "R1"
@@ -43,6 +44,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[11:44@511] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "C1"
@@ -55,6 +57,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[12:45@561] "1e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -68,6 +71,6 @@ REFUSED src/test/resources/circuit-benchmark/circuits/rc-low-pass.jmx 4:5 a docu
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/rc-low-pass.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 8ece42ff627bdffc31b951d53249e453
+READS ecdd198f66a0f36f58d7c6ff8c49e57c
 == line 11 begun with a stray word
-READS a692f0f0468b1d7d3e7469abe19704ed
+READS 639e4a6eff9ee1c917a475898f7b47be

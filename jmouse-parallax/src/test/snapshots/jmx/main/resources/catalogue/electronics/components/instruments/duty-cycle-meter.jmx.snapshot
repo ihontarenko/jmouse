@@ -147,6 +147,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[52:51@1924] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 52
               - Part
                   id: "R1"
@@ -159,6 +160,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[53:52@1980] "1 MOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 53
               - Part
                   id: "R2"
@@ -171,6 +173,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[54:50@2036] "1 MOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 54
               - Part
                   id: "U1"
@@ -182,6 +185,7 @@ ExperienceDocument
                       reference = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 55
           sharedBench: null
           duration: Double 0.001
@@ -221,25 +225,25 @@ REFUSED src/main/resources/catalogue/electronics/components/instruments/duty-cyc
 == line 18 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/duty-cycle-meter.jmx 19:11 'pins' holds lines, not a nested '{ … }'
 == line 25 deleted
-READS d39fe5086f95c8218df2c16dd8ad4382
+READS 92996a2ced8714c06393b8c7edeff56c
 == line 25 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/duty-cycle-meter.jmx 25:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 32 deleted
-READS 405745179544d62c6050f6e7bffcf785
+READS 511bcb2c43e71e7239c746bf39d27a7a
 == line 32 begun with a stray word
-READS d691a50d63d8ba0440b264314691f98e
+READS 481d6a5c7994ae16baa451bed4ccb6f8
 == line 39 deleted
-READS 65c88b9f1969e80ad2c6e047ce69cd5f
+READS 0261adf3781e3a8bea0a84ff49b54538
 == line 39 begun with a stray word
-READS 78a4a6fa2a2b0ccb28e597b5e6d93179
+READS 4b22a7095a528417ca3c85f95527ad1a
 == line 46 deleted
-READS 6827ed9bf0dfc2b7689e8afdadfd5fc2
+READS 2c53c15ebb69621f5036b9acd56c599e
 == line 46 begun with a stray word
-READS d34586f85b7196310e2bb8674c0c47b7
+READS 8e0c2321dba7201109a06f24462b8b8f
 == line 53 deleted
-READS c49c3447143ff3c9f3889d9e5a900f39
+READS ac4aad9e7e92846a914b56947dae0a15
 == line 53 begun with a stray word
-READS 4e798905ced6774d119f94d4085fbbdb
+READS 3ad2e3d69586e915ed707097531ab955
 == line 60 deleted
 REFUSED src/main/resources/catalogue/electronics/components/instruments/duty-cycle-meter.jmx 5:1 component "…" is opened with '{' and never closed
 == line 60 begun with a stray word

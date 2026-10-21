@@ -592,6 +592,7 @@ ExperienceDocument
                   settings: Map(1)
                       current = SourceText[102:34@7313] "1 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 102
           sharedBench: null
           duration: Double 0.001
@@ -634,6 +635,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[110:55@7556] "1 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 110
               - Part
                   id: "U1"
@@ -645,6 +647,7 @@ ExperienceDocument
                       cathode = "cathode"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 111
           sharedBench: null
           duration: Double 0.001
@@ -676,43 +679,43 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 13:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 961b6957bd1f9861196a4e97347285b5
+READS 137e18d55d0bebb482919e39721a4208
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 7396657968401ab8096fd69254b94a52
+READS ce97f640978c31e7dcd52255043dce5d
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 18 deleted
-READS a9f780aa2b78f6bc86543298bd048fa7
+READS c1e2c2334eebca4ea016bb541f59dc8b
 == line 18 begun with a stray word
-READS 218fa9a98f1af4daa74f4458eae89d27
+READS a351a06eeddba6b404344cae6bbe6575
 == line 25 deleted
-READS bfe3854298d7a574442d328fd48985de
+READS 97173c1b23bbadffa561930af5fb377c
 == line 25 begun with a stray word
-READS d46032459ceb334fc79b65a4cd2ad869
+READS 7f16f11aaadf60fb9ec0e9b2db1ce940
 == line 32 deleted
-READS 7dc74567b9716cf50a878948561bc72c
+READS 2114e6a106e4e76fa32c898c80f1fa79
 == line 32 begun with a stray word
-READS 8ebcbdd7485530627472d64ae12ea7b2
+READS d602feb25f691cb36b84290566cd6c5b
 == line 39 deleted
-READS 5dc73c323b751d252e2175ef9eb2c248
+READS 24003d85e0cd7b6b3b008c2c3cbda73c
 == line 39 begun with a stray word
-READS c2d0a17624e1ea11f3f05d7883b2303b
+READS 423ee9c515cb98b8602c315a8a24a467
 == line 46 deleted
-READS 0d85a54514383116b8290a1c65358d43
+READS c7e1e5a8bb69923430d294d681a92cd1
 == line 46 begun with a stray word
-READS f1a2135294f244f1bfd29da04bf9ddd1
+READS aa81f74d5baf5b644ae543b0d0f8309f
 == line 53 deleted
-READS a74b5177e86bbb41f647a7a1dc8c7200
+READS b0bb8fe3ef6a906dc4e2222f0b8e7059
 == line 53 begun with a stray word
-READS 58587a6d924adfbdc0e8010970e35ec1
+READS 75bcf20f548c6e81411b496cfad6efa2
 == line 60 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 60:9 'overvoltage' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
-READS f5e854c2d15cc8562a367e48dd4d94b0
+READS 0498295993e40dedf70768fec7091d5c
 == line 67 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 67:9 a line here is 'port pin' — the symbol's port, then the component's pin it is — or 'input = expression' — what one of the symbol's inputs is drawn from
 == line 74 deleted
@@ -720,6 +723,6 @@ REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 75:15
 == line 74 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 76:15 'symbol uses' holds lines, not a nested '{ … }'
 == line 81 deleted
-READS ed2a567a81399c4404f017c534dbd83c
+READS 4c357a38382bad671fc4455f990f1fcd
 == line 81 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 81:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

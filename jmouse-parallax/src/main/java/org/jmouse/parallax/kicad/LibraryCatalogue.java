@@ -40,6 +40,12 @@ final class LibraryCatalogue implements KiCadCatalogue {
         return numbers.computeIfAbsent(component, this::numbered);
     }
 
+    @Override
+    public Optional<String> footprintOf(String component) {
+        return document(component).flatMap(document -> document.block(Block.FootprintUse.class))
+                .map(Block.FootprintUse::footprint);
+    }
+
     private Map<String, String> numbered(String component) {
         Optional<String> source = library.source(component);
         if (source.isEmpty()) {

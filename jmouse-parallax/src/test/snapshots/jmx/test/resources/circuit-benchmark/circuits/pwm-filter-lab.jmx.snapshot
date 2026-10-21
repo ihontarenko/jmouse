@@ -110,6 +110,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[21:47@1276] "U"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 21
               - Part
                   id: "R1"
@@ -122,6 +123,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[22:51@1329] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 22
               - Part
                   id: "P1"
@@ -135,6 +137,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[23:78@1412] "RP"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "D1"
@@ -146,6 +149,7 @@ ExperienceDocument
                       cathode = "timing"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "D2"
@@ -157,6 +161,7 @@ ExperienceDocument
                       cathode = "drain"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
               - Part
                   id: "CT1"
@@ -169,6 +174,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[26:49@1571] "CT"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 26
               - Part
                   id: "U1"
@@ -185,6 +191,7 @@ ExperienceDocument
                       reset = "vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 27
               - Part
                   id: "R2"
@@ -197,6 +204,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[28:45@1746] "R"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 28
               - Part
                   id: "C1"
@@ -209,6 +217,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[29:45@1793] "C"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 29
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -224,21 +233,21 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 6:1 circuit "…" is opened with '{' and never closed
 == line 4 deleted
-READS 9a3e8f0feca26042fb8278907b21bc93
+READS fb03e43f2bc735c9bb620d7de7b79494
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 4607c6c80a03b50eda1c6fd8d1383ab8
+READS 52a5dee388aa13cc0e9aeb835fadc6ea
 == line 11 begun with a stray word
-READS 63d3b6054c4e7205e2a93fe6b7e13074
+READS d039fab2a392d7d216c72cff45c6a9ba
 == line 18 deleted
-READS 0de46ca0b5d13b4a912dc1bb55f4d3f4
+READS f571671d15e5b8698c3cba68d5262a8c
 == line 18 begun with a stray word
-READS c990b7a8c449e67a6b8d19377122fb06
+READS 9ffb245b44aa8ca26b3a7eafaa14cacd
 == line 25 deleted
-READS 3ed941b5a4071310995f50426bcec471
+READS d19dba097d105d50df24596c264dfd3e
 == line 25 begun with a stray word
-READS b9eab8c092434099b930f3bedd204a4b
+READS 0d676495399ed96937fbf3fc8c85e079
 == line 32 deleted
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 32:9 'transient_response' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
 == line 32 begun with a stray word

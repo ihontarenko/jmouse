@@ -256,6 +256,7 @@ ExperienceDocument
                   settings: Map(1)
                       current = SourceText[46:34@2131] "10 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 46
           sharedBench: null
           duration: Double 0.001
@@ -296,6 +297,7 @@ ExperienceDocument
                   settings: Map(1)
                       current = SourceText[54:34@2405] "10 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 54
           sharedBench: null
           duration: Double 0.001
@@ -336,6 +338,7 @@ ExperienceDocument
                   settings: Map(1)
                       voltage = SourceText[62:34@2635] "20 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 62
           sharedBench: null
           duration: Double 0.001
@@ -379,6 +382,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[70:55@2884] "100 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 70
               - Part
                   id: "U1"
@@ -390,6 +394,7 @@ ExperienceDocument
                       cathode = "cathode"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 71
           sharedBench: null
           duration: Double 0.001
@@ -433,6 +438,7 @@ ExperienceDocument
                       amplitude = SourceText[79:76@3212] "10 V"
                       frequency = SourceText[79:94@3230] "50 Hz"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 79
               - Part
                   id: "U1"
@@ -444,6 +450,7 @@ ExperienceDocument
                       cathode = "output"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 80
               - Part
                   id: "C1"
@@ -456,6 +463,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[81:52@3343] "100 uF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 81
               - Part
                   id: "R1"
@@ -468,6 +476,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[82:50@3400] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 82
           sharedBench: null
           duration: Double 0.04
@@ -506,15 +515,15 @@ REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 4:5 a documen
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 5e21cc5d9a2e706c5bbc8c6ec3f6a956
+READS af4a50834335fb5800cde57d26f324a6
 == line 11 begun with a stray word
-READS 447deddeda4b4f90e37c5eaf1c130d1b
+READS afd248ef07936915b9b0f89042717be5
 == line 18 deleted
-READS 58e0720dc04dca71b830a3895273a951
+READS 894316f16e9d9f6c37a2075cd160aaee
 == line 18 begun with a stray word
-READS 1a4afd8e2159c5c2188ddbecf299f6a1
+READS 8808cd786deb921f58936495869d8d6f
 == line 25 deleted
-READS ed5ec233447eef531c3b0a06e7f83cad
+READS 90ca82e596c5dc0a0ee4df2b3c3789f7
 == line 25 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 25:9 a parameter is 'name = value [unit] [in minimum .. maximum] [step s] [flags] ["description"]'
 == line 32 deleted
@@ -528,7 +537,7 @@ REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 39:5 'zzz' is
 == line 46 deleted
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 44:0 expectation 'forward voltage at 10 mA' of a component needs a bench: 'bench for 3 ms { parts }'
 == line 46 begun with a stray word
-READS 1777965540871149d62c51b6533dd9b2
+READS 76c9069fd8d5e9c030ccb6fb94fe02bd
 == line 53 deleted
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 53:13 'X1' is not a criterion: near, within or is
 == line 53 begun with a stray word
@@ -542,6 +551,6 @@ REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 68:5 expectat
 == line 74 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 74:9 'zzz' is not a criterion: near, within or is
 == line 81 deleted
-READS d147b05695df39c38925aa01428dbb6c
+READS 1ff14c9b7721667b18a5c1e12217524b
 == line 81 begun with a stray word
-READS 13b8dd6121c00b805370a9b77b681982
+READS da2e566efbe4305911b40a319d38d7b3

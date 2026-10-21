@@ -432,6 +432,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[59:57@3339] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
               - Part
                   id: "I1"
@@ -444,6 +445,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[60:52@3396] "1 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 60
               - Part
                   id: "U1"
@@ -456,6 +458,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 61
           sharedBench: null
           duration: Double 0.001
@@ -499,6 +502,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[69:57@3741] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 69
               - Part
                   id: "I1"
@@ -511,6 +515,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[70:52@3798] "1 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 70
               - Part
                   id: "U1"
@@ -523,6 +528,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 71
           sharedBench: null
           duration: Double 0.001
@@ -566,6 +572,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[79:57@4135] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 79
               - Part
                   id: "I1"
@@ -578,6 +585,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[80:52@4192] "5 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 80
               - Part
                   id: "U1"
@@ -590,6 +598,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 81
           sharedBench: null
           duration: Double 0.001
@@ -633,6 +642,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[89:54@4559] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 89
               - Part
                   id: "R1"
@@ -645,6 +655,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[90:58@4622] "64.7 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 90
               - Part
                   id: "C1"
@@ -657,6 +668,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[91:55@4686] "1 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 91
               - Part
                   id: "I1"
@@ -669,6 +681,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[92:52@4743] "15 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 92
               - Part
                   id: "U1"
@@ -681,6 +694,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 93
           sharedBench: null
           duration: Double 0.001
@@ -723,6 +737,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[101:54@5094] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 101
               - Part
                   id: "R1"
@@ -735,6 +750,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[102:58@5157] "64.7 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 102
               - Part
                   id: "C1"
@@ -747,6 +763,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[103:55@5221] "1 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 103
               - Part
                   id: "I1"
@@ -759,6 +776,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[104:52@5278] "15 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 104
               - Part
                   id: "U1"
@@ -771,6 +789,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 105
           sharedBench: null
           duration: Double 0.001
@@ -813,6 +832,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[113:57@5631] "30 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 113
               - Part
                   id: "U1"
@@ -825,6 +845,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 114
           sharedBench: null
           duration: Double 0.001
@@ -857,37 +878,37 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 5:1 component "…" is opened with '{' and never closed
 == line 11 deleted
-READS c3bfe2681a565b12a6ba56f6e158a13e
+READS be30487f6eb30183574ad108afbefcb8
 == line 11 begun with a stray word
-READS 40c50e567e2b3b4d0961f655c8fcad98
+READS 5b2eb69eaa7971d99987020f35d13370
 == line 18 deleted
-READS 0d1a8e71a25bf0dc449115d79270d45b
+READS 488239982f8fa5040733dd27dd448ae3
 == line 18 begun with a stray word
-READS 5b32a1ef92d4dc6a674b97c371124d4c
+READS d23872d1776037f5a4c1d8488133a032
 == line 25 deleted
-READS 9fe5fa64a4c1223558e5123f19bb8b99
+READS 7ac3054c3335787941b04023e9044a3e
 == line 25 begun with a stray word
-READS b340c367ba18d85128e8e241b005ea10
+READS aafa16e572dfc5218a2e46a3243d34e5
 == line 32 deleted
-READS ef6facaf00ebff558c48ef1e1dcf36f7
+READS 1b1c8bcab78ee4a4f1fa4cd91a784f0c
 == line 32 begun with a stray word
-READS c95c38035892074bee02a7f8258875c5
+READS 866f9cfa799eab7f9893bb2926276211
 == line 39 deleted
-READS 499d7522cbab137b2c2ed66ac916fd52
+READS 0e88e28c57327feb52fecfbcaa4028eb
 == line 39 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 39:9 a parameter is 'name = value [unit] [in minimum .. maximum] [step s] [flags] ["description"]'
 == line 46 deleted
-READS 9a3dded0d09ea20b5e2ca0d94dcbf29e
+READS 8bc7109c984f7f7bc874ef434843a212
 == line 46 begun with a stray word
-READS 22c336bfed1ecb7943e985a557f1f58e
+READS bc7bb7b310d2c1e14fa2ee68a16bf5c4
 == line 53 deleted
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 56:95 'pins' holds lines, not a nested '{ … }'
 == line 53 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 57:95 'pins' holds lines, not a nested '{ … }'
 == line 60 deleted
-READS 71bcf7abe46743b609a4cc9f2709035d
+READS 9bfce4265e2a53ebfeb710be5d41f2a2
 == line 60 begun with a stray word
-READS 30e4164331e7f3763e9fc67367ed18db
+READS 9601a409cecb260925df30044fc3e189
 == line 67 deleted
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 67:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 67 begun with a stray word
@@ -897,9 +918,9 @@ REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 67:5 expectat
 == line 74 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 74:9 'zzz' is not a criterion: near, within or is
 == line 81 deleted
-READS c51d18f20e4c83f393e73ad32e5cb4d5
+READS 6f34046b264f7e157535ee3169faab5f
 == line 81 begun with a stray word
-READS 90c3e337407c7147720fb0ec456335b4
+READS a34b96058afdfd4306a16b7ce4684a4c
 == line 88 deleted
 REFUSED src/test/resources/circuit-benchmark/components/2n2907.jmx 88:13 'V1' is not a criterion: near, within or is
 == line 88 begun with a stray word

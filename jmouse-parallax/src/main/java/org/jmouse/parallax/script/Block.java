@@ -685,13 +685,21 @@ public sealed interface Block {
      * @param settings   parameter overrides and words such as {@code closed}
      * @param symbol     which of the component's symbols the part is drawn with, when not its default: one its
      *                   {@code symbol uses} line names
+     * @param footprint  the footprint this part sits on, when not its component's: {@code footprint dip-8-footprint} —
+     *                   the same component in another package
      */
     record Part(String id, String reference, Optional<String> unit, List<String> positional, Map<String, String> named,
-                Map<String, SourceText> settings, Optional<String> symbol, int line) {
+                Map<String, SourceText> settings, Optional<String> symbol, Optional<String> footprint, int line) {
         public Part {
             positional = List.copyOf(positional);
             named = orderedCopy(named);
             settings = orderedCopy(settings);
+            footprint = footprint == null ? Optional.empty() : footprint;
+        }
+
+        public Part(String id, String reference, Optional<String> unit, List<String> positional, Map<String, String> named,
+                    Map<String, SourceText> settings, Optional<String> symbol, int line) {
+            this(id, reference, unit, positional, named, settings, symbol, Optional.empty(), line);
         }
     }
 

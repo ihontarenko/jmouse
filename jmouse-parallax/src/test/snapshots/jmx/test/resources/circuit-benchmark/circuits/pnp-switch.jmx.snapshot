@@ -33,6 +33,7 @@ ExperienceDocument
                       low = SourceText[9:78@367] "-5"
                       frequency = SourceText[9:94@383] "100000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 9
               - Part
                   id: "R1"
@@ -45,6 +46,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[10:48@437] "330"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "V1"
@@ -57,6 +59,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[11:50@490] "10"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "R2"
@@ -69,6 +72,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[12:54@546] "66"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "Q1"
@@ -81,6 +85,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -94,6 +99,6 @@ REFUSED src/test/resources/circuit-benchmark/circuits/pnp-switch.jmx 4:9 'summar
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/pnp-switch.jmx 4:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
 == line 11 deleted
-READS 9d995f7644bf13e1faf2f51cfbfc7502
+READS 9f75249155df7de94420324655ad4ed3
 == line 11 begun with a stray word
-READS abb24a683531f646a90f8d1b02aaf71e
+READS 4666fb60d054ca5ac45e521b5bf5f93e

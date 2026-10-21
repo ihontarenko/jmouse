@@ -140,6 +140,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[38:51@1156] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 38
               - Part
                   id: "U1"
@@ -153,6 +154,7 @@ ExperienceDocument
                       minus = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 39
               - Part
                   id: "R1"
@@ -165,6 +167,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[40:48@1275] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 40
           sharedBench: null
           duration: Double 0.001
@@ -196,15 +199,15 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/instruments/wattmeter.jmx 1:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 3a9bf65ce55520ca37c556ae3317e7a6
+READS 158a3beb2584c60ece952dec0c96ade8
 == line 4 begun with a stray word
-READS bc0f58260320e1ee5f22382c98477a82
+READS 0f1f139f5e270dc099247ad98019695a
 == line 11 deleted
-READS fcc6a443f2d40dc59ae7b0a64287254f
+READS 0d2e1b04792c2c03541af6971aaeecbf
 == line 11 begun with a stray word
-READS 25820a6d9a0d76844e55524e724f21e3
+READS 61e38864851ba4b3cd1c143212d33fe8
 == line 18 deleted
-READS 4e28ab4b913d397e6daad5bc0fe959bb
+READS 2cf9c4c54a78cb101b0b73162cf6b3aa
 == line 18 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/wattmeter.jmx 18:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 25 deleted
@@ -212,10 +215,10 @@ REFUSED src/main/resources/catalogue/electronics/components/instruments/wattmete
 == line 25 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/wattmeter.jmx 26:13 'leads' holds lines, not a nested '{ … }'
 == line 32 deleted
-READS 21615d6e53970043faf7ec78d17f78ae
+READS f329745c05b4cceb80c5a4371d5ee75a
 == line 32 begun with a stray word
-READS dfe9ea46b03ee5583ea0f41290d5ede7
+READS b67beae7d7d5609b89e14c8ce10ef857
 == line 39 deleted
-READS 15edf197d00094fa2134d8857118f2fc
+READS 14d4d17bc9b4f0fd4db583cf7a2a81f5
 == line 39 begun with a stray word
-READS db9002c2670a31374caa0daf82503507
+READS 55d61701fdfaa96b58e3db4e15e336e2

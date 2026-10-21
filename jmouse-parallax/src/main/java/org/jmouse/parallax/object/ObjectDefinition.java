@@ -1426,9 +1426,18 @@ public sealed interface ObjectDefinition {
      * its {@code value} its component's first parameter (ohms, farads, henries, volts, amperes; a diode's saturation
      * current); a model names its {@code component} and connects its {@code pins}. Every circuit starts from rest, so a
      * source is switched on at the start; a sine or a square is a generator, a model of its own.
+     *
+     * @param footprint the footprint this part sits on when not its component's; null for the component's own
      */
     record CircuitElement(String id, CircuitElementType type, String positive, String negative, String value,
-                          String component, Map<String, String> pins, Map<String, String> overrides, String symbol) {
+                          String component, Map<String, String> pins, Map<String, String> overrides, String symbol,
+                          String footprint) {
+
+        /** An element on its component's own footprint. */
+        public CircuitElement(String id, CircuitElementType type, String positive, String negative, String value,
+                              String component, Map<String, String> pins, Map<String, String> overrides, String symbol) {
+            this(id, type, positive, negative, value, component, pins, overrides, symbol, null);
+        }
 
         /** An element drawn with its component's default symbol. */
         public CircuitElement(String id, CircuitElementType type, String positive, String negative, String value,
@@ -1438,6 +1447,7 @@ public sealed interface ObjectDefinition {
 
         public CircuitElement {
             symbol = symbol == null || symbol.isBlank() ? null : symbol.strip();
+            footprint = footprint == null || footprint.isBlank() ? null : footprint.strip();
             if (id == null || !id.matches("[A-Za-z][A-Za-z0-9_]{0,31}")) {
                 throw new IllegalArgumentException("An element id is a name such as R1 or V_in.");
             }

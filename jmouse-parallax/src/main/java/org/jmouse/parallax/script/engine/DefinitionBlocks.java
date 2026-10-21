@@ -520,7 +520,7 @@ final class DefinitionBlocks {
         }
         new TreeMap<>(element.overrides()).forEach((name, value) -> settings.put(name, written(value)));
         return new Block.Part(element.id(), reference, Optional.empty(), positional, named, settings,
-                Optional.ofNullable(element.symbol()), 0);
+                Optional.ofNullable(element.symbol()), Optional.ofNullable(element.footprint()), 0);
     }
 
     /** {@code input VIN}: a net a sheet hands to its parent, and which way it goes. */

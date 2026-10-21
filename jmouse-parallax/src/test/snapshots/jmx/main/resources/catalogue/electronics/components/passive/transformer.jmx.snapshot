@@ -469,6 +469,7 @@ ExperienceDocument
                       amplitude = SourceText[97:76@6451] "100 V"
                       frequency = SourceText[97:95@6470] "50 Hz"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 97
               - Part
                   id: "U1"
@@ -482,6 +483,7 @@ ExperienceDocument
                       secondary_two = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 98
               - Part
                   id: "R1"
@@ -494,6 +496,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[99:50@6629] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 99
           sharedBench: null
           duration: Double 0.06
@@ -528,29 +531,29 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 21:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 9b7b0df65d89efa80d5b3b92a5031f3c
+READS b2f773ff7d26ad401fd61789ba415f2d
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 3947cbe8c6386fc356f0738bc4008ce8
+READS 212dc0628b098a976e5eff25cce1ed5b
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 18 deleted
-READS 5591d5a485d9567a36cea4371770f2c5
+READS 9cc2b7576d61219e060958aa4a6fe542
 == line 18 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 18:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 25 deleted
-READS f317a181fe073179fed4cc0e3e83d899
+READS b114995bb1acb1348a19ab3c9ddafcc3
 == line 25 begun with a stray word
-READS c07d24deb32022b76228162c07f55b6f
+READS 82c2ba8f23d7eee1f2b353090e9a52ce
 == line 32 deleted
-READS a1ddc4851257943710f2138370977170
+READS eb045e2ed361f5bd493e4a0f63f0ec66
 == line 32 begun with a stray word
-READS 4c5266e2913a3ff265cc2cbf14da9853
+READS d0635f6388228f4dc69e4680b1cd5032
 == line 39 deleted
-READS fd0daae7445bda55d7350f9b4134b5d8
+READS 9c878a36d06f59df28380c96b7d66a66
 == line 39 begun with a stray word
-READS 8662939529823b8da2d8d05b3256cf8c
+READS 823aa3abaddc98cd36b755692afe9536
 == line 46 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 47:10 'parameters' holds lines, not a nested '{ … }'
 == line 46 begun with a stray word
@@ -568,10 +571,10 @@ REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.
 == line 67 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 69:15 'symbol uses' holds lines, not a nested '{ … }'
 == line 74 deleted
-READS 5ec7443932d607a0eb495d95266cfb6d
+READS 15328311ceec4928605fd39c0e7f09b7
 == line 74 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 88 deleted
-READS 7398d9c16e5e5450c25a126b939a6ccf
+READS c92c1443db6468f75694fb2a3c132a7c
 == line 88 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 88:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

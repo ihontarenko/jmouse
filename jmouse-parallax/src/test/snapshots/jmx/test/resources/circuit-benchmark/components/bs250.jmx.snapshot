@@ -300,6 +300,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[48:51@2579] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 48
               - Part
                   id: "R1"
@@ -312,6 +313,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[49:49@2633] "50 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 49
               - Part
                   id: "U1"
@@ -324,6 +326,7 @@ ExperienceDocument
                       source = "Vdd"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 50
           sharedBench: null
           duration: Double 0.001
@@ -366,6 +369,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[58:51@2952] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 58
               - Part
                   id: "I1"
@@ -378,6 +382,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[59:52@3009] "1 mA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
               - Part
                   id: "U1"
@@ -390,6 +395,7 @@ ExperienceDocument
                       source = "Vdd"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 60
           sharedBench: null
           duration: Double 0.001
@@ -432,6 +438,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[68:53@3310] "100 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 68
               - Part
                   id: "U1"
@@ -444,6 +451,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 69
           sharedBench: null
           duration: Double 0.001
@@ -475,29 +483,29 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 6:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 67d87535e5070566c9e15cc0dde85a39
+READS e4a023db72373d967eb341b8890fea72
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 6b641afae33d14882732296f277f176f
+READS f8080675e325a29dd011a7f3b58c640f
 == line 11 begun with a stray word
-READS 40aabbe512ae4b197afffb20ed2ebd1e
+READS 3703b9ef717a1abacc1554e2234d5738
 == line 18 deleted
-READS 72c5420c53b01ccdc0dd41260acec5f6
+READS 248ddf8194e276e6e9d853371b5ef109
 == line 18 begun with a stray word
-READS 9eeb7bece53f0dd71a21b657cb6c4d5d
+READS 1e3ba31d0eee1605f1c34caac8112d56
 == line 25 deleted
-READS 0ce4d1ec722b648c47647b5cc798158d
+READS 259f5e8d56ddacd7a79f5e431a93738b
 == line 25 begun with a stray word
-READS 19e45e647cc185580aa5f07dc08f30bc
+READS 3feb45e898e345aecf2e75b7c2052d69
 == line 32 deleted
-READS 96090898f8c1dc9a835941b90ee2f993
+READS 859c7eda062ed177ca0b6034fdbe480d
 == line 32 begun with a stray word
-READS 2c050a713b95c1b99e52b4a2223478df
+READS dae255b6e7ecb1d804f805b62ca6ebba
 == line 39 deleted
-READS 884974bcd36ab5b4d6f32237d3f72099
+READS a936ecbdd98f7eb359168372e4ca58bf
 == line 39 begun with a stray word
-READS 4253a7db85b289de970de493fead346c
+READS 60f884dd5990215a1046343c53b1295f
 == line 46 deleted
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 46:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 46 begun with a stray word
@@ -507,9 +515,9 @@ REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 46:5 expectati
 == line 53 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 53:9 'zzz' is not a criterion: near, within or is
 == line 60 deleted
-READS 7fd5657661fb2c95e14c4294178a04fe
+READS 729fdee8cecf0a833272e7fee48098c2
 == line 60 begun with a stray word
-READS c06428695a5bb414d6a3b63e7d4aaf77
+READS d28c8eb990a66db7291580931ea33617
 == line 67 deleted
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 67:13 'I1' is not a criterion: near, within or is
 == line 67 begun with a stray word

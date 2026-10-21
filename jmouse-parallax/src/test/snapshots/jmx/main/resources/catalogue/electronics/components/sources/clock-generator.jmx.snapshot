@@ -114,6 +114,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[50:51@1673] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 50
               - Part
                   id: "U1"
@@ -127,6 +128,7 @@ ExperienceDocument
                   settings: Map(1)
                       frequency = SourceText[51:70@1746] "2 kHz"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 51
           sharedBench: null
           duration: Double 0.005
@@ -175,6 +177,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[59:51@2009] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
               - Part
                   id: "U1"
@@ -189,6 +192,7 @@ ExperienceDocument
                       frequency = SourceText[60:70@2082] "2 kHz"
                       duty = SourceText[60:84@2096] "0.25"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 60
           sharedBench: null
           duration: Double 0.005
@@ -226,13 +230,13 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/sources/clock-generator.jmx 6:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 66900bb499d6507faa25d6cf39d7c8e4
+READS ac31159e6200b85d92fe6ee7ca23b83d
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/clock-generator.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 2524873752083a94a142eee1b38374e6
+READS b1af5d4ac3fe10647039b7bb693511f7
 == line 11 begun with a stray word
-READS 504a3ebdae44b0684e1a1126d6455b00
+READS c28d4963d2786c6189355b83199ce019
 == line 18 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/clock-generator.jmx 19:10 'parameters' holds lines, not a nested '{ … }'
 == line 18 begun with a stray word
@@ -242,7 +246,7 @@ REFUSED src/main/resources/catalogue/electronics/components/sources/clock-genera
 == line 32 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/clock-generator.jmx 32:19 in 'behaviour': Unexpected token 0207:1182:0032 [T_DO] at 208
 == line 39 deleted
-READS 13fc15d9f6b2e9a69fa48245f1ae3eea
+READS 75536343f6176bd58742c14cbf78bf1a
 == line 39 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/clock-generator.jmx 39:39 in 'behaviour': Unexpected token 0247:1371:0039 [T_CLOSE_PAREN] at 248
 == line 46 deleted
@@ -254,6 +258,6 @@ REFUSED src/main/resources/catalogue/electronics/components/sources/clock-genera
 == line 53 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/clock-generator.jmx 53:9 'zzz' is not a criterion: near, within or is
 == line 60 deleted
-READS a967715da98afffc8d8fd58f6c46f120
+READS 784590ebc455ee1bf598a0f028b70061
 == line 60 begun with a stray word
-READS 3f2882fc1bebd8754d233e62f8c2e779
+READS 47663676a97af8169588ca2665f48590

@@ -12,24 +12,29 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * {@code R1 resistor (in, out) resistance = R}, {@code U1 lm358@3 (A.non_inverting_input = ref, A.output = out,
  * Vcc = vcc, GND = 0)} — a unit's pin named with its unit —, {@code SW1 switch (a, b) closed},
- * {@code R2 resistor (a, b) resistance = R symbol resistor-iec} — drawn with another of the component's symbols.
+ * {@code R2 resistor (a, b) resistance = R symbol resistor-iec} — drawn with another of the component's symbols —,
+ * {@code U4 ne5532 (…) footprint dip-8-footprint} — sitting on another package than its component's.
  */
 final class PartLineParser extends JmxLineParser<Part> {
 
     private static final String SHAPE = "a part is 'ID component (connections) [settings] [place x, y]'";
 
+    /** The clauses that close a part line, each once, in either order: {@code symbol r2 footprint dip-8-footprint}. */
+    private static final Set<String> CLOSING_WORDS = Set.of("symbol", "footprint");
+
     /**
-     * Where a setting's value ends: a comma, the next {@code name =} — settings need no comma between them —, or the
-     * {@code symbol} the part is drawn with.
+     * Where a setting's value ends: a comma, the next {@code name =} — settings need no comma between them —, or a
+     * closing clause: the {@code symbol} the part is drawn with, the {@code footprint} it sits on.
      */
     private static final Boundary SETTING = (token, after, depth) -> depth == 0
             && (token.type() == BasicToken.T_COMMA
                 || (token.type() == BasicToken.T_IDENTIFIER && after.value().equals("="))
-                || (token.type() != BasicToken.T_STRING && token.value().equals("symbol")));
+                || (token.type() != BasicToken.T_STRING && CLOSING_WORDS.contains(token.value())));
 
     private final Reading reading;
     private final JmxValues values;
@@ -65,18 +70,23 @@ final class PartLineParser extends JmxLineParser<Part> {
             throw reading.refusalAhead(placeAt, "a part is placed in the 'layout' block: 'layout { " + id + " at 240, 200 }'");
         }
         Map<String, SourceText> settings = settings();
-        Optional<String> symbol = Optional.empty();
-        if (cursor.checkValueAt(0, "symbol") && !reading.atLineEnd()) {
-            Token symbolWord = cursor.next();
-            if (reading.atLineEnd()) {
-                throw reading.refusal(symbolWord, "'symbol' names one of the component's symbols: 'symbol resistor-iec'");
+        Map<String, String> closing = new LinkedHashMap<>();
+        while (!reading.atLineEnd()) {
+            Token word = cursor.next();
+            if (!CLOSING_WORDS.contains(word.value())) {
+                throw reading.refusal(word, "a part line ends with 'symbol resistor-iec' and 'footprint dip-8-footprint'");
             }
-            symbol = Optional.of(reading.joinedWord());
-            if (!reading.atLineEnd()) {
-                throw reading.refusal(symbolWord, "'symbol' names one of the component's symbols: 'symbol resistor-iec'");
+            if (reading.atLineEnd() || CLOSING_WORDS.contains(cursor.current().value())) {
+                throw reading.refusal(word, "'" + word.value() + "' names one: '" + word.value() + " "
+                        + ("symbol".equals(word.value()) ? "resistor-iec" : "dip-8-footprint") + "'");
+            }
+            if (closing.putIfAbsent(word.value(), reading.joinedWord()) != null) {
+                throw reading.refusal(word, "'" + word.value() + "' is written twice on one part");
             }
         }
-        return new Part(id, reference, Optional.empty(), positional, named, settings, symbol, reading.lineOf(first));
+        return new Part(id, reference, Optional.empty(), positional, named, settings,
+                Optional.ofNullable(closing.get("symbol")), Optional.ofNullable(closing.get("footprint")),
+                reading.lineOf(first));
     }
 
     /** {@code (a, b)} by pin order, or {@code (pin = net, …)} by name — never both. */
@@ -144,7 +154,7 @@ final class PartLineParser extends JmxLineParser<Part> {
     private Map<String, SourceText> settings() {
         TokenCursor cursor = reading.cursor;
         Map<String, SourceText> settings = new LinkedHashMap<>();
-        while (!reading.atLineEnd() && !cursor.checkValueAt(0, "symbol")) {
+        while (!reading.atLineEnd() && !CLOSING_WORDS.contains(cursor.current().value())) {
             if (cursor.isCurrent(BasicToken.T_COMMA)) {
                 cursor.next();
                 continue;

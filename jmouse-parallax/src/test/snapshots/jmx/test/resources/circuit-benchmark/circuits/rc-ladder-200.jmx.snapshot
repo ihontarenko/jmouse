@@ -32,6 +32,7 @@ ExperienceDocument
                       amplitude = SourceText[10:69@513] "5"
                       frequency = SourceText[10:84@528] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "R1"
@@ -44,6 +45,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[11:43@575] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "C1"
@@ -56,6 +58,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[12:44@622] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "R2"
@@ -68,6 +71,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[13:43@669] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "C2"
@@ -80,6 +84,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[14:44@716] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
               - Part
                   id: "R3"
@@ -92,6 +97,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[15:43@763] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 15
               - Part
                   id: "C3"
@@ -104,6 +110,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[16:44@810] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 16
               - Part
                   id: "R4"
@@ -116,6 +123,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[17:43@857] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 17
               - Part
                   id: "C4"
@@ -128,6 +136,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[18:44@904] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 18
               - Part
                   id: "R5"
@@ -140,6 +149,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[19:43@951] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 19
               - Part
                   id: "C5"
@@ -152,6 +162,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[20:44@998] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 20
               - Part
                   id: "R6"
@@ -164,6 +175,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[21:43@1045] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 21
               - Part
                   id: "C6"
@@ -176,6 +188,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[22:44@1092] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 22
               - Part
                   id: "R7"
@@ -188,6 +201,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[23:43@1139] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "C7"
@@ -200,6 +214,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[24:44@1186] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "R8"
@@ -212,6 +227,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[25:43@1233] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
               - Part
                   id: "C8"
@@ -224,6 +240,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[26:44@1280] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 26
               - Part
                   id: "R9"
@@ -236,6 +253,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[27:43@1327] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 27
               - Part
                   id: "C9"
@@ -248,6 +266,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[28:44@1374] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 28
               - Part
                   id: "R10"
@@ -260,6 +279,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[29:45@1423] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 29
               - Part
                   id: "C10"
@@ -272,6 +292,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[30:46@1472] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 30
               - Part
                   id: "R11"
@@ -284,6 +305,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[31:46@1522] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 31
               - Part
                   id: "C11"
@@ -296,6 +318,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[32:46@1571] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 32
               - Part
                   id: "R12"
@@ -308,6 +331,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[33:46@1621] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 33
               - Part
                   id: "C12"
@@ -320,6 +344,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[34:46@1670] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 34
               - Part
                   id: "R13"
@@ -332,6 +357,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[35:46@1720] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 35
               - Part
                   id: "C13"
@@ -344,6 +370,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[36:46@1769] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 36
               - Part
                   id: "R14"
@@ -356,6 +383,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[37:46@1819] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 37
               - Part
                   id: "C14"
@@ -368,6 +396,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[38:46@1868] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 38
               - Part
                   id: "R15"
@@ -380,6 +409,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[39:46@1918] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 39
               - Part
                   id: "C15"
@@ -392,6 +422,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[40:46@1967] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 40
               - Part
                   id: "R16"
@@ -404,6 +435,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[41:46@2017] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 41
               - Part
                   id: "C16"
@@ -416,6 +448,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[42:46@2066] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 42
               - Part
                   id: "R17"
@@ -428,6 +461,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[43:46@2116] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 43
               - Part
                   id: "C17"
@@ -440,6 +474,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[44:46@2165] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 44
               - Part
                   id: "R18"
@@ -452,6 +487,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[45:46@2215] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 45
               - Part
                   id: "C18"
@@ -464,6 +500,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[46:46@2264] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 46
               - Part
                   id: "R19"
@@ -476,6 +513,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[47:46@2314] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 47
               - Part
                   id: "C19"
@@ -488,6 +526,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[48:46@2363] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 48
               - Part
                   id: "R20"
@@ -500,6 +539,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[49:46@2413] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 49
               - Part
                   id: "C20"
@@ -512,6 +552,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[50:46@2462] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 50
               - Part
                   id: "R21"
@@ -524,6 +565,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[51:46@2512] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 51
               - Part
                   id: "C21"
@@ -536,6 +578,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[52:46@2561] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 52
               - Part
                   id: "R22"
@@ -548,6 +591,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[53:46@2611] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 53
               - Part
                   id: "C22"
@@ -560,6 +604,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[54:46@2660] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 54
               - Part
                   id: "R23"
@@ -572,6 +617,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[55:46@2710] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 55
               - Part
                   id: "C23"
@@ -584,6 +630,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[56:46@2759] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 56
               - Part
                   id: "R24"
@@ -596,6 +643,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[57:46@2809] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 57
               - Part
                   id: "C24"
@@ -608,6 +656,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[58:46@2858] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 58
               - Part
                   id: "R25"
@@ -620,6 +669,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[59:46@2908] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
               - Part
                   id: "C25"
@@ -632,6 +682,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[60:46@2957] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 60
               - Part
                   id: "R26"
@@ -644,6 +695,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[61:46@3007] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 61
               - Part
                   id: "C26"
@@ -656,6 +708,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[62:46@3056] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 62
               - Part
                   id: "R27"
@@ -668,6 +721,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[63:46@3106] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 63
               - Part
                   id: "C27"
@@ -680,6 +734,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[64:46@3155] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 64
               - Part
                   id: "R28"
@@ -692,6 +747,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[65:46@3205] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 65
               - Part
                   id: "C28"
@@ -704,6 +760,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[66:46@3254] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 66
               - Part
                   id: "R29"
@@ -716,6 +773,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[67:46@3304] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 67
               - Part
                   id: "C29"
@@ -728,6 +786,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[68:46@3353] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 68
               - Part
                   id: "R30"
@@ -740,6 +799,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[69:46@3403] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 69
               - Part
                   id: "C30"
@@ -752,6 +812,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[70:46@3452] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 70
               - Part
                   id: "R31"
@@ -764,6 +825,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[71:46@3502] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 71
               - Part
                   id: "C31"
@@ -776,6 +838,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[72:46@3551] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 72
               - Part
                   id: "R32"
@@ -788,6 +851,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[73:46@3601] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 73
               - Part
                   id: "C32"
@@ -800,6 +864,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[74:46@3650] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 74
               - Part
                   id: "R33"
@@ -812,6 +877,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[75:46@3700] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 75
               - Part
                   id: "C33"
@@ -824,6 +890,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[76:46@3749] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 76
               - Part
                   id: "R34"
@@ -836,6 +903,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[77:46@3799] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 77
               - Part
                   id: "C34"
@@ -848,6 +916,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[78:46@3848] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 78
               - Part
                   id: "R35"
@@ -860,6 +929,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[79:46@3898] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 79
               - Part
                   id: "C35"
@@ -872,6 +942,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[80:46@3947] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 80
               - Part
                   id: "R36"
@@ -884,6 +955,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[81:46@3997] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 81
               - Part
                   id: "C36"
@@ -896,6 +968,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[82:46@4046] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 82
               - Part
                   id: "R37"
@@ -908,6 +981,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[83:46@4096] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 83
               - Part
                   id: "C37"
@@ -920,6 +994,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[84:46@4145] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 84
               - Part
                   id: "R38"
@@ -932,6 +1007,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[85:46@4195] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 85
               - Part
                   id: "C38"
@@ -944,6 +1020,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[86:46@4244] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 86
               - Part
                   id: "R39"
@@ -956,6 +1033,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[87:46@4294] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 87
               - Part
                   id: "C39"
@@ -968,6 +1046,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[88:46@4343] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 88
               - Part
                   id: "R40"
@@ -980,6 +1059,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[89:46@4393] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 89
               - Part
                   id: "C40"
@@ -992,6 +1072,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[90:46@4442] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 90
               - Part
                   id: "R41"
@@ -1004,6 +1085,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[91:46@4492] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 91
               - Part
                   id: "C41"
@@ -1016,6 +1098,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[92:46@4541] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 92
               - Part
                   id: "R42"
@@ -1028,6 +1111,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[93:46@4591] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 93
               - Part
                   id: "C42"
@@ -1040,6 +1124,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[94:46@4640] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 94
               - Part
                   id: "R43"
@@ -1052,6 +1137,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[95:46@4690] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 95
               - Part
                   id: "C43"
@@ -1064,6 +1150,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[96:46@4739] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 96
               - Part
                   id: "R44"
@@ -1076,6 +1163,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[97:46@4789] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 97
               - Part
                   id: "C44"
@@ -1088,6 +1176,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[98:46@4838] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 98
               - Part
                   id: "R45"
@@ -1100,6 +1189,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[99:46@4888] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 99
               - Part
                   id: "C45"
@@ -1112,6 +1202,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[100:46@4937] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 100
               - Part
                   id: "R46"
@@ -1124,6 +1215,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[101:46@4987] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 101
               - Part
                   id: "C46"
@@ -1136,6 +1228,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[102:46@5036] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 102
               - Part
                   id: "R47"
@@ -1148,6 +1241,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[103:46@5086] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 103
               - Part
                   id: "C47"
@@ -1160,6 +1254,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[104:46@5135] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 104
               - Part
                   id: "R48"
@@ -1172,6 +1267,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[105:46@5185] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 105
               - Part
                   id: "C48"
@@ -1184,6 +1280,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[106:46@5234] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 106
               - Part
                   id: "R49"
@@ -1196,6 +1293,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[107:46@5284] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 107
               - Part
                   id: "C49"
@@ -1208,6 +1306,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[108:46@5333] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 108
               - Part
                   id: "R50"
@@ -1220,6 +1319,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[109:46@5383] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 109
               - Part
                   id: "C50"
@@ -1232,6 +1332,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[110:46@5432] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 110
               - Part
                   id: "R51"
@@ -1244,6 +1345,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[111:46@5482] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 111
               - Part
                   id: "C51"
@@ -1256,6 +1358,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[112:46@5531] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 112
               - Part
                   id: "R52"
@@ -1268,6 +1371,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[113:46@5581] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 113
               - Part
                   id: "C52"
@@ -1280,6 +1384,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[114:46@5630] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 114
               - Part
                   id: "R53"
@@ -1292,6 +1397,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[115:46@5680] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 115
               - Part
                   id: "C53"
@@ -1304,6 +1410,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[116:46@5729] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 116
               - Part
                   id: "R54"
@@ -1316,6 +1423,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[117:46@5779] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 117
               - Part
                   id: "C54"
@@ -1328,6 +1436,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[118:46@5828] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 118
               - Part
                   id: "R55"
@@ -1340,6 +1449,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[119:46@5878] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 119
               - Part
                   id: "C55"
@@ -1352,6 +1462,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[120:46@5927] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 120
               - Part
                   id: "R56"
@@ -1364,6 +1475,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[121:46@5977] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 121
               - Part
                   id: "C56"
@@ -1376,6 +1488,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[122:46@6026] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 122
               - Part
                   id: "R57"
@@ -1388,6 +1501,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[123:46@6076] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 123
               - Part
                   id: "C57"
@@ -1400,6 +1514,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[124:46@6125] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 124
               - Part
                   id: "R58"
@@ -1412,6 +1527,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[125:46@6175] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 125
               - Part
                   id: "C58"
@@ -1424,6 +1540,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[126:46@6224] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 126
               - Part
                   id: "R59"
@@ -1436,6 +1553,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[127:46@6274] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 127
               - Part
                   id: "C59"
@@ -1448,6 +1566,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[128:46@6323] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 128
               - Part
                   id: "R60"
@@ -1460,6 +1579,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[129:46@6373] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 129
               - Part
                   id: "C60"
@@ -1472,6 +1592,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[130:46@6422] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 130
               - Part
                   id: "R61"
@@ -1484,6 +1605,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[131:46@6472] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 131
               - Part
                   id: "C61"
@@ -1496,6 +1618,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[132:46@6521] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 132
               - Part
                   id: "R62"
@@ -1508,6 +1631,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[133:46@6571] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 133
               - Part
                   id: "C62"
@@ -1520,6 +1644,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[134:46@6620] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 134
               - Part
                   id: "R63"
@@ -1532,6 +1657,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[135:46@6670] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 135
               - Part
                   id: "C63"
@@ -1544,6 +1670,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[136:46@6719] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 136
               - Part
                   id: "R64"
@@ -1556,6 +1683,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[137:46@6769] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 137
               - Part
                   id: "C64"
@@ -1568,6 +1696,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[138:46@6818] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 138
               - Part
                   id: "R65"
@@ -1580,6 +1709,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[139:46@6868] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 139
               - Part
                   id: "C65"
@@ -1592,6 +1722,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[140:46@6917] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 140
               - Part
                   id: "R66"
@@ -1604,6 +1735,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[141:46@6967] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 141
               - Part
                   id: "C66"
@@ -1616,6 +1748,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[142:46@7016] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 142
               - Part
                   id: "R67"
@@ -1628,6 +1761,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[143:46@7066] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 143
               - Part
                   id: "C67"
@@ -1640,6 +1774,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[144:46@7115] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 144
               - Part
                   id: "R68"
@@ -1652,6 +1787,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[145:46@7165] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 145
               - Part
                   id: "C68"
@@ -1664,6 +1800,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[146:46@7214] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 146
               - Part
                   id: "R69"
@@ -1676,6 +1813,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[147:46@7264] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 147
               - Part
                   id: "C69"
@@ -1688,6 +1826,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[148:46@7313] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 148
               - Part
                   id: "R70"
@@ -1700,6 +1839,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[149:46@7363] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 149
               - Part
                   id: "C70"
@@ -1712,6 +1852,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[150:46@7412] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 150
               - Part
                   id: "R71"
@@ -1724,6 +1865,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[151:46@7462] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 151
               - Part
                   id: "C71"
@@ -1736,6 +1878,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[152:46@7511] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 152
               - Part
                   id: "R72"
@@ -1748,6 +1891,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[153:46@7561] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 153
               - Part
                   id: "C72"
@@ -1760,6 +1904,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[154:46@7610] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 154
               - Part
                   id: "R73"
@@ -1772,6 +1917,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[155:46@7660] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 155
               - Part
                   id: "C73"
@@ -1784,6 +1930,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[156:46@7709] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 156
               - Part
                   id: "R74"
@@ -1796,6 +1943,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[157:46@7759] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 157
               - Part
                   id: "C74"
@@ -1808,6 +1956,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[158:46@7808] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 158
               - Part
                   id: "R75"
@@ -1820,6 +1969,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[159:46@7858] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 159
               - Part
                   id: "C75"
@@ -1832,6 +1982,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[160:46@7907] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 160
               - Part
                   id: "R76"
@@ -1844,6 +1995,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[161:46@7957] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 161
               - Part
                   id: "C76"
@@ -1856,6 +2008,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[162:46@8006] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 162
               - Part
                   id: "R77"
@@ -1868,6 +2021,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[163:46@8056] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 163
               - Part
                   id: "C77"
@@ -1880,6 +2034,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[164:46@8105] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 164
               - Part
                   id: "R78"
@@ -1892,6 +2047,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[165:46@8155] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 165
               - Part
                   id: "C78"
@@ -1904,6 +2060,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[166:46@8204] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 166
               - Part
                   id: "R79"
@@ -1916,6 +2073,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[167:46@8254] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 167
               - Part
                   id: "C79"
@@ -1928,6 +2086,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[168:46@8303] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 168
               - Part
                   id: "R80"
@@ -1940,6 +2099,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[169:46@8353] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 169
               - Part
                   id: "C80"
@@ -1952,6 +2112,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[170:46@8402] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 170
               - Part
                   id: "R81"
@@ -1964,6 +2125,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[171:46@8452] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 171
               - Part
                   id: "C81"
@@ -1976,6 +2138,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[172:46@8501] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 172
               - Part
                   id: "R82"
@@ -1988,6 +2151,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[173:46@8551] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 173
               - Part
                   id: "C82"
@@ -2000,6 +2164,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[174:46@8600] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 174
               - Part
                   id: "R83"
@@ -2012,6 +2177,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[175:46@8650] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 175
               - Part
                   id: "C83"
@@ -2024,6 +2190,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[176:46@8699] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 176
               - Part
                   id: "R84"
@@ -2036,6 +2203,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[177:46@8749] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 177
               - Part
                   id: "C84"
@@ -2048,6 +2216,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[178:46@8798] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 178
               - Part
                   id: "R85"
@@ -2060,6 +2229,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[179:46@8848] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 179
               - Part
                   id: "C85"
@@ -2072,6 +2242,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[180:46@8897] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 180
               - Part
                   id: "R86"
@@ -2084,6 +2255,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[181:46@8947] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 181
               - Part
                   id: "C86"
@@ -2096,6 +2268,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[182:46@8996] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 182
               - Part
                   id: "R87"
@@ -2108,6 +2281,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[183:46@9046] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 183
               - Part
                   id: "C87"
@@ -2120,6 +2294,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[184:46@9095] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 184
               - Part
                   id: "R88"
@@ -2132,6 +2307,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[185:46@9145] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 185
               - Part
                   id: "C88"
@@ -2144,6 +2320,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[186:46@9194] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 186
               - Part
                   id: "R89"
@@ -2156,6 +2333,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[187:46@9244] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 187
               - Part
                   id: "C89"
@@ -2168,6 +2346,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[188:46@9293] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 188
               - Part
                   id: "R90"
@@ -2180,6 +2359,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[189:46@9343] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 189
               - Part
                   id: "C90"
@@ -2192,6 +2372,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[190:46@9392] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 190
               - Part
                   id: "R91"
@@ -2204,6 +2385,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[191:46@9442] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 191
               - Part
                   id: "C91"
@@ -2216,6 +2398,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[192:46@9491] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 192
               - Part
                   id: "R92"
@@ -2228,6 +2411,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[193:46@9541] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 193
               - Part
                   id: "C92"
@@ -2240,6 +2424,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[194:46@9590] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 194
               - Part
                   id: "R93"
@@ -2252,6 +2437,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[195:46@9640] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 195
               - Part
                   id: "C93"
@@ -2264,6 +2450,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[196:46@9689] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 196
               - Part
                   id: "R94"
@@ -2276,6 +2463,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[197:46@9739] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 197
               - Part
                   id: "C94"
@@ -2288,6 +2476,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[198:46@9788] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 198
               - Part
                   id: "R95"
@@ -2300,6 +2489,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[199:46@9838] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 199
               - Part
                   id: "C95"
@@ -2312,6 +2502,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[200:46@9887] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 200
               - Part
                   id: "R96"
@@ -2324,6 +2515,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[201:46@9937] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 201
               - Part
                   id: "C96"
@@ -2336,6 +2528,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[202:46@9986] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 202
               - Part
                   id: "R97"
@@ -2348,6 +2541,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[203:46@10036] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 203
               - Part
                   id: "C97"
@@ -2360,6 +2554,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[204:46@10085] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 204
               - Part
                   id: "R98"
@@ -2372,6 +2567,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[205:46@10135] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 205
               - Part
                   id: "C98"
@@ -2384,6 +2580,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[206:46@10184] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 206
               - Part
                   id: "R99"
@@ -2396,6 +2593,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[207:46@10234] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 207
               - Part
                   id: "C99"
@@ -2408,6 +2606,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[208:46@10283] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 208
               - Part
                   id: "R100"
@@ -2420,6 +2619,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[209:48@10335] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 209
               - Part
                   id: "C100"
@@ -2432,6 +2632,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[210:48@10386] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 210
               - Part
                   id: "R101"
@@ -2444,6 +2645,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[211:49@10439] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 211
               - Part
                   id: "C101"
@@ -2456,6 +2658,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[212:48@10490] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 212
               - Part
                   id: "R102"
@@ -2468,6 +2671,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[213:49@10543] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 213
               - Part
                   id: "C102"
@@ -2480,6 +2684,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[214:48@10594] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 214
               - Part
                   id: "R103"
@@ -2492,6 +2697,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[215:49@10647] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 215
               - Part
                   id: "C103"
@@ -2504,6 +2710,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[216:48@10698] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 216
               - Part
                   id: "R104"
@@ -2516,6 +2723,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[217:49@10751] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 217
               - Part
                   id: "C104"
@@ -2528,6 +2736,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[218:48@10802] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 218
               - Part
                   id: "R105"
@@ -2540,6 +2749,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[219:49@10855] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 219
               - Part
                   id: "C105"
@@ -2552,6 +2762,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[220:48@10906] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 220
               - Part
                   id: "R106"
@@ -2564,6 +2775,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[221:49@10959] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 221
               - Part
                   id: "C106"
@@ -2576,6 +2788,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[222:48@11010] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 222
               - Part
                   id: "R107"
@@ -2588,6 +2801,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[223:49@11063] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 223
               - Part
                   id: "C107"
@@ -2600,6 +2814,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[224:48@11114] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 224
               - Part
                   id: "R108"
@@ -2612,6 +2827,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[225:49@11167] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 225
               - Part
                   id: "C108"
@@ -2624,6 +2840,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[226:48@11218] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 226
               - Part
                   id: "R109"
@@ -2636,6 +2853,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[227:49@11271] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 227
               - Part
                   id: "C109"
@@ -2648,6 +2866,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[228:48@11322] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 228
               - Part
                   id: "R110"
@@ -2660,6 +2879,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[229:49@11375] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 229
               - Part
                   id: "C110"
@@ -2672,6 +2892,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[230:48@11426] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 230
               - Part
                   id: "R111"
@@ -2684,6 +2905,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[231:49@11479] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 231
               - Part
                   id: "C111"
@@ -2696,6 +2918,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[232:48@11530] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 232
               - Part
                   id: "R112"
@@ -2708,6 +2931,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[233:49@11583] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 233
               - Part
                   id: "C112"
@@ -2720,6 +2944,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[234:48@11634] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 234
               - Part
                   id: "R113"
@@ -2732,6 +2957,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[235:49@11687] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 235
               - Part
                   id: "C113"
@@ -2744,6 +2970,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[236:48@11738] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 236
               - Part
                   id: "R114"
@@ -2756,6 +2983,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[237:49@11791] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 237
               - Part
                   id: "C114"
@@ -2768,6 +2996,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[238:48@11842] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 238
               - Part
                   id: "R115"
@@ -2780,6 +3009,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[239:49@11895] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 239
               - Part
                   id: "C115"
@@ -2792,6 +3022,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[240:48@11946] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 240
               - Part
                   id: "R116"
@@ -2804,6 +3035,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[241:49@11999] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 241
               - Part
                   id: "C116"
@@ -2816,6 +3048,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[242:48@12050] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 242
               - Part
                   id: "R117"
@@ -2828,6 +3061,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[243:49@12103] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 243
               - Part
                   id: "C117"
@@ -2840,6 +3074,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[244:48@12154] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 244
               - Part
                   id: "R118"
@@ -2852,6 +3087,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[245:49@12207] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 245
               - Part
                   id: "C118"
@@ -2864,6 +3100,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[246:48@12258] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 246
               - Part
                   id: "R119"
@@ -2876,6 +3113,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[247:49@12311] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 247
               - Part
                   id: "C119"
@@ -2888,6 +3126,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[248:48@12362] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 248
               - Part
                   id: "R120"
@@ -2900,6 +3139,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[249:49@12415] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 249
               - Part
                   id: "C120"
@@ -2912,6 +3152,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[250:48@12466] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 250
               - Part
                   id: "R121"
@@ -2924,6 +3165,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[251:49@12519] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 251
               - Part
                   id: "C121"
@@ -2936,6 +3178,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[252:48@12570] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 252
               - Part
                   id: "R122"
@@ -2948,6 +3191,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[253:49@12623] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 253
               - Part
                   id: "C122"
@@ -2960,6 +3204,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[254:48@12674] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 254
               - Part
                   id: "R123"
@@ -2972,6 +3217,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[255:49@12727] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 255
               - Part
                   id: "C123"
@@ -2984,6 +3230,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[256:48@12778] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 256
               - Part
                   id: "R124"
@@ -2996,6 +3243,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[257:49@12831] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 257
               - Part
                   id: "C124"
@@ -3008,6 +3256,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[258:48@12882] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 258
               - Part
                   id: "R125"
@@ -3020,6 +3269,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[259:49@12935] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 259
               - Part
                   id: "C125"
@@ -3032,6 +3282,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[260:48@12986] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 260
               - Part
                   id: "R126"
@@ -3044,6 +3295,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[261:49@13039] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 261
               - Part
                   id: "C126"
@@ -3056,6 +3308,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[262:48@13090] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 262
               - Part
                   id: "R127"
@@ -3068,6 +3321,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[263:49@13143] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 263
               - Part
                   id: "C127"
@@ -3080,6 +3334,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[264:48@13194] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 264
               - Part
                   id: "R128"
@@ -3092,6 +3347,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[265:49@13247] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 265
               - Part
                   id: "C128"
@@ -3104,6 +3360,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[266:48@13298] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 266
               - Part
                   id: "R129"
@@ -3116,6 +3373,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[267:49@13351] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 267
               - Part
                   id: "C129"
@@ -3128,6 +3386,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[268:48@13402] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 268
               - Part
                   id: "R130"
@@ -3140,6 +3399,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[269:49@13455] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 269
               - Part
                   id: "C130"
@@ -3152,6 +3412,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[270:48@13506] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 270
               - Part
                   id: "R131"
@@ -3164,6 +3425,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[271:49@13559] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 271
               - Part
                   id: "C131"
@@ -3176,6 +3438,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[272:48@13610] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 272
               - Part
                   id: "R132"
@@ -3188,6 +3451,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[273:49@13663] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 273
               - Part
                   id: "C132"
@@ -3200,6 +3464,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[274:48@13714] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 274
               - Part
                   id: "R133"
@@ -3212,6 +3477,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[275:49@13767] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 275
               - Part
                   id: "C133"
@@ -3224,6 +3490,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[276:48@13818] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 276
               - Part
                   id: "R134"
@@ -3236,6 +3503,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[277:49@13871] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 277
               - Part
                   id: "C134"
@@ -3248,6 +3516,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[278:48@13922] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 278
               - Part
                   id: "R135"
@@ -3260,6 +3529,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[279:49@13975] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 279
               - Part
                   id: "C135"
@@ -3272,6 +3542,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[280:48@14026] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 280
               - Part
                   id: "R136"
@@ -3284,6 +3555,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[281:49@14079] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 281
               - Part
                   id: "C136"
@@ -3296,6 +3568,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[282:48@14130] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 282
               - Part
                   id: "R137"
@@ -3308,6 +3581,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[283:49@14183] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 283
               - Part
                   id: "C137"
@@ -3320,6 +3594,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[284:48@14234] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 284
               - Part
                   id: "R138"
@@ -3332,6 +3607,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[285:49@14287] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 285
               - Part
                   id: "C138"
@@ -3344,6 +3620,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[286:48@14338] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 286
               - Part
                   id: "R139"
@@ -3356,6 +3633,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[287:49@14391] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 287
               - Part
                   id: "C139"
@@ -3368,6 +3646,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[288:48@14442] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 288
               - Part
                   id: "R140"
@@ -3380,6 +3659,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[289:49@14495] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 289
               - Part
                   id: "C140"
@@ -3392,6 +3672,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[290:48@14546] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 290
               - Part
                   id: "R141"
@@ -3404,6 +3685,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[291:49@14599] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 291
               - Part
                   id: "C141"
@@ -3416,6 +3698,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[292:48@14650] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 292
               - Part
                   id: "R142"
@@ -3428,6 +3711,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[293:49@14703] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 293
               - Part
                   id: "C142"
@@ -3440,6 +3724,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[294:48@14754] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 294
               - Part
                   id: "R143"
@@ -3452,6 +3737,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[295:49@14807] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 295
               - Part
                   id: "C143"
@@ -3464,6 +3750,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[296:48@14858] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 296
               - Part
                   id: "R144"
@@ -3476,6 +3763,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[297:49@14911] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 297
               - Part
                   id: "C144"
@@ -3488,6 +3776,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[298:48@14962] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 298
               - Part
                   id: "R145"
@@ -3500,6 +3789,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[299:49@15015] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 299
               - Part
                   id: "C145"
@@ -3512,6 +3802,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[300:48@15066] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 300
               - Part
                   id: "R146"
@@ -3524,6 +3815,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[301:49@15119] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 301
               - Part
                   id: "C146"
@@ -3536,6 +3828,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[302:48@15170] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 302
               - Part
                   id: "R147"
@@ -3548,6 +3841,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[303:49@15223] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 303
               - Part
                   id: "C147"
@@ -3560,6 +3854,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[304:48@15274] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 304
               - Part
                   id: "R148"
@@ -3572,6 +3867,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[305:49@15327] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 305
               - Part
                   id: "C148"
@@ -3584,6 +3880,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[306:48@15378] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 306
               - Part
                   id: "R149"
@@ -3596,6 +3893,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[307:49@15431] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 307
               - Part
                   id: "C149"
@@ -3608,6 +3906,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[308:48@15482] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 308
               - Part
                   id: "R150"
@@ -3620,6 +3919,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[309:49@15535] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 309
               - Part
                   id: "C150"
@@ -3632,6 +3932,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[310:48@15586] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 310
               - Part
                   id: "R151"
@@ -3644,6 +3945,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[311:49@15639] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 311
               - Part
                   id: "C151"
@@ -3656,6 +3958,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[312:48@15690] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 312
               - Part
                   id: "R152"
@@ -3668,6 +3971,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[313:49@15743] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 313
               - Part
                   id: "C152"
@@ -3680,6 +3984,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[314:48@15794] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 314
               - Part
                   id: "R153"
@@ -3692,6 +3997,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[315:49@15847] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 315
               - Part
                   id: "C153"
@@ -3704,6 +4010,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[316:48@15898] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 316
               - Part
                   id: "R154"
@@ -3716,6 +4023,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[317:49@15951] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 317
               - Part
                   id: "C154"
@@ -3728,6 +4036,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[318:48@16002] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 318
               - Part
                   id: "R155"
@@ -3740,6 +4049,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[319:49@16055] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 319
               - Part
                   id: "C155"
@@ -3752,6 +4062,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[320:48@16106] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 320
               - Part
                   id: "R156"
@@ -3764,6 +4075,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[321:49@16159] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 321
               - Part
                   id: "C156"
@@ -3776,6 +4088,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[322:48@16210] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 322
               - Part
                   id: "R157"
@@ -3788,6 +4101,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[323:49@16263] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 323
               - Part
                   id: "C157"
@@ -3800,6 +4114,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[324:48@16314] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 324
               - Part
                   id: "R158"
@@ -3812,6 +4127,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[325:49@16367] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 325
               - Part
                   id: "C158"
@@ -3824,6 +4140,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[326:48@16418] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 326
               - Part
                   id: "R159"
@@ -3836,6 +4153,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[327:49@16471] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 327
               - Part
                   id: "C159"
@@ -3848,6 +4166,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[328:48@16522] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 328
               - Part
                   id: "R160"
@@ -3860,6 +4179,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[329:49@16575] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 329
               - Part
                   id: "C160"
@@ -3872,6 +4192,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[330:48@16626] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 330
               - Part
                   id: "R161"
@@ -3884,6 +4205,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[331:49@16679] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 331
               - Part
                   id: "C161"
@@ -3896,6 +4218,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[332:48@16730] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 332
               - Part
                   id: "R162"
@@ -3908,6 +4231,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[333:49@16783] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 333
               - Part
                   id: "C162"
@@ -3920,6 +4244,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[334:48@16834] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 334
               - Part
                   id: "R163"
@@ -3932,6 +4257,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[335:49@16887] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 335
               - Part
                   id: "C163"
@@ -3944,6 +4270,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[336:48@16938] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 336
               - Part
                   id: "R164"
@@ -3956,6 +4283,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[337:49@16991] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 337
               - Part
                   id: "C164"
@@ -3968,6 +4296,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[338:48@17042] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 338
               - Part
                   id: "R165"
@@ -3980,6 +4309,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[339:49@17095] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 339
               - Part
                   id: "C165"
@@ -3992,6 +4322,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[340:48@17146] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 340
               - Part
                   id: "R166"
@@ -4004,6 +4335,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[341:49@17199] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 341
               - Part
                   id: "C166"
@@ -4016,6 +4348,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[342:48@17250] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 342
               - Part
                   id: "R167"
@@ -4028,6 +4361,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[343:49@17303] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 343
               - Part
                   id: "C167"
@@ -4040,6 +4374,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[344:48@17354] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 344
               - Part
                   id: "R168"
@@ -4052,6 +4387,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[345:49@17407] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 345
               - Part
                   id: "C168"
@@ -4064,6 +4400,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[346:48@17458] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 346
               - Part
                   id: "R169"
@@ -4076,6 +4413,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[347:49@17511] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 347
               - Part
                   id: "C169"
@@ -4088,6 +4426,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[348:48@17562] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 348
               - Part
                   id: "R170"
@@ -4100,6 +4439,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[349:49@17615] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 349
               - Part
                   id: "C170"
@@ -4112,6 +4452,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[350:48@17666] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 350
               - Part
                   id: "R171"
@@ -4124,6 +4465,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[351:49@17719] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 351
               - Part
                   id: "C171"
@@ -4136,6 +4478,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[352:48@17770] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 352
               - Part
                   id: "R172"
@@ -4148,6 +4491,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[353:49@17823] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 353
               - Part
                   id: "C172"
@@ -4160,6 +4504,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[354:48@17874] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 354
               - Part
                   id: "R173"
@@ -4172,6 +4517,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[355:49@17927] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 355
               - Part
                   id: "C173"
@@ -4184,6 +4530,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[356:48@17978] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 356
               - Part
                   id: "R174"
@@ -4196,6 +4543,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[357:49@18031] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 357
               - Part
                   id: "C174"
@@ -4208,6 +4556,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[358:48@18082] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 358
               - Part
                   id: "R175"
@@ -4220,6 +4569,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[359:49@18135] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 359
               - Part
                   id: "C175"
@@ -4232,6 +4582,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[360:48@18186] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 360
               - Part
                   id: "R176"
@@ -4244,6 +4595,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[361:49@18239] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 361
               - Part
                   id: "C176"
@@ -4256,6 +4608,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[362:48@18290] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 362
               - Part
                   id: "R177"
@@ -4268,6 +4621,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[363:49@18343] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 363
               - Part
                   id: "C177"
@@ -4280,6 +4634,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[364:48@18394] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 364
               - Part
                   id: "R178"
@@ -4292,6 +4647,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[365:49@18447] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 365
               - Part
                   id: "C178"
@@ -4304,6 +4660,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[366:48@18498] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 366
               - Part
                   id: "R179"
@@ -4316,6 +4673,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[367:49@18551] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 367
               - Part
                   id: "C179"
@@ -4328,6 +4686,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[368:48@18602] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 368
               - Part
                   id: "R180"
@@ -4340,6 +4699,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[369:49@18655] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 369
               - Part
                   id: "C180"
@@ -4352,6 +4712,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[370:48@18706] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 370
               - Part
                   id: "R181"
@@ -4364,6 +4725,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[371:49@18759] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 371
               - Part
                   id: "C181"
@@ -4376,6 +4738,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[372:48@18810] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 372
               - Part
                   id: "R182"
@@ -4388,6 +4751,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[373:49@18863] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 373
               - Part
                   id: "C182"
@@ -4400,6 +4764,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[374:48@18914] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 374
               - Part
                   id: "R183"
@@ -4412,6 +4777,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[375:49@18967] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 375
               - Part
                   id: "C183"
@@ -4424,6 +4790,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[376:48@19018] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 376
               - Part
                   id: "R184"
@@ -4436,6 +4803,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[377:49@19071] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 377
               - Part
                   id: "C184"
@@ -4448,6 +4816,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[378:48@19122] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 378
               - Part
                   id: "R185"
@@ -4460,6 +4829,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[379:49@19175] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 379
               - Part
                   id: "C185"
@@ -4472,6 +4842,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[380:48@19226] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 380
               - Part
                   id: "R186"
@@ -4484,6 +4855,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[381:49@19279] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 381
               - Part
                   id: "C186"
@@ -4496,6 +4868,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[382:48@19330] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 382
               - Part
                   id: "R187"
@@ -4508,6 +4881,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[383:49@19383] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 383
               - Part
                   id: "C187"
@@ -4520,6 +4894,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[384:48@19434] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 384
               - Part
                   id: "R188"
@@ -4532,6 +4907,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[385:49@19487] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 385
               - Part
                   id: "C188"
@@ -4544,6 +4920,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[386:48@19538] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 386
               - Part
                   id: "R189"
@@ -4556,6 +4933,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[387:49@19591] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 387
               - Part
                   id: "C189"
@@ -4568,6 +4946,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[388:48@19642] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 388
               - Part
                   id: "R190"
@@ -4580,6 +4959,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[389:49@19695] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 389
               - Part
                   id: "C190"
@@ -4592,6 +4972,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[390:48@19746] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 390
               - Part
                   id: "R191"
@@ -4604,6 +4985,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[391:49@19799] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 391
               - Part
                   id: "C191"
@@ -4616,6 +4998,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[392:48@19850] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 392
               - Part
                   id: "R192"
@@ -4628,6 +5011,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[393:49@19903] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 393
               - Part
                   id: "C192"
@@ -4640,6 +5024,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[394:48@19954] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 394
               - Part
                   id: "R193"
@@ -4652,6 +5037,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[395:49@20007] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 395
               - Part
                   id: "C193"
@@ -4664,6 +5050,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[396:48@20058] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 396
               - Part
                   id: "R194"
@@ -4676,6 +5063,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[397:49@20111] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 397
               - Part
                   id: "C194"
@@ -4688,6 +5076,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[398:48@20162] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 398
               - Part
                   id: "R195"
@@ -4700,6 +5089,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[399:49@20215] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 399
               - Part
                   id: "C195"
@@ -4712,6 +5102,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[400:48@20266] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 400
               - Part
                   id: "R196"
@@ -4724,6 +5115,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[401:49@20319] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 401
               - Part
                   id: "C196"
@@ -4736,6 +5128,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[402:48@20370] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 402
               - Part
                   id: "R197"
@@ -4748,6 +5141,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[403:49@20423] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 403
               - Part
                   id: "C197"
@@ -4760,6 +5154,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[404:48@20474] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 404
               - Part
                   id: "R198"
@@ -4772,6 +5167,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[405:49@20527] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 405
               - Part
                   id: "C198"
@@ -4784,6 +5180,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[406:48@20578] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 406
               - Part
                   id: "R199"
@@ -4796,6 +5193,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[407:49@20631] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 407
               - Part
                   id: "C199"
@@ -4808,6 +5206,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[408:48@20682] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 408
               - Part
                   id: "R200"
@@ -4820,6 +5219,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[409:49@20735] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 409
               - Part
                   id: "C200"
@@ -4832,6 +5232,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[410:48@20786] "1e-8"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 410
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -4845,46 +5246,46 @@ REFUSED src/test/resources/circuit-benchmark/circuits/rc-ladder-200.jmx 4:5 a do
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/rc-ladder-200.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS ac335071f46f0fbeb63bf2876f16067d
+READS 49c12c042045df4d2d8f397cee490eef
 == line 11 begun with a stray word
-READS a5005ec688c742f93ebf27119c9febf8
+READS 9a1146ca256115744e9f3a2c2314cb9c
 == line 18 deleted
-READS 88166bbeb9b8fdaa6ff312c4f1d8b21c
+READS 0399ac7ae4271b22546278d3c4d387b5
 == line 18 begun with a stray word
-READS f44960d53d377a86946d2d1194b47e3a
+READS 75d7b9042bb08ce5e739f31c0118aff5
 == line 25 deleted
-READS 20e5022dc535e1156c318509b8b53eb1
+READS 82faf90334f6fb6af778ca61624ea205
 == line 25 begun with a stray word
-READS 090fdd0ae6d280f7d7f3e3ec6314d6f5
+READS 04c1e2b4ec4b6ca0a28e31fdbf0341a2
 == line 32 deleted
-READS 2b96fa05a636799528315d4e58baa342
+READS 170c0c9ff61f60dff9a20562ac244779
 == line 32 begun with a stray word
-READS 3f51b1b31343b761489d032296ec7c88
+READS 9cca465386ef455d67114fbef690a79b
 == line 39 deleted
-READS 8c7805c8b5df4639b5f307268523b2db
+READS 725ccc25a66f321aa323517db913d747
 == line 39 begun with a stray word
-READS 5d664989de378f05ee9ce1725001fb31
+READS eef909036b5edd0430b05de1ec98bee8
 == line 46 deleted
-READS b7675a407da5070ef0be5b23ae15da48
+READS fd5f388e6d25ee2012ec52b0192b301d
 == line 46 begun with a stray word
-READS aa2178f87e4cbd76316e0b29888f6a30
+READS 1f1370a1d05692571b9bf00b32ff81e5
 == line 53 deleted
-READS 8e037a438b5da5dc58884d9043daf40c
+READS 3d1e8c73f64b0081be78b02a53cbbd23
 == line 53 begun with a stray word
-READS 38b40f09c1ad578942858fd2428ba7ec
+READS c5748e8b84c5500a3da9c7596edcf57a
 == line 60 deleted
-READS d825ed024687365f0146bec10ee4c2ff
+READS 412edaf647f9c586c3d338076fea8592
 == line 60 begun with a stray word
-READS bc69c2414d8551be63f22954714d2e12
+READS ae1c95fc267f63ff367fc909b561d84f
 == line 67 deleted
-READS bb92b4a3eee2dd5d540ea3e624452dcf
+READS 31a05aa745ce39ee7e2d74c70677af18
 == line 67 begun with a stray word
-READS 8ff7c46e51678519f05fab5eea90a9df
+READS 0f3197221ae492f1f76d04174a54974a
 == line 74 deleted
-READS 45ca65c83f981f3e6cd3331827031b89
+READS cf7afdf46fea06d96822e02b3a801f3e
 == line 74 begun with a stray word
-READS 14a515ba4621b88ada960d15ec81f8a0
+READS 0aab0c1bcdc64012afbd9dc86eb81087
 == line 81 deleted
-READS 6bd2926395e9999d7093ba8c6c0918a2
+READS a06dac5ced7ec8f0380b48d19cfd3c9a
 == line 81 begun with a stray word
-READS fa66dd16b8513c6577072d31d7e6e09c
+READS 939c0fd119b9874a75ef82b67814ed20

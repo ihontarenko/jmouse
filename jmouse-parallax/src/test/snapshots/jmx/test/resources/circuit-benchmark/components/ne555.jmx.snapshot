@@ -458,6 +458,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[114:51@4705] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 114
               - Part
                   id: "R1"
@@ -470,6 +471,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[115:55@4764] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 115
               - Part
                   id: "R2"
@@ -482,6 +484,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[116:61@4832] "10 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 116
               - Part
                   id: "C1"
@@ -494,6 +497,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[117:55@4895] "10 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 117
               - Part
                   id: "U1"
@@ -510,6 +514,7 @@ ExperienceDocument
                       reset = "Vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 118
           sharedBench: null
           duration: Double 0.003
@@ -558,6 +563,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[126:51@5324] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 126
               - Part
                   id: "R1"
@@ -570,6 +576,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[127:55@5383] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 127
               - Part
                   id: "R2"
@@ -582,6 +589,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[128:61@5451] "10 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 128
               - Part
                   id: "C1"
@@ -594,6 +602,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[129:55@5514] "10 nF"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 129
               - Part
                   id: "U1"
@@ -610,6 +619,7 @@ ExperienceDocument
                       reset = "Vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 130
           sharedBench: null
           duration: Double 0.003
@@ -658,6 +668,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[138:51@5939] "15 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 138
               - Part
                   id: "R1"
@@ -670,6 +681,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[139:50@5994] "130 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 139
               - Part
                   id: "U1"
@@ -685,6 +697,7 @@ ExperienceDocument
                       reset = "Vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 140
           sharedBench: null
           duration: Double 1.0E-4
@@ -716,47 +729,47 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 5:1 component "…" is opened with '{' and never closed
 == line 11 deleted
-READS c8789921d5f786ed6f3d9317172de4bc
+READS ed0ef14edac4db8a339405a50d64682f
 == line 11 begun with a stray word
-READS 8f5019365eccd3b36ebcd73a2cde3fdf
+READS 8ed6110d283250c36f6d190acd91ca7e
 == line 18 deleted
-READS 7fc0e50f9213d0cdbd1632762ca20888
+READS c78d3d6754c8d63d75f7f492597be99b
 == line 18 begun with a stray word
-READS daaf599949d2cdb9f9591d6a7a210dfd
+READS c8edaf8185af371dc2522460e4aecfa8
 == line 25 deleted
-READS 1144af23651e02552047aa776f89d905
+READS b18b96eb6bf8e46d0c7b6d78653853ec
 == line 25 begun with a stray word
-READS 4b49e250a00eaf7671ca34433b0ec8d3
+READS 54c77204e565b133549ad0c8c12dfe6c
 == line 32 deleted
-READS 9894319a79c68b49ddd43fb06b0cbcee
+READS 8289015567f7737f1339260e07b742e9
 == line 32 begun with a stray word
-READS aff65a81e5af79a693366e69f8911bfd
+READS 0b6ae1cfdb9bdde8aa017ee0189645db
 == line 39 deleted
-READS a90d870e105fe5b3bc71bbbb735f2d7e
+READS 107df9d29aedc13c5c869e67ad523cd8
 == line 39 begun with a stray word
-READS 2686d881a340dc58d0f192769951ce0b
+READS c970636fffc79ff83bc03f9568f95def
 == line 46 deleted
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 46:9 'lower' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 46 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 46:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 deleted
-READS d6c461845980db2a517fc7b972b53552
+READS 9b6ba3f80c14a7a3dc9c522007ea1d04
 == line 53 begun with a stray word
-READS d2ef082c88393e79b25036f7e8b44eea
+READS f6a740dc24b40203c30038aa00d5fd5e
 == line 60 deleted
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 61:15 'state' holds lines, not a nested '{ … }'
 == line 60 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 62:15 'state' holds lines, not a nested '{ … }'
 == line 67 deleted
-READS 2719e022a5d4857598bec3a9b66aecfe
+READS ac6137116f08543789ebe5bc46723f4b
 == line 67 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 67:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 74 deleted
-READS f1460c0daa8c394d7c220f10b8dadedf
+READS ddb1d7f7c871c29757219f0c04a6ddbd
 == line 74 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 81 deleted
-READS 9fc39d85d8f0865ac4ee58349895e77e
+READS 8216fa72fe8006a8cfbcc58b816441af
 == line 81 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 81:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 88 deleted

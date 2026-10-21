@@ -141,6 +141,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[40:47@1816] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 40
               - Part
                   id: "U1"
@@ -152,6 +153,7 @@ ExperienceDocument
                       negative = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 41
           sharedBench: null
           duration: Double 0.001
@@ -194,6 +196,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[49:47@2132] "5 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 49
               - Part
                   id: "U1"
@@ -205,6 +208,7 @@ ExperienceDocument
                       negative = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 50
           sharedBench: null
           duration: Double 0.001
@@ -247,6 +251,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[58:47@2438] "1 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 58
               - Part
                   id: "U1"
@@ -258,6 +263,7 @@ ExperienceDocument
                       negative = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
           sharedBench: null
           duration: Double 0.001
@@ -289,21 +295,21 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/sources/bench-supply.jmx 9:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 2dca580004046dd0435b62a8a608f091
+READS 85d3179390a7cfafa071c08c0dad56f3
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/bench-supply.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 87a4a4ddb29ca23801cd4441758475e1
+READS 924faad6f6095652b5aee2a3cfc2dd7e
 == line 11 begun with a stray word
-READS 9eaa1151055e22dc127aa854eb68cbf9
+READS 336625b3cfb38c200b28215acd64768f
 == line 18 deleted
-READS 681c4c5241276b7333eccf7f67d48a3b
+READS 6db10c48c596fa54c37927487d3b8fb3
 == line 18 begun with a stray word
-READS 08c5a3c477f638cb72d1fbe7c2189b51
+READS 52b369ba13a7172664f9b1fee7eb296f
 == line 25 deleted
-READS 4c77073158ad0048b82abe9b2080251f
+READS 0c6ec34a90eb07c28d506dd8b2b2320e
 == line 25 begun with a stray word
-READS f302f87d527789594c66dee7ced46e42
+READS 15c6bbd1a6454f6b6c8514eb0bbf3b82
 == line 39 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/bench-supply.jmx 39:13 'R1' is not a criterion: near, within or is
 == line 39 begun with a stray word

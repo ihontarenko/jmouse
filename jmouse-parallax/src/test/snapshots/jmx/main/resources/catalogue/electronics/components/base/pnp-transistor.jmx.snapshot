@@ -68,6 +68,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[23:57@788] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "I1"
@@ -80,6 +81,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[24:52@844] "10 uA"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "U1"
@@ -92,6 +94,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
           sharedBench: null
           duration: Double 0.001
@@ -128,14 +131,14 @@ REFUSED src/main/resources/catalogue/electronics/components/base/pnp-transistor.
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/pnp-transistor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 541ba019fc9c356484a4d288ca3eecad
+READS 29e2af45c9f9cdd09c523f375055f871
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/pnp-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 deleted
-READS 73ae5d9a115d576da5d6ea87b6e3c349
+READS 672235617da0700872ad9367213d9ffc
 == line 18 begun with a stray word
-READS a037a151d4634d56e4f310a842f9eb81
+READS e2a706281be4b506a9ebac09099b991b
 == line 25 deleted
-READS d353f600e0900befc3dfaefbe35b9820
+READS 62ee6f78dc061ca2675d9d25ff805d15
 == line 25 begun with a stray word
-READS 651256c51cd1628bec238bec80564cc7
+READS e8781022f7f3a420334121e194861f24

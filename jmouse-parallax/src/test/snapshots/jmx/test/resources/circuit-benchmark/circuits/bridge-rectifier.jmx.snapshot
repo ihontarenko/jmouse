@@ -32,6 +32,7 @@ ExperienceDocument
                       amplitude = SourceText[10:69@472] "10"
                       frequency = SourceText[10:85@488] "50"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "D1"
@@ -43,6 +44,7 @@ ExperienceDocument
                       cathode = "p"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "D3"
@@ -54,6 +56,7 @@ ExperienceDocument
                       cathode = "p"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "D2"
@@ -65,6 +68,7 @@ ExperienceDocument
                       cathode = "b"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "D4"
@@ -76,6 +80,7 @@ ExperienceDocument
                       cathode = "a"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
               - Part
                   id: "RL"
@@ -88,6 +93,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[15:41@703] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 15
               - Part
                   id: "CL"
@@ -100,6 +106,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[16:43@750] "10e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 16
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -113,10 +120,10 @@ REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 4:5 a
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS c3ec0421e8ddc003ef98dda9daebe19c
+READS 18a192163eeca15c4b81b230c68d68fe
 == line 11 begun with a stray word
-READS 2f66bb9c68c477a3b1d820a657339410
+READS 43c4e15a7f9408e512b2c70ab52209f4
 == line 18 deleted
-READS d8da7f15b7306204522af8962266f2a2
+READS d08517b895a6545dfc7d90bb38b9bf5e
 == line 18 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 18:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view

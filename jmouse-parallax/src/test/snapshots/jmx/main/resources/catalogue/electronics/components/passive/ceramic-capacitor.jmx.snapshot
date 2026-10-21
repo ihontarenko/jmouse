@@ -295,6 +295,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[64:53@3527] "20 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 64
               - Part
                   id: "R1"
@@ -307,6 +308,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[65:60@3592] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 65
               - Part
                   id: "U1"
@@ -318,6 +320,7 @@ ExperienceDocument
                       terminal_two = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 66
           sharedBench: null
           duration: Double 5.0E-4
@@ -349,27 +352,27 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 7:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 8c73ea99f187cfdfae3e7e7d128a28e0
+READS b508f481c1c4f981ccc4e1e67aec21ba
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 5edf876f2455fb09270f8b117a6d44a7
+READS 5620ec09f71493b9a76461fd64074307
 == line 11 begun with a stray word
-READS bc8b2dc666459d9b0d8f99ac5a1eb78d
+READS 01f74f7ef8f0538453b18d22a191fe69
 == line 18 deleted
-READS 0d2553478117b096cd18ad93ca759b7f
+READS 13addc088a2b5434f2f527e8ba66c123
 == line 18 begun with a stray word
-READS 2dc57abf223c7e9e54bb33f8a29e7746
+READS 190714f3e35b26cd16fb2fb1e8d9d3fc
 == line 25 deleted
-READS fa5c282336b913c0bf32081238c81924
+READS 79f6e141ded7bf6cc64a13b4b65ca9dd
 == line 25 begun with a stray word
-READS b7cea2a6304c092f85741928a46357ca
+READS 898ba989b7ffd93be6e6134654f78525
 == line 32 deleted
-READS 1d42f6fa74a903c571c62a0fd6d454c8
+READS e59fcba81744a3cfd10eb6af4f52993b
 == line 32 begun with a stray word
-READS 103c036147c8ed1fd59c427ceeda2c6c
+READS c2453f2e813a60ea63ef997da088a30e
 == line 53 deleted
-READS 355fe5e4febd486c662b133644c36276
+READS d7fd9a22c94f578209702e12c97951c9
 == line 53 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 53:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 60 deleted

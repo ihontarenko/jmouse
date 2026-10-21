@@ -91,6 +91,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[23:51@992] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "R1"
@@ -103,6 +104,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[24:49@1045] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "U1"
@@ -115,6 +117,7 @@ ExperienceDocument
                       source = "Vdd"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
           sharedBench: null
           duration: Double 0.001
@@ -150,10 +153,10 @@ REFUSED src/test/resources/circuit-benchmark/components/p-mosfet.jmx 4:5 a docum
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/p-mosfet.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 21f16d03233a6cd9c47997c557ca68ae
+READS 84689d1000c446aa76935b6f86cb460e
 == line 11 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/p-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
-READS deec16602be5944512b81a140fe8f489
+READS 41b1b2f72ec2e518e904c5591dffcb6c
 == line 25 begun with a stray word
-READS 40d39d3426d9517b450df758c18f4f9c
+READS fe6790bd12f436f0aeedc844b2ffb680

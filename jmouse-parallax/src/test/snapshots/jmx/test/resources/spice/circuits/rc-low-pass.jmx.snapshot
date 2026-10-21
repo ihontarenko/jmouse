@@ -82,6 +82,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[15:46@553] "U"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 15
               - Part
                   id: "R1"
@@ -94,6 +95,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[16:44@599] "R"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 16
               - Part
                   id: "C1"
@@ -106,6 +108,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[17:45@646] "C"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 17
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -129,13 +132,13 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/spice/circuits/rc-low-pass.jmx 1:1 circuit "…" is opened with '{' and never closed
 == line 4 deleted
-READS 31f392ba2bc94c752870bd31f2d6879e
+READS 03759200342bc3340eb36b4a2a80c1fb
 == line 4 begun with a stray word
-READS 266e9c8b90ab386b0e31fdaef813d99e
+READS 3d65d8689662597a91e77336b3892f7c
 == line 11 deleted
-READS c628ebbd41c18b473b250aa38b2f63e8
+READS 39f0cea1adfbcd85175b72fb4bf7bb68
 == line 11 begun with a stray word
-READS a44d269f8096d08b2b7d933ec9926f25
+READS e15b78429576479dc80882400463eae8
 == line 18 deleted
 REFUSED src/test/resources/spice/circuits/rc-low-pass.jmx 19:10 'parts' holds lines, not a nested '{ … }'
 == line 18 begun with a stray word

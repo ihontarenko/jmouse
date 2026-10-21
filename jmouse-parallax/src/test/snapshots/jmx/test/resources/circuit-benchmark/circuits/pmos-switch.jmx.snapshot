@@ -33,6 +33,7 @@ ExperienceDocument
                       low = SourceText[10:79@455] "0"
                       frequency = SourceText[10:94@470] "100000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "R1"
@@ -45,6 +46,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[11:48@524] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "V1"
@@ -57,6 +59,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[12:50@577] "10"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "Q1"
@@ -69,6 +72,7 @@ ExperienceDocument
                       source = "supply"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "R2"
@@ -81,6 +85,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[14:45@687] "100"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -94,6 +99,6 @@ REFUSED src/test/resources/circuit-benchmark/circuits/pmos-switch.jmx 4:5 a docu
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/pmos-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS d02f6fcaf3c0bd9324f986ac54ca8121
+READS 0ada26a3cf15714dda38dc6afd37e8d2
 == line 11 begun with a stray word
-READS 63ecbea09cd5ab85302b76f8b334bc82
+READS 626192974d95c400458ca436007d320b

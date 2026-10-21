@@ -560,6 +560,7 @@ ExperienceDocument
                       amplitude = SourceText[100:76@6866] "325 V"
                       frequency = SourceText[100:95@6885] "50 Hz"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 100
               - Part
                   id: "U1"
@@ -574,6 +575,7 @@ ExperienceDocument
                       secondary_two = "bottom"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 101
               - Part
                   id: "R1"
@@ -586,6 +588,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[102:47@7059] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 102
               - Part
                   id: "R2"
@@ -598,6 +601,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[103:50@7117] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 103
           sharedBench: null
           duration: Double 0.06
@@ -644,6 +648,7 @@ ExperienceDocument
                       amplitude = SourceText[113:76@7601] "325 V"
                       frequency = SourceText[113:95@7620] "50 Hz"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 113
               - Part
                   id: "U1"
@@ -658,6 +663,7 @@ ExperienceDocument
                       secondary_two = "bottom"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 114
               - Part
                   id: "R1"
@@ -670,6 +676,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[115:52@7799] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 115
               - Part
                   id: "R2"
@@ -682,6 +689,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[116:55@7861] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 116
           sharedBench: null
           duration: Double 0.06
@@ -716,25 +724,25 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 13:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 9a6f038225645540a51b6c982affe74a
+READS 9a7dfd3a60b6971f74528bc9df31fb67
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 9a6f038225645540a51b6c982affe74a
+READS 9a7dfd3a60b6971f74528bc9df31fb67
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 18 deleted
-READS ddd817245b8b2268108e5049446ae790
+READS b29368489a82c8a13f7135aef6ea906e
 == line 18 begun with a stray word
-READS f63c0c3c7c55dd27e0efecc0f3f1ddfa
+READS 9e764b69ab1f7e5895fba692770d13a0
 == line 25 deleted
-READS 3becff0c0ea22af01d50a6863aa51f17
+READS 1ed658a347c89d5045d4fc19e13b2754
 == line 25 begun with a stray word
-READS dbc516b7e296e331c1a2118354e686ff
+READS 95ef0820b138dde10aa7d9a65c8c7168
 == line 32 deleted
-READS e282f80ced9cff2b24bdad1d95bc64d2
+READS accafdc9e9672e10a08c9a4d0ee5b1a4
 == line 32 begun with a stray word
-READS 061702c6daf6d1e10a2a5bbb698b4246
+READS b02d5cae3a0c81820e48e8bfa5fd64f6
 == line 46 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 47:11 'pins' holds lines, not a nested '{ … }'
 == line 46 begun with a stray word
@@ -744,22 +752,22 @@ REFUSED src/main/resources/catalogue/electronics/components/passive/center-tappe
 == line 60 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
-READS 1de5fcb374a338640087912706d4b22a
+READS 8d6f02716b68df382c4a0e765ced1a72
 == line 67 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 67:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 74 deleted
-READS 4e56a4cf25a6a0a96b5cbb7e9e281f47
+READS dac898a37704bc78f4ca5c74b15e36d0
 == line 74 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 81 deleted
-READS e74ef210cbf84373b8d5e10f686ee0e6
+READS 1579e77bbc8f301c47eb287ee4d972c0
 == line 81 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 81:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 88 deleted
-READS 206fea7e99406c9ca876879912d4cdc7
+READS 21b48cb2f9e5df26070b09d6d5a7c9ce
 == line 88 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 88:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
 == line 95 deleted
-READS c49884e0095966528b1482c56395d171
+READS 5010c92831e4e057dab4b832708c0724
 == line 95 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/center-tapped-transformer.jmx 95:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

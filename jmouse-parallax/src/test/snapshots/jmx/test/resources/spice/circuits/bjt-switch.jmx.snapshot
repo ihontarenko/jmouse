@@ -65,6 +65,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[18:69@1301] "12 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 18
               - Part
                   id: "G1"
@@ -79,6 +80,7 @@ ExperienceDocument
                       frequency = SourceText[19:86@1391] "f"
                       duty = SourceText[19:96@1401] "0.5"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 19
               - Part
                   id: "RB"
@@ -91,6 +93,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[20:51@1455] "R_base"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 20
               - Part
                   id: "A1"
@@ -102,6 +105,7 @@ ExperienceDocument
                       out = "top"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 21
               - Part
                   id: "RL"
@@ -116,6 +120,7 @@ ExperienceDocument
                       power_rating = SourceText[22:72@1574] "2 W"
                       thermal_resistance = SourceText[22:98@1600] "60 K/W"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 22
               - Part
                   id: "Q1"
@@ -128,6 +133,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "VM1"
@@ -139,6 +145,7 @@ ExperienceDocument
                       minus = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
       - Layout
           items: List(13)
@@ -582,37 +589,37 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 7:1 circuit "…" is opened with '{' and never closed
 == line 4 deleted
-READS 6169d61c46470757aab90f17fd96a744
+READS 9d23d625591eb5bfcd8ba1aa4e0be827
 == line 4 begun with a stray word
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 4cf9a32acab5ff02f5e26b8b9c799455
+READS 22c7505f24492ea0ba162f20e37917bb
 == line 11 begun with a stray word
-READS 0ec27e4d2db5f5b8362650fe87a41d0b
+READS f3b94692c83da4a339b21f2cd7e86b79
 == line 18 deleted
-READS f9c81511e4733c025a7f4ad4a7a85ba7
+READS 9e3e63065641de8e3cd04504ee59823c
 == line 18 begun with a stray word
-READS 44c4f026bd6257416a2b75dffd9a3c09
+READS 6063c1722dcf422461d1d88fa63f7515
 == line 25 deleted
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 25:12 'parts' holds lines, not a nested '{ … }'
 == line 25 begun with a stray word
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 26:12 'parts' holds lines, not a nested '{ … }'
 == line 32 deleted
-READS 1ccab7f794ccd36d09e0a6b435a9fbc1
+READS a4bce60cafa0941e3ccfef52bade1996
 == line 32 begun with a stray word
-READS 421d5f7a9fb80507580cf34909db4151
+READS 7614040c20ff6ff38b5d7a46aaf5bca5
 == line 39 deleted
-READS ee67f73829005c458213999cb9b671a4
+READS 497c110fe82deda738b72667ea1c1007
 == line 39 begun with a stray word
-READS afe63e495af5a3cffe17bdaed4bf6e75
+READS 6e51a3bc4eee8b3096243db211ac4c9b
 == line 46 deleted
-READS 168d4ea452d6ac60873cb11af25357a1
+READS 34d134df3ad4905d6d84c25108605bc0
 == line 46 begun with a stray word
-READS b270f3c2ceb37cecac3eea00bd4df2d3
+READS c3123a3d23658979adc2384c25ce20ab
 == line 53 deleted
-READS 4e4e8cdba958ca1ab858714f99a6467f
+READS 46522cbbae9260c51ce9d1284811d5d3
 == line 53 begun with a stray word
-READS e72dc582da9826116499afa6125a824c
+READS 7e79f6a1bf1c0099af687155014dea59
 == line 60 deleted
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 60:122 'probes' holds lines, not a nested '{ … }'
 == line 60 begun with a stray word

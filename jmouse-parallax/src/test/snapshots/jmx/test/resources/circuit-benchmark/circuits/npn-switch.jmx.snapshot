@@ -33,6 +33,7 @@ ExperienceDocument
                       low = SourceText[10:78@491] "-5"
                       frequency = SourceText[10:94@507] "100000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 10
               - Part
                   id: "R1"
@@ -45,6 +46,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[11:48@561] "330"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 11
               - Part
                   id: "V1"
@@ -57,6 +59,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[12:50@614] "10"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 12
               - Part
                   id: "R2"
@@ -69,6 +72,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[13:54@670] "66"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 13
               - Part
                   id: "Q1"
@@ -81,6 +85,7 @@ ExperienceDocument
                       emitter = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 14
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -94,6 +99,6 @@ REFUSED src/test/resources/circuit-benchmark/circuits/npn-switch.jmx 4:5 a docum
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/npn-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 7a3a8d7377cc77d35f8f0352c6acf0e9
+READS 5588b7ba00a642f8253a2c82c02d7909
 == line 11 begun with a stray word
-READS 7ae0103e6426c477110c9a8caf65cecf
+READS a35e7cc6e3dd8e5052d61af4415941fb

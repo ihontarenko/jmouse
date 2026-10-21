@@ -92,6 +92,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[25:51@978] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
               - Part
                   id: "R1"
@@ -104,6 +105,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[26:51@1033] "100 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 26
               - Part
                   id: "U1"
@@ -116,6 +118,7 @@ ExperienceDocument
                       source = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 27
           sharedBench: null
           duration: Double 0.001
@@ -151,13 +154,13 @@ REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS a0e8378a7755ee0860ab9d606d880461
+READS c6dda1ef207bbffc164bcb095a2d319d
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
-READS edaa8d1f00b92fdae292b97f41bef775
+READS 8524b3eda176c44db100616b72a2cc50
 == line 25 begun with a stray word
-READS d3d57d0ca9606832744aad071bb56317
+READS ae084f326f6c6377e18895c49696ef14
 == line 32 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:1 component "…" is opened with '{' and never closed
 == line 32 begun with a stray word

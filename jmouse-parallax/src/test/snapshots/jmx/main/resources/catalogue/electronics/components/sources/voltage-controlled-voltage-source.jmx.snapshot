@@ -116,6 +116,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[35:53@1352] "0.5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 35
               - Part
                   id: "R1"
@@ -128,6 +129,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[36:50@1407] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 36
               - Part
                   id: "U1"
@@ -142,6 +144,7 @@ ExperienceDocument
                   settings: Map(1)
                       gain = SourceText[37:110@1523] "10"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 37
           sharedBench: null
           duration: Double 0.001
@@ -181,13 +184,13 @@ REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-cont
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-voltage-source.jmx 11:5 a meta field is 'name value'
 == line 18 deleted
-READS 253abdd49c5078ad86941174c343e296
+READS efd6e16e52b6758691dd82f95763e0e3
 == line 18 begun with a stray word
-READS 4788f989e704f9efc5d8dd5701fed301
+READS d15b6cabe5cc179ba955734e16372196
 == line 25 deleted
-READS 8c8b01433eb7431e02a014b695cda318
+READS 886be502a01b8eb7f4dac4975232d99b
 == line 25 begun with a stray word
-READS 447214712e98548298ab47781d85cdb4
+READS ce2308b4b899f722b4c7e9c6617cefd5
 == line 39 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-voltage-source.jmx 33:5 expectation 'ten times the control' needs a measure and a criterion (near, within or is)
 == line 39 begun with a stray word

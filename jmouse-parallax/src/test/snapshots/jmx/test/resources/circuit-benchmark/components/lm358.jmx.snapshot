@@ -336,6 +336,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[58:51@3003] "15 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 58
               - Part
                   id: "V2"
@@ -348,6 +349,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[59:57@3065] "7.5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 59
               - Part
                   id: "V3"
@@ -360,6 +362,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[60:53@3124] "7.4 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 60
               - Part
                   id: "R1"
@@ -372,6 +375,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[61:63@3193] "10 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 61
               - Part
                   id: "R2"
@@ -384,6 +388,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[62:64@3265] "100 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 62
               - Part
                   id: "U1"
@@ -398,6 +403,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 63
           sharedBench: null
           duration: Double 0.001
@@ -440,6 +446,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[71:51@3645] "15 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 71
               - Part
                   id: "V2"
@@ -452,6 +459,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[72:53@3703] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 72
               - Part
                   id: "U1"
@@ -466,6 +474,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 73
           sharedBench: null
           duration: Double 1.0E-5
@@ -508,6 +517,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[81:51@4075] "30 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 81
               - Part
                   id: "V2"
@@ -520,6 +530,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[82:53@4133] "1 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 82
               - Part
                   id: "R1"
@@ -532,6 +543,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[83:50@4187] "2 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 83
               - Part
                   id: "U1"
@@ -546,6 +558,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 84
           sharedBench: null
           duration: Double 0.001
@@ -588,6 +601,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[92:51@4569] "5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 92
               - Part
                   id: "V2"
@@ -600,6 +614,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[93:53@4626] "2.5 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 93
               - Part
                   id: "U1"
@@ -617,6 +632,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 94
           sharedBench: null
           duration: Double 0.001
@@ -649,37 +665,37 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 5:1 component "…" is opened with '{' and never closed
 == line 11 deleted
-READS 26d7a59a6912d1bc3a3e6230b89e7bf2
+READS 38f7e66a4c3164980e70e7cd48c92d72
 == line 11 begun with a stray word
-READS 20df7339aa060c4900fdf0c43464e80e
+READS a6116f23dc20984adeda73791f77c681
 == line 18 deleted
-READS 854a69acadfeab5d40bacd3089c533c8
+READS 9208fc0b071c026182255602f3b7d814
 == line 18 begun with a stray word
-READS f1b54ef474beb5bac76fde4c177147e0
+READS 9d6f486191384964bc05a5374a7ee104
 == line 25 deleted
-READS f0435366a70b91df6a42d07643626dee
+READS 09dfcae61868195f5a0f810f3b78f56e
 == line 25 begun with a stray word
-READS 88280a89176fa16c77e8cb8a28048e9b
+READS 97a6ef66456ddff79507b1249b769b47
 == line 32 deleted
-READS a778a6a54c9c9f9504c54ff134826471
+READS e292a38df80e99ea9033203c6653102a
 == line 32 begun with a stray word
-READS 100668d03350607238ef0f5d0808066d
+READS 85798cb180f94f5481e8fe38910a9eed
 == line 39 deleted
-READS 1588657cb6af285d9b8f2f379b675b5f
+READS e87d05adf6388a4e5f7b5cfe1d31d8a2
 == line 39 begun with a stray word
-READS 5232d72c327e62f8f7e2903730acb75d
+READS ec6f322becaaff6e42347625701c7847
 == line 46 deleted
-READS cf0455d9413e0112fbe4efbecbdbce00
+READS 85adc4949bb96f5260e3443430c8eae8
 == line 46 begun with a stray word
-READS 9aa68cbd3b165f2b7c36969338673ef1
+READS 42988d4b3370fa03c81572c149801943
 == line 53 deleted
 REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 55:81 'symbol uses' holds lines, not a nested '{ … }'
 == line 53 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 56:81 'symbol uses' holds lines, not a nested '{ … }'
 == line 60 deleted
-READS 4bf2ac48c63f00b6e74089ce2395ead4
+READS e17762d1ccec4cd64e8607986a0e11cc
 == line 60 begun with a stray word
-READS 6af48c40a2e97f46a78b91e0e08cbcdf
+READS 0c0039def9f54d1e5b005044bfe26c69
 == line 67 deleted
 REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 68:5 'expect' is not a criterion: near, within or is
 == line 67 begun with a stray word
@@ -689,9 +705,9 @@ REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 78:5 'expect' 
 == line 74 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 74:9 a part is 'ID component (connections) [settings] [place x, y]'
 == line 81 deleted
-READS 3fa0795525c74ac1c69775000da75c80
+READS 345ea69b0d490d2b9805dfc0481c4a87
 == line 81 begun with a stray word
-READS 4f6648512589bb6f4371e829d8a107d7
+READS 76346832b1b2c81b35aa6263780462ea
 == line 88 deleted
 REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 89:5 'expect' is not a criterion: near, within or is
 == line 88 begun with a stray word

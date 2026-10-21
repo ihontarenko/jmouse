@@ -109,6 +109,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[32:51@1006] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 32
               - Part
                   id: "U1"
@@ -120,6 +121,7 @@ ExperienceDocument
                       out = "load"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 33
               - Part
                   id: "R1"
@@ -132,6 +134,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[34:48@1101] "1 kOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 34
           sharedBench: null
           duration: Double 0.001
@@ -174,6 +177,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[42:51@1413] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 42
               - Part
                   id: "U1"
@@ -185,6 +189,7 @@ ExperienceDocument
                       out = "load"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 43
               - Part
                   id: "R1"
@@ -197,6 +202,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[44:48@1508] "10 Ohm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 44
           sharedBench: null
           duration: Double 0.001
@@ -228,13 +234,13 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 1:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 42ec34a4a13b3fa4baeeed1236d7bd0a
+READS d28dcb3be532f8323666b80cc18230b7
 == line 4 begun with a stray word
-READS c1813f857dfe5038fbc7b4b3904c269e
+READS b397b03db61627805a9795378ef94b36
 == line 11 deleted
-READS f85b0961d87a6f1a152d948284b85faf
+READS 6d39487341c3f96a551edba8c73d2791
 == line 11 begun with a stray word
-READS d6da981f0d2154c72fbd786d983fd7c5
+READS e0a828408498bba943f995836d6fe40f
 == line 18 deleted
 REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 18:9 'in' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 begun with a stray word
@@ -244,9 +250,9 @@ REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.
 == line 25 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 deleted
-READS 7c5236128ac87604e60b71cac2175f98
+READS 08fafbee11f84382c4f919283c1dfae8
 == line 32 begun with a stray word
-READS 814e21a1b5d06905585d768b1751ac16
+READS cddee610b373cf20912d6e46d74b2ea1
 == line 46 deleted
 REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 40:5 expectation 'drops across its shunt on a realistic bench' needs a measure and a criterion (near, within or is)
 == line 46 begun with a stray word

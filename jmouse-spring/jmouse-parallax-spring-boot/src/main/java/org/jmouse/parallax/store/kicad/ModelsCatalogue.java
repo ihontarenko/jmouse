@@ -62,6 +62,11 @@ final class ModelsCatalogue implements KiCadCatalogue {
         return numbered;
     }
 
+    @Override
+    public Optional<String> footprintOf(String component) {
+        return model(component).map(ComponentModels.ModelView::footprint).filter(footprint -> !footprint.isBlank());
+    }
+
     /** The model as an editor reads it; empty for a component the reader may not see or the catalogue lacks. */
     private Optional<ComponentModels.ModelView> model(String component) {
         return described.computeIfAbsent(component, reference -> {

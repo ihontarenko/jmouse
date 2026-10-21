@@ -109,6 +109,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[32:51@1010] "10 V"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 32
               - Part
                   id: "R1"
@@ -121,6 +122,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[33:52@1066] "1 MOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 33
               - Part
                   id: "R2"
@@ -133,6 +135,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[34:50@1122] "1 MOhm"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 34
               - Part
                   id: "U1"
@@ -144,6 +147,7 @@ ExperienceDocument
                       minus = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 35
           sharedBench: null
           duration: Double 0.001
@@ -175,13 +179,13 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 1:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS c63150ad4295ba87f73f7a7b36c9ad4d
+READS 68e0bea954cbe91da02472061523461f
 == line 4 begun with a stray word
-READS 186483bce7e4c8eef3fa4d3704f97d2a
+READS 179bf278cd4dd415c78a49630d9f5a6b
 == line 11 deleted
-READS 1f1070962bac9741ce1afdd335482f06
+READS 14dec6eeb0dccd733cb99069f2c5cee4
 == line 11 begun with a stray word
-READS 076185d72d645a040c4150f26967b9f2
+READS a3169cac2004bbb3e31316da006f61ca
 == line 18 deleted
 REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 18:9 'plus' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 begun with a stray word
@@ -191,9 +195,9 @@ REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmete
 == line 25 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 deleted
-READS 8e6b9fe0dcf43f975e00509ed2474cc1
+READS 25ade28cd396451706577395218c871a
 == line 32 begun with a stray word
-READS e768f2abff9871957df6e9588b40d262
+READS 77e21d5ff34ff970ddb8162cff65b737
 == line 39 deleted
 REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 1:1 component "…" is opened with '{' and never closed
 == line 39 begun with a stray word

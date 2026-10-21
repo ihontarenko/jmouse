@@ -6,6 +6,7 @@ import org.jmouse.kicad.footprint.KiCadFootprint;
 import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
+import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.engine.DefinedObject;
 
@@ -78,8 +79,9 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
                     placed -> slugs.getOrDefault(placed, slugOf(placed)));
             // A sheet is called what KiCad calls it; the project it belongs to is said by where it is filed.
             String title = sheet.root() ? name : sheet.name();
+            ObjectDefinition.Circuit circuit = onTheirFootprints(read, found, catalogue, notes);
             circuits.add(new DefinedObject(slugs.get(file), title, "Imported from KiCad: " + file, null, "circuits",
-                    List.of("electronics", "kicad"), false, null, read.circuit(), List.of(), List.of(), List.of(),
+                    List.of("electronics", "kicad"), false, null, circuit, List.of(), List.of(), List.of(),
                     List.of(), List.of()));
             uses.addAll(read.symbols());
             for (KiCadSymbolDefinition definition : read.components()) {
@@ -163,6 +165,44 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
      * The footprint a component made from a KiCad symbol lands on: the one its parts name, when the libraries hold it
      * and every pin number of the symbol is a pad of it; otherwise none, and a note says why.
      */
+    /**
+     * A part of a catalogue component whose KiCad part sits on another package than the component's own footprint —
+     * an NE5532 drawn as DIP-8 where the catalogue's is SOIC-8 — gets that footprint on its own line, when the footprint
+     * was found and has a pad for every pin number of the component.
+     */
+    private static ObjectDefinition.Circuit onTheirFootprints(KiCadSheetImport.Sheet read, Map<String, KiCadFootprint> found,
+                                                              KiCadCatalogue catalogue, List<String> notes) {
+        Set<String> made = new LinkedHashSet<>();
+        read.components().forEach(definition -> made.add(KiCadSymbolDrawing.componentSlugOf(definition)));
+        List<ObjectDefinition.CircuitElement> elements = new ArrayList<>();
+        for (ObjectDefinition.CircuitElement element : read.circuit().elements()) {
+            String libraryId = read.footprints().get(element.id());
+            if (element.type() != ObjectDefinition.CircuitElementType.MODEL || libraryId == null
+                    || !found.containsKey(libraryId) || made.contains(element.component())) {
+                elements.add(element);
+                continue;
+            }
+            String slug = KiCadFootprintDrawing.slugOf(libraryId);
+            if (catalogue.footprintOf(element.component()).map(slug::equals).orElse(false)) {
+                elements.add(element);
+                continue;
+            }
+            Set<String> pads = found.get(libraryId).padNumbers();
+            List<String> missing = catalogue.pinsByNumber(element.component()).keySet().stream()
+                    .filter(number -> !pads.contains(number)).toList();
+            if (!missing.isEmpty()) {
+                notes.add(element.id() + " keeps " + element.component() + "'s footprint: " + libraryId + " has no pad "
+                        + String.join(", ", missing));
+                elements.add(element);
+                continue;
+            }
+            elements.add(new ObjectDefinition.CircuitElement(element.id(), element.type(), element.positive(),
+                    element.negative(), element.value(), element.component(), element.pins(), element.overrides(),
+                    element.symbol(), slug));
+        }
+        return read.circuit().withElements(elements);
+    }
+
     private static Optional<String> landing(KiCadSymbolDefinition definition, String libraryId,
                                             Map<String, KiCadFootprint> found, List<String> notes) {
         if (libraryId == null || !found.containsKey(libraryId)) {

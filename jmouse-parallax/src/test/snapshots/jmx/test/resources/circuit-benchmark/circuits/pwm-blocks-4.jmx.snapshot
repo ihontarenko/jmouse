@@ -47,6 +47,7 @@ ExperienceDocument
                   settings: Map(1)
                       U_output = SourceText[15:47@796] "U"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 15
               - Part
                   id: "R1_1"
@@ -59,6 +60,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[16:55@853] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 16
               - Part
                   id: "P1_1"
@@ -72,6 +74,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[17:86@944] "100000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 17
               - Part
                   id: "D1_1"
@@ -83,6 +86,7 @@ ExperienceDocument
                       cathode = "timing_1"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 18
               - Part
                   id: "D2_1"
@@ -94,6 +98,7 @@ ExperienceDocument
                       cathode = "drain_1"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 19
               - Part
                   id: "CT_1"
@@ -106,6 +111,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[20:52@1122] "10e-9"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 20
               - Part
                   id: "U1_1"
@@ -122,6 +128,7 @@ ExperienceDocument
                       reset = "vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 21
               - Part
                   id: "R2_1"
@@ -134,6 +141,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[22:51@1316] "4700"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 22
               - Part
                   id: "C1_1"
@@ -146,6 +154,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[23:49@1370] "1e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 23
               - Part
                   id: "U2_1"
@@ -160,6 +169,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 24
               - Part
                   id: "RL_1"
@@ -172,6 +182,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[25:52@1554] "10000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 25
               - Part
                   id: "R1_2"
@@ -184,6 +195,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[26:55@1615] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 26
               - Part
                   id: "P1_2"
@@ -197,6 +209,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[27:86@1706] "68000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 27
               - Part
                   id: "D1_2"
@@ -208,6 +221,7 @@ ExperienceDocument
                       cathode = "timing_2"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 28
               - Part
                   id: "D2_2"
@@ -219,6 +233,7 @@ ExperienceDocument
                       cathode = "drain_2"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 29
               - Part
                   id: "CT_2"
@@ -231,6 +246,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[30:52@1883] "10e-9"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 30
               - Part
                   id: "U1_2"
@@ -247,6 +263,7 @@ ExperienceDocument
                       reset = "vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 31
               - Part
                   id: "R2_2"
@@ -259,6 +276,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[32:51@2077] "4700"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 32
               - Part
                   id: "C1_2"
@@ -271,6 +289,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[33:49@2131] "1e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 33
               - Part
                   id: "U2_2"
@@ -285,6 +304,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 34
               - Part
                   id: "RL_2"
@@ -297,6 +317,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[35:52@2315] "10000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 35
               - Part
                   id: "R1_3"
@@ -309,6 +330,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[36:55@2376] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 36
               - Part
                   id: "P1_3"
@@ -322,6 +344,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[37:86@2467] "47000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 37
               - Part
                   id: "D1_3"
@@ -333,6 +356,7 @@ ExperienceDocument
                       cathode = "timing_3"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 38
               - Part
                   id: "D2_3"
@@ -344,6 +368,7 @@ ExperienceDocument
                       cathode = "drain_3"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 39
               - Part
                   id: "CT_3"
@@ -356,6 +381,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[40:52@2644] "10e-9"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 40
               - Part
                   id: "U1_3"
@@ -372,6 +398,7 @@ ExperienceDocument
                       reset = "vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 41
               - Part
                   id: "R2_3"
@@ -384,6 +411,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[42:51@2838] "4700"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 42
               - Part
                   id: "C1_3"
@@ -396,6 +424,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[43:49@2892] "1e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 43
               - Part
                   id: "U2_3"
@@ -410,6 +439,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 44
               - Part
                   id: "RL_3"
@@ -422,6 +452,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[45:52@3076] "10000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 45
               - Part
                   id: "R1_4"
@@ -434,6 +465,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[46:55@3137] "1000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 46
               - Part
                   id: "P1_4"
@@ -447,6 +479,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[47:86@3228] "150000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 47
               - Part
                   id: "D1_4"
@@ -458,6 +491,7 @@ ExperienceDocument
                       cathode = "timing_4"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 48
               - Part
                   id: "D2_4"
@@ -469,6 +503,7 @@ ExperienceDocument
                       cathode = "drain_4"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 49
               - Part
                   id: "CT_4"
@@ -481,6 +516,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[50:52@3406] "10e-9"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 50
               - Part
                   id: "U1_4"
@@ -497,6 +533,7 @@ ExperienceDocument
                       reset = "vcc"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 51
               - Part
                   id: "R2_4"
@@ -509,6 +546,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[52:51@3600] "4700"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 52
               - Part
                   id: "C1_4"
@@ -521,6 +559,7 @@ ExperienceDocument
                   settings: Map(1)
                       capacitance = SourceText[53:49@3654] "1e-6"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 53
               - Part
                   id: "U2_4"
@@ -535,6 +574,7 @@ ExperienceDocument
                       GND = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 54
               - Part
                   id: "RL_4"
@@ -547,6 +587,7 @@ ExperienceDocument
                   settings: Map(1)
                       resistance = SourceText[55:52@3838] "10000"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 55
       - Analysis
           kind: AnalysisKind.TRANSIENT
@@ -562,7 +603,7 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 6:1 circuit "…" is opened with '{' and never closed
 == line 4 deleted
-READS c06698a042ffea552dd45cfc831c7f65
+READS e6800f3304d346f3aca87fb71fcbcf0d
 == line 4 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
@@ -570,29 +611,29 @@ REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 11:9 'U' 
 == line 11 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 11:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
 == line 18 deleted
-READS 0c81664fbfafcb688ed17b135a5e94af
+READS 3e0686ec3f4725f402c227872f673839
 == line 18 begun with a stray word
-READS bd3e2af19191fe3319105d018882ec16
+READS 4ce88ee89b409f4fcb7697e0ec128cb6
 == line 25 deleted
-READS 139f3b46a1b4429538696e571b73162a
+READS 0dbdb4613954e12ef8d6969fe69a578e
 == line 25 begun with a stray word
-READS 1dd9b1807f542c3624a727efd9b0df3d
+READS b1205cb1241ea5ac043c6d929ddd0747
 == line 32 deleted
-READS 749be0a916774f8f100c29a74174fb9b
+READS c5c2b2a15d37801f8af0237e50a3d1d6
 == line 32 begun with a stray word
-READS 97f5629f0f4ef9f740e15e4272c01f31
+READS 57dd90d092931fd10233e6e6c0b6a08e
 == line 39 deleted
-READS 0e8cefc21e51e52ce469b2734cfa1cd7
+READS 5f687d3979f9bd2351af7f882139cafd
 == line 39 begun with a stray word
-READS c9aadf01439c9884d645654d3a7ab3cc
+READS 91e6bd3db44cea024877a2b96ef34d14
 == line 46 deleted
-READS b08bb03b90a37f2e789d2d412d1cfeae
+READS a93e3c3e7d9248a8f230723b067487bc
 == line 46 begun with a stray word
-READS 1ffce3788cf612acb32b6d940f4ea6ec
+READS 0294f3f5af0930d553a0d0917d7c7ab0
 == line 53 deleted
-READS f4f306e61345e7ca9db42f60bdfaef48
+READS 95d8906d9152fa75f8d7f3284dc168b8
 == line 53 begun with a stray word
-READS 546e8b174b399bf1ab0ff662b012139f
+READS 347f594b462595feaf9652da74c1c067
 == line 60 deleted
 REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 6:1 circuit "…" is opened with '{' and never closed
 == line 60 begun with a stray word

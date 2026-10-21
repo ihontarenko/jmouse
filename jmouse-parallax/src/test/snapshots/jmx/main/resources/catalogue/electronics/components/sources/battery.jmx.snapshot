@@ -249,6 +249,7 @@ ExperienceDocument
                   settings: Map(1)
                       I_output = SourceText[56:56@2851] "2 A"
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 56
               - Part
                   id: "U1"
@@ -260,6 +261,7 @@ ExperienceDocument
                       negative = "0"
                   settings: Map(0)
                   symbol: Optional.empty
+                  footprint: Optional.empty
                   line: Integer 57
           sharedBench: null
           duration: Double 0.001
@@ -291,21 +293,21 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 7:1 component "…" is opened with '{' and never closed
 == line 4 deleted
-READS 78182040054466d607721de54f788460
+READS 87978945a87dabd4459143ed84e5e52d
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 727836d872fd86992b306f3575acea49
+READS 216bbb1cbe19055d6ad050fb51561627
 == line 11 begun with a stray word
-READS b8af34f90aef9b152e58ce72be355b0c
+READS 212f46c24b48af820e0b8087cf2fc17e
 == line 18 deleted
-READS 5395653ba6c513fab485267917ff108e
+READS 8c158769ef5d97e3aa55bf44d936cc6d
 == line 18 begun with a stray word
-READS 008fcdb4fc898bae53a6d4004709551d
+READS aafa82c1ee25f7ac8b1d6765bf3efe46
 == line 25 deleted
-READS 5794db339d22bb308efee3a218fbdbb8
+READS ce23419fe8e0f6bbde5076ec947dedaf
 == line 25 begun with a stray word
-READS 64ea6c064deb718c29b5669d530ebc68
+READS e9ca603ad4d422634fa666a015e1eb66
 == line 32 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 33:11 'pins' holds lines, not a nested '{ … }'
 == line 32 begun with a stray word
