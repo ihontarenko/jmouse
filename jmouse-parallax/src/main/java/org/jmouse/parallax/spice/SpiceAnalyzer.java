@@ -1,7 +1,9 @@
 package org.jmouse.parallax.spice;
 
 import org.jmouse.formula.Formula;
-import org.jmouse.formula.el.FormulaLanguage;
+import org.jmouse.formula.FormulaPrinter;
+import org.jmouse.formula.RealCompiler;
+import org.jmouse.formula.Symbols;
 import org.jmouse.parallax.spice.SpiceNetlist.Element;
 import org.jmouse.parallax.spice.SpiceNetlist.ModelType;
 import org.jmouse.parallax.spice.SpiceNetlist.Parameter;
@@ -9,6 +11,7 @@ import org.jmouse.parallax.spice.SpiceNetlist.PassiveKind;
 import org.jmouse.spice.SpiceNumbers;
 import org.jmouse.spice.SpiceParseException;
 import org.jmouse.spice.SpicePosition;
+import org.jmouse.spice.expression.SpiceExpressionLanguage;
 import org.jmouse.spice.node.SpiceArgument;
 import org.jmouse.spice.node.SpiceCard;
 import org.jmouse.spice.node.SpiceDeck;
@@ -172,7 +175,7 @@ final class SpiceAnalyzer {
                 }
                 yield new Formula.Variable(declared);
             }
-            case SpiceValue.Expression expression -> SpiceExpressions.read(expression.expression().text(),
+            case SpiceValue.Expression expression -> SpiceExpressionLanguage.standard().read(expression.expression().text(),
                     expression.position(), scope.names());
         };
     }
@@ -423,7 +426,10 @@ final class SpiceAnalyzer {
 
     /** A formula's value against the values given. */
     static double evaluate(Formula formula, Map<String, Double> values) {
-        return FormulaLanguage.standard().evaluate(SpiceExpressions.jmf(formula), values);
+        List<String> names = List.copyOf(values.keySet());
+        double[] arguments = names.stream().mapToDouble(values::get).toArray();
+        return RealCompiler.compile(formula, Symbols.of(names.toArray(String[]::new)), FormulaPrinter.text(formula))
+                .evaluate(arguments);
     }
 
     private static double number(Formula formula, Map<String, Double> known, SpicePosition position) {

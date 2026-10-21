@@ -57,9 +57,8 @@
     </properties>
 
     <!--
-        jMouse's language framework and nothing else: the splitter, tokenizer, cursor, parser context and node contracts
-        SPICE is read with. No expression engine: what a value inside braces means is the caller's to decide — the
-        Parallax bridge reads it with jMF.
+        jMouse's language framework: the splitter, tokenizer, cursor, parser context and node contracts SPICE is read
+        with, and its expressions are read as a dialect of jME into jMF formulas (org.jmouse.spice.expression).
     -->
     <dependencies>
         <dependency>
@@ -71,6 +70,12 @@
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-units</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- The tree SPICE expressions are read into and written from: jMF, a dialect of jME as SPICE expressions are -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-formula</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

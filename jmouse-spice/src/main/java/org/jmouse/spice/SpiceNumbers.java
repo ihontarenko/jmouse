@@ -53,9 +53,10 @@ public final class SpiceNumbers {
         if (!matcher.matches()) {
             return Optional.empty();
         }
-        double mantissa = Double.parseDouble(matcher.group(1));
         String suffix = matcher.group(2);
-        return Optional.of(new Engineering(mantissa * scale(suffix), suffix));
+        // Scaled in decimal, as written: 4.7n is the double nearest 4.7·10⁻⁹, not 4.7 times the double nearest 10⁻⁹.
+        BigDecimal scaled = new BigDecimal(matcher.group(1)).multiply(BigDecimal.valueOf(scale(suffix)));
+        return Optional.of(new Engineering(scaled.doubleValue(), suffix));
     }
 
     /** What the letters after a number multiply it by. */

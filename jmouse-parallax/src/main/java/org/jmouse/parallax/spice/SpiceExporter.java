@@ -29,6 +29,8 @@ import org.jmouse.spice.node.SpiceElement;
 import org.jmouse.spice.node.SpiceParameter;
 import org.jmouse.spice.node.SpiceStatement;
 import org.jmouse.spice.node.SpiceValue;
+import org.jmouse.spice.expression.SpiceExpressionLanguage;
+import org.jmouse.spice.expression.UntranslatableFormula;
 import org.jmouse.spice.node.SpiceWaveform;
 import org.jmouse.spice.printer.SpicePrinter;
 import org.jmouse.units.Quantity;
@@ -84,6 +86,9 @@ final class SpiceExporter {
 
     private static final String SINE   = "offset+amplitude*sin(2*pi*frequency*time+phase)";
     private static final String SQUARE = "low+(high-low)*(mod(frequency*time,1)<duty)";
+
+    /** Every formula the deck carries is written by the SPICE dialect, walking its tree. */
+    private static final SpiceExpressionLanguage EXPRESSIONS = SpiceExpressionLanguage.standard();
 
     private final ComponentLibrary library;
     private final List<SpiceNote>  notes = new ArrayList<>();
@@ -261,7 +266,7 @@ final class SpiceExporter {
         List<SpiceStatement> written;
         try {
             written = translatedPart(part, scope);
-        } catch (SpiceExpressions.Untranslatable untranslatable) {
+        } catch (UntranslatableFormula untranslatable) {
             notes.add(new SpiceNote(part.line(), part.id() + ": " + untranslatable.getMessage() + "; left out"));
             written = List.of();
         }
@@ -631,10 +636,10 @@ final class SpiceExporter {
         }
         Formula substituted = Substitution.substitute(expression, values);
         try {
-            String written = SpiceExpressions.spice(substituted, name -> behaviouralName(name, Map.of(), scope));
+            String written = EXPRESSIONS.write(substituted, name -> behaviouralName(name, Map.of(), scope));
             return Optional.of(List.of(new SpiceElement.Behavioural(elementName('B', id), positive, negative, true,
                     written, SpicePosition.NONE)));
-        } catch (SpiceExpressions.Untranslatable untranslatable) {
+        } catch (UntranslatableFormula untranslatable) {
             return Optional.empty();
         }
     }
@@ -751,9 +756,9 @@ final class SpiceExporter {
             for (ComponentModel.Equation equation : model.equations()) {
                 Formula expression = equations.read(equation.formula());
                 switch (equation.kind()) {
-                    case STATE -> elements.rate(node(nodes, equation.state()), SpiceExpressions.spice(expression, names));
+                    case STATE -> elements.rate(node(nodes, equation.state()), EXPRESSIONS.write(expression, names));
                     case VOLTAGE -> elements.voltage(node(nodes, equation.positive()), node(nodes, equation.negative()),
-                            SpiceExpressions.spice(requireNoRate(expression), names));
+                            EXPRESSIONS.write(requireNoRate(expression), names));
                     case CURRENT -> elements.current(node(nodes, equation.positive()), node(nodes, equation.negative()),
                             Rates.of(expression), names);
                 }
@@ -865,7 +870,7 @@ final class SpiceExporter {
             return call;
         });
         if (found[0]) {
-            throw new SpiceExpressions.Untranslatable("a rate of change d(…)/dt that is not a term of a current, which "
+            throw new UntranslatableFormula("a rate of change d(…)/dt that is not a term of a current, which "
                     + "SPICE can carry only through a capacitor");
         }
         return formula;
@@ -913,7 +918,7 @@ final class SpiceExporter {
         void current(String positive, String negative, Rates rates, Function<String, String> names) {
             if (!isZero(Simplification.simplify(rates.rest()))) {
                 body.add(new SpiceElement.Behavioural(name('B'), positive, negative, false,
-                        SpiceExpressions.spice(rates.rest(), names), SpicePosition.NONE));
+                        EXPRESSIONS.write(rates.rest(), names), SpicePosition.NONE));
             }
             for (Formula charge : rates.charges()) {
                 if (isZero(Simplification.simplify(charge))) {
@@ -922,7 +927,7 @@ final class SpiceExporter {
                 String held = "q" + unit + index;
                 String sensed = held + "_sensed";
                 String sense = name('V');
-                body.add(new SpiceElement.Behavioural(name('B'), held, "0", true, SpiceExpressions.spice(charge, names),
+                body.add(new SpiceElement.Behavioural(name('B'), held, "0", true, EXPRESSIONS.write(charge, names),
                         SpicePosition.NONE));
                 body.add(new SpiceElement.Source(sense, held, sensed, SpiceValue.number(0), true, null, List.of(),
                         SpicePosition.NONE));
@@ -980,13 +985,13 @@ final class SpiceExporter {
             return SpiceNumbers.write(figure);
         }
         if (name.startsWith(PIN_CURRENT)) {
-            throw new SpiceExpressions.Untranslatable("the current into pin '" + name.substring(PIN_CURRENT.length())
+            throw new UntranslatableFormula("the current into pin '" + name.substring(PIN_CURRENT.length())
                     + "' is not something a B source can read");
         }
         return switch (name) {
             case "time" -> "time";
             case "temperature" -> "(temper + " + TemperatureScale.ZERO_CELSIUS + ")";
-            default -> throw new SpiceExpressions.Untranslatable("'" + name + "' is neither a node, a parameter nor "
+            default -> throw new UntranslatableFormula("'" + name + "' is neither a node, a parameter nor "
                     + "the time");
         };
     }
@@ -1036,7 +1041,7 @@ final class SpiceExporter {
     private static SpiceValue value(Formula formula, Scope scope) {
         return value(formula, name -> {
             if (!scope.parameters().contains(name)) {
-                throw new SpiceExpressions.Untranslatable("'" + name + "' is not a parameter here");
+                throw new UntranslatableFormula("'" + name + "' is not a parameter here");
             }
             return name;
         });
@@ -1051,7 +1056,7 @@ final class SpiceExporter {
                 // falls through to the expression
             }
         }
-        return SpiceValue.expression(SpiceExpressions.spice(formula, names));
+        return SpiceValue.expression(EXPRESSIONS.write(formula, names));
     }
 
     private static Formula formula(String text, int line) {

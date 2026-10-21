@@ -3,6 +3,7 @@ package org.jmouse.parallax.spice;
 import org.jmouse.parallax.component.TemperatureScale;
 
 import org.jmouse.formula.Formula;
+import org.jmouse.formula.FormulaPrinter;
 import org.jmouse.formula.Simplification;
 import org.jmouse.formula.Substitution;
 import org.jmouse.parallax.component.ComponentDocuments;
@@ -903,7 +904,7 @@ final class SpiceImporter {
         if (folded.variables().isEmpty()) {
             return JmxText.quantity(SpiceAnalyzer.evaluate(folded, Map.of()), unit == null ? "" : unit);
         }
-        String expression = SpiceExpressions.jmf(folded);
+        String expression = FormulaPrinter.text(folded);
         // ⚠️ A part's setting that begins with a digit is read as a quantity — '1 / f' as 1 with a unit it ignores —, so
         // an expression that would begin with one is written in parentheses.
         char first = expression.charAt(0);
