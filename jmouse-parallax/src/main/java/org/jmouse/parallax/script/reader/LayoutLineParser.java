@@ -44,6 +44,7 @@ final class LayoutLineParser extends JmxLineParser<LayoutLineParser.Laid> {
     /** Where a coordinate ends: a comma, or a placement word. */
     private static final Boundary COORDINATE = (token, after, depth) -> token.type() == BasicToken.T_COMMA
             || token.value().equals("rotate") || token.value().equals("mirror") || token.value().equals("shows")
+            || token.value().equals("size")
             || (LABELS.contains(token.value()) && after.value().equals("at"));
 
     /** What a layout line lays out: a part or a mark, or a wire. */
@@ -194,12 +195,26 @@ final class LayoutLineParser extends JmxLineParser<LayoutLineParser.Laid> {
         boolean mirrored = false;
         Map<String, Point> labels = new LinkedHashMap<>();
         List<String> shows = new ArrayList<>();
+        Optional<Block.Size> size = Optional.empty();
         while (!reading.atLineEnd()) {
             Token word = cursor.next();
             switch (word.value()) {
                 case "rotate" -> rotation = values.number().filter(ignored -> atPlacementWord())
                         .orElseThrow(() -> reading.refusal(word, "a rotation is a number of degrees"));
                 case "mirror" -> mirrored = true;
+                case "size" -> {
+                    // A placed sheet's box, as KiCad sizes a hierarchical sheet: 'S1 at 400, 300 size 240 x 160'.
+                    if (size.isPresent() || reading.lineView().offsetOf(0, "x") < 0) {
+                        throw reading.refusal(word, "a block is sized once, 'size width x height'");
+                    }
+                    double width = values.quantity(JmxValues.words(Set.of("x")));
+                    cursor.next();
+                    double height = values.quantity(COORDINATE);
+                    if (width <= 0 || height <= 0) {
+                        throw reading.refusal(word, "a block's width and height are more than nothing");
+                    }
+                    size = Optional.of(new Block.Size(width, height));
+                }
                 case "shows" -> {
                     while (!reading.atLineEnd() && !atPlacementWord()) {
                         Token shown = cursor.next();
@@ -224,7 +239,7 @@ final class LayoutLineParser extends JmxLineParser<LayoutLineParser.Laid> {
                 }
             }
         }
-        return new Placement(x, y, rotation, mirrored, labels, shows);
+        return new Placement(x, y, rotation, mirrored, labels, shows, size);
     }
 
     /** Whether the cursor stands on a placement word, or the line's end: what ends the one before it. */

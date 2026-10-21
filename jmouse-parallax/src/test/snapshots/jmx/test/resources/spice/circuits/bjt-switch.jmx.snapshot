@@ -154,6 +154,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "G1"
                   unit: Optional.empty
@@ -166,6 +167,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "RB"
                   unit: Optional.empty
@@ -178,6 +180,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "Q1"
                   unit: Optional.empty
@@ -190,6 +193,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "RL"
                   unit: Optional.empty
@@ -202,6 +206,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "A1"
                   unit: Optional.empty
@@ -214,6 +219,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "VM1"
                   unit: Optional.empty
@@ -226,6 +232,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "Jc"
                   unit: Optional.empty
@@ -238,6 +245,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "Jg1"
                   unit: Optional.empty
@@ -250,6 +258,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "Jg2"
                   unit: Optional.empty
@@ -262,6 +271,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "Jg3"
                   unit: Optional.empty
@@ -274,6 +284,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "Jg4"
                   unit: Optional.empty
@@ -286,6 +297,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
               - LayoutItem
                   id: "GND1"
                   unit: Optional.empty
@@ -298,6 +310,7 @@ ExperienceDocument
                       mirrored: false
                       labels: Map(0)
                       shows: List(0)
+                      size: Optional.empty
           wires: List(15)
               - LayoutWire
                   id: "W1"
@@ -569,37 +582,37 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 7:1 circuit "…" is opened with '{' and never closed
 == line 4 deleted
-READS 788ad8c9acb7da6f2ca02d682d4e2f06
+READS 6169d61c46470757aab90f17fd96a744
 == line 4 begun with a stray word
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-READS 1d5f8f04de2f39039a97d368941afba7
+READS 4cf9a32acab5ff02f5e26b8b9c799455
 == line 11 begun with a stray word
-READS 082e25faa362e861d326e6fefb47253c
+READS 0ec27e4d2db5f5b8362650fe87a41d0b
 == line 18 deleted
-READS 6baaaa81f9bad1fadd46d6d8c4ee7be7
+READS f9c81511e4733c025a7f4ad4a7a85ba7
 == line 18 begun with a stray word
-READS 9bb34de2bf325ebd63b7035674b34829
+READS 44c4f026bd6257416a2b75dffd9a3c09
 == line 25 deleted
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 25:12 'parts' holds lines, not a nested '{ … }'
 == line 25 begun with a stray word
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 26:12 'parts' holds lines, not a nested '{ … }'
 == line 32 deleted
-READS 26f0d1a2656e9bd21b6eddb423c3f201
+READS 1ccab7f794ccd36d09e0a6b435a9fbc1
 == line 32 begun with a stray word
-READS 16b0572e9ff9213c8c11a5ad2c19a82c
+READS 421d5f7a9fb80507580cf34909db4151
 == line 39 deleted
-READS acd1d6d2fc8e98487cc5c13b3df4d80a
+READS ee67f73829005c458213999cb9b671a4
 == line 39 begun with a stray word
-READS 8857517d34dde2fea1dab215825ef7ae
+READS afe63e495af5a3cffe17bdaed4bf6e75
 == line 46 deleted
-READS 0231da2ecb04d3fbb9d8e8ae917245b5
+READS 168d4ea452d6ac60873cb11af25357a1
 == line 46 begun with a stray word
-READS ee15f8f1eb5519ced71f774cb3574a96
+READS b270f3c2ceb37cecac3eea00bd4df2d3
 == line 53 deleted
-READS 1f890abf5544b236e2aa01b36db31510
+READS 4e4e8cdba958ca1ab858714f99a6467f
 == line 53 begun with a stray word
-READS c7e5fd5427d71b57ffe6dab75fa021b9
+READS e72dc582da9826116499afa6125a824c
 == line 60 deleted
 REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 60:122 'probes' holds lines, not a nested '{ … }'
 == line 60 begun with a stray word

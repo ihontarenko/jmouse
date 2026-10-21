@@ -649,17 +649,30 @@ public sealed interface Block {
      * Where a part is drawn: {@code at x, y [rotate degrees] [mirror]}, and where its texts stand when they were put
      * somewhere by hand — {@code name at dx, dy}, {@code value at …}, {@code readings at …}, from the part's centre —,
      * and how an instrument's display reads, when the reader chose: {@code shows rms graph}.
+     *
+     * @param size how big a block — a placed sheet — is drawn, {@code size 240 x 160}, as KiCad sizes a hierarchical
+     *             sheet; empty when the sheet sizes it from its ports and name
      */
     record Placement(double x, double y, double rotation, boolean mirrored, Map<String, Point> labels,
-                     List<String> shows) {
+                     List<String> shows, Optional<Size> size) {
         public Placement {
             labels = labels == null ? Map.of() : orderedCopy(labels);
             shows = shows == null ? List.of() : List.copyOf(shows);
+            size = size == null ? Optional.empty() : size;
+        }
+
+        public Placement(double x, double y, double rotation, boolean mirrored, Map<String, Point> labels,
+                         List<String> shows) {
+            this(x, y, rotation, mirrored, labels, shows, Optional.empty());
         }
 
         public Placement(double x, double y, double rotation, boolean mirrored) {
             this(x, y, rotation, mirrored, Map.of(), List.of());
         }
+    }
+
+    /** {@code 240 x 160}: a width and a height in sheet units. */
+    record Size(double width, double height) {
     }
 
     /**

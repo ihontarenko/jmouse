@@ -537,7 +537,7 @@ final class DefinitionBlocks {
         }
         return new Block.LayoutItem(item.id(), Optional.ofNullable(item.unit()), Optional.ofNullable(item.mark()),
                 Optional.ofNullable(item.net()), new Block.Placement(item.x(), item.y(), item.rotation(), item.mirrored(),
-                labels, item.shows()));
+                labels, item.shows(), Optional.ofNullable(item.size()).map(size -> new Block.Size(size.width(), size.height()))));
     }
 
     /** {@code W1 wire R1.negative to C1.positive via 240 120, 300 120}. */

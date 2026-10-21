@@ -759,7 +759,8 @@ public final class EngineSelection {
                         item.net().orElse(null),
                         item.placement().x(), item.placement().y(), item.placement().rotation(),
                         item.placement().mirrored(), labelOffsets(item.placement()), item.placement().shows(),
-                        item.unit().orElse(null))).toList(),
+                        item.unit().orElse(null), item.placement().size().map(size -> new ObjectDefinition.BlockSize(size.width(),
+                                size.height())).orElse(null))).toList(),
                 layout.wires().stream().map(wire -> new ObjectDefinition.SchematicWire(wire.id(), wire.from(), wire.to(),
                         wire.bends().stream().map(bend -> new ObjectDefinition.Bend(bend.x(), bend.y())).toList()))
                         .toList());

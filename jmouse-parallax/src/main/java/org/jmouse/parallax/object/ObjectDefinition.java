@@ -981,9 +981,15 @@ public sealed interface ObjectDefinition {
      * @param shows  how an instrument's display reads, when the reader chose ({@code rms}, {@code graph}); empty otherwise
      * @param unit   the unit of a multi-unit part this places on its own ({@code U4.B at …}); null for the part itself,
      *               which draws every unit not placed apart and the pins the units share
+     * @param size   how big a block — a placed sheet — is drawn ({@code size 240 x 160}); null when the sheet sizes it
      */
     record PlacedItem(String id, String mark, String net, double x, double y, double rotation, boolean mirrored,
-                      Map<String, LabelOffset> labels, List<String> shows, String unit) {
+                      Map<String, LabelOffset> labels, List<String> shows, String unit, BlockSize size) {
+
+        public PlacedItem(String id, String mark, String net, double x, double y, double rotation, boolean mirrored,
+                          Map<String, LabelOffset> labels, List<String> shows, String unit) {
+            this(id, mark, net, x, y, rotation, mirrored, labels, shows, unit, null);
+        }
 
         /** The texts a part has, each placed by hand or by the sheet. */
         private static final Set<String> TEXTS = Set.of("name", "value", "readings");
@@ -1049,6 +1055,15 @@ public sealed interface ObjectDefinition {
     }
 
     record Bend(double x, double y) {
+    }
+
+    /** A block's width and height on the sheet, in sheet units. */
+    record BlockSize(double width, double height) {
+        public BlockSize {
+            if (!(width > 0) || !(height > 0)) {
+                throw new IllegalArgumentException("A block's width and height are more than nothing.");
+            }
+        }
     }
 
     /**

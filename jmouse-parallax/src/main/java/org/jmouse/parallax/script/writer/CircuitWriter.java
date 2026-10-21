@@ -61,7 +61,7 @@ final class CircuitWriter {
         return line.append(" at ").append(placement(item.placement())).toString();
     }
 
-    /** {@code x, y [rotate degrees] [mirror] [name at dx, dy] [shows rms graph]}. */
+    /** {@code x, y [rotate degrees] [mirror] [size w x h] [name at dx, dy] [shows rms graph]}. */
     private static String placement(Placement placement) {
         StringBuilder written = new StringBuilder(Values.point(placement.x(), placement.y()));
         if (placement.rotation() != 0) {
@@ -70,6 +70,8 @@ final class CircuitWriter {
         if (placement.mirrored()) {
             written.append(" mirror");
         }
+        placement.size().ifPresent(size -> written.append(" size ").append(Values.number(size.width())).append(" x ")
+                .append(Values.number(size.height())));
         placement.labels().forEach((label, point) -> written.append(' ').append(label).append(" at ")
                 .append(Values.point(point.x(), point.y())));
         if (!placement.shows().isEmpty()) {
