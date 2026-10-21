@@ -1,8 +1,6 @@
 package org.jmouse.parallax.kicad;
 
-import org.jmouse.kicad.footprint.KiCadFootprint;
 import org.jmouse.kicad.footprint.KiCadFootprintIndex;
-import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.jmouse.kicad.parser.KiCadParseException;
 import org.jmouse.kicad.parser.KiCadParser;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
@@ -24,7 +22,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,12 +35,13 @@ import java.util.stream.Stream;
  * tokens ({@link KiCadSymbolIndex}) rather than built. Until the walk ends the provider is
  * {@link ProviderState.Status#INDEXING}. The footprints are listed by file name and read only when one is fetched.</p>
  *
- * <h2>⚠️ What is fetched stays KiCad's</h2>
+ * <h2>⚠️ Nothing of KiCad's drawing is converted</h2>
  *
- * <p>KiCad's libraries are licensed CC-BY-SA 4.0 with the KiCad libraries exception: a design may use them under any
- * licence, but a converted symbol or footprint is an adaptation of the library and stays under its licence. A fetched
- * document therefore carries {@code license} and {@code source} in its meta, and is converted on demand into the
- * reader's own place — never into a catalogue that ships under another licence.</p>
+ * <p>KiCad's libraries are licensed CC-BY-SA 4.0 with the KiCad libraries exception, and a converted symbol or
+ * footprint would be an adaptation of them. So a fetched symbol becomes a component from its facts alone — pin
+ * numbers, names, kinds — drawn as our box ({@code PinBox}); its footprint is named, not converted, and the part lands
+ * on one of our footprints once one is chosen. A footprint is listed so it can be found, and is not fetched. The
+ * component carries the library's licence and source, since its description and pin names are read from it.</p>
  */
 public final class InstalledKiCadParts implements PartSearchProvider {
 
@@ -152,32 +150,18 @@ public final class InstalledKiCadParts implements PartSearchProvider {
         List<ExperienceDocument> documents = new ArrayList<>();
         List<String> notes = new ArrayList<>();
         String written = symbol.property("Footprint");
-        Optional<String> footprintSlug = Optional.empty();
         if (!written.isBlank()) {
-            Optional<KiCadFootprint> footprint = KiCadFootprintLibraries.in(footprintFolders).find(written);
-            if (footprint.isPresent()) {
-                documents.add(licensed(KiCadFootprintDrawing.documentOf(written, footprint.get()), null));
-                footprintSlug = Optional.of(KiCadFootprintDrawing.slugOf(written));
-            } else {
-                notes.add("Its footprint " + written + " is not among the installed libraries; the part has none yet.");
-            }
+            notes.add("KiCad names its footprint " + written + "; KiCad's footprints are not converted — choose one of ours for the part.");
         }
-        // The component is drawn with its symbol's units, so they are stored before it, as an import stores them.
-        for (int unit : KiCadSymbolDrawing.units(symbol)) {
-            documents.add(licensed(KiCadSymbolDrawing.documentOf(symbol, unit, Map.of()), null));
-        }
-        ExperienceDocument component = licensed(KiCadComponentStub.documentOf(symbol, footprintSlug),
+        ExperienceDocument component = licensed(KiCadComponentStub.documentOf(symbol, Optional.empty()),
                 symbol.property("Datasheet"));
         documents.add(component);
         return new FetchedPart(documents, component.slug(), notes);
     }
 
     private FetchedPart fetchFootprint(String libraryIdentifier) {
-        KiCadFootprint footprint = KiCadFootprintLibraries.in(footprintFolders).find(libraryIdentifier)
-                .orElseThrow(() -> new IllegalArgumentException("No installed KiCad library holds the footprint "
-                        + libraryIdentifier + "."));
-        ExperienceDocument document = licensed(KiCadFootprintDrawing.documentOf(libraryIdentifier, footprint), null);
-        return new FetchedPart(List.of(document), document.slug(), List.of());
+        throw new IllegalArgumentException("KiCad's footprint " + libraryIdentifier + " is not converted into ours: its "
+                + "drawing stays KiCad's. Choose the footprint of our library for that package.");
     }
 
     private KiCadSymbolDefinition readSymbol(String libraryIdentifier) {
@@ -227,7 +211,7 @@ public final class InstalledKiCadParts implements PartSearchProvider {
 
     private PartCandidate candidateOf(KiCadFootprintIndex.Entry footprint) {
         return new PartCandidate(code(), FOOTPRINT_PREFIX + footprint.identifier(), PartCandidate.Kind.FOOTPRINT,
-                footprint.identifier(), null, null, null, null, null, KICAD_LIBRARY_LICENSE, null, true);
+                footprint.identifier(), null, null, null, null, null, KICAD_LIBRARY_LICENSE, null, false);
     }
 
     private void startIndexing() {

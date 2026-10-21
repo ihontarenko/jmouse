@@ -91,7 +91,8 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
                 }
                 Optional<String> footprint = landing(definition, footprintOfSymbol.get(definition.name()), found, notes);
                 components.put(component, KiCadComponentStub.documentOf(definition, footprint,
-                        KiCadComponentStub.drawnWith(definition, library, catalogue)));
+                        KiCadComponentStub.drawnWith(definition, library, catalogue),
+                        KiCadComponentStub.boxed(definition, library)));
                 libraries.putIfAbsent(component, KiCadSymbolDrawing.libraryOf(definition));
             }
             read.notes().forEach(note -> notes.add(file + ": " + note));

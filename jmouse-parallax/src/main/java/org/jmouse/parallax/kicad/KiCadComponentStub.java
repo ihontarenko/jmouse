@@ -11,6 +11,7 @@ import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.Meta;
 import org.jmouse.parallax.script.Meta.MetaValue;
+import org.jmouse.parallax.symbol.PinBox;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,16 +29,19 @@ import java.util.Set;
  * nothing until its model is written. It is built as a jMX document and written by jMX's own writer.
  *
  * <p>A symbol the library map names a drawing for is drawn with that catalogue symbol, its pins named as the map names
- * them. Otherwise a symbol of one unit is drawn by the symbol imported from KiCad, and a symbol of several is a box: each
- * unit has its own drawing, and a part is drawn with one symbol.</p>
+ * them. Otherwise a chip — a symbol of several units, or one whose designator the map lists as boxed — is our box,
+ * its pins placed by what they are ({@link PinBox}); only a design's own small symbol keeps the drawing it came with.
+ * A symbol taken from KiCad's libraries rather than a design is always a box: its drawing is KiCad's, never ours.</p>
  */
 public final class KiCadComponentStub {
 
-    /** Where a pin of each kind stands on a box: what comes in on the left, what goes out on the right. */
-    private static final String LEFT   = "left";
-    private static final String RIGHT  = "right";
-    private static final String TOP    = "top";
-    private static final String BOTTOM = "bottom";
+    /** The words a box draws a clock's edge and an inverting bubble with. */
+    private static final String EDGE = "edge";
+    private static final String BUBBLE = "bubble";
+
+    /** The names a chip's grounds and supplies go by, which a pin's kind alone does not always tell. */
+    private static final String GROUND_NAMES = "GND.*|VSS.*|AGND|DGND|PGND";
+    private static final String SUPPLY_NAMES = "VCC.*|VDD.*|VBAT|AVDD|DVDD|V\\+";
 
     /** Pins by their number as a package counts them: a number by its value, a grid name (A3) after, by its letters. */
     private static final Comparator<KiCadPin> PACKAGE_ORDER = Comparator
@@ -58,7 +62,7 @@ public final class KiCadComponentStub {
      * imported from the one KiCad's parts of it name.
      */
     public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol, Optional<String> footprint) {
-        return documentOf(symbol, footprint, Optional.empty());
+        return documentOf(symbol, footprint, Optional.empty(), true);
     }
 
     /**
@@ -66,7 +70,7 @@ public final class KiCadComponentStub {
      * {@link #drawnWith} —, its pins named as the drawing names them.
      */
     public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol, Optional<String> footprint,
-                                                Optional<KiCadLibraryMap.Drawing> drawing) {
+                                                Optional<KiCadLibraryMap.Drawing> drawing, boolean boxed) {
         Map<String, String> pinNames = drawing.map(KiCadLibraryMap.Drawing::pins).orElse(Map.of());
         List<Pin> pins = pinsOf(symbol, pinNames);
         String summary = firstOf(symbol.property("Description"), symbol.property("ki_description"), symbol.name())
@@ -82,7 +86,7 @@ public final class KiCadComponentStub {
                 List.of(), null, List.of(), fields, Map.of());
         Block.Symbol drawn = drawing.map(found -> new Block.Symbol(List.of(found.symbol()), Map.of(), Optional.empty(),
                 Map.of(), 0, 0, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), Map.of()))
-                .orElseGet(() -> symbolOf(symbol, pins));
+                .orElseGet(() -> symbolOf(symbol, pins, boxed));
         List<Block> blocks = new ArrayList<>(List.of(new Block.Pins(pins), drawn));
         footprint.ifPresent(slug -> blocks.add(new Block.FootprintUse(slug)));
         return new ExperienceDocument(Kind.COMPONENT, KiCadSymbolDrawing.titleOf(symbol),
@@ -121,24 +125,20 @@ public final class KiCadComponentStub {
                 }
                 List<Integer> numbers = pin.number().matches("\\d+") ? List.of(Integer.parseInt(pin.number())) : List.of();
                 String description = KiCadPin.NO_NAME.equals(pin.name()) ? "" : pin.name();
-                pins.add(new Pin(name, numbers, natureOf(pin), directionOf(pin), List.of(), description));
+                pins.add(new Pin(name, numbers, natureOf(pin), directionOf(pin), attributesOf(pin), description));
             }
         }
         return pins;
     }
 
-    /** One unit: KiCad's drawing of it. Several: a box, since a part is drawn with one symbol and each unit has its own. */
-    private static Block.Symbol symbolOf(KiCadSymbolDefinition symbol, List<Pin> pins) {
+    /** A design's own symbol of one unit: its drawing. A chip: our box, its pins placed by what they are. */
+    private static Block.Symbol symbolOf(KiCadSymbolDefinition symbol, List<Pin> pins, boolean boxed) {
         List<Integer> units = KiCadSymbolDrawing.units(symbol);
-        if (units.size() == 1) {
+        if (!boxed && units.size() == 1) {
             return new Block.Symbol(List.of(KiCadSymbolDrawing.slugOf(symbol, units.getFirst())), Map.of(), Optional.empty(),
                     Map.of(), 0, 0, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), Map.of());
         }
-        Map<String, List<String>> sides = new LinkedHashMap<>();
-        for (Pin pin : pins) {
-            sides.computeIfAbsent(sideOf(pin), ignored -> new ArrayList<>()).add(pin.name());
-        }
-        return new Block.Symbol(List.of(), Map.of(), Optional.of("box"), sides, 0, 0, List.of(), List.of(), List.of(),
+        return new Block.Symbol(List.of(), Map.of(), Optional.of("box"), PinBox.sides(pins), 0, 0, List.of(), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(), Map.of());
     }
 
@@ -149,25 +149,38 @@ public final class KiCadComponentStub {
         return numbers;
     }
 
-    /** Whether a part placed from this symbol is drawn by KiCad's symbol: only a symbol of one unit is. */
-    public static boolean drawnByKiCad(KiCadSymbolDefinition symbol) {
-        return KiCadSymbolDrawing.units(symbol).size() == 1;
+    /**
+     * Whether a part placed from this symbol is drawn as our box: a symbol of several units — a part is drawn with one
+     * symbol —, or a chip, its designator one the library map lists as boxed ({@code boxed-designators U}).
+     */
+    public static boolean boxed(KiCadSymbolDefinition symbol, KiCadLibraryMap library) {
+        return KiCadSymbolDrawing.units(symbol).size() > 1
+                || designatorOf(symbol).filter(library.boxedDesignators()::contains).isPresent();
     }
 
-    private static String sideOf(Pin pin) {
-        if (pin.nature() == PinNature.POWER) {
-            return pin.direction() == PinDirection.OUTPUT ? RIGHT : TOP;
+    /** What a pin's shape says the box must draw: a clock's edge, an inverting bubble. */
+    private static List<String> attributesOf(KiCadPin pin) {
+        String shape = pin.shape() == null ? "" : pin.shape();
+        List<String> attributes = new ArrayList<>();
+        if (shape.contains("clock")) {
+            attributes.add(EDGE);
         }
-        if (pin.nature() == PinNature.GROUND) {
-            return BOTTOM;
+        if (shape.startsWith("inverted")) {
+            attributes.add(BUBBLE);
         }
-        return pin.direction() == PinDirection.OUTPUT ? RIGHT : LEFT;
+        return attributes;
     }
 
+    /**
+     * A power pin is a supply or a ground by its name. A passive pin named as one is one too: KiCad marks a chip's extra
+     * VSS pins passive, so they are not fought over by its power flags, and a box must still put them at the bottom.
+     */
     private static PinNature natureOf(KiCadPin pin) {
+        String name = pin.name().toUpperCase(Locale.ROOT);
         return switch (pin.type()) {
-            case POWER_INPUT, POWER_OUTPUT -> pin.name().toUpperCase(Locale.ROOT).matches("GND.*|VSS.*|AGND|DGND|PGND")
-                    ? PinNature.GROUND : PinNature.POWER;
+            case POWER_INPUT, POWER_OUTPUT -> name.matches(GROUND_NAMES) ? PinNature.GROUND : PinNature.POWER;
+            case PASSIVE -> name.matches(GROUND_NAMES) ? PinNature.GROUND
+                    : name.matches(SUPPLY_NAMES) ? PinNature.POWER : PinNature.ANALOG;
             default -> PinNature.ANALOG;
         };
     }
@@ -175,7 +188,9 @@ public final class KiCadComponentStub {
     private static PinDirection directionOf(KiCadPin pin) {
         return switch (pin.type()) {
             case OUTPUT, POWER_OUTPUT, OPEN_COLLECTOR, OPEN_EMITTER -> PinDirection.OUTPUT;
-            case BIDIRECTIONAL, TRI_STATE -> PinDirection.BIDIRECTIONAL;
+            case BIDIRECTIONAL -> PinDirection.BIDIRECTIONAL;
+            // A three-state pin drives its line or lets it go: an output that may float, never one that reads.
+            case TRI_STATE -> PinDirection.OUTPUT;
             default -> PinDirection.INPUT;
         };
     }

@@ -264,8 +264,8 @@ public final class KiCadSheetImport {
                     + "its component is.");
             placeAsKiCad(id, first, points);
         } else {
-            // A component made from a symbol of several units is drawn as a box: its part names no symbol.
-            if (KiCadComponentStub.drawnByKiCad(definition)) {
+            // A chip is drawn as our box: its part names no symbol. Only a design's own small symbol is drawn as it came.
+            if (!KiCadComponentStub.boxed(definition, library)) {
                 symbol = KiCadSymbolDrawing.slugOf(definition, first.unit());
                 symbols.add(new SymbolUse(definition, first.unit(), Map.of()));
             }

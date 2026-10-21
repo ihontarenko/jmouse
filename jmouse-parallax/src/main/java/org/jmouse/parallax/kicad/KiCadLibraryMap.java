@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public final class KiCadLibraryMap {
         }
     }
 
-    public static final KiCadLibraryMap EMPTY = new KiCadLibraryMap(Map.of(), Map.of(), List.of());
+    public static final KiCadLibraryMap EMPTY = new KiCadLibraryMap(Map.of(), Map.of(), List.of(), Set.of());
 
     private static final String COUNT = "{count}";
     private static final String NUMBER = "{number}";
@@ -88,8 +90,11 @@ public final class KiCadLibraryMap {
     private final Map<String, Mapping> mappings;
     private final Map<String, Drawing> drawings;
     private final List<Family> families;
+    private final Set<String> boxedDesignators;
 
-    private KiCadLibraryMap(Map<String, Mapping> mappings, Map<String, Drawing> drawings, List<Family> families) {
+    private KiCadLibraryMap(Map<String, Mapping> mappings, Map<String, Drawing> drawings, List<Family> families,
+                            Set<String> boxedDesignators) {
+        this.boxedDesignators = Set.copyOf(boxedDesignators);
         // In the order written: a component two symbols stand for is exported as the first.
         this.mappings = Collections.unmodifiableMap(new LinkedHashMap<>(mappings));
         this.drawings = Map.copyOf(drawings);
@@ -126,7 +131,10 @@ public final class KiCadLibraryMap {
                         .ifPresent(drawing -> drawings.put(symbol.get(), new Drawing(drawing, pins)));
             }
         }
-        return new KiCadLibraryMap(mappings, drawings, families);
+        Set<String> boxed = new LinkedHashSet<>();
+        map.field("boxed-designators").ifPresent(field -> (field.value() instanceof SheetValue.Sequence sequence
+                ? sequence.items() : List.of(field.value())).forEach(item -> boxed.add(word(item))));
+        return new KiCadLibraryMap(mappings, drawings, families, boxed);
     }
 
     /**
@@ -136,6 +144,11 @@ public final class KiCadLibraryMap {
     public Optional<String> libraryIdOf(String component) {
         return mappings.entrySet().stream().filter(entry -> entry.getValue().component().equals(component))
                 .map(Map.Entry::getKey).findFirst();
+    }
+
+    /** The designators of chips — {@code U}, {@code IC} —, which a design's symbol of are drawn as our box. */
+    public Set<String> boxedDesignators() {
+        return boxedDesignators;
     }
 
     /** What a library id stands for, when the map names it. */
