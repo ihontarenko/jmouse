@@ -41,10 +41,12 @@ public class KiCadImports {
      *
      * @param root    the slug of the design's root circuit
      * @param created what was stored new, by slug
+     * @param updated the circuits of an earlier import of the same design, written over with this one
      * @param reused  the symbols the catalogue already held
      * @param notes   what the import could not carry, part by part
      */
-    public record Imported(String root, List<String> created, List<String> reused, List<String> notes) {
+    public record Imported(String root, List<String> created, List<String> updated, List<String> reused,
+                           List<String> notes) {
     }
 
     private final Catalogue catalogue;
@@ -74,6 +76,7 @@ public class KiCadImports {
         KiCadProjectImport imported = KiCadProjectImport.of(project, name, libraryMap(),
                 new ModelsCatalogue(components));
         List<String> created = new ArrayList<>();
+        List<String> updated = new ArrayList<>();
         List<String> reused = new ArrayList<>();
         for (DefinedObject symbol : imported.symbols()) {
             if (objects.findBySlug(symbol.slug()).isPresent()) {
@@ -95,12 +98,13 @@ public class KiCadImports {
                             + "this place's: rename the KiCad project or its sheet's file.");
                 }
                 catalogue.update(existing.get().getId(), draft(source), existing.get().getVersion());
+                updated.add(circuit.slug());
             } else {
                 catalogue.createOwned(owner, draft(source));
                 created.add(circuit.slug());
             }
         }
-        return new Imported(circuits.getFirst().slug(), created, reused, imported.notes());
+        return new Imported(circuits.getFirst().slug(), created, updated, reused, imported.notes());
     }
 
     private static KiCadProject project(String rootFile, Map<String, String> files) {
