@@ -2,6 +2,7 @@ package org.jmouse.parallax.kicad;
 
 import org.jmouse.parallax.object.ComponentLibrary;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,6 +45,14 @@ public interface KiCadCatalogue {
 
     /** How a component is drawn; empty when the catalogue does not draw it. */
     Optional<PartDrawing> drawingOf(String component);
+
+    /**
+     * Every symbol the component may be drawn with, its default first — the symbols its {@code symbol uses} line names,
+     * each with the same port map. An import draws a part with the one whose pins stand most where KiCad's do.
+     */
+    default List<PartDrawing> drawingsOf(String component) {
+        return drawingOf(component).map(List::of).orElse(List.of());
+    }
 
     /**
      * The component's pin by its package's number — {@code 1} is {@code anode}; on a part of several blocks the

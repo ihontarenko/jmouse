@@ -6,6 +6,7 @@ import org.jmouse.parallax.kicad.KiCadCatalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,9 +21,18 @@ final class ModelsCatalogue implements KiCadCatalogue {
 
     private final ComponentModels components;
     private final Map<String, Optional<ComponentModels.ModelView>> described = new LinkedHashMap<>();
+    /** The documents a reader may draw with, components and symbols alike: every symbol a component offers. */
+    private final KiCadCatalogue documents;
 
     ModelsCatalogue(ComponentModels components) {
         this.components = components;
+        this.documents = KiCadCatalogue.of(components.forDrawing());
+    }
+
+    @Override
+    public List<PartDrawing> drawingsOf(String component) {
+        List<PartDrawing> offered = documents.drawingsOf(component);
+        return offered.isEmpty() ? drawingOf(component).map(List::of).orElse(List.of()) : offered;
     }
 
     @Override

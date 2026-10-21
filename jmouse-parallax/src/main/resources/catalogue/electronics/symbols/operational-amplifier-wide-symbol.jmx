@@ -1,0 +1,60 @@
+symbol "Operational amplifier, KiCad's proportions" as operational-amplifier-wide-symbol {
+    meta {
+        summary "Operational amplifier as KiCad draws it: the non-inverting input on top, inputs 2.54 mm apart, the supplies from the triangle's slanted side — the same living drawing as the compact one, so a KiCad design's wires land on its pins"
+        category circuits
+        tags electronics, schematic
+    }
+    # KiCad's Amplifier_Operational at 2.54 mm = 40: inputs at x = -120, the output at 120, the supplies at x = -40 from
+    # the slanted sides (y = ±60 there) out to ±120.
+    size 240 x 240
+    input swing 0 .. 1
+    input lead -1 .. 1
+    input saturated 0 .. 1
+    input failed
+
+    # Where the output stands between its supplies: a gauge inside the body, empty at the negative rail, full at the
+    # positive one.
+    live box output_level at -10, 0 size 8 x 44 {
+        live level = swing
+        live fill = if(saturated > 0.5, warm, positive)
+    }
+
+    # The body warms when the output is pinned at a rail: no longer amplifying, it is comparing.
+    live path triangle "M-80-80V80L80 0Z" {
+        live stroke = if(failed > 0.5, burned, if(saturated > 0.5, warm, signal))
+    }
+
+    live group body {
+        path "M-120-40H-80"
+        path "M-120 40H-80"
+        path "M80 0H120"
+        path "M-40-60V-120"
+        path "M-40 60V120"
+        path "M-32-100H-24M-28-104V-96"
+        path "M-32 100H-24"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The higher input lights: the way the output is being driven.
+    live path non_inverting_sign "M-74-40H-62M-68-46V-34" {
+        live stroke = if(failed > 0.5, burned, if(lead > 0.5, positive, signal))
+    }
+
+    live path inverting_sign "M-74 40H-62" {
+        live stroke = if(failed > 0.5, burned, if(lead < -0.5, positive, signal))
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin non_inverting_input at -120, -40
+    pin inverting_input at -120, 40
+    pin output at 120, 0
+    pin positive_supply at -40, -120
+    pin negative_supply at -40, 120
+    label name at 40, -60
+    label value at 40, 64
+}

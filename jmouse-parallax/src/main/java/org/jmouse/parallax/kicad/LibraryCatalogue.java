@@ -7,7 +7,9 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,21 +55,30 @@ final class LibraryCatalogue implements KiCadCatalogue {
     }
 
     private Optional<PartDrawing> drawing(String component) {
+        List<PartDrawing> all = drawingsOf(component);
+        return all.isEmpty() ? Optional.empty() : Optional.of(all.getFirst());
+    }
+
+    @Override
+    public List<PartDrawing> drawingsOf(String component) {
         Optional<ExperienceDocument> document = document(component);
         if (document.isEmpty()) {
-            return Optional.empty();
+            return List.of();
         }
         Optional<Block.Symbol> uses = symbolBlock(document.get()).filter(symbol -> !symbol.uses().isEmpty());
         if (uses.isEmpty()) {
-            return Optional.empty();
+            return List.of();
         }
-        String slug = uses.get().uses().getFirst();
         Map<String, String> ports = uses.get().ports();
-        return document(slug).flatMap(LibraryCatalogue::symbolBlock).map(drawn -> {
-            Map<String, double[]> pins = new LinkedHashMap<>();
-            drawn.pins().forEach(pin -> pins.put(ports.getOrDefault(pin.pin(), pin.pin()), new double[] {pin.x(), pin.y()}));
-            return new PartDrawing(slug, pins);
-        });
+        List<PartDrawing> drawings = new ArrayList<>();
+        for (String slug : uses.get().uses()) {
+            document(slug).flatMap(LibraryCatalogue::symbolBlock).ifPresent(drawn -> {
+                Map<String, double[]> pins = new LinkedHashMap<>();
+                drawn.pins().forEach(pin -> pins.put(ports.getOrDefault(pin.pin(), pin.pin()), new double[] {pin.x(), pin.y()}));
+                drawings.add(new PartDrawing(slug, pins));
+            });
+        }
+        return List.copyOf(drawings);
     }
 
     private Optional<ExperienceDocument> document(String slug) {

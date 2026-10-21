@@ -21,6 +21,7 @@ import org.jmouse.parallax.object.ObjectDefinition.SchematicWire;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -227,7 +228,13 @@ public final class KiCadSheetImport {
                     number -> overrides.put(parameter, plain(number)),
                     () -> notes.add(id + ": its value '" + first.value() + "' is not a number, so " + parameter
                             + " keeps the component's own.")));
-            drawn = catalogue.drawingOf(component);
+            // Of the symbols the component offers, the one whose pins stand most where KiCad's do: a catalogue symbol
+            // drawn smaller than KiCad's lands none, and every wire into it would come by a label.
+            List<KiCadCatalogue.PartDrawing> offered = catalogue.drawingsOf(component);
+            drawn = offered.stream().max(Comparator.comparingDouble(candidate -> fit(candidate, unitPoints.get(first))));
+            if (drawn.isPresent() && !offered.isEmpty() && drawn.get() != offered.getFirst()) {
+                symbol = drawn.get().symbol();
+            }
         } else {
             component = KiCadSymbolDrawing.componentSlugOf(definition);
             components.add(definition);
@@ -338,6 +345,41 @@ public final class KiCadSheetImport {
      * @return where it stands: x, y, rotation, and 1 when mirrored
      */
     private double[] placeAligned(String id, String unit, KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
+        double[] best = alignment(drawing, points);
+        double x = best[0];
+        double y = best[1];
+        boolean mirrored = best[3] == 1;
+        double rotation = best[2];
+        Map<String, double[]> local = localPins(drawing, points);
+        items.add(new PlacedItem(id, null, null, x, y, rotation, mirrored, Map.of(), List.of(), unit));
+        points.forEach((pin, point) -> {
+            double[] onSymbol = local.get(pin);
+            double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, rotation, mirrored);
+            terminal(point, id + "." + pin, new double[] {x + turned[0], y + turned[1]}, new double[] {x, y});
+        });
+        return new double[] {x, y, rotation, mirrored ? 1 : 0};
+    }
+
+    /** How well a symbol can stand where KiCad's pins are: the pins it lands, less a little for the distance of the rest. */
+    private static double fit(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
+        double[] best = alignment(drawing, points);
+        return best[4] - best[5] / 1e9;
+    }
+
+    /** A symbol's pins that stand for these KiCad pins: `A.output` is the symbol's `output`. */
+    private static Map<String, double[]> localPins(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
+        Map<String, double[]> local = new LinkedHashMap<>();
+        points.keySet().forEach(pin -> {
+            double[] point = drawing.pins().get(symbolPinOf(pin));
+            if (point != null) {
+                local.put(pin, point);
+            }
+        });
+        return local;
+    }
+
+    /** Where a symbol stands best for these KiCad pins: x, y, rotation, 1 when mirrored, the pins landed, the error left. */
+    private static double[] alignment(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
         Map<String, double[]> local = new LinkedHashMap<>();
         points.keySet().forEach(pin -> {
             double[] point = drawing.pins().get(symbolPinOf(pin));
@@ -387,17 +429,7 @@ public final class KiCadSheetImport {
                 }
             }
         }
-        double x = best[0];
-        double y = best[1];
-        boolean mirrored = best[3] == 1;
-        double rotation = best[2];
-        items.add(new PlacedItem(id, null, null, x, y, rotation, mirrored, Map.of(), List.of(), unit));
-        points.forEach((pin, point) -> {
-            double[] onSymbol = local.get(pin);
-            double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, rotation, mirrored);
-            terminal(point, id + "." + pin, new double[] {x + turned[0], y + turned[1]}, new double[] {x, y});
-        });
-        return new double[] {x, y, rotation, mirrored ? 1 : 0};
+        return new double[] {best[0], best[1], best[2], best[3], bestLanded, bestError};
     }
 
     /**
