@@ -66,7 +66,8 @@ public class ComponentModels {
 
     public record PinView(String name, java.util.Map<String, Integer> numbers, boolean shared, String nature,
                           boolean output, String description) { }
-    public record ParameterView(String name, double value, boolean perUnit, String description) { }
+    /** @param unit the SI unit its value is in, as the document wrote it (`V`, `W`, `K/W`); empty for a plain number */
+    public record ParameterView(String name, double value, boolean perUnit, String description, String unit) { }
     /** A text parameter: its words, the only words a part may write when it lists them, and what it is. */
     public record TextView(String name, String value, List<String> choices, String description) { }
 
@@ -170,7 +171,7 @@ public class ComponentModels {
                 model.pins().stream().map(pin -> new PinView(pin.name(), pin.numbers(), pin.shared(), pin.nature().name(),
                         pin.output(), pin.description())).toList(),
                 model.parameters().stream().map(parameter -> new ParameterView(parameter.name(), parameter.value(),
-                        parameter.perUnit(), parameter.description())).toList(),
+                        parameter.perUnit(), parameter.description(), parameter.unit())).toList(),
                 model.texts().entrySet().stream().map(written -> new TextView(written.getKey(), written.getValue().value(),
                         written.getValue().choices(), written.getValue().description())).toList(), model.symbol(),
                 symbol == null ? null : symbol.getSlug(), variants, drawing, ports,
@@ -212,7 +213,7 @@ public class ComponentModels {
             default -> "ANALOG";
         }, port.direction().equals("output"), null)).toList();
         List<ParameterView> parameters = sheet.parameters().stream()
-                .map(parameter -> new ParameterView(parameter.name(), parameter.defaultValue(), false, parameter.label())).toList();
+                .map(parameter -> new ParameterView(parameter.name(), parameter.defaultValue(), false, parameter.label(), "")).toList();
         return new ModelView(sheet.title(), SHEET_KIND, List.of(), pins, parameters, List.of(), symbol, null, List.of(), null, Map.of(),
                 List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR, sheet.parameters());
     }
