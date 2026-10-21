@@ -1,0 +1,57 @@
+symbol "Shielded pin header, 42 contacts" as shielded-header-1x42-symbol {
+    meta {
+        summary "A single-row pin header of 42, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size 60 x 1740
+    path "M-4 -800H40M-8 -802H-4V-798H-8ZM-4 -760H40M-8 -762H-4V-758H-8ZM-4 -720H40M-8 -722H-4V-718H-8ZM-4 -680H40M-8 -682H-4V-678H-8ZM-4 -640H40M-8 -642H-4V-638H-8ZM-4 -600H40M-8 -602H-4V-598H-8ZM-4 -560H40M-8 -562H-4V-558H-8ZM-4 -520H40M-8 -522H-4V-518H-8ZM-4 -480H40M-8 -482H-4V-478H-8ZM-4 -440H40M-8 -442H-4V-438H-8ZM-4 -400H40M-8 -402H-4V-398H-8ZM-4 -360H40M-8 -362H-4V-358H-8ZM-4 -320H40M-8 -322H-4V-318H-8ZM-4 -280H40M-8 -282H-4V-278H-8ZM-4 -240H40M-8 -242H-4V-238H-8ZM-4 -200H40M-8 -202H-4V-198H-8ZM-4 -160H40M-8 -162H-4V-158H-8ZM-4 -120H40M-8 -122H-4V-118H-8ZM-4 -80H40M-8 -82H-4V-78H-8ZM-4 -40H40M-8 -42H-4V-38H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8ZM-4 80H40M-8 78H-4V82H-8ZM-4 120H40M-8 118H-4V122H-8ZM-4 160H40M-8 158H-4V162H-8ZM-4 200H40M-8 198H-4V202H-8ZM-4 240H40M-8 238H-4V242H-8ZM-4 280H40M-8 278H-4V282H-8ZM-4 320H40M-8 318H-4V322H-8ZM-4 360H40M-8 358H-4V362H-8ZM-4 400H40M-8 398H-4V402H-8ZM-4 440H40M-8 438H-4V442H-8ZM-4 480H40M-8 478H-4V482H-8ZM-4 520H40M-8 518H-4V522H-8ZM-4 560H40M-8 558H-4V562H-8ZM-4 600H40M-8 598H-4V602H-8ZM-4 640H40M-8 638H-4V642H-8ZM-4 680H40M-8 678H-4V682H-8ZM-4 720H40M-8 718H-4V722H-8ZM-4 760H40M-8 758H-4V762H-8ZM-4 800H40M-8 798H-4V802H-8ZM-4 840H40M-8 838H-4V842H-8Z"
+    pin pin1 at 40, -800 "1"
+    pin pin2 at 40, -760 "2"
+    pin pin3 at 40, -720 "3"
+    pin pin4 at 40, -680 "4"
+    pin pin5 at 40, -640 "5"
+    pin pin6 at 40, -600 "6"
+    pin pin7 at 40, -560 "7"
+    pin pin8 at 40, -520 "8"
+    pin pin9 at 40, -480 "9"
+    pin pin10 at 40, -440 "10"
+    pin pin11 at 40, -400 "11"
+    pin pin12 at 40, -360 "12"
+    pin pin13 at 40, -320 "13"
+    pin pin14 at 40, -280 "14"
+    pin pin15 at 40, -240 "15"
+    pin pin16 at 40, -200 "16"
+    pin pin17 at 40, -160 "17"
+    pin pin18 at 40, -120 "18"
+    pin pin19 at 40, -80 "19"
+    pin pin20 at 40, -40 "20"
+    pin pin21 at 40, 0 "21"
+    pin pin22 at 40, 40 "22"
+    pin pin23 at 40, 80 "23"
+    pin pin24 at 40, 120 "24"
+    pin pin25 at 40, 160 "25"
+    pin pin26 at 40, 200 "26"
+    pin pin27 at 40, 240 "27"
+    pin pin28 at 40, 280 "28"
+    pin pin29 at 40, 320 "29"
+    pin pin30 at 40, 360 "30"
+    pin pin31 at 40, 400 "31"
+    pin pin32 at 40, 440 "32"
+    pin pin33 at 40, 480 "33"
+    pin pin34 at 40, 520 "34"
+    pin pin35 at 40, 560 "35"
+    pin pin36 at 40, 600 "36"
+    pin pin37 at 40, 640 "37"
+    pin pin38 at 40, 680 "38"
+    pin pin39 at 40, 720 "39"
+    pin pin40 at 40, 760 "40"
+    pin pin41 at 40, 800 "41"
+    pin pin42 at 40, 840 "42"
+    path "M-14 -814H30V854H-14ZM0 854V880"
+    pin shield at 0, 880 "SH"
+    label name at -4, -816
+    label value at -4, 896
+}

@@ -36,6 +36,9 @@ final class ConnectorSymbols {
                     case "screw" -> screw(slug, family.title(), contacts, license);
                     default -> throw new IllegalArgumentException("No connector style '" + family.word("style") + "'");
                 };
+                if ("yes".equals(family.optionalWord("shielded").orElse("no"))) {
+                    document = shielded(document, contacts, "double-row".equals(family.word("style")));
+                }
                 symbols.add(new GeneratedSymbol(slug, family.word("folder"), document));
             }
         }
@@ -104,6 +107,25 @@ final class ConnectorSymbols {
                 + "    label name at 0, " + (first - 24) + "\n"
                 + "    label value at 0, " + (last + 28) + "\n"
                 + "}\n";
+    }
+
+    /**
+     * The same connector inside its shield: a box around the contacts and one more pin below, {@code shield}, the
+     * contact the shell is soldered by.
+     */
+    private static String shielded(String document, int rows, boolean doubleRow) {
+        int first = first(rows);
+        int last = first + (rows - 1) * PITCH;
+        int left = doubleRow ? -34 : -14;
+        int right = doubleRow ? 34 : 30;
+        int shieldPin = last + PITCH;
+        String shield = "    path \"M" + left + " " + (first - 14) + "H" + right + "V" + (last + 14) + "H" + left + "ZM0 " + (last + 14)
+                + "V" + shieldPin + "\"\n    pin shield at 0, " + shieldPin + " \"SH\"\n";
+        return document
+                .replaceFirst("    size (\\d+) x (\\d+)", "    size $1 x " + (height(rows) + PITCH))
+                .replaceFirst("(    label name)", java.util.regex.Matcher.quoteReplacement(shield) + "$1")
+                .replaceFirst("label value at (-?\\d+), -?\\d+", "label value at $1, " + (shieldPin + 16))
+                .replace("as drawn on a schematic:", "inside its shield, as drawn on a schematic:");
     }
 
     private static String head(String title, String slug, String summary, String license) {

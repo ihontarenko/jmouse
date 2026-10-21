@@ -1,0 +1,43 @@
+symbol "Shielded pin header, 2 x 14" as shielded-header-2x14-symbol {
+    meta {
+        summary "A two-row pin header of 28, inside its shield, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size 120 x 620
+    path "M-20 -250H20V290H-20ZM-60 -240H-20M20 -240H60M-60 -200H-20M20 -200H60M-60 -160H-20M20 -160H60M-60 -120H-20M20 -120H60M-60 -80H-20M20 -80H60M-60 -40H-20M20 -40H60M-60 0H-20M20 0H60M-60 40H-20M20 40H60M-60 80H-20M20 80H60M-60 120H-20M20 120H60M-60 160H-20M20 160H60M-60 200H-20M20 200H60M-60 240H-20M20 240H60M-60 280H-20M20 280H60"
+    pin pin1 at -60, -240 "1"
+    pin pin2 at 60, -240 "2"
+    pin pin3 at -60, -200 "3"
+    pin pin4 at 60, -200 "4"
+    pin pin5 at -60, -160 "5"
+    pin pin6 at 60, -160 "6"
+    pin pin7 at -60, -120 "7"
+    pin pin8 at 60, -120 "8"
+    pin pin9 at -60, -80 "9"
+    pin pin10 at 60, -80 "10"
+    pin pin11 at -60, -40 "11"
+    pin pin12 at 60, -40 "12"
+    pin pin13 at -60, 0 "13"
+    pin pin14 at 60, 0 "14"
+    pin pin15 at -60, 40 "15"
+    pin pin16 at 60, 40 "16"
+    pin pin17 at -60, 80 "17"
+    pin pin18 at 60, 80 "18"
+    pin pin19 at -60, 120 "19"
+    pin pin20 at 60, 120 "20"
+    pin pin21 at -60, 160 "21"
+    pin pin22 at 60, 160 "22"
+    pin pin23 at -60, 200 "23"
+    pin pin24 at 60, 200 "24"
+    pin pin25 at -60, 240 "25"
+    pin pin26 at 60, 240 "26"
+    pin pin27 at -60, 280 "27"
+    pin pin28 at 60, 280 "28"
+    path "M-34 -254H34V294H-34ZM0 294V320"
+    pin shield at 0, 320 "SH"
+    label name at 0, -264
+    label value at 0, 336
+}

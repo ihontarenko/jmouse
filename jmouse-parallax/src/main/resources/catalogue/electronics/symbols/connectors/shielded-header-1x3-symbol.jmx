@@ -1,0 +1,18 @@
+symbol "Shielded pin header, 3 contacts" as shielded-header-1x3-symbol {
+    meta {
+        summary "A single-row pin header of 3, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size 60 x 180
+    path "M-4 -40H40M-8 -42H-4V-38H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8Z"
+    pin pin1 at 40, -40 "1"
+    pin pin2 at 40, 0 "2"
+    pin pin3 at 40, 40 "3"
+    path "M-14 -54H30V54H-14ZM0 54V80"
+    pin shield at 0, 80 "SH"
+    label name at -4, -56
+    label value at -4, 96
+}

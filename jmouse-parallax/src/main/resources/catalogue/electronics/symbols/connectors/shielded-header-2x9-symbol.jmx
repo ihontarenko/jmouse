@@ -1,0 +1,33 @@
+symbol "Shielded pin header, 2 x 9" as shielded-header-2x9-symbol {
+    meta {
+        summary "A two-row pin header of 18, inside its shield, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size 120 x 420
+    path "M-20 -170H20V170H-20ZM-60 -160H-20M20 -160H60M-60 -120H-20M20 -120H60M-60 -80H-20M20 -80H60M-60 -40H-20M20 -40H60M-60 0H-20M20 0H60M-60 40H-20M20 40H60M-60 80H-20M20 80H60M-60 120H-20M20 120H60M-60 160H-20M20 160H60"
+    pin pin1 at -60, -160 "1"
+    pin pin2 at 60, -160 "2"
+    pin pin3 at -60, -120 "3"
+    pin pin4 at 60, -120 "4"
+    pin pin5 at -60, -80 "5"
+    pin pin6 at 60, -80 "6"
+    pin pin7 at -60, -40 "7"
+    pin pin8 at 60, -40 "8"
+    pin pin9 at -60, 0 "9"
+    pin pin10 at 60, 0 "10"
+    pin pin11 at -60, 40 "11"
+    pin pin12 at 60, 40 "12"
+    pin pin13 at -60, 80 "13"
+    pin pin14 at 60, 80 "14"
+    pin pin15 at -60, 120 "15"
+    pin pin16 at 60, 120 "16"
+    pin pin17 at -60, 160 "17"
+    pin pin18 at 60, 160 "18"
+    path "M-34 -174H34V174H-34ZM0 174V200"
+    pin shield at 0, 200 "SH"
+    label name at 0, -184
+    label value at 0, 216
+}

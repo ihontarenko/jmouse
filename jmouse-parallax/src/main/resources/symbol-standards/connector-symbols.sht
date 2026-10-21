@@ -26,4 +26,20 @@ sheet "Connector symbols" as connector-symbols {
         pins 1 .. 24
         folder "connectors"
     }
+
+    shielded-header-single "Shielded pin header" {
+        name "shielded-header-1x{pins}"
+        style single-row
+        shielded yes
+        pins 1 .. 60
+        folder "connectors"
+    }
+
+    shielded-header-double "Shielded pin header" {
+        name "shielded-header-2x{pins}"
+        style double-row
+        shielded yes
+        pins 1 .. 60
+        folder "connectors"
+    }
 }
