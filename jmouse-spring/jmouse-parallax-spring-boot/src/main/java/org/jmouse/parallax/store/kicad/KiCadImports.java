@@ -10,8 +10,10 @@ import org.jmouse.parallax.jpa.catalogue.ObjectStore;
 import org.jmouse.parallax.kicad.KiCadLibraryMap;
 import org.jmouse.parallax.kicad.KiCadProjectImport;
 import org.jmouse.parallax.owner.ParallaxOwner;
+import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.engine.DefinedObject;
 import org.jmouse.parallax.script.engine.ExperienceDefinitions;
+import org.jmouse.parallax.script.writer.DocumentWriter;
 import org.jmouse.parallax.problem.ParallaxProblem;
 import org.jmouse.parallax.store.catalogue.Catalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
@@ -78,11 +80,11 @@ public class KiCadImports {
         List<String> created = new ArrayList<>();
         List<String> updated = new ArrayList<>();
         List<String> reused = new ArrayList<>();
-        for (DefinedObject symbol : imported.symbols()) {
+        for (ExperienceDocument symbol : imported.symbols()) {
             if (objects.findBySlug(symbol.slug()).isPresent()) {
                 reused.add(symbol.slug());
             } else {
-                catalogue.createOwned(owner, draft(ExperienceDefinitions.write(symbol)));
+                catalogue.createOwned(owner, draft(DocumentWriter.write(symbol)));
                 created.add(symbol.slug());
             }
         }

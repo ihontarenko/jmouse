@@ -1,0 +1,14 @@
+symbol "Pin header, 3 contacts" as pin-header-1x3-symbol {
+    meta {
+        summary "A single-row pin header of 3, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+    }
+    size 60 x 80
+    path "M-4 -20H40M-8 -22H-4V-18H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 20H40M-8 18H-4V22H-8Z"
+    pin pin1 at 40, -20 "1"
+    pin pin2 at 40, 0 "2"
+    pin pin3 at 40, 20 "3"
+    label name at -4, -36
+    label value at -4, 40
+}

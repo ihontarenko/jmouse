@@ -4,6 +4,7 @@ import org.jmouse.kicad.KiCadProject;
 import org.jmouse.kicad.KiCadProject.SheetInstance;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
+import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.engine.DefinedObject;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.TreeSet;
  * @param notes    what the import could not carry, by part: a component the library map does not name, a value that is
  *                 not a number, a unit drawn by another's place
  */
-public record KiCadProjectImport(List<DefinedObject> circuits, List<DefinedObject> symbols, List<String> notes) {
+public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDocument> symbols, List<String> notes) {
 
     /**
      * @param name what the design is called: its project's name, {@code LINEAR_500W_PS-1}
@@ -61,10 +62,10 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<DefinedObjec
             uses.addAll(read.symbols());
             read.notes().forEach(note -> notes.add(file + ": " + note));
         }
-        List<DefinedObject> symbols = new ArrayList<>();
+        List<ExperienceDocument> symbols = new ArrayList<>();
         Set<String> drawn = new LinkedHashSet<>();
         for (KiCadSheetImport.SymbolUse use : uses) {
-            DefinedObject symbol = KiCadSymbolDrawing.object(use.symbol(), use.unit(), use.pinNames());
+            ExperienceDocument symbol = KiCadSymbolDrawing.documentOf(use.symbol(), use.unit(), use.pinNames());
             if (drawn.add(symbol.slug())) {
                 symbols.add(symbol);
             }

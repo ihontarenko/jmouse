@@ -1,0 +1,31 @@
+symbol "Transformer with two secondaries" as dual-secondary-transformer-symbol {
+    meta {
+        summary "A transformer with one primary and two separate secondaries, as drawn on a schematic: each winding on pins of its own"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 96
+    input failed
+
+    live group body {
+        path "M-40-20H-18C-3-20-3-7-18-7C-3-7-3 7-18 7C-3 7-3 20-18 20H-40M-2-44V44M2-44V44"
+        path "M40-40H18C33-40 33-30 18-30C33-30 33-20 18-20H40"
+        path "M40 20H18C33 20 33 30 18 30C33 30 33 40 18 40H40"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin primary_one at -40, -20
+    pin primary_two at -40, 20
+    pin secondary_a_one at 40, -40
+    pin secondary_a_two at 40, -20
+    pin secondary_b_one at 40, 20
+    pin secondary_b_two at 40, 40
+    label name at 0, -56
+    label value at 0, 60
+}
