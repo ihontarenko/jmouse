@@ -191,8 +191,8 @@ public final class KiCadSheetImport {
         }
         byReference.forEach((reference, units) -> part(reference, units, pinNets));
         unmapped.forEach((made, parts) -> notes.add(String.join(", ", parts) + ": " + made + ", made from KiCad's symbol "
-                + "— its pins and its drawing —, since the library map names no component for it; it computes nothing "
-                + "until its model is written."));
+                + "— its pins, and its drawing unless the map names one of ours —, since the library map names no component "
+                + "for it; it computes nothing until its model is written."));
     }
 
     private void part(String reference, List<KiCadSymbolInstance> units, Map<String, String> pinNets) {
@@ -200,13 +200,17 @@ public final class KiCadSheetImport {
         KiCadSymbolDefinition definition = schematic.definitionOf(first).orElseThrow();
         String id = id(reference);
         Optional<KiCadLibraryMap.Mapping> mapping = library.mappingOf(first.libraryId());
+        // With no model, the drawing the map names for it, when that drawing places every pin.
+        Optional<KiCadLibraryMap.Drawing> ownDrawing = mapping.isPresent() ? Optional.empty()
+                : KiCadComponentStub.drawnWith(definition, library, catalogue);
         if (first.libraryId().startsWith(CONNECTOR_LIBRARY)) {
             connectors.add(id);
         }
         // The map's own numbering where it writes one — KiCad's diode is 1 = K, a catalogue diode's 1 is its anode —,
         // else the component's package numbers, which KiCad's numbers are.
         Map<String, String> numbered = mapping.map(found -> found.pins().isEmpty()
-                ? catalogue.pinsByNumber(found.component()) : found.pins()).orElse(Map.of());
+                ? catalogue.pinsByNumber(found.component()) : found.pins())
+                .orElseGet(() -> ownDrawing.map(KiCadLibraryMap.Drawing::pins).orElse(Map.of()));
         Map<String, String> pins = new LinkedHashMap<>();
         // Where each KiCad unit's pins stand on the sheet, by the name the part gives them: `A.output`, `Vcc`.
         Map<KiCadSymbolInstance, Map<String, KiCadPoint>> unitPoints = new LinkedHashMap<>();
@@ -216,6 +220,10 @@ public final class KiCadSheetImport {
                 String name = numbered.getOrDefault(pin.number(), KiCadSymbolDrawing.pinName(pin));
                 String net = pinNets.getOrDefault(unit.uuid() + ":" + pin.number(), nets.of(id + "_" + name + "_open"));
                 pins.putIfAbsent(name, net);
+                // A pin not connected inside the part has no place on a drawing of ours, which draws what connects.
+                if (ownDrawing.isPresent() && !numbered.containsKey(pin.number())) {
+                    continue;
+                }
                 placed.putIfAbsent(name, unit.placement().place(pin.at()));
             }
         }
@@ -244,7 +252,9 @@ public final class KiCadSheetImport {
         } else {
             component = KiCadSymbolDrawing.componentSlugOf(definition);
             components.add(definition);
-            unmapped.computeIfAbsent(first.libraryId() + " → '" + component + "'", ignored -> new ArrayList<>()).add(id);
+            drawn = ownDrawing.flatMap(found -> catalogue.symbolDrawing(found.symbol()));
+            unmapped.computeIfAbsent(first.libraryId() + " → '" + component + "'"
+                    + drawn.map(found -> " drawn with " + found.symbol()).orElse(""), ignored -> new ArrayList<>()).add(id);
         }
         if (drawn.isPresent()) {
             placeUnits(id, drawn.get(), first, unitPoints);

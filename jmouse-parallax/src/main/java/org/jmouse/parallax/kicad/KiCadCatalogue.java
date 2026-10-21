@@ -60,6 +60,11 @@ public interface KiCadCatalogue {
      */
     Map<String, String> pinsByNumber(String component);
 
+    /** A catalogue symbol by its slug and where each of its pins stands; empty when the catalogue does not hold it. */
+    default Optional<PartDrawing> symbolDrawing(String symbol) {
+        return Optional.empty();
+    }
+
     /** The footprint a component's own {@code footprint} line names; empty when it names none. */
     default Optional<String> footprintOf(String component) {
         return Optional.empty();

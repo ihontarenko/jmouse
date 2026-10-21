@@ -87,6 +87,15 @@ final class LibraryCatalogue implements KiCadCatalogue {
         return List.copyOf(drawings);
     }
 
+    @Override
+    public Optional<PartDrawing> symbolDrawing(String symbol) {
+        return document(symbol).flatMap(LibraryCatalogue::symbolBlock).map(drawn -> {
+            Map<String, double[]> pins = new LinkedHashMap<>();
+            drawn.pins().forEach(pin -> pins.put(pin.pin(), new double[] {pin.x(), pin.y()}));
+            return new PartDrawing(symbol, pins);
+        });
+    }
+
     private Optional<ExperienceDocument> document(String slug) {
         return library.source(slug).map(source -> ExperienceReader.read(source, slug + ".jmx").getFirst());
     }

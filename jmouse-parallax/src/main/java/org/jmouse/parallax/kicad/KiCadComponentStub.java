@@ -1,6 +1,7 @@
 package org.jmouse.parallax.kicad;
 
 import org.jmouse.kicad.symbol.KiCadPin;
+import org.jmouse.kicad.symbol.KiCadPinType;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.Pin;
@@ -26,8 +27,9 @@ import java.util.Set;
  * numbers them, and the symbol KiCad draws it with — a part that can be placed, wired and stored, and that computes
  * nothing until its model is written. It is built as a jMX document and written by jMX's own writer.
  *
- * <p>A symbol of one unit is drawn by the symbol imported from KiCad. A symbol of several is a box: each unit has its
- * own drawing, and a part is drawn with one symbol.</p>
+ * <p>A symbol the library map names a drawing for is drawn with that catalogue symbol, its pins named as the map names
+ * them. Otherwise a symbol of one unit is drawn by the symbol imported from KiCad, and a symbol of several is a box: each
+ * unit has its own drawing, and a part is drawn with one symbol.</p>
  */
 public final class KiCadComponentStub {
 
@@ -56,9 +58,20 @@ public final class KiCadComponentStub {
      * imported from the one KiCad's parts of it name.
      */
     public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol, Optional<String> footprint) {
-        List<Pin> pins = pinsOf(symbol);
+        return documentOf(symbol, footprint, Optional.empty());
+    }
+
+    /**
+     * The component's document, drawn with the catalogue symbol {@code drawing} names when there is one — see
+     * {@link #drawnWith} —, its pins named as the drawing names them.
+     */
+    public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol, Optional<String> footprint,
+                                                Optional<KiCadLibraryMap.Drawing> drawing) {
+        Map<String, String> pinNames = drawing.map(KiCadLibraryMap.Drawing::pins).orElse(Map.of());
+        List<Pin> pins = pinsOf(symbol, pinNames);
         String summary = firstOf(symbol.property("Description"), symbol.property("ki_description"), symbol.name())
-                + " — imported from KiCad: its pins and its drawing, with no model yet";
+                + (drawing.isPresent() ? " — imported from KiCad: its pins, drawn with the catalogue's symbol, with no model yet"
+                : " — imported from KiCad: its pins and its drawing, with no model yet");
         Map<String, MetaValue> fields = new LinkedHashMap<>();
         designatorOf(symbol).ifPresent(designator -> fields.put("designator", new MetaValue.Names(List.of(designator))));
         String written = symbol.property("Footprint");
@@ -67,22 +80,42 @@ public final class KiCadComponentStub {
         }
         Meta meta = new Meta(summary, null, "circuits", List.of("electronics", "kicad"), "KiCad symbol " + symbol.name(),
                 List.of(), null, List.of(), fields, Map.of());
-        List<Block> blocks = new ArrayList<>(List.of(new Block.Pins(pins), symbolOf(symbol, pins)));
+        Block.Symbol drawn = drawing.map(found -> new Block.Symbol(List.of(found.symbol()), Map.of(), Optional.empty(),
+                Map.of(), 0, 0, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), Map.of()))
+                .orElseGet(() -> symbolOf(symbol, pins));
+        List<Block> blocks = new ArrayList<>(List.of(new Block.Pins(pins), drawn));
         footprint.ifPresent(slug -> blocks.add(new Block.FootprintUse(slug)));
         return new ExperienceDocument(Kind.COMPONENT, KiCadSymbolDrawing.titleOf(symbol),
                 KiCadSymbolDrawing.componentSlugOf(symbol),
                 Optional.empty(), meta, Optional.empty(), List.of(), List.of(), blocks, 0);
     }
 
-    /** Every pad once, named by its number as the part's connections name it, KiCad's own name its description. */
-    private static List<Pin> pinsOf(KiCadSymbolDefinition symbol) {
+    /**
+     * The drawing the library map names for a symbol, when it can draw it: the catalogue holds the drawing, the map names
+     * every pin the symbol numbers but those KiCad marks as not connected, and each name is a pin of the drawing. A
+     * drawing that would leave a connectable pin unplaced is no drawing — the part keeps KiCad's.
+     */
+    public static Optional<KiCadLibraryMap.Drawing> drawnWith(KiCadSymbolDefinition symbol, KiCadLibraryMap library,
+                                                              KiCadCatalogue catalogue) {
+        return library.drawingOf(symbol.name()).filter(drawing -> catalogue.symbolDrawing(drawing.symbol())
+                .map(drawn -> symbol.pins().stream().filter(pin -> pin.type() != KiCadPinType.NOT_CONNECTED)
+                        .allMatch(pin -> drawing.pins().containsKey(pin.number())
+                                && drawn.pins().containsKey(drawing.pins().get(pin.number()))))
+                .orElse(false));
+    }
+
+    /**
+     * Every pad once, named by its number as the part's connections name it — or as {@code pinNames} names that number —,
+     * KiCad's own name its description.
+     */
+    private static List<Pin> pinsOf(KiCadSymbolDefinition symbol, Map<String, String> pinNames) {
         List<Pin> pins = new ArrayList<>();
         Set<String> named = new LinkedHashSet<>();
         for (int unit : KiCadSymbolDrawing.units(symbol)) {
             // KiCad keeps a unit's pins in the order they were drawn; the package's order is by number, 1, 2, … 10.
             List<KiCadPin> unitPins = symbol.pinsOf(unit).stream().sorted(PACKAGE_ORDER).toList();
             for (KiCadPin pin : unitPins) {
-                String name = KiCadSymbolDrawing.pinName(pin);
+                String name = pinNames.getOrDefault(pin.number(), KiCadSymbolDrawing.pinName(pin));
                 if (!named.add(name)) {
                     continue;
                 }
