@@ -75,7 +75,7 @@ public final class KiCadSheetImport {
     private final KiCadProject alone;
     private final String path;
     private final KiCadConnectivity connectivity;
-    private final KiCadNetNames nets = new KiCadNetNames();
+    private final KiCadNetNames nets;
     private final Set<String> ids = new HashSet<>();
     private final List<CircuitElement> elements = new ArrayList<>();
     private final List<PlacedItem> items = new ArrayList<>();
@@ -90,8 +90,9 @@ public final class KiCadSheetImport {
     private record Terminal(String name, double[] drawn) {
     }
 
-    private KiCadSheetImport(KiCadSchematic schematic, String instancePath, KiCadLibraryMap library,
+    private KiCadSheetImport(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
                              KiCadCatalogue catalogue, Function<String, String> sheetSlug) {
+        this.nets = new KiCadNetNames(ground);
         this.schematic = schematic;
         this.library = library;
         this.catalogue = catalogue;
@@ -104,11 +105,12 @@ public final class KiCadSheetImport {
     /**
      * @param instancePath the path of the place the sheet stands in whose references the parts take: KiCad numbers
      *                     a sheet's parts for each place it stands, and the first place's numbers are the document's
+     * @param ground       the KiCad net that is node 0: the design's reference ground
      * @param sheetSlug    the slug of the circuit a sheet file becomes, for a box placing it
      */
-    public static Sheet of(KiCadSchematic schematic, String instancePath, KiCadLibraryMap library,
+    public static Sheet of(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
                            KiCadCatalogue catalogue, Function<String, String> sheetSlug) {
-        KiCadSheetImport sheet = new KiCadSheetImport(schematic, instancePath, library, catalogue, sheetSlug);
+        KiCadSheetImport sheet = new KiCadSheetImport(schematic, instancePath, ground, library, catalogue, sheetSlug);
         sheet.parts();
         sheet.marks();
         sheet.boxes();
@@ -176,7 +178,7 @@ public final class KiCadSheetImport {
                             + " keeps the component's own.")));
             drawn = catalogue.drawingOf(component);
         } else {
-            component = KiCadSymbolDrawing.slugOf(definition, 1).replaceFirst("-unit-a$", "");
+            component = KiCadSymbolDrawing.componentSlugOf(definition);
             notes.add(id + " (" + first.libraryId() + ") has no component in the library map: it is drawn, and a model "
                     + "named '" + component + "' is what simulating it needs.");
         }

@@ -11,7 +11,8 @@ import java.util.Set;
 /**
  * KiCad's net names as jMX names them: a name a part line can write — {@code +12V} is {@code plus_12V},
  * {@code /control/IN} is {@code IN}, {@code Net-(R5-Pad1)} is {@code net_R5_Pad1} —, each KiCad net one jMX net, and
- * the net KiCad's {@code GND} symbol names node {@value Circuit#GROUND}.
+ * the design's reference ground — KiCad's {@code GND}, or the ground a design of isolated grounds is measured from —
+ * node {@value Circuit#GROUND}.
  */
 final class KiCadNetNames {
 
@@ -21,8 +22,16 @@ final class KiCadNetNames {
     /** How long a jMX net's name is at most. */
     private static final int LONGEST = 32;
 
+    /** The KiCad net that is node 0. */
+    private final String ground;
+
     private final Map<String, String> named = new HashMap<>();
     private final Set<String> taken = new HashSet<>();
+
+    /** @param ground the KiCad net that is node 0 */
+    KiCadNetNames(String ground) {
+        this.ground = ground;
+    }
 
     /** The jMX net a KiCad net is, the same every time it is asked. */
     String of(String kicad) {
@@ -30,7 +39,7 @@ final class KiCadNetNames {
     }
 
     private String fresh(String kicad) {
-        if (kicad.equals(KICAD_GROUND)) {
+        if (kicad.equals(ground)) {
             return Circuit.GROUND;
         }
         String name = kicad.replaceAll(".*/", "");

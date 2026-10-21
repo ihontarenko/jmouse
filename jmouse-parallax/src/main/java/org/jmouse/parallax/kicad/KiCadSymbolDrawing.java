@@ -74,13 +74,23 @@ public final class KiCadSymbolDrawing {
         return "pin" + pin.number().replaceAll("[^A-Za-z0-9]", "_");
     }
 
-    /** A slug for a KiCad library id and unit: {@code Device:R} is {@code kicad-device-r}, a dual's second {@code …-unit-b}. */
-    public static String slugOf(KiCadSymbolDefinition symbol, int unit) {
+    /**
+     * The slug of the component a KiCad symbol stands for when the catalogue has none yet: {@code Transistor_BJT:TIP42}
+     * is {@code kicad-transistor-bjt-tip42} — what a model written for it is called.
+     */
+    public static String componentSlugOf(KiCadSymbolDefinition symbol) {
         // A sign that opens a name is a word: power:+12V and power:-12V are two symbols.
         String signed = symbol.name().replaceAll("(^|:)\\+", "$1plus-").replaceAll("(^|:)-", "$1minus-");
-        String slug = "kicad-" + signed.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-+|-+$", "");
-        return units(symbol).size() > 1 ? slug + "-unit-" + unitLetter(unit).toLowerCase(Locale.ROOT) : slug;
+        return "kicad-" + signed.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+    }
+
+    /**
+     * The slug of a unit's symbol, a symbol's as the catalogue's are: {@code Device:R} is {@code kicad-device-r-symbol},
+     * a dual's second unit {@code …-unit-b-symbol}.
+     */
+    public static String slugOf(KiCadSymbolDefinition symbol, int unit) {
+        String slug = componentSlugOf(symbol);
+        return (units(symbol).size() > 1 ? slug + "-unit-" + unitLetter(unit).toLowerCase(Locale.ROOT) : slug) + "-symbol";
     }
 
     /** One unit of a symbol as the jMX symbol document jMX's writer makes of it. */
