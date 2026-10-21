@@ -285,7 +285,8 @@ public final class KiCadSymbolDrawing {
             }
             double radius = Math.hypot(start[0] - center[0], start[1] - center[1]);
             double turn = (middle[0] - start[0]) * (end[1] - start[1]) - (middle[1] - start[1]) * (end[0] - start[0]);
-            boolean clockwise = turn < 0;
+            // Y points down here: start, mid, end turning clockwise on screen is a positive cross product.
+            boolean clockwise = turn > 0;
             double from = Math.atan2(start[1] - center[1], start[0] - center[0]);
             double to = Math.atan2(end[1] - center[1], end[0] - center[0]);
             double span = clockwise ? to - from : from - to;
