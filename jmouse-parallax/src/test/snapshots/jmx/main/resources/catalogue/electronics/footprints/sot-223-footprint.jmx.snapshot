@@ -1,17 +1,17 @@
 ExperienceDocument
   kind: Kind.FOOTPRINT
-  title: "SOT-223-3_TabPin2"
-  slug: "kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint"
+  title: "SOT-223, tab on pin 2"
+  slug: "sot-223-footprint"
   type: Optional.empty
   meta: Meta
-      summary: "module CMS SOT223 4 pins — imported from KiCad"
+      summary: "4-lead SOT-223, gull-wing: three leads 2.3 mm apart on one side, the wide tab opposite them and joined to pin 2"
       description: null
       category: "circuits"
       tags: List(3)
           - "electronics"
-          - "kicad"
           - "footprint"
-      source: "KiCad footprint Package_TO_SOT_SMD:SOT-223-3_TabPin2"
+          - "surface"
+      source: "JEDEC TO-261AA"
       authors: List(0)
       license: null
       links: List(0)
@@ -27,11 +27,11 @@ ExperienceDocument
                   number: "1"
                   type: PadType.SURFACE
                   shape: PadShape.ROUNDED_RECTANGLE
-                  x: Double -3.15
-                  y: Double -2.3
+                  x: Double -2.3
+                  y: Double 2.95
                   rotation: Double 0.0
-                  width: Double 2.0
-                  height: Double 1.5
+                  width: Double 0.9
+                  height: Double 2.1
                   drillWidth: Double 0.0
                   drillHeight: Double 0.0
                   roundness: Double 0.25
@@ -39,23 +39,11 @@ ExperienceDocument
                   number: "2"
                   type: PadType.SURFACE
                   shape: PadShape.ROUNDED_RECTANGLE
-                  x: Double -3.15
-                  y: Double 0.0
+                  x: Double 0.0
+                  y: Double 2.95
                   rotation: Double 0.0
-                  width: Double 2.0
-                  height: Double 1.5
-                  drillWidth: Double 0.0
-                  drillHeight: Double 0.0
-                  roundness: Double 0.25
-              - FootprintPad
-                  number: "2"
-                  type: PadType.SURFACE
-                  shape: PadShape.ROUNDED_RECTANGLE
-                  x: Double 3.15
-                  y: Double 0.0
-                  rotation: Double 0.0
-                  width: Double 2.0
-                  height: Double 3.8
+                  width: Double 0.9
+                  height: Double 2.1
                   drillWidth: Double 0.0
                   drillHeight: Double 0.0
                   roundness: Double 0.25
@@ -63,43 +51,59 @@ ExperienceDocument
                   number: "3"
                   type: PadType.SURFACE
                   shape: PadShape.ROUNDED_RECTANGLE
-                  x: Double -3.15
-                  y: Double 2.3
+                  x: Double 2.3
+                  y: Double 2.95
                   rotation: Double 0.0
-                  width: Double 2.0
-                  height: Double 1.5
+                  width: Double 0.9
+                  height: Double 2.1
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "2"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double 0.0
+                  y: Double -2.95
+                  rotation: Double 0.0
+                  width: Double 3.15
+                  height: Double 2.1
                   drillWidth: Double 0.0
                   drillHeight: Double 0.0
                   roundness: Double 0.25
           outlines: List(4)
               - FootprintOutline
-                  layer: "silkscreen"
-                  width: Double 0.12
+                  layer: "fabrication"
+                  width: Double 0.1
                   filled: false
-                  path: "M-1.85 -3.41L1.91 -3.41M-1.85 3.41L1.91 3.41M1.91 -3.41L1.91 -2.15M1.91 3.41L1.91 2.15"
+                  path: "M-3.25 -1.75H3.25V1.75H-2.25L-3.25 0.75Z"
               - FootprintOutline
                   layer: "silkscreen"
                   width: Double 0.12
+                  filled: false
+                  path: "M-3.36 -1.86H-3.0M-3.36 -1.86V1.86H-3.0M3.36 -1.86H3.0M3.36 -1.86V1.86H3.0"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.0
                   filled: true
-                  path: "M-3.13 -3.31L-3.37 -3.64L-2.89 -3.64L-3.13 -3.31Z"
+                  path: "M-3.56 3.5A0.2 0.2 0 1 0 -3.16 3.5A0.2 0.2 0 1 0 -3.56 3.5Z"
               - FootprintOutline
                   layer: "courtyard"
                   width: Double 0.05
                   filled: false
-                  path: "M-4.4 -3.6L-4.4 3.6M-4.4 3.6L4.4 3.6M4.4 -3.6L-4.4 -3.6M4.4 3.6L4.4 -3.6"
-              - FootprintOutline
-                  layer: "fabrication"
-                  width: Double 0.1
-                  filled: false
-                  path: "M-1.85 -2.35L-1.85 3.35M-1.85 -2.35L-0.85 -3.35M-1.85 3.35L1.85 3.35M-0.85 -3.35L1.85 -3.35M1.85 -3.35L1.85 3.35"
+                  path: "M-3.75 -4.25H3.75V4.25H-3.75Z"
   line: Integer 1
 == the last brace removed
-REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
+REFUSED src/main/resources/catalogue/electronics/footprints/sot-223-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
 == line 4 deleted
-READS ae3a70c5b0d33ebe867cf588fcdc1c5f
+READS 3d72b17b92a407289499ff37ff2e3269
 == line 4 begun with a stray word
-READS 55e4ef5e23bebbcf999a325d6e1b536b
+READS 7abc5fba29b5d02456348d6996311cbd
 == line 11 deleted
-READS 52a03b3440b31ee5afa7e84141e3ce98
+READS a151b4bfa4eac0517506ca56abf072e4
 == line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta
+REFUSED src/main/resources/catalogue/electronics/footprints/sot-223-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta
+== line 18 deleted
+READS 4400b3cdcd59b8c7a0cd2928a0900260
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/sot-223-footprint.jmx 18:5 'zzz' is not a block of a footprint; it holds meta

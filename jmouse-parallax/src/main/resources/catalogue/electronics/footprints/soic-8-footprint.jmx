@@ -1,0 +1,23 @@
+footprint "SOIC-8, 3.9 mm body" as soic-8-footprint {
+    meta {
+        summary "8-lead small-outline package, gull-wing, 1.27 mm pitch, body 3.9 × 4.9 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MS-012 AA"
+    }
+    # Drawn from MS-012 AA: pitch 1.27, lead tips 5.80…6.20 apart, foot L 0.40…1.27, lead b 0.31…0.51, body 3.9 × 4.9.
+    # Our surface rule, IPC-7351 nominal density for gull-wing leads: toe 0.35, heel 0.35, side 0.03, tolerances left out —
+    # Z = 6.20 + 2 × 0.35 = 6.90, G = 5.80 − 2 × 1.27 − 2 × 0.35 = 2.56, X = 0.51 + 2 × 0.03 = 0.57; pad (Z − G) / 2 long,
+    # centred at (Z + G) / 4, sizes to the nearest 0.05, corners rounded a quarter. Courtyard 0.25 past copper and body.
+    pad "1" surface rounded-rectangle at -2.35, -1.905 size 2.15 x 0.6 roundness 0.25
+    pad "2" surface rounded-rectangle at -2.35, -0.635 size 2.15 x 0.6 roundness 0.25
+    pad "3" surface rounded-rectangle at -2.35, 0.635 size 2.15 x 0.6 roundness 0.25
+    pad "4" surface rounded-rectangle at -2.35, 1.905 size 2.15 x 0.6 roundness 0.25
+    pad "5" surface rounded-rectangle at 2.35, 1.905 size 2.15 x 0.6 roundness 0.25
+    pad "6" surface rounded-rectangle at 2.35, 0.635 size 2.15 x 0.6 roundness 0.25
+    pad "7" surface rounded-rectangle at 2.35, -0.635 size 2.15 x 0.6 roundness 0.25
+    pad "8" surface rounded-rectangle at 2.35, -1.905 size 2.15 x 0.6 roundness 0.25
+    outline fabrication width 0.1 "M-0.95 -2.45H1.95V2.45H-1.95V-1.45Z"
+    outline silkscreen width 0.12 "M-3.425 -2.56H1.95M-1.95 2.56H1.95"
+    outline courtyard width 0.05 "M-3.7 -2.7H3.7V2.7H-3.7Z"
+}

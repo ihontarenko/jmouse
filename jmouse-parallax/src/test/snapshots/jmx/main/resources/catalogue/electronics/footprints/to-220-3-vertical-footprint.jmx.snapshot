@@ -1,0 +1,97 @@
+ExperienceDocument
+  kind: Kind.FOOTPRINT
+  title: "TO-220-3, standing"
+  slug: "to-220-3-vertical-footprint"
+  type: Optional.empty
+  meta: Meta
+      summary: "3-lead TO-220 standing upright, through-hole, 2.54 mm pitch, the tab at the back"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "footprint"
+          - "through-hole"
+      source: "JEDEC TO-220AB"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Footprint
+          pads: List(3)
+              - FootprintPad
+                  number: "1"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.RECTANGLE
+                  x: Double -2.54
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 2.25
+                  height: Double 2.4
+                  drillWidth: Double 1.4
+                  drillHeight: Double 1.4
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "2"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 0.0
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 2.25
+                  height: Double 2.4
+                  drillWidth: Double 1.4
+                  drillHeight: Double 1.4
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "3"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 2.54
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 2.25
+                  height: Double 2.4
+                  drillWidth: Double 1.4
+                  drillHeight: Double 1.4
+                  roundness: Double 0.0
+          outlines: List(4)
+              - FootprintOutline
+                  layer: "fabrication"
+                  width: Double 0.1
+                  filled: false
+                  path: "M-5.08 -2.05H5.08V2.4H-5.08ZM-5.08 1.15H5.08"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: false
+                  path: "M-5.19 -2.16H5.19V2.51H-5.19Z"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.0
+                  filled: true
+                  path: "M-2.74 -1.75A0.2 0.2 0 1 0 -2.34 -1.75A0.2 0.2 0 1 0 -2.74 -1.75Z"
+              - FootprintOutline
+                  layer: "courtyard"
+                  width: Double 0.05
+                  filled: false
+                  path: "M-5.6 -2.55H5.6V2.9H-5.6Z"
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/footprints/to-220-3-vertical-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
+== line 4 deleted
+READS e4c4e7ce1c0165001b3866e2d58c83c9
+== line 4 begun with a stray word
+READS 8dc2f38ca5e08761959e9038e8681d6f
+== line 11 deleted
+READS 867686460f48b605dccd9319c774a566
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/to-220-3-vertical-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta
+== line 18 deleted
+READS 4bc5f09c000ca393a4147ebe6833872f
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/to-220-3-vertical-footprint.jmx 18:5 'zzz' is not a block of a footprint; it holds meta

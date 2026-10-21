@@ -805,12 +805,12 @@ nature `FOOTPRINT`; the definition carries the drawing as `FootprintDrawing` JSO
 which is what a library browser or a board preview paints.
 
 ```
-footprint "TO-220-3_Vertical" as kicad-package-to-sot-tht-to-220-3-vertical-footprint {
-    meta { summary "TO-220-3, Vertical, RM 2.54mm" }
-    pad "1" through-hole rectangle at 0, 0 size 1.905 x 2 drill 1.1
-    pad "2" surface rounded-rectangle at 2.54, 0 rotate 90 size 1 x 1.5 roundness 0.25
-    outline silkscreen width 0.12 "M-2.58 -3.27L7.66 -3.27"
-    outline courtyard width 0.05 filled "M-2.71 -3.4L7.79 -3.4L7.79 1.51Z"
+footprint "SOT-223, tab on pin 2" as sot-223-footprint {
+    meta { summary "4-lead SOT-223, gull-wing, its tab joined to pin 2" }
+    pad "1" surface rounded-rectangle at -2.3, 2.95 size 0.9 x 2.1 roundness 0.25
+    pad "2" surface rounded-rectangle at 0, -2.95 size 3.15 x 2.1 roundness 0.25
+    outline silkscreen width 0.12 "M-3.36 -1.86V1.86H-3.0"
+    outline courtyard width 0.05 "M-3.75 -4.25H3.75V4.25H-3.75Z"
 }
 ```
 

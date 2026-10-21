@@ -1,0 +1,24 @@
+footprint "DIP-8, 7.62 mm rows" as dip-8-footprint {
+    meta {
+        summary "8-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm (300 mil) apart"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "JEDEC MS-001"
+    }
+    # Drawn from MS-001 (8 leads): pitch 2.54, rows 7.62, lead b 0.56 × c 0.36 at most, body 6.35 × 9.27 nominal.
+    # Our through-hole rule: drill = the lead's largest cross-section (its diagonal) + 0.2, up to the next 0.05; pad = drill
+    # + 2 × 0.5 ring, narrowed to pitch − 0.25 where neighbours would touch; pin 1 square. Courtyard 0.5 past copper and
+    # body. Origin at the package's centre, Y down.
+    pad "1" through-hole rectangle at -3.81, -3.81 size 1.9 x 1.9 drill 0.9
+    pad "2" through-hole circle at -3.81, -1.27 size 1.9 x 1.9 drill 0.9
+    pad "3" through-hole circle at -3.81, 1.27 size 1.9 x 1.9 drill 0.9
+    pad "4" through-hole circle at -3.81, 3.81 size 1.9 x 1.9 drill 0.9
+    pad "5" through-hole circle at 3.81, 3.81 size 1.9 x 1.9 drill 0.9
+    pad "6" through-hole circle at 3.81, 1.27 size 1.9 x 1.9 drill 0.9
+    pad "7" through-hole circle at 3.81, -1.27 size 1.9 x 1.9 drill 0.9
+    pad "8" through-hole circle at 3.81, -3.81 size 1.9 x 1.9 drill 0.9
+    outline fabrication width 0.1 "M-2.175 -4.635H3.175V4.635H-3.175V-3.635Z"
+    outline silkscreen width 0.12 "M-2.6 -4.75H-0.75A0.75 0.75 0 0 0 0.75 -4.75H2.6V4.75H-2.6Z"
+    outline silkscreen filled "M-2.2 -3.81A0.3 0.3 0 1 0 -1.6 -3.81A0.3 0.3 0 1 0 -2.2 -3.81Z"
+    outline courtyard width 0.05 "M-5.25 -5.25H5.25V5.25H-5.25Z"
+}

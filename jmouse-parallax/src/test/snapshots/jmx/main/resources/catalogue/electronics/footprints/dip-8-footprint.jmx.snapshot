@@ -1,0 +1,157 @@
+ExperienceDocument
+  kind: Kind.FOOTPRINT
+  title: "DIP-8, 7.62 mm rows"
+  slug: "dip-8-footprint"
+  type: Optional.empty
+  meta: Meta
+      summary: "8-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm (300 mil) apart"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "footprint"
+          - "through-hole"
+      source: "JEDEC MS-001"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Footprint
+          pads: List(8)
+              - FootprintPad
+                  number: "1"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.RECTANGLE
+                  x: Double -3.81
+                  y: Double -3.81
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "2"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double -3.81
+                  y: Double -1.27
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "3"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double -3.81
+                  y: Double 1.27
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "4"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double -3.81
+                  y: Double 3.81
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "5"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double 3.81
+                  y: Double 3.81
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "6"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double 3.81
+                  y: Double 1.27
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "7"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double 3.81
+                  y: Double -1.27
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "8"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.CIRCLE
+                  x: Double 3.81
+                  y: Double -3.81
+                  rotation: Double 0.0
+                  width: Double 1.9
+                  height: Double 1.9
+                  drillWidth: Double 0.9
+                  drillHeight: Double 0.9
+                  roundness: Double 0.0
+          outlines: List(4)
+              - FootprintOutline
+                  layer: "fabrication"
+                  width: Double 0.1
+                  filled: false
+                  path: "M-2.175 -4.635H3.175V4.635H-3.175V-3.635Z"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: false
+                  path: "M-2.6 -4.75H-0.75A0.75 0.75 0 0 0 0.75 -4.75H2.6V4.75H-2.6Z"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.0
+                  filled: true
+                  path: "M-2.2 -3.81A0.3 0.3 0 1 0 -1.6 -3.81A0.3 0.3 0 1 0 -2.2 -3.81Z"
+              - FootprintOutline
+                  layer: "courtyard"
+                  width: Double 0.05
+                  filled: false
+                  path: "M-5.25 -5.25H5.25V5.25H-5.25Z"
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/footprints/dip-8-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
+== line 4 deleted
+READS 129993e0665b212d7908524472eae298
+== line 4 begun with a stray word
+READS bc305240889a689ab82a3bdb68405e1a
+== line 11 deleted
+READS ef17f465397e286d16c6a454802b43bf
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/dip-8-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta
+== line 18 deleted
+READS 118ac29f93b1aedb44113215f52f3cdc
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/dip-8-footprint.jmx 18:5 'zzz' is not a block of a footprint; it holds meta
