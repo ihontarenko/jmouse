@@ -46,6 +46,9 @@ public final class KiCadSymbolDrawing {
     /** The grid a symbol's size is rounded up to. */
     private static final double GRID = 20;
 
+    /** What a pin named by its KiCad number starts with: {@code pin1}, {@code pinA}. */
+    private static final String PIN_PREFIX = "pin";
+
     /** The radius of the bubble an inverted pin carries at the body, millimetres. */
     private static final double BUBBLE_RADIUS = 0.635;
 
@@ -80,7 +83,15 @@ public final class KiCadSymbolDrawing {
 
     /** What a pin is called in jMX: {@code pin} and its number, the package's name for it — {@code pin1}, {@code pinA3}. */
     public static String pinName(KiCadPin pin) {
-        return "pin" + pin.number().replaceAll("[^A-Za-z0-9]", "_");
+        return PIN_PREFIX + pin.number().replaceAll("[^A-Za-z0-9]", "_");
+    }
+
+    /**
+     * The KiCad number a pin named by {@link #pinName} stands for: {@code pinA} is {@code A}. A sign the name could not
+     * keep was written as {@code _} and stays one.
+     */
+    public static Optional<String> numberOfPinName(String name) {
+        return name.matches(PIN_PREFIX + "[A-Za-z0-9_]+") ? Optional.of(name.substring(PIN_PREFIX.length())) : Optional.empty();
     }
 
     /**

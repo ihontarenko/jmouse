@@ -429,13 +429,16 @@ public final class ComponentDocuments {
 
     // ─── pins, states, symbol ───────────────────────────────────────────────────────────────────────
 
-    /** A pin's package numbers resolved against the declared units: one for all, or one per unit. */
+    /** A pin's package numbers resolved against the declared units: one for all, one per unit, or none written. */
     private static Pin pin(Block.Pin pin, List<String> units, ExperienceDocument document) {
         List<Integer> numbers = pin.numbers();
         Map<String, Integer> byUnit = new LinkedHashMap<>();
         boolean shared = units.isEmpty() || numbers.size() <= 1;
         if (shared) {
-            byUnit.put("", numbers.isEmpty() ? 0 : numbers.getFirst());
+            // A pin written without a number has none: 0 would name a pin no package has, and is read back as one.
+            if (!numbers.isEmpty()) {
+                byUnit.put("", numbers.getFirst());
+            }
         } else if (numbers.size() == units.size()) {
             for (int unit = 0; unit < units.size(); unit++) {
                 byUnit.put(units.get(unit), numbers.get(unit));

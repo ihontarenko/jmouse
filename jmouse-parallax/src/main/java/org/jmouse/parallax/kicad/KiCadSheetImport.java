@@ -51,6 +51,24 @@ public final class KiCadSheetImport {
     /** The span a transient of an imported sheet covers until its author sets one, seconds. */
     private static final double TIME = 0.02;
 
+    /** KiCad's standard libraries of connectors start so: {@code Connector:}, {@code Connector_Generic:}. */
+    private static final String CONNECTOR_LIBRARY = "Connector";
+
+    /** How many divisions a rail stands up from the screen's middle at the scale chosen for it. */
+    private static final double RAIL_DIVISIONS = 3;
+
+    /** The oscilloscope's channels an import sets up, in the order the rails are given to them. */
+    private static final List<String> CHANNELS = List.of("CH1", "CH2");
+
+    /** The sheet's grid in drawing units: KiCad's 1.27 mm grid, which every symbol's pins stand on. */
+    private static final double GRID = 20;
+
+    /**
+     * How far from its KiCad point a pin may be drawn and still be wired to it, along both axes: a catalogue symbol
+     * shaped otherwise than KiCad's puts a pin a grid step or three away; a pin further off is on another unit's place.
+     */
+    private static final double LEAD_LIMIT = 6 * GRID;
+
     /** Where a mark's symbol connects, in its own drawing, and which way its body goes from there. */
     private record MarkShape(String terminal, double pinY, double bodyY) {
     }
@@ -91,14 +109,31 @@ public final class KiCadSheetImport {
     private final Set<KiCadSymbolDefinition> components = new LinkedHashSet<>();
     /** The parts of each symbol the library map names no component for, by what was made for them: one note each. */
     private final Map<String, List<String>> unmapped = new LinkedHashMap<>();
+    /** The rails KiCad's power symbols name, by net, with the voltage their value says: {@code +48V} is 48. */
+    private final Map<String, Double> rails = new LinkedHashMap<>();
+    /** The parts a design is plugged into the world through — KiCad's connectors —, by reference. */
+    private final List<String> connectors = new ArrayList<>();
     private final List<String> notes = new ArrayList<>();
     private final List<ObjectDefinition.SheetPort> ports = new ArrayList<>();
     private final Set<String> globals = new LinkedHashSet<>();
     /** The terminal at each connection point, by the point's key, and where the terminal is drawn. */
     private final Map<String, Terminal> terminals = new LinkedHashMap<>();
 
-    private record Terminal(String name, double[] drawn) {
+    /**
+     * A terminal of the drawing and where it is drawn; for a part's pin, also where the part stands, which says the way
+     * the pin leaves its body — the way a stub leads a wire into it.
+     */
+    private record Terminal(String name, double[] drawn, double[] partCentre) {
     }
+
+    /** Two terminals KiCad joins by touching, pin on pin, with no wire between them: the drawing gets one. */
+    private record Touching(Terminal first, Terminal second, KiCadPoint point) {
+    }
+
+    private final List<Touching> touching = new ArrayList<>();
+
+    /** The label a far pin is reached by, once per pin. */
+    private final Map<String, Terminal> pinLabels = new HashMap<>();
 
     private KiCadSheetImport(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
                              KiCadCatalogue catalogue, Function<String, String> sheetSlug) {
@@ -125,9 +160,12 @@ public final class KiCadSheetImport {
         sheet.marks();
         sheet.boxes();
         sheet.wires();
+        sheet.touchingWires();
         ObjectDefinition.SheetBoundary boundary = new ObjectDefinition.SheetBoundary(sheet.ports, sheet.globals);
+        sheet.noteConnectors();
         ObjectDefinition.Circuit circuit = new ObjectDefinition.Circuit(sheet.elements, new Interval(0, TIME),
-                new ObjectDefinition.SchematicLayout(sheet.items, sheet.wires), null, List.of(), List.of(), null, boundary);
+                new ObjectDefinition.SchematicLayout(sheet.items, sheet.wires), null, sheet.railProbes(), List.of(), null,
+                boundary);
         return new Sheet(circuit, sheet.symbols, sheet.components, sheet.notes);
     }
 
@@ -159,6 +197,9 @@ public final class KiCadSheetImport {
         KiCadSymbolDefinition definition = schematic.definitionOf(first).orElseThrow();
         String id = id(reference);
         Optional<KiCadLibraryMap.Mapping> mapping = library.mappingOf(first.libraryId());
+        if (first.libraryId().startsWith(CONNECTOR_LIBRARY)) {
+            connectors.add(id);
+        }
         // The map's own numbering where it writes one — KiCad's diode is 1 = K, a catalogue diode's 1 is its anode —,
         // else the component's package numbers, which KiCad's numbers are.
         Map<String, String> numbered = mapping.map(found -> found.pins().isEmpty()
@@ -268,7 +309,7 @@ public final class KiCadSheetImport {
         shared.forEach((pin, point) -> {
             double[] onSymbol = drawing.pins().get(symbolPinOf(pin));
             double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, part[2], part[3] == 1);
-            terminal(point, id + "." + pin, new double[] {part[0] + turned[0], part[1] + turned[1]});
+            terminal(point, id + "." + pin, new double[] {part[0] + turned[0], part[1] + turned[1]}, new double[] {part[0], part[1]});
         });
     }
 
@@ -305,45 +346,82 @@ public final class KiCadSheetImport {
             }
         });
         List<String> shared = List.copyOf(local.keySet());
+        // Of the eight ways the symbol can stand, and of the places on the grid it can stand at, the one where most of its
+        // pins land on KiCad's exactly; then the one nearest the rest. A pin that does not land is led to by a short
+        // stub, so a place on the grid matters more than a mean that lands none.
+        int bestLanded = -1;
         double bestError = Double.MAX_VALUE;
         double[] best = {0, 0, 0, 0};
         for (int quarter = 0; quarter < 4; quarter++) {
             for (int flip = 0; flip < 2; flip++) {
                 double rotation = quarter * 90;
                 boolean mirrored = flip == 1;
-                double sumX = 0;
-                double sumY = 0;
-                for (String pin : shared) {
-                    double[] kicad = drawn(points.get(pin));
-                    double[] turned = turned(local.get(pin), rotation, mirrored);
-                    sumX += kicad[0] - turned[0];
-                    sumY += kicad[1] - turned[1];
-                }
-                double x = shared.isEmpty() ? 0 : sumX / shared.size();
-                double y = shared.isEmpty() ? 0 : sumY / shared.size();
-                double error = 0;
-                for (String pin : shared) {
-                    double[] kicad = drawn(points.get(pin));
-                    double[] turned = turned(local.get(pin), rotation, mirrored);
-                    error += Math.pow(x + turned[0] - kicad[0], 2) + Math.pow(y + turned[1] - kicad[1], 2);
-                }
-                if (error < bestError - 1e-9) {
-                    bestError = error;
-                    best = new double[] {x, y, rotation, flip};
+                for (double[] place : candidatePlaces(shared, local, points, rotation, mirrored)) {
+                    int landed = 0;
+                    double error = 0;
+                    boolean onAnother = false;
+                    for (String pin : shared) {
+                        double[] kicad = drawn(points.get(pin));
+                        double[] turned = turned(local.get(pin), rotation, mirrored);
+                        double[] at = {place[0] + turned[0], place[1] + turned[1]};
+                        double distance = Math.hypot(at[0] - kicad[0], at[1] - kicad[1]);
+                        if (distance < 0.01) {
+                            landed++;
+                        }
+                        error += distance * distance;
+                        // A pin on the point where KiCad draws another of the part's pins would be joined to that one's net.
+                        for (String another : shared) {
+                            if (!another.equals(pin) && same(at, drawn(points.get(another)))) {
+                                onAnother = true;
+                            }
+                        }
+                    }
+                    if (onAnother) {
+                        landed = -1;
+                    }
+                    if (landed > bestLanded || (landed == bestLanded && error < bestError - 1e-9)) {
+                        bestLanded = landed;
+                        bestError = error;
+                        best = new double[] {place[0], place[1], rotation, flip};
+                    }
                 }
             }
         }
-        double x = grid(best[0]);
-        double y = grid(best[1]);
+        double x = best[0];
+        double y = best[1];
         boolean mirrored = best[3] == 1;
         double rotation = best[2];
         items.add(new PlacedItem(id, null, null, x, y, rotation, mirrored, Map.of(), List.of(), unit));
         points.forEach((pin, point) -> {
             double[] onSymbol = local.get(pin);
             double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, rotation, mirrored);
-            terminal(point, id + "." + pin, new double[] {x + turned[0], y + turned[1]});
+            terminal(point, id + "." + pin, new double[] {x + turned[0], y + turned[1]}, new double[] {x, y});
         });
         return new double[] {x, y, rotation, mirrored ? 1 : 0};
+    }
+
+    /**
+     * Where a symbol turned this way may stand: on the grid, wherever one of its pins lands on its KiCad point, and the
+     * grid point nearest the place that suits all pins on average.
+     */
+    private static List<double[]> candidatePlaces(List<String> pins, Map<String, double[]> local, Map<String, KiCadPoint> points,
+                                                  double rotation, boolean mirrored) {
+        List<double[]> places = new ArrayList<>();
+        double sumX = 0;
+        double sumY = 0;
+        for (String pin : pins) {
+            double[] kicad = drawn(points.get(pin));
+            double[] turned = turned(local.get(pin), rotation, mirrored);
+            places.add(new double[] {grid(kicad[0] - turned[0]), grid(kicad[1] - turned[1])});
+            sumX += kicad[0] - turned[0];
+            sumY += kicad[1] - turned[1];
+        }
+        if (!pins.isEmpty()) {
+            places.add(new double[] {grid(sumX / pins.size()), grid(sumY / pins.size())});
+        } else {
+            places.add(new double[] {0, 0});
+        }
+        return places;
     }
 
     /** A point of a symbol on the sheet as jMX turns it: mirrored left to right first, then turned clockwise. */
@@ -375,6 +453,7 @@ public final class KiCadSheetImport {
                 mark("ground", "ground", net.equals(ObjectDefinition.Circuit.GROUND) ? null : net, GROUND, point, body);
             } else {
                 globals.add(net);
+                KiCadValue.volts(value).ifPresent(volts -> rails.putIfAbsent(net, volts));
                 mark("power", "global", net, GLOBAL, point, body);
             }
         }
@@ -537,17 +616,213 @@ public final class KiCadSheetImport {
         }
     }
 
-    /** A wire between two terminals; where a terminal is drawn off KiCad's point, the wire passes KiCad's point. */
+    /**
+     * A wire between two terminals. Where a terminal is drawn off KiCad's point — a catalogue symbol is shaped otherwise
+     * than KiCad's —, the wire still passes KiCad's point and is led from it into the pin by a stub of straight stretches.
+     */
     private void wire(Terminal from, double[] fromPoint, List<double[]> bends, Terminal to, double[] toPoint) {
+        from = byNameWhenFar(from, fromPoint);
+        to = byNameWhenFar(to, toPoint);
+        List<double[]> path = new ArrayList<>(lead(from, fromPoint).reversed());
+        path.addAll(bends);
+        path.addAll(lead(to, toPoint));
         List<ObjectDefinition.Bend> through = new ArrayList<>();
-        if (!same(from.drawn(), fromPoint)) {
-            through.add(new ObjectDefinition.Bend(fromPoint[0], fromPoint[1]));
+        double[] previous = from.drawn();
+        for (double[] point : path) {
+            if (!same(point, previous)) {
+                through.add(new ObjectDefinition.Bend(point[0], point[1]));
+                previous = point;
+            }
         }
-        bends.forEach(bend -> through.add(new ObjectDefinition.Bend(bend[0], bend[1])));
-        if (!same(to.drawn(), toPoint)) {
-            through.add(new ObjectDefinition.Bend(toPoint[0], toPoint[1]));
+        if (!through.isEmpty() && same(previous, to.drawn())) {
+            through.removeLast();
         }
         wires.add(new SchematicWire("W" + (wires.size() + 1), from.name(), to.name(), through));
+    }
+
+    /**
+     * The corners a wire takes from KiCad's point into a terminal drawn elsewhere, the terminal itself left out: none when
+     * it stands on the point, KiCad's point when they share a line, else KiCad's point and one corner — chosen so the
+     * last stretch enters the pin the way the pin leaves its part's body, as a schematic draws a lead.
+     */
+    private List<double[]> lead(Terminal terminal, double[] kicadPoint) {
+        double[] pin = terminal.drawn();
+        if (same(pin, kicadPoint)) {
+            return List.of();
+        }
+        if (Math.abs(pin[0] - kicadPoint[0]) < 0.01 || Math.abs(pin[1] - kicadPoint[1]) < 0.01) {
+            return List.of(kicadPoint);
+        }
+        double[] centre = terminal.partCentre();
+        boolean sideways = centre == null || Math.abs(pin[0] - centre[0]) >= Math.abs(pin[1] - centre[1]);
+        double[] preferred = sideways ? new double[] {kicadPoint[0], pin[1]} : new double[] {pin[0], kicadPoint[1]};
+        double[] other = sideways ? new double[] {pin[0], kicadPoint[1]} : new double[] {kicadPoint[0], pin[1]};
+        // A stub that runs over another pin would join it in KiCad, which connects whatever a wire touches: the other
+        // corner, if it is clear.
+        double[] corner = passesPin(kicadPoint, preferred, pin, terminal) && !passesPin(kicadPoint, other, pin, terminal)
+                ? other : preferred;
+        return List.of(kicadPoint, corner);
+    }
+
+    /** Whether a stub from a point through a corner to its pin runs over a pin of another terminal. */
+    private boolean passesPin(double[] start, double[] corner, double[] end, Terminal own) {
+        Optional<String> ownNet = netOf(own.name());
+        for (Terminal other : terminals.values()) {
+            if (other == own || other.name().equals(own.name())) {
+                continue;
+            }
+            double[] point = other.drawn();
+            if (!onSegment(point, start, corner) && !onSegment(point, corner, end)) {
+                continue;
+            }
+            // A pin of the same net may lie on the way: touching it joins nothing new.
+            if (ownNet.isEmpty() || !ownNet.equals(netOf(other.name()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Whether a point lies on an axis-parallel segment, its ends included. */
+    private static boolean onSegment(double[] point, double[] from, double[] to) {
+        boolean withinX = point[0] >= Math.min(from[0], to[0]) - 0.01 && point[0] <= Math.max(from[0], to[0]) + 0.01;
+        boolean withinY = point[1] >= Math.min(from[1], to[1]) - 0.01 && point[1] <= Math.max(from[1], to[1]) + 0.01;
+        boolean onLine = Math.abs(from[0] - to[0]) < 0.01 ? Math.abs(point[0] - from[0]) < 0.01
+                : Math.abs(from[1] - to[1]) < 0.01 && Math.abs(point[1] - from[1]) < 0.01;
+        return withinX && withinY && onLine;
+    }
+
+    /** Whether every stub from KiCad's point into this terminal would run over another pin. */
+    private boolean stubBlocked(Terminal terminal, double[] kicadPoint) {
+        double[] pin = terminal.drawn();
+        if (same(pin, kicadPoint)) {
+            return false;
+        }
+        double[] one = {kicadPoint[0], pin[1]};
+        double[] other = {pin[0], kicadPoint[1]};
+        return passesPin(kicadPoint, one, pin, terminal) && passesPin(kicadPoint, other, pin, terminal);
+    }
+
+    /**
+     * A terminal drawn far from its KiCad point — a pin KiCad draws on another unit, the power unit's supply pins drawn
+     * on the part's own symbol — is reached by its net's name, as KiCad reaches a power pin: the wire ends at KiCad's
+     * point on a label of the net, and the pin gets a label of its own. A long stub across the sheet would cross other
+     * nets' wires and, written back to KiCad, join them where a corner lands on one.
+     */
+    private Terminal byNameWhenFar(Terminal terminal, double[] kicadPoint) {
+        double[] pin = terminal.drawn();
+        boolean near = Math.abs(pin[0] - kicadPoint[0]) + Math.abs(pin[1] - kicadPoint[1]) <= LEAD_LIMIT;
+        if (near && !stubBlocked(terminal, kicadPoint)) {
+            return terminal;
+        }
+        Optional<String> net = netOf(terminal.name());
+        if (net.isEmpty()) {
+            return terminal;
+        }
+        pinLabels.computeIfAbsent(terminal.name(), name -> {
+            double[] centre = terminal.partCentre() == null ? kicadPoint : terminal.partCentre();
+            Terminal label = labelAt(net.get(), pin, new double[] {pin[0] - centre[0], pin[1] - centre[1]});
+            wires.add(new SchematicWire("W" + (wires.size() + 1), terminal.name(), label.name(), List.of()));
+            return label;
+        });
+        return labelAt(net.get(), kicadPoint, new double[] {0, -1});
+    }
+
+    /**
+     * A mark of a net whose pin stands on a drawn point, its body pointing along {@code away}: a ground for node 0, a
+     * label for any other net.
+     */
+    private Terminal labelAt(String net, double[] at, double[] away) {
+        boolean ground = net.equals(ObjectDefinition.Circuit.GROUND);
+        MarkShape shape = ground ? GROUND : LABEL;
+        double rotation = rotationTowards(away, shape.bodyY());
+        double[] pin = turned(new double[] {0, shape.pinY()}, rotation, false);
+        String id = id((ground ? "ground" : "label") + (items.size() + 1));
+        items.add(new PlacedItem(id, ground ? "ground" : "label", ground ? null : net, at[0] - pin[0], at[1] - pin[1], rotation,
+                false));
+        return new Terminal(id + "." + shape.terminal(), at, null);
+    }
+
+    /** The net a terminal is on: a part's pin by its connections, a mark by the net it names, a ground by node 0. */
+    private Optional<String> netOf(String terminal) {
+        int dot = terminal.indexOf('.');
+        String id = terminal.substring(0, dot);
+        String pin = terminal.substring(dot + 1);
+        for (CircuitElement element : elements) {
+            if (element.id().equals(id) && element.pins() != null) {
+                return Optional.ofNullable(element.pins().get(pin));
+            }
+        }
+        for (PlacedItem item : items) {
+            if (item.id().equals(id) && item.mark() != null && !item.mark().equals("junction")) {
+                return Optional.of(item.net() != null ? item.net() : ObjectDefinition.Circuit.GROUND);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * What the oscilloscope opens on: the design's supply rails as KiCad's power symbols name them — the highest
+     * positive one, then the most negative or the next highest —, each at the 1-2-5 scale that holds it within
+     * {@link #RAIL_DIVISIONS} divisions. An arbitrary net at millivolts per division is what a first run showed without.
+     */
+    private List<ObjectDefinition.BenchProbe> railProbes() {
+        List<Map.Entry<String, Double>> positive = rails.entrySet().stream().filter(rail -> rail.getValue() > 0)
+                .sorted((one, other) -> Double.compare(other.getValue(), one.getValue())).toList();
+        List<Map.Entry<String, Double>> negative = rails.entrySet().stream().filter(rail -> rail.getValue() < 0)
+                .sorted((one, other) -> Double.compare(one.getValue(), other.getValue())).toList();
+        List<Map.Entry<String, Double>> chosen = new ArrayList<>();
+        if (!positive.isEmpty()) {
+            chosen.add(positive.getFirst());
+        }
+        if (!negative.isEmpty()) {
+            chosen.add(negative.getFirst());
+        } else if (positive.size() > 1) {
+            chosen.add(positive.get(1));
+        }
+        List<ObjectDefinition.BenchProbe> probes = new ArrayList<>();
+        for (int index = 0; index < chosen.size() && index < CHANNELS.size(); index++) {
+            probes.add(new ObjectDefinition.BenchProbe(CHANNELS.get(index), "voltage", chosen.get(index).getKey(), null,
+                    scaleFor(Math.abs(chosen.get(index).getValue())), null, null));
+        }
+        return probes;
+    }
+
+    /** The smallest step of the 1-2-5 series at which a voltage stands within {@link #RAIL_DIVISIONS} divisions. */
+    private static double scaleFor(double volts) {
+        double wanted = volts / RAIL_DIVISIONS;
+        double decade = Math.pow(10, Math.floor(Math.log10(wanted)));
+        for (double step : new double[] {1, 2, 5, 10}) {
+            if (step * decade >= wanted) {
+                return step * decade;
+            }
+        }
+        return 10 * decade;
+    }
+
+    /**
+     * A design is plugged into the world through its connectors — mains in, a potentiometer or a load off the board —,
+     * and runs on the bench only once something stands at them: the note names them, so the reader knows where to put a
+     * source, a load or a meter.
+     */
+    private void noteConnectors() {
+        if (!connectors.isEmpty()) {
+            notes.add(String.join(", ", connectors) + " connect the design to what is off the board — its supply, its "
+                    + "controls, its load: nothing stands at them on the bench, so place a source, a load or a meter at "
+                    + "each to run it as it is used.");
+        }
+    }
+
+    /** Terminals that touch at one KiCad point, pin on pin: a wire between them through that point. */
+    private void touchingWires() {
+        for (Touching pair : touching) {
+            double[] point = drawn(pair.point());
+            if (same(pair.first().drawn(), pair.second().drawn())) {
+                wires.add(new SchematicWire("W" + (wires.size() + 1), pair.first().name(), pair.second().name(), List.of()));
+            } else {
+                wire(pair.first(), point, List.of(), pair.second(), point);
+            }
+        }
     }
 
     private static boolean same(double[] one, double[] other) {
@@ -567,7 +842,16 @@ public final class KiCadSheetImport {
     private final Map<String, KiCadPoint> terminalPoints = new HashMap<>();
 
     private void terminal(KiCadPoint point, String name, double[] drawn) {
-        terminals.putIfAbsent(point.key(), new Terminal(name, drawn));
+        terminal(point, name, drawn, null);
+    }
+
+    /** A terminal at a KiCad point; a second one at the same point touches the first, and is wired to it. */
+    private void terminal(KiCadPoint point, String name, double[] drawn, double[] partCentre) {
+        Terminal terminal = new Terminal(name, drawn, partCentre);
+        Terminal first = terminals.putIfAbsent(point.key(), terminal);
+        if (first != null && !first.name().equals(name)) {
+            touching.add(new Touching(first, terminal, point));
+        }
         terminalPoints.putIfAbsent(point.key(), point);
     }
 
@@ -581,8 +865,9 @@ public final class KiCadSheetImport {
                 rounded(point.y() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE)};
     }
 
+    /** The nearest point of the sheet's grid: KiCad's 1.27 mm, twenty drawing units. */
     private static double grid(double value) {
-        return Math.round(value / 10) * 10;
+        return Math.round(value / GRID) * GRID;
     }
 
     private static double rounded(double value) {

@@ -686,6 +686,9 @@ public final class KiCadSchematicExport {
         Map<String, String> numbers = new LinkedHashMap<>();
         model.pins().forEach(pin -> pin.numbers().forEach((unit, number) -> numbers.putIfAbsent(
                 unit.isEmpty() || pin.shared() ? pin.name() : unit + "." + pin.name(), String.valueOf(number))));
+        // A pin a jMX number cannot say — KiCad's A, S1 or B3 — is named after it by the import, pinA: the number is read back.
+        model.pins().stream().filter(pin -> pin.numbers().isEmpty()).forEach(pin -> KiCadSymbolDrawing.numberOfPinName(pin.name())
+                .ifPresent(number -> numbers.putIfAbsent(pin.name(), number)));
         // The map's own numbering wins: KiCad's diode is 1 = K where the catalogue's 1 is its anode.
         mapping.ifPresent(found -> found.pins().forEach((number, pin) -> numbers.put(pin, number)));
         Optional<Block.Symbol> uses = document.block(Block.Symbol.class);
