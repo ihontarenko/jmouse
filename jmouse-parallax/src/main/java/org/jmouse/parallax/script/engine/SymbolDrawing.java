@@ -27,7 +27,7 @@ import java.util.function.Function;
  * @param inputs   what a living drawing is drawn from ({@link LivingDrawing})
  * @param elements a living drawing's elements
  */
-record SymbolDrawing(double width, double height, List<String> paths, List<Pin> pins, List<Label> labels,
+public record SymbolDrawing(double width, double height, List<String> paths, List<Pin> pins, List<Label> labels,
                      List<Indicator> indicators, List<String> upright, List<Input> inputs, List<Element> elements) {
 
     /** The only drawing version there is. */
@@ -37,15 +37,15 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
     static final List<String> GEOMETRY = List.of("at", "size", "radius", "from", "to", "pivot");
 
     /** Where a pin meets the drawing, and the text printed beside it; an empty label prints nothing. */
-    record Pin(String name, double x, double y, String label) {
+    public record Pin(String name, double x, double y, String label) {
     }
 
     /** Where a part's {@code name} or {@code value} is printed, the text centred on the point. */
-    record Label(String subject, double x, double y) {
+    public record Label(String subject, double x, double y) {
     }
 
     /** Where a part's live figure of this name is drawn: a box in the symbol's coordinates. */
-    record Indicator(String name, double left, double top, double right, double bottom) {
+    public record Indicator(String name, double left, double top, double right, double bottom) {
     }
 
     /**
@@ -54,15 +54,15 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
      * @param range   the range as written, empty for the default 0 … 1 and for a picture
      * @param picture whether it is a picture: a row of bytes, in hexadecimal
      */
-    record Input(String name, double low, double high, String range, boolean picture) {
+    public record Input(String name, double low, double high, String range, boolean picture) {
     }
 
     /**
      * A property's value: as written, as expression trees ({@link LivingDrawing}) — one per value, {@code move} has two
      * —, and how it moves: {@code still}, {@code live} or {@code animated} in the JSON.
      */
-    record Value(String written, List<Object> expressions, SymbolMotion motion) {
-        Value {
+    public record Value(String written, List<Object> expressions, SymbolMotion motion) {
+        public Value {
             expressions = List.copyOf(expressions);
         }
     }
@@ -72,9 +72,9 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
      * path data, geometry by word, a {@code when}'s condition (null otherwise), properties, what a layer hides and what a
      * group or a layer holds.
      */
-    record Element(String shape, String name, boolean live, String path, Map<String, List<Double>> geometry,
+    public record Element(String shape, String name, boolean live, String path, Map<String, List<Double>> geometry,
                    Value condition, Map<String, Value> properties, List<String> hidden, List<Element> children) {
-        Element {
+        public Element {
             geometry = Collections.unmodifiableMap(new LinkedHashMap<>(geometry));
             properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
             hidden = List.copyOf(hidden);
@@ -82,7 +82,7 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
         }
     }
 
-    SymbolDrawing {
+    public SymbolDrawing {
         paths = List.copyOf(paths);
         pins = List.copyOf(pins);
         labels = List.copyOf(labels);
@@ -216,7 +216,7 @@ record SymbolDrawing(double width, double height, List<String> paths, List<Pin> 
     // ─── writing ────────────────────────────────────────────────────────────────────────────────────
 
     /** The canonical JSON of this drawing. */
-    String toJson() {
+    public String toJson() {
         JsonObject drawing = new JsonObject().put("version", VERSION);
         if (width > 0 || height > 0) {
             drawing.put("width", width).put("height", height);

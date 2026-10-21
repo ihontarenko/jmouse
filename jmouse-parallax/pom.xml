@@ -88,6 +88,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- KiCad, the model: schematics and symbols are imported to and exported from jMX (org.jmouse.parallax.kicad) -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-kicad</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
