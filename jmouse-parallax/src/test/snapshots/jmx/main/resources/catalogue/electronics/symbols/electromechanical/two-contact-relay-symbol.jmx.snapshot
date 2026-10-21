@@ -1,0 +1,261 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Relay with two normally-open contacts"
+  slug: "two-contact-relay-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A relay with two make contacts, as drawn on a schematic: its coil, and two contacts on one armature that close together while the coil holds them"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 400.0
+          height: Double 240.0
+          paths: List(1)
+              - "M-156 0H-140M-130 0H-114M-104 0H-88M-78 0H-62M-52 0H-36M-26 0H-10M2 0H18M28 0H44M54 0H70M80 0H96M106 0H122M132 0H148"
+          pins: List(6)
+              - SymbolPin
+                  pin: "coil_one"
+                  x: Double -180.0
+                  y: Double -120.0
+                  label: ""
+              - SymbolPin
+                  pin: "coil_two"
+                  x: Double -180.0
+                  y: Double 120.0
+                  label: ""
+              - SymbolPin
+                  pin: "first_common"
+                  x: Double -20.0
+                  y: Double 120.0
+                  label: ""
+              - SymbolPin
+                  pin: "first_normally_open"
+                  x: Double 20.0
+                  y: Double -120.0
+                  label: ""
+              - SymbolPin
+                  pin: "second_common"
+                  x: Double 140.0
+                  y: Double 120.0
+                  label: ""
+              - SymbolPin
+                  pin: "second_normally_open"
+                  x: Double 180.0
+                  y: Double -120.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double -120.0
+                  y: Double -60.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double -120.0
+                  y: Double 64.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(2)
+              - SymbolInput
+                  name: "energized"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(4)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(4)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-180-120V-40M-180 40V120M-200-40H-160V40H-200ZM-200 40L-160-40"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 14
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-20 120V20M20-120V-20M14-20H26"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 15
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M140 120V20M180-120V-20M174-20H186"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 16
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-23 20A3 3 0 1 0 -17 20A3 3 0 1 0 -23 20M137 20A3 3 0 1 0 143 20A3 3 0 1 0 137 20"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 17
+                  line: Integer 13
+              - SymbolElement
+                  shape: "group"
+                  name: "first_blade"
+                  live: true
+                  path: ""
+                  geometry: Map(1)
+                      pivot = List(2)
+                          - Double -20.0
+                          - Double 20.0
+                  condition: null
+                  properties: List(2)
+                      - SymbolProperty rotate LIVE
+                          - HostCall[name=between, arguments=[Constant[value=0], Constant[value=0.436332313], HostCall[name=smooth, arguments=[Variable[name=energized], Constant[value=0.04]]]]]
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=energized], right=Constant[value=0.5]], value=Variable[name=positive]]], otherwise=Variable[name=signal]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-20 20L-1-33"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 25
+                  line: Integer 24
+              - SymbolElement
+                  shape: "group"
+                  name: "second_blade"
+                  live: true
+                  path: ""
+                  geometry: Map(1)
+                      pivot = List(2)
+                          - Double 140.0
+                          - Double 20.0
+                  condition: null
+                  properties: List(2)
+                      - SymbolProperty rotate LIVE
+                          - HostCall[name=between, arguments=[Constant[value=0], Constant[value=0.436332313], HostCall[name=smooth, arguments=[Variable[name=energized], Constant[value=0.04]]]]]
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=energized], right=Constant[value=0.5]], value=Variable[name=positive]]], otherwise=Variable[name=signal]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M140 20L159-33"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 31
+                  line: Integer 30
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.35], right=Binary[operator=MULTIPLY, left=Constant[value=0.65], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M-187-9L-183-3M-174-8L-178-2M-186 8L-182 3M-173 9L-177 3"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 37
+                  line: Integer 36
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 9ccc9315d3f0c741f600b76bbdbb1c53
+== line 4 begun with a stray word
+READS 2d7ab5587bd1f42b3dfc92fdfca2288c
+== line 11 deleted
+READS 634e3d4dc32ced5387eb38d690d99f8f
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 18 deleted
+READS ec8b3af4244b1ba1e7551c514e62f24d
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 18:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 25 deleted
+READS a23e8c558da89dd002f7bedd9509bf69
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 25:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 32 deleted
+READS b947753257a1b5d818ef074cdfa6fed0
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 32:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 39 deleted
+READS fc0dbcb79ead4640210dc6d028ecc65d
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 39:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 46 deleted
+READS 5c64412a75504a92b531a564266724e1
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/two-contact-relay-symbol.jmx 46:5 'zzz' is not a block of a symbol; it holds meta

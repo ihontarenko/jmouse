@@ -1,0 +1,130 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Jumper, bridged"
+  slug: "bridged-jumper-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A jumper closed by its bridge, as drawn on a schematic: two pads and the solder or link that joins them — a connection that can be cut"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 40.0
+          paths: List(0)
+          pins: List(2)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -22.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 28.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(2)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(2)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-40 0H-18M18 0H40"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 11
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-18-8H-4V8H-18ZM4-8H18V8H4Z"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 12
+                  line: Integer 10
+              - SymbolElement
+                  shape: "path"
+                  name: "bridge"
+                  live: true
+                  path: "M-6-3H6V3H-6Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(2)
+                      - SymbolProperty fill STILL
+                          - Variable[name=signal]
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 17
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/bridged-jumper-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 0da2b4bf25e0b59944ed743125348917
+== line 4 begun with a stray word
+READS 11a9e26088c32bf3ed361eb990b57601
+== line 11 deleted
+READS aea0ab6769a92b5bbf43c250c7ad40b3
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/bridged-jumper-symbol.jmx 11:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 18 deleted
+READS 482557ebd5c80c527a636dbb6b29d2d9
+== line 18 begun with a stray word
+READS 847a853630b5339737a1ed98fe240ca8
+== line 25 deleted
+READS 1c045848264588af4ae5189c7dd96afa
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/electromechanical/bridged-jumper-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta
