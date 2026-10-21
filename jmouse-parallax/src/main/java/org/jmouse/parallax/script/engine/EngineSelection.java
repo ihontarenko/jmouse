@@ -564,7 +564,7 @@ public final class EngineSelection {
         }
         ObjectDefinition.GeometricConstruction shown = new ObjectDefinition.GeometricConstruction(2, elements);
         int dimension = constants.optionalInteger(DefinitionWords.DIMENSION, what)
-                .orElse(DefinitionWriter.shownDimension(shown));
+                .orElse(DefinitionBlocks.shownDimension(shown));
         return new ObjectDefinition.GeometricConstruction(dimension, elements);
     }
 

@@ -7,6 +7,7 @@ import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.form.DocumentForms;
 import org.jmouse.parallax.script.form.DocumentOutline;
 import org.jmouse.parallax.script.form.FormEdit;
+import org.jmouse.parallax.script.writer.DocumentLines;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.object.ObjectDefinition.CircuitElement;
@@ -55,7 +56,7 @@ final class CanvasTexts {
         Map<String, CircuitElement> before = current.elements().stream()
                 .collect(Collectors.toMap(CircuitElement::id, element -> element));
         Map<String, String> parts = new LinkedHashMap<>();
-        circuit.elements().forEach(element -> parts.put(element.id(), DefinitionWriter.part(element)));
+        circuit.elements().forEach(element -> parts.put(element.id(), DocumentLines.part(DefinitionBlocks.part(element))));
         Set<String> unchangedParts = circuit.elements().stream()
                 .filter(element -> element.equals(before.get(element.id()))).map(CircuitElement::id)
                 .collect(Collectors.toSet());
@@ -71,7 +72,7 @@ final class CanvasTexts {
             text = probes(text, current, circuit);
         }
         if (!circuit.time().equals(current.time())) {
-            text = analysis(text, DefinitionWriter.analysis(circuit.time()));
+            text = analysis(text, DocumentLines.analysis(DefinitionBlocks.analysis(circuit.time())));
         }
         return declaredParameters(text, parameters);
     }
@@ -85,11 +86,11 @@ final class CanvasTexts {
         Map<String, String> lines = new LinkedHashMap<>();
         Map<String, Object> now = new HashMap<>();
         for (PlacedItem item : after.items()) {
-            lines.put(item.placement(), DefinitionWriter.placed(item));
+            lines.put(item.placement(), DocumentLines.layoutItem(DefinitionBlocks.layoutItem(item)));
             now.put(item.placement(), item);
         }
         for (SchematicWire wire : after.wires()) {
-            lines.put(wire.id(), DefinitionWriter.wire(wire));
+            lines.put(wire.id(), DocumentLines.wire(DefinitionBlocks.wire(wire)));
             now.put(wire.id(), wire);
         }
         return keyedLines(source, "layout", lines, key -> Objects.equals(was.get(key), now.get(key)));
@@ -111,7 +112,7 @@ final class CanvasTexts {
             text = ensureBlock(text, "ports");
             for (ObjectDefinition.SheetPort port : boundary.ports()) {
                 text = DocumentForms.apply(text, edit(FormEdit.Action.ADD_LINE, statementOf(text, "ports"), 0,
-                        Map.of("line", DefinitionWriter.port(port))));
+                        Map.of("line", DocumentLines.port(DefinitionBlocks.port(port)))));
             }
         }
 
@@ -129,7 +130,7 @@ final class CanvasTexts {
         Map<String, Block.Net> before = new HashMap<>();
         written.forEach(net -> before.put(net.net(), net));
         Map<String, String> lines = new LinkedHashMap<>();
-        nets.forEach((name, net) -> lines.put(name, DefinitionWriter.net(net)));
+        nets.forEach((name, net) -> lines.put(name, DocumentLines.net(net)));
         text = keyedLines(text, "nets", lines, name -> nets.get(name).equals(before.get(name)));
         int netsStatement = statementOf(text, "nets");
         if (nets.isEmpty() && netsStatement >= 0) {
@@ -148,16 +149,16 @@ final class CanvasTexts {
         Map<String, String> lines = new LinkedHashMap<>();
         Map<String, Object> now = new HashMap<>();
         for (ObjectDefinition.BenchProbe probe : circuit.probes()) {
-            lines.put(probe.id(), DefinitionWriter.probe(probe));
+            lines.put(probe.id(), DocumentLines.probe(DefinitionBlocks.probe(probe)));
             now.put(probe.id(), probe);
         }
         // The time base is the block's line keyed by its word, kept as written while it stays the same.
-        String timeBase = DefinitionWriter.TIME_BASE;
+        String timeBase = DefinitionBlocks.TIME_BASE;
         if (current.timePerDivision() != null) {
             was.put(timeBase, current.timePerDivision());
         }
         if (circuit.timePerDivision() != null) {
-            lines.put(timeBase, DefinitionWriter.timeBase(circuit.timePerDivision()));
+            lines.put(timeBase, DocumentLines.timeBase(DefinitionBlocks.timeBase(circuit.timePerDivision())));
             now.put(timeBase, circuit.timePerDivision());
         }
         return keyedLines(source, "probes", lines, key -> Objects.equals(was.get(key), now.get(key)));
@@ -188,7 +189,7 @@ final class CanvasTexts {
             }
             text = ensureBlock(text, "parameters");
             text = DocumentForms.apply(text, edit(FormEdit.Action.ADD_LINE, statementOf(text, "parameters"), 0,
-                    Map.of("line", ObjectDocumentWriter.slider(parameter))));
+                    Map.of("line", DocumentLines.parameter(ObjectDocumentBuilder.slider(parameter)))));
         }
         return text;
     }
@@ -201,7 +202,7 @@ final class CanvasTexts {
      */
     static String symbol(String source, String drawing, Head head) {
         String text = head(source, head);
-        List<String> lines = DefinitionWriter.drawingLines(drawing);
+        List<String> lines = DocumentLines.drawingLines(DefinitionBlocks.symbol(drawing));
         int position = 0;
         while (true) {
             DocumentOutline outline = DocumentOutline.of(text);

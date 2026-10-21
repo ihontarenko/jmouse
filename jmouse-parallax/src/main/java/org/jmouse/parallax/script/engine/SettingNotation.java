@@ -44,7 +44,8 @@ final class SettingNotation {
         return String.join(" ", pairs);
     }
 
-    private static String value(Object value) {
+    /** One setting's value, as {@link #write} spells it: a number, a truth value, a name or a text in quotes, a list. */
+    static String value(Object value) {
         return switch (value) {
             case Integer number -> number.toString();
             case Long number -> number.toString();

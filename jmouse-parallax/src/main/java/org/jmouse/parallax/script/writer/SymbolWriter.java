@@ -5,6 +5,7 @@ import org.jmouse.parallax.script.Block.SymbolElement;
 import org.jmouse.parallax.script.Block.SymbolInput;
 import org.jmouse.parallax.script.Block.SymbolProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,20 +43,30 @@ final class SymbolWriter {
         });
     }
 
-    /** A drawing's lines: its size, paths, inputs, elements, pins, labels and indicators. */
+    /** A drawing's lines: its size and paths, the inputs and elements of a living drawing, then its pins, labels and indicators. */
     static void drawing(Block.Symbol symbol, SourceLines lines) {
-        if (symbol.width() != 0 || symbol.height() != 0) {
-            lines.line("size " + Values.number(symbol.width()) + " x " + Values.number(symbol.height()));
-        }
-        symbol.paths().forEach(path -> lines.line("path " + Values.text(path)));
-        symbol.upright().forEach(path -> lines.line("path " + Values.text(path) + " upright"));
+        List<String> plain = plainLines(symbol);
+        int shape = (symbol.width() != 0 || symbol.height() != 0 ? 1 : 0) + symbol.paths().size() + symbol.upright().size();
+        plain.subList(0, shape).forEach(lines::line);
         symbol.inputs().forEach(input -> lines.line(input(input)));
         symbol.elements().forEach(element -> element(element, lines));
-        symbol.pins().forEach(pin -> lines.line("pin " + pin.pin() + " at " + Values.point(pin.x(), pin.y())
+        plain.subList(shape, plain.size()).forEach(lines::line);
+    }
+
+    /** The statements of a drawing a canvas redraws, in the order they are written: size, paths, upright paths, pins, labels, indicators. */
+    static List<String> plainLines(Block.Symbol symbol) {
+        List<String> lines = new ArrayList<>();
+        if (symbol.width() != 0 || symbol.height() != 0) {
+            lines.add("size " + Values.number(symbol.width()) + " x " + Values.number(symbol.height()));
+        }
+        symbol.paths().forEach(path -> lines.add("path " + Values.text(path)));
+        symbol.upright().forEach(path -> lines.add("path " + Values.text(path) + " upright"));
+        symbol.pins().forEach(pin -> lines.add("pin " + pin.pin() + " at " + Values.point(pin.x(), pin.y())
                 + Values.described(pin.label())));
-        symbol.labels().forEach(label -> lines.line("label " + label.subject() + " at " + Values.point(label.x(), label.y())));
-        symbol.indicators().forEach(indicator -> lines.line("indicator " + indicator.name() + " from "
+        symbol.labels().forEach(label -> lines.add("label " + label.subject() + " at " + Values.point(label.x(), label.y())));
+        symbol.indicators().forEach(indicator -> lines.add("indicator " + indicator.name() + " from "
                 + Values.point(indicator.left(), indicator.top()) + " to " + Values.point(indicator.right(), indicator.bottom())));
+        return lines;
     }
 
     /** {@code input closed}, {@code input current 0 .. 20 mA}, {@code input screen picture}. */

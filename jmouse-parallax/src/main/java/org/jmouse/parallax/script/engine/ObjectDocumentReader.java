@@ -53,8 +53,8 @@ final class ObjectDocumentReader {
         Meta meta = document.meta();
         return new DefinedObject(document.slug(), document.title(), meta.summary(), meta.description(),
                 meta.category() == null ? null : meta.category().toUpperCase(Locale.ROOT), meta.tags(),
-                meta.field(ObjectDocumentWriter.FEATURED).map(ObjectDocumentReader::isYes).orElse(false),
-                meta.field(ObjectDocumentWriter.LATEX).map(ObjectDocumentReader::text).orElse(null), definition,
+                meta.field(ObjectDocumentBuilder.FEATURED).map(ObjectDocumentReader::isYes).orElse(false),
+                meta.field(ObjectDocumentBuilder.LATEX).map(ObjectDocumentReader::text).orElse(null), definition,
                 parameters, properties(document), representations(document), presets(document), relations(document));
     }
 
@@ -120,7 +120,7 @@ final class ObjectDocumentReader {
         Set<String> owned = EngineSelection.ownedMetaFields(document);
         List<Property> properties = new ArrayList<>();
         document.meta().fields().forEach((field, value) -> {
-            if (field.equals(ObjectDocumentWriter.relationField(RelationKind.USES_SYMBOL))) {
+            if (field.equals(ObjectDocumentBuilder.relationField(RelationKind.USES_SYMBOL))) {
                 throw new IllegalArgumentException("'" + document.title() + "' names its symbol in meta; a part is drawn "
                         + "with 'symbol uses <slug> { port pin … }', the one place that choice is written.");
             }
@@ -128,12 +128,12 @@ final class ObjectDocumentReader {
                 throw new IllegalArgumentException("'" + document.title() + "' keeps its drawing in meta; a circuit is "
                         + "drawn by its 'layout' block: 'layout { R1 at 240, 200 rotate 90 }'.");
             }
-            if (ObjectDocumentWriter.RESERVED_FIELDS.contains(field) || ObjectDocumentWriter.isRelationField(field)
+            if (ObjectDocumentBuilder.RESERVED_FIELDS.contains(field) || ObjectDocumentBuilder.isRelationField(field)
                     || owned.contains(field)) {
                 return;
             }
             String key = field.replace('_', '-');
-            String label = document.meta().label(field).orElse(ObjectDocumentWriter.propertyLabel(key));
+            String label = document.meta().label(field).orElse(ObjectDocumentBuilder.propertyLabel(key));
             properties.add(new Property(key, label, text(value)));
         });
         return properties;
@@ -147,7 +147,7 @@ final class ObjectDocumentReader {
         List<Relation> relations = new ArrayList<>();
         document.meta().fields().forEach((field, value) -> {
             for (RelationKind kind : RelationKind.values()) {
-                if (kind != RelationKind.USES_SYMBOL && ObjectDocumentWriter.relationField(kind).equals(field)) {
+                if (kind != RelationKind.USES_SYMBOL && ObjectDocumentBuilder.relationField(kind).equals(field)) {
                     names(value).forEach(slug -> relations.add(new Relation(slug, kind)));
                 }
             }

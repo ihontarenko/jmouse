@@ -3,6 +3,7 @@ package org.jmouse.parallax.script.engine;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
+import org.jmouse.parallax.script.writer.DocumentWriter;
 import org.jmouse.parallax.object.ObjectDefinition;
 
 /**
@@ -74,7 +75,7 @@ public final class ExperienceDefinitions {
         if (object.definition() instanceof ObjectDefinition.Component component) {
             return component.source();
         }
-        return ObjectDocumentWriter.write(object);
+        return DocumentWriter.write(ObjectDocumentBuilder.documentOf(object));
     }
 
     /**

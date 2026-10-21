@@ -4,6 +4,7 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.Block.Criterion;
 import org.jmouse.parallax.script.Block.Part;
 import org.jmouse.parallax.script.Block.Placement;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ final class CircuitWriter {
     }
 
     /** {@code R1 at 240, 200 rotate 90}, {@code U4.B at …}, {@code GND1 ground at …}, {@code A1 ground agnd at …}, {@code L1 label vp at …}. */
-    private static String item(Block.LayoutItem item) {
+    static String item(Block.LayoutItem item) {
         StringBuilder line = new StringBuilder(item.id());
         item.unit().ifPresent(unit -> line.append('.').append(unit));
         item.mark().ifPresent(mark -> line.append(' ').append(mark));
@@ -78,7 +79,7 @@ final class CircuitWriter {
     }
 
     /** {@code W1 wire R1.negative to C1.positive via 240 120, 300 120}. */
-    private static String wire(Block.LayoutWire wire) {
+    static String wire(Block.LayoutWire wire) {
         StringBuilder line = new StringBuilder(wire.id()).append(" wire ").append(wire.from()).append(" to ").append(wire.to());
         if (!wire.bends().isEmpty()) {
             line.append(" via ").append(String.join(", ", wire.bends().stream()
@@ -87,40 +88,50 @@ final class CircuitWriter {
         return line.toString();
     }
 
-    /** {@code name [ground] [global] [route x,y x,y …]}. */
     static void nets(Block.Nets nets, SourceLines lines) {
-        lines.block("nets", inner -> nets.nets().forEach(net -> {
-            StringBuilder line = new StringBuilder(net.net());
-            if (net.ground()) {
-                line.append(" ground");
-            }
-            if (net.global()) {
-                line.append(" global");
-            }
-            if (!net.route().isEmpty()) {
-                line.append(" route ").append(String.join(" ", net.route().stream()
-                        .map(point -> Values.number(point.x()) + "," + Values.number(point.y())).toList()));
-            }
-            inner.line(line.toString());
-        }));
+        lines.block("nets", inner -> nets.nets().forEach(net -> inner.line(net(net))));
+    }
+
+    /** {@code name [ground] [global] [route x,y x,y …]}. */
+    static String net(Block.Net net) {
+        StringBuilder line = new StringBuilder(net.net());
+        if (net.ground()) {
+            line.append(" ground");
+        }
+        if (net.global()) {
+            line.append(" global");
+        }
+        if (!net.route().isEmpty()) {
+            line.append(" route ").append(String.join(" ", net.route().stream()
+                    .map(point -> Values.number(point.x()) + "," + Values.number(point.y())).toList()));
+        }
+        return line.toString();
+    }
+
+    static void ports(Block.Ports ports, SourceLines lines) {
+        lines.block("ports", inner -> ports.ports().forEach(port -> inner.line(port(port))));
     }
 
     /** {@code input in}, {@code output out}. */
-    static void ports(Block.Ports ports, SourceLines lines) {
-        lines.block("ports", inner -> ports.ports().forEach(port ->
-                inner.line(port.direction().name().toLowerCase(Locale.ROOT) + " " + port.net())));
+    static String port(Block.Port port) {
+        return port.direction().name().toLowerCase(Locale.ROOT) + " " + port.net();
     }
 
     /** The channels, then the time base the oscilloscope opens on. */
     static void probes(Block.Probes probes, SourceLines lines) {
         lines.block("probes", inner -> {
             probes.probes().forEach(probe -> inner.line(probe(probe)));
-            probes.timePerDivision().ifPresent(time -> inner.line("time " + time.written() + "/div"));
+            probes.timePerDivision().ifPresent(time -> inner.line(timeBase(time)));
         });
     }
 
+    /** {@code time 5 ms/div}. */
+    static String timeBase(Quantity timePerDivision) {
+        return "time " + timePerDivision.written() + "/div";
+    }
+
     /** {@code CH1 out 2 V/div}, {@code CH2 out against ref}, {@code CH3 current R1}, {@code L1 level clock}. */
-    private static String probe(Block.Probe probe) {
+    static String probe(Block.Probe probe) {
         StringBuilder line = new StringBuilder(probe.id()).append(' ');
         switch (probe.measure()) {
             case 'I' -> line.append("current ");
