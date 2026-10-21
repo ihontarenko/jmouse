@@ -3,6 +3,7 @@ symbol "Thermistor" as thermistor-symbol {
         summary "A thermistor, as drawn on a schematic: a resistor's body crossed by the hooked line of a resistance that follows the temperature"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input failed

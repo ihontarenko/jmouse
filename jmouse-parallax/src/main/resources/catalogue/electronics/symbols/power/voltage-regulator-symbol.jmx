@@ -3,6 +3,7 @@ symbol "Three-terminal voltage regulator" as voltage-regulator-symbol {
         summary "A three-terminal linear regulator, as drawn on a schematic: input on the left, output on the right, its reference below"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 80
     input failed

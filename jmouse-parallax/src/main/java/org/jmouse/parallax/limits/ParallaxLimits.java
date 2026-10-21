@@ -37,4 +37,7 @@ public interface ParallaxLimits {
 
     /** Objects one scene may hold. */
     long maximumSceneObjects();
+
+    /** Pins one symbol may draw: a 2 × 60 connector, a 144-lead chip. A guard against a drawing that is not a part. */
+    int maximumSymbolPins();
 }

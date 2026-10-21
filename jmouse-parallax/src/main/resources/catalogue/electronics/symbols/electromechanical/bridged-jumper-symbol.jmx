@@ -3,6 +3,7 @@ symbol "Jumper, bridged" as bridged-jumper-symbol {
         summary "A jumper closed by its bridge, as drawn on a schematic: two pads and the solder or link that joins them — a connection that can be cut"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input failed

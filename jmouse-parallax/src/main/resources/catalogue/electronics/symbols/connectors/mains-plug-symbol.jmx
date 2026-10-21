@@ -3,6 +3,7 @@ symbol "Mains plug with earth" as mains-plug-symbol {
         summary "A mains plug with an earth contact, as drawn on a schematic: line, neutral and earth leaving to the right"
         category circuits
         tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     path "M-30-30H6V30H-30ZM6-20H40M6 0H40M6 20H40M28 20V30M22 30H34M24 34H32"

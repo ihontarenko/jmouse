@@ -24,7 +24,7 @@ component "Potentiometer" as potentiometer type potentiometer {
         b analog 3  "second end"
     }
 
-    symbol uses potentiometer-symbol {
+    symbol uses potentiometer-symbol, trimmer-symbol {
         failed = failed
         position = position
     }

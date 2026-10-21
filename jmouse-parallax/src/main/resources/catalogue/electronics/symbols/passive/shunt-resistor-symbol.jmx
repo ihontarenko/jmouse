@@ -3,6 +3,7 @@ symbol "Shunt resistor, four terminals" as shunt-resistor-symbol {
         summary "A current-sense shunt with Kelvin terminals, as drawn on a schematic: the current runs top to bottom, the voltage is taken from the right"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     input load 0 .. 1

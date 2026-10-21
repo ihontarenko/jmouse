@@ -3,6 +3,7 @@ symbol "N-channel MOSFET" as n-channel-mosfet-symbol {
         summary "N-channel MOSFET, as drawn on a schematic"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     input conduction

@@ -3,6 +3,7 @@ symbol "Sheet port" as port-label-symbol {
         summary "A net the sheet hands to its parent, as KiCad's hierarchical label: the pin of this sheet's block on the sheet that places it. The arrow points both ways — the signal may go either way."
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 40 x 48
     path "M0 24V12"

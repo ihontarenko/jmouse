@@ -3,6 +3,7 @@ symbol "Diode" as diode-symbol {
         summary "Diode, as drawn on a schematic: lit inside while it conducts, its bar thickening as it blocks, hot in breakdown"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input forward 0 .. 1

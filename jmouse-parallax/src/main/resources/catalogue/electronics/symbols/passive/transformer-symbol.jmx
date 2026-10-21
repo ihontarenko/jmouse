@@ -3,6 +3,7 @@ symbol "Transformer" as transformer-symbol {
         summary "Transformer, as drawn on a schematic: its windings char and smoulder once it has burned out"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     input failed

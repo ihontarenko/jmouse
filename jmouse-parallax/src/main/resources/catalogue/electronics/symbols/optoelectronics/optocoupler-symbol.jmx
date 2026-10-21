@@ -3,6 +3,7 @@ symbol "Optocoupler" as optocoupler-symbol {
         summary "Optocoupler, as drawn on a schematic: its LED lights with the current it is given, its light crosses the barrier, and the phototransistor conducts with what it receives"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 100 x 80
     input light 0 .. 1

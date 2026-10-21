@@ -3,6 +3,7 @@ symbol "Fuse" as fuse-symbol {
         summary "Fuse, as drawn on a schematic"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     path "M-40 0H40M-17-7H17V7H-17Z"

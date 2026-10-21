@@ -3,6 +3,7 @@ symbol "XOR gate" as xor-gate-symbol {
         summary "A two-input exclusive-OR gate, as drawn on a schematic (ANSI)"
         category circuits
         tags electronics, schematic, logic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     path "M-20-20H0Q18-20 26 0Q18 20 0 20H-20Q-8 0-20-20ZM-27-20Q-15 0-27 20M-40-10H-22.5M-40 10H-22.5M26 0H40M-10-20V-30M-10 20V30"

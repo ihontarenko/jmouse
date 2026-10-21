@@ -3,6 +3,7 @@ symbol "Adjustable voltage regulator" as adjustable-regulator-symbol {
         summary "An adjustable three-terminal linear regulator, as drawn on a schematic: input on the left, output on the right, the adjustment below"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 80
     input failed

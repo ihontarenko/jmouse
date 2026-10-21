@@ -3,6 +3,7 @@ symbol "Global net label" as global-label-symbol {
         summary "A net that is one name across every sheet of a project, as KiCad's global label: the rails a power symbol draws. Every global label of one name, on any sheet, is that net."
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 40 x 44
     path "M0 22V10"

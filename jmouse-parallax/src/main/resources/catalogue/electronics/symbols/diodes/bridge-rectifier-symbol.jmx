@@ -3,6 +3,7 @@ symbol "Bridge rectifier" as bridge-rectifier-symbol {
         summary "Bridge rectifier, as drawn on a schematic: the pair of diodes that carries the current lights — one diagonal on each half of the mains"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 120
     input pair_a 0 .. 1

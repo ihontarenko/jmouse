@@ -3,6 +3,7 @@ symbol "Capacitor" as capacitor-symbol {
         summary "Capacitor, as drawn on a schematic: its plates take the colours of + and − as it charges, thickening and glowing as strongly as its voltage is against its rating"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input charge -1 .. 1

@@ -3,6 +3,7 @@ symbol "Varistor" as varistor-symbol {
         summary "A varistor, as drawn on a schematic: a resistor's body crossed by the bent line of a resistance that falls with the voltage"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input failed

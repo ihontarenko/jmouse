@@ -3,6 +3,7 @@ symbol "Barrel jack" as barrel-jack-symbol {
         summary "A DC barrel jack, as drawn on a schematic: the centre pin above, the sleeve below"
         category circuits
         tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     path "M-30-24H-2V-16H-30ZM-2-20H40M-14 20H40M-14 20V2L-20-6M-14 2L-8-6"

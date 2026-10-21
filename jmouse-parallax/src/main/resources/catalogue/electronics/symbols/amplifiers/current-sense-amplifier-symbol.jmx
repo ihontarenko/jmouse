@@ -3,6 +3,7 @@ symbol "Current-sense amplifier" as current-sense-amplifier-symbol {
         summary "A current-sense amplifier, as drawn on a schematic: the shunt's two inputs and the two references on the left, the output on the right, the supply above and ground below"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 160
     input failed

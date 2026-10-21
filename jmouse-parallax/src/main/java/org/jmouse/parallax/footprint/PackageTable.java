@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * One entry of a package table — a JEDEC outline, a chip size, a header pitch — read in millimetres. A length is written
+ * One entry of a library table — a JEDEC outline, a chip size, a header pitch, a connector family — read in millimetres. A length is written
  * with its unit ({@code 1.27 mm}); a tolerance as a range ({@code 5.8 mm .. 6.2 mm}).
  */
-record PackageTable(SheetEntry entry) {
+public record PackageTable(SheetEntry entry) {
 
     /** From the smallest to the largest a maker may ship. */
     record Span(double minimum, double maximum) {
@@ -37,7 +37,7 @@ record PackageTable(SheetEntry entry) {
     }
 
     /** A footprint's name from its kind's template: {@code "axial-resistor-body-{code}-pitch-{pitch}"}. */
-    static String named(String template, Map<String, String> words) {
+    public static String named(String template, Map<String, String> words) {
         String named = template;
         for (Map.Entry<String, String> word : words.entrySet()) {
             named = named.replace("{" + word.getKey() + "}", word.getValue());
@@ -73,11 +73,11 @@ record PackageTable(SheetEntry entry) {
         return words;
     }
 
-    String id() {
+    public String id() {
         return entry.id();
     }
 
-    String title() {
+    public String title() {
         return entry.title().orElse(entry.id());
     }
 
@@ -106,11 +106,11 @@ record PackageTable(SheetEntry entry) {
         return new Span(single, single);
     }
 
-    String word(String field) {
+    public String word(String field) {
         return optionalWord(field).orElseThrow(() -> refused(field, "a word"));
     }
 
-    Optional<String> optionalWord(String field) {
+    public Optional<String> optionalWord(String field) {
         return entry.value(field).map(value -> switch (value) {
             case SheetValue.Word(String word) -> word;
             case SheetValue.Text(String text) -> text;
@@ -157,7 +157,7 @@ record PackageTable(SheetEntry entry) {
     }
 
     /** {@code rows 1, 2} or {@code pins 1 .. 40}: whole numbers, a range spelled out. */
-    List<Integer> counts(String field) {
+    public List<Integer> counts(String field) {
         SheetValue value = require(field);
         List<Integer> counts = new ArrayList<>();
         if (value instanceof SheetValue.Range(SheetValue from, SheetValue to)) {

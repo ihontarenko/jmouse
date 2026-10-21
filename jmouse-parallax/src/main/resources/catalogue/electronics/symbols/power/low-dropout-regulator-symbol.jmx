@@ -3,6 +3,7 @@ symbol "Low-dropout regulator with set and good pins" as low-dropout-regulator-s
         summary "A resistor-set low-dropout regulator, as drawn on a schematic: input, enable and the good-threshold on the left, the output, its sense and the good flag on the right, the set, the limit and ground below"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 160 x 160
     input failed

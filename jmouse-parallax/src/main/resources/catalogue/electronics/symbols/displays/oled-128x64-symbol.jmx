@@ -3,6 +3,7 @@ symbol "128×64 OLED module" as oled-128x64-symbol {
         summary "A monochrome OLED module on I²C: its 128-column screen shows the controller's display memory, two units a pixel"
         category circuits
         tags electronics, schematic, display
+        license "CERN-OHL-W-2.0"
     }
     size 300 x 200
     input screen picture

@@ -3,6 +3,7 @@ symbol "Net label" as net-label-symbol {
         summary "A net's label: a tag on a short lead, the net's name over it. Every label of one name is one net — a rail or any signal — with no wire drawn between them, as KiCad's labels are."
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 40 x 40
     path "M0 20V10"

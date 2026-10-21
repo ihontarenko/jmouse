@@ -3,7 +3,9 @@ symbol "Pin header, 2 x 8" as pin-header-2x8-symbol {
         summary "A two-row pin header of 16, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
         category circuits
         tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
     }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
     size 120 x 340
     path "M-20 -130H20V170H-20ZM-60 -120H-20M20 -120H60M-60 -80H-20M20 -80H60M-60 -40H-20M20 -40H60M-60 0H-20M20 0H60M-60 40H-20M20 40H60M-60 80H-20M20 80H60M-60 120H-20M20 120H60M-60 160H-20M20 160H60"
     pin pin1 at -60, -120 "1"

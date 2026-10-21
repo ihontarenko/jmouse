@@ -3,6 +3,7 @@ symbol "Seven-segment display" as seven-segment-symbol {
         summary "A seven-segment digit and its point, cathodes common: each segment lights red as its own current flows"
         category circuits
         tags electronics, schematic, display
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 120
     input light_a 0 .. 100

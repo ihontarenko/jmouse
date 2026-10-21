@@ -3,6 +3,7 @@ symbol "P-channel JFET" as p-channel-jfet-symbol {
         summary "P-channel JFET, as drawn on a schematic: the source at the top, the gate's arrow pointing out of the channel"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     input conduction

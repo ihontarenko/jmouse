@@ -3,6 +3,7 @@ symbol "Switch" as switch-symbol {
         summary "Switch, as drawn on a schematic: its lever lies on the far contact while it is closed"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input closed

@@ -3,6 +3,7 @@ symbol "Zener diode" as zener-diode-symbol {
         summary "Zener diode, as drawn on a schematic: lit inside while it conducts forward, its bar glowing while it regulates in breakdown"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input forward 0 .. 1

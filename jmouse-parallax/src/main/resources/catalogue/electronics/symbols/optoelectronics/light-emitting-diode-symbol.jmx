@@ -3,6 +3,7 @@ symbol "Light-emitting diode" as light-emitting-diode-symbol {
         summary "Light-emitting diode, as drawn on a schematic: its die lights in its own colour as current flows, and chars once it has burned out"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input light 0 .. 100

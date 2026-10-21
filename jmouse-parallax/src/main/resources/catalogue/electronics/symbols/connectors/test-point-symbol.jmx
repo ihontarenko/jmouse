@@ -3,6 +3,7 @@ symbol "Test point" as test-point-symbol {
         summary "Test point, as drawn on a schematic"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 60 x 40
     path "M0 20V0M-5-5H5V5H-5Z"

@@ -3,6 +3,7 @@ symbol "LED bar" as led-bar-symbol {
         summary "Eight LEDs in a row, cathodes common: each segment lights red as its own current flows"
         category circuits
         tags electronics, schematic, display
+        license "CERN-OHL-W-2.0"
     }
     size 180 x 120
     input light_0 0 .. 100

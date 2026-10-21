@@ -3,6 +3,7 @@ symbol "Triac" as triac-symbol {
         summary "Triac, as drawn on a schematic: two thyristors back to back with one gate"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     input conduction

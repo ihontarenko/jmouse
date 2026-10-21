@@ -3,6 +3,7 @@ symbol "84×48 graphic LCD module" as lcd-84x48-symbol {
         summary "The Nokia 5110 module: an 84×48 monochrome LCD on SPI, its screen showing the controller's display memory, three units a pixel"
         category circuits
         tags electronics, schematic, display
+        license "CERN-OHL-W-2.0"
     }
     size 280 x 220
     input screen picture

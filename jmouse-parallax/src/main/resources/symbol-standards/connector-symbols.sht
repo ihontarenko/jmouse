@@ -1,0 +1,29 @@
+# Connector symbols drawn from their contact count: one drawing per style, every count of its range. A style is how
+# the contacts stand — `single-row` (each a pin leaving to the right), `double-row` (odd on the left, even on the
+# right, as a ribbon cable counts them), `screw` (each wire coming in from the left under its screw). Contacts stand
+# on the 40 pitch; the name template takes the count.
+sheet "Connector symbols" as connector-symbols {
+    description "Pin headers and screw terminals, one symbol per contact count."
+    license "CERN-OHL-W-2.0"
+
+    pin-header-single "Pin header" {
+        name "pin-header-1x{pins}"
+        style single-row
+        pins 1 .. 60
+        folder "connectors"
+    }
+
+    pin-header-double "Pin header" {
+        name "pin-header-2x{pins}"
+        style double-row
+        pins 1 .. 60
+        folder "connectors"
+    }
+
+    screw-terminal "Screw terminal" {
+        name "screw-terminal-1x{pins}"
+        style screw
+        pins 1 .. 24
+        folder "connectors"
+    }
+}

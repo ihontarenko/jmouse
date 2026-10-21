@@ -3,6 +3,7 @@ symbol "Operational amplifier, KiCad's proportions" as operational-amplifier-wid
         summary "Operational amplifier as KiCad draws it: the non-inverting input on top, inputs 2.54 mm apart, the supplies from the triangle's slanted side — the same living drawing as the compact one, so a KiCad design's wires land on its pins"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # KiCad's Amplifier_Operational at 2.54 mm = 40: inputs at x = -120, the output at 120, the supplies at x = -40 from
     # the slanted sides (y = ±60 there) out to ±120.

@@ -1,5 +1,6 @@
 package org.jmouse.parallax.store.catalogue;
 
+import org.jmouse.parallax.limits.ParallaxLimits;
 import org.jmouse.formula.FormulaException;
 import org.jmouse.parallax.catalogue.HomeCategoryPolicy;
 import org.jmouse.parallax.Computation;
@@ -88,6 +89,7 @@ public class Catalogue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Catalogue.class);
 
+    private final ParallaxLimits limits;
     private final ObjectStore objects;
     private final CategoryStore categories;
     private final ObjectAccess objectAccess;
@@ -107,7 +109,9 @@ public class Catalogue {
                      ParallaxAuthority authority, Computations computations, ParallaxJson documents,
                      ApplicationEventPublisher events, Clock clock, FormulaNotations notations,
                      ComponentModels componentModels, ObjectDocuments objectDocuments,
-                     ParallaxPlaces places, SharedDocuments sharedDocuments, HomeCategoryPolicy homeCategories) {
+                     ParallaxPlaces places, SharedDocuments sharedDocuments, HomeCategoryPolicy homeCategories,
+                     ParallaxLimits limits) {
+        this.limits = limits;
         this.objects = objects;
         this.categories = categories;
         this.objectAccess = objectAccess;
@@ -777,8 +781,9 @@ public class Catalogue {
                 throw ParallaxProblem.invalid("A symbol needs version 1 and up to 200 vector paths.");
             }
             if (drawing.get("pins") != null) {
-                if (!(drawing.get("pins") instanceof List<?> pins) || pins.size() > 64) {
-                    throw ParallaxProblem.invalid("A symbol can have at most 64 pins.");
+                int maximum = limits.maximumSymbolPins();
+                if (!(drawing.get("pins") instanceof List<?> pins) || pins.size() > maximum) {
+                    throw ParallaxProblem.invalid("A symbol can have at most " + maximum + " pins.");
                 }
                 Set<String> names = new LinkedHashSet<>();
                 for (Object entry : pins) {

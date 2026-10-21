@@ -3,6 +3,7 @@ symbol "Ferrite bead" as ferrite-bead-symbol {
         summary "A ferrite bead, as drawn on a schematic: a slanted block threaded on the wire"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input failed

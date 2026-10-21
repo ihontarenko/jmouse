@@ -3,6 +3,7 @@ symbol "Schottky diode" as schottky-diode-symbol {
         summary "Schottky diode, as drawn on a schematic: the diode's triangle against a bar hooked at both ends — lit inside while it conducts, the bar thickening as it blocks"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input forward 0 .. 1

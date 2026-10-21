@@ -3,6 +3,7 @@ symbol "16×2 character LCD" as lcd-1602-symbol {
         summary "A 16×2 character LCD module: its window shows the 32 characters its controller holds on screen"
         category circuits
         tags electronics, schematic, display
+        license "CERN-OHL-W-2.0"
     }
     size 180 x 120
     input cell_0 0 .. 255

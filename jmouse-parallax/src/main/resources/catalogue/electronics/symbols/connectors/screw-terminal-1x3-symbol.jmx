@@ -3,7 +3,9 @@ symbol "Screw terminal, 3 contacts" as screw-terminal-1x3-symbol {
         summary "A terminal block of 3 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
         category circuits
         tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
     }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
     size 80 x 140
     path "M-20 -50H20V50H-20ZM-40 -40H-6M-6 -40A6 6 0 1 0 6 -40A6 6 0 1 0 -6 -40ZM-4 -36L4 -44M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36"
     pin pin1 at -40, -40 "1"

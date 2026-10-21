@@ -3,6 +3,7 @@ symbol "Buzzer" as buzzer-symbol {
         summary "A buzzer, as drawn on a schematic: a sounder's dome on its body, its leads in from one side — waves leave the dome while it sounds"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # Both leads in from the left, 2.54 mm apart, as a sounder is usually wired: the positive one above.
     size 80 x 80

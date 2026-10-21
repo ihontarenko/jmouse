@@ -3,6 +3,7 @@ symbol "Inductor" as inductor-symbol {
         summary "Inductor, as drawn on a schematic"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input failed

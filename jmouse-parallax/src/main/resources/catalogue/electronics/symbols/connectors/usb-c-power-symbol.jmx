@@ -3,6 +3,7 @@ symbol "USB-C receptacle, power only" as usb-c-power-symbol {
         summary "A USB-C receptacle that only takes power, as drawn on a schematic: bus power, the two configuration pins and ground on the right, the shield below"
         category circuits
         tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 120
     path "M-40-40H20V40H-40ZM20-30H60M20-10H60M20 10H60M20 30H60M-20 40V60"

@@ -3,6 +3,7 @@ symbol "AND gate" as and-gate-symbol {
         summary "A two-input AND gate, as drawn on a schematic (ANSI)"
         category circuits
         tags electronics, schematic, logic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     path "M-20-20H0A20 20 0 0 1 0 20H-20ZM-40-10H-20M-40 10H-20M20 0H40M-10-20V-30M-10 20V30"

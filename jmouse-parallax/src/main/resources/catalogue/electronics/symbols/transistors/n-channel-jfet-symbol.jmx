@@ -3,6 +3,7 @@ symbol "N-channel JFET" as n-channel-jfet-symbol {
         summary "N-channel JFET, as drawn on a schematic: the gate's arrow points into the channel"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     input conduction

@@ -3,6 +3,7 @@ symbol "Ground" as ground-symbol {
         summary "Ground, as drawn on a schematic"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 60 x 40
     path "M0-20V0M-16 0H16M-10 6H10M-4 12H4"

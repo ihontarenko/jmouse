@@ -3,6 +3,7 @@ symbol "Adjustable shunt reference" as shunt-reference-symbol {
         summary "An adjustable shunt regulator, as drawn on a schematic: a Zener's bar on a diode, its reference input coming in from the side"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # Drawn upright, as the TL431's datasheet draws it: the cathode above, the anode below, the reference from the left
     # into the diode's slanted side.

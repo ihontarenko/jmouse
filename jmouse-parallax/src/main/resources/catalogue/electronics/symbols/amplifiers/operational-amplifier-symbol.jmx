@@ -3,6 +3,7 @@ symbol "Operational amplifier" as operational-amplifier-symbol {
         summary "Operational amplifier, as drawn on a schematic: a gauge shows where its output stands between its supplies, the higher input lights, and the body warms when the output is pinned at a rail"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # The triangle's slanted sides cross x = 0 at y = ±15; the supply leads leave from there, so the rails come in from
     # above and below and never cross the signal path, as on every datasheet's drawing.

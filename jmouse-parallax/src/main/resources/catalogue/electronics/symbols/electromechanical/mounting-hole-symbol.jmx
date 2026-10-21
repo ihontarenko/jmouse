@@ -3,6 +3,7 @@ symbol "Mounting hole with pad" as mounting-hole-symbol {
         summary "A plated mounting hole, as drawn on a schematic: the hole, and the pad that ties it to a net below"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 40 x 60
     path "M-12-10A12 12 0 1 0 12-10A12 12 0 1 0-12-10ZM-6-10A6 6 0 1 0 6-10A6 6 0 1 0-6-10ZM0 2V20"

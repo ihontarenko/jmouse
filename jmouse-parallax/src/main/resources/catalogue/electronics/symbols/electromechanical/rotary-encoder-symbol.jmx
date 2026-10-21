@@ -3,6 +3,7 @@ symbol "Rotary encoder with switch" as rotary-encoder-symbol {
         summary "An incremental rotary encoder with a push switch, as drawn on a schematic: its two phases and common on the left, the switch on the right"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     path "M-20-30H20V30H-20ZM-40-20H-20M-40 0H-20M-40 20H-20M20-20H40M20 20H40M-10 0A10 10 0 1 0 10 0A10 10 0 1 0-10 0ZM0-10V-4"

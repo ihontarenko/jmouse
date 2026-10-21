@@ -3,6 +3,7 @@ symbol "Relay" as relay-symbol {
         summary "A relay, as drawn on a schematic: its coil, and a changeover contact that leaves normally-closed for normally-open while the coil holds it"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 100 x 80
     input energized

@@ -3,6 +3,7 @@ symbol "Wattmeter" as wattmeter-symbol {
         summary "Wattmeter, as drawn on a schematic: a dial marked W, its current through left and right, its voltage top and bottom"
         category circuits
         tags electronics, schematic, instrument
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 80
     path "M-40 0H-18M18 0H40M0 -40V-18M0 18V40M-18 0A18 18 0 1 0 18 0A18 18 0 1 0 -18 0"

@@ -3,6 +3,7 @@ symbol "USB micro-B receptacle" as usb-micro-b-symbol {
         summary "A USB micro-B receptacle, as drawn on a schematic: bus power, the data pair, the ID pin and ground on the right, the shield below"
         category circuits
         tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
     }
     size 120 x 140
     path "M-40-50H20V50H-40ZM20-40H60M20-20H60M20 0H60M20 20H60M20 40H60M-20 50V70"

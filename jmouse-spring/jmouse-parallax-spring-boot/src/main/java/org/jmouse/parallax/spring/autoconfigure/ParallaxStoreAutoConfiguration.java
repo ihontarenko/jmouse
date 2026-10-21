@@ -249,10 +249,11 @@ public class ParallaxStoreAutoConfiguration {
                                        ParallaxJson documents, ApplicationEventPublisher events, Clock clock,
                                        FormulaNotations notations, ComponentModels componentModels,
                                        ObjectDocuments objectDocuments, ObjectProvider<ParallaxPlaces> places,
-                                       SharedDocuments sharedDocuments, HomeCategoryPolicy homeCategories) {
+                                       SharedDocuments sharedDocuments, HomeCategoryPolicy homeCategories,
+                                       ObjectProvider<ParallaxLimits> limits) {
         return new Catalogue(objects, categories, objectAccess, requireAuthority(authority), computations, documents,
                              events, clock, notations, componentModels, objectDocuments, requirePlaces(places),
-                             sharedDocuments, homeCategories);
+                             sharedDocuments, homeCategories, requireLimits(limits));
     }
 
     /**

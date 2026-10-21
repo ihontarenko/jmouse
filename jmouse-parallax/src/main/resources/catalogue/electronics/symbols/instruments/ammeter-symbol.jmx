@@ -3,6 +3,7 @@ symbol "Ammeter" as ammeter-symbol {
         summary "Ammeter, as drawn on a schematic: a dial marked A"
         category circuits
         tags electronics, schematic, instrument
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     path "M-40 0H-18M18 0H40M-18 0A18 18 0 1 0 18 0A18 18 0 1 0 -18 0"

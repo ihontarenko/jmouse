@@ -3,6 +3,7 @@ symbol "Transformer, air core" as transformer-air-core-symbol {
         summary "A transformer with no core, as drawn on a schematic: two windings facing each other, nothing between them"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     input failed

@@ -3,6 +3,7 @@ symbol "Current-sense amplifier, KiCad's proportions" as current-sense-amplifier
         summary "A current-sense amplifier as KiCad draws the INA240: a triangle, the inputs on the left, the supply above, ground and the two references below — so a KiCad design's wires land on its pins"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # KiCad's Amplifier_Current:INA240A1D at 2.54 mm = 40. Its fourth pin stands on ground's point: KiCad ties it there.
     size 240 x 240

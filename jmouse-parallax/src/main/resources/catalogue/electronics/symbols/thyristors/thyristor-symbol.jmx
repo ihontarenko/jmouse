@@ -3,6 +3,7 @@ symbol "Thyristor" as thyristor-symbol {
         summary "Thyristor (SCR), as drawn on a schematic: a diode with a gate at its cathode"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     input conduction

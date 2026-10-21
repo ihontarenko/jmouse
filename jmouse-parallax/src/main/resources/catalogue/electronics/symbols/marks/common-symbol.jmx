@@ -3,6 +3,7 @@ symbol "Common, 0 V" as common-symbol {
         summary "The circuit's 0 V — the common of a bipolar supply —, drawn as an open triangle rather than an earth"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 40 x 40
     path "M0-20V0M-12 0H12L0 12Z"

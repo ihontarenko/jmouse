@@ -3,6 +3,7 @@ symbol "Transformer with a centre tap" as center-tapped-transformer-symbol {
         summary "A transformer whose secondary is tapped in its middle, as drawn on a schematic: two halves of one winding"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 64
     input failed

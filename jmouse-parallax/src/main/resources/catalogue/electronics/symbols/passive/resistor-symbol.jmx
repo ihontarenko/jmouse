@@ -3,6 +3,7 @@ symbol "Resistor" as resistor-symbol {
         summary "Resistor, as drawn on a schematic: its body fills with the share of its rated power it takes, warming in colour as it nears the rating"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     input load 0 .. 1

@@ -3,6 +3,7 @@ symbol "Schmitt-trigger inverter" as schmitt-not-gate-symbol {
         summary "An inverter with Schmitt-trigger input, as drawn on a schematic: the hysteresis loop inside the triangle"
         category circuits
         tags electronics, schematic, logic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     path "M-16-16L12 0L-16 16ZM12 0A4 4 0 1 0 20 0A4 4 0 1 0 12 0M-40 0H-16M20 0H40M-12 4H-3V-4H1M-8 4V-4H1M-10-12.6V-30M-10 12.6V30"

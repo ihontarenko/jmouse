@@ -1,0 +1,15 @@
+symbol "Pin header, 2 x 1" as pin-header-2x1-symbol {
+    meta {
+        summary "A two-row pin header of 2, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size 120 x 60
+    path "M-20 -10H20V10H-20ZM-60 0H-20M20 0H60"
+    pin pin1 at -60, 0 "1"
+    pin pin2 at 60, 0 "2"
+    label name at 0, -24
+    label value at 0, 28
+}

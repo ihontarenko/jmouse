@@ -3,6 +3,7 @@ symbol "NOT gate" as not-gate-symbol {
         summary "An inverter, as drawn on a schematic (ANSI): a triangle and the bubble that inverts"
         category circuits
         tags electronics, schematic, logic
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 60
     path "M-16-16L12 0L-16 16ZM12 0A4 4 0 1 0 20 0A4 4 0 1 0 12 0M-40 0H-16M20 0H40M-10-12.6V-30M-10 12.6V30"

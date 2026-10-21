@@ -3,6 +3,7 @@ symbol "Connector" as connector-symbol {
         summary "Connector, as drawn on a schematic"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     size 60 x 60
     path "M-40-20H0M-40 20H0M0-25H15V25H0ZM5-20H10M5 20H10"

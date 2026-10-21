@@ -3,6 +3,7 @@ symbol "Transformer with two secondaries" as dual-secondary-transformer-symbol {
         summary "A transformer with one primary and two separate secondaries, as drawn on a schematic: each winding on pins of its own"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # Pins where KiCad's TEZ10 draws them (2.54 mm = 40): the primary on the left, the first secondary high and the second
     # low on the right — so a KiCad design's wires land on them as drawn there.

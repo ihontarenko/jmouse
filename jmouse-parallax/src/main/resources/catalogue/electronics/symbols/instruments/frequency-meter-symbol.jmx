@@ -3,6 +3,7 @@ symbol "Frequency meter" as frequency-meter-symbol {
         summary "Frequency meter, as drawn on a schematic: a dial marked F"
         category circuits
         tags electronics, schematic, instrument
+        license "CERN-OHL-W-2.0"
     }
     size 80 x 40
     path "M-40 0H-18M18 0H40M-18 0A18 18 0 1 0 18 0A18 18 0 1 0 -18 0"

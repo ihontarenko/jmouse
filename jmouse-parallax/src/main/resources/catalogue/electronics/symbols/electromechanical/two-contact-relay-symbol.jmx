@@ -3,6 +3,7 @@ symbol "Relay with two normally-open contacts" as two-contact-relay-symbol {
         summary "A relay with two make contacts, as drawn on a schematic: its coil, and two contacts on one armature that close together while the coil holds them"
         category circuits
         tags electronics, schematic
+        license "CERN-OHL-W-2.0"
     }
     # Pins where KiCad's RTE4 relay has them (2.54 mm = 40): the coil on the left, each contact's common below and its
     # make side above — so a KiCad design's wires land. The drawing is ours.
