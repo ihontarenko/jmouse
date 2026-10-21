@@ -5,12 +5,19 @@ import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Trivia;
 import org.jmouse.el.node.expression.SpanNode;
 
+import org.jmouse.formula.el.FormulaLanguage;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Everything a read jMX document holds, written out as text, so that two readers can be compared by what they built
@@ -45,6 +52,43 @@ final class DocumentSnapshot {
         List<ExperienceDocument> read(String text, String document);
     }
 
+    /**
+     * A drawing's value as the formula it is: the frozen reader wrote it in SI ({@code (0.06)}), rounded to twelve
+     * digits and spaced token by token; the reader now keeps it as written ({@code 60 ms}), for jMF to read with its
+     * units. Both are compared as the tree a drawing makes of them, every constant to eleven digits.
+     */
+    private static String drawingValue(String formula) {
+        try {
+            String tree = DRAWING.parse(formula).toString();
+            Matcher number = CONSTANT.matcher(tree);
+            StringBuilder rounded = new StringBuilder();
+            while (number.find()) {
+                BigDecimal value = new BigDecimal(number.group()).round(new MathContext(11)).stripTrailingZeros();
+                number.appendReplacement(rounded, value.toString());
+            }
+            number.appendTail(rounded);
+            return rounded.toString();
+        } catch (RuntimeException unreadable) {
+            return "UNREADABLE " + formula;
+        }
+    }
+
+    private static final Pattern CONSTANT = Pattern.compile("-?\\d+\\.\\d+(?:E-?\\d+)?");
+
+    /** The language a drawing's values are read in; its functions are the drawing's own, read where they are declared. */
+    private static final FormulaLanguage DRAWING = drawingLanguage();
+
+    private static FormulaLanguage drawingLanguage() {
+        try {
+            Field functions = Class.forName("org.jmouse.parallax.script.engine.LivingDrawing").getDeclaredField("FUNCTIONS");
+            functions.setAccessible(true);
+            String[] names = ((Collection<?>) functions.get(null)).stream().map(String::valueOf).toArray(String[]::new);
+            return FormulaLanguage.standard().withQuantities().withHostCalls(names);
+        } catch (ReflectiveOperationException unreachable) {
+            throw new IllegalStateException(unreachable);
+        }
+    }
+
     private static void write(StringBuilder snapshot, Object value, int depth) {
         String indent = "  ".repeat(depth);
         switch (value) {
@@ -77,6 +121,13 @@ final class DocumentSnapshot {
                 for (Object item : collection) {
                     snapshot.append(indent).append("  - ");
                     write(snapshot, item, depth + 2);
+                }
+            }
+            case Block.SymbolProperty property -> {
+                snapshot.append("SymbolProperty ").append(property.name()).append(' ').append(property.motion())
+                        .append('\n');
+                for (String formula : property.formulas()) {
+                    snapshot.append(indent).append("  - ").append(drawingValue(formula)).append('\n');
                 }
             }
             case Record record -> {

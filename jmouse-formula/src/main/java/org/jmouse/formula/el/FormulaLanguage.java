@@ -14,6 +14,7 @@ import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.QuantityParser;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;
 import org.jmouse.formula.MathematicalConstant;
@@ -53,14 +54,19 @@ public final class FormulaLanguage {
     private final Map<String, String> rates;
 
     public FormulaLanguage() {
+        this(reading(false), Set.of(), Map.of());
+    }
+
+    private static Reading reading(boolean quantities) {
         FormulaExtensionContainer extensions = new FormulaExtensionContainer();
+        if (quantities) {
+            extensions.addParser(new QuantityParser());
+        }
         DefaultParserContext context = new DefaultParserContext(extensions);
         Lexer lexer = new DefaultLexer(new DefaultTokenizer(
                 new ExpressionSplitter(ExpressionSplitter.Dialect.MATHEMATICS), new ExpressionRecognizer()));
-        this.reading = new Reading(new ExpressionLanguage(extensions, lexer, context, ExpressionParser.class), lexer,
-                context, new FormulaDocumentParser(), new ConcurrentHashMap<>());
-        this.hostCalls = Set.of();
-        this.rates = Map.of();
+        return new Reading(new ExpressionLanguage(extensions, lexer, context, ExpressionParser.class), lexer, context,
+                new FormulaDocumentParser(), new ConcurrentHashMap<>());
     }
 
     private FormulaLanguage(Reading reading, Set<String> hostCalls, Map<String, String> rates) {
@@ -96,6 +102,15 @@ public final class FormulaLanguage {
         Set<String> declared = new LinkedHashSet<>(hostCalls);
         declared.addAll(List.of(names));
         return new FormulaLanguage(reading, declared, rates);
+    }
+
+    /**
+     * The same language, reading a number with its unit as one operand in SI — {@code 60 ms} is {@code 0.06},
+     * {@code -30 deg} is {@code -π/6} — where the standard one reads {@code 2 m} as twice {@code m}: for a text written
+     * with units, such as a drawing's values.
+     */
+    public FormulaLanguage withQuantities() {
+        return new FormulaLanguage(reading(true), hostCalls, rates);
     }
 
     public static FormulaLanguage standard() {

@@ -55,7 +55,8 @@ final class LivingDrawing {
             Map.entry("pixels", Set.of(1)), Map.entry("columns", Set.of(1)), Map.entry("rows", Set.of(1)),
             Map.entry("invert", Set.of(1)), Map.entry("stride", Set.of(1)), Map.entry("first_column", Set.of(1)));
 
-    private static final FormulaLanguage LANGUAGE = FormulaLanguage.standard().withHostCalls(FUNCTIONS.toArray(String[]::new));
+    private static final FormulaLanguage LANGUAGE = FormulaLanguage.standard().withQuantities()
+            .withHostCalls(FUNCTIONS.toArray(String[]::new));
 
     private final String what;
     private final Set<String> inputs = new HashSet<>();

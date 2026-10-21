@@ -13,10 +13,7 @@ import org.jmouse.parallax.script.Block.SymbolPin;
 import org.jmouse.parallax.script.Block.SymbolProperty;
 import org.jmouse.parallax.script.Kind;
 import org.jmouse.parallax.script.SourceText;
-import org.jmouse.units.Quantity;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,12 +58,6 @@ final class SymbolReader {
 
     /** The marks before a property. */
     private static final Map<String, SymbolMotion> MOTIONS = Map.of("live", SymbolMotion.LIVE, "animate", SymbolMotion.ANIMATED);
-
-    /** How many significant digits a quantity keeps once it is in SI: enough for any written value, none of the binary noise. */
-    private static final MathContext SI_DIGITS = new MathContext(12);
-
-    /** The most tokens a unit after a number is read from inside a drawing's expression. */
-    private static final int LONGEST_UNIT = 3;
 
     /** A point's x ends at its comma. */
     private static final Boundary COMMA = (token, after, depth) -> depth == 0 && token.type() == BasicToken.T_COMMA;
@@ -622,61 +613,30 @@ final class SymbolReader {
     }
 
     /**
-     * A drawing's expression as jMF: every number followed by a unit in SI ({@code 60 ms} → {@code 0.06},
-     * {@code -30 deg} → {@code -0.5236}) and {@code ->} — {@code curve(current, 0 mA -> 0, 20 mA -> 1)} — a comma.
+     * A drawing's expression as jMF reads it with units — {@code 60 ms}, {@code -30 deg} are numbers with their units —,
+     * written with the drawing's own pairing: {@code ->} in {@code curve(current, 0 mA -> 0, 20 mA -> 1)} is a comma
+     * between the two values it pairs.
      *
      * @param tokens the expression's tokens
      * @param after  the token after them, where the last one's written text ends
      */
     private String formula(List<Token> tokens, Token after) {
-        StringBuilder formula = new StringBuilder();
-        int index = 0;
-        while (index < tokens.size()) {
-            Token token = tokens.get(index);
+        for (Token token : tokens) {
             if (reading.isString(token)) {
                 throw reading.refusal(token, "a drawing's value is a number, an input, a word such as 'burned' or an "
                         + "expression of them — not a text in quotes");
             }
-            Optional<Double> number = JmxValues.number(token.value());
-            if (number.isPresent()) {
-                int unitTokens = unitAfter(tokens, index + 1);
-                if (unitTokens > 0) {
-                    StringBuilder unit = new StringBuilder();
-                    for (Token unitToken : tokens.subList(index + 1, index + 1 + unitTokens)) {
-                        unit.append(reading.isString(unitToken) ? reading.literal(unitToken) : unitToken.value());
-                    }
-                    double inSi = Quantity.of(number.get(), unit.toString()).orElseThrow().value();
-                    formula.append('(').append(new BigDecimal(inSi, SI_DIGITS).stripTrailingZeros().toPlainString()).append(") ");
-                    index += 1 + unitTokens;
-                    continue;
-                }
-            }
+        }
+        int start = tokens.getFirst().offset();
+        StringBuilder formula = new StringBuilder(reading.text(start, after.offset()).text());
+        // From the last token back, so a replacement leaves the offsets of the ones before it where they were.
+        for (Token token : tokens.reversed()) {
             if (token.value().equals("->")) {
-                formula.append(", ");
-            } else {
-                Token next = index + 1 < tokens.size() ? tokens.get(index + 1) : after;
-                formula.append(reading.text(token.offset(), next.offset()).text());
-                if (!formula.isEmpty() && !Character.isWhitespace(formula.charAt(formula.length() - 1))) {
-                    formula.append(' ');
-                }
-            }
-            index++;
-        }
-        return formula.toString().strip();
-    }
-
-    /** How many tokens after a number make its unit, the longest reading first; 0 when none does. */
-    private int unitAfter(List<Token> tokens, int from) {
-        for (int count = Math.min(LONGEST_UNIT, tokens.size() - from); count >= 1; count--) {
-            StringBuilder unit = new StringBuilder();
-            for (Token token : tokens.subList(from, from + count)) {
-                unit.append(reading.isString(token) ? reading.literal(token) : token.value());
-            }
-            if (Quantity.isUnit(unit.toString())) {
-                return count;
+                int at = token.offset() - start;
+                formula.replace(at, at + token.value().length(), ",");
             }
         }
-        return 0;
+        return formula.toString();
     }
 
     Drawing drawing() {
