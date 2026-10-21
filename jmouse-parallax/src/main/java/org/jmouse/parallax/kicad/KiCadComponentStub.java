@@ -48,21 +48,30 @@ public final class KiCadComponentStub {
 
     /** The component's document: what it is called, what it says of itself, its pins and how it is drawn. */
     public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol) {
+        return documentOf(symbol, Optional.empty());
+    }
+
+    /**
+     * The component's document, its package landing on a footprint: {@code footprint kicad-…-footprint}, the footprint
+     * imported from the one KiCad's parts of it name.
+     */
+    public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol, Optional<String> footprint) {
         List<Pin> pins = pinsOf(symbol);
         String summary = firstOf(symbol.property("Description"), symbol.property("ki_description"), symbol.name())
                 + " — imported from KiCad: its pins and its drawing, with no model yet";
         Map<String, MetaValue> fields = new LinkedHashMap<>();
         designatorOf(symbol).ifPresent(designator -> fields.put("designator", new MetaValue.Names(List.of(designator))));
-        String footprint = symbol.property("Footprint");
-        if (!footprint.isBlank()) {
-            fields.put("package", new MetaValue.Text(footprint));
+        String written = symbol.property("Footprint");
+        if (!written.isBlank()) {
+            fields.put("package", new MetaValue.Text(written));
         }
         Meta meta = new Meta(summary, null, "circuits", List.of("electronics", "kicad"), "KiCad symbol " + symbol.name(),
                 List.of(), null, List.of(), fields, Map.of());
+        List<Block> blocks = new ArrayList<>(List.of(new Block.Pins(pins), symbolOf(symbol, pins)));
+        footprint.ifPresent(slug -> blocks.add(new Block.FootprintUse(slug)));
         return new ExperienceDocument(Kind.COMPONENT, KiCadSymbolDrawing.titleOf(symbol),
                 KiCadSymbolDrawing.componentSlugOf(symbol),
-                Optional.empty(), meta, Optional.empty(), List.of(), List.of(),
-                List.of(new Block.Pins(pins), symbolOf(symbol, pins)), 0);
+                Optional.empty(), meta, Optional.empty(), List.of(), List.of(), blocks, 0);
     }
 
     /** Every pad once, named by its number as the part's connections name it, KiCad's own name its description. */
@@ -98,6 +107,13 @@ public final class KiCadComponentStub {
         }
         return new Block.Symbol(List.of(), Map.of(), Optional.of("box"), sides, 0, 0, List.of(), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(), Map.of());
+    }
+
+    /** The numbers its pins carry, each once: what the pads of the footprint its package lands on must carry. */
+    public static Set<String> pinNumbers(KiCadSymbolDefinition symbol) {
+        Set<String> numbers = new LinkedHashSet<>();
+        symbol.pins().stream().sorted(PACKAGE_ORDER).forEach(pin -> numbers.add(pin.number()));
+        return numbers;
     }
 
     /** Whether a part placed from this symbol is drawn by KiCad's symbol: only a symbol of one unit is. */

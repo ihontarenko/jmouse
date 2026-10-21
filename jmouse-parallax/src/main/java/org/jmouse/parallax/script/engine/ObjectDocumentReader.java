@@ -124,6 +124,10 @@ final class ObjectDocumentReader {
                 throw new IllegalArgumentException("'" + document.title() + "' names its symbol in meta; a part is drawn "
                         + "with 'symbol uses <slug> { port pin … }', the one place that choice is written.");
             }
+            if (field.equals(ObjectDocumentBuilder.relationField(RelationKind.USES_FOOTPRINT))) {
+                throw new IllegalArgumentException("'" + document.title() + "' names its footprint in meta; a component "
+                        + "names it with 'footprint <slug>', the one place that choice is written.");
+            }
             if (field.startsWith("schematic_layout")) {
                 throw new IllegalArgumentException("'" + document.title() + "' keeps its drawing in meta; a circuit is "
                         + "drawn by its 'layout' block: 'layout { R1 at 240, 200 rotate 90 }'.");
@@ -141,19 +145,22 @@ final class ObjectDocumentReader {
 
     /**
      * {@code see_also saddle, wave}: one meta field per kind of relation; and the symbols a component is drawn with,
-     * which {@code symbol uses resistor-symbol} names — the default first — and no meta field does.
+     * which {@code symbol uses resistor-symbol} names — the default first —, and the footprint its {@code footprint} line
+     * names, which no meta field does.
      */
     private static List<Relation> relations(ExperienceDocument document) {
         List<Relation> relations = new ArrayList<>();
         document.meta().fields().forEach((field, value) -> {
             for (RelationKind kind : RelationKind.values()) {
-                if (kind != RelationKind.USES_SYMBOL && ObjectDocumentBuilder.relationField(kind).equals(field)) {
+                if (!kind.writtenByLine() && ObjectDocumentBuilder.relationField(kind).equals(field)) {
                     names(value).forEach(slug -> relations.add(new Relation(slug, kind)));
                 }
             }
         });
         document.block(Block.Symbol.class).ifPresent(symbol -> symbol.uses()
                 .forEach(slug -> relations.add(new Relation(slug, RelationKind.USES_SYMBOL))));
+        document.block(Block.FootprintUse.class)
+                .ifPresent(use -> relations.add(new Relation(use.footprint(), RelationKind.USES_FOOTPRINT)));
         return relations;
     }
 

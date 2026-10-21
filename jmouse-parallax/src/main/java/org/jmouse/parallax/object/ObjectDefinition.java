@@ -58,6 +58,7 @@ import java.util.Set;
         @JsonSubTypes.Type(value = ObjectDefinition.Program.class, name = "PROGRAM"),
         @JsonSubTypes.Type(value = ObjectDefinition.Component.class, name = "COMPONENT"),
         @JsonSubTypes.Type(value = ObjectDefinition.Symbol.class, name = "SYMBOL"),
+        @JsonSubTypes.Type(value = ObjectDefinition.Footprint.class, name = "FOOTPRINT"),
         @JsonSubTypes.Type(value = ObjectDefinition.Graph.class, name = "GRAPH"),
         @JsonSubTypes.Type(value = ObjectDefinition.Family.class, name = "FAMILY")
 })
@@ -1125,6 +1126,26 @@ public sealed interface ObjectDefinition {
     }
 
     /** A reusable vector symbol: the drawing its jMX document describes (size, paths, pins, labels, indicators), carried as {@code SymbolDrawing} JSON. */
+    /**
+     * How a part sits on a board: its pads and outlines in millimetres, as {@code FootprintDrawing} JSON. Computes nothing;
+     * a component names it, and its package pin numbers land on its pads.
+     */
+    record Footprint(String drawing) implements ObjectDefinition {
+        public Footprint {
+            if (drawing == null || drawing.isBlank() || drawing.length() > 500_000) {
+                throw new IllegalArgumentException("A footprint needs pads and outlines under 500000 characters.");
+            }
+        }
+
+        public ObjectKind objectKind() {
+            return ObjectKind.FOOTPRINT;
+        }
+
+        public int ambientDimension() {
+            return 2;
+        }
+    }
+
     record Symbol(String drawing) implements ObjectDefinition {
         public Symbol {
             if (drawing == null || drawing.isBlank() || drawing.length() > 100_000) {

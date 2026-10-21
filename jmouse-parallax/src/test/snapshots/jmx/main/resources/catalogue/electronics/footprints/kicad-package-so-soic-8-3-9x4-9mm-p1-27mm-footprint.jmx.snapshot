@@ -1,0 +1,157 @@
+ExperienceDocument
+  kind: Kind.FOOTPRINT
+  title: "SOIC-8_3.9x4.9mm_P1.27mm"
+  slug: "kicad-package-so-soic-8-3-9x4-9mm-p1-27mm-footprint"
+  type: Optional.empty
+  meta: Meta
+      summary: "SOIC, 8 Pin (JEDEC MS-012AA, https://www.analog.com/media/en/package-pcb-resources/package/pkg_pdf/soic_narrow-r/r_8.pdf), generated with kicad-footprint-generator ipc_gullwing_generator.py — imported from KiCad"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "kicad"
+          - "footprint"
+      source: "KiCad footprint Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Footprint
+          pads: List(8)
+              - FootprintPad
+                  number: "1"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -2.475
+                  y: Double -1.905
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "2"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -2.475
+                  y: Double -0.635
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "3"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -2.475
+                  y: Double 0.635
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "4"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -2.475
+                  y: Double 1.905
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "5"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double 2.475
+                  y: Double 1.905
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "6"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double 2.475
+                  y: Double 0.635
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "7"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double 2.475
+                  y: Double -0.635
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "8"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double 2.475
+                  y: Double -1.905
+                  rotation: Double 0.0
+                  width: Double 1.95
+                  height: Double 0.6
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+          outlines: List(4)
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: false
+                  path: "M0 -2.56L-1.95 -2.56M0 -2.56L1.95 -2.56M0 2.56L-1.95 2.56M0 2.56L1.95 2.56"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: true
+                  path: "M-2.7 -2.465L-2.94 -2.795L-2.46 -2.795L-2.7 -2.465Z"
+              - FootprintOutline
+                  layer: "courtyard"
+                  width: Double 0.05
+                  filled: false
+                  path: "M-3.7 -2.7L-3.7 2.7M-3.7 2.7L3.7 2.7M3.7 -2.7L-3.7 -2.7M3.7 2.7L3.7 -2.7"
+              - FootprintOutline
+                  layer: "fabrication"
+                  width: Double 0.1
+                  filled: false
+                  path: "M-1.95 -1.475L-0.975 -2.45M-1.95 2.45L-1.95 -1.475M-0.975 -2.45L1.95 -2.45M1.95 -2.45L1.95 2.45M1.95 2.45L-1.95 2.45"
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-so-soic-8-3-9x4-9mm-p1-27mm-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
+== line 4 deleted
+READS 46fe60a0f68e316ec1cc5373afa88726
+== line 4 begun with a stray word
+READS d55f0244dcf04d3ff3e0497a8bd40329
+== line 11 deleted
+READS 1a7c4d3b90ac06caffb44ae079b956fc
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-so-soic-8-3-9x4-9mm-p1-27mm-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta
+== line 18 deleted
+READS 6cf89c0b93293de26a17223fd48ee441
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-so-soic-8-3-9x4-9mm-p1-27mm-footprint.jmx 18:5 'zzz' is not a block of a footprint; it holds meta

@@ -1,6 +1,7 @@
 package org.jmouse.parallax.store.kicad;
 
 import org.jmouse.kicad.KiCadProject;
+import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.jmouse.kicad.parser.KiCadParseException;
 import org.jmouse.kicad.parser.KiCadParser;
 import org.jmouse.kicad.schematic.KiCadSchematic;
@@ -51,31 +52,37 @@ public class KiCadImports {
     private final ObjectStore objects;
     private final ComponentModels components;
     private final KiCadLibraryMaps maps;
+    private final KiCadFootprintLibraries installedFootprints;
     private final ApplicationEventPublisher events;
 
+    /** @param installedFootprints the footprint libraries a design's own are searched before: KiCad's installed ones */
     public KiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components, KiCadLibraryMaps maps,
-                        ApplicationEventPublisher events) {
+                        KiCadFootprintLibraries installedFootprints, ApplicationEventPublisher events) {
         this.catalogue = catalogue;
         this.objects = objects;
         this.components = components;
         this.maps = maps;
+        this.installedFootprints = installedFootprints;
         this.events = events;
     }
 
     /**
      * @param rootFile the root schematic's file name, {@code LINEAR_500W_PS-1.kicad_sch}
-     * @param files    every sheet's text by its file name, the root's among them — what the reader chose; the server
-     *                 reads no file itself
+     * @param files    every sheet's text by its file name, the root's among them — what the reader chose —, and the
+     *                 footprints of the project's own libraries as {@code LIBRARY.pretty/NAME.kicad_mod}; the server
+     *                 reads no file of the design itself, only KiCad's installed libraries
      */
     @Transactional
     public Imported importDesign(ParallaxOwner owner, String rootFile, Map<String, String> files) {
         KiCadProject project = project(rootFile, files);
         String name = rootFile.replaceFirst("\\.kicad_sch$", "");
         KiCadProjectImport imported = KiCadProjectImport.of(project, name, maps.read(),
-                new ModelsCatalogue(components));
+                new ModelsCatalogue(components), KiCadFootprintLibraries.among(files).then(installedFootprints));
         List<String> created = new ArrayList<>();
         List<String> updated = new ArrayList<>();
         List<String> reused = new ArrayList<>();
+        // The footprints first: a component made below names its footprint, and is stored only when that is there.
+        imported.footprints().forEach(footprint -> storeMade(owner, footprint, created, updated, reused));
         imported.symbols().forEach(symbol -> storeMade(owner, symbol, created, updated, reused));
         // A component made from a KiCad symbol after the symbol it is drawn with: one the catalogue already holds — a
         // model written for it since, above all — is the one the circuits use.
@@ -104,7 +111,7 @@ public class KiCadImports {
     }
 
     /**
-     * A symbol or a component the import makes, stored where nothing is called so. One an earlier import of this place made
+     * A footprint, a symbol or a component the import makes, stored where nothing is called so. One an earlier import of this place made
      * and nobody has edited since — still its first revision — is written over, so a better drawing or pin order reaches
      * it; any other is kept as it is: a model written for it, a curator's edit, another place's or the catalogue's.
      * ⚠️ Being written over makes it a second revision, so it is refreshed once: the store keeps no record of who wrote a

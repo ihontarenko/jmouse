@@ -112,9 +112,9 @@ REFUSED src/main/resources/catalogue/electronics/components/sources/triangle-gen
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/sources/triangle-generator.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-REFUSED src/main/resources/catalogue/electronics/components/sources/triangle-generator.jmx 11:9 'high' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/sources/triangle-generator.jmx 11:9 'high' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/sources/triangle-generator.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/sources/triangle-generator.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 deleted
 READS cee45fdd005c5121e3c05d44a28b9277
 == line 18 begun with a stray word

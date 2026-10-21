@@ -39,6 +39,9 @@ public final class DocumentWriter {
                 if (document.kind() == Kind.SYMBOL && block instanceof Block.Symbol drawing) {
                     // A symbol document is its drawing: its lines stand at the top of its body, not in a block.
                     SymbolWriter.drawing(drawing, body);
+                } else if (block instanceof Block.Footprint land) {
+                    // A footprint document is its pads and outlines, at the top of its body, as a symbol is its drawing.
+                    FootprintWriter.drawing(land, body);
                 } else {
                     block(block, body);
                 }
@@ -93,6 +96,8 @@ public final class DocumentWriter {
             case Block.Probes probes -> CircuitWriter.probes(probes, lines);
             case Block.Analysis analysis -> lines.line(CircuitWriter.analysis(analysis));
             case Block.Sheet sheet -> lines.line(CircuitWriter.sheet(sheet));
+            case Block.Footprint land -> FootprintWriter.drawing(land, lines);
+            case Block.FootprintUse use -> lines.line("footprint " + use.footprint());
             case Block.Maps maps -> StructureWriter.maps(maps, lines);
             case Block.Axiom axiom -> lines.line("axiom " + Values.text(axiom.axiom()));
             case Block.Rules rules -> StructureWriter.rules(rules, lines);

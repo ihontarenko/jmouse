@@ -39,6 +39,7 @@ public enum Kind {
     COMPONENT("component", Role.COMPUTABLE, Blocks.COMPONENT),
     CIRCUIT("circuit", Role.COMPUTABLE, Blocks.CIRCUIT),
     SYMBOL("symbol", Role.DRAWING, Set.of("meta")),
+    FOOTPRINT("footprint", Role.DRAWING, Set.of("meta")),
     FAMILY("family", Role.SHARED, Set.of("meta", "parameters", "formulas")),
     FUNCTIONS("functions", Role.SHARED, Set.of("meta", "formulas", "heat")),
     CATEGORY("category", Role.CATALOGUE, Set.of("meta")),
@@ -101,6 +102,9 @@ public enum Kind {
     /** The lines a {@code symbol} document is drawn with, written at the top level of its body. */
     public static final Set<String> DRAWING_LINES = Set.of("size", "path", "pin", "label", "indicator");
 
+    /** The lines a {@code footprint} document is drawn with, in millimetres, at the top level of its body. */
+    public static final Set<String> FOOTPRINT_LINES = Set.of("pad", "outline");
+
     public static Optional<Kind> ofKeyword(String word) {
         return Arrays.stream(values()).filter(kind -> kind.keyword.equals(word)).findFirst();
     }
@@ -112,7 +116,7 @@ public enum Kind {
         static final Set<String> EVOLVING = with(MATHEMATICS, "state", "equations");
 
         static final Set<String> COMPONENT = Set.of("meta", "parameters", "formulas", "pins", "nodes", "state",
-                "equations", "heat", "behaviour", "symbol", "parts", "nets", "view", "expect", "bench", "display", "measure", "leads");
+                "equations", "heat", "behaviour", "symbol", "footprint", "parts", "nets", "view", "expect", "bench", "display", "measure", "leads");
 
         static final Set<String> CIRCUIT = Set.of("meta", "parameters", "formulas", "sheet", "parts", "nets", "layout",
                 "ports", "probes", "analysis", "symbol", "view", "expect");

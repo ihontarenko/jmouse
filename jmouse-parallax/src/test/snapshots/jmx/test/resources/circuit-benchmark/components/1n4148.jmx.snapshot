@@ -522,9 +522,9 @@ REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 33:10 'parame
 == line 32 begun with a stray word
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 34:10 'parameters' holds lines, not a nested '{ … }'
 == line 39 deleted
-REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 39:9 'a' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 39:9 'a' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 39 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 39:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 39:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 46 deleted
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 44:0 expectation 'forward voltage at 10 mA' of a component needs a bench: 'bench for 3 ms { parts }'
 == line 46 begun with a stray word
@@ -536,7 +536,7 @@ REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 53:9 'zzz' is
 == line 60 deleted
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 60:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 60 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 74 deleted
 REFUSED src/test/resources/circuit-benchmark/components/1n4148.jmx 68:5 expectation 'breakdown at 100 uA' needs a measure and a criterion (near, within or is)
 == line 74 begun with a stray word

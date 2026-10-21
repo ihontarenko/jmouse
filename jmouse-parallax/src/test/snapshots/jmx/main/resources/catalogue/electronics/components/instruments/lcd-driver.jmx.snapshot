@@ -358,9 +358,9 @@ READS cc9b9de0cd1c1ae20fa6e57d1f1a3ca9
 == line 46 begun with a stray word
 READS e42cea09df0f654e9024a4531d9ed035
 == line 53 deleted
-REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 53:9 'update_count' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 53:9 'update_count' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 deleted
 READS a27f714cb2681058617676599e6e3bfc
 == line 60 begun with a stray word

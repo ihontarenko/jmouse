@@ -152,7 +152,7 @@ REFUSED src/test/resources/circuit-benchmark/components/n-mosfet.jmx 4:1 a docum
 == line 11 deleted
 READS e44625473b0e271c33dd2a5e1c8b6fad
 == line 11 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/n-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/n-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
 READS e526084d6d351409de5201fb8b024285
 == line 25 begun with a stray word

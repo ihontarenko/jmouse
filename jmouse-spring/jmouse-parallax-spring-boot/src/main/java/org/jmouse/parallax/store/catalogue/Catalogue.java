@@ -801,7 +801,8 @@ public class Catalogue {
     /**
      * The relations a text implies: its {@code meta} relation fields, the catalogue components a circuit pins
      * ({@code CONSTRUCTED_FROM}), and the symbols a component is drawn with ({@code USES_SYMBOL}) — the ones its
-     * {@code symbol uses} line names, each checked to draw every pin of the component.
+     * {@code symbol uses} line names, each checked to draw every pin of the component —, and the footprint its
+     * {@code footprint} line names, checked to have a pad for every pin number and not indexed.
      */
     private List<MathematicalObject.Relation> relationsOf(MathematicalObject object, DefinedObject defined,
                                                           RelationIndexing indexing) {
@@ -830,6 +831,18 @@ public class Catalogue {
                             object.getSlug(), related.getSlug(), problem.get());
                     continue;
                 }
+            }
+            if (relation.kind() == DefinedObject.RelationKind.USES_FOOTPRINT) {
+                Optional<String> problem = footprintProblem(object, defined, related);
+                if (problem.isPresent()) {
+                    if (indexing == RelationIndexing.NOW) {
+                        throw ParallaxProblem.invalid(problem.get() + ".");
+                    }
+                    LOGGER.warn("Object '{}' cannot land on '{}': {}.", object.getSlug(), related.getSlug(), problem.get());
+                }
+                // Checked, not indexed: object_relations admits the kinds its CHECK names, and that list grows only
+                // with a schema rebuilt from its first migration. The footprint's users are read from the texts.
+                continue;
             }
             if (relatedIds.add(related.getId())) {
                 relations.add(new MathematicalObject.Relation(related.getId(), relation.kind().name(), relations.size()));
@@ -870,6 +883,24 @@ public class Catalogue {
             return Optional.of("only a component is drawn with a symbol");
         }
         return componentModels.bindingProblem(written.source(), symbol);
+    }
+
+    /**
+     * Why a component's package cannot land on the footprint its {@code footprint} line names: it is not a footprint, it
+     * is somebody else's, or a pin number of the component is no pad of it.
+     */
+    private Optional<String> footprintProblem(MathematicalObject component, DefinedObject defined,
+                                              MathematicalObject footprint) {
+        if (footprint.getKind() != ObjectKind.FOOTPRINT) {
+            return Optional.of("'" + footprint.getSlug() + "' is not a footprint");
+        }
+        if (!footprint.isCatalogue() && !footprint.owner().equals(component.owner())) {
+            return Optional.of("a component can use a workspace footprint only from its own workspace");
+        }
+        if (!(defined.definition() instanceof ObjectDefinition.Component written)) {
+            return Optional.of("only a component lands on a footprint");
+        }
+        return componentModels.footprintProblem(written.source(), footprint);
     }
 
     private static DefinedObject.RelationKind relationKind(String kind) {

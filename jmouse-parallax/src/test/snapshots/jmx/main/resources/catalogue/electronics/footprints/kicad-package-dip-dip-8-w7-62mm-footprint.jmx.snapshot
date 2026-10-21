@@ -1,0 +1,152 @@
+ExperienceDocument
+  kind: Kind.FOOTPRINT
+  title: "DIP-8_W7.62mm"
+  slug: "kicad-package-dip-dip-8-w7-62mm-footprint"
+  type: Optional.empty
+  meta: Meta
+      summary: "8-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils) — imported from KiCad"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "kicad"
+          - "footprint"
+      source: "KiCad footprint Package_DIP:DIP-8_W7.62mm"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Footprint
+          pads: List(8)
+              - FootprintPad
+                  number: "1"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.RECTANGLE
+                  x: Double 0.0
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "2"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 0.0
+                  y: Double 2.54
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "3"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 0.0
+                  y: Double 5.08
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "4"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 0.0
+                  y: Double 7.62
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "5"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 7.62
+                  y: Double 7.62
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "6"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 7.62
+                  y: Double 5.08
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "7"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 7.62
+                  y: Double 2.54
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+              - FootprintPad
+                  number: "8"
+                  type: PadType.THROUGH_HOLE
+                  shape: PadShape.OVAL
+                  x: Double 7.62
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 1.6
+                  height: Double 1.6
+                  drillWidth: Double 0.8
+                  drillHeight: Double 0.8
+                  roundness: Double 0.0
+          outlines: List(3)
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: false
+                  path: "M1.16 -1.33L1.16 8.95M1.16 8.95L6.46 8.95M2.81 -1.33L1.16 -1.33M6.46 -1.33L4.81 -1.33M6.46 8.95L6.46 -1.33M4.81 -1.33A1 1 0 0 1 2.81 -1.33"
+              - FootprintOutline
+                  layer: "courtyard"
+                  width: Double 0.05
+                  filled: false
+                  path: "M-1.1 -1.55L-1.1 9.15M-1.1 9.15L8.7 9.15M8.7 -1.55L-1.1 -1.55M8.7 9.15L8.7 -1.55"
+              - FootprintOutline
+                  layer: "fabrication"
+                  width: Double 0.1
+                  filled: false
+                  path: "M0.635 -0.27L1.635 -1.27M0.635 8.89L0.635 -0.27M1.635 -1.27L6.985 -1.27M6.985 -1.27L6.985 8.89M6.985 8.89L0.635 8.89"
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-dip-dip-8-w7-62mm-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
+== line 4 deleted
+READS 1e7b395b30278d5b33b35f242da2e01d
+== line 4 begun with a stray word
+READS f9845f8db154a64fd9a547abddb8fe41
+== line 11 deleted
+READS 0a0a98d33eec083e418adc9b927e49d5
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-dip-dip-8-w7-62mm-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta
+== line 18 deleted
+READS b7ec53c59c190ac914cc5d4bf4af48d5
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-dip-dip-8-w7-62mm-footprint.jmx 18:5 'zzz' is not a block of a footprint; it holds meta

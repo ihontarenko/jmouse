@@ -446,7 +446,7 @@ REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic
 == line 11 deleted
 READS 8322b9ee96b83ce6af4174c3d0c85bdf
 == line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 deleted
 READS 82a196d8456627a2673544daa1b5c715
 == line 18 begun with a stray word
@@ -470,7 +470,7 @@ READS 973803305acbb422cb510db89b9ad909
 == line 53 deleted
 READS 2b510ff6a9a94f5185315230e40a05e9
 == line 53 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
 READS 8e66d9b0edd3ee26c790e631db29336e
 == line 67 begun with a stray word
@@ -482,7 +482,7 @@ READS 9bcdb8be6190d392b0223a61f9f7f4d5
 == line 81 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 81:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 81 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 81:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 81:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 88 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/electrolytic-capacitor.jmx 81:5 expectation 'in the cold the ESR grows, and the step's jump with it' needs a measure and a criterion (near, within or is)
 == line 88 begun with a stray word

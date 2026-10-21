@@ -129,7 +129,7 @@ REFUSED src/test/resources/circuit-benchmark/components/pnp-transistor.jmx 4:1 a
 == line 11 deleted
 READS 174d2f5b1966d6985bc3e97323817234
 == line 11 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/pnp-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/pnp-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
 REFUSED src/test/resources/circuit-benchmark/components/pnp-transistor.jmx 19:5 expectation 'on: 10 µA drawn out of the base drives a milliampere' needs a measure and a criterion (near, within or is)
 == line 25 begun with a stray word

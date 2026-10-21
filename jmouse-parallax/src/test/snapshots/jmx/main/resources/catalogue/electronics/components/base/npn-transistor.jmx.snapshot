@@ -130,7 +130,7 @@ REFUSED src/main/resources/catalogue/electronics/components/base/npn-transistor.
 == line 11 deleted
 READS 31db4a5a09354ab77c1cb874623c06c0
 == line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/npn-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/npn-transistor.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 deleted
 READS 7ab83e97fc66b18319009fb40d8d12e9
 == line 18 begun with a stray word

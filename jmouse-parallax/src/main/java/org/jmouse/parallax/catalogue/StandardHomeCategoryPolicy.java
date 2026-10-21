@@ -27,7 +27,7 @@ public class StandardHomeCategoryPolicy implements HomeCategoryPolicy {
             case SEQUENCE -> "SEQUENCES";
             case VALUE -> "CALCULUS";
             case PROGRAM -> "PROGRAMS";
-            case CIRCUIT, COMPONENT, SYMBOL -> "CIRCUITS";
+            case CIRCUIT, COMPONENT, SYMBOL, FOOTPRINT -> "CIRCUITS";
             case GRAPH -> "GRAPHS";
             case FAMILY -> "CURVES";
         });

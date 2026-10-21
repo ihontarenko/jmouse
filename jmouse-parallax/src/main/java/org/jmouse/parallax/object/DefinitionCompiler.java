@@ -124,6 +124,7 @@ public final class DefinitionCompiler {
             case Program program -> List.of();
             case ObjectDefinition.Component component -> List.of();
             case ObjectDefinition.Symbol symbol -> List.of();
+            case ObjectDefinition.Footprint footprint -> List.of();
             case ObjectDefinition.Graph graph -> List.of();
             case ObjectDefinition.Family family -> variablesOf(family.member());
         };
@@ -214,6 +215,8 @@ public final class DefinitionCompiler {
                 // each line is read where the Graph classifies it, not here
             }
             case ObjectDefinition.Symbol symbol -> {
+            }
+            case ObjectDefinition.Footprint footprint -> {
             }
         }
     }

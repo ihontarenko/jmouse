@@ -192,9 +192,9 @@ READS b95c2fb15829ce4632ebe61855ea76a7
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 18 deleted
-REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 18:9 'resistance' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 18:9 'resistance' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 18:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 18:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
 READS f4a8a9a059e27295bed2175f2ac36c61
 == line 25 begun with a stray word
@@ -204,6 +204,6 @@ REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx
 == line 32 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 33:33 'pins' holds lines, not a nested '{ … }'
 == line 39 deleted
-REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 39:9 'let' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 39:9 'let' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 39 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 39:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/resistor.jmx 39:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view

@@ -560,9 +560,9 @@ REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.
 == line 53 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 55:11 'pins' holds lines, not a nested '{ … }'
 == line 60 deleted
-REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 60:9 'flux_primary' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 60:9 'flux_primary' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
 REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 68:15 'symbol uses' holds lines, not a nested '{ … }'
 == line 67 begun with a stray word

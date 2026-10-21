@@ -126,4 +126,4 @@ READS c4b1169c05d94f186b4c5dfaf47c1ed5
 == line 32 deleted
 REFUSED src/main/resources/catalogue/electronics/components/sources/staircase-generator.jmx 5:1 component "…" is opened with '{' and never closed
 == line 32 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/sources/staircase-generator.jmx 32:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/sources/staircase-generator.jmx 32:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view

@@ -1,0 +1,16 @@
+footprint "SOT-223-3_TabPin2" as kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint {
+    meta {
+        summary "module CMS SOT223 4 pins — imported from KiCad"
+        category circuits
+        tags electronics, kicad, footprint
+        source "KiCad footprint Package_TO_SOT_SMD:SOT-223-3_TabPin2"
+    }
+    pad "1" surface rounded-rectangle at -3.15, -2.3 size 2 x 1.5 roundness 0.25
+    pad "2" surface rounded-rectangle at -3.15, 0 size 2 x 1.5 roundness 0.25
+    pad "2" surface rounded-rectangle at 3.15, 0 size 2 x 3.8 roundness 0.25
+    pad "3" surface rounded-rectangle at -3.15, 2.3 size 2 x 1.5 roundness 0.25
+    outline silkscreen width 0.12 "M-1.85 -3.41L1.91 -3.41M-1.85 3.41L1.91 3.41M1.91 -3.41L1.91 -2.15M1.91 3.41L1.91 2.15"
+    outline silkscreen width 0.12 filled "M-3.13 -3.31L-3.37 -3.64L-2.89 -3.64L-3.13 -3.31Z"
+    outline courtyard width 0.05 "M-4.4 -3.6L-4.4 3.6M-4.4 3.6L4.4 3.6M4.4 -3.6L-4.4 -3.6M4.4 3.6L4.4 -3.6"
+    outline fabrication width 0.1 "M-1.85 -2.35L-1.85 3.35M-1.85 -2.35L-0.85 -3.35M-1.85 3.35L1.85 3.35M-0.85 -3.35L1.85 -3.35M1.85 -3.35L1.85 3.35"
+}

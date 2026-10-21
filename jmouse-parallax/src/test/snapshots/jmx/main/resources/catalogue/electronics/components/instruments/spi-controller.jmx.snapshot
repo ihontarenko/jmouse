@@ -295,9 +295,9 @@ READS a003f0e7af8e1e67becc3648ba95931b
 == line 4 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
 == line 11 deleted
-REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 11:9 'designator' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 11:9 'designator' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 deleted
 READS bea86798934667d6b711a1acb4dc46e2
 == line 32 begun with a stray word
@@ -311,9 +311,9 @@ READS 447e76cc8df2573ef94871b241f3f53c
 == line 46 begun with a stray word
 READS d2ca1d68758a85d329e5e40aac147acf
 == line 53 deleted
-REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 53:9 'word_read' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 53:9 'word_read' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 deleted
 REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 61:9 in 'behaviour': Unexpected token 0411:2920:0061 [T_END] at 412
 == line 60 begun with a stray word

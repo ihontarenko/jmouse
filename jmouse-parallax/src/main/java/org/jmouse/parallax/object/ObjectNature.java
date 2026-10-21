@@ -26,6 +26,9 @@ public enum ObjectNature {
     /** A reusable editable drawing assigned to a component model. */
     SYMBOL,
 
+    /** How a part sits on a board — pads and outlines — named by a component model. */
+    FOOTPRINT,
+
     /** Lines drawn together on panes, moved by one clock: the Graph workbench, saved. */
     GRAPH
 }

@@ -1,0 +1,105 @@
+ExperienceDocument
+  kind: Kind.FOOTPRINT
+  title: "SOT-223-3_TabPin2"
+  slug: "kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint"
+  type: Optional.empty
+  meta: Meta
+      summary: "module CMS SOT223 4 pins — imported from KiCad"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "kicad"
+          - "footprint"
+      source: "KiCad footprint Package_TO_SOT_SMD:SOT-223-3_TabPin2"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Footprint
+          pads: List(4)
+              - FootprintPad
+                  number: "1"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -3.15
+                  y: Double -2.3
+                  rotation: Double 0.0
+                  width: Double 2.0
+                  height: Double 1.5
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "2"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -3.15
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 2.0
+                  height: Double 1.5
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "2"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double 3.15
+                  y: Double 0.0
+                  rotation: Double 0.0
+                  width: Double 2.0
+                  height: Double 3.8
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+              - FootprintPad
+                  number: "3"
+                  type: PadType.SURFACE
+                  shape: PadShape.ROUNDED_RECTANGLE
+                  x: Double -3.15
+                  y: Double 2.3
+                  rotation: Double 0.0
+                  width: Double 2.0
+                  height: Double 1.5
+                  drillWidth: Double 0.0
+                  drillHeight: Double 0.0
+                  roundness: Double 0.25
+          outlines: List(4)
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: false
+                  path: "M-1.85 -3.41L1.91 -3.41M-1.85 3.41L1.91 3.41M1.91 -3.41L1.91 -2.15M1.91 3.41L1.91 2.15"
+              - FootprintOutline
+                  layer: "silkscreen"
+                  width: Double 0.12
+                  filled: true
+                  path: "M-3.13 -3.31L-3.37 -3.64L-2.89 -3.64L-3.13 -3.31Z"
+              - FootprintOutline
+                  layer: "courtyard"
+                  width: Double 0.05
+                  filled: false
+                  path: "M-4.4 -3.6L-4.4 3.6M-4.4 3.6L4.4 3.6M4.4 -3.6L-4.4 -3.6M4.4 3.6L4.4 -3.6"
+              - FootprintOutline
+                  layer: "fabrication"
+                  width: Double 0.1
+                  filled: false
+                  path: "M-1.85 -2.35L-1.85 3.35M-1.85 -2.35L-0.85 -3.35M-1.85 3.35L1.85 3.35M-0.85 -3.35L1.85 -3.35M1.85 -3.35L1.85 3.35"
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint.jmx 1:1 footprint "…" is opened with '{' and never closed
+== line 4 deleted
+READS ae3a70c5b0d33ebe867cf588fcdc1c5f
+== line 4 begun with a stray word
+READS 55e4ef5e23bebbcf999a325d6e1b536b
+== line 11 deleted
+READS 52a03b3440b31ee5afa7e84141e3ce98
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/footprints/kicad-package-to-sot-smd-sot-223-3-tabpin2-footprint.jmx 11:5 'zzz' is not a block of a footprint; it holds meta

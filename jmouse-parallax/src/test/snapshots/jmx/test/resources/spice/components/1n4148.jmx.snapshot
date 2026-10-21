@@ -494,9 +494,9 @@ READS ae84dbc736ad6472eb53ebeb93f6a3e2
 == line 25 begun with a stray word
 REFUSED src/test/resources/spice/components/1n4148.jmx 25:9 a parameter is 'name = value [unit] [in minimum .. maximum] [step s] [flags] ["description"]'
 == line 32 deleted
-REFUSED src/test/resources/spice/components/1n4148.jmx 32:9 'anode' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/spice/components/1n4148.jmx 32:9 'anode' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 begun with a stray word
-REFUSED src/test/resources/spice/components/1n4148.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/spice/components/1n4148.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 39 deleted
 READS 12e69d6b13981e7d8eec646f843872d6
 == line 39 begun with a stray word

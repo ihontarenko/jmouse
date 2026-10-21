@@ -1,7 +1,9 @@
 package org.jmouse.parallax.store.catalogue;
 
 import org.jmouse.parallax.owner.ParallaxOwner;
+import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
+import org.jmouse.parallax.script.engine.FootprintDrawing;
 import org.jmouse.parallax.circuit.elaboration.SheetHierarchy;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.script.engine.DefinedObject;
@@ -86,19 +88,33 @@ public class ComponentModels {
      * @param designator      what a part of it is called on a sheet before its number ({@code meta designator R}), or null
      * @param sheetParameters a sheet's sliders as the sheet declares them — range, step, unit —, which each of its blocks
      *                        sets on its own; empty for a component
+     * @param footprint       the footprint its package lands on ({@code footprint …}), if the reader may see it; null otherwise
      */
     public record ModelView(String name, String kind, List<String> units, List<PinView> pins,
                             List<ParameterView> parameters, List<TextView> texts, List<String> symbol, String symbolReference,
                             List<String> symbolVariants, String symbolDrawing, Map<String, String> symbolPorts,
                             List<MeasureView> measures, Map<String, LeadView> leads, Map<String, String> displayUnits,
                             Map<String, String> displayCaptions,
-                            String designator, List<ParameterDefinition> sheetParameters) { }
+                            String designator, List<ParameterDefinition> sheetParameters, String footprint) { }
     /** A lead's look: one of the lead colours, and the colour of its stripes or null. */
     public record LeadView(String colour, String stripes) { }
     /** One figure an instrument reads ({@code reading = plus - minus unit V signal}): its name, its unit, whether it is a signal. */
     public record MeasureView(String name, String unit, boolean signal) { }
     public record ReferenceView(String reference, String name, String kind, String origin,
                                 ParallaxOwner owner, String status) { }
+
+    /**
+     * A footprint document as a shelf shows it: its drawing — {@code FootprintDrawing} JSON, pads and outlines in
+     * millimetres —, ready to draw.
+     */
+    public record FootprintView(String slug, String title, String summary, String origin, ParallaxOwner owner,
+                                String drawing) { }
+
+    /** A footprint and the components whose package lands on it, of those the reader may see. */
+    public record FootprintDetail(FootprintView footprint, List<ComponentUse> usedBy) { }
+
+    /** A component naming a footprint: its slug and what it is called. */
+    public record ComponentUse(String slug, String title) { }
 
     /** A symbol document as a shelf or a palette shows it: its drawing, ready to draw. */
     public record SymbolView(String slug, String title, String summary, String origin, ParallaxOwner owner,
@@ -134,6 +150,33 @@ public class ComponentModels {
                 .toList();
     }
 
+    /** Every footprint document the reader may see, with its drawing, by title. */
+    @Transactional(readOnly = true)
+    public List<FootprintView> footprints() {
+        return objects.findByKind(ObjectKind.FOOTPRINT).stream()
+                .filter(objectAccess::canRead)
+                .sorted(Comparator.comparing(MathematicalObject::getTitle))
+                .map(this::footprintView)
+                .toList();
+    }
+
+    /**
+     * One footprint and the components that name it: every component the reader may see whose head text says
+     * {@code footprint <slug>}, read through the document cache.
+     */
+    @Transactional(readOnly = true)
+    public FootprintDetail footprint(String slug) {
+        MathematicalObject footprint = readableFootprint(slug).orElseThrow(() -> ParallaxProblem.notFound("The footprint"));
+        DefinedObject.Relation named = new DefinedObject.Relation(slug, DefinedObject.RelationKind.USES_FOOTPRINT);
+        List<ComponentUse> usedBy = objects.findByKind(ObjectKind.COMPONENT).stream()
+                .filter(objectAccess::canRead)
+                .filter(component -> names(component, named))
+                .sorted(Comparator.comparing(MathematicalObject::getTitle))
+                .map(component -> new ComponentUse(component.getSlug(), component.getTitle()))
+                .toList();
+        return new FootprintDetail(footprintView(footprint), usedBy);
+    }
+
     /** Metadata for the editor and schematic, subject to the same reader access as the model object. */
     @Transactional(readOnly = true)
     public ModelView describe(String reference) {
@@ -167,6 +210,8 @@ public class ComponentModels {
         String drawing = symbol == null ? null : drawingOf(symbol);
         Map<String, String> ports = drawing == null ? Map.of()
                 : ComponentSources.pinsByPort(document, pinNames(model), portsOf(drawing));
+        String footprint = document.block(Block.FootprintUse.class).map(Block.FootprintUse::footprint)
+                .filter(named -> readableFootprint(named).isPresent()).orElse(null);
         return new ModelView(model.name(), model.kind(), model.units(),
                 model.pins().stream().map(pin -> new PinView(pin.name(), pin.numbers(), pin.shared(), pin.nature().name(),
                         pin.output(), pin.description())).toList(),
@@ -178,7 +223,8 @@ public class ComponentModels {
                 model.measures().entrySet().stream().map(measure -> new MeasureView(measure.getKey(), measure.getValue().unit(), measure.getValue().signal())).toList(),
                 model.leads().entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,
                         lead -> new LeadView(lead.getValue().colour(), lead.getValue().stripes()), (one, other) -> one, java.util.LinkedHashMap::new)),
-                model.displayUnits(), model.displayCaptions(), model.headerValue("designator").orElse(null), List.of());
+                model.displayUnits(), model.displayCaptions(), model.headerValue("designator").orElse(null), List.of(),
+                footprint);
     }
 
     /**
@@ -215,7 +261,7 @@ public class ComponentModels {
         List<ParameterView> parameters = sheet.parameters().stream()
                 .map(parameter -> new ParameterView(parameter.name(), parameter.defaultValue(), false, parameter.label(), "")).toList();
         return new ModelView(sheet.title(), SHEET_KIND, List.of(), pins, parameters, List.of(), symbol, null, List.of(), null, Map.of(),
-                List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR, sheet.parameters());
+                List.of(), Map.of(), Map.of(), Map.of(), SHEET_DESIGNATOR, sheet.parameters(), null);
     }
 
     /**
@@ -226,6 +272,25 @@ public class ComponentModels {
         ExperienceDocument component = ComponentSources.readComponent(source);
         ComponentModel model = ComponentDocuments.read(source, component.slug(), forEditing());
         return ComponentSources.bindingProblem(component, pinNames(model), symbol.getSlug(), portsOf(drawingOf(symbol)));
+    }
+
+    /**
+     * Why a component's package cannot land on a footprint: a pin number of the component — those of the base it
+     * extends included — that is no copper pad of the footprint. Empty when every one is.
+     */
+    Optional<String> footprintProblem(String source, MathematicalObject footprint) {
+        ExperienceDocument component = ComponentSources.readComponent(source);
+        ComponentModel model = ComponentDocuments.read(source, component.slug(), forEditing());
+        Set<String> pads = FootprintDrawing.fromJson(footprintDrawingOf(footprint)).padNumbers();
+        List<String> missing = model.pins().stream()
+                .flatMap(pin -> pin.numbers().values().stream().map(String::valueOf).filter(number -> !pads.contains(number))
+                        .map(number -> pin.name() + " " + number))
+                .toList();
+        if (missing.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of("'" + footprint.getSlug() + "' has no pad for " + String.join(", ", missing) + "; its pads are "
+                + String.join(", ", pads));
     }
 
     /** A model's pins, those of the base it extends included. */
@@ -285,6 +350,37 @@ public class ComponentModels {
     private Optional<MathematicalObject> readableSymbol(String slug) {
         return objects.findBySlug(slug)
                 .filter(candidate -> candidate.getKind() == ObjectKind.SYMBOL && objectAccess.canRead(candidate));
+    }
+
+    /** A footprint document by its slug, if it is one and the reader may see it. */
+    private Optional<MathematicalObject> readableFootprint(String slug) {
+        return objects.findBySlug(slug)
+                .filter(candidate -> candidate.getKind() == ObjectKind.FOOTPRINT && objectAccess.canRead(candidate));
+    }
+
+    /** Whether a component's head text names a relation; a text that no longer reads names nothing. */
+    private boolean names(MathematicalObject component, DefinedObject.Relation relation) {
+        try {
+            return definedObject(component).relations().contains(relation);
+        } catch (IllegalArgumentException | ParallaxProblem unreadable) {
+            return false;
+        }
+    }
+
+    private FootprintView footprintView(MathematicalObject footprint) {
+        return new FootprintView(footprint.getSlug(), footprint.getTitle(), footprint.getSummary(),
+                CatalogueViews.Origin.of(footprint).name(), CatalogueViews.ownerOf(footprint), footprintDrawingOf(footprint));
+    }
+
+    /** An object's head text, read through the document cache. */
+    private DefinedObject definedObject(MathematicalObject object) {
+        return objectDocuments.cached(object.getSourceChecksum(), () -> sourceAt(object, object.getRevision()).orElseThrow(),
+                object.getSlug());
+    }
+
+    /** A footprint object's drawing, read from its head text. */
+    private String footprintDrawingOf(MathematicalObject footprint) {
+        return ((ObjectDefinition.Footprint) definedObject(footprint).definition()).drawing();
     }
 
     /** A symbol object's drawing, read from its head text. */

@@ -138,6 +138,8 @@ final class DefinitionBlocks {
             case Program program -> program(program);
             case Circuit circuit -> circuit(circuit);
             case Symbol symbol -> new Mapped(Kind.SYMBOL, List.of(symbol(symbol.drawing())));
+            case ObjectDefinition.Footprint footprint -> new Mapped(Kind.FOOTPRINT,
+                    List.of(FootprintDrawing.fromJson(footprint.drawing()).block()));
             case ObjectDefinition.Graph graph -> graph(graph);
             case ObjectDefinition.Family family -> throw new IllegalArgumentException(
                     "A family is a line of a graph; it is kept as the graph's text, not as an object of its own.");

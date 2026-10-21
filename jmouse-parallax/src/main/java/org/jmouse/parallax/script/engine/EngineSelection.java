@@ -146,6 +146,7 @@ public final class EngineSelection {
             case PROGRAM -> program();
             case CIRCUIT -> circuit();
             case SYMBOL -> symbol();
+            case FOOTPRINT -> footprint();
             case GRAPH -> graph();
             case COMPONENT -> throw new IllegalArgumentException(what + " is its own source: read it from its text.");
             case FAMILY, FUNCTIONS, CATEGORY, COLLECTION, COURSE, INSTRUMENT -> throw new IllegalArgumentException(
@@ -859,6 +860,16 @@ public final class EngineSelection {
         return new ObjectDefinition.Symbol(new SymbolDrawing(drawn.width(), drawn.height(), drawn.paths(), pins, labels,
                 indicators, drawn.upright(), LivingDrawing.inputs(drawn.inputs()),
                 LivingDrawing.elements(what, drawn.inputs(), drawn.elements())).toJson());
+    }
+
+    /** The pad and outline lines of a {@code footprint} document as the drawing JSON a footprint definition carries. */
+    private ObjectDefinition footprint() {
+        Block.Footprint drawn = document.block(Block.Footprint.class)
+                .orElseThrow(() -> new IllegalArgumentException(what + " draws something: pad and outline lines."));
+        if (drawn.pads().isEmpty()) {
+            throw new IllegalArgumentException(what + " has no pads: a footprint is where a part is soldered.");
+        }
+        return new ObjectDefinition.Footprint(FootprintDrawing.of(drawn).toJson());
     }
 
     // ─── graphs ─────────────────────────────────────────────────────────────────────────────────────

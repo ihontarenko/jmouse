@@ -26,6 +26,7 @@ public final class JmxExtension implements Extension {
         DeclarationReader declarations = new DeclarationReader(reading);
         CircuitReader circuits = new CircuitReader(reading);
         SymbolReader symbols = new SymbolReader(reading);
+        FootprintReader footprints = new FootprintReader(reading);
         PresentationReader presentation = new PresentationReader(reading);
         StructureReader structures = new StructureReader(reading, presentation);
         GraphReader graphs = new GraphReader(reading, circuits);
@@ -56,6 +57,7 @@ public final class JmxExtension implements Extension {
 
                 block("view", keyword -> presentation.view()),
                 block("symbol", keyword -> symbols.symbol()),
+                block("footprint", footprints::use),
 
                 block("expect", kind -> kind == Kind.GRAPH, graphs::check),
                 block("expect", kind -> kind != Kind.GRAPH, circuits::expectation),
@@ -87,7 +89,7 @@ public final class JmxExtension implements Extension {
                 block("clock", graphs::clock),
                 block("panes", graphs::panes),
                 block("lines", keyword -> graphs.lines()));
-        this.document = new DocumentParser(reading, declarations, symbols, new DocumentRules(reading), statements);
+        this.document = new DocumentParser(reading, declarations, symbols, footprints, new DocumentRules(reading), statements);
         this.file = new JmxFileParser(reading);
     }
 

@@ -736,9 +736,9 @@ READS a90d870e105fe5b3bc71bbbb735f2d7e
 == line 39 begun with a stray word
 READS 2686d881a340dc58d0f192769951ce0b
 == line 46 deleted
-REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 46:9 'lower' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 46:9 'lower' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 46 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 46:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/ne555.jmx 46:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 deleted
 READS d6c461845980db2a517fc7b972b53552
 == line 53 begun with a stray word

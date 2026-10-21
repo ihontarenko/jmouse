@@ -107,6 +107,18 @@ public class CatalogueController {
         return componentModels.symbols();
     }
 
+    @GetMapping("/footprints")
+    @PublicEndpoint("lists catalogue footprints and only owned footprints the caller may read, with their drawings")
+    public List<ComponentModels.FootprintView> footprints() {
+        return componentModels.footprints();
+    }
+
+    @GetMapping("/footprints/{slug}")
+    @PublicEndpoint("a footprint the caller may read, and the components it may read that land on it")
+    public ComponentModels.FootprintDetail footprint(@PathVariable String slug) {
+        return componentModels.footprint(slug);
+    }
+
     @GetMapping("/catalogue/categories")
     @PublicEndpoint("the published catalogue is open to every reader")
     public List<CategoryView> categories(@RequestParam(required = false) ObjectNature nature) {

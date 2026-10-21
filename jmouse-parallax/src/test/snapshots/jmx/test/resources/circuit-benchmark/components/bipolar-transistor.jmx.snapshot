@@ -1106,9 +1106,9 @@ READS 902260e54afea846024d3e6c2a10f6c8
 == line 67 begun with a stray word
 READS b9d7c2909166f287cc5082f6e6686110
 == line 81 deleted
-REFUSED src/test/resources/circuit-benchmark/components/bipolar-transistor.jmx 81:9 'bi' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/bipolar-transistor.jmx 81:9 'bi' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 81 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/bipolar-transistor.jmx 81:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/bipolar-transistor.jmx 81:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 95 deleted
 READS 91bda6f584c0f65a25ad4f7f339208f1
 == line 95 begun with a stray word

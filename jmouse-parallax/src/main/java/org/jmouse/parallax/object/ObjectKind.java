@@ -32,6 +32,7 @@ public enum ObjectKind {
     PROGRAM,
     COMPONENT,
     SYMBOL,
+    FOOTPRINT,
     GRAPH,
     FAMILY;
 
@@ -42,6 +43,7 @@ public enum ObjectKind {
             case PROGRAM -> ObjectNature.PROGRAM;
             case COMPONENT -> ObjectNature.COMPONENT;
             case SYMBOL -> ObjectNature.SYMBOL;
+            case FOOTPRINT -> ObjectNature.FOOTPRINT;
             case GRAPH -> ObjectNature.GRAPH;
             default -> ObjectNature.MATHEMATICAL;
         };

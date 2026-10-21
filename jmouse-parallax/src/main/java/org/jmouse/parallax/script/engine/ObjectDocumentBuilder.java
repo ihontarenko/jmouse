@@ -65,10 +65,10 @@ final class ObjectDocumentBuilder {
                 Optional.empty(), List.of(), List.of(), blocks, 0);
     }
 
-    /** A symbol is a drawing: it has meta and nothing it would show or vary. */
+    /** A symbol or a footprint is a drawing: it has meta and nothing it would show or vary. */
     private static void requireViewAllowed(DefinedObject object) {
-        if (object.definition() instanceof ObjectDefinition.Symbol) {
-            throw new IllegalArgumentException("Symbol '" + object.slug() + "' is a drawing; it has no representations or presets.");
+        if (object.definition() instanceof ObjectDefinition.Symbol || object.definition() instanceof ObjectDefinition.Footprint) {
+            throw new IllegalArgumentException("'" + object.slug() + "' is a drawing; it has no representations or presets.");
         }
     }
 
@@ -117,12 +117,12 @@ final class ObjectDocumentBuilder {
     }
 
     /**
-     * The relations meta fields carry. {@code USES_SYMBOL} is not one: a component's {@code symbol uses} line says it,
-     * and that line belongs to the component's own source.
+     * The relations meta fields carry. {@code USES_SYMBOL} and {@code USES_FOOTPRINT} are not: a component's
+     * {@code symbol uses} and {@code footprint} lines say them, and those lines belong to the component's own source.
      */
     private static Map<RelationKind, List<String>> relationsByKind(List<Relation> relations) {
         Map<RelationKind, List<String>> byKind = new LinkedHashMap<>();
-        relations.stream().filter(relation -> relation.kind() != RelationKind.USES_SYMBOL)
+        relations.stream().filter(relation -> !relation.kind().writtenByLine())
                 .forEach(relation -> byKind.computeIfAbsent(relation.kind(), kind -> new ArrayList<>()).add(relation.slug()));
         return byKind;
     }
@@ -132,10 +132,10 @@ final class ObjectDocumentBuilder {
         return DefinitionWords.word(kind);
     }
 
-    /** Whether a meta field is a relation; {@code uses_symbol} is not, since {@code symbol uses} says it. */
+    /** Whether a meta field is a relation; {@code uses_symbol} and {@code uses_footprint} are not, since lines say them. */
     static boolean isRelationField(String field) {
         for (RelationKind kind : RelationKind.values()) {
-            if (kind != RelationKind.USES_SYMBOL && relationField(kind).equals(field)) {
+            if (!kind.writtenByLine() && relationField(kind).equals(field)) {
                 return true;
             }
         }

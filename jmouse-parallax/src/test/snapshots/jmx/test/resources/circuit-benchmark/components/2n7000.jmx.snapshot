@@ -832,7 +832,7 @@ READS 96b4cd4bcd67c052edfee7f3b4900917
 == line 74 deleted
 REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 74:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 74 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 74:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 74:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 81 deleted
 REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 85:5 'expect' is not a criterion: near, within or is
 == line 81 begun with a stray word

@@ -2,6 +2,8 @@ package org.jmouse.parallax.kicad;
 
 import org.jmouse.kicad.KiCadProject;
 import org.jmouse.kicad.KiCadProject.SheetInstance;
+import org.jmouse.kicad.footprint.KiCadFootprint;
+import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -13,31 +15,41 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
  * A KiCad design as jMX documents: a circuit for each sheet file — the root's places the others as blocks, as KiCad's
- * hierarchy does —, and a symbol for each KiCad symbol a sheet draws with KiCad's own drawing, once however many
- * sheets use it.
+ * hierarchy does —, a symbol for each KiCad symbol a sheet draws with KiCad's own drawing, and a footprint for each
+ * footprint its parts name that the libraries hold, each once however many sheets use it.
  *
  * @param circuits every sheet file's circuit, the root's first
  * @param symbols    the symbols the circuits draw with, each unit once; the catalogue keeps one it already has
  * @param components the components made from KiCad symbols the library map names none for, each once; the catalogue
- *                   keeps one it already has — a model written for it since, above all
- * @param libraries  the KiCad library each symbol and component made from KiCad comes from, by its slug — {@code Device}
- *                   for {@code kicad-device-r-shunt} —, so a host can file them as KiCad does
+ *                   keeps one it already has — a model written for it since, above all. Each lands on the footprint
+ *                   its parts name when every pin number of it is a pad there
+ * @param footprints the footprints the parts name, each once, as the footprint libraries hold them; the catalogue keeps
+ *                   one it already has
+ * @param libraries  the KiCad library each symbol, component and footprint made from KiCad comes from, by its slug —
+ *                   {@code Device} for {@code kicad-device-r-shunt} —, so a host can file them as KiCad does
  * @param notes    what the import could not carry, by part: a component the library map does not name, a value that is
- *                 not a number, a unit drawn by another's place
+ *                 not a number, a unit drawn by another's place, a footprint no library holds
  */
 public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDocument> symbols,
-                                 List<ExperienceDocument> components, Map<String, String> libraries, List<String> notes) {
+                                 List<ExperienceDocument> components, List<ExperienceDocument> footprints,
+                                 Map<String, String> libraries, List<String> notes) {
+
+    /** The property a KiCad part names its footprint by. */
+    private static final String FOOTPRINT = "Footprint";
 
     /**
-     * @param name what the design is called: its project's name, {@code LINEAR_500W_PS-1}
+     * @param name       what the design is called: its project's name, {@code LINEAR_500W_PS-1}
+     * @param footprints where the footprints its parts name are looked up: the project's own libraries, then KiCad's
      */
     public static KiCadProjectImport of(KiCadProject project, String name, KiCadLibraryMap library,
-                                        KiCadCatalogue catalogue) {
+                                        KiCadCatalogue catalogue, KiCadFootprintLibraries footprints) {
         String root = slugOf(name);
         Map<String, String> slugs = new LinkedHashMap<>();
         for (SheetInstance sheet : project.sheets()) {
@@ -54,6 +66,8 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
             notes.add("The design has no GND: " + ground + " is node 0, the ground everything is measured from; its other "
                     + "grounds stay nets of their own.");
         }
+        Map<String, KiCadFootprint> found = footprintsNamed(project, footprints, notes);
+        Map<String, String> footprintOfSymbol = footprintOfSymbol(project);
         Set<String> imported = new LinkedHashSet<>();
         for (SheetInstance sheet : project.sheets()) {
             String file = sheet.schematic().name();
@@ -69,8 +83,13 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
                     List.of(), List.of()));
             uses.addAll(read.symbols());
             for (KiCadSymbolDefinition definition : read.components()) {
-                components.putIfAbsent(KiCadSymbolDrawing.componentSlugOf(definition), KiCadComponentStub.documentOf(definition));
-                libraries.putIfAbsent(KiCadSymbolDrawing.componentSlugOf(definition), KiCadSymbolDrawing.libraryOf(definition));
+                String component = KiCadSymbolDrawing.componentSlugOf(definition);
+                if (components.containsKey(component)) {
+                    continue;
+                }
+                Optional<String> footprint = landing(definition, footprintOfSymbol.get(definition.name()), found, notes);
+                components.put(component, KiCadComponentStub.documentOf(definition, footprint));
+                libraries.putIfAbsent(component, KiCadSymbolDrawing.libraryOf(definition));
             }
             read.notes().forEach(note -> notes.add(file + ": " + note));
         }
@@ -83,8 +102,81 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
                 libraries.putIfAbsent(symbol.slug(), KiCadSymbolDrawing.libraryOf(use.symbol()));
             }
         }
+        List<ExperienceDocument> footprintDocuments = new ArrayList<>();
+        found.forEach((libraryId, footprint) -> {
+            footprintDocuments.add(KiCadFootprintDrawing.documentOf(libraryId, footprint));
+            libraries.putIfAbsent(KiCadFootprintDrawing.slugOf(libraryId), KiCadFootprintDrawing.libraryOf(libraryId));
+        });
         return new KiCadProjectImport(List.copyOf(circuits), List.copyOf(symbols), List.copyOf(components.values()),
-                Map.copyOf(libraries), List.copyOf(notes));
+                List.copyOf(footprintDocuments), Map.copyOf(libraries), List.copyOf(notes));
+    }
+
+    /**
+     * Every footprint a part of the design names, by its library id, each once; one the libraries do not hold is said
+     * in a note with the parts that name it — the design still imports.
+     */
+    private static Map<String, KiCadFootprint> footprintsNamed(KiCadProject project, KiCadFootprintLibraries footprints,
+                                                               List<String> notes) {
+        Map<String, KiCadFootprint> found = new LinkedHashMap<>();
+        Map<String, Set<String>> missing = new TreeMap<>();
+        for (SheetInstance sheet : project.sheets()) {
+            for (KiCadSymbolInstance symbol : sheet.schematic().symbols()) {
+                String libraryId = symbol.property(FOOTPRINT).strip();
+                if (libraryId.isEmpty() || found.containsKey(libraryId)) {
+                    continue;
+                }
+                Optional<KiCadFootprint> read;
+                try {
+                    read = footprints.find(libraryId);
+                } catch (IllegalArgumentException unreadable) {
+                    notes.add("The footprint " + libraryId + " cannot be read: " + unreadable.getMessage());
+                    read = Optional.empty();
+                }
+                read.ifPresentOrElse(footprint -> found.put(libraryId, footprint), () -> missing
+                        .computeIfAbsent(libraryId, ignored -> new TreeSet<>()).add(symbol.reference(sheet.path())));
+            }
+        }
+        missing.forEach((libraryId, parts) -> notes.add("The footprint " + libraryId + " is in no library the import "
+                + "reads (the project's folder, KiCad's own): " + String.join(", ", parts) + " land on nothing."));
+        return found;
+    }
+
+    /** The footprint the parts of each KiCad symbol name, by the symbol's library id: the one most of them name. */
+    private static Map<String, String> footprintOfSymbol(KiCadProject project) {
+        Map<String, Map<String, Integer>> counted = new LinkedHashMap<>();
+        for (SheetInstance sheet : project.sheets()) {
+            for (KiCadSymbolInstance symbol : sheet.schematic().symbols()) {
+                String libraryId = symbol.property(FOOTPRINT).strip();
+                if (!libraryId.isEmpty()) {
+                    counted.computeIfAbsent(symbol.libraryId(), ignored -> new LinkedHashMap<>())
+                            .merge(libraryId, 1, Integer::sum);
+                }
+            }
+        }
+        Map<String, String> chosen = new LinkedHashMap<>();
+        counted.forEach((symbol, named) -> named.entrySet().stream().max(Map.Entry.comparingByValue())
+                .ifPresent(most -> chosen.put(symbol, most.getKey())));
+        return chosen;
+    }
+
+    /**
+     * The footprint a component made from a KiCad symbol lands on: the one its parts name, when the libraries hold it
+     * and every pin number of the symbol is a pad of it; otherwise none, and a note says why.
+     */
+    private static Optional<String> landing(KiCadSymbolDefinition definition, String libraryId,
+                                            Map<String, KiCadFootprint> found, List<String> notes) {
+        if (libraryId == null || !found.containsKey(libraryId)) {
+            return Optional.empty();
+        }
+        Set<String> pads = found.get(libraryId).padNumbers();
+        List<String> missing = KiCadComponentStub.pinNumbers(definition).stream()
+                .filter(number -> !pads.contains(number)).toList();
+        if (!missing.isEmpty()) {
+            notes.add(KiCadSymbolDrawing.componentSlugOf(definition) + " does not land on " + libraryId + ": its pins "
+                    + String.join(", ", missing) + " are no pad there (pads " + String.join(", ", pads) + ").");
+            return Optional.empty();
+        }
+        return Optional.of(KiCadFootprintDrawing.slugOf(libraryId));
     }
 
     /**

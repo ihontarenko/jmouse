@@ -603,9 +603,9 @@ READS a4769af7774e7f294bc2af89d8376cd6
 == line 18 begun with a stray word
 READS dd566cb41186ec893b8d10f10d791855
 == line 25 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 25:9 'polarity' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 25:9 'polarity' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 deleted
 READS c37d7ab9c67d86ea2a549e48b660d160
 == line 32 begun with a stray word
@@ -619,9 +619,9 @@ READS 6d040fc3140392dd09c29c5d519b1e18
 == line 46 begun with a stray word
 READS af8e0512981728c4d69e41a6f1298ae0
 == line 60 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 60:9 'di' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 60:9 'di' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/junction-field-effect-transistor.jmx 71:15 'symbol uses' holds lines, not a nested '{ … }'
 == line 67 begun with a stray word

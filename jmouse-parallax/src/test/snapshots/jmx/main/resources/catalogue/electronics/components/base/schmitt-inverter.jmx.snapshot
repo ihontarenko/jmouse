@@ -197,9 +197,9 @@ READS 2ee2004e89680a5e19888a889358894b
 == line 25 begun with a stray word
 READS 893a8f2859ecfb6d1c5df807728f8695
 == line 32 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 32:9 'high' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 32:9 'high' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 39 deleted
 READS 29bf8bfdab5e1c2f3aeff94f2cf306c7
 == line 39 begun with a stray word

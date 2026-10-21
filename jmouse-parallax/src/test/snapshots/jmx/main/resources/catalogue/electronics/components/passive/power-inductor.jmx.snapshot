@@ -474,9 +474,9 @@ READS f77a08d5109bac42b6ccc06f8a279dad
 == line 46 begun with a stray word
 READS 330121f00a817f72b2a672b96addadec
 == line 53 deleted
-REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:9 'I_winding' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:9 'I_winding' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 deleted
 READS 66d78b2fae79d278e9c0d6ba51f7fc67
 == line 60 begun with a stray word

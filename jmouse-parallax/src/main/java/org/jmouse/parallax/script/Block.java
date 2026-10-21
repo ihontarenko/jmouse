@@ -830,6 +830,94 @@ public sealed interface Block {
         }
     }
 
+    // ─── footprints: how a part sits on a board ───────────────────────────────────────────────────────
+
+    /** What a pad is on the board: plated through it, on its surface, a connector's edge finger, or a bare hole. */
+    enum PadType {
+        THROUGH_HOLE("through-hole"), SURFACE("surface"), CONNECTOR("connector"), UNPLATED_HOLE("unplated-hole");
+
+        private final String word;
+
+        PadType(String word) {
+            this.word = word;
+        }
+
+        public String word() {
+            return word;
+        }
+
+        public static Optional<PadType> of(String word) {
+            return java.util.Arrays.stream(values()).filter(type -> type.word.equals(word)).findFirst();
+        }
+    }
+
+    /** A pad's copper outline. */
+    enum PadShape {
+        CIRCLE("circle"), RECTANGLE("rectangle"), OVAL("oval"), TRAPEZOID("trapezoid"),
+        ROUNDED_RECTANGLE("rounded-rectangle"), CUSTOM("custom");
+
+        private final String word;
+
+        PadShape(String word) {
+            this.word = word;
+        }
+
+        public String word() {
+            return word;
+        }
+
+        public static Optional<PadShape> of(String word) {
+            return java.util.Arrays.stream(values()).filter(shape -> shape.word.equals(word)).findFirst();
+        }
+    }
+
+    /**
+     * {@code pad "1" through-hole rectangle at 0, 0 size 1.905 x 2 drill 1.1}: one pad, in millimetres from the
+     * footprint's origin, Y downwards as on the board.
+     *
+     * @param number      what the package calls it — {@code 1}, {@code A3}; the component's pin of that package number
+     *                    lands on it; empty for a mounting hole
+     * @param rotation    degrees, counter-clockwise as KiCad turns a pad
+     * @param drillWidth  the hole's width; 0 for a pad on the surface
+     * @param drillHeight the hole's height — an oval hole's other side —; equal to its width for a round one
+     * @param roundness   a rounded rectangle's corner radius as a share of its smaller side
+     */
+    record FootprintPad(String number, PadType type, PadShape shape, double x, double y, double rotation, double width,
+                        double height, double drillWidth, double drillHeight, double roundness) {
+    }
+
+    /**
+     * {@code outline silkscreen width 0.12 "M-2.58 -3.27L…"}: the lines a footprint draws on one of the board's layers, as
+     * path data in millimetres.
+     *
+     * @param layer {@code silkscreen} (printed on the board), {@code fabrication} (the part's body), {@code courtyard}
+     *              (the room it keeps), {@code copper}
+     */
+    record FootprintOutline(String layer, double width, boolean filled, String path) {
+    }
+
+    /** A {@code footprint} document's lines: its pads and its outlines. */
+    record Footprint(List<FootprintPad> pads, List<FootprintOutline> outlines) implements Block {
+        public Footprint {
+            pads = List.copyOf(pads);
+            outlines = List.copyOf(outlines);
+        }
+
+        public String name() {
+            return "footprint";
+        }
+    }
+
+    /**
+     * {@code footprint to-220-3-vertical}: the footprint a component's package lands on — every package pin number of
+     * the component is one of its pads.
+     */
+    record FootprintUse(String footprint) implements Block {
+        public String name() {
+            return "footprint";
+        }
+    }
+
     /** {@code sheet 1200 x 760 grid 20}. */
     record Sheet(double width, double height, double grid) implements Block {
         public String name() {

@@ -30,14 +30,17 @@ final class DocumentParser extends AbstractParser {
     private final Reading reading;
     private final DeclarationReader declarations;
     private final SymbolReader symbols;
+    private final FootprintReader footprints;
     private final DocumentRules rules;
     private final List<JmxStatementParser> statements;
 
-    DocumentParser(Reading reading, DeclarationReader declarations, SymbolReader symbols, DocumentRules rules,
+    DocumentParser(Reading reading, DeclarationReader declarations, SymbolReader symbols, FootprintReader footprints,
+                   DocumentRules rules,
                    List<JmxStatementParser> statements) {
         this.reading = reading;
         this.declarations = declarations;
         this.symbols = symbols;
+        this.footprints = footprints;
         this.rules = rules;
         this.statements = List.copyOf(statements);
     }
@@ -101,6 +104,7 @@ final class DocumentParser extends AbstractParser {
         Body body = new Body();
         Set<String> written = new HashSet<>();
         SymbolReader.Drawing drawing = kind == Kind.SYMBOL ? symbols.drawing() : null;
+        FootprintReader.Drawing land = kind == Kind.FOOTPRINT ? footprints.drawing() : null;
         reading.body("'{' to open " + kind.keyword() + " \"" + title + "\"",
                 () -> reading.refusal(head, kind.keyword() + " \"…\" is opened with '{' and never closed"),
                 () -> {
@@ -111,10 +115,16 @@ final class DocumentParser extends AbstractParser {
                     // A symbol's drawing is written as lines of its own, not as a block: `rect …`, `line …`, `pin …`.
                     if (drawing != null && symbols.atDrawingLine()) {
                         drawing.read();
+                    } else if (land != null && footprints.atFootprintLine()) {
+                        // A footprint, likewise: its pads and outlines are lines of its own.
+                        land.read();
                     } else {
                         gather(body, statement(kind, written, context));
                     }
                 });
+        if (land != null) {
+            body.blocks.add(land.footprint());
+        }
         if (drawing != null) {
             body.blocks.add(drawing.symbol());
         }

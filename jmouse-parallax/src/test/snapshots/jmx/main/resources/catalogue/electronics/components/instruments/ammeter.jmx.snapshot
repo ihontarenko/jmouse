@@ -236,13 +236,13 @@ READS f85b0961d87a6f1a152d948284b85faf
 == line 11 begun with a stray word
 READS d6da981f0d2154c72fbd786d983fd7c5
 == line 18 deleted
-REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 18:9 'in' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 18:9 'in' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 18 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 18:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 18:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
-REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 25:9 'a' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 25:9 'a' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/instruments/ammeter.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 32 deleted
 READS 7c5236128ac87604e60b71cac2175f98
 == line 32 begun with a stray word

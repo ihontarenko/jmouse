@@ -108,6 +108,7 @@ public record ObjectExplanation(List<DocumentForm.StatementForm> structure, Deri
             case PROGRAM -> "Program: the run block executed with the formulas";
             case COMPONENT -> "Component model: its equations and behaviour, checked on a bench";
             case SYMBOL -> "Drawing: paths, pins and labels";
+            case FOOTPRINT -> "Footprint: pads and outlines, in millimetres";
             case GRAPH -> "Workbench: each line computed in its pane, on one clock";
             case FAMILY -> "Family: the member computed once for every value of its index";
         };

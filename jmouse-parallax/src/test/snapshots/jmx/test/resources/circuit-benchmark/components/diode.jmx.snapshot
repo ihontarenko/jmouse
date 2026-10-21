@@ -689,9 +689,9 @@ READS 583defb0f9ab131d2a88eb1e44ce5535
 == line 53 begun with a stray word
 READS 72e690348bede95dc71722a4f90707cd
 == line 60 deleted
-REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 60:9 'overvoltage' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 60:9 'overvoltage' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/diode.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 67 deleted
 READS a33482781af66f98d0c5d2545d7395c3
 == line 67 begun with a stray word

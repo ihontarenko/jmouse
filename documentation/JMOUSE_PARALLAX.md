@@ -797,6 +797,46 @@ and is required; the reader also takes `ac`, `operating` and `dc_sweep` with `fr
 `nets` (`name [ground] [route x,y …]`), `ports` (`input|output|power|ground|analog net`) and `sheet 1200 x 760 grid 20`
 are also read.
 
+### A footprint: how a part sits on a board
+
+A `footprint` document is a part's land pattern — its pads and the outlines it draws —, in **millimetres** from its
+origin, Y downwards, as a board is drawn (a sheet's 20-unit grid means nothing on a board). Its kind is `FOOTPRINT`,
+nature `FOOTPRINT`; the definition carries the drawing as `FootprintDrawing` JSON (`version`, `pads`, `outlines`),
+which is what a library browser or a board preview paints.
+
+```
+footprint "TO-220-3_Vertical" as kicad-package-to-sot-tht-to-220-3-vertical-footprint {
+    meta { summary "TO-220-3, Vertical, RM 2.54mm" }
+    pad "1" through-hole rectangle at 0, 0 size 1.905 x 2 drill 1.1
+    pad "2" surface rounded-rectangle at 2.54, 0 rotate 90 size 1 x 1.5 roundness 0.25
+    outline silkscreen width 0.12 "M-2.58 -3.27L7.66 -3.27"
+    outline courtyard width 0.05 filled "M-2.71 -3.4L7.79 -3.4L7.79 1.51Z"
+}
+```
+
+- **`pad "NUMBER" TYPE SHAPE at x, y [rotate degrees] size width x height [drill width [x height]] [roundness share]`** —
+  the type is `through-hole`, `surface`, `connector` or `unplated-hole`; the shape `circle`, `rectangle`, `oval`,
+  `trapezoid`, `rounded-rectangle` or `custom`; rotation is KiCad's, counter-clockwise; `roundness` is a rounded
+  rectangle's corner radius as a share of its smaller side. A mounting hole has the number `""`.
+- **`outline LAYER [width w] [filled] "path"`** — SVG path data on `silkscreen`, `fabrication`, `courtyard` or `copper`.
+
+A component names the footprint its package lands on with **`footprint <slug>`**, one line, the only place that choice
+lives (`uses_footprint` in meta is refused); `meta package` stays as the package's name in words. On every save the
+store checks that the footprint is one, that it is the catalogue's or the component's own owner's, and that **every
+pin number of the component — the base it extends included — is a copper pad of it**; a save that breaks it is refused,
+a catalogue import only warns. The relation `USES_FOOTPRINT` is derived from the line and checked, but not indexed in
+`object_relations` (its CHECK lists the kinds the schema was created with); the components using a footprint are read
+from their texts.
+
+**From KiCad.** `jmouse-kicad` reads a `.kicad_mod` into `KiCadFootprint` (pads, lines, rectangles, circles, arcs,
+polygons) and resolves `LIBRARY:NAME` through `KiCadFootprintLibraries` — the files a design is sent with
+(`LIBRARY.pretty/NAME.kicad_mod`), then the folders `jmouse.parallax.kicad.footprint-libraries` names (KiCad's installed
+`*.pretty`). `KiCadFootprintDrawing` turns one into a document, slug `kicad-<library>-<name>-footprint`, one outline per
+layer, stroke and fill. An import stores every footprint its parts name once — before the symbols and components, with
+the same reuse rule — and a component made from a KiCad symbol gets the `footprint` line of the footprint most of its
+parts name when every pin number of the symbol is a pad there; otherwise a note says why. A footprint no library holds
+is a note, never a failure.
+
 ## Hosting it — the SPI
 
 The library keeps no accounts, no owners table, no policy and no seeds. It asks the host, through these interfaces
@@ -893,6 +933,7 @@ the service decides per row (published to anybody, drafts to editors, owned rows
 | `PUT /catalogue/objects/{id}/status` | `CATALOGUE_PUBLISH` |
 | `GET` · `POST OWNER/objects` | `SCENE_READ` · `SCENE_WRITE` about the owner |
 | `GET /component-models` · `/component-models/{reference}` · `/symbols` | service |
+| `GET /footprints` · `/footprints/{slug}` (the footprint and the components that land on it) | service |
 | `GET /instruments` · `/instruments/{code}` · `PUT /instruments/{code}` | public · `CATALOGUE_WRITE` |
 | `GET /representations` | public |
 | `POST /computations` · `/computations/frames` · `/computations/estimate` | service (`Computing.authorize`) |

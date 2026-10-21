@@ -851,7 +851,7 @@ READS 40b634813557522f480ad76d8d8aeeb8
 == line 53 deleted
 REFUSED src/test/resources/spice/components/2n2222.jmx 53:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 53 begun with a stray word
-REFUSED src/test/resources/spice/components/2n2222.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/spice/components/2n2222.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 60 deleted
 REFUSED src/test/resources/spice/components/2n2222.jmx 53:5 expectation 'gain at a tenth of a milliampere' needs a measure and a criterion (near, within or is)
 == line 60 begun with a stray word

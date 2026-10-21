@@ -61,12 +61,14 @@ import org.jmouse.parallax.store.kicad.KiCadExports;
 import org.jmouse.parallax.store.kicad.KiCadImports;
 import org.jmouse.parallax.store.kicad.KiCadLibraryMaps;
 import org.jmouse.parallax.store.kicad.KiCadProperties;
+import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.ObjectMapper;
 
+import java.nio.file.Path;
 import java.time.Clock;
 
 /**
@@ -99,7 +101,8 @@ import java.time.Clock;
  *     <li>{@code jmouse.parallax.computation.*} — {@link ComputationProperties};</li>
  *     <li>{@code jmouse.parallax.catalogue.*} — {@link CatalogueProperties};</li>
  *     <li>{@code jmouse.parallax.spice.*} — {@link SpiceProperties}: the second engine, when a command is set.</li>
- *     <li>{@code jmouse.parallax.kicad.*} — {@link KiCadProperties}: the library map a KiCad import reads.</li>
+ *     <li>{@code jmouse.parallax.kicad.*} — {@link KiCadProperties}: the library map a KiCad import reads, and the
+ *     footprint libraries it looks a part's footprint up in.</li>
  * </ul>
  */
 @AutoConfiguration(after = ParallaxJpaAutoConfiguration.class)
@@ -542,13 +545,16 @@ public class ParallaxStoreAutoConfiguration {
 
     /**
      * 📥 KiCad in: a design's sheets imported and stored in an owner's place, its symbols matched to the catalogue's
-     * components through the library map {@code jmouse.parallax.kicad.library-map} names.
+     * components through the library map {@code jmouse.parallax.kicad.library-map} names, the footprints its parts name
+     * looked up in the libraries sent with it and then in {@code jmouse.parallax.kicad.footprint-libraries}.
      */
     @Bean
     @ConditionalOnMissingBean
     public KiCadImports parallaxKiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components,
-                                             KiCadLibraryMaps maps, ApplicationEventPublisher events) {
-        return new KiCadImports(catalogue, objects, components, maps, events);
+                                             KiCadLibraryMaps maps, KiCadProperties properties,
+                                             ApplicationEventPublisher events) {
+        return new KiCadImports(catalogue, objects, components, maps, KiCadFootprintLibraries.in(
+                properties.footprintLibraries().stream().map(Path::of).toList()), events);
     }
 
     /** 📤 KiCad out: a circuit written as a KiCad schematic, its parts under the library ids the library map gives back. */

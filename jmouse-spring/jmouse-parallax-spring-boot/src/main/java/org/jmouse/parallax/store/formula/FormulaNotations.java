@@ -211,6 +211,7 @@ public class FormulaNotations {
             case ObjectDefinition.Program program -> definitionLines(program.formulas());
             case ObjectDefinition.Component ignored -> List.of();
             case ObjectDefinition.Symbol ignored -> List.of();
+            case ObjectDefinition.Footprint ignored -> List.of();
             case ObjectDefinition.Graph ignored -> List.of();
             case ObjectDefinition.Family family -> linesOf(family.member());
             case ObjectDefinition.Circuit circuit -> circuit.elements().stream()

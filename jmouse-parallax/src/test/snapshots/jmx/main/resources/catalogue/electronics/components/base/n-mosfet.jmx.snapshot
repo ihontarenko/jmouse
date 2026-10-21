@@ -153,7 +153,7 @@ REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:
 == line 11 deleted
 READS a0e8378a7755ee0860ab9d606d880461
 == line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 25 deleted
 READS edaa8d1f00b92fdae292b97f41bef775
 == line 25 begun with a stray word
@@ -161,4 +161,4 @@ READS d3d57d0ca9606832744aad071bb56317
 == line 32 deleted
 REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:1 component "…" is opened with '{' and never closed
 == line 32 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 32:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 32:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view

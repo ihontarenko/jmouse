@@ -501,7 +501,7 @@ READS 4253a7db85b289de970de493fead346c
 == line 46 deleted
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 46:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
 == line 46 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 46:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 46:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
 == line 53 deleted
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 46:5 expectation 'on-resistance at -200 mA and -10 V gate drive' needs a measure and a criterion (near, within or is)
 == line 53 begun with a stray word
@@ -517,4 +517,4 @@ REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 67:9 'zzz' is 
 == line 74 deleted
 REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 6:1 component "…" is opened with '{' and never closed
 == line 74 begun with a stray word
-REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 74:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+REFUSED src/test/resources/circuit-benchmark/components/bs250.jmx 74:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, footprint, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view

@@ -73,6 +73,11 @@ public record DefinedObject(String slug, String title, String summary, String de
 
     /** How one object is related to another. */
     public enum RelationKind {
-        GENERALIZES, SPECIAL_CASE, DEFORMATION_OF, CONSTRUCTED_FROM, DUAL, SIMILAR, SEE_ALSO, USES_SYMBOL
+        GENERALIZES, SPECIAL_CASE, DEFORMATION_OF, CONSTRUCTED_FROM, DUAL, SIMILAR, SEE_ALSO, USES_SYMBOL, USES_FOOTPRINT;
+
+        /** Whether a line of the source says it — {@code symbol uses}, {@code footprint} — rather than a meta field. */
+        public boolean writtenByLine() {
+            return this == USES_SYMBOL || this == USES_FOOTPRINT;
+        }
     }
 }

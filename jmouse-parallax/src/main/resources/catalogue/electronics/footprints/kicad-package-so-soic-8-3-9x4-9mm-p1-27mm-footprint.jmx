@@ -1,0 +1,20 @@
+footprint "SOIC-8_3.9x4.9mm_P1.27mm" as kicad-package-so-soic-8-3-9x4-9mm-p1-27mm-footprint {
+    meta {
+        summary "SOIC, 8 Pin (JEDEC MS-012AA, https://www.analog.com/media/en/package-pcb-resources/package/pkg_pdf/soic_narrow-r/r_8.pdf), generated with kicad-footprint-generator ipc_gullwing_generator.py — imported from KiCad"
+        category circuits
+        tags electronics, kicad, footprint
+        source "KiCad footprint Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+    }
+    pad "1" surface rounded-rectangle at -2.475, -1.905 size 1.95 x 0.6 roundness 0.25
+    pad "2" surface rounded-rectangle at -2.475, -0.635 size 1.95 x 0.6 roundness 0.25
+    pad "3" surface rounded-rectangle at -2.475, 0.635 size 1.95 x 0.6 roundness 0.25
+    pad "4" surface rounded-rectangle at -2.475, 1.905 size 1.95 x 0.6 roundness 0.25
+    pad "5" surface rounded-rectangle at 2.475, 1.905 size 1.95 x 0.6 roundness 0.25
+    pad "6" surface rounded-rectangle at 2.475, 0.635 size 1.95 x 0.6 roundness 0.25
+    pad "7" surface rounded-rectangle at 2.475, -0.635 size 1.95 x 0.6 roundness 0.25
+    pad "8" surface rounded-rectangle at 2.475, -1.905 size 1.95 x 0.6 roundness 0.25
+    outline silkscreen width 0.12 "M0 -2.56L-1.95 -2.56M0 -2.56L1.95 -2.56M0 2.56L-1.95 2.56M0 2.56L1.95 2.56"
+    outline silkscreen width 0.12 filled "M-2.7 -2.465L-2.94 -2.795L-2.46 -2.795L-2.7 -2.465Z"
+    outline courtyard width 0.05 "M-3.7 -2.7L-3.7 2.7M-3.7 2.7L3.7 2.7M3.7 -2.7L-3.7 -2.7M3.7 2.7L3.7 -2.7"
+    outline fabrication width 0.1 "M-1.95 -1.475L-0.975 -2.45M-1.95 2.45L-1.95 -1.475M-0.975 -2.45L1.95 -2.45M1.95 -2.45L1.95 2.45M1.95 2.45L-1.95 2.45"
+}
