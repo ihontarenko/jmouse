@@ -1,0 +1,30 @@
+footprint "Pin socket, 2.54 mm pitch, 1 × 15, vertical" as pin-socket-1x15-pitch-254-vertical-footprint {
+    meta {
+        summary "Pin socket, 2.54 mm pitch, 1 row of 15, upright, through-hole"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60603-13 grid"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.jmd#pin-socket and the land pattern rules; regenerate, never edit.
+    # Square lead 0.64: drill 1.15, pad 2.15, pin 1 square.
+    pad "1" through-hole rectangle at 0, -17.78 size 2.15 x 2.15 drill 1.15
+    pad "2" through-hole circle at 0, -15.24 size 2.15 x 2.15 drill 1.15
+    pad "3" through-hole circle at 0, -12.7 size 2.15 x 2.15 drill 1.15
+    pad "4" through-hole circle at 0, -10.16 size 2.15 x 2.15 drill 1.15
+    pad "5" through-hole circle at 0, -7.62 size 2.15 x 2.15 drill 1.15
+    pad "6" through-hole circle at 0, -5.08 size 2.15 x 2.15 drill 1.15
+    pad "7" through-hole circle at 0, -2.54 size 2.15 x 2.15 drill 1.15
+    pad "8" through-hole circle at 0, 0 size 2.15 x 2.15 drill 1.15
+    pad "9" through-hole circle at 0, 2.54 size 2.15 x 2.15 drill 1.15
+    pad "10" through-hole circle at 0, 5.08 size 2.15 x 2.15 drill 1.15
+    pad "11" through-hole circle at 0, 7.62 size 2.15 x 2.15 drill 1.15
+    pad "12" through-hole circle at 0, 10.16 size 2.15 x 2.15 drill 1.15
+    pad "13" through-hole circle at 0, 12.7 size 2.15 x 2.15 drill 1.15
+    pad "14" through-hole circle at 0, 15.24 size 2.15 x 2.15 drill 1.15
+    pad "15" through-hole circle at 0, 17.78 size 2.15 x 2.15 drill 1.15
+    outline fabrication width 0.1 "M-0.423 -19.05H1.27V19.05H-1.27V-18.203Z"
+    outline silkscreen width 0.12 "M-1.38 -19.16H1.38V19.16H-1.38Z"
+    outline silkscreen filled "M-2.18 -17.78A0.3 0.3 0 1 0 -1.58 -17.78A0.3 0.3 0 1 0 -2.18 -17.78Z"
+    outline courtyard width 0.05 "M-1.75 -19.55H1.75V19.55H-1.75Z"
+}

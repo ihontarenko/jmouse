@@ -1,0 +1,48 @@
+footprint "Pin header, 2.54 mm pitch, 1 × 33, vertical" as pin-header-1x33-pitch-254-vertical-footprint {
+    meta {
+        summary "Pin header, 2.54 mm pitch, 1 row of 33, upright, through-hole"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60603-13 grid"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.jmd#pin-header and the land pattern rules; regenerate, never edit.
+    # Square lead 0.64: drill 1.15, pad 2.15, pin 1 square.
+    pad "1" through-hole rectangle at 0, -40.64 size 2.15 x 2.15 drill 1.15
+    pad "2" through-hole circle at 0, -38.1 size 2.15 x 2.15 drill 1.15
+    pad "3" through-hole circle at 0, -35.56 size 2.15 x 2.15 drill 1.15
+    pad "4" through-hole circle at 0, -33.02 size 2.15 x 2.15 drill 1.15
+    pad "5" through-hole circle at 0, -30.48 size 2.15 x 2.15 drill 1.15
+    pad "6" through-hole circle at 0, -27.94 size 2.15 x 2.15 drill 1.15
+    pad "7" through-hole circle at 0, -25.4 size 2.15 x 2.15 drill 1.15
+    pad "8" through-hole circle at 0, -22.86 size 2.15 x 2.15 drill 1.15
+    pad "9" through-hole circle at 0, -20.32 size 2.15 x 2.15 drill 1.15
+    pad "10" through-hole circle at 0, -17.78 size 2.15 x 2.15 drill 1.15
+    pad "11" through-hole circle at 0, -15.24 size 2.15 x 2.15 drill 1.15
+    pad "12" through-hole circle at 0, -12.7 size 2.15 x 2.15 drill 1.15
+    pad "13" through-hole circle at 0, -10.16 size 2.15 x 2.15 drill 1.15
+    pad "14" through-hole circle at 0, -7.62 size 2.15 x 2.15 drill 1.15
+    pad "15" through-hole circle at 0, -5.08 size 2.15 x 2.15 drill 1.15
+    pad "16" through-hole circle at 0, -2.54 size 2.15 x 2.15 drill 1.15
+    pad "17" through-hole circle at 0, 0 size 2.15 x 2.15 drill 1.15
+    pad "18" through-hole circle at 0, 2.54 size 2.15 x 2.15 drill 1.15
+    pad "19" through-hole circle at 0, 5.08 size 2.15 x 2.15 drill 1.15
+    pad "20" through-hole circle at 0, 7.62 size 2.15 x 2.15 drill 1.15
+    pad "21" through-hole circle at 0, 10.16 size 2.15 x 2.15 drill 1.15
+    pad "22" through-hole circle at 0, 12.7 size 2.15 x 2.15 drill 1.15
+    pad "23" through-hole circle at 0, 15.24 size 2.15 x 2.15 drill 1.15
+    pad "24" through-hole circle at 0, 17.78 size 2.15 x 2.15 drill 1.15
+    pad "25" through-hole circle at 0, 20.32 size 2.15 x 2.15 drill 1.15
+    pad "26" through-hole circle at 0, 22.86 size 2.15 x 2.15 drill 1.15
+    pad "27" through-hole circle at 0, 25.4 size 2.15 x 2.15 drill 1.15
+    pad "28" through-hole circle at 0, 27.94 size 2.15 x 2.15 drill 1.15
+    pad "29" through-hole circle at 0, 30.48 size 2.15 x 2.15 drill 1.15
+    pad "30" through-hole circle at 0, 33.02 size 2.15 x 2.15 drill 1.15
+    pad "31" through-hole circle at 0, 35.56 size 2.15 x 2.15 drill 1.15
+    pad "32" through-hole circle at 0, 38.1 size 2.15 x 2.15 drill 1.15
+    pad "33" through-hole circle at 0, 40.64 size 2.15 x 2.15 drill 1.15
+    outline fabrication width 0.1 "M-0.423 -41.91H1.27V41.91H-1.27V-41.063Z"
+    outline silkscreen width 0.12 "M-1.38 -42.02H1.38V42.02H-1.38Z"
+    outline silkscreen filled "M-2.18 -40.64A0.3 0.3 0 1 0 -1.58 -40.64A0.3 0.3 0 1 0 -2.18 -40.64Z"
+    outline courtyard width 0.05 "M-1.75 -42.4H1.75V42.4H-1.75Z"
+}

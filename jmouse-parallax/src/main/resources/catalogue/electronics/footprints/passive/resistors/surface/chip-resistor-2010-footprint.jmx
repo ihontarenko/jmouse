@@ -1,0 +1,17 @@
+footprint "Chip resistor 2010 (5025 metric)" as chip-resistor-2010-footprint {
+    meta {
+        summary "Resistor, 2010 (5025 metric) chip body, reflow pads"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60115-8 dimensions, 2010 (5025 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#resistor-2010 and the land pattern rules; regenerate, never edit.
+    # Body 4.9…5.1 × 2.35…2.65, terminal 0.35…0.85; fillets toe 0.35, heel 0, side 0.
+    # Z = 5.8, G = 3.2, X = 2.65; pad 1.3 × 2.65 centred at ±2.25.
+    pad "1" surface rounded-rectangle at -2.25, 0 size 1.3 x 2.65 roundness 0.25
+    pad "2" surface rounded-rectangle at 2.25, 0 size 1.3 x 2.65 roundness 0.25
+    outline fabrication width 0.1 "M-2.5 -1.25H2.5V1.25H-2.5Z"
+    outline silkscreen width 0.12 "M-1.34 -1.36H1.34M-1.34 1.36H1.34"
+    outline courtyard width 0.05 "M-3.15 -1.6H3.15V1.6H-3.15Z"
+}

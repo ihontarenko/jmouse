@@ -1,0 +1,21 @@
+footprint "DIP-6, 7.62 mm rows" as dip-6-footprint {
+    meta {
+        summary "6-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "JEDEC MS-001"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/dual-inline-packages.jmd#dip and the land pattern rules; regenerate, never edit.
+    # Lead 0.56 × 0.36 at most: drill 0.9, pad 1.9, pin 1 square; body 6.35 × 8.9.
+    pad "1" through-hole rectangle at -3.81, -2.54 size 1.9 x 1.9 drill 0.9
+    pad "2" through-hole circle at -3.81, 0 size 1.9 x 1.9 drill 0.9
+    pad "3" through-hole circle at -3.81, 2.54 size 1.9 x 1.9 drill 0.9
+    pad "4" through-hole circle at 3.81, 2.54 size 1.9 x 1.9 drill 0.9
+    pad "5" through-hole circle at 3.81, 0 size 1.9 x 1.9 drill 0.9
+    pad "6" through-hole circle at 3.81, -2.54 size 1.9 x 1.9 drill 0.9
+    outline fabrication width 0.1 "M-2.175 -4.45H3.175V4.45H-3.175V-3.45Z"
+    outline silkscreen width 0.12 "M-2.6 -4.56H-0.75A0.75 0.75 0 0 0 0.75 -4.56H2.6V4.56H-2.6Z"
+    outline silkscreen filled "M-2.2 -2.54A0.3 0.3 0 1 0 -1.6 -2.54A0.3 0.3 0 1 0 -2.2 -2.54Z"
+    outline courtyard width 0.05 "M-5.25 -4.95H5.25V4.95H-5.25Z"
+}

@@ -1,0 +1,69 @@
+# How our library turns a package's dimensions into copper: one set of rules every generated footprint follows, so a
+# change of taste is a change here and a regeneration, never an edit of a footprint.
+#
+# Surface leads (IPC-7351B, tolerances left out): Z = the leads' outer span at its largest + 2 × toe; G = their inner
+# span at its smallest − 2 × heel; X = the lead's width at its largest + 2 × side. A pad is (Z − G) / 2 long, centred at
+# (Z + G) / 4. Through-hole leads: drill = the lead's largest cross-section (a round lead's diameter, a flat or square
+# lead's diagonal) + the allowance, up to the drill step; pad = drill + 2 × ring, narrowed to pitch − gap where
+# neighbours would touch.
+map "Land pattern rules" as land-pattern-rules {
+    description "The fillets, drills, rings and drawing lines every footprint of our library is generated with."
+    source "IPC-7351B section 3 (land pattern goals), IPC-2222 section 9 (holes)"
+    license "CERN-OHL-W-2.0"
+
+    gull-wing "Gull-wing leads, nominal density" source table "3-2" {
+        toe 0.35 mm
+        heel 0.35 mm
+        side 0.03 mm
+        courtyard 0.25 mm
+    }
+
+    chip "Rectangular end terminals, 1608 and larger, nominal density" source table "3-5" {
+        toe 0.35 mm
+        heel 0 mm
+        side 0 mm
+        courtyard 0.25 mm
+    }
+
+    chip-small "Rectangular end terminals, smaller than 1608, nominal density" source table "3-6" {
+        toe 0.2 mm
+        heel -0.05 mm
+        side 0 mm
+        courtyard 0.15 mm
+    }
+
+    chip-hand-soldering "Rectangular end terminals for an iron, most density" source table "3-5" {
+        toe 0.55 mm
+        heel 0 mm
+        side 0.05 mm
+        courtyard 0.5 mm
+    }
+
+    chip-small-hand-soldering "Rectangular end terminals smaller than 1608, for an iron, most density" source table "3-6" {
+        toe 0.3 mm
+        heel 0 mm
+        side 0.05 mm
+        courtyard 0.2 mm
+    }
+
+    through-hole "Through-hole leads" source section "IPC-2222 9.2" {
+        drill-allowance 0.2 mm
+        drill-step 0.05 mm
+        ring 0.5 mm
+        gap 0.25 mm
+        courtyard 0.5 mm
+    }
+
+    drawing "The lines every footprint draws" {
+        grid 0.05 mm
+        roundness 0.25
+        fabrication-width 0.1 mm
+        silkscreen-width 0.12 mm
+        silkscreen-clearance 0.2 mm
+        silkscreen-offset 0.11 mm
+        courtyard-width 0.05 mm
+        chamfer 1 mm
+        pin-mark-radius 0.3 mm
+        pin-notch-radius 0.75 mm
+    }
+}

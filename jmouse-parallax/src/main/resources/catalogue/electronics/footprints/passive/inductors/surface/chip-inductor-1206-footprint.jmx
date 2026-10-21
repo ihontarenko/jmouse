@@ -1,0 +1,17 @@
+footprint "Chip inductor 1206 (3216 metric)" as chip-inductor-1206-footprint {
+    meta {
+        summary "Inductor, 1206 (3216 metric) chip body, reflow pads"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60384-22 dimensions, 1206 (3216 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#capacitor-1206 and the land pattern rules; regenerate, never edit.
+    # Body 3…3.4 × 1.4…1.8, terminal 0.3…0.8; fillets toe 0.35, heel 0, side 0.
+    # Z = 4.1, G = 1.4, X = 1.8; pad 1.35 × 1.8 centred at ±1.4.
+    pad "1" surface rounded-rectangle at -1.4, 0 size 1.35 x 1.8 roundness 0.25
+    pad "2" surface rounded-rectangle at 1.4, 0 size 1.35 x 1.8 roundness 0.25
+    outline fabrication width 0.1 "M-1.6 -0.8H1.6V0.8H-1.6Z"
+    outline silkscreen width 0.12 "M-0.465 -0.91H0.465M-0.465 0.91H0.465"
+    outline courtyard width 0.05 "M-2.35 -1.15H2.35V1.15H-2.35Z"
+}

@@ -1,0 +1,18 @@
+footprint "Chip led 1210 (3225 metric)" as chip-led-1210-footprint {
+    meta {
+        summary "LED, 1210 (3225 metric) chip body, reflow pads; pad 1 is the cathode"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60115-8 dimensions, 1210 (3225 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#resistor-1210 and the land pattern rules; regenerate, never edit.
+    # Body 3…3.2 × 2.45…2.75, terminal 0.25…0.75; fillets toe 0.35, heel 0, side 0.
+    # Z = 3.9, G = 1.5, X = 2.75; pad 1.2 × 2.75 centred at ±1.35.
+    pad "1" surface rounded-rectangle at -1.35, 0 size 1.2 x 2.75 roundness 0.25
+    pad "2" surface rounded-rectangle at 1.35, 0 size 1.2 x 2.75 roundness 0.25
+    outline fabrication width 0.1 "M-1.55 -1.3H1.55V1.3H-1.55Z"
+    outline silkscreen width 0.12 "M-0.49 -1.41H0.49M-0.49 1.41H0.49"
+    outline silkscreen width 0.12 "M-2.21 -1.485V1.485"
+    outline courtyard width 0.05 "M-2.2 -1.65H2.2V1.65H-2.2Z"
+}

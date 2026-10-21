@@ -1,0 +1,85 @@
+# Gull-wing small-outline packages, one entry a JEDEC outline: what every member shares, and each member's lead count
+# with its body length. `span` is from lead tip to lead tip across the body; `foot` the length of a lead's flat on the
+# board; `lead` its width. A member is named `<name>-<leads>` — `soic-8`, `tssop-20` —, its outline's `suffix` after.
+map "Small-outline packages" as small-outline-packages {
+    description "Gull-wing small-outline packages by JEDEC outline."
+    form gull-wing
+
+    soic "SOIC, 3.9 mm body" source standard "JEDEC MS-012" {
+        name soic
+        pitch 1.27 mm
+        span 5.8 mm .. 6.2 mm
+        foot 0.4 mm .. 1.27 mm
+        lead 0.31 mm .. 0.51 mm
+        body-width 3.9 mm
+        members 8 = 4.9 mm, 14 = 8.65 mm, 16 = 9.9 mm
+        folder "packages/surface/small-outline"
+    }
+
+    soic-wide "SOIC, 7.5 mm body" source standard "JEDEC MS-013" {
+        name soic
+        suffix wide
+        pitch 1.27 mm
+        span 10 mm .. 10.65 mm
+        foot 0.4 mm .. 1.27 mm
+        lead 0.31 mm .. 0.51 mm
+        body-width 7.5 mm
+        members 16 = 10.3 mm, 18 = 11.55 mm, 20 = 12.8 mm, 24 = 15.4 mm, 28 = 17.9 mm
+        folder "packages/surface/small-outline"
+    }
+
+    qsop "QSOP, 3.9 mm body" source standard "JEDEC MO-137" {
+        name qsop
+        pitch 0.635 mm
+        span 5.8 mm .. 6.2 mm
+        foot 0.4 mm .. 1.27 mm
+        lead 0.2 mm .. 0.3 mm
+        body-width 3.9 mm
+        members 16 = 4.9 mm, 20 = 8.65 mm, 24 = 8.65 mm, 28 = 9.9 mm
+        folder "packages/surface/small-outline"
+    }
+
+    ssop "SSOP, 5.3 mm body" source standard "JEDEC MO-150" {
+        name ssop
+        pitch 0.65 mm
+        span 7.4 mm .. 8.2 mm
+        foot 0.55 mm .. 0.95 mm
+        lead 0.22 mm .. 0.38 mm
+        body-width 5.3 mm
+        members 14 = 6.2 mm, 16 = 6.2 mm, 20 = 7.2 mm, 24 = 8.2 mm, 28 = 10.2 mm
+        folder "packages/surface/small-outline"
+    }
+
+    tssop "TSSOP, 4.4 mm body" source standard "JEDEC MO-153" {
+        name tssop
+        pitch 0.65 mm
+        span 6.2 mm .. 6.6 mm
+        foot 0.45 mm .. 0.75 mm
+        lead 0.19 mm .. 0.3 mm
+        body-width 4.4 mm
+        members 8 = 3 mm, 14 = 5 mm, 16 = 5 mm, 20 = 6.5 mm, 24 = 7.8 mm, 28 = 9.7 mm
+        folder "packages/surface/small-outline"
+    }
+
+    msop-8 "MSOP, 3 mm body, 0.65 mm pitch" source standard "JEDEC MO-187 AA" {
+        name msop
+        pitch 0.65 mm
+        span 4.75 mm .. 5.05 mm
+        foot 0.4 mm .. 0.7 mm
+        lead 0.22 mm .. 0.38 mm
+        body-width 3 mm
+        members 8 = 3 mm
+        folder "packages/surface/small-outline"
+    }
+
+    msop-10 "MSOP, 3 mm body, 0.5 mm pitch" source standard "JEDEC MO-187 BA" {
+        name msop
+        pitch 0.5 mm
+        span 4.75 mm .. 5.05 mm
+        foot 0.4 mm .. 0.7 mm
+        lead 0.17 mm .. 0.27 mm
+        body-width 3 mm
+        members 10 = 3 mm
+        folder "packages/surface/small-outline"
+    }
+}

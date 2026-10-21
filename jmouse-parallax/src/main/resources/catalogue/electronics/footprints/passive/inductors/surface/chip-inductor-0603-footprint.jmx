@@ -1,0 +1,16 @@
+footprint "Chip inductor 0603 (1608 metric)" as chip-inductor-0603-footprint {
+    meta {
+        summary "Inductor, 0603 (1608 metric) chip body, reflow pads"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60384-22 dimensions, 0603 (1608 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#capacitor-0603 and the land pattern rules; regenerate, never edit.
+    # Body 1.5…1.7 × 0.7…0.9, terminal 0.2…0.5; fillets toe 0.35, heel 0, side 0.
+    # Z = 2.4, G = 0.5, X = 0.9; pad 0.95 × 0.9 centred at ±0.75.
+    pad "1" surface rounded-rectangle at -0.75, 0 size 0.95 x 0.9 roundness 0.25
+    pad "2" surface rounded-rectangle at 0.75, 0 size 0.95 x 0.9 roundness 0.25
+    outline fabrication width 0.1 "M-0.8 -0.4H0.8V0.4H-0.8Z"
+    outline courtyard width 0.05 "M-1.5 -0.7H1.5V0.7H-1.5Z"
+}

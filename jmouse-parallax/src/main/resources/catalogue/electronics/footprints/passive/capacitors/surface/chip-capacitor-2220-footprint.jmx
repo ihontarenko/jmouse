@@ -1,0 +1,17 @@
+footprint "Chip capacitor 2220 (5750 metric)" as chip-capacitor-2220-footprint {
+    meta {
+        summary "Capacitor, 2220 (5750 metric) chip body, reflow pads"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60384-22 dimensions, 2220 (5750 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#capacitor-2220 and the land pattern rules; regenerate, never edit.
+    # Body 5.3…6.1 × 4.6…5.4, terminal 0.3…1; fillets toe 0.35, heel 0, side 0.
+    # Z = 6.8, G = 3.3, X = 5.4; pad 1.75 × 5.4 centred at ±2.55.
+    pad "1" surface rounded-rectangle at -2.55, 0 size 1.75 x 5.4 roundness 0.25
+    pad "2" surface rounded-rectangle at 2.55, 0 size 1.75 x 5.4 roundness 0.25
+    outline fabrication width 0.1 "M-2.85 -2.5H2.85V2.5H-2.85Z"
+    outline silkscreen width 0.12 "M-1.415 -2.61H1.415M-1.415 2.61H1.415"
+    outline courtyard width 0.05 "M-3.7 -2.95H3.7V2.95H-3.7Z"
+}

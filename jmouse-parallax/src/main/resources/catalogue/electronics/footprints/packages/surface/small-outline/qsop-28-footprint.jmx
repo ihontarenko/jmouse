@@ -1,0 +1,43 @@
+footprint "QSOP-28, 3.9 mm body" as qsop-28-footprint {
+    meta {
+        summary "28-lead QSOP, 3.9 mm body, gull-wing, 0.635 mm pitch, body 3.9 × 9.9 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MO-137"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/small-outline-packages.jmd#qsop and the land pattern rules; regenerate, never edit.
+    # Leads span 5.8…6.2, foot 0.4…1.27, width 0.2…0.3; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 6.9, G = 2.56, X = 0.36; pad 2.15 × 0.4 centred at ±2.35.
+    pad "1" surface rounded-rectangle at -2.35, -4.127 size 2.15 x 0.4 roundness 0.25
+    pad "2" surface rounded-rectangle at -2.35, -3.492 size 2.15 x 0.4 roundness 0.25
+    pad "3" surface rounded-rectangle at -2.35, -2.857 size 2.15 x 0.4 roundness 0.25
+    pad "4" surface rounded-rectangle at -2.35, -2.222 size 2.15 x 0.4 roundness 0.25
+    pad "5" surface rounded-rectangle at -2.35, -1.587 size 2.15 x 0.4 roundness 0.25
+    pad "6" surface rounded-rectangle at -2.35, -0.952 size 2.15 x 0.4 roundness 0.25
+    pad "7" surface rounded-rectangle at -2.35, -0.317 size 2.15 x 0.4 roundness 0.25
+    pad "8" surface rounded-rectangle at -2.35, 0.318 size 2.15 x 0.4 roundness 0.25
+    pad "9" surface rounded-rectangle at -2.35, 0.953 size 2.15 x 0.4 roundness 0.25
+    pad "10" surface rounded-rectangle at -2.35, 1.588 size 2.15 x 0.4 roundness 0.25
+    pad "11" surface rounded-rectangle at -2.35, 2.223 size 2.15 x 0.4 roundness 0.25
+    pad "12" surface rounded-rectangle at -2.35, 2.858 size 2.15 x 0.4 roundness 0.25
+    pad "13" surface rounded-rectangle at -2.35, 3.493 size 2.15 x 0.4 roundness 0.25
+    pad "14" surface rounded-rectangle at -2.35, 4.128 size 2.15 x 0.4 roundness 0.25
+    pad "15" surface rounded-rectangle at 2.35, 4.128 size 2.15 x 0.4 roundness 0.25
+    pad "16" surface rounded-rectangle at 2.35, 3.493 size 2.15 x 0.4 roundness 0.25
+    pad "17" surface rounded-rectangle at 2.35, 2.858 size 2.15 x 0.4 roundness 0.25
+    pad "18" surface rounded-rectangle at 2.35, 2.223 size 2.15 x 0.4 roundness 0.25
+    pad "19" surface rounded-rectangle at 2.35, 1.588 size 2.15 x 0.4 roundness 0.25
+    pad "20" surface rounded-rectangle at 2.35, 0.953 size 2.15 x 0.4 roundness 0.25
+    pad "21" surface rounded-rectangle at 2.35, 0.318 size 2.15 x 0.4 roundness 0.25
+    pad "22" surface rounded-rectangle at 2.35, -0.317 size 2.15 x 0.4 roundness 0.25
+    pad "23" surface rounded-rectangle at 2.35, -0.952 size 2.15 x 0.4 roundness 0.25
+    pad "24" surface rounded-rectangle at 2.35, -1.587 size 2.15 x 0.4 roundness 0.25
+    pad "25" surface rounded-rectangle at 2.35, -2.222 size 2.15 x 0.4 roundness 0.25
+    pad "26" surface rounded-rectangle at 2.35, -2.857 size 2.15 x 0.4 roundness 0.25
+    pad "27" surface rounded-rectangle at 2.35, -3.492 size 2.15 x 0.4 roundness 0.25
+    pad "28" surface rounded-rectangle at 2.35, -4.127 size 2.15 x 0.4 roundness 0.25
+    outline fabrication width 0.1 "M-0.95 -4.95H1.95V4.95H-1.95V-3.95Z"
+    outline silkscreen width 0.12 "M-3.425 -5.06H1.95M-1.95 5.06H1.95"
+    outline courtyard width 0.05 "M-3.7 -5.2H3.7V5.2H-3.7Z"
+}

@@ -1,0 +1,17 @@
+footprint "Chip capacitor 1812 (4532 metric), hand soldering" as chip-capacitor-1812-hand-soldering-footprint {
+    meta {
+        summary "Capacitor, 1812 (4532 metric) chip body, pads lengthened for a soldering iron"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60384-22 dimensions, 1812 (4532 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#capacitor-1812 and the land pattern rules; regenerate, never edit.
+    # Body 4.2…4.8 × 2.9…3.5, terminal 0.3…0.8; fillets toe 0.55, heel 0, side 0.05.
+    # Z = 5.9, G = 2.6, X = 3.6; pad 1.65 × 3.6 centred at ±2.15.
+    pad "1" surface rounded-rectangle at -2.15, 0 size 1.65 x 3.6 roundness 0.25
+    pad "2" surface rounded-rectangle at 2.15, 0 size 1.65 x 3.6 roundness 0.25
+    outline fabrication width 0.1 "M-2.25 -1.6H2.25V1.6H-2.25Z"
+    outline silkscreen width 0.12 "M-1.065 -1.71H1.065M-1.065 1.71H1.065"
+    outline courtyard width 0.05 "M-3.5 -2.3H3.5V2.3H-3.5Z"
+}

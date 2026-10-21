@@ -1,14 +1,14 @@
 footprint "SOIC-8, 3.9 mm body" as soic-8-footprint {
     meta {
-        summary "8-lead small-outline package, gull-wing, 1.27 mm pitch, body 3.9 × 4.9 mm"
+        summary "8-lead SOIC, 3.9 mm body, gull-wing, 1.27 mm pitch, body 3.9 × 4.9 mm"
         category circuits
         tags electronics, footprint, surface
-        source "JEDEC MS-012 AA"
+        source "JEDEC MS-012"
+        license "CERN-OHL-W-2.0"
     }
-    # Drawn from MS-012 AA: pitch 1.27, lead tips 5.80…6.20 apart, foot L 0.40…1.27, lead b 0.31…0.51, body 3.9 × 4.9.
-    # Our surface rule, IPC-7351 nominal density for gull-wing leads: toe 0.35, heel 0.35, side 0.03, tolerances left out —
-    # Z = 6.20 + 2 × 0.35 = 6.90, G = 5.80 − 2 × 1.27 − 2 × 0.35 = 2.56, X = 0.51 + 2 × 0.03 = 0.57; pad (Z − G) / 2 long,
-    # centred at (Z + G) / 4, sizes to the nearest 0.05, corners rounded a quarter. Courtyard 0.25 past copper and body.
+    # Generated from footprint-standards/small-outline-packages.jmd#soic and the land pattern rules; regenerate, never edit.
+    # Leads span 5.8…6.2, foot 0.4…1.27, width 0.31…0.51; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 6.9, G = 2.56, X = 0.57; pad 2.15 × 0.6 centred at ±2.35.
     pad "1" surface rounded-rectangle at -2.35, -1.905 size 2.15 x 0.6 roundness 0.25
     pad "2" surface rounded-rectangle at -2.35, -0.635 size 2.15 x 0.6 roundness 0.25
     pad "3" surface rounded-rectangle at -2.35, 0.635 size 2.15 x 0.6 roundness 0.25

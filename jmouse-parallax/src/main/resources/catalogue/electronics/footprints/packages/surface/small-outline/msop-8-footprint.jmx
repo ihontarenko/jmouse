@@ -1,0 +1,23 @@
+footprint "MSOP-8, 3 mm body" as msop-8-footprint {
+    meta {
+        summary "8-lead MSOP, 3 mm body, 0.65 mm pitch, gull-wing, 0.65 mm pitch, body 3 × 3 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MO-187 AA"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/small-outline-packages.jmd#msop-8 and the land pattern rules; regenerate, never edit.
+    # Leads span 4.75…5.05, foot 0.4…0.7, width 0.22…0.38; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 5.75, G = 2.65, X = 0.44; pad 1.55 × 0.45 centred at ±2.1.
+    pad "1" surface rounded-rectangle at -2.1, -0.975 size 1.55 x 0.45 roundness 0.25
+    pad "2" surface rounded-rectangle at -2.1, -0.325 size 1.55 x 0.45 roundness 0.25
+    pad "3" surface rounded-rectangle at -2.1, 0.325 size 1.55 x 0.45 roundness 0.25
+    pad "4" surface rounded-rectangle at -2.1, 0.975 size 1.55 x 0.45 roundness 0.25
+    pad "5" surface rounded-rectangle at 2.1, 0.975 size 1.55 x 0.45 roundness 0.25
+    pad "6" surface rounded-rectangle at 2.1, 0.325 size 1.55 x 0.45 roundness 0.25
+    pad "7" surface rounded-rectangle at 2.1, -0.325 size 1.55 x 0.45 roundness 0.25
+    pad "8" surface rounded-rectangle at 2.1, -0.975 size 1.55 x 0.45 roundness 0.25
+    outline fabrication width 0.1 "M-0.5 -1.5H1.5V1.5H-1.5V-0.5Z"
+    outline silkscreen width 0.12 "M-2.875 -1.61H1.5M-1.5 1.61H1.5"
+    outline courtyard width 0.05 "M-3.15 -1.75H3.15V1.75H-3.15Z"
+}

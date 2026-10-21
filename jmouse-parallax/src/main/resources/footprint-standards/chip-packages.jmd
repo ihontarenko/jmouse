@@ -1,0 +1,122 @@
+# Chip parts with two rectangular end terminals, by their EIA size code (inches, as the trade says it; the metric code is
+# its title). Each family a part kind lands on names the size table it reads: a resistor's thick-film body and a
+# capacitor's ceramic body share a size code and not their terminals. A size is a range — the smallest to the largest
+# part a maker may ship —, and the land pattern rules read its ends.
+map "Chip packages" as chip-packages {
+    description "Two-terminal chip bodies by EIA size, and the part kinds drawn on each."
+    form chip
+    source "IEC 60115-8 (fixed chip resistors) and IEC 60384-22 (multilayer ceramic chip capacitors), dimension tables"
+
+    kinds "The part kinds of the chip family, and the body table each reads" {
+        resistor "Resistor" {
+            sizes resistor-sizes
+            folder "passive/resistors/surface"
+        }
+        capacitor "Capacitor" {
+            sizes capacitor-sizes
+            folder "passive/capacitors/surface"
+        }
+        inductor "Inductor" {
+            sizes capacitor-sizes
+            folder "passive/inductors/surface"
+        }
+        fuse "Fuse" {
+            sizes resistor-sizes
+            folder "passive/fuses/surface"
+        }
+        diode "Diode" {
+            sizes resistor-sizes
+            folder "semiconductors/diodes/surface"
+        }
+        led "LED" {
+            sizes resistor-sizes
+            folder "semiconductors/optoelectronics/surface"
+        }
+    }
+
+    resistor-sizes "Thick-film chip resistor bodies" source table "IEC 60115-8 dimensions" {
+        resistor-0201 "0201 (0603 metric)" {
+            length 0.57 mm .. 0.63 mm
+            width 0.27 mm .. 0.33 mm
+            terminal 0.05 mm .. 0.15 mm
+        }
+        resistor-0402 "0402 (1005 metric)" {
+            length 0.95 mm .. 1.05 mm
+            width 0.45 mm .. 0.55 mm
+            terminal 0.1 mm .. 0.3 mm
+        }
+        resistor-0603 "0603 (1608 metric)" {
+            length 1.5 mm .. 1.7 mm
+            width 0.7 mm .. 0.9 mm
+            terminal 0.1 mm .. 0.4 mm
+        }
+        resistor-0805 "0805 (2012 metric)" {
+            length 1.9 mm .. 2.1 mm
+            width 1.15 mm .. 1.35 mm
+            terminal 0.1 mm .. 0.5 mm
+        }
+        resistor-1206 "1206 (3216 metric)" {
+            length 3 mm .. 3.2 mm
+            width 1.5 mm .. 1.7 mm
+            terminal 0.25 mm .. 0.65 mm
+        }
+        resistor-1210 "1210 (3225 metric)" {
+            length 3 mm .. 3.2 mm
+            width 2.45 mm .. 2.75 mm
+            terminal 0.25 mm .. 0.75 mm
+        }
+        resistor-2010 "2010 (5025 metric)" {
+            length 4.9 mm .. 5.1 mm
+            width 2.35 mm .. 2.65 mm
+            terminal 0.35 mm .. 0.85 mm
+        }
+        resistor-2512 "2512 (6332 metric)" {
+            length 6.25 mm .. 6.45 mm
+            width 3.05 mm .. 3.35 mm
+            terminal 0.35 mm .. 0.85 mm
+        }
+    }
+
+    capacitor-sizes "Multilayer ceramic chip bodies" source table "IEC 60384-22 dimensions" {
+        capacitor-0201 "0201 (0603 metric)" {
+            length 0.57 mm .. 0.63 mm
+            width 0.27 mm .. 0.33 mm
+            terminal 0.1 mm .. 0.2 mm
+        }
+        capacitor-0402 "0402 (1005 metric)" {
+            length 0.95 mm .. 1.05 mm
+            width 0.45 mm .. 0.55 mm
+            terminal 0.15 mm .. 0.35 mm
+        }
+        capacitor-0603 "0603 (1608 metric)" {
+            length 1.5 mm .. 1.7 mm
+            width 0.7 mm .. 0.9 mm
+            terminal 0.2 mm .. 0.5 mm
+        }
+        capacitor-0805 "0805 (2012 metric)" {
+            length 1.9 mm .. 2.1 mm
+            width 1.15 mm .. 1.35 mm
+            terminal 0.25 mm .. 0.75 mm
+        }
+        capacitor-1206 "1206 (3216 metric)" {
+            length 3 mm .. 3.4 mm
+            width 1.4 mm .. 1.8 mm
+            terminal 0.3 mm .. 0.8 mm
+        }
+        capacitor-1210 "1210 (3225 metric)" {
+            length 3 mm .. 3.4 mm
+            width 2.3 mm .. 2.7 mm
+            terminal 0.3 mm .. 0.8 mm
+        }
+        capacitor-1812 "1812 (4532 metric)" {
+            length 4.2 mm .. 4.8 mm
+            width 2.9 mm .. 3.5 mm
+            terminal 0.3 mm .. 0.8 mm
+        }
+        capacitor-2220 "2220 (5750 metric)" {
+            length 5.3 mm .. 6.1 mm
+            width 4.6 mm .. 5.4 mm
+            terminal 0.3 mm .. 1 mm
+        }
+    }
+}

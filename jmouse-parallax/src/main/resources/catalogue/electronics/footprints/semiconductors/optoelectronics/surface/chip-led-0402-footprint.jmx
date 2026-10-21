@@ -1,0 +1,17 @@
+footprint "Chip led 0402 (1005 metric)" as chip-led-0402-footprint {
+    meta {
+        summary "LED, 0402 (1005 metric) chip body, reflow pads; pad 1 is the cathode"
+        category circuits
+        tags electronics, footprint, surface
+        source "IEC 60115-8 dimensions, 0402 (1005 metric)"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.jmd#resistor-0402 and the land pattern rules; regenerate, never edit.
+    # Body 0.95…1.05 × 0.45…0.55, terminal 0.1…0.3; fillets toe 0.2, heel -0.05, side 0.
+    # Z = 1.45, G = 0.45, X = 0.55; pad 0.5 × 0.55 centred at ±0.5.
+    pad "1" surface rounded-rectangle at -0.5, 0 size 0.5 x 0.55 roundness 0.25
+    pad "2" surface rounded-rectangle at 0.5, 0 size 0.5 x 0.55 roundness 0.25
+    outline fabrication width 0.1 "M-0.5 -0.25H0.5V0.25H-0.5Z"
+    outline silkscreen width 0.12 "M-1.01 -0.385V0.385"
+    outline courtyard width 0.05 "M-0.9 -0.45H0.9V0.45H-0.9Z"
+}
