@@ -88,9 +88,17 @@ public final class KiCadSymbolDrawing {
      * is {@code kicad-transistor-bjt-tip42} — what a model written for it is called.
      */
     public static String componentSlugOf(KiCadSymbolDefinition symbol) {
+        // A part library of its own is named as its one part (AD5292BRUZ-100-RL7:AD5292BRUZ-100-RL7): said once.
+        String library = symbol.name().contains(":") ? symbol.name().substring(0, symbol.name().indexOf(':')) : "";
+        String named = library.equalsIgnoreCase(titleOf(symbol)) ? titleOf(symbol) : symbol.name();
         // A sign that opens a name is a word: power:+12V and power:-12V are two symbols.
-        String signed = symbol.name().replaceAll("(^|:)\\+", "$1plus-").replaceAll("(^|:)-", "$1minus-");
+        String signed = named.replaceAll("(^|:)\\+", "$1plus-").replaceAll("(^|:)-", "$1minus-");
         return "kicad-" + signed.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+    }
+
+    /** What a symbol is called without its library: {@code LM317_TO-220} of {@code Regulator_Linear:LM317_TO-220}. */
+    public static String titleOf(KiCadSymbolDefinition symbol) {
+        return symbol.name().substring(symbol.name().indexOf(':') + 1);
     }
 
     /**
@@ -119,7 +127,7 @@ public final class KiCadSymbolDrawing {
 
     /** One unit of a symbol as a jMX symbol document: what it is called and says of itself, and its drawing. */
     public static ExperienceDocument documentOf(KiCadSymbolDefinition symbol, int unit, Map<String, String> pinNames) {
-        String title = symbol.name() + (units(symbol).size() > 1 ? " unit " + unitLetter(unit) : "");
+        String title = titleOf(symbol) + (units(symbol).size() > 1 ? " unit " + unitLetter(unit) : "");
         String summary = firstOf(symbol.property("Description"), symbol.property("ki_description"), symbol.name())
                 + ", drawn as KiCad draws it";
         Meta meta = new Meta(summary, null, "circuits", List.of("electronics", "schematic", "kicad"), null, List.of(),

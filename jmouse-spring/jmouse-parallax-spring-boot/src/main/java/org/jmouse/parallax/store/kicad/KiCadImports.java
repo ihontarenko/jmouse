@@ -44,7 +44,7 @@ public class KiCadImports {
      * @param root    the slug of the design's root circuit
      * @param created what was stored new, by slug
      * @param updated the circuits of an earlier import of the same design, written over with this one
-     * @param reused  the symbols the catalogue already held
+     * @param reused  the symbols and components the catalogue already held
      * @param notes   what the import could not carry, part by part
      */
     public record Imported(String root, List<String> created, List<String> updated, List<String> reused,
@@ -86,6 +86,16 @@ public class KiCadImports {
             } else {
                 catalogue.createOwned(owner, draft(DocumentWriter.write(symbol)));
                 created.add(symbol.slug());
+            }
+        }
+        // A component made from a KiCad symbol after the symbol it is drawn with, and only where none is called so: one
+        // the catalogue already holds — a model written for it since, above all — is the one the circuits use.
+        for (ExperienceDocument component : imported.components()) {
+            if (objects.findBySlug(component.slug()).isPresent()) {
+                reused.add(component.slug());
+            } else {
+                catalogue.createOwned(owner, draft(DocumentWriter.write(component)));
+                created.add(component.slug());
             }
         }
         List<DefinedObject> circuits = imported.circuits();

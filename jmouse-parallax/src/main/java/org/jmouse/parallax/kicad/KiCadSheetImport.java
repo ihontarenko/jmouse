@@ -60,8 +60,14 @@ public final class KiCadSheetImport {
     private static final MarkShape PORT = new MarkShape("label", 24, -1);
     private static final MarkShape GLOBAL = new MarkShape("label", 22, -1);
 
-    /** What one sheet comes out as. */
-    public record Sheet(ObjectDefinition.Circuit circuit, Set<SymbolUse> symbols, List<String> notes) {
+    /**
+     * What one sheet comes out as.
+     *
+     * @param components the KiCad symbols the library map names no component for: each needs one, made from the symbol
+     *                   ({@link KiCadComponentStub}) where the catalogue has none
+     */
+    public record Sheet(ObjectDefinition.Circuit circuit, Set<SymbolUse> symbols, Set<KiCadSymbolDefinition> components,
+                        List<String> notes) {
     }
 
     /** A unit of a KiCad symbol the sheet draws with KiCad's own drawing, its pins named as the part names them. */
@@ -82,6 +88,9 @@ public final class KiCadSheetImport {
     private final List<PlacedItem> items = new ArrayList<>();
     private final List<SchematicWire> wires = new ArrayList<>();
     private final Set<SymbolUse> symbols = new LinkedHashSet<>();
+    private final Set<KiCadSymbolDefinition> components = new LinkedHashSet<>();
+    /** The parts of each symbol the library map names no component for, by what was made for them: one note each. */
+    private final Map<String, List<String>> unmapped = new LinkedHashMap<>();
     private final List<String> notes = new ArrayList<>();
     private final List<ObjectDefinition.SheetPort> ports = new ArrayList<>();
     private final Set<String> globals = new LinkedHashSet<>();
@@ -119,7 +128,7 @@ public final class KiCadSheetImport {
         ObjectDefinition.SheetBoundary boundary = new ObjectDefinition.SheetBoundary(sheet.ports, sheet.globals);
         ObjectDefinition.Circuit circuit = new ObjectDefinition.Circuit(sheet.elements, new Interval(0, TIME),
                 new ObjectDefinition.SchematicLayout(sheet.items, sheet.wires), null, List.of(), List.of(), null, boundary);
-        return new Sheet(circuit, sheet.symbols, sheet.notes);
+        return new Sheet(circuit, sheet.symbols, sheet.components, sheet.notes);
     }
 
     // ─── parts ──────────────────────────────────────────────────────────────────────────────────────
@@ -140,6 +149,9 @@ public final class KiCadSheetImport {
             byReference.computeIfAbsent(instance.reference(path), ignored -> new ArrayList<>()).add(instance);
         }
         byReference.forEach((reference, units) -> part(reference, units, pinNets));
+        unmapped.forEach((made, parts) -> notes.add(String.join(", ", parts) + ": " + made + ", made from KiCad's symbol "
+                + "— its pins and its drawing —, since the library map names no component for it; it computes nothing "
+                + "until its model is written."));
     }
 
     private void part(String reference, List<KiCadSymbolInstance> units, Map<String, String> pinNets) {
@@ -177,8 +189,8 @@ public final class KiCadSheetImport {
             drawn = catalogue.drawingOf(component);
         } else {
             component = KiCadSymbolDrawing.componentSlugOf(definition);
-            notes.add(id + " (" + first.libraryId() + ") has no component in the library map: it is drawn, and a model "
-                    + "named '" + component + "' is what simulating it needs.");
+            components.add(definition);
+            unmapped.computeIfAbsent(first.libraryId() + " → '" + component + "'", ignored -> new ArrayList<>()).add(id);
         }
         if (drawn.isPresent()) {
             placeUnits(id, drawn.get(), first, unitPoints);
@@ -188,8 +200,11 @@ public final class KiCadSheetImport {
                     + "its component is.");
             placeAsKiCad(id, first, points);
         } else {
-            symbol = KiCadSymbolDrawing.slugOf(definition, first.unit());
-            symbols.add(new SymbolUse(definition, first.unit(), Map.of()));
+            // A component made from a symbol of several units is drawn as a box: its part names no symbol.
+            if (KiCadComponentStub.drawnByKiCad(definition)) {
+                symbol = KiCadSymbolDrawing.slugOf(definition, first.unit());
+                symbols.add(new SymbolUse(definition, first.unit(), Map.of()));
+            }
             placeAsKiCad(id, first, points);
         }
         if (units.size() > 1 && drawn.isEmpty()) {
