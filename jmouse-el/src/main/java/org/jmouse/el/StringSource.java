@@ -33,6 +33,7 @@ public class StringSource implements TokenizableSource {
     private       Type[] types;             // Array storing token types
     private       int[]  offsets;           // Array storing token positions
     private       int[]  lengths;           // Array storing token lengths
+    private       int[]  breaks;            // Where each line ends, read on the first line number asked
 
     public StringSource(String name, String text) {
         this(name, new StringReader(text));
@@ -96,21 +97,45 @@ public class StringSource implements TokenizableSource {
      */
     @Override
     public int getLineNumber(int offset) {
-        int lines = 1;
+        int[] breaks = lineBreaks();
+        int   before = Arrays.binarySearch(breaks, Math.min(offset, length));
 
-        offset = Math.min(offset, buffer.length);
+        // Every break that starts before the offset ends a line: an exact hit is a break at the offset itself,
+        // which belongs to the line it ends; a miss reports where the offset would be inserted.
+        return 1 + (before >= 0 ? before : -before - 1);
+    }
 
-        for (int i = 0; i < offset; i++) {
-            char character = buffer[i];
-            if (character == '\r' && buffer[i + 1] == '\n') {
-                lines++;
-                i++;
-            } else if (character == '\n' || character == '\r') {
-                lines++;
+    /**
+     * Where each line ends, read once: the position of every {@code \n}, every {@code \r}, and of the {@code \r} of a
+     * {@code \r\n} — one break, not two. It was counted from the start of the text on every call, and the tokenizer
+     * asks once per token, so reading a text took time growing with its square.
+     */
+    private int[] lineBreaks() {
+        int[] breaks = this.breaks;
+
+        if (breaks == null) {
+            int[] found = new int[DEFAULT_ARRAY_SIZE];
+            int   count = 0;
+
+            for (int position = 0; position < length; position++) {
+                char character = buffer[position];
+                if (character == '\n' || character == '\r') {
+                    if (count == found.length) {
+                        found = expand(found, found.length << 1);
+                    }
+                    found[count++] = position;
+                    // A \r\n is one break: the \n that follows a \r belongs to it.
+                    if (character == '\r' && position + 1 < length && buffer[position + 1] == '\n') {
+                        position++;
+                    }
+                }
             }
+
+            breaks = Arrays.copyOf(found, count);
+            this.breaks = breaks;
         }
 
-        return lines;
+        return breaks;
     }
 
     /**
