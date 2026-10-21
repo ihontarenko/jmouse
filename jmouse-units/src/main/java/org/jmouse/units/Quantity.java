@@ -1,5 +1,6 @@
 package org.jmouse.units;
 
+import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -44,7 +45,8 @@ public record Quantity(double value, String unit, String written) {
         // ⚠️ Written with the unit as the author wrote it — °C, not degC; µs, not us —: the symbols are read for the
         // scale, and a document written back says what it said.
         String authored = unitText.strip();
-        return Units.read(authored).map(read -> new Quantity(number * read.factor(), read.base(),
+        // Scaled in decimal: 450 nm is the double nearest 4.5e-7, not 450 times the double nearest 1e-9.
+        return Units.read(authored).map(read -> new Quantity(scaled(number, read.factor()), read.base(),
                 format(number) + (authored.equals(PERCENT) ? "" : " ") + authored));
     }
 
@@ -96,6 +98,10 @@ public record Quantity(double value, String unit, String written) {
     /** What the value measures; empty for a plain number's unit that names nothing, such as {@code div}. */
     public Optional<Dimension> dimension() {
         return unit.isEmpty() ? Optional.of(Dimension.NONE) : Units.read(unit).flatMap(CompoundUnit::dimension);
+    }
+
+    private static double scaled(double number, double factor) {
+        return BigDecimal.valueOf(number).multiply(BigDecimal.valueOf(factor)).doubleValue();
     }
 
     private static String format(double value) {

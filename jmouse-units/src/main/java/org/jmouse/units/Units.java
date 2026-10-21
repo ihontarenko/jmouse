@@ -1,5 +1,7 @@
 package org.jmouse.units;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -100,7 +102,8 @@ public final class Units {
         }
         String compact = asRead(written).replace(" ", "");
         Matcher matcher = FACTOR.matcher(compact);
-        double factor = 1;
+        // In decimal, so a prefix scales exactly: a thousandth over a millionth is a thousand, not 1000.0000000000001.
+        BigDecimal factor = BigDecimal.ONE;
         StringBuilder base = new StringBuilder();
         Optional<Dimension> dimension = Optional.of(Dimension.NONE);
         int position = 0;
@@ -120,17 +123,17 @@ public final class Units {
             }
             Raised term = raised.get();
             boolean dividing = operator.equals(QUOTIENT);
-            factor = dividing ? factor / term.factor() : factor * term.factor();
+            factor = dividing ? factor.divide(term.factor(), MathContext.DECIMAL128) : factor.multiply(term.factor());
             base.append(operator).append(term.base());
             dimension = dimension.flatMap(sofar -> term.dimension().map(measured -> dividing ? sofar.over(measured) : sofar.times(measured)));
             first = false;
         }
         boolean complete = position == compact.length() && !first && !base.toString().equals(ONE);
-        return complete ? Optional.of(new CompoundUnit(factor, base.toString(), dimension)) : Optional.empty();
+        return complete ? Optional.of(new CompoundUnit(factor.doubleValue(), base.toString(), dimension)) : Optional.empty();
     }
 
     /** One factor with its power applied: {@code us} is a millionth of a second, {@code V^2} a volt squared. */
-    private record Raised(double factor, String base, Optional<Dimension> dimension) {
+    private record Raised(BigDecimal factor, String base, Optional<Dimension> dimension) {
     }
 
     private static Optional<Raised> raised(String written, boolean first) {
@@ -144,9 +147,9 @@ public final class Units {
         String symbol = symbolAndPower[0];
         String suffix = power == 1 ? "" : POWER + power;
         if (first && symbol.equals(ONE)) {
-            return Optional.of(new Raised(1, ONE + suffix, Optional.of(Dimension.NONE)));
+            return Optional.of(new Raised(BigDecimal.ONE, ONE + suffix, Optional.of(Dimension.NONE)));
         }
-        return scaled(symbol).map(term -> new Raised(Math.pow(term.factor(), power), term.base() + suffix,
+        return scaled(symbol).map(term -> new Raised(term.factor().pow(power, MathContext.DECIMAL128), term.base() + suffix,
                 term.dimension().map(dimension -> dimension.power(power))));
     }
 
@@ -154,7 +157,7 @@ public final class Units {
     private static Optional<Raised> scaled(String symbol) {
         Unit whole = TABLE.get(symbol);
         if (whole != null) {
-            return Optional.of(new Raised(whole.scale(), whole.base(), whole.dimension()));
+            return Optional.of(new Raised(BigDecimal.valueOf(whole.scale()), whole.base(), whole.dimension()));
         }
         if (symbol.length() < 2) {
             return Optional.empty();
@@ -163,7 +166,8 @@ public final class Units {
         if (unit == null || !unit.prefixable()) {
             return Optional.empty();
         }
-        return SiPrefix.of(symbol.charAt(0)).map(prefix -> new Raised(prefix.factor() * unit.scale(), unit.base(),
+        return SiPrefix.of(symbol.charAt(0)).map(prefix -> new Raised(
+                BigDecimal.valueOf(prefix.factor()).multiply(BigDecimal.valueOf(unit.scale())), unit.base(),
                 unit.dimension()));
     }
 }
