@@ -1,0 +1,2 @@
+org.jmouse.taxonomy.management.autoconfigure.TaxonomyAutoConfiguration
+org.jmouse.taxonomy.management.autoconfigure.TaxonomyFlywayAutoConfiguration

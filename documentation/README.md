@@ -60,6 +60,7 @@ Coverage: **94 public reactor modules**, **76 new module manuals** in this docum
 | `jmouse-storage-jpa` | [JMOUSE_STORAGE_JPA.md](JMOUSE_STORAGE_JPA.md) | Stored-file registry over Jakarta Persistence, with its own migrations and an orphan sweeper |
 | `jmouse-tree` | [JMOUSE_TREE.md](JMOUSE_TREE.md) | A hierarchy kept as a nested set: what a node of one is, and its numbering rebuilt from the parent pointers |
 | `jmouse-tree-jpa` | [JMOUSE_TREE_JPA.md](JMOUSE_TREE_JPA.md) | A nested-set hierarchy over Jakarta Persistence: range reads, insertion, moves and deletion on a host entity's own table |
+| `jmouse-taxonomy` · `jmouse-taxonomy-jpa` · `jmouse-taxonomy-management` | [JMOUSE_TAXONOMY.md](JMOUSE_TAXONOMY.md) | Categories that classify any entity: several named trees, entity types a host registers, assignments, and the routes at /jmouse/taxonomy/api |
 | `jmouse-files` | [JMOUSE_FILES.md](JMOUSE_FILES.md) | What a managed file is, where it is filed, and the tree it is filed into |
 | `jmouse-files-jpa` | [JMOUSE_FILES_JPA.md](JMOUSE_FILES_JPA.md) | Managed files, polymorphic filing and the storage directory tree over Jakarta Persistence |
 | `jmouse-web` | [JMOUSE_WEB.md](JMOUSE_WEB.md) | jmouse-web |

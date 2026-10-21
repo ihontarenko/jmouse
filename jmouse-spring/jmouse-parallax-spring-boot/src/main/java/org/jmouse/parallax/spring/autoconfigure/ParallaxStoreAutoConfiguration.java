@@ -547,8 +547,8 @@ public class ParallaxStoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public KiCadImports parallaxKiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components,
-                                             KiCadLibraryMaps maps) {
-        return new KiCadImports(catalogue, objects, components, maps);
+                                             KiCadLibraryMaps maps, ApplicationEventPublisher events) {
+        return new KiCadImports(catalogue, objects, components, maps, events);
     }
 
     /** 📤 KiCad out: a circuit written as a KiCad schematic, its parts under the library ids the library map gives back. */

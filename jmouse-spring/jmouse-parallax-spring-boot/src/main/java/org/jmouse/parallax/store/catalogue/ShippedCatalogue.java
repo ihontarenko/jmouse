@@ -59,8 +59,11 @@ public record ShippedCatalogue(List<ShippedObject> objects, List<ExperienceDocum
         instruments = List.copyOf(instruments);
     }
 
-    /** Reads every shipped file; a file that does not read, or an object file holding more than one document, fails. */
-    static ShippedCatalogue load(List<String> locations) {
+    /**
+     * Reads every shipped file; a file that does not read, or an object file holding more than one document, fails. A host
+     * reads the catalogue through it too — to file what it ships —, so the files are read one way only.
+     */
+    public static ShippedCatalogue load(List<String> locations) {
         List<ShippedObject> objects = new ArrayList<>();
         List<ExperienceDocument> categories = new ArrayList<>();
         List<ExperienceDocument> collections = new ArrayList<>();

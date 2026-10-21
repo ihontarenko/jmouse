@@ -7,6 +7,7 @@ import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.jmouse.parallax.jpa.catalogue.MathematicalObject;
 import org.jmouse.parallax.jpa.catalogue.ObjectStore;
 import org.jmouse.parallax.kicad.KiCadProjectImport;
+import org.jmouse.parallax.event.KiCadDesignImported;
 import org.jmouse.parallax.owner.ParallaxOwner;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.engine.DefinedObject;
@@ -16,6 +17,7 @@ import org.jmouse.parallax.problem.ParallaxProblem;
 import org.jmouse.parallax.store.catalogue.Catalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
 import org.jmouse.parallax.store.catalogue.ObjectDraft;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -49,12 +51,15 @@ public class KiCadImports {
     private final ObjectStore objects;
     private final ComponentModels components;
     private final KiCadLibraryMaps maps;
+    private final ApplicationEventPublisher events;
 
-    public KiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components, KiCadLibraryMaps maps) {
+    public KiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components, KiCadLibraryMaps maps,
+                        ApplicationEventPublisher events) {
         this.catalogue = catalogue;
         this.objects = objects;
         this.components = components;
         this.maps = maps;
+        this.events = events;
     }
 
     /**
@@ -107,6 +112,8 @@ public class KiCadImports {
                 created.add(circuit.slug());
             }
         }
+        events.publishEvent(new KiCadDesignImported(owner, circuits.getFirst().slug(), imported.libraries(),
+                circuits.stream().map(DefinedObject::slug).toList()));
         return new Imported(circuits.getFirst().slug(), created, updated, reused, imported.notes());
     }
 

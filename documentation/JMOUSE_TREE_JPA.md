@@ -5,7 +5,7 @@ it exists for, and the writes that keep its numbering true. The host keeps its e
 its own rules — names, which names may stand side by side, what a move rewrites besides the shape. This module is
 the shape alone.
 
-The first host is `jmouse-files-jpa` (`StorageDirectories`, one tree per owner key); a taxonomy is the next.
+The hosts are `jmouse-files-jpa` (`StorageDirectories`, one tree per owner key) and `jmouse-taxonomy-jpa` (`Taxonomies`, one tree per taxonomy).
 
 ## Responsibility map
 

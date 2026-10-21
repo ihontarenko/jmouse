@@ -25,11 +25,13 @@ import java.util.TreeSet;
  * @param symbols    the symbols the circuits draw with, each unit once; the catalogue keeps one it already has
  * @param components the components made from KiCad symbols the library map names none for, each once; the catalogue
  *                   keeps one it already has — a model written for it since, above all
+ * @param libraries  the KiCad library each symbol and component made from KiCad comes from, by its slug — {@code Device}
+ *                   for {@code kicad-device-r-shunt} —, so a host can file them as KiCad does
  * @param notes    what the import could not carry, by part: a component the library map does not name, a value that is
  *                 not a number, a unit drawn by another's place
  */
 public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDocument> symbols,
-                                 List<ExperienceDocument> components, List<String> notes) {
+                                 List<ExperienceDocument> components, Map<String, String> libraries, List<String> notes) {
 
     /**
      * @param name what the design is called: its project's name, {@code LINEAR_500W_PS-1}
@@ -45,6 +47,7 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
         List<DefinedObject> circuits = new ArrayList<>();
         Set<KiCadSheetImport.SymbolUse> uses = new LinkedHashSet<>();
         Map<String, ExperienceDocument> components = new LinkedHashMap<>();
+        Map<String, String> libraries = new LinkedHashMap<>();
         List<String> notes = new ArrayList<>();
         String ground = referenceGround(project);
         if (!ground.equals(KiCadNetNames.KICAD_GROUND)) {
@@ -64,8 +67,10 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
                     List.of("electronics", "kicad"), false, null, read.circuit(), List.of(), List.of(), List.of(),
                     List.of(), List.of()));
             uses.addAll(read.symbols());
-            read.components().forEach(definition -> components.putIfAbsent(KiCadSymbolDrawing.componentSlugOf(definition),
-                    KiCadComponentStub.documentOf(definition)));
+            for (KiCadSymbolDefinition definition : read.components()) {
+                components.putIfAbsent(KiCadSymbolDrawing.componentSlugOf(definition), KiCadComponentStub.documentOf(definition));
+                libraries.putIfAbsent(KiCadSymbolDrawing.componentSlugOf(definition), KiCadSymbolDrawing.libraryOf(definition));
+            }
             read.notes().forEach(note -> notes.add(file + ": " + note));
         }
         List<ExperienceDocument> symbols = new ArrayList<>();
@@ -74,10 +79,11 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
             ExperienceDocument symbol = KiCadSymbolDrawing.documentOf(use.symbol(), use.unit(), use.pinNames());
             if (drawn.add(symbol.slug())) {
                 symbols.add(symbol);
+                libraries.putIfAbsent(symbol.slug(), KiCadSymbolDrawing.libraryOf(use.symbol()));
             }
         }
         return new KiCadProjectImport(List.copyOf(circuits), List.copyOf(symbols), List.copyOf(components.values()),
-                List.copyOf(notes));
+                Map.copyOf(libraries), List.copyOf(notes));
     }
 
     /**

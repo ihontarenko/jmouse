@@ -96,6 +96,12 @@ public final class KiCadSymbolDrawing {
         return "kicad-" + signed.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
     }
 
+    /** The KiCad library a symbol comes from: {@code Regulator_Linear} of {@code Regulator_Linear:LM317_TO-220}; empty for none. */
+    public static String libraryOf(KiCadSymbolDefinition symbol) {
+        int colon = symbol.name().indexOf(':');
+        return colon < 0 ? "" : symbol.name().substring(0, colon);
+    }
+
     /** What a symbol is called without its library: {@code LM317_TO-220} of {@code Regulator_Linear:LM317_TO-220}. */
     public static String titleOf(KiCadSymbolDefinition symbol) {
         return symbol.name().substring(symbol.name().indexOf(':') + 1);

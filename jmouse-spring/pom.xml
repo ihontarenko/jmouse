@@ -45,6 +45,7 @@
         <module>jmouse-parallax-spring-boot</module>
         <module>jmouse-parallax-management</module>
         <module>jmouse-parallax-live</module>
+        <module>jmouse-taxonomy-management</module>
     </modules>
 
 </project>
