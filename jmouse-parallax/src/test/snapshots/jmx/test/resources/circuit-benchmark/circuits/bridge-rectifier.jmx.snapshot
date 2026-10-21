@@ -1,0 +1,122 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "Bridge rectifier with a smoothing capacitor"
+  slug: "bridge-rectifier"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: 50 Hz sine, four 1N4148, RC load."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parts
+          parts: List(7)
+              - Part
+                  id: "AC1"
+                  reference: "sine-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "a"
+                      negative = "b"
+                  settings: Map(2)
+                      amplitude = SourceText[10:69@472] "10"
+                      frequency = SourceText[10:85@488] "50"
+                  symbol: Optional.empty
+                  line: Integer 10
+              - Part
+                  id: "D1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "a"
+                      cathode = "p"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 11
+              - Part
+                  id: "D3"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "b"
+                      cathode = "p"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "D2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "0"
+                      cathode = "b"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 13
+              - Part
+                  id: "D4"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "0"
+                      cathode = "a"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 14
+              - Part
+                  id: "RL"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "p"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[15:41@703] "1000"
+                  symbol: Optional.empty
+                  line: Integer 15
+              - Part
+                  id: "CL"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "p"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[16:43@750] "10e-6"
+                  symbol: Optional.empty
+                  line: Integer 16
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[18:28@789] "0.04 s"
+  line: Integer 4
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 4:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS c3ec0421e8ddc003ef98dda9daebe19c
+== line 11 begun with a stray word
+READS 2f66bb9c68c477a3b1d820a657339410
+== line 18 deleted
+READS d8da7f15b7306204522af8962266f2a2
+== line 18 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/bridge-rectifier.jmx 18:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view

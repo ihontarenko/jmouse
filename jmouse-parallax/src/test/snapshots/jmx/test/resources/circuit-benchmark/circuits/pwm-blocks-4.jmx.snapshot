@@ -1,0 +1,599 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "Four PWM blocks with followers"
+  slug: "pwm-blocks-4"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: 4 × [NE555 PWM + RC + LM358 follower] on one supply, at four periods."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(4)
+      - Parameters
+          parameters: List(1)
+              - Parameter
+                  name: "U"
+                  value: SourceText[12:13@687] "12"
+                  quantity: Optional Quantity
+                      value: Double 12.0
+                      unit: "V"
+                      written: "12 V"
+                  range: Optional Range
+                      minimum: SourceText[12:21@695] "5"
+                      maximum: SourceText[12:26@700] "15"
+                  step: Optional SourceText[12:34@708] "0.5"
+                  flags: List(0)
+                  description: "Supply voltage"
+                  values: List(0)
+      - Parts
+          parts: List(41)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[15:47@796] "U"
+                  symbol: Optional.empty
+                  line: Integer 15
+              - Part
+                  id: "R1_1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "discharge_1"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[16:55@853] "1000"
+                  symbol: Optional.empty
+                  line: Integer 16
+              - Part
+                  id: "P1_1"
+                  reference: "potentiometer"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      a = "charge_1"
+                      w = "discharge_1"
+                      b = "drain_1"
+                  settings: Map(1)
+                      resistance = SourceText[17:86@944] "100000"
+                  symbol: Optional.empty
+                  line: Integer 17
+              - Part
+                  id: "D1_1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "charge_1"
+                      cathode = "timing_1"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 18
+              - Part
+                  id: "D2_1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "timing_1"
+                      cathode = "drain_1"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 19
+              - Part
+                  id: "CT_1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "timing_1"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[20:52@1122] "10e-9"
+                  symbol: Optional.empty
+                  line: Integer 20
+              - Part
+                  id: "U1_1"
+                  reference: "ne555"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(7)
+                      Vcc = "vcc"
+                      GND = "0"
+                      trigger = "timing_1"
+                      threshold = "timing_1"
+                      discharge = "discharge_1"
+                      output = "pwm_1"
+                      reset = "vcc"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 21
+              - Part
+                  id: "R2_1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "pwm_1"
+                      - "out_1"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[22:51@1316] "4700"
+                  symbol: Optional.empty
+                  line: Integer 22
+              - Part
+                  id: "C1_1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "out_1"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[23:49@1370] "1e-6"
+                  symbol: Optional.empty
+                  line: Integer 23
+              - Part
+                  id: "U2_1"
+                  reference: "lm358"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "out_1"
+                      A.inverting_input = "buffered_1"
+                      A.output = "buffered_1"
+                      Vcc = "vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 24
+              - Part
+                  id: "RL_1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "buffered_1"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[25:52@1554] "10000"
+                  symbol: Optional.empty
+                  line: Integer 25
+              - Part
+                  id: "R1_2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "discharge_2"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[26:55@1615] "1000"
+                  symbol: Optional.empty
+                  line: Integer 26
+              - Part
+                  id: "P1_2"
+                  reference: "potentiometer"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      a = "charge_2"
+                      w = "discharge_2"
+                      b = "drain_2"
+                  settings: Map(1)
+                      resistance = SourceText[27:86@1706] "68000"
+                  symbol: Optional.empty
+                  line: Integer 27
+              - Part
+                  id: "D1_2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "charge_2"
+                      cathode = "timing_2"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 28
+              - Part
+                  id: "D2_2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "timing_2"
+                      cathode = "drain_2"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 29
+              - Part
+                  id: "CT_2"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "timing_2"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[30:52@1883] "10e-9"
+                  symbol: Optional.empty
+                  line: Integer 30
+              - Part
+                  id: "U1_2"
+                  reference: "ne555"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(7)
+                      Vcc = "vcc"
+                      GND = "0"
+                      trigger = "timing_2"
+                      threshold = "timing_2"
+                      discharge = "discharge_2"
+                      output = "pwm_2"
+                      reset = "vcc"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 31
+              - Part
+                  id: "R2_2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "pwm_2"
+                      - "out_2"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[32:51@2077] "4700"
+                  symbol: Optional.empty
+                  line: Integer 32
+              - Part
+                  id: "C1_2"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "out_2"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[33:49@2131] "1e-6"
+                  symbol: Optional.empty
+                  line: Integer 33
+              - Part
+                  id: "U2_2"
+                  reference: "lm358"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "out_2"
+                      A.inverting_input = "buffered_2"
+                      A.output = "buffered_2"
+                      Vcc = "vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 34
+              - Part
+                  id: "RL_2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "buffered_2"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[35:52@2315] "10000"
+                  symbol: Optional.empty
+                  line: Integer 35
+              - Part
+                  id: "R1_3"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "discharge_3"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[36:55@2376] "1000"
+                  symbol: Optional.empty
+                  line: Integer 36
+              - Part
+                  id: "P1_3"
+                  reference: "potentiometer"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      a = "charge_3"
+                      w = "discharge_3"
+                      b = "drain_3"
+                  settings: Map(1)
+                      resistance = SourceText[37:86@2467] "47000"
+                  symbol: Optional.empty
+                  line: Integer 37
+              - Part
+                  id: "D1_3"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "charge_3"
+                      cathode = "timing_3"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 38
+              - Part
+                  id: "D2_3"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "timing_3"
+                      cathode = "drain_3"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 39
+              - Part
+                  id: "CT_3"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "timing_3"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[40:52@2644] "10e-9"
+                  symbol: Optional.empty
+                  line: Integer 40
+              - Part
+                  id: "U1_3"
+                  reference: "ne555"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(7)
+                      Vcc = "vcc"
+                      GND = "0"
+                      trigger = "timing_3"
+                      threshold = "timing_3"
+                      discharge = "discharge_3"
+                      output = "pwm_3"
+                      reset = "vcc"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 41
+              - Part
+                  id: "R2_3"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "pwm_3"
+                      - "out_3"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[42:51@2838] "4700"
+                  symbol: Optional.empty
+                  line: Integer 42
+              - Part
+                  id: "C1_3"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "out_3"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[43:49@2892] "1e-6"
+                  symbol: Optional.empty
+                  line: Integer 43
+              - Part
+                  id: "U2_3"
+                  reference: "lm358"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "out_3"
+                      A.inverting_input = "buffered_3"
+                      A.output = "buffered_3"
+                      Vcc = "vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 44
+              - Part
+                  id: "RL_3"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "buffered_3"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[45:52@3076] "10000"
+                  symbol: Optional.empty
+                  line: Integer 45
+              - Part
+                  id: "R1_4"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "discharge_4"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[46:55@3137] "1000"
+                  symbol: Optional.empty
+                  line: Integer 46
+              - Part
+                  id: "P1_4"
+                  reference: "potentiometer"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      a = "charge_4"
+                      w = "discharge_4"
+                      b = "drain_4"
+                  settings: Map(1)
+                      resistance = SourceText[47:86@3228] "150000"
+                  symbol: Optional.empty
+                  line: Integer 47
+              - Part
+                  id: "D1_4"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "charge_4"
+                      cathode = "timing_4"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 48
+              - Part
+                  id: "D2_4"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "timing_4"
+                      cathode = "drain_4"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 49
+              - Part
+                  id: "CT_4"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "timing_4"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[50:52@3406] "10e-9"
+                  symbol: Optional.empty
+                  line: Integer 50
+              - Part
+                  id: "U1_4"
+                  reference: "ne555"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(7)
+                      Vcc = "vcc"
+                      GND = "0"
+                      trigger = "timing_4"
+                      threshold = "timing_4"
+                      discharge = "discharge_4"
+                      output = "pwm_4"
+                      reset = "vcc"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 51
+              - Part
+                  id: "R2_4"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "pwm_4"
+                      - "out_4"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[52:51@3600] "4700"
+                  symbol: Optional.empty
+                  line: Integer 52
+              - Part
+                  id: "C1_4"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "out_4"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[53:49@3654] "1e-6"
+                  symbol: Optional.empty
+                  line: Integer 53
+              - Part
+                  id: "U2_4"
+                  reference: "lm358"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "out_4"
+                      A.inverting_input = "buffered_4"
+                      A.output = "buffered_4"
+                      Vcc = "vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 54
+              - Part
+                  id: "RL_4"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "buffered_4"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[55:52@3838] "10000"
+                  symbol: Optional.empty
+                  line: Integer 55
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[57:28@3879] "0.02 s"
+      - View
+          items: List(1)
+              - Representation
+                  representation: "transient_response"
+                  primary: true
+                  settings: SourceText[59:35@3933] ""
+  line: Integer 6
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 6:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+READS c06698a042ffea552dd45cfc831c7f65
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 11:9 'U' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 11 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 11:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 18 deleted
+READS 0c81664fbfafcb688ed17b135a5e94af
+== line 18 begun with a stray word
+READS bd3e2af19191fe3319105d018882ec16
+== line 25 deleted
+READS 139f3b46a1b4429538696e571b73162a
+== line 25 begun with a stray word
+READS 1dd9b1807f542c3624a727efd9b0df3d
+== line 32 deleted
+READS 749be0a916774f8f100c29a74174fb9b
+== line 32 begun with a stray word
+READS 97f5629f0f4ef9f740e15e4272c01f31
+== line 39 deleted
+READS 0e8cefc21e51e52ce469b2734cfa1cd7
+== line 39 begun with a stray word
+READS c9aadf01439c9884d645654d3a7ab3cc
+== line 46 deleted
+READS b08bb03b90a37f2e789d2d412d1cfeae
+== line 46 begun with a stray word
+READS 1ffce3788cf612acb32b6d940f4ea6ec
+== line 53 deleted
+READS f4f306e61345e7ca9db42f60bdfaef48
+== line 53 begun with a stray word
+READS 546e8b174b399bf1ab0ff662b012139f
+== line 60 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 6:1 circuit "…" is opened with '{' and never closed
+== line 60 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-blocks-4.jmx 6:1 circuit "…" is opened with '{' and never closed

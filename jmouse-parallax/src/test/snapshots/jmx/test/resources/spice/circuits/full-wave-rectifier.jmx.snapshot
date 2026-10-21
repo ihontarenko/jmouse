@@ -1,0 +1,380 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "Full-wave bridge rectifier"
+  slug: "full-wave-rectifier"
+  type: Optional.empty
+  meta: Meta
+      summary: "Four diodes turn both halves of an alternating voltage the same way round: the load sees |V_in| less two diode drops."
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "rectifiers"
+          - "diodes"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(5)
+      - Parameters
+          parameters: List(2)
+              - Parameter
+                  name: "Vm"
+                  value: SourceText[8:14@303] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "V"
+                      written: "10 V"
+                  range: Optional Range
+                      minimum: SourceText[8:22@311] "2"
+                      maximum: SourceText[8:27@316] "24"
+                  step: Optional SourceText[8:35@324] "0.5"
+                  flags: List(0)
+                  description: "Peak input voltage"
+                  values: List(0)
+              - Parameter
+                  name: "R"
+                  value: SourceText[9:13@361] "1000"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "Ohm"
+                      written: "1000 Ohm"
+                  range: Optional Range
+                      minimum: SourceText[9:23@371] "100"
+                      maximum: SourceText[9:30@378] "10000"
+                  step: Optional SourceText[9:41@389] "100"
+                  flags: List(0)
+                  description: "Load resistance"
+                  values: List(0)
+      - Parts
+          parts: List(6)
+              - Part
+                  id: "AC1"
+                  reference: "sine-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "a"
+                      negative = "b"
+                  settings: Map(2)
+                      amplitude = SourceText[12:69@497] "Vm"
+                      frequency = SourceText[12:85@513] "50"
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "D1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "a"
+                      cathode = "p"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 13
+              - Part
+                  id: "D3"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "b"
+                      cathode = "p"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 14
+              - Part
+                  id: "D2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "0"
+                      cathode = "b"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 15
+              - Part
+                  id: "D4"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "0"
+                      cathode = "a"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 16
+              - Part
+                  id: "RL"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "p"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[17:41@728] "R"
+                  symbol: Optional.empty
+                  line: Integer 17
+      - Layout
+          items: List(11)
+              - LayoutItem
+                  id: "D1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 400.0
+                      y: Double 220.0
+                      rotation: Double 270.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "D4"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 400.0
+                      y: Double 380.0
+                      rotation: Double 270.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "D3"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 600.0
+                      y: Double 220.0
+                      rotation: Double 270.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "D2"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 600.0
+                      y: Double 380.0
+                      rotation: Double 270.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "AC1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 500.0
+                      y: Double 300.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "RL"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 760.0
+                      y: Double 300.0
+                      rotation: Double 90.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Ja"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 400.0
+                      y: Double 300.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jb"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 600.0
+                      y: Double 300.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jp"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 600.0
+                      y: Double 160.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jg"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 600.0
+                      y: Double 440.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "GND1"
+                  unit: Optional.empty
+                  mark: Optional "ground"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 600.0
+                      y: Double 500.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+          wires: List(13)
+              - LayoutWire
+                  id: "W1"
+                  from: "D1.anode"
+                  to: "Ja.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W2"
+                  from: "D4.cathode"
+                  to: "Ja.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W3"
+                  from: "AC1.positive"
+                  to: "Ja.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W4"
+                  from: "D3.anode"
+                  to: "Jb.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W5"
+                  from: "D2.cathode"
+                  to: "Jb.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W6"
+                  from: "AC1.negative"
+                  to: "Jb.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W7"
+                  from: "D1.cathode"
+                  to: "Jp.j"
+                  bends: List(1)
+                      - Point
+                          x: Double 400.0
+                          y: Double 160.0
+              - LayoutWire
+                  id: "W8"
+                  from: "D3.cathode"
+                  to: "Jp.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W9"
+                  from: "Jp.j"
+                  to: "RL.positive"
+                  bends: List(1)
+                      - Point
+                          x: Double 760.0
+                          y: Double 160.0
+              - LayoutWire
+                  id: "W10"
+                  from: "D4.anode"
+                  to: "Jg.j"
+                  bends: List(1)
+                      - Point
+                          x: Double 400.0
+                          y: Double 440.0
+              - LayoutWire
+                  id: "W11"
+                  from: "D2.anode"
+                  to: "Jg.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W12"
+                  from: "RL.negative"
+                  to: "Jg.j"
+                  bends: List(1)
+                      - Point
+                          x: Double 760.0
+                          y: Double 440.0
+              - LayoutWire
+                  id: "W13"
+                  from: "Jg.j"
+                  to: "GND1.ground"
+                  bends: List(0)
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[45:28@1641] "0.04 s"
+      - View
+          items: List(2)
+              - Representation
+                  representation: "transient_response"
+                  primary: true
+                  settings: SourceText[47:35@1693] ""
+              - Representation
+                  representation: "operating_point"
+                  primary: false
+                  settings: SourceText[48:24@1717] ""
+  line: Integer 1
+== the last brace removed
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 1:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+READS 6499a3109fe884c74560c05df3dc7474
+== line 4 begun with a stray word
+READS ae8bf0c1de6e571326c9656ac21d5694
+== line 11 deleted
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 11:9 'AC1' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 11 begun with a stray word
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 11:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 18 deleted
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 18:12 'parts' holds lines, not a nested '{ … }'
+== line 18 begun with a stray word
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 19:12 'parts' holds lines, not a nested '{ … }'
+== line 25 deleted
+READS a0e436fe03d958150a34910514dc0e58
+== line 25 begun with a stray word
+READS c55f7b8bbec9db247b36c223c3200454
+== line 32 deleted
+READS d1a0bc7bc00a96700d0adc127e17eb2e
+== line 32 begun with a stray word
+READS dc295530ab93668cbd552de3d7bbd733
+== line 39 deleted
+READS 0224f149de8bb35beac5c854983ab949
+== line 39 begun with a stray word
+READS 765e00ded2b09dd968a111179ad41639
+== line 46 deleted
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 46:9 'transient_response' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 46 begun with a stray word
+REFUSED src/test/resources/spice/circuits/full-wave-rectifier.jmx 46:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view

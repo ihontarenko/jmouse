@@ -1,0 +1,254 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "Voltage multiplier, 4 stages"
+  slug: "voltage-multiplier-4"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: Cockcroft–Walton, 4 stages of 1N4148 and 100 nF from a 10 V, 1 kHz sine into 1 MΩ."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parts
+          parts: List(18)
+              - Part
+                  id: "AC1"
+                  reference: "sine-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "n0"
+                      negative = "0"
+                  settings: Map(2)
+                      amplitude = SourceText[10:70@520] "10"
+                      frequency = SourceText[10:86@536] "1000"
+                  symbol: Optional.empty
+                  line: Integer 10
+              - Part
+                  id: "CA1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n0"
+                      - "n1"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[11:46@586] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 11
+              - Part
+                  id: "DA1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "0"
+                      cathode = "n1"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "DB1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "n1"
+                      cathode = "b1"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 13
+              - Part
+                  id: "CB1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "0"
+                      - "b1"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[14:45@726] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 14
+              - Part
+                  id: "CA2"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n1"
+                      - "n2"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[15:46@776] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 15
+              - Part
+                  id: "DA2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "b1"
+                      cathode = "n2"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 16
+              - Part
+                  id: "DB2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "n2"
+                      cathode = "b2"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 17
+              - Part
+                  id: "CB2"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "b1"
+                      - "b2"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[18:46@918] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 18
+              - Part
+                  id: "CA3"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n2"
+                      - "n3"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[19:46@968] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 19
+              - Part
+                  id: "DA3"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "b2"
+                      cathode = "n3"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 20
+              - Part
+                  id: "DB3"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "n3"
+                      cathode = "b3"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 21
+              - Part
+                  id: "CB3"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "b2"
+                      - "b3"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[22:46@1110] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 22
+              - Part
+                  id: "CA4"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n3"
+                      - "n4"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[23:46@1160] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 23
+              - Part
+                  id: "DA4"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "b3"
+                      cathode = "n4"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 24
+              - Part
+                  id: "DB4"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "n4"
+                      cathode = "b4"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 25
+              - Part
+                  id: "CB4"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "b3"
+                      - "b4"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[26:46@1302] "1e-7"
+                  symbol: Optional.empty
+                  line: Integer 26
+              - Part
+                  id: "RL"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "b4"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[27:42@1348] "1000000"
+                  symbol: Optional.empty
+                  line: Integer 27
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[29:28@1389] "0.02 s"
+  line: Integer 4
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/voltage-multiplier-4.jmx 4:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/voltage-multiplier-4.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/voltage-multiplier-4.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 1a3beaf1a0397dd8876a28b4905a3bb1
+== line 11 begun with a stray word
+READS fbfd7b76bd08ad0d2c42c97fa447581e
+== line 18 deleted
+READS c40a2dcbdb926765a2985dc80d90c3a3
+== line 18 begun with a stray word
+READS e0327963e4164494eee8e953b4bfed0b
+== line 25 deleted
+READS f1dc56d6f3504086f7f278d28918fb8e
+== line 25 begun with a stray word
+READS d78dbaa06968c62d5cc61529a02d1483

@@ -1,0 +1,245 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Bridge rectifier"
+  slug: "bridge-rectifier-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "Bridge rectifier, as drawn on a schematic: the pair of diodes that carries the current lights — one diagonal on each half of the mains"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 120.0
+          height: Double 120.0
+          paths: List(0)
+          pins: List(4)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -60.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 60.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "p"
+                  x: Double 0.0
+                  y: Double -60.0
+                  label: ""
+              - SymbolPin
+                  pin: "m"
+                  x: Double 0.0
+                  y: Double 60.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 34.0
+                  y: Double -40.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 34.0
+                  y: Double 40.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(3)
+              - SymbolInput
+                  name: "pair_a"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[8:18@330] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "pair_b"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[9:18@355] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(6)
+              - SymbolElement
+                  shape: "path"
+                  name: "pair_a_upper"
+                  live: true
+                  path: "M-20 -10.1L-15.05 -24.95L-29.9 -20Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(4)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=clear]
+                      - SymbolProperty fill STILL
+                          - Variable[name=positive]
+                      - SymbolProperty opacity LIVE
+                          - HostCall[name=seen, arguments=[Variable[name=pair_a]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=9], right=HostCall[name=seen, arguments=[Variable[name=pair_a]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 16
+              - SymbolElement
+                  shape: "path"
+                  name: "pair_a_lower"
+                  live: true
+                  path: "M20 29.9L24.95 15.05L10.1 20Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(4)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=clear]
+                      - SymbolProperty fill STILL
+                          - Variable[name=positive]
+                      - SymbolProperty opacity LIVE
+                          - HostCall[name=seen, arguments=[Variable[name=pair_a]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=9], right=HostCall[name=seen, arguments=[Variable[name=pair_a]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 23
+              - SymbolElement
+                  shape: "path"
+                  name: "pair_b_upper"
+                  live: true
+                  path: "M29.9 -20L15.05 -24.95L20 -10.1Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(4)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=clear]
+                      - SymbolProperty fill STILL
+                          - Variable[name=positive]
+                      - SymbolProperty opacity LIVE
+                          - HostCall[name=seen, arguments=[Variable[name=pair_b]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=9], right=HostCall[name=seen, arguments=[Variable[name=pair_b]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 30
+              - SymbolElement
+                  shape: "path"
+                  name: "pair_b_lower"
+                  live: true
+                  path: "M-10.1 20L-24.95 15.05L-20 29.9Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(4)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=clear]
+                      - SymbolProperty fill STILL
+                          - Variable[name=positive]
+                      - SymbolProperty opacity LIVE
+                          - HostCall[name=seen, arguments=[Variable[name=pair_b]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=9], right=HostCall[name=seen, arguments=[Variable[name=pair_b]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 37
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-60 0H-40M40 0H60M0-60V-40M0 40V60M-40 0L0-40L40 0L0 40ZM-20 -10.1L-15.05 -24.95L-29.9 -20ZM-10.1 -20L-20 -29.9M29.9 -20L15.05 -24.95L20 -10.1ZM20 -29.9L10.1 -20M-10.1 20L-24.95 15.05L-20 29.9ZM-20 10.1L-29.9 20M20 29.9L24.95 15.05L10.1 20ZM29.9 20L20 10.1M6-56H12M9-59V-53M6 56H12"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 45
+                  line: Integer 44
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.35], right=Binary[operator=MULTIPLY, left=Constant[value=0.65], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 50
+                  line: Integer 49
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/bridge-rectifier-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 14fb20913a4178d2fa89b1af56ec9f30
+== line 4 begun with a stray word
+READS 0ed839f990f88a83e5104e1ea5af8dc2
+== line 18 deleted
+READS 5284d733be9c6f370f87816b80e3125f
+== line 18 begun with a stray word
+READS 525c49d4a239bf5deff9dc50272a7a70
+== line 25 deleted
+READS c7c245ada6feddc506f9ff8939da406f
+== line 25 begun with a stray word
+READS ff923d30da14d25141730bea6f982877
+== line 32 deleted
+READS 753559ec67123166712dd0675fd7f2ef
+== line 32 begun with a stray word
+READS 27fad99e146334f8115b01792715a131
+== line 39 deleted
+READS 0c9a11917aac62748eaa1f1f859309e4
+== line 39 begun with a stray word
+READS 9511083399b1a6445335083ebd48a65a
+== line 46 deleted
+READS 01e0b4d65f3edee004187eaa2588e15b
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/bridge-rectifier-symbol.jmx 46:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 53 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/bridge-rectifier-symbol.jmx 54:5 'pin' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/bridge-rectifier-symbol.jmx 53:5 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 60 deleted
+READS 1f751f6ee0360a64b5b1f1e523aa7bed
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/bridge-rectifier-symbol.jmx 60:5 'zzz' is not a block of a symbol; it holds meta

@@ -1,0 +1,67 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Bench power supply"
+  slug: "bench-supply-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A DC supply with a current limit, as drawn on a schematic: a source with the DC mark and a limit bar"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 40.0
+          paths: List(1)
+              - "M-40 0H-16M16 0H40M-16 0A16 16 0 1 0 16 0A16 16 0 1 0-16 0M-8-3H8M-8 3H-4M-1 3H2M5 3H8M-6 9H6M-26-9V-3M-29-6H-23"
+          pins: List(2)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -26.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 32.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/bench-supply-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 6e05550d2253366a696f86a43f9eda7c
+== line 4 begun with a stray word
+READS 6f325f4e3c909664d2807f700dbfa9a8
+== line 11 deleted
+READS 2015d68350991ae37e6794267856d16a
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/bench-supply-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

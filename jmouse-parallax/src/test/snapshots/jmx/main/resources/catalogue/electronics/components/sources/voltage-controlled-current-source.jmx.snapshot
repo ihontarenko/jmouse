@@ -1,0 +1,193 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Voltage-controlled current source"
+  slug: "voltage-controlled-current-source"
+  type: Optional "source"
+  meta: Meta
+      summary: "Ideal voltage-controlled current source: I(positive → negative) = transconductance · V(control_positive, control_negative)"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "SPICE G element, linear form"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "G"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(5)
+      - Parameters
+          parameters: List(1)
+              - Parameter
+                  name: "transconductance"
+                  value: SourceText[14:28@619] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "A/V"
+                      written: "1 mA/V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the output current over the controlling voltage"
+                  values: List(0)
+      - Pins
+          pins: List(4)
+              - Pin
+                  name: "positive"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the current leaves the circuit here"
+              - Pin
+                  name: "negative"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "and comes back here"
+              - Pin
+                  name: "control_positive"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "controlling voltage, positive"
+              - Pin
+                  name: "control_negative"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "controlling voltage, negative"
+          buses: List(0)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional "box"
+          sides: Map(2)
+              left = List(2)
+                  - "control_positive"
+                  - "control_negative"
+              right = List(2)
+                  - "positive"
+                  - "negative"
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Equations
+          equations: List(1)
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "positive"
+                  negative: "negative"
+                  expression: SourceText[30:40@1181] "transconductance * (control_positive - control_negative)"
+                  type: null
+      - Expectation
+          title: "a milliampere per volt into a load"
+          reference: "1 mA/V, 2 V in: 2 mA through 1 kΩ from ground to the output, -2 V"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[35:53@1445] "2 V"
+                  symbol: Optional.empty
+                  line: Integer 35
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "output"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[36:50@1498] "1 kOhm"
+                  symbol: Optional.empty
+                  line: Integer 36
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(4)
+                      positive = "output"
+                      negative = "0"
+                      control_positive = "input"
+                      control_negative = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 37
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "output"
+          criterion: Criterion
+              kind: CriterionKind.NEAR
+              typical: Optional Amount
+                  expression: SourceText[40:14@1663] "-2"
+                  quantity: Optional Quantity
+                      value: Double -2.0
+                      unit: "V"
+                      written: "-2 V"
+              tolerance: Optional Amount
+                  expression: SourceText[40:22@1671] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "%"
+                      written: "0.1%"
+              relative: true
+              minimum: Optional.empty
+              maximum: Optional.empty
+              exact: null
+          line: Integer 33
+  line: Integer 4
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 4:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 12:5 a meta field is 'name value'
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 11:5 a meta field is 'name value'
+== line 18 deleted
+READS d4ab65b054ca016ecc3617782b909441
+== line 18 begun with a stray word
+READS 64f3d47c444c5b3afe1de5dde2dddaa2
+== line 25 deleted
+READS 7de4f29ee8f7596e089ffc9b5fb84bad
+== line 25 begun with a stray word
+READS 4220071d160dd3a0091e9f841d872dee
+== line 39 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 33:5 expectation 'a milliampere per volt into a load' needs a measure and a criterion (near, within or is)
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-controlled-current-source.jmx 39:9 'zzz' is not a criterion: near, within or is

@@ -1,0 +1,698 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "LM358"
+  slug: "lm358"
+  type: Optional "opamp"
+  meta: Meta
+      summary: "Dual operational amplifier, single supply 3 V to 32 V, inputs and output to ground"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "TI LM358 datasheet (SLOS068)"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(3)
+          designator = Text
+              text: "U"
+          package = Text
+              text: "SOIC-8"
+          failure = Text
+              text: "short Vcc GND"
+      labels: Map(0)
+  base: Optional "operational-amplifier"
+  units: List(2)
+      - "A"
+      - "B"
+  uses: List(0)
+  blocks: List(7)
+      - Parameters
+          parameters: List(19)
+              - Parameter
+                  name: "open_loop_gain"
+                  value: SourceText[18:26@762] "100000"
+                  quantity: Optional Quantity
+                      value: Double 100000.0
+                      unit: ""
+                      written: "100000"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "open-loop gain, 100 dB (min 25 V/mV)"
+                  values: List(0)
+              - Parameter
+                  name: "gain_bandwidth"
+                  value: SourceText[19:26@850] "0.7"
+                  quantity: Optional Quantity
+                      value: Double 700000.0
+                      unit: "Hz"
+                      written: "0.7 MHz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "unity-gain bandwidth"
+                  values: List(0)
+              - Parameter
+                  name: "slew_rate"
+                  value: SourceText[20:21@916] "0.3"
+                  quantity: Optional Quantity
+                      value: Double 300000.0
+                      unit: "V/s"
+                      written: "0.3 V/us"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "slew rate"
+                  values: List(0)
+              - Parameter
+                  name: "V_input_offset"
+                  value: SourceText[21:26@977] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "V"
+                      written: "0 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(1)
+                      - ParameterFlag.PER_UNIT
+                  description: "input offset; typically 2 mV either way"
+                  values: List(0)
+              - Parameter
+                  name: "I_input_bias"
+                  value: SourceText[22:24@1065] "20"
+                  quantity: Optional Quantity
+                      value: Double 2.0E-8
+                      unit: "A"
+                      written: "20 nA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "input bias current, out of the input pins (PNP inputs)"
+                  values: List(0)
+              - Parameter
+                  name: "V_common_mode_high"
+                  value: SourceText[25:30@1354] "1.5"
+                  quantity: Optional Quantity
+                      value: Double 1.5
+                      unit: "V"
+                      written: "1.5 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the inputs work up to V+ - 1.5 V"
+                  values: List(0)
+              - Parameter
+                  name: "V_noise"
+                  value: SourceText[26:19@1422] "40"
+                  quantity: Optional Quantity
+                      value: Double 4.0E-8
+                      unit: "V"
+                      written: "40 nV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "input voltage noise density at 1 kHz, 40 nV/√Hz"
+                  values: List(0)
+              - Parameter
+                  name: "I_quiescent"
+                  value: SourceText[27:23@1520] "0.35"
+                  quantity: Optional Quantity
+                      value: Double 3.5E-4
+                      unit: "A"
+                      written: "0.35 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "supply current per unit"
+                  values: List(0)
+              - Parameter
+                  name: "R_output"
+                  value: SourceText[28:20@1589] "50"
+                  quantity: Optional Quantity
+                      value: Double 50.0
+                      unit: "Ohm"
+                      written: "50 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: ""
+                  values: List(0)
+              - Parameter
+                  name: "I_output_source"
+                  value: SourceText[29:27@1623] "40"
+                  quantity: Optional Quantity
+                      value: Double 0.04
+                      unit: "A"
+                      written: "40 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "output short-circuit current, sourcing"
+                  values: List(0)
+              - Parameter
+                  name: "I_output_sink"
+                  value: SourceText[30:25@1707] "20"
+                  quantity: Optional Quantity
+                      value: Double 0.02
+                      unit: "A"
+                      written: "20 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "output short-circuit current, sinking"
+                  values: List(0)
+              - Parameter
+                  name: "V_output_headroom"
+                  value: SourceText[31:29@1796] "1.5"
+                  quantity: Optional Quantity
+                      value: Double 1.5
+                      unit: "V"
+                      written: "1.5 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the output stays this far below V+"
+                  values: List(0)
+              - Parameter
+                  name: "V_output_low"
+                  value: SourceText[32:24@1877] "5"
+                  quantity: Optional Quantity
+                      value: Double 0.005
+                      unit: "V"
+                      written: "5 mV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the output reaches this close to ground"
+                  values: List(0)
+              - Parameter
+                  name: "recovery"
+                  value: SourceText[33:20@1960] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "1/s"
+                      written: "1000000 1/s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast the gain stage comes back out of saturation"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[35:30@2130] "120"
+                  quantity: Optional Quantity
+                      value: Double 120.0
+                      unit: "K/W"
+                      written: "120 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[36:33@2220] "5"
+                  quantity: Optional Quantity
+                      value: Double 5.0
+                      unit: "s"
+                      written: "5 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[37:21@2278] "150"
+                  quantity: Optional Quantity
+                      value: Double 150.0
+                      unit: "degC"
+                      written: "150 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+              - Parameter
+                  name: "V_offset_spread"
+                  value: SourceText[38:27@2368] "7"
+                  quantity: Optional Quantity
+                      value: Double 0.007
+                      unit: "V"
+                      written: "7 mV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VIO at most 7 mV"
+                  values: List(0)
+              - Parameter
+                  name: "V_supply_maximum"
+                  value: SourceText[39:28@2435] "32"
+                  quantity: Optional Quantity
+                      value: Double 32.0
+                      unit: "V"
+                      written: "32 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the supply span it is rated for"
+                  values: List(0)
+      - Pins
+          pins: List(5)
+              - Pin
+                  name: "output"
+                  numbers: List(2)
+                      - Integer 1
+                      - Integer 7
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "inverting_input"
+                  numbers: List(2)
+                      - Integer 2
+                      - Integer 6
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "inverting"
+              - Pin
+                  name: "non_inverting_input"
+                  numbers: List(2)
+                      - Integer 3
+                      - Integer 5
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "non-inverting"
+              - Pin
+                  name: "Vcc"
+                  numbers: List(1)
+                      - Integer 8
+                  nature: PinNature.POWER
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "GND"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.GROUND
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "operational-amplifier-symbol"
+          ports: Map(2)
+              positive_supply = "Vcc"
+              negative_supply = "GND"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Expectation
+          title: "inverting gain of ten"
+          reference: "closed-loop application, G = -R2 / R1"
+          bench: List(6)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[58:51@3003] "15 V"
+                  symbol: Optional.empty
+                  line: Integer 58
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "reference"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[59:57@3065] "7.5 V"
+                  symbol: Optional.empty
+                  line: Integer 59
+              - Part
+                  id: "V3"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[60:53@3124] "7.4 V"
+                  symbol: Optional.empty
+                  line: Integer 60
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "inverting_input"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[61:63@3193] "10 kOhm"
+                  symbol: Optional.empty
+                  line: Integer 61
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "inverting_input"
+                      - "output"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[62:64@3265] "100 kOhm"
+                  symbol: Optional.empty
+                  line: Integer 62
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "reference"
+                      A.inverting_input = "inverting_input"
+                      A.output = "output"
+                      Vcc = "Vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 63
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "output"
+          criterion: Criterion
+              kind: CriterionKind.NEAR
+              typical: Optional Amount
+                  expression: SourceText[66:14@3466] "8.5"
+                  quantity: Optional Quantity
+                      value: Double 8.5
+                      unit: "V"
+                      written: "8.5 V"
+              tolerance: Optional Amount
+                  expression: SourceText[66:23@3475] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.01
+                      unit: "%"
+                      written: "1%"
+              relative: true
+              minimum: Optional.empty
+              maximum: Optional.empty
+              exact: null
+          line: Integer 56
+      - Expectation
+          title: "slew rate"
+          reference: "electrical characteristics, slew_rate 0.3 V/us"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[71:51@3645] "15 V"
+                  symbol: Optional.empty
+                  line: Integer 71
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[72:53@3703] "5 V"
+                  symbol: Optional.empty
+                  line: Integer 72
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "input"
+                      A.inverting_input = "output"
+                      A.output = "output"
+                      Vcc = "Vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 73
+          sharedBench: null
+          duration: Double 1.0E-5
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "output"
+          criterion: Criterion
+              kind: CriterionKind.NEAR
+              typical: Optional Amount
+                  expression: SourceText[76:14@3882] "3"
+                  quantity: Optional Quantity
+                      value: Double 3.0
+                      unit: "V"
+                      written: "3 V"
+              tolerance: Optional Amount
+                  expression: SourceText[76:21@3889] "25"
+                  quantity: Optional Quantity
+                      value: Double 0.25
+                      unit: "%"
+                      written: "25%"
+              relative: true
+              minimum: Optional.empty
+              maximum: Optional.empty
+              exact: null
+          line: Integer 69
+      - Expectation
+          title: "output high with 2 kOhm at 30 V"
+          reference: "electrical characteristics, VOH min 26 V"
+          bench: List(4)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[81:51@4075] "30 V"
+                  symbol: Optional.empty
+                  line: Integer 81
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[82:53@4133] "1 V"
+                  symbol: Optional.empty
+                  line: Integer 82
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "output"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[83:50@4187] "2 kOhm"
+                  symbol: Optional.empty
+                  line: Integer 83
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(5)
+                      A.non_inverting_input = "input"
+                      A.inverting_input = "0"
+                      A.output = "output"
+                      Vcc = "Vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 84
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "output"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[87:16@4370] "26"
+                  quantity: Optional Quantity
+                      value: Double 26.0
+                      unit: "V"
+                      written: "26 V"
+              maximum: Optional Amount
+                  expression: SourceText[87:24@4378] "30"
+                  quantity: Optional Quantity
+                      value: Double 30.0
+                      unit: "V"
+                      written: "30 V"
+              exact: null
+          line: Integer 79
+      - Expectation
+          title: "supply current, both units"
+          reference: "electrical characteristics, ICC max 1.2 mA at 5 V"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[92:51@4569] "5 V"
+                  symbol: Optional.empty
+                  line: Integer 92
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[93:53@4626] "2.5 V"
+                  symbol: Optional.empty
+                  line: Integer 93
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(8)
+                      A.non_inverting_input = "input"
+                      A.inverting_input = "a"
+                      A.output = "a"
+                      B.non_inverting_input = "input"
+                      B.inverting_input = "b"
+                      B.output = "b"
+                      Vcc = "Vcc"
+                      GND = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 94
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "final"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[97:16@4871] "-1.2"
+                  quantity: Optional Quantity
+                      value: Double -0.0012
+                      unit: "A"
+                      written: "-1.2 mA"
+              maximum: Optional Amount
+                  expression: SourceText[97:27@4882] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 mA"
+              exact: null
+          line: Integer 90
+  line: Integer 5
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 5:1 component "…" is opened with '{' and never closed
+== line 11 deleted
+READS 26d7a59a6912d1bc3a3e6230b89e7bf2
+== line 11 begun with a stray word
+READS 20df7339aa060c4900fdf0c43464e80e
+== line 18 deleted
+READS 854a69acadfeab5d40bacd3089c533c8
+== line 18 begun with a stray word
+READS f1b54ef474beb5bac76fde4c177147e0
+== line 25 deleted
+READS f0435366a70b91df6a42d07643626dee
+== line 25 begun with a stray word
+READS 88280a89176fa16c77e8cb8a28048e9b
+== line 32 deleted
+READS a778a6a54c9c9f9504c54ff134826471
+== line 32 begun with a stray word
+READS 100668d03350607238ef0f5d0808066d
+== line 39 deleted
+READS 1588657cb6af285d9b8f2f379b675b5f
+== line 39 begun with a stray word
+READS 5232d72c327e62f8f7e2903730acb75d
+== line 46 deleted
+READS cf0455d9413e0112fbe4efbecbdbce00
+== line 46 begun with a stray word
+READS 9aa68cbd3b165f2b7c36969338673ef1
+== line 53 deleted
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 55:81 'symbol uses' holds lines, not a nested '{ … }'
+== line 53 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 56:81 'symbol uses' holds lines, not a nested '{ … }'
+== line 60 deleted
+READS 4bf2ac48c63f00b6e74089ce2395ead4
+== line 60 begun with a stray word
+READS 6af48c40a2e97f46a78b91e0e08cbcdf
+== line 67 deleted
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 68:5 'expect' is not a criterion: near, within or is
+== line 67 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 67:5 'zzz' is not a criterion: near, within or is
+== line 74 deleted
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 78:5 'expect' is not a criterion: near, within or is
+== line 74 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 74:9 a part is 'ID component (connections) [settings] [place x, y]'
+== line 81 deleted
+READS 3fa0795525c74ac1c69775000da75c80
+== line 81 begun with a stray word
+READS 4f6648512589bb6f4371e829d8a107d7
+== line 88 deleted
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 89:5 'expect' is not a criterion: near, within or is
+== line 88 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/lm358.jmx 88:5 'zzz' is not a criterion: near, within or is

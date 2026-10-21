@@ -1,0 +1,725 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Diode"
+  slug: "diode"
+  type: Optional "diode"
+  meta: Meta
+      summary: "Junction diode with every effect: recombination, high injection, depletion and diffusion charge, breakdown"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "Berkeley SPICE3 / ngspice 47 diode model, level 1; defaults are SPICE's"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "D"
+          failure = Text
+              text: "short"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(2)
+      - "smooth-transitions"
+      - "junctions"
+  blocks: List(8)
+      - Parameters
+          parameters: List(25)
+              - Parameter
+                  name: "I_saturation"
+                  value: SourceText[24:24@1465] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-14
+                      unit: "A"
+                      written: "10 fA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IS: saturation current"
+                  values: List(0)
+              - Parameter
+                  name: "emission_coefficient"
+                  value: SourceText[25:32@1545] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "N: emission coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "R_series"
+                  value: SourceText[26:20@1606] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RS: series resistance (SPICE's 0 means none; here a milliohm)"
+                  values: List(0)
+              - Parameter
+                  name: "I_recombination"
+                  value: SourceText[27:27@1724] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ISR: recombination saturation current — the low-current excess of the forward curve"
+                  values: List(0)
+              - Parameter
+                  name: "recombination_emission_coefficient"
+                  value: SourceText[28:46@1876] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: ""
+                      written: "2"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "NR: emission coefficient of the recombination current"
+                  values: List(0)
+              - Parameter
+                  name: "I_knee"
+                  value: SourceText[29:18@1954] "1000000000"
+                  quantity: Optional Quantity
+                      value: Double 1.0E9
+                      unit: "A"
+                      written: "1000000000 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IKF: high-injection knee current (SPICE's none is a gigaampere here)"
+                  values: List(0)
+              - Parameter
+                  name: "C_junction_zero_bias"
+                  value: SourceText[30:32@2093] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CJO: zero-bias junction capacitance"
+                  values: List(0)
+              - Parameter
+                  name: "V_junction"
+                  value: SourceText[31:22@2168] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "V"
+                      written: "1 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VJ: junction potential"
+                  values: List(0)
+              - Parameter
+                  name: "grading_coefficient"
+                  value: SourceText[32:31@2249] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "M: grading coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "forward_bias_coefficient"
+                  value: SourceText[33:36@2326] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "FC: past FC·VJ the depletion capacitance goes on as a straight line"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time"
+                  value: SourceText[34:24@2431] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "s"
+                      written: "0 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TT: transit time — the stored charge behind reverse recovery"
+                  values: List(0)
+              - Parameter
+                  name: "V_breakdown"
+                  value: SourceText[35:23@2540] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "V"
+                      written: "1 kV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "BV: reverse breakdown voltage (SPICE's none is a kilovolt here)"
+                  values: List(0)
+              - Parameter
+                  name: "I_breakdown"
+                  value: SourceText[36:23@2653] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "A"
+                      written: "1 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IBV: current at V_breakdown"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[37:21@2728] "300.15"
+                  quantity: Optional Quantity
+                      value: Double 300.15
+                      unit: "K"
+                      written: "300.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TNOM: the temperature the figures above are measured at"
+                  values: List(0)
+              - Parameter
+                  name: "saturation_temperature_exponent"
+                  value: SourceText[38:43@2855] "3"
+                  quantity: Optional Quantity
+                      value: Double 3.0
+                      unit: ""
+                      written: "3"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XTI: how steeply I_saturation follows the temperature"
+                  values: List(0)
+              - Parameter
+                  name: "breakdown_temperature_coefficient"
+                  value: SourceText[39:45@2960] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TCV: BV moves by this share per kelvin"
+                  values: List(0)
+              - Parameter
+                  name: "resistance_temperature_coefficient"
+                  value: SourceText[40:46@3049] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TRS: RS moves by this share per kelvin"
+                  values: List(0)
+              - Parameter
+                  name: "E_gap"
+                  value: SourceText[41:17@3109] "1.11"
+                  quantity: Optional Quantity
+                      value: Double 1.11
+                      unit: "V"
+                      written: "1.11 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "EG: band gap, in volts"
+                  values: List(0)
+              - Parameter
+                  name: "area"
+                  value: SourceText[42:16@3180] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "area factor: multiplies the currents and the capacitance, divides RS"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[43:24@3306] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: "W"
+                      written: "0.5 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[44:30@3382] "300"
+                  quantity: Optional Quantity
+                      value: Double 300.0
+                      unit: "K/W"
+                      written: "300 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[45:33@3475] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "s"
+                      written: "1 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[46:21@3538] "175"
+                  quantity: Optional Quantity
+                      value: Double 175.0
+                      unit: "degC"
+                      written: "175 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+              - Parameter
+                  name: "V_reverse_maximum"
+                  value: SourceText[47:29@3635] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1000000 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VRRM: the reverse voltage it is rated to block; none is a megavolt"
+                  values: List(0)
+              - Parameter
+                  name: "I_forward_maximum"
+                  value: SourceText[48:29@3751] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "A"
+                      written: "1000000 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IF: the current it is rated to carry, either way; none is a megaampere"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "anode"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "anode"
+              - Pin
+                  name: "cathode"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "cathode, the banded end"
+          buses: List(0)
+      - Nodes
+          nodes: List(1)
+              - InternalNode
+                  name: "j"
+                  digital: false
+                  description: "the junction, behind the series resistance"
+      - Display
+          figures: Map(2)
+              overvoltage = SourceText[61:23@4152] "100 * max(0, cathode - anode) / V_reverse_maximum"
+              overcurrent = SourceText[62:23@4242] "100 * abs(anode.current) / I_forward_maximum"
+          units: Map(2)
+              overvoltage = "%"
+              overcurrent = "%"
+          captions: Map(2)
+              overvoltage = "of VRRM"
+              overcurrent = "of its rated current"
+      - Symbol
+          uses: List(1)
+              - "diode-symbol"
+          ports: Map(2)
+              a = "anode"
+              b = "cathode"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(4)
+              failed = SourceText[66:18@4376] "failed"
+              forward = SourceText[69:19@4631] "max(0, anode.current) / I_forward_maximum"
+              reverse = SourceText[70:19@4692] "max(0, cathode - anode) / min(V_reverse_maximum, V_breakdown)"
+              breakdown = SourceText[71:21@4775] "max(0, 0 - anode.current) / I_breakdown"
+      - Equations
+          equations: List(14)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_diode"
+                  positive: null
+                  negative: null
+                  expression: SourceText[77:33@4910] "j - cathode"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "T_junction"
+                  positive: null
+                  negative: null
+                  expression: SourceText[79:40@5089] "temperature"
+                  type: QuantityType
+                      name: "temperature"
+                      unit: "K"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 1
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "stored"
+                  positive: null
+                  negative: null
+                  expression: SourceText[82:30@5319] "min(detail, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "R_series_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[83:41@5375] "R_series * (1 + resistance_temperature_coefficient * (T_junction - T_nominal))"
+                  type: QuantityType
+                      name: "resistance"
+                      unit: "Ω"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_breakdown_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[84:41@5495] "V_breakdown * (1 + breakdown_temperature_coefficient * (T_junction - T_nominal))"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_saturation_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[85:42@5618] "area * junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, emission_coefficient, E_gap)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_recombination_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[86:45@5789] "area * junction_saturation(I_recombination, T_junction, T_nominal, saturation_temperature_exponent, recombination_emission_coefficient, E_gap)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_diffusion"
+                  positive: null
+                  negative: null
+                  expression: SourceText[87:37@5969] "high_injection(junction_current(V_diode, I_saturation_now, emission_coefficient, T_junction), area * I_knee)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_generation"
+                  positive: null
+                  negative: null
+                  expression: SourceText[89:38@6230] "stored * junction_current(V_diode, I_recombination_now, recombination_emission_coefficient, T_junction) * recombination_factor(V_diode, V_junction, grading_coefficient)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_reverse_breakdown"
+                  positive: null
+                  negative: null
+                  expression: SourceText[90:45@6444] "breakdown_current(V_diode, V_breakdown_now, area * I_breakdown, emission_coefficient, T_junction)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "Q_junction"
+                  positive: null
+                  negative: null
+                  expression: SourceText[91:35@6577] "stored * (depletion_charge(V_diode, area * C_junction_zero_bias, V_junction, grading_coefficient, forward_bias_coefficient) + transit_time * I_diffusion)"
+                  type: QuantityType
+                      name: "charge"
+                      unit: "C"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 1
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_through"
+                  positive: null
+                  negative: null
+                  expression: SourceText[93:35@6768] "(anode - j) * area / R_series_now"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "anode"
+                  negative: "j"
+                  expression: SourceText[95:30@6834] "I_through"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "j"
+                  negative: "cathode"
+                  expression: SourceText[97:32@6992] "I_diffusion + I_generation - I_reverse_breakdown + d(Q_junction)/dt + noise(2 * elementary_charge * abs(I_diffusion + I_generation))"
+                  type: null
+      - Expectation
+          title: "the ideal law at SPICE's defaults"
+          reference: "IS 1e-14, N 1: V = N·Vt·ln(I/IS + 1) ≈ 0.656 V at 1 mA, 300 K"
+          bench: List(1)
+              - Part
+                  id: "X1"
+                  reference: "forward"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(0)
+                  settings: Map(1)
+                      current = SourceText[102:34@7313] "1 mA"
+                  symbol: Optional.empty
+                  line: Integer 102
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "anode"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[105:16@7378] "0.64"
+                  quantity: Optional Quantity
+                      value: Double 0.64
+                      unit: "V"
+                      written: "0.64 V"
+              maximum: Optional Amount
+                  expression: SourceText[105:26@7388] "0.67"
+                  quantity: Optional Quantity
+                      value: Double 0.67
+                      unit: "V"
+                      written: "0.67 V"
+              exact: null
+          line: Integer 100
+      - Expectation
+          title: "breakdown at the reverse knee"
+          reference: "BV 1 kV, IBV 1 mA"
+          bench: List(2)
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "cathode"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[110:55@7556] "1 mA"
+                  symbol: Optional.empty
+                  line: Integer 110
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "0"
+                      cathode = "cathode"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 111
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "cathode"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[114:16@7675] "995"
+                  quantity: Optional Quantity
+                      value: Double 995.0
+                      unit: "V"
+                      written: "995 V"
+              maximum: Optional Amount
+                  expression: SourceText[114:25@7684] "1005"
+                  quantity: Optional Quantity
+                      value: Double 1005.0
+                      unit: "V"
+                      written: "1005 V"
+              exact: null
+          line: Integer 108
+  line: Integer 13
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 13:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 961b6957bd1f9861196a4e97347285b5
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 7396657968401ab8096fd69254b94a52
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+READS a9f780aa2b78f6bc86543298bd048fa7
+== line 18 begun with a stray word
+READS 218fa9a98f1af4daa74f4458eae89d27
+== line 25 deleted
+READS bfe3854298d7a574442d328fd48985de
+== line 25 begun with a stray word
+READS d46032459ceb334fc79b65a4cd2ad869
+== line 32 deleted
+READS 7dc74567b9716cf50a878948561bc72c
+== line 32 begun with a stray word
+READS 8ebcbdd7485530627472d64ae12ea7b2
+== line 39 deleted
+READS 5dc73c323b751d252e2175ef9eb2c248
+== line 39 begun with a stray word
+READS c2d0a17624e1ea11f3f05d7883b2303b
+== line 46 deleted
+READS 0d85a54514383116b8290a1c65358d43
+== line 46 begun with a stray word
+READS f1a2135294f244f1bfd29da04bf9ddd1
+== line 53 deleted
+READS a74b5177e86bbb41f647a7a1dc8c7200
+== line 53 begun with a stray word
+READS 58587a6d924adfbdc0e8010970e35ec1
+== line 60 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 60:9 'overvoltage' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 67 deleted
+READS f5e854c2d15cc8562a367e48dd4d94b0
+== line 67 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 67:9 a line here is 'port pin' — the symbol's port, then the component's pin it is — or 'input = expression' — what one of the symbol's inputs is drawn from
+== line 74 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 75:15 'symbol uses' holds lines, not a nested '{ … }'
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 76:15 'symbol uses' holds lines, not a nested '{ … }'
+== line 81 deleted
+READS ed2a567a81399c4404f017c534dbd83c
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/diode.jmx 81:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

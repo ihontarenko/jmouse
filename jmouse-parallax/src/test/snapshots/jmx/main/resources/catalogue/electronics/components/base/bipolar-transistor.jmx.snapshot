@@ -1,0 +1,1132 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Bipolar transistor"
+  slug: "bipolar-transistor"
+  type: Optional "bjt"
+  meta: Meta
+      summary: "Gummel–Poon bipolar transistor: gain falling at both ends, Early effect, stored charge, junction capacitances"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "Gummel–Poon model as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "Q"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(2)
+      - "smooth-transitions"
+      - "junctions"
+  blocks: List(6)
+      - Parameters
+          parameters: List(44)
+              - Parameter
+                  name: "polarity"
+                  value: SourceText[29:20@1832] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "1 for NPN, -1 for PNP"
+                  values: List(0)
+              - Parameter
+                  name: "I_saturation"
+                  value: SourceText[30:24@1907] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-16
+                      unit: "A"
+                      written: "0.1 fA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IS: transport saturation current"
+                  values: List(0)
+              - Parameter
+                  name: "beta_forward"
+                  value: SourceText[31:24@1989] "100"
+                  quantity: Optional Quantity
+                      value: Double 100.0
+                      unit: ""
+                      written: "100"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "BF: ideal forward current gain"
+                  values: List(0)
+              - Parameter
+                  name: "beta_forward_spread"
+                  value: SourceText[32:31@2076] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how far BF spreads from part to part, as a share: a bench's tolerance corners use it"
+                  values: List(0)
+              - Parameter
+                  name: "emission_coefficient"
+                  value: SourceText[33:32@2211] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "NF: forward emission coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "V_early"
+                  value: SourceText[34:19@2280] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1 MV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VAF: forward Early voltage (none is a megavolt here)"
+                  values: List(0)
+              - Parameter
+                  name: "I_knee"
+                  value: SourceText[35:18@2381] "1000000000"
+                  quantity: Optional Quantity
+                      value: Double 1.0E9
+                      unit: "A"
+                      written: "1000000000 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IKF: forward high-injection knee (none is a gigaampere here)"
+                  values: List(0)
+              - Parameter
+                  name: "I_leakage_base_emitter"
+                  value: SourceText[36:34@2507] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ISE: base–emitter leakage saturation current"
+                  values: List(0)
+              - Parameter
+                  name: "leakage_emission_base_emitter"
+                  value: SourceText[37:41@2608] "1.5"
+                  quantity: Optional Quantity
+                      value: Double 1.5
+                      unit: ""
+                      written: "1.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "NE: its emission coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "beta_reverse"
+                  value: SourceText[38:24@2669] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "BR: ideal reverse current gain"
+                  values: List(0)
+              - Parameter
+                  name: "emission_coefficient_reverse"
+                  value: SourceText[39:40@2765] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "NR: reverse emission coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "V_early_reverse"
+                  value: SourceText[40:27@2834] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1 MV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VAR: reverse Early voltage"
+                  values: List(0)
+              - Parameter
+                  name: "I_knee_reverse"
+                  value: SourceText[41:26@2909] "1000000000"
+                  quantity: Optional Quantity
+                      value: Double 1.0E9
+                      unit: "A"
+                      written: "1000000000 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IKR: reverse high-injection knee"
+                  values: List(0)
+              - Parameter
+                  name: "I_leakage_base_collector"
+                  value: SourceText[42:36@3001] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ISC: base–collector leakage saturation current"
+                  values: List(0)
+              - Parameter
+                  name: "leakage_emission_base_collector"
+                  value: SourceText[43:43@3104] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: ""
+                      written: "2"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "NC: its emission coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "R_base"
+                  value: SourceText[44:18@3157] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RB: zero-bias base resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_base_minimum"
+                  value: SourceText[45:26@3244] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "Ohm"
+                      written: "0 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RBM: the base resistance at high current; 0 means R_base"
+                  values: List(0)
+              - Parameter
+                  name: "R_emitter"
+                  value: SourceText[46:21@3345] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RE: emitter resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_collector"
+                  value: SourceText[47:23@3419] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RC: collector resistance"
+                  values: List(0)
+              - Parameter
+                  name: "C_base_emitter"
+                  value: SourceText[48:26@3496] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CJE: base–emitter zero-bias capacitance"
+                  values: List(0)
+              - Parameter
+                  name: "V_junction_base_emitter"
+                  value: SourceText[49:35@3594] "0.75"
+                  quantity: Optional Quantity
+                      value: Double 0.75
+                      unit: "V"
+                      written: "0.75 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VJE: its built-in potential"
+                  values: List(0)
+              - Parameter
+                  name: "grading_base_emitter"
+                  value: SourceText[50:32@3668] "0.33"
+                  quantity: Optional Quantity
+                      value: Double 0.33
+                      unit: ""
+                      written: "0.33"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "MJE: its grading coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "C_base_collector"
+                  value: SourceText[51:28@3742] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CJC: base–collector zero-bias capacitance"
+                  values: List(0)
+              - Parameter
+                  name: "V_junction_base_collector"
+                  value: SourceText[52:37@3842] "0.75"
+                  quantity: Optional Quantity
+                      value: Double 0.75
+                      unit: "V"
+                      written: "0.75 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VJC: its built-in potential"
+                  values: List(0)
+              - Parameter
+                  name: "grading_base_collector"
+                  value: SourceText[53:34@3916] "0.33"
+                  quantity: Optional Quantity
+                      value: Double 0.33
+                      unit: ""
+                      written: "0.33"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "MJC: its grading coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "internal_base_collector_fraction"
+                  value: SourceText[54:44@4004] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XCJC: the share of CJC at the internal base; the rest is at the base pin"
+                  values: List(0)
+              - Parameter
+                  name: "forward_bias_coefficient"
+                  value: SourceText[55:36@4118] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "FC: past FC·VJ a depletion capacitance goes on as a straight line"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_forward"
+                  value: SourceText[56:32@4229] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "s"
+                      written: "0 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TF: ideal forward transit time — sets fT"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_bias_dependence"
+                  value: SourceText[57:40@4327] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XTF: how much TF grows with current"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_bias_voltage"
+                  value: SourceText[58:37@4409] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1 MV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VTF: the VBC that halves that growth"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_current"
+                  value: SourceText[59:32@4490] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ITF: the current at which TF's growth sets in"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_reverse"
+                  value: SourceText[60:32@4585] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "s"
+                      written: "0 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TR: ideal reverse transit time — the storage time of a saturated switch"
+                  values: List(0)
+              - Parameter
+                  name: "beta_temperature_exponent"
+                  value: SourceText[61:37@4711] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XTB: how the gains follow the temperature"
+                  values: List(0)
+              - Parameter
+                  name: "saturation_temperature_exponent"
+                  value: SourceText[62:43@4808] "3"
+                  quantity: Optional Quantity
+                      value: Double 3.0
+                      unit: ""
+                      written: "3"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XTI: how the saturation current follows the temperature"
+                  values: List(0)
+              - Parameter
+                  name: "E_gap"
+                  value: SourceText[63:17@4887] "1.11"
+                  quantity: Optional Quantity
+                      value: Double 1.11
+                      unit: "V"
+                      written: "1.11 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "EG: band gap, in volts"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[64:21@4963] "300.15"
+                  quantity: Optional Quantity
+                      value: Double 300.15
+                      unit: "K"
+                      written: "300.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TNOM: the temperature the figures above are measured at"
+                  values: List(0)
+              - Parameter
+                  name: "V_breakdown"
+                  value: SourceText[65:23@5070] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "V"
+                      written: "1 kV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "collector–emitter sustaining voltage: an inductive kick stops here"
+                  values: List(0)
+              - Parameter
+                  name: "I_breakdown"
+                  value: SourceText[66:23@5186] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "A"
+                      written: "1 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "avalanche current at V_breakdown"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[67:24@5269] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: "W"
+                      written: "0.5 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[68:30@5345] "250"
+                  quantity: Optional Quantity
+                      value: Double 250.0
+                      unit: "K/W"
+                      written: "250 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[69:33@5438] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: "s"
+                      written: "2 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[70:21@5501] "150"
+                  quantity: Optional Quantity
+                      value: Double 150.0
+                      unit: "degC"
+                      written: "150 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+              - Parameter
+                  name: "V_collector_emitter_maximum"
+                  value: SourceText[71:39@5608] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1000000 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VCEO: the collector-emitter voltage it is rated for; none is a megavolt"
+                  values: List(0)
+              - Parameter
+                  name: "I_collector_maximum"
+                  value: SourceText[72:31@5721] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "A"
+                      written: "1000000 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IC: the collector current it is rated for; none is a megaampere"
+                  values: List(0)
+      - Pins
+          pins: List(3)
+              - Pin
+                  name: "emitter"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "emitter"
+              - Pin
+                  name: "base"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "base"
+              - Pin
+                  name: "collector"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "collector"
+          buses: List(0)
+      - Nodes
+          nodes: List(3)
+              - InternalNode
+                  name: "bi"
+                  digital: false
+                  description: "the intrinsic base, behind the base resistance"
+              - InternalNode
+                  name: "ci"
+                  digital: false
+                  description: "the intrinsic collector, behind the collector resistance"
+              - InternalNode
+                  name: "ei"
+                  digital: false
+                  description: "the intrinsic emitter, behind the emitter resistance"
+      - Symbol
+          uses: List(1)
+              - "npn-transistor-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              failed = SourceText[88:18@6388] "failed"
+      - Display
+          figures: Map(3)
+              conduction = SourceText[93:22@6537] "min(1, max(0, (polarity * (base - emitter) - 0.5) / 0.2))"
+              overvoltage = SourceText[94:23@6618] "100 * abs(collector - emitter) / V_collector_emitter_maximum"
+              overcurrent = SourceText[95:23@6719] "100 * abs(collector.current) / I_collector_maximum"
+          units: Map(2)
+              overvoltage = "%"
+              overcurrent = "%"
+          captions: Map(2)
+              overvoltage = "of VCEO"
+              overcurrent = "of its rated IC"
+      - Equations
+          equations: List(34)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "T_junction"
+                  positive: null
+                  negative: null
+                  expression: SourceText[100:40@6988] "temperature"
+                  type: QuantityType
+                      name: "temperature"
+                      unit: "K"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 1
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "beta_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[101:32@7032] "beta_forward * (1 + tolerance_corner * beta_forward_spread)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_be"
+                  positive: null
+                  negative: null
+                  expression: SourceText[102:30@7122] "polarity * (bi - ei)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_bc"
+                  positive: null
+                  negative: null
+                  expression: SourceText[103:30@7173] "polarity * (bi - ci)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_bx"
+                  positive: null
+                  negative: null
+                  expression: SourceText[104:30@7224] "polarity * (base - ci)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_ce"
+                  positive: null
+                  negative: null
+                  expression: SourceText[105:30@7277] "polarity * (ci - ei)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "warmth"
+                  positive: null
+                  negative: null
+                  expression: SourceText[106:30@7328] "T_junction / T_nominal"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "gain_drift"
+                  positive: null
+                  negative: null
+                  expression: SourceText[107:34@7385] "warmth ^ beta_temperature_exponent"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_saturation_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[108:42@7462] "junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, 1, E_gap)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_leakage_base_emitter_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[109:52@7614] "junction_saturation(I_leakage_base_emitter, T_junction, T_nominal, saturation_temperature_exponent, leakage_emission_base_emitter, E_gap) / gain_drift"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_leakage_base_collector_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[110:54@7819] "junction_saturation(I_leakage_base_collector, T_junction, T_nominal, saturation_temperature_exponent, leakage_emission_base_collector, E_gap) / gain_drift"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "forward"
+                  positive: null
+                  negative: null
+                  expression: SourceText[112:33@8009] "junction_current(V_be, I_saturation_now, emission_coefficient, T_junction)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "reverse"
+                  positive: null
+                  negative: null
+                  expression: SourceText[113:33@8117] "junction_current(V_bc, I_saturation_now, emission_coefficient_reverse, T_junction)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "leakage_emitter"
+                  positive: null
+                  negative: null
+                  expression: SourceText[114:41@8241] "junction_current(V_be, I_leakage_base_emitter_now, leakage_emission_base_emitter, T_junction)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "leakage_collector"
+                  positive: null
+                  negative: null
+                  expression: SourceText[115:43@8378] "junction_current(V_bc, I_leakage_base_collector_now, leakage_emission_base_collector, T_junction)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "early"
+                  positive: null
+                  negative: null
+                  expression: SourceText[118:29@8592] "1 / (1 - V_bc / V_early - V_be / V_early_reverse)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "injection"
+                  positive: null
+                  negative: null
+                  expression: SourceText[119:33@8675] "forward / I_knee + reverse / I_knee_reverse"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "base_charge"
+                  positive: null
+                  negative: null
+                  expression: SourceText[120:35@8754] "early * (1 + sqrt(soft_positive_part(1 + 4 * injection, 1e-9))) / 2"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "transport"
+                  positive: null
+                  negative: null
+                  expression: SourceText[121:35@8857] "(forward - reverse) / base_charge"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "transit_growth"
+                  positive: null
+                  negative: null
+                  expression: SourceText[123:38@8931] "transit_time_bias_dependence * exp(V_bc / (1.44 * transit_time_bias_voltage)) * if(transit_time_current > 0, (forward / (forward + transit_time_current)) ^ 2, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "stored"
+                  positive: null
+                  negative: null
+                  expression: SourceText[126:30@9311] "min(detail, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "Q_base_emitter"
+                  positive: null
+                  negative: null
+                  expression: SourceText[127:39@9365] "stored * (depletion_charge(V_be, C_base_emitter, V_junction_base_emitter, grading_base_emitter, forward_bias_coefficient) + transit_time_forward * (1 + transit_growth) * forward / base_charge)"
+                  type: QuantityType
+                      name: "charge"
+                      unit: "C"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 1
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "Q_base_collector"
+                  positive: null
+                  negative: null
+                  expression: SourceText[128:41@9599] "stored * (depletion_charge(V_bc, internal_base_collector_fraction * C_base_collector, V_junction_base_collector, grading_base_collector, forward_bias_coefficient) + transit_time_reverse * reverse)"
+                  type: QuantityType
+                      name: "charge"
+                      unit: "C"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 1
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "Q_base_external"
+                  positive: null
+                  negative: null
+                  expression: SourceText[129:40@9836] "stored * depletion_charge(V_bx, (1 - internal_base_collector_fraction) * C_base_collector, V_junction_base_collector, grading_base_collector, forward_bias_coefficient)"
+                  type: QuantityType
+                      name: "charge"
+                      unit: "C"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 1
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "R_base_high"
+                  positive: null
+                  negative: null
+                  expression: SourceText[131:40@10046] "if(R_base_minimum > 0, R_base_minimum, R_base)"
+                  type: QuantityType
+                      name: "resistance"
+                      unit: "Ω"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "R_base_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[132:39@10132] "R_base_high + (R_base - R_base_high) / base_charge"
+                  type: QuantityType
+                      name: "resistance"
+                      unit: "Ω"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "avalanche"
+                  positive: null
+                  negative: null
+                  expression: SourceText[133:35@10218] "I_breakdown * limit_exponential((V_ce - V_breakdown) / thermal_voltage(T_junction))"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "base"
+                  negative: "bi"
+                  expression: SourceText[135:30@10334] "(base - bi) / R_base_now"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "collector"
+                  negative: "ci"
+                  expression: SourceText[136:35@10394] "(collector - ci) / R_collector"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "ei"
+                  negative: "emitter"
+                  expression: SourceText[137:33@10458] "(ei - emitter) / R_emitter"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "ci"
+                  negative: "ei"
+                  expression: SourceText[139:28@10631] "polarity * (transport + avalanche) + noise(2 * elementary_charge * abs(transport))"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "bi"
+                  negative: "ei"
+                  expression: SourceText[140:28@10742] "polarity * (forward / (beta_now * gain_drift) + leakage_emitter + d(Q_base_emitter)/dt) + noise(2 * elementary_charge * abs(forward / (beta_now * gain_drift) + leakage_emitter))"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "bi"
+                  negative: "ci"
+                  expression: SourceText[141:28@10948] "polarity * (reverse / (beta_reverse * gain_drift) + leakage_collector + d(Q_base_collector)/dt)"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "base"
+                  negative: "ci"
+                  expression: SourceText[142:30@11074] "polarity * d(Q_base_external)/dt"
+                  type: null
+  line: Integer 18
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 18:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 098ffb1e5acaad4de0426d7e06c268fb
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 94763aef69d17de2938051882856bf4f
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 18:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 18:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 25 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 27:5 a meta field is 'name value'
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 25:5 a meta field is 'name value'
+== line 32 deleted
+READS 67b283507e0009ff23513ec75f8ab25f
+== line 32 begun with a stray word
+READS 5df9387fd1217f9c225c2c17f1ff487c
+== line 39 deleted
+READS e00292b048c3ca174e9d1cfaa649b882
+== line 39 begun with a stray word
+READS 9a417bfdfdc46162309a73ab8a8d8e7c
+== line 46 deleted
+READS f2ac9229491afa1bca30cbb4962ec5d1
+== line 46 begun with a stray word
+READS 3107b6cb72a4dded1138a77d595182e5
+== line 53 deleted
+READS 5c0d30b08d4d6f3909c8cad39f9fb0b9
+== line 53 begun with a stray word
+READS 5fdb6d4e912c65e794e62966744affad
+== line 60 deleted
+READS 4715be4c97222b1f3c75406906af92f0
+== line 60 begun with a stray word
+READS 8ef6cc765efb527d3a88f40251584b94
+== line 67 deleted
+READS 8b2e7111cf16da624dbaa9e55491d015
+== line 67 begun with a stray word
+READS d28e880c333c355aa09054fe90dc240b
+== line 81 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 81:9 'bi' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/bipolar-transistor.jmx 81:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 88 deleted
+READS 8fed7855ac7d36a00f627c207cf11c73
+== line 88 begun with a stray word
+READS 15354bd0a3755ba4b177e1fd29c5673f

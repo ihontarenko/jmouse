@@ -1,0 +1,99 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "N-channel MOSFET switch"
+  slug: "nmos-switch"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: 2N7000 low-side switch, 100 kHz, 200 mA."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parts
+          parts: List(5)
+              - Part
+                  id: "G1"
+                  reference: "square-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "drive"
+                      negative = "0"
+                  settings: Map(3)
+                      high = SourceText[10:69@475] "10"
+                      low = SourceText[10:79@485] "0"
+                      frequency = SourceText[10:94@500] "100000"
+                  symbol: Optional.empty
+                  line: Integer 10
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drive"
+                      - "gate"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[11:48@554] "100"
+                  symbol: Optional.empty
+                  line: Integer 11
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "supply"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[12:50@607] "10"
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "supply"
+                      - "drain"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[13:50@659] "47"
+                  symbol: Optional.empty
+                  line: Integer 13
+              - Part
+                  id: "Q1"
+                  reference: "2n7000"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "gate"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 14
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[16:28@754] "0.0001 s"
+  line: Integer 4
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/nmos-switch.jmx 4:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/nmos-switch.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/nmos-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 0408e49cc7399d43a713967bffad86ca
+== line 11 begun with a stray word
+READS 0d404c38699db2bb68de243d9e320019

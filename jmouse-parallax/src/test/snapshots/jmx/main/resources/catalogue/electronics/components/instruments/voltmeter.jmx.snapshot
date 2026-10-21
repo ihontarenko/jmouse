@@ -1,0 +1,200 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Voltmeter"
+  slug: "voltmeter"
+  type: Optional "meter"
+  meta: Meta
+      summary: "Reads the voltage of its red lead against its black one"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "VM"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(7)
+      - Parameters
+          parameters: List(1)
+              - Parameter
+                  name: "R_input"
+                  value: SourceText[8:19@222] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E7
+                      unit: "Ohm"
+                      written: "10 MOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "input resistance: what it draws through, on a realistic bench"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "plus"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "red lead"
+              - Pin
+                  name: "minus"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "black lead"
+          buses: List(0)
+      - Equations
+          equations: List(1)
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "plus"
+                  negative: "minus"
+                  expression: SourceText[16:33@538] "realistic * (plus - minus) / R_input"
+                  type: null
+      - Leads
+          looks: Map(2)
+              plus = LeadLook
+                  colour: "red"
+                  stripes: "black"
+              minus = LeadLook
+                  colour: "black"
+                  stripes: "white"
+      - Measure
+          figures: Map(1)
+              reading = MeasureFigure
+                  expression: SourceText[23:19@696] "plus - minus"
+                  unit: "V"
+                  signal: true
+      - Symbol
+          uses: List(1)
+              - "voltmeter-symbol"
+          ports: Map(2)
+              a = "plus"
+              b = "minus"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Expectation
+          title: "draws nothing on an ideal bench"
+          reference: "an ideal voltmeter across the lower half of a 1 MOhm divider leaves it at half"
+          bench: List(4)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "top"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[32:51@1010] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 32
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "top"
+                      - "middle"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[33:52@1066] "1 MOhm"
+                  symbol: Optional.empty
+                  line: Integer 33
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "middle"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[34:50@1122] "1 MOhm"
+                  symbol: Optional.empty
+                  line: Integer 34
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      plus = "middle"
+                      minus = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 35
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "middle"
+          criterion: Criterion
+              kind: CriterionKind.NEAR
+              typical: Optional Amount
+                  expression: SourceText[38:14@1228] "5"
+                  quantity: Optional Quantity
+                      value: Double 5.0
+                      unit: "V"
+                      written: "5 V"
+              tolerance: Optional Amount
+                  expression: SourceText[38:21@1235] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "%"
+                      written: "0.1%"
+              relative: true
+              minimum: Optional.empty
+              maximum: Optional.empty
+              exact: null
+          line: Integer 30
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 1:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS c63150ad4295ba87f73f7a7b36c9ad4d
+== line 4 begun with a stray word
+READS 186483bce7e4c8eef3fa4d3704f97d2a
+== line 11 deleted
+READS 1f1070962bac9741ce1afdd335482f06
+== line 11 begun with a stray word
+READS 076185d72d645a040c4150f26967b9f2
+== line 18 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 18:9 'plus' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 18:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 25 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 25:9 'a' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 32 deleted
+READS 8e6b9fe0dcf43f975e00509ed2474cc1
+== line 32 begun with a stray word
+READS e768f2abff9871957df6e9588b40d262
+== line 39 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 1:1 component "…" is opened with '{' and never closed
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/voltmeter.jmx 39:5 'zzz' is not a criterion: near, within or is

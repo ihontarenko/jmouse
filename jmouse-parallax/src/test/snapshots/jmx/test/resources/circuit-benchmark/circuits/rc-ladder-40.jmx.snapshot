@@ -1,0 +1,1050 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "RC ladder, 40 sections"
+  slug: "rc-ladder-40"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: 40 × (100 Ω + 10 nF) in a chain from a 5 V, 1 kHz sine — one coupled piece."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parts
+          parts: List(81)
+              - Part
+                  id: "V1"
+                  reference: "sine-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "n0"
+                      negative = "0"
+                  settings: Map(2)
+                      amplitude = SourceText[10:69@509] "5"
+                      frequency = SourceText[10:84@524] "1000"
+                  symbol: Optional.empty
+                  line: Integer 10
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n0"
+                      - "n1"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[11:43@571] "100"
+                  symbol: Optional.empty
+                  line: Integer 11
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n1"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[12:44@618] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n1"
+                      - "n2"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[13:43@665] "100"
+                  symbol: Optional.empty
+                  line: Integer 13
+              - Part
+                  id: "C2"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n2"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[14:44@712] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 14
+              - Part
+                  id: "R3"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n2"
+                      - "n3"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[15:43@759] "100"
+                  symbol: Optional.empty
+                  line: Integer 15
+              - Part
+                  id: "C3"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n3"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[16:44@806] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 16
+              - Part
+                  id: "R4"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n3"
+                      - "n4"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[17:43@853] "100"
+                  symbol: Optional.empty
+                  line: Integer 17
+              - Part
+                  id: "C4"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n4"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[18:44@900] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 18
+              - Part
+                  id: "R5"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n4"
+                      - "n5"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[19:43@947] "100"
+                  symbol: Optional.empty
+                  line: Integer 19
+              - Part
+                  id: "C5"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n5"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[20:44@994] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 20
+              - Part
+                  id: "R6"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n5"
+                      - "n6"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[21:43@1041] "100"
+                  symbol: Optional.empty
+                  line: Integer 21
+              - Part
+                  id: "C6"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n6"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[22:44@1088] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 22
+              - Part
+                  id: "R7"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n6"
+                      - "n7"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[23:43@1135] "100"
+                  symbol: Optional.empty
+                  line: Integer 23
+              - Part
+                  id: "C7"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n7"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[24:44@1182] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 24
+              - Part
+                  id: "R8"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n7"
+                      - "n8"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[25:43@1229] "100"
+                  symbol: Optional.empty
+                  line: Integer 25
+              - Part
+                  id: "C8"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n8"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[26:44@1276] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 26
+              - Part
+                  id: "R9"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n8"
+                      - "n9"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[27:43@1323] "100"
+                  symbol: Optional.empty
+                  line: Integer 27
+              - Part
+                  id: "C9"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n9"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[28:44@1370] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 28
+              - Part
+                  id: "R10"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n9"
+                      - "n10"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[29:45@1419] "100"
+                  symbol: Optional.empty
+                  line: Integer 29
+              - Part
+                  id: "C10"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n10"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[30:46@1468] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 30
+              - Part
+                  id: "R11"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n10"
+                      - "n11"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[31:46@1518] "100"
+                  symbol: Optional.empty
+                  line: Integer 31
+              - Part
+                  id: "C11"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n11"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[32:46@1567] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 32
+              - Part
+                  id: "R12"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n11"
+                      - "n12"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[33:46@1617] "100"
+                  symbol: Optional.empty
+                  line: Integer 33
+              - Part
+                  id: "C12"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n12"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[34:46@1666] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 34
+              - Part
+                  id: "R13"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n12"
+                      - "n13"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[35:46@1716] "100"
+                  symbol: Optional.empty
+                  line: Integer 35
+              - Part
+                  id: "C13"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n13"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[36:46@1765] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 36
+              - Part
+                  id: "R14"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n13"
+                      - "n14"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[37:46@1815] "100"
+                  symbol: Optional.empty
+                  line: Integer 37
+              - Part
+                  id: "C14"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n14"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[38:46@1864] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 38
+              - Part
+                  id: "R15"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n14"
+                      - "n15"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[39:46@1914] "100"
+                  symbol: Optional.empty
+                  line: Integer 39
+              - Part
+                  id: "C15"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n15"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[40:46@1963] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 40
+              - Part
+                  id: "R16"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n15"
+                      - "n16"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[41:46@2013] "100"
+                  symbol: Optional.empty
+                  line: Integer 41
+              - Part
+                  id: "C16"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n16"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[42:46@2062] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 42
+              - Part
+                  id: "R17"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n16"
+                      - "n17"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[43:46@2112] "100"
+                  symbol: Optional.empty
+                  line: Integer 43
+              - Part
+                  id: "C17"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n17"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[44:46@2161] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 44
+              - Part
+                  id: "R18"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n17"
+                      - "n18"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[45:46@2211] "100"
+                  symbol: Optional.empty
+                  line: Integer 45
+              - Part
+                  id: "C18"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n18"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[46:46@2260] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 46
+              - Part
+                  id: "R19"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n18"
+                      - "n19"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[47:46@2310] "100"
+                  symbol: Optional.empty
+                  line: Integer 47
+              - Part
+                  id: "C19"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n19"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[48:46@2359] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 48
+              - Part
+                  id: "R20"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n19"
+                      - "n20"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[49:46@2409] "100"
+                  symbol: Optional.empty
+                  line: Integer 49
+              - Part
+                  id: "C20"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n20"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[50:46@2458] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 50
+              - Part
+                  id: "R21"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n20"
+                      - "n21"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[51:46@2508] "100"
+                  symbol: Optional.empty
+                  line: Integer 51
+              - Part
+                  id: "C21"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n21"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[52:46@2557] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 52
+              - Part
+                  id: "R22"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n21"
+                      - "n22"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[53:46@2607] "100"
+                  symbol: Optional.empty
+                  line: Integer 53
+              - Part
+                  id: "C22"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n22"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[54:46@2656] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 54
+              - Part
+                  id: "R23"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n22"
+                      - "n23"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[55:46@2706] "100"
+                  symbol: Optional.empty
+                  line: Integer 55
+              - Part
+                  id: "C23"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n23"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[56:46@2755] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 56
+              - Part
+                  id: "R24"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n23"
+                      - "n24"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[57:46@2805] "100"
+                  symbol: Optional.empty
+                  line: Integer 57
+              - Part
+                  id: "C24"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n24"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[58:46@2854] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 58
+              - Part
+                  id: "R25"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n24"
+                      - "n25"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[59:46@2904] "100"
+                  symbol: Optional.empty
+                  line: Integer 59
+              - Part
+                  id: "C25"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n25"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[60:46@2953] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 60
+              - Part
+                  id: "R26"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n25"
+                      - "n26"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[61:46@3003] "100"
+                  symbol: Optional.empty
+                  line: Integer 61
+              - Part
+                  id: "C26"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n26"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[62:46@3052] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 62
+              - Part
+                  id: "R27"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n26"
+                      - "n27"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[63:46@3102] "100"
+                  symbol: Optional.empty
+                  line: Integer 63
+              - Part
+                  id: "C27"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n27"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[64:46@3151] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 64
+              - Part
+                  id: "R28"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n27"
+                      - "n28"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[65:46@3201] "100"
+                  symbol: Optional.empty
+                  line: Integer 65
+              - Part
+                  id: "C28"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n28"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[66:46@3250] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 66
+              - Part
+                  id: "R29"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n28"
+                      - "n29"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[67:46@3300] "100"
+                  symbol: Optional.empty
+                  line: Integer 67
+              - Part
+                  id: "C29"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n29"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[68:46@3349] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 68
+              - Part
+                  id: "R30"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n29"
+                      - "n30"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[69:46@3399] "100"
+                  symbol: Optional.empty
+                  line: Integer 69
+              - Part
+                  id: "C30"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n30"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[70:46@3448] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 70
+              - Part
+                  id: "R31"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n30"
+                      - "n31"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[71:46@3498] "100"
+                  symbol: Optional.empty
+                  line: Integer 71
+              - Part
+                  id: "C31"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n31"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[72:46@3547] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 72
+              - Part
+                  id: "R32"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n31"
+                      - "n32"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[73:46@3597] "100"
+                  symbol: Optional.empty
+                  line: Integer 73
+              - Part
+                  id: "C32"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n32"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[74:46@3646] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 74
+              - Part
+                  id: "R33"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n32"
+                      - "n33"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[75:46@3696] "100"
+                  symbol: Optional.empty
+                  line: Integer 75
+              - Part
+                  id: "C33"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n33"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[76:46@3745] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 76
+              - Part
+                  id: "R34"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n33"
+                      - "n34"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[77:46@3795] "100"
+                  symbol: Optional.empty
+                  line: Integer 77
+              - Part
+                  id: "C34"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n34"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[78:46@3844] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 78
+              - Part
+                  id: "R35"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n34"
+                      - "n35"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[79:46@3894] "100"
+                  symbol: Optional.empty
+                  line: Integer 79
+              - Part
+                  id: "C35"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n35"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[80:46@3943] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 80
+              - Part
+                  id: "R36"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n35"
+                      - "n36"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[81:46@3993] "100"
+                  symbol: Optional.empty
+                  line: Integer 81
+              - Part
+                  id: "C36"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n36"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[82:46@4042] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 82
+              - Part
+                  id: "R37"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n36"
+                      - "n37"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[83:46@4092] "100"
+                  symbol: Optional.empty
+                  line: Integer 83
+              - Part
+                  id: "C37"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n37"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[84:46@4141] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 84
+              - Part
+                  id: "R38"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n37"
+                      - "n38"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[85:46@4191] "100"
+                  symbol: Optional.empty
+                  line: Integer 85
+              - Part
+                  id: "C38"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n38"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[86:46@4240] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 86
+              - Part
+                  id: "R39"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n38"
+                      - "n39"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[87:46@4290] "100"
+                  symbol: Optional.empty
+                  line: Integer 87
+              - Part
+                  id: "C39"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n39"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[88:46@4339] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 88
+              - Part
+                  id: "R40"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n39"
+                      - "n40"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[89:46@4389] "100"
+                  symbol: Optional.empty
+                  line: Integer 89
+              - Part
+                  id: "C40"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "n40"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[90:46@4438] "1e-8"
+                  symbol: Optional.empty
+                  line: Integer 90
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[92:28@4476] "0.005 s"
+  line: Integer 4
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/rc-ladder-40.jmx 4:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/rc-ladder-40.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/rc-ladder-40.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS f026e9a489d5a63f00e37022891890a8
+== line 11 begun with a stray word
+READS 7864f805349d6b9a2ad2cee4f722240c
+== line 18 deleted
+READS 6bfe84bff298c1d987c1955de4063341
+== line 18 begun with a stray word
+READS 1cc35dcab9fb9a3dfe2b6d74f46c3eac
+== line 25 deleted
+READS 4017af5b8fa51518240e46cf4c87f11f
+== line 25 begun with a stray word
+READS bde76008130af4369838cd4d346d92a3
+== line 32 deleted
+READS 7f20c6ab5534f7ee60c22455358244d2
+== line 32 begun with a stray word
+READS b31928e95fa2541b8da0c40c0e51a8e6
+== line 39 deleted
+READS a847f69fbe26aff471573d6782150428
+== line 39 begun with a stray word
+READS 30cb6c819cddfbf248e671bd6fdd837f
+== line 46 deleted
+READS 6c95bca0d8969f869a31e17399420e39
+== line 46 begun with a stray word
+READS 1462fd53f37e05972e84775b7bdd4ac2
+== line 53 deleted
+READS fe8906d8194173cbbb027280d41fa7db
+== line 53 begun with a stray word
+READS 8f13062801e15e8018458f9ae2303a67
+== line 60 deleted
+READS c777a95ef15e842ea024e1628e21899a
+== line 60 begun with a stray word
+READS 74253acd5426b67270cae1de672ffa99
+== line 67 deleted
+READS 6b195c7956dda252e612dd832b4beefa
+== line 67 begun with a stray word
+READS a2ae3f7833bbdc8bda4303a789889e8d
+== line 74 deleted
+READS 8eeab9360b258fb54c7af1b89bb1a1c8
+== line 74 begun with a stray word
+READS 216ad1763749f1e00f110e0cac2ca02c
+== line 81 deleted
+READS c94d8221b93c3fc4ab2e4f48a943d234
+== line 81 begun with a stray word
+READS 620a16b2687f3759ddcebda30784d87b

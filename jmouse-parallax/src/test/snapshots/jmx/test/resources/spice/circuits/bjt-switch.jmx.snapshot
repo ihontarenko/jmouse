@@ -1,0 +1,618 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "2N2222 as a switch"
+  slug: "bjt-switch"
+  type: Optional.empty
+  meta: Meta
+      summary: "A 2N2222A switching a 100 Ω load from 12 V, its base driven by a square wave. At 1 kΩ it saturates: the collector swings between 12 V and 0.1 V. Turn the base resistor past about 7 kΩ and it leaves saturation — the collector stops reaching the bottom and the transistor warms."
+      description: null
+      category: "circuits"
+      tags: List(4)
+          - "transistors"
+          - "switching"
+          - "instruments"
+          - "interactive"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(10)
+      - Parameters
+          parameters: List(2)
+              - Parameter
+                  name: "R_base"
+                  value: SourceText[14:18@1049] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "Ohm"
+                      written: "1 kOhm"
+                  range: Optional Range
+                      minimum: SourceText[14:26@1057] "1 kΩ"
+                      maximum: SourceText[14:34@1065] "47 kΩ"
+                  step: Optional SourceText[14:45@1076] "1 kΩ"
+                  flags: List(0)
+                  description: "Base resistor: past about 7 kΩ the transistor leaves saturation"
+                  values: List(0)
+              - Parameter
+                  name: "f"
+                  value: SourceText[15:13@1159] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "Hz"
+                      written: "1 kHz"
+                  range: Optional Range
+                      minimum: SourceText[15:22@1168] "100 Hz"
+                      maximum: SourceText[15:32@1178] "10 kHz"
+                  step: Optional SourceText[15:44@1190] "100 Hz"
+                  flags: List(0)
+                  description: "Drive frequency"
+                  values: List(0)
+      - Parts
+          parts: List(7)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "vcc"
+                      negative = "0"
+                  settings: Map(1)
+                      U_output = SourceText[18:69@1301] "12 V"
+                  symbol: Optional.empty
+                  line: Integer 18
+              - Part
+                  id: "G1"
+                  reference: "square-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "drive"
+                      negative = "0"
+                  settings: Map(3)
+                      high = SourceText[19:69@1374] "5 V"
+                      frequency = SourceText[19:86@1391] "f"
+                      duty = SourceText[19:96@1401] "0.5"
+                  symbol: Optional.empty
+                  line: Integer 19
+              - Part
+                  id: "RB"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drive"
+                      - "control"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[20:51@1455] "R_base"
+                  symbol: Optional.empty
+                  line: Integer 20
+              - Part
+                  id: "A1"
+                  reference: "ammeter"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      in = "vcc"
+                      out = "top"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 21
+              - Part
+                  id: "RL"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "top"
+                      - "switched"
+                  named: Map(0)
+                  settings: Map(3)
+                      resistance = SourceText[22:50@1552] "100 Ω"
+                      power_rating = SourceText[22:72@1574] "2 W"
+                      thermal_resistance = SourceText[22:98@1600] "60 K/W"
+                  symbol: Optional.empty
+                  line: Integer 22
+              - Part
+                  id: "Q1"
+                  reference: "2n2222"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "control"
+                      collector = "switched"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 23
+              - Part
+                  id: "VM1"
+                  reference: "voltmeter"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      plus = "switched"
+                      minus = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 24
+      - Layout
+          items: List(13)
+              - LayoutItem
+                  id: "V1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 160.0
+                      y: Double 300.0
+                      rotation: Double 90.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "G1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 360.0
+                      y: Double 380.0
+                      rotation: Double 90.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "RB"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 460.0
+                      y: Double 300.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Q1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 560.0
+                      y: Double 300.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "RL"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 580.0
+                      y: Double 160.0
+                      rotation: Double 90.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "A1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 380.0
+                      y: Double 80.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "VM1"
+                  unit: Optional.empty
+                  mark: Optional.empty
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 720.0
+                      y: Double 300.0
+                      rotation: Double 90.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jc"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 580.0
+                      y: Double 230.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jg1"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 160.0
+                      y: Double 460.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jg2"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 360.0
+                      y: Double 460.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jg3"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 580.0
+                      y: Double 460.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "Jg4"
+                  unit: Optional.empty
+                  mark: Optional "junction"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 720.0
+                      y: Double 460.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+              - LayoutItem
+                  id: "GND1"
+                  unit: Optional.empty
+                  mark: Optional "ground"
+                  net: Optional.empty
+                  placement: Placement
+                      x: Double 360.0
+                      y: Double 520.0
+                      rotation: Double 0.0
+                      mirrored: false
+                      labels: Map(0)
+                      shows: List(0)
+          wires: List(15)
+              - LayoutWire
+                  id: "W1"
+                  from: "V1.positive"
+                  to: "A1.in"
+                  bends: List(1)
+                      - Point
+                          x: Double 160.0
+                          y: Double 80.0
+              - LayoutWire
+                  id: "W2"
+                  from: "A1.out"
+                  to: "RL.positive"
+                  bends: List(1)
+                      - Point
+                          x: Double 580.0
+                          y: Double 80.0
+              - LayoutWire
+                  id: "W3"
+                  from: "RL.negative"
+                  to: "Jc.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W4"
+                  from: "Jc.j"
+                  to: "Q1.collector"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W5"
+                  from: "VM1.plus"
+                  to: "Jc.j"
+                  bends: List(1)
+                      - Point
+                          x: Double 720.0
+                          y: Double 230.0
+              - LayoutWire
+                  id: "W6"
+                  from: "G1.positive"
+                  to: "RB.positive"
+                  bends: List(1)
+                      - Point
+                          x: Double 360.0
+                          y: Double 300.0
+              - LayoutWire
+                  id: "W7"
+                  from: "RB.negative"
+                  to: "Q1.base"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W8"
+                  from: "V1.negative"
+                  to: "Jg1.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W9"
+                  from: "Jg1.j"
+                  to: "Jg2.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W10"
+                  from: "G1.negative"
+                  to: "Jg2.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W11"
+                  from: "Jg2.j"
+                  to: "GND1.ground"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W12"
+                  from: "Jg2.j"
+                  to: "Jg3.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W13"
+                  from: "Q1.emitter"
+                  to: "Jg3.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W14"
+                  from: "Jg3.j"
+                  to: "Jg4.j"
+                  bends: List(0)
+              - LayoutWire
+                  id: "W15"
+                  from: "VM1.minus"
+                  to: "Jg4.j"
+                  bends: List(0)
+      - Probes
+          probes: List(3)
+              - Probe
+                  id: "CH1"
+                  measure: 'V'
+                  target: "drive"
+                  reference: Optional.empty
+                  scale: Optional Quantity
+                      value: Double 2.0
+                      unit: "V"
+                      written: "2 V"
+                  mode: Optional.empty
+                  expression: Optional.empty
+              - Probe
+                  id: "CH2"
+                  measure: 'V'
+                  target: "switched"
+                  reference: Optional.empty
+                  scale: Optional Quantity
+                      value: Double 5.0
+                      unit: "V"
+                      written: "5 V"
+                  mode: Optional.empty
+                  expression: Optional.empty
+              - Probe
+                  id: "CH3"
+                  measure: 'V'
+                  target: "control"
+                  reference: Optional.empty
+                  scale: Optional Quantity
+                      value: Double 0.5
+                      unit: "V"
+                      written: "0.5 V"
+                  mode: Optional.empty
+                  expression: Optional.empty
+          timePerDivision: Optional.empty
+      - Expectation
+          title: "saturated while on: a tenth of a volt across it"
+          reference: "datasheet VCE(sat) at most 0.3 V at 150 mA, IB 15 mA"
+          bench: List(0)
+          sharedBench: null
+          duration: Double 0.0
+          temperature: null
+          realistic: false
+          measure: List(5)
+              - "minimum"
+              - "switched"
+              - "after"
+              - "1"
+              - "ms"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[63:16@3026] "0.05"
+                  quantity: Optional Quantity
+                      value: Double 0.05
+                      unit: "V"
+                      written: "0.05 V"
+              maximum: Optional Amount
+                  expression: SourceText[63:26@3036] "0.3"
+                  quantity: Optional Quantity
+                      value: Double 0.3
+                      unit: "V"
+                      written: "0.3 V"
+              exact: null
+          line: Integer 61
+      - Expectation
+          title: "off: the collector at the supply"
+          reference: "cut-off: no collector current, no drop across RL"
+          bench: List(0)
+          sharedBench: null
+          duration: Double 0.0
+          temperature: null
+          realistic: false
+          measure: List(5)
+              - "maximum"
+              - "switched"
+              - "after"
+              - "1"
+              - "ms"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[67:16@3211] "11.9"
+                  quantity: Optional Quantity
+                      value: Double 11.9
+                      unit: "V"
+                      written: "11.9 V"
+              maximum: Optional Amount
+                  expression: SourceText[67:26@3221] "12.1"
+                  quantity: Optional Quantity
+                      value: Double 12.1
+                      unit: "V"
+                      written: "12.1 V"
+              exact: null
+          line: Integer 65
+      - Expectation
+          title: "the load takes (12 V − VCE) / 100 Ω while on"
+          reference: "Ohm's law across RL with the transistor saturated"
+          bench: List(0)
+          sharedBench: null
+          duration: Double 0.0
+          temperature: null
+          realistic: false
+          measure: List(6)
+              - "maximum"
+              - "current"
+              - "RL"
+              - "after"
+              - "1"
+              - "ms"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[71:16@3412] "0.115"
+                  quantity: Optional Quantity
+                      value: Double 0.115
+                      unit: "A"
+                      written: "0.115 A"
+              maximum: Optional Amount
+                  expression: SourceText[71:27@3423] "0.122"
+                  quantity: Optional Quantity
+                      value: Double 0.122
+                      unit: "A"
+                      written: "0.122 A"
+              exact: null
+          line: Integer 69
+      - Expectation
+          title: "the base sits one junction above the emitter"
+          reference: "datasheet VBE(sat) 0.6 … 1.2 V; IB = (5 V − VBE) / 1 kΩ ≈ 4.2 mA"
+          bench: List(0)
+          sharedBench: null
+          duration: Double 0.0
+          temperature: null
+          realistic: false
+          measure: List(5)
+              - "maximum"
+              - "control"
+              - "after"
+              - "1"
+              - "ms"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[75:16@3627] "0.65"
+                  quantity: Optional Quantity
+                      value: Double 0.65
+                      unit: "V"
+                      written: "0.65 V"
+              maximum: Optional Amount
+                  expression: SourceText[75:26@3637] "1.0"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "V"
+                      written: "1 V"
+              exact: null
+          line: Integer 73
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[77:28@3676] "0.01 s"
+      - View
+          items: List(1)
+              - Representation
+                  representation: "transient_response"
+                  primary: true
+                  settings: SourceText[79:35@3728] ""
+  line: Integer 7
+== the last brace removed
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 7:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+READS 788ad8c9acb7da6f2ca02d682d4e2f06
+== line 4 begun with a stray word
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 1d5f8f04de2f39039a97d368941afba7
+== line 11 begun with a stray word
+READS 082e25faa362e861d326e6fefb47253c
+== line 18 deleted
+READS 6baaaa81f9bad1fadd46d6d8c4ee7be7
+== line 18 begun with a stray word
+READS 9bb34de2bf325ebd63b7035674b34829
+== line 25 deleted
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 25:12 'parts' holds lines, not a nested '{ … }'
+== line 25 begun with a stray word
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 26:12 'parts' holds lines, not a nested '{ … }'
+== line 32 deleted
+READS 26f0d1a2656e9bd21b6eddb423c3f201
+== line 32 begun with a stray word
+READS 16b0572e9ff9213c8c11a5ad2c19a82c
+== line 39 deleted
+READS acd1d6d2fc8e98487cc5c13b3df4d80a
+== line 39 begun with a stray word
+READS 8857517d34dde2fea1dab215825ef7ae
+== line 46 deleted
+READS 0231da2ecb04d3fbb9d8e8ae917245b5
+== line 46 begun with a stray word
+READS ee15f8f1eb5519ced71f774cb3574a96
+== line 53 deleted
+READS 1f890abf5544b236e2aa01b36db31510
+== line 53 begun with a stray word
+READS c7e5fd5427d71b57ffe6dab75fa021b9
+== line 60 deleted
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 60:122 'probes' holds lines, not a nested '{ … }'
+== line 60 begun with a stray word
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 61:122 'probes' holds lines, not a nested '{ … }'
+== line 67 deleted
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 65:5 expectation 'off: the collector at the supply' needs a measure and a criterion (near, within or is)
+== line 67 begun with a stray word
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 67:9 'zzz' is not a criterion: near, within or is
+== line 74 deleted
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 73:5 expectation 'the base sits one junction above the emitter' needs a measure and a criterion (near, within or is)
+== line 74 begun with a stray word
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 74:9 'zzz' is not a criterion: near, within or is
+== line 81 deleted
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 7:1 circuit "…" is opened with '{' and never closed
+== line 81 begun with a stray word
+REFUSED src/test/resources/spice/circuits/bjt-switch.jmx 81:1 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view

@@ -1,0 +1,402 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "I²C controller"
+  slug: "i2c-controller"
+  type: Optional "controller"
+  meta: Meta
+      summary: "Drives one I²C transaction — write, read, or write then read — and shows the last byte it read"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "NXP UM10204, I²C-bus specification and user manual, rev. 7.0 (2021): §3.1, a controller's view of a transfer"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "BUS"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(1)
+      - "cmos-hc"
+  blocks: List(6)
+      - Parameters
+          parameters: List(8)
+              - Parameter
+                  name: "address"
+                  value: SourceText[24:19@1571] "80"
+                  quantity: Optional Quantity
+                      value: Double 80.0
+                      unit: ""
+                      written: "80"
+                  range: Optional Range
+                      minimum: SourceText[24:25@1577] "8"
+                      maximum: SourceText[24:30@1582] "119"
+                  step: Optional SourceText[24:39@1591] "1"
+                  flags: List(1)
+                      - ParameterFlag.INTEGER
+                  description: "the target's 7-bit address"
+                  values: List(0)
+              - Parameter
+                  name: "bytes"
+                  value: SourceText[25:17@1653] "\"0 165\""
+                  quantity: Optional.empty
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(1)
+                      - ParameterFlag.TEXT
+                  description: "the bytes after the address, up to 16, decimal or 0x hexadecimal: a register, then what is written into it"
+                  values: List(0)
+              - Parameter
+                  name: "operation"
+                  value: SourceText[26:21@1821] "\"write\""
+                  quantity: Optional.empty
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(1)
+                      - ParameterFlag.TEXT
+                  description: "a write, a read, or a write and then a read back from its first byte"
+                  values: List(3)
+                      - SourceText[26:33@1833] "\"write\""
+                      - SourceText[26:42@1842] "\"read\""
+                      - SourceText[26:50@1850] "\"write-read\""
+              - Parameter
+                  name: "count"
+                  value: SourceText[27:17@1953] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional Range
+                      minimum: SourceText[27:22@1958] "1"
+                      maximum: SourceText[27:27@1963] "8"
+                  step: Optional SourceText[27:34@1970] "1"
+                  flags: List(1)
+                      - ParameterFlag.INTEGER
+                  description: "how many bytes a read takes"
+                  values: List(0)
+              - Parameter
+                  name: "clock_frequency"
+                  value: SourceText[28:27@2048] "100"
+                  quantity: Optional Quantity
+                      value: Double 100000.0
+                      unit: "Hz"
+                      written: "100 kHz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "SCL: 100 kHz standard mode, 400 kHz fast mode"
+                  values: List(0)
+              - Parameter
+                  name: "start_at"
+                  value: SourceText[29:20@2144] "20"
+                  quantity: Optional Quantity
+                      value: Double 2.0E-5
+                      unit: "s"
+                      written: "20 us"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "when the transaction begins"
+                  values: List(0)
+              - Parameter
+                  name: "pause"
+                  value: SourceText[30:17@2226] "100"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-4
+                      unit: "s"
+                      written: "100 us"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "between the write and the read back: an EEPROM's write cycle wants 5 ms"
+                  values: List(0)
+              - Parameter
+                  name: "repeat_every"
+                  value: SourceText[31:24@2362] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "s"
+                      written: "0 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the whole transaction again this long after it began; 0 runs it once"
+                  values: List(0)
+      - Pins
+          pins: List(12)
+              - Pin
+                  name: "scl"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.BIDIRECTIONAL
+                  attributes: List(1)
+                      - "open-drain"
+                  description: "serial clock"
+              - Pin
+                  name: "sda"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.BIDIRECTIONAL
+                  attributes: List(1)
+                      - "open-drain"
+                  description: "serial data"
+              - Pin
+                  name: "data_0"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_1"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_2"
+                  numbers: List(1)
+                      - Integer 5
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_3"
+                  numbers: List(1)
+                      - Integer 6
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_4"
+                  numbers: List(1)
+                      - Integer 7
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_5"
+                  numbers: List(1)
+                      - Integer 8
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_6"
+                  numbers: List(1)
+                      - Integer 9
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_7"
+                  numbers: List(1)
+                      - Integer 10
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "GND"
+                  numbers: List(1)
+                      - Integer 11
+                  nature: PinNature.GROUND
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "Vcc"
+                  numbers: List(1)
+                      - Integer 12
+                  nature: PinNature.POWER
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+          buses: List(1)
+              - Bus
+                  name: "data"
+                  pins: List(8)
+                      - "data_0"
+                      - "data_1"
+                      - "data_2"
+                      - "data_3"
+                      - "data_4"
+                      - "data_5"
+                      - "data_6"
+                      - "data_7"
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional "box"
+          sides: Map(3)
+              left = List(2)
+                  - "scl"
+                  - "sda"
+              right = List(1)
+                  - "data"
+              power = List(2)
+                  - "Vcc"
+                  - "GND"
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - State
+          variables: List(11)
+              - StateVariable
+                  name: "plan"
+                  initial: SourceText[49:20@2902] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the steps of this transaction: a byte to send, or one of the conditions below"
+                  length: Integer 24
+              - StateVariable
+                  name: "planned"
+                  initial: SourceText[50:19@3019] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "how many steps are planned"
+                  length: Integer 0
+              - StateVariable
+                  name: "cursor"
+                  initial: SourceText[51:18@3085] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the step being clocked out"
+                  length: Integer 0
+              - StateVariable
+                  name: "quarter"
+                  initial: SourceText[52:19@3153] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "which quarter of the bit or condition it is in"
+                  length: Integer 0
+              - StateVariable
+                  name: "bits"
+                  initial: SourceText[53:16@3237] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "bits of the present byte clocked; 8 is the ACK clock"
+                  length: Integer 0
+              - StateVariable
+                  name: "incoming"
+                  initial: SourceText[54:20@3334] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the byte being read"
+                  length: Integer 0
+              - StateVariable
+                  name: "reading_back"
+                  initial: SourceText[55:24@3398] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 during the read that follows a write"
+                  length: Integer 0
+              - StateVariable
+                  name: "on_the_bus"
+                  initial: SourceText[56:22@3475] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 from a transaction's START to its last STOP"
+                  length: Integer 0
+              - StateVariable
+                  name: "waiting"
+                  initial: SourceText[57:19@3558] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 when a repetition fell due while a transaction was on the bus"
+                  length: Integer 0
+              - StateVariable
+                  name: "acknowledged"
+                  initial: SourceText[58:24@3667] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "whether the last byte sent was acknowledged"
+                  length: Integer 0
+              - StateVariable
+                  name: "last_read"
+                  initial: SourceText[59:21@3748] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the last byte read"
+                  length: Integer 0
+      - Display
+          figures: Map(2)
+              taken = SourceText[63:17@3824] "acknowledged"
+              byte_read = SourceText[64:21@3910] "last_read"
+          units: Map(0)
+          captions: Map(2)
+              taken = "1 when the target took the last byte sent"
+              byte_read = "the last byte read"
+      - Behaviour
+          script: ScriptNode "SCRIPT['behaviour']"
+          source: SourceText[68:9@3980] "# The steps that are not a byte to send.\n        final let READ_AND_ACKNOWLEDGE = -1\n        final let READ_THE_LAST = -2  # read and NACK it: the target lets go of the bus\n        final let REPEATED_START = -3\n        final let STOP = -4\n        final let START = -5\n        final let MOST_BYTES = 16\n\n        function add_step(step)\n            plan = with(plan, planned, step)\n            planned = planned + 1\n        end\n\n        # The bytes it was told to send, read once a transaction.\n        function written_bytes()\n            let written = bytes_of(bytes)\n            if written | length > MOST_BYTES then\n                refuse('bytes holds ' ~ (written | length) ~ ' bytes; it sends up to ' ~ MOST_BYTES)\n            end\n            return written\n        end\n\n        function plan_write()\n            add_step(START)\n            add_step(address * 2)\n            for value in written_bytes() do\n                add_step(value)\n            end\n            add_step(STOP)\n        end\n\n        # A read names its register first, then turns the bus round with a repeated START.\n        function plan_read()\n            let written = written_bytes()\n            add_step(START)\n            if written | length > 0 then\n                add_step(address * 2)\n                add_step(written | first)\n                add_step(REPEATED_START)\n            end\n            add_step(address * 2 + 1)\n            for index in 1..count do\n                if index == count then\n                    add_step(READ_THE_LAST)\n                else\n                    add_step(READ_AND_ACKNOWLEDGE)\n                end\n            end\n            add_step(STOP)\n        end\n\n        function quarter_time()\n            return 1 / (4 * clock_frequency)\n        end\n\n        function next_step()\n            cursor = cursor + 1\n            quarter = 0\n        end\n\n        # START: SDA falls while SCL is high, then SCL falls.\n        function start_condition()\n            if quarter == 0 then\n                drive('sda', 0)\n            else\n                drive('scl', 0)\n                next_step()\n                return\n            end\n            quarter = quarter + 1\n        end\n\n        # A repeated START: SDA let go, SCL raised, then SDA falls under it and SCL follows.\n        function repeated_start()\n            if quarter == 0 then\n                drive('sda', 1)\n            elseif quarter == 1 then\n                drive('scl', 1)\n            elseif quarter == 2 then\n                drive('sda', 0)\n            else\n                drive('scl', 0)\n                next_step()\n                return\n            end\n            quarter = quarter + 1\n        end\n\n        # STOP: SDA low, SCL raised, then SDA let go under it.\n        function stop_condition()\n            if quarter == 0 then\n                drive('sda', 0)\n            elseif quarter == 1 then\n                drive('scl', 1)\n            else\n                drive('sda', 1)\n                next_step()\n                return\n            end\n            quarter = quarter + 1\n        end\n\n        # One bit of a byte, a quarter at a time: SDA set while SCL is low, SCL raised, SDA read, SCL lowered.\n        function byte_quarter(step)\n            let sending = step >= 0\n            if quarter == 0 then\n                if bits < 8 and sending then\n                    drive('sda', bit(step, 7 - bits))\n                elseif bits == 8 and step == READ_AND_ACKNOWLEDGE then\n                    drive('sda', 0)\n                else\n                    drive('sda', 1)\n                end\n            elseif quarter == 1 then\n                drive('scl', 1)\n            elseif quarter == 2 then\n                if bits < 8 and not sending then\n                    # A line nobody holds at a level reads as the pull-up leaves it.\n                    incoming = incoming * 2 + level_or(sda, 1)\n                elseif bits == 8 and sending then\n                    acknowledged = 1 - level_or(sda, 1)\n                end\n            else\n                drive('scl', 0)\n                bits = bits + 1\n                if bits == 9 then\n                    if not sending then\n                        last_read = incoming\n                        drive('data', incoming)\n                        incoming = 0\n                    end\n                    bits = 0\n                    next_step()\n                    return\n                end\n            end\n            quarter = (quarter + 1) % 4\n        end\n\n        function begin()\n            on_the_bus = 1\n            planned = 0\n            cursor = 0\n            quarter = 0\n            bits = 0\n            incoming = 0\n            if operation == 'read' or reading_back == 1 then\n                plan_read()\n            else\n                plan_write()\n            end\n            schedule('tick', quarter_time())\n        end\n\n        # The last STOP is out: a write's read back follows, else the bus is free — for a repetition that waited.\n        function finish()\n            if operation == 'write-read' and reading_back == 0 then\n                reading_back = 1\n                schedule('begin', pause)\n                return\n            end\n            reading_back = 0\n            on_the_bus = 0\n            if waiting == 1 then\n                waiting = 0\n                begin()\n            end\n        end\n\n        # Every repetition is counted from the moment the first transaction began.\n        on timer 'repeat' do\n            schedule('repeat', repeat_every)\n            if on_the_bus == 1 then\n                waiting = 1\n            else\n                begin()\n            end\n        end\n\n        on start do\n            drive('scl', 1)\n            drive('sda', 1)\n            drive('data', 0)\n            schedule('begin', start_at)\n            if repeat_every > 0 then\n                schedule('repeat', start_at + repeat_every)\n            end\n        end\n\n        on timer 'begin' do\n            begin()\n        end\n\n        on timer 'tick' do\n            let step = item(plan, cursor)\n            if step == START then\n                start_condition()\n            elseif step == REPEATED_START then\n                repeated_start()\n            elseif step == STOP then\n                stop_condition()\n            else\n                byte_quarter(step)\n            end\n            if cursor < planned then\n                schedule('tick', quarter_time())\n            else\n                finish()\n            end\n        end"
+  line: Integer 14
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 14:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 9e277c77d9f1fad1945fc1edc4f527ef
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 67c31ca280f2c4d93110c717eca73efe
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+READS 7902dbd48f9bb68806926bc560a70a66
+== line 18 begun with a stray word
+READS 392cd18ef4bc4da21e4f7d01ecb1953b
+== line 25 deleted
+READS 6b8421469a60f2ee5b5a62fc7618fad5
+== line 25 begun with a stray word
+READS 985217533018e6411c8c6ea8de484ab6
+== line 32 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 33:10 'parameters' holds lines, not a nested '{ … }'
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 34:10 'parameters' holds lines, not a nested '{ … }'
+== line 39 deleted
+READS c55624c1fcdca99e576069b9493cb43d
+== line 39 begun with a stray word
+READS b9b27eedb450c3dfd08a82d84d4052f6
+== line 46 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 47:11 'symbol' holds lines, not a nested '{ … }'
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 48:11 'symbol' holds lines, not a nested '{ … }'
+== line 53 deleted
+READS 02c2447dcd8804f6a53ded1ec9fa555c
+== line 53 begun with a stray word
+READS 25d321a3cd73dea0df80c8f367cdadb1
+== line 60 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 61:13 'state' holds lines, not a nested '{ … }'
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 62:13 'state' holds lines, not a nested '{ … }'
+== line 67 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 68:9 'final' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 67 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 67:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 74 deleted
+READS 48c4ec3465585d6fbebee609a48fe43c
+== line 74 begun with a stray word
+READS 571730653d423c757a23517e38fe3aa0
+== line 81 deleted
+READS dfe1c3aafce84d6eaea27f17c836e3ae
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/i2c-controller.jmx 81:42 in 'behaviour': Unexpected token 0658:4448:0081 [T_COMMA] at 659

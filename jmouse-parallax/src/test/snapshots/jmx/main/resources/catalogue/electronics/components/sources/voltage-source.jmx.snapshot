@@ -1,0 +1,97 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Voltage source"
+  slug: "voltage-source"
+  type: Optional "voltage-source"
+  meta: Meta
+      summary: "Two-terminal voltage source: constant, or switched on at the start. A sine or a square is a generator — sine-generator, square-generator"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "V"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(4)
+      - Parameters
+          parameters: List(1)
+              - Parameter
+                  name: "U_output"
+                  value: SourceText[8:20@329] "5"
+                  quantity: Optional Quantity
+                      value: Double 5.0
+                      unit: "V"
+                      written: "5 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "source voltage"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "positive"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "positive terminal"
+              - Pin
+                  name: "negative"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "negative terminal"
+          buses: List(0)
+      - Equations
+          equations: List(1)
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "positive"
+                  negative: "negative"
+                  expression: SourceText[17:40@703] "U_output"
+                  type: null
+      - Symbol
+          uses: List(1)
+              - "voltage-source-symbol"
+          ports: Map(2)
+              a = "positive"
+              b = "negative"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-source.jmx 1:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 0a04bdcccb48d61a7f80b2852f3f94df
+== line 4 begun with a stray word
+READS af6b12e22f72a30b611ee583993a2624
+== line 11 deleted
+READS eb2bcc31abdbbcc66c5824e2dc8c4c17
+== line 11 begun with a stray word
+READS 498aab98246f561bc55c1b0dabeaa3e8
+== line 18 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-source.jmx 19:39 'equations' holds lines, not a nested '{ … }'
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/voltage-source.jmx 20:39 'equations' holds lines, not a nested '{ … }'

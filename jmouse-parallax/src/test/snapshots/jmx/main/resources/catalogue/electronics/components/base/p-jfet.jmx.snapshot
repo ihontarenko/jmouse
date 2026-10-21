@@ -1,0 +1,70 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "P-channel JFET"
+  slug: "p-jfet"
+  type: Optional "jfet"
+  meta: Meta
+      summary: "P-channel JFET, the level-1 model at its defaults"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "J"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional "junction-field-effect-transistor"
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parameters
+          parameters: List(1)
+              - Parameter
+                  name: "polarity"
+                  value: SourceText[14:20@462] "-1"
+                  quantity: Optional Quantity
+                      value: Double -1.0
+                      unit: ""
+                      written: "-1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "p-channel"
+                  values: List(0)
+      - Symbol
+          uses: List(1)
+              - "p-channel-jfet-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              failed = SourceText[18:18@569] "failed"
+  line: Integer 4
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/p-jfet.jmx 4:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/p-jfet.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/p-jfet.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 1910f22cfb3c159ac55118bcfff4c4f7
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/p-jfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 18 deleted
+READS ba760d11aa2bdf923f20e5e001db5e24
+== line 18 begun with a stray word
+READS 780d7bfb4aa6ff69c22409a936b052cf

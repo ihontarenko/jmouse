@@ -1,0 +1,379 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "LCD driver"
+  slug: "lcd-driver"
+  type: Optional "controller"
+  meta: Meta
+      summary: "Drives an HD44780 LCD on an 8-bit bus: initializes it, writes a line, and counts updates on the second"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "Hitachi HD44780U data sheet (ADE-207-272(Z)): instruction table 6, bus write timing (E pulse 230 ns minimum, data latched on its falling edge), execution times at 270 kHz"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "BUS"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(1)
+      - "cmos-hc"
+  blocks: List(6)
+      - Parameters
+          parameters: List(8)
+              - Parameter
+                  name: "first_line"
+                  value: SourceText[18:22@1182] "\"Hello, Parallax!\""
+                  quantity: Optional.empty
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(1)
+                      - ParameterFlag.TEXT
+                  description: "what the first line says"
+                  values: List(0)
+              - Parameter
+                  name: "second_label"
+                  value: SourceText[19:24@1255] "\"Updates:\""
+                  quantity: Optional.empty
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(1)
+                      - ParameterFlag.TEXT
+                  description: "what the second line says before the count"
+                  values: List(0)
+              - Parameter
+                  name: "columns"
+                  value: SourceText[20:19@1339] "16"
+                  quantity: Optional Quantity
+                      value: Double 16.0
+                      unit: ""
+                      written: "16"
+                  range: Optional Range
+                      minimum: SourceText[20:25@1345] "8"
+                      maximum: SourceText[20:30@1350] "40"
+                  step: Optional SourceText[20:38@1358] "1"
+                  flags: List(1)
+                      - ParameterFlag.INTEGER
+                  description: "how many characters a line of the display holds: 40 is all an HD44780 line has"
+                  values: List(0)
+              - Parameter
+                  name: "start_at"
+                  value: SourceText[21:20@1470] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "s"
+                      written: "1 ms"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "when it begins: a real module wants 40 ms after power-up"
+                  values: List(0)
+              - Parameter
+                  name: "update_every"
+                  value: SourceText[22:24@1577] "200"
+                  quantity: Optional Quantity
+                      value: Double 0.2
+                      unit: "s"
+                      written: "200 ms"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how often it writes the second line again"
+                  values: List(0)
+              - Parameter
+                  name: "bit_time"
+                  value: SourceText[23:20@1661] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-6
+                      unit: "s"
+                      written: "1 us"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how long RS and the data stand before E rises, and E stays high"
+                  values: List(0)
+              - Parameter
+                  name: "settle"
+                  value: SourceText[24:18@1769] "50"
+                  quantity: Optional Quantity
+                      value: Double 5.0E-5
+                      unit: "s"
+                      written: "50 us"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how long it waits after a byte: more than the controller's 37 µs"
+                  values: List(0)
+              - Parameter
+                  name: "clear_settle"
+                  value: SourceText[25:24@1886] "2"
+                  quantity: Optional Quantity
+                      value: Double 0.002
+                      unit: "s"
+                      written: "2 ms"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how long it waits after a clear or a return home: more than 1.52 ms"
+                  values: List(0)
+      - Pins
+          pins: List(13)
+              - Pin
+                  name: "register_select"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "RS"
+              - Pin
+                  name: "read_write"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "R/W, held low: the driver only writes"
+              - Pin
+                  name: "enable"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "E"
+              - Pin
+                  name: "data_0"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_1"
+                  numbers: List(1)
+                      - Integer 5
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_2"
+                  numbers: List(1)
+                      - Integer 6
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_3"
+                  numbers: List(1)
+                      - Integer 7
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_4"
+                  numbers: List(1)
+                      - Integer 8
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_5"
+                  numbers: List(1)
+                      - Integer 9
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_6"
+                  numbers: List(1)
+                      - Integer 10
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "data_7"
+                  numbers: List(1)
+                      - Integer 11
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "DB0 to DB7"
+              - Pin
+                  name: "GND"
+                  numbers: List(1)
+                      - Integer 12
+                  nature: PinNature.GROUND
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "Vcc"
+                  numbers: List(1)
+                      - Integer 13
+                  nature: PinNature.POWER
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+          buses: List(1)
+              - Bus
+                  name: "data"
+                  pins: List(8)
+                      - "data_0"
+                      - "data_1"
+                      - "data_2"
+                      - "data_3"
+                      - "data_4"
+                      - "data_5"
+                      - "data_6"
+                      - "data_7"
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional "box"
+          sides: Map(2)
+              right = List(4)
+                  - "register_select"
+                  - "read_write"
+                  - "enable"
+                  - "data"
+              power = List(2)
+                  - "Vcc"
+                  - "GND"
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - State
+          variables: List(8)
+              - StateVariable
+                  name: "bytes"
+                  initial: SourceText[43:21@2435] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the bytes of this burst, in order: room for two lines of 40 and the commands"
+                  length: Integer 96
+              - StateVariable
+                  name: "characters"
+                  initial: SourceText[44:26@2561] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 where the byte is a character (RS high), 0 where it is a command"
+                  length: Integer 96
+              - StateVariable
+                  name: "planned"
+                  initial: SourceText[45:19@2665] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "how many bytes the burst has"
+                  length: Integer 0
+              - StateVariable
+                  name: "cursor"
+                  initial: SourceText[46:18@2737] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the byte being written"
+                  length: Integer 0
+              - StateVariable
+                  name: "phase"
+                  initial: SourceText[47:17@2803] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "what the next tick does to the byte: SET_LINES, RAISE_ENABLE or LOWER_ENABLE"
+                  length: Integer 0
+              - StateVariable
+                  name: "updates"
+                  initial: SourceText[48:19@2926] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "how many times the second line was written"
+                  length: Integer 0
+              - StateVariable
+                  name: "on_the_bus"
+                  initial: SourceText[49:22@3016] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 while a burst is being written"
+                  length: Integer 0
+              - StateVariable
+                  name: "waiting"
+                  initial: SourceText[50:19@3090] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 when an update fell due while a burst was being written"
+                  length: Integer 0
+      - Display
+          figures: Map(1)
+              update_count = SourceText[54:24@3218] "updates"
+          units: Map(0)
+          captions: Map(1)
+              update_count = "how many times the second line was written"
+      - Behaviour
+          script: ScriptNode "SCRIPT['behaviour']"
+          source: SourceText[58:9@3313] "# The three steps of writing one byte.\n        final let SET_LINES = 0\n        final let RAISE_ENABLE = 1\n        final let LOWER_ENABLE = 2\n\n        # The instructions of table 6, each built from its bits.\n        function clear_display()\n            return 1\n        end\n\n        function entry_mode(increment, shift)\n            return 4 + 2 * increment + shift\n        end\n\n        function display_control(display, cursor_shown, blinking)\n            return 8 + 4 * display + 2 * cursor_shown + blinking\n        end\n\n        function function_set(eight_bit, two_lines, large_font)\n            return 32 + 16 * eight_bit + 8 * two_lines + 4 * large_font\n        end\n\n        # DDRAM address: row 0 starts at 00h, row 1 at 40h.\n        function ddram_address(row, column)\n            return 128 + 64 * row + column\n        end\n\n        function add_byte(value, character)\n            bytes = with(bytes, planned, value)\n            characters = with(characters, planned, character)\n            planned = planned + 1\n        end\n\n        function add_command(value)\n            add_byte(value, 0)\n        end\n\n        # A text's characters, each its code, then spaces up to `width`.\n        function add_text(text, width)\n            let text_length = text | length\n            for index in 0..width - 1 do\n                if index < text_length then\n                    add_byte(text | sub(index, index + 1) | char | int, 1)\n                else\n                    add_byte(32, 1)\n                end\n            end\n        end\n\n        function add_digit(value)\n            add_byte(48 + value % 10, 1)\n        end\n\n        # The second line: its label, then the count in four digits at the line's end.\n        function plan_second_line()\n            add_command(ddram_address(1, 0))\n            add_text(second_label, columns - 4)\n            add_digit(floor(updates / 1000))\n            add_digit(floor(updates / 100))\n            add_digit(floor(updates / 10))\n            add_digit(updates)\n        end\n\n        function plan_initialization()\n            add_command(function_set(1, 1, 0))\n            add_command(display_control(1, 0, 0))\n            add_command(clear_display())\n            add_command(entry_mode(1, 0))\n            add_command(ddram_address(0, 0))\n            add_text(first_line, columns)\n        end\n\n        function start_burst(initializing)\n            on_the_bus = 1\n            planned = 0\n            cursor = 0\n            phase = SET_LINES\n            if initializing == 1 then\n                plan_initialization()\n            end\n            plan_second_line()\n            updates = updates + 1\n            schedule('tick', 0)\n        end\n\n        # A clear and a return home take 1.52 ms; every other byte 37 µs.\n        function wait_after(value, character)\n            if character == 0 and value < 4 then\n                return clear_settle\n            end\n            return settle\n        end\n\n        on start do\n            drive('register_select', 0)\n            drive('read_write', 0)\n            drive('enable', 0)\n            drive('data', 0)\n            schedule('initialize', start_at)\n        end\n\n        on timer 'initialize' do\n            start_burst(1)\n            schedule('update', update_every)\n        end\n\n        on timer 'update' do\n            schedule('update', update_every)\n            if on_the_bus == 1 then\n                waiting = 1\n            else\n                start_burst(0)\n            end\n        end\n\n        # The burst's last byte is executed: an update that fell due meanwhile goes now.\n        on timer 'written' do\n            on_the_bus = 0\n            if waiting == 1 then\n                waiting = 0\n                start_burst(0)\n            end\n        end\n\n        on timer 'tick' do\n            let value = item(bytes, cursor)\n            let character = item(characters, cursor)\n            if phase == SET_LINES then\n                drive('register_select', character)\n                drive('data', value)\n                phase = RAISE_ENABLE\n                schedule('tick', bit_time)\n            elseif phase == RAISE_ENABLE then\n                drive('enable', 1)\n                phase = LOWER_ENABLE\n                schedule('tick', bit_time)\n            else\n                drive('enable', 0)\n                phase = SET_LINES\n                cursor = cursor + 1\n                if cursor < planned then\n                    schedule('tick', wait_after(value, character))\n                else\n                    schedule('written', wait_after(value, character))\n                end\n            end\n        end"
+  line: Integer 8
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 8:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 1b6e26d470d0db758cb59fb1fc4558ae
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS b0926092b13a82c0dd94819b9df67eb1
+== line 11 begun with a stray word
+READS 8865a994b56ecefba61cd4e6305fe0a2
+== line 18 deleted
+READS 15a6922c7216587d70b6bbcc58737e16
+== line 18 begun with a stray word
+READS 376442a821a2e33c92bc17ae129a8906
+== line 25 deleted
+READS 44643d2009742dd3436b0435a9b79cc6
+== line 25 begun with a stray word
+READS da4004dc520e7024bf869a444895e9ad
+== line 32 deleted
+READS 67216b6fa9ca8d457041e790d0ab2a3f
+== line 32 begun with a stray word
+READS 6f8714b14e42eae6701fd029f90c5ec1
+== line 39 deleted
+READS 960dd137ed4fd7bab69ad24c640bb5d1
+== line 39 begun with a stray word
+READS 99ab0fd68e6bf6949c4290f4b9f38406
+== line 46 deleted
+READS cc9b9de0cd1c1ae20fa6e57d1f1a3ca9
+== line 46 begun with a stray word
+READS e42cea09df0f654e9024a4531d9ed035
+== line 53 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 53:9 'update_count' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 60 deleted
+READS a27f714cb2681058617676599e6e3bfc
+== line 60 begun with a stray word
+READS 7a1208eac9ea15cd6f80a7a915463043
+== line 74 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 204:5 in 'behaviour': Unexpected token 1249:7922:0204 [T_CLOSE_CURLY] at 1250
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 205:5 in 'behaviour': Unexpected token 1251:7934:0205 [T_CLOSE_CURLY] at 1252
+== line 81 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 82:9 in 'behaviour': Unexpected token 0557:4095:0082 [T_END] at 558
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/lcd-driver.jmx 83:9 in 'behaviour': Unexpected token 0565:4134:0083 [T_END] at 566
+== line 88 deleted
+READS f68fb19de9a0aba6a98691463dcc39e8
+== line 88 begun with a stray word
+READS 897e12499ebb1d40e00961a7d3d9f285

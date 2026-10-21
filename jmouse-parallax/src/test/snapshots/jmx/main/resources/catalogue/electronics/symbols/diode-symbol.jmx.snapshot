@@ -1,0 +1,197 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Diode"
+  slug: "diode-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "Diode, as drawn on a schematic: lit inside while it conducts, its bar thickening as it blocks, hot in breakdown"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 40.0
+          paths: List(0)
+          pins: List(2)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -26.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 32.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(4)
+              - SymbolInput
+                  name: "forward"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[8:19@284] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "reverse"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[9:19@310] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "breakdown"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[10:21@338] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(4)
+              - SymbolElement
+                  shape: "path"
+                  name: "die"
+                  live: true
+                  path: "M-12-12L12 0-12 12Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(4)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=clear]
+                      - SymbolProperty fill STILL
+                          - Variable[name=positive]
+                      - SymbolProperty opacity LIVE
+                          - HostCall[name=seen, arguments=[Variable[name=forward]]]
+                      - SymbolProperty glow LIVE
+                          - Binary[operator=MULTIPLY, left=Constant[value=9], right=HostCall[name=seen, arguments=[Variable[name=forward]]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 16
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-40 0H-12V-12L12 0-12 12V0M12 0H40"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 24
+                  line: Integer 23
+              - SymbolElement
+                  shape: "path"
+                  name: "bar"
+                  live: true
+                  path: "M12-12V12"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(3)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=breakdown], right=Constant[value=0.05]], value=Variable[name=hot]]], otherwise=Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=reverse], right=Constant[value=0.005]], value=Variable[name=negative]]], otherwise=Variable[name=signal]]]]
+                      - SymbolProperty thickness LIVE
+                          - HostCall[name=curve, arguments=[Variable[name=reverse], Constant[value=0], Constant[value=1], Constant[value=0.05], Constant[value=1.6], Constant[value=1], Constant[value=2.6]]]
+                      - SymbolProperty glow LIVE
+                          - HostCall[name=curve, arguments=[Variable[name=breakdown], Constant[value=0], Constant[value=0], Constant[value=1], Constant[value=6]]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 30
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.35], right=Binary[operator=MULTIPLY, left=Constant[value=0.65], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 37
+                  line: Integer 36
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 45ee172c0f62aefbe1e1560efc9e964b
+== line 4 begun with a stray word
+READS 9d8c79d35bdc95e1d9e6e73448e573f4
+== line 11 deleted
+READS d01aa9abe61d61ed62f34bcbcfdd85b5
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 18 deleted
+READS dfcf5da99e967739dc8c217299def021
+== line 18 begun with a stray word
+READS d1720812907fcf424c5072a3822f44cc
+== line 25 deleted
+READS ee6c2fd8bd380b342558f9e5a7e0ef19
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 25:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 32 deleted
+READS 20fe15b766e18c23af8d85b83e916bc4
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 32:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 39 deleted
+READS d73d6ffb6f284ed9d8de2f76240402db
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 39:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 46 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/diode-symbol.jmx 46:1 'zzz' is not a block of a symbol; it holds meta

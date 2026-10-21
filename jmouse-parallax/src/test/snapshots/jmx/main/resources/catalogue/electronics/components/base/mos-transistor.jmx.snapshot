@@ -1,0 +1,910 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "MOS transistor"
+  slug: "mos-transistor"
+  type: Optional "mosfet"
+  meta: Meta
+      summary: "Level-1 MOSFET: square-law channel, channel-length modulation, series resistances, body diode, gate and junction capacitances"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "MOS level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "Q"
+          failure = Text
+              text: "short drain source"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(2)
+      - "smooth-transitions"
+      - "junctions"
+  blocks: List(7)
+      - Parameters
+          parameters: List(34)
+              - Parameter
+                  name: "polarity"
+                  value: SourceText[35:20@2588] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "1 for n-channel, -1 for p-channel"
+                  values: List(0)
+              - Parameter
+                  name: "V_threshold"
+                  value: SourceText[36:23@2674] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "V"
+                      written: "0 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VTO: zero-bias threshold voltage, SPICE's sign"
+                  values: List(0)
+              - Parameter
+                  name: "V_threshold_spread"
+                  value: SourceText[37:30@2777] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "V"
+                      written: "0 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how far the threshold's magnitude spreads from part to part: a bench's tolerance corners use it"
+                  values: List(0)
+              - Parameter
+                  name: "transconductance_spread"
+                  value: SourceText[38:35@2927] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how far KP spreads from part to part, as a share"
+                  values: List(0)
+              - Parameter
+                  name: "transconductance"
+                  value: SourceText[39:28@3018] "20"
+                  quantity: Optional Quantity
+                      value: Double 2.0E-5
+                      unit: "A/V^2"
+                      written: "20 uA/V^2"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "KP: the channel's transconductance parameter, the whole device (W/L = 1)"
+                  values: List(0)
+              - Parameter
+                  name: "channel_length_modulation"
+                  value: SourceText[40:37@3149] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "LAMBDA: per volt"
+                  values: List(0)
+              - Parameter
+                  name: "R_drain"
+                  value: SourceText[41:19@3197] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RD: drain series resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_source"
+                  value: SourceText[42:20@3275] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RS: source series resistance"
+                  values: List(0)
+              - Parameter
+                  name: "I_saturation"
+                  value: SourceText[43:24@3357] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-14
+                      unit: "A"
+                      written: "10 fA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IS: bulk junction saturation current — the body diode"
+                  values: List(0)
+              - Parameter
+                  name: "emission_coefficient"
+                  value: SourceText[44:32@3468] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "N: its emission coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "C_bulk_drain"
+                  value: SourceText[45:24@3537] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CBD: drain–bulk zero-bias capacitance"
+                  values: List(0)
+              - Parameter
+                  name: "V_junction"
+                  value: SourceText[46:22@3622] "0.8"
+                  quantity: Optional Quantity
+                      value: Double 0.8
+                      unit: "V"
+                      written: "0.8 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "PB: its built-in potential"
+                  values: List(0)
+              - Parameter
+                  name: "grading_coefficient"
+                  value: SourceText[47:31@3707] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "MJ: its grading coefficient"
+                  values: List(0)
+              - Parameter
+                  name: "forward_bias_coefficient"
+                  value: SourceText[48:36@3789] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "FC: past FC·PB the depletion capacitance goes on as a straight line"
+                  values: List(0)
+              - Parameter
+                  name: "C_gate_source"
+                  value: SourceText[49:25@3895] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CGSO: gate–source overlap capacitance (W = 1)"
+                  values: List(0)
+              - Parameter
+                  name: "C_gate_drain"
+                  value: SourceText[50:24@3989] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CGDO: gate–drain overlap capacitance (W = 1)"
+                  values: List(0)
+              - Parameter
+                  name: "C_gate_drain_zero_bias"
+                  value: SourceText[51:34@4093] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "F"
+                      written: "0 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "not SPICE: the gate–drain depletion capacitance at zero bias, and its value with the drain below the gate"
+                  values: List(0)
+              - Parameter
+                  name: "V_gate_drain_potential"
+                  value: SourceText[52:34@4248] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "V"
+                      written: "1 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "not SPICE: that depletion's potential"
+                  values: List(0)
+              - Parameter
+                  name: "gate_drain_grading"
+                  value: SourceText[53:30@4331] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "not SPICE: that depletion's grading: how fast it falls as the drain rises above the gate"
+                  values: List(0)
+              - Parameter
+                  name: "R_gate"
+                  value: SourceText[54:18@4457] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "Ohm"
+                      written: "1 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RG: the gate's internal resistance, which with Ciss sets how fast it switches"
+                  values: List(0)
+              - Parameter
+                  name: "body_transit_time"
+                  value: SourceText[55:29@4595] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "s"
+                      written: "0 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the body diode's transit time: its stored charge, the reverse recovery of a freewheeling diode"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[56:21@4731] "300.15"
+                  quantity: Optional Quantity
+                      value: Double 300.15
+                      unit: "K"
+                      written: "300.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TNOM: the temperature the figures above are measured at"
+                  values: List(0)
+              - Parameter
+                  name: "V_threshold_coefficient"
+                  value: SourceText[57:35@4850] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "not SPICE: how the threshold's magnitude drifts, V/K (negative: it opens earlier when hot)"
+                  values: List(0)
+              - Parameter
+                  name: "resistance_temperature_exponent"
+                  value: SourceText[58:43@4998] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "not SPICE: RD and RS grow as (temperature / T_nominal)^this"
+                  values: List(0)
+              - Parameter
+                  name: "E_gap"
+                  value: SourceText[59:17@5081] "1.11"
+                  quantity: Optional Quantity
+                      value: Double 1.11
+                      unit: "V"
+                      written: "1.11 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the band gap the body diode's saturation current follows"
+                  values: List(0)
+              - Parameter
+                  name: "V_breakdown"
+                  value: SourceText[60:23@5193] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "V"
+                      written: "1 kV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "drain–source avalanche voltage"
+                  values: List(0)
+              - Parameter
+                  name: "I_breakdown"
+                  value: SourceText[61:23@5273] "1"
+                  quantity: Optional Quantity
+                      value: Double 0.001
+                      unit: "A"
+                      written: "1 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "avalanche current at V_breakdown"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[62:24@5356] "0.4"
+                  quantity: Optional Quantity
+                      value: Double 0.4
+                      unit: "W"
+                      written: "0.4 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[63:30@5432] "312"
+                  quantity: Optional Quantity
+                      value: Double 312.0
+                      unit: "K/W"
+                      written: "312 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[64:33@5525] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: "s"
+                      written: "2 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[65:21@5588] "150"
+                  quantity: Optional Quantity
+                      value: Double 150.0
+                      unit: "degC"
+                      written: "150 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+              - Parameter
+                  name: "V_drain_source_maximum"
+                  value: SourceText[66:34@5690] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1000000 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VDS: the drain-source voltage it is rated for; none is a megavolt"
+                  values: List(0)
+              - Parameter
+                  name: "V_gate_source_maximum"
+                  value: SourceText[67:33@5804] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "V"
+                      written: "1000000 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VGS: what the gate oxide is rated for, either way; none is a megavolt"
+                  values: List(0)
+              - Parameter
+                  name: "I_drain_maximum"
+                  value: SourceText[68:27@5917] "1e6"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "A"
+                      written: "1000000 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ID: the drain current it is rated for; none is a megaampere"
+                  values: List(0)
+      - Pins
+          pins: List(3)
+              - Pin
+                  name: "source"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "source, and the bulk"
+              - Pin
+                  name: "gate"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "gate"
+              - Pin
+                  name: "drain"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "drain"
+          buses: List(0)
+      - Nodes
+          nodes: List(3)
+              - InternalNode
+                  name: "di"
+                  digital: false
+                  description: "the intrinsic drain, behind the drain resistance"
+              - InternalNode
+                  name: "gi"
+                  digital: false
+                  description: "the intrinsic gate, behind the gate resistance"
+              - InternalNode
+                  name: "si"
+                  digital: false
+                  description: "the intrinsic source, behind the source resistance"
+      - Symbol
+          uses: List(1)
+              - "n-channel-mosfet-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              failed = SourceText[84:18@6585] "failed"
+      - Display
+          figures: Map(3)
+              conduction = SourceText[89:22@6736] "min(1, max(0, (polarity * (gate - source) - abs(V_threshold)) / 2))"
+              overvoltage = SourceText[90:23@6827] "100 * max(abs(drain - source) / V_drain_source_maximum, abs(gate - source) / V_gate_source_maximum)"
+              overcurrent = SourceText[91:23@6973] "100 * abs(drain.current) / I_drain_maximum"
+          units: Map(2)
+              overvoltage = "%"
+              overcurrent = "%"
+          captions: Map(2)
+              overvoltage = "of VDS or VGS"
+              overcurrent = "of its rated ID"
+      - TypeDefinition
+          type: "transconductance_coefficient"
+          definition: SourceText[95:41@7191] "current / voltage ^ 2"
+      - Equations
+          equations: List(27)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "T_junction"
+                  positive: null
+                  negative: null
+                  expression: SourceText[99:40@7399] "temperature"
+                  type: QuantityType
+                      name: "temperature"
+                      unit: "K"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 1
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "warmth"
+                  positive: null
+                  negative: null
+                  expression: SourceText[100:30@7441] "T_junction / T_nominal"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_gs"
+                  positive: null
+                  negative: null
+                  expression: SourceText[101:30@7494] "polarity * (gi - si)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_gd"
+                  positive: null
+                  negative: null
+                  expression: SourceText[102:30@7545] "polarity * (gi - di)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_ds"
+                  positive: null
+                  negative: null
+                  expression: SourceText[103:30@7596] "polarity * (di - si)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_bd"
+                  positive: null
+                  negative: null
+                  expression: SourceText[104:30@7647] "polarity * (source - di)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_control"
+                  positive: null
+                  negative: null
+                  expression: SourceText[107:35@7793] "if(V_ds >= 0, V_gs, V_gd)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_across"
+                  positive: null
+                  negative: null
+                  expression: SourceText[108:34@7853] "abs(V_ds)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_threshold_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[109:41@7904] "polarity * V_threshold + tolerance_corner * V_threshold_spread + V_threshold_coefficient * (T_junction - T_nominal)"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "beta"
+                  positive: null
+                  negative: null
+                  expression: SourceText[110:51@8071] "transconductance * (1 + tolerance_corner * transconductance_spread) / warmth ^ 1.5"
+                  type: QuantityType
+                      name: "transconductance_coefficient"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer -2
+                          length: Integer -4
+                          time: Integer 6
+                          current: Integer 3
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "overdrive"
+                  positive: null
+                  negative: null
+                  expression: SourceText[111:35@8189] "V_control - V_threshold_now"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "square_law"
+                  positive: null
+                  negative: null
+                  expression: SourceText[112:36@8253] "if(V_across < overdrive, beta * (overdrive - V_across / 2) * V_across, beta / 2 * overdrive ^ 2)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "channel"
+                  positive: null
+                  negative: null
+                  expression: SourceText[113:33@8383] "if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_saturation_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[115:42@8505] "junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "body"
+                  positive: null
+                  negative: null
+                  expression: SourceText[116:30@8624] "junction_current(V_bd, I_saturation_now, emission_coefficient, T_junction)"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "stored"
+                  positive: null
+                  negative: null
+                  expression: SourceText[121:30@9134] "min(detail, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "Q_gate_drain"
+                  positive: null
+                  negative: null
+                  expression: SourceText[122:37@9186] "stored * (C_gate_drain * V_gd + depletion_charge(min(V_gd, 0), C_gate_drain_zero_bias, V_gate_drain_potential, gate_drain_grading, forward_bias_coefficient) + C_gate_drain_zero_bias * max(V_gd, 0))"
+                  type: QuantityType
+                      name: "charge"
+                      unit: "C"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 1
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "Q_bulk_drain"
+                  positive: null
+                  negative: null
+                  expression: SourceText[123:37@9421] "stored * (depletion_charge(V_bd, C_bulk_drain, V_junction, grading_coefficient, forward_bias_coefficient) + body_transit_time * body)"
+                  type: QuantityType
+                      name: "charge"
+                      unit: "C"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 1
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "avalanche"
+                  positive: null
+                  negative: null
+                  expression: SourceText[124:35@9590] "I_breakdown * limit_exponential((V_ds - V_breakdown) / thermal_voltage(T_junction))"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "resistance_drift"
+                  positive: null
+                  negative: null
+                  expression: SourceText[125:40@9714] "warmth ^ resistance_temperature_exponent"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "drain"
+                  negative: "di"
+                  expression: SourceText[127:31@9788] "(drain - di) / (R_drain * resistance_drift)"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "si"
+                  negative: "source"
+                  expression: SourceText[128:32@9864] "(si - source) / (R_source * resistance_drift)"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "di"
+                  negative: "si"
+                  expression: SourceText[130:28@10058] "polarity * (if(V_ds >= 0, channel, 0 - channel) + avalanche) + noise(8 / 3 * boltzmann * T_junction * sqrt(2 * beta * soft_positive_part(channel, 1e-15)))"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "source"
+                  negative: "di"
+                  expression: SourceText[131:32@10245] "polarity * (body + d(Q_bulk_drain)/dt)"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "gate"
+                  negative: "gi"
+                  expression: SourceText[132:30@10314] "(gate - gi) / R_gate"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "gi"
+                  negative: "si"
+                  expression: SourceText[133:28@10363] "polarity * d(stored * C_gate_source * V_gs)/dt"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "gi"
+                  negative: "di"
+                  expression: SourceText[134:28@10438] "polarity * d(Q_gate_drain)/dt"
+                  type: null
+  line: Integer 24
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 24:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 9e587e1c04f9259d60f378231470e27d
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 206bccfd3f4ef9cc2d13baa868238fd4
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+READS 1fe776eda1ed81401eb118d453637c06
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 18:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 25 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 25:9 'designator' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 32 deleted
+READS aeb7d9cdd3f3d1f33c5153afcdc11352
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 39 deleted
+READS 796ad3e09842efd7d8ccb6950a018229
+== line 39 begun with a stray word
+READS 576696dc142ad244d421b2b6a14f1536
+== line 46 deleted
+READS 2f84b6e14607b16f758f99d0444974d3
+== line 46 begun with a stray word
+READS 448c0d2ce48a1b634971077bf7f3d8db
+== line 53 deleted
+READS 9b9329a1e4a5a5398776c3a647ce2c66
+== line 53 begun with a stray word
+READS 490d2f3d1f0eaafe2295ba50ff6f2a1a
+== line 60 deleted
+READS b53ccd16318177c6dc0f4225a0683921
+== line 60 begun with a stray word
+READS 1ce25ef2349d4f7e7f04dbf3a6c92190
+== line 67 deleted
+READS 4f8d0316b5d83e3628791aa168990375
+== line 67 begun with a stray word
+READS e3a1753027e6d7d9e736d54d505188c1
+== line 74 deleted
+READS 6b073e62baf9a30f52688c0992b32312
+== line 74 begun with a stray word
+READS d036a8095ce659fadabdd3b469b9322b
+== line 81 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 82:41 'nodes' holds lines, not a nested '{ … }'
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/mos-transistor.jmx 83:41 'nodes' holds lines, not a nested '{ … }'

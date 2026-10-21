@@ -1,0 +1,210 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Schmitt-trigger inverter"
+  slug: "schmitt-inverter"
+  type: Optional "gate"
+  meta: Meta
+      summary: "An inverter with two input thresholds: a slow or noisy edge switches it once"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "behavioural: two thresholds as shares of the supply, a latch between them"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "U"
+          failure = Text
+              text: "short Vcc GND"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(6)
+      - Parameters
+          parameters: List(5)
+              - Parameter
+                  name: "upper_share"
+                  value: SourceText[16:23@882] "0.6"
+                  quantity: Optional Quantity
+                      value: Double 0.6
+                      unit: ""
+                      written: "0.6"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the rising threshold as a share of the supply"
+                  values: List(0)
+              - Parameter
+                  name: "lower_share"
+                  value: SourceText[17:23@977] "0.4"
+                  quantity: Optional Quantity
+                      value: Double 0.4
+                      unit: ""
+                      written: "0.4"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the falling threshold as a share of the supply"
+                  values: List(0)
+              - Parameter
+                  name: "edge"
+                  value: SourceText[18:16@1066] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-8
+                      unit: "s"
+                      written: "10 ns"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "output transition time"
+                  values: List(0)
+              - Parameter
+                  name: "R_output"
+                  value: SourceText[19:20@1142] "50"
+                  quantity: Optional Quantity
+                      value: Double 50.0
+                      unit: "Ohm"
+                      written: "50 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "output resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_input"
+                  value: SourceText[20:19@1208] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E9
+                      unit: "Ohm"
+                      written: "1 GOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "input leakage"
+                  values: List(0)
+      - Pins
+          pins: List(4)
+              - Pin
+                  name: "a"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "input A"
+              - Pin
+                  name: "GND"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.GROUND
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "output"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "output Y"
+              - Pin
+                  name: "Vcc"
+                  numbers: List(1)
+                      - Integer 5
+                  nature: PinNature.POWER
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "schmitt-not-gate-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - State
+          variables: List(2)
+              - StateVariable
+                  name: "high"
+                  initial: SourceText[33:16@1512] "1"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the output's level: written by the behaviour, read by the equations"
+                  length: Integer 0
+              - StateVariable
+                  name: "shown"
+                  initial: SourceText[34:17@1630] "1"
+                  discrete: false
+                  range: Optional.empty
+                  description: "the output stage following it with a finite edge"
+                  length: Integer 0
+      - Equations
+          equations: List(3)
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "a"
+                  negative: "GND"
+                  expression: SourceText[38:28@1765] "(a - GND) / R_input"
+                  type: null
+              - Equation
+                  form: EquationForm.DERIVATIVE
+                  subject: "shown"
+                  positive: null
+                  negative: null
+                  expression: SourceText[39:23@1808] "(high - shown) / edge"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "Vcc"
+                  negative: "output"
+                  expression: SourceText[40:33@1863] "(GND + shown * (Vcc - GND) - output) / R_output"
+                  type: null
+      - Behaviour
+          script: ScriptNode "SCRIPT['behaviour']"
+          source: SourceText[44:9@1946] "on start do\n            if (a - GND) > upper_share * (Vcc - GND) then\n                high = 0\n            end\n        end\n\n        on above 'a - GND - upper_share * (Vcc - GND)' do\n            high = 0\n        end\n\n        on below 'a - GND - lower_share * (Vcc - GND)' do\n            high = 1\n        end"
+  line: Integer 6
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 6:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS f27aadefd2283c5abd256aa03d888030
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 4bbfd8819b4f387750a62210b38bfdc8
+== line 11 begun with a stray word
+READS 41aef13904024a8403e0bec99ccd2025
+== line 18 deleted
+READS 3bc22a3a7ee6c66693df60bba30c9cf6
+== line 18 begun with a stray word
+READS 217b244d141da59ea81ece0c26f86e7c
+== line 25 deleted
+READS 2ee2004e89680a5e19888a889358894b
+== line 25 begun with a stray word
+READS 893a8f2859ecfb6d1c5df807728f8695
+== line 32 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 32:9 'high' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 32:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 39 deleted
+READS 29bf8bfdab5e1c2f3aeff94f2cf306c7
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/schmitt-inverter.jmx 39:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
+== line 46 deleted
+READS 86b570e28dbef3f461e980251745df04
+== line 46 begun with a stray word
+READS 2a7f0a601b3e73951470c26b6daa7df2

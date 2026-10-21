@@ -1,0 +1,358 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Relay"
+  slug: "relay"
+  type: Optional "relay"
+  meta: Meta
+      summary: "An electromagnetic relay: a coil that pulls a changeover contact in above one voltage and lets it go below another"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "behavioural armature: a latch with hysteresis and two contacts; the coil a winding with its core losses and self-capacitance"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "K"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(7)
+      - Parameters
+          parameters: List(8)
+              - Parameter
+                  name: "R_coil"
+                  value: SourceText[38:18@2428] "400"
+                  quantity: Optional Quantity
+                      value: Double 400.0
+                      unit: "Ohm"
+                      written: "400 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "coil resistance: the copper"
+                  values: List(0)
+              - Parameter
+                  name: "L_coil"
+                  value: SourceText[39:18@2505] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "H"
+                      written: "1 H"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "coil inductance"
+                  values: List(0)
+              - Parameter
+                  name: "R_core"
+                  value: SourceText[40:18@2570] "300"
+                  quantity: Optional Quantity
+                      value: Double 300000.0
+                      unit: "Ohm"
+                      written: "300 kOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "core loss: the iron's eddy currents and hysteresis, as a resistance across the inductance"
+                  values: List(0)
+              - Parameter
+                  name: "C_winding"
+                  value: SourceText[41:21@2712] "100"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-10
+                      unit: "F"
+                      written: "100 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "winding self-capacitance, between its turns and layers"
+                  values: List(0)
+              - Parameter
+                  name: "V_pull_in"
+                  value: SourceText[42:21@2816] "9"
+                  quantity: Optional Quantity
+                      value: Double 9.0
+                      unit: "V"
+                      written: "9 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the coil voltage it pulls in at"
+                  values: List(0)
+              - Parameter
+                  name: "V_drop_out"
+                  value: SourceText[43:22@2898] "1.2"
+                  quantity: Optional Quantity
+                      value: Double 1.2
+                      unit: "V"
+                      written: "1.2 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the coil voltage it lets go below"
+                  values: List(0)
+              - Parameter
+                  name: "R_contact"
+                  value: SourceText[44:21@2980] "100"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "Ohm"
+                      written: "100 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "contact resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_open"
+                  value: SourceText[45:18@3045] "100"
+                  quantity: Optional Quantity
+                      value: Double 1.0E8
+                      unit: "Ohm"
+                      written: "100 MOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "resistance across an open contact"
+                  values: List(0)
+      - Pins
+          pins: List(5)
+              - Pin
+                  name: "coil_one"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "coil"
+              - Pin
+                  name: "coil_two"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "coil"
+              - Pin
+                  name: "common"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "the changeover contact's arm"
+              - Pin
+                  name: "normally_open"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "made while the coil holds the armature"
+              - Pin
+                  name: "normally_closed"
+                  numbers: List(1)
+                      - Integer 5
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "made while the armature rests"
+          buses: List(0)
+      - Nodes
+          nodes: List(2)
+              - InternalNode
+                  name: "winding"
+                  digital: false
+                  description: "between the coil's copper and its inductance"
+              - InternalNode
+                  name: "coil_current"
+                  digital: false
+                  description: "a node whose voltage above coil_two is the inductance's current, one volt per ampere: what the armature's events read"
+      - Symbol
+          uses: List(1)
+              - "relay-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              energized = SourceText[62:21@3829] "energized"
+      - State
+          variables: List(2)
+              - StateVariable
+                  name: "energized"
+                  initial: SourceText[66:21@3882] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the armature pulled in: written by the behaviour, read by the contacts"
+                  length: Integer 0
+              - StateVariable
+                  name: "I_inductance"
+                  initial: SourceText[67:24@4005] "0"
+                  discrete: false
+                  range: Optional.empty
+                  description: "the current in the coil's inductance: its ampere-turns, which hold the armature"
+                  length: Integer 0
+      - Equations
+          equations: List(10)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "stored"
+                  positive: null
+                  negative: null
+                  expression: SourceText[72:30@4286] "min(detail, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "R_carrier"
+                  positive: null
+                  negative: null
+                  expression: SourceText[73:38@4339] "1"
+                  type: QuantityType
+                      name: "resistance"
+                      unit: "Ω"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "V_inductance"
+                  positive: null
+                  negative: null
+                  expression: SourceText[74:38@4379] "winding - coil_two"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "coil_one"
+                  negative: "winding"
+                  expression: SourceText[76:39@4439] "(coil_one - winding) / R_coil"
+                  type: null
+              - Equation
+                  form: EquationForm.DERIVATIVE
+                  subject: "I_inductance"
+                  positive: null
+                  negative: null
+                  expression: SourceText[77:30@4499] "V_inductance / L_coil"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "winding"
+                  negative: "coil_two"
+                  expression: SourceText[78:39@4560] "I_inductance + V_inductance / R_core"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "coil_one"
+                  negative: "coil_two"
+                  expression: SourceText[79:40@4637] "d(stored * C_winding * (coil_one - coil_two))/dt"
+                  type: null
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "coil_current"
+                  negative: "coil_two"
+                  expression: SourceText[80:44@4730] "R_carrier * I_inductance"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "common"
+                  negative: "normally_open"
+                  expression: SourceText[82:43@4800] "(common - normally_open) / (energized * R_contact + (1 - energized) * R_open)"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "common"
+                  negative: "normally_closed"
+                  expression: SourceText[83:45@4923] "(common - normally_closed) / ((1 - energized) * R_contact + energized * R_open)"
+                  type: null
+      - Behaviour
+          script: ScriptNode "SCRIPT['behaviour']"
+          source: SourceText[87:9@5038] "# Either way round: a relay's coil pulls whichever way its current runs.\n        on above 'abs(coil_current - coil_two) - V_pull_in / R_coil' do\n            energized = 1\n        end\n\n        on below 'abs(coil_current - coil_two) - V_drop_out / R_coil' when energized > 0 do\n            energized = 0\n        end"
+  line: Integer 28
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 28:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 3960905851f6362e3c60493e702a71a9
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS ca9a37c296d3cba61325032ac4be20f0
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+READS 43fbd1b59eff10967315994caa200576
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 18:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 25 deleted
+READS 2d234248407f15fca5e812486d85e100
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 25:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 32 deleted
+READS 271ca429eedbb2771e08172eaaa52bb8
+== line 32 begun with a stray word
+READS e2cd4ce9e0c9c60a41e30f3ae64a43ea
+== line 39 deleted
+READS 91e14f01b25ee0d1871ef77423a30e27
+== line 39 begun with a stray word
+READS 6087be87f823e51db4f9a23d485f3b5c
+== line 46 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 47:10 'parameters' holds lines, not a nested '{ … }'
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 48:10 'parameters' holds lines, not a nested '{ … }'
+== line 53 deleted
+READS 93271b7459df234b4372ddb87ebfea28
+== line 53 begun with a stray word
+READS 3f4ac76d9e3fdd5a56a6885d3889930e
+== line 67 deleted
+READS 391a01196cf62773bed8753fab1189f7
+== line 67 begun with a stray word
+READS a21d5d1762bc327fb97b0131922dd0eb
+== line 74 deleted
+READS 24fd476efc6bc046cdbcf1be917f1542
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
+== line 88 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 89:9 in 'behaviour': Unexpected token 0851:5147:0089 [T_END] at 852
+== line 88 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 88:71 in 'behaviour': Unexpected token 0850:5182:0088 [T_DO] at 851
+== line 95 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 28:1 component "…" is opened with '{' and never closed
+== line 95 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/relay.jmx 28:1 component "…" is opened with '{' and never closed

@@ -1,0 +1,157 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Noise generator"
+  slug: "noise-generator"
+  type: Optional "generator"
+  meta: Meta
+      summary: "Band-limited noise: white (flat to the bandwidth) or pink (equal power per octave), at an RMS level"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "G"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(1)
+      - "signals"
+  blocks: List(4)
+      - Parameters
+          parameters: List(6)
+              - Parameter
+                  name: "level"
+                  value: SourceText[15:17@606] "100"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "V"
+                      written: "100 mV"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RMS voltage of the noise"
+                  values: List(0)
+              - Parameter
+                  name: "bandwidth"
+                  value: SourceText[16:21@685] "20"
+                  quantity: Optional Quantity
+                      value: Double 20000.0
+                      unit: "Hz"
+                      written: "20 kHz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the highest frequency in it"
+                  values: List(0)
+              - Parameter
+                  name: "lowest"
+                  value: SourceText[17:18@760] "20"
+                  quantity: Optional Quantity
+                      value: Double 20.0
+                      unit: "Hz"
+                      written: "20 Hz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "where pink noise starts; white noise starts at zero"
+                  values: List(0)
+              - Parameter
+                  name: "pink"
+                  value: SourceText[18:16@860] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: ""
+                      written: "0"
+                  range: Optional Range
+                      minimum: SourceText[18:21@865] "0"
+                      maximum: SourceText[18:26@870] "1"
+                  step: Optional SourceText[18:33@877] "1"
+                  flags: List(1)
+                      - ParameterFlag.LIVE
+                  description: "0: white — flat to the bandwidth; 1: pink — equal power in every octave"
+                  values: List(0)
+              - Parameter
+                  name: "offset"
+                  value: SourceText[19:18@984] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "V"
+                      written: "0 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the voltage it wanders around"
+                  values: List(0)
+              - Parameter
+                  name: "seed"
+                  value: SourceText[20:16@1062] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "another seed, another noise of the same kind"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "positive"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "positive terminal"
+              - Pin
+                  name: "negative"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "negative terminal"
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "noise-source-symbol"
+          ports: Map(2)
+              a = "positive"
+              b = "negative"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Equations
+          equations: List(1)
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "positive"
+                  negative: "negative"
+                  expression: SourceText[34:40@1399] "offset + level * ((1 - pink) * band_noise(time, bandwidth, seed) + pink * pink_noise(time, lowest, bandwidth, seed))"
+                  type: null
+  line: Integer 5
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/sources/noise-generator.jmx 5:1 component "…" is opened with '{' and never closed
+== line 18 deleted
+READS 24da8fac0ac5855b3e82291cd161a9a6
+== line 18 begun with a stray word
+READS 89ada73c9a4a7281d4452474d1d30200
+== line 25 deleted
+READS 70489b6d950ae097d516befe39b80d18
+== line 25 begun with a stray word
+READS d7fdf663631e1dfa78c951ba86a3773d

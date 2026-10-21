@@ -1,0 +1,382 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Ceramic capacitor"
+  slug: "ceramic-capacitor"
+  type: Optional "capacitor"
+  meta: Meta
+      summary: "MLCC, X7R: capacitance falling with DC bias and temperature, ESR, ESL"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "the DC-bias and temperature curves an X7R MLCC's datasheet gives"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "C"
+          failure = Text
+              text: "short"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(7)
+      - Parameters
+          parameters: List(11)
+              - Parameter
+                  name: "capacitance"
+                  value: SourceText[17:23@931] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-5
+                      unit: "F"
+                      written: "10 uF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "nominal capacitance, at 0 V and 25 C"
+                  values: List(0)
+              - Parameter
+                  name: "V_half"
+                  value: SourceText[18:18@1012] "8"
+                  quantity: Optional Quantity
+                      value: Double 8.0
+                      unit: "V"
+                      written: "8 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the DC bias at which half the capacitance is left"
+                  values: List(0)
+              - Parameter
+                  name: "R_equivalent_series"
+                  value: SourceText[19:31@1124] "5"
+                  quantity: Optional Quantity
+                      value: Double 0.005
+                      unit: "Ohm"
+                      written: "5 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ESR"
+                  values: List(0)
+              - Parameter
+                  name: "L_equivalent_series"
+                  value: SourceText[20:31@1177] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-9
+                      unit: "H"
+                      written: "1 nH"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ESL: package and mounting"
+                  values: List(0)
+              - Parameter
+                  name: "temperature_curvature"
+                  value: SourceText[21:33@1254] "1.5e-5"
+                  quantity: Optional Quantity
+                      value: Double 1.5E-5
+                      unit: ""
+                      written: "1.5E-5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "X7R: about -15 % at 100 K either side of 25 C, as a share per kelvin squared"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[22:21@1368] "298.15"
+                  quantity: Optional Quantity
+                      value: Double 298.15
+                      unit: "K"
+                      written: "298.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the temperature the capacitance is given at"
+                  values: List(0)
+              - Parameter
+                  name: "voltage_rating"
+                  value: SourceText[23:26@1466] "25"
+                  quantity: Optional Quantity
+                      value: Double 25.0
+                      unit: "V"
+                      written: "25 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the rated voltage"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[24:24@1531] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "W"
+                      written: "0.1 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[25:30@1607] "200"
+                  quantity: Optional Quantity
+                      value: Double 200.0
+                      unit: "K/W"
+                      written: "200 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[26:33@1700] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "s"
+                      written: "10 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[27:21@1763] "125"
+                  quantity: Optional Quantity
+                      value: Double 125.0
+                      unit: "degC"
+                      written: "125 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "terminal_one"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "first terminal"
+              - Pin
+                  name: "terminal_two"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "second terminal"
+          buses: List(0)
+      - Nodes
+          nodes: List(2)
+              - InternalNode
+                  name: "plate"
+                  digital: false
+                  description: "the capacitance, behind ESR and ESL"
+              - InternalNode
+                  name: "series_current"
+                  digital: false
+                  description: "a node whose voltage above terminal_two is the series current, one volt per ampere"
+      - Symbol
+          uses: List(1)
+              - "capacitor-symbol"
+          ports: Map(2)
+              a = "terminal_one"
+              b = "terminal_two"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(2)
+              failed = SourceText[41:18@2283] "failed"
+              charge = SourceText[42:18@2308] "(terminal_one - terminal_two) / voltage_rating"
+      - Display
+          figures: Map(1)
+              overvoltage = SourceText[48:23@2450] "100 * abs(terminal_one - terminal_two) / voltage_rating"
+          units: Map(1)
+              overvoltage = "%"
+          captions: Map(1)
+              overvoltage = "of its rated voltage"
+      - Equations
+          equations: List(6)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "R_carrier"
+                  positive: null
+                  negative: null
+                  expression: SourceText[54:38@2803] "1"
+                  type: QuantityType
+                      name: "resistance"
+                      unit: "Ω"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_series"
+                  positive: null
+                  negative: null
+                  expression: SourceText[55:34@2839] "(series_current - terminal_two) / R_carrier"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "C_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[56:35@2918] "capacitance * (1 - temperature_curvature * (temperature - T_nominal) ^ 2)"
+                  type: QuantityType
+                      name: "capacitance"
+                      unit: "F"
+                      dimension: Dimension
+                          mass: Integer -1
+                          length: Integer -2
+                          time: Integer 4
+                          current: Integer 2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "series_current"
+                  negative: "terminal_two"
+                  expression: SourceText[57:50@3042] "R_carrier * terminal_one.current"
+                  type: null
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "terminal_one"
+                  negative: "plate"
+                  expression: SourceText[58:41@3116] "R_equivalent_series * terminal_one.current + d(L_equivalent_series * I_series)/dt"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "plate"
+                  negative: "terminal_two"
+                  expression: SourceText[59:41@3239] "d(C_now * V_half * atan((plate - terminal_two) / V_half))/dt"
+                  type: null
+      - Expectation
+          title: "charged faster than its nominal value would"
+          reference: "DC bias: 20 V through 100 Ω — a nominal 10 µF reaches 7.9 V in 0.5 ms"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[64:53@3527] "20 V"
+                  symbol: Optional.empty
+                  line: Integer 64
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "input"
+                      - "terminal_one"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[65:60@3592] "100 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 65
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      terminal_one = "terminal_one"
+                      terminal_two = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 66
+          sharedBench: null
+          duration: Double 5.0E-4
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "terminal_one"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[69:16@3732] "8.5"
+                  quantity: Optional Quantity
+                      value: Double 8.5
+                      unit: "V"
+                      written: "8.5 V"
+              maximum: Optional Amount
+                  expression: SourceText[69:25@3741] "18"
+                  quantity: Optional Quantity
+                      value: Double 18.0
+                      unit: "V"
+                      written: "18 V"
+              exact: null
+          line: Integer 62
+  line: Integer 7
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 7:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 8c73ea99f187cfdfae3e7e7d128a28e0
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 5edf876f2455fb09270f8b117a6d44a7
+== line 11 begun with a stray word
+READS bc8b2dc666459d9b0d8f99ac5a1eb78d
+== line 18 deleted
+READS 0d2553478117b096cd18ad93ca759b7f
+== line 18 begun with a stray word
+READS 2dc57abf223c7e9e54bb33f8a29e7746
+== line 25 deleted
+READS fa5c282336b913c0bf32081238c81924
+== line 25 begun with a stray word
+READS b7cea2a6304c092f85741928a46357ca
+== line 32 deleted
+READS 1d42f6fa74a903c571c62a0fd6d454c8
+== line 32 begun with a stray word
+READS 103c036147c8ed1fd59c427ceeda2c6c
+== line 53 deleted
+READS 355fe5e4febd486c662b133644c36276
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 53:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
+== line 60 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 61:135 'equations' holds lines, not a nested '{ … }'
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 62:135 'equations' holds lines, not a nested '{ … }'
+== line 67 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 62:5 expectation 'charged faster than its nominal value would' needs a measure and a criterion (near, within or is)
+== line 67 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/ceramic-capacitor.jmx 67:9 a part is 'ID component (connections) [settings] [place x, y]'

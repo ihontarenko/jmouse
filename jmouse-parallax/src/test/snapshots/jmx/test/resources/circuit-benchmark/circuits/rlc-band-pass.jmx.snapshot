@@ -1,0 +1,82 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "RLC band-pass at resonance"
+  slug: "rlc-band-pass"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: 1 V at 1592 Hz into 10 mH, 1 µF and 100 Ω; the output is across the resistor."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parts
+          parts: List(4)
+              - Part
+                  id: "G1"
+                  reference: "sine-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "in"
+                      negative = "0"
+                  settings: Map(2)
+                      amplitude = SourceText[11:69@628] "1"
+                      frequency = SourceText[11:84@643] "1591.55"
+                  symbol: Optional.empty
+                  line: Integer 11
+              - Part
+                  id: "L1"
+                  reference: "inductor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "in"
+                      - "middle"
+                  named: Map(0)
+                  settings: Map(1)
+                      inductance = SourceText[12:47@697] "0.01"
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "middle"
+                      - "out"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[13:50@751] "1e-6"
+                  symbol: Optional.empty
+                  line: Integer 13
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "out"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[14:43@798] "100"
+                  symbol: Optional.empty
+                  line: Integer 14
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[16:28@835] "0.02 s"
+  line: Integer 5
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/rlc-band-pass.jmx 5:1 circuit "…" is opened with '{' and never closed
+== line 11 deleted
+READS c613ffa7947a797d7fa8cb99d1d1dc9e
+== line 11 begun with a stray word
+READS 7dc95c11a7270a581513b64e055ec638

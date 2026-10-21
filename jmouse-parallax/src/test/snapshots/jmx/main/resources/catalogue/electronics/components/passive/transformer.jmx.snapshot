@@ -1,0 +1,577 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Transformer"
+  slug: "transformer"
+  type: Optional "transformer"
+  meta: Meta
+      summary: "Two coupled windings: self and mutual inductance, leakage, winding resistance, core loss and winding capacitance"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "coupled inductors as in Berkeley SPICE3 / ngspice 47 (L, L, K), with the core loss and capacitances of a small mains transformer"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "T"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(7)
+      - Parameters
+          parameters: List(15)
+              - Parameter
+                  name: "L_primary"
+                  value: SourceText[31:21@2182] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "H"
+                      written: "10 H"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "primary inductance: the magnetising inductance seen from the primary"
+                  values: List(0)
+              - Parameter
+                  name: "L_secondary"
+                  value: SourceText[32:23@2302] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "H"
+                      written: "0.1 H"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "secondary inductance: turns ratio √(L1 / L2) = 10"
+                  values: List(0)
+              - Parameter
+                  name: "coupling"
+                  value: SourceText[33:20@2398] "0.999"
+                  quantity: Optional Quantity
+                      value: Double 0.999
+                      unit: ""
+                      written: "0.999"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "K: 1 is a perfect core; below it, leakage"
+                  values: List(0)
+              - Parameter
+                  name: "R_primary"
+                  value: SourceText[34:21@2490] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "Ohm"
+                      written: "10 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "primary winding resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_secondary"
+                  value: SourceText[35:23@2568] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "Ohm"
+                      written: "0.1 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "secondary winding resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_core"
+                  value: SourceText[36:18@2641] "100"
+                  quantity: Optional Quantity
+                      value: Double 100000.0
+                      unit: "Ohm"
+                      written: "100 kOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "core loss across the primary: about half a watt at 230 V, a small mains core's no-load loss"
+                  values: List(0)
+              - Parameter
+                  name: "C_primary"
+                  value: SourceText[37:21@2785] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-9
+                      unit: "F"
+                      written: "1 nF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the primary's self-capacitance, between its many turns and layers"
+                  values: List(0)
+              - Parameter
+                  name: "C_secondary"
+                  value: SourceText[38:23@2902] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-9
+                      unit: "F"
+                      written: "1 nF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the secondary's self-capacitance"
+                  values: List(0)
+              - Parameter
+                  name: "C_interwinding"
+                  value: SourceText[39:26@2987] "200"
+                  quantity: Optional Quantity
+                      value: Double 2.0E-10
+                      unit: "F"
+                      written: "200 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "between the windings, across their insulation"
+                  values: List(0)
+              - Parameter
+                  name: "copper_temperature_coefficient"
+                  value: SourceText[40:42@3098] "0.00393"
+                  quantity: Optional Quantity
+                      value: Double 0.00393
+                      unit: ""
+                      written: "0.00393"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "copper: the windings' resistance rises 0.393 % per kelvin"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[41:21@3187] "298.15"
+                  quantity: Optional Quantity
+                      value: Double 298.15
+                      unit: "K"
+                      written: "298.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the temperature the resistances are given at"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[42:24@3284] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "W"
+                      written: "10 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[43:30@3360] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "K/W"
+                      written: "10 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[44:33@3453] "300"
+                  quantity: Optional Quantity
+                      value: Double 300.0
+                      unit: "s"
+                      written: "300 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[45:21@3516] "120"
+                  quantity: Optional Quantity
+                      value: Double 120.0
+                      unit: "degC"
+                      written: "120 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+      - Pins
+          pins: List(4)
+              - Pin
+                  name: "primary_one"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "primary, dotted end"
+              - Pin
+                  name: "primary_two"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "primary"
+              - Pin
+                  name: "secondary_one"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "secondary, dotted end"
+              - Pin
+                  name: "secondary_two"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "secondary"
+          buses: List(0)
+      - Nodes
+          nodes: List(2)
+              - InternalNode
+                  name: "primary_winding"
+                  digital: false
+                  description: "behind the primary's copper"
+              - InternalNode
+                  name: "secondary_winding"
+                  digital: false
+                  description: "behind the secondary's copper"
+      - State
+          variables: List(2)
+              - StateVariable
+                  name: "flux_primary"
+                  initial: SourceText[61:24@4085] "0"
+                  discrete: false
+                  range: Optional.empty
+                  description: "the flux the primary links, Φ1, in webers"
+                  length: Integer 0
+              - StateVariable
+                  name: "flux_secondary"
+                  initial: SourceText[62:26@4178] "0"
+                  discrete: false
+                  range: Optional.empty
+                  description: "the flux the secondary links, Φ2"
+                  length: Integer 0
+      - Symbol
+          uses: List(2)
+              - "transformer-symbol"
+              - "transformer-air-core-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              failed = SourceText[66:18@4328] "failed"
+      - Equations
+          equations: List(16)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "T_winding"
+                  positive: null
+                  negative: null
+                  expression: SourceText[71:39@4527] "temperature"
+                  type: QuantityType
+                      name: "temperature"
+                      unit: "K"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 1
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "warming"
+                  positive: null
+                  negative: null
+                  expression: SourceText[72:31@4570] "1 + copper_temperature_coefficient * (T_winding - T_nominal)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "stored"
+                  positive: null
+                  negative: null
+                  expression: SourceText[74:30@4763] "min(detail, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "L_mutual_scale"
+                  positive: null
+                  negative: null
+                  expression: SourceText[77:43@5047] "sqrt(L_primary * L_secondary)"
+                  type: QuantityType
+                      name: "inductance"
+                      unit: "H"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -2
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "leakage"
+                  positive: null
+                  negative: null
+                  expression: SourceText[78:31@5108] "1 - coupling ^ 2"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_primary"
+                  positive: null
+                  negative: null
+                  expression: SourceText[79:35@5160] "(flux_primary / L_primary - coupling * flux_secondary / L_mutual_scale) / leakage"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_secondary"
+                  positive: null
+                  negative: null
+                  expression: SourceText[80:37@5279] "(flux_secondary / L_secondary - coupling * flux_primary / L_mutual_scale) / leakage"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "primary_one"
+                  negative: "primary_winding"
+                  expression: SourceText[82:50@5415] "(primary_one - primary_winding) / (R_primary * warming)"
+                  type: null
+              - Equation
+                  form: EquationForm.DERIVATIVE
+                  subject: "flux_primary"
+                  positive: null
+                  negative: null
+                  expression: SourceText[83:30@5501] "primary_winding - primary_two"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "primary_winding"
+                  negative: "primary_two"
+                  expression: SourceText[84:50@5581] "I_primary + (primary_winding - primary_two) / R_core"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "primary_one"
+                  negative: "primary_two"
+                  expression: SourceText[85:46@5680] "d(stored * C_primary * (primary_one - primary_two))/dt"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "secondary_one"
+                  negative: "secondary_winding"
+                  expression: SourceText[87:54@5791] "(secondary_one - secondary_winding) / (R_secondary * warming)"
+                  type: null
+              - Equation
+                  form: EquationForm.DERIVATIVE
+                  subject: "flux_secondary"
+                  positive: null
+                  negative: null
+                  expression: SourceText[88:32@5885] "secondary_winding - secondary_two"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "secondary_winding"
+                  negative: "secondary_two"
+                  expression: SourceText[89:54@5973] "I_secondary"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "secondary_one"
+                  negative: "secondary_two"
+                  expression: SourceText[90:50@6035] "d(stored * C_secondary * (secondary_one - secondary_two))/dt"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "primary_one"
+                  negative: "secondary_one"
+                  expression: SourceText[92:48@6146] "d(stored * C_interwinding * (primary_one - secondary_one))/dt"
+                  type: null
+      - Expectation
+          title: "ten to one on a loaded secondary"
+          reference: "turns ratio √(L1 / L2) = 10: 100 V peak in, about 10 V peak out into 100 Ω"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "sine-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "input"
+                      negative = "0"
+                  settings: Map(2)
+                      amplitude = SourceText[97:76@6451] "100 V"
+                      frequency = SourceText[97:95@6470] "50 Hz"
+                  symbol: Optional.empty
+                  line: Integer 97
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(4)
+                      primary_one = "input"
+                      primary_two = "0"
+                      secondary_one = "output"
+                      secondary_two = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 98
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "output"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[99:50@6629] "100 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 99
+          sharedBench: null
+          duration: Double 0.06
+          temperature: null
+          realistic: false
+          measure: List(5)
+              - "maximum"
+              - "output"
+              - "after"
+              - "40"
+              - "ms"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[102:16@6708] "9"
+                  quantity: Optional Quantity
+                      value: Double 9.0
+                      unit: "V"
+                      written: "9 V"
+              maximum: Optional Amount
+                  expression: SourceText[102:23@6715] "10.2"
+                  quantity: Optional Quantity
+                      value: Double 10.2
+                      unit: "V"
+                      written: "10.2 V"
+              exact: null
+          line: Integer 95
+  line: Integer 21
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 21:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 9b7b0df65d89efa80d5b3b92a5031f3c
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 3947cbe8c6386fc356f0738bc4008ce8
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+READS 5591d5a485d9567a36cea4371770f2c5
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 18:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 25 deleted
+READS f317a181fe073179fed4cc0e3e83d899
+== line 25 begun with a stray word
+READS c07d24deb32022b76228162c07f55b6f
+== line 32 deleted
+READS a1ddc4851257943710f2138370977170
+== line 32 begun with a stray word
+READS 4c5266e2913a3ff265cc2cbf14da9853
+== line 39 deleted
+READS fd0daae7445bda55d7350f9b4134b5d8
+== line 39 begun with a stray word
+READS 8662939529823b8da2d8d05b3256cf8c
+== line 46 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 47:10 'parameters' holds lines, not a nested '{ … }'
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 48:10 'parameters' holds lines, not a nested '{ … }'
+== line 53 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 54:11 'pins' holds lines, not a nested '{ … }'
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 55:11 'pins' holds lines, not a nested '{ … }'
+== line 60 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 60:9 'flux_primary' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 60:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 67 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 68:15 'symbol uses' holds lines, not a nested '{ … }'
+== line 67 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 69:15 'symbol uses' holds lines, not a nested '{ … }'
+== line 74 deleted
+READS 5ec7443932d607a0eb495d95266cfb6d
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
+== line 88 deleted
+READS 7398d9c16e5e5450c25a126b939a6ccf
+== line 88 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/transformer.jmx 88:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

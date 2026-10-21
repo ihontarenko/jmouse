@@ -1,0 +1,906 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "2N2222A"
+  slug: "2n2222"
+  type: Optional "bjt"
+  meta: Meta
+      summary: "NPN small-signal switching transistor, 40 V, 600 mA"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "onsemi P2N2222A datasheet P2N2222A/D, Rev. 7, and its SPICE model"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(3)
+          designator = Text
+              text: "Q"
+          package = Text
+              text: "TO-92"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional "npn-transistor"
+  units: List(0)
+  uses: List(0)
+  blocks: List(9)
+      - Parameters
+          parameters: List(29)
+              - Parameter
+                  name: "I_saturation"
+                  value: SourceText[16:24@615] "14.34"
+                  quantity: Optional Quantity
+                      value: Double 1.434E-14
+                      unit: "A"
+                      written: "14.34 fA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IS: transport saturation current"
+                  values: List(0)
+              - Parameter
+                  name: "beta_forward"
+                  value: SourceText[17:24@697] "255.9"
+                  quantity: Optional Quantity
+                      value: Double 255.9
+                      unit: ""
+                      written: "255.9"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "BF: ideal forward current gain"
+                  values: List(0)
+              - Parameter
+                  name: "V_early"
+                  value: SourceText[18:19@772] "74.03"
+                  quantity: Optional Quantity
+                      value: Double 74.03
+                      unit: "V"
+                      written: "74.03 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VAF: forward Early voltage"
+                  values: List(0)
+              - Parameter
+                  name: "I_knee"
+                  value: SourceText[19:18@847] "0.2847"
+                  quantity: Optional Quantity
+                      value: Double 0.2847
+                      unit: "A"
+                      written: "0.2847 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IKF: above it the gain falls"
+                  values: List(0)
+              - Parameter
+                  name: "I_leakage_base_emitter"
+                  value: SourceText[20:34@941] "14.34"
+                  quantity: Optional Quantity
+                      value: Double 1.434E-14
+                      unit: "A"
+                      written: "14.34 fA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ISE: below a milliampere the gain falls"
+                  values: List(0)
+              - Parameter
+                  name: "leakage_emission_base_emitter"
+                  value: SourceText[21:41@1037] "1.307"
+                  quantity: Optional Quantity
+                      value: Double 1.307
+                      unit: ""
+                      written: "1.307"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "NE"
+                  values: List(0)
+              - Parameter
+                  name: "beta_reverse"
+                  value: SourceText[22:24@1072] "6.092"
+                  quantity: Optional Quantity
+                      value: Double 6.092
+                      unit: ""
+                      written: "6.092"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "BR: ideal reverse current gain"
+                  values: List(0)
+              - Parameter
+                  name: "R_base"
+                  value: SourceText[23:18@1146] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "Ohm"
+                      written: "10 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RB: base spreading resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_collector"
+                  value: SourceText[24:23@1230] "0.3"
+                  quantity: Optional Quantity
+                      value: Double 0.3
+                      unit: "Ohm"
+                      written: "0.3 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "collector bulk resistance: most of VCE(sat) at high current"
+                  values: List(0)
+              - Parameter
+                  name: "R_emitter"
+                  value: SourceText[25:21@1337] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "Ohm"
+                      written: "0.1 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "emitter resistance"
+                  values: List(0)
+              - Parameter
+                  name: "C_base_emitter"
+                  value: SourceText[26:26@1410] "22.01"
+                  quantity: Optional Quantity
+                      value: Double 2.201E-11
+                      unit: "F"
+                      written: "22.01 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CJE"
+                  values: List(0)
+              - Parameter
+                  name: "grading_base_emitter"
+                  value: SourceText[27:32@1469] "0.377"
+                  quantity: Optional Quantity
+                      value: Double 0.377
+                      unit: ""
+                      written: "0.377"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "MJE"
+                  values: List(0)
+              - Parameter
+                  name: "C_base_collector"
+                  value: SourceText[28:28@1518] "7.306"
+                  quantity: Optional Quantity
+                      value: Double 7.306E-12
+                      unit: "F"
+                      written: "7.306 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CJC"
+                  values: List(0)
+              - Parameter
+                  name: "grading_base_collector"
+                  value: SourceText[29:34@1577] "0.3416"
+                  quantity: Optional Quantity
+                      value: Double 0.3416
+                      unit: ""
+                      written: "0.3416"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "MJC"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_forward"
+                  value: SourceText[30:32@1628] "411.1"
+                  quantity: Optional Quantity
+                      value: Double 4.111E-10
+                      unit: "s"
+                      written: "411.1 ps"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TF: fT about 300 MHz"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_bias_dependence"
+                  value: SourceText[31:40@1706] "3"
+                  quantity: Optional Quantity
+                      value: Double 3.0
+                      unit: ""
+                      written: "3"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XTF"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_bias_voltage"
+                  value: SourceText[32:37@1756] "1.7"
+                  quantity: Optional Quantity
+                      value: Double 1.7
+                      unit: "V"
+                      written: "1.7 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VTF"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_current"
+                  value: SourceText[33:32@1804] "0.6"
+                  quantity: Optional Quantity
+                      value: Double 0.6
+                      unit: "A"
+                      written: "0.6 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ITF"
+                  values: List(0)
+              - Parameter
+                  name: "transit_time_reverse"
+                  value: SourceText[34:32@1857] "46.91"
+                  quantity: Optional Quantity
+                      value: Double 4.691E-8
+                      unit: "s"
+                      written: "46.91 ns"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "TR: the storage time of a saturated switch"
+                  values: List(0)
+              - Parameter
+                  name: "beta_temperature_exponent"
+                  value: SourceText[35:37@1954] "1.5"
+                  quantity: Optional Quantity
+                      value: Double 1.5
+                      unit: ""
+                      written: "1.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "XTB"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[36:21@1991] "298.15"
+                  quantity: Optional Quantity
+                      value: Double 298.15
+                      unit: "K"
+                      written: "298.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the temperature the figures above are measured at"
+                  values: List(0)
+              - Parameter
+                  name: "V_breakdown"
+                  value: SourceText[37:23@2092] "60"
+                  quantity: Optional Quantity
+                      value: Double 60.0
+                      unit: "V"
+                      written: "60 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "avalanche onset: an approximation — VCEO is guaranteed to 40 V, a typical part holds more"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[39:24@2333] "0.625"
+                  quantity: Optional Quantity
+                      value: Double 0.625
+                      unit: "W"
+                      written: "0.625 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[40:30@2409] "200"
+                  quantity: Optional Quantity
+                      value: Double 200.0
+                      unit: "K/W"
+                      written: "200 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[41:33@2502] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: "s"
+                      written: "2 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[42:21@2565] "150"
+                  quantity: Optional Quantity
+                      value: Double 150.0
+                      unit: "degC"
+                      written: "150 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+              - Parameter
+                  name: "beta_forward_spread"
+                  value: SourceText[43:31@2664] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "hFE 100 ... 300 at 150 mA: about half either way"
+                  values: List(0)
+              - Parameter
+                  name: "V_collector_emitter_maximum"
+                  value: SourceText[44:39@2770] "40"
+                  quantity: Optional Quantity
+                      value: Double 40.0
+                      unit: "V"
+                      written: "40 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VCEO"
+                  values: List(0)
+              - Parameter
+                  name: "I_collector_maximum"
+                  value: SourceText[45:31@2817] "600"
+                  quantity: Optional Quantity
+                      value: Double 0.6
+                      unit: "A"
+                      written: "600 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IC, continuous"
+                  values: List(0)
+      - Pins
+          pins: List(3)
+              - Pin
+                  name: "emitter"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "emitter"
+              - Pin
+                  name: "base"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "base"
+              - Pin
+                  name: "collector"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "collector"
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "npn-transistor-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Expectation
+          title: "gain at a tenth of a milliampere"
+          reference: "hFE at least 35 at IC 0.1 mA, VCE 10 V"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[58:57@3271] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 58
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "base"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[59:52@3328] "1 uA"
+                  symbol: Optional.empty
+                  line: Integer 59
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "base"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 60
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "operating"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[63:16@3469] "-0.3"
+                  quantity: Optional Quantity
+                      value: Double -3.0E-4
+                      unit: "A"
+                      written: "-0.3 mA"
+              maximum: Optional Amount
+                  expression: SourceText[63:27@3480] "-35"
+                  quantity: Optional Quantity
+                      value: Double -3.5E-5
+                      unit: "A"
+                      written: "-35 uA"
+              exact: null
+          line: Integer 56
+      - Expectation
+          title: "gain at half an ampere"
+          reference: "hFE at least 40 at IC 500 mA, VCE 10 V"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[68:57@3664] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 68
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "base"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[69:52@3721] "5 mA"
+                  symbol: Optional.empty
+                  line: Integer 69
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "base"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 70
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "operating"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[73:16@3862] "-1.5"
+                  quantity: Optional Quantity
+                      value: Double -1.5
+                      unit: "A"
+                      written: "-1.5 A"
+              maximum: Optional Amount
+                  expression: SourceText[73:26@3872] "-0.2"
+                  quantity: Optional Quantity
+                      value: Double -0.2
+                      unit: "A"
+                      written: "-0.2 A"
+              exact: null
+          line: Integer 66
+      - Expectation
+          title: "DC current gain at about 150 mA"
+          reference: "hFE 100 … 300 at IC 150 mA, VCE 10 V"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[78:57@4063] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 78
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "base"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[79:52@4120] "1 mA"
+                  symbol: Optional.empty
+                  line: Integer 79
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "base"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 80
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "operating"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[83:16@4261] "-0.3"
+                  quantity: Optional Quantity
+                      value: Double -0.3
+                      unit: "A"
+                      written: "-0.3 A"
+              maximum: Optional Amount
+                  expression: SourceText[83:26@4271] "-0.1"
+                  quantity: Optional Quantity
+                      value: Double -0.1
+                      unit: "A"
+                      written: "-0.1 A"
+              exact: null
+          line: Integer 76
+      - Expectation
+          title: "saturated at 150 mA with 15 mA of base current"
+          reference: "VCE(sat) at most 0.3 V at IC 150 mA, IB 15 mA"
+          bench: List(5)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[88:51@4480] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 88
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "collector"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[89:55@4540] "64.7 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 89
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[90:55@4604] "1 nF"
+                  symbol: Optional.empty
+                  line: Integer 90
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "base"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[91:52@4661] "15 mA"
+                  symbol: Optional.empty
+                  line: Integer 91
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "base"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 92
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "collector"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[95:16@4798] "0.06"
+                  quantity: Optional Quantity
+                      value: Double 0.06
+                      unit: "V"
+                      written: "0.06 V"
+              maximum: Optional Amount
+                  expression: SourceText[95:26@4808] "0.3"
+                  quantity: Optional Quantity
+                      value: Double 0.3
+                      unit: "V"
+                      written: "0.3 V"
+              exact: null
+          line: Integer 86
+      - Expectation
+          title: "base-emitter voltage in saturation"
+          reference: "VBE(sat) 0.6 … 1.2 V at IC 150 mA, IB 15 mA"
+          bench: List(5)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[100:51@5002] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 100
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "collector"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[101:55@5062] "64.7 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 101
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[102:55@5126] "1 nF"
+                  symbol: Optional.empty
+                  line: Integer 102
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "base"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[103:52@5183] "15 mA"
+                  symbol: Optional.empty
+                  line: Integer 103
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "base"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 104
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "base"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[107:16@5315] "0.6"
+                  quantity: Optional Quantity
+                      value: Double 0.6
+                      unit: "V"
+                      written: "0.6 V"
+              maximum: Optional Amount
+                  expression: SourceText[107:25@5324] "1.2"
+                  quantity: Optional Quantity
+                      value: Double 1.2
+                      unit: "V"
+                      written: "1.2 V"
+              exact: null
+          line: Integer 98
+      - Expectation
+          title: "off when the base is at the emitter"
+          reference: "collector cut-off current at most 10 nA"
+          bench: List(2)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[112:57@5521] "40 V"
+                  symbol: Optional.empty
+                  line: Integer 112
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "0"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 113
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "operating"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[116:16@5659] "-10"
+                  quantity: Optional Quantity
+                      value: Double -1.0E-8
+                      unit: "A"
+                      written: "-10 nA"
+              maximum: Optional Amount
+                  expression: SourceText[116:26@5669] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 A"
+              exact: null
+          line: Integer 110
+  line: Integer 4
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 4:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS f38c729acb8d626725c814d8c5be321e
+== line 11 begun with a stray word
+READS 293a019ffa1f656d7bc5a6656616a903
+== line 18 deleted
+READS 71242aa640486926f79c1d7347f72025
+== line 18 begun with a stray word
+READS 80f7719a332df4b8aa8fb2d3edca54cd
+== line 25 deleted
+READS 72cd1bbf8040c8160adbe088b8292ece
+== line 25 begun with a stray word
+READS 8930774e6ca2642ee7630ccbd21f4c6a
+== line 32 deleted
+READS ba94ce8dbcd1b8bd622c25514bd86789
+== line 32 begun with a stray word
+READS b3789c718dc35735a953a985040e5f67
+== line 39 deleted
+READS 52bbe4645298a5e4f35c77b0dd8d356f
+== line 39 begun with a stray word
+READS fba978a797a8064421ca9162dba4ca59
+== line 46 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 47:10 'parameters' holds lines, not a nested '{ … }'
+== line 46 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 48:10 'parameters' holds lines, not a nested '{ … }'
+== line 60 deleted
+READS f4afe9c5ef866cea1de3bd9ca3482760
+== line 60 begun with a stray word
+READS e28fc03b48fe99cf44cfce51629eb25e
+== line 67 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 67:13 'V1' is not a criterion: near, within or is
+== line 67 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 67:9 'zzz' is not a criterion: near, within or is
+== line 74 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 75:5 'expect' is not a criterion: near, within or is
+== line 74 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 74:5 'zzz' is not a criterion: near, within or is
+== line 81 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 85:5 'expect' is not a criterion: near, within or is
+== line 81 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n2222.jmx 81:9 a part is 'ID component (connections) [settings] [place x, y]'
+== line 88 deleted
+READS 5992a51c81169928a21b0f33d8793f9c
+== line 88 begun with a stray word
+READS 611813624819bf64cd24bfa75a178514

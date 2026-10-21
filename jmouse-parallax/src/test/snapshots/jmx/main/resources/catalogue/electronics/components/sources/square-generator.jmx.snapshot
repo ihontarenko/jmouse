@@ -1,0 +1,132 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Square generator"
+  slug: "square-generator"
+  type: Optional "generator"
+  meta: Meta
+      summary: "An ideal square voltage: high for the duty's share of every period, low for the rest"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "G"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(4)
+      - Parameters
+          parameters: List(4)
+              - Parameter
+                  name: "high"
+                  value: SourceText[13:16@551] "5"
+                  quantity: Optional Quantity
+                      value: Double 5.0
+                      unit: "V"
+                      written: "5 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the level while on"
+                  values: List(0)
+              - Parameter
+                  name: "low"
+                  value: SourceText[14:15@624] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "V"
+                      written: "0 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the level while off"
+                  values: List(0)
+              - Parameter
+                  name: "frequency"
+                  value: SourceText[15:21@705] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "Hz"
+                      written: "1 kHz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how many periods a second"
+                  values: List(0)
+              - Parameter
+                  name: "duty"
+                  value: SourceText[16:16@781] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional Range
+                      minimum: SourceText[16:23@788] "0.01"
+                      maximum: SourceText[16:31@796] "0.99"
+                  step: Optional SourceText[16:41@806] "0.01"
+                  flags: List(1)
+                      - ParameterFlag.LIVE
+                  description: "share of each period spent high"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "positive"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "positive terminal"
+              - Pin
+                  name: "negative"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "negative terminal"
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "square-source-symbol"
+          ports: Map(2)
+              a = "positive"
+              b = "negative"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Equations
+          equations: List(1)
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "positive"
+                  negative: "negative"
+                  expression: SourceText[30:40@1111] "low + (high - low) * (mod(frequency * time, 1) < duty)"
+                  type: null
+  line: Integer 5
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/sources/square-generator.jmx 5:1 component "…" is opened with '{' and never closed
+== line 25 deleted
+READS a565c547b443da69426f454f4bfab390
+== line 25 begun with a stray word
+READS 0ef23d3af88771618f34f7d496b24467
+== line 32 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/square-generator.jmx 5:1 component "…" is opened with '{' and never closed
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/square-generator.jmx 32:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view

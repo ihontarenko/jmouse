@@ -1,0 +1,248 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "I²C target"
+  slug: "i2c-target"
+  type: Optional "interface"
+  meta: Meta
+      summary: "The I²C bus protocol of a target: address, ACK, bytes in and out, START and STOP"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "NXP UM10204, I²C-bus specification and user manual, rev. 7.0 (2021): §3.1 bit transfer, START and STOP, byte format, ACK, 7-bit addressing"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "U"
+          failure = Text
+              text: "short Vcc GND"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(1)
+      - "cmos-hc"
+  blocks: List(6)
+      - Parameters
+          parameters: List(2)
+              - Parameter
+                  name: "address"
+                  value: SourceText[26:19@1604] "8"
+                  quantity: Optional Quantity
+                      value: Double 8.0
+                      unit: ""
+                      written: "8"
+                  range: Optional Range
+                      minimum: SourceText[26:24@1609] "8"
+                      maximum: SourceText[26:29@1614] "119"
+                  step: Optional SourceText[26:38@1623] "1"
+                  flags: List(1)
+                      - ParameterFlag.INTEGER
+                  description: "its 7-bit address (the reserved ones excluded)"
+                  values: List(0)
+              - Parameter
+                  name: "data_hold"
+                  value: SourceText[27:21@1704] "300"
+                  quantity: Optional Quantity
+                      value: Double 3.0E-7
+                      unit: "s"
+                      written: "300 ns"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "SDA changes this long after SCL falls: tHD;DAT"
+                  values: List(0)
+      - Pins
+          pins: List(4)
+              - Pin
+                  name: "scl"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "serial clock, driven by the controller"
+              - Pin
+                  name: "sda"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.BIDIRECTIONAL
+                  attributes: List(1)
+                      - "open-drain"
+                  description: "serial data: pulled low to send a 0 or an ACK, else let go"
+              - Pin
+                  name: "GND"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.GROUND
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "Vcc"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.POWER
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+          buses: List(0)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional "box"
+          sides: Map(2)
+              left = List(2)
+                  - "scl"
+                  - "sda"
+              power = List(2)
+                  - "Vcc"
+                  - "GND"
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Bench
+          title: "i2c-bus"
+          parts: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[45:47@2385] "5 V"
+                  symbol: Optional.empty
+                  line: Integer 45
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "scl"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[46:45@2433] "4.7 kOhm"
+                  symbol: Optional.empty
+                  line: Integer 46
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vcc"
+                      - "sda"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[47:45@2486] "4.7 kOhm"
+                  symbol: Optional.empty
+                  line: Integer 47
+      - State
+          variables: List(6)
+              - StateVariable
+                  name: "phase"
+                  initial: SourceText[51:17@2530] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "where the transaction stands: IDLE, ADDRESSING, WRITTEN_TO or READ_FROM"
+                  length: Integer 0
+              - StateVariable
+                  name: "bits"
+                  initial: SourceText[52:16@2640] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "bits of the byte clocked so far; ACKNOWLEDGING while the ninth clock is"
+                  length: Integer 0
+              - StateVariable
+                  name: "shift"
+                  initial: SourceText[53:17@2752] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the byte coming in, most significant bit first"
+                  length: Integer 0
+              - StateVariable
+                  name: "outgoing"
+                  initial: SourceText[54:20@2841] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the byte going out"
+                  length: Integer 0
+              - StateVariable
+                  name: "position"
+                  initial: SourceText[55:20@2899] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "bytes passed in this transaction since the address"
+                  length: Integer 0
+              - StateVariable
+                  name: "selection"
+                  initial: SourceText[56:21@2990] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the address byte that chose it: its last bit says whether it is read or written"
+                  length: Integer 0
+      - Behaviour
+          script: ScriptNode "SCRIPT['behaviour']"
+          source: SourceText[60:9@3120] "final let IDLE = 0             # not addressed: it only listens for a START\n        final let ADDRESSING = 1       # a START was heard; the address byte is coming in\n        final let WRITTEN_TO = 2       # its address was heard with the write bit\n        final let READ_FROM = 3        # its address was heard with the read bit\n        final let ACKNOWLEDGING = 9    # the count of bits while the ninth clock — the ACK — is on the bus\n\n        function own_address()\n            return address\n        end\n\n        function acknowledges()\n            return true\n        end\n\n        function received(value, index)\n        end\n\n        function transmitted(index)\n            return 255\n        end\n\n        function stopped()\n        end\n\n        function release()\n            drive('sda', 1, data_hold)\n        end\n\n        # The transaction is lost or not ours: the bus is let go of until the next START.\n        function forget()\n            phase = IDLE\n            bits = 0\n            release()\n        end\n\n        # The next byte out: asked of the chip, its first bit put on the line at once.\n        function send_next()\n            outgoing = transmitted(position)\n            position = position + 1\n            bits = 0\n            drive('sda', bit(outgoing, 7), data_hold)\n        end\n\n        # The ninth clock is over: the next byte begins.\n        function next_byte()\n            bits = 0\n            shift = 0\n            if phase == ADDRESSING then\n                if bit(selection, 0) == 1 then\n                    phase = READ_FROM\n                    send_next()\n                else\n                    phase = WRITTEN_TO\n                    release()\n                end\n            else\n                release()\n            end\n        end\n\n        # Eight bits are in: an address that is ours and answered, or a data byte for the chip — acknowledged either way.\n        function byte_in()\n            if phase == ADDRESSING then\n                if shift_right(shift, 1) != own_address() or not acknowledges() then\n                    forget()\n                    return\n                end\n                selection = shift\n            else\n                received(shift, position)\n                position = position + 1\n            end\n            bits = ACKNOWLEDGING\n            drive('sda', 0, data_hold)\n        end\n\n        # SDA falling while SCL is high: a START, or a repeated one.\n        on falling 'sda' when scl == 1 do\n            phase = ADDRESSING\n            bits = 0\n            shift = 0\n            position = 0\n            release()\n        end\n\n        # SDA rising while SCL is high: a STOP.\n        on rising 'sda' when scl == 1 do\n            if phase != IDLE then\n                stopped()\n            end\n            forget()\n        end\n\n        on rising 'scl' when phase != IDLE do\n            if not known(sda) then\n                forget()\n            elseif phase == READ_FROM then\n                if bits < 8 then\n                    bits = bits + 1\n                elseif bits == 8 then\n                    # The controller's ACK: a high here is its NACK, the last byte it wanted.\n                    bits = ACKNOWLEDGING\n                    if sda == 1 then\n                        phase = IDLE\n                    end\n                end\n            elseif bits < 8 then\n                shift = shift * 2 + sda\n                bits = bits + 1\n            end\n        end\n\n        on falling 'scl' when phase != IDLE do\n            if phase == READ_FROM then\n                if bits < 8 then\n                    drive('sda', bit(outgoing, 7 - bits), data_hold)\n                elseif bits == 8 then\n                    release()\n                else\n                    send_next()\n                end\n            elseif bits == 8 then\n                byte_in()\n            elseif bits == ACKNOWLEDGING then\n                next_byte()\n            end\n        end"
+  line: Integer 15
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 15:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS cf49a0c1cd49bc8e82a82b0a5aa15b0c
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 561c1fe630035062588eb61adac57fe7
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 18 deleted
+READS 06583cea3e28404012120b20234d46cb
+== line 18 begun with a stray word
+READS 7ea86a47be8bf23626dccb0a8a038337
+== line 25 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 25:9 'address' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 25:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 32 deleted
+READS 46509bfaced9746286b5cf0f1a097ca1
+== line 32 begun with a stray word
+READS e5d696868cae705b5ee403c8876eec3e
+== line 39 deleted
+READS 3b237809759ef059a6e52f2ca4652feb
+== line 39 begun with a stray word
+READS 1cd3b43a2a629667b52e425db558369a
+== line 46 deleted
+READS 47d52feb49cb7f33404ef4740175d7ae
+== line 46 begun with a stray word
+READS ad30d54d8d7c77ea9b2d96e8cdececa0
+== line 53 deleted
+READS bcb4937af83f2d00e03b7f6cc66f8c52
+== line 53 begun with a stray word
+READS ddd3dccfcc231a4599b5e970dd51c4c2
+== line 60 deleted
+READS 597e89575d1d2c32140d186bf6a6f89a
+== line 60 begun with a stray word
+READS b57f9100498cceda1aa203138bdb5789
+== line 67 deleted
+READS 5c0f2e599c63c36fe1b39b038d46f0b3
+== line 67 begun with a stray word
+READS 38999993fb2fcb483ab40425405b738c
+== line 74 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 74:9 in 'behaviour': Unexpected token 0610:3705:0074 [T_END] at 611
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 75:9 in 'behaviour': Unexpected token 0618:3740:0075 [T_END] at 619
+== line 81 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 81:9 in 'behaviour': Unexpected token 0631:3830:0081 [T_END] at 632
+== line 81 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/i2c-target.jmx 82:9 in 'behaviour': Unexpected token 0636:3852:0082 [T_END] at 637

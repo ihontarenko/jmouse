@@ -20,8 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Everything a read jMX document holds, written out as text, so that two readers can be compared by what they built
- * rather than by how: every record component in order, every {@link SourceText} with its line, column and offset, and
+ * Everything a read jMX document holds, written out as text, so that a reading can be compared by what it built
+ * rather than by how — with the snapshot recorded of it, or with the same text written back and read again: every record
+ * component in order, every {@link SourceText} with its line, column and offset, and
  * every jMS node with its kind, its span and its children.
  *
  * <p>Without positions it says what a document holds and nothing about where: no line, column or offset, no
@@ -69,9 +70,8 @@ final class DocumentSnapshot {
     }
 
     /**
-     * A drawing's value as the formula it is: the frozen reader wrote it in SI ({@code (0.06)}), rounded to twelve
-     * digits and spaced token by token; the reader now keeps it as written ({@code 60 ms}), for jMF to read with its
-     * units. Both are compared as the tree a drawing makes of them, every constant to eleven digits.
+     * A drawing's value as the formula it is: the tree a drawing makes of it, every constant to eleven digits — so a
+     * value spelled another way that means the same number ({@code 60 ms}, {@code 0.06 s}) reads the same.
      */
     private static String drawingValue(String formula) {
         try {

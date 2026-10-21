@@ -1,0 +1,146 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Transformer with a centre tap"
+  slug: "center-tapped-transformer-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A transformer whose secondary is tapped in its middle, as drawn on a schematic: two halves of one winding"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 64.0
+          paths: List(0)
+          pins: List(5)
+              - SymbolPin
+                  pin: "primary_one"
+                  x: Double -40.0
+                  y: Double -20.0
+                  label: ""
+              - SymbolPin
+                  pin: "primary_two"
+                  x: Double -40.0
+                  y: Double 20.0
+                  label: ""
+              - SymbolPin
+                  pin: "secondary_one"
+                  x: Double 40.0
+                  y: Double -30.0
+                  label: ""
+              - SymbolPin
+                  pin: "center_tap"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "secondary_two"
+                  x: Double 40.0
+                  y: Double 30.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -42.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 46.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(2)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-40-20H-18C-3-20-3-7-18-7C-3-7-3 7-18 7C-3 7-3 20-18 20H-40M-2-32V32M2-32V32M40-30H18C33-30 33-15 18-15C33-15 33 0 18 0C33 0 33 15 18 15C33 15 33 30 18 30H40M18 0H40"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 11
+                  line: Integer 10
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.35], right=Binary[operator=MULTIPLY, left=Constant[value=0.65], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 16
+                  line: Integer 15
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/center-tapped-transformer-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 055d056cb053c85825bcce38ddedd883
+== line 4 begun with a stray word
+READS 9b93b593dce165249169e4e00c8fa285
+== line 11 deleted
+READS ac7413fcaab2d8e8ed6f48d95b8616cc
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/center-tapped-transformer-symbol.jmx 11:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 18 deleted
+READS 87f44771d886a16e3d84b9512c2b8b67
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/center-tapped-transformer-symbol.jmx 18:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 25 deleted
+READS 244903e4931198cf73b613b527339e73
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/center-tapped-transformer-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta

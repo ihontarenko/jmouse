@@ -1,0 +1,41 @@
+ExperienceDocument
+  kind: Kind.FUNCTIONS
+  title: "Signals"
+  slug: "signals"
+  type: Optional.empty
+  meta: Meta
+      summary: "Band-limited white and pink noise as functions of the time: smooth, repeatable, RMS 1"
+      description: null
+      category: null
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Formulas
+          definitions: Optional SourceText[16:9@975] "# where in its slice the k-th sine sits, 0.05 … 0.95, and its phase: deterministic scatter\n        slice_jitter(k, seed) = 0.5 + 0.45 * sin(12.9898 * k + 78.233 * seed)\n        slice_phase(k, seed) = pi * (1 + sin(39.3468 * k + 11.135 * seed))\n\n        # white noise up to `bandwidth`: 48 sines, equally strong, evenly over the band — RMS 1\n        band_noise(t, bandwidth, seed) = sqrt(2 / 48) * sum(k, 1, 48, sin(2 * pi * bandwidth * (k - 1 + slice_jitter(k, seed)) / 48 * t + slice_phase(k, seed)))\n\n        # pink noise from `lowest` to `highest`: 48 sines, equally strong, evenly over the band's LOGARITHM — the same\n        # power in every octave, which is what pink means — RMS 1\n        pink_noise(t, lowest, highest, seed) = sqrt(2 / 48) * sum(k, 1, 48, sin(2 * pi * lowest * (highest / lowest)^((k - 1 + slice_jitter(k, seed)) / 48) * t + slice_phase(k, seed)))"
+  line: Integer 10
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/functions/signals.jmx 10:1 functions "…" is opened with '{' and never closed
+== line 4 deleted
+READS 520d96e4067f621e02b5d244b5694e0c
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/functions/signals.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/functions/signals.jmx 11:9 'summary' is not a block of a functions; it holds formulas, heat, meta
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/functions/signals.jmx 11:5 'zzz' is not a block of a functions; it holds formulas, heat, meta
+== line 18 deleted
+READS fe200ad3e25a8166fb543a2920520152
+== line 18 begun with a stray word
+READS e751bde1d705549ce69debd2b1945468
+== line 25 deleted
+READS 68904eb191ed2579cde8277f51ff80c4
+== line 25 begun with a stray word
+READS 5acbb3e94373208e2da1b8ef1a65bde6

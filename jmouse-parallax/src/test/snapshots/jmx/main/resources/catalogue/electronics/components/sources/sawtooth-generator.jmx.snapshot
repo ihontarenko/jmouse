@@ -1,0 +1,125 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Sawtooth generator"
+  slug: "sawtooth-generator"
+  type: Optional "generator"
+  meta: Meta
+      summary: "An ideal sawtooth voltage: a straight rise over the whole period and an instant fall"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "G"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(4)
+      - Parameters
+          parameters: List(3)
+              - Parameter
+                  name: "high"
+                  value: SourceText[12:16@499] "5"
+                  quantity: Optional Quantity
+                      value: Double 5.0
+                      unit: "V"
+                      written: "5 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the level each ramp reaches"
+                  values: List(0)
+              - Parameter
+                  name: "low"
+                  value: SourceText[13:15@565] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "V"
+                      written: "0 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the level each ramp starts from"
+                  values: List(0)
+              - Parameter
+                  name: "frequency"
+                  value: SourceText[14:21@642] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000.0
+                      unit: "Hz"
+                      written: "1 kHz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how many periods a second"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "positive"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "positive terminal"
+              - Pin
+                  name: "negative"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "negative terminal"
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "sawtooth-source-symbol"
+          ports: Map(2)
+              a = "positive"
+              b = "negative"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Equations
+          equations: List(1)
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "positive"
+                  negative: "negative"
+                  expression: SourceText[28:40@960] "low + (high - low) * mod(frequency * time, 1)"
+                  type: null
+  line: Integer 4
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 4:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 11:9 'high' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 18 deleted
+READS 84d85d1aea34134ddf5f24c935d6c0b1
+== line 18 begun with a stray word
+READS 0aa36842a5c4b1779a0af5e3a69288ee
+== line 25 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 26:15 'symbol uses' holds lines, not a nested '{ … }'
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/sawtooth-generator.jmx 27:15 'symbol uses' holds lines, not a nested '{ … }'

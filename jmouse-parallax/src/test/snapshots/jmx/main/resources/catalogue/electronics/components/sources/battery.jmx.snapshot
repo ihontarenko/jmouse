@@ -1,0 +1,324 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Battery"
+  slug: "battery"
+  type: Optional "source"
+  meta: Meta
+      summary: "Battery: EMF by state of charge, internal resistance, polarisation sag and recovery"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "the Thevenin battery model (EMF + R0 + one RC), a lithium-ion cell's figures"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "B"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(6)
+      - Parameters
+          parameters: List(10)
+              - Parameter
+                  name: "V_full"
+                  value: SourceText[17:18@916] "4.2"
+                  quantity: Optional Quantity
+                      value: Double 4.2
+                      unit: "V"
+                      written: "4.2 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "EMF when full"
+                  values: List(0)
+              - Parameter
+                  name: "V_empty"
+                  value: SourceText[18:19@980] "3.0"
+                  quantity: Optional Quantity
+                      value: Double 3.0
+                      unit: "V"
+                      written: "3 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "EMF when empty"
+                  values: List(0)
+              - Parameter
+                  name: "state_of_charge"
+                  value: SourceText[19:27@1052] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional Range
+                      minimum: SourceText[19:32@1057] "0"
+                      maximum: SourceText[19:37@1062] "1"
+                  step: Optional SourceText[19:44@1069] "0.05"
+                  flags: List(1)
+                      - ParameterFlag.LIVE
+                  description: "how full it is"
+                  values: List(0)
+              - Parameter
+                  name: "R_internal"
+                  value: SourceText[20:22@1118] "50"
+                  quantity: Optional Quantity
+                      value: Double 0.05
+                      unit: "Ohm"
+                      written: "50 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "R0: the drop under load, at once"
+                  values: List(0)
+              - Parameter
+                  name: "R_polarisation"
+                  value: SourceText[21:26@1204] "30"
+                  quantity: Optional Quantity
+                      value: Double 0.03
+                      unit: "Ohm"
+                      written: "30 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "R1: the further sag, over the polarisation time"
+                  values: List(0)
+              - Parameter
+                  name: "C_polarisation"
+                  value: SourceText[22:26@1301] "300"
+                  quantity: Optional Quantity
+                      value: Double 300.0
+                      unit: "F"
+                      written: "300 F"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "C1: with R1, a sag over about ten seconds"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[23:24@1390] "10"
+                  quantity: Optional Quantity
+                      value: Double 10.0
+                      unit: "W"
+                      written: "10 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it may deliver"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[24:30@1465] "20"
+                  quantity: Optional Quantity
+                      value: Double 20.0
+                      unit: "K/W"
+                      written: "20 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[25:33@1558] "300"
+                  quantity: Optional Quantity
+                      value: Double 300.0
+                      unit: "s"
+                      written: "300 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[26:21@1621] "60"
+                  quantity: Optional Quantity
+                      value: Double 60.0
+                      unit: "degC"
+                      written: "60 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "positive"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "positive terminal"
+              - Pin
+                  name: "negative"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "negative terminal"
+          buses: List(0)
+      - Nodes
+          nodes: List(2)
+              - InternalNode
+                  name: "emf"
+                  digital: false
+                  description: "the EMF, behind the internal resistance"
+              - InternalNode
+                  name: "polarised"
+                  digital: false
+                  description: "behind the polarisation RC"
+      - Symbol
+          uses: List(1)
+              - "battery-symbol"
+          ports: Map(2)
+              a = "positive"
+              b = "negative"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(2)
+              failed = SourceText[40:18@2092] "failed"
+              state_of_charge = SourceText[41:27@2126] "state_of_charge"
+      - Equations
+          equations: List(4)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "EMF"
+                  positive: null
+                  negative: null
+                  expression: SourceText[48:29@2341] "V_empty + (V_full - V_empty) * (0.8 * state_of_charge + 0.2 * (1 - (1 - state_of_charge) ^ 4))"
+                  type: QuantityType
+                      name: "voltage"
+                      unit: "V"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.VOLTAGE
+                  subject: null
+                  positive: "emf"
+                  negative: "negative"
+                  expression: SourceText[49:35@2471] "EMF"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "polarised"
+                  negative: "emf"
+                  expression: SourceText[50:36@2511] "(polarised - emf) / R_polarisation + d(C_polarisation * (polarised - emf))/dt"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "positive"
+                  negative: "polarised"
+                  expression: SourceText[51:41@2630] "(positive - polarised) / R_internal"
+                  type: null
+      - Expectation
+          title: "sags under a 2 A load at once"
+          reference: "R0 50 mΩ: 0.1 V at once from a full cell"
+          bench: List(2)
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "0"
+                      - "positive"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[56:56@2851] "2 A"
+                  symbol: Optional.empty
+                  line: Integer 56
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "positive"
+                      negative = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 57
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "positive"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[60:16@2971] "4.05"
+                  quantity: Optional Quantity
+                      value: Double 4.05
+                      unit: "V"
+                      written: "4.05 V"
+              maximum: Optional Amount
+                  expression: SourceText[60:26@2981] "4.11"
+                  quantity: Optional Quantity
+                      value: Double 4.11
+                      unit: "V"
+                      written: "4.11 V"
+              exact: null
+          line: Integer 54
+  line: Integer 7
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 7:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 78182040054466d607721de54f788460
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 727836d872fd86992b306f3575acea49
+== line 11 begun with a stray word
+READS b8af34f90aef9b152e58ce72be355b0c
+== line 18 deleted
+READS 5395653ba6c513fab485267917ff108e
+== line 18 begun with a stray word
+READS 008fcdb4fc898bae53a6d4004709551d
+== line 25 deleted
+READS 5794db339d22bb308efee3a218fbdbb8
+== line 25 begun with a stray word
+READS 64ea6c064deb718c29b5669d530ebc68
+== line 32 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 33:11 'pins' holds lines, not a nested '{ … }'
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 34:11 'pins' holds lines, not a nested '{ … }'
+== line 39 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 39:9 'failed' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 39:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 46 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 47:9 'let' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 46 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 46:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 60 deleted
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 54:5 expectation 'sags under a 2 A load at once' needs a measure and a criterion (near, within or is)
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/sources/battery.jmx 60:9 'zzz' is not a criterion: near, within or is

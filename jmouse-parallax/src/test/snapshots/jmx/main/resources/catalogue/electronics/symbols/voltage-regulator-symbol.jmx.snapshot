@@ -1,0 +1,147 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Three-terminal voltage regulator"
+  slug: "voltage-regulator-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A three-terminal linear regulator, as drawn on a schematic: input on the left, output on the right, its reference below"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 120.0
+          height: Double 80.0
+          paths: List(0)
+          pins: List(3)
+              - SymbolPin
+                  pin: "input"
+                  x: Double -60.0
+                  y: Double 0.0
+                  label: "IN"
+              - SymbolPin
+                  pin: "output"
+                  x: Double 60.0
+                  y: Double 0.0
+                  label: "OUT"
+              - SymbolPin
+                  pin: "ground"
+                  x: Double 0.0
+                  y: Double 40.0
+                  label: "GND"
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -32.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 52.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(2)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(2)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-30-20H30V20H-30Z"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 11
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-60 0H-30M30 0H60M0 20V40"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 12
+                  line: Integer 10
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.35], right=Binary[operator=MULTIPLY, left=Constant[value=0.65], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 17
+                  line: Integer 16
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/voltage-regulator-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 7a1b0dcbb02ea2c868f757c0636c7921
+== line 4 begun with a stray word
+READS d2c61d31c20caa6afb2135ce1a266642
+== line 11 deleted
+READS 8174a66f8bc37d0aeaf992cb0103537b
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/voltage-regulator-symbol.jmx 11:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 18 deleted
+READS 079530793bde748ad1dbad85e7e2befa
+== line 18 begun with a stray word
+READS 5e318f8b5484d2e7b591c821c67fd371
+== line 25 deleted
+READS 9925139e1fa2ae823e34a4fefd139024
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/voltage-regulator-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta

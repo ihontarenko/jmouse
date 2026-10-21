@@ -1,0 +1,195 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Potentiometer"
+  slug: "potentiometer"
+  type: Optional "potentiometer"
+  meta: Meta
+      summary: "A resistance with a wiper, moved while the circuit runs"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "RV"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(4)
+      - Parameters
+          parameters: List(7)
+              - Parameter
+                  name: "position"
+                  value: SourceText[11:20@356] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: ""
+                      written: "0.5"
+                  range: Optional Range
+                      minimum: SourceText[11:27@363] "0"
+                      maximum: SourceText[11:32@368] "1"
+                  step: Optional SourceText[11:39@375] "0.01"
+                  flags: List(1)
+                      - ParameterFlag.LIVE
+                  description: "Wiper position"
+                  values: List(0)
+              - Parameter
+                  name: "resistance"
+                  value: SourceText[12:22@424] "10"
+                  quantity: Optional Quantity
+                      value: Double 10000.0
+                      unit: "Ohm"
+                      written: "10 kOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "end-to-end resistance"
+                  values: List(0)
+              - Parameter
+                  name: "R_wiper"
+                  value: SourceText[13:19@478] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "Ohm"
+                      written: "1 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "wiper contact resistance"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[15:24@631] "0.5"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: "W"
+                      written: "0.5 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[16:30@705] "100"
+                  quantity: Optional Quantity
+                      value: Double 100.0
+                      unit: "K/W"
+                      written: "100 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[17:33@795] "20"
+                  quantity: Optional Quantity
+                      value: Double 20.0
+                      unit: "s"
+                      written: "20 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[18:21@854] "125"
+                  quantity: Optional Quantity
+                      value: Double 125.0
+                      unit: "degC"
+                      written: "125 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+      - Pins
+          pins: List(3)
+              - Pin
+                  name: "a"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "first end"
+              - Pin
+                  name: "w"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "wiper"
+              - Pin
+                  name: "b"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "second end"
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "potentiometer-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Equations
+          equations: List(2)
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "a"
+                  negative: "w"
+                  expression: SourceText[30:26@1126] "(a - w) / (position * resistance + R_wiper)"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "w"
+                  negative: "b"
+                  expression: SourceText[31:26@1196] "(w - b) / ((1 - position) * resistance + R_wiper)"
+                  type: null
+  line: Integer 2
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/components/potentiometer.jmx 2:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS 2bbc42defd1c95ca80b1cdf0f43df887
+== line 4 begun with a stray word
+READS cbbf1ad32eedcf633f97c158f0987aa5
+== line 11 deleted
+READS 72c2e4813280efec6ae4c4958e07b60b
+== line 11 begun with a stray word
+READS 048d2e5c42d1611bbbd0f7278b0bf154
+== line 18 deleted
+READS 4e96537e0bb48e326099e4d6784d8cef
+== line 18 begun with a stray word
+READS 795aa3853d79757aa0aef57f7f230507
+== line 25 deleted
+REFUSED src/test/resources/circuit-benchmark/components/potentiometer.jmx 28:15 'pins' holds lines, not a nested '{ … }'
+== line 25 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/potentiometer.jmx 29:15 'pins' holds lines, not a nested '{ … }'
+== line 32 deleted
+REFUSED src/test/resources/circuit-benchmark/components/potentiometer.jmx 2:1 component "…" is opened with '{' and never closed
+== line 32 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/potentiometer.jmx 32:5 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …

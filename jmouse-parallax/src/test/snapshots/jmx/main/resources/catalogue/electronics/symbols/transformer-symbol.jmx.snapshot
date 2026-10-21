@@ -1,0 +1,131 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Transformer"
+  slug: "transformer-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "Transformer, as drawn on a schematic: its windings char and smoulder once it has burned out"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 60.0
+          paths: List(1)
+              - "M-2-22V22M2-22V22"
+          pins: List(4)
+              - SymbolPin
+                  pin: "primary_one"
+                  x: Double -40.0
+                  y: Double -20.0
+                  label: ""
+              - SymbolPin
+                  pin: "primary_two"
+                  x: Double -40.0
+                  y: Double 20.0
+                  label: ""
+              - SymbolPin
+                  pin: "secondary_one"
+                  x: Double 40.0
+                  y: Double -20.0
+                  label: ""
+              - SymbolPin
+                  pin: "secondary_two"
+                  x: Double 40.0
+                  y: Double 20.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -32.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 36.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(2)
+              - SymbolElement
+                  shape: "path"
+                  name: "windings"
+                  live: true
+                  path: "M-40-20H-18C-3-20-3-7-18-7C-3-7-3 7-18 7C-3 7-3 20-18 20H-40M40-20H18C3-20 3-7 18-7C3-7 3 7 18 7C3 7 3 20 18 20H40"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 11
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.4], right=Binary[operator=MULTIPLY, left=Constant[value=0.6], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M-14-6L-8 0M-10-12L-4-6M8-8L14-2M6 2L12 8"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 16
+                  line: Integer 15
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/transformer-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 20f5cf98cdc11913680b26b9c4c5b421
+== line 4 begun with a stray word
+READS 7555fc0d591bd408db4a7a78b15afa9a
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/transformer-symbol.jmx 11:14 'stroke' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/transformer-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 18 deleted
+READS a43f5d06d910d8faca48187885203bc2
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/transformer-symbol.jmx 18:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 25 deleted
+READS e55189e16a1c45c53aefcde380accc0c
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/transformer-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta

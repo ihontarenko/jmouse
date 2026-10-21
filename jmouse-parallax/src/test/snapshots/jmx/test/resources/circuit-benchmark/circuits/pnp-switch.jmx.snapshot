@@ -1,0 +1,99 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "PNP saturated switch"
+  slug: "pnp-switch"
+  type: Optional.empty
+  meta: Meta
+      summary: "Benchmark: 2N2907A switch, 100 kHz, 150 mA into saturation."
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(2)
+      - Parts
+          parts: List(5)
+              - Part
+                  id: "G1"
+                  reference: "square-generator"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      positive = "drive"
+                      negative = "0"
+                  settings: Map(3)
+                      high = SourceText[9:69@358] "5"
+                      low = SourceText[9:78@367] "-5"
+                      frequency = SourceText[9:94@383] "100000"
+                  symbol: Optional.empty
+                  line: Integer 9
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drive"
+                      - "base"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[10:48@437] "330"
+                  symbol: Optional.empty
+                  line: Integer 10
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "0"
+                      - "supply"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[11:50@490] "10"
+                  symbol: Optional.empty
+                  line: Integer 11
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "collector"
+                      - "supply"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[12:54@546] "66"
+                  symbol: Optional.empty
+                  line: Integer 12
+              - Part
+                  id: "Q1"
+                  reference: "2n2907"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      base = "base"
+                      collector = "collector"
+                      emitter = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 13
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[15:28@650] "0.0001 s"
+  line: Integer 3
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/pnp-switch.jmx 3:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/pnp-switch.jmx 4:9 'summary' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/pnp-switch.jmx 4:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 11 deleted
+READS 9d995f7644bf13e1faf2f51cfbfc7502
+== line 11 begun with a stray word
+READS abb24a683531f646a90f8d1b02aaf71e

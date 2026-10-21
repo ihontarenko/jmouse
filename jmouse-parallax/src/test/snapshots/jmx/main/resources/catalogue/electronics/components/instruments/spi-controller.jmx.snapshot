@@ -1,0 +1,340 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "SPI controller"
+  slug: "spi-controller"
+  type: Optional "controller"
+  meta: Meta
+      summary: "Drives one SPI transaction in mode 0 — its bytes out, as many in — and shows the last two bytes read"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "Motorola SPI block guide, V04.01: mode 0 (CPOL 0, CPHA 0) — data valid on the rising clock edge, shifted on the falling one, most significant bit first"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          designator = Text
+              text: "BUS"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(1)
+      - "cmos-hc"
+  blocks: List(6)
+      - Parameters
+          parameters: List(4)
+              - Parameter
+                  name: "bytes"
+                  value: SourceText[20:17@1184] "\"1 128 0\""
+                  quantity: Optional.empty
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(1)
+                      - ParameterFlag.TEXT
+                  description: "the bytes sent, up to 16, decimal or 0x hexadecimal; as many are read"
+                  values: List(0)
+              - Parameter
+                  name: "clock_frequency"
+                  value: SourceText[21:27@1316] "1"
+                  quantity: Optional Quantity
+                      value: Double 1000000.0
+                      unit: "Hz"
+                      written: "1 MHz"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "SCK"
+                  values: List(0)
+              - Parameter
+                  name: "start_at"
+                  value: SourceText[22:20@1365] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-5
+                      unit: "s"
+                      written: "10 us"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "when the target is selected"
+                  values: List(0)
+              - Parameter
+                  name: "repeat_every"
+                  value: SourceText[23:24@1449] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "s"
+                      written: "0 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the transaction again this long after it began; 0 runs it once"
+                  values: List(0)
+      - Pins
+          pins: List(14)
+              - Pin
+                  name: "sck"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "serial clock"
+              - Pin
+                  name: "mosi"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "controller out, target in"
+              - Pin
+                  name: "miso"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "controller in, target out"
+              - Pin
+                  name: "cs"
+                  numbers: List(1)
+                      - Integer 4
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "chip select, active low"
+              - Pin
+                  name: "data_0"
+                  numbers: List(1)
+                      - Integer 5
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_1"
+                  numbers: List(1)
+                      - Integer 6
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_2"
+                  numbers: List(1)
+                      - Integer 7
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_3"
+                  numbers: List(1)
+                      - Integer 8
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_4"
+                  numbers: List(1)
+                      - Integer 9
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_5"
+                  numbers: List(1)
+                      - Integer 10
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_6"
+                  numbers: List(1)
+                      - Integer 11
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "data_7"
+                  numbers: List(1)
+                      - Integer 12
+                  nature: PinNature.DIGITAL
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "the last byte read, D0 the least significant bit"
+              - Pin
+                  name: "GND"
+                  numbers: List(1)
+                      - Integer 13
+                  nature: PinNature.GROUND
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+              - Pin
+                  name: "Vcc"
+                  numbers: List(1)
+                      - Integer 14
+                  nature: PinNature.POWER
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: ""
+          buses: List(1)
+              - Bus
+                  name: "data"
+                  pins: List(8)
+                      - "data_0"
+                      - "data_1"
+                      - "data_2"
+                      - "data_3"
+                      - "data_4"
+                      - "data_5"
+                      - "data_6"
+                      - "data_7"
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional "box"
+          sides: Map(3)
+              left = List(4)
+                  - "sck"
+                  - "mosi"
+                  - "miso"
+                  - "cs bubble"
+              right = List(1)
+                  - "data"
+              power = List(2)
+                  - "Vcc"
+                  - "GND"
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - State
+          variables: List(8)
+              - StateVariable
+                  name: "sent"
+                  initial: SourceText[43:20@2156] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the bytes of this transaction"
+                  length: Integer 16
+              - StateVariable
+                  name: "sending"
+                  initial: SourceText[44:19@2225] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "how many bytes it is"
+                  length: Integer 0
+              - StateVariable
+                  name: "clocked"
+                  initial: SourceText[45:19@2286] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "bits clocked so far"
+                  length: Integer 0
+              - StateVariable
+                  name: "incoming"
+                  initial: SourceText[46:20@2347] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the byte being read"
+                  length: Integer 0
+              - StateVariable
+                  name: "selected"
+                  initial: SourceText[47:20@2407] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 from the select to the release"
+                  length: Integer 0
+              - StateVariable
+                  name: "waiting"
+                  initial: SourceText[48:19@2479] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "1 when a repetition fell due while the target was selected"
+                  length: Integer 0
+              - StateVariable
+                  name: "previous_read"
+                  initial: SourceText[49:25@2584] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the byte read before the last one"
+                  length: Integer 0
+              - StateVariable
+                  name: "last_read"
+                  initial: SourceText[50:21@2654] "0"
+                  discrete: true
+                  range: Optional.empty
+                  description: "the last byte read"
+                  length: Integer 0
+      - Display
+          figures: Map(1)
+              word_read = SourceText[54:21@2734] "previous_read * 256 + last_read"
+          units: Map(0)
+          captions: Map(1)
+              word_read = "the last two bytes read, as one number"
+      - Behaviour
+          script: ScriptNode "SCRIPT['behaviour']"
+          source: SourceText[58:9@2840] "final let MOST_BYTES = 16\n\n        function half_period()\n            return 1 / (2 * clock_frequency)\n        end\n\n        function put_bit()\n            drive('mosi', bit(item(sent, floor(clocked / 8)), 7 - clocked % 8))\n        end\n\n        # The bytes it was told to send, read once a transaction; with none it selects and lets go.\n        function select_target()\n            let written = bytes_of(bytes)\n            if written | length > MOST_BYTES then\n                refuse('bytes holds ' ~ (written | length) ~ ' bytes; it sends up to ' ~ MOST_BYTES)\n            end\n            sending = 0\n            for value in written do\n                sent = with(sent, sending, value)\n                sending = sending + 1\n            end\n            selected = 1\n            clocked = 0\n            incoming = 0\n            drive('cs', 0)\n            if sending == 0 then\n                schedule('release', half_period())\n                return\n            end\n            put_bit()\n            schedule('rise', half_period())\n        end\n\n        on start do\n            drive('cs', 1)\n            drive('sck', 0)\n            drive('mosi', 0)\n            drive('data', 0)\n            schedule('select', start_at)\n            if repeat_every > 0 then\n                schedule('repeat', start_at + repeat_every)\n            end\n        end\n\n        on timer 'select' do\n            select_target()\n        end\n\n        # The rising edge: the target's bit is read. A MISO no target drives yet is read as 0 — a target's \"don't care\"\n        # bits before its answer, which a real controller reads as whatever the line floats at.\n        on timer 'rise' do\n            drive('sck', 1)\n            incoming = incoming * 2 + level_or(miso, 0)\n            schedule('fall', half_period())\n        end\n\n        # The falling edge: a byte is complete every eighth one, and the next bit goes out.\n        on timer 'fall' do\n            drive('sck', 0)\n            clocked = clocked + 1\n            if clocked % 8 == 0 then\n                previous_read = last_read\n                last_read = incoming\n                drive('data', incoming)\n                incoming = 0\n            end\n            if clocked < 8 * sending then\n                put_bit()\n                schedule('rise', half_period())\n            else\n                schedule('release', half_period())\n            end\n        end\n\n        on timer 'release' do\n            drive('cs', 1)\n            selected = 0\n            if waiting == 1 then\n                waiting = 0\n                schedule('select', half_period())\n            end\n        end\n\n        # Every repetition is counted from the moment the first transaction began.\n        on timer 'repeat' do\n            schedule('repeat', repeat_every)\n            if selected == 1 then\n                waiting = 1\n            else\n                select_target()\n            end\n        end"
+  line: Integer 10
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 10:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS a003f0e7af8e1e67becc3648ba95931b
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 11:9 'designator' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 32 deleted
+READS bea86798934667d6b711a1acb4dc46e2
+== line 32 begun with a stray word
+READS d85d796c71d40f8116693f967e0c4584
+== line 39 deleted
+READS 78c092fd4ba8a984f7a8d0ef783d2cc1
+== line 39 begun with a stray word
+READS b8e17e0f4adf2c0970cb2d500a50cfe6
+== line 46 deleted
+READS 447e76cc8df2573ef94871b241f3f53c
+== line 46 begun with a stray word
+READS d2ca1d68758a85d329e5e40aac147acf
+== line 53 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 53:9 'word_read' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 60 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 61:9 in 'behaviour': Unexpected token 0411:2920:0061 [T_END] at 412
+== line 60 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 62:9 in 'behaviour': Unexpected token 0416:2946:0062 [T_END] at 417
+== line 74 deleted
+READS 391a7a2d7d083e7c5da92b0f16d2484c
+== line 74 begun with a stray word
+READS a7d9aa29c6710a46830b098f0585115d
+== line 81 deleted
+READS e91752eb1a7bdf488b7a601c812ff003
+== line 81 begun with a stray word
+READS 1ca8b188b466282e2dc7125f9cea830b
+== line 88 deleted
+READS 0d60cb76805cf5c1cb7c660b0d63c444
+== line 88 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 88:30 in 'behaviour': Unexpected token 0587:3857:0088 [T_CLOSE_PAREN] at 588
+== line 95 deleted
+READS e9bb7c35fe786362f388201fa5044cee
+== line 95 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 95:18 in 'behaviour': Unexpected token 0621:4006:0095 [T_CLOSE_PAREN] at 622
+== line 102 deleted
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 103:9 in 'behaviour': Unexpected token 0656:4221:0103 [T_END] at 657
+== line 102 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/instruments/spi-controller.jmx 102:28 in 'behaviour': Unexpected token 0655:4212:0102 [T_DO] at 656

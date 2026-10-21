@@ -1,0 +1,245 @@
+ExperienceDocument
+  kind: Kind.CIRCUIT
+  title: "PWM from a 555 and output filter"
+  slug: "pwm-filter-lab"
+  type: Optional.empty
+  meta: Meta
+      summary: "A real NE555 PWM generator: the potentiometer sets the duty cycle while it runs, the RC filter turns the pulses into a voltage."
+      description: null
+      category: "circuits"
+      tags: List(4)
+          - "pwm"
+          - "filter"
+          - "timer"
+          - "hands-on"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(1)
+          purpose = Text
+              text: "PWM pulses from a real timer, filtered output and ripple"
+      labels: Map(1)
+          purpose = "Measure"
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(4)
+      - Parameters
+          parameters: List(5)
+              - Parameter
+                  name: "U"
+                  value: SourceText[14:13@862] "12"
+                  quantity: Optional Quantity
+                      value: Double 12.0
+                      unit: "V"
+                      written: "12 V"
+                  range: Optional Range
+                      minimum: SourceText[14:21@870] "5"
+                      maximum: SourceText[14:26@875] "15"
+                  step: Optional SourceText[14:34@883] "0.5"
+                  flags: List(0)
+                  description: "Supply voltage"
+                  values: List(0)
+              - Parameter
+                  name: "RP"
+                  value: SourceText[15:14@918] "100"
+                  quantity: Optional Quantity
+                      value: Double 100000.0
+                      unit: "Ohm"
+                      written: "100 kOhm"
+                  range: Optional Range
+                      minimum: SourceText[15:24@928] "10"
+                      maximum: SourceText[15:30@934] "470"
+                  step: Optional SourceText[15:39@943] "10"
+                  flags: List(0)
+                  description: "Potentiometer value — sets the period; its wiper (live part P1) sets the duty"
+                  values: List(0)
+              - Parameter
+                  name: "CT"
+                  value: SourceText[16:14@1040] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-8
+                      unit: "F"
+                      written: "10 nF"
+                  range: Optional Range
+                      minimum: SourceText[16:23@1049] "1"
+                      maximum: SourceText[16:28@1054] "100"
+                  step: Optional SourceText[16:37@1063] "1"
+                  flags: List(0)
+                  description: "Timing capacitance"
+                  values: List(0)
+              - Parameter
+                  name: "R"
+                  value: SourceText[17:13@1099] "4.7"
+                  quantity: Optional Quantity
+                      value: Double 4700.0
+                      unit: "Ohm"
+                      written: "4.7 kOhm"
+                  range: Optional Range
+                      minimum: SourceText[17:23@1109] "0.1"
+                      maximum: SourceText[17:30@1116] "47"
+                  step: Optional SourceText[17:38@1124] "0.1"
+                  flags: List(0)
+                  description: "Filter resistance"
+                  values: List(0)
+              - Parameter
+                  name: "C"
+                  value: SourceText[18:13@1161] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-6
+                      unit: "F"
+                      written: "1 uF"
+                  range: Optional Range
+                      minimum: SourceText[18:21@1169] "0.1"
+                      maximum: SourceText[18:28@1176] "10"
+                  step: Optional SourceText[18:36@1184] "0.1"
+                  flags: List(0)
+                  description: "Filter capacitance"
+                  values: List(0)
+      - Parts
+          parts: List(9)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[21:47@1276] "U"
+                  symbol: Optional.empty
+                  line: Integer 21
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "vcc"
+                      - "discharge"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[22:51@1329] "1000"
+                  symbol: Optional.empty
+                  line: Integer 22
+              - Part
+                  id: "P1"
+                  reference: "potentiometer"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      a = "charge"
+                      w = "discharge"
+                      b = "drain"
+                  settings: Map(1)
+                      resistance = SourceText[23:78@1412] "RP"
+                  symbol: Optional.empty
+                  line: Integer 23
+              - Part
+                  id: "D1"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "charge"
+                      cathode = "timing"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 24
+              - Part
+                  id: "D2"
+                  reference: "1n4148"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      anode = "timing"
+                      cathode = "drain"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 25
+              - Part
+                  id: "CT1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "timing"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[26:49@1571] "CT"
+                  symbol: Optional.empty
+                  line: Integer 26
+              - Part
+                  id: "U1"
+                  reference: "ne555"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(7)
+                      Vcc = "vcc"
+                      GND = "0"
+                      trigger = "timing"
+                      threshold = "timing"
+                      discharge = "discharge"
+                      output = "pwm"
+                      reset = "vcc"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 27
+              - Part
+                  id: "R2"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "pwm"
+                      - "out"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[28:45@1746] "R"
+                  symbol: Optional.empty
+                  line: Integer 28
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "out"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[29:45@1793] "C"
+                  symbol: Optional.empty
+                  line: Integer 29
+      - Analysis
+          kind: AnalysisKind.TRANSIENT
+          settings: Map(1)
+              for = SourceText[31:28@1830] "0.02 s"
+      - View
+          items: List(1)
+              - Representation
+                  representation: "transient_response"
+                  primary: true
+                  settings: SourceText[33:35@1884] ""
+  line: Integer 6
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 6:1 circuit "…" is opened with '{' and never closed
+== line 4 deleted
+READS 9a3e8f0feca26042fb8278907b21bc93
+== line 4 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 4607c6c80a03b50eda1c6fd8d1383ab8
+== line 11 begun with a stray word
+READS 63d3b6054c4e7205e2a93fe6b7e13074
+== line 18 deleted
+READS 0de46ca0b5d13b4a912dc1bb55f4d3f4
+== line 18 begun with a stray word
+READS c990b7a8c449e67a6b8d19377122fb06
+== line 25 deleted
+READS 3ed941b5a4071310995f50426bcec471
+== line 25 begun with a stray word
+READS b9eab8c092434099b930f3bedd204a4b
+== line 32 deleted
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 32:9 'transient_response' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view
+== line 32 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/circuits/pwm-filter-lab.jmx 32:5 'zzz' is not a block of a circuit; it holds analysis, expect, formulas, layout, meta, nets, parameters, parts, ports, probes, sheet, symbol, view

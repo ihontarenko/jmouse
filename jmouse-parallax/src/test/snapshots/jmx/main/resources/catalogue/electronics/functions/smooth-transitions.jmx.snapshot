@@ -1,0 +1,42 @@
+ExperienceDocument
+  kind: Kind.FUNCTIONS
+  title: "Smooth transitions"
+  slug: "smooth-transitions"
+  type: Optional.empty
+  meta: Meta
+      summary: "Smooth replacements for corners a Newton solver cannot cross"
+      description: null
+      category: null
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(1)
+      - "constants"
+  blocks: List(1)
+      - Formulas
+          definitions: Optional SourceText[15:9@592] "# max(x, 0), rounded over a knee `width` wide\n        soft_positive_part(x, width) = if(x > 0, x + width * ln(1 + exp(-x / width)), width * ln(1 + exp(x / width)))\n\n        # x held between low and high, with rounded knees\n        soft_clamp(x, low, high, width) = low + soft_positive_part(x - low, width) - soft_positive_part(x - high, width)\n\n        # min(a, b), rounded\n        soft_minimum(a, b, width) = a - soft_positive_part(a - b, width)\n\n        # |x|, rounded at zero\n        soft_absolute(x, width) = sqrt(x^2 + width^2)\n\n        # a step from 0 to 1 around zero, `width` wide\n        soft_step(x, width) = if(x > 0, 1 / (1 + exp(-x / width)), exp(x / width) / (1 + exp(x / width)))\n\n        # exp(x) that turns into its own tangent above 40 instead of overflowing\n        limit_exponential(x) = if(x < 40, exp(x), exp(40) * (x - 39))\n\n        # kT/q in volts\n        thermal_voltage(temperature) = boltzmann * temperature / elementary_charge"
+  line: Integer 7
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/functions/smooth-transitions.jmx 7:1 functions "…" is opened with '{' and never closed
+== line 4 deleted
+READS be7ad7bf2aa21b096e80f40cacb5eb8e
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/functions/smooth-transitions.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS 4365d6a5d0070fe28e389ab91e0d7faa
+== line 11 begun with a stray word
+READS ccccd70d59b54e35c35cc52d2e75e353
+== line 18 deleted
+READS 3402fbeb092c07f49d648f0667ac5f50
+== line 18 begun with a stray word
+READS f809e1ba25722a44737feca6f9caf3c7
+== line 25 deleted
+READS 483d64978563b8227fed94bca0241988
+== line 25 begun with a stray word
+READS 1610bec658c9bf3f43bb02d4f00b15a9

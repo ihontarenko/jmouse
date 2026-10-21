@@ -1,0 +1,164 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "N-channel MOSFET"
+  slug: "n-mosfet"
+  type: Optional "mosfet"
+  meta: Meta
+      summary: "N-channel MOSFET, the level-1 model at its defaults"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "Q"
+          failure = Text
+              text: "short drain source"
+      labels: Map(0)
+  base: Optional "mos-transistor"
+  units: List(0)
+  uses: List(0)
+  blocks: List(3)
+      - Parameters
+          parameters: List(3)
+              - Parameter
+                  name: "polarity"
+                  value: SourceText[14:20@498] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: ""
+                      written: "1"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "n-channel"
+                  values: List(0)
+              - Parameter
+                  name: "V_threshold"
+                  value: SourceText[15:23@560] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "V"
+                      written: "1 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VTO: an enhancement part opens above it"
+                  values: List(0)
+              - Parameter
+                  name: "transconductance"
+                  value: SourceText[16:28@654] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "A/V^2"
+                      written: "0.1 A/V^2"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "KP: the whole channel"
+                  values: List(0)
+      - Symbol
+          uses: List(1)
+              - "n-channel-mosfet-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              failed = SourceText[20:18@767] "failed"
+      - Expectation
+          title: "on: 5 V of gate drive sinks the load's current"
+          reference: "KP 0.1 A/V², VTO 1 V: deep in the linear region"
+          bench: List(3)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[25:51@978] "5 V"
+                  symbol: Optional.empty
+                  line: Integer 25
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "drain"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[26:51@1033] "100 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 26
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "Vdd"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 27
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "drain"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[30:16@1162] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "V"
+                      written: "0.1 V"
+              maximum: Optional Amount
+                  expression: SourceText[30:25@1171] "0.15"
+                  quantity: Optional Quantity
+                      value: Double 0.15
+                      unit: "V"
+                      written: "0.15 V"
+              exact: null
+          line: Integer 23
+  line: Integer 4
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:5 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS a0e8378a7755ee0860ab9d606d880461
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 11:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 25 deleted
+READS edaa8d1f00b92fdae292b97f41bef775
+== line 25 begun with a stray word
+READS d3d57d0ca9606832744aad071bb56317
+== line 32 deleted
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 4:1 component "…" is opened with '{' and never closed
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/base/n-mosfet.jmx 32:1 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view

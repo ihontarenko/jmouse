@@ -1,0 +1,843 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "2N7000"
+  slug: "2n7000"
+  type: Optional "mosfet"
+  meta: Meta
+      summary: "N-channel enhancement MOSFET, 60 V, 200 mA continuous"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "onsemi 2N7000/2N7002/NDS7002A datasheet NDS7002A/D, Rev. 11"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(3)
+          designator = Text
+              text: "Q"
+          package = Text
+              text: "TO-92"
+          failure = Text
+              text: "short drain source"
+      labels: Map(0)
+  base: Optional "n-mosfet"
+  units: List(0)
+  uses: List(0)
+  blocks: List(9)
+      - Parameters
+          parameters: List(22)
+              - Parameter
+                  name: "V_threshold"
+                  value: SourceText[17:23@731] "2.1"
+                  quantity: Optional Quantity
+                      value: Double 2.1
+                      unit: "V"
+                      written: "2.1 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VTO: typical gate threshold at 1 mA"
+                  values: List(0)
+              - Parameter
+                  name: "transconductance"
+                  value: SourceText[18:28@821] "0.484"
+                  quantity: Optional Quantity
+                      value: Double 0.484
+                      unit: "A/V^2"
+                      written: "0.484 A/V^2"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "KP: fits RDS(on) 1.2 Ω at VGS 10 V and 1.8 Ω at 4.5 V with RD + RS"
+                  values: List(0)
+              - Parameter
+                  name: "R_drain"
+                  value: SourceText[19:19@928] "0.84"
+                  quantity: Optional Quantity
+                      value: Double 0.84
+                      unit: "Ohm"
+                      written: "0.84 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RD: most of what the gate cannot reduce"
+                  values: List(0)
+              - Parameter
+                  name: "R_source"
+                  value: SourceText[20:20@1018] "0.1"
+                  quantity: Optional Quantity
+                      value: Double 0.1
+                      unit: "Ohm"
+                      written: "0.1 Ohm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RS"
+                  values: List(0)
+              - Parameter
+                  name: "I_saturation"
+                  value: SourceText[21:24@1074] "15"
+                  quantity: Optional Quantity
+                      value: Double 1.5E-11
+                      unit: "A"
+                      written: "15 pA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "IS: body diode saturation current"
+                  values: List(0)
+              - Parameter
+                  name: "emission_coefficient"
+                  value: SourceText[22:32@1165] "1.5"
+                  quantity: Optional Quantity
+                      value: Double 1.5
+                      unit: ""
+                      written: "1.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "N: body diode emission factor"
+                  values: List(0)
+              - Parameter
+                  name: "C_bulk_drain"
+                  value: SourceText[23:24@1236] "7"
+                  quantity: Optional Quantity
+                      value: Double 7.0E-12
+                      unit: "F"
+                      written: "7 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CBD: Coss - Crss at zero bias"
+                  values: List(0)
+              - Parameter
+                  name: "C_gate_source"
+                  value: SourceText[24:25@1316] "16"
+                  quantity: Optional Quantity
+                      value: Double 1.6E-11
+                      unit: "F"
+                      written: "16 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CGSO: Ciss - Crss"
+                  values: List(0)
+              - Parameter
+                  name: "C_gate_drain"
+                  value: SourceText[25:24@1382] "4"
+                  quantity: Optional Quantity
+                      value: Double 4.0E-12
+                      unit: "F"
+                      written: "4 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "CGDO: Crss"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[26:21@1439] "298.15"
+                  quantity: Optional Quantity
+                      value: Double 298.15
+                      unit: "K"
+                      written: "298.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the temperature the figures above are measured at"
+                  values: List(0)
+              - Parameter
+                  name: "V_threshold_coefficient"
+                  value: SourceText[27:35@1552] "-0.005"
+                  quantity: Optional Quantity
+                      value: Double -0.005
+                      unit: ""
+                      written: "-0.005"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the gate turns on earlier when hot, V/K"
+                  values: List(0)
+              - Parameter
+                  name: "resistance_temperature_exponent"
+                  value: SourceText[28:43@1649] "1.5"
+                  quantity: Optional Quantity
+                      value: Double 1.5
+                      unit: ""
+                      written: "1.5"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "RDS(on) normalised to temperature: about 1.5x at 125 C"
+                  values: List(0)
+              - Parameter
+                  name: "V_breakdown"
+                  value: SourceText[29:23@1733] "60"
+                  quantity: Optional Quantity
+                      value: Double 60.0
+                      unit: "V"
+                      written: "60 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "drain-source breakdown at 10 uA"
+                  values: List(0)
+              - Parameter
+                  name: "I_breakdown"
+                  value: SourceText[30:23@1814] "10"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-5
+                      unit: "A"
+                      written: "10 uA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "avalanche current at V_breakdown"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[32:24@1983] "0.4"
+                  quantity: Optional Quantity
+                      value: Double 0.4
+                      unit: "W"
+                      written: "0.4 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[33:30@2059] "312"
+                  quantity: Optional Quantity
+                      value: Double 312.0
+                      unit: "K/W"
+                      written: "312 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[34:33@2152] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: "s"
+                      written: "2 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[35:21@2215] "150"
+                  quantity: Optional Quantity
+                      value: Double 150.0
+                      unit: "degC"
+                      written: "150 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+              - Parameter
+                  name: "V_threshold_spread"
+                  value: SourceText[36:30@2313] "0.9"
+                  quantity: Optional Quantity
+                      value: Double 0.9
+                      unit: "V"
+                      written: "0.9 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VGS(th) 0.8 ... 3 V"
+                  values: List(0)
+              - Parameter
+                  name: "V_drain_source_maximum"
+                  value: SourceText[37:34@2386] "60"
+                  quantity: Optional Quantity
+                      value: Double 60.0
+                      unit: "V"
+                      written: "60 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VDS"
+                  values: List(0)
+              - Parameter
+                  name: "V_gate_source_maximum"
+                  value: SourceText[38:33@2439] "20"
+                  quantity: Optional Quantity
+                      value: Double 20.0
+                      unit: "V"
+                      written: "20 V"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "VGS, either way"
+                  values: List(0)
+              - Parameter
+                  name: "I_drain_maximum"
+                  value: SourceText[39:27@2498] "500"
+                  quantity: Optional Quantity
+                      value: Double 0.5
+                      unit: "A"
+                      written: "500 mA"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ID 200 mA continuous, 500 mA pulsed"
+                  values: List(0)
+      - Pins
+          pins: List(3)
+              - Pin
+                  name: "source"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "source"
+              - Pin
+                  name: "gate"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "gate"
+              - Pin
+                  name: "drain"
+                  numbers: List(1)
+                      - Integer 3
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.OUTPUT
+                  attributes: List(0)
+                  description: "drain"
+          buses: List(0)
+      - Symbol
+          uses: List(1)
+              - "n-channel-mosfet-symbol"
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+      - Expectation
+          title: "on-state voltage at 500 mA and 10 V gate drive"
+          reference: "RDS(on) and VDS(on) at VGS 10 V"
+          bench: List(5)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "gate"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[52:52@2976] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 52
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[53:51@3032] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 53
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "drain"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[54:51@3088] "18.8 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 54
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drain"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[55:51@3148] "1 nF"
+                  symbol: Optional.empty
+                  line: Integer 55
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "gate"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 56
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "drain"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[59:16@3271] "0.4"
+                  quantity: Optional Quantity
+                      value: Double 0.4
+                      unit: "V"
+                      written: "0.4 V"
+              maximum: Optional Amount
+                  expression: SourceText[59:25@3280] "2.5"
+                  quantity: Optional Quantity
+                      value: Double 2.5
+                      unit: "V"
+                      written: "2.5 V"
+              exact: null
+          line: Integer 50
+      - Expectation
+          title: "on-resistance rises when hot"
+          reference: "RDS(on) normalised to temperature: about 1.5x at 125 C"
+          bench: List(5)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "gate"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[64:52@3490] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 64
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[65:51@3546] "10 V"
+                  symbol: Optional.empty
+                  line: Integer 65
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "drain"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[66:51@3602] "18.8 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 66
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drain"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[67:51@3662] "1 nF"
+                  symbol: Optional.empty
+                  line: Integer 67
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "gate"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 68
+          sharedBench: null
+          duration: Double 0.001
+          temperature: Double 125.0
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "drain"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[71:16@3785] "0.75"
+                  quantity: Optional Quantity
+                      value: Double 0.75
+                      unit: "V"
+                      written: "0.75 V"
+              maximum: Optional Amount
+                  expression: SourceText[71:26@3795] "2.5"
+                  quantity: Optional Quantity
+                      value: Double 2.5
+                      unit: "V"
+                      written: "2.5 V"
+              exact: null
+          line: Integer 62
+      - Expectation
+          title: "low on-state voltage at 75 mA and 4.5 V gate drive"
+          reference: "VDS(on) at VGS 4.5 V"
+          bench: List(5)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "gate"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[76:52@3983] "4.5 V"
+                  symbol: Optional.empty
+                  line: Integer 76
+              - Part
+                  id: "V2"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[77:51@4040] "4.5 V"
+                  symbol: Optional.empty
+                  line: Integer 77
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "drain"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[78:51@4097] "58 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 78
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drain"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[79:51@4155] "1 nF"
+                  symbol: Optional.empty
+                  line: Integer 79
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "gate"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 80
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "drain"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[83:16@4278] "0.08"
+                  quantity: Optional Quantity
+                      value: Double 0.08
+                      unit: "V"
+                      written: "0.08 V"
+              maximum: Optional Amount
+                  expression: SourceText[83:26@4288] "0.4"
+                  quantity: Optional Quantity
+                      value: Double 0.4
+                      unit: "V"
+                      written: "0.4 V"
+              exact: null
+          line: Integer 74
+      - Expectation
+          title: "off-state drain current at 48 V"
+          reference: "IDSS maximum 1 uA"
+          bench: List(2)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drain"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[88:53@4455] "48 V"
+                  symbol: Optional.empty
+                  line: Integer 88
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "0"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 89
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "operating"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[92:16@4584] "-1"
+                  quantity: Optional Quantity
+                      value: Double -1.0E-6
+                      unit: "A"
+                      written: "-1 uA"
+              maximum: Optional Amount
+                  expression: SourceText[92:25@4593] "0"
+                  quantity: Optional Quantity
+                      value: Double 0.0
+                      unit: "A"
+                      written: "0 A"
+              exact: null
+          line: Integer 86
+      - Expectation
+          title: "drain breakdown near 60 V"
+          reference: "BVDSS at 10 uA"
+          bench: List(2)
+              - Part
+                  id: "I1"
+                  reference: "current-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "drain"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      I_output = SourceText[97:53@4749] "10 uA"
+                  symbol: Optional.empty
+                  line: Integer 97
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "0"
+                      drain = "drain"
+                      source = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 98
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "operating"
+              - "drain"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[101:16@4874] "59.9"
+                  quantity: Optional Quantity
+                      value: Double 59.9
+                      unit: "V"
+                      written: "59.9 V"
+              maximum: Optional Amount
+                  expression: SourceText[101:26@4884] "62"
+                  quantity: Optional Quantity
+                      value: Double 62.0
+                      unit: "V"
+                      written: "62 V"
+              exact: null
+          line: Integer 95
+      - Expectation
+          title: "body diode forward voltage"
+          reference: "drain-source diode characteristic"
+          bench: List(4)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[106:51@5059] "1 V"
+                  symbol: Optional.empty
+                  line: Integer 106
+              - Part
+                  id: "R1"
+                  reference: "resistor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "Vdd"
+                      - "source"
+                  named: Map(0)
+                  settings: Map(1)
+                      resistance = SourceText[107:52@5115] "1 Ohm"
+                  symbol: Optional.empty
+                  line: Integer 107
+              - Part
+                  id: "C1"
+                  reference: "capacitor"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "source"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      capacitance = SourceText[108:52@5173] "1 nF"
+                  symbol: Optional.empty
+                  line: Integer 108
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(3)
+                      gate = "0"
+                      drain = "0"
+                      source = "source"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 109
+          sharedBench: null
+          duration: Double 0.001
+          temperature: null
+          realistic: false
+          measure: List(2)
+              - "final"
+              - "source"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[112:16@5295] "0.7"
+                  quantity: Optional Quantity
+                      value: Double 0.7
+                      unit: "V"
+                      written: "0.7 V"
+              maximum: Optional Amount
+                  expression: SourceText[112:25@5304] "1.2"
+                  quantity: Optional Quantity
+                      value: Double 1.2
+                      unit: "V"
+                      written: "1.2 V"
+              exact: null
+          line: Integer 104
+  line: Integer 5
+== the last brace removed
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 5:1 component "…" is opened with '{' and never closed
+== line 11 deleted
+READS cfa8234679cbeeb2a29650263caeeda0
+== line 11 begun with a stray word
+READS 79cfe12fdf413657638660fc953b9645
+== line 18 deleted
+READS cfd29242c8c3756c0d0f704537dd5b2a
+== line 18 begun with a stray word
+READS ac3f216ec124521ed87db6053b069e46
+== line 25 deleted
+READS e18858c7786cf95a24424e485f9dd719
+== line 25 begun with a stray word
+READS 1a75bc24a06c7e144e3209b912c33ef2
+== line 32 deleted
+READS b42ab760553bb9bee4442af97f8c1f6b
+== line 32 begun with a stray word
+READS b4c9391cc23b01c6f2d21145620b7d8c
+== line 39 deleted
+READS a323a5d27648ec68ebed548461b38905
+== line 39 begun with a stray word
+READS 638db157e3a4521796a91728cce306df
+== line 46 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 49:100 'pins' holds lines, not a nested '{ … }'
+== line 46 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 50:100 'pins' holds lines, not a nested '{ … }'
+== line 53 deleted
+READS 060e0a5a3ea6c63d68a3909e190b1f43
+== line 53 begun with a stray word
+READS 6e9f167535ba25eaebf61beb38731e67
+== line 60 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 61:5 'expect' is not a criterion: near, within or is
+== line 60 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 60:5 'zzz' is not a criterion: near, within or is
+== line 67 deleted
+READS 42893b96edf2b210954729bc897623c4
+== line 67 begun with a stray word
+READS 96b4cd4bcd67c052edfee7f3b4900917
+== line 74 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 74:9 a shared bench is 'bench name { parts }': 'bench i2c-bus { V1 …; R1 … }'
+== line 74 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 74:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 81 deleted
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 85:5 'expect' is not a criterion: near, within or is
+== line 81 begun with a stray word
+REFUSED src/test/resources/circuit-benchmark/components/2n7000.jmx 81:9 a part is 'ID component (connections) [settings] [place x, y]'
+== line 88 deleted
+READS 240b47da46dc9c03c17e602f68732050
+== line 88 begun with a stray word
+READS d61f0a856825583d50b6d0bc70b04897

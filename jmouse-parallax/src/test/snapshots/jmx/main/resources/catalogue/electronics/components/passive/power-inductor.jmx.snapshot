@@ -1,0 +1,499 @@
+ExperienceDocument
+  kind: Kind.COMPONENT
+  title: "Power inductor"
+  slug: "power-inductor"
+  type: Optional "inductor"
+  meta: Meta
+      summary: "Power inductor: inductance, winding resistance, core saturation, core loss and self-resonance"
+      description: null
+      category: "circuits"
+      tags: List(0)
+      source: "the figures a power inductor's datasheet gives: L, DCR, ISAT, SRF, Q"
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(2)
+          designator = Text
+              text: "L"
+          failure = Text
+              text: "open"
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(8)
+      - Parameters
+          parameters: List(13)
+              - Parameter
+                  name: "inductance"
+                  value: SourceText[29:22@1850] "100"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-4
+                      unit: "H"
+                      written: "100 uH"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "inductance at small currents"
+                  values: List(0)
+              - Parameter
+                  name: "I_saturation"
+                  value: SourceText[30:24@1930] "2"
+                  quantity: Optional Quantity
+                      value: Double 2.0
+                      unit: "A"
+                      written: "2 A"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "ISAT: past it the core saturates and the inductance falls away"
+                  values: List(0)
+              - Parameter
+                  name: "saturated_inductance"
+                  value: SourceText[31:32@2050] "5"
+                  quantity: Optional Quantity
+                      value: Double 5.0E-6
+                      unit: "H"
+                      written: "5 uH"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what is left once the core is saturated: the winding's air-core inductance. An approximation — a datasheet gives ISAT as a 30 % drop, not this floor"
+                  values: List(0)
+              - Parameter
+                  name: "R_winding"
+                  value: SourceText[32:21@2237] "50"
+                  quantity: Optional Quantity
+                      value: Double 0.05
+                      unit: "Ohm"
+                      written: "50 mOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "DCR: the winding's resistance"
+                  values: List(0)
+              - Parameter
+                  name: "C_winding"
+                  value: SourceText[33:21@2316] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0E-12
+                      unit: "F"
+                      written: "1 pF"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the capacitance between its turns: with 100 µH, a self-resonance near 16 MHz, as a datasheet's SRF gives"
+                  values: List(0)
+              - Parameter
+                  name: "R_core"
+                  value: SourceText[34:18@2467] "2"
+                  quantity: Optional Quantity
+                      value: Double 2000.0
+                      unit: "Ohm"
+                      written: "2 kOhm"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the ferrite's loss as a resistance across the inductance: a Q of about 30 at 100 kHz"
+                  values: List(0)
+              - Parameter
+                  name: "copper_temperature_coefficient"
+                  value: SourceText[35:42@2625] "0.00393"
+                  quantity: Optional Quantity
+                      value: Double 0.00393
+                      unit: ""
+                      written: "0.00393"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "copper: the winding's resistance rises 0.393 % per kelvin"
+                  values: List(0)
+              - Parameter
+                  name: "saturation_temperature_coefficient"
+                  value: SourceText[36:46@2739] "-0.004"
+                  quantity: Optional Quantity
+                      value: Double -0.004
+                      unit: ""
+                      written: "-0.004"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "a ferrite core saturates earlier when hot, about 0.4 % per kelvin"
+                  values: List(0)
+              - Parameter
+                  name: "T_nominal"
+                  value: SourceText[37:21@2835] "298.15"
+                  quantity: Optional Quantity
+                      value: Double 298.15
+                      unit: "K"
+                      written: "298.15 K"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "the temperature the figures are given at"
+                  values: List(0)
+              - Parameter
+                  name: "power_rating"
+                  value: SourceText[38:24@2928] "1"
+                  quantity: Optional Quantity
+                      value: Double 1.0
+                      unit: "W"
+                      written: "1 W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "what it is rated for"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_resistance"
+                  value: SourceText[39:30@3004] "50"
+                  quantity: Optional Quantity
+                      value: Double 50.0
+                      unit: "K/W"
+                      written: "50 K/W"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "kelvin above the bench per watt it takes"
+                  values: List(0)
+              - Parameter
+                  name: "thermal_time_constant"
+                  value: SourceText[40:33@3097] "30"
+                  quantity: Optional Quantity
+                      value: Double 30.0
+                      unit: "s"
+                      written: "30 s"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "how fast it warms to that"
+                  values: List(0)
+              - Parameter
+                  name: "T_maximum"
+                  value: SourceText[41:21@3160] "125"
+                  quantity: Optional Quantity
+                      value: Double 125.0
+                      unit: "degC"
+                      written: "125 degC"
+                  range: Optional.empty
+                  step: Optional.empty
+                  flags: List(0)
+                  description: "past this it fails on a realistic bench"
+                  values: List(0)
+      - Pins
+          pins: List(2)
+              - Pin
+                  name: "terminal_one"
+                  numbers: List(1)
+                      - Integer 1
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "first terminal"
+              - Pin
+                  name: "terminal_two"
+                  numbers: List(1)
+                      - Integer 2
+                  nature: PinNature.ANALOG
+                  direction: PinDirection.INPUT
+                  attributes: List(0)
+                  description: "second terminal"
+          buses: List(0)
+      - Nodes
+          nodes: List(1)
+              - InternalNode
+                  name: "winding"
+                  digital: false
+                  description: "behind the copper: where the inductance begins"
+      - State
+          variables: List(1)
+              - StateVariable
+                  name: "I_winding"
+                  initial: SourceText[54:21@3539] "0"
+                  discrete: false
+                  range: Optional.empty
+                  description: "the current in the inductance"
+                  length: Integer 0
+      - Symbol
+          uses: List(1)
+              - "inductor-symbol"
+          ports: Map(2)
+              a = "terminal_one"
+              b = "terminal_two"
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 0.0
+          height: Double 0.0
+          paths: List(0)
+          pins: List(0)
+          labels: List(0)
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(1)
+              failed = SourceText[58:18@3659] "failed"
+      - Equations
+          equations: List(9)
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "T_winding"
+                  positive: null
+                  negative: null
+                  expression: SourceText[65:39@3906] "temperature"
+                  type: QuantityType
+                      name: "temperature"
+                      unit: "K"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 1
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "R_winding_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[66:42@3960] "R_winding * (1 + copper_temperature_coefficient * (T_winding - T_nominal))"
+                  type: QuantityType
+                      name: "resistance"
+                      unit: "Ω"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -3
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "I_saturation_now"
+                  positive: null
+                  negative: null
+                  expression: SourceText[67:42@4077] "I_saturation * (1 + saturation_temperature_coefficient * (T_winding - T_nominal))"
+                  type: QuantityType
+                      name: "current"
+                      unit: "A"
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 1
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "stored"
+                  positive: null
+                  negative: null
+                  expression: SourceText[69:30@4309] "min(detail, 1)"
+                  type: QuantityType
+                      name: "ratio"
+                      unit: ""
+                      dimension: Dimension
+                          mass: Integer 0
+                          length: Integer 0
+                          time: Integer 0
+                          current: Integer 0
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.LOCAL
+                  subject: "L_incremental"
+                  positive: null
+                  negative: null
+                  expression: SourceText[70:42@4366] "saturated_inductance + (inductance - saturated_inductance) / cosh(I_winding / I_saturation_now) ^ 2"
+                  type: QuantityType
+                      name: "inductance"
+                      unit: "H"
+                      dimension: Dimension
+                          mass: Integer 1
+                          length: Integer 2
+                          time: Integer -2
+                          current: Integer -2
+                          temperature: Integer 0
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "terminal_one"
+                  negative: "winding"
+                  expression: SourceText[72:43@4511] "(terminal_one - winding) / R_winding_now"
+                  type: null
+              - Equation
+                  form: EquationForm.DERIVATIVE
+                  subject: "I_winding"
+                  positive: null
+                  negative: null
+                  expression: SourceText[73:27@4579] "(winding - terminal_two) / L_incremental"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "winding"
+                  negative: "terminal_two"
+                  expression: SourceText[74:43@4663] "I_winding + (winding - terminal_two) / R_core"
+                  type: null
+              - Equation
+                  form: EquationForm.CURRENT
+                  subject: null
+                  positive: "terminal_one"
+                  negative: "terminal_two"
+                  expression: SourceText[75:48@4757] "d(stored * C_winding * (terminal_one - terminal_two))/dt"
+                  type: null
+      - Expectation
+          title: "a ramp of V / L below saturation"
+          reference: "1 V across 100 µH: 0.5 A after 50 µs"
+          bench: List(2)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "feed"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[80:52@4995] "1 V"
+                  symbol: Optional.empty
+                  line: Integer 80
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      terminal_one = "feed"
+                      terminal_two = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 81
+          sharedBench: null
+          duration: Double 5.0E-5
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "final"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[84:16@5121] "-0.55"
+                  quantity: Optional Quantity
+                      value: Double -0.55
+                      unit: "A"
+                      written: "-0.55 A"
+              maximum: Optional Amount
+                  expression: SourceText[84:27@5132] "-0.45"
+                  quantity: Optional Quantity
+                      value: Double -0.45
+                      unit: "A"
+                      written: "-0.45 A"
+              exact: null
+          line: Integer 78
+      - Expectation
+          title: "the core saturates past ISAT"
+          reference: "the same 1 V after 250 µs: a linear inductor would carry 2.5 A"
+          bench: List(2)
+              - Part
+                  id: "V1"
+                  reference: "voltage-source"
+                  unit: Optional.empty
+                  positional: List(2)
+                      - "feed"
+                      - "0"
+                  named: Map(0)
+                  settings: Map(1)
+                      U_output = SourceText[89:52@5344] "1 V"
+                  symbol: Optional.empty
+                  line: Integer 89
+              - Part
+                  id: "U1"
+                  reference: "self"
+                  unit: Optional.empty
+                  positional: List(0)
+                  named: Map(2)
+                      terminal_one = "feed"
+                      terminal_two = "0"
+                  settings: Map(0)
+                  symbol: Optional.empty
+                  line: Integer 90
+          sharedBench: null
+          duration: Double 2.5E-4
+          temperature: null
+          realistic: false
+          measure: List(3)
+              - "final"
+              - "current"
+              - "V1"
+          criterion: Criterion
+              kind: CriterionKind.WITHIN
+              typical: Optional.empty
+              tolerance: Optional.empty
+              relative: false
+              minimum: Optional Amount
+                  expression: SourceText[93:16@5470] "-21"
+                  quantity: Optional Quantity
+                      value: Double -21.0
+                      unit: "A"
+                      written: "-21 A"
+              maximum: Optional Amount
+                  expression: SourceText[93:25@5479] "-4"
+                  quantity: Optional Quantity
+                      value: Double -4.0
+                      unit: "A"
+                      written: "-4 A"
+              exact: null
+          line: Integer 87
+  line: Integer 19
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 19:1 component "…" is opened with '{' and never closed
+== line 4 deleted
+READS acb65be805abb8369e08970a5cb0163f
+== line 4 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 4:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 11 deleted
+READS f9b6cf924e91f21925415f08982762c9
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 11:1 a document opens with its kind and a title in quotes: 'surface "Radial wave" { … }'
+== line 25 deleted
+READS 07924166de1017c8b2ad7a61337957ba
+== line 25 begun with a stray word
+READS 7d20891dc34e17e09c9c75512892651f
+== line 32 deleted
+READS 084b89752242bb88b1ca6af9390badeb
+== line 32 begun with a stray word
+READS 867740bc95f3b52deace2492b9542839
+== line 39 deleted
+READS 19b78886747de45651e1e2d61d0a860b
+== line 39 begun with a stray word
+READS f5c4a1f631fb7dd1e53ffe1bea0d22b8
+== line 46 deleted
+READS f77a08d5109bac42b6ccc06f8a279dad
+== line 46 begun with a stray word
+READS 330121f00a817f72b2a672b96addadec
+== line 53 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:9 'I_winding' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 53 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 53:5 'zzz' is not a block of a component; it holds behaviour, bench, display, equations, expect, formulas, heat, leads, measure, meta, nets, nodes, parameters, parts, pins, state, symbol, view
+== line 60 deleted
+READS 66d78b2fae79d278e9c0d6ba51f7fc67
+== line 60 begun with a stray word
+READS ff48d26f9f52a5dbd5d81146fa2bac48
+== line 67 deleted
+READS f53456cc780d51abd241e6ccf7ae2e82
+== line 67 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 67:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
+== line 74 deleted
+READS 8d09ea6d3db3746860e8c6d8733cf733
+== line 74 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 74:9 an equation is d(x)/dt = …, x_next = …, x_start = …, current a -> b = …, voltage a -> b = …, 0 = … or let name [: type] = …
+== line 81 deleted
+READS f782921eab0898833e53338b39da68e8
+== line 81 begun with a stray word
+READS f6f9c4a553b871609a39c76bbd3bde6d
+== line 88 deleted
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 88:13 'V1' is not a criterion: near, within or is
+== line 88 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/components/passive/power-inductor.jmx 88:9 'zzz' is not a criterion: near, within or is
