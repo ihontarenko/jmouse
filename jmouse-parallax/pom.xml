@@ -62,6 +62,12 @@
             <artifactId>jmouse-formula</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Slugifier: an object's and a document's slug is minted by the one rule every jmouse tree uses -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Units, dimensions and the value as a datasheet writes it (Quantity): a jMX value is read with them -->
         <dependency>
             <groupId>org.jmouse</groupId>

@@ -1,8 +1,8 @@
 package org.jmouse.parallax.script;
 
-import java.text.Normalizer;
+import org.jmouse.core.text.Slugifier;
+
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,11 +53,15 @@ public record ExperienceDocument(Kind kind, String title, String slug, Optional<
         return Capabilities.of(this);
     }
 
-    /** A slug from a title: lowercase ASCII words joined by hyphens. */
+    /**
+     * A slug from a title: lowercase ASCII words joined by hyphens, by the rule every jmouse tree mints its slugs with —
+     * Cyrillic transliterated, marks dropped, a superscript digit kept as a digit. A document whose head writes
+     * {@code as slug} keeps that one; this answers only for a document that writes none.
+     */
     public static String slugOf(String title) {
-        String decomposed = Normalizer.normalize(title, Normalizer.Form.NFKD).replaceAll("\\p{M}", "")
-                .toLowerCase(Locale.ROOT);
-        String slug = decomposed.replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
-        return slug.isEmpty() ? "untitled" : slug;
+        return SLUGS.slug(title);
     }
+
+    /** The slug rule, falling back to {@code untitled} when nothing of a title can stand in an address. */
+    private static final Slugifier SLUGS = Slugifier.standard().fallingBackTo("untitled");
 }
