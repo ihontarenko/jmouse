@@ -2,6 +2,7 @@ package org.jmouse.formula.el;
 
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.literal.QuantityLiteralNode;
 import org.jmouse.el.parser.ExpressionParser;
@@ -13,6 +14,8 @@ import org.jmouse.el.parser.PrimaryExpressionParser;
 import org.jmouse.el.parser.PropertyParser;
 import org.jmouse.el.parser.QuantityParser;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -23,7 +26,10 @@ import static org.jmouse.el.lexer.BasicToken.T_IDENTIFIER;
 import static org.jmouse.el.lexer.BasicToken.T_NEW_LINE;
 import static org.jmouse.el.lexer.BasicToken.T_OPEN_PAREN;
 
-/** jMF's primary expressions: numbers, names, calls and groups, without jME's lambda ambiguity for (x). */
+/**
+ * jMF's primary expressions: numbers, names, calls, groups and tuples, without jME's lambda ambiguity for (x) — a
+ * group with a comma in it, {@code (cos t, sin t)}, is a {@link TupleNode}.
+ */
 public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParser {
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
@@ -42,13 +48,28 @@ public final class FormulaPrimaryExpressionParser extends PrimaryExpressionParse
             // "in": current(in), in.current — not an operator.
             parent.add(context.getParser(PropertyParser.class).parse(cursor, context));
         } else if (cursor.consumeIf(T_OPEN_PAREN)) {
-            parent.add(context.getParser(ExpressionParser.class).parse(cursor, context));
-            cursor.ensure(T_CLOSE_PAREN);
+            parent.add(group(cursor, context));
         } else if (cursor.consumeIf(T_NEW_LINE)) {
             parse(cursor, parent, context);
         } else {
             throw new ParseException("Unexpected token " + cursor.peek() + " at " + cursor.position());
         }
+    }
+
+    /** {@code (a)} is {@code a}; {@code (a, b, …)} is a tuple of them. The cursor is past the opening parenthesis. */
+    private static Node group(TokenCursor cursor, ParserContext context) {
+        Expression first = (Expression) context.getParser(ExpressionParser.class).parse(cursor, context);
+        if (!cursor.isCurrent(T_COMMA)) {
+            cursor.ensure(T_CLOSE_PAREN);
+            return first;
+        }
+        List<Expression> components = new ArrayList<>();
+        components.add(first);
+        while (cursor.consumeIf(T_COMMA)) {
+            components.add((Expression) context.getParser(ExpressionParser.class).parse(cursor, context));
+        }
+        cursor.ensure(T_CLOSE_PAREN);
+        return new TupleNode(components);
     }
 
     /**

@@ -46,27 +46,6 @@ public final class ObjectFiles {
         return parameters;
     }
 
-    /** The parts of a text between separators that stand outside every bracket, stripped; empty parts dropped. */
-    static List<String> splitTopLevel(String text, char separator) {
-        List<String> parts = new ArrayList<>();
-        int depth = 0;
-        int start = 0;
-        for (int index = 0; index < text.length(); index++) {
-            char character = text.charAt(index);
-            if (character == '(' || character == '[') {
-                depth++;
-            } else if (character == ')' || character == ']') {
-                depth--;
-            } else if (character == separator && depth == 0) {
-                parts.add(text.substring(start, index).strip());
-                start = index + 1;
-            }
-        }
-        parts.add(text.substring(start).strip());
-        parts.removeIf(String::isEmpty);
-        return parts;
-    }
-
     /** One object read out of a file, with the line it came from and the parameters its formula needs. */
     public record ReadObject(String name, int line, String source, ObjectDefinition definition,
                              List<ParameterDefinition> parameters) {

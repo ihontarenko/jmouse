@@ -81,6 +81,8 @@ public final class FormulaTranslator {
             case LiteralNode<?> literal -> literal(literal);
             case PropertyNode property -> name(property.getPath());
             case FunctionNode function -> function(function);
+            case TupleNode tuple -> throw refusal("'" + tuple.toSource() + "' is a tuple — a point, a curve's components —, not a "
+                    + "number: write one of its components where a number is wanted.", null);
             default -> throw refusal("'" + expression.toSource() + "' is not part of formula notation.", null);
         };
     }

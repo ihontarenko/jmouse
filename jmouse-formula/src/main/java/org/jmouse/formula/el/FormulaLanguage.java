@@ -3,11 +3,13 @@ package org.jmouse.formula.el;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.DefaultLexer;
 import org.jmouse.el.lexer.DefaultTokenizer;
 import org.jmouse.el.lexer.ExpressionRecognizer;
 import org.jmouse.el.lexer.ExpressionSplitter;
 import org.jmouse.el.lexer.Lexer;
+import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.BasicNode;
 import org.jmouse.el.node.Node;
@@ -22,6 +24,7 @@ import org.jmouse.formula.MathematicalFunction;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.Symbols;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -190,11 +193,115 @@ public final class FormulaLanguage {
             Formula.Definition definition = definition(statement, definitions, source);
             definitions.put(definition.name(), definition);
         }
-        return switch (statements.getLast()) {
+        FormulaStatement last = statements.getLast();
+        if (!last.ranges().isEmpty()) {
+            FormulaStatement.Range range = last.ranges().getFirst();
+            throw new FormulaException("'" + range.variable() + " in " + range.from().text() + " .. " + range.to().text()
+                    + "' is the range of a curve or a family, not part of a formula.", source, range.offset());
+        }
+        return switch (last) {
             case FormulaStatement.Assignment equation -> new Formula.Equation(
                     translate(equation.left(), definitions, source), translate(equation.right(), definitions, source));
             case FormulaStatement.Plain plain -> translate(plain.expression(), definitions, source);
         };
+    }
+
+    /**
+     * A document's statements as written, each with its parts cut from the source by the grammar — what a reader of a
+     * graph's line builds a point, a curve or a construction step from. A statement need not be a formula here: a tuple,
+     * a construction step and a range are all read.
+     *
+     * @throws FormulaException when the text does not parse
+     */
+    public List<WrittenStatement> written(String source) {
+        List<FormulaStatement> statements = statements(source);
+        FormulaNotation.Normalized normalized = FormulaNotation.normalizeTracked(source);
+        List<WrittenStatement> written = new ArrayList<>();
+        for (FormulaStatement statement : statements) {
+            String text = source.substring(normalized.sourceIndex(statement.offset()),
+                    normalized.sourceIndex(statement.end())).strip();
+            List<WrittenStatement.Range> ranges = statement.ranges().stream().map(range -> new WrittenStatement.Range(
+                    range.variable(), writtenText(range.from().tokens(), source, normalized),
+                    writtenText(range.to().tokens(), source, normalized), range.integer(),
+                    normalized.sourceIndex(range.offset()))).toList();
+            written.add(switch (statement) {
+                case FormulaStatement.Assignment assignment -> new WrittenStatement(text,
+                        assignment.head().map(FormulaStatement.Head::name),
+                        assignment.head().map(FormulaStatement.Head::parameters).orElse(List.of()),
+                        written(assignment.right().tokens(), source, normalized), ranges);
+                case FormulaStatement.Plain plain -> new WrittenStatement(text, Optional.empty(), List.of(),
+                        written(plain.expression().tokens(), source, normalized), ranges);
+            });
+        }
+        return List.copyOf(written);
+    }
+
+    /**
+     * An expression's tokens as written, and its shape: a tuple when a parenthesis opened first closes last with a comma
+     * between them at its own level, a call when a name opens such a parenthesis, else an expression.
+     */
+    private static WrittenStatement.Written written(List<Token> tokens, String source, FormulaNotation.Normalized normalized) {
+        String text = writtenText(tokens, source, normalized);
+        int open = tokens.size() > 1 && tokens.get(1).type() == BasicToken.T_OPEN_PAREN
+                && tokens.getFirst().type() == BasicToken.T_IDENTIFIER ? 1
+                : tokens.getFirst().type() == BasicToken.T_OPEN_PAREN ? 0 : -1;
+        if (open < 0 || closingOf(tokens, open) != tokens.size() - 1) {
+            return new WrittenStatement.Written(text, new WrittenStatement.Expression());
+        }
+        List<List<Token>> parts = topLevelParts(tokens.subList(open + 1, tokens.size() - 1));
+        List<WrittenStatement.Written> written = parts.stream().filter(part -> !part.isEmpty())
+                .map(part -> written(part, source, normalized)).toList();
+        if (open == 1) {
+            return new WrittenStatement.Written(text, new WrittenStatement.Call(tokens.getFirst().value(), written));
+        }
+        return parts.size() > 1
+                ? new WrittenStatement.Written(text, new WrittenStatement.Tuple(written))
+                : new WrittenStatement.Written(text, new WrittenStatement.Expression());
+    }
+
+    /** The source the tokens were read from, from the first's start to the last's end, as typed and trimmed. */
+    private static String writtenText(List<Token> tokens, String source, FormulaNotation.Normalized normalized) {
+        Token last = tokens.getLast();
+        int start = normalized.sourceIndex(tokens.getFirst().offset());
+        int end = normalized.sourceIndex(last.offset() + last.value().length());
+        return source.substring(start, end).strip();
+    }
+
+    /** The index of the parenthesis or bracket closing the one at {@code open}; -1 when none does. */
+    private static int closingOf(List<Token> tokens, int open) {
+        int depth = 0;
+        for (int index = open; index < tokens.size(); index++) {
+            Token.Type type = tokens.get(index).type();
+            if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
+                depth++;
+            } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
+                depth--;
+                if (depth == 0) {
+                    return index;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /** The tokens split at the commas outside parentheses and brackets. */
+    private static List<List<Token>> topLevelParts(List<Token> tokens) {
+        List<List<Token>> parts = new ArrayList<>();
+        int depth = 0;
+        int start = 0;
+        for (int index = 0; index < tokens.size(); index++) {
+            Token.Type type = tokens.get(index).type();
+            if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
+                depth++;
+            } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
+                depth--;
+            } else if (depth == 0 && type == BasicToken.T_COMMA) {
+                parts.add(tokens.subList(start, index));
+                start = index + 1;
+            }
+        }
+        parts.add(tokens.subList(start, tokens.size()));
+        return parts;
     }
 
     /**
@@ -276,6 +383,10 @@ public final class FormulaLanguage {
         return statements.stream().map(statement -> {
             if (statement instanceof FormulaStatement.Assignment assignment && assignment.head().isPresent()) {
                 requireDefinable(assignment.head().get().name(), source);
+                if (!assignment.ranges().isEmpty()) {
+                    throw new FormulaException("A range belongs after the last statement, not after the definition of "
+                            + assignment.head().get().name() + ".", source, assignment.ranges().getFirst().offset());
+                }
                 return assignment;
             }
             throw new FormulaException("'" + written(statement) + "' is neither a definition nor the last statement; "

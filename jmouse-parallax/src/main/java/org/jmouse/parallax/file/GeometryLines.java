@@ -2,6 +2,8 @@ package org.jmouse.parallax.file;
 
 import org.jmouse.formula.FormulaException;
 import org.jmouse.formula.el.FormulaLanguage;
+import org.jmouse.formula.el.WrittenStatement;
+import org.jmouse.formula.el.WrittenStatement.Written;
 import org.jmouse.parallax.object.ObjectDefinition;
 import org.jmouse.parallax.object.ObjectDefinition.GeometricElement;
 import org.jmouse.parallax.object.ObjectDefinition.GeometricElementType;
@@ -15,8 +17,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A line of a graph that is geometry rather than a function: a point written as a tuple — {@code (cos t, sin t)}, the
@@ -27,14 +27,13 @@ import java.util.regex.Pattern;
  * <p>Labels say what is marked: a named element carries its name, a bare point a blank label (marked, no word), and
  * the helpers a call builds — the tail of a vector, the line itself when it is a shape — an empty one (not marked).</p>
  *
- * <p>The line comes as the graph writes it: its definitions first, then the line, joined by {@code ;}. A definition
- * {@code P = (…)} or {@code S = segment(…)} is an element the line may name; any other definition — a function, a
- * constant — is kept as jMF and written in front of every coordinate, so a coordinate may call it.</p>
+ * <p>The line comes as the graph writes it: its definitions first, then the line, joined by {@code ;}; jMF's grammar
+ * reads it ({@link FormulaLanguage#written}). A definition {@code P = (…)} or {@code S = segment(…)} is an element the
+ * line may name; any other definition — a function, a constant — is kept as jMF and written in front of every
+ * coordinate, so a coordinate may call it.</p>
  */
 public final class GeometryLines {
 
-    private static final Pattern DEFINITION = Pattern.compile("\\s*([A-Za-z][A-Za-z0-9_]*)\\s*=(?!=)\\s*(.+)", Pattern.DOTALL);
-    private static final Pattern CALL = Pattern.compile("\\s*([A-Za-z_]+)\\s*\\((.*)\\)\\s*", Pattern.DOTALL);
     private static final Set<String> STEP_WORDS = wordsOf();
 
     private GeometryLines() {
@@ -42,67 +41,49 @@ public final class GeometryLines {
 
     /** The line as a construction, or empty when its last statement is not a point or a construction step. */
     public static Optional<ObjectFiles.ReadObject> read(String source) {
-        List<String> statements = splitTopLevel(source, ';');
-        if (statements.isEmpty()) {
+        List<WrittenStatement> statements;
+        try {
+            statements = FormulaLanguage.standard().written(source);
+        } catch (FormulaException unreadable) {
             return Optional.empty();
         }
-        String last = statements.getLast();
-        Matcher named = DEFINITION.matcher(last);
-        String lastName = named.matches() && isGeometry(named.group(2)) ? named.group(1) : null;
-        String lastBody = lastName != null ? named.group(2) : last;
-        if (!isGeometry(lastBody)) {
+        WrittenStatement last = statements.getLast();
+        if (!last.ranges().isEmpty() || !isGeometry(last.expression())) {
+            return Optional.empty();
+        }
+        String lastName = isElement(last) ? last.name().orElseThrow() : null;
+        if (last.defines() && lastName == null) {
             return Optional.empty();
         }
         Builder builder = new Builder();
-        for (String statement : statements.subList(0, statements.size() - 1)) {
-            Matcher definition = DEFINITION.matcher(statement);
-            if (definition.matches() && isGeometry(definition.group(2))) {
-                if (!definition.group(1).equals(lastName)) {
-                    builder.element(definition.group(1), definition.group(2), definition.group(1));
+        for (WrittenStatement statement : statements.subList(0, statements.size() - 1)) {
+            if (isElement(statement)) {
+                String name = statement.name().orElseThrow();
+                if (!name.equals(lastName)) {
+                    builder.element(name, statement.expression(), name);
                 }
             } else {
-                builder.definitions.add(statement.strip());
+                builder.definitions.add(statement.text());
             }
         }
-        builder.element(lastName != null ? lastName : "shown", lastBody, lastName != null ? lastName : isTuple(lastBody.strip()) ? " " : "");
-        int dimension = builder.dimension;
-        ObjectDefinition.GeometricConstruction construction = new ObjectDefinition.GeometricConstruction(dimension, builder.elements);
+        Written lastBody = last.expression();
+        builder.element(lastName != null ? lastName : "shown", lastBody,
+                lastName != null ? lastName : lastBody.shape() instanceof WrittenStatement.Tuple ? " " : "");
+        ObjectDefinition.GeometricConstruction construction = new ObjectDefinition.GeometricConstruction(builder.dimension,
+                builder.elements);
         return Optional.of(new ObjectFiles.ReadObject("geometry", 1, source, construction, builder.parameters()));
     }
 
-    /** Whether a statement is a point `(a, b)` or a construction step `type(…)`. */
-    private static boolean isGeometry(String text) {
-        String body = text.strip();
-        if (isTuple(body)) {
-            return true;
-        }
-        Matcher call = CALL.matcher(body);
-        return call.matches() && STEP_WORDS.contains(call.group(1).toLowerCase(Locale.ROOT)) && closesAtEnd(body);
+    /** Whether a statement names an element: {@code P = (1, 2)}, {@code S = segment(A, B)} — a name, no parameters. */
+    private static boolean isElement(WrittenStatement statement) {
+        return statement.defines() && statement.parameters().isEmpty() && statement.ranges().isEmpty()
+                && isGeometry(statement.expression());
     }
 
-    private static boolean isTuple(String body) {
-        return body.startsWith("(") && closesAtEnd(body) && splitTopLevel(body.substring(1, body.length() - 1), ',').size() >= 2;
-    }
-
-    /** Whether the parenthesis opened first closes at the very end: `(a, b)` but not `(a) + (b)`. */
-    private static boolean closesAtEnd(String body) {
-        int depth = 0;
-        for (int index = 0; index < body.length(); index++) {
-            char character = body.charAt(index);
-            if (character == '(') {
-                depth++;
-            } else if (character == ')') {
-                depth--;
-                if (depth == 0 && index != body.length() - 1) {
-                    return false;
-                }
-            }
-        }
-        return depth == 0 && body.endsWith(")");
-    }
-
-    private static List<String> splitTopLevel(String text, char separator) {
-        return ObjectFiles.splitTopLevel(text, separator);
+    /** Whether an expression is a point `(a, b)` or a construction step `type(…)`. */
+    private static boolean isGeometry(Written written) {
+        return written.shape() instanceof WrittenStatement.Tuple
+                || written.shape() instanceof WrittenStatement.Call call && STEP_WORDS.contains(call.name().toLowerCase(Locale.ROOT));
     }
 
     private static Set<String> wordsOf() {
@@ -122,35 +103,33 @@ public final class GeometryLines {
         int dimension = 2;
         int anonymous = 0;
 
-        void element(String id, String body, String label) {
-            String written = body.strip();
-            if (isTuple(written)) {
-                point(id, written, label);
+        void element(String id, Written body, String label) {
+            if (body.shape() instanceof WrittenStatement.Tuple tuple) {
+                point(id, tuple, label);
                 return;
             }
-            Matcher call = CALL.matcher(written);
-            if (!call.matches()) {
-                throw new IllegalArgumentException("'" + written + "' is neither a point nor a construction step.");
+            if (!(body.shape() instanceof WrittenStatement.Call call)) {
+                throw new IllegalArgumentException("'" + body.text() + "' is neither a point nor a construction step.");
             }
-            GeometricElementType type = GeometricElementType.valueOf(call.group(1).toUpperCase(Locale.ROOT));
+            GeometricElementType type = GeometricElementType.valueOf(call.name().toUpperCase(Locale.ROOT));
             List<String> references = new ArrayList<>();
             List<String> values = new ArrayList<>();
-            for (String argument : splitTopLevel(call.group(2), ',')) {
+            for (Written argument : call.arguments()) {
                 if (type == GeometricElementType.POINT) {
-                    values.add(withDefinitions(argument));
-                } else if (known.containsKey(argument)) {
-                    references.add(argument);
-                } else if (isGeometry(argument) && !isTuple(argument)) {
+                    values.add(withDefinitions(argument.text()));
+                } else if (known.containsKey(argument.text())) {
+                    references.add(argument.text());
+                } else if (argument.shape() instanceof WrittenStatement.Tuple tuple) {
+                    String point = "point" + (++anonymous);
+                    point(point, tuple, "");
+                    references.add(point);
+                } else if (isGeometry(argument)) {
                     // A step inside a step — rotation(polygon(…), C, θ): built first, as a helper nobody sees.
                     String inner = "shape" + (++anonymous);
                     element(inner, argument, "");
                     references.add(inner);
-                } else if (isTuple(argument)) {
-                    String point = "point" + (++anonymous);
-                    point(point, argument, "");
-                    references.add(point);
                 } else {
-                    values.add(withDefinitions(argument));
+                    values.add(withDefinitions(argument.text()));
                 }
             }
             if (type == GeometricElementType.POINT) {
@@ -160,14 +139,14 @@ public final class GeometryLines {
             known.put(id, type);
         }
 
-        void point(String id, String tuple, String label) {
-            List<String> parts = splitTopLevel(tuple.substring(1, tuple.length() - 1), ',');
+        void point(String id, WrittenStatement.Tuple tuple, String label) {
+            List<Written> parts = tuple.components();
             if (parts.size() > 3) {
                 throw new IllegalArgumentException("A point has two or three coordinates, not " + parts.size() + ".");
             }
             dimension = Math.max(dimension, parts.size());
             elements.add(new GeometricElement(id, GeometricElementType.POINT, List.of(),
-                    parts.stream().map(this::withDefinitions).toList(), label));
+                    parts.stream().map(part -> withDefinitions(part.text())).toList(), label));
             known.put(id, GeometricElementType.POINT);
         }
 

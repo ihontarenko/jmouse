@@ -42,6 +42,9 @@ final class FormulaDocumentParser extends StatementsParser {
     /** What a line ends in when the statement goes on to the next: an operator, a comma, an {@code =}. */
     private static final String CONTINUING = "+-*/^,=<>&|!%";
 
+    /** The word after a range that makes its variable a whole index: {@code k in 1 .. N integer}. */
+    private static final String INTEGER = "integer";
+
     @Override
     protected void open(TokenCursor cursor) {
         cursor.consumeIf(BasicToken.T_SOL);
@@ -65,24 +68,73 @@ final class FormulaDocumentParser extends StatementsParser {
         cursor.shift(written.size());
         int offset = meaningful.getFirst().offset();
         int ending = startOf(end, cursor.source());
-        List<Integer> equals = topLevelEquals(meaningful);
+        List<FormulaStatement.Range> ranges = new ArrayList<>();
+        List<Token> body = withoutRanges(meaningful, written, end, cursor, context, ranges);
+        Token bodyEnd = ranges.isEmpty() ? end : written.get(written.indexOf(body.getLast()) + 1);
+        List<Integer> equals = topLevelEquals(body);
         if (equals.size() > 1) {
             throw new FormulaException("An equation has one '='; compare with '==' instead.",
-                    sourceText(cursor), meaningful.get(equals.get(1)).offset());
+                    sourceText(cursor), body.get(equals.get(1)).offset());
         }
         if (equals.isEmpty()) {
-            return new FormulaStatementNode(new FormulaStatement.Plain(side(meaningful, written, end, cursor, context),
-                    offset, ending));
+            return new FormulaStatementNode(new FormulaStatement.Plain(side(body, written, bodyEnd, cursor, context),
+                    ranges, offset, ending));
         }
         int at = equals.getFirst();
-        List<Token> left = meaningful.subList(0, at);
-        List<Token> right = meaningful.subList(at + 1, meaningful.size());
+        List<Token> left = body.subList(0, at);
+        List<Token> right = body.subList(at + 1, body.size());
         if (left.isEmpty() || right.isEmpty()) {
             throw new FormulaException("A side of the formula is empty.", sourceText(cursor), offset);
         }
-        Token equalSign = meaningful.get(at);
+        Token equalSign = body.get(at);
         return new FormulaStatementNode(new FormulaStatement.Assignment(head(left),
-                side(left, written, equalSign, cursor, context), side(right, written, end, cursor, context), offset, ending));
+                side(left, written, equalSign, cursor, context), side(right, written, bodyEnd, cursor, context), ranges,
+                offset, ending));
+    }
+
+    /**
+     * The statement without the ranges written after it, which are gathered into {@code ranges} in order:
+     * {@code (cos s, sin s)  s in 0 .. 2 pi  k in 1 .. N integer} is its tuple, then {@code s}'s range and {@code k}'s.
+     * A range is a name, {@code in}, two bounds around {@code ..} — all outside parentheses —, and {@code integer} for a
+     * whole index; it stands after the statement's own tokens, which never end up empty.
+     */
+    private static List<Token> withoutRanges(List<Token> meaningful, List<Token> written, Token end, TokenCursor cursor,
+                                             ParserContext context, List<FormulaStatement.Range> ranges) {
+        int length = meaningful.size();
+        Token after = end;
+        while (true) {
+            boolean integer = length > 0 && meaningful.get(length - 1).type() == BasicToken.T_IDENTIFIER
+                    && meaningful.get(length - 1).value().equals(INTEGER);
+            int boundsEnd = integer ? length - 1 : length;
+            int in = -1;
+            int dots = -1;
+            int depth = 0;
+            for (int index = 0; index < boundsEnd; index++) {
+                Token.Type type = meaningful.get(index).type();
+                if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
+                    depth++;
+                } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
+                    depth--;
+                } else if (depth == 0 && type == BasicToken.T_IN && index > 1
+                        && meaningful.get(index - 1).type() == BasicToken.T_IDENTIFIER) {
+                    in = index;
+                    dots = -1;
+                } else if (depth == 0 && type == BasicToken.T_DOUBLE_DOT && in >= 0 && dots < 0) {
+                    dots = index;
+                }
+            }
+            if (in < 0 || dots < 0 || dots == in + 1 || dots == boundsEnd - 1) {
+                return meaningful.subList(0, length);
+            }
+            Token dotsToken = meaningful.get(dots);
+            Token toEnd = integer ? meaningful.get(boundsEnd) : after;
+            FormulaStatement.Side from = side(meaningful.subList(in + 1, dots), written, dotsToken, cursor, context);
+            FormulaStatement.Side to = side(meaningful.subList(dots + 1, boundsEnd), written, toEnd, cursor, context);
+            Token variable = meaningful.get(in - 1);
+            ranges.addFirst(new FormulaStatement.Range(variable.value(), from, to, integer, variable.offset()));
+            length = in - 1;
+            after = variable;
+        }
     }
 
     /**
@@ -211,7 +263,7 @@ final class FormulaDocumentParser extends StatementsParser {
                 names.add(token.value());
             }
         }
-        return new FormulaStatement.Side(expression, text, Set.copyOf(names));
+        return new FormulaStatement.Side(expression, text, Set.copyOf(names), tokens);
     }
 
     /**
