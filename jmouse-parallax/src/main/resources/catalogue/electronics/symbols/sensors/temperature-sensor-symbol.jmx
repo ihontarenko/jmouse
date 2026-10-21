@@ -1,0 +1,41 @@
+symbol "Temperature sensor, analog output" as temperature-sensor-symbol {
+    meta {
+        summary "A temperature sensor with a voltage output, as drawn on a schematic: a body marked with a thermometer, the supply above, ground below and the output to the right"
+        category circuits
+        tags electronics, schematic
+    }
+    size 160 x 160
+    input reading 0 .. 1
+    input failed
+
+    live group body {
+        path "M-40-40H40V40H-40Z"
+        path "M0-40V-80M0 40V80M40 0H80"
+        path "M-22-26V8M-14-26V8M-22-26A4 4 0 0 1 -14-26"
+        path "M-10-90H-2M-6-94V-86"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The thermometer's bulb and its column, filled as far as the reading goes.
+    live path bulb "M-26 16A8 8 0 1 0 -10 16A8 8 0 1 0 -26 16Z" {
+        live stroke = if(failed > 0.5, burned, signal)
+        fill = warm
+    }
+
+    live box column at -18, -8 size 4 x 32 {
+        live level = reading
+        fill = warm
+    }
+
+    live when failed > 0.5 {
+        path scorch "M3-9L7-3M16-8L12-2M4 8L8 3M17 9L13 3"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin supply at 0, -80 "+VS"
+    pin ground at 0, 80 "GND"
+    pin output at 80, 0 "VOUT"
+    label name at 60, -52
+    label value at 60, 56
+}

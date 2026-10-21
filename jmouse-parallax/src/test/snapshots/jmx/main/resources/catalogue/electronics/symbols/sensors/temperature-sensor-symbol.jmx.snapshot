@@ -1,0 +1,215 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Temperature sensor, analog output"
+  slug: "temperature-sensor-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A temperature sensor with a voltage output, as drawn on a schematic: a body marked with a thermometer, the supply above, ground below and the output to the right"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 160.0
+          height: Double 160.0
+          paths: List(0)
+          pins: List(3)
+              - SymbolPin
+                  pin: "supply"
+                  x: Double 0.0
+                  y: Double -80.0
+                  label: "+VS"
+              - SymbolPin
+                  pin: "ground"
+                  x: Double 0.0
+                  y: Double 80.0
+                  label: "GND"
+              - SymbolPin
+                  pin: "output"
+                  x: Double 80.0
+                  y: Double 0.0
+                  label: "VOUT"
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 60.0
+                  y: Double -52.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 60.0
+                  y: Double 56.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(2)
+              - SymbolInput
+                  name: "reading"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional SourceText[8:19@370] "0 .. 1"
+                  picture: false
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(4)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(4)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-40-40H40V40H-40Z"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 12
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M0-40V-80M0 40V80M40 0H80"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 13
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-22-26V8M-14-26V8M-22-26A4 4 0 0 1 -14-26"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 14
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-10-90H-2M-6-94V-86"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 15
+                  line: Integer 11
+              - SymbolElement
+                  shape: "path"
+                  name: "bulb"
+                  live: true
+                  path: "M-26 16A8 8 0 1 0 -10 16A8 8 0 1 0 -26 16Z"
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(2)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                      - SymbolProperty fill STILL
+                          - Variable[name=warm]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 20
+              - SymbolElement
+                  shape: "box"
+                  name: "column"
+                  live: true
+                  path: ""
+                  geometry: Map(2)
+                      at = List(2)
+                          - Double -18.0
+                          - Double -8.0
+                      size = List(2)
+                          - Double 4.0
+                          - Double 32.0
+                  condition: null
+                  properties: List(2)
+                      - SymbolProperty level LIVE
+                          - Variable[name=reading]
+                      - SymbolProperty fill STILL
+                          - Variable[name=warm]
+                  hidden: List(0)
+                  children: List(0)
+                  line: Integer 25
+              - SymbolElement
+                  shape: "when"
+                  name: ""
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: SymbolProperty when LIVE
+                      - Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]]
+                  properties: List(2)
+                      - SymbolProperty stroke STILL
+                          - Variable[name=burned]
+                      - SymbolProperty opacity ANIMATED
+                          - Binary[operator=ADD, left=Constant[value=0.35], right=Binary[operator=MULTIPLY, left=Constant[value=0.65], right=HostCall[name=blink, arguments=[Constant[value=1]]]]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: "scorch"
+                          live: false
+                          path: "M3-9L7-3M16-8L12-2M4 8L8 3M17 9L13 3"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 31
+                  line: Integer 30
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/sensors/temperature-sensor-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS d91b5dc62f1e7e9b399fcfeca4e6f4d4
+== line 4 begun with a stray word
+READS 2e66248e267f35e6545534f8f803dbe0
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/sensors/temperature-sensor-symbol.jmx 15:14 'stroke' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/sensors/temperature-sensor-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 25 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/sensors/temperature-sensor-symbol.jmx 25:14 'level' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/sensors/temperature-sensor-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta
+== line 32 deleted
+READS 79834587a4b709803f4d1a72eb3661bb
+== line 32 begun with a stray word
+READS 4d88a7e0817bee28d11c45e27e7f554b
+== line 39 deleted
+READS 3767d58b1b6c3d48485d9cbf14186ebb
+== line 39 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/sensors/temperature-sensor-symbol.jmx 39:5 'zzz' is not a block of a symbol; it holds meta
