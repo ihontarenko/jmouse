@@ -1,13 +1,11 @@
 package org.jmouse.parallax.store.kicad;
 
-import org.jmouse.datamap.DataMapReader;
 import org.jmouse.kicad.KiCadProject;
 import org.jmouse.kicad.parser.KiCadParseException;
 import org.jmouse.kicad.parser.KiCadParser;
 import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.jmouse.parallax.jpa.catalogue.MathematicalObject;
 import org.jmouse.parallax.jpa.catalogue.ObjectStore;
-import org.jmouse.parallax.kicad.KiCadLibraryMap;
 import org.jmouse.parallax.kicad.KiCadProjectImport;
 import org.jmouse.parallax.owner.ParallaxOwner;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -18,12 +16,8 @@ import org.jmouse.parallax.problem.ParallaxProblem;
 import org.jmouse.parallax.store.catalogue.Catalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
 import org.jmouse.parallax.store.catalogue.ObjectDraft;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,16 +48,13 @@ public class KiCadImports {
     private final Catalogue catalogue;
     private final ObjectStore objects;
     private final ComponentModels components;
-    private final ResourceLoader resources;
-    private final KiCadProperties properties;
+    private final KiCadLibraryMaps maps;
 
-    public KiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components, ResourceLoader resources,
-                        KiCadProperties properties) {
+    public KiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components, KiCadLibraryMaps maps) {
         this.catalogue = catalogue;
         this.objects = objects;
         this.components = components;
-        this.resources = resources;
-        this.properties = properties;
+        this.maps = maps;
     }
 
     /**
@@ -75,7 +66,7 @@ public class KiCadImports {
     public Imported importDesign(ParallaxOwner owner, String rootFile, Map<String, String> files) {
         KiCadProject project = project(rootFile, files);
         String name = rootFile.replaceFirst("\\.kicad_sch$", "");
-        KiCadProjectImport imported = KiCadProjectImport.of(project, name, libraryMap(),
+        KiCadProjectImport imported = KiCadProjectImport.of(project, name, maps.read(),
                 new ModelsCatalogue(components));
         List<String> created = new ArrayList<>();
         List<String> updated = new ArrayList<>();
@@ -137,19 +128,6 @@ public class KiCadImports {
             }));
         } catch (KiCadParseException unreadable) {
             throw ParallaxProblem.invalid("invalid-kicad", unreadable.getMessage());
-        }
-    }
-
-    private KiCadLibraryMap libraryMap() {
-        var resource = resources.getResource(properties.libraryMap());
-        if (!resource.exists()) {
-            return KiCadLibraryMap.EMPTY;
-        }
-        try {
-            String text = resource.getContentAsString(StandardCharsets.UTF_8);
-            return KiCadLibraryMap.of(DataMapReader.read(properties.libraryMap(), text));
-        } catch (IOException unreadable) {
-            throw new UncheckedIOException("The KiCad library map " + properties.libraryMap() + " cannot be read", unreadable);
         }
     }
 

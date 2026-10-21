@@ -7,6 +7,7 @@ import org.jmouse.parallax.spice.SpiceModelCarriers;
 import org.jmouse.parallax.spice.SpiceSimulator;
 import org.jmouse.parallax.store.catalogue.Catalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
+import org.jmouse.parallax.store.kicad.KiCadExports;
 import org.jmouse.parallax.store.kicad.KiCadImports;
 import org.jmouse.parallax.store.catalogue.Instruments;
 import org.jmouse.parallax.store.catalogue.ShippedObjects;
@@ -92,10 +93,10 @@ public class ParallaxManagementConfiguration {
                 Optional.ofNullable(simulator.getIfAvailable()));
     }
 
-    /** 📥 KiCad in: a design's sheets imported into an owner's place. */
+    /** 📥📤 KiCad in and out: a design's sheets imported into an owner's place, a circuit written as a schematic. */
     @Bean
-    public KiCadController parallaxKiCadController(KiCadImports imports) {
-        return new KiCadController(imports);
+    public KiCadController parallaxKiCadController(KiCadImports imports, KiCadExports exports) {
+        return new KiCadController(imports, exports);
     }
 
     @Bean

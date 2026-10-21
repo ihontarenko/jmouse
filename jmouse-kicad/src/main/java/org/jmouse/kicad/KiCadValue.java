@@ -1,6 +1,8 @@
 package org.jmouse.kicad;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -44,6 +46,28 @@ public final class KiCadValue {
             return Optional.of(scaled(whole + "." + letter.group(3), letter.group(2)));
         }
         return Optional.empty();
+    }
+
+    /** The multipliers a value is written with, a power of ten each, from the smallest. */
+    private static final List<String> MULTIPLIERS = List.of("p", "n", "u", "m", "", "k", "M", "G", "T");
+    private static final int SMALLEST_POWER = -12;
+
+    /**
+     * A number as a schematic's author writes a value: three significant digits at most, its multiplier a letter —
+     * {@code 10k}, {@code 100n}, {@code 4.7u}, {@code 470}, {@code 2.2M}. What {@link #number} reads back.
+     */
+    public static String written(double number) {
+        if (!Double.isFinite(number)) {
+            throw new IllegalArgumentException(number + " is no value a schematic can write.");
+        }
+        if (number == 0) {
+            return "0";
+        }
+        BigDecimal value = new BigDecimal(number).round(new MathContext(3));
+        int power = Math.floorDiv(value.precision() - value.scale() - 1, 3) * 3;
+        power = Math.max(SMALLEST_POWER, Math.min(SMALLEST_POWER + 3 * (MULTIPLIERS.size() - 1), power));
+        BigDecimal mantissa = value.scaleByPowerOfTen(-power).stripTrailingZeros();
+        return mantissa.toPlainString() + MULTIPLIERS.get((power - SMALLEST_POWER) / 3);
     }
 
     /** In decimal, so {@code 4K7} is exactly the double nearest 4700. */

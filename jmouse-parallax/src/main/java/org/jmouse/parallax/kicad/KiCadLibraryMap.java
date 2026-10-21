@@ -4,6 +4,7 @@ import org.jmouse.datamap.DataMap;
 import org.jmouse.datamap.DataMapEntry;
 import org.jmouse.datamap.DataMapValue;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,8 @@ public final class KiCadLibraryMap {
     private final Map<String, Mapping> mappings;
 
     private KiCadLibraryMap(Map<String, Mapping> mappings) {
-        this.mappings = Map.copyOf(mappings);
+        // In the order written: a component two symbols stand for is exported as the first.
+        this.mappings = Collections.unmodifiableMap(new LinkedHashMap<>(mappings));
     }
 
     /** The map a jMD document holds, entry by entry. */
@@ -53,6 +55,15 @@ public final class KiCadLibraryMap {
             mappings.put(symbol.get(), new Mapping(component.get(), pins, entry.value("value").map(KiCadLibraryMap::word)));
         }
         return new KiCadLibraryMap(mappings);
+    }
+
+    /**
+     * The library id a component is written as in KiCad — the first entry that names it —, when the map names one: the
+     * way back an export takes.
+     */
+    public Optional<String> libraryIdOf(String component) {
+        return mappings.entrySet().stream().filter(entry -> entry.getValue().component().equals(component))
+                .map(Map.Entry::getKey).findFirst();
     }
 
     /** What a library id stands for, when the map names it. */

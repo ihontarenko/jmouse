@@ -244,6 +244,16 @@ public class ComponentModels {
         return library(objectAccess::canRead);
     }
 
+    /**
+     * What {@link #forEditing} holds, and the symbol documents the reader may see besides: what drawing a circuit's
+     * parts needs — a KiCad export draws every part from its component's symbol.
+     */
+    public ComponentLibrary forDrawing() {
+        ComponentLibrary components = forEditing();
+        return reference -> components.source(reference)
+                .or(() -> readableSymbol(reference).flatMap(symbol -> sourceAt(symbol, symbol.getRevision())));
+    }
+
     private ComponentLibrary library(java.util.function.Predicate<MathematicalObject> visible) {
         ComponentLibrary components = reference -> {
             int separator = reference.lastIndexOf('@');

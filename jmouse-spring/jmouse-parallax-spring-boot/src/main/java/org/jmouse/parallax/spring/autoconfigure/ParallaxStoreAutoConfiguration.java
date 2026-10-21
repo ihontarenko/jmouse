@@ -55,7 +55,9 @@ import org.jmouse.parallax.store.spice.SpiceConfigured;
 import org.jmouse.parallax.spice.NgspiceProcess;
 import org.jmouse.parallax.spice.SpiceSimulator;
 import org.jmouse.parallax.store.spice.SpiceProperties;
+import org.jmouse.parallax.store.kicad.KiCadExports;
 import org.jmouse.parallax.store.kicad.KiCadImports;
+import org.jmouse.parallax.store.kicad.KiCadLibraryMaps;
 import org.jmouse.parallax.store.kicad.KiCadProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
@@ -537,7 +539,21 @@ public class ParallaxStoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public KiCadImports parallaxKiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components,
-                                             ResourceLoader resources, KiCadProperties properties) {
-        return new KiCadImports(catalogue, objects, components, resources, properties);
+                                             KiCadLibraryMaps maps) {
+        return new KiCadImports(catalogue, objects, components, maps);
+    }
+
+    /** 📤 KiCad out: a circuit written as a KiCad schematic, its parts under the library ids the library map gives back. */
+    @Bean
+    @ConditionalOnMissingBean
+    public KiCadExports parallaxKiCadExports(ComponentModels components, KiCadLibraryMaps maps) {
+        return new KiCadExports(components, maps);
+    }
+
+    /** 🗺 The library map a KiCad import and export read: {@code jmouse.parallax.kicad.library-map}. */
+    @Bean
+    @ConditionalOnMissingBean
+    public KiCadLibraryMaps parallaxKiCadLibraryMaps(ResourceLoader resources, KiCadProperties properties) {
+        return new KiCadLibraryMaps(resources, properties);
     }
 }
