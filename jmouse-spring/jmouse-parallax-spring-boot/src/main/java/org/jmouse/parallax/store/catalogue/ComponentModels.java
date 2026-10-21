@@ -318,13 +318,15 @@ public class ComponentModels {
     }
 
     /**
-     * What {@link #forEditing} holds, and the symbol documents the reader may see besides: what drawing a circuit's
-     * parts needs — a KiCad export draws every part from its component's symbol.
+     * What {@link #forEditing} holds, and the symbol and footprint documents the reader may see besides: what drawing
+     * a circuit's parts needs — a KiCad export draws every part from its component's symbol and names the footprint it
+     * sits on as KiCad knows it.
      */
     public ComponentLibrary forDrawing() {
         ComponentLibrary components = forEditing();
         return reference -> components.source(reference)
-                .or(() -> readableSymbol(reference).flatMap(symbol -> sourceAt(symbol, symbol.getRevision())));
+                .or(() -> readableSymbol(reference).flatMap(symbol -> sourceAt(symbol, symbol.getRevision())))
+                .or(() -> readableFootprint(reference).flatMap(footprint -> sourceAt(footprint, footprint.getRevision())));
     }
 
     private ComponentLibrary library(java.util.function.Predicate<MathematicalObject> visible) {
