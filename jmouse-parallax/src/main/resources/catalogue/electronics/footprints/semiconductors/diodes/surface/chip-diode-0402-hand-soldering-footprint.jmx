@@ -1,6 +1,6 @@
 footprint "Chip diode 0402 (1005 metric), hand soldering" as chip-diode-0402-hand-soldering-footprint {
     meta {
-        summary "Diode, 0402 (1005 metric) chip body, pads lengthened for a soldering iron; pad 1 is the cathode"
+        summary "Chip diode, 0402 (1005 metric) body, pads lengthened for a soldering iron; pad 1 is the cathode"
         category circuits
         tags electronics, footprint, surface
         source "IEC 60115-8 dimensions, 0402 (1005 metric)"
@@ -8,10 +8,10 @@ footprint "Chip diode 0402 (1005 metric), hand soldering" as chip-diode-0402-han
     }
     # Generated from footprint-standards/chip-packages.jmd#resistor-0402 and the land pattern rules; regenerate, never edit.
     # Body 0.95…1.05 × 0.45…0.55, terminal 0.1…0.3; fillets toe 0.3, heel 0, side 0.05.
-    # Z = 1.65, G = 0.35, X = 0.65; pad 0.65 × 0.65 centred at ±0.5.
-    pad "1" surface rounded-rectangle at -0.5, 0 size 0.65 x 0.65 roundness 0.25
-    pad "2" surface rounded-rectangle at 0.5, 0 size 0.65 x 0.65 roundness 0.25
+    # Z = 1.7, G = 0.43, X = 0.7; pad 0.65 × 0.7 centred at ±0.55.
+    pad "1" surface rounded-rectangle at -0.55, 0 size 0.65 x 0.7 roundness 0.25
+    pad "2" surface rounded-rectangle at 0.55, 0 size 0.65 x 0.7 roundness 0.25
     outline fabrication width 0.1 "M-0.5 -0.25H0.5V0.25H-0.5Z"
-    outline silkscreen width 0.12 "M-1.085 -0.435V0.435"
-    outline courtyard width 0.05 "M-1.05 -0.55H1.05V0.55H-1.05Z"
+    outline silkscreen width 0.12 "M-1.135 -0.46V0.46"
+    outline courtyard width 0.05 "M-1.1 -0.55H1.1V0.55H-1.1Z"
 }

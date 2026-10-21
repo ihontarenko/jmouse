@@ -1,0 +1,15 @@
+footprint "Mounting hole M4, a plated ring under a countersunk head" as mounting-hole-m4-din-965-pad-footprint {
+    meta {
+        summary "M4 screw, 4.3 mm hole, a plated ring under a countersunk head"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.jmd#screw-m4; regenerate, never edit.
+    # Hole 4.3 (ISO 273 fine); head ⌀8.4, ring ⌀9.2 = head + 2 × 0.4.
+    pad "1" through-hole circle at 0, 0 size 9.2 x 9.2 drill 4.3
+    outline fabrication width 0.1 "M-4.2 0A4.2 4.2 0 1 0 4.2 0A4.2 4.2 0 1 0 -4.2 0Z"
+    outline silkscreen width 0.12 "M-4.86 0A4.86 4.86 0 1 0 4.86 0A4.86 4.86 0 1 0 -4.86 0Z"
+    outline courtyard width 0.05 "M-5.1 0A5.1 5.1 0 1 0 5.1 0A5.1 5.1 0 1 0 -5.1 0Z"
+}

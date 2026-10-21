@@ -1,0 +1,17 @@
+footprint "Radial electrolytic capacitor, 6.3 mm can" as radial-electrolytic-capacitor-diameter-630-pitch-250-footprint {
+    meta {
+        summary "Radial electrolytic capacitor, 6.3 mm can, leads 2.5 mm apart; pin 1 is the positive lead"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.jmd#can-6-3 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.5: drill 0.7, pad 1.7, pin 1 square.
+    pad "1" through-hole rectangle at -1.25, 0 size 1.7 x 1.7 drill 0.7
+    pad "2" through-hole circle at 1.25, 0 size 1.7 x 1.7 drill 0.7
+    outline fabrication width 0.1 "M-3.15 0A3.15 3.15 0 1 0 3.15 0A3.15 3.15 0 1 0 -3.15 0Z"
+    outline silkscreen width 0.12 "M-3.26 0A3.26 3.26 0 1 0 3.26 0A3.26 3.26 0 1 0 -3.26 0Z"
+    outline silkscreen width 0.12 "M-3.32 -1.59H-2.36M-2.84 -2.07V-1.11"
+    outline courtyard width 0.05 "M-3.65 -3.65H3.65V3.65H-3.65Z"
+}

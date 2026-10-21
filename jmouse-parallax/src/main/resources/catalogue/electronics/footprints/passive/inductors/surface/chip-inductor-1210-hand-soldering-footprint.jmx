@@ -1,6 +1,6 @@
 footprint "Chip inductor 1210 (3225 metric), hand soldering" as chip-inductor-1210-hand-soldering-footprint {
     meta {
-        summary "Inductor, 1210 (3225 metric) chip body, pads lengthened for a soldering iron"
+        summary "Chip inductor, 1210 (3225 metric) body, pads lengthened for a soldering iron"
         category circuits
         tags electronics, footprint, surface
         source "IEC 60384-22 dimensions, 1210 (3225 metric)"
@@ -8,10 +8,10 @@ footprint "Chip inductor 1210 (3225 metric), hand soldering" as chip-inductor-12
     }
     # Generated from footprint-standards/chip-packages.jmd#capacitor-1210 and the land pattern rules; regenerate, never edit.
     # Body 3…3.4 × 2.3…2.7, terminal 0.3…0.8; fillets toe 0.55, heel 0, side 0.05.
-    # Z = 4.5, G = 1.4, X = 2.8; pad 1.55 × 2.8 centred at ±1.5.
-    pad "1" surface rounded-rectangle at -1.5, 0 size 1.55 x 2.8 roundness 0.25
-    pad "2" surface rounded-rectangle at 1.5, 0 size 1.55 x 2.8 roundness 0.25
+    # Z = 4.515, G = 1.686, X = 2.815; pad 1.4 × 2.85 centred at ±1.55.
+    pad "1" surface rounded-rectangle at -1.55, 0 size 1.4 x 2.85 roundness 0.25
+    pad "2" surface rounded-rectangle at 1.55, 0 size 1.4 x 2.85 roundness 0.25
     outline fabrication width 0.1 "M-1.6 -1.25H1.6V1.25H-1.6Z"
-    outline silkscreen width 0.12 "M-0.465 -1.36H0.465M-0.465 1.36H0.465"
-    outline courtyard width 0.05 "M-2.8 -1.9H2.8V1.9H-2.8Z"
+    outline silkscreen width 0.12 "M-0.59 -1.36H0.59M-0.59 1.36H0.59"
+    outline courtyard width 0.05 "M-2.75 -1.95H2.75V1.95H-2.75Z"
 }

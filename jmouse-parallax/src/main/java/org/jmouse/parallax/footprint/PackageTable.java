@@ -1,6 +1,7 @@
 package org.jmouse.parallax.footprint;
 
 import org.jmouse.datamap.DataMapEntry;
+import org.jmouse.datamap.DataMapField;
 import org.jmouse.datamap.DataMapValue;
 import org.jmouse.units.Quantity;
 
@@ -22,6 +23,54 @@ record PackageTable(DataMapEntry entry) {
         double nominal() {
             return (minimum + maximum) / 2;
         }
+    }
+
+    /**
+     * A size written inside a kind: its own fields first, then the kind's — {@code name}, {@code folder}, the pitches —,
+     * so what every size of a kind shares is written once.
+     */
+    static PackageTable inheriting(DataMapEntry kind, DataMapEntry size) {
+        List<DataMapField> fields = new ArrayList<>(size.fields());
+        fields.addAll(kind.fields());
+        return new PackageTable(new DataMapEntry(size.id(), size.title(), size.source().or(kind::source), fields,
+                size.entries()));
+    }
+
+    /** A footprint's name from its kind's template: {@code "axial-resistor-body-{code}-pitch-{pitch}"}. */
+    static String named(String template, Map<String, String> words) {
+        String named = template;
+        for (Map.Entry<String, String> word : words.entrySet()) {
+            named = named.replace("{" + word.getKey() + "}", word.getValue());
+        }
+        if (named.contains("{")) {
+            throw new IllegalArgumentException("The name template '" + template + "' names a size no table gives: " + named);
+        }
+        return named;
+    }
+
+    /** A length as a name writes it: hundredths of a millimetre, at least three digits — 2.54 → 254, 0.5 → 050. */
+    static String hundredths(double millimetres) {
+        String written = String.valueOf(Math.round(millimetres * 100));
+        return "0".repeat(Math.max(0, 3 - written.length())) + written;
+    }
+
+    /**
+     * What a name template may use: every field written as a single length, in hundredths of a millimetre, and every
+     * field written as a word or a text, as written.
+     */
+    Map<String, String> words() {
+        Map<String, String> words = new LinkedHashMap<>();
+        for (DataMapField field : entry.fields()) {
+            switch (field.value()) {
+                case DataMapValue.Measure(Quantity quantity) when "m".equals(quantity.unit()) ->
+                        words.putIfAbsent(field.name(), hundredths(Math.round(quantity.value() * 1e6) / 1e3));
+                case DataMapValue.Word(String word) -> words.putIfAbsent(field.name(), word);
+                case DataMapValue.Text(String text) -> words.putIfAbsent(field.name(), text);
+                default -> {
+                }
+            }
+        }
+        return words;
     }
 
     String id() {
@@ -69,6 +118,19 @@ record PackageTable(DataMapEntry entry) {
         });
     }
 
+    /** {@code pitches 5.08 mm, 7.62 mm}: lengths in the order written. */
+    List<Double> lengths(String field) {
+        List<Double> lengths = new ArrayList<>();
+        for (DataMapValue item : items(require(field))) {
+            lengths.add(millimetres(item, field));
+        }
+        return lengths;
+    }
+
+    boolean has(String field) {
+        return entry.value(field).isPresent();
+    }
+
     /** {@code members 8 = 4.9 mm, 14 = 8.65 mm}: each lead count with its body length, in the order written. */
     Map<Integer, Double> members(String field) {
         Map<Integer, Double> members = new LinkedHashMap<>();
@@ -79,6 +141,19 @@ record PackageTable(DataMapEntry entry) {
             members.put(Integer.valueOf(name), millimetres(length, field));
         }
         return members;
+    }
+
+    /** {@code left 1 = -1, 2 = 1}: each name with a plain number, in the order written. */
+    Map<String, Double> places(String field) {
+        Map<String, Double> places = new LinkedHashMap<>();
+        for (DataMapValue item : items(require(field))) {
+            if (!(item instanceof DataMapValue.Assignment(String name, DataMapValue.Measure(Quantity quantity)))
+                    || !quantity.unit().isEmpty()) {
+                throw refused(field, "names with plain numbers: 1 = -1, 2 = 1");
+            }
+            places.put(name, quantity.value());
+        }
+        return places;
     }
 
     /** {@code rows 1, 2} or {@code pins 1 .. 40}: whole numbers, a range spelled out. */

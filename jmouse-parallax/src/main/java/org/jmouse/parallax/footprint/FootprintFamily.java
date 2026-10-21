@@ -11,14 +11,18 @@ import java.util.Optional;
  * table document says which it is by its {@code form}, and the family emits a footprint for every member it lists.
  */
 public sealed interface FootprintFamily permits ChipFootprints, SmallOutlineFootprints, DualInlineFootprints,
-        HeaderFootprints {
+        HeaderFootprints, AxialFootprints, RadialFootprints, InlineFootprints, HoleFootprints {
 
     /** Every family, by the {@code form} a package table names it with. */
     Map<String, FootprintFamily> BY_FORM = Map.of(
             "chip", new ChipFootprints(),
             "gull-wing", new SmallOutlineFootprints(),
             "dual-inline", new DualInlineFootprints(),
-            "header", new HeaderFootprints());
+            "header", new HeaderFootprints(),
+            "axial", new AxialFootprints(),
+            "radial", new RadialFootprints(),
+            "inline", new InlineFootprints(),
+            "hole", new HoleFootprints());
 
     static Optional<FootprintFamily> of(String form) {
         return Optional.ofNullable(BY_FORM.get(form));

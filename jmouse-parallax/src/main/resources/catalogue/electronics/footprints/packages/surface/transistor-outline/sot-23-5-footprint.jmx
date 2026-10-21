@@ -1,0 +1,20 @@
+footprint "SOT-23-5, 1.6 mm body" as sot-23-5-footprint {
+    meta {
+        summary "5-lead SOT-23, 5 leads, gull-wing, 0.95 mm pitch, body 1.6 × 2.9 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MO-178 AA"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/small-outline-packages.jmd#sot-23-5 and the land pattern rules; regenerate, never edit.
+    # Leads span 2.6…3, foot 0.3…0.6, width 0.3…0.5; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 3.715, G = 0.898, X = 0.589; pad 1.4 × 0.6 centred at ±1.15.
+    pad "1" surface rounded-rectangle at -1.15, -0.95 size 1.4 x 0.6 roundness 0.25
+    pad "2" surface rounded-rectangle at -1.15, 0 size 1.4 x 0.6 roundness 0.25
+    pad "3" surface rounded-rectangle at -1.15, 0.95 size 1.4 x 0.6 roundness 0.25
+    pad "4" surface rounded-rectangle at 1.15, 0.95 size 1.4 x 0.6 roundness 0.25
+    pad "5" surface rounded-rectangle at 1.15, -0.95 size 1.4 x 0.6 roundness 0.25
+    outline fabrication width 0.1 "M-0.267 -1.45H0.8V1.45H-0.8V-0.917Z"
+    outline silkscreen width 0.12 "M-1.85 -1.56H0.8M-0.8 1.56H0.8"
+    outline courtyard width 0.05 "M-2.1 -1.7H2.1V1.7H-2.1Z"
+}

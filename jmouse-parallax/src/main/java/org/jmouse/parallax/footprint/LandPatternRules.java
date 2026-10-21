@@ -4,32 +4,50 @@ import org.jmouse.datamap.DataMap;
 import org.jmouse.datamap.DataMapEntry;
 import org.jmouse.datamap.DataMapValue;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * How a package's dimensions become copper, read from {@code footprint-standards/land-pattern-rules.jmd}: every
  * generated footprint follows these, so a change of taste is one edit there and a regeneration.
  *
  * @param license the licence every footprint of our library is published under
+ * @param fillets the surface lead rules by name — {@code gull-wing}, {@code chip}, {@code chip-small},
+ *                {@code chip-hand-soldering}, {@code melf} …: every entry that writes a toe
  */
-public record LandPatternRules(String license, Fillets gullWing, Fillets chip, Fillets chipSmall,
-                               Fillets chipHandSoldering, Fillets chipSmallHandSoldering, ThroughHole throughHole,
+public record LandPatternRules(String license, Map<String, Fillets> fillets, Tolerances tolerances, ThroughHole throughHole,
                                Drawing drawing) {
+
+    public LandPatternRules {
+        fillets = Map.copyOf(fillets);
+    }
 
     /** The solder fillets a surface lead's pad leaves room for (IPC-7351), and the courtyard kept beyond. */
     public record Fillets(double toe, double heel, double side, double courtyard) {
     }
 
+    /** What the board's making and the part's placing add to a land: IPC-7351's F and P. */
+    public record Tolerances(double fabrication, double placement) {
+    }
+
     /** A hole drilled for a lead and the ring of copper around it (IPC-2222). */
     public record ThroughHole(double drillAllowance, double drillStep, double ring, double gap, double courtyard) {
 
-        /** The hole for a lead {@code width} by {@code thickness}: its diagonal and the allowance, up to the drill step. */
+        /** The hole for a lead {@code width} by {@code thickness} (0 for a round lead): its diagonal and the allowance, up to the drill step. */
         public double drill(double width, double thickness) {
             double diagonal = Math.hypot(width, thickness);
             return Math.ceil((diagonal + drillAllowance) / drillStep - 1e-9) * drillStep;
         }
 
+        /** The pad a drill is ringed with, before a neighbour narrows it. */
+        public double pad(double drill) {
+            return drill + 2 * ring;
+        }
+
         /** The pad around a drill, narrowed where it would come nearer than the gap to its neighbour. */
         public double pad(double drill, double pitch) {
-            return Math.min(drill + 2 * ring, pitch - gap);
+            return Math.min(pad(drill), pitch - gap);
         }
     }
 
@@ -53,20 +71,40 @@ public record LandPatternRules(String license, Fillets gullWing, Fillets chip, F
         public double up(double length) {
             return Math.ceil(length / grid - 1e-9) * grid;
         }
+
+        /** How far a silkscreen line's middle stands from copper: the clearance and half the line. */
+        public double clearOfCopper() {
+            return silkscreenClearance + silkscreenWidth / 2;
+        }
+    }
+
+    /** The fillets of that name; refused when the rules have none. */
+    public Fillets fillets(String name) {
+        return find(name).orElseThrow(() -> new IllegalArgumentException("The land pattern rules have no fillets '" + name + "'"));
+    }
+
+    public Optional<Fillets> find(String name) {
+        return Optional.ofNullable(fillets.get(name));
     }
 
     public static LandPatternRules of(DataMap map) {
+        Map<String, Fillets> fillets = new LinkedHashMap<>();
+        for (DataMapEntry entry : map.entries()) {
+            if (entry.value("toe").isPresent()) {
+                PackageTable table = new PackageTable(entry);
+                fillets.put(entry.id(), new Fillets(table.length("toe"), table.length("heel"), table.length("side"),
+                        table.length("courtyard")));
+            }
+        }
         return new LandPatternRules(
                 map.field("license").map(field -> field.value() instanceof DataMapValue.Text(String text) ? text : field.value().written())
                         .orElseThrow(() -> new IllegalArgumentException("The land pattern rules name no licence")),
-                fillets(map, "gull-wing"), fillets(map, "chip"), fillets(map, "chip-small"),
-                fillets(map, "chip-hand-soldering"), fillets(map, "chip-small-hand-soldering"),
+                fillets, tolerances(new PackageTable(entry(map, "tolerances"))),
                 throughHole(new PackageTable(entry(map, "through-hole"))), drawing(new PackageTable(entry(map, "drawing"))));
     }
 
-    private static Fillets fillets(DataMap map, String id) {
-        PackageTable table = new PackageTable(entry(map, id));
-        return new Fillets(table.length("toe"), table.length("heel"), table.length("side"), table.length("courtyard"));
+    private static Tolerances tolerances(PackageTable table) {
+        return new Tolerances(table.length("fabrication"), table.length("placement"));
     }
 
     private static ThroughHole throughHole(PackageTable table) {

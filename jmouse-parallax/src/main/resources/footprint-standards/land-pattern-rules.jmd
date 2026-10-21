@@ -1,8 +1,9 @@
 # How our library turns a package's dimensions into copper: one set of rules every generated footprint follows, so a
 # change of taste is a change here and a regeneration, never an edit of a footprint.
 #
-# Surface leads (IPC-7351B, tolerances left out): Z = the leads' outer span at its largest + 2 × toe; G = their inner
-# span at its smallest − 2 × heel; X = the lead's width at its largest + 2 × side. A pad is (Z − G) / 2 long, centred at
+# Surface leads (IPC-7351B, tolerances included): Z = the leads' smallest outer span + 2 × toe + the root sum of the
+# span's tolerance, the board's and the placement's; G = their largest inner span (its tolerance pooled) − 2 × heel −
+# the same root sum; X = the lead's smallest width + 2 × side + the root sum. A pad is (Z − G) / 2 long, centred at
 # (Z + G) / 4. Through-hole leads: drill = the lead's largest cross-section (a round lead's diameter, a flat or square
 # lead's diagonal) + the allowance, up to the drill step; pad = drill + 2 × ring, narrowed to pitch − gap where
 # neighbours would touch.
@@ -10,6 +11,11 @@ map "Land pattern rules" as land-pattern-rules {
     description "The fillets, drills, rings and drawing lines every footprint of our library is generated with."
     source "IPC-7351B section 3 (land pattern goals), IPC-2222 section 9 (holes)"
     license "CERN-OHL-W-2.0"
+
+    tolerances "What the board and the placing machine add" source table "IPC-7351B 3.1.5" {
+        fabrication 0.1 mm
+        placement 0.05 mm
+    }
 
     gull-wing "Gull-wing leads, nominal density" source table "3-2" {
         toe 0.35 mm
@@ -44,6 +50,20 @@ map "Land pattern rules" as land-pattern-rules {
         heel 0 mm
         side 0.05 mm
         courtyard 0.2 mm
+    }
+
+    melf "Cylindrical end caps (MELF), nominal density" source table "3-7" {
+        toe 0.4 mm
+        heel 0.2 mm
+        side 0.1 mm
+        courtyard 0.25 mm
+    }
+
+    test-point "A bare pad a probe lands on" {
+        toe 0 mm
+        heel 0 mm
+        side 0 mm
+        courtyard 0.25 mm
     }
 
     through-hole "Through-hole leads" source section "IPC-2222 9.2" {

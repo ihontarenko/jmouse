@@ -1,0 +1,16 @@
+footprint "Film box capacitor, 5 mm pitch, 7.2 mm wide" as box-capacitor-length-720-width-720-pitch-500-footprint {
+    meta {
+        summary "Film box capacitor, 5 mm pitch, 7.2 mm wide, leads 5 mm apart"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60286-2 lead spacing, makers' box sizes"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.jmd#box-5 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.5: drill 0.7, pad 1.7, pin 1 square.
+    pad "1" through-hole rectangle at -2.5, 0 size 1.7 x 1.7 drill 0.7
+    pad "2" through-hole circle at 2.5, 0 size 1.7 x 1.7 drill 0.7
+    outline fabrication width 0.1 "M-3.6 -3.6H3.6V3.6H-3.6Z"
+    outline silkscreen width 0.12 "M-3.71 -3.71H3.71V3.71H-3.71Z"
+    outline courtyard width 0.05 "M-4.1 -4.1H4.1V4.1H-4.1Z"
+}

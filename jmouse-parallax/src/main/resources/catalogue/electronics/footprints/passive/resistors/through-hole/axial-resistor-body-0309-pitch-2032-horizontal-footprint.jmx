@@ -1,0 +1,16 @@
+footprint "Axial resistor DIN 0309, horizontal, 20.32 mm" as axial-resistor-body-0309-pitch-2032-horizontal-footprint {
+    meta {
+        summary "Axial resistor DIN 0309, body 9 × ⌀3.2 mm, laid flat, 20.32 mm between its holes"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60286-1 bodies, DIN 44051 size codes"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/axial-packages.jmd#resistor-0309 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.7: drill 0.9, pad 1.9, pin 1 square.
+    pad "1" through-hole rectangle at -10.16, 0 size 1.9 x 1.9 drill 0.9
+    pad "2" through-hole circle at 10.16, 0 size 1.9 x 1.9 drill 0.9
+    outline fabrication width 0.1 "M-4.5 -1.6H4.5V1.6H-4.5ZM-10.16 0H-4.5M4.5 0H10.16"
+    outline silkscreen width 0.12 "M-4.61 -1.71H4.61V1.71H-4.61ZM-8.95 0H-4.61M4.61 0H8.95"
+    outline courtyard width 0.05 "M-11.6 -2.1H11.6V2.1H-11.6Z"
+}

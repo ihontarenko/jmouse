@@ -1,6 +1,6 @@
 footprint "Chip resistor 1206 (3216 metric)" as chip-resistor-1206-footprint {
     meta {
-        summary "Resistor, 1206 (3216 metric) chip body, reflow pads"
+        summary "Chip resistor, 1206 (3216 metric) body, reflow pads"
         category circuits
         tags electronics, footprint, surface
         source "IEC 60115-8 dimensions, 1206 (3216 metric)"
@@ -8,10 +8,10 @@ footprint "Chip resistor 1206 (3216 metric)" as chip-resistor-1206-footprint {
     }
     # Generated from footprint-standards/chip-packages.jmd#resistor-1206 and the land pattern rules; regenerate, never edit.
     # Body 3…3.2 × 1.5…1.7, terminal 0.25…0.65; fillets toe 0.35, heel 0, side 0.
-    # Z = 3.9, G = 1.7, X = 1.7; pad 1.1 × 1.7 centred at ±1.4.
-    pad "1" surface rounded-rectangle at -1.4, 0 size 1.1 x 1.7 roundness 0.25
-    pad "2" surface rounded-rectangle at 1.4, 0 size 1.1 x 1.7 roundness 0.25
+    # Z = 3.929, G = 1.89, X = 1.729; pad 1 × 1.75 centred at ±1.45.
+    pad "1" surface rounded-rectangle at -1.45, 0 size 1 x 1.75 roundness 0.25
+    pad "2" surface rounded-rectangle at 1.45, 0 size 1 x 1.75 roundness 0.25
     outline fabrication width 0.1 "M-1.55 -0.8H1.55V0.8H-1.55Z"
-    outline silkscreen width 0.12 "M-0.59 -0.91H0.59M-0.59 0.91H0.59"
-    outline courtyard width 0.05 "M-2.2 -1.1H2.2V1.1H-2.2Z"
+    outline silkscreen width 0.12 "M-0.69 -0.91H0.69M-0.69 0.91H0.69"
+    outline courtyard width 0.05 "M-2.2 -1.15H2.2V1.15H-2.2Z"
 }

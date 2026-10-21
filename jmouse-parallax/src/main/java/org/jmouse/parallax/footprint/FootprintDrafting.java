@@ -34,6 +34,34 @@ final class FootprintDrafting {
                 exact(drill), exact(drill), 0);
     }
 
+    /**
+     * A through-hole pad {@code width} by {@code height}: pin 1 square-cornered, the others round — an oval where a
+     * neighbour narrowed them.
+     */
+    FootprintPad throughHolePad(String number, double x, double y, double width, double height, double drill) {
+        PadShape shape = "1".equals(number) ? PadShape.RECTANGLE : width == height ? PadShape.CIRCLE : PadShape.OVAL;
+        return new FootprintPad(number, PadType.THROUGH_HOLE, shape, exact(x), exact(y), 0, exact(width), exact(height),
+                exact(drill), exact(drill), 0);
+    }
+
+    /** A plated hole of one shape however it is numbered: a mounting hole's ring, a via stitched around it. */
+    FootprintPad platedHole(String number, double x, double y, double size, double drill) {
+        return new FootprintPad(number, PadType.THROUGH_HOLE, PadShape.CIRCLE, exact(x), exact(y), 0, exact(size),
+                exact(size), exact(drill), exact(drill), 0);
+    }
+
+    /** A bare hole with no copper: it belongs to no net. */
+    FootprintPad unplatedHole(double drill) {
+        return new FootprintPad("", PadType.UNPLATED_HOLE, PadShape.CIRCLE, 0, 0, 0, exact(drill), exact(drill),
+                exact(drill), exact(drill), 0);
+    }
+
+    /** A round surface pad: a test point. */
+    FootprintPad roundSurfacePad(String number, double diameter) {
+        return new FootprintPad(number, PadType.SURFACE, PadShape.CIRCLE, 0, 0, 0, exact(diameter), exact(diameter), 0,
+                0, 0);
+    }
+
     /** The body, its pin-1 corner cut by the chamfer — no larger than a third of its shorter side. */
     FootprintOutline body(double width, double length) {
         double halfWidth = width / 2;
@@ -54,16 +82,34 @@ final class FootprintDrafting {
                 rectangle(drawing.nearest(halfWidth), drawing.nearest(halfLength)));
     }
 
+    /** The courtyard as a box that need not be centred: a TO body stands in front of its leads. */
+    FootprintOutline courtyard(double left, double top, double right, double bottom) {
+        return new FootprintOutline("courtyard", drawing.courtyardWidth(), false,
+                "M" + point(drawing.nearest(left), drawing.nearest(top)) + "H" + number(drawing.nearest(right))
+                        + "V" + number(drawing.nearest(bottom)) + "H" + number(drawing.nearest(left)) + "Z");
+    }
+
+    FootprintOutline courtyardCircle(double radius) {
+        return new FootprintOutline("courtyard", drawing.courtyardWidth(), false, circle(0, 0, drawing.nearest(radius)));
+    }
+
+    FootprintOutline fabrication(String path) {
+        return new FootprintOutline("fabrication", drawing.fabricationWidth(), false, path);
+    }
+
     FootprintOutline silkscreen(String path) {
         return new FootprintOutline("silkscreen", drawing.silkscreenWidth(), false, path);
     }
 
     /** A filled dot on the silkscreen beside the first pin. */
     FootprintOutline pinMark(double x, double y) {
-        double radius = drawing.pinMarkRadius();
-        return new FootprintOutline("silkscreen", 0, true, "M" + point(x - radius, y) + "A" + number(radius) + " "
-                + number(radius) + " 0 1 0 " + point(x + radius, y) + "A" + number(radius) + " " + number(radius)
-                + " 0 1 0 " + point(x - radius, y) + "Z");
+        return new FootprintOutline("silkscreen", 0, true, circle(x, y, drawing.pinMarkRadius()));
+    }
+
+    /** A circle as two half arcs. */
+    static String circle(double x, double y, double radius) {
+        return "M" + point(x - radius, y) + "A" + number(radius) + " " + number(radius) + " 0 1 0 " + point(x + radius, y)
+                + "A" + number(radius) + " " + number(radius) + " 0 1 0 " + point(x - radius, y) + "Z";
     }
 
     String rectangle(double halfWidth, double halfLength) {

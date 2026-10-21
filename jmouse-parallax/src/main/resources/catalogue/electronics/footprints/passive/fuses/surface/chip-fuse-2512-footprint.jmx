@@ -1,6 +1,6 @@
 footprint "Chip fuse 2512 (6332 metric)" as chip-fuse-2512-footprint {
     meta {
-        summary "Fuse, 2512 (6332 metric) chip body, reflow pads"
+        summary "Chip fuse, 2512 (6332 metric) body, reflow pads"
         category circuits
         tags electronics, footprint, surface
         source "IEC 60115-8 dimensions, 2512 (6332 metric)"
@@ -8,10 +8,10 @@ footprint "Chip fuse 2512 (6332 metric)" as chip-fuse-2512-footprint {
     }
     # Generated from footprint-standards/chip-packages.jmd#resistor-2512 and the land pattern rules; regenerate, never edit.
     # Body 6.25…6.45 × 3.05…3.35, terminal 0.35…0.85; fillets toe 0.35, heel 0, side 0.
-    # Z = 7.15, G = 4.55, X = 3.35; pad 1.3 × 3.35 centred at ±2.95.
-    pad "1" surface rounded-rectangle at -2.95, 0 size 1.3 x 3.35 roundness 0.25
-    pad "2" surface rounded-rectangle at 2.95, 0 size 1.3 x 3.35 roundness 0.25
+    # Z = 7.179, G = 4.774, X = 3.37; pad 1.2 × 3.4 centred at ±3.
+    pad "1" surface rounded-rectangle at -3, 0 size 1.2 x 3.4 roundness 0.25
+    pad "2" surface rounded-rectangle at 3, 0 size 1.2 x 3.4 roundness 0.25
     outline fabrication width 0.1 "M-3.175 -1.6H3.175V1.6H-3.175Z"
-    outline silkscreen width 0.12 "M-2.04 -1.71H2.04M-2.04 1.71H2.04"
+    outline silkscreen width 0.12 "M-2.14 -1.71H2.14M-2.14 1.71H2.14"
     outline courtyard width 0.05 "M-3.85 -1.95H3.85V1.95H-3.85Z"
 }

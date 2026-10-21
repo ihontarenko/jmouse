@@ -1,0 +1,16 @@
+footprint "Ceramic disc capacitor, 4.3 mm disc, 5 mm pitch" as disc-capacitor-diameter-430-width-190-pitch-500-footprint {
+    meta {
+        summary "Ceramic disc capacitor, 4.3 mm disc, 5 mm pitch, leads 5 mm apart"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60286-2 lead spacing, makers' disc sizes"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.jmd#disc-4-3-5 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.5: drill 0.7, pad 1.7, pin 1 square.
+    pad "1" through-hole rectangle at -2.5, 0 size 1.7 x 1.7 drill 0.7
+    pad "2" through-hole circle at 2.5, 0 size 1.7 x 1.7 drill 0.7
+    outline fabrication width 0.1 "M-2.15 -0.95H2.15V0.95H-2.15Z"
+    outline silkscreen width 0.12 "M-3.61 -1.11H3.61V1.11H-3.61Z"
+    outline courtyard width 0.05 "M-3.85 -1.45H3.85V1.45H-3.85Z"
+}

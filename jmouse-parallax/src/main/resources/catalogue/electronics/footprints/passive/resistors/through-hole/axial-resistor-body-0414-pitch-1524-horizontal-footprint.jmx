@@ -1,0 +1,16 @@
+footprint "Axial resistor DIN 0414, horizontal, 15.24 mm" as axial-resistor-body-0414-pitch-1524-horizontal-footprint {
+    meta {
+        summary "Axial resistor DIN 0414, body 11.9 × ⌀4.5 mm, laid flat, 15.24 mm between its holes"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60286-1 bodies, DIN 44051 size codes"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/axial-packages.jmd#resistor-0414 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.8: drill 1, pad 2, pin 1 square.
+    pad "1" through-hole rectangle at -7.62, 0 size 2 x 2 drill 1
+    pad "2" through-hole circle at 7.62, 0 size 2 x 2 drill 1
+    outline fabrication width 0.1 "M-5.95 -2.25H5.95V2.25H-5.95ZM-7.62 0H-5.95M5.95 0H7.62"
+    outline silkscreen width 0.12 "M-6.06 -2.36H6.06V2.36H-6.06ZM-6.36 0H-6.06M6.06 0H6.36"
+    outline courtyard width 0.05 "M-9.1 -2.75H9.1V2.75H-9.1Z"
+}
