@@ -21,7 +21,7 @@ import java.util.Optional;
  * <p>Nothing here rewrites an expression. Expressions travel as the strings the definition holds; only numbers the
  * definition keeps as numbers — bounds, weights, coefficients — are formatted here.</p>
  */
-final class Notation {
+public final class Notation {
 
     private Notation() {
     }
@@ -32,7 +32,7 @@ final class Notation {
      * The shortest decimal that reads back to exactly {@code value}: {@code -3}, {@code 0.0015},
      * {@code 6.283185307179586}, {@code 1e-9}.
      */
-    static String number(double value) {
+    public static String number(double value) {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("A jMX number is finite, not " + value + ".");
         }
@@ -161,7 +161,7 @@ final class Notation {
      * A text on one line, in the quotes that keep it whole: double quotes, or single ones when it holds a double
      * quote. jMX strings have no escapes, so a text holding both, or a line break, cannot be written on one line.
      */
-    static String text(String value) {
+    public static String text(String value) {
         if (value.indexOf('\n') < 0 && value.indexOf('\r') < 0) {
             if (value.indexOf('"') < 0) {
                 return "\"" + value + "\"";
@@ -178,7 +178,7 @@ final class Notation {
      * A text that ends its line: on one line when it can be, otherwise as {@code """ … """} over several lines, each
      * indented by {@code indentation}. Refused when the reader's dedenting would not give it back as it is.
      */
-    static String longText(String value, String indentation) {
+    public static String longText(String value, String indentation) {
         if (value.indexOf('\n') < 0 && (value.indexOf('"') < 0 || value.indexOf('\'') < 0)) {
             return text(value);
         }
@@ -212,7 +212,7 @@ final class Notation {
      * A body cut from between braces, its first line already trimmed and the rest still carrying the block's
      * indentation: that indentation, shared by every later line, is taken off again.
      */
-    static String bodyWithoutIndentation(String body) {
+    public static String bodyWithoutIndentation(String body) {
         String[] lines = body.split("\n", -1);
         int indentation = Integer.MAX_VALUE;
         for (int index = 1; index < lines.length; index++) {

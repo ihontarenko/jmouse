@@ -14,16 +14,9 @@ import org.jmouse.script.el.ScriptExtension;
 import org.jmouse.script.el.lexer.ScriptRecognizer;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -33,14 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * the same tree, every expression cut out at the same line, column and offset; for every broken variant of one, the
  * same refusal at the same place.
  *
- * <p>The documents are this module's catalogue and test resources, and every directory named in the system property
- * {@code jmx.catalogues} (separated by {@code ;}) — a product's catalogue lives outside this repository. Run it over
+ * <p>The documents are {@link CatalogueTexts}: a product's catalogue is named in {@code jmx.catalogues}. Run it over
  * the electronics catalogue of Parallax and the archived mathematics one too: the mathematics writes juxtaposition
  * ({@code 0 .. 2 pi step 0.01}) where the electronics never does.</p>
  */
 class JmxReadingEquivalenceTest {
-
-    private static final String EXTRA_CATALOGUES = "jmx.catalogues";
 
     /** Every this-many-th line of a document is deleted, one at a time, and its first word replaced. */
     private static final int MUTATION_STRIDE = 7;
@@ -48,7 +38,7 @@ class JmxReadingEquivalenceTest {
 
     @Test
     void everyDocumentReadsTheSame() {
-        Map<String, String> documents = documents();
+        Map<String, String> documents = CatalogueTexts.documents();
         assertFalse(documents.isEmpty());
         List<String> differing = new ArrayList<>();
         documents.forEach((name, text) -> {
@@ -63,7 +53,7 @@ class JmxReadingEquivalenceTest {
     @Test
     void everyBrokenDocumentIsRefusedTheSame() {
         List<String> differing = new ArrayList<>();
-        documents().forEach((name, text) -> {
+        CatalogueTexts.documents().forEach((name, text) -> {
             for (String variant : variants(text)) {
                 if (!DocumentSnapshot.outcome(JmxReadingEquivalenceTest::byHand, variant, name)
                         .equals(DocumentSnapshot.outcome(ExperienceReader::read, variant, name))) {
@@ -114,30 +104,6 @@ class JmxReadingEquivalenceTest {
             made++;
         }
         return variants;
-    }
-
-    private static Map<String, String> documents() {
-        List<Path> roots = new ArrayList<>(List.of(Path.of("src/main/resources/catalogue"), Path.of("src/test/resources")));
-        String extra = System.getProperty(EXTRA_CATALOGUES, "");
-        for (String root : extra.split(";")) {
-            if (!root.isBlank()) {
-                roots.add(Path.of(root.strip()));
-            }
-        }
-        Map<String, String> documents = new LinkedHashMap<>();
-        for (Path root : roots) {
-            if (!Files.isDirectory(root)) {
-                continue;
-            }
-            try (Stream<Path> files = Files.walk(root)) {
-                for (Path file : files.filter(path -> path.toString().endsWith(".jmx")).sorted().toList()) {
-                    documents.put(file.toString().replace('\\', '/'), Files.readString(file, StandardCharsets.UTF_8));
-                }
-            } catch (IOException unreadable) {
-                throw new UncheckedIOException(unreadable);
-            }
-        }
-        return documents;
     }
 
     private static String firstDifference(Map<String, String> documents, List<String> differing) {

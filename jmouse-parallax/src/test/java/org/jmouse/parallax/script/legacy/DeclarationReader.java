@@ -60,7 +60,7 @@ final class DeclarationReader {
      * electrical quantities, the core's, and the document's own named earlier — by {@code *}, {@code /} and whole
      * powers ({@code current ^ 2}, {@code 1 / time}). What it says is a dimension; a {@code let} may then be typed by it.
      */
-    void type(Reading.Line line) {
+    Block.TypeDefinition type(Reading.Line line) {
         if (line.size() < 3 || !line.value(1).equals("=")) {
             throw line.refusal("a type is 'type name = power / area': a name, '=', and known types joined by * and /");
         }
@@ -69,6 +69,7 @@ final class DeclarationReader {
             throw line.refusal(0, "'" + name + "' is already a type");
         }
         types.put(name, new QuantityType(name, "", typeExpression(line, 2)));
+        return new Block.TypeDefinition(name, line.text(2));
     }
 
     /** What a written type name is: the document's own first, then jMX's and the core's. */

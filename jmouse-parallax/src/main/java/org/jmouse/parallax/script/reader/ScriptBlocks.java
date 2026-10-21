@@ -8,6 +8,7 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceParseException;
+import org.jmouse.parallax.script.SourceText;
 import org.jmouse.script.el.ScriptParseException;
 import org.jmouse.script.el.node.ScriptNode;
 
@@ -26,14 +27,21 @@ final class ScriptBlocks {
     }
 
     Block.Behaviour behaviour() {
-        return new Block.Behaviour(script("behaviour"));
+        int start = reading.cursor.current().offset();
+        ScriptNode script = script("behaviour");
+        return new Block.Behaviour(script, body(start));
     }
 
     Block.Run run() {
         int start = reading.cursor.current().offset();
         ScriptNode script = script("run");
+        return new Block.Run(script, body(start));
+    }
+
+    /** The text between the brace at {@code open} and the one just read, which closed it. */
+    private SourceText body(int open) {
         int end = reading.cursor.lookAt(-1).offset() + 1;
-        return new Block.Run(script, reading.text(start + 1, end - 1));
+        return reading.text(open + 1, end - 1);
     }
 
     /** {@code formulas { jMF definitions }}. A shared library is pulled in at the top with {@code use <slug>}. */

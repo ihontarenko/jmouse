@@ -151,8 +151,6 @@ final class DocumentParser extends AbstractParser {
             case DocumentStatement.Base base -> body.base = Optional.of(base.slug());
             case DocumentStatement.Units units -> body.units = units.names();
             case DocumentStatement.Uses uses -> body.uses.addAll(uses.slugs());
-            case DocumentStatement.TypeDeclaration ignored -> {
-            }
             case DocumentStatement.MetaBlock meta -> body.meta = meta.meta();
             case DocumentStatement.BlockStatement block -> body.blocks.add(block.block());
         }

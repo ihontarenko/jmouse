@@ -266,8 +266,12 @@ public sealed interface Block {
         }
     }
 
-    /** {@code behaviour { … }}: jMS handlers and functions, parsed by jMS. */
-    record Behaviour(ScriptNode script) implements Block {
+    /**
+     * {@code behaviour { … }}: jMS handlers and functions, parsed by jMS.
+     *
+     * @param source the body between the braces as written: what the document is written back with
+     */
+    record Behaviour(ScriptNode script, SourceText source) implements Block {
         public String name() {
             return "behaviour";
         }
@@ -277,6 +281,18 @@ public sealed interface Block {
     record Run(ScriptNode script, SourceText source) implements Block {
         public String name() {
             return "run";
+        }
+    }
+
+    /**
+     * {@code type power_density = power / area}: a quantity the document names, built from the known ones, which a
+     * {@code let} after it may be typed by. Kept where it stands among the blocks, since only what follows reads it.
+     *
+     * @param definition the known types it is made of, as written: joined by {@code *} and {@code /}, with whole powers
+     */
+    record TypeDefinition(String type, SourceText definition) implements Block {
+        public String name() {
+            return "type";
         }
     }
 

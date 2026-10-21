@@ -20,10 +20,6 @@ sealed interface DocumentStatement {
     record Uses(List<String> slugs) implements DocumentStatement {
     }
 
-    /** {@code type name …} — declared into the reading, so it holds nothing itself. */
-    record TypeDeclaration() implements DocumentStatement {
-    }
-
     /** {@code meta { … }} */
     record MetaBlock(Meta meta) implements DocumentStatement {
     }

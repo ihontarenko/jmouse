@@ -148,7 +148,7 @@ public final class DocumentReader {
                 case "extends" -> body.base = Optional.of(word(keyword, "extends"));
                 case "units" -> body.units = names(keyword, "units");
                 case "use" -> body.uses.addAll(names(keyword, "use"));
-                case "type" -> declarations.type(reading.line());
+                case "type" -> body.blocks.add(declarations.type(reading.line()));
                 default -> {
                     if (!kind.allows(name)) {
                         throw reading.refusal(keyword, "'" + name + "' is not a block of a " + kind.keyword()
@@ -186,7 +186,7 @@ public final class DocumentReader {
             case "pins" -> declarations.pins();
             case "nodes" -> declarations.nodes();
             case "formulas" -> formulas(keyword);
-            case "behaviour" -> new Block.Behaviour(script("behaviour"));
+            case "behaviour" -> behaviour();
             case "run" -> run();
             case "view" -> presentation.view();
             case "expect" -> circuits.expectation(keyword);
@@ -228,6 +228,13 @@ public final class DocumentReader {
         }
         throw reading.refusal(keyword, "formulas are '{ definitions }'; to pull in a shared library write "
                 + "'use <slug>' at the top of the document");
+    }
+
+    private Block.Behaviour behaviour() {
+        int start = reading.cursor.current().offset();
+        ScriptNode script = script("behaviour");
+        int end = reading.cursor.lookAt(-1).offset() + 1;
+        return new Block.Behaviour(script, reading.text(start + 1, end - 1));
     }
 
     private Block.Run run() {

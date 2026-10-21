@@ -23,13 +23,29 @@ import java.util.regex.Pattern;
  * Everything a read jMX document holds, written out as text, so that two readers can be compared by what they built
  * rather than by how: every record component in order, every {@link SourceText} with its line, column and offset, and
  * every jMS node with its kind, its span and its children.
+ *
+ * <p>Without positions it says what a document holds and nothing about where: no line, column or offset, no
+ * {@code line} of a record, no span of a node, and an expression that spans lines with each line's indentation taken
+ * off — what a document written back and read again must still say.</p>
  */
 final class DocumentSnapshot {
 
-    private DocumentSnapshot() {
+    private final boolean positions;
+
+    private DocumentSnapshot(boolean positions) {
+        this.positions = positions;
     }
 
     static String of(List<ExperienceDocument> documents) {
+        return new DocumentSnapshot(true).snapshot(documents);
+    }
+
+    /** What the documents hold, wherever it was written. */
+    static String withoutPositions(List<ExperienceDocument> documents) {
+        return new DocumentSnapshot(false).snapshot(documents);
+    }
+
+    private String snapshot(List<ExperienceDocument> documents) {
         StringBuilder snapshot = new StringBuilder();
         for (ExperienceDocument document : documents) {
             write(snapshot, document, 0);
@@ -89,10 +105,12 @@ final class DocumentSnapshot {
         }
     }
 
-    private static void write(StringBuilder snapshot, Object value, int depth) {
+    private void write(StringBuilder snapshot, Object value, int depth) {
         String indent = "  ".repeat(depth);
         switch (value) {
             case null -> snapshot.append("null\n");
+            case SourceText text when !positions ->
+                    snapshot.append("SourceText ").append(quoted(withoutIndentation(text.text()))).append('\n');
             case SourceText text -> snapshot.append("SourceText[").append(text.line()).append(':').append(text.column())
                     .append('@').append(text.offset()).append("] ").append(quoted(text.text())).append('\n');
             case String text -> snapshot.append(quoted(text)).append('\n');
@@ -133,6 +151,9 @@ final class DocumentSnapshot {
             case Record record -> {
                 snapshot.append(record.getClass().getSimpleName()).append('\n');
                 for (RecordComponent component : record.getClass().getRecordComponents()) {
+                    if (!positions && component.getName().equals("line")) {
+                        continue;
+                    }
                     snapshot.append(indent).append("  ").append(component.getName()).append(": ");
                     write(snapshot, valueOf(record, component), depth + 2);
                 }
@@ -144,10 +165,10 @@ final class DocumentSnapshot {
         }
     }
 
-    private static void writeNode(StringBuilder snapshot, Node node, int depth) {
+    private void writeNode(StringBuilder snapshot, Node node, int depth) {
         String indent = "  ".repeat(depth);
         snapshot.append(node.getClass().getSimpleName());
-        if (node instanceof AbstractExpression expression && expression.getSpan() instanceof SpanNode span) {
+        if (positions && node instanceof AbstractExpression expression && expression.getSpan() instanceof SpanNode span) {
             snapshot.append(" @").append(span.lineNumber()).append(':').append(span.position());
         }
         String shown = String.valueOf(node);
@@ -174,6 +195,11 @@ final class DocumentSnapshot {
         } catch (ReflectiveOperationException unreadable) {
             throw new IllegalStateException("cannot read " + component.getName() + " of " + record, unreadable);
         }
+    }
+
+    /** A text that spans lines, each line without its indentation: where a written-back body stands is not what it says. */
+    private static String withoutIndentation(String text) {
+        return String.join("\n", text.lines().map(String::strip).toList());
     }
 
     private static String quoted(String text) {

@@ -68,7 +68,7 @@ final class DeclarationReader {
      * electrical quantities, the core's, and the document's own named earlier — by {@code *}, {@code /} and whole
      * powers ({@code current ^ 2}, {@code 1 / time}). What it says is a dimension; a {@code let} may then be typed by it.
      */
-    void type() {
+    Block.TypeDefinition type() {
         TokenCursor line = reading.lineView();
         Token first = reading.cursor.current();
         if (line.remaining() < 3 || !line.checkValueAt(1, "=")) {
@@ -79,7 +79,9 @@ final class DeclarationReader {
             throw reading.refusalAhead(0, "'" + name + "' is already a type");
         }
         types.put(name, new QuantityType(name, "", typeExpression(line, 2)));
+        SourceText definition = reading.text(line.lookAt(2).offset(), line.lookAt(line.remaining()).offset());
         reading.skipLine();
+        return new Block.TypeDefinition(name, definition);
     }
 
     /** What a written type name is: the document's own first, then jMX's and the core's. */
