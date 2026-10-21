@@ -4,12 +4,12 @@ import org.jmouse.formula.Complex;
 import org.jmouse.formula.ComplexCompiler;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaException;
+import org.jmouse.formula.FormulaPrinter;
 import org.jmouse.formula.RealCompiler;
 import org.jmouse.formula.Symbols;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.units.Quantity;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,20 +36,7 @@ public final class Notation {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("A jMX number is finite, not " + value + ".");
         }
-        if (value == 0) {
-            return 1 / value < 0 ? "-0" : "0";
-        }
-        double magnitude = Math.abs(value);
-        if (magnitude >= 1e-6 && magnitude < 1e21) {
-            return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
-        }
-        String scientific = Double.toString(value);
-        int exponent = scientific.indexOf('E');
-        String mantissa = scientific.substring(0, exponent);
-        if (mantissa.endsWith(".0")) {
-            mantissa = mantissa.substring(0, mantissa.length() - 2);
-        }
-        return mantissa + "e" + scientific.substring(exponent + 1);
+        return FormulaPrinter.number(value);
     }
 
     /**
@@ -128,10 +115,19 @@ public final class Notation {
 
     // ─── complex numbers ────────────────────────────────────────────────────────────────────────────
 
-    /** {@code -2 - 3.1416 i}: the imaginary part apart from its sign, as jMF reads it. */
+    /**
+     * {@code -2 - 3.1416 * i}: the real part, then the imaginary part apart from its sign — built as the formula it is and
+     * printed by jMF.
+     */
     static String complex(double real, double imaginary) {
-        String sign = imaginary < 0 || (imaginary == 0 && 1 / imaginary < 0) ? "-" : "+";
-        return number(real) + " " + sign + " " + number(Math.abs(imaginary)) + " i";
+        if (!Double.isFinite(real) || !Double.isFinite(imaginary)) {
+            throw new IllegalArgumentException("A jMX number is finite, not " + real + " + " + imaginary + " i.");
+        }
+        boolean negative = imaginary < 0 || (imaginary == 0 && 1 / imaginary < 0);
+        Formula imaginaryPart = new Formula.Binary(Formula.Operator.MULTIPLY, new Formula.Constant(Math.abs(imaginary)),
+                new Formula.ImaginaryUnit());
+        return FormulaPrinter.text(new Formula.Binary(negative ? Formula.Operator.SUBTRACT : Formula.Operator.ADD,
+                new Formula.Constant(real), imaginaryPart));
     }
 
     /** The real and imaginary parts of a constant complex number: {@code a + b i}, {@code a - b i}, {@code 2 pi i}. */

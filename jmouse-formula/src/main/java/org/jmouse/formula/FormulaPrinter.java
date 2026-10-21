@@ -1,5 +1,6 @@
 package org.jmouse.formula;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -251,14 +252,32 @@ public final class FormulaPrinter {
         };
     }
 
-    private static String number(double value) {
+    /**
+     * A number as jMF writes it: the shortest decimal that reads back to exactly {@code value} — {@code -3},
+     * {@code 0.0015}, {@code 6.283185307179586} —, and {@code 1e-9}, {@code 2.5e21} beyond the range a plain decimal
+     * stays short in; {@code inf} for an infinity.
+     */
+    public static String number(double value) {
         if (Double.isInfinite(value)) {
             return value > 0 ? "inf" : "-inf";
         }
-        if (value == Math.rint(value) && Math.abs(value) < 1e15) {
-            return Long.toString((long) value);
+        if (Double.isNaN(value)) {
+            return Double.toString(value);
         }
-        return Double.toString(value);
+        if (value == 0) {
+            return 1 / value < 0 ? "-0" : "0";
+        }
+        double magnitude = Math.abs(value);
+        if (magnitude >= 1e-6 && magnitude < 1e21) {
+            return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
+        }
+        String scientific = Double.toString(value);
+        int exponent = scientific.indexOf('E');
+        String mantissa = scientific.substring(0, exponent);
+        if (mantissa.endsWith(".0")) {
+            mantissa = mantissa.substring(0, mantissa.length() - 2);
+        }
+        return mantissa + "e" + scientific.substring(exponent + 1);
     }
 
     private static String wrap(String text, boolean needed) {

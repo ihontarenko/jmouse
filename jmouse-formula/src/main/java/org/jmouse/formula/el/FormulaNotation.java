@@ -1,5 +1,6 @@
 package org.jmouse.formula.el;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,24 +20,55 @@ public final class FormulaNotation {
             Map.entry('≥', ">="), Map.entry('≠', "!="), Map.entry('∧', " and "), Map.entry('∨', " or "),
             Map.entry('¬', "!"));
 
+    /** The most characters one typed character becomes: a symbol's words, or a superscript's caret and digit. */
+    private static final int LONGEST_WRITING = Math.max(2, SYMBOLS.values().stream().mapToInt(String::length).max().orElse(1));
+
     private FormulaNotation() {
     }
 
     public static String normalize(String source) {
+        return normalizeTracked(source).text();
+    }
+
+    /**
+     * A text brought to what the lexer reads, with where each of its characters came from — what lets a position
+     * the lexer found be pointed at in the text as it was typed.
+     *
+     * @param text   the normalized text
+     * @param origin for every character of {@code text}, the index of the source character it was written as; one more
+     *               entry, the source's length, stands for the end
+     */
+    public record Normalized(String text, int[] origin) {
+
+        /** Where a position of the normalized text stands in the source: an index from 0 to the source's length. */
+        public int sourceIndex(int normalizedIndex) {
+            return origin[Math.max(0, Math.min(normalizedIndex, origin.length - 1))];
+        }
+    }
+
+    /** {@link #normalize}, keeping where each normalized character came from. */
+    public static Normalized normalizeTracked(String source) {
         StringBuilder normalized = new StringBuilder(source.length() + 8);
+        int[] origin = new int[source.length() * LONGEST_WRITING + 1];
         boolean afterSuperscript = false;
         for (int index = 0; index < source.length(); index++) {
             char character = source.charAt(index);
             int digit = superscriptDigit(character);
+            String written;
             if (digit >= 0) {
-                normalized.append(afterSuperscript ? "" : "^").append(digit);
+                written = (afterSuperscript ? "" : "^") + digit;
                 afterSuperscript = true;
-                continue;
+            } else {
+                afterSuperscript = false;
+                written = symbol(character).orElse(String.valueOf(character));
             }
-            afterSuperscript = false;
-            normalized.append(symbol(character).orElse(String.valueOf(character)));
+            for (int offset = 0; offset < written.length(); offset++) {
+                origin[normalized.length() + offset] = index;
+            }
+            normalized.append(written);
         }
-        return normalized.toString();
+        origin[normalized.length()] = source.length();
+        return new Normalized(normalized.toString(), Arrays.copyOf(origin, normalized.length() + 1));
     }
 
     /**

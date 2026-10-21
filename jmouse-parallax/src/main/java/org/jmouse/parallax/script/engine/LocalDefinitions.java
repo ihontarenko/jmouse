@@ -1,5 +1,8 @@
 package org.jmouse.parallax.script.engine;
 
+import org.jmouse.formula.FormulaException;
+import org.jmouse.formula.el.FormulaLanguage;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,26 +35,20 @@ record LocalDefinitions(List<String> definitions, String result) {
     }
 
     /**
-     * The definitions and the result of an expression, split at its {@code ;} outside parentheses.
+     * The definitions and the result of an expression, as jMF's own document grammar cuts its statements — each kept as
+     * the author typed it.
      *
-     * @throws IllegalArgumentException when joining the parts with {@code "; "} would not give the expression back
+     * @throws IllegalArgumentException when the expression is not a formula document, or when joining the parts with
+     *                                  {@code "; "} would not give it back
      */
     static LocalDefinitions of(String expression) {
-        List<String> parts = new ArrayList<>();
-        int depth = 0;
-        int start = 0;
-        for (int index = 0; index < expression.length(); index++) {
-            char character = expression.charAt(index);
-            if (character == '(' || character == '[') {
-                depth++;
-            } else if (character == ')' || character == ']') {
-                depth--;
-            } else if (character == ';' && depth == 0) {
-                parts.add(expression.substring(start, index).strip());
-                start = index + 1;
-            }
+        List<String> parts;
+        try {
+            parts = FormulaLanguage.standard().statementTexts(expression);
+        } catch (FormulaException unreadable) {
+            throw new IllegalArgumentException("'" + expression + "' is not a formula: " + unreadable.getMessage(),
+                    unreadable);
         }
-        parts.add(expression.substring(start).strip());
         LocalDefinitions local = new LocalDefinitions(parts.subList(0, parts.size() - 1), parts.getLast());
         if (!local.joined().equals(expression)) {
             throw new IllegalArgumentException("The expression '" + expression + "' separates its local definitions "

@@ -64,6 +64,7 @@ final class FormulaDocumentParser extends StatementsParser {
         Token end = extent(cursor, written, meaningful);
         cursor.shift(written.size());
         int offset = meaningful.getFirst().offset();
+        int ending = startOf(end, cursor.source());
         List<Integer> equals = topLevelEquals(meaningful);
         if (equals.size() > 1) {
             throw new FormulaException("An equation has one '='; compare with '==' instead.",
@@ -71,7 +72,7 @@ final class FormulaDocumentParser extends StatementsParser {
         }
         if (equals.isEmpty()) {
             return new FormulaStatementNode(new FormulaStatement.Plain(side(meaningful, written, end, cursor, context),
-                    offset));
+                    offset, ending));
         }
         int at = equals.getFirst();
         List<Token> left = meaningful.subList(0, at);
@@ -81,7 +82,7 @@ final class FormulaDocumentParser extends StatementsParser {
         }
         Token equalSign = meaningful.get(at);
         return new FormulaStatementNode(new FormulaStatement.Assignment(head(left),
-                side(left, written, equalSign, cursor, context), side(right, written, end, cursor, context), offset));
+                side(left, written, equalSign, cursor, context), side(right, written, end, cursor, context), offset, ending));
     }
 
     /**

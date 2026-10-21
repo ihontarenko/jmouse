@@ -197,6 +197,18 @@ public final class FormulaLanguage {
         };
     }
 
+    /**
+     * A formula document's statements as they were typed — {@code r = sqrt(x^2 + y^2)}, {@code sin(r) / r} —, each cut
+     * from the source where this grammar says it begins and ends, so a {@code ;} inside brackets or a statement that
+     * goes on to the next line is never mistaken for its end.
+     */
+    public List<String> statementTexts(String source) {
+        List<FormulaStatement> statements = statements(source);
+        FormulaNotation.Normalized normalized = FormulaNotation.normalizeTracked(source);
+        return statements.stream().map(statement -> source.substring(normalized.sourceIndex(statement.offset()),
+                normalized.sourceIndex(statement.end())).strip()).toList();
+    }
+
     /** Every definition a document makes, in order, for a library others will call. */
     public List<Formula.Definition> definitions(String source) {
         return definitions(source, List.of());

@@ -1,5 +1,7 @@
 package org.jmouse.parallax.script.engine;
 
+import org.jmouse.formula.Formula;
+import org.jmouse.formula.FormulaPrinter;
 import org.jmouse.parallax.fractal.FractalComputations;
 import org.jmouse.parallax.object.Interval;
 import org.jmouse.parallax.object.ObjectDefinition;
@@ -52,6 +54,7 @@ import org.jmouse.parallax.script.engine.DefinitionWords.Primitive;
 import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -249,8 +252,8 @@ final class DefinitionBlocks {
                     Optional.empty(), "", 0))));
         }
         blocks.addAll(stepped(fractal.state(), fractal.iteration()));
-        blocks.add(outputs(output("escape", OutputType.IMAGE, Optional.empty(), List.of(FractalComputations.EscapeTime.FUNCTION
-                + "(" + fractal.state() + ", " + DefinitionWords.BAILOUT + ", " + DefinitionWords.ITERATIONS + ")"))));
+        blocks.add(outputs(output("escape", OutputType.IMAGE, Optional.empty(), List.of(hostCall(
+                FractalComputations.EscapeTime.FUNCTION, fractal.state(), DefinitionWords.BAILOUT, DefinitionWords.ITERATIONS)))));
         return new Mapped(Kind.ITERATION, constants, Map.of(), blocks);
     }
 
@@ -261,9 +264,18 @@ final class DefinitionBlocks {
         List<Block> blocks = new ArrayList<>();
         blocks.add(inputs(List.of(region(fractal.state(), fractal.real(), fractal.imaginary()))));
         blocks.addAll(stepped(fractal.state(), fractal.iteration()));
-        blocks.add(outputs(output("basin", OutputType.IMAGE, Optional.empty(), List.of(FractalComputations.NewtonBasins.FUNCTION
-                + "(" + fractal.state() + ", " + DefinitionWords.ITERATIONS + ", " + DefinitionWords.TOLERANCE + ")"))));
+        blocks.add(outputs(output("basin", OutputType.IMAGE, Optional.empty(), List.of(hostCall(
+                FractalComputations.NewtonBasins.FUNCTION, fractal.state(), DefinitionWords.ITERATIONS, DefinitionWords.TOLERANCE)))));
         return new Mapped(Kind.ITERATION, constants, Map.of(), blocks);
+    }
+
+    /**
+     * {@code escape_time(z, bailout, iterations)}: a call of the engine's own function over named values, built as the jMF
+     * host call it is and printed by jMF.
+     */
+    private static String hostCall(String function, String... names) {
+        return FormulaPrinter.text(new Formula.HostCall(function,
+                Arrays.stream(names).<Formula>map(Formula.Variable::new).toList()));
     }
 
     /** {@code formulas} for the step's local definitions, then {@code state_next = step}. */
