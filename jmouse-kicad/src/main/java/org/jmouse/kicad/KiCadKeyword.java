@@ -49,7 +49,30 @@ public enum KiCadKeyword implements KiCadName {
     LABEL("label"),
     GLOBAL_LABEL("global_label"),
     HIERARCHICAL_LABEL("hierarchical_label"),
-    SHEET("sheet");
+    SHEET("sheet"),
+
+    // ─── footprints ───────────────────────────────────────────────────────────────────────────────
+    FOOTPRINT("footprint"),
+    DESCRIPTION("descr"),
+    TAGS("tags"),
+    PAD("pad"),
+    DRILL("drill"),
+    LAYER("layer"),
+    LAYERS("layers"),
+    ROUNDNESS("roundrect_rratio"),
+    LINE("fp_line"),
+    RECTANGLE("fp_rect"),
+    CIRCLE("fp_circle"),
+    ARC("fp_arc"),
+    POLYGON("fp_poly"),
+    START("start"),
+    END("end"),
+    CENTER("center"),
+    MIDDLE("mid"),
+    STROKE("stroke"),
+    WIDTH("width"),
+    FILL("fill"),
+    TYPE("type");
 
     private final String word;
 
