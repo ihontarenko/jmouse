@@ -74,6 +74,8 @@ final class SpiceExporter {
     private static final double SQUARE_EDGE = 1e-6;
     /** SPICE's printing step is this share of the run; jMX has none, the engine choosing its own steps. */
     private static final double PRINTING_STEP = 1e-3;
+    /** How many samples a run is printed in: one a printing step. */
+    static final int PRINTED_SAMPLES = (int) Math.round(1 / PRINTING_STEP);
 
     private static final String SINE   = "offset+amplitude*sin(2*pi*frequency*time+phase)";
     private static final String SQUARE = "low+(high-low)*(mod(frequency*time,1)<duty)";
@@ -85,6 +87,10 @@ final class SpiceExporter {
     /** References already reported on, so a component used by ten parts is noted once. */
     private final Set<String> reported = new java.util.HashSet<>();
     private final Map<String, String> renamedElements = new LinkedHashMap<>();
+    /** Every part written as an element, by its id: the name SPICE knows it by. */
+    private final Map<String, String> elementNames = new LinkedHashMap<>();
+    /** The parts the deck could not carry: a deck without them is another circuit. */
+    private final Set<String> leftOut = new LinkedHashSet<>();
     /** Subcircuits that cannot be written, each noted once; and those being written, to refuse one inside itself. */
     private final Set<String> refusedSubcircuits = new java.util.HashSet<>();
     private final Set<String> writingSubcircuits = new java.util.HashSet<>();
@@ -101,10 +107,17 @@ final class SpiceExporter {
         this.overrides = Map.copyOf(overrides);
     }
 
-    /** The deck written, and what was not carried across. */
-    record Written(SpiceDeck deck, List<SpiceNote> notes) {
+    /**
+     * The deck written, and what was not carried across.
+     *
+     * @param elementNames the name each part written as an element has in SPICE, by its id ({@code 1} → {@code R1})
+     * @param leftOut      the parts the deck does not carry: SPICE's answer is then another circuit's
+     */
+    record Written(SpiceDeck deck, List<SpiceNote> notes, Map<String, String> elementNames, Set<String> leftOut) {
         Written {
             notes = List.copyOf(notes);
+            elementNames = Map.copyOf(elementNames);
+            leftOut = Set.copyOf(leftOut);
         }
 
         String text() {
@@ -120,7 +133,7 @@ final class SpiceExporter {
             default -> throw new SpiceParseException(SpicePosition.ofLine(document.line()), "SPICE describes circuits "
                     + "and components; this is a " + document.kind().keyword());
         };
-        return new Written(deck, notes);
+        return new Written(deck, notes, elementNames, leftOut);
     }
 
     // ─── a circuit ──────────────────────────────────────────────────────────────────────────────────
@@ -222,10 +235,12 @@ final class SpiceExporter {
     /** A SPICE element name: the jMX id, its letter put in front when it does not begin with it. */
     private String elementName(char letter, String id) {
         if (Character.toUpperCase(id.charAt(0)) == letter) {
+            elementNames.put(id, id);
             return id;
         }
         String name = letter + id;
         renamedElements.put(id, name);
+        elementNames.put(id, name);
         return name;
     }
 
@@ -238,12 +253,17 @@ final class SpiceExporter {
 
     /** The statements one part becomes; none, with a note, when it is left out. */
     private List<SpiceStatement> part(Block.Part part, Scope scope) {
+        List<SpiceStatement> written;
         try {
-            return translatedPart(part, scope);
+            written = translatedPart(part, scope);
         } catch (SpiceExpressions.Untranslatable untranslatable) {
             notes.add(new SpiceNote(part.line(), part.id() + ": " + untranslatable.getMessage() + "; left out"));
-            return List.of();
+            written = List.of();
         }
+        if (written.isEmpty()) {
+            leftOut.add(part.id());
+        }
+        return written;
     }
 
     private List<SpiceStatement> translatedPart(Block.Part part, Scope scope) {
@@ -336,14 +356,16 @@ final class SpiceExporter {
 
     /**
      * A source as it is in a jMX circuit, which starts from rest: a pulse that rises from 0 at time 0 and stays past the
-     * end of any run. A {@code DC} card would start the SPICE run at its operating point instead.
+     * end of any run — SPICE's transient starts from the pulse's value at 0 —, and its value as {@code DC}, which the
+     * operating point, the DC sweep and the small-signal analyses stand on (checked against ngspice 47: {@code DC 5
+     * PULSE(0 5 …)} is 5 V at the operating point and 0 V at the start of the transient).
      */
     private SpiceElement.Source source(String name, String positive, String negative, SpiceValue value) {
         SpiceValue edge = SpiceValue.number(span * STEP_EDGE);
         SpiceValue forever = SpiceValue.number(1e30);
         SpiceWaveform pulse = new SpiceWaveform(SpiceWaveform.Kind.PULSE,
                 List.of(SpiceValue.number(0), value, SpiceValue.number(0), edge, edge, forever, forever), SpicePosition.NONE);
-        return new SpiceElement.Source(name, positive, negative, null, false, pulse, List.of(), SpicePosition.NONE);
+        return new SpiceElement.Source(name, positive, negative, value, true, pulse, List.of(), SpicePosition.NONE);
     }
 
     // ─── parts that are components ──────────────────────────────────────────────────────────────────

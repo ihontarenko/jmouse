@@ -10,7 +10,7 @@ public interface SpiceSimulator {
     /**
      * Runs one deck in batch mode.
      *
-     * @return everything the program printed
+     * @return everything the program printed, what it complained of after it
      * @throws SpiceRunException when the program cannot be started, fails, or takes longer than it is allowed
      */
     String run(String deck);

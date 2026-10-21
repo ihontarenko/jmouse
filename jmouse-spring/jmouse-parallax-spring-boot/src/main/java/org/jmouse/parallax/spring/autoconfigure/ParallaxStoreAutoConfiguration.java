@@ -52,7 +52,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Conditional;
 import org.jmouse.parallax.store.spice.SpiceConfigured;
+import org.jmouse.parallax.circuit.CircuitEngines;
 import org.jmouse.parallax.spice.NgspiceProcess;
+import org.jmouse.parallax.spice.SpiceEngine;
 import org.jmouse.parallax.spice.SpiceSimulator;
 import org.jmouse.parallax.store.spice.SpiceProperties;
 import org.jmouse.parallax.store.kicad.KiCadExports;
@@ -109,14 +111,20 @@ public class ParallaxStoreAutoConfiguration {
     // ── What the services share ──────────────────────────────────────────────────────────────────────────────────
 
     /**
-     * 📐 The computation registry of the engine: every representation Parallax can compute.
+     * 📐 The computation registry of the engine: every representation Parallax can compute — a circuit's batch
+     * analyses by the library's own engine, or by SPICE where a simulator is configured.
      *
      * @return the registry
      */
     @Bean
     @ConditionalOnMissingBean
-    public Computations parallaxComputations() {
-        return StandardComputations.registry();
+    public Computations parallaxComputations(ObjectProvider<SpiceSimulator> simulator) {
+        CircuitEngines engines = CircuitEngines.parallaxOnly();
+        SpiceSimulator spice = simulator.getIfAvailable();
+        if (spice != null) {
+            engines = engines.with(new SpiceEngine(spice));
+        }
+        return StandardComputations.registry(engines);
     }
 
     /**

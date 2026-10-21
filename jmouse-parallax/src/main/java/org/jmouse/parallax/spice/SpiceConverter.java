@@ -1,7 +1,9 @@
 package org.jmouse.parallax.spice;
 
 import org.jmouse.parallax.Dataset;
+import org.jmouse.parallax.circuit.CircuitEngine;
 import org.jmouse.parallax.component.ComponentDocuments;
+import org.jmouse.parallax.object.CompiledObject;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.object.DefinitionCompiler;
 import org.jmouse.parallax.script.ExperienceDocument;
@@ -109,17 +111,19 @@ public final class SpiceConverter {
     }
 
     /**
-     * A jMX circuit's transient computed by SPICE instead of the engine — the same deck {@link #exportDocument} writes,
-     * at the parameters given, run by the simulator.
+     * A jMX circuit's transient computed by SPICE instead of the engine — by {@link SpiceEngine}, as every analysis SPICE
+     * runs, at the parameters given. A part the deck could not carry is in the notes rather than refused: the reader
+     * sees them beside the answer.
      *
      * @param parameters parameters at other values than the document's: where the bench's sliders stand
-     * @param notes      what the deck could not carry: a part left out makes SPICE's answer another circuit's
      * @throws SpiceRunException when SPICE gives no answer
      */
     public SpiceTransient simulateTransient(String source, Map<String, Double> parameters, SpiceSimulator simulator) {
-        SpiceExporter.Written written = new SpiceExporter(library, parameters).write(source);
-        String deck = SpiceTransientRun.controlled(written.text());
-        return new SpiceTransient(SpiceTransientRun.series(simulator.run(deck)), deck, lines(written.notes()));
+        DefinedObject defined = ExperienceDefinitions.read(source, "circuit");
+        CompiledObject circuit = DefinitionCompiler.compile(defined.definition(), defined.parameters(), parameters, library);
+        SpiceEngine.SpiceRun run = new SpiceEngine(simulator).transientRun(circuit,
+                new CircuitEngine.TransientRequest(SpiceExporter.PRINTED_SAMPLES, false, false, null));
+        return new SpiceTransient((Dataset.TimeSeries) run.dataset(), run.deck(), run.notes());
     }
 
     /** A transient computed by SPICE: its series, the deck it ran, and what the deck could not carry. */

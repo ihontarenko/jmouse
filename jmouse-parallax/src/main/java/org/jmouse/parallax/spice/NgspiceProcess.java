@@ -21,6 +21,9 @@ public final class NgspiceProcess implements SpiceSimulator {
     /** A printout is at most this long: a run that prints more is refused rather than held in memory. */
     private static final int MAXIMUM_OUTPUT = 64 * 1024 * 1024;
 
+    /** What ngspice says when a run cannot go on. */
+    private static final String FATAL = "fatal error";
+
     private final List<String> command;
     private final Duration     timeout;
 
@@ -36,7 +39,9 @@ public final class NgspiceProcess implements SpiceSimulator {
     public String run(String deck) {
         Process process;
         try {
-            process = new ProcessBuilder(command).redirectErrorStream(true).start();
+            // Its errors apart from its printout: merged, a note ngspice writes to its error stream while its table is
+            // still in the output's buffer landed in the middle of a row ("-7.26Note: No ".plot" …").
+            process = new ProcessBuilder(command).start();
         } catch (IOException refused) {
             throw new SpiceRunException("ngspice could not be started (" + String.join(" ", command) + "): "
                     + refused.getMessage(), refused);
@@ -45,6 +50,8 @@ public final class NgspiceProcess implements SpiceSimulator {
         // On a thread of its own, since it blocks on the pipe: in the common pool it held a worker every parallel stream needs.
         CompletableFuture<String> printed = CompletableFuture.supplyAsync(() -> readAll(process.getInputStream()),
                 reader -> Thread.ofVirtual().name("ngspice-output").start(reader));
+        CompletableFuture<String> complained = CompletableFuture.supplyAsync(() -> readAll(process.getErrorStream()),
+                reader -> Thread.ofVirtual().name("ngspice-errors").start(reader));
         try (OutputStream input = process.getOutputStream()) {
             input.write(deck.getBytes(StandardCharsets.UTF_8));
         } catch (IOException refused) {
@@ -57,12 +64,16 @@ public final class NgspiceProcess implements SpiceSimulator {
                 throw new SpiceRunException("ngspice did not finish within " + timeout.toSeconds() + " s.");
             }
             String output = printed.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            // ngspice in batch mode with a control block may exit with 1 after printing everything asked: a failure is
-            // a non-zero exit with no table printed.
-            if (process.exitValue() != 0 && !output.contains("\nIndex")) {
-                throw new SpiceRunException("ngspice failed (exit " + process.exitValue() + "): " + lastLines(output));
+            String errors = complained.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            // ngspice in batch mode with a control block exits with 1 after printing everything asked, its last word a
+            // note that no .print line ran: a failure is a fatal error, or a run that printed nothing.
+            boolean fatal = errors.contains(FATAL) || output.contains(FATAL);
+            if (fatal || (process.exitValue() != 0 && output.isBlank())) {
+                throw new SpiceRunException("ngspice failed (exit " + process.exitValue() + "): "
+                        + lastLines(errors.isBlank() ? output : errors));
             }
-            return output;
+            // Its complaints after what it printed, never inside it: a reader that misses what it asked for says why.
+            return errors.isBlank() ? output : output + System.lineSeparator() + errors;
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             process.destroyForcibly();
