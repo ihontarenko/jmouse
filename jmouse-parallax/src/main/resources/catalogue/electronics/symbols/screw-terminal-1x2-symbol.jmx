@@ -4,10 +4,10 @@ symbol "Screw terminal, 2 contacts" as screw-terminal-1x2-symbol {
         category circuits
         tags electronics, schematic, connector
     }
-    size 80 x 60
-    path "M-20 -10H20V30H-20ZM-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 20H-6M-6 20A6 6 0 1 0 6 20A6 6 0 1 0 -6 20ZM-4 24L4 16"
+    size 80 x 100
+    path "M-20 -10H20V50H-20ZM-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36"
     pin pin1 at -40, 0 "1"
-    pin pin2 at -40, 20 "2"
+    pin pin2 at -40, 40 "2"
     label name at 0, -24
-    label value at 0, 48
+    label value at 0, 68
 }

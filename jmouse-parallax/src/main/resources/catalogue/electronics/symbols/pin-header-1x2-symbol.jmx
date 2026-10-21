@@ -4,10 +4,10 @@ symbol "Pin header, 2 contacts" as pin-header-1x2-symbol {
         category circuits
         tags electronics, schematic, connector
     }
-    size 60 x 60
-    path "M-4 -20H40M-8 -22H-4V-18H-8ZM-4 0H40M-8 -2H-4V2H-8Z"
-    pin pin1 at 40, -20 "1"
-    pin pin2 at 40, 0 "2"
-    label name at -4, -36
-    label value at -4, 20
+    size 60 x 100
+    path "M-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8Z"
+    pin pin1 at 40, 0 "1"
+    pin pin2 at 40, 40 "2"
+    label name at -4, -16
+    label value at -4, 60
 }

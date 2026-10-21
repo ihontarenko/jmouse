@@ -27,14 +27,14 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 80.0
-          height: Double 100.0
+          height: Double 180.0
           paths: List(1)
-              - "M-20 -30H20V50H-20ZM-40 -20H-6M-6 -20A6 6 0 1 0 6 -20A6 6 0 1 0 -6 -20ZM-4 -16L4 -24M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 20H-6M-6 20A6 6 0 1 0 6 20A6 6 0 1 0 -6 20ZM-4 24L4 16M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36"
+              - "M-20 -50H20V90H-20ZM-40 -40H-6M-6 -40A6 6 0 1 0 6 -40A6 6 0 1 0 -6 -40ZM-4 -36L4 -44M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36M-40 80H-6M-6 80A6 6 0 1 0 6 80A6 6 0 1 0 -6 80ZM-4 84L4 76"
           pins: List(4)
               - SymbolPin
                   pin: "pin1"
                   x: Double -40.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "1"
               - SymbolPin
                   pin: "pin2"
@@ -44,22 +44,22 @@ ExperienceDocument
               - SymbolPin
                   pin: "pin3"
                   x: Double -40.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "3"
               - SymbolPin
                   pin: "pin4"
                   x: Double -40.0
-                  y: Double 40.0
+                  y: Double 80.0
                   label: "4"
           labels: List(2)
               - SymbolLabel
                   subject: "name"
                   x: Double 0.0
-                  y: Double -44.0
+                  y: Double -64.0
               - SymbolLabel
                   subject: "value"
                   x: Double 0.0
-                  y: Double 68.0
+                  y: Double 108.0
           indicators: List(0)
           upright: List(0)
           inputs: List(0)
@@ -69,10 +69,10 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/screw-terminal-1x4-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS 08b669192999ed2ecfdd86e8ada424fb
+READS 1d0956498a074091f41ffd8d697defe1
 == line 4 begun with a stray word
-READS 6e35a5efe07f52a51cac56e9848c9b68
+READS fb1ca3f96f676f031ebf3eac7d47b653
 == line 11 deleted
-READS e00844a44f06fa8073daefd75e8c5014
+READS 7c60b42e4b7c1a59868e47d4e6ee0597
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/screw-terminal-1x4-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

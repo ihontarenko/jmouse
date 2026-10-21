@@ -27,39 +27,39 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 120.0
-          height: Double 160.0
+          height: Double 300.0
           paths: List(1)
-              - "M-20 -70H20V70H-20ZM-60 -60H-20M20 -60H60M-60 -40H-20M20 -40H60M-60 -20H-20M20 -20H60M-60 0H-20M20 0H60M-60 20H-20M20 20H60M-60 40H-20M20 40H60M-60 60H-20M20 60H60"
+              - "M-20 -130H20V130H-20ZM-60 -120H-20M20 -120H60M-60 -80H-20M20 -80H60M-60 -40H-20M20 -40H60M-60 0H-20M20 0H60M-60 40H-20M20 40H60M-60 80H-20M20 80H60M-60 120H-20M20 120H60"
           pins: List(14)
               - SymbolPin
                   pin: "pin1"
                   x: Double -60.0
-                  y: Double -60.0
+                  y: Double -120.0
                   label: "1"
               - SymbolPin
                   pin: "pin2"
                   x: Double 60.0
-                  y: Double -60.0
+                  y: Double -120.0
                   label: "2"
               - SymbolPin
                   pin: "pin3"
                   x: Double -60.0
-                  y: Double -40.0
+                  y: Double -80.0
                   label: "3"
               - SymbolPin
                   pin: "pin4"
                   x: Double 60.0
-                  y: Double -40.0
+                  y: Double -80.0
                   label: "4"
               - SymbolPin
                   pin: "pin5"
                   x: Double -60.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "5"
               - SymbolPin
                   pin: "pin6"
                   x: Double 60.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "6"
               - SymbolPin
                   pin: "pin7"
@@ -74,42 +74,42 @@ ExperienceDocument
               - SymbolPin
                   pin: "pin9"
                   x: Double -60.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "9"
               - SymbolPin
                   pin: "pin10"
                   x: Double 60.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "10"
               - SymbolPin
                   pin: "pin11"
                   x: Double -60.0
-                  y: Double 40.0
+                  y: Double 80.0
                   label: "11"
               - SymbolPin
                   pin: "pin12"
                   x: Double 60.0
-                  y: Double 40.0
+                  y: Double 80.0
                   label: "12"
               - SymbolPin
                   pin: "pin13"
                   x: Double -60.0
-                  y: Double 60.0
+                  y: Double 120.0
                   label: "13"
               - SymbolPin
                   pin: "pin14"
                   x: Double 60.0
-                  y: Double 60.0
+                  y: Double 120.0
                   label: "14"
           labels: List(2)
               - SymbolLabel
                   subject: "name"
                   x: Double 0.0
-                  y: Double -84.0
+                  y: Double -144.0
               - SymbolLabel
                   subject: "value"
                   x: Double 0.0
-                  y: Double 88.0
+                  y: Double 148.0
           indicators: List(0)
           upright: List(0)
           inputs: List(0)
@@ -119,15 +119,15 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x7-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS 255bc1264c9c801a20da72fc86123eaa
+READS 386facbdef50185cb5d469ef33be858a
 == line 4 begun with a stray word
-READS c2e29c1d84f2238d1a6bdf53edf32fb3
+READS 1a22f31202c4758b65967321a4eeaa18
 == line 11 deleted
-READS c97a28cabfa06d939fb227debc4b6ad3
+READS bb73062d1d242b3e2aa9e4662b375331
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x7-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
 == line 18 deleted
-READS b669bbc0fb7b83c1db21b1f3d378e68c
+READS 8146f5beefcae0e3983db85eb9742570
 == line 18 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x7-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta
 == line 25 deleted

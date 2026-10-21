@@ -27,9 +27,9 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 80.0
-          height: Double 60.0
+          height: Double 100.0
           paths: List(1)
-              - "M-20 -10H20V30H-20ZM-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 20H-6M-6 20A6 6 0 1 0 6 20A6 6 0 1 0 -6 20ZM-4 24L4 16"
+              - "M-20 -10H20V50H-20ZM-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36"
           pins: List(2)
               - SymbolPin
                   pin: "pin1"
@@ -39,7 +39,7 @@ ExperienceDocument
               - SymbolPin
                   pin: "pin2"
                   x: Double -40.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "2"
           labels: List(2)
               - SymbolLabel
@@ -49,7 +49,7 @@ ExperienceDocument
               - SymbolLabel
                   subject: "value"
                   x: Double 0.0
-                  y: Double 48.0
+                  y: Double 68.0
           indicators: List(0)
           upright: List(0)
           inputs: List(0)
@@ -59,10 +59,10 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/screw-terminal-1x2-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS aebec141d4316b687663800de51a30fe
+READS 78b1857d81cb3dadddbb5f19606c6d49
 == line 4 begun with a stray word
-READS 6cf57627f73f3897015fd13d4bcbdaa8
+READS cf34703fb7e3265ce6502c500cf94356
 == line 11 deleted
-READS 47a4a6283c40193cd65224775f1d2210
+READS bf037c67739de2ea3d90d7bc7d81c497
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/screw-terminal-1x2-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

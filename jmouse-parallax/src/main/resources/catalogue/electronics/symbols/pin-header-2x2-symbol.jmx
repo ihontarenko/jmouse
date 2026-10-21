@@ -4,12 +4,12 @@ symbol "Pin header, 2 x 2" as pin-header-2x2-symbol {
         category circuits
         tags electronics, schematic, connector
     }
-    size 120 x 60
-    path "M-20 -10H20V30H-20ZM-60 0H-20M20 0H60M-60 20H-20M20 20H60"
+    size 120 x 100
+    path "M-20 -10H20V50H-20ZM-60 0H-20M20 0H60M-60 40H-20M20 40H60"
     pin pin1 at -60, 0 "1"
     pin pin2 at 60, 0 "2"
-    pin pin3 at -60, 20 "3"
-    pin pin4 at 60, 20 "4"
+    pin pin3 at -60, 40 "3"
+    pin pin4 at 60, 40 "4"
     label name at 0, -24
-    label value at 0, 48
+    label value at 0, 68
 }

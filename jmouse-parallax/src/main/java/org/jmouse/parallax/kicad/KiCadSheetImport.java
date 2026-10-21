@@ -536,7 +536,11 @@ public final class KiCadSheetImport {
             double[] at = drawn(box.at());
             double[] size = {box.size().x() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE,
                     box.size().y() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE};
-            items.add(new PlacedItem(id, null, null, grid(at[0] + size[0] / 2), grid(at[1] + size[1] / 2), 0, false));
+            // Drawn the size KiCad draws it, on the grid, so its name and its sheet stand where they stood there.
+            ObjectDefinition.BlockSize drawnSize = new ObjectDefinition.BlockSize(Math.max(GRID, grid(size[0])),
+                    Math.max(GRID, grid(size[1])));
+            items.add(new PlacedItem(id, null, null, grid(at[0] + size[0] / 2), grid(at[1] + size[1] / 2), 0, false,
+                    Map.of(), List.of(), null, drawnSize));
         }
     }
 
@@ -653,30 +657,63 @@ public final class KiCadSheetImport {
         if (Math.abs(pin[0] - kicadPoint[0]) < 0.01 || Math.abs(pin[1] - kicadPoint[1]) < 0.01) {
             return List.of(kicadPoint);
         }
+        List<List<double[]>> candidates = leadCandidates(terminal, kicadPoint);
+        return candidates.stream().filter(candidate -> clear(candidate, terminal)).findFirst().orElse(candidates.getFirst());
+    }
+
+    /**
+     * The ways a stub may run from KiCad's point into a pin, simplest first: one corner, entering the pin the way it leaves
+     * its body; the other corner; then a jog out along the pin's own direction, one to three grid steps clear of the body,
+     * so a stub hemmed in by its neighbours' pins still finds a free lane. Every corner is on the grid.
+     */
+    private static List<List<double[]>> leadCandidates(Terminal terminal, double[] kicadPoint) {
+        double[] pin = terminal.drawn();
         double[] centre = terminal.partCentre();
         boolean sideways = centre == null || Math.abs(pin[0] - centre[0]) >= Math.abs(pin[1] - centre[1]);
         double[] preferred = sideways ? new double[] {kicadPoint[0], pin[1]} : new double[] {pin[0], kicadPoint[1]};
         double[] other = sideways ? new double[] {pin[0], kicadPoint[1]} : new double[] {kicadPoint[0], pin[1]};
-        // A stub that runs over another pin would join it in KiCad, which connects whatever a wire touches: the other
-        // corner, if it is clear.
-        double[] corner = passesPin(kicadPoint, preferred, pin, terminal) && !passesPin(kicadPoint, other, pin, terminal)
-                ? other : preferred;
-        return List.of(kicadPoint, corner);
+        List<List<double[]>> candidates = new ArrayList<>();
+        candidates.add(List.of(kicadPoint, preferred));
+        candidates.add(List.of(kicadPoint, other));
+        // Outwards from the body: the side of the pin away from the part's centre.
+        double outwards = centre == null ? 1 : Math.signum(sideways ? pin[0] - centre[0] : pin[1] - centre[1]);
+        for (int steps = 1; steps <= 3; steps++) {
+            double lane = outwards * steps * GRID;
+            if (sideways) {
+                double x = pin[0] + lane;
+                candidates.add(List.of(kicadPoint, new double[] {x, kicadPoint[1]}, new double[] {x, pin[1]}));
+                candidates.add(List.of(kicadPoint, new double[] {kicadPoint[0], pin[1] + lane},
+                        new double[] {x, pin[1] + lane}, new double[] {x, pin[1]}));
+            } else {
+                double y = pin[1] + lane;
+                candidates.add(List.of(kicadPoint, new double[] {kicadPoint[0], y}, new double[] {pin[0], y}));
+                candidates.add(List.of(kicadPoint, new double[] {pin[0] + lane, kicadPoint[1]},
+                        new double[] {pin[0] + lane, y}, new double[] {pin[0], y}));
+            }
+        }
+        return candidates;
     }
 
-    /** Whether a stub from a point through a corner to its pin runs over a pin of another terminal. */
-    private boolean passesPin(double[] start, double[] corner, double[] end, Terminal own) {
+    /** Whether a stub — KiCad's point, its corners, then the pin — runs over no pin of another net. */
+    private boolean clear(List<double[]> corners, Terminal terminal) {
+        List<double[]> points = new ArrayList<>(corners);
+        points.add(terminal.drawn());
+        for (int index = 1; index < points.size(); index++) {
+            if (crossesPin(points.get(index - 1), points.get(index), terminal)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Whether one straight stretch of a stub runs over a pin of another net. */
+    private boolean crossesPin(double[] from, double[] to, Terminal own) {
         Optional<String> ownNet = netOf(own.name());
         for (Terminal other : terminals.values()) {
             if (other == own || other.name().equals(own.name())) {
                 continue;
             }
-            double[] point = other.drawn();
-            if (!onSegment(point, start, corner) && !onSegment(point, corner, end)) {
-                continue;
-            }
-            // A pin of the same net may lie on the way: touching it joins nothing new.
-            if (ownNet.isEmpty() || !ownNet.equals(netOf(other.name()))) {
+            if (onSegment(other.drawn(), from, to) && (ownNet.isEmpty() || !ownNet.equals(netOf(other.name())))) {
                 return true;
             }
         }
@@ -698,9 +735,7 @@ public final class KiCadSheetImport {
         if (same(pin, kicadPoint)) {
             return false;
         }
-        double[] one = {kicadPoint[0], pin[1]};
-        double[] other = {pin[0], kicadPoint[1]};
-        return passesPin(kicadPoint, one, pin, terminal) && passesPin(kicadPoint, other, pin, terminal);
+        return leadCandidates(terminal, kicadPoint).stream().noneMatch(candidate -> clear(candidate, terminal));
     }
 
     /**

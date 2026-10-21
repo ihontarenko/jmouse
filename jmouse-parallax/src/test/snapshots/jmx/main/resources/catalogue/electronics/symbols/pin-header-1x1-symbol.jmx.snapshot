@@ -27,7 +27,7 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 60.0
-          height: Double 40.0
+          height: Double 60.0
           paths: List(1)
               - "M-4 0H40M-8 -2H-4V2H-8Z"
           pins: List(1)
@@ -54,10 +54,10 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-1x1-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS fc9634fbf58fb78bc1f73d6565b87645
+READS ee5c57455c2a8c022bf32bc44b1fe520
 == line 4 begun with a stray word
-READS 64812ce7b7353707334a1981525614d8
+READS df2fcdada088771801ab6d8092043668
 == line 11 deleted
-READS 411d6494ff17c104b43ccc629cf0b01b
+READS 8829ffcffb30def56c29eddfe0bd5a98
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-1x1-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

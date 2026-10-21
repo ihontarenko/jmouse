@@ -62,7 +62,8 @@ public record KiCadProjectImport(List<DefinedObject> circuits, List<ExperienceDo
             }
             KiCadSheetImport.Sheet read = KiCadSheetImport.of(sheet.schematic(), sheet.path(), ground, library, catalogue,
                     placed -> slugs.getOrDefault(placed, slugOf(placed)));
-            String title = sheet.root() ? name : name + " — " + sheet.name();
+            // A sheet is called what KiCad calls it; the project it belongs to is said by where it is filed.
+            String title = sheet.root() ? name : sheet.name();
             circuits.add(new DefinedObject(slugs.get(file), title, "Imported from KiCad: " + file, null, "circuits",
                     List.of("electronics", "kicad"), false, null, read.circuit(), List.of(), List.of(), List.of(),
                     List.of(), List.of()));

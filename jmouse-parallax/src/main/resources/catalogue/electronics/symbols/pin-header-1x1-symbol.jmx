@@ -4,7 +4,7 @@ symbol "Pin header, 1 contact" as pin-header-1x1-symbol {
         category circuits
         tags electronics, schematic, connector
     }
-    size 60 x 40
+    size 60 x 60
     path "M-4 0H40M-8 -2H-4V2H-8Z"
     pin pin1 at 40, 0 "1"
     label name at -4, -16

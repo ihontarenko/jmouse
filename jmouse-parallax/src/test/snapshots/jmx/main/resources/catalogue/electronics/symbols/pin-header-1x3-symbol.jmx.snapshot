@@ -27,14 +27,14 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 60.0
-          height: Double 80.0
+          height: Double 140.0
           paths: List(1)
-              - "M-4 -20H40M-8 -22H-4V-18H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 20H40M-8 18H-4V22H-8Z"
+              - "M-4 -40H40M-8 -42H-4V-38H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8Z"
           pins: List(3)
               - SymbolPin
                   pin: "pin1"
                   x: Double 40.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "1"
               - SymbolPin
                   pin: "pin2"
@@ -44,17 +44,17 @@ ExperienceDocument
               - SymbolPin
                   pin: "pin3"
                   x: Double 40.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "3"
           labels: List(2)
               - SymbolLabel
                   subject: "name"
                   x: Double -4.0
-                  y: Double -36.0
+                  y: Double -56.0
               - SymbolLabel
                   subject: "value"
                   x: Double -4.0
-                  y: Double 40.0
+                  y: Double 60.0
           indicators: List(0)
           upright: List(0)
           inputs: List(0)
@@ -64,10 +64,10 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-1x3-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS e22c7a5e46fc7902728dd15b9fa74173
+READS 8c7f2a503dea01347ebc2d61a01952b1
 == line 4 begun with a stray word
-READS 3dd0d21730bd0a2186c47f0281c8a91c
+READS 5a77c6a695d623bd10dec80b3d0c70b4
 == line 11 deleted
-READS 84fab8251f8c1db4a848fb027eff3421
+READS 54254a640a6fad4794383f122820f2cc
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-1x3-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

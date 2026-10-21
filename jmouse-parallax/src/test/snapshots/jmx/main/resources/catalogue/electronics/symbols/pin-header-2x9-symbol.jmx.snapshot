@@ -27,49 +27,49 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 120.0
-          height: Double 200.0
+          height: Double 380.0
           paths: List(1)
-              - "M-20 -90H20V90H-20ZM-60 -80H-20M20 -80H60M-60 -60H-20M20 -60H60M-60 -40H-20M20 -40H60M-60 -20H-20M20 -20H60M-60 0H-20M20 0H60M-60 20H-20M20 20H60M-60 40H-20M20 40H60M-60 60H-20M20 60H60M-60 80H-20M20 80H60"
+              - "M-20 -170H20V170H-20ZM-60 -160H-20M20 -160H60M-60 -120H-20M20 -120H60M-60 -80H-20M20 -80H60M-60 -40H-20M20 -40H60M-60 0H-20M20 0H60M-60 40H-20M20 40H60M-60 80H-20M20 80H60M-60 120H-20M20 120H60M-60 160H-20M20 160H60"
           pins: List(18)
               - SymbolPin
                   pin: "pin1"
                   x: Double -60.0
-                  y: Double -80.0
+                  y: Double -160.0
                   label: "1"
               - SymbolPin
                   pin: "pin2"
                   x: Double 60.0
-                  y: Double -80.0
+                  y: Double -160.0
                   label: "2"
               - SymbolPin
                   pin: "pin3"
                   x: Double -60.0
-                  y: Double -60.0
+                  y: Double -120.0
                   label: "3"
               - SymbolPin
                   pin: "pin4"
                   x: Double 60.0
-                  y: Double -60.0
+                  y: Double -120.0
                   label: "4"
               - SymbolPin
                   pin: "pin5"
                   x: Double -60.0
-                  y: Double -40.0
+                  y: Double -80.0
                   label: "5"
               - SymbolPin
                   pin: "pin6"
                   x: Double 60.0
-                  y: Double -40.0
+                  y: Double -80.0
                   label: "6"
               - SymbolPin
                   pin: "pin7"
                   x: Double -60.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "7"
               - SymbolPin
                   pin: "pin8"
                   x: Double 60.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "8"
               - SymbolPin
                   pin: "pin9"
@@ -84,52 +84,52 @@ ExperienceDocument
               - SymbolPin
                   pin: "pin11"
                   x: Double -60.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "11"
               - SymbolPin
                   pin: "pin12"
                   x: Double 60.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "12"
               - SymbolPin
                   pin: "pin13"
                   x: Double -60.0
-                  y: Double 40.0
+                  y: Double 80.0
                   label: "13"
               - SymbolPin
                   pin: "pin14"
                   x: Double 60.0
-                  y: Double 40.0
+                  y: Double 80.0
                   label: "14"
               - SymbolPin
                   pin: "pin15"
                   x: Double -60.0
-                  y: Double 60.0
+                  y: Double 120.0
                   label: "15"
               - SymbolPin
                   pin: "pin16"
                   x: Double 60.0
-                  y: Double 60.0
+                  y: Double 120.0
                   label: "16"
               - SymbolPin
                   pin: "pin17"
                   x: Double -60.0
-                  y: Double 80.0
+                  y: Double 160.0
                   label: "17"
               - SymbolPin
                   pin: "pin18"
                   x: Double 60.0
-                  y: Double 80.0
+                  y: Double 160.0
                   label: "18"
           labels: List(2)
               - SymbolLabel
                   subject: "name"
                   x: Double 0.0
-                  y: Double -104.0
+                  y: Double -184.0
               - SymbolLabel
                   subject: "value"
                   x: Double 0.0
-                  y: Double 108.0
+                  y: Double 188.0
           indicators: List(0)
           upright: List(0)
           inputs: List(0)
@@ -139,18 +139,18 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x9-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS 9d45ba748563f60ea3c1ff7bfcbc85bd
+READS 96bc2158c17dac04e5caa58eda9a317b
 == line 4 begun with a stray word
-READS ea6baa22029417f454900453fe6af240
+READS 7cb34845d213a93049753a16103ef791
 == line 11 deleted
-READS cc3619c4a7cb8fb3e604e97f41be8e01
+READS 64faeb69944efc877b4cfca87327fb52
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x9-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
 == line 18 deleted
-READS 5c78ad0acf363983ce8982d564392b27
+READS c5ef0d5eb3dd1a587adfdf62bfe8bc1c
 == line 18 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x9-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta
 == line 25 deleted
-READS d510c1f6b11d53ced8d7aa0bd3a9474a
+READS 112a8de1c0e645f5474ce0c77a7402a2
 == line 25 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x9-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta

@@ -27,14 +27,14 @@ ExperienceDocument
           shape: Optional.empty
           sides: Map(0)
           width: Double 80.0
-          height: Double 80.0
+          height: Double 140.0
           paths: List(1)
-              - "M-20 -30H20V30H-20ZM-40 -20H-6M-6 -20A6 6 0 1 0 6 -20A6 6 0 1 0 -6 -20ZM-4 -16L4 -24M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 20H-6M-6 20A6 6 0 1 0 6 20A6 6 0 1 0 -6 20ZM-4 24L4 16"
+              - "M-20 -50H20V50H-20ZM-40 -40H-6M-6 -40A6 6 0 1 0 6 -40A6 6 0 1 0 -6 -40ZM-4 -36L4 -44M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36"
           pins: List(3)
               - SymbolPin
                   pin: "pin1"
                   x: Double -40.0
-                  y: Double -20.0
+                  y: Double -40.0
                   label: "1"
               - SymbolPin
                   pin: "pin2"
@@ -44,17 +44,17 @@ ExperienceDocument
               - SymbolPin
                   pin: "pin3"
                   x: Double -40.0
-                  y: Double 20.0
+                  y: Double 40.0
                   label: "3"
           labels: List(2)
               - SymbolLabel
                   subject: "name"
                   x: Double 0.0
-                  y: Double -44.0
+                  y: Double -64.0
               - SymbolLabel
                   subject: "value"
                   x: Double 0.0
-                  y: Double 48.0
+                  y: Double 68.0
           indicators: List(0)
           upright: List(0)
           inputs: List(0)
@@ -64,10 +64,10 @@ ExperienceDocument
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/screw-terminal-1x3-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS 95bb4e76435c213674c649018dd9eb23
+READS 28edcfe6f935841319da97bb64a68c40
 == line 4 begun with a stray word
-READS cb1f9cdaa5222ec7832a37d40c4ed91d
+READS 4e368002fb4d1f467ea1813a54e83064
 == line 11 deleted
-READS 7c7808e5afef53351edc3329f19fcf3b
+READS e38b6016ba9ba4d650aa984728d6867f
 == line 11 begun with a stray word
 REFUSED src/main/resources/catalogue/electronics/symbols/screw-terminal-1x3-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta

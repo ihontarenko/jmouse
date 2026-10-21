@@ -4,24 +4,24 @@ symbol "Pin header, 2 x 8" as pin-header-2x8-symbol {
         category circuits
         tags electronics, schematic, connector
     }
-    size 120 x 180
-    path "M-20 -70H20V90H-20ZM-60 -60H-20M20 -60H60M-60 -40H-20M20 -40H60M-60 -20H-20M20 -20H60M-60 0H-20M20 0H60M-60 20H-20M20 20H60M-60 40H-20M20 40H60M-60 60H-20M20 60H60M-60 80H-20M20 80H60"
-    pin pin1 at -60, -60 "1"
-    pin pin2 at 60, -60 "2"
-    pin pin3 at -60, -40 "3"
-    pin pin4 at 60, -40 "4"
-    pin pin5 at -60, -20 "5"
-    pin pin6 at 60, -20 "6"
+    size 120 x 340
+    path "M-20 -130H20V170H-20ZM-60 -120H-20M20 -120H60M-60 -80H-20M20 -80H60M-60 -40H-20M20 -40H60M-60 0H-20M20 0H60M-60 40H-20M20 40H60M-60 80H-20M20 80H60M-60 120H-20M20 120H60M-60 160H-20M20 160H60"
+    pin pin1 at -60, -120 "1"
+    pin pin2 at 60, -120 "2"
+    pin pin3 at -60, -80 "3"
+    pin pin4 at 60, -80 "4"
+    pin pin5 at -60, -40 "5"
+    pin pin6 at 60, -40 "6"
     pin pin7 at -60, 0 "7"
     pin pin8 at 60, 0 "8"
-    pin pin9 at -60, 20 "9"
-    pin pin10 at 60, 20 "10"
-    pin pin11 at -60, 40 "11"
-    pin pin12 at 60, 40 "12"
-    pin pin13 at -60, 60 "13"
-    pin pin14 at 60, 60 "14"
-    pin pin15 at -60, 80 "15"
-    pin pin16 at 60, 80 "16"
-    label name at 0, -84
-    label value at 0, 108
+    pin pin9 at -60, 40 "9"
+    pin pin10 at 60, 40 "10"
+    pin pin11 at -60, 80 "11"
+    pin pin12 at 60, 80 "12"
+    pin pin13 at -60, 120 "13"
+    pin pin14 at 60, 120 "14"
+    pin pin15 at -60, 160 "15"
+    pin pin16 at 60, 160 "16"
+    label name at 0, -144
+    label value at 0, 188
 }
