@@ -413,7 +413,8 @@ public final class KiCadSheetImport {
                         error += distance * distance;
                         // A pin on the point where KiCad draws another of the part's pins would be joined to that one's net.
                         for (String another : shared) {
-                            if (!another.equals(pin) && same(at, drawn(points.get(another)))) {
+                            // Pins KiCad stacks on one point (two grounds) land on each other by design.
+                            if (!another.equals(pin) && same(at, drawn(points.get(another))) && !same(kicad, drawn(points.get(another)))) {
                                 onAnother = true;
                             }
                         }

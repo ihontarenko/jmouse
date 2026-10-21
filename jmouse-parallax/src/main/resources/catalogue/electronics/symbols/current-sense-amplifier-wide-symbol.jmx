@@ -1,0 +1,35 @@
+symbol "Current-sense amplifier, KiCad's proportions" as current-sense-amplifier-wide-symbol {
+    meta {
+        summary "A current-sense amplifier as KiCad draws the INA240: a triangle, the inputs on the left, the supply above, ground and the two references below — so a KiCad design's wires land on its pins"
+        category circuits
+        tags electronics, schematic
+    }
+    # KiCad's Amplifier_Current:INA240A1D at 2.54 mm = 40. Its fourth pin stands on ground's point: KiCad ties it there.
+    size 240 x 240
+    input failed
+
+    live group body {
+        path "M-80-80V80L80 0Z"
+        path "M-120-40H-80M-120 40H-80M80 0H120"
+        path "M-40-60V-120M-40 60V120M0 40V120M40 20V120"
+        path "M-72-40H-60M-66-46V-34M-72 40H-60"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    live when failed > 0.5 {
+        path scorch "M-7-9L-3-3M6-8L2-2M-6 8L-2 3M7 9L3 3M-10 0H-5M10 0H5"
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin non_inverting_input at -120, -40 "IN+"
+    pin inverting_input at -120, 40 "IN−"
+    pin output at 120, 0
+    pin Vcc at -40, -120 "VS"
+    pin GND at -40, 120 "GND"
+    pin not_connected at -40, 120
+    pin reference_two at 0, 120 "REF2"
+    pin reference_one at 40, 120 "REF1"
+    label name at 40, -60
+    label value at 40, 64
+}
