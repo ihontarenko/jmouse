@@ -86,6 +86,48 @@ sheet "Small-outline packages" as small-outline-packages {
         folder "packages/surface/small-outline"
     }
 
+    msop-10-exposed "MSOP, 3 mm body, 0.5 mm pitch, exposed pad" source standard "JEDEC MO-187 BA-T" {
+        name msop
+        suffix exposed-pad
+        pitch 0.5 mm
+        span 4.75 mm .. 5.05 mm
+        foot 0.4 mm .. 0.7 mm
+        lead 0.17 mm .. 0.27 mm
+        body-width 3 mm
+        exposed-pad-width 1.68 mm
+        exposed-pad-length 1.88 mm
+        members 10 = 3 mm
+        folder "packages/surface/small-outline"
+    }
+
+    msop-12-exposed "MSOP, 3 × 4 mm body, 0.65 mm pitch, exposed pad" source standard "the makers' MSE12 outline (Analog Devices)" {
+        name msop
+        suffix exposed-pad
+        pitch 0.65 mm
+        span 4.75 mm .. 5.05 mm
+        foot 0.4 mm .. 0.7 mm
+        lead 0.22 mm .. 0.32 mm
+        body-width 3 mm
+        exposed-pad-width 1.65 mm
+        exposed-pad-length 2.85 mm
+        members 12 = 4.04 mm
+        folder "packages/surface/small-outline"
+    }
+
+    tssop-20-exposed "TSSOP, 4.4 mm body, exposed pad" source standard "JEDEC MO-153 AC-ET" {
+        name tssop
+        suffix exposed-pad
+        pitch 0.65 mm
+        span 6.2 mm .. 6.6 mm
+        foot 0.45 mm .. 0.75 mm
+        lead 0.19 mm .. 0.3 mm
+        body-width 4.4 mm
+        exposed-pad-width 2.74 mm
+        exposed-pad-length 3.86 mm
+        members 20 = 6.5 mm
+        folder "packages/surface/small-outline"
+    }
+
     msop-10 "MSOP, 3 mm body, 0.5 mm pitch" source standard "JEDEC MO-187 BA" {
         name msop
         pitch 0.5 mm

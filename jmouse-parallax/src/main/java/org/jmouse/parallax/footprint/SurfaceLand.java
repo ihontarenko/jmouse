@@ -46,7 +46,13 @@ record SurfaceLand(double outer, double inner, double width) {
         return drawing.nearest((outer + inner) / 4);
     }
 
-    /** The pad's width across the lead, up to the grid. */
+    /** The pad's width across the lead, up to the grid — narrowed, as IPC-7351 does, where it would leave neighbours on the pitch closer than the pad gap. */
+    double padWidth(LandPatternRules.Drawing drawing, LandPatternRules.Tolerances tolerances, double pitch) {
+        double widest = Math.floor((pitch - tolerances.padGap()) / drawing.grid() + 1e-9) * drawing.grid();
+        return Math.min(drawing.up(width), widest);
+    }
+
+    /** The pad's width across a lead with no neighbour on a pitch: a two-terminal part's. */
     double padWidth(LandPatternRules.Drawing drawing) {
         return drawing.up(width);
     }

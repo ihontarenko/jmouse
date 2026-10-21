@@ -12,7 +12,7 @@ footprint "Chip diode 2010 (5025 metric), hand soldering" as chip-diode-2010-han
     pad "1" surface rounded-rectangle at -2.4, 0 size 1.4 x 2.8 roundness 0.25
     pad "2" surface rounded-rectangle at 2.4, 0 size 1.4 x 2.8 roundness 0.25
     outline fabrication width 0.1 "M-2.5 -1.25H2.5V1.25H-2.5Z"
-    outline silkscreen width 0.12 "M-1.44 -1.36H1.44M-1.44 1.36H1.44"
+    outline silkscreen width 0.12 "M-1.44 -1.66H1.44M-1.44 1.66H1.44"
     outline silkscreen width 0.12 "M-3.36 -1.51V1.51"
     outline courtyard width 0.05 "M-3.6 -1.9H3.6V1.9H-3.6Z"
 }

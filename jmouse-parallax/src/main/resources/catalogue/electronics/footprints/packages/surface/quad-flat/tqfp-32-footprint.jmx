@@ -1,0 +1,47 @@
+footprint "TQFP-32, 7 mm body" as tqfp-32-footprint {
+    meta {
+        summary "32-lead TQFP-32, 7 mm body, 0.8 mm pitch, body 7 × 7 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MS-026 ABA"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/quad-packages.sht#tqfp-32 and the land pattern rules; regenerate, never edit.
+    # Z = 9.915, G = 6.798, X = 0.547; pad 1.55 × 0.55 centred at ±4.2.
+    pad "1" surface rounded-rectangle at -4.2, -2.8 size 1.55 x 0.55 roundness 0.25
+    pad "2" surface rounded-rectangle at -4.2, -2 size 1.55 x 0.55 roundness 0.25
+    pad "3" surface rounded-rectangle at -4.2, -1.2 size 1.55 x 0.55 roundness 0.25
+    pad "4" surface rounded-rectangle at -4.2, -0.4 size 1.55 x 0.55 roundness 0.25
+    pad "5" surface rounded-rectangle at -4.2, 0.4 size 1.55 x 0.55 roundness 0.25
+    pad "6" surface rounded-rectangle at -4.2, 1.2 size 1.55 x 0.55 roundness 0.25
+    pad "7" surface rounded-rectangle at -4.2, 2 size 1.55 x 0.55 roundness 0.25
+    pad "8" surface rounded-rectangle at -4.2, 2.8 size 1.55 x 0.55 roundness 0.25
+    pad "9" surface rounded-rectangle at -2.8, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "10" surface rounded-rectangle at -2, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "11" surface rounded-rectangle at -1.2, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "12" surface rounded-rectangle at -0.4, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "13" surface rounded-rectangle at 0.4, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "14" surface rounded-rectangle at 1.2, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "15" surface rounded-rectangle at 2, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "16" surface rounded-rectangle at 2.8, 4.2 size 0.55 x 1.55 roundness 0.25
+    pad "17" surface rounded-rectangle at 4.2, 2.8 size 1.55 x 0.55 roundness 0.25
+    pad "18" surface rounded-rectangle at 4.2, 2 size 1.55 x 0.55 roundness 0.25
+    pad "19" surface rounded-rectangle at 4.2, 1.2 size 1.55 x 0.55 roundness 0.25
+    pad "20" surface rounded-rectangle at 4.2, 0.4 size 1.55 x 0.55 roundness 0.25
+    pad "21" surface rounded-rectangle at 4.2, -0.4 size 1.55 x 0.55 roundness 0.25
+    pad "22" surface rounded-rectangle at 4.2, -1.2 size 1.55 x 0.55 roundness 0.25
+    pad "23" surface rounded-rectangle at 4.2, -2 size 1.55 x 0.55 roundness 0.25
+    pad "24" surface rounded-rectangle at 4.2, -2.8 size 1.55 x 0.55 roundness 0.25
+    pad "25" surface rounded-rectangle at 2.8, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "26" surface rounded-rectangle at 2, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "27" surface rounded-rectangle at 1.2, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "28" surface rounded-rectangle at 0.4, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "29" surface rounded-rectangle at -0.4, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "30" surface rounded-rectangle at -1.2, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "31" surface rounded-rectangle at -2, -4.2 size 0.55 x 1.55 roundness 0.25
+    pad "32" surface rounded-rectangle at -2.8, -4.2 size 0.55 x 1.55 roundness 0.25
+    outline fabrication width 0.1 "M-2.5 -3.5H3.5V3.5H-3.5V-2.5Z"
+    outline silkscreen width 0.12 "M-3.335 -3.61H-3.61V-3.335M-3.335 3.61H-3.61V3.335M3.335 -3.61H3.61V-3.335M3.335 3.61H3.61V3.335"
+    outline silkscreen filled "M-5.835 -2.8A0.3 0.3 0 1 0 -5.235 -2.8A0.3 0.3 0 1 0 -5.835 -2.8Z"
+    outline courtyard width 0.05 "M-5.25 -5.25H5.25V5.25H-5.25Z"
+}

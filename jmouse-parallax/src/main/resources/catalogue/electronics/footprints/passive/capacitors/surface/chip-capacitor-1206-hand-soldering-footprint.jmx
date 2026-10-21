@@ -12,6 +12,6 @@ footprint "Chip capacitor 1206 (3216 metric), hand soldering" as chip-capacitor-
     pad "1" surface rounded-rectangle at -1.55, 0 size 1.4 x 1.95 roundness 0.25
     pad "2" surface rounded-rectangle at 1.55, 0 size 1.4 x 1.95 roundness 0.25
     outline fabrication width 0.1 "M-1.6 -0.8H1.6V0.8H-1.6Z"
-    outline silkscreen width 0.12 "M-0.59 -0.91H0.59M-0.59 0.91H0.59"
+    outline silkscreen width 0.12 "M-0.59 -1.235H0.59M-0.59 1.235H0.59"
     outline courtyard width 0.05 "M-2.75 -1.5H2.75V1.5H-2.75Z"
 }

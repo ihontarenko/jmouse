@@ -27,8 +27,8 @@ public record LandPatternRules(String license, Map<String, Fillets> fillets, Tol
     public record Fillets(double toe, double heel, double side, double courtyard) {
     }
 
-    /** What the board's making and the part's placing add to a land: IPC-7351's F and P. */
-    public record Tolerances(double fabrication, double placement) {
+    /** What the board's making and the part's placing add to a land — IPC-7351's F and P —, and the least copper gap between neighbouring pads. */
+    public record Tolerances(double fabrication, double placement, double padGap) {
     }
 
     /** A hole drilled for a lead and the ring of copper around it (IPC-2222). */
@@ -104,7 +104,7 @@ public record LandPatternRules(String license, Map<String, Fillets> fillets, Tol
     }
 
     private static Tolerances tolerances(PackageTable table) {
-        return new Tolerances(table.length("fabrication"), table.length("placement"));
+        return new Tolerances(table.length("fabrication"), table.length("placement"), table.length("pad-gap"));
     }
 
     private static ThroughHole throughHole(PackageTable table) {

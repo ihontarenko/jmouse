@@ -12,7 +12,7 @@ footprint "MELF diode MiniMELF (SOD-80, DO-213AA)" as melf-diode-mini-footprint 
     pad "1" surface rounded-rectangle at -1.65, 0 size 1.2 x 1.85 roundness 0.25
     pad "2" surface rounded-rectangle at 1.65, 0 size 1.2 x 1.85 roundness 0.25
     outline fabrication width 0.1 "M-1.75 -0.75H1.75V0.75H-1.75Z"
-    outline silkscreen width 0.12 "M-0.79 -0.86H0.79M-0.79 0.86H0.79"
+    outline silkscreen width 0.12 "M-0.79 -1.185H0.79M-0.79 1.185H0.79"
     outline silkscreen width 0.12 "M-2.51 -1.035V1.035"
     outline courtyard width 0.05 "M-2.5 -1.2H2.5V1.2H-2.5Z"
 }

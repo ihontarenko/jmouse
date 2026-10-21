@@ -12,6 +12,6 @@ footprint "Chip resistor 2512 (6332 metric)" as chip-resistor-2512-footprint {
     pad "1" surface rounded-rectangle at -3, 0 size 1.2 x 3.4 roundness 0.25
     pad "2" surface rounded-rectangle at 3, 0 size 1.2 x 3.4 roundness 0.25
     outline fabrication width 0.1 "M-3.175 -1.6H3.175V1.6H-3.175Z"
-    outline silkscreen width 0.12 "M-2.14 -1.71H2.14M-2.14 1.71H2.14"
+    outline silkscreen width 0.12 "M-2.14 -1.96H2.14M-2.14 1.96H2.14"
     outline courtyard width 0.05 "M-3.85 -1.95H3.85V1.95H-3.85Z"
 }

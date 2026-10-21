@@ -12,6 +12,6 @@ footprint "Chip fuse 1206 (3216 metric)" as chip-fuse-1206-footprint {
     pad "1" surface rounded-rectangle at -1.45, 0 size 1 x 1.75 roundness 0.25
     pad "2" surface rounded-rectangle at 1.45, 0 size 1 x 1.75 roundness 0.25
     outline fabrication width 0.1 "M-1.55 -0.8H1.55V0.8H-1.55Z"
-    outline silkscreen width 0.12 "M-0.69 -0.91H0.69M-0.69 0.91H0.69"
+    outline silkscreen width 0.12 "M-0.69 -1.135H0.69M-0.69 1.135H0.69"
     outline courtyard width 0.05 "M-2.2 -1.15H2.2V1.15H-2.2Z"
 }

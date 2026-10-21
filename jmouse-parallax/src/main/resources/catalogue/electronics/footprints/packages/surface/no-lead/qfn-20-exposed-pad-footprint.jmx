@@ -1,0 +1,36 @@
+footprint "QFN-20, 4 mm body" as qfn-20-exposed-pad-footprint {
+    meta {
+        summary "20-lead QFN-20, 4 mm body, 0.5 mm pitch, body 4 × 4 mm, exposed pad 2.6 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MO-220"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/quad-packages.sht#qfn-20-exposed-pad and the land pattern rules; regenerate, never edit.
+    # Z = 4.729, G = 3.009, X = 0.264; pad 0.85 × 0.3 centred at ±1.95.
+    pad "1" surface rounded-rectangle at -1.95, -1 size 0.85 x 0.3 roundness 0.25
+    pad "2" surface rounded-rectangle at -1.95, -0.5 size 0.85 x 0.3 roundness 0.25
+    pad "3" surface rounded-rectangle at -1.95, 0 size 0.85 x 0.3 roundness 0.25
+    pad "4" surface rounded-rectangle at -1.95, 0.5 size 0.85 x 0.3 roundness 0.25
+    pad "5" surface rounded-rectangle at -1.95, 1 size 0.85 x 0.3 roundness 0.25
+    pad "6" surface rounded-rectangle at -1, 1.95 size 0.3 x 0.85 roundness 0.25
+    pad "7" surface rounded-rectangle at -0.5, 1.95 size 0.3 x 0.85 roundness 0.25
+    pad "8" surface rounded-rectangle at 0, 1.95 size 0.3 x 0.85 roundness 0.25
+    pad "9" surface rounded-rectangle at 0.5, 1.95 size 0.3 x 0.85 roundness 0.25
+    pad "10" surface rounded-rectangle at 1, 1.95 size 0.3 x 0.85 roundness 0.25
+    pad "11" surface rounded-rectangle at 1.95, 1 size 0.85 x 0.3 roundness 0.25
+    pad "12" surface rounded-rectangle at 1.95, 0.5 size 0.85 x 0.3 roundness 0.25
+    pad "13" surface rounded-rectangle at 1.95, 0 size 0.85 x 0.3 roundness 0.25
+    pad "14" surface rounded-rectangle at 1.95, -0.5 size 0.85 x 0.3 roundness 0.25
+    pad "15" surface rounded-rectangle at 1.95, -1 size 0.85 x 0.3 roundness 0.25
+    pad "16" surface rounded-rectangle at 1, -1.95 size 0.3 x 0.85 roundness 0.25
+    pad "17" surface rounded-rectangle at 0.5, -1.95 size 0.3 x 0.85 roundness 0.25
+    pad "18" surface rounded-rectangle at 0, -1.95 size 0.3 x 0.85 roundness 0.25
+    pad "19" surface rounded-rectangle at -0.5, -1.95 size 0.3 x 0.85 roundness 0.25
+    pad "20" surface rounded-rectangle at -1, -1.95 size 0.3 x 0.85 roundness 0.25
+    pad "21" surface rounded-rectangle at 0, 0 size 2.6 x 2.6 roundness 0.25
+    outline fabrication width 0.1 "M-1 -2H2V2H-2V-1Z"
+    outline silkscreen width 0.12 "M-1.41 -2.11H-2.11V-1.41M-1.41 2.11H-2.11V1.41M1.41 -2.11H2.11V-1.41M1.41 2.11H2.11V1.41"
+    outline silkscreen filled "M-3.235 -1A0.3 0.3 0 1 0 -2.635 -1A0.3 0.3 0 1 0 -3.235 -1Z"
+    outline courtyard width 0.05 "M-2.65 -2.65H2.65V2.65H-2.65Z"
+}

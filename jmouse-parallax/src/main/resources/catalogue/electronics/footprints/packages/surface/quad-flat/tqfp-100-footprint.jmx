@@ -1,0 +1,115 @@
+footprint "TQFP-100, 14 mm body" as tqfp-100-footprint {
+    meta {
+        summary "100-lead TQFP-100, 14 mm body, 0.5 mm pitch, body 14 × 14 mm"
+        category circuits
+        tags electronics, footprint, surface
+        source "JEDEC MS-026 AED"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/quad-packages.sht#tqfp-100 and the land pattern rules; regenerate, never edit.
+    # Z = 16.915, G = 13.798, X = 0.38; pad 1.55 × 0.3 centred at ±7.7.
+    pad "1" surface rounded-rectangle at -7.7, -6 size 1.55 x 0.3 roundness 0.25
+    pad "2" surface rounded-rectangle at -7.7, -5.5 size 1.55 x 0.3 roundness 0.25
+    pad "3" surface rounded-rectangle at -7.7, -5 size 1.55 x 0.3 roundness 0.25
+    pad "4" surface rounded-rectangle at -7.7, -4.5 size 1.55 x 0.3 roundness 0.25
+    pad "5" surface rounded-rectangle at -7.7, -4 size 1.55 x 0.3 roundness 0.25
+    pad "6" surface rounded-rectangle at -7.7, -3.5 size 1.55 x 0.3 roundness 0.25
+    pad "7" surface rounded-rectangle at -7.7, -3 size 1.55 x 0.3 roundness 0.25
+    pad "8" surface rounded-rectangle at -7.7, -2.5 size 1.55 x 0.3 roundness 0.25
+    pad "9" surface rounded-rectangle at -7.7, -2 size 1.55 x 0.3 roundness 0.25
+    pad "10" surface rounded-rectangle at -7.7, -1.5 size 1.55 x 0.3 roundness 0.25
+    pad "11" surface rounded-rectangle at -7.7, -1 size 1.55 x 0.3 roundness 0.25
+    pad "12" surface rounded-rectangle at -7.7, -0.5 size 1.55 x 0.3 roundness 0.25
+    pad "13" surface rounded-rectangle at -7.7, 0 size 1.55 x 0.3 roundness 0.25
+    pad "14" surface rounded-rectangle at -7.7, 0.5 size 1.55 x 0.3 roundness 0.25
+    pad "15" surface rounded-rectangle at -7.7, 1 size 1.55 x 0.3 roundness 0.25
+    pad "16" surface rounded-rectangle at -7.7, 1.5 size 1.55 x 0.3 roundness 0.25
+    pad "17" surface rounded-rectangle at -7.7, 2 size 1.55 x 0.3 roundness 0.25
+    pad "18" surface rounded-rectangle at -7.7, 2.5 size 1.55 x 0.3 roundness 0.25
+    pad "19" surface rounded-rectangle at -7.7, 3 size 1.55 x 0.3 roundness 0.25
+    pad "20" surface rounded-rectangle at -7.7, 3.5 size 1.55 x 0.3 roundness 0.25
+    pad "21" surface rounded-rectangle at -7.7, 4 size 1.55 x 0.3 roundness 0.25
+    pad "22" surface rounded-rectangle at -7.7, 4.5 size 1.55 x 0.3 roundness 0.25
+    pad "23" surface rounded-rectangle at -7.7, 5 size 1.55 x 0.3 roundness 0.25
+    pad "24" surface rounded-rectangle at -7.7, 5.5 size 1.55 x 0.3 roundness 0.25
+    pad "25" surface rounded-rectangle at -7.7, 6 size 1.55 x 0.3 roundness 0.25
+    pad "26" surface rounded-rectangle at -6, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "27" surface rounded-rectangle at -5.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "28" surface rounded-rectangle at -5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "29" surface rounded-rectangle at -4.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "30" surface rounded-rectangle at -4, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "31" surface rounded-rectangle at -3.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "32" surface rounded-rectangle at -3, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "33" surface rounded-rectangle at -2.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "34" surface rounded-rectangle at -2, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "35" surface rounded-rectangle at -1.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "36" surface rounded-rectangle at -1, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "37" surface rounded-rectangle at -0.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "38" surface rounded-rectangle at 0, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "39" surface rounded-rectangle at 0.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "40" surface rounded-rectangle at 1, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "41" surface rounded-rectangle at 1.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "42" surface rounded-rectangle at 2, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "43" surface rounded-rectangle at 2.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "44" surface rounded-rectangle at 3, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "45" surface rounded-rectangle at 3.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "46" surface rounded-rectangle at 4, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "47" surface rounded-rectangle at 4.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "48" surface rounded-rectangle at 5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "49" surface rounded-rectangle at 5.5, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "50" surface rounded-rectangle at 6, 7.7 size 0.3 x 1.55 roundness 0.25
+    pad "51" surface rounded-rectangle at 7.7, 6 size 1.55 x 0.3 roundness 0.25
+    pad "52" surface rounded-rectangle at 7.7, 5.5 size 1.55 x 0.3 roundness 0.25
+    pad "53" surface rounded-rectangle at 7.7, 5 size 1.55 x 0.3 roundness 0.25
+    pad "54" surface rounded-rectangle at 7.7, 4.5 size 1.55 x 0.3 roundness 0.25
+    pad "55" surface rounded-rectangle at 7.7, 4 size 1.55 x 0.3 roundness 0.25
+    pad "56" surface rounded-rectangle at 7.7, 3.5 size 1.55 x 0.3 roundness 0.25
+    pad "57" surface rounded-rectangle at 7.7, 3 size 1.55 x 0.3 roundness 0.25
+    pad "58" surface rounded-rectangle at 7.7, 2.5 size 1.55 x 0.3 roundness 0.25
+    pad "59" surface rounded-rectangle at 7.7, 2 size 1.55 x 0.3 roundness 0.25
+    pad "60" surface rounded-rectangle at 7.7, 1.5 size 1.55 x 0.3 roundness 0.25
+    pad "61" surface rounded-rectangle at 7.7, 1 size 1.55 x 0.3 roundness 0.25
+    pad "62" surface rounded-rectangle at 7.7, 0.5 size 1.55 x 0.3 roundness 0.25
+    pad "63" surface rounded-rectangle at 7.7, 0 size 1.55 x 0.3 roundness 0.25
+    pad "64" surface rounded-rectangle at 7.7, -0.5 size 1.55 x 0.3 roundness 0.25
+    pad "65" surface rounded-rectangle at 7.7, -1 size 1.55 x 0.3 roundness 0.25
+    pad "66" surface rounded-rectangle at 7.7, -1.5 size 1.55 x 0.3 roundness 0.25
+    pad "67" surface rounded-rectangle at 7.7, -2 size 1.55 x 0.3 roundness 0.25
+    pad "68" surface rounded-rectangle at 7.7, -2.5 size 1.55 x 0.3 roundness 0.25
+    pad "69" surface rounded-rectangle at 7.7, -3 size 1.55 x 0.3 roundness 0.25
+    pad "70" surface rounded-rectangle at 7.7, -3.5 size 1.55 x 0.3 roundness 0.25
+    pad "71" surface rounded-rectangle at 7.7, -4 size 1.55 x 0.3 roundness 0.25
+    pad "72" surface rounded-rectangle at 7.7, -4.5 size 1.55 x 0.3 roundness 0.25
+    pad "73" surface rounded-rectangle at 7.7, -5 size 1.55 x 0.3 roundness 0.25
+    pad "74" surface rounded-rectangle at 7.7, -5.5 size 1.55 x 0.3 roundness 0.25
+    pad "75" surface rounded-rectangle at 7.7, -6 size 1.55 x 0.3 roundness 0.25
+    pad "76" surface rounded-rectangle at 6, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "77" surface rounded-rectangle at 5.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "78" surface rounded-rectangle at 5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "79" surface rounded-rectangle at 4.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "80" surface rounded-rectangle at 4, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "81" surface rounded-rectangle at 3.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "82" surface rounded-rectangle at 3, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "83" surface rounded-rectangle at 2.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "84" surface rounded-rectangle at 2, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "85" surface rounded-rectangle at 1.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "86" surface rounded-rectangle at 1, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "87" surface rounded-rectangle at 0.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "88" surface rounded-rectangle at 0, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "89" surface rounded-rectangle at -0.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "90" surface rounded-rectangle at -1, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "91" surface rounded-rectangle at -1.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "92" surface rounded-rectangle at -2, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "93" surface rounded-rectangle at -2.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "94" surface rounded-rectangle at -3, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "95" surface rounded-rectangle at -3.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "96" surface rounded-rectangle at -4, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "97" surface rounded-rectangle at -4.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "98" surface rounded-rectangle at -5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "99" surface rounded-rectangle at -5.5, -7.7 size 0.3 x 1.55 roundness 0.25
+    pad "100" surface rounded-rectangle at -6, -7.7 size 0.3 x 1.55 roundness 0.25
+    outline fabrication width 0.1 "M-6 -7H7V7H-7V-6Z"
+    outline silkscreen width 0.12 "M-6.41 -7.11H-7.11V-6.41M-6.41 7.11H-7.11V6.41M6.41 -7.11H7.11V-6.41M6.41 7.11H7.11V6.41"
+    outline silkscreen filled "M-9.335 -6A0.3 0.3 0 1 0 -8.735 -6A0.3 0.3 0 1 0 -9.335 -6Z"
+    outline courtyard width 0.05 "M-8.75 -8.75H8.75V8.75H-8.75Z"
+}

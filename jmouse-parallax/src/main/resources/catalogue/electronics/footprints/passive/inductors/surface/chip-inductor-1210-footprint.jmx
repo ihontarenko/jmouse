@@ -12,6 +12,6 @@ footprint "Chip inductor 1210 (3225 metric)" as chip-inductor-1210-footprint {
     pad "1" surface rounded-rectangle at -1.45, 0 size 1.2 x 2.75 roundness 0.25
     pad "2" surface rounded-rectangle at 1.45, 0 size 1.2 x 2.75 roundness 0.25
     outline fabrication width 0.1 "M-1.6 -1.25H1.6V1.25H-1.6Z"
-    outline silkscreen width 0.12 "M-0.59 -1.36H0.59M-0.59 1.36H0.59"
+    outline silkscreen width 0.12 "M-0.59 -1.635H0.59M-0.59 1.635H0.59"
     outline courtyard width 0.05 "M-2.3 -1.65H2.3V1.65H-2.3Z"
 }

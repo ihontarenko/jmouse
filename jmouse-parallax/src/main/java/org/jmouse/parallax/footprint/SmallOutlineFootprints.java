@@ -78,7 +78,7 @@ final class SmallOutlineFootprints implements FootprintFamily {
         SurfaceLand land = SurfaceLand.of(span, foot, lead, fillets, rules.tolerances());
         double padLength = land.padLength(drawing);
         double centre = land.centre(drawing);
-        double padWidth = land.padWidth(drawing);
+        double padWidth = land.padWidth(drawing, rules.tolerances(), pitch);
 
         List<Block.FootprintPad> pads = new ArrayList<>();
         double lastPadEdge = 0;
@@ -86,6 +86,11 @@ final class SmallOutlineFootprints implements FootprintFamily {
         for (Lead placed : leads) {
             pads.add(drafting.surfacePad(placed.number(), placed.side() * centre, placed.y(), padLength, padWidth));
             lastPadEdge = Math.max(lastPadEdge, Math.abs(placed.y()) + padWidth / 2);
+        }
+        // A thermal pad under the body is the number after the last lead, as a maker's pinout counts it.
+        if (outline.has("exposed-pad-width")) {
+            pads.add(drafting.surfacePad(String.valueOf(leads.size() + 1), 0, 0, outline.length("exposed-pad-width"),
+                    outline.length("exposed-pad-length")));
         }
 
         double halfWidth = bodyWidth / 2;

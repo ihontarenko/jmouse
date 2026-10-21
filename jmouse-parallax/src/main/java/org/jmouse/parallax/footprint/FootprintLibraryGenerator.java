@@ -27,7 +27,7 @@ public final class FootprintLibraryGenerator {
     /** The package tables, in the order their footprints are written. */
     static final List<String> TABLES = List.of("chip-packages.sht", "small-outline-packages.sht",
             "dual-inline-packages.sht", "header-packages.sht", "axial-packages.sht", "radial-packages.sht",
-            "inline-packages.sht", "hole-packages.sht");
+            "inline-packages.sht", "hole-packages.sht", "quad-packages.sht");
 
     private static final String FOLDER = "footprint-standards/";
 

@@ -15,6 +15,14 @@ sheet "Land pattern rules" as land-pattern-rules {
     tolerances "What the board and the placing machine add" source table "IPC-7351B 3.1.5" {
         fabrication 0.1 mm
         placement 0.05 mm
+        pad-gap 0.2 mm
+    }
+
+    no-lead "Bottom terminations (QFN, DFN, SON), nominal density" source table "3-15" {
+        toe 0.3 mm
+        heel 0 mm
+        side -0.04 mm
+        courtyard 0.25 mm
     }
 
     gull-wing "Gull-wing leads, nominal density" source table "3-2" {

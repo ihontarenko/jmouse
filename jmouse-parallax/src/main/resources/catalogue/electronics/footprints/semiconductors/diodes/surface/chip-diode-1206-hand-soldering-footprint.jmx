@@ -12,7 +12,7 @@ footprint "Chip diode 1206 (3216 metric), hand soldering" as chip-diode-1206-han
     pad "1" surface rounded-rectangle at -1.55, 0 size 1.2 x 1.85 roundness 0.25
     pad "2" surface rounded-rectangle at 1.55, 0 size 1.2 x 1.85 roundness 0.25
     outline fabrication width 0.1 "M-1.55 -0.8H1.55V0.8H-1.55Z"
-    outline silkscreen width 0.12 "M-0.69 -0.91H0.69M-0.69 0.91H0.69"
+    outline silkscreen width 0.12 "M-0.69 -1.185H0.69M-0.69 1.185H0.69"
     outline silkscreen width 0.12 "M-2.41 -1.035V1.035"
     outline courtyard width 0.05 "M-2.65 -1.45H2.65V1.45H-2.65Z"
 }

@@ -12,6 +12,6 @@ footprint "Chip resistor 0805 (2012 metric), hand soldering" as chip-resistor-08
     pad "1" surface rounded-rectangle at -1.1, 0 size 1.05 x 1.5 roundness 0.25
     pad "2" surface rounded-rectangle at 1.1, 0 size 1.05 x 1.5 roundness 0.25
     outline fabrication width 0.1 "M-1 -0.625H1V0.625H-1Z"
-    outline silkscreen width 0.12 "M-0.315 -0.735H0.315M-0.315 0.735H0.315"
+    outline silkscreen width 0.12 "M-0.315 -1.01H0.315M-0.315 1.01H0.315"
     outline courtyard width 0.05 "M-2.15 -1.25H2.15V1.25H-2.15Z"
 }

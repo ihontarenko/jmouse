@@ -63,9 +63,12 @@ final class ChipFootprints implements FootprintFamily {
                 drafting.surfacePad("1", -centre, 0, padLength, padWidth),
                 drafting.surfacePad("2", centre, 0, padLength, padWidth));
         List<FootprintOutline> outlines = new ArrayList<>();
-        outlines.add(drafting.plainBody(length.nominal(), width.nominal()));
+        // A leaded body (SOD) writes its leads as length, terminal and width, and its body apart.
+        double bodyLength = size.has("body-length") ? size.length("body-length") : length.nominal();
+        double bodyWidth = size.has("body-width") ? size.length("body-width") : width.nominal();
+        outlines.add(drafting.plainBody(bodyLength, bodyWidth));
         double lineEnd = centre - padLength / 2 - drawing.silkscreenClearance() - drawing.silkscreenWidth() / 2;
-        double lineY = width.nominal() / 2 + drawing.silkscreenOffset();
+        double lineY = Math.max(bodyWidth / 2 + drawing.silkscreenOffset(), padWidth / 2 + drawing.clearOfCopper());
         if (lineEnd > drawing.silkscreenWidth()) {
             outlines.add(drafting.silkscreen("M" + FootprintDrafting.point(-lineEnd, -lineY) + "H" + number(lineEnd)
                     + "M" + FootprintDrafting.point(-lineEnd, lineY) + "H" + number(lineEnd)));

@@ -8,31 +8,31 @@ footprint "SSOP-24, 5.3 mm body" as ssop-24-footprint {
     }
     # Generated from footprint-standards/small-outline-packages.sht#ssop and the land pattern rules; regenerate, never edit.
     # Leads span 7.4…8.2, foot 0.55…0.95, width 0.22…0.38; fillets toe 0.35, heel 0.35, side 0.03.
-    # Z = 8.908, G = 5.104, X = 0.475; pad 1.9 × 0.5 centred at ±3.5.
-    pad "1" surface rounded-rectangle at -3.5, -3.575 size 1.9 x 0.5 roundness 0.25
-    pad "2" surface rounded-rectangle at -3.5, -2.925 size 1.9 x 0.5 roundness 0.25
-    pad "3" surface rounded-rectangle at -3.5, -2.275 size 1.9 x 0.5 roundness 0.25
-    pad "4" surface rounded-rectangle at -3.5, -1.625 size 1.9 x 0.5 roundness 0.25
-    pad "5" surface rounded-rectangle at -3.5, -0.975 size 1.9 x 0.5 roundness 0.25
-    pad "6" surface rounded-rectangle at -3.5, -0.325 size 1.9 x 0.5 roundness 0.25
-    pad "7" surface rounded-rectangle at -3.5, 0.325 size 1.9 x 0.5 roundness 0.25
-    pad "8" surface rounded-rectangle at -3.5, 0.975 size 1.9 x 0.5 roundness 0.25
-    pad "9" surface rounded-rectangle at -3.5, 1.625 size 1.9 x 0.5 roundness 0.25
-    pad "10" surface rounded-rectangle at -3.5, 2.275 size 1.9 x 0.5 roundness 0.25
-    pad "11" surface rounded-rectangle at -3.5, 2.925 size 1.9 x 0.5 roundness 0.25
-    pad "12" surface rounded-rectangle at -3.5, 3.575 size 1.9 x 0.5 roundness 0.25
-    pad "13" surface rounded-rectangle at 3.5, 3.575 size 1.9 x 0.5 roundness 0.25
-    pad "14" surface rounded-rectangle at 3.5, 2.925 size 1.9 x 0.5 roundness 0.25
-    pad "15" surface rounded-rectangle at 3.5, 2.275 size 1.9 x 0.5 roundness 0.25
-    pad "16" surface rounded-rectangle at 3.5, 1.625 size 1.9 x 0.5 roundness 0.25
-    pad "17" surface rounded-rectangle at 3.5, 0.975 size 1.9 x 0.5 roundness 0.25
-    pad "18" surface rounded-rectangle at 3.5, 0.325 size 1.9 x 0.5 roundness 0.25
-    pad "19" surface rounded-rectangle at 3.5, -0.325 size 1.9 x 0.5 roundness 0.25
-    pad "20" surface rounded-rectangle at 3.5, -0.975 size 1.9 x 0.5 roundness 0.25
-    pad "21" surface rounded-rectangle at 3.5, -1.625 size 1.9 x 0.5 roundness 0.25
-    pad "22" surface rounded-rectangle at 3.5, -2.275 size 1.9 x 0.5 roundness 0.25
-    pad "23" surface rounded-rectangle at 3.5, -2.925 size 1.9 x 0.5 roundness 0.25
-    pad "24" surface rounded-rectangle at 3.5, -3.575 size 1.9 x 0.5 roundness 0.25
+    # Z = 8.908, G = 5.104, X = 0.475; pad 1.9 × 0.45 centred at ±3.5.
+    pad "1" surface rounded-rectangle at -3.5, -3.575 size 1.9 x 0.45 roundness 0.25
+    pad "2" surface rounded-rectangle at -3.5, -2.925 size 1.9 x 0.45 roundness 0.25
+    pad "3" surface rounded-rectangle at -3.5, -2.275 size 1.9 x 0.45 roundness 0.25
+    pad "4" surface rounded-rectangle at -3.5, -1.625 size 1.9 x 0.45 roundness 0.25
+    pad "5" surface rounded-rectangle at -3.5, -0.975 size 1.9 x 0.45 roundness 0.25
+    pad "6" surface rounded-rectangle at -3.5, -0.325 size 1.9 x 0.45 roundness 0.25
+    pad "7" surface rounded-rectangle at -3.5, 0.325 size 1.9 x 0.45 roundness 0.25
+    pad "8" surface rounded-rectangle at -3.5, 0.975 size 1.9 x 0.45 roundness 0.25
+    pad "9" surface rounded-rectangle at -3.5, 1.625 size 1.9 x 0.45 roundness 0.25
+    pad "10" surface rounded-rectangle at -3.5, 2.275 size 1.9 x 0.45 roundness 0.25
+    pad "11" surface rounded-rectangle at -3.5, 2.925 size 1.9 x 0.45 roundness 0.25
+    pad "12" surface rounded-rectangle at -3.5, 3.575 size 1.9 x 0.45 roundness 0.25
+    pad "13" surface rounded-rectangle at 3.5, 3.575 size 1.9 x 0.45 roundness 0.25
+    pad "14" surface rounded-rectangle at 3.5, 2.925 size 1.9 x 0.45 roundness 0.25
+    pad "15" surface rounded-rectangle at 3.5, 2.275 size 1.9 x 0.45 roundness 0.25
+    pad "16" surface rounded-rectangle at 3.5, 1.625 size 1.9 x 0.45 roundness 0.25
+    pad "17" surface rounded-rectangle at 3.5, 0.975 size 1.9 x 0.45 roundness 0.25
+    pad "18" surface rounded-rectangle at 3.5, 0.325 size 1.9 x 0.45 roundness 0.25
+    pad "19" surface rounded-rectangle at 3.5, -0.325 size 1.9 x 0.45 roundness 0.25
+    pad "20" surface rounded-rectangle at 3.5, -0.975 size 1.9 x 0.45 roundness 0.25
+    pad "21" surface rounded-rectangle at 3.5, -1.625 size 1.9 x 0.45 roundness 0.25
+    pad "22" surface rounded-rectangle at 3.5, -2.275 size 1.9 x 0.45 roundness 0.25
+    pad "23" surface rounded-rectangle at 3.5, -2.925 size 1.9 x 0.45 roundness 0.25
+    pad "24" surface rounded-rectangle at 3.5, -3.575 size 1.9 x 0.45 roundness 0.25
     outline fabrication width 0.1 "M-1.65 -4.1H2.65V4.1H-2.65V-3.1Z"
     outline silkscreen width 0.12 "M-4.45 -4.21H2.65M-2.65 4.21H2.65"
     outline courtyard width 0.05 "M-4.7 -4.35H4.7V4.35H-4.7Z"

@@ -42,6 +42,14 @@ sheet "Chip packages" as chip-packages {
             polarity cathode
             folder "semiconductors/diodes/surface"
         }
+        sod "Diode" {
+            name sod
+            sizes sod-sizes
+            fillets gull-wing
+            hand-soldering no
+            polarity cathode
+            folder "semiconductors/diodes/surface"
+        }
         melf-resistor "MELF resistor" {
             name melf-resistor
             sizes melf-sizes
@@ -155,6 +163,33 @@ sheet "Chip packages" as chip-packages {
             length 4.8 mm .. 5.2 mm
             width 2.4 mm .. 2.6 mm
             terminal 0.4 mm .. 0.6 mm
+        }
+    }
+
+    sod-sizes "Small-outline diodes: two flat leads" source table "JEDEC SOD outlines, the makers' drawings (Nexperia)" {
+        sod-123 "SOD-123" {
+            code "123"
+            length 3.55 mm .. 3.85 mm
+            terminal 0.25 mm .. 0.5 mm
+            width 0.5 mm .. 0.7 mm
+            body-length 2.7 mm
+            body-width 1.6 mm
+        }
+        sod-323 "SOD-323" {
+            code "323"
+            length 2.5 mm .. 2.7 mm
+            terminal 0.2 mm .. 0.4 mm
+            width 0.25 mm .. 0.4 mm
+            body-length 1.7 mm
+            body-width 1.25 mm
+        }
+        sod-523 "SOD-523" {
+            code "523"
+            length 1.5 mm .. 1.7 mm
+            terminal 0.15 mm .. 0.3 mm
+            width 0.25 mm .. 0.35 mm
+            body-length 1.2 mm
+            body-width 0.8 mm
         }
     }
 }
