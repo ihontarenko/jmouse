@@ -84,8 +84,12 @@ final class SpiceExporter {
     /** How many samples a run is printed in: one a printing step. */
     static final int PRINTED_SAMPLES = (int) Math.round(1 / PRINTING_STEP);
 
-    private static final String SINE   = "offset+amplitude*sin(2*pi*frequency*time+phase)";
-    private static final String SQUARE = "low+(high-low)*(mod(frequency*time,1)<duty)";
+    /**
+     * The shapes SPICE has a source of its own for, as trees: a generator is one of them when its equation reads to the
+     * same tree — however it is spaced or bracketed —, and its parameters become the source's arguments.
+     */
+    private static final Formula SINE   = formula("offset + amplitude * sin(2 * pi * frequency * time + phase)", 0);
+    private static final Formula SQUARE = formula("low + (high - low) * (mod(frequency * time, 1) < duty)", 0);
 
     /** Every formula the deck carries is written by the SPICE dialect, walking its tree. */
     private static final SpiceExpressionLanguage EXPRESSIONS = SpiceExpressionLanguage.standard();
@@ -597,7 +601,12 @@ final class SpiceExporter {
         }
         String positive = pins.get(equation.get().positive());
         String negative = pins.get(equation.get().negative());
-        String shape = equation.get().expression().text().replace(" ", "");
+        Formula shape;
+        try {
+            shape = formula(equation.get().expression().text(), equation.get().expression().line());
+        } catch (SpiceParseException unreadable) {
+            return Optional.empty();
+        }
         Function<String, Formula> parameter = name -> values.getOrDefault(name, new Formula.Constant(0));
         if (shape.equals(SINE)) {
             Formula degrees = new Formula.Binary(Formula.Operator.DIVIDE, new Formula.Binary(Formula.Operator.MULTIPLY,
@@ -628,13 +637,7 @@ final class SpiceExporter {
             return Optional.of(List.of(new SpiceElement.Source(elementName('V', id), positive, negative, null, false,
                     pulse, List.of(), SpicePosition.NONE)));
         }
-        Formula expression;
-        try {
-            expression = formula(equation.get().expression().text(), equation.get().expression().line());
-        } catch (SpiceParseException unreadable) {
-            return Optional.empty();
-        }
-        Formula substituted = Substitution.substitute(expression, values);
+        Formula substituted = Substitution.substitute(shape, values);
         try {
             String written = EXPRESSIONS.write(substituted, name -> behaviouralName(name, Map.of(), scope));
             return Optional.of(List.of(new SpiceElement.Behavioural(elementName('B', id), positive, negative, true,
