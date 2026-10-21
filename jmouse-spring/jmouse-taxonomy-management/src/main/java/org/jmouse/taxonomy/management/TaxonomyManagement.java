@@ -57,24 +57,30 @@ public class TaxonomyManagement {
     public TreeView tree(String taxonomyCode, String entityType) {
         Taxonomy taxonomy = taxonomies.requireTaxonomy(taxonomyCode);
         List<TaxonomyCategory> categories = taxonomies.categories(taxonomyCode);
-        List<TaxonomyAssignment> visible = visible(taxonomies.assignments(taxonomyCode, entityType));
-        Map<String, Set<String>> filedIn = new HashMap<>();
-        for (TaxonomyAssignment assignment : visible) {
-            filedIn.computeIfAbsent(assignment.getCategoryId(), ignored -> new HashSet<>())
-                    .add(assignment.getEntityType() + ":" + assignment.getEntityId());
+        // Which categories each entity the reader may see is filed in. Visibility is the entity type's answer, not a
+        // column, so the filings are read once and narrowed here rather than counted by the database.
+        Map<String, Set<String>> filingsOf = new HashMap<>();
+        for (TaxonomyAssignment assignment : visible(taxonomies.assignments(taxonomyCode, entityType))) {
+            filingsOf.computeIfAbsent(assignment.getEntityType() + ":" + assignment.getEntityId(), ignored -> new HashSet<>())
+                    .add(assignment.getCategoryId());
+        }
+        // An entity counts once in every category on the way up from where it is filed: filed in two siblings, it is
+        // one entity of their parent. Each walk is as long as the tree is deep.
+        Map<String, TaxonomyCategory> byId = new HashMap<>();
+        categories.forEach(category -> byId.put(category.getId(), category));
+        Map<String, Long> counts = new HashMap<>();
+        for (Set<String> filedIn : filingsOf.values()) {
+            Set<String> holding = new HashSet<>();
+            for (String categoryId : filedIn) {
+                for (TaxonomyCategory step = byId.get(categoryId); step != null && holding.add(step.getId());
+                     step = step.getParentId() == null ? null : byId.get(step.getParentId())) {
+                    counts.merge(step.getId(), 1L, Long::sum);
+                }
+            }
         }
         List<CategoryView> views = new ArrayList<>();
         for (TaxonomyCategory category : categories) {
-            // In tree order a category's subtree is the run of categories inside its range; their filings are its own.
-            Set<String> held = new HashSet<>();
-            for (TaxonomyCategory inside : categories) {
-                if (inside.getTreeLeft() >= category.getTreeLeft() && inside.getTreeRight() <= category.getTreeRight()) {
-                    held.addAll(filedIn.getOrDefault(inside.getId(), Set.of()));
-                }
-            }
-            CategoryPath parent = category.getPath().parent();
-            views.add(new CategoryView(category.getPath().toString(), parent == null ? null : parent.toString(),
-                    category.getTitle(), category.getDescription(), category.getDepth(), held.size()));
+            views.add(viewOf(category, counts.getOrDefault(category.getId(), 0L)));
         }
         return new TreeView(viewOf(taxonomy), views);
     }

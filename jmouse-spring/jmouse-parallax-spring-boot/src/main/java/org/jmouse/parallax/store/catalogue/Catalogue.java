@@ -36,6 +36,7 @@ import org.jmouse.parallax.store.catalogue.CatalogueViews.RevisionView;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.SheetBlockView;
 import org.jmouse.parallax.store.catalogue.CatalogueViews.SheetView;
 import org.jmouse.parallax.event.ObjectCreated;
+import org.jmouse.parallax.event.ObjectDeleted;
 import org.jmouse.parallax.event.ObjectStatusChanged;
 import org.jmouse.parallax.store.formula.FormulaNotations;
 import org.jmouse.parallax.problem.ParallaxProblem;
@@ -463,6 +464,7 @@ public class Catalogue {
         }
         requireUnplaced(object);
         objects.remove(object);
+        events.publishEvent(new ObjectDeleted(object.getId(), object.getSlug(), authority.requireActor()));
     }
 
     /**
