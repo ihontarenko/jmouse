@@ -299,6 +299,16 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-tree</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-tree-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-files</artifactId>
         <version>${jmouse.version}</version>
       </dependency>

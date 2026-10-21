@@ -8,6 +8,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import org.jmouse.files.directory.DirectoryPath;
+import org.jmouse.tree.NestedSetNode;
 
 import java.time.LocalDateTime;
 
@@ -41,6 +42,10 @@ import java.time.LocalDateTime;
  * parent pointer turns into a recursive descent. The pointer stays and is the authority: a move is
  * <em>expressed</em> as a new parent and <em>executed</em> as a renumbering, so a numbering that
  * somehow ends up corrupt can always be rebuilt from the pointers.</p>
+ *
+ * <p>The numbering and every write that keeps it true are {@code jmouse-tree}'s: this is a
+ * {@link NestedSetNode}, its tree is {@link #getOwnerKey() an owner's}, and {@link StorageDirectories} keeps
+ * only what makes it a folder — names, slugs, paths, roots.</p>
  */
 @Entity
 @Table(
@@ -48,7 +53,7 @@ import java.time.LocalDateTime;
     uniqueConstraints = @UniqueConstraint(name = "unique_storage_directories_path",
                                           columnNames = {"owner_key", "path"})
 )
-public class StorageDirectory {
+public class StorageDirectory implements NestedSetNode {
 
     /**
      * How deep the tree may go, counting a root as level one.
@@ -195,16 +200,6 @@ public class StorageDirectory {
      */
     public String namespace() {
         return DirectoryPath.of(path).namespace();
-    }
-
-    /**
-     * 🌿 Whether a directory sits inside this one's range.
-     *
-     * @param other the candidate descendant
-     * @return {@code true} when it is within, itself excluded
-     */
-    public boolean contains(StorageDirectory other) {
-        return other.treeLeft > treeLeft && other.treeRight < treeRight;
     }
 
     public String getId() {

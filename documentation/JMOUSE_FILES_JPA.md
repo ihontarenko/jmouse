@@ -51,6 +51,8 @@ The entry points below are the major contracts, not an assertion that every clas
 
 ## Constraints worth preserving
 
+- The nested set itself — ranges, insertion, moves, deletion, renumbering — is [jmouse-tree-jpa](JMOUSE_TREE_JPA.md); StorageDirectories keeps roots, names, slugs, paths, the depth limit and its refusals.
+
 - Every tree write renumbers the nested set. Bypassing the service with individual parent-column changes breaks subtree and ancestor range queries. ([StorageDirectories](../jmouse-files-jpa/src/main/java/org/jmouse/files/jpa/directory/StorageDirectories.java))
 
 - The declared maximum depth is eight. Root handling and move validation are directory-domain constraints, not storage-key formatting concerns. ([StorageDirectory](../jmouse-files-jpa/src/main/java/org/jmouse/files/jpa/directory/StorageDirectory.java))

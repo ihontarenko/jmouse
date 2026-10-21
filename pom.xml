@@ -125,6 +125,8 @@
         <module>jmouse-storage</module>
         <module>jmouse-storage-s3</module>
         <module>jmouse-storage-jpa</module>
+        <module>jmouse-tree</module>
+        <module>jmouse-tree-jpa</module>
         <module>jmouse-files</module>
         <module>jmouse-money</module>
         <module>jmouse-money-jpa</module>

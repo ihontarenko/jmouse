@@ -5,11 +5,13 @@ import org.jmouse.files.OwnerReference;
 import org.jmouse.files.directory.DirectoryPath;
 import org.jmouse.files.directory.DirectorySlugs;
 import org.jmouse.files.exception.DirectoryException;
+import org.jmouse.tree.jpa.NestedSetMapping;
+import org.jmouse.tree.jpa.NestedSetTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -30,13 +32,26 @@ import java.util.function.Supplier;
  * that is how a caller ends up reading numbers that were true a moment ago and writing them back.</p>
  *
  * <p>Transaction demarcation is the caller's, and a renumbering is only safe inside one.</p>
+ *
+ * <h3>The numbering is the tree library's; what makes it a folder is this class's</h3>
+ *
+ * <p>Ranges, insertion, moves, deletion and renumbering are {@link NestedSetTree} ({@code jmouse-tree-jpa}),
+ * one tree per owner key. What stays here is a folder's own: roots named by configuration and never moved,
+ * names and their slugs, paths rewritten on a move, the depth a person may go to, and the refusals in this
+ * library's words.</p>
  */
 public class StorageDirectories {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageDirectories.class);
 
-    private final EntityManager    entityManager;
-    private final Supplier<String> identifiers;
+    /** One tree per owner; siblings in the order they were made, then by name. */
+    private static final NestedSetMapping<StorageDirectory> MAPPING = new NestedSetMapping<>(
+        StorageDirectory.class, "ownerKey", StorageDirectory::getOwnerKey,
+        Comparator.comparingInt(StorageDirectory::getSortOrder).thenComparing(StorageDirectory::getName));
+
+    private final EntityManager                   entityManager;
+    private final Supplier<String>                identifiers;
+    private final NestedSetTree<StorageDirectory> tree;
 
     /**
      * 🏗️ Work over the application's persistence context.
@@ -47,6 +62,7 @@ public class StorageDirectories {
     public StorageDirectories(EntityManager entityManager, Supplier<String> identifiers) {
         this.entityManager = entityManager;
         this.identifiers   = identifiers;
+        this.tree          = new NestedSetTree<>(entityManager, MAPPING);
     }
 
     // ── Reading ───────────────────────────────────────────────────────────────
@@ -93,22 +109,9 @@ public class StorageDirectories {
      * @return the subtree, shallowest first
      */
     public List<StorageDirectory> subtreeOf(StorageDirectory directory) {
-        return entityManager.createQuery(
-                "SELECT directory FROM StorageDirectory directory "
-                + "WHERE directory.ownerKey = :ownerKey "
-                + "AND directory.treeLeft >= :left AND directory.treeRight <= :right "
-                + "ORDER BY directory.treeLeft", StorageDirectory.class)
-            .setParameter("ownerKey", directory.getOwnerKey())
-            .setParameter("left", directory.getTreeLeft())
-            .setParameter("right", directory.getTreeRight())
-            .getResultList();
+        return tree.subtreeOf(directory);
     }
 
-    /**
-     * 🌱 Every root, which is every place a product declared.
-     *
-     * @return the roots, by path
-     */
     /**
      * 🌿 The folders directly inside one — one level, in tree order.
      *
@@ -120,15 +123,15 @@ public class StorageDirectories {
      * @return its children
      */
     public List<StorageDirectory> childrenOf(StorageDirectory parent) {
-        return entityManager.createQuery(
-                "SELECT directory FROM StorageDirectory directory "
-                + "WHERE directory.ownerKey = :ownerKey AND directory.parentId = :parentId "
-                + "ORDER BY directory.treeLeft", StorageDirectory.class)
-            .setParameter("ownerKey", parent.getOwnerKey())
-            .setParameter("parentId", parent.getId())
-            .getResultList();
+        return tree.childrenOf(parent);
     }
 
+    /**
+     * 🌱 Every root of one owner's tree, which is every place a product declared for it.
+     *
+     * @param ownerKey whose tree
+     * @return the roots, by path
+     */
     public List<StorageDirectory> roots(String ownerKey) {
         return entityManager.createQuery(
                 "SELECT directory FROM StorageDirectory directory "
@@ -148,21 +151,7 @@ public class StorageDirectories {
      * @return its ancestors, outermost first
      */
     public List<StorageDirectory> ancestorsOf(String identifier) {
-        StorageDirectory directory = entityManager.find(StorageDirectory.class, identifier);
-
-        if (directory == null) {
-            return List.of();
-        }
-
-        return entityManager.createQuery(
-                "SELECT directory FROM StorageDirectory directory "
-                + "WHERE directory.ownerKey = :ownerKey "
-                + "AND directory.treeLeft < :left AND directory.treeRight > :right "
-                + "ORDER BY directory.treeLeft", StorageDirectory.class)
-            .setParameter("ownerKey", directory.getOwnerKey())
-            .setParameter("left", directory.getTreeLeft())
-            .setParameter("right", directory.getTreeRight())
-            .getResultList();
+        return tree.find(identifier).map(tree::ancestorsOf).orElse(List.of());
     }
 
     /**
@@ -173,26 +162,10 @@ public class StorageDirectories {
      * becomes the reason a product feels slow.</p>
      *
      * @param identifiers the directories
-     * @return the union of their subtrees
+     * @return the union of their subtrees, each directory once, in tree order
      */
     public List<StorageDirectory> subtreesOf(Collection<String> identifiers) {
-        List<StorageDirectory> roots = entityManager.createQuery(
-                "SELECT directory FROM StorageDirectory directory WHERE directory.id IN :identifiers",
-                StorageDirectory.class)
-            .setParameter("identifiers", identifiers)
-            .getResultList();
-
-        if (roots.isEmpty()) {
-            return List.of();
-        }
-
-        List<StorageDirectory> found = new ArrayList<>();
-
-        for (StorageDirectory each : roots) {
-            found.addAll(subtreeOf(each));
-        }
-
-        return found;
+        return tree.subtreesOf(identifiers);
     }
 
     // ── Writing ───────────────────────────────────────────────────────────────
@@ -354,22 +327,11 @@ public class StorageDirectories {
         }
 
         String slug = uniqueSlug(parent, name);
-        int    left = parent.getTreeRight();
+        String path = DirectoryPath.of(parent.getPath()).resolve(slug).toString();
 
-        // Make room: everything at or right of the parent's right bound shifts two places.
-        shift(parent.getOwnerKey(), "treeLeft", left, 2);
-        shift(parent.getOwnerKey(), "treeRight", left, 2);
-
-        StorageDirectory directory = new StorageDirectory(
-            identifiers.get(), parent.getOwnerKey(), parent.getId(), name.trim(), slug,
-            DirectoryPath.of(parent.getPath()).resolve(slug).toString(), false,
-            left, left + 1, parent.getDepth() + 1, nextSortOrder(parent.getId()));
-
-        entityManager.persist(directory);
-        entityManager.flush();
-        entityManager.clear();
-
-        return require(directory.getId());
+        return tree.insertUnder(parent, place -> new StorageDirectory(
+            identifiers.get(), parent.getOwnerKey(), place.parentId(), name.trim(), slug, path, false,
+            place.treeLeft(), place.treeRight(), place.depth(), place.sortOrder()));
     }
 
     /**
@@ -431,9 +393,9 @@ public class StorageDirectories {
                     .formatted(directory.getPath(), destination.getPath()));
         }
 
-        int span    = directory.getTreeRight() - directory.getTreeLeft() + 1;
+        int span     = directory.getTreeRight() - directory.getTreeLeft() + 1;
         int newDepth = destination.getDepth() + 1;
-        int deepest  = newDepth + subtreeHeight(directory);
+        int deepest  = newDepth + tree.subtreeHeight(directory);
 
         if (deepest > StorageDirectory.MAXIMUM_DEPTH) {
             throw new DirectoryException(
@@ -441,11 +403,11 @@ public class StorageDirectories {
                     .formatted(directory.getPath(), deepest, StorageDirectory.MAXIMUM_DEPTH));
         }
 
-        // ⚠️ The path has to be rewritten too, and BEFORE the renumbering — `subtreeOf` reads the
-        // current numbering to find what moves, so it must still be the old one. Leaving this out was
-        // the bug this method shipped with: `renumber()` only touches treeLeft, treeRight and depth, so
-        // a moved folder kept the path of where it used to be — and `path` is both the unique key and
-        // what `find(DirectoryPath)` looks up, so the tree would resolve to the wrong place silently.
+        // ⚠️ The path has to be rewritten too, and BEFORE the move — `subtreeOf` reads the current
+        // numbering to find what moves, so it must still be the old one. Leaving this out was the bug this
+        // method shipped with: the tree's renumbering only touches treeLeft, treeRight and depth, so a
+        // moved folder kept the path of where it used to be — and `path` is both the unique key and what
+        // `find(DirectoryPath)` looks up, so the tree would resolve to the wrong place silently.
         String slug    = uniqueSlug(destination, directory.getName(), directory.getId());
         String newPath = DirectoryPath.of(destination.getPath()).resolve(slug).toString();
 
@@ -454,18 +416,13 @@ public class StorageDirectories {
         directory.setSlug(slug);
         directory.setPath(newPath);
 
-        // Expressed as a new parent and executed as a renumbering: the pointer is the authority, so
-        // the numbering is rebuilt from it rather than patched in place.
-        directory.setParentId(destination.getId());
-        entityManager.flush();
-
-        renumber(directory.getOwnerKey());
-        entityManager.clear();
+        // The new paths are flushed with the move, which renumbers the owner's tree from the pointers.
+        StorageDirectory moved = tree.move(directory, destination);
 
         LOGGER.debug("📦 Moved directory {} under {} ({} node(s))",
                      directory.getId(), destination.getPath(), span);
 
-        return require(directory.getId());
+        return moved;
     }
 
     /**
@@ -493,32 +450,19 @@ public class StorageDirectories {
                     .formatted(directory.getPath(), subtree.size() - 1));
         }
 
-        for (StorageDirectory removed : subtree) {
-            entityManager.remove(removed);
-        }
-
-        entityManager.flush();
-        renumber(directory.getOwnerKey());
-        entityManager.clear();
+        tree.delete(directory);
     }
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
     private StorageDirectory createRoot(String ownerKey, DirectoryPath path) {
-        int highest = highestBound(ownerKey);
-
-        StorageDirectory root = new StorageDirectory(
-            identifiers.get(), ownerKey, null, path.toString(),
-            DirectorySlugs.of(path.segments().getLast()),
-            path.toString(), true, highest + 1, highest + 2, 1, roots(ownerKey).size());
-
-        entityManager.persist(root);
-        entityManager.flush();
-        entityManager.clear();
+        StorageDirectory root = tree.insertRoot(ownerKey, place -> new StorageDirectory(
+            identifiers.get(), ownerKey, null, path.toString(), DirectorySlugs.of(path.segments().getLast()),
+            path.toString(), true, place.treeLeft(), place.treeRight(), place.depth(), place.sortOrder()));
 
         LOGGER.info("🌱 Created storage root '{}' for owner '{}'", path, ownerKey);
 
-        return require(root.getId());
+        return root;
     }
 
     private void refuseRootChange(StorageDirectory directory, String what) {
@@ -595,96 +539,5 @@ public class StorageDirectories {
                 descendant.setPath(newPath + descendant.getPath().substring(oldPath.length()));
             }
         }
-    }
-
-    private int subtreeHeight(StorageDirectory directory) {
-        return subtreeOf(directory).stream()
-                .mapToInt(StorageDirectory::getDepth)
-                .max()
-                .orElse(directory.getDepth()) - directory.getDepth();
-    }
-
-    /**
-     * 🔢 Widen the numbering to the right of an insertion point — within ONE owner's tree.
-     *
-     * <p>⚠️ Scoped by owner, and it has to be: without that, one person adding a folder renumbers every
-     * other person's tree in the installation. Correctness would survive it, since the ranges stay
-     * contiguous either way, but a write that touches every row in the table is not a write anybody
-     * expects from making a folder.</p>
-     */
-    private void shift(String ownerKey, String bound, int from, int by) {
-        entityManager.createQuery(
-                ("UPDATE StorageDirectory directory SET directory.%s = directory.%s + :by "
-                 + "WHERE directory.ownerKey = :ownerKey AND directory.%s >= :from")
-                    .formatted(bound, bound, bound))
-            .setParameter("ownerKey", ownerKey)
-            .setParameter("by", by)
-            .setParameter("from", from)
-            .executeUpdate();
-    }
-
-    private int highestBound(String ownerKey) {
-        Integer highest = entityManager.createQuery(
-                "SELECT MAX(directory.treeRight) FROM StorageDirectory directory "
-                + "WHERE directory.ownerKey = :ownerKey", Integer.class)
-            .setParameter("ownerKey", ownerKey)
-            .getSingleResult();
-
-        return highest == null ? 0 : highest;
-    }
-
-    private int nextSortOrder(String parentId) {
-        Integer highest = entityManager.createQuery(
-                "SELECT MAX(directory.sortOrder) FROM StorageDirectory directory "
-                + "WHERE directory.parentId = :parentId", Integer.class)
-            .setParameter("parentId", parentId)
-            .getSingleResult();
-
-        return highest == null ? 0 : highest + 1;
-    }
-
-    /**
-     * 🔢 Rebuild the whole numbering from the parent pointers.
-     *
-     * <p>⚠️ Scoped to ONE owner's tree: rebuilding the whole table because somebody moved their own
-     * folder would be a write nobody expects, and the trees are independent by construction.</p>
-     *
-     * <p>⚠️ <strong>Rebuilt rather than patched, and that is the safety property.</strong> Patching a
-     * move means four range updates that must all be right; getting one wrong leaves a numbering that
-     * looks plausible and answers subtree questions incorrectly, which is a silent authorization bug.
-     * Rebuilding from the pointers cannot drift, and the pointers are what a person edits.</p>
-     */
-    private void renumber(String ownerKey) {
-        List<StorageDirectory> all = entityManager.createQuery(
-                "SELECT directory FROM StorageDirectory directory "
-                + "WHERE directory.ownerKey = :ownerKey "
-                + "ORDER BY directory.sortOrder, directory.name", StorageDirectory.class)
-            .setParameter("ownerKey", ownerKey)
-            .getResultList();
-
-        int counter = 0;
-
-        for (StorageDirectory root : all.stream().filter(StorageDirectory::isRoot).toList()) {
-            counter = number(root, all, counter + 1, 1);
-        }
-
-        entityManager.flush();
-    }
-
-    private int number(StorageDirectory directory, List<StorageDirectory> all, int left, int depth) {
-        int counter = left;
-
-        directory.setTreeLeft(left);
-        directory.setDepth(depth);
-
-        for (StorageDirectory child : all.stream()
-                .filter(candidate -> directory.getId().equals(candidate.getParentId()))
-                .toList()) {
-            counter = number(child, all, counter + 1, depth + 1);
-        }
-
-        directory.setTreeRight(counter + 1);
-
-        return counter + 1;
     }
 }

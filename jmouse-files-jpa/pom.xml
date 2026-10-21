@@ -65,6 +65,12 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-storage-jpa</artifactId>
         </dependency>
+        <!-- The directory tree is a nested set, and the nested set is a library of its own: the numbering and
+             every write that keeps it true live there, so a taxonomy stands on the same tree. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-tree-jpa</artifactId>
+        </dependency>
 
         <!-- Jakarta Persistence only. No Spring Data, no Spring: transaction demarcation belongs to
              whoever calls the registry, not to the library. -->
