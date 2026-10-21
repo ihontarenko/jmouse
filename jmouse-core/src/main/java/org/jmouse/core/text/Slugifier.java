@@ -130,8 +130,11 @@ public final class Slugifier {
             working = transliterator.toLatin(working);
         }
 
-        // ⚠️ Last, for the reason in the class note: NFD splits `й` and a table would then miss it.
-        return Normalizer.normalize(working, Normalizer.Form.NFD).replaceAll("\\p{M}+", "");
+        // ⚠️ Last, for the reason in the class note: decomposition splits `й` and a table would then miss it.
+        // ⚠️ Compatibility decomposition (NFKD), not canonical (NFD): a superscript or subscript digit, a ligature, a
+        // full-width letter are a letter or a digit written another way — `x²` is `x2`, `ﬁ` is `fi` —, and NFD keeps
+        // them as they are, so the squeeze afterwards threw them away and `x²` and `x` became one address.
+        return Normalizer.normalize(working, Normalizer.Form.NFKD).replaceAll("\\p{M}+", "");
     }
 
     /**
