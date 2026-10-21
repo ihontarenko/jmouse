@@ -235,7 +235,10 @@ public final class KiCadSheetImport {
                 mirrored = false;
             }
         }
-        items.add(new PlacedItem(id, null, null, at[0], at[1], rotation, mirrored));
+        // The symbol is drawn around the middle of its body, not KiCad's origin: the part stands that far away, turned.
+        double[] centre = turned(KiCadSymbolDrawing.centreOf(schematic.definitionOf(instance).orElseThrow(), instance.unit()),
+                rotation, mirrored);
+        items.add(new PlacedItem(id, null, null, at[0] + centre[0], at[1] + centre[1], rotation, mirrored));
         points.forEach((pin, point) -> terminal(point, id + "." + pin, drawn(point)));
     }
 

@@ -76,24 +76,10 @@ public class KiCadImports {
         List<String> created = new ArrayList<>();
         List<String> updated = new ArrayList<>();
         List<String> reused = new ArrayList<>();
-        for (ExperienceDocument symbol : imported.symbols()) {
-            if (objects.findBySlug(symbol.slug()).isPresent()) {
-                reused.add(symbol.slug());
-            } else {
-                catalogue.createOwned(owner, draft(DocumentWriter.write(symbol)));
-                created.add(symbol.slug());
-            }
-        }
-        // A component made from a KiCad symbol after the symbol it is drawn with, and only where none is called so: one
-        // the catalogue already holds — a model written for it since, above all — is the one the circuits use.
-        for (ExperienceDocument component : imported.components()) {
-            if (objects.findBySlug(component.slug()).isPresent()) {
-                reused.add(component.slug());
-            } else {
-                catalogue.createOwned(owner, draft(DocumentWriter.write(component)));
-                created.add(component.slug());
-            }
-        }
+        imported.symbols().forEach(symbol -> storeMade(owner, symbol, created, updated, reused));
+        // A component made from a KiCad symbol after the symbol it is drawn with: one the catalogue already holds — a
+        // model written for it since, above all — is the one the circuits use.
+        imported.components().forEach(component -> storeMade(owner, component, created, updated, reused));
         List<DefinedObject> circuits = imported.circuits();
         // A sheet before the sheet that places it: a block names its sheet by bare slug, the sheet's head, and a circuit
         // is stored only when every part it names is there.
@@ -115,6 +101,35 @@ public class KiCadImports {
         events.publishEvent(new KiCadDesignImported(owner, circuits.getFirst().slug(), imported.libraries(),
                 circuits.stream().map(DefinedObject::slug).toList()));
         return new Imported(circuits.getFirst().slug(), created, updated, reused, imported.notes());
+    }
+
+    /**
+     * A symbol or a component the import makes, stored where nothing is called so. One an earlier import of this place made
+     * and nobody has edited since — still its first revision — is written over, so a better drawing or pin order reaches
+     * it; any other is kept as it is: a model written for it, a curator's edit, another place's or the catalogue's.
+     * ⚠️ Being written over makes it a second revision, so it is refreshed once: the store keeps no record of who wrote a
+     * revision, and an edit cannot be told from an import's rewrite otherwise.
+     */
+    private void storeMade(ParallaxOwner owner, ExperienceDocument made, List<String> created, List<String> updated,
+                           List<String> reused) {
+        Optional<MathematicalObject> existing = objects.findBySlug(made.slug());
+        if (existing.isEmpty()) {
+            catalogue.createOwned(owner, draft(DocumentWriter.write(made)));
+            created.add(made.slug());
+            return;
+        }
+        MathematicalObject stored = existing.get();
+        boolean untouched = stored.owner().map(owner::equals).orElse(false) && stored.getRevision() == 1;
+        if (!untouched) {
+            reused.add(made.slug());
+            return;
+        }
+        // Read before the update: the stored object is the managed entity the update changes.
+        int before = stored.getRevision();
+        int after = catalogue.update(stored.getId(), draft(DocumentWriter.write(made)), stored.getVersion()).summary()
+                .definitionRevision();
+        // An unchanged text writes nothing: the object is as this import would make it.
+        (after == before ? reused : updated).add(made.slug());
     }
 
     private static KiCadProject project(String rootFile, Map<String, String> files) {

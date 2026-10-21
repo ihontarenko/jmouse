@@ -144,20 +144,9 @@ public final class KiCadSymbolDrawing {
 
     /** One unit of a symbol as a drawing, each pin drawn by the name {@code pinNames} gives its number, else {@link #pinName}. */
     public static Block.Symbol drawing(KiCadSymbolDefinition symbol, int unit, Map<String, String> pinNames) {
-        Shapes shapes = new Shapes();
-        for (KiCadList body : symbol.tree().lists("symbol")) {
-            Matcher name = BODY.matcher(body.word(1));
-            int bodyUnit = name.matches() ? Integer.parseInt(name.group(1)) : 0;
-            int style = name.matches() ? Integer.parseInt(name.group(2)) : 1;
-            if (style == DE_MORGAN || (bodyUnit != 0 && bodyUnit != unit)) {
-                continue;
-            }
-            body.lists("polyline").forEach(shapes::polyline);
-            body.lists("rectangle").forEach(shapes::rectangle);
-            body.lists("circle").forEach(shapes::circle);
-            body.lists("arc").forEach(shapes::arc);
-            body.lists("bezier").forEach(shapes::bezier);
-        }
+        double[] centre = centreOf(symbol, unit);
+        Shapes shapes = new Shapes(centre[0], centre[1]);
+        outline(symbol, unit, shapes);
         boolean namesShown = symbol.tree().list("pin_names").map(names -> !names.says("hide")).orElse(true);
         List<SymbolPin> pins = new ArrayList<>();
         for (KiCadPin pin : symbol.pinsOf(unit)) {
@@ -179,6 +168,42 @@ public final class KiCadSymbolDrawing {
                 pins, labels, List.of(), List.of(), List.of(), elements, Map.of());
     }
 
+    /**
+     * Where a unit's body and pins are centred, in drawing units from KiCad's origin, on the grid: a jMX symbol stands
+     * around its origin, while a vendor's KiCad symbol often has its origin at a corner — at pin 1 —, which left its
+     * drawing in one quarter of its own box. The drawing is moved by this, and a part placed with it by the same turned.
+     */
+    public static double[] centreOf(KiCadSymbolDefinition symbol, int unit) {
+        Shapes measured = new Shapes(0, 0);
+        outline(symbol, unit, measured);
+        symbol.pinsOf(unit).forEach(pin -> {
+            measured.pin(pin);
+            measured.point(pin.at());
+        });
+        if (measured.minimumX > measured.maximumX) {
+            return new double[] {0, 0};
+        }
+        return new double[] {Math.round((measured.minimumX + measured.maximumX) / 2 / GRID) * GRID,
+                Math.round((measured.minimumY + measured.maximumY) / 2 / GRID) * GRID};
+    }
+
+    /** A unit's body — every shape of its own and of every unit's, the De Morgan alternative left out. */
+    private static void outline(KiCadSymbolDefinition symbol, int unit, Shapes shapes) {
+        for (KiCadList body : symbol.tree().lists("symbol")) {
+            Matcher name = BODY.matcher(body.word(1));
+            int bodyUnit = name.matches() ? Integer.parseInt(name.group(1)) : 0;
+            int style = name.matches() ? Integer.parseInt(name.group(2)) : 1;
+            if (style == DE_MORGAN || (bodyUnit != 0 && bodyUnit != unit)) {
+                continue;
+            }
+            body.lists("polyline").forEach(shapes::polyline);
+            body.lists("rectangle").forEach(shapes::rectangle);
+            body.lists("circle").forEach(shapes::circle);
+            body.lists("arc").forEach(shapes::arc);
+            body.lists("bezier").forEach(shapes::bezier);
+        }
+    }
+
     private static Optional<SymbolLabel> label(KiCadSymbolDefinition symbol, String property, String subject,
                                                Shapes shapes) {
         return symbol.tree().lists("property").stream().filter(list -> list.word(1).equals(property)).findFirst()
@@ -193,8 +218,20 @@ public final class KiCadSymbolDrawing {
 
         private final List<String> strokes = new ArrayList<>();
         private final List<String> fills = new ArrayList<>();
+        /** Where the drawing's origin stands in KiCad's, in drawing units: every point is drawn from it. */
+        private final double originX;
+        private final double originY;
         private double reachX;
         private double reachY;
+        private double minimumX = Double.POSITIVE_INFINITY;
+        private double maximumX = Double.NEGATIVE_INFINITY;
+        private double minimumY = Double.POSITIVE_INFINITY;
+        private double maximumY = Double.NEGATIVE_INFINITY;
+
+        Shapes(double originX, double originY) {
+            this.originX = originX;
+            this.originY = originY;
+        }
 
         void polyline(KiCadList shape) {
             List<double[]> points = points(shape);
@@ -288,7 +325,8 @@ public final class KiCadSymbolDrawing {
 
         /** A KiCad point in drawing units, Y turned downwards; the drawing's reach grows to hold it. */
         double[] point(KiCadPoint point) {
-            double[] drawn = {rounded(point.x() * UNITS_PER_MILLIMETRE), rounded(-point.y() * UNITS_PER_MILLIMETRE)};
+            double[] drawn = {rounded(point.x() * UNITS_PER_MILLIMETRE - originX),
+                    rounded(-point.y() * UNITS_PER_MILLIMETRE - originY)};
             reach(drawn[0], drawn[1]);
             return drawn;
         }
@@ -296,6 +334,10 @@ public final class KiCadSymbolDrawing {
         private void reach(double x, double y) {
             reachX = Math.max(reachX, Math.abs(x));
             reachY = Math.max(reachY, Math.abs(y));
+            minimumX = Math.min(minimumX, x);
+            maximumX = Math.max(maximumX, x);
+            minimumY = Math.min(minimumY, y);
+            maximumY = Math.max(maximumY, y);
         }
 
         double width() {
