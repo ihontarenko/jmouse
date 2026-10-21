@@ -9,6 +9,7 @@ import org.jmouse.parallax.store.catalogue.Catalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
 import org.jmouse.parallax.store.kicad.KiCadExports;
 import org.jmouse.parallax.store.kicad.KiCadImports;
+import org.jmouse.parallax.store.part.PartSearch;
 import org.jmouse.parallax.store.catalogue.Instruments;
 import org.jmouse.parallax.store.catalogue.ShippedObjects;
 import org.jmouse.parallax.store.collection.Collections;
@@ -97,6 +98,12 @@ public class ParallaxManagementConfiguration {
     @Bean
     public KiCadController parallaxKiCadController(KiCadImports imports, KiCadExports exports) {
         return new KiCadController(imports, exports);
+    }
+
+    /** 🔎 Parts searched for beyond the reader's library, and one found stored in an owner's place. */
+    @Bean
+    public PartSearchController parallaxPartSearchController(PartSearch parts) {
+        return new PartSearchController(parts);
     }
 
     @Bean

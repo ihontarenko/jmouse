@@ -61,6 +61,12 @@ import org.jmouse.parallax.store.kicad.KiCadExports;
 import org.jmouse.parallax.store.kicad.KiCadImports;
 import org.jmouse.parallax.store.kicad.KiCadLibraryMaps;
 import org.jmouse.parallax.store.kicad.KiCadProperties;
+import org.jmouse.parallax.kicad.InstalledKiCadParts;
+import org.jmouse.parallax.part.PartSearchProvider;
+import org.jmouse.parallax.store.part.CataloguePartSearch;
+import org.jmouse.parallax.store.part.NexarPartSearch;
+import org.jmouse.parallax.store.part.PartSearch;
+import org.jmouse.parallax.store.part.PartSearchProperties;
 import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
@@ -69,6 +75,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.ObjectMapper;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.time.Clock;
 
 /**
@@ -102,13 +109,15 @@ import java.time.Clock;
  *     <li>{@code jmouse.parallax.catalogue.*} — {@link CatalogueProperties};</li>
  *     <li>{@code jmouse.parallax.spice.*} — {@link SpiceProperties}: the second engine, when a command is set.</li>
  *     <li>{@code jmouse.parallax.kicad.*} — {@link KiCadProperties}: the library map a KiCad import reads, and the
- *     footprint libraries it looks a part's footprint up in.</li>
+ *     footprint libraries it looks a part's footprint up in, and the symbol libraries the part search reads.</li>
+ *     <li>{@code jmouse.parallax.parts.*} — {@link PartSearchProperties}: how many candidates a provider answers with,
+ *     and the Nexar application the supplier search signs in as.</li>
  * </ul>
  */
 @AutoConfiguration(after = ParallaxJpaAutoConfiguration.class)
 @ConditionalOnClass({ObjectStore.class, TransactionTemplate.class, ObjectMapper.class})
 @EnableConfigurationProperties({ComputationProperties.class, CatalogueProperties.class, SpiceProperties.class,
-        KiCadProperties.class})
+        KiCadProperties.class, PartSearchProperties.class})
 public class ParallaxStoreAutoConfiguration {
 
     // ── What the services share ──────────────────────────────────────────────────────────────────────────────────
@@ -569,5 +578,41 @@ public class ParallaxStoreAutoConfiguration {
     @ConditionalOnMissingBean
     public KiCadLibraryMaps parallaxKiCadLibraryMaps(ResourceLoader resources, KiCadProperties properties) {
         return new KiCadLibraryMaps(resources, properties);
+    }
+
+    // ── Part search ──────────────────────────────────────────────────────────────────────────────────────────────
+
+    /** 🔎 The catalogue as a part search: its published objects, nothing to fetch. */
+    @Bean
+    @ConditionalOnMissingBean
+    public CataloguePartSearch parallaxCataloguePartSearch(Catalogue catalogue) {
+        return new CataloguePartSearch(catalogue);
+    }
+
+    /**
+     * 🔎 The KiCad libraries installed beside the server as a part search: {@code jmouse.parallax.kicad.symbol-libraries}
+     * and {@code footprint-libraries}, indexed on a thread of their own the first time they are asked about.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public InstalledKiCadParts parallaxInstalledKiCadParts(KiCadProperties properties) {
+        return new InstalledKiCadParts(properties.symbolLibraries().stream().map(Path::of).toList(),
+                properties.footprintLibraries().stream().map(Path::of).toList(),
+                command -> Thread.ofVirtual().name("parallax-kicad-index").start(command));
+    }
+
+    /** 🔎 Nexar's supply search: listed always, not configured until {@code jmouse.parallax.parts.nexar.*} names a client. */
+    @Bean
+    @ConditionalOnMissingBean
+    public NexarPartSearch parallaxNexarPartSearch(PartSearchProperties properties, ObjectMapper mapper, Clock clock) {
+        return new NexarPartSearch(properties.nexar(), mapper, clock);
+    }
+
+    /** 🔎 Every part search asked at once, and a found part stored in an owner's place. */
+    @Bean
+    @ConditionalOnMissingBean
+    public PartSearch parallaxPartSearch(List<PartSearchProvider> providers, Catalogue catalogue, ObjectStore objects,
+                                         TransactionTemplate transactions, PartSearchProperties properties) {
+        return new PartSearch(providers, catalogue, objects, transactions, properties.limit());
     }
 }
