@@ -1,5 +1,10 @@
 package org.jmouse.parallax.script.form;
 
+import org.jmouse.el.StringSource;
+import org.jmouse.el.lexer.ExpressionSplitter;
+import org.jmouse.el.lexer.RawToken;
+import org.jmouse.parallax.script.ExperienceReader;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +18,10 @@ import java.util.Optional;
  * survive an edit. What a line means is the reader's to say ({@link LineCodecs}); the outline only says where it is,
  * and it is found even in a text the reader refuses, so a form can still show the document it cannot read.</p>
  *
+ * <p>The shape is read from the engine's tokens — jMX's dialect with its long texts and its {@code #} comments —, so a
+ * string, a long text and a comment are exactly what the reader takes them to be. ⚠️ One rule is the outline's own,
+ * because a text being edited is often broken: a quote that is not closed on its line runs to the end of that line.</p>
+ *
  * @param kind       the document's first word
  * @param title      the title in quotes, its span without the quotes
  * @param headEnd    the offset of the brace that opens the body
@@ -20,6 +29,10 @@ import java.util.Optional;
  * @param statements the body's statements, in order
  */
 public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd, List<Statement> statements) {
+
+    /** jMX's lexing, with the two things a document's text has that an expression has not. */
+    private static final ExpressionSplitter SPLITTER = new ExpressionSplitter(
+            ExperienceReader.DIALECT.withLongTexts().withLineComments());
 
     public DocumentOutline {
         statements = List.copyOf(statements);
@@ -71,49 +84,101 @@ public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd,
     // ─── reading the shape ──────────────────────────────────────────────────────────────────────────
 
     public static DocumentOutline of(String text) {
-        return new Scanner(text).document();
+        return new Shape(text, pieces(text)).document();
     }
 
-    /** One pass over the text, position by position. */
-    private static final class Scanner {
+    /** What a piece of the text is to its shape. */
+    private enum PieceKind { WORD, STRING, OPEN, CLOSE, SEPARATOR, LINE_BREAK, OTHER }
 
-        private final String text;
-        private int          position;
+    /** One piece of the text: a token, or a line break; comments and space between them are not pieces. */
+    private record Piece(PieceKind kind, int start, int end) {
+    }
 
-        Scanner(String text) {
+    /**
+     * The text's tokens as pieces of its shape. A line-break token stands for several breaks, and a line ends at each.
+     * A quote the lexer left alone — not closed on its line — is a string to the end of that line, its break included,
+     * and whatever was lexed inside it is passed over.
+     */
+    private static List<Piece> pieces(String text) {
+        List<Piece> pieces = new ArrayList<>();
+        int passedUntil = 0;
+        for (RawToken token : SPLITTER.split(new StringSource("outline", text))) {
+            int start = token.offset();
+            int end = start + token.length();
+            if (token.type() == RawToken.Type.NEW_LINE) {
+                for (int at = Math.max(start, passedUntil); at < end; at++) {
+                    if (text.charAt(at) == '\n') {
+                        pieces.add(new Piece(PieceKind.LINE_BREAK, at, at + 1));
+                    }
+                }
+                continue;
+            }
+            if (start < passedUntil) {
+                continue;
+            }
+            String value = token.value();
+            PieceKind kind = switch (token.type()) {
+                case STRING -> PieceKind.STRING;
+                case IDENTIFIER, NUMBER -> PieceKind.WORD;
+                default -> switch (value) {
+                    case "{" -> PieceKind.OPEN;
+                    case "}" -> PieceKind.CLOSE;
+                    case ";" -> PieceKind.SEPARATOR;
+                    case "\"", "'" -> PieceKind.STRING;
+                    default -> PieceKind.OTHER;
+                };
+            };
+            if (kind == PieceKind.STRING && (value.equals("\"") || value.equals("'"))) {
+                int lineBreak = text.indexOf('\n', start);
+                end = lineBreak < 0 ? text.length() : lineBreak + 1;
+                passedUntil = end;
+            }
+            pieces.add(new Piece(kind, start, end));
+        }
+        return pieces;
+    }
+
+    /** One pass over the pieces, in order. */
+    private static final class Shape {
+
+        private final String      text;
+        private final List<Piece> pieces;
+        private int               index;
+
+        Shape(String text, List<Piece> pieces) {
             this.text = text;
+            this.pieces = pieces;
         }
 
         DocumentOutline document() {
-            skipSpaceAndComments();
-            int kindStart = position;
-            while (position < text.length() && isWordCharacter(text.charAt(position))) {
-                position++;
+            skipLineBreaks();
+            int kindStart = startOf(index);
+            String kind = wordAt(kindStart);
+            index = firstFrom(kindStart + kind.length());
+            skipLineBreaks();
+            Span title = new Span(startOf(index), startOf(index));
+            if (at(PieceKind.STRING) && text.charAt(startOf(index)) == '"') {
+                Piece string = pieces.get(index);
+                title = new Span(string.start() + 1, Math.max(string.start() + 1, string.end() - 1));
+                index++;
             }
-            String kind = text.substring(kindStart, position);
-            skipSpaceAndComments();
-            Span title = new Span(position, position);
-            if (position < text.length() && text.charAt(position) == '"') {
-                int end = endOfString(position);
-                title = new Span(position + 1, Math.max(position + 1, end - 1));
-                position = end;
-            }
-            int open = findOutsideStrings('{', position);
+            int open = next(PieceKind.OPEN, index);
             if (open < 0) {
                 return new DocumentOutline(kind, title, text.length(), text.length(), List.of());
             }
-            position = open + 1;
+            int headEnd = pieces.get(open).start();
+            index = open + 1;
             List<Statement> statements = new ArrayList<>();
             while (true) {
-                skipSpaceAndComments();
-                if (position >= text.length()) {
-                    return new DocumentOutline(kind, title, open, text.length(), statements);
+                skipLineBreaks();
+                if (index >= pieces.size()) {
+                    return new DocumentOutline(kind, title, headEnd, text.length(), statements);
                 }
-                if (text.charAt(position) == '}') {
-                    return new DocumentOutline(kind, title, open, position, statements);
+                if (at(PieceKind.CLOSE)) {
+                    return new DocumentOutline(kind, title, headEnd, startOf(index), statements);
                 }
-                if (text.charAt(position) == ';') {
-                    position++;
+                if (at(PieceKind.SEPARATOR)) {
+                    index++;
                     continue;
                 }
                 statements.add(statement());
@@ -121,205 +186,153 @@ public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd,
         }
 
         private Statement statement() {
-            int start = position;
+            int start = startOf(index);
             String indent = indentOf(start);
-            int wordEnd = start;
-            while (wordEnd < text.length() && isWordCharacter(text.charAt(wordEnd))) {
-                wordEnd++;
-            }
-            String word = text.substring(start, wordEnd);
-            if (wordEnd == start) {
-                wordEnd = Math.min(text.length(), start + 1);
-            }
-            position = wordEnd;
-            int headerStart = position;
-            int lineEnd = endOfLine(position);
-            int brace = firstOpeningBraceBefore(position, lineEnd);
+            String word = wordAt(start);
+            int wordEnd = word.isEmpty() ? Math.min(text.length(), start + 1) : start + word.length();
+            int headerStart = wordEnd;
+            int first = firstFrom(wordEnd);
+            int lineEnd = endOfLine(first);
+            int brace = openingBraceBefore(first, lineEnd);
             if (brace < 0) {
-                position = lineEnd;
-                return new Statement(word, new Span(start, contentEnd(start, lineEnd)), trimmed(headerStart, contentEnd(start, lineEnd)),
-                        Optional.empty(), indent);
+                index = firstFrom(lineEnd);
+                // The word itself is content: a statement of one word (`end`) ends where the word does.
+                int end = contentEnd(first, lineEnd, wordEnd);
+                return new Statement(word, new Span(start, end), trimmed(headerStart, end), Optional.empty(), indent);
             }
-            Span header = trimmed(headerStart, brace);
+            int openOffset = pieces.get(brace).start();
+            Span header = trimmed(headerStart, openOffset);
             int close = matchingBrace(brace);
-            Body body = new Body(brace, close, lines(brace + 1, close));
-            position = Math.min(text.length(), close + 1);
-            return new Statement(word, new Span(start, position), header, Optional.of(body), indent);
+            int closeOffset = close < 0 ? text.length() : pieces.get(close).start();
+            Body body = new Body(openOffset, closeOffset, lines(brace + 1, closeOffset));
+            int after = Math.min(text.length(), closeOffset + 1);
+            index = close < 0 ? pieces.size() : close + 1;
+            return new Statement(word, new Span(start, after), header, Optional.of(body), indent);
         }
 
-        /** The lines between two offsets: each ends at a line break outside braces, strings and long texts. */
-        private List<Line> lines(int from, int to) {
+        /** The lines between a piece and an offset: each ends at a line break or {@code ;} outside braces. */
+        private List<Line> lines(int fromPiece, int to) {
             List<Line> lines = new ArrayList<>();
-            int at = from;
-            while (at < to) {
-                while (at < to && (Character.isWhitespace(text.charAt(at)) || text.charAt(at) == ';')) {
+            int at = fromPiece;
+            while (at < pieces.size() && startOf(at) < to) {
+                if (pieces.get(at).kind() == PieceKind.LINE_BREAK || pieces.get(at).kind() == PieceKind.SEPARATOR) {
                     at++;
-                }
-                if (at >= to) {
-                    break;
-                }
-                if (text.charAt(at) == '#') {
-                    while (at < to && text.charAt(at) != '\n') {
-                        at++;
-                    }
                     continue;
                 }
+                int start = startOf(at);
                 int end = Math.min(endOfLine(at), to);
-                int content = contentEnd(at, end);
-                int lineStart = Math.max(from, text.lastIndexOf('\n', at - 1) + 1);
-                String before = text.substring(lineStart, at);
-                int physicalStart = before.isBlank() ? lineStart : at;
+                int content = contentEnd(at, end, start);
+                int lineStart = text.lastIndexOf('\n', start - 1) + 1;
+                String before = text.substring(lineStart, start);
+                int physicalStart = before.isBlank() ? lineStart : start;
                 int whole = end < to && text.charAt(end) == '\n' ? end + 1 : end;
-                lines.add(new Line(new Span(at, content), new Span(physicalStart, whole), before.isBlank() ? before : ""));
-                at = end;
+                lines.add(new Line(new Span(start, content), new Span(physicalStart, whole), before.isBlank() ? before : ""));
+                at = firstFrom(end);
             }
             return lines;
         }
 
-        /** The end of the line starting at an offset: its line break or {@code ;}, outside braces, strings and comments. */
-        private int endOfLine(int from) {
+        /** Where the line holding a piece ends: its line break or {@code ;} at depth zero, or a closing brace above it. */
+        private int endOfLine(int fromPiece) {
             int depth = 0;
-            int at = from;
-            while (at < text.length()) {
-                char character = text.charAt(at);
-                if (character == '"' || character == '\'') {
-                    at = endOfString(at);
-                    continue;
-                }
-                if (character == '#') {
-                    while (at < text.length() && text.charAt(at) != '\n') {
-                        at++;
+            for (int at = fromPiece; at < pieces.size(); at++) {
+                Piece piece = pieces.get(at);
+                switch (piece.kind()) {
+                    case OPEN -> depth++;
+                    case CLOSE -> {
+                        if (depth == 0) {
+                            return piece.start();
+                        }
+                        depth--;
                     }
-                    continue;
-                }
-                if (character == '{') {
-                    depth++;
-                } else if (character == '}') {
-                    if (depth == 0) {
-                        return at;
+                    case LINE_BREAK, SEPARATOR -> {
+                        if (depth == 0) {
+                            return piece.start();
+                        }
                     }
-                    depth--;
-                } else if ((character == '\n' || character == ';') && depth == 0) {
-                    return at;
+                    default -> {
+                    }
                 }
-                at++;
             }
             return text.length();
         }
 
-        /** Where a line's content ends: before a trailing comment and trailing whitespace. */
-        private int contentEnd(int from, int end) {
-            int at = from;
-            int last = from;
-            while (at < end) {
-                char character = text.charAt(at);
-                if (character == '"' || character == '\'') {
-                    at = Math.min(end, endOfString(at));
-                    last = at;
-                    continue;
+        /** Where a line's content ends: after its last piece before an offset — a trailing comment is no piece. */
+        private int contentEnd(int fromPiece, int end, int start) {
+            int last = start;
+            for (int at = fromPiece; at < pieces.size() && startOf(at) < end; at++) {
+                if (pieces.get(at).kind() != PieceKind.LINE_BREAK) {
+                    last = Math.min(end, pieces.get(at).end());
                 }
-                if (character == '#') {
-                    break;
-                }
-                if (!Character.isWhitespace(character)) {
-                    last = at + 1;
-                }
-                at++;
             }
             return last;
         }
 
-        /** The first {@code {} at depth zero between two offsets, outside strings and comments; -1 when none. */
-        private int firstOpeningBraceBefore(int from, int end) {
-            int at = from;
-            while (at < end) {
-                char character = text.charAt(at);
-                if (character == '"' || character == '\'') {
-                    at = endOfString(at);
-                    continue;
-                }
-                if (character == '#') {
-                    return -1;
-                }
-                if (character == '{') {
+        /** The first opening brace among the pieces before an offset; -1 when none. */
+        private int openingBraceBefore(int fromPiece, int end) {
+            for (int at = fromPiece; at < pieces.size() && startOf(at) < end; at++) {
+                if (pieces.get(at).kind() == PieceKind.OPEN) {
                     return at;
                 }
-                at++;
             }
             return -1;
         }
 
+        /** The brace that closes the one at a piece; -1 when the text ends first. */
         private int matchingBrace(int open) {
             int depth = 0;
-            int at = open;
-            while (at < text.length()) {
-                char character = text.charAt(at);
-                if (character == '"' || character == '\'') {
-                    at = endOfString(at);
-                    continue;
-                }
-                if (character == '#') {
-                    while (at < text.length() && text.charAt(at) != '\n') {
-                        at++;
-                    }
-                    continue;
-                }
-                if (character == '{') {
+            for (int at = open; at < pieces.size(); at++) {
+                if (pieces.get(at).kind() == PieceKind.OPEN) {
                     depth++;
-                } else if (character == '}') {
+                } else if (pieces.get(at).kind() == PieceKind.CLOSE) {
                     depth--;
                     if (depth == 0) {
                         return at;
                     }
                 }
-                at++;
-            }
-            return text.length();
-        }
-
-        private int findOutsideStrings(char wanted, int from) {
-            int at = from;
-            while (at < text.length()) {
-                char character = text.charAt(at);
-                if (character == '"' || character == '\'') {
-                    at = endOfString(at);
-                    continue;
-                }
-                if (character == wanted) {
-                    return at;
-                }
-                at++;
             }
             return -1;
         }
 
-        /** The offset just after a string that opens at {@code at}: a {@code """ … """} long text, or a quoted text. */
-        private int endOfString(int at) {
-            if (text.startsWith("\"\"\"", at)) {
-                int end = text.indexOf("\"\"\"", at + 3);
-                return end < 0 ? text.length() : end + 3;
-            }
-            char quote = text.charAt(at);
-            int index = at + 1;
-            while (index < text.length() && text.charAt(index) != quote && text.charAt(index) != '\n') {
-                index++;
-            }
-            return Math.min(text.length(), index + 1);
-        }
-
-        private void skipSpaceAndComments() {
-            while (position < text.length()) {
-                char character = text.charAt(position);
-                if (Character.isWhitespace(character)) {
-                    position++;
-                } else if (character == '#') {
-                    while (position < text.length() && text.charAt(position) != '\n') {
-                        position++;
-                    }
-                } else {
-                    return;
+        private int next(PieceKind kind, int fromPiece) {
+            for (int at = fromPiece; at < pieces.size(); at++) {
+                if (pieces.get(at).kind() == kind) {
+                    return at;
                 }
             }
+            return -1;
+        }
+
+        /** The first piece that starts at or after an offset. */
+        private int firstFrom(int offset) {
+            int at = 0;
+            while (at < pieces.size() && pieces.get(at).start() < offset) {
+                at++;
+            }
+            return at;
+        }
+
+        private boolean at(PieceKind kind) {
+            return index < pieces.size() && pieces.get(index).kind() == kind;
+        }
+
+        private int startOf(int piece) {
+            return piece < pieces.size() ? pieces.get(piece).start() : text.length();
+        }
+
+        private void skipLineBreaks() {
+            while (at(PieceKind.LINE_BREAK)) {
+                index++;
+            }
+        }
+
+        /** The word a statement or the document opens with: the letters, digits and underscores at an offset. */
+        private String wordAt(int offset) {
+            int end = offset;
+            while (end < text.length() && (Character.isLetterOrDigit(text.charAt(end)) || text.charAt(end) == '_')) {
+                end++;
+            }
+            return text.substring(offset, end);
         }
 
         private Span trimmed(int from, int to) {
@@ -338,10 +351,6 @@ public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd,
             int lineStart = text.lastIndexOf('\n', offset - 1) + 1;
             String before = text.substring(lineStart, offset);
             return before.isBlank() ? before : "";
-        }
-
-        private static boolean isWordCharacter(char character) {
-            return Character.isLetterOrDigit(character) || character == '_';
         }
     }
 }

@@ -34,17 +34,38 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
      *                      a name. Mathematics has none: there {@code 2d} is two times {@code d}.
      * @param stepOperators whether {@code ++} and {@code --} are operators of their own. Mathematics has no
      *                      steps: there {@code 2--1} is two minus minus one.
+     * @param longTexts     whether {@code """ … """} is one string, line breaks and quotes inside it included — a
+     *                      document's long text. A long text left open runs to the end of the source. Without it,
+     *                      {@code """} is an empty string followed by a quote.
+     * @param lineComments  whether {@code #} opens a comment that runs to the end of its line and is passed over as
+     *                      space is — no token stands for it. Without it, {@code #} is a character like any other.
      */
-    public record Dialect(boolean typedNumbers, boolean stepOperators) {
+    public record Dialect(boolean typedNumbers, boolean stepOperators, boolean longTexts, boolean lineComments) {
 
         /** jME's own: typed numbers and step operators, as Java writes them. */
         public static final Dialect PROGRAMMING = new Dialect(true, true);
 
         /** A formula's: no type suffixes and no steps. */
         public static final Dialect MATHEMATICS = new Dialect(false, false);
+
+        /** A language without long texts or line comments: how every dialect read before they existed. */
+        public Dialect(boolean typedNumbers, boolean stepOperators) {
+            this(typedNumbers, stepOperators, false, false);
+        }
+
+        /** This dialect, reading {@code """ … """} as one string. */
+        public Dialect withLongTexts() {
+            return new Dialect(typedNumbers, stepOperators, true, lineComments);
+        }
+
+        /** This dialect, passing over {@code #} comments to the end of their line. */
+        public Dialect withLineComments() {
+            return new Dialect(typedNumbers, stepOperators, longTexts, true);
+        }
     }
 
     private final Pattern expressionPattern;
+    private final boolean lineComments;
 
     public ExpressionSplitter() {
         this(Dialect.PROGRAMMING);
@@ -52,11 +73,15 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
 
     public ExpressionSplitter(Dialect dialect) {
         this.expressionPattern = expressionPattern(dialect);
+        this.lineComments = dialect.lineComments();
     }
 
     private static Pattern expressionPattern(Dialect dialect) {
         String typeSuffix = dialect.typedNumbers() ? "(?:[FLIDSBClfidsbc](?![A-Za-z0-9_]))?" : "";
         String steps = dialect.stepOperators() ? "\\+\\+|--|" : "";
+        // Tried before a quoted string, which would otherwise read its first two quotes as an empty string.
+        String longText = dialect.longTexts() ? "\"\"\"[\\s\\S]*?(?:\"\"\"|\\z)|" : "";
+        String comment = dialect.lineComments() ? "|(?<COMMENT>#[^\\n\\r]*)" : "";
         return Pattern.compile(
                 "[^\\S\\r\\n]*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
                 "|(?<NUMBER>(?<!\\d)(\\d+(\\.\\d+)?([Ee][+-]?\\d+)?" + typeSuffix + "))" +
@@ -64,7 +89,8 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
                 // looks like alternation and is not: inside a character class the pipe is a literal, so the
                 // effect was to forbid the one character quoting exists to protect. `'a|b'` failed to parse
                 // anywhere in the language — and a value like "3300|mΩ" is ordinary data, not an edge case.
-                "|(?<STRING>'[^'\\n\\r]*'|\"[^\"\\n\\r]*\")" +
+                "|(?<STRING>" + longText + "'[^'\\n\\r]*'|\"[^\"\\n\\r]*\")" +
+                comment +
                 "|(?<OPERATOR>\\?\\?|->|\\.\\.|<=|>=|!=|==|&&|\\|\\||-=|\\+=|" + steps + "\\*\\*|[-+*/%^><=!])" +
                 "|(?<NL>[\\n\\r]+)" +
                 "|(?<OTHER>\\S))"
@@ -77,6 +103,8 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
     public static final String NEW_LINE   = "NL";
     public static final String OPERATOR   = "OPERATOR";
     public static final String OTHER      = "OTHER";
+    /** A {@code #} comment, in a dialect that has them: matched so it can be passed over, never a token. */
+    public static final String COMMENT    = "COMMENT";
 
     // Define group names and their corresponding type types.
     private static final String[]                   GROUP_NAMES         = {IDENTIFIER, NUMBER, STRING, NEW_LINE, OPERATOR, OTHER};
@@ -109,6 +137,12 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
         int          index   = 0;
 
         while (matcher.find(index)) {
+            // A comment is passed over as space is: it ends where its line does, and nothing stands for it.
+            if (lineComments && matcher.group(COMMENT) != null) {
+                index = matcher.end() > index ? matcher.end() : index + 1;
+                continue;
+            }
+
             String        tokenValue  = null;
             RawToken.Type tokenType   = GROUP_TO_TOKEN_TYPE.get(OTHER);
             int           startOffset = offset + matcher.start();
