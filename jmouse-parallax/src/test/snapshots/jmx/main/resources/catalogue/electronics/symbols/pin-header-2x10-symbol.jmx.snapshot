@@ -1,0 +1,166 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Pin header, 2 x 10"
+  slug: "pin-header-2x10-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A two-row pin header of 20, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+      description: null
+      category: "circuits"
+      tags: List(3)
+          - "electronics"
+          - "schematic"
+          - "connector"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 120.0
+          height: Double 220.0
+          paths: List(1)
+              - "M-20 -90H20V110H-20ZM-60 -80H-20M20 -80H60M-60 -60H-20M20 -60H60M-60 -40H-20M20 -40H60M-60 -20H-20M20 -20H60M-60 0H-20M20 0H60M-60 20H-20M20 20H60M-60 40H-20M20 40H60M-60 60H-20M20 60H60M-60 80H-20M20 80H60M-60 100H-20M20 100H60"
+          pins: List(20)
+              - SymbolPin
+                  pin: "pin1"
+                  x: Double -60.0
+                  y: Double -80.0
+                  label: "1"
+              - SymbolPin
+                  pin: "pin2"
+                  x: Double 60.0
+                  y: Double -80.0
+                  label: "2"
+              - SymbolPin
+                  pin: "pin3"
+                  x: Double -60.0
+                  y: Double -60.0
+                  label: "3"
+              - SymbolPin
+                  pin: "pin4"
+                  x: Double 60.0
+                  y: Double -60.0
+                  label: "4"
+              - SymbolPin
+                  pin: "pin5"
+                  x: Double -60.0
+                  y: Double -40.0
+                  label: "5"
+              - SymbolPin
+                  pin: "pin6"
+                  x: Double 60.0
+                  y: Double -40.0
+                  label: "6"
+              - SymbolPin
+                  pin: "pin7"
+                  x: Double -60.0
+                  y: Double -20.0
+                  label: "7"
+              - SymbolPin
+                  pin: "pin8"
+                  x: Double 60.0
+                  y: Double -20.0
+                  label: "8"
+              - SymbolPin
+                  pin: "pin9"
+                  x: Double -60.0
+                  y: Double 0.0
+                  label: "9"
+              - SymbolPin
+                  pin: "pin10"
+                  x: Double 60.0
+                  y: Double 0.0
+                  label: "10"
+              - SymbolPin
+                  pin: "pin11"
+                  x: Double -60.0
+                  y: Double 20.0
+                  label: "11"
+              - SymbolPin
+                  pin: "pin12"
+                  x: Double 60.0
+                  y: Double 20.0
+                  label: "12"
+              - SymbolPin
+                  pin: "pin13"
+                  x: Double -60.0
+                  y: Double 40.0
+                  label: "13"
+              - SymbolPin
+                  pin: "pin14"
+                  x: Double 60.0
+                  y: Double 40.0
+                  label: "14"
+              - SymbolPin
+                  pin: "pin15"
+                  x: Double -60.0
+                  y: Double 60.0
+                  label: "15"
+              - SymbolPin
+                  pin: "pin16"
+                  x: Double 60.0
+                  y: Double 60.0
+                  label: "16"
+              - SymbolPin
+                  pin: "pin17"
+                  x: Double -60.0
+                  y: Double 80.0
+                  label: "17"
+              - SymbolPin
+                  pin: "pin18"
+                  x: Double 60.0
+                  y: Double 80.0
+                  label: "18"
+              - SymbolPin
+                  pin: "pin19"
+                  x: Double -60.0
+                  y: Double 100.0
+                  label: "19"
+              - SymbolPin
+                  pin: "pin20"
+                  x: Double 60.0
+                  y: Double 100.0
+                  label: "20"
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -104.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 128.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x10-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 4deda706c4281b8069d6f97fa3431e5b
+== line 4 begun with a stray word
+READS f2911d4c5d92a5e257ab7cc6f6771387
+== line 11 deleted
+READS 0194d5717e041ee8d5d9a1fbed4b9232
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x10-symbol.jmx 11:5 'zzz' is not a block of a symbol; it holds meta
+== line 18 deleted
+READS 9e7e69e751ef3560c4b22aa78e8ac7b3
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x10-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta
+== line 25 deleted
+READS 09c4cdfe84d92b31b220219a2312bd4f
+== line 25 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/pin-header-2x10-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta

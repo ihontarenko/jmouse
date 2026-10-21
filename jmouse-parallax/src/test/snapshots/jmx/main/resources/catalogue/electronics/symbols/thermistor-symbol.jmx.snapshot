@@ -1,0 +1,100 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Thermistor"
+  slug: "thermistor-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A thermistor, as drawn on a schematic: a resistor's body crossed by the hooked line of a resistance that follows the temperature"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 80.0
+          height: Double 40.0
+          paths: List(0)
+          pins: List(2)
+              - SymbolPin
+                  pin: "a"
+                  x: Double -40.0
+                  y: Double 0.0
+                  label: ""
+              - SymbolPin
+                  pin: "b"
+                  x: Double 40.0
+                  y: Double 0.0
+                  label: ""
+          labels: List(2)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -26.0
+              - SymbolLabel
+                  subject: "value"
+                  x: Double 0.0
+                  y: Double 32.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(1)
+              - SymbolInput
+                  name: "failed"
+                  low: Double 0.0
+                  high: Double 1.0
+                  range: Optional.empty
+                  picture: false
+          elements: List(1)
+              - SymbolElement
+                  shape: "group"
+                  name: "body"
+                  live: true
+                  path: ""
+                  geometry: Map(0)
+                  condition: null
+                  properties: List(1)
+                      - SymbolProperty stroke LIVE
+                          - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
+                  hidden: List(0)
+                  children: List(1)
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-40 0H-16V-7H16V7H-16V0M16 0H40M-18 14L14-14H22"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 11
+                  line: Integer 10
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/thermistor-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS c86c6a49525262fbdbb2b76782798e82
+== line 4 begun with a stray word
+READS b7b42be00157850201534b4a9b330848
+== line 11 deleted
+READS e8a467cce963bd7ce2a1ec229fb815ac
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/thermistor-symbol.jmx 11:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 18 deleted
+READS ceb78f3ea6b7b133cc5c9174545ab487
+== line 18 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/thermistor-symbol.jmx 18:5 'zzz' is not a block of a symbol; it holds meta

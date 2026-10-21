@@ -1,0 +1,14 @@
+symbol "Mains plug with earth" as mains-plug-symbol {
+    meta {
+        summary "A mains plug with an earth contact, as drawn on a schematic: line, neutral and earth leaving to the right"
+        category circuits
+        tags electronics, schematic, connector
+    }
+    size 80 x 80
+    path "M-30-30H6V30H-30ZM6-20H40M6 0H40M6 20H40M28 20V30M22 30H34M24 34H32"
+    pin line at 40, -20 "L"
+    pin neutral at 40, 0 "N"
+    pin earth at 40, 20 "PE"
+    label name at -12, -44
+    label value at -12, 48
+}

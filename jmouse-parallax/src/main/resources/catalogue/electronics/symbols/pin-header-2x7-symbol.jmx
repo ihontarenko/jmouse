@@ -1,0 +1,25 @@
+symbol "Pin header, 2 x 7" as pin-header-2x7-symbol {
+    meta {
+        summary "A two-row pin header of 14, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+    }
+    size 120 x 160
+    path "M-20 -70H20V70H-20ZM-60 -60H-20M20 -60H60M-60 -40H-20M20 -40H60M-60 -20H-20M20 -20H60M-60 0H-20M20 0H60M-60 20H-20M20 20H60M-60 40H-20M20 40H60M-60 60H-20M20 60H60"
+    pin pin1 at -60, -60 "1"
+    pin pin2 at 60, -60 "2"
+    pin pin3 at -60, -40 "3"
+    pin pin4 at 60, -40 "4"
+    pin pin5 at -60, -20 "5"
+    pin pin6 at 60, -20 "6"
+    pin pin7 at -60, 0 "7"
+    pin pin8 at 60, 0 "8"
+    pin pin9 at -60, 20 "9"
+    pin pin10 at 60, 20 "10"
+    pin pin11 at -60, 40 "11"
+    pin pin12 at 60, 40 "12"
+    pin pin13 at -60, 60 "13"
+    pin pin14 at 60, 60 "14"
+    label name at 0, -84
+    label value at 0, 88
+}

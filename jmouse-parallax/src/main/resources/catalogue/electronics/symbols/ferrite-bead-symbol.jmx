@@ -1,0 +1,19 @@
+symbol "Ferrite bead" as ferrite-bead-symbol {
+    meta {
+        summary "A ferrite bead, as drawn on a schematic: a slanted block threaded on the wire"
+        category circuits
+        tags electronics, schematic
+    }
+    size 80 x 40
+    input failed
+
+    live group body {
+        path "M-40 0H-8M8 0H40M-16 4L2-14L16-4L-2 14Z"
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    pin a at -40, 0
+    pin b at 40, 0
+    label name at 0, -26
+    label value at 0, 32
+}

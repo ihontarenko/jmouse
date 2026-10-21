@@ -1,0 +1,14 @@
+symbol "Barrel jack with switch" as barrel-jack-switch-symbol {
+    meta {
+        summary "A DC barrel jack with the switch a plug opens, as drawn on a schematic: the centre pin above, the switch in the middle, the sleeve below"
+        category circuits
+        tags electronics, schematic, connector
+    }
+    size 80 x 60
+    path "M-30-24H-2V-16H-30ZM-2-20H40M-14 20H40M-14 20V2L-20-6M-14 2L-8-6M40 0H10L4-8"
+    pin tip at 40, -20 "+"
+    pin switch at 40, 0
+    pin sleeve at 40, 20 "−"
+    label name at -10, -38
+    label value at -10, 38
+}

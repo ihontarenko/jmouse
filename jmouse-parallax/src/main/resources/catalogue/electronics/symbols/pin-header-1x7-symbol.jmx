@@ -1,0 +1,18 @@
+symbol "Pin header, 7 contacts" as pin-header-1x7-symbol {
+    meta {
+        summary "A single-row pin header of 7, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        category circuits
+        tags electronics, schematic, connector
+    }
+    size 60 x 160
+    path "M-4 -60H40M-8 -62H-4V-58H-8ZM-4 -40H40M-8 -42H-4V-38H-8ZM-4 -20H40M-8 -22H-4V-18H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 20H40M-8 18H-4V22H-8ZM-4 40H40M-8 38H-4V42H-8ZM-4 60H40M-8 58H-4V62H-8Z"
+    pin pin1 at 40, -60 "1"
+    pin pin2 at 40, -40 "2"
+    pin pin3 at 40, -20 "3"
+    pin pin4 at 40, 0 "4"
+    pin pin5 at 40, 20 "5"
+    pin pin6 at 40, 40 "6"
+    pin pin7 at 40, 60 "7"
+    label name at -4, -76
+    label value at -4, 80
+}

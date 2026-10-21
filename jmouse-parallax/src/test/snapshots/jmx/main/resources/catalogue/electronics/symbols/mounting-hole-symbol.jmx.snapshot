@@ -1,0 +1,58 @@
+ExperienceDocument
+  kind: Kind.SYMBOL
+  title: "Mounting hole with pad"
+  slug: "mounting-hole-symbol"
+  type: Optional.empty
+  meta: Meta
+      summary: "A plated mounting hole, as drawn on a schematic: the hole, and the pad that ties it to a net below"
+      description: null
+      category: "circuits"
+      tags: List(2)
+          - "electronics"
+          - "schematic"
+      source: null
+      authors: List(0)
+      license: null
+      links: List(0)
+      fields: Map(0)
+      labels: Map(0)
+  base: Optional.empty
+  units: List(0)
+  uses: List(0)
+  blocks: List(1)
+      - Symbol
+          uses: List(0)
+          ports: Map(0)
+          shape: Optional.empty
+          sides: Map(0)
+          width: Double 40.0
+          height: Double 60.0
+          paths: List(1)
+              - "M-12-10A12 12 0 1 0 12-10A12 12 0 1 0-12-10ZM-6-10A6 6 0 1 0 6-10A6 6 0 1 0-6-10ZM0 2V20"
+          pins: List(1)
+              - SymbolPin
+                  pin: "pad"
+                  x: Double 0.0
+                  y: Double 20.0
+                  label: ""
+          labels: List(1)
+              - SymbolLabel
+                  subject: "name"
+                  x: Double 0.0
+                  y: Double -30.0
+          indicators: List(0)
+          upright: List(0)
+          inputs: List(0)
+          elements: List(0)
+          bindings: Map(0)
+  line: Integer 1
+== the last brace removed
+REFUSED src/main/resources/catalogue/electronics/symbols/mounting-hole-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 4 deleted
+READS 63b39d2840b86fc3a560c5b20b822c52
+== line 4 begun with a stray word
+READS 1f73215c3e15e2eb9c0373605e89ef7e
+== line 11 deleted
+REFUSED src/main/resources/catalogue/electronics/symbols/mounting-hole-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
+== line 11 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/mounting-hole-symbol.jmx 11:1 'zzz' is not a block of a symbol; it holds meta

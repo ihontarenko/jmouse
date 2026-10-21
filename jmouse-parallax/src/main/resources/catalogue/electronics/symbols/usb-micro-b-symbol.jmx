@@ -1,0 +1,17 @@
+symbol "USB micro-B receptacle" as usb-micro-b-symbol {
+    meta {
+        summary "A USB micro-B receptacle, as drawn on a schematic: bus power, the data pair, the ID pin and ground on the right, the shield below"
+        category circuits
+        tags electronics, schematic, connector
+    }
+    size 120 x 140
+    path "M-40-50H20V50H-40ZM20-40H60M20-20H60M20 0H60M20 20H60M20 40H60M-20 50V70"
+    pin vbus at 60, -40 "VBUS"
+    pin data_plus at 60, -20 "D+"
+    pin data_minus at 60, 0 "D-"
+    pin id at 60, 20 "ID"
+    pin ground at 60, 40 "GND"
+    pin shield at -20, 70 "Shield"
+    label name at -10, -64
+    label value at 20, 64
+}
