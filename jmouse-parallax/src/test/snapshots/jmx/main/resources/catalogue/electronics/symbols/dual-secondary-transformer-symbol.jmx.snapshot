@@ -25,49 +25,49 @@ ExperienceDocument
           ports: Map(0)
           shape: Optional.empty
           sides: Map(0)
-          width: Double 80.0
-          height: Double 96.0
+          width: Double 160.0
+          height: Double 340.0
           paths: List(0)
           pins: List(6)
               - SymbolPin
                   pin: "primary_one"
-                  x: Double -40.0
-                  y: Double -20.0
+                  x: Double -80.0
+                  y: Double -80.0
                   label: ""
               - SymbolPin
                   pin: "primary_two"
-                  x: Double -40.0
-                  y: Double 20.0
+                  x: Double -80.0
+                  y: Double 80.0
                   label: ""
               - SymbolPin
                   pin: "secondary_a_one"
-                  x: Double 40.0
-                  y: Double -40.0
+                  x: Double 80.0
+                  y: Double -120.0
                   label: ""
               - SymbolPin
                   pin: "secondary_a_two"
-                  x: Double 40.0
-                  y: Double -20.0
+                  x: Double 80.0
+                  y: Double 0.0
                   label: ""
               - SymbolPin
                   pin: "secondary_b_one"
-                  x: Double 40.0
-                  y: Double 20.0
+                  x: Double 80.0
+                  y: Double 40.0
                   label: ""
               - SymbolPin
                   pin: "secondary_b_two"
-                  x: Double 40.0
-                  y: Double 40.0
+                  x: Double 80.0
+                  y: Double 160.0
                   label: ""
           labels: List(2)
               - SymbolLabel
                   subject: "name"
                   x: Double 0.0
-                  y: Double -56.0
+                  y: Double -146.0
               - SymbolLabel
                   subject: "value"
                   x: Double 0.0
-                  y: Double 60.0
+                  y: Double 186.0
           indicators: List(0)
           upright: List(0)
           inputs: List(1)
@@ -89,41 +89,52 @@ ExperienceDocument
                       - SymbolProperty stroke LIVE
                           - Piecewise[branches=[Branch[condition=Comparison[relation=GREATER, left=Variable[name=failed], right=Constant[value=0.5]], value=Variable[name=burned]]], otherwise=Variable[name=signal]]
                   hidden: List(0)
-                  children: List(3)
+                  children: List(4)
                       - SymbolElement
                           shape: "path"
                           name: ""
                           live: false
-                          path: "M-40-20H-18C-3-20-3-7-18-7C-3-7-3 7-18 7C-3 7-3 20-18 20H-40M-2-44V44M2-44V44"
-                          geometry: Map(0)
-                          condition: null
-                          properties: List(0)
-                          hidden: List(0)
-                          children: List(0)
-                          line: Integer 11
-                      - SymbolElement
-                          shape: "path"
-                          name: ""
-                          live: false
-                          path: "M40-40H18C33-40 33-30 18-30C33-30 33-20 18-20H40"
-                          geometry: Map(0)
-                          condition: null
-                          properties: List(0)
-                          hidden: List(0)
-                          children: List(0)
-                          line: Integer 12
-                      - SymbolElement
-                          shape: "path"
-                          name: ""
-                          live: false
-                          path: "M40 20H18C33 20 33 30 18 30C33 30 33 40 18 40H40"
+                          path: "M-80-80H-40C-20-80-20-40-40-40C-20-40-20 0-40 0C-20 0-20 40-40 40C-20 40-20 80-40 80H-80"
                           geometry: Map(0)
                           condition: null
                           properties: List(0)
                           hidden: List(0)
                           children: List(0)
                           line: Integer 13
-                  line: Integer 10
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M-4-130V170M4-130V170"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 14
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M80-120H40C20-120 20-80 40-80C20-80 20-40 40-40C20-40 20 0 40 0H80"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 15
+                      - SymbolElement
+                          shape: "path"
+                          name: ""
+                          live: false
+                          path: "M80 40H40C20 40 20 80 40 80C20 80 20 120 40 120C20 120 20 160 40 160H80"
+                          geometry: Map(0)
+                          condition: null
+                          properties: List(0)
+                          hidden: List(0)
+                          children: List(0)
+                          line: Integer 16
+                  line: Integer 12
               - SymbolElement
                   shape: "when"
                   name: ""
@@ -149,25 +160,21 @@ ExperienceDocument
                           properties: List(0)
                           hidden: List(0)
                           children: List(0)
-                          line: Integer 18
-                  line: Integer 17
+                          line: Integer 21
+                  line: Integer 20
           bindings: Map(0)
   line: Integer 1
 == the last brace removed
 REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 1:1 symbol "…" is opened with '{' and never closed
 == line 4 deleted
-READS 3d983fc9812d98a2b354de55aca771c4
+READS 4aecbdc2b34e13c1be5d32683981e7bc
 == line 4 begun with a stray word
-READS 652087590527cbaddb453ac8904b17d5
-== line 11 deleted
-READS 739dc5489d02b8406a5a370b6f1728ab
-== line 11 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 11:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+READS cb8cd2fde833f84d136fc16e1a1730af
 == line 18 deleted
-READS 888fa0171f2bce34b5b06eb5b982da0e
+REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 25:5 'pin' is not an element: path, box, circle, line, glyph, group or 'live when'
 == line 18 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 18:9 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
-== line 25 deleted
-READS 6e850f0a5a7e4fca7d50ebe719edc938
-== line 25 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 25:5 'zzz' is not a block of a symbol; it holds meta
+REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 18:5 'zzz' is not an element: path, box, circle, line, glyph, group or 'live when'
+== line 32 deleted
+READS 66660a49c1866b6b8fa04b1a3f65d949
+== line 32 begun with a stray word
+REFUSED src/main/resources/catalogue/electronics/symbols/dual-secondary-transformer-symbol.jmx 32:5 'zzz' is not a block of a symbol; it holds meta

@@ -4,13 +4,16 @@ symbol "Transformer with two secondaries" as dual-secondary-transformer-symbol {
         category circuits
         tags electronics, schematic
     }
-    size 80 x 96
+    # Pins where KiCad's TEZ10 draws them (2.54 mm = 40): the primary on the left, the first secondary high and the second
+    # low on the right — so a KiCad design's wires land on them as drawn there.
+    size 160 x 340
     input failed
 
     live group body {
-        path "M-40-20H-18C-3-20-3-7-18-7C-3-7-3 7-18 7C-3 7-3 20-18 20H-40M-2-44V44M2-44V44"
-        path "M40-40H18C33-40 33-30 18-30C33-30 33-20 18-20H40"
-        path "M40 20H18C33 20 33 30 18 30C33 30 33 40 18 40H40"
+        path "M-80-80H-40C-20-80-20-40-40-40C-20-40-20 0-40 0C-20 0-20 40-40 40C-20 40-20 80-40 80H-80"
+        path "M-4-130V170M4-130V170"
+        path "M80-120H40C20-120 20-80 40-80C20-80 20-40 40-40C20-40 20 0 40 0H80"
+        path "M80 40H40C20 40 20 80 40 80C20 80 20 120 40 120C20 120 20 160 40 160H80"
         live stroke = if(failed > 0.5, burned, signal)
     }
 
@@ -20,12 +23,12 @@ symbol "Transformer with two secondaries" as dual-secondary-transformer-symbol {
         animate opacity = 0.35 + 0.65 * blink(1 Hz)
     }
 
-    pin primary_one at -40, -20
-    pin primary_two at -40, 20
-    pin secondary_a_one at 40, -40
-    pin secondary_a_two at 40, -20
-    pin secondary_b_one at 40, 20
-    pin secondary_b_two at 40, 40
-    label name at 0, -56
-    label value at 0, 60
+    pin primary_one at -80, -80
+    pin primary_two at -80, 80
+    pin secondary_a_one at 80, -120
+    pin secondary_a_two at 80, 0
+    pin secondary_b_one at 80, 40
+    pin secondary_b_two at 80, 160
+    label name at 0, -146
+    label value at 0, 186
 }
