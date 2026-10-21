@@ -979,9 +979,11 @@ public sealed interface ObjectDefinition {
      * @param labels where its texts stand when they were put somewhere by hand — {@code name}, {@code value},
      *               {@code readings} —, from its centre; empty when the sheet places them all
      * @param shows  how an instrument's display reads, when the reader chose ({@code rms}, {@code graph}); empty otherwise
+     * @param unit   the unit of a multi-unit part this places on its own ({@code U4.B at …}); null for the part itself,
+     *               which draws every unit not placed apart and the pins the units share
      */
     record PlacedItem(String id, String mark, String net, double x, double y, double rotation, boolean mirrored,
-                      Map<String, LabelOffset> labels, List<String> shows) {
+                      Map<String, LabelOffset> labels, List<String> shows, String unit) {
 
         /** The texts a part has, each placed by hand or by the sheet. */
         private static final Set<String> TEXTS = Set.of("name", "value", "readings");
@@ -998,7 +1000,17 @@ public sealed interface ObjectDefinition {
         private static final Set<String> NAMED = Set.of("label", "port", "global");
 
         public PlacedItem(String id, String mark, String net, double x, double y, double rotation, boolean mirrored) {
-            this(id, mark, net, x, y, rotation, mirrored, Map.of(), List.of());
+            this(id, mark, net, x, y, rotation, mirrored, Map.of(), List.of(), null);
+        }
+
+        public PlacedItem(String id, String mark, String net, double x, double y, double rotation, boolean mirrored,
+                          Map<String, LabelOffset> labels, List<String> shows) {
+            this(id, mark, net, x, y, rotation, mirrored, labels, shows, null);
+        }
+
+        /** What the sheet calls this placement: the part's id, or {@code U4.B} for a unit placed on its own. */
+        public String placement() {
+            return unit == null ? id : id + "." + unit;
         }
 
         public PlacedItem {
@@ -1018,6 +1030,10 @@ public sealed interface ObjectDefinition {
             }
             if (mark != null && NAMED.contains(mark) && (net == null || net.isBlank())) {
                 throw new IllegalArgumentException("A " + mark + " names the net it is: '" + id + " " + mark + " vp at x, y'.");
+            }
+            if (unit != null && (mark != null || !unit.matches("[A-Za-z][A-Za-z0-9_]{0,15}"))) {
+                throw new IllegalArgumentException("A unit is placed for a part, named as its component's units line names it: "
+                        + "'U4.B at x, y'.");
             }
         }
     }

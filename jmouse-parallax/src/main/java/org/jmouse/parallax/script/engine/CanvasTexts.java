@@ -79,14 +79,14 @@ final class CanvasTexts {
     private static String layout(String source, SchematicLayout before, SchematicLayout after) {
         Map<String, Object> was = new HashMap<>();
         if (before != null) {
-            before.items().forEach(item -> was.put(item.id(), item));
+            before.items().forEach(item -> was.put(item.placement(), item));
             before.wires().forEach(wire -> was.put(wire.id(), wire));
         }
         Map<String, String> lines = new LinkedHashMap<>();
         Map<String, Object> now = new HashMap<>();
         for (PlacedItem item : after.items()) {
-            lines.put(item.id(), DefinitionWriter.placed(item));
-            now.put(item.id(), item);
+            lines.put(item.placement(), DefinitionWriter.placed(item));
+            now.put(item.placement(), item);
         }
         for (SchematicWire wire : after.wires()) {
             lines.put(wire.id(), DefinitionWriter.wire(wire));

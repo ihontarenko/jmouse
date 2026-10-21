@@ -22,7 +22,7 @@ import java.util.Set;
  */
 final class LayoutLineParser extends JmxLineParser<LayoutLineParser.Laid> {
 
-    private static final String SHAPE = "a layout line is 'ID at x, y', 'ID ground [net] at x, y', "
+    private static final String SHAPE = "a layout line is 'ID at x, y', 'ID.UNIT at x, y', 'ID ground [net] at x, y', "
             + "'ID label|port|global NET at x, y', 'ID common at x, y', 'ID junction at x, y' or 'ID wire from to to'";
     private static final String WIRE = "a wire is 'ID wire PART.pin to PART.pin [via x y, x y …]'";
 
@@ -31,6 +31,9 @@ final class LayoutLineParser extends JmxLineParser<LayoutLineParser.Laid> {
 
     /** The marks that stand without a net: a ground of node 0, a common, a junction. */
     private static final Set<String> MARKS = Set.of("ground", "common", "junction");
+
+    /** A unit's name, as a component's {@code units} line writes it: {@code A}, {@code B}. */
+    private static final String UNIT = "[A-Za-z][A-Za-z0-9_]*";
 
     /** The texts of a part that can be put somewhere by hand, in the order a layout line writes them. */
     static final List<String> LABELS = List.of("name", "value", "readings");
@@ -88,7 +91,17 @@ final class LayoutLineParser extends JmxLineParser<LayoutLineParser.Laid> {
         }
         if (word.equals("at")) {
             cursor.next();
-            return new Item(new Block.LayoutItem(id, Optional.empty(), Optional.empty(), placement()));
+            // 'U4.B at …' places unit B of the part U4 on its own.
+            int dot = id.indexOf('.');
+            if (dot < 0) {
+                return new Item(new Block.LayoutItem(id, Optional.empty(), Optional.empty(), placement()));
+            }
+            String unit = id.substring(dot + 1);
+            if (dot == 0 || !unit.matches(UNIT)) {
+                throw reading.refusal(first, "'" + id + "' is not a part's unit: a unit is placed 'U4.B at x, y'");
+            }
+            return new Item(new Block.LayoutItem(id.substring(0, dot), Optional.of(unit), Optional.empty(), Optional.empty(),
+                    placement()));
         }
         if (MARKS.contains(word) && line.checkValueAt(1, "at")) {
             cursor.shift(2);

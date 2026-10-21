@@ -478,7 +478,7 @@ final class DefinitionWriter {
 
     /** {@code R1 at 240, 200 rotate 90 mirror name at 0, -40}, {@code GND1 ground at 600, 520}. */
     static String placed(ObjectDefinition.PlacedItem item) {
-        StringBuilder line = new StringBuilder(item.id());
+        StringBuilder line = new StringBuilder(item.placement());
         if (item.mark() != null) {
             line.append(' ').append(item.mark());
         }

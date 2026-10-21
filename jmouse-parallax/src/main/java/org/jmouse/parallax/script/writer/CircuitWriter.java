@@ -51,9 +51,10 @@ final class CircuitWriter {
         });
     }
 
-    /** {@code R1 at 240, 200 rotate 90}, {@code GND1 ground at …}, {@code A1 ground agnd at …}, {@code L1 label vp at …}. */
+    /** {@code R1 at 240, 200 rotate 90}, {@code U4.B at …}, {@code GND1 ground at …}, {@code A1 ground agnd at …}, {@code L1 label vp at …}. */
     private static String item(Block.LayoutItem item) {
         StringBuilder line = new StringBuilder(item.id());
+        item.unit().ifPresent(unit -> line.append('.').append(unit));
         item.mark().ifPresent(mark -> line.append(' ').append(mark));
         item.net().ifPresent(net -> line.append(' ').append(net));
         return line.append(" at ").append(placement(item.placement())).toString();

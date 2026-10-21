@@ -710,10 +710,18 @@ public sealed interface Block {
      * {@code J1 junction at 200, 200} are marks that are not parts. A ground mark is node 0 unless it names another:
      * {@code A1 ground agnd at 600, 520} is the net {@code agnd}, a ground of its own that the engine keeps apart from 0.
      *
+     * <p>A part of several units may place each unit where it belongs: {@code U4.B at 1500, 2900} draws unit B there,
+     * with the pins of that unit; the part's own line ({@code U4 at …}) draws the units not placed on their own, and the
+     * pins every unit shares.</p>
+     *
+     * @param unit which unit of a multi-unit part the line places, written {@code U4.B}; empty for the part itself
      * @param mark {@code ground} or {@code junction} for a mark; empty for a part, which the {@code parts} block names
      * @param net  the net a ground mark is; empty for node 0
      */
-    record LayoutItem(String id, Optional<String> mark, Optional<String> net, Placement placement) {
+    record LayoutItem(String id, Optional<String> unit, Optional<String> mark, Optional<String> net, Placement placement) {
+        public LayoutItem(String id, Optional<String> mark, Optional<String> net, Placement placement) {
+            this(id, Optional.empty(), mark, net, placement);
+        }
     }
 
     /**

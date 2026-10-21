@@ -205,7 +205,7 @@ public final class SheetHierarchy {
             ObjectDefinition.SchematicLayout layout = sheet.layout() == null ? null : new ObjectDefinition.SchematicLayout(
                     sheet.layout().items().stream().map(item -> new ObjectDefinition.PlacedItem(block.id() + "_" + item.id(),
                             item.mark(), item.net() == null ? null : net(block, boundary, item.net()), item.x(), item.y(),
-                            item.rotation(), item.mirrored(), item.labels(), item.shows())).toList(),
+                            item.rotation(), item.mirrored(), item.labels(), item.shows(), item.unit())).toList(),
                     sheet.layout().wires().stream().map(wire -> new ObjectDefinition.SchematicWire(block.id() + "_" + wire.id(),
                             terminal(block, wire.from()), terminal(block, wire.to()), wire.bends())).toList());
             return new Circuit(parts, sheet.time(), layout, null, List.of(), List.of(), null, boundary);

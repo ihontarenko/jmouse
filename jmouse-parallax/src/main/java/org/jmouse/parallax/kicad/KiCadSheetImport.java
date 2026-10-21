@@ -21,6 +21,7 @@ import org.jmouse.parallax.object.ObjectDefinition.SchematicWire;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -151,21 +152,18 @@ public final class KiCadSheetImport {
         Map<String, String> numbered = mapping.map(found -> found.pins().isEmpty()
                 ? catalogue.pinsByNumber(found.component()) : found.pins()).orElse(Map.of());
         Map<String, String> pins = new LinkedHashMap<>();
-        Map<String, KiCadPoint> points = new LinkedHashMap<>();
+        // Where each KiCad unit's pins stand on the sheet, by the name the part gives them: `A.output`, `Vcc`.
+        Map<KiCadSymbolInstance, Map<String, KiCadPoint>> unitPoints = new LinkedHashMap<>();
         for (KiCadSymbolInstance unit : units) {
+            Map<String, KiCadPoint> placed = unitPoints.computeIfAbsent(unit, ignored -> new LinkedHashMap<>());
             for (KiCadPin pin : definition.pinsOf(unit.unit())) {
                 String name = numbered.getOrDefault(pin.number(), KiCadSymbolDrawing.pinName(pin));
                 String net = pinNets.getOrDefault(unit.uuid() + ":" + pin.number(), nets.of(id + "_" + name + "_open"));
                 pins.putIfAbsent(name, net);
-                if (unit == first) {
-                    points.putIfAbsent(name, unit.placement().place(pin.at()));
-                }
+                placed.putIfAbsent(name, unit.placement().place(pin.at()));
             }
         }
-        if (units.size() > 1) {
-            notes.add(id + " is drawn by its unit " + KiCadSymbolDrawing.unitLetter(first.unit()) + " alone: a jMX sheet places "
-                    + "a part once, and its other units are wired by their nets.");
-        }
+        Map<String, KiCadPoint> points = unitPoints.get(first);
         Map<String, String> overrides = new LinkedHashMap<>();
         Optional<KiCadCatalogue.PartDrawing> drawn = Optional.empty();
         String component;
@@ -183,7 +181,7 @@ public final class KiCadSheetImport {
                     + "named '" + component + "' is what simulating it needs.");
         }
         if (drawn.isPresent()) {
-            placeAligned(id, drawn.get(), points);
+            placeUnits(id, drawn.get(), first, unitPoints);
         } else if (mapping.isPresent()) {
             // A part is drawn only with a symbol its component offers: one with none stands where KiCad places it.
             notes.add(id + ": " + component + " has no symbol of its own, so it stands where KiCad places it, drawn as "
@@ -193,6 +191,10 @@ public final class KiCadSheetImport {
             symbol = KiCadSymbolDrawing.slugOf(definition, first.unit());
             symbols.add(new SymbolUse(definition, first.unit(), Map.of()));
             placeAsKiCad(id, first, points);
+        }
+        if (units.size() > 1 && drawn.isEmpty()) {
+            notes.add(id + " is drawn by its unit " + KiCadSymbolDrawing.unitLetter(first.unit()) + " alone: KiCad draws "
+                    + "each of its units apart and a part is drawn with one symbol; the other units are wired by their nets.");
         }
         elements.add(new CircuitElement(id, ObjectDefinition.CircuitElementType.MODEL, null, null, "", component, pins,
                 overrides, symbol));
@@ -223,14 +225,63 @@ public final class KiCadSheetImport {
     }
 
     /**
-     * A part drawn with the catalogue's symbol, turned, mirrored and moved so its pins stand where KiCad's do: of the
-     * eight ways it can stand, the one whose pins are nearest KiCad's.
+     * A part of the catalogue drawn where KiCad draws its units. The first unit KiCad places is the part's own line; every
+     * other whose pins all belong to one unit of the component — {@code B.output}, {@code B.inverting_input} — is placed
+     * on its own, {@code U4.B at …}, with the same symbol; a unit of shared pins alone (KiCad's power unit) is drawn by the
+     * part's symbol, which carries those pins, and its wires are led there.
      */
-    private void placeAligned(String id, KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
-        // A block's pin, A.output, stands where the symbol draws its pin, output: a symbol draws one block.
+    private void placeUnits(String id, KiCadCatalogue.PartDrawing drawing, KiCadSymbolInstance first,
+                            Map<KiCadSymbolInstance, Map<String, KiCadPoint>> unitPoints) {
+        Map<String, KiCadPoint> own = unitPoints.get(first);
+        Optional<String> partUnit = componentUnitOf(own.keySet());
+        double[] part = placeAligned(id, null, drawing, own);
+        Map<String, KiCadPoint> shared = new LinkedHashMap<>();
+        unitPoints.forEach((unit, points) -> {
+            if (unit == first) {
+                return;
+            }
+            Optional<String> letter = componentUnitOf(points.keySet());
+            if (letter.isPresent() && !letter.equals(partUnit)) {
+                placeAligned(id, letter.get(), drawing, points);
+            } else {
+                points.forEach(shared::putIfAbsent);
+            }
+        });
+        shared.forEach((pin, point) -> {
+            double[] onSymbol = drawing.pins().get(symbolPinOf(pin));
+            double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, part[2], part[3] == 1);
+            terminal(point, id + "." + pin, new double[] {part[0] + turned[0], part[1] + turned[1]});
+        });
+    }
+
+    /** The one unit of the component a KiCad unit's pins belong to ({@code B} for {@code B.output}), when they all do. */
+    private static Optional<String> componentUnitOf(Collection<String> pins) {
+        Set<String> letters = new HashSet<>();
+        for (String pin : pins) {
+            int dot = pin.indexOf('.');
+            if (dot > 0) {
+                letters.add(pin.substring(0, dot));
+            }
+        }
+        return letters.size() == 1 ? Optional.of(letters.iterator().next()) : Optional.empty();
+    }
+
+    /** A unit's pin, {@code A.output}, is the pin the symbol draws, {@code output}: a symbol draws one unit. */
+    private static String symbolPinOf(String pin) {
+        return pin.substring(pin.indexOf('.') + 1);
+    }
+
+    /**
+     * A part, or one of its units, drawn with the catalogue's symbol, turned, mirrored and moved so its pins stand where
+     * KiCad's do: of the eight ways it can stand, the one whose pins are nearest KiCad's.
+     *
+     * @param unit the unit placed on its own, {@code B}; null for the part's own line
+     * @return where it stands: x, y, rotation, and 1 when mirrored
+     */
+    private double[] placeAligned(String id, String unit, KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
         Map<String, double[]> local = new LinkedHashMap<>();
         points.keySet().forEach(pin -> {
-            double[] point = drawing.pins().get(pin.replaceFirst("^[A-Z]\\.", ""));
+            double[] point = drawing.pins().get(symbolPinOf(pin));
             if (point != null) {
                 local.put(pin, point);
             }
@@ -268,12 +319,13 @@ public final class KiCadSheetImport {
         double y = grid(best[1]);
         boolean mirrored = best[3] == 1;
         double rotation = best[2];
-        items.add(new PlacedItem(id, null, null, x, y, rotation, mirrored));
+        items.add(new PlacedItem(id, null, null, x, y, rotation, mirrored, Map.of(), List.of(), unit));
         points.forEach((pin, point) -> {
             double[] onSymbol = local.get(pin);
             double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, rotation, mirrored);
             terminal(point, id + "." + pin, new double[] {x + turned[0], y + turned[1]});
         });
+        return new double[] {x, y, rotation, mirrored ? 1 : 0};
     }
 
     /** A point of a symbol on the sheet as jMX turns it: mirrored left to right first, then turned clockwise. */
