@@ -1,0 +1,19 @@
+footprint "Pin header, 2.00 mm pitch, 2 × 2, vertical" as pin-header-2x2-pitch-200-vertical-footprint {
+    meta {
+        summary "Pin header, 2.00 mm pitch, 2 rows of 2, upright, through-hole"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60603-13 grid"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-header-2-00 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.5: drill 0.95, pad 1.75, pin 1 square.
+    pad "1" through-hole rectangle at -1, -1 size 1.75 x 1.75 drill 0.95
+    pad "2" through-hole circle at 1, -1 size 1.75 x 1.75 drill 0.95
+    pad "3" through-hole circle at -1, 1 size 1.75 x 1.75 drill 0.95
+    pad "4" through-hole circle at 1, 1 size 1.75 x 1.75 drill 0.95
+    outline fabrication width 0.1 "M-1 -2H2V2H-2V-1Z"
+    outline silkscreen width 0.12 "M-2.11 -2.11H2.11V2.11H-2.11Z"
+    outline silkscreen filled "M-2.91 -1A0.3 0.3 0 1 0 -2.31 -1A0.3 0.3 0 1 0 -2.91 -1Z"
+    outline courtyard width 0.05 "M-2.5 -2.5H2.5V2.5H-2.5Z"
+}

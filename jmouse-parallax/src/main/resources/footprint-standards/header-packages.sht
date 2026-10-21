@@ -1,4 +1,5 @@
-# Pin headers and sockets by pitch: square leads on a grid, every row count with every pin count of the ranges. A member
+# A terminal block's pin is round: `thickness 0`, its hole drilled for its diameter.
+# Pin headers, sockets and screw terminal blocks by pitch: square leads on a grid, every row count with every pin count of the ranges. A member
 # is named `<name>-<rows>x<pins>-pitch-<pitch in hundredths of a millimetre>-vertical`.
 sheet "Header packages" as header-packages {
     description "Pin headers and sockets, square leads on a grid."
@@ -21,6 +22,82 @@ sheet "Header packages" as header-packages {
         thickness 0.64 mm
         rows 1, 2
         pins 1 .. 40
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    pin-header-2-00 "Pin header, 2.00 mm pitch" source standard "IEC 60603-13 grid" {
+        name pin-header
+        pitch 2 mm
+        lead 0.5 mm
+        thickness 0.5 mm
+        rows 1, 2
+        pins 1 .. 40
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    pin-socket-2-00 "Pin socket, 2.00 mm pitch" source standard "IEC 60603-13 grid" {
+        name pin-socket
+        pitch 2 mm
+        lead 0.5 mm
+        thickness 0.5 mm
+        rows 1, 2
+        pins 1 .. 40
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    pin-header-1-27 "Pin header, 1.27 mm pitch" source standard "IEC 60603-13 grid" {
+        name pin-header
+        pitch 1.27 mm
+        lead 0.4 mm
+        thickness 0.4 mm
+        rows 1, 2
+        pins 1 .. 40
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    pin-socket-1-27 "Pin socket, 1.27 mm pitch" source standard "IEC 60603-13 grid" {
+        name pin-socket
+        pitch 1.27 mm
+        lead 0.4 mm
+        thickness 0.4 mm
+        rows 1, 2
+        pins 1 .. 40
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    terminal-block-5-00 "Screw terminal block, 5.00 mm pitch" source standard "IEC 60947-7-1 terminal blocks, the makers' pin sizes" {
+        name terminal-block
+        pitch 5 mm
+        lead 1.1 mm
+        thickness 0 mm
+        rows 1
+        pins 2 .. 12
+        body-depth 7.6 mm
+        standing horizontal
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    terminal-block-5-08 "Screw terminal block, 5.08 mm pitch" source standard "IEC 60947-7-1 terminal blocks, the makers' pin sizes" {
+        name terminal-block
+        pitch 5.08 mm
+        lead 1.1 mm
+        thickness 0 mm
+        rows 1
+        pins 2 .. 12
+        body-depth 7.6 mm
+        standing horizontal
+        folder "electromechanical/connectors/through-hole"
+    }
+
+    terminal-block-3-50 "Screw terminal block, 3.50 mm pitch" source standard "IEC 60947-7-1 terminal blocks, the makers' pin sizes" {
+        name terminal-block
+        pitch 3.5 mm
+        lead 0.9 mm
+        thickness 0 mm
+        rows 1
+        pins 2 .. 12
+        body-depth 7 mm
+        standing horizontal
         folder "electromechanical/connectors/through-hole"
     }
 }

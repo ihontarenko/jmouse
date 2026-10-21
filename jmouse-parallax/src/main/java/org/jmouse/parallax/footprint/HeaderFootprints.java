@@ -48,7 +48,8 @@ final class HeaderFootprints implements FootprintFamily {
             }
         }
 
-        double bodyWidth = rows * pitch;
+        // A terminal block's body is deeper than its pitch: the screw and the wire's mouth stand behind the row.
+        double bodyWidth = header.has("body-depth") ? header.length("body-depth") : rows * pitch;
         double bodyLength = pinsPerRow * pitch;
         double silkHalfWidth = bodyWidth / 2 + drawing.silkscreenOffset();
         double silkHalfLength = bodyLength / 2 + drawing.silkscreenOffset();
@@ -61,9 +62,10 @@ final class HeaderFootprints implements FootprintFamily {
                         Math.max(bodyLength, (pinsPerRow - 1) * pitch + pad) / 2 + holes.courtyard()));
 
         String name = header.word("name");
-        String pitchWord = String.valueOf(Math.round(pitch * 100));
-        String slug = name + "-" + rows + "x" + pinsPerRow + "-pitch-" + pitchWord + "-vertical-footprint";
-        String title = header.title() + ", " + rows + " × " + pinsPerRow + ", vertical";
+        String pitchWord = PackageTable.hundredths(pitch);
+        String standing = header.optionalWord("standing").orElse("vertical");
+        String slug = name + "-" + rows + "x" + pinsPerRow + "-pitch-" + pitchWord + "-" + standing + "-footprint";
+        String title = header.title() + ", " + rows + " × " + pinsPerRow + ", " + standing;
         String summary = header.title() + ", " + rows + (rows == 1 ? " row" : " rows") + " of " + pinsPerRow
                 + ", upright, through-hole";
         List<String> notes = List.of(

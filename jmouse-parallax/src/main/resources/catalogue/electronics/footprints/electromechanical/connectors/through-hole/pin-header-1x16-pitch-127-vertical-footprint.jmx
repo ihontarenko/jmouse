@@ -1,0 +1,31 @@
+footprint "Pin header, 1.27 mm pitch, 1 × 16, vertical" as pin-header-1x16-pitch-127-vertical-footprint {
+    meta {
+        summary "Pin header, 1.27 mm pitch, 1 row of 16, upright, through-hole"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60603-13 grid"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-header-1-27 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.4: drill 0.8, pad 1.02, pin 1 square.
+    pad "1" through-hole rectangle at 0, -9.525 size 1.02 x 1.02 drill 0.8
+    pad "2" through-hole circle at 0, -8.255 size 1.02 x 1.02 drill 0.8
+    pad "3" through-hole circle at 0, -6.985 size 1.02 x 1.02 drill 0.8
+    pad "4" through-hole circle at 0, -5.715 size 1.02 x 1.02 drill 0.8
+    pad "5" through-hole circle at 0, -4.445 size 1.02 x 1.02 drill 0.8
+    pad "6" through-hole circle at 0, -3.175 size 1.02 x 1.02 drill 0.8
+    pad "7" through-hole circle at 0, -1.905 size 1.02 x 1.02 drill 0.8
+    pad "8" through-hole circle at 0, -0.635 size 1.02 x 1.02 drill 0.8
+    pad "9" through-hole circle at 0, 0.635 size 1.02 x 1.02 drill 0.8
+    pad "10" through-hole circle at 0, 1.905 size 1.02 x 1.02 drill 0.8
+    pad "11" through-hole circle at 0, 3.175 size 1.02 x 1.02 drill 0.8
+    pad "12" through-hole circle at 0, 4.445 size 1.02 x 1.02 drill 0.8
+    pad "13" through-hole circle at 0, 5.715 size 1.02 x 1.02 drill 0.8
+    pad "14" through-hole circle at 0, 6.985 size 1.02 x 1.02 drill 0.8
+    pad "15" through-hole circle at 0, 8.255 size 1.02 x 1.02 drill 0.8
+    pad "16" through-hole circle at 0, 9.525 size 1.02 x 1.02 drill 0.8
+    outline fabrication width 0.1 "M-0.212 -10.16H0.635V10.16H-0.635V-9.737Z"
+    outline silkscreen width 0.12 "M-0.745 -10.27H0.745V10.27H-0.745Z"
+    outline silkscreen filled "M-1.545 -9.525A0.3 0.3 0 1 0 -0.945 -9.525A0.3 0.3 0 1 0 -1.545 -9.525Z"
+    outline courtyard width 0.05 "M-1.15 -10.65H1.15V10.65H-1.15Z"
+}

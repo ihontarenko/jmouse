@@ -1,0 +1,41 @@
+footprint "Pin socket, 2.00 mm pitch, 2 × 13, vertical" as pin-socket-2x13-pitch-200-vertical-footprint {
+    meta {
+        summary "Pin socket, 2.00 mm pitch, 2 rows of 13, upright, through-hole"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60603-13 grid"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-socket-2-00 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.5: drill 0.95, pad 1.75, pin 1 square.
+    pad "1" through-hole rectangle at -1, -12 size 1.75 x 1.75 drill 0.95
+    pad "2" through-hole circle at 1, -12 size 1.75 x 1.75 drill 0.95
+    pad "3" through-hole circle at -1, -10 size 1.75 x 1.75 drill 0.95
+    pad "4" through-hole circle at 1, -10 size 1.75 x 1.75 drill 0.95
+    pad "5" through-hole circle at -1, -8 size 1.75 x 1.75 drill 0.95
+    pad "6" through-hole circle at 1, -8 size 1.75 x 1.75 drill 0.95
+    pad "7" through-hole circle at -1, -6 size 1.75 x 1.75 drill 0.95
+    pad "8" through-hole circle at 1, -6 size 1.75 x 1.75 drill 0.95
+    pad "9" through-hole circle at -1, -4 size 1.75 x 1.75 drill 0.95
+    pad "10" through-hole circle at 1, -4 size 1.75 x 1.75 drill 0.95
+    pad "11" through-hole circle at -1, -2 size 1.75 x 1.75 drill 0.95
+    pad "12" through-hole circle at 1, -2 size 1.75 x 1.75 drill 0.95
+    pad "13" through-hole circle at -1, 0 size 1.75 x 1.75 drill 0.95
+    pad "14" through-hole circle at 1, 0 size 1.75 x 1.75 drill 0.95
+    pad "15" through-hole circle at -1, 2 size 1.75 x 1.75 drill 0.95
+    pad "16" through-hole circle at 1, 2 size 1.75 x 1.75 drill 0.95
+    pad "17" through-hole circle at -1, 4 size 1.75 x 1.75 drill 0.95
+    pad "18" through-hole circle at 1, 4 size 1.75 x 1.75 drill 0.95
+    pad "19" through-hole circle at -1, 6 size 1.75 x 1.75 drill 0.95
+    pad "20" through-hole circle at 1, 6 size 1.75 x 1.75 drill 0.95
+    pad "21" through-hole circle at -1, 8 size 1.75 x 1.75 drill 0.95
+    pad "22" through-hole circle at 1, 8 size 1.75 x 1.75 drill 0.95
+    pad "23" through-hole circle at -1, 10 size 1.75 x 1.75 drill 0.95
+    pad "24" through-hole circle at 1, 10 size 1.75 x 1.75 drill 0.95
+    pad "25" through-hole circle at -1, 12 size 1.75 x 1.75 drill 0.95
+    pad "26" through-hole circle at 1, 12 size 1.75 x 1.75 drill 0.95
+    outline fabrication width 0.1 "M-1 -13H2V13H-2V-12Z"
+    outline silkscreen width 0.12 "M-2.11 -13.11H2.11V13.11H-2.11Z"
+    outline silkscreen filled "M-2.91 -12A0.3 0.3 0 1 0 -2.31 -12A0.3 0.3 0 1 0 -2.91 -12Z"
+    outline courtyard width 0.05 "M-2.5 -13.5H2.5V13.5H-2.5Z"
+}

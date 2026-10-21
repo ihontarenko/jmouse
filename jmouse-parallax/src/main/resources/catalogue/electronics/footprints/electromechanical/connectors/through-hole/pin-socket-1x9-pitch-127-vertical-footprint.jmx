@@ -1,0 +1,24 @@
+footprint "Pin socket, 1.27 mm pitch, 1 × 9, vertical" as pin-socket-1x9-pitch-127-vertical-footprint {
+    meta {
+        summary "Pin socket, 1.27 mm pitch, 1 row of 9, upright, through-hole"
+        category circuits
+        tags electronics, footprint, through-hole
+        source "IEC 60603-13 grid"
+        license "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-socket-1-27 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.4: drill 0.8, pad 1.02, pin 1 square.
+    pad "1" through-hole rectangle at 0, -5.08 size 1.02 x 1.02 drill 0.8
+    pad "2" through-hole circle at 0, -3.81 size 1.02 x 1.02 drill 0.8
+    pad "3" through-hole circle at 0, -2.54 size 1.02 x 1.02 drill 0.8
+    pad "4" through-hole circle at 0, -1.27 size 1.02 x 1.02 drill 0.8
+    pad "5" through-hole circle at 0, 0 size 1.02 x 1.02 drill 0.8
+    pad "6" through-hole circle at 0, 1.27 size 1.02 x 1.02 drill 0.8
+    pad "7" through-hole circle at 0, 2.54 size 1.02 x 1.02 drill 0.8
+    pad "8" through-hole circle at 0, 3.81 size 1.02 x 1.02 drill 0.8
+    pad "9" through-hole circle at 0, 5.08 size 1.02 x 1.02 drill 0.8
+    outline fabrication width 0.1 "M-0.212 -5.715H0.635V5.715H-0.635V-5.292Z"
+    outline silkscreen width 0.12 "M-0.745 -5.825H0.745V5.825H-0.745Z"
+    outline silkscreen filled "M-1.545 -5.08A0.3 0.3 0 1 0 -0.945 -5.08A0.3 0.3 0 1 0 -1.545 -5.08Z"
+    outline courtyard width 0.05 "M-1.15 -6.2H1.15V6.2H-1.15Z"
+}
