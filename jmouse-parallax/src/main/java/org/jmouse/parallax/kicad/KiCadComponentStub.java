@@ -12,6 +12,7 @@ import org.jmouse.parallax.script.Meta;
 import org.jmouse.parallax.script.Meta.MetaValue;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,6 +36,12 @@ public final class KiCadComponentStub {
     private static final String RIGHT  = "right";
     private static final String TOP    = "top";
     private static final String BOTTOM = "bottom";
+
+    /** Pins by their number as a package counts them: a number by its value, a grid name (A3) after, by its letters. */
+    private static final Comparator<KiCadPin> PACKAGE_ORDER = Comparator
+            .comparing((KiCadPin pin) -> !pin.number().matches("\\d+"))
+            .thenComparingLong(pin -> pin.number().matches("\\d+") ? Long.parseLong(pin.number()) : 0)
+            .thenComparing(KiCadPin::number);
 
     private KiCadComponentStub() {
     }
@@ -63,7 +70,9 @@ public final class KiCadComponentStub {
         List<Pin> pins = new ArrayList<>();
         Set<String> named = new LinkedHashSet<>();
         for (int unit : KiCadSymbolDrawing.units(symbol)) {
-            for (KiCadPin pin : symbol.pinsOf(unit)) {
+            // KiCad keeps a unit's pins in the order they were drawn; the package's order is by number, 1, 2, … 10.
+            List<KiCadPin> unitPins = symbol.pinsOf(unit).stream().sorted(PACKAGE_ORDER).toList();
+            for (KiCadPin pin : unitPins) {
                 String name = KiCadSymbolDrawing.pinName(pin);
                 if (!named.add(name)) {
                     continue;
