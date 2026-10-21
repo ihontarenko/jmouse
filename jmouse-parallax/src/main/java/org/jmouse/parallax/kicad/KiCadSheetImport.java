@@ -184,12 +184,14 @@ public final class KiCadSheetImport {
         }
         if (drawn.isPresent()) {
             placeAligned(id, drawn.get(), points);
+        } else if (mapping.isPresent()) {
+            // A part is drawn only with a symbol its component offers: one with none stands where KiCad places it.
+            notes.add(id + ": " + component + " has no symbol of its own, so it stands where KiCad places it, drawn as "
+                    + "its component is.");
+            placeAsKiCad(id, first, points);
         } else {
             symbol = KiCadSymbolDrawing.slugOf(definition, first.unit());
-            // A symbol draws one block: its pin is output, the part's A.output.
-            Map<String, String> drawnNames = new LinkedHashMap<>();
-            numbered.forEach((number, name) -> drawnNames.put(number, name.replaceFirst("^[A-Z]\\.", "")));
-            symbols.add(new SymbolUse(definition, first.unit(), drawnNames));
+            symbols.add(new SymbolUse(definition, first.unit(), Map.of()));
             placeAsKiCad(id, first, points);
         }
         elements.add(new CircuitElement(id, ObjectDefinition.CircuitElementType.MODEL, null, null, "", component, pins,

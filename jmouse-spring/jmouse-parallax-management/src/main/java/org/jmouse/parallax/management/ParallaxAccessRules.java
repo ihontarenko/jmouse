@@ -70,7 +70,7 @@ public final class ParallaxAccessRules {
     static final List<Class<?>> CONTROLLERS = List.of(
             CatalogueController.class, ComputationController.class, DocumentController.class, SpiceController.class,
             FormulaController.class, SubjectController.class, SceneController.class, CollectionController.class,
-            ParallaxAdministrationController.class);
+            ParallaxAdministrationController.class, KiCadController.class);
 
     /** The capabilities some route here is gated by; each must be mapped before the rules can be built. */
     private static final Set<ParallaxCapability> REQUIRED = EnumSet.of(
@@ -146,6 +146,8 @@ public final class ParallaxAccessRules {
                 .method(CatalogueController.class, "ownedObjects", aboutOwner(sceneRead))
                 .method(CatalogueController.class, "ownedSheets", aboutOwner(sceneRead))
                 .method(CatalogueController.class, "createOwned", aboutOwner(sceneWrite))
+                // A KiCad design imported is circuits and symbols written into the owner's place, as createOwned writes one.
+                .method(KiCadController.class, "importDesign", aboutOwner(sceneWrite))
 
                 // Every other computation route decides per object and per job, inside its service.
                 .type(ComputationController.class, jobAdminister)

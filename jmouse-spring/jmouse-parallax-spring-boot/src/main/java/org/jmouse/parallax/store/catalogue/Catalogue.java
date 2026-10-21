@@ -722,7 +722,11 @@ public class Catalogue {
         }
     }
 
-    /** A part drawn with another symbol than its default may only use one its component's {@code symbol uses} line names. */
+    /**
+     * A part drawn with another symbol than its default may only use one its component's {@code symbol uses} line names.
+     * A part whose component the catalogue does not hold yet — a KiCad part waiting for its model — has no symbols to
+     * choose from, and is drawn with the one it names; simulating it names the model it needs.
+     */
     private void validatePartSymbols(ObjectDefinition.Circuit circuit) {
         for (ObjectDefinition.CircuitElement element : circuit.elements()) {
             if (element.symbol() == null) {
@@ -733,7 +737,7 @@ public class Catalogue {
             try {
                 variants = componentModels.describe(component).symbolVariants();
             } catch (ParallaxProblem.NotFound missing) {
-                variants = List.of();
+                continue;
             }
             if (!variants.contains(element.symbol())) {
                 throw ParallaxProblem.invalid("Part '" + element.id() + "' is drawn with '" + element.symbol() + "', which '"

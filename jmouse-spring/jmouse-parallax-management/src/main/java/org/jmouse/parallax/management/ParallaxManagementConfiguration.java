@@ -7,6 +7,7 @@ import org.jmouse.parallax.spice.SpiceModelCarriers;
 import org.jmouse.parallax.spice.SpiceSimulator;
 import org.jmouse.parallax.store.catalogue.Catalogue;
 import org.jmouse.parallax.store.catalogue.ComponentModels;
+import org.jmouse.parallax.store.kicad.KiCadImports;
 import org.jmouse.parallax.store.catalogue.Instruments;
 import org.jmouse.parallax.store.catalogue.ShippedObjects;
 import org.jmouse.parallax.store.collection.Collections;
@@ -89,6 +90,12 @@ public class ParallaxManagementConfiguration {
                                                    ObjectProvider<SpiceSimulator> simulator) {
         return new SpiceController(componentModels, carriers.getIfAvailable(SpiceModelCarriers::standard), authority,
                 Optional.ofNullable(simulator.getIfAvailable()));
+    }
+
+    /** 📥 KiCad in: a design's sheets imported into an owner's place. */
+    @Bean
+    public KiCadController parallaxKiCadController(KiCadImports imports) {
+        return new KiCadController(imports);
     }
 
     @Bean

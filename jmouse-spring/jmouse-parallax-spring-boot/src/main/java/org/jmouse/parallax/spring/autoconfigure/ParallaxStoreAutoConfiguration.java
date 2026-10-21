@@ -45,6 +45,7 @@ import org.jmouse.parallax.store.scene.Scenes;
 import org.jmouse.parallax.store.statistics.ParallaxStatistics;
 import org.jmouse.parallax.store.subject.Subjects;
 import org.jmouse.parallax.store.support.ParallaxJson;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -54,6 +55,8 @@ import org.jmouse.parallax.store.spice.SpiceConfigured;
 import org.jmouse.parallax.spice.NgspiceProcess;
 import org.jmouse.parallax.spice.SpiceSimulator;
 import org.jmouse.parallax.store.spice.SpiceProperties;
+import org.jmouse.parallax.store.kicad.KiCadImports;
+import org.jmouse.parallax.store.kicad.KiCadProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -92,11 +95,13 @@ import java.time.Clock;
  *     <li>{@code jmouse.parallax.computation.*} — {@link ComputationProperties};</li>
  *     <li>{@code jmouse.parallax.catalogue.*} — {@link CatalogueProperties};</li>
  *     <li>{@code jmouse.parallax.spice.*} — {@link SpiceProperties}: the second engine, when a command is set.</li>
+ *     <li>{@code jmouse.parallax.kicad.*} — {@link KiCadProperties}: the library map a KiCad import reads.</li>
  * </ul>
  */
 @AutoConfiguration(after = ParallaxJpaAutoConfiguration.class)
 @ConditionalOnClass({ObjectStore.class, TransactionTemplate.class, ObjectMapper.class})
-@EnableConfigurationProperties({ComputationProperties.class, CatalogueProperties.class, SpiceProperties.class})
+@EnableConfigurationProperties({ComputationProperties.class, CatalogueProperties.class, SpiceProperties.class,
+        KiCadProperties.class})
 public class ParallaxStoreAutoConfiguration {
 
     // ── What the services share ──────────────────────────────────────────────────────────────────────────────────
@@ -523,5 +528,16 @@ public class ParallaxStoreAutoConfiguration {
     @Conditional(SpiceConfigured.class)
     public SpiceSimulator parallaxSpiceSimulator(SpiceProperties properties) {
         return new NgspiceProcess(properties.command(), properties.timeout());
+    }
+
+    /**
+     * 📥 KiCad in: a design's sheets imported and stored in an owner's place, its symbols matched to the catalogue's
+     * components through the library map {@code jmouse.parallax.kicad.library-map} names.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public KiCadImports parallaxKiCadImports(Catalogue catalogue, ObjectStore objects, ComponentModels components,
+                                             ResourceLoader resources, KiCadProperties properties) {
+        return new KiCadImports(catalogue, objects, components, resources, properties);
     }
 }
