@@ -4,6 +4,7 @@ import org.jmouse.parallax.script.Block;
 import org.jmouse.units.Quantity;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Single lines of a document, written as {@link DocumentWriter} writes them inside their blocks: what an editor that
@@ -66,5 +67,11 @@ public final class DocumentLines {
      */
     public static List<String> drawingLines(Block.Symbol drawing) {
         return SymbolWriter.plainLines(drawing);
+    }
+
+    /** A footprint's statements in the order its document writes them — its pads, then its outlines —: the lines the footprint editor redraws. */
+    public static List<String> footprintLines(Block.Footprint footprint) {
+        return Stream.concat(footprint.pads().stream().map(FootprintWriter::pad),
+                footprint.outlines().stream().map(FootprintWriter::outline)).toList();
     }
 }

@@ -41,7 +41,7 @@ public class DocumentController {
                                    String title, String summary, String category) {
     }
 
-    /** The drawing canvas: the drawing as JSON, and the head fields it edits beside the sheet. */
+    /** A drawing canvas — a symbol's, a footprint's —: the drawing as JSON, and the head fields it edits beside the sheet. */
     public record DrawingRequest(String source, String drawing, String title, String category) {
     }
 
@@ -75,6 +75,12 @@ public class DocumentController {
     @PublicEndpoint("changing a text the caller sent; nothing is read from or written to the catalogue")
     public EditedDocument drawing(@RequestBody DrawingRequest request) {
         return editing.patchSymbol(request.source(), request.drawing(), request.title(), request.category());
+    }
+
+    @PostMapping("/footprint")
+    @PublicEndpoint("changing a text the caller sent; nothing is read from or written to the catalogue")
+    public EditedDocument footprint(@RequestBody DrawingRequest request) {
+        return editing.patchFootprint(request.source(), request.drawing(), request.title(), request.category());
     }
 
     @PostMapping("/symbol")

@@ -118,6 +118,11 @@ public final class ExperienceDefinitions {
         return CanvasTexts.symbol(source, drawing, new CanvasTexts.Head(title, null, category));
     }
 
+    /** What the footprint editor drew — its pads and outlines as the drawing's JSON — written into the footprint's text line by line. */
+    public static String patchFootprint(String source, String drawing, String title, String category) {
+        return CanvasTexts.footprint(source, drawing, new CanvasTexts.Head(title, null, category));
+    }
+
     /** The structure and what is derived from it, each with the line it follows from (DECISIONS §15). */
     public static ObjectExplanation explain(String source, DefinedObject defined) {
         return ObjectExplanation.of(source, defined);

@@ -102,6 +102,12 @@ public class DocumentEditing {
         return patched(() -> ExperienceDefinitions.patchSymbol(source, drawing, title, category));
     }
 
+    /** What the footprint editor drew, written into the footprint's text line by line. */
+    public EditedDocument patchFootprint(String source, String drawing, String title, String category) {
+        requireText(source);
+        return patched(() -> ExperienceDefinitions.patchFootprint(source, drawing, title, category));
+    }
+
     private EditedDocument patched(java.util.function.Supplier<String> patch) {
         String edited;
         try {

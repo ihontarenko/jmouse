@@ -194,19 +194,34 @@ final class CanvasTexts {
         return text;
     }
 
-    // ─── symbol ─────────────────────────────────────────────────────────────────────────────────────
+    // ─── symbol and footprint ───────────────────────────────────────────────────────────────────────
+
+    /** What the drawing canvas drew written into the symbol's text: its size, path, pin, label and indicator lines. */
+    static String symbol(String source, String drawing, Head head) {
+        return redrawn(head(source, head), DocumentLines.drawingLines(DefinitionBlocks.symbol(drawing)), Kind.DRAWING_LINES);
+    }
+
+    /** What the footprint editor drew written into the footprint's text: its pad and outline lines. */
+    static String footprint(String source, String drawing, Head head) {
+        // Read by its shape, not compiled: a new footprint arrives as its head alone, and a footprint without pads is refused.
+        if (!Kind.FOOTPRINT.keyword().equals(DocumentOutline.of(source).kind())) {
+            throw new IllegalArgumentException("The footprint editor draws a footprint; this text is not one.");
+        }
+        return redrawn(head(source, head), DocumentLines.footprintLines(FootprintDrawing.fromJson(drawing).block()),
+                Kind.FOOTPRINT_LINES);
+    }
 
     /**
-     * A drawing's lines in place of the ones written: the n-th line of the drawing replaces the n-th drawing statement
-     * when they differ, extra lines are added after the last statement and missing ones removed.
+     * A drawing's lines in place of the ones written — the statements of the body's top level that `words` start —: the
+     * n-th line of the drawing replaces the n-th drawing statement when they differ, extra lines are added after the last
+     * statement and missing ones removed.
      */
-    static String symbol(String source, String drawing, Head head) {
-        String text = head(source, head);
-        List<String> lines = DocumentLines.drawingLines(DefinitionBlocks.symbol(drawing));
+    private static String redrawn(String source, List<String> lines, Set<String> words) {
+        String text = source;
         int position = 0;
         while (true) {
             DocumentOutline outline = DocumentOutline.of(text);
-            List<Integer> drawn = drawingStatements(outline);
+            List<Integer> drawn = drawingStatements(outline, words);
             if (position < Math.min(lines.size(), drawn.size())) {
                 DocumentOutline.Statement statement = outline.statements().get(drawn.get(position));
                 if (!statement.span().of(text).strip().replaceAll("\\s+", " ").equals(lines.get(position))) {
@@ -226,10 +241,10 @@ final class CanvasTexts {
         }
     }
 
-    private static List<Integer> drawingStatements(DocumentOutline outline) {
+    private static List<Integer> drawingStatements(DocumentOutline outline, Set<String> words) {
         List<Integer> drawn = new ArrayList<>();
         for (int index = 0; index < outline.statements().size(); index++) {
-            if (Kind.DRAWING_LINES.contains(outline.statements().get(index).word())
+            if (words.contains(outline.statements().get(index).word())
                     && outline.statements().get(index).body().isEmpty()) {
                 drawn.add(index);
             }
