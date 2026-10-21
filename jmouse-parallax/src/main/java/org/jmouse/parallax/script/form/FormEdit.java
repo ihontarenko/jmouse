@@ -22,6 +22,8 @@ public record FormEdit(Action action, int statement, int line, Map<String, Strin
     public enum Action {
         /** The document's title. */
         SET_TITLE,
+        /** The address the document is stored under, written after {@code as}: {@code text} is the new one. */
+        SET_ADDRESS,
         /** One line inside a block, from its fields. */
         SET_LINE,
         /** A new line at the end of a block, from its fields. */

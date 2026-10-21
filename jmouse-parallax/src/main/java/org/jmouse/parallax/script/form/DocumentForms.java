@@ -1,6 +1,7 @@
 package org.jmouse.parallax.script.form;
 
 import org.jmouse.parallax.script.ExperienceNotation;
+import org.jmouse.parallax.support.ParallaxIdentifiers;
 import org.jmouse.parallax.script.ExperienceParseException;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.Kind;
@@ -166,6 +167,7 @@ public final class DocumentForms {
         DocumentOutline outline = DocumentOutline.of(source);
         return switch (edit.action()) {
             case SET_TITLE -> replace(source, outline.title(), edit.text().replace("\"", "'").strip());
+            case SET_ADDRESS -> setAddress(source, outline, edit.text().strip());
             case SET_LINE -> setLine(source, outline, edit);
             case ADD_LINE -> addLine(source, outline, edit);
             case REMOVE_LINE -> remove(source, lineOf(outline, edit).whole());
@@ -223,6 +225,22 @@ public final class DocumentForms {
         int end = source.indexOf('\n', body.lines().getLast().content().end());
         int at = end < 0 || end > body.close() ? body.lines().getLast().content().end() : end;
         return insert(source, at, "\n" + indent + text);
+    }
+
+    /**
+     * The address after {@code as} rewritten — a copy of a document stored under a name of its own —, or written after the
+     * title where the head names none.
+     */
+    private static String setAddress(String source, DocumentOutline outline, String address) {
+        if (!ParallaxIdentifiers.isSlug(address)) {
+            throw new IllegalArgumentException("An address is lowercase letters and digits joined by hyphens: '"
+                    + address + "' is not one");
+        }
+        Span span = outline.address();
+        if (span.start() == span.end()) {
+            return insert(source, span.start(), " as " + address);
+        }
+        return replace(source, span, address);
     }
 
     private static String setHeader(String source, DocumentOutline outline, FormEdit edit) {

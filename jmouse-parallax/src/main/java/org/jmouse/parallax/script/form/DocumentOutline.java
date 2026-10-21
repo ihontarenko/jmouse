@@ -24,11 +24,13 @@ import java.util.Optional;
  *
  * @param kind       the document's first word
  * @param title      the title in quotes, its span without the quotes
+ * @param address    the address written after {@code as} in the head, {@code voltage-divider}; an empty span where the
+ *                   title ends when the head names none
  * @param headEnd    the offset of the brace that opens the body
  * @param bodyEnd    the offset of the brace that closes the body, or the end of the text when it is never closed
  * @param statements the body's statements, in order
  */
-public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd, List<Statement> statements) {
+public record DocumentOutline(String kind, Span title, Span address, int headEnd, int bodyEnd, List<Statement> statements) {
 
     /** jMX's lexing, with the two things a document's text has that an expression has not. */
     private static final ExpressionSplitter SPLITTER = new ExpressionSplitter(
@@ -164,18 +166,19 @@ public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd,
             }
             int open = next(PieceKind.OPEN, index);
             if (open < 0) {
-                return new DocumentOutline(kind, title, text.length(), text.length(), List.of());
+                return new DocumentOutline(kind, title, addressIn(title, text.length()), text.length(), text.length(), List.of());
             }
             int headEnd = pieces.get(open).start();
+            Span address = addressIn(title, headEnd);
             index = open + 1;
             List<Statement> statements = new ArrayList<>();
             while (true) {
                 skipLineBreaks();
                 if (index >= pieces.size()) {
-                    return new DocumentOutline(kind, title, headEnd, text.length(), statements);
+                    return new DocumentOutline(kind, title, address, headEnd, text.length(), statements);
                 }
                 if (at(PieceKind.CLOSE)) {
-                    return new DocumentOutline(kind, title, headEnd, startOf(index), statements);
+                    return new DocumentOutline(kind, title, address, headEnd, startOf(index), statements);
                 }
                 if (at(PieceKind.SEPARATOR)) {
                     index++;
@@ -183,6 +186,31 @@ public record DocumentOutline(String kind, Span title, int headEnd, int bodyEnd,
                 }
                 statements.add(statement());
             }
+        }
+
+        /**
+         * The address the head writes after {@code as} — its pieces as long as they touch, {@code voltage-divider} being a
+         * word, a dash and a word —; where none is written, the empty span just past the title's closing quote.
+         */
+        private Span addressIn(Span title, int headEnd) {
+            int afterTitle = title.end() < text.length() && text.charAt(title.end()) == '"' ? title.end() + 1 : title.end();
+            for (int piece = 0; piece < pieces.size() && pieces.get(piece).start() < headEnd; piece++) {
+                Piece candidate = pieces.get(piece);
+                if (candidate.start() < afterTitle || candidate.kind() != PieceKind.WORD
+                        || !text.startsWith("as", candidate.start()) || candidate.end() - candidate.start() != 2
+                        || piece + 1 >= pieces.size()) {
+                    continue;
+                }
+                int first = piece + 1;
+                int last = first;
+                while (last + 1 < pieces.size() && pieces.get(last + 1).start() == pieces.get(last).end()
+                        && pieces.get(last + 1).start() < headEnd
+                        && (pieces.get(last + 1).kind() == PieceKind.WORD || pieces.get(last + 1).kind() == PieceKind.OTHER)) {
+                    last++;
+                }
+                return new Span(pieces.get(first).start(), pieces.get(last).end());
+            }
+            return new Span(afterTitle, afterTitle);
         }
 
         private Statement statement() {
