@@ -208,9 +208,17 @@ class SpiceConverterTest {
         assertTrue(ammeter.text().contains("B1 in out V=0"), ammeter.text());
         assertTrue(ammeter.notes().stream().anyMatch(note -> note.contains("ideal bench")), ammeter.notes().toString());
 
-        SpiceParseException generator = assertThrows(SpiceParseException.class, () -> converter.exportDocument(
-                resource("spice/components/2n7000.jmx").orElseThrow().replace("type mosfet", "type amplifier")));
-        assertTrue(generator.getDetail().contains("cannot be a SPICE subcircuit"), generator.getDetail());
+        // Not SPICE's own MOSFET: its equations as B sources, each charge's rate carried by a 1 F capacitor sensed by a
+        // zero-volt source and driven back between the pins.
+        String transistor = converter.exportDocument(resource("spice/components/2n7000.jmx").orElseThrow()
+                .replace("type mosfet", "type amplifier")).text();
+        assertTrue(transistor.contains(".subckt 2n7000 source gate drain"), transistor);
+        assertTrue(transistor.contains("V=({C_gate_source} * (V(gate) - V(source)))"), transistor);
+        assertTrue(transistor.contains("q8_sensed 0 1") && transistor.contains("F11 gate source V8 1"), transistor);
+
+        SpiceParseException gate = assertThrows(SpiceParseException.class, () -> converter.exportDocument(
+                LIBRARY.source("and-gate").orElseThrow()));
+        assertTrue(gate.getDetail().contains("cannot be a SPICE subcircuit"), gate.getDetail());
     }
 
     @Test

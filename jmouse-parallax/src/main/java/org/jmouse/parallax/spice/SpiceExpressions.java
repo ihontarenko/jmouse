@@ -3,12 +3,14 @@ package org.jmouse.parallax.spice;
 import org.jmouse.formula.Formula;
 import org.jmouse.formula.FormulaPrinter;
 import org.jmouse.formula.MathematicalFunction;
+import org.jmouse.formula.Substitution;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.spice.SpiceNumbers;
 import org.jmouse.spice.SpiceParseException;
 import org.jmouse.spice.SpicePosition;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,8 +34,9 @@ import java.util.regex.Pattern;
  * <h2>jMF to SPICE</h2>
  *
  * <p>Fully parenthesised, functions by ngspice's names, a comparison or a condition written as {@code (c ? 1 : 0)} — a
- * truth is a number in jMF — and {@code mod} through {@code floor}. What has no SPICE spelling — a derivative, a call of
- * the author's own function, a host call such as {@code current(pin)} — is {@link Untranslatable}.</p>
+ * truth is a number in jMF — and {@code mod} through {@code floor}. What has no SPICE spelling — a derivative, a host
+ * call such as {@code current(pin)} — is {@link Untranslatable}. A call of a function the document uses is
+ * written as the function's body with its arguments put in.</p>
  */
 public final class SpiceExpressions {
 
@@ -196,39 +199,63 @@ public final class SpiceExpressions {
      * @throws Untranslatable when the formula holds what SPICE cannot say
      */
     public static String spice(Formula formula, Function<String, String> variables) {
+        return written(formula, variables, 0);
+    }
+
+    /** How deep calls of the document's functions may nest before one is taken for a function that calls itself. */
+    private static final int DEEPEST_APPLICATION = 32;
+
+    /** @param depth how many calls of the document's functions this formula was put in place of */
+    private static String written(Formula formula, Function<String, String> variables, int depth) {
         return switch (formula) {
             case Formula.Constant constant -> number(constant.value());
             case Formula.NamedConstant named -> number(named.constant().value());
             case Formula.Variable variable -> variables.apply(variable.name());
-            case Formula.Negation negation -> "(-" + spice(negation.operand(), variables) + ")";
-            case Formula.Binary binary -> binary(binary, variables);
-            case Formula.Call call -> call(call, variables);
-            case Formula.Comparison comparison -> "((" + spice(comparison.left(), variables) + " "
-                    + comparison.relation().symbol() + " " + spice(comparison.right(), variables) + ") ? 1 : 0)";
-            case Formula.Logical logical -> "((" + truth(logical.left(), variables)
+            case Formula.Negation negation -> "(-" + written(negation.operand(), variables, depth) + ")";
+            case Formula.Binary binary -> binary(binary, variables, depth);
+            case Formula.Call call -> call(call, variables, depth);
+            case Formula.Comparison comparison -> "((" + written(comparison.left(), variables, depth) + " "
+                    + comparison.relation().symbol() + " " + written(comparison.right(), variables, depth) + ") ? 1 : 0)";
+            case Formula.Logical logical -> "((" + truth(logical.left(), variables, depth)
                     + (logical.connective() == Formula.Connective.AND ? " && " : " || ")
-                    + truth(logical.right(), variables) + ") ? 1 : 0)";
-            case Formula.Not not -> "((" + spice(not.operand(), variables) + " == 0) ? 1 : 0)";
-            case Formula.Piecewise piecewise -> piecewise(piecewise, variables);
+                    + truth(logical.right(), variables, depth) + ") ? 1 : 0)";
+            case Formula.Not not -> "((" + written(not.operand(), variables, depth) + " == 0) ? 1 : 0)";
+            case Formula.Piecewise piecewise -> piecewise(piecewise, variables, depth);
             case Formula.HostCall call -> throw new Untranslatable("'" + call.name() + "(…)' has no SPICE counterpart");
-            case Formula.Application application -> throw new Untranslatable("'" + application.definition().name()
-                    + "(…)' is a function of the document's own, which SPICE cannot call");
+            case Formula.Application application -> applied(application, variables, depth);
             default -> throw new Untranslatable("'" + FormulaPrinter.text(formula) + "' has no SPICE counterpart");
         };
     }
 
-    private static String truth(Formula formula, Function<String, String> variables) {
-        return "(" + spice(formula, variables) + " != 0)";
+    /**
+     * A call of a function the document uses — {@code soft_minimum(a, b, width)} from {@code smooth-transitions} — written
+     * as its body with the arguments put in: exactly the function, which a B source cannot define but can say. A
+     * function that calls itself has no finite body to put in and stays untranslatable.
+     */
+    private static String applied(Formula.Application application, Function<String, String> variables, int depth) {
+        Formula.Definition definition = application.definition();
+        if (depth >= DEEPEST_APPLICATION) {
+            throw new Untranslatable("'" + definition.name() + "(…)' calls itself, which SPICE cannot say");
+        }
+        Map<String, Formula> arguments = new LinkedHashMap<>();
+        for (int index = 0; index < definition.parameters().size(); index++) {
+            arguments.put(definition.parameters().get(index), application.arguments().get(index));
+        }
+        return written(Substitution.substitute(definition.body(), arguments), variables, depth + 1);
     }
 
-    private static String binary(Formula.Binary binary, Function<String, String> variables) {
-        String left = spice(binary.left(), variables);
-        String right = spice(binary.right(), variables);
+    private static String truth(Formula formula, Function<String, String> variables, int depth) {
+        return "(" + written(formula, variables, depth) + " != 0)";
+    }
+
+    private static String binary(Formula.Binary binary, Function<String, String> variables, int depth) {
+        String left = written(binary.left(), variables, depth);
+        String right = written(binary.right(), variables, depth);
         return "(" + left + " " + binary.operator().symbol() + " " + right + ")";
     }
 
-    private static String call(Formula.Call call, Function<String, String> variables) {
-        List<String> arguments = call.arguments().stream().map(argument -> spice(argument, variables)).toList();
+    private static String call(Formula.Call call, Function<String, String> variables, int depth) {
+        List<String> arguments = call.arguments().stream().map(argument -> written(argument, variables, depth)).toList();
         return switch (call.function()) {
             case MOD -> "(" + arguments.get(0) + " - " + arguments.get(1) + " * floor(" + arguments.get(0) + " / "
                     + arguments.get(1) + "))";
@@ -245,17 +272,17 @@ public final class SpiceExpressions {
         };
     }
 
-    private static String piecewise(Formula.Piecewise piecewise, Function<String, String> variables) {
+    private static String piecewise(Formula.Piecewise piecewise, Function<String, String> variables, int depth) {
         if (piecewise.otherwise() == null) {
             throw new Untranslatable("a piecewise value undefined where no branch holds has no SPICE counterpart");
         }
-        String written = spice(piecewise.otherwise(), variables);
+        String nested = written(piecewise.otherwise(), variables, depth);
         for (int index = piecewise.branches().size() - 1; index >= 0; index--) {
             Formula.Piecewise.Branch branch = piecewise.branches().get(index);
-            written = "(" + truth(branch.condition(), variables) + " ? " + spice(branch.value(), variables) + " : "
-                    + written + ")";
+            nested = "(" + truth(branch.condition(), variables, depth) + " ? " + written(branch.value(), variables, depth)
+                    + " : " + nested + ")";
         }
-        return written;
+        return nested;
     }
 
     private static String number(double value) {

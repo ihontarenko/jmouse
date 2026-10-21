@@ -13,6 +13,12 @@ import java.util.List;
  */
 public record CircuitTopology(List<String> nodes, List<String> sources) {
 
+    /**
+     * The resistance behind the engine's gmin: every analog node a model touches leaks to ground through it. Another
+     * engine gives a pin the circuit connects to nothing the same leak, so that node is what the engine solves.
+     */
+    public static final double NODE_LEAK_RESISTANCE = Netlist.LEAK_RESISTANCE;
+
     public CircuitTopology {
         nodes = List.copyOf(nodes);
         sources = List.copyOf(sources);

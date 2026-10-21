@@ -11,6 +11,7 @@ import org.jmouse.parallax.object.ObjectDefinition.BenchConditions;
 import org.jmouse.parallax.object.ObjectDefinition.Circuit;
 import org.jmouse.parallax.script.engine.DefinedObject;
 import org.jmouse.parallax.script.engine.ExperienceDefinitions;
+import org.jmouse.spice.SpiceParseException;
 import org.jmouse.spice.SpicePosition;
 import org.jmouse.spice.node.SpiceArgument;
 import org.jmouse.spice.node.SpiceDeck;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,7 +76,19 @@ public final class SpiceEngine implements CircuitEngine {
             notes = List.copyOf(notes);
             leftOut = Set.copyOf(leftOut);
         }
+
+        /** The same run, saying one thing more about how its answer stands to the library's engine's. */
+        SpiceRun noting(String note) {
+            List<String> more = new java.util.ArrayList<>(notes);
+            more.add(note);
+            return new SpiceRun(dataset, deck, more, leftOut);
+        }
     }
+
+    /** What a SPICE transient says about its start, beside the library's engine's run from rest. */
+    static final String TRANSIENT_START = "SPICE starts the run from its operating point at time 0, the library's engine "
+            + "from rest: a supply written as a subcircuit stands at its voltage from the first sample, and a capacitor no "
+            + "source charges at 0 starts where the operating point puts it";
 
     @Override
     public CircuitEngineKind kind() {
@@ -83,27 +97,27 @@ public final class SpiceEngine implements CircuitEngine {
 
     @Override
     public Dataset operatingPoint(CompiledObject circuit) {
-        return carried(operatingPointRun(circuit));
+        return carried(circuit, () -> operatingPointRun(circuit));
     }
 
     @Override
     public Dataset transientResponse(CompiledObject circuit, TransientRequest request, ComputationProgress progress) {
-        return carried(transientRun(circuit, request));
+        return carried(circuit, () -> transientRun(circuit, request));
     }
 
     @Override
     public Dataset frequencyResponse(CompiledObject circuit, FrequencyRange range, ComputationProgress progress) {
-        return carried(frequencyResponseRun(circuit, range));
+        return carried(circuit, () -> frequencyResponseRun(circuit, range));
     }
 
     @Override
     public Dataset noiseResponse(CompiledObject circuit, FrequencyRange range, ComputationProgress progress) {
-        return carried(noiseResponseRun(circuit, range));
+        return carried(circuit, () -> noiseResponseRun(circuit, range));
     }
 
     @Override
     public Dataset directCurrentSweep(CompiledObject circuit, SweepRequest request, ComputationProgress progress) {
-        return carried(directCurrentSweepRun(circuit, request));
+        return carried(circuit, () -> directCurrentSweepRun(circuit, request));
     }
 
     // ─── the analyses, each a run ──────────────────────────────────────────────────────────────────
@@ -124,8 +138,12 @@ public final class SpiceEngine implements CircuitEngine {
     }
 
     /**
-     * {@code tran}: the run from rest over the circuit's time span, or the window asked for, printed on an even grid of
-     * the samples asked.
+     * {@code tran}: the run over the circuit's time span, or the window asked for, printed on an even grid of the samples
+     * asked. It starts from SPICE's operating point at time 0, where the library's engine starts from rest: a supply
+     * written as a subcircuit (a dual supply) stands at its voltage from the first sample, and a capacitor no source
+     * charges at 0 (an integrator's) starts where the operating point puts it. {@code uic}, SPICE's own start from rest,
+     * is not used: without the operating point's gmin and source stepping its first point does not converge on the
+     * catalogue's op-amp model (checked against ngspice 47: "timestep too small; initial timepoint").
      */
     public SpiceRun transientRun(CompiledObject circuit, TransientRequest request) {
         if (request.levels()) {
@@ -148,7 +166,7 @@ public final class SpiceEngine implements CircuitEngine {
                 + " " + number(start), "linearize", "print all"), (printout, prepared) -> {
             SpicePrintout.Table table = printout.table("tran");
             return series("t", table, table.axisColumn(TIME), prepared, Dataset.TimeSeries.AxisScale.LINEAR);
-        });
+        }).noting(TRANSIENT_START);
     }
 
     /**
@@ -299,10 +317,36 @@ public final class SpiceEngine implements CircuitEngine {
     }
 
     /** A run's dataset, refused when the deck left a part out: its answer would be another circuit's, said as this one's. */
+    /**
+     * A run's dataset, as the computations ask for it: what SPICE could not do — a circuit that does not write as a deck,
+     * a run ngspice gave up on — is a refusal in its own words, as the library's engine refuses a circuit it cannot solve,
+     * never an error of the server.
+     */
+    private Dataset carried(CompiledObject circuit, Supplier<SpiceRun> run) {
+        try {
+            // Refused before ngspice runs: a deck without a part answers for another circuit, and ngspice failing on
+            // it would hide why.
+            SpiceExporter.Written written = prepare(circuit, false).written();
+            if (!written.leftOut().isEmpty()) {
+                throw new IllegalArgumentException(leftOutRefusal(written.leftOut(),
+                        written.notes().stream().map(SpiceNote::toString).toList()));
+            }
+            return carried(run.get());
+        } catch (SpiceParseException unwritten) {
+            throw new IllegalArgumentException("The circuit does not write as a SPICE deck: " + unwritten.getDetail(), unwritten);
+        } catch (SpiceRunException failed) {
+            throw new IllegalArgumentException("ngspice could not compute it: " + failed.getMessage(), failed);
+        }
+    }
+
+    private static String leftOutRefusal(Set<String> leftOut, List<String> notes) {
+        return "SPICE cannot carry " + String.join(", ", leftOut) + ", so its answer would be another circuit's: "
+                + String.join("; ", notes);
+    }
+
     private static Dataset carried(SpiceRun run) {
         if (!run.leftOut().isEmpty()) {
-            throw new IllegalArgumentException("SPICE cannot carry " + String.join(", ", run.leftOut())
-                    + ", so its answer would be another circuit's: " + String.join("; ", run.notes()));
+            throw new IllegalArgumentException(leftOutRefusal(run.leftOut(), run.notes()));
         }
         return run.dataset();
     }

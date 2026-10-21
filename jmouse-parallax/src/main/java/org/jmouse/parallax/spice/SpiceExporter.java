@@ -10,11 +10,16 @@ import org.jmouse.formula.Substitution;
 import org.jmouse.formula.el.FormulaLanguage;
 import org.jmouse.parallax.component.ComponentDocuments;
 import org.jmouse.parallax.component.ComponentModel;
+import org.jmouse.parallax.component.ComponentVocabulary;
+import org.jmouse.parallax.component.ModelLanguage;
+import org.jmouse.parallax.component.PinQuantities;
+import org.jmouse.parallax.circuit.CircuitTopology;
 import org.jmouse.parallax.object.ComponentLibrary;
 import org.jmouse.parallax.script.Block;
 import org.jmouse.parallax.script.ExperienceDocument;
 import org.jmouse.parallax.script.ExperienceReader;
 import org.jmouse.parallax.script.SourceText;
+import org.jmouse.spice.SpiceNumbers;
 import org.jmouse.spice.SpiceParseException;
 import org.jmouse.spice.SpicePosition;
 import org.jmouse.spice.node.SpiceArgument;
@@ -268,7 +273,16 @@ final class SpiceExporter {
 
     private List<SpiceStatement> translatedPart(Block.Part part, Scope scope) {
         Map<String, Formula> settings = new LinkedHashMap<>();
-        part.settings().forEach((name, text) -> settings.put(name, setting(text)));
+        part.settings().forEach((name, text) -> {
+            // A text — a display's first line, a chip's start-up bytes — is read by the part's behaviour, never by its
+            // equations; SPICE has no place for it.
+            if (text.text().startsWith("\"")) {
+                notes.add(new SpiceNote(part.line(), part.id() + "'s " + name + " is a text, which SPICE has no place "
+                        + "for; left out"));
+                return;
+            }
+            settings.put(name, setting(text));
+        });
         if (!part.positional().isEmpty()) {
             return primitive(part.id(), part.reference(), part.positional().get(0), part.positional().get(1), settings,
                     scope, part.line());
@@ -290,10 +304,11 @@ final class SpiceExporter {
             return List.of();
         }
         Map<String, String> pins = new LinkedHashMap<>();
+        List<String> packagePins = packagePins(model);
         part.named().forEach((name, net) -> {
-            if (model.pin(name).isPresent()) {
+            if (packagePins.contains(name)) {
                 pins.put(name, net);
-            } else if (model.parameter(name).isPresent()) {
+            } else if (model.parameter(name).isPresent() || unitParameter(model, name)) {
                 settings.put(name, setting(new SourceText(net, part.line(), 0, 0)));
             } else {
                 notes.add(new SpiceNote(part.line(), part.id() + ": '" + name + "' is neither a pin nor a parameter of "
@@ -373,13 +388,41 @@ final class SpiceExporter {
     private List<SpiceStatement> model(Block.Part part, ExperienceDocument document, ComponentModel model,
                                        Map<String, String> pins, Map<String, Formula> settings, Scope scope) {
         int line = part.line();
-        List<String> pinNames = model.pins().stream().map(ComponentModel.Pin::name).toList();
-        if (!pins.keySet().containsAll(pinNames)) {
-            List<String> open = pinNames.stream().filter(pin -> !pins.containsKey(pin)).toList();
-            notes.add(new SpiceNote(line, part.id() + ": pins " + String.join(", ", open) + " are connected to nothing; "
-                    + "SPICE wants every node of an element; left out"));
-            return List.of();
+        List<String> pinNames = packagePins(model);
+        List<SpiceStatement> leaks = openPins(part, pinNames, pins);
+        List<SpiceStatement> written = new ArrayList<>(modelStatements(part, document, model, pinNames, pins, settings, scope));
+        if (!written.isEmpty()) {
+            written.addAll(0, leaks);
         }
+        return written;
+    }
+
+    /**
+     * What the engine gives a pin a part connects to nothing — a private node, and its leak to ground (gmin) —, written
+     * as SPICE needs it: every node of an element named, and each with a way to ground. {@code pins} gains the private
+     * nodes.
+     */
+    private List<SpiceStatement> openPins(Block.Part part, List<String> pinNames, Map<String, String> pins) {
+        List<String> open = pinNames.stream().filter(pin -> !pins.containsKey(pin)).toList();
+        List<SpiceStatement> leaks = new ArrayList<>();
+        for (String pin : open) {
+            String node = spiceNode(part.id() + "." + pin);
+            pins.put(pin, node);
+            leaks.add(new SpiceElement.Passive("R" + node + "_leak", node, "0", SpiceValue.number(CircuitTopology.NODE_LEAK_RESISTANCE),
+                    List.of(), SpicePosition.NONE));
+        }
+        if (!open.isEmpty()) {
+            notes.add(new SpiceNote(part.line(), part.id() + ": " + String.join(", ", open) + " connect to nothing — each "
+                    + "is a node of its own with the engine's leak to ground, " + SpiceNumbers.write(CircuitTopology.NODE_LEAK_RESISTANCE)
+                    + " Ω, as the engine solves it"));
+        }
+        return leaks;
+    }
+
+    private List<SpiceStatement> modelStatements(Block.Part part, ExperienceDocument document, ComponentModel model,
+                                                 List<String> pinNames, Map<String, String> pins,
+                                                 Map<String, Formula> settings, Scope scope) {
+        int line = part.line();
         Map<String, Formula> values = parameterValues(model, settings);
         Optional<String> primitive = primitiveType(document);
         if (primitive.isPresent()) {
@@ -407,7 +450,7 @@ final class SpiceExporter {
             return List.of();
         }
         List<SpiceParameter> overrides = new ArrayList<>();
-        settings.forEach((name, formula) -> overrides.add(SpiceParameter.of(name, value(formula, scope))));
+        settings.forEach((name, formula) -> overrides.add(SpiceParameter.of(spiceNode(name), value(formula, scope))));
         return List.of(new SpiceElement.Instance(elementName('X', part.id()), pinNames.stream().map(pins::get).toList(),
                 subcircuit.get(), overrides, SpicePosition.NONE));
     }
@@ -434,6 +477,42 @@ final class SpiceExporter {
         model.parameters().forEach(parameter -> values.put(parameter.name(),
                 settings.getOrDefault(parameter.name(), new Formula.Constant(parameter.value()))));
         return values;
+    }
+
+    /**
+     * The pins of the package as a part connects them: a pin of every unit by its unit ({@code A.output},
+     * {@code B.output}), a shared one — the supplies — once, in the order the component writes its pins.
+     */
+    static List<String> packagePins(ComponentModel model) {
+        if (model.units().isEmpty()) {
+            return model.pins().stream().map(ComponentModel.Pin::name).toList();
+        }
+        List<String> pins = new ArrayList<>();
+        for (String unit : model.units()) {
+            model.pins().stream().filter(pin -> !pin.shared()).forEach(pin -> pins.add(unit + "." + pin.name()));
+        }
+        model.pins().stream().filter(ComponentModel.Pin::shared).forEach(pin -> pins.add(pin.name()));
+        return pins;
+    }
+
+    /** Whether a setting names one unit's parameter: {@code A.gain} on a package of units A and B. */
+    private static boolean unitParameter(ComponentModel model, String name) {
+        int dot = name.indexOf('.');
+        return dot > 0 && model.units().contains(name.substring(0, dot)) && model.parameter(name.substring(dot + 1)).isPresent();
+    }
+
+    /**
+     * A node of a subcircuit as ngspice reads it as that node: {@code gnd}, in any case, is ground to ngspice, and a
+     * component's pin of that name (an op-amp's negative supply) is no ground — it is renamed, as {@code 0} would be.
+     */
+    static String subcircuitNode(String name) {
+        String node = spiceNode(name);
+        return node.equalsIgnoreCase("gnd") || node.equals("0") ? node + "_pin" : node;
+    }
+
+    /** A pin or a unit's parameter as SPICE can name it: a dot is no part of a SPICE name, so {@code A.output} is {@code A_output}. */
+    static String spiceNode(String name) {
+        return name.replace('.', '_');
     }
 
     /** {@code D1 anode cathode 1n4148} and its {@code .model}, one per set of parameter values. */
@@ -600,10 +679,13 @@ final class SpiceExporter {
         if (!writingSubcircuits.add(name)) {
             throw new SpiceParseException(SpicePosition.ofLine(document.line()), reference + " contains itself");
         }
-        Optional<String> refusal = unsupportedBlocks(document);
+        Optional<String> refusal = unsupportedBlocks(document, model);
         List<SpiceStatement> body = new ArrayList<>();
-        if (refusal.isEmpty()) {
-            refusal = body(document, model, body);
+        for (String unit : model.unitNames()) {
+            if (refusal.isPresent()) {
+                break;
+            }
+            refusal = body(document, model, unit, body);
         }
         writingSubcircuits.remove(name);
         if (refusal.isPresent()) {
@@ -612,28 +694,41 @@ final class SpiceExporter {
                     + "; the parts that are one are left out"));
             return Optional.empty();
         }
-        List<SpiceParameter> parameters = model.parameters().stream()
-                .map(parameter -> SpiceParameter.of(parameter.name(), SpiceValue.number(parameter.value()))).toList();
-        definitions.put(name, SpiceCard.Subcircuit.of(name, model.pins().stream().map(ComponentModel.Pin::name).toList(),
+        List<SpiceParameter> parameters = new ArrayList<>(model.parameters().stream()
+                .map(parameter -> SpiceParameter.of(parameter.name(), SpiceValue.number(parameter.value()))).toList());
+        // Each unit reads its parameters by its own names (A_gain), the package's value unless a part sets the unit's.
+        for (String unit : model.units()) {
+            model.parameters().forEach(parameter -> parameters.add(SpiceParameter.of(unit + "_" + parameter.name(),
+                    SpiceValue.expression(parameter.name()))));
+        }
+        definitions.put(name, SpiceCard.Subcircuit.of(name, packagePins(model).stream().map(SpiceExporter::subcircuitNode).toList(),
                 parameters, body));
         return Optional.of(name);
     }
 
-    private static Optional<String> unsupportedBlocks(ExperienceDocument document) {
-        if (document.block(Block.State.class).isPresent()) {
-            return Optional.of("it keeps a state");
+    /** What a subcircuit cannot say, as the model — the component with what it inherits — has it. */
+    private static Optional<String> unsupportedBlocks(ExperienceDocument document, ComponentModel model) {
+        if (model.states().stream().anyMatch(ComponentModel.State::discrete)) {
+            return Optional.of("it keeps a discrete state, which only its behaviour changes");
         }
-        if (document.block(Block.Behaviour.class).isPresent()) {
+        if (model.behaviour() != null) {
             return Optional.of("it has behaviour");
         }
-        if (!document.units().isEmpty()) {
-            return Optional.of("it is a package of several units");
+        if (!model.units().isEmpty() && document.block(Block.Parts.class).isPresent()) {
+            return Optional.of("it is a package of several units built of parts");
         }
         return Optional.empty();
     }
 
-    /** The subcircuit's statements into {@code body}; the reason it cannot be written, when it cannot. */
-    private Optional<String> body(ExperienceDocument document, ComponentModel model, List<SpiceStatement> body) {
+    /**
+     * One unit's statements into {@code body} — the component's, for a package of one —; the reason it cannot be
+     * written, when it cannot. A unit's pins are the package's pins of that unit ({@code A_output}), its inner nodes and
+     * its elements are its own ({@code A_stage}, {@code BA1}), and it reads its parameters by its own names.
+     *
+     * @param unit the unit, {@code A}; empty for a package of one
+     */
+    private Optional<String> body(ExperienceDocument document, ComponentModel model, String unit, List<SpiceStatement> body) {
+        String prefix = unit.isEmpty() ? "" : unit + "_";
         Set<String> parameters = new LinkedHashSet<>();
         model.parameters().forEach(parameter -> parameters.add(parameter.name()));
         Map<String, Double> values = new LinkedHashMap<>();
@@ -642,51 +737,200 @@ final class SpiceExporter {
         for (Block.Part part : document.block(Block.Parts.class).map(Block.Parts::parts).orElse(List.of())) {
             body.addAll(part(part, scope));
         }
-        Map<String, String> nodes = nodes(model);
-        Map<String, Formula> locals = new LinkedHashMap<>();
-        int index = 1;
-        boolean ideal = false;
-        for (Block.Equation equation : document.block(Block.Equations.class).map(Block.Equations::equations).orElse(List.of())) {
-            int line = equation.expression().line();
-            Formula expression;
-            try {
-                expression = Substitution.replaceHostCalls(PIN_CURRENT_LANGUAGE.parse(equation.expression().text()),
-                        call -> !(call.arguments().size() == 1 && call.arguments().getFirst() instanceof Formula.Variable pin)
-                                ? call : call.name().equals("voltage") ? pin : new Formula.Variable(PIN_CURRENT + pin.name()));
-            } catch (RuntimeException unreadable) {
-                return Optional.of("line " + line + " — " + unreadable.getMessage());
+        Map<String, String> nodes = nodes(model, prefix);
+        Function<String, String> names = name -> behaviouralName(name, nodes, scope, parameter -> prefix + parameter);
+        // The functions its equations may call — those of the libraries it uses, smooth-transitions —, written in place.
+        List<Formula.Definition> library = ModelLanguage.LANGUAGE.definitions(ModelLanguage.libraryText(model));
+        Equations equations = new Equations(library);
+        try {
+            model.locals().forEach(equations::local);
+            Elements elements = new Elements(unit, body);
+            for (ComponentModel.State state : model.states()) {
+                elements.state(node(nodes, state.name()));
             }
-            expression = Substitution.substitute(expression, locals);
-            if (expression.variables().contains("realistic")) {
-                expression = IdealBench.fold(Substitution.substitute(expression, "realistic", new Formula.Constant(0)));
-                ideal = true;
-            }
-            switch (equation.form()) {
-                case LOCAL -> locals.put(equation.subject(), expression);
-                case VOLTAGE, CURRENT -> {
-                    boolean voltage = equation.form() == Block.EquationForm.VOLTAGE;
-                    if (!voltage && isZero(expression)) {
-                        continue;
-                    }
-                    String written;
-                    try {
-                        written = SpiceExpressions.spice(expression, name -> behaviouralName(name, nodes, scope));
-                    } catch (SpiceExpressions.Untranslatable untranslatable) {
-                        return Optional.of("line " + line + " — " + untranslatable.getMessage());
-                    }
-                    body.add(new SpiceElement.Behavioural("B" + index++, equation.positive(), equation.negative(),
-                            voltage, written, SpicePosition.NONE));
-                }
-                default -> {
-                    return Optional.of("line " + line + " is a derivative, a step or a start, which a B source cannot say");
+            for (ComponentModel.Equation equation : model.equations()) {
+                Formula expression = equations.read(equation.formula());
+                switch (equation.kind()) {
+                    case STATE -> elements.rate(node(nodes, equation.state()), SpiceExpressions.spice(expression, names));
+                    case VOLTAGE -> elements.voltage(node(nodes, equation.positive()), node(nodes, equation.negative()),
+                            SpiceExpressions.spice(requireNoRate(expression), names));
+                    case CURRENT -> elements.current(node(nodes, equation.positive()), node(nodes, equation.negative()),
+                            Rates.of(expression), names);
                 }
             }
+        } catch (RuntimeException untranslatable) {
+            return Optional.of(untranslatable.getMessage());
         }
-        if (ideal && reported.add("ideal:" + document.slug())) {
+        if (equations.ideal && reported.add("ideal:" + document.slug())) {
             notes.add(new SpiceNote(document.line(), document.slug() + " is written as on an ideal bench: 'realistic' "
                     + "is 0, so what it draws there is what it draws in SPICE"));
         }
+        if (equations.noisy && reported.add("noise:" + document.slug())) {
+            notes.add(new SpiceNote(document.line(), document.slug() + "'s noise sources (noise(…)) have no SPICE "
+                    + "counterpart: they add nothing to the other analyses, and SPICE's noise analysis leaves them out"));
+        }
         return Optional.empty();
+    }
+
+    /**
+     * A model's expressions as one unit reads them: its {@code let}s put in place, in order; a pin's members read as its
+     * voltage or {@link #PIN_CURRENT}; the ideal bench's terms folded away; a noise source, which adds nothing but to a
+     * noise analysis, as 0.
+     */
+    private static final class Equations {
+
+        private final List<Formula.Definition> library;
+        private final Map<String, Formula> locals = new LinkedHashMap<>();
+        private boolean ideal;
+        private boolean noisy;
+
+        Equations(List<Formula.Definition> library) {
+            this.library = library;
+        }
+
+        void local(String name, String formula) {
+            locals.put(name, read(formula));
+        }
+
+        Formula read(String formula) {
+            Formula expression = Substitution.replaceHostCalls(ModelLanguage.LANGUAGE.parse(formula, library), call -> {
+                if (call.name().equals(ModelLanguage.NOISE)) {
+                    noisy = true;
+                    return new Formula.Constant(0);
+                }
+                if (call.arguments().size() == 1 && call.arguments().getFirst() instanceof Formula.Variable pin) {
+                    return call.name().equals(PinQuantities.VOLTAGE) ? pin : call.name().equals(PinQuantities.CURRENT)
+                            ? new Formula.Variable(PIN_CURRENT + pin.name()) : call;
+                }
+                return call;
+            });
+            expression = Substitution.substitute(expression, locals);
+            if (expression.variables().contains(ComponentVocabulary.REALISTIC)) {
+                expression = IdealBench.fold(Substitution.substitute(expression, ComponentVocabulary.REALISTIC,
+                        new Formula.Constant(0)));
+                ideal = true;
+            }
+            return expression;
+        }
+    }
+
+    /**
+     * A current equation's right side split as a capacitor's is: what flows now ({@code rest}), and the charges whose
+     * rate of change flows besides — {@code d(q)/dt}, each with its sign.
+     */
+    private record Rates(Formula rest, List<Formula> charges) {
+
+        static Rates of(Formula expression) {
+            List<Formula> now = new ArrayList<>();
+            List<Formula> charges = new ArrayList<>();
+            gather(expression, false, now, charges);
+            Formula rest = now.stream().reduce((left, right) -> new Formula.Binary(Formula.Operator.ADD, left, right))
+                    .orElse(new Formula.Constant(0));
+            return new Rates(rest, charges);
+        }
+
+        /** Every term of a sum, each with its sign: a rate's charge into {@code charges}, any other term into {@code now}. */
+        private static void gather(Formula formula, boolean negated, List<Formula> now, List<Formula> charges) {
+            if (formula instanceof Formula.HostCall call && call.name().equals(ModelLanguage.RATE) && call.arguments().size() == 1) {
+                charges.add(signed(call.arguments().getFirst(), negated));
+                return;
+            }
+            if (formula instanceof Formula.Binary binary && binary.operator() == Formula.Operator.ADD) {
+                gather(binary.left(), negated, now, charges);
+                gather(binary.right(), negated, now, charges);
+                return;
+            }
+            if (formula instanceof Formula.Binary binary && binary.operator() == Formula.Operator.SUBTRACT) {
+                gather(binary.left(), negated, now, charges);
+                gather(binary.right(), !negated, now, charges);
+                return;
+            }
+            if (formula instanceof Formula.Negation negation) {
+                gather(negation.operand(), !negated, now, charges);
+                return;
+            }
+            now.add(signed(requireNoRate(formula), negated));
+        }
+
+        private static Formula signed(Formula formula, boolean negated) {
+            return negated ? new Formula.Negation(formula) : formula;
+        }
+    }
+
+    /** A formula with no rate of change in it: a rate is said only as a term of a current, where a capacitor carries it. */
+    private static Formula requireNoRate(Formula formula) {
+        boolean[] found = {false};
+        Substitution.replaceHostCalls(formula, call -> {
+            found[0] |= call.name().equals(ModelLanguage.RATE);
+            return call;
+        });
+        if (found[0]) {
+            throw new SpiceExpressions.Untranslatable("a rate of change d(…)/dt that is not a term of a current, which "
+                    + "SPICE can carry only through a capacitor");
+        }
+        return formula;
+    }
+
+    /**
+     * The SPICE elements one unit's equations become, named after the unit ({@code BA1}, {@code CA_gain_stage}):
+     * <ul>
+     *     <li>a voltage or a current that is an expression of the pins — a {@code B} source;</li>
+     *     <li>a charge's rate {@code d(q)/dt} in a current — a {@code B} source holding {@code q} on a node of its own,
+     *     a 1 F capacitor whose current is then {@code dq/dt}, sensed by a zero-volt source and driven between the pins
+     *     by a current-controlled source. A {@code ddt()} in a B source would say it too, but ngspice leaves it out of
+     *     the small-signal analyses (checked against ngspice 47: an RC whose C is {@code ddt} has a flat response);</li>
+     *     <li>a state {@code d(x)/dt = f} — a node {@code x} with a 1 F capacitor to ground and a {@code B} current
+     *     source pushing {@code f} into it, so {@code dx/dt = f} exactly.</li>
+     * </ul>
+     */
+    private static final class Elements {
+
+        private final String unit;
+        private final List<SpiceStatement> body;
+        private int index = 1;
+
+        Elements(String unit, List<SpiceStatement> body) {
+            this.unit = unit;
+            this.body = body;
+        }
+
+        private String name(char letter) {
+            return letter + unit + index++;
+        }
+
+        void state(String node) {
+            body.add(new SpiceElement.Passive(name('C'), node, "0", SpiceValue.number(1), List.of(), SpicePosition.NONE));
+        }
+
+        void rate(String node, String written) {
+            body.add(new SpiceElement.Behavioural(name('B'), "0", node, false, written, SpicePosition.NONE));
+        }
+
+        void voltage(String positive, String negative, String written) {
+            body.add(new SpiceElement.Behavioural(name('B'), positive, negative, true, written, SpicePosition.NONE));
+        }
+
+        void current(String positive, String negative, Rates rates, Function<String, String> names) {
+            if (!isZero(Simplification.simplify(rates.rest()))) {
+                body.add(new SpiceElement.Behavioural(name('B'), positive, negative, false,
+                        SpiceExpressions.spice(rates.rest(), names), SpicePosition.NONE));
+            }
+            for (Formula charge : rates.charges()) {
+                if (isZero(Simplification.simplify(charge))) {
+                    continue;
+                }
+                String held = "q" + unit + index;
+                String sensed = held + "_sensed";
+                String sense = name('V');
+                body.add(new SpiceElement.Behavioural(name('B'), held, "0", true, SpiceExpressions.spice(charge, names),
+                        SpicePosition.NONE));
+                body.add(new SpiceElement.Source(sense, held, sensed, SpiceValue.number(0), true, null, List.of(),
+                        SpicePosition.NONE));
+                body.add(new SpiceElement.Passive(name('C'), sensed, "0", SpiceValue.number(1), List.of(), SpicePosition.NONE));
+                body.add(new SpiceElement.Generic(name('F'), List.of(word(positive), word(negative), word(sense), word("1")),
+                        SpicePosition.NONE));
+            }
+        }
     }
 
     /**
@@ -694,15 +938,22 @@ final class SpiceExporter {
      * name only has to survive until an ideal bench folds it away or {@link #behaviouralName} refuses it.
      */
     private static final String PIN_CURRENT = "current_into_";
-    /** jMF with a pin's members — {@code in.current}, {@code current(in)}, {@code in.voltage} — read as host calls. */
-    private static final FormulaLanguage PIN_CURRENT_LANGUAGE = FormulaLanguage.standard().withHostCalls("current", "voltage");
 
-    /** The names an equation reads as node voltages: the component's pins and its inner nodes. */
-    private static Map<String, String> nodes(ComponentModel model) {
+    /**
+     * The names an equation reads as node voltages, and the node each is in the subcircuit: the component's pins and
+     * its inner nodes — a unit's under its prefix ({@code A_output}), a shared pin as it is.
+     */
+    private static Map<String, String> nodes(ComponentModel model, String prefix) {
         Map<String, String> nodes = new LinkedHashMap<>();
-        model.pins().forEach(pin -> nodes.put(pin.name(), pin.name()));
-        model.nodes().forEach(node -> nodes.put(node, node));
+        model.pins().forEach(pin -> nodes.put(pin.name(), subcircuitNode(pin.shared() ? pin.name() : prefix + pin.name())));
+        model.nodes().forEach(node -> nodes.put(node, subcircuitNode(prefix + node)));
+        model.states().forEach(state -> nodes.put(state.name(), subcircuitNode(prefix + state.name())));
         return nodes;
+    }
+
+    /** The subcircuit node a name of the model is: a pin, an inner node or a state; ground is 0. */
+    private static String node(Map<String, String> nodes, String name) {
+        return nodes.getOrDefault(name, name);
     }
 
     /**
@@ -710,11 +961,23 @@ final class SpiceExporter {
      * time and the temperature as ngspice names them.
      */
     private static String behaviouralName(String name, Map<String, String> nodes, Scope scope) {
+        return behaviouralName(name, nodes, scope, Function.identity());
+    }
+
+    /** @param parameterName how a parameter is named where the expression stands: a unit reads its own ({@code A_gain}) */
+    private static String behaviouralName(String name, Map<String, String> nodes, Scope scope,
+                                          Function<String, String> parameterName) {
         if (nodes.containsKey(name)) {
             return "V(" + nodes.get(name) + ")";
         }
         if (scope.parameters().contains(name)) {
-            return "{" + name + "}";
+            return "{" + parameterName.apply(name) + "}";
+        }
+        // The bench's other figures as the nominal bench a deck runs on sets them: ideal, every part at its value,
+        // standard detail. The temperature is ngspice's own, below.
+        Double figure = ComponentVocabulary.nominalBench().get(name);
+        if (figure != null && !name.equals(ComponentVocabulary.TEMPERATURE)) {
+            return SpiceNumbers.write(figure);
         }
         if (name.startsWith(PIN_CURRENT)) {
             throw new SpiceExpressions.Untranslatable("the current into pin '" + name.substring(PIN_CURRENT.length())

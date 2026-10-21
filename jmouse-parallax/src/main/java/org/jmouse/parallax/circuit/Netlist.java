@@ -38,7 +38,7 @@ record Netlist(List<String> nodes, List<Element> elements, List<Branch> branches
     static final int GROUND = -1;
 
     /** The resistance behind gmin: 1e-12 S from every analog node a model touches to ground. */
-    private static final double LEAK_RESISTANCE = 1e12;
+    static final double LEAK_RESISTANCE = 1e12;
 
     /** What the solver's own leaks to ground are named: elements of the solution, never parts of the circuit. */
     private static final String LEAK_PREFIX = "gmin_";
