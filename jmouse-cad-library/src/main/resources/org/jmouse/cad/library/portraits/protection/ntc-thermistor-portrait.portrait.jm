@@ -1,0 +1,35 @@
+# A bead NTC thermistor as it is held: a small black epoxy drop on two fine leads; scorched when it fails.
+portrait:ntc-thermistor-portrait("NTC thermistor") {
+    meta {
+        summary: "A bead NTC thermistor: a black epoxy drop on two leads"
+        code: "PT.THERMISTOR:NTC-BEAD"
+        category: circuits
+        tags: electronics, portrait, thermistor, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 100)
+    input:failed
+
+    path:leads("M-6 6V24L-20 36V50M6 6V24L20 36V50") {
+        stroke = silver
+        thickness = 1.4
+    }
+    pin:terminal_one(at: -20 50)
+    pin:terminal_two(at: 20 50)
+    path:body("M-10 0A10 10 0 1 0 10 0A10 10 0 1 0-10 0Z") {
+        fill = black
+    }
+    path:sheen("M-7-4C-5-8-2-9 0-9") {
+        stroke = white
+        thickness = 1
+        opacity = 0.4
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-10 0A10 10 0 1 0 10 0A10 10 0 1 0-10 0Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.6
+        }
+    }
+}

@@ -1,0 +1,22 @@
+symbol:thermistor-symbol("Thermistor") {
+    meta {
+        summary: "A thermistor, as drawn on a schematic: a resistor's body crossed by the hooked line of a resistance that follows the temperature"
+        code: "SY.RESISTOR:THERMISTOR-NTC"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:failed
+
+    group:body(live) {
+        path("M-60 0H-32V-14H32V14H-32V0M32 0H60M-36 28L28-28H44")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

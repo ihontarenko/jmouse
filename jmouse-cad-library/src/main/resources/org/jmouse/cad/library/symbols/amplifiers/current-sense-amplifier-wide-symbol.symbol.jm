@@ -1,0 +1,43 @@
+symbol:current-sense-amplifier-wide-symbol("Current-sense amplifier, KiCad's proportions") {
+    meta {
+        summary: "A current-sense amplifier as KiCad draws the INA240: a triangle, the inputs on the left, the supply above, ground and the two references below — so a KiCad design's wires land on its pins"
+        code: "SY.AMPLIFIER:CURRENT-SENSE-WIDE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # KiCad's Amplifier_Current:INA240A1D at 2.54 mm = 40. Its fourth pin stands on ground's point: KiCad ties it there.
+    size(480 x 480)
+    input:failed
+
+    # The body, filled as the drawing theme fills a part's body.
+    path:body_fill("M-160-160V160L160 0Z") {
+        fill = body
+    }
+
+    group:body(live) {
+        path("M-160-160V160L160 0Z")
+        path("M-240-80H-160M-240 80H-160M160 0H240")
+        path("M-80-120V-240M-80 120V240M0 80V240M80 40V240")
+        path("M-144-80H-120M-132-92V-68M-144 80H-120")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:non_inverting_input(at: -240 -80, "IN+")
+    pin:inverting_input(at: -240 80, "IN−")
+    pin:output(at: 240 0)
+    pin:Vcc(at: -80 -240, "VS")
+    pin:GND(at: -80 240, "GND")
+    pin:not_connected(at: -80 240)
+    pin:reference_two(at: 0 240, "REF2")
+    pin:reference_one(at: 80 240, "REF1")
+    label(name, at: 80 -120)
+    label(value, at: 80 128)
+}

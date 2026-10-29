@@ -1,0 +1,77 @@
+# Electrical macromodel of the LT3045, a 500 mA ultralow-noise low-dropout regulator: a precision 100 µA current
+# flows out of SET into the resistor the design puts there, and the output follows the voltage it makes — sensed at
+# OUTS — through a smooth current-limited pass device. EN/UV enables it above its 1.24 V threshold; PG pulls low while
+# PGFB is below 300 mV. It covers the set voltage, the dropout and the internal current limit. The ILIM pin's
+# programmable limit, the noise itself, thermal shutdown and the ripple rejection's frequency dependence are outside it.
+component:lt3045("LT3045", type: regulator) {
+    meta {
+        designator: U
+        summary: "Ultralow-noise LDO, 500 mA, 0 V to 15 V out, set by one resistor (100 µA × R_SET), MSOP-12E"
+        source: "Analog Devices LT3045 datasheet (rev. C): SET pin current 100 µA ±1 %, dropout 260 mV at 500 mA, EN/UV 1.24 V"
+        package: "MSOP-12-1EP"
+        category: circuits
+        failure: open
+    }
+    use:smooth-transitions
+
+    parameter:I_set(100 uA, "SET pin current, 99 µA to 101 µA")
+    parameter:V_dropout(260 mV, "dropout at 500 mA, typical; at most 400 mV")
+    parameter:I_limit(530 mA, "internal current limit, typical")
+    parameter:I_ground(2.2 mA, "quiescent current into GND at no load, typical")
+    parameter:V_enable(1.24 V, "EN/UV turn-on threshold, rising")
+    parameter:V_power_good(300 mV, "PGFB threshold: PG releases above it")
+    parameter:R_power_good(100 Ohm, "PG's pull-down when the output is not yet good")
+    parameter:transconductance(50 A/V, "regulation transconductance: load regulation within the datasheet's limits")
+    parameter:thermal_resistance(40 K/W, "MSOP-12E soldered to its pad: kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(10 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:input(power, 1, "IN; pins 2 and 3 are IN too")
+    pin:enable(analog, input, 4, "EN/UV: on above 1.24 V")
+    pin:power_good(analog, output, 5, "PG: open drain, pulled low until PGFB passes 300 mV")
+    pin:current_limit(analog, 6, "ILIM: its programmable limit is not modelled")
+    pin:power_good_feedback(analog, input, 7, "PGFB")
+    pin:set(analog, 8, "SET: 100 µA out of it; the output follows its voltage")
+    pin:GND(power, 9, "GND; pin 13, the exposed pad, is GND too")
+    pin:output_sense(analog, input, 10, "OUTS: where the output is regulated")
+    pin:output(analog, output, 11, "OUT; pin 12 is OUT too")
+
+    symbol(uses: low-dropout-regulator-symbol) {
+        bind:failed(failed)
+    }
+
+    equations {
+        let enabled : ratio = soft_step(enable - V_enable, 0.02)
+        let error : voltage = (set - GND) - (output_sense - GND)
+        let headroom : ratio = soft_step((input - output) - V_dropout, 0.05)
+        let requested : current = soft_positive_part(transconductance * error, 0.001)
+        current input -> set = enabled * I_set
+        current input -> output = enabled * headroom * I_limit * requested / sqrt(I_limit^2 + requested^2)
+        current input -> GND = I_ground
+        current power_good -> GND = (1 - soft_step((power_good_feedback - GND) - V_power_good, 0.01)) * (power_good - GND) / R_power_good
+    }
+
+    expect("3.3 V from a 33.2 kΩ SET resistor at 100 mA", from: "VOUT = 100 µA × R_SET") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 5 V)
+            part:R1(resistor, [set, 0], resistance: 33.2 kOhm)
+            part:R2(resistor, [output, 0], resistance: 33 Ohm)
+            part:C2(capacitor, [output, 0], capacitance: 10 uF)
+            part:U1(self, [input: input, enable: input, set: set, output: output, output_sense: output, GND: 0])
+        }
+        measure(final, output)
+        near(3.32 V, +- 2%)
+    }
+
+    expect("off below its enable threshold", from: "EN/UV threshold 1.24 V") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 5 V)
+            part:V2(voltage-source, [enable, 0], U_output: 0.5 V)
+            part:R1(resistor, [set, 0], resistance: 33.2 kOhm)
+            part:R2(resistor, [output, 0], resistance: 33 Ohm)
+            part:U1(self, [input: input, enable: enable, set: set, output: output, output_sense: output, GND: 0])
+        }
+        measure(final, output)
+        within(0 V .. 0.05 V)
+    }
+}

@@ -1,0 +1,93 @@
+# The PC817 is an optocoupler: an infrared LED and a phototransistor in one package, with nothing between them but
+# light. The collector current is the current transfer ratio times the LED's current, as long as the transistor has
+# voltage to carry it; with too little it saturates. The LED is the diode law with a GaAs junction's numbers.
+# Not represented: the CTR's fall with temperature and its dependence on the LED current, the phototransistor's
+# slow edges (microseconds). The isolation is a resistance across the barrier — what keeps the two sides' grounds from
+# drifting apart when nothing else joins them.
+
+component:pc817("PC817", type: optocoupler) {
+    meta {
+        designator: U
+        summary: "Optocoupler, phototransistor output, CTR 50 … 600 %, 5 kV isolation"
+        source: "Sharp PC817 datasheet, electrical characteristics"
+        package: "DIP-4"
+        category: circuits
+        failure: open
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:I_saturation(4.2 fA, "the LED's saturation current: VF 1.2 V at 20 mA")
+    parameter:emission_coefficient(1.6, "the LED's emission coefficient")
+    parameter:R_series(2 Ohm, "the LED's series resistance")
+    parameter:current_transfer_ratio(1, "CTR: collector current over LED current, 0.5 … 6 by rank")
+    parameter:transfer_temperature_coefficient(-0.004, "the CTR falls by this share per kelvin above 25 C: about 0.8 at 75 C")
+    parameter:T_nominal(298.15 K, "the temperature the CTR is given at")
+    parameter:V_saturation(0.1 V, "the VCE a saturated phototransistor does not go below")
+    parameter:V_saturation_knee(0.05 V, "how sharply it comes out of saturation above that")
+    parameter:V_early(100 V, "the collector current's rise with VCE")
+    parameter:I_dark(1 nA, "collector current with the LED off")
+    parameter:I_forward_maximum(50 mA, "IF: the LED's rated forward current")
+    parameter:I_collector_maximum(50 mA, "IC: the phototransistor's rated collector current")
+    parameter:R_isolation(50 GOhm, "isolation resistance across the barrier: 5·10¹⁰ Ω typical at 500 V DC")
+    parameter:power_rating(0.2 W, "what it is rated for")
+    parameter:thermal_resistance(400 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(100 °C, "past this it fails on a realistic bench")
+
+    pin:anode(analog, 1, "LED anode")
+    pin:cathode(analog, 2, "LED cathode")
+    pin:emitter(analog, 3, "phototransistor emitter")
+    pin:collector(analog, 4, "phototransistor collector")
+
+    node:j("the LED junction, behind its series resistance")
+
+    symbol(uses: optocoupler-symbol) {
+        bind:failed(failed)
+        bind:light(max(0, anode.current) / I_forward_maximum)
+        bind:conduction(min(1, max(0, collector.current) / I_collector_maximum))
+    }
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let transfer_now : ratio = current_transfer_ratio * (1 + transfer_temperature_coefficient * (T_junction - T_nominal))
+        let I_light : current = junction_current(j - cathode, I_saturation, emission_coefficient, T_junction)
+        let V_collector : voltage = soft_positive_part(collector - emitter - V_saturation, 0.01)
+        let carried : ratio = V_collector / (V_collector + V_saturation_knee) * (1 + (collector - emitter) / V_early)
+
+        current anode -> j = (anode - j) / R_series
+        current j -> cathode = I_light
+        current collector -> emitter = (transfer_now * soft_positive_part(I_light, 1e-9) + I_dark) * carried
+        current cathode -> emitter = (cathode - emitter) / R_isolation
+    }
+
+    expect("LED forward voltage at 20 mA", from: "VF 1.2 V typical, 1.4 V at most at 20 mA") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [anode, 0], I_output: 20 mA)
+            part:U1(self, [anode: anode, cathode: 0, collector: 0, emitter: 0])
+        }
+        measure(operating, anode)
+        within(1.0 V .. 1.4 V)
+    }
+
+    expect("the light carries the current across", from: "CTR 50 … 600 % at IF 5 mA, VCE 5 V") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [anode, 0], I_output: 5 mA)
+            part:V1(voltage-source, [collector, 0], U_output: 5 V)
+            part:U1(self, [anode: anode, cathode: 0, collector: collector, emitter: 0])
+        }
+        measure(operating, current: V1)
+        within(-30 mA .. -2.5 mA)
+    }
+
+    expect("saturated as a switch", from: "VCE(sat) 0.2 V at most at IF 20 mA, IC 1 mA") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [anode, 0], I_output: 20 mA)
+            part:V1(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [supply, collector], resistance: 4.7 kOhm)
+            part:U1(self, [anode: anode, cathode: 0, collector: collector, emitter: 0])
+        }
+        measure(operating, collector)
+        within(0 V .. 0.2 V)
+    }
+}

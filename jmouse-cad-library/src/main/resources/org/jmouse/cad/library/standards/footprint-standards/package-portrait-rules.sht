@@ -1,0 +1,39 @@
+# How a member of a package table is drawn from above, as a sheet places it: pin 1 at the bottom left beside the
+# notch and the dot, counted along the bottom and back along the top. One pitch of the package is one grid step of the
+# sheet, whatever it is in millimetres, so every pin lands on a grid line; the rest are shares of the body.
+sheet "Package portrait rules" as package-portrait-rules {
+    description "The grid, the shares and the colours every package portrait of our library is generated with."
+
+    grid 20
+    shortest-lead 6
+    corner 0.08
+    notch 0.24
+    dot 0.13
+    dot-inset 2.6
+    marking-width 0.7
+    marking-height 0.45
+    marking-input marking
+
+    dual-inline "A dual in-line lead: its wide shoulder out to the row, where it bends down, then the narrow lead into the hole" {
+        mounting through-hole
+    }
+    gull-wing "A gull wing: one flat lead from the body out to its foot on the board" {
+        mounting surface-mount
+    }
+
+    leads "The leads" {
+        stroke clear
+        fill silver
+    }
+    body "The moulded body" {
+        fill black
+    }
+    mark "The notch and the dot beside pin 1" {
+        stroke clear
+        fill grey
+        opacity 0.6
+    }
+    marking "What the part prints on its body, its component binding the words" {
+        fill silver
+    }
+}

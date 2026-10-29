@@ -1,0 +1,17 @@
+symbol:barrel-jack-switch-symbol("Barrel jack with switch") {
+    meta {
+        summary: "A DC barrel jack with the switch a plug opens, as drawn on a schematic: the centre pin above, the switch in the middle, the sleeve below"
+        code: "SY.CONNECTOR:BARREL-JACK-SWITCH"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    path("M-60-48H-4V-32H-60ZM-4-40H80M-28 40H80M-28 40V4L-40-12M-28 4L-16-12M80 0H20L8-16")
+    pin:tip(at: 80 -40, "+")
+    pin:switch(at: 80 0)
+    pin:sleeve(at: 80 40, "−")
+    label(name, at: -20 -76)
+    label(value, at: -20 76)
+}

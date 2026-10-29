@@ -15,6 +15,15 @@ public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
     private final BasicAuthenticationEntryPoint entryPoint         = new BasicAuthenticationEntryPoint();
     private       boolean                       challengeOnFailure = true;
 
+    public HttpBasicConfigurer() {
+        continueChainBeforeSuccess = true;
+    }
+
+    @Override
+    protected org.jmouse.security.web.AuthenticationEntryPoint defaultEntryPoint() {
+        return entryPoint;
+    }
+
     public HttpBasicConfigurer<B> realmName(String realm) {
         this.entryPoint.setRealmName(realm);
         return this;

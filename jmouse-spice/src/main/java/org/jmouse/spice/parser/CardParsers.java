@@ -8,6 +8,7 @@ import org.jmouse.spice.SpicePosition;
 import org.jmouse.spice.lexer.SpiceTokenKind;
 import org.jmouse.spice.node.SpiceArgument;
 import org.jmouse.spice.node.SpiceCard;
+import org.jmouse.spice.node.SpiceCommand;
 import org.jmouse.spice.node.SpiceParameter;
 import org.jmouse.spice.node.SpiceValue;
 import org.jmouse.spice.parser.CardReader.Card;
@@ -204,9 +205,9 @@ final class CardParsers {
 
         @Override
         SpiceCard statement(Card card, TokenCursor cursor, ParserContext context) {
-            List<String> lines = new ArrayList<>();
+            List<SpiceCommand> lines = new ArrayList<>();
             while (SpiceTokenKind.CONTROL_LINE.matches(cursor.peek())) {
-                lines.add(cursor.next().value());
+                lines.add(new SpiceCommand.Written(cursor.next().value()));
             }
             if (!SpiceTokenKind.isWord(cursor.peek(), ".endc")) {
                 throw new SpiceParseException(card.position(), "'.control' is never closed by '.endc'");

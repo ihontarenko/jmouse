@@ -1,0 +1,80 @@
+# An open-frame relay seen from the side, as through its clear cover: the copper coil on its core, the armature hinged
+# above it and the changeover contact at its tip — resting on the normally-closed contact, pulled down onto the
+# normally-open one while the coil is energized, by the part's own `energized`.
+portrait:relay-portrait("Relay") {
+    meta {
+        summary: "An open-frame relay: the armature pulls down onto the normally-open contact while the coil is energized"
+        code: "PT.RELAY:OPEN-FRAME"
+        category: circuits
+        tags: electronics, portrait, relay, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 120)
+    input:energized(0 .. 1)
+    input:failed
+
+    path:cover("M-46-44H46V44H-46Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.08
+    }
+    path:coil_leads("M-34 32V44L-40 50V60M-16 32V44L-20 50V60") {
+        stroke = copper
+        thickness = 1.2
+    }
+    path:strips("M14-16H20V60M14-32H40V60M0 60V46") {
+        stroke = silver
+        thickness = 1.6
+    }
+    path:braid("M0 46C0 20-48 6-40-22") {
+        stroke = copper
+        thickness = 0.8
+    }
+    pin:coil_one(at: -40 60)
+    pin:coil_two(at: -20 60)
+    pin:common(at: 0 60)
+    pin:normally_open(at: 20 60)
+    pin:normally_closed(at: 40 60)
+    path:coil("M-38-10H-12V32H-38Z") {
+        fill = copper
+    }
+    path:windings("M-38-4H-12M-38 2H-12M-38 8H-12M-38 14H-12M-38 20H-12M-38 26H-12") {
+        stroke = brown
+        thickness = 0.4
+        opacity = 0.5
+    }
+    path:pole("M-29-16H-21V-10H-29Z") {
+        stroke = clear
+        fill = silver
+    }
+    path:fixed_contacts("M11-32A3 3 0 1 0 17-32A3 3 0 1 0 11-32ZM11-16A3 3 0 1 0 17-16A3 3 0 1 0 11-16Z") {
+        stroke = clear
+        fill = silver
+    }
+    group:armature(live, pivot: -40 -22) {
+        path:plate("M-42-24H14V-20H-42Z") {
+            fill = silver
+        }
+        path:moving_contact("M11-22A3 3 0 1 0 17-22A3 3 0 1 0 11-22Z") {
+            stroke = clear
+            fill = silver
+        }
+        live rotate = between(-8 deg, 0 deg, smooth(energized, 40 ms))
+    }
+    path:base("M-46 44H46V50H-46Z") {
+        stroke = clear
+        fill = black
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-38-10H-12V32H-38Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.6
+        }
+    }
+    path:cover_edge("M-46-44H46V44H-46Z") {
+        fill = clear
+        opacity = 0.4
+    }
+}

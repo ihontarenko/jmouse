@@ -1,0 +1,104 @@
+# Pure digital: no equations. Thresholds, edges, output strength and how the part slows down at 2 V come from the
+# family; what is left is what a flip-flop is — when it samples, what it holds, and what it refuses to promise. A
+# setup or hold violation stores X rather than a guess, and X travels honestly through what follows.
+
+component:74hc74("74HC74", type: flip-flop) {
+    meta {
+        designator: U
+        summary: "Dual D-type flip-flop, positive edge, asynchronous set and reset"
+        source: "Nexperia 74HC74 datasheet"
+        package: "SOIC-14"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+    units:[A, B]
+
+    parameter:propagation_delay(16 ns, "clock to Q at 4.5 V (max 44 ns)")
+    parameter:setup(20 ns, "D stable before the clock rises")
+    parameter:hold(3 ns, "D stable after the clock rises")
+    # How it warms and where it gives up (DIP-14 in still air).
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:not_clear(digital, input, 1 13, "clear, active low")
+    pin:data(digital, input, 2 12)
+    pin:clock(digital, input, 3 11)
+    pin:not_preset(digital, input, 4 10, "preset, active low")
+    pin:output(digital, output, 5 9)
+    pin:not_output(digital, output, 6 8)
+    pin:GND(ground, 7)
+    pin:Vcc(power, 14)
+
+    symbol(box) {
+        left([data, clock edge])
+        top(not_preset bubble)
+        bottom(not_clear bubble)
+        right([output, not_output bubble])
+    }
+
+    state:stored(X, discrete, "what the flip-flop holds; unknown at power-up")
+
+    behaviour {
+        function inverted(level)
+            if level == 0 then
+                return 1
+            elseif level == 1 then
+                return 0
+            end
+            return X
+        end
+
+        function show()
+            let delay : time = propagation_delay * delay_scale(Vcc - GND)
+            if not_clear == 0 and not_preset == 0 then
+                drive('output', 1, delay)
+                drive('not_output', 1, delay)
+            else
+                drive('output', stored, delay)
+                drive('not_output', inverted(stored), delay)
+            end
+        end
+
+        on start do
+            show()
+        end
+
+        on change 'not_clear, not_preset' do
+            if not_clear == 0 and not_preset == 1 then
+                stored = 0
+            elseif not_preset == 0 and not_clear == 1 then
+                stored = 1
+            end
+            show()
+        end
+
+        on rising 'clock' when not_clear == 1 and not_preset == 1 do
+            if since('data') < setup then
+                stored = X
+            else
+                stored = data
+            end
+            show()
+        end
+
+        # D moved too soon after the edge that sampled it
+        on change 'data' when clock == 1 and since('clock') < hold do
+            stored = X
+            show()
+        end
+    }
+
+    expect("Q-bar fed back to D divides the clock by two", from: "function table") {
+        bench(for: 10 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:R1(resistor, [Vcc, clear], resistance: 1 kOhm)
+            part:C1(capacitor, [clear, 0], capacitance: 1 nF)
+            part:U1(self, [A.data: feedback, A.clock: clock, A.output: half, A.not_output: feedback, A.not_clear: clear, A.not_preset: Vcc, Vcc: Vcc, GND: 0])
+        }
+        measure(frequency, level: half, above: 0.5, after: 3 us)
+        near(500 kHz, +- 1%)
+    }
+}

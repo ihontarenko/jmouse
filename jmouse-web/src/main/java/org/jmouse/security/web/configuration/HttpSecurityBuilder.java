@@ -33,6 +33,15 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     <C extends SecurityConfigurer<MatchableSecurityFilterChain, H>> C getConfigurer(Class<C> type);
 
+    /** Optional lookup; the existing getConfigurer method retains its strict contract. */
+    default <C extends SecurityConfigurer<MatchableSecurityFilterChain, H>> java.util.Optional<C> findConfigurer(Class<C> type) {
+        try {
+            return java.util.Optional.ofNullable(getConfigurer(type));
+        } catch (java.util.NoSuchElementException absent) {
+            return java.util.Optional.empty();
+        }
+    }
+
     H chainMatcher(Customizer<MatcherCriteria> customizer);
 
 }

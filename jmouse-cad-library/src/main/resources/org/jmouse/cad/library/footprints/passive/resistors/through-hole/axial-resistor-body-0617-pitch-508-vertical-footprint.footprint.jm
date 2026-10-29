@@ -1,0 +1,18 @@
+footprint:axial-resistor-body-0617-pitch-508-vertical-footprint("Axial resistor DIN 0617, vertical, 5.08 mm") {
+    meta {
+        summary: "Axial resistor DIN 0617, body 17 × ⌀6 mm, stood on end over pin 1, 5.08 mm between its holes"
+        code: "FP.AXIAL:R0617-P5.08-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60286-1 bodies, DIN 44051 size codes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/axial-packages.sht#resistor-0617 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.8: drill 1, pad 2, pin 1 square.
+    pad:1(through-hole, rectangle, at: -2.54 0, size: 2 x 2, drill: 1)
+    pad:2(through-hole, circle, at: 2.54 0, size: 2 x 2, drill: 1)
+    outline(fabrication, width: 0.1, "M-5.54 0A3 3 0 1 0 0.46 0A3 3 0 1 0 -5.54 0ZM-2.54 0H2.54")
+    outline(silkscreen, width: 0.12, "M-5.65 0A3.11 3.11 0 1 0 0.57 0A3.11 3.11 0 1 0 -5.65 0Z")
+    outline(courtyard, width: 0.05, "M-6.15 -3.6H4.05V3.6H-6.15Z")
+}

@@ -1,0 +1,12 @@
+[
+  { "ending": "-F_Cu.gbr", "role": "top copper" },
+  { "ending": "-B_Cu.gbr", "role": "bottom copper" },
+  { "ending": "_Cu.gbr", "role": "inner copper" },
+  { "ending": "_Mask.gbr", "role": "solder mask (negative: what is drawn is left bare)" },
+  { "ending": "_Paste.gbr", "role": "solder paste stencil" },
+  { "ending": "_Silkscreen.gbr", "role": "silkscreen" },
+  { "ending": "-Edge_Cuts.gbr", "role": "board outline" },
+  { "ending": "-PTH.drl", "role": "plated holes and slots (Excellon)" },
+  { "ending": "-NPTH.drl", "role": "unplated holes (Excellon)" },
+  { "ending": "-netlist.ipc", "role": "netlist for the bare board's electrical test (IPC-D-356)" }
+]

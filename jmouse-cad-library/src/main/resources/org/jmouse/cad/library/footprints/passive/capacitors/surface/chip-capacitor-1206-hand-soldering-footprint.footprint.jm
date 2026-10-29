@@ -1,0 +1,19 @@
+footprint:chip-capacitor-1206-hand-soldering-footprint("Chip capacitor 1206 (3216 metric), hand soldering") {
+    meta {
+        summary: "Chip capacitor, 1206 (3216 metric) body, pads lengthened for a soldering iron"
+        code: "FP.CHIP:C1206-HAND"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60384-22 dimensions, 1206 (3216 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#capacitor-1206 and the land pattern rules; regenerate, never edit.
+    # Body 3…3.4 × 1.4…1.8, terminal 0.3…0.8; fillets toe 0.55, heel 0, side 0.05.
+    # Z = 4.515, G = 1.686, X = 1.915; pad 1.4 × 1.95 centred at ±1.55.
+    pad:1(surface, rounded-rectangle, at: -1.55 0, size: 1.4 x 1.95, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 1.55 0, size: 1.4 x 1.95, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-1.6 -0.8H1.6V0.8H-1.6Z")
+    outline(silkscreen, width: 0.12, "M-0.59 -1.235H0.59M-0.59 1.235H0.59")
+    outline(courtyard, width: 0.05, "M-2.75 -1.5H2.75V1.5H-2.75Z")
+}

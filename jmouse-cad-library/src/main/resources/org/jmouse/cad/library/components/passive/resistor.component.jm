@@ -1,0 +1,47 @@
+# A resistor as it is: Ohm's law at the resistance it has now — its value, at the corner of its tolerance a bench sets,
+# moved by its temperature coefficient from T_nominal — with the Johnson–Nyquist noise of that resistance at its own
+# temperature. Its own heat is the shared law's (functions/heat.jmx): on a realistic bench the power it takes warms it,
+# and `temperature` here is that.
+#
+# Written in pin order on a sheet — R1 resistor (a, b) resistance = 10 kΩ — the first pin is a, the second b. At any one
+# temperature it is linear and reads no time, so the engine stamps it once for the whole run, as a SPICE R.
+
+component:resistor("Resistor", type: resistor) {
+    use:constants
+
+    meta {
+        designator: R
+        summary: "Two-terminal resistor: Ohm's law, tolerance, temperature drift, thermal noise"
+        category: circuits
+        failure: open
+        value: resistance
+    }
+    parameter:resistance(1 kOhm, "resistance")
+    parameter:tolerance(1 %, "how far a part may be from its value, ±; a bench's corners use it")
+    parameter:temperature_coefficient(100 ppm/K, "how its value moves per kelvin away from T_nominal; a bench's temperature uses it")
+    parameter:T_nominal(298.15 K, "the temperature its value is given at")
+    # How it warms and where it gives up (a quarter-watt film resistor in free air).
+    parameter:power_rating(0.25 W, "what it is rated for")
+    parameter:thermal_resistance(250 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(10 s, "how fast it warms to that")
+    parameter:T_maximum(155 °C, "past this it fails on a realistic bench")
+    pin:terminal_one(analog, 1, "first terminal")
+    pin:terminal_two(analog, 2, "second terminal")
+    symbol(uses: resistor-symbol) {
+        bind:failed(failed)
+        bind:load(power / power_rating)
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+    equations {
+        let R_now : resistance = resistance * (1 + tolerance_corner * tolerance) * (1 + temperature_coefficient * (temperature - T_nominal))
+        # Johnson–Nyquist noise, 4kT/R: nothing to the solution, to a realistic bench a hiss
+        current terminal_one -> terminal_two = (terminal_one - terminal_two) / R_now + noise(4 * boltzmann * temperature / R_now)
+    }
+
+    # How it looks in the hand: its colour bands, read from its resistance and tolerance (IEC 60062).
+    portrait(uses: axial-resistor-portrait) {
+        bind:resistance(resistance)
+        bind:tolerance(tolerance)
+    }
+}

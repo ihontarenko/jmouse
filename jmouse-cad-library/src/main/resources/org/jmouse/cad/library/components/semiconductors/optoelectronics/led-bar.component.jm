@@ -1,0 +1,99 @@
+# LED bar: 8 red LEDs with their cathodes joined — one junction law each, as a lone red LED has, written
+# once per segment. Each segment's light is its own display figure, so the drawing lights the segments that conduct.
+# A segment wants its own series resistor: nothing in the part limits its current.
+
+component:led-bar("LED bar", type: display) {
+    meta {
+        designator: DS
+        summary: "Eight red LEDs in a row, common cathode: a level meter or a byte made visible"
+        source: "a typical red LED die, as led-red: VF about 2.0 V at 20 mA, VR 5 V; common cathode"
+        package: "DIP-16 bar, 8 segments"
+        category: circuits
+        failure: open
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:I_saturation(0.00066 fA, "IS of each segment: the wide band gap's tiny saturation current")
+    parameter:emission_coefficient(2, "N")
+    parameter:R_series(2.5 Ohm, "RS of each segment: its bulk and its bond wire")
+    parameter:I_rated(20 mA, "the current a segment's brightness is given at")
+    parameter:I_forward_maximum(30 mA, "IF of each segment, continuous")
+    parameter:power_rating(0.4 W, "what the whole package is rated for")
+    parameter:thermal_resistance(200 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(100 °C, "past this it fails on a realistic bench")
+
+    pin:anode_0(analog, 1, "anode of segment 0")
+    pin:anode_1(analog, 2, "anode of segment 1")
+    pin:anode_2(analog, 3, "anode of segment 2")
+    pin:anode_3(analog, 4, "anode of segment 3")
+    pin:anode_4(analog, 5, "anode of segment 4")
+    pin:anode_5(analog, 6, "anode of segment 5")
+    pin:anode_6(analog, 7, "anode of segment 6")
+    pin:anode_7(analog, 8, "anode of segment 7")
+    pin:cathode(analog, 9, "the common cathode")
+
+    figure:light_0(100 * max(0, anode_0.current) / I_rated, unit: %, "of segment 0's rated brightness")
+    figure:light_1(100 * max(0, anode_1.current) / I_rated, unit: %, "of segment 1's rated brightness")
+    figure:light_2(100 * max(0, anode_2.current) / I_rated, unit: %, "of segment 2's rated brightness")
+    figure:light_3(100 * max(0, anode_3.current) / I_rated, unit: %, "of segment 3's rated brightness")
+    figure:light_4(100 * max(0, anode_4.current) / I_rated, unit: %, "of segment 4's rated brightness")
+    figure:light_5(100 * max(0, anode_5.current) / I_rated, unit: %, "of segment 5's rated brightness")
+    figure:light_6(100 * max(0, anode_6.current) / I_rated, unit: %, "of segment 6's rated brightness")
+    figure:light_7(100 * max(0, anode_7.current) / I_rated, unit: %, "of segment 7's rated brightness")
+    figure:overcurrent(100 * max(abs(anode_0.current), max(abs(anode_1.current), max(abs(anode_2.current), max(abs(anode_3.current), max(abs(anode_4.current), max(abs(anode_5.current), max(abs(anode_6.current), abs(anode_7.current)))))))) / I_forward_maximum, unit: %, "of a segment's rated current")
+
+    symbol(uses: led-bar-symbol)
+
+    node:junction_anode_0
+    node:junction_anode_1
+    node:junction_anode_2
+    node:junction_anode_3
+    node:junction_anode_4
+    node:junction_anode_5
+    node:junction_anode_6
+    node:junction_anode_7
+
+    equations {
+        current anode_0 -> junction_anode_0 = (anode_0 - junction_anode_0) / R_series
+        current junction_anode_0 -> cathode = junction_current(junction_anode_0 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_1 -> junction_anode_1 = (anode_1 - junction_anode_1) / R_series
+        current junction_anode_1 -> cathode = junction_current(junction_anode_1 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_2 -> junction_anode_2 = (anode_2 - junction_anode_2) / R_series
+        current junction_anode_2 -> cathode = junction_current(junction_anode_2 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_3 -> junction_anode_3 = (anode_3 - junction_anode_3) / R_series
+        current junction_anode_3 -> cathode = junction_current(junction_anode_3 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_4 -> junction_anode_4 = (anode_4 - junction_anode_4) / R_series
+        current junction_anode_4 -> cathode = junction_current(junction_anode_4 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_5 -> junction_anode_5 = (anode_5 - junction_anode_5) / R_series
+        current junction_anode_5 -> cathode = junction_current(junction_anode_5 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_6 -> junction_anode_6 = (anode_6 - junction_anode_6) / R_series
+        current junction_anode_6 -> cathode = junction_current(junction_anode_6 - cathode, I_saturation, emission_coefficient, temperature)
+        current anode_7 -> junction_anode_7 = (anode_7 - junction_anode_7) / R_series
+        current junction_anode_7 -> cathode = junction_current(junction_anode_7 - cathode, I_saturation, emission_coefficient, temperature)
+    }
+
+    expect("a segment's forward voltage at 20 mA", from: "VF 2.0 V typical, 2.5 V at most at 20 mA, as a red LED") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [lit, 0], I_output: 20 mA)
+            # The other segments are tied off to the cathode, as unused ones are on a board: dark, and no node left floating.
+            part:U1(self, [anode_0: lit, anode_1: 0, anode_2: 0, anode_3: 0, anode_4: 0, anode_5: 0, anode_6: 0, anode_7: 0, cathode: 0])
+        }
+        measure(operating, lit)
+        within(1.8 V .. 2.5 V)
+    }
+
+    expect("a segment lights alone", from: "common cathode: each anode drives its own segment") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [supply, lit], resistance: 150 Ohm)
+            part:R2(resistor, [supply, dark], resistance: 1 GOhm)
+            part:U1(self, [anode_0: lit, anode_1: dark, cathode: 0])
+        }
+        measure(operating, current: R1)
+        within(18 mA .. 22 mA)
+    }
+
+    # How it looks in the hand: the bar graph itself, its bars lit by the same figures as the symbol.
+    portrait(uses: led-bar-portrait)
+}

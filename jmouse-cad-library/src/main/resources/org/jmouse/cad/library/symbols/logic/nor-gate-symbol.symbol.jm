@@ -1,0 +1,23 @@
+symbol:nor-gate-symbol("NOR gate") {
+    meta {
+        summary: "A two-input NOR gate, as drawn on a schematic (ANSI): the OR body and the bubble that inverts"
+        code: "SY.GATE:NOR"
+        category: circuits
+        tags: electronics, schematic, logic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    path("M-48-40H-8Q28-40 44 0Q28 40-8 40H-48Q-24 0-48-40ZM44 0A8 8 0 1 0 60 0A8 8 0 1 0 44 0M-80-20H-39M-80 20H-39M60 0H80M-20-40V-60M-20 40V60")
+    # The body, filled as the drawing theme fills a part's body.
+    path:body_fill("M-48-40H-8Q28-40 44 0Q28 40-8 40H-48Q-24 0-48-40Z") {
+        fill = body
+    }
+    pin:a(at: -80 -20)
+    pin:b(at: -80 20)
+    pin:output(at: 80 0)
+    pin:Vcc(at: -20 -60)
+    pin:GND(at: -20 60)
+    label(name, at: 28 -60)
+    label(value, at: 28 72)
+}

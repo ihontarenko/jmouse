@@ -1,0 +1,55 @@
+# Generated from footprint-standards/small-outline-packages.sht#ssop; regenerate, never edit.
+portrait:ssop-24-portrait("SSOP-24") {
+    meta {
+        summary: "24-lead SSOP, 5.3 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.SSOP:24-P0.65-W5.3"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MO-150"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(273 x 240)
+    input:marking(text)
+
+    path:leads("M-124.615 81.538H-115.385V120H-124.615ZM-124.615 -81.538H-115.385V-120H-124.615ZM-104.615 81.538H-95.385V120H-104.615ZM-104.615 -81.538H-95.385V-120H-104.615ZM-84.615 81.538H-75.385V120H-84.615ZM-84.615 -81.538H-75.385V-120H-84.615ZM-64.615 81.538H-55.385V120H-64.615ZM-64.615 -81.538H-55.385V-120H-64.615ZM-44.615 81.538H-35.385V120H-44.615ZM-44.615 -81.538H-35.385V-120H-44.615ZM-24.615 81.538H-15.385V120H-24.615ZM-24.615 -81.538H-15.385V-120H-24.615ZM-4.615 81.538H4.615V120H-4.615ZM-4.615 -81.538H4.615V-120H-4.615ZM15.385 81.538H24.615V120H15.385ZM15.385 -81.538H24.615V-120H15.385ZM35.385 81.538H44.615V120H35.385ZM35.385 -81.538H44.615V-120H35.385ZM55.385 81.538H64.615V120H55.385ZM55.385 -81.538H64.615V-120H55.385ZM75.385 81.538H84.615V120H75.385ZM75.385 -81.538H84.615V-120H75.385ZM95.385 81.538H104.615V120H95.385ZM95.385 -81.538H104.615V-120H95.385Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -120 120)
+    pin:2(at: -100 120)
+    pin:3(at: -80 120)
+    pin:4(at: -60 120)
+    pin:5(at: -40 120)
+    pin:6(at: -20 120)
+    pin:7(at: 0 120)
+    pin:8(at: 20 120)
+    pin:9(at: 40 120)
+    pin:10(at: 60 120)
+    pin:11(at: 80 120)
+    pin:12(at: 100 120)
+    pin:13(at: 100 -120)
+    pin:14(at: 80 -120)
+    pin:15(at: 60 -120)
+    pin:16(at: 40 -120)
+    pin:17(at: 20 -120)
+    pin:18(at: 0 -120)
+    pin:19(at: -20 -120)
+    pin:20(at: -40 -120)
+    pin:21(at: -60 -120)
+    pin:22(at: -80 -120)
+    pin:23(at: -100 -120)
+    pin:24(at: -120 -120)
+    path:body("M-129.631 -81.538H109.631A6.523 6.523 0 0 1 116.154 -75.015V75.015A6.523 6.523 0 0 1 109.631 81.538H-129.631A6.523 6.523 0 0 1 -136.154 75.015V-75.015A6.523 6.523 0 0 1 -129.631 -81.538Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-119.194 53.978A10.6 10.6 0 1 0 -97.994 53.978A10.6 10.6 0 1 0 -119.194 53.978Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 176.615 x 36.692) {
+        fill = silver
+        text = marking
+    }
+}

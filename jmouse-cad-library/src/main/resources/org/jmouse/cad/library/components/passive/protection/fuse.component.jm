@@ -1,0 +1,44 @@
+# A 1 A fast-acting glass fuse: its cold resistance, and a fusible element that gives way when its own heat takes it past
+# melting. The element's heating is fitted to open near twice the rated current; the datasheet's time–current curve is
+# not followed point by point.
+component:fuse("Fuse, 1 A fast", type: fuse) {
+    meta {
+        designator: F
+        summary: "Fast-acting fuse, 1 A, 250 V, 5 × 20 mm"
+        source: "Littelfuse 217 series datasheet: 1 A, cold resistance about 0.1 Ω"
+        package: "Fuse_5x20mm"
+        category: circuits
+        failure: open
+    }
+
+    parameter:R_cold(100 mOhm, "cold resistance of the 1 A rating")
+    parameter:power_rating(0.4 W, "the element's dissipation at about twice its rated current")
+    parameter:thermal_resistance(450 K/W, "the element's rise per watt: past T_maximum near twice the rated current")
+    parameter:thermal_time_constant(0.2 s, "a fast element's thermal mass")
+    parameter:T_maximum(210 °C, "where the element is taken to give way")
+
+    pin:terminal_one(analog, 1, "first cap")
+    pin:terminal_two(analog, 2, "second cap")
+
+    symbol(uses: fuse-symbol) {
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    equations {
+        current terminal_one -> terminal_two = (terminal_one - terminal_two) / R_cold
+    }
+
+    expect("drops a tenth of a volt at its rated current", from: "cold resistance about 0.1 Ω for the 1 A rating") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [feed, 0], U_output: 10 V)
+            part:R1(resistor, [feed, a], resistance: 9.9 Ohm)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, a)
+        within(0.09 V .. 0.11 V)
+    }
+
+    # How it looks in the hand: a glass tube whose element parts when it blows.
+    portrait(uses: fuse-portrait)
+}

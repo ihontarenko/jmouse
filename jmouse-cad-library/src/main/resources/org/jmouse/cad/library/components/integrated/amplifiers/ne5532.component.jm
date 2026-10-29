@@ -1,0 +1,109 @@
+# The NE5532: two low-noise bipolar op-amps that drive 600 Ω. Its NPN inputs draw a fifth of a microampere into each
+# pin — through a large source resistance that is an offset — and present only 300 kΩ between them. The pin called GND
+# is V-.
+
+component:ne5532("NE5532", type: opamp) {
+    meta {
+        designator: U
+        summary: "Dual low-noise bipolar operational amplifier, ±22 V, 10 MHz, 9 V/µs, drives 600 Ω"
+        source: "TI NE5532 datasheet (SLOS075), electrical characteristics at ±15 V"
+        package: "SOIC-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:operational-amplifier
+    units:[A, B]
+
+    parameter:open_loop_gain(100000, "AVD 100 V/mV")
+    parameter:gain_bandwidth(10 MHz, "unity-gain bandwidth")
+    parameter:second_pole(20 MHz, "unity-gain stable: a phase margin near 60°")
+    parameter:slew_rate(9 V/us, "slew rate")
+    parameter:V_input_offset(0 V, per: unit, "input offset; typically 0.5 mV either way")
+    parameter:I_input_bias(-200 nA, "input bias current, into the input pins (NPN inputs)")
+    parameter:R_input(300 kOhm, "differential input resistance")
+    parameter:V_noise(5 nV, "input voltage noise density at 1 kHz, 5 nV/√Hz")
+    parameter:I_noise(0.7 pA, "input current noise density at 1 kHz, 0.7 pA/√Hz")
+    parameter:noise_corner(50 Hz, "8 nV/√Hz at 30 Hz against 5 at 1 kHz: a corner near 50 Hz")
+    parameter:V_common_mode_low(2 V, "VICR ±13 V at ±15 V")
+    parameter:V_common_mode_high(2 V, "VICR ±13 V at ±15 V")
+    parameter:I_quiescent(4 mA, "supply current per unit")
+    parameter:R_output(10 Ohm, "output resistance")
+    parameter:I_output_source(38 mA, "output short-circuit current")
+    parameter:I_output_sink(38 mA, "output short-circuit current")
+    parameter:V_output_headroom(2 V, "VOM ±13 V into 600 Ω at ±15 V")
+    parameter:V_output_low(2 V, "the same towards V-")
+    parameter:V_supply_nominal(30 V, "the supply span the figures are given at")
+    parameter:V_supply_maximum(44 V, "the supply span it is rated for")
+    parameter:V_offset_spread(4 mV, "VIO at most 4 mV")
+
+    pin:output(analog, output, 1 7)
+    pin:inverting_input(analog, input, 2 6, "inverting")
+    pin:non_inverting_input(analog, input, 3 5, "non-inverting")
+    pin:Vcc(power, 8, "V+")
+    pin:GND(power, 4, "V-")
+
+    footprint(soic-8-footprint)
+
+    symbol(uses: [operational-amplifier-symbol, operational-amplifier-wide-symbol]) {
+        bind:failed(failed)
+        bind:positive_supply(pin: Vcc)
+        bind:negative_supply(pin: GND)
+    }
+
+    expect("inverting gain of ten", from: "closed-loop application, G = -R2 / R1") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: 0.5 V)
+            part:R1(resistor, [input, inverting_input], resistance: 10 kOhm)
+            part:R2(resistor, [inverting_input, output], resistance: 100 kOhm)
+            part:U1(self, [A.non_inverting_input: 0, A.inverting_input: inverting_input, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, output)
+        near(-5 V, +- 1%)
+    }
+
+    expect("slew rate", from: "electrical characteristics, SR 9 V/µs typical") {
+        bench(for: 0.5 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: 10 V)
+            part:U1(self, [A.non_inverting_input: input, A.inverting_input: output, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(final, output)
+        near(4.5 V, +- 25%)
+    }
+
+    expect("output swing into 600 Ω", from: "VOM ±12 V minimum at RL 600 Ω, ±15 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: 1 V)
+            part:R1(resistor, [output, 0], resistance: 600 Ohm)
+            part:U1(self, [A.non_inverting_input: input, A.inverting_input: 0, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, output)
+        within(12 V .. 15 V)
+    }
+
+    expect("bias current through a 100 kΩ source", from: "IIB 200 nA typical, 800 nA maximum, into the inputs") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:R1(resistor, [0, input], resistance: 100 kOhm)
+            part:U1(self, [A.non_inverting_input: input, A.inverting_input: output, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, output)
+        within(-80 mV .. -5 mV)
+    }
+
+    expect("supply current, both units", from: "ICC 16 mA maximum, both amplifiers") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:U1(self, [A.non_inverting_input: 0, A.inverting_input: a, A.output: a, B.non_inverting_input: 0, B.inverting_input: b, B.output: b, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, current: V1)
+        within(-16 mA .. 0 mA)
+    }
+}

@@ -1,0 +1,31 @@
+symbol:center-tapped-transformer-symbol("Transformer with a centre tap") {
+    meta {
+        summary: "A transformer whose secondary is tapped in its middle, as drawn on a schematic: two halves of one winding"
+        code: "SY.TRANSFORMER:CENTER-TAPPED"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 128)
+    input:failed
+
+    group:body(live) {
+        path("M-80-40H-36C-6-40-6-14-36-14C-6-14-6 14-36 14C-6 14-6 40-36 40H-80M-4-64V64M4-64V64M80-60H36C66-60 66-30 36-30C66-30 66 0 36 0C66 0 66 30 36 30C66 30 66 60 36 60H80M36 0H80")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:primary_one(at: -80 -40)
+    pin:primary_two(at: -80 40)
+    pin:secondary_one(at: 80 -60)
+    pin:center_tap(at: 80 0)
+    pin:secondary_two(at: 80 60)
+    label(name, at: 0 -84)
+    label(value, at: 0 92)
+}

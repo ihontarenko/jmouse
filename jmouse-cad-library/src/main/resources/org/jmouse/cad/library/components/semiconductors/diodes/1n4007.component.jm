@@ -1,0 +1,73 @@
+# The 1N4007 is the general diode as a mains rectifier: a large junction (nanoamperes of saturation current, a high
+# emission coefficient), a 1000 V rating and microseconds of stored charge — the reverse recovery that makes it the
+# wrong diode above a few kilohertz.
+
+component:1n4007("1N4007", type: diode) {
+    meta {
+        designator: D
+        summary: "General-purpose rectifier, 1000 V, 1 A"
+        source: "onsemi / Vishay 1N4001–1N4007 datasheets; starting point: the common vendor SPICE model"
+        package: "DO-41"
+        category: circuits
+        failure: short
+    }
+    extends:diode
+
+    parameter:I_saturation(7.03 nA, "IS")
+    parameter:emission_coefficient(1.808, "N")
+    parameter:R_series(34 mOhm, "RS")
+    parameter:C_junction_zero_bias(10 pF, "CJO")
+    parameter:V_junction(0.7 V, "VJ")
+    parameter:grading_coefficient(0.5, "M")
+    parameter:transit_time(4 us, "TT: a standard-recovery rectifier stores microseconds of charge")
+    parameter:V_breakdown(1200 V, "avalanche above the rated 1000 V")
+    parameter:I_breakdown(10 uA, "current at V_breakdown")
+    parameter:E_gap(1.057 V, "EG")
+    parameter:saturation_temperature_exponent(5, "XTI")
+    # How it warms and where it gives up (DO-41: RθJA about 100 K/W, TJ max 150 °C).
+    parameter:power_rating(1.25 W, "what it is rated for")
+    parameter:thermal_resistance(100 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:V_reverse_maximum(1000 V, "VRRM")
+    parameter:I_forward_maximum(1 A, "IF(AV)")
+
+    pin:anode(analog, 1, "anode")
+    pin:cathode(analog, 2, "cathode, the banded end")
+
+    symbol(uses: diode-symbol) {
+        bind:failed(failed)
+        bind:a(pin: anode)
+        bind:b(pin: cathode)
+    }
+
+    expect("forward voltage at 1 A", from: "electrical characteristics, VF at most 1.1 V at 1 A") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 1 A)
+        }
+        measure(operating, anode)
+        within(0.75 V .. 1.1 V)
+    }
+
+    expect("reverse current at 1000 V", from: "electrical characteristics, IR at most 5 uA at VRRM, 25 C") {
+        bench(for: 1 ms) {
+            part:X1(reverse, voltage: 1000 V)
+        }
+        measure(operating, current: V1)
+        within(-5 uA .. 0 A)
+    }
+
+    expect("half-wave rectifier keeps 10 V peaks", from: "typical application: mains rectifier") {
+        bench(for: 40 ms) {
+            part:V1(sine-generator, [positive: input, negative: 0], amplitude: 10 V, frequency: 50 Hz)
+            part:U1(self, [anode: input, cathode: output])
+            part:C1(capacitor, [output, 0], capacitance: 100 uF)
+            part:R1(resistor, [output, 0], resistance: 1 kOhm)
+        }
+        measure(maximum, output, after: 20 ms)
+        within(9.0 V .. 9.5 V)
+    }
+
+    # How it looks in the hand: its black body and the silver band at the cathode.
+    portrait(uses: axial-diode-portrait)
+}

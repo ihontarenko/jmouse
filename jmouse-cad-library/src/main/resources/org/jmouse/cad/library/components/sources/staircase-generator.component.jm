@@ -1,0 +1,28 @@
+# A staircase voltage: `steps` equal steps from the offset up, each held for one period of `frequency`, then back to the
+# first — what a transistor curve tracer feeds a base with, one base current per sweep of the collector. Its edges are
+# where floor() steps, and the engine lands a step on each, as on a square wave's.
+
+component:staircase-generator("Staircase generator", type: generator) {
+    meta {
+        designator: G
+        summary: "Equal voltage steps, each held for one period, cycling: offset + step · floor(mod(frequency · time, steps))"
+        category: circuits
+    }
+
+    parameter:step(0.5 V, "the height of one step")
+    parameter:steps(6, "how many steps before it starts again")
+    parameter:frequency(50 Hz, "steps a second: each step lasts one period")
+    parameter:offset(0 V, "the first step's level")
+
+    pin:positive(analog, 1, "positive terminal")
+    pin:negative(analog, 2, "negative terminal")
+
+    symbol(uses: square-source-symbol) {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+
+    equations {
+        voltage positive -> negative = offset + step * floor(mod(frequency * time, steps))
+    }
+}

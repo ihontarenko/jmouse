@@ -62,6 +62,11 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter, Heade
     private void renderView(boolean error, boolean logout, RequestContext requestContext) {
         Map<String, Object> model = new HashMap<>();
 
+        Object csrf = requestContext.request().getAttribute(org.jmouse.security.web.csrf.CsrfToken.REQUEST_ATTRIBUTE);
+        if (csrf instanceof org.jmouse.security.web.csrf.CsrfToken token) {
+            model.put("csrfToken", token.value());
+            model.put("csrfParameterName", token.parameterName());
+        }
         model.put("submitAction", action);
         model.put("usernameParameter", usernameParameter);
         model.put("passwordParameter", passwordParameter);

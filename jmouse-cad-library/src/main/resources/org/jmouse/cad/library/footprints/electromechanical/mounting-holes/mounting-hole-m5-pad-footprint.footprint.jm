@@ -1,0 +1,17 @@
+footprint:mounting-hole-m5-pad-footprint("Mounting hole M5, a plated ring under the head") {
+    meta {
+        summary: "M5 screw, 5.3 mm hole, a plated ring under the head"
+        code: "FP.MH:M5-PAD"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#screw-m5; regenerate, never edit.
+    # Hole 5.3 (ISO 273 fine); head ⌀9.5, ring ⌀10.3 = head + 2 × 0.4.
+    pad:1(through-hole, circle, at: 0 0, size: 10.3 x 10.3, drill: 5.3)
+    outline(fabrication, width: 0.1, "M-4.75 0A4.75 4.75 0 1 0 4.75 0A4.75 4.75 0 1 0 -4.75 0Z")
+    outline(silkscreen, width: 0.12, "M-5.41 0A5.41 5.41 0 1 0 5.41 0A5.41 5.41 0 1 0 -5.41 0Z")
+    outline(courtyard, width: 0.05, "M-5.65 0A5.65 5.65 0 1 0 5.65 0A5.65 5.65 0 1 0 -5.65 0Z")
+}

@@ -1,0 +1,19 @@
+symbol:usb-c-power-symbol("USB-C receptacle, power only") {
+    meta {
+        summary: "A USB-C receptacle that only takes power, as drawn on a schematic: bus power, the two configuration pins and ground on the right, the shield below"
+        code: "SY.CONNECTOR:USB-C-POWER"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(240 x 240)
+    path("M-80-80H40V80H-80ZM40-60H120M40-20H120M40 20H120M40 60H120M-40 80V120")
+    pin:vbus(at: 120 -60, "VBUS")
+    pin:configuration_one(at: 120 -20, "CC1")
+    pin:configuration_two(at: 120 20, "CC2")
+    pin:ground(at: 120 60, "GND")
+    pin:shield(at: -40 120, "Shield")
+    label(name, at: -20 -108)
+    label(value, at: 40 108)
+}

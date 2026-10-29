@@ -1,0 +1,180 @@
+symbol:lcd-1602-symbol("16×2 character LCD") {
+    meta {
+        summary: "A 16×2 character LCD module: its window shows the 32 characters its controller holds on screen"
+        code: "SY.DISPLAY:LCD-16X2"
+        category: circuits
+        tags: electronics, schematic, display
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(360 x 240)
+    input:cell_0(0 .. 255)
+    input:cell_1(0 .. 255)
+    input:cell_2(0 .. 255)
+    input:cell_3(0 .. 255)
+    input:cell_4(0 .. 255)
+    input:cell_5(0 .. 255)
+    input:cell_6(0 .. 255)
+    input:cell_7(0 .. 255)
+    input:cell_8(0 .. 255)
+    input:cell_9(0 .. 255)
+    input:cell_10(0 .. 255)
+    input:cell_11(0 .. 255)
+    input:cell_12(0 .. 255)
+    input:cell_13(0 .. 255)
+    input:cell_14(0 .. 255)
+    input:cell_15(0 .. 255)
+    input:cell_16(0 .. 255)
+    input:cell_17(0 .. 255)
+    input:cell_18(0 .. 255)
+    input:cell_19(0 .. 255)
+    input:cell_20(0 .. 255)
+    input:cell_21(0 .. 255)
+    input:cell_22(0 .. 255)
+    input:cell_23(0 .. 255)
+    input:cell_24(0 .. 255)
+    input:cell_25(0 .. 255)
+    input:cell_26(0 .. 255)
+    input:cell_27(0 .. 255)
+    input:cell_28(0 .. 255)
+    input:cell_29(0 .. 255)
+    input:cell_30(0 .. 255)
+    input:cell_31(0 .. 255)
+
+    path("M-180-80H140V80H-180Z")
+    path("M-160-80V-120")
+    path("M-120-80V-120")
+    path("M-80-80V-120")
+    path("M-40-80V-120")
+    path("M0-80V-120")
+    path("M40-80V-120")
+    path("M80-80V-120")
+    path("M120-80V-120")
+    path("M-160 80V120")
+    path("M-120 80V120")
+    path("M-80 80V120")
+    path("M-40 80V120")
+    path("M0 80V120")
+    path("M40 80V120")
+    path("M80 80V120")
+    path("M120 80V120")
+    box:window(at: -20 -8, size: 280 x 72) {
+        fill = green
+        opacity = 0.25
+    }
+    glyph:character_0(live, at: -140 -24, size: 14 x 24) {
+        live character = cell_0
+    }
+    glyph:character_1(live, at: -124 -24, size: 14 x 24) {
+        live character = cell_1
+    }
+    glyph:character_2(live, at: -108 -24, size: 14 x 24) {
+        live character = cell_2
+    }
+    glyph:character_3(live, at: -92 -24, size: 14 x 24) {
+        live character = cell_3
+    }
+    glyph:character_4(live, at: -76 -24, size: 14 x 24) {
+        live character = cell_4
+    }
+    glyph:character_5(live, at: -60 -24, size: 14 x 24) {
+        live character = cell_5
+    }
+    glyph:character_6(live, at: -44 -24, size: 14 x 24) {
+        live character = cell_6
+    }
+    glyph:character_7(live, at: -28 -24, size: 14 x 24) {
+        live character = cell_7
+    }
+    glyph:character_8(live, at: -12 -24, size: 14 x 24) {
+        live character = cell_8
+    }
+    glyph:character_9(live, at: 4 -24, size: 14 x 24) {
+        live character = cell_9
+    }
+    glyph:character_10(live, at: 20 -24, size: 14 x 24) {
+        live character = cell_10
+    }
+    glyph:character_11(live, at: 36 -24, size: 14 x 24) {
+        live character = cell_11
+    }
+    glyph:character_12(live, at: 52 -24, size: 14 x 24) {
+        live character = cell_12
+    }
+    glyph:character_13(live, at: 68 -24, size: 14 x 24) {
+        live character = cell_13
+    }
+    glyph:character_14(live, at: 84 -24, size: 14 x 24) {
+        live character = cell_14
+    }
+    glyph:character_15(live, at: 100 -24, size: 14 x 24) {
+        live character = cell_15
+    }
+    glyph:character_16(live, at: -140 8, size: 14 x 24) {
+        live character = cell_16
+    }
+    glyph:character_17(live, at: -124 8, size: 14 x 24) {
+        live character = cell_17
+    }
+    glyph:character_18(live, at: -108 8, size: 14 x 24) {
+        live character = cell_18
+    }
+    glyph:character_19(live, at: -92 8, size: 14 x 24) {
+        live character = cell_19
+    }
+    glyph:character_20(live, at: -76 8, size: 14 x 24) {
+        live character = cell_20
+    }
+    glyph:character_21(live, at: -60 8, size: 14 x 24) {
+        live character = cell_21
+    }
+    glyph:character_22(live, at: -44 8, size: 14 x 24) {
+        live character = cell_22
+    }
+    glyph:character_23(live, at: -28 8, size: 14 x 24) {
+        live character = cell_23
+    }
+    glyph:character_24(live, at: -12 8, size: 14 x 24) {
+        live character = cell_24
+    }
+    glyph:character_25(live, at: 4 8, size: 14 x 24) {
+        live character = cell_25
+    }
+    glyph:character_26(live, at: 20 8, size: 14 x 24) {
+        live character = cell_26
+    }
+    glyph:character_27(live, at: 36 8, size: 14 x 24) {
+        live character = cell_27
+    }
+    glyph:character_28(live, at: 52 8, size: 14 x 24) {
+        live character = cell_28
+    }
+    glyph:character_29(live, at: 68 8, size: 14 x 24) {
+        live character = cell_29
+    }
+    glyph:character_30(live, at: 84 8, size: 14 x 24) {
+        live character = cell_30
+    }
+    glyph:character_31(live, at: 100 8, size: 14 x 24) {
+        live character = cell_31
+    }
+
+    pin:ground(at: -160 -120)
+    pin:supply(at: -120 -120)
+    pin:contrast(at: -80 -120)
+    pin:register_select(at: -40 -120)
+    pin:read_write(at: 0 -120)
+    pin:enable(at: 40 -120)
+    pin:backlight_anode(at: 80 -120)
+    pin:backlight_cathode(at: 120 -120)
+    pin:data_0(at: -160 120)
+    pin:data_1(at: -120 120)
+    pin:data_2(at: -80 120)
+    pin:data_3(at: -40 120)
+    pin:data_4(at: 0 120)
+    pin:data_5(at: 40 120)
+    pin:data_6(at: 80 120)
+    pin:data_7(at: 120 120)
+    label(name, at: 200 -60)
+    label(value, at: 200 60)
+}

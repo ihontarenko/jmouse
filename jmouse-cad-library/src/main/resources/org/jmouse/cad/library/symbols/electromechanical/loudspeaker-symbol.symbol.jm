@@ -1,0 +1,31 @@
+symbol:loudspeaker-symbol("Loudspeaker") {
+    meta {
+        summary: "Loudspeaker, as drawn on a schematic: a magnet box and its cone, sound leaving it as strongly as it is driven"
+        code: "SY.TRANSDUCER:LOUDSPEAKER"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:level(0 .. 1)
+    input:failed
+    group:body(live) {
+        path("M-80-40H-32V-20M-80 40H-32V20M-32-20H-12V20H-32ZM-12-20L28-52V52L-12 20")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    path:sound(live, "M40-20A28 28 0 0 1 40 20M52-36A48 48 0 0 1 52 36") {
+        stroke = positive
+        live opacity = seen(level)
+        live glow = 5 * level
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin:a(at: -80 -40)
+    pin:b(at: -80 40)
+    label(name, at: 0 -72)
+    label(value, at: 0 80)
+}

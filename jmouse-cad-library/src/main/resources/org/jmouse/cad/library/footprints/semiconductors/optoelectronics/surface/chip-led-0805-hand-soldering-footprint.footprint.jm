@@ -1,0 +1,20 @@
+footprint:chip-led-0805-hand-soldering-footprint("Chip LED 0805 (2012 metric), hand soldering") {
+    meta {
+        summary: "Chip LED, 0805 (2012 metric) body, pads lengthened for a soldering iron; pad 1 is the cathode"
+        code: "FP.CHIP:LED0805-HAND"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60115-8 dimensions, 0805 (2012 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#resistor-0805 and the land pattern rules; regenerate, never edit.
+    # Body 1.9…2.1 × 1.15…1.35, terminal 0.1…0.5; fillets toe 0.55, heel 0, side 0.05.
+    # Z = 3.229, G = 1.09, X = 1.479; pad 1.05 × 1.5 centred at ±1.1.
+    pad:1(surface, rounded-rectangle, at: -1.1 0, size: 1.05 x 1.5, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 1.1 0, size: 1.05 x 1.5, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-1 -0.625H1V0.625H-1Z")
+    outline(silkscreen, width: 0.12, "M-0.315 -1.01H0.315M-0.315 1.01H0.315")
+    outline(silkscreen, width: 0.12, "M-1.885 -0.86V0.86")
+    outline(courtyard, width: 0.05, "M-2.15 -1.25H2.15V1.25H-2.15Z")
+}

@@ -1,0 +1,16 @@
+symbol:voltage-source-symbol("Voltage source") {
+    meta {
+        summary: "Voltage source, as drawn on a schematic"
+        code: "SY.SOURCE:VOLTAGE-DC"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    path("M-80 0H-32M32 0H80M-32 0A32 32 0 1 0 32 0A32 32 0 1 0-32 0M-18 0H-2M-10-8V8M10 0H22")
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

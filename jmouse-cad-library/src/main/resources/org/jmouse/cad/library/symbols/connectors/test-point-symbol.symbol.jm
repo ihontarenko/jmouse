@@ -1,0 +1,14 @@
+symbol:test-point-symbol("Test point") {
+    meta {
+        summary: "Test point, as drawn on a schematic"
+        code: "SY.CONNECTOR:TEST-POINT"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    path("M0 40V0M-10-10H10V10H-10Z")
+    pin:probe(at: 0 40)
+    label(name, at: 0 -32)
+}

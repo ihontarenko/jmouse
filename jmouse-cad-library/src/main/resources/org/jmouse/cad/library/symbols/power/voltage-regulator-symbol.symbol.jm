@@ -1,0 +1,30 @@
+symbol:voltage-regulator-symbol("Three-terminal voltage regulator") {
+    meta {
+        summary: "A three-terminal linear regulator, as drawn on a schematic: input on the left, output on the right, its reference below"
+        code: "SY.REGULATOR:LINEAR-FIXED"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(240 x 160)
+    input:failed
+
+    group:body(live) {
+        path("M-60-40H60V40H-60Z")
+        path("M-120 0H-60M60 0H120M0 40V80")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:input(at: -120 0, "IN")
+    pin:output(at: 120 0, "OUT")
+    pin:ground(at: 0 80, "GND")
+    label(name, at: 0 -64)
+    label(value, at: 0 104)
+}

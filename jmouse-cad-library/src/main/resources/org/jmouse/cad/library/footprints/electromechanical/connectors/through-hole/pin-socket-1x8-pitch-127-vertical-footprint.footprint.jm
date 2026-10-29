@@ -1,0 +1,25 @@
+footprint:pin-socket-1x8-pitch-127-vertical-footprint("Pin socket, 1.27 mm pitch, 1 × 8, vertical") {
+    meta {
+        summary: "Pin socket, 1.27 mm pitch, 1 row of 8, upright, through-hole"
+        code: "FP.SKT:1X8-P1.27-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-socket-1-27 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.4: drill 0.8, pad 1.02, pin 1 square.
+    pad:1(through-hole, rectangle, at: 0 -4.445, size: 1.02 x 1.02, drill: 0.8)
+    pad:2(through-hole, circle, at: 0 -3.175, size: 1.02 x 1.02, drill: 0.8)
+    pad:3(through-hole, circle, at: 0 -1.905, size: 1.02 x 1.02, drill: 0.8)
+    pad:4(through-hole, circle, at: 0 -0.635, size: 1.02 x 1.02, drill: 0.8)
+    pad:5(through-hole, circle, at: 0 0.635, size: 1.02 x 1.02, drill: 0.8)
+    pad:6(through-hole, circle, at: 0 1.905, size: 1.02 x 1.02, drill: 0.8)
+    pad:7(through-hole, circle, at: 0 3.175, size: 1.02 x 1.02, drill: 0.8)
+    pad:8(through-hole, circle, at: 0 4.445, size: 1.02 x 1.02, drill: 0.8)
+    outline(fabrication, width: 0.1, "M-0.212 -5.08H0.635V5.08H-0.635V-4.657Z")
+    outline(silkscreen, width: 0.12, "M-0.745 -5.19H0.745V5.19H-0.745Z")
+    outline(silkscreen, filled, "M-1.545 -4.445A0.3 0.3 0 1 0 -0.945 -4.445A0.3 0.3 0 1 0 -1.545 -4.445Z")
+    outline(courtyard, width: 0.05, "M-1.15 -5.6H1.15V5.6H-1.15Z")
+}

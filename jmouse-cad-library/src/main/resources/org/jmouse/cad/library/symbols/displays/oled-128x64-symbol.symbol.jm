@@ -1,0 +1,43 @@
+symbol:oled-128x64-symbol("128×64 OLED module") {
+    meta {
+        summary: "A monochrome OLED module on I²C: its 128-column screen shows the controller's display memory, two units a pixel"
+        code: "SY.DISPLAY:OLED-128X64"
+        category: circuits
+        tags: electronics, schematic, display
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(600 x 400)
+    input:screen(picture)
+    input:lit(0 .. 1)
+    input:inverted(0 .. 1)
+    input:mirrored_columns(0 .. 1)
+    input:mirrored_rows(0 .. 1)
+    input:matrix_rows(32 .. 64)
+    input:memory_columns(128 .. 132)
+    input:column_offset(0 .. 4)
+
+    path("M-300-160H300V180H-300Z")
+    path("M-258-110H258V150H-258Z")
+    path("M-80-160V-200")
+    path("M-40-160V-200")
+    path("M0-160V-200")
+    path("M40-160V-200")
+    bitmap:screen(live, at: 0 20, size: 512 x 256) {
+        live pixels = screen
+        columns = 128
+        live stride = memory_columns
+        live first_column = column_offset
+        live rows = matrix_rows
+        live invert = inverted > 0.5
+        live visible = lit > 0.5
+        live scale = 1 - 2 * mirrored_columns, 1 - 2 * mirrored_rows
+    }
+
+    pin:GND(at: -80 -200)
+    pin:Vcc(at: -40 -200)
+    pin:scl(at: 0 -200)
+    pin:sda(at: 40 -200)
+    label(name, at: 360 -80)
+    label(value, at: 360 80)
+}

@@ -1,0 +1,79 @@
+# The BS250 is the level-1 p-channel MOSFET with numbers placed inside the datasheet's limits: its table gives ranges
+# (VGS(th) -1 .. -3.5 V, RDS(on) at most 14 Ω), not typical curves, so the model is a typical part within them and
+# its checks test the limits. The p-channel carrier: an imported `.model … PMOS(…)` without a part of its own is
+# `p-mosfet`; this is the datasheet part.
+
+component:bs250("BS250", type: mosfet) {
+    meta {
+        designator: Q
+        summary: "P-channel enhancement MOSFET, -45 V, -230 mA continuous"
+        source: "Diodes Inc. BS250P datasheet, electrical characteristics (limits only)"
+        package: "TO-92"
+        category: circuits
+        failure: short drain source
+    }
+    extends:p-mosfet
+
+    parameter:V_threshold(-2.4 V, "VTO: inside VGS(th) -1 .. -3.5 V at -1 mA")
+    parameter:transconductance(26 mA/V^2, "KP: with RD + RS, about 9 Ω at VGS -10 V — under the 14 Ω limit")
+    parameter:R_drain(3.5 Ohm, "RD")
+    parameter:R_source(0.5 Ohm, "RS")
+    parameter:I_saturation(10 pA, "IS: body diode saturation current")
+    parameter:emission_coefficient(1.5, "N: body diode emission factor")
+    parameter:C_bulk_drain(20 pF, "CBD: output capacitance at zero bias")
+    parameter:C_gate_source(25 pF, "CGSO: inside Ciss at most 60 pF")
+    parameter:C_gate_drain(5 pF, "CGDO: Crss")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:V_threshold_coefficient(-0.004, "the gate turns on earlier when hot, V/K")
+    parameter:resistance_temperature_exponent(1.5, "RDS(on) rises when hot")
+    parameter:V_breakdown(50 V, "drain-source avalanche: BVDSS is at least 45 V")
+    parameter:I_breakdown(100 uA, "avalanche current at V_breakdown")
+    parameter:V_drain_source_maximum(45 V, "VDS")
+    parameter:V_gate_source_maximum(20 V, "VGS, either way")
+    parameter:I_drain_maximum(230 mA, "ID")
+    parameter:V_threshold_spread(1.1 V, "VGS(th) -1 ... -3.5 V")
+
+    pin:source(analog, 1, "source")
+    pin:gate(analog, input, 2, "gate")
+    pin:drain(analog, output, 3, "drain")
+
+    footprint(to-92-inline-footprint)
+
+    symbol(uses: p-channel-mosfet-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("on-resistance at -200 mA and -10 V gate drive", from: "RDS(on) at most 14 Ω at VGS -10 V, ID -200 mA") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 10 V)
+            part:R1(resistor, [drain, 0], resistance: 50 Ohm)
+            part:U1(self, [gate: 0, drain: drain, source: Vdd])
+        }
+        measure(operating, drain)
+        within(7.2 V .. 10 V)
+    }
+
+    expect("gate threshold at -1 mA", from: "VGS(th) -1 .. -3.5 V at ID -1 mA, VDS = VGS") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 10 V)
+            part:I1(current-source, [0, gate], I_output: 1 mA)
+            part:U1(self, [gate: gate, drain: gate, source: Vdd])
+        }
+        measure(operating, gate)
+        within(6.5 V .. 9 V)
+    }
+
+    expect("drain breakdown beyond -45 V", from: "BVDSS at least -45 V") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [0, drain], I_output: 100 uA)
+            part:U1(self, [gate: 0, drain: drain, source: 0])
+        }
+        measure(operating, drain)
+        within(-60 V .. -45 V)
+    }
+
+    # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-92-portrait) {
+        bind:marking("BS250")
+    }
+}

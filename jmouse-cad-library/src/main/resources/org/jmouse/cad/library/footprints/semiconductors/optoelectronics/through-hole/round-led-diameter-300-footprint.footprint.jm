@@ -1,0 +1,20 @@
+footprint:round-led-diameter-300-footprint("Round LED, 3 mm (T-1)") {
+    meta {
+        summary: "Round LED, 3 mm (T-1), leads 2.54 mm apart; pin 1 is the cathode"
+        code: "FP.LED:D3"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "T-1 and T-1¾ lamp bodies, 2.54 mm lead spacing"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.sht#led-3 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.5: drill 0.7, pad 1.7, pin 1 square.
+    pad:1(through-hole, rectangle, at: -1.27 0, size: 1.7 x 1.7, drill: 0.7)
+    pad:2(through-hole, circle, at: 1.27 0, size: 1.7 x 1.7, drill: 0.7)
+    outline(fabrication, width: 0.1, "M-1.9 0A1.9 1.9 0 1 0 1.9 0A1.9 1.9 0 1 0 -1.9 0Z")
+    outline(silkscreen, width: 0.12, "M-2.38 0A2.38 2.38 0 1 0 2.38 0A2.38 2.38 0 1 0 -2.38 0Z")
+    outline(fabrication, width: 0.1, "M-1.5 0A1.5 1.5 0 1 0 1.5 0A1.5 1.5 0 1 0 -1.5 0Z")
+    outline(fabrication, width: 0.1, "M-1.14 -1.14V1.14")
+    outline(courtyard, width: 0.05, "M-2.6 -2.4H2.6V2.4H-2.6Z")
+}

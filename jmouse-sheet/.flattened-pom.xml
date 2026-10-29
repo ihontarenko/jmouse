@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-data-map</artifactId>
+  <artifactId>jmouse-sheet</artifactId>
   <version>1.0.1</version>
   <name>jMouse - Data map</name>
-  <description>jMouse Framework - Data map: jMD, a language of facts on the jME engine — entries holding fields with their sources (page, table), values with units, ranges, name-value maps, lists and links between documents — with its reader, writer and a library that resolves the links. A data sheet, a library map, a correspondence index are written in it</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-data-map</url>
+  <description>jMouse Framework - Data map: sheet, a language of facts on the jME engine — entries holding fields with their sources (page, table), values with units, ranges, name-value maps, lists and links between documents — with its reader, writer and a library that resolves the links. A data sheet, a library map, a correspondence index are written in it</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-sheet</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-data-map</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-sheet</url>
   </scm>
   <dependencies>
     <dependency>

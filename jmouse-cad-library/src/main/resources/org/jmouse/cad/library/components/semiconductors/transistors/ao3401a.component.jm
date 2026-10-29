@@ -1,0 +1,76 @@
+# The AO3401A is the level-1 p-channel MOSFET with a small SOT-23 die's numbers: a threshold near -0.9 V, about 46 mΩ at
+# a -4.5 V gate (a fifth of it the series resistances), and the capacitances of a small trench die. The load switch of a
+# 3.3 V or 5 V rail.
+
+component:ao3401a("AO3401A", type: mosfet) {
+    meta {
+        designator: Q
+        summary: "P-channel MOSFET, -30 V, -4 A, 50 mΩ at -10 V, SOT-23"
+        source: "Alpha & Omega AO3401A datasheet: VGS(th) -0.5 … -1.3 V, RDS(on) < 50 mΩ at -10 V, < 60 mΩ at -4.5 V"
+        package: "SOT-23"
+        category: circuits
+        failure: short drain source
+    }
+    extends:p-mosfet
+
+    parameter:V_threshold(-0.9 V, "VTO: gate threshold, -0.5 … -1.3 V at -250 uA")
+    parameter:transconductance(7.7 A/V^2, "KP: with RD + RS, 46 mΩ at VGS -4.5 V, the typical; at -10 V it gives 24 mΩ, below the 38 mΩ typical — level 1 cannot follow both")
+    parameter:R_drain(8 mOhm, "RD")
+    parameter:R_source(2 mOhm, "RS")
+    parameter:I_saturation(10 pA, "IS: body diode saturation current")
+    parameter:emission_coefficient(1.2, "N: body diode emission factor")
+    parameter:C_bulk_drain(60 pF, "CBD: Coss - Crss")
+    parameter:C_gate_source(590 pF, "CGSO: Ciss - Crss")
+    parameter:C_gate_drain(55 pF, "CGDO: Crss")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:V_threshold_coefficient(-0.003, "the gate turns on earlier when hot, V/K")
+    parameter:resistance_temperature_exponent(1.5, "RDS(on) rises when hot")
+    parameter:V_breakdown(30 V, "drain-source breakdown")
+    parameter:I_breakdown(250 uA, "avalanche current at V_breakdown")
+    parameter:power_rating(1.4 W, "PD at 25 °C on its copper")
+    parameter:thermal_resistance(90 K/W, "RθJA on the datasheet's board")
+    parameter:thermal_time_constant(5 s, "how fast a SOT-23 warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:V_threshold_spread(0.4 V, "VGS(th) -0.5 ... -1.3 V")
+    parameter:V_drain_source_maximum(30 V, "VDS")
+    parameter:V_gate_source_maximum(12 V, "VGS, either way")
+    parameter:I_drain_maximum(4 A, "ID at 25 °C")
+
+    pin:gate(analog, input, 1, "gate")
+    pin:source(analog, 2, "source")
+    pin:drain(analog, output, 3, "drain")
+
+    symbol(uses: p-channel-mosfet-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("on-state voltage at 1 A and a -4.5 V gate", from: "RDS(on) at most 60 mΩ at VGS -4.5 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 4.5 V)
+            part:R1(resistor, [drain, 0], resistance: 4.44 Ohm)
+            part:U1(self, [gate: 0, drain: drain, source: Vdd])
+        }
+        measure(operating, drain)
+        within(4.44 V .. 4.5 V)
+    }
+
+    expect("off with its gate at its source", from: "VGS(th) at most -0.5 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 5 V)
+            part:R1(resistor, [drain, 0], resistance: 1 kOhm)
+            part:U1(self, [gate: Vdd, drain: drain, source: Vdd])
+        }
+        measure(operating, drain)
+        within(0 V .. 0.01 V)
+    }
+
+    expect("body diode forward voltage", from: "VSD at most 1 V at 1 A") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [feed, 0], U_output: 1 V)
+            part:R1(resistor, [feed, drain], resistance: 1 Ohm)
+            part:U1(self, [gate: 0, drain: drain, source: 0])
+        }
+        measure(operating, drain)
+        within(0.4 V .. 1 V)
+    }
+}

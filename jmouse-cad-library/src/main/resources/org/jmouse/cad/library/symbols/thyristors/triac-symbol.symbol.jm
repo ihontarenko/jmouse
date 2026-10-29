@@ -1,0 +1,36 @@
+symbol:triac-symbol("Triac") {
+    meta {
+        summary: "Triac, as drawn on a schematic: two thyristors back to back with one gate"
+        code: "SY.THYRISTOR:TRIAC"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    input:conduction
+    input:failed
+
+    group:body(live) {
+        path("M-80 0H-20M-20-28V28M20-28V28M20 0H80M-20-24L20-8-20 8M20 24L-20 8 20-8M20 16L40 40V60")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    path:channel(live, "M-80 0H-20M-20-24L20-8-20 8M20 24L-20 8 20-8M20 0H80") {
+        stroke = positive
+        live opacity = smooth(conduction, 40 ms)
+        live glow = 6 * conduction
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    pin:gate(at: 40 60)
+    label(name, at: 0 -40)
+    label(value, at: 0 80)
+}

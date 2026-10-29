@@ -1,0 +1,52 @@
+# A four-terminal current-sense shunt: the current runs between the force terminals, the voltage is read at the sense
+# terminals, which carry no current of their own — a Kelvin connection, so the copper of the force leads does not enter
+# the reading. 10 mΩ, 1 %, 2 W.
+component:shunt-resistor("Shunt resistor, 10 mΩ, four terminals", type: resistor) {
+    use:constants
+
+    meta {
+        designator: R
+        summary: "Current-sense shunt, 10 mΩ ±1 %, 2 W, Kelvin terminals"
+        source: "Vishay WSK2512 datasheet: four-terminal 2512, 10 mΩ, 1 %, 2 W, 75 ppm/K"
+        package: "R_Shunt_Vishay_WSK2512_6332Metric_T1.19mm"
+        category: circuits
+        failure: open
+        value: resistance
+    }
+
+    parameter:resistance(10 mOhm, "resistance between the sense terminals")
+    parameter:tolerance(1 %, "how far a part may be from its value, ±")
+    parameter:temperature_coefficient(75 ppm/K, "how its value moves per kelvin away from T_nominal")
+    parameter:T_nominal(298.15 K, "the temperature its value is given at")
+    parameter:power_rating(2 W, "what it is rated for")
+    parameter:thermal_resistance(40 K/W, "kelvin above the bench per watt it takes, on its copper")
+    parameter:thermal_time_constant(10 s, "how fast it warms to that")
+    parameter:T_maximum(170 °C, "past this it fails on a realistic bench")
+
+    pin:force_one(analog, 1, "force: the current comes in")
+    pin:sense_one(analog, 2, "sense, at the first end")
+    pin:sense_two(analog, 3, "sense, at the second end")
+    pin:force_two(analog, 4, "force: the current goes out")
+
+    symbol(uses: shunt-resistor-symbol) {
+        bind:failed(failed)
+        bind:load(power / power_rating)
+    }
+
+    equations {
+        let R_now : resistance = resistance * (1 + tolerance_corner * tolerance) * (1 + temperature_coefficient * (temperature - T_nominal))
+        current force_one -> force_two = (force_one - force_two) / R_now + noise(4 * boltzmann * temperature / R_now)
+        voltage sense_one -> force_one = 0
+        voltage sense_two -> force_two = 0
+    }
+
+    expect("ten millivolts at an ampere", from: "10 mΩ ±1 %") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [feed, 0], U_output: 10 V)
+            part:R1(resistor, [feed, a], resistance: 9.99 Ohm)
+            part:U1(self, [force_one: a, force_two: 0, sense_one: s, sense_two: t])
+        }
+        measure(operating, s)
+        within(9.85 mV .. 10.15 mV)
+    }
+}

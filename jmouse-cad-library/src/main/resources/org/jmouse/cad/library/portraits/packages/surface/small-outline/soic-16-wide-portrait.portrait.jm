@@ -1,0 +1,47 @@
+# Generated from footprint-standards/small-outline-packages.sht#soic-wide; regenerate, never edit.
+portrait:soic-16-wide-portrait("SOIC-16, wide") {
+    meta {
+        summary: "16-lead SOIC, 7.5 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.SOIC:16-P1.27-W7.5"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MS-013"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(183 x 200)
+    input:marking(text)
+
+    path:leads("M-83.228 59.055H-76.772V100H-83.228ZM-83.228 -59.055H-76.772V-100H-83.228ZM-63.228 59.055H-56.772V100H-63.228ZM-63.228 -59.055H-56.772V-100H-63.228ZM-43.228 59.055H-36.772V100H-43.228ZM-43.228 -59.055H-36.772V-100H-43.228ZM-23.228 59.055H-16.772V100H-23.228ZM-23.228 -59.055H-16.772V-100H-23.228ZM-3.228 59.055H3.228V100H-3.228ZM-3.228 -59.055H3.228V-100H-3.228ZM16.772 59.055H23.228V100H16.772ZM16.772 -59.055H23.228V-100H16.772ZM36.772 59.055H43.228V100H36.772ZM36.772 -59.055H43.228V-100H36.772ZM56.772 59.055H63.228V100H56.772ZM56.772 -59.055H63.228V-100H56.772Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -80 100)
+    pin:2(at: -60 100)
+    pin:3(at: -40 100)
+    pin:4(at: -20 100)
+    pin:5(at: 0 100)
+    pin:6(at: 20 100)
+    pin:7(at: 40 100)
+    pin:8(at: 60 100)
+    pin:9(at: 60 -100)
+    pin:10(at: 40 -100)
+    pin:11(at: 20 -100)
+    pin:12(at: 0 -100)
+    pin:13(at: -20 -100)
+    pin:14(at: -40 -100)
+    pin:15(at: -60 -100)
+    pin:16(at: -80 -100)
+    path:body("M-86.378 -59.055H66.378A4.724 4.724 0 0 1 71.102 -54.331V54.331A4.724 4.724 0 0 1 66.378 59.055H-86.378A4.724 4.724 0 0 1 -91.102 54.331V-54.331A4.724 4.724 0 0 1 -86.378 -59.055Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-78.819 39.094A7.677 7.677 0 1 0 -63.465 39.094A7.677 7.677 0 1 0 -78.819 39.094Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 113.543 x 26.575) {
+        fill = silver
+        text = marking
+    }
+}

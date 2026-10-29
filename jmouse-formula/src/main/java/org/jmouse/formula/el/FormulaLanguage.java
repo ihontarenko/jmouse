@@ -53,17 +53,26 @@ public final class FormulaLanguage {
     }
 
     private final Reading             reading;
+    private final boolean             quantities;
+    private final boolean             pairs;
     private final Set<String>         hostCalls;
     private final Map<String, String> rates;
 
     public FormulaLanguage() {
-        this(reading(false), Set.of(), Map.of());
+        this(reading(false), false, false, Set.of(), Map.of());
     }
 
     private static Reading reading(boolean quantities) {
+        return reading(quantities, false);
+    }
+
+    private static Reading reading(boolean quantities, boolean pairs) {
         FormulaExtensionContainer extensions = new FormulaExtensionContainer();
         if (quantities) {
             extensions.addParser(new QuantityParser());
+        }
+        if (pairs) {
+            extensions.addOperator(FormulaOperator.PAIR);
         }
         DefaultParserContext context = new DefaultParserContext(extensions);
         Lexer lexer = new DefaultLexer(new DefaultTokenizer(
@@ -72,8 +81,10 @@ public final class FormulaLanguage {
                 new FormulaDocumentParser(), new ConcurrentHashMap<>());
     }
 
-    private FormulaLanguage(Reading reading, Set<String> hostCalls, Map<String, String> rates) {
+    private FormulaLanguage(Reading reading, boolean quantities, boolean pairs, Set<String> hostCalls, Map<String, String> rates) {
         this.reading = reading;
+        this.quantities = quantities;
+        this.pairs = pairs;
         this.hostCalls = Set.copyOf(hostCalls);
         this.rates = Map.copyOf(rates);
     }
@@ -90,7 +101,7 @@ public final class FormulaLanguage {
     public FormulaLanguage withRate(String variable, String hostCall) {
         Map<String, String> declared = new LinkedHashMap<>(rates);
         declared.put(RATE_OPERATOR + variable, hostCall);
-        return new FormulaLanguage(reading, hostCalls, declared);
+        return new FormulaLanguage(reading, quantities, pairs, hostCalls, declared);
     }
 
     /** The {@code d} of {@code d(f)/dt}, both above and in front of the variable below. */
@@ -104,7 +115,7 @@ public final class FormulaLanguage {
     public FormulaLanguage withHostCalls(String... names) {
         Set<String> declared = new LinkedHashSet<>(hostCalls);
         declared.addAll(List.of(names));
-        return new FormulaLanguage(reading, declared, rates);
+        return new FormulaLanguage(reading, quantities, pairs, declared, rates);
     }
 
     /**
@@ -113,7 +124,16 @@ public final class FormulaLanguage {
      * with units, such as a drawing's values.
      */
     public FormulaLanguage withQuantities() {
-        return new FormulaLanguage(reading(true), hostCalls, rates);
+        return new FormulaLanguage(reading(true, pairs), true, pairs, hostCalls, rates);
+    }
+
+    /**
+     * The same language, reading {@code a -> b} among a call's arguments as the two values it pairs — a drawing's
+     * {@code curve(current, 0 mA -> 0, 20 mA -> 1)} is {@code curve(current, 0 mA, 0, 20 mA, 1)} —, where the standard one
+     * refuses the arrow. A pair is read in the tree, never in the text; anywhere but among a call's arguments it is refused.
+     */
+    public FormulaLanguage withPairs() {
+        return new FormulaLanguage(reading(quantities, true), quantities, true, hostCalls, rates);
     }
 
     public static FormulaLanguage standard() {

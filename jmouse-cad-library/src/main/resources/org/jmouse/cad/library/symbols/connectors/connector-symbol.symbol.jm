@@ -1,0 +1,16 @@
+symbol:connector-symbol("Connector") {
+    meta {
+        summary: "Connector, as drawn on a schematic"
+        code: "SY.CONNECTOR:GENERIC"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 120)
+    path("M-80-40H0M-80 40H0M0-50H30V50H0ZM10-40H20M10 40H20")
+    pin:first(at: -80 -40)
+    pin:second(at: -80 40)
+    label(name, at: 16 -72)
+    label(value, at: 16 80)
+}

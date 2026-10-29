@@ -1,0 +1,20 @@
+# A USB micro-B receptacle: the bus power, the data pair, the ID pin and ground, numbered as the USB specification
+# numbers them. Only the contacts: what a host on the other end does is not here.
+component:usb-micro-b("USB micro-B receptacle", type: connector) {
+    meta {
+        designator: J
+        summary: "USB 2.0 micro-B receptacle, 5 contacts and the shield"
+        source: "USB 2.0 micro-B pinout; no electrical behaviour"
+        package: "USB_Micro-B"
+        category: circuits
+    }
+
+    pin:vbus(power, 1, "VBUS, 5 V from the host")
+    pin:data_minus(analog, 2, "D−")
+    pin:data_plus(analog, 3, "D+")
+    pin:id(analog, 4, "ID: open on a device, grounded on a host cable")
+    pin:ground(ground, 5, "GND")
+    pin:shield(analog, 6, "the shell")
+
+    symbol(uses: usb-micro-b-symbol)
+}

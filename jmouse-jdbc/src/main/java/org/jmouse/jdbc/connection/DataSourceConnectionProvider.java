@@ -19,6 +19,11 @@ public final class DataSourceConnectionProvider extends AbstractConnectionProvid
     }
 
     @Override
+    public Object getResourceKey() {
+        return dataSource;
+    }
+
+    @Override
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }

@@ -13,6 +13,7 @@
 
     <packaging>jar</packaging>
     <artifactId>jmouse-ai-mcp-authorization</artifactId>
+    <version>1.0.2-session-csrf</version>
     <name>jMouse - AI MCP Authorization</name>
     <description>jMouse Framework - The three protocol endpoints and the shared consent screen a Model Context Protocol client walks before it holds a credential</description>
     <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-ai-mcp-authorization</url>
@@ -52,7 +53,7 @@
             <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>${project.version}</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

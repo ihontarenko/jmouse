@@ -1,25 +1,31 @@
 package org.jmouse.spice.node;
 
+import org.jmouse.el.writer.SourceWritable;
+import org.jmouse.el.writer.SourceWriter;
+import org.jmouse.el.writer.TextSourceWriter;
 import org.jmouse.spice.SpicePosition;
 
 import java.util.List;
 
 /**
  * One argument of a card as written, for what a node keeps without a field of its own: an element's area, an
- * {@code AC} specification, a controlled source's control, the words of a dot card the reader has no node for.
+ * {@code AC} specification, a controlled source's control, the words of a dot card the reader has no node for. It
+ * writes itself as SPICE writes it back.
  */
-public sealed interface SpiceArgument {
+public sealed interface SpiceArgument extends SourceWritable {
 
     SpicePosition position();
 
-    /** The argument as SPICE writes it back. */
-    String written();
+    /** The argument as SPICE writes it back, on its own. */
+    default String written() {
+        return TextSourceWriter.render(this, SpiceNode.LAYOUT);
+    }
 
     /** {@code out}, {@code 10uF}, {@code DC}, {@code params:}. */
     record Word(String text, SpicePosition position) implements SpiceArgument {
         @Override
-        public String written() {
-            return text;
+        public void writeSource(SourceWriter writer) {
+            writer.word(text);
         }
     }
 
@@ -31,24 +37,24 @@ public sealed interface SpiceArgument {
         }
 
         @Override
-        public String written() {
-            return expression.written();
+        public void writeSource(SourceWriter writer) {
+            writer.write(expression);
         }
     }
 
     /** {@code "models.lib"}: a text in double quotes. */
     record Text(String text, SpicePosition position) implements SpiceArgument {
         @Override
-        public String written() {
-            return "\"" + text + "\"";
+        public void writeSource(SourceWriter writer) {
+            writer.text(text);
         }
     }
 
     /** {@code IS=2.52n}, {@code W={2*L}}. */
     record Assignment(String name, SpiceArgument value, SpicePosition position) implements SpiceArgument {
         @Override
-        public String written() {
-            return name + "=" + value.written();
+        public void writeSource(SourceWriter writer) {
+            writer.word(name).opening("=").write(value);
         }
     }
 
@@ -59,8 +65,14 @@ public sealed interface SpiceArgument {
         }
 
         @Override
-        public String written() {
-            return name + "(" + String.join(" ", arguments.stream().map(SpiceArgument::written).toList()) + ")";
+        public void writeSource(SourceWriter writer) {
+            // A group without a name stands as a word of its own; a named one opens right after its name.
+            if (name.isEmpty()) {
+                writer.openingWord("(");
+            } else {
+                writer.word(name).opening("(");
+            }
+            writer.each(arguments).join(")");
         }
     }
 }

@@ -1,0 +1,47 @@
+footprint:pin-header-2x15-pitch-254-vertical-footprint("Pin header, 2.54 mm pitch, 2 × 15, vertical") {
+    meta {
+        summary: "Pin header, 2.54 mm pitch, 2 rows of 15, upright, through-hole"
+        code: "FP.HDR:2X15-P2.54-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-header and the land pattern rules; regenerate, never edit.
+    # Square lead 0.64: drill 1.15, pad 2.15, pin 1 square.
+    pad:1(through-hole, rectangle, at: -1.27 -17.78, size: 2.15 x 2.15, drill: 1.15)
+    pad:2(through-hole, circle, at: 1.27 -17.78, size: 2.15 x 2.15, drill: 1.15)
+    pad:3(through-hole, circle, at: -1.27 -15.24, size: 2.15 x 2.15, drill: 1.15)
+    pad:4(through-hole, circle, at: 1.27 -15.24, size: 2.15 x 2.15, drill: 1.15)
+    pad:5(through-hole, circle, at: -1.27 -12.7, size: 2.15 x 2.15, drill: 1.15)
+    pad:6(through-hole, circle, at: 1.27 -12.7, size: 2.15 x 2.15, drill: 1.15)
+    pad:7(through-hole, circle, at: -1.27 -10.16, size: 2.15 x 2.15, drill: 1.15)
+    pad:8(through-hole, circle, at: 1.27 -10.16, size: 2.15 x 2.15, drill: 1.15)
+    pad:9(through-hole, circle, at: -1.27 -7.62, size: 2.15 x 2.15, drill: 1.15)
+    pad:10(through-hole, circle, at: 1.27 -7.62, size: 2.15 x 2.15, drill: 1.15)
+    pad:11(through-hole, circle, at: -1.27 -5.08, size: 2.15 x 2.15, drill: 1.15)
+    pad:12(through-hole, circle, at: 1.27 -5.08, size: 2.15 x 2.15, drill: 1.15)
+    pad:13(through-hole, circle, at: -1.27 -2.54, size: 2.15 x 2.15, drill: 1.15)
+    pad:14(through-hole, circle, at: 1.27 -2.54, size: 2.15 x 2.15, drill: 1.15)
+    pad:15(through-hole, circle, at: -1.27 0, size: 2.15 x 2.15, drill: 1.15)
+    pad:16(through-hole, circle, at: 1.27 0, size: 2.15 x 2.15, drill: 1.15)
+    pad:17(through-hole, circle, at: -1.27 2.54, size: 2.15 x 2.15, drill: 1.15)
+    pad:18(through-hole, circle, at: 1.27 2.54, size: 2.15 x 2.15, drill: 1.15)
+    pad:19(through-hole, circle, at: -1.27 5.08, size: 2.15 x 2.15, drill: 1.15)
+    pad:20(through-hole, circle, at: 1.27 5.08, size: 2.15 x 2.15, drill: 1.15)
+    pad:21(through-hole, circle, at: -1.27 7.62, size: 2.15 x 2.15, drill: 1.15)
+    pad:22(through-hole, circle, at: 1.27 7.62, size: 2.15 x 2.15, drill: 1.15)
+    pad:23(through-hole, circle, at: -1.27 10.16, size: 2.15 x 2.15, drill: 1.15)
+    pad:24(through-hole, circle, at: 1.27 10.16, size: 2.15 x 2.15, drill: 1.15)
+    pad:25(through-hole, circle, at: -1.27 12.7, size: 2.15 x 2.15, drill: 1.15)
+    pad:26(through-hole, circle, at: 1.27 12.7, size: 2.15 x 2.15, drill: 1.15)
+    pad:27(through-hole, circle, at: -1.27 15.24, size: 2.15 x 2.15, drill: 1.15)
+    pad:28(through-hole, circle, at: 1.27 15.24, size: 2.15 x 2.15, drill: 1.15)
+    pad:29(through-hole, circle, at: -1.27 17.78, size: 2.15 x 2.15, drill: 1.15)
+    pad:30(through-hole, circle, at: 1.27 17.78, size: 2.15 x 2.15, drill: 1.15)
+    outline(fabrication, width: 0.1, "M-1.54 -19.05H2.54V19.05H-2.54V-18.05Z")
+    outline(silkscreen, width: 0.12, "M-2.65 -19.16H2.65V19.16H-2.65Z")
+    outline(silkscreen, filled, "M-3.45 -17.78A0.3 0.3 0 1 0 -2.85 -17.78A0.3 0.3 0 1 0 -3.45 -17.78Z")
+    outline(courtyard, width: 0.05, "M-3.05 -19.55H3.05V19.55H-3.05Z")
+}

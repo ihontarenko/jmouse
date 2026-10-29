@@ -42,10 +42,12 @@ public final class SessionManagementFilter implements BeanFilter {
             SecurityContext after              = SecurityContextHolder.getContext();
             boolean         afterAuthenticated = isAuthenticated(after);
 
-            if (!beforeAuthenticated && afterAuthenticated) {
+            if (!beforeAuthenticated && afterAuthenticated && !Boolean.TRUE.equals(
+                    request.getAttribute(SessionAuthenticateHandler.APPLIED_ATTRIBUTE))) {
                 Authentication authentication = after.getAuthentication();
                 if (authentication != null) {
                     sessionAuthentication.onAuthentication(authentication, keeper);
+                    request.setAttribute(SessionAuthenticateHandler.APPLIED_ATTRIBUTE, true);
                 }
             }
         }

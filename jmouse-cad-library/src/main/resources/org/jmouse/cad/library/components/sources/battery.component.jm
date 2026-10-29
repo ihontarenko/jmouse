@@ -1,0 +1,59 @@
+# A battery as a load sees it: an EMF that follows its state of charge, an internal resistance that the load current
+# drops across at once, and a polarisation — an RC — that sags the voltage further over seconds and recovers when the
+# load goes. The state of charge is a live setting, not integrated from the current: a circuit's operating point would
+# have to hold the battery's current at nought for its charge to stand still.
+# Defaults: one lithium-ion cell. Not represented: the EMF's fall with cold, ageing, the charger's CC/CV.
+
+component:battery("Battery", type: source) {
+    meta {
+        designator: B
+        summary: "Battery: EMF by state of charge, internal resistance, polarisation sag and recovery"
+        source: "the Thevenin battery model (EMF + R0 + one RC), a lithium-ion cell's figures"
+        category: circuits
+        failure: open
+    }
+
+    parameter:V_full(4.2 V, "EMF when full")
+    parameter:V_empty(3.0 V, "EMF when empty")
+    parameter:state_of_charge(1, in: 0 .. 1, step: 0.05, live, "how full it is")
+    parameter:R_internal(50 mOhm, "R0: the drop under load, at once")
+    parameter:R_polarisation(30 mOhm, "R1: the further sag, over the polarisation time")
+    parameter:C_polarisation(300 F, "C1: with R1, a sag over about ten seconds")
+    parameter:power_rating(10 W, "what it may deliver")
+    parameter:thermal_resistance(20 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(300 s, "how fast it warms to that")
+    parameter:T_maximum(60 °C, "past this it fails on a realistic bench")
+
+    pin:positive(analog, 1, "positive terminal")
+    pin:negative(analog, 2, "negative terminal")
+
+    node:emf("the EMF, behind the internal resistance")
+    node:polarised("behind the polarisation RC")
+
+    symbol(uses: battery-symbol) {
+        bind:failed(failed)
+        bind:state_of_charge(state_of_charge)
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+
+    equations {
+        # A lithium cell's EMF is flat across the middle of its charge and falls off at the empty end.
+        let EMF : voltage = V_empty + (V_full - V_empty) * (0.8 * state_of_charge + 0.2 * (1 - (1 - state_of_charge) ^ 4))
+        voltage emf -> negative = EMF
+        current polarised -> emf = (polarised - emf) / R_polarisation + d(C_polarisation * (polarised - emf))/dt
+        current positive -> polarised = (positive - polarised) / R_internal
+    }
+
+    expect("sags under a 2 A load at once", from: "R0 50 mΩ: 0.1 V at once from a full cell") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [0, positive], I_output: 2 A)
+            part:U1(self, [positive: positive, negative: 0])
+        }
+        measure(final, positive)
+        within(4.05 V .. 4.11 V)
+    }
+
+    # How it looks in the hand: an 18650 cell on its side.
+    portrait(uses: cylindrical-cell-portrait)
+}

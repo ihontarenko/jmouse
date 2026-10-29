@@ -1,0 +1,19 @@
+footprint:radial-electrolytic-capacitor-diameter-2500-pitch-1000-footprint("Radial electrolytic capacitor, 25 mm can") {
+    meta {
+        summary: "Radial electrolytic capacitor, 25 mm can, leads 10 mm apart; pin 1 is the positive lead"
+        code: "FP.RADIAL:CP-D25-P10"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.sht#can-25 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀1: drill 1.2, pad 2.2, pin 1 square.
+    pad:1(through-hole, rectangle, at: -5 0, size: 2.2 x 2.2, drill: 1.2)
+    pad:2(through-hole, circle, at: 5 0, size: 2.2 x 2.2, drill: 1.2)
+    outline(fabrication, width: 0.1, "M-12.5 0A12.5 12.5 0 1 0 12.5 0A12.5 12.5 0 1 0 -12.5 0Z")
+    outline(silkscreen, width: 0.12, "M-12.61 0A12.61 12.61 0 1 0 12.61 0A12.61 12.61 0 1 0 -12.61 0Z")
+    outline(silkscreen, width: 0.12, "M-7.32 -1.84H-6.36M-6.84 -2.32V-1.36")
+    outline(courtyard, width: 0.05, "M-13 -13H13V13H-13Z")
+}

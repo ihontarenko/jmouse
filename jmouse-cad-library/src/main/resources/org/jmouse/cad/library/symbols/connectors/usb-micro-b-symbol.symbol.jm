@@ -1,0 +1,20 @@
+symbol:usb-micro-b-symbol("USB micro-B receptacle") {
+    meta {
+        summary: "A USB micro-B receptacle, as drawn on a schematic: bus power, the data pair, the ID pin and ground on the right, the shield below"
+        code: "SY.CONNECTOR:USB-MICRO-B"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(240 x 280)
+    path("M-80-100H40V100H-80ZM40-80H120M40-40H120M40 0H120M40 40H120M40 80H120M-40 100V140")
+    pin:vbus(at: 120 -80, "VBUS")
+    pin:data_plus(at: 120 -40, "D+")
+    pin:data_minus(at: 120 0, "D-")
+    pin:id(at: 120 40, "ID")
+    pin:ground(at: 120 80, "GND")
+    pin:shield(at: -40 140, "Shield")
+    label(name, at: -20 -128)
+    label(value, at: 40 128)
+}

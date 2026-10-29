@@ -1,0 +1,88 @@
+# The BC547B is the bipolar transistor with NXP's published Gummel–Poon numbers for the B gain group: the everyday
+# small-signal NPN, its gain peaking at a few milliamperes and falling off past a hundred.
+
+component:bc547("BC547B", type: bjt) {
+    meta {
+        designator: Q
+        summary: "NPN general-purpose transistor, 45 V, 100 mA, gain group B"
+        source: "NXP BC547 datasheet and its SPICE model"
+        package: "TO-92"
+        category: circuits
+        failure: open
+    }
+    extends:npn-transistor
+
+    parameter:I_saturation(23.9 fA, "IS")
+    parameter:beta_forward(294.3, "BF")
+    parameter:emission_coefficient(1.008, "NF")
+    parameter:V_early(63.2 V, "VAF")
+    parameter:I_knee(0.1357 A, "IKF")
+    parameter:I_leakage_base_emitter(3.545 fA, "ISE")
+    parameter:leakage_emission_base_emitter(1.541, "NE")
+    parameter:beta_reverse(7.946, "BR")
+    parameter:emission_coefficient_reverse(1.004, "NR")
+    parameter:V_early_reverse(25.9 V, "VAR")
+    parameter:I_knee_reverse(0.1144 A, "IKR")
+    parameter:I_leakage_base_collector(62.72 fA, "ISC")
+    parameter:leakage_emission_base_collector(1.243, "NC")
+    parameter:R_base(1 Ohm, "RB")
+    parameter:R_emitter(0.4683 Ohm, "RE")
+    parameter:R_collector(0.85 Ohm, "RC")
+    parameter:C_base_emitter(13.58 pF, "CJE")
+    parameter:V_junction_base_emitter(0.65 V, "VJE")
+    parameter:grading_base_emitter(0.3279, "MJE")
+    parameter:C_base_collector(3.728 pF, "CJC")
+    parameter:V_junction_base_collector(0.3997 V, "VJC")
+    parameter:grading_base_collector(0.2955, "MJC")
+    parameter:internal_base_collector_fraction(0.6193, "XCJC")
+    parameter:transit_time_forward(0.4391 ns, "TF: fT about 300 MHz")
+    parameter:transit_time_bias_dependence(120, "XTF")
+    parameter:transit_time_bias_voltage(2.643 V, "VTF")
+    parameter:transit_time_current(0.7495 A, "ITF")
+    parameter:transit_time_reverse(10 ns, "TR")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:V_breakdown(65 V, "avalanche onset: VCEO is guaranteed to 45 V")
+    parameter:power_rating(0.5 W, "what it is rated for")
+    parameter:thermal_resistance(250 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:beta_forward_spread(0.38, "gain group B, hFE 200 ... 450")
+    parameter:V_collector_emitter_maximum(45 V, "VCEO")
+    parameter:I_collector_maximum(100 mA, "IC, continuous")
+
+    pin:emitter(analog, 1, "emitter")
+    pin:base(analog, input, 2, "base")
+    pin:collector(analog, output, 3, "collector")
+
+    footprint(to-92-inline-footprint)
+
+    symbol(uses: npn-transistor-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("gain group B at 2 mA", from: "hFE 200 … 450 at IC 2 mA, VCE 5 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [collector, 0], U_output: 5 V)
+            part:I1(current-source, [base, 0], I_output: 7 uA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(operating, current: V1)
+        within(-3.2 mA .. -1.4 mA)
+    }
+
+    expect("saturated at 10 mA with 0.5 mA of base current", from: "VCE(sat) at most 250 mV at IC 10 mA, IB 0.5 mA") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 10 V)
+            part:R1(resistor, [Vcc, collector], resistance: 1 kOhm)
+            part:I1(current-source, [base, 0], I_output: 0.5 mA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(operating, collector)
+        within(0.02 V .. 0.25 V)
+    }
+
+    # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-92-portrait) {
+        bind:marking("BC547B")
+    }
+}

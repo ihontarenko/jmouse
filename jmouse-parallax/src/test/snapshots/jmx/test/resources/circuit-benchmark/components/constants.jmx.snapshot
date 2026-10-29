@@ -1,33 +1,0 @@
-ExperienceDocument
-  kind: Kind.FUNCTIONS
-  title: "Physical constants"
-  slug: "constants"
-  type: Optional.empty
-  meta: Meta
-      summary: "Boltzmann's constant, the elementary charge, 0 °C in kelvin"
-      description: null
-      category: null
-      tags: List(0)
-      source: null
-      authors: List(0)
-      license: null
-      links: List(0)
-      fields: Map(0)
-      labels: Map(0)
-  base: Optional.empty
-  units: List(0)
-  uses: List(0)
-  blocks: List(1)
-      - Formulas
-          definitions: Optional SourceText[11:9@428] "# Boltzmann's constant, J/K (exact since 2019)\n        boltzmann = 1.380649e-23\n\n        # The elementary charge, C (exact since 2019)\n        elementary_charge = 1.602176634e-19\n\n        # 0 °C in kelvin\n        zero_celsius = 273.15"
-  line: Integer 5
-== the last brace removed
-REFUSED src/test/resources/circuit-benchmark/components/constants.jmx 5:1 functions "…" is opened with '{' and never closed
-== line 11 deleted
-READS d5bda1ea9ef4d9128f1e63ac62f8c465
-== line 11 begun with a stray word
-READS 0f6991fc615737d94c04976175902d1a
-== line 18 deleted
-READS 4ce09dc9a8679e245eb62ac55ae52cfc
-== line 18 begun with a stray word
-READS e0197891cc2ff6a88b8df660be4a94bc

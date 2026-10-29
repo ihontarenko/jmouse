@@ -1,120 +1,0 @@
-ExperienceDocument
-  kind: Kind.COMPONENT
-  title: "OR gate"
-  slug: "or-gate"
-  type: Optional "gate"
-  meta: Meta
-      summary: "A two-input OR gate: high while either input is high"
-      description: null
-      category: "circuits"
-      tags: List(0)
-      source: "the gate's function table: Y = A + B"
-      authors: List(0)
-      license: null
-      links: List(0)
-      fields: Map(2)
-          designator = Text
-              text: "U"
-          failure = Text
-              text: "short Vcc GND"
-      labels: Map(0)
-  base: Optional.empty
-  units: List(0)
-  uses: List(1)
-      - "cmos-hc"
-  blocks: List(4)
-      - Parameters
-          parameters: List(1)
-              - Parameter
-                  name: "propagation_delay"
-                  value: SourceText[16:29@644] "10"
-                  quantity: Optional Quantity
-                      value: Double 1.0E-8
-                      unit: "s"
-                      written: "10 ns"
-                  range: Optional.empty
-                  step: Optional.empty
-                  flags: List(0)
-                  description: "input to output at the family's nominal supply"
-                  values: List(0)
-      - Pins
-          pins: List(5)
-              - Pin
-                  name: "a"
-                  numbers: List(1)
-                      - Integer 1
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: "input A"
-              - Pin
-                  name: "b"
-                  numbers: List(1)
-                      - Integer 2
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: "input B"
-              - Pin
-                  name: "GND"
-                  numbers: List(1)
-                      - Integer 3
-                  nature: PinNature.GROUND
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: ""
-              - Pin
-                  name: "output"
-                  numbers: List(1)
-                      - Integer 4
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.OUTPUT
-                  attributes: List(0)
-                  description: "output Y"
-              - Pin
-                  name: "Vcc"
-                  numbers: List(1)
-                      - Integer 5
-                  nature: PinNature.POWER
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: ""
-          buses: List(0)
-      - Symbol
-          uses: List(1)
-              - "or-gate-symbol"
-          ports: Map(0)
-          shape: Optional.empty
-          sides: Map(0)
-          width: Double 0.0
-          height: Double 0.0
-          paths: List(0)
-          pins: List(0)
-          labels: List(0)
-          indicators: List(0)
-          upright: List(0)
-          inputs: List(0)
-          elements: List(0)
-          bindings: Map(0)
-      - Behaviour
-          script: ScriptNode "SCRIPT['behaviour']"
-          source: SourceText[30:9@982] "function level()\n            if a == 1 or b == 1 then\n                return 1\n            elseif a == 0 and b == 0 then\n                return 0\n            end\n            return X\n        end\n\n        function show()\n            drive('output', level(), propagation_delay * delay_scale(Vcc - GND))\n        end\n\n        on start do\n            show()\n        end\n\n        on change 'a, b' do\n            show()\n        end"
-  line: Integer 5
-== the last brace removed
-REFUSED src/main/resources/catalogue/electronics/components/base/or-gate.jmx 5:1 component "…" is opened with '{' and never closed
-== line 11 deleted
-READS f86f509e6b1b6da05632b1ff0221473e
-== line 11 begun with a stray word
-READS 127fabd7ce5b1fda93a41dc0e74b7ea2
-== line 25 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/or-gate.jmx 28:15 'pins' holds lines, not a nested '{ … }'
-== line 25 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/or-gate.jmx 29:15 'pins' holds lines, not a nested '{ … }'
-== line 32 deleted
-READS e08db487b41b1b2e2671f589b8fc28c4
-== line 32 begun with a stray word
-READS cfe231e30fc081e723772dcef0efda2b
-== line 39 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/or-gate.jmx 40:9 in 'behaviour': Unexpected token 0223:1277:0040 [T_END] at 224
-== line 39 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/or-gate.jmx 41:9 in 'behaviour': Unexpected token 0228:1297:0041 [T_END] at 229

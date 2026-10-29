@@ -100,6 +100,12 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
      * @param type   key class
      * @param object instance to share
      */
+    /** Optional collection lookup without using exceptions for this builder's normal control flow. */
+    @SuppressWarnings("unchecked")
+    public <C extends SecurityConfigurer<T, B>> java.util.Optional<C> findConfigurer(Class<C> type) {
+        return configurers.stream().filter(type::isInstance).map(value -> (C) value).findFirst();
+    }
+
     public <U> void setSharedObject(Class<U> type, U object) {
         shared.put(type, object);
     }
@@ -142,9 +148,11 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
         U instance = getSharedObject(type);
 
         if (instance == null) {
-            try {
-                instance = getBean(type);
-            } catch (BeanNotFoundException ignored) { }
+            if (getBeanContext() != null) {
+                try {
+                    instance = getBean(type);
+                } catch (BeanNotFoundException ignored) { }
+            }
 
             if (instance == null && defaultObject != null) {
                 instance = defaultObject.get();

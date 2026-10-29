@@ -1,0 +1,38 @@
+# A current source whose current is a transconductance times the voltage between two other nodes — SPICE's G. The
+# current flows from positive through the source to negative; the control pins draw none.
+
+component:voltage-controlled-current-source("Voltage-controlled current source", type: source) {
+    meta {
+        designator: G
+        summary: "Ideal voltage-controlled current source: I(positive → negative) = transconductance · V(control_positive, control_negative)"
+        source: "SPICE G element, linear form"
+        category: circuits
+        failure: open
+    }
+
+    parameter:transconductance(1 mA/V, "the output current over the controlling voltage")
+
+    pin:positive(analog, output, 1, "the current leaves the circuit here")
+    pin:negative(analog, output, 2, "and comes back here")
+    pin:control_positive(analog, input, 3, "controlling voltage, positive")
+    pin:control_negative(analog, input, 4, "controlling voltage, negative")
+
+    symbol(box) {
+        left([control_positive, control_negative])
+        right([positive, negative])
+    }
+
+    equations {
+        current positive -> negative = transconductance * (control_positive - control_negative)
+    }
+
+    expect("a milliampere per volt into a load", from: "1 mA/V, 2 V in: 2 mA through 1 kΩ from ground to the output, -2 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 2 V)
+            part:R1(resistor, [output, 0], resistance: 1 kOhm)
+            part:U1(self, [positive: output, negative: 0, control_positive: input, control_negative: 0])
+        }
+        measure(operating, output)
+        near(-2 V, +- 0.1%)
+    }
+}

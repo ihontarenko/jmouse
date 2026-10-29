@@ -1,0 +1,229 @@
+# What the cards of a SPICE netlist are in jMX, both ways: the component an element card becomes, its pins in the order
+# SPICE writes its nodes, and what its value sets; the device a .model describes, the component that carries it, and
+# what each of its parameters is called — and the letter of the element line that takes a model of it. A parameter written with no value after its SPICE name has no default jMX can
+# write — SPICE's none (no resistance, no breakdown, no limit) —, so the carrying component's own value stands. A
+# default in °C is one SPICE writes in degrees Celsius where jMX writes kelvin.
+sheet "SPICE devices" as spice-devices {
+    description "The SPICE elements and devices jMX imports and exports, and the names their parameters take in each."
+
+    resistor "R: a resistor" {
+        card R
+        component resistor
+        pins terminal_one, terminal_two
+        value resistance
+    }
+    capacitor "C: a capacitor" {
+        card C
+        component capacitor
+        pins terminal_one, terminal_two
+        value capacitance
+    }
+    inductor "L: an inductor" {
+        card L
+        component inductor
+        pins terminal_one, terminal_two
+        value inductance
+    }
+    voltage-source "V … DC, and a PULSE that steps once and stays" {
+        card V
+        component voltage-source
+        pins positive, negative
+        value U_output
+    }
+    # SPICE's current flows from the first node through the source to the second; a jMX source pushes its value out of
+    # its first pin — so the nodes land on the pins the other way round.
+    current-source "I … DC, and a PULSE that steps once and stays" {
+        card I
+        component current-source
+        pins negative, positive
+        value I_output
+    }
+    sine-generator "V … SIN(offset amplitude frequency delay damping phase)" {
+        card V
+        signal SIN
+        component sine-generator
+        pins positive, negative
+        settings offset = offset, amplitude = amplitude, frequency = frequency, phase = phase
+    }
+    # A PULSE that repeats is a square, its duty taken at half height so its average stays the pulse's.
+    square-generator "V … PULSE(initial pulsed delay rise fall width period)" {
+        card V
+        signal PULSE
+        component square-generator
+        pins positive, negative
+        settings pulsed = high, initial = low, frequency = frequency, duty = duty
+    }
+    voltage-controlled-voltage-source "E: a linear voltage-controlled voltage source" {
+        card E
+        component voltage-controlled-voltage-source
+        pins positive, negative, control_positive, control_negative
+        value gain
+    }
+    voltage-controlled-current-source "G: a linear voltage-controlled current source" {
+        card G
+        component voltage-controlled-current-source
+        pins positive, negative, control_positive, control_negative
+        value transconductance
+    }
+
+    diode "D: a junction diode" {
+        model D
+        element D
+        type diode
+        pins anode, cathode
+        carrier diode
+        parameters diode-parameters
+    }
+    npn "Q with an NPN model: a bipolar transistor, Gummel–Poon" {
+        model NPN
+        element Q
+        type bjt
+        polarity 1
+        pins collector, base, emitter
+        carrier npn-transistor
+        parameters bipolar-parameters
+    }
+    pnp "Q with a PNP model" {
+        model PNP
+        element Q
+        type bjt
+        polarity -1
+        pins collector, base, emitter
+        carrier pnp-transistor
+        parameters bipolar-parameters
+    }
+    nmos "M with an NMOS model: a MOSFET, level 1" {
+        model NMOS
+        element M
+        type mosfet
+        polarity 1
+        pins drain, gate, source
+        carrier n-mosfet
+        parameters mosfet-parameters
+        geometry mosfet-geometry
+    }
+    pmos "M with a PMOS model" {
+        model PMOS
+        element M
+        type mosfet
+        polarity -1
+        pins drain, gate, source
+        carrier p-mosfet
+        parameters mosfet-parameters
+        geometry mosfet-geometry
+    }
+    njf "J with an NJF model: a junction FET, level 1" {
+        model NJF
+        element J
+        type jfet
+        polarity 1
+        pins drain, gate, source
+        carrier n-jfet
+        parameters jfet-parameters
+    }
+    pjf "J with a PJF model" {
+        model PJF
+        element J
+        type jfet
+        polarity -1
+        pins drain, gate, source
+        carrier p-jfet
+        parameters jfet-parameters
+    }
+
+    diode-parameters "A diode model" {
+        I_saturation                       IS = 1e-14
+        emission_coefficient               N = 1
+        R_series                           RS
+        I_recombination                    ISR = 0
+        recombination_emission_coefficient NR = 2
+        I_knee                             IKF
+        C_junction_zero_bias               CJO = 0
+        V_junction                         VJ = 1
+        grading_coefficient                M = 0.5
+        forward_bias_coefficient           FC = 0.5
+        transit_time                       TT = 0
+        V_breakdown                        BV
+        I_breakdown                        IBV
+        saturation_temperature_exponent    XTI = 3
+        E_gap                              EG = 1.11
+        T_nominal                          TNOM = 27 °C
+    }
+    bipolar-parameters "A bipolar model" {
+        I_saturation                     IS = 1e-16
+        beta_forward                     BF = 100
+        emission_coefficient             NF = 1
+        V_early                          VAF
+        I_knee                           IKF
+        I_leakage_base_emitter           ISE = 0
+        leakage_emission_base_emitter    NE = 1.5
+        beta_reverse                     BR = 1
+        emission_coefficient_reverse     NR = 1
+        V_early_reverse                  VAR
+        I_knee_reverse                   IKR
+        I_leakage_base_collector         ISC = 0
+        leakage_emission_base_collector  NC = 2
+        R_base                           RB
+        R_base_minimum                   RBM
+        R_emitter                        RE
+        R_collector                      RC
+        C_base_emitter                   CJE = 0
+        V_junction_base_emitter          VJE = 0.75
+        grading_base_emitter             MJE = 0.33
+        C_base_collector                 CJC = 0
+        V_junction_base_collector        VJC = 0.75
+        grading_base_collector           MJC = 0.33
+        internal_base_collector_fraction XCJC = 1
+        forward_bias_coefficient         FC = 0.5
+        transit_time_forward             TF = 0
+        transit_time_bias_dependence     XTF = 0
+        transit_time_bias_voltage        VTF
+        transit_time_current             ITF = 0
+        transit_time_reverse             TR = 0
+        beta_temperature_exponent        XTB = 0
+        saturation_temperature_exponent  XTI = 3
+        E_gap                            EG = 1.11
+        T_nominal                        TNOM = 27 °C
+    }
+    # Level 1 with W = L = 1 on the device line, so KP is the whole channel and CGSO, CGDO are farads.
+    mosfet-parameters "A MOSFET model" {
+        V_threshold               VTO = 0
+        transconductance          KP = 0.00002
+        channel_length_modulation LAMBDA = 0
+        R_drain                   RD
+        R_source                  RS
+        I_saturation              IS = 1e-14
+        emission_coefficient      N = 1
+        C_bulk_drain              CBD = 0
+        V_junction                PB = 0.8
+        grading_coefficient       MJ = 0.5
+        forward_bias_coefficient  FC = 0.5
+        C_gate_source             CGSO = 0
+        C_gate_drain              CGDO = 0
+        T_nominal                 TNOM = 27 °C
+    }
+    # Level 1: VTO keeps its sign for both channels, IDSS = BETA · VTO².
+    jfet-parameters "A JFET model" {
+        V_threshold               VTO = -2
+        transconductance          BETA = 0.0001
+        channel_length_modulation LAMBDA = 0
+        R_drain                   RD
+        R_source                  RS
+        I_saturation              IS = 1e-14
+        emission_coefficient      N = 1
+        C_gate_source             CGS = 0
+        C_gate_drain              CGD = 0
+        V_junction                PB = 1
+        forward_bias_coefficient  FC = 0.5
+        T_nominal                 TNOM = 27 °C
+    }
+
+    # A jMX MOSFET is the whole channel, W = L = 1: what the device line's W and L do to its model. KP is multiplied by
+    # W / L, the overlap capacitances — written per metre of width — by W; a line that writes neither takes SPICE's
+    # default for both (ngspice's DEFW, DEFL).
+    mosfet-geometry "A MOSFET's width and length" {
+        default 100 um
+        by-ratio transconductance
+        by-width C_gate_source, C_gate_drain
+    }
+}

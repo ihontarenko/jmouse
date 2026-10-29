@@ -67,7 +67,7 @@ public abstract class AbstractTransactionCoordinator
             return;
         }
 
-        if (status instanceof TransactionStatusSupport statusSupport && statusSupport.hasSuspended()) {
+        if (!status.isNew() && status instanceof TransactionStatusSupport statusSupport && statusSupport.hasSuspended()) {
             cleanupAfterCompletion(status);
             return;
         }
@@ -87,6 +87,10 @@ public abstract class AbstractTransactionCoordinator
             return;
         }
 
+        if (!status.isNew() && context.getSavepoint().isEmpty()) {
+            cleanupAfterCompletion(status);
+            return;
+        }
         processCommit(context, status);
     }
 
@@ -96,7 +100,7 @@ public abstract class AbstractTransactionCoordinator
             return;
         }
 
-        if (status instanceof TransactionStatusSupport ss && ss.hasSuspended()) {
+        if (!status.isNew() && status instanceof TransactionStatusSupport ss && ss.hasSuspended()) {
             cleanupAfterCompletion(status);
             return;
         }
@@ -106,6 +110,7 @@ public abstract class AbstractTransactionCoordinator
 
         if (!status.isNew() && context.getSavepoint().isEmpty()) {
             context.setRollbackOnly();
+            cleanupAfterCompletion(status);
             return;
         }
 
@@ -129,13 +134,22 @@ public abstract class AbstractTransactionCoordinator
 
             case REQUIRES_NEW:
                 SuspendedResources suspended = suspend();
-                TransactionStatus status = startNewTransaction(definition);
-
-                if (status instanceof TransactionStatusSupport statusSupport) {
-                    statusSupport.setSuspended(suspended);
+                try {
+                    TransactionStatus status = startNewTransaction(definition);
+                    if (status instanceof TransactionStatusSupport statusSupport) {
+                        statusSupport.setSuspended(suspended);
+                    }
+                    return status;
+                } catch (RuntimeException | Error failure) {
+                    try {
+                        resume(suspended);
+                    } catch (RuntimeException | Error resumeFailure) {
+                        if (failure != resumeFailure) {
+                            failure.addSuppressed(resumeFailure);
+                        }
+                    }
+                    throw failure;
                 }
-
-                return status;
 
             case NESTED:
                 return startNestedTransaction(existing);
@@ -187,7 +201,33 @@ public abstract class AbstractTransactionCoordinator
         if (existing instanceof MutableTransactionContext mutable) {
             mutable.getAttributes().ifPresent(attributes -> joinValidator.validate(requested, attributes));
         }
-        return existing.getStatus();
+        TransactionStatus joinedStatus = new ParticipatingStatus(existing.getStatus());
+        MutableTransactionContext joined = new MutableTransactionContext(
+                existing.getDefinition(), joinedStatus, existing.getSession());
+        if (existing instanceof MutableTransactionContext mutable) {
+            mutable.getAttributes().ifPresent(joined::setAttributes);
+        }
+        contextHolder.bindContext(joined);
+        return joinedStatus;
+    }
+
+    private static final class ParticipatingStatus extends TransactionStatusSupport {
+        private final TransactionStatus owner;
+
+        private ParticipatingStatus(TransactionStatus owner) {
+            super(false);
+            this.owner = owner;
+        }
+
+        @Override
+        public boolean isRollbackOnly() {
+            return owner.isRollbackOnly();
+        }
+
+        @Override
+        public void markRollbackOnly() {
+            owner.markRollbackOnly();
+        }
     }
 
     protected TransactionStatus startNestedTransaction(
@@ -229,7 +269,9 @@ public abstract class AbstractTransactionCoordinator
         SynchronizationContext synchronizationContext = synchronizationHolder.getCurrent();
 
         try {
-            triggerBeforeCommit(synchronizationContext);
+            if (status.isNew()) {
+                triggerBeforeCommit(synchronizationContext);
+            }
 
             if (status.isNew()) {
                 doCommit(context.getSession());
@@ -242,11 +284,11 @@ public abstract class AbstractTransactionCoordinator
                 });
             }
 
-            triggerAfterCommit(synchronizationContext);
-            triggerAfterCompletion(
-                    synchronizationContext,
-                    TransactionSynchronization.CompletionStatus.COMMITTED
-            );
+            if (status.isNew()) {
+                triggerAfterCommit(synchronizationContext);
+                triggerAfterCompletion(
+                        synchronizationContext, TransactionSynchronization.CompletionStatus.COMMITTED);
+            }
         } catch (Exception exception) {
             if (status.isNew()) {
                 try {
@@ -255,11 +297,11 @@ public abstract class AbstractTransactionCoordinator
                     LOGGER.error("Failed to rollback transaction!", rollbackException);
                 }
             }
-            triggerAfterRollback(synchronizationContext);
-            triggerAfterCompletion(
-                    synchronizationContext,
-                    TransactionSynchronization.CompletionStatus.ROLLED_BACK
-            );
+            if (status.isNew()) {
+                triggerAfterRollback(synchronizationContext);
+                triggerAfterCompletion(
+                        synchronizationContext, TransactionSynchronization.CompletionStatus.ROLLED_BACK);
+            }
             throw exception;
         } finally {
             cleanupAfterCompletion(status);
@@ -275,17 +317,18 @@ public abstract class AbstractTransactionCoordinator
             } else {
                 context.getSavepoint().ifPresent(savepoint -> {
                     doRollbackToSavepoint(context.getSession(), savepoint);
+                    doReleaseSavepoint(context.getSession(), savepoint);
                     if (context instanceof MutableTransactionContext mutable) {
                         mutable.clearSavepoint();
                     }
                 });
             }
 
-            triggerAfterRollback(synchronizationContext);
-            triggerAfterCompletion(
-                    synchronizationContext,
-                    TransactionSynchronization.CompletionStatus.ROLLED_BACK
-            );
+            if (status.isNew()) {
+                triggerAfterRollback(synchronizationContext);
+                triggerAfterCompletion(
+                        synchronizationContext, TransactionSynchronization.CompletionStatus.ROLLED_BACK);
+            }
         } finally {
             cleanupAfterCompletion(status);
         }
@@ -301,16 +344,32 @@ public abstract class AbstractTransactionCoordinator
 
         TransactionContext finished = contextHolder.unbindContext();
 
-        if (status.isNew()) {
-            synchronizationHolder.unbind();
-            if (finished != null) {
-                finished.getSession().close();
+        Throwable cleanupFailure = null;
+        try {
+            if (status.isNew()) {
+                synchronizationHolder.unbind();
+                if (finished != null) {
+                    finished.getSession().close();
+                }
             }
-        }
-
-        if (statusSupport != null && statusSupport.hasSuspended()) {
-            resume(statusSupport.getSuspended());
-            statusSupport.setSuspended(null);
+        } catch (RuntimeException | Error failure) {
+            cleanupFailure = failure;
+            throw failure;
+        } finally {
+            if (statusSupport != null && statusSupport.hasSuspended()) {
+                try {
+                    resume(statusSupport.getSuspended());
+                } catch (RuntimeException | Error resumeFailure) {
+                    if (cleanupFailure == null) {
+                        throw resumeFailure;
+                    }
+                    if (cleanupFailure != resumeFailure) {
+                        cleanupFailure.addSuppressed(resumeFailure);
+                    }
+                } finally {
+                    statusSupport.setSuspended(null);
+                }
+            }
         }
     }
 

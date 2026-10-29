@@ -1,0 +1,36 @@
+# A miniature toggle switch seen from the side: the body, the threaded bushing and its nut, the bat lever thrown one way
+# while open and the other while closed — by the part's own `closed`, as its symbol's lever is.
+portrait:toggle-switch-portrait("Toggle switch") {
+    meta {
+        summary: "A miniature toggle switch whose lever is thrown by the part's state"
+        code: "PT.SWITCH:TOGGLE"
+        category: circuits
+        tags: electronics, portrait, switch, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 100)
+    input:closed(0 .. 1)
+
+    path:legs("M-22 24H-18V50H-22ZM18 24H22V50H18Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:a(at: -20 50)
+    pin:b(at: 20 50)
+    path:body("M-24 0H24V24H-24Z") {
+        fill = black
+    }
+    group:lever(live, pivot: 0 -6) {
+        path:bat("M-2.5-6L-4-40C-4-44 4-44 4-40L2.5-6Z") {
+            fill = silver
+        }
+        live rotate = between(-28 deg, 28 deg, smooth(closed, 60 ms))
+    }
+    path:bushing("M-8-10H8V0H-8Z") {
+        fill = silver
+    }
+    path:nut("M-13-4H13V0H-13Z") {
+        fill = grey
+    }
+}

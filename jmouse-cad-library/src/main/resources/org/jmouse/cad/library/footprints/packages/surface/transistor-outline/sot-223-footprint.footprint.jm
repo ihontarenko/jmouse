@@ -1,0 +1,22 @@
+footprint:sot-223-footprint("SOT-223, tab on pin 2") {
+    meta {
+        summary: "4-lead SOT-223, gull-wing: three leads 2.3 mm apart on one side, the wide tab opposite them and joined to pin 2"
+        code: "FP.SOT223:4"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC TO-261AA"
+    }
+    # Drawn from TO-261AA: pitch 2.30, lead tips 6.70…7.30 apart, foot L 0.75…1.10, lead b 0.84 and tab b1 3.10 at most,
+    # body 6.5 × 3.5.
+    # Our surface rule, IPC-7351 nominal density for gull-wing leads: toe 0.35, heel 0.35, side 0.03, tolerances left out —
+    # Z = 7.30 + 0.70 = 8.00, G = 6.70 − 2.20 − 0.70 = 3.80; pads 2.1 long centred 2.95 out, 0.9 and 3.15 wide, corners
+    # rounded a quarter. The tab is numbered 2: it is that pin. Courtyard 0.25 past copper and body.
+    pad:1(surface, rounded-rectangle, at: -2.3 2.95, size: 0.9 x 2.1, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0 2.95, size: 0.9 x 2.1, roundness: 0.25)
+    pad:3(surface, rounded-rectangle, at: 2.3 2.95, size: 0.9 x 2.1, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0 -2.95, size: 3.15 x 2.1, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-3.25 -1.75H3.25V1.75H-2.25L-3.25 0.75Z")
+    outline(silkscreen, width: 0.12, "M-3.36 -1.86H-3.0M-3.36 -1.86V1.86H-3.0M3.36 -1.86H3.0M3.36 -1.86V1.86H3.0")
+    outline(silkscreen, filled, "M-3.56 3.5A0.2 0.2 0 1 0 -3.16 3.5A0.2 0.2 0 1 0 -3.56 3.5Z")
+    outline(courtyard, width: 0.05, "M-3.75 -4.25H3.75V4.25H-3.75Z")
+}

@@ -1,0 +1,35 @@
+symbol:current-sense-amplifier-symbol("Current-sense amplifier") {
+    meta {
+        summary: "A current-sense amplifier, as drawn on a schematic: the shunt's two inputs and the two references on the left, the output on the right, the supply above and ground below"
+        code: "SY.AMPLIFIER:CURRENT-SENSE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(240 x 320)
+    input:failed
+
+    # The body, filled as the drawing theme fills a part's body.
+    path:body_fill("M-80-120H80V120H-80Z") {
+        fill = body
+    }
+
+    group:body(live) {
+        path("M-80-120H80V120H-80Z")
+        path("M-120-80H-80M-120-40H-80M-120 40H-80M-120 80H-80M80 0H120M0-120V-160M-40 120V160M40 120V160")
+        path("M-60-88H-48M-54-94V-82M-60-40H-48")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    pin:non_inverting_input(at: -120 -80, "IN+")
+    pin:inverting_input(at: -120 -40, "IN−")
+    pin:reference_one(at: -120 40, "REF1")
+    pin:reference_two(at: -120 80, "REF2")
+    pin:output(at: 120 0, "OUT")
+    pin:Vcc(at: 0 -160, "VS")
+    pin:GND(at: -40 160, "GND")
+    pin:not_connected(at: 40 160, "NC")
+    label(name, at: 60 -140)
+    label(value, at: 60 188)
+}

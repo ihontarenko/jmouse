@@ -1,0 +1,30 @@
+symbol:transformer-symbol("Transformer") {
+    meta {
+        summary: "Transformer, as drawn on a schematic: its windings char and smoulder once it has burned out"
+        code: "SY.TRANSFORMER:MAGNETIC-CORE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    input:failed
+
+    path("M-4-44V44M4-44V44")
+    path:windings(live, "M-80-40H-36C-6-40-6-14-36-14C-6-14-6 14-36 14C-6 14-6 40-36 40H-80M80-40H36C6-40 6-14 36-14C6-14 6 14 36 14C6 14 6 40 36 40H80") {
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-28-12L-16 0M-20-24L-8-12M16-16L28-4M12 4L24 16")
+        stroke = burned
+        animate opacity = 0.4 + 0.6 * blink(1 Hz)
+    }
+
+    pin:primary_one(at: -80 -40)
+    pin:primary_two(at: -80 40)
+    pin:secondary_one(at: 80 -40)
+    pin:secondary_two(at: 80 40)
+    label(name, at: 0 -64)
+    label(value, at: 0 72)
+}

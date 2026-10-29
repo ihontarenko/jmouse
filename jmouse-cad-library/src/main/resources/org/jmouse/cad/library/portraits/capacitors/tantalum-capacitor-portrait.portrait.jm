@@ -1,0 +1,46 @@
+# A moulded tantalum chip seen from straight above: an amber block, the darker band across its plus end, and printed in
+# one line the polarity triangle, its picofarad code (107 = 100 µF) and the EIA letter of its voltage (J = 6.3 V).
+portrait:tantalum-capacitor-portrait("Tantalum capacitor") {
+    meta {
+        summary: "A moulded tantalum chip from above, its plus band, picofarad code and voltage letter read from its values"
+        code: "PT.CAPACITOR:TANTALUM-MOULDED"
+        category: circuits
+        tags: electronics, portrait, capacitor, surface-mount
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(90 x 50)
+    input:capacitance(100 nF .. 1 mF, typical: 100 µF)
+    input:voltage_rating(4 V .. 50 V, typical: 16 V)
+
+    pin:positive(at: -40 0)
+    pin:negative(at: 40 0)
+    box:body(at: 0 0, size: 84 x 46) {
+        stroke = clear
+        fill = amber
+    }
+    box:plus_band(at: -36 0, size: 12 x 46) {
+        stroke = clear
+        fill = copper
+    }
+    path:polarity("M-21 5L-15 -5L-9 5Z") {
+        stroke = clear
+        fill = brown
+    }
+    glyph:code_1(live, at: -6.5 0, size: 10.5 x 15) {
+        fill = brown
+        live character = 48 + floor(round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) / 100)
+    }
+    glyph:code_2(live, at: 4 0, size: 10.5 x 15) {
+        fill = brown
+        live character = 48 + round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) - 10 * floor(round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) / 10)
+    }
+    glyph:code_3(live, at: 14.5 0, size: 10.5 x 15) {
+        fill = brown
+        live character = 48 + floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1
+    }
+    glyph:voltage_letter(live, at: 28 0, size: 10 x 15) {
+        fill = brown
+        live character = if(voltage_rating <= 4 V, 71, if(voltage_rating <= 6.3 V, 74, if(voltage_rating <= 10 V, 65, if(voltage_rating <= 16 V, 67, if(voltage_rating <= 20 V, 68, if(voltage_rating <= 25 V, 69, if(voltage_rating <= 35 V, 86, 84)))))))
+    }
+}

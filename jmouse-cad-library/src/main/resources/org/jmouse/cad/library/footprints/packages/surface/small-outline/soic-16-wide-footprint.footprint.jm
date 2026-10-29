@@ -1,0 +1,33 @@
+footprint:soic-16-wide-footprint("SOIC-16, 7.5 mm body") {
+    meta {
+        summary: "16-lead SOIC, 7.5 mm body, gull-wing, 1.27 mm pitch, body 7.5 × 10.3 mm"
+        code: "FP.SOIC:16-P1.27-W7.5"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC MS-013"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/small-outline-packages.sht#soic-wide and the land pattern rules; regenerate, never edit.
+    # Leads span 10…10.65, foot 0.4…1.27, width 0.31…0.51; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 11.36, G = 7.255, X = 0.599; pad 2.05 × 0.6 centred at ±4.65.
+    pad:1(surface, rounded-rectangle, at: -4.65 -4.445, size: 2.05 x 0.6, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: -4.65 -3.175, size: 2.05 x 0.6, roundness: 0.25)
+    pad:3(surface, rounded-rectangle, at: -4.65 -1.905, size: 2.05 x 0.6, roundness: 0.25)
+    pad:4(surface, rounded-rectangle, at: -4.65 -0.635, size: 2.05 x 0.6, roundness: 0.25)
+    pad:5(surface, rounded-rectangle, at: -4.65 0.635, size: 2.05 x 0.6, roundness: 0.25)
+    pad:6(surface, rounded-rectangle, at: -4.65 1.905, size: 2.05 x 0.6, roundness: 0.25)
+    pad:7(surface, rounded-rectangle, at: -4.65 3.175, size: 2.05 x 0.6, roundness: 0.25)
+    pad:8(surface, rounded-rectangle, at: -4.65 4.445, size: 2.05 x 0.6, roundness: 0.25)
+    pad:9(surface, rounded-rectangle, at: 4.65 4.445, size: 2.05 x 0.6, roundness: 0.25)
+    pad:10(surface, rounded-rectangle, at: 4.65 3.175, size: 2.05 x 0.6, roundness: 0.25)
+    pad:11(surface, rounded-rectangle, at: 4.65 1.905, size: 2.05 x 0.6, roundness: 0.25)
+    pad:12(surface, rounded-rectangle, at: 4.65 0.635, size: 2.05 x 0.6, roundness: 0.25)
+    pad:13(surface, rounded-rectangle, at: 4.65 -0.635, size: 2.05 x 0.6, roundness: 0.25)
+    pad:14(surface, rounded-rectangle, at: 4.65 -1.905, size: 2.05 x 0.6, roundness: 0.25)
+    pad:15(surface, rounded-rectangle, at: 4.65 -3.175, size: 2.05 x 0.6, roundness: 0.25)
+    pad:16(surface, rounded-rectangle, at: 4.65 -4.445, size: 2.05 x 0.6, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-2.75 -5.15H3.75V5.15H-3.75V-4.15Z")
+    outline(silkscreen, width: 0.12, "M-5.675 -5.26H3.75M-3.75 5.26H3.75")
+    outline(courtyard, width: 0.05, "M-5.95 -5.4H5.95V5.4H-5.95Z")
+}

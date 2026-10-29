@@ -224,7 +224,37 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-data-map</artifactId>
+        <artifactId>jmouse-revisions</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-plugin</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-plugin-spring</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-sheet</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-gerber</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-stroke-fonts</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-svg-path</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -239,27 +269,137 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-parallax</artifactId>
+        <artifactId>jmouse-numerics</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-parallax-jpa</artifactId>
+        <artifactId>jmouse-el-grammar</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-parallax-spring-boot</artifactId>
+        <artifactId>jmouse-cad</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-parallax-management</artifactId>
+        <artifactId>jmouse-cad-document</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-parallax-live</artifactId>
+        <artifactId>jmouse-cad-schematic</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-board</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.locationtech.jts</groupId>
+        <artifactId>jts-core</artifactId>
+        <version>1.20.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-simulation</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-packages</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-spice</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-kicad</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-nexar</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-library</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-exchange</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-spring-boot</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-management</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-spice</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-xyce</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-gerber</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-pcbway</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-jlcpcb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-kicad</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-nexar</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-explorer</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-live</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-taxonomy-management</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -305,6 +445,16 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-tree-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-taxonomy</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-taxonomy-jpa</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>

@@ -1,0 +1,25 @@
+symbol:switch-symbol("Switch") {
+    meta {
+        summary: "Switch, as drawn on a schematic: its lever lies on the far contact while it is closed"
+        code: "SY.SWITCH:SPST"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:closed
+
+    path("M-80 0H-26M26 0H80")
+    path("M-30 0A4 4 0 1 0-22 0A4 4 0 1 0-30 0M22 0A4 4 0 1 0 30 0A4 4 0 1 0 22 0")
+
+    group:lever(live, pivot: -26 0) {
+        path("M-26 0H26")
+        live rotate = between(-30 deg, 0 deg, smooth(closed, 60 ms))
+    }
+
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

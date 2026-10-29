@@ -1,0 +1,59 @@
+# Generated from footprint-standards/small-outline-packages.sht#tssop; regenerate, never edit.
+portrait:tssop-28-portrait("TSSOP-28") {
+    meta {
+        summary: "28-lead TSSOP, 4.4 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.TSSOP:28-P0.65-W4.4"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MO-153"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(319 x 200)
+    input:marking(text)
+
+    path:leads("M-143.769 67.692H-136.231V100H-143.769ZM-143.769 -67.692H-136.231V-100H-143.769ZM-123.769 67.692H-116.231V100H-123.769ZM-123.769 -67.692H-116.231V-100H-123.769ZM-103.769 67.692H-96.231V100H-103.769ZM-103.769 -67.692H-96.231V-100H-103.769ZM-83.769 67.692H-76.231V100H-83.769ZM-83.769 -67.692H-76.231V-100H-83.769ZM-63.769 67.692H-56.231V100H-63.769ZM-63.769 -67.692H-56.231V-100H-63.769ZM-43.769 67.692H-36.231V100H-43.769ZM-43.769 -67.692H-36.231V-100H-43.769ZM-23.769 67.692H-16.231V100H-23.769ZM-23.769 -67.692H-16.231V-100H-23.769ZM-3.769 67.692H3.769V100H-3.769ZM-3.769 -67.692H3.769V-100H-3.769ZM16.231 67.692H23.769V100H16.231ZM16.231 -67.692H23.769V-100H16.231ZM36.231 67.692H43.769V100H36.231ZM36.231 -67.692H43.769V-100H36.231ZM56.231 67.692H63.769V100H56.231ZM56.231 -67.692H63.769V-100H56.231ZM76.231 67.692H83.769V100H76.231ZM76.231 -67.692H83.769V-100H76.231ZM96.231 67.692H103.769V100H96.231ZM96.231 -67.692H103.769V-100H96.231ZM116.231 67.692H123.769V100H116.231ZM116.231 -67.692H123.769V-100H116.231Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -140 100)
+    pin:2(at: -120 100)
+    pin:3(at: -100 100)
+    pin:4(at: -80 100)
+    pin:5(at: -60 100)
+    pin:6(at: -40 100)
+    pin:7(at: -20 100)
+    pin:8(at: 0 100)
+    pin:9(at: 20 100)
+    pin:10(at: 40 100)
+    pin:11(at: 60 100)
+    pin:12(at: 80 100)
+    pin:13(at: 100 100)
+    pin:14(at: 120 100)
+    pin:15(at: 120 -100)
+    pin:16(at: 100 -100)
+    pin:17(at: 80 -100)
+    pin:18(at: 60 -100)
+    pin:19(at: 40 -100)
+    pin:20(at: 20 -100)
+    pin:21(at: 0 -100)
+    pin:22(at: -20 -100)
+    pin:23(at: -40 -100)
+    pin:24(at: -60 -100)
+    pin:25(at: -80 -100)
+    pin:26(at: -100 -100)
+    pin:27(at: -120 -100)
+    pin:28(at: -140 -100)
+    path:body("M-153.815 -67.692H133.815A5.415 5.415 0 0 1 139.231 -62.277V62.277A5.415 5.415 0 0 1 133.815 67.692H-153.815A5.415 5.415 0 0 1 -159.231 62.277V-62.277A5.415 5.415 0 0 1 -153.815 -67.692Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-145.151 44.812A8.8 8.8 0 1 0 -127.551 44.812A8.8 8.8 0 1 0 -145.151 44.812Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 208.923 x 30.462) {
+        fill = silver
+        text = marking
+    }
+}

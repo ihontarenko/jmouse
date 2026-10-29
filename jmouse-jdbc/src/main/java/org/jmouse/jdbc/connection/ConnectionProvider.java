@@ -52,6 +52,14 @@ public interface ConnectionProvider {
     Connection getConnection() throws SQLException;
 
     /**
+     * Stable identity of the underlying transactional resource.
+     * Decorators delegate this identity; DataSource providers use the DataSource itself.
+     */
+    default Object getResourceKey() {
+        return this;
+    }
+
+    /**
      * Releases a previously obtained {@link Connection}.
      * <p>
      * The exact behavior depends on the implementation:

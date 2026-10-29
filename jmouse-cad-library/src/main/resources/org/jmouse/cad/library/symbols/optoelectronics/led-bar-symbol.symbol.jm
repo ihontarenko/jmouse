@@ -1,0 +1,82 @@
+symbol:led-bar-symbol("LED bar") {
+    meta {
+        summary: "Eight LEDs in a row, cathodes common: each segment lights red as its own current flows"
+        code: "SY.LED:BAR-8"
+        category: circuits
+        tags: electronics, schematic, display
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(360 x 240)
+    input:light_0(0 .. 100)
+    input:light_1(0 .. 100)
+    input:light_2(0 .. 100)
+    input:light_3(0 .. 100)
+    input:light_4(0 .. 100)
+    input:light_5(0 .. 100)
+    input:light_6(0 .. 100)
+    input:light_7(0 .. 100)
+
+    path("M-180-80H140V80H-180Z")
+    path("M-160 52V64H120V52M-40 64V120")
+    path("M-160-80V-120")
+    path("M-120-80V-120")
+    path("M-80-80V-120")
+    path("M-40-80V-120")
+    path("M0-80V-120")
+    path("M40-80V-120")
+    path("M80-80V-120")
+    path("M120-80V-120")
+    path:glow_0(live, "M-172-60H-148V40H-172Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_0, 0, 100))
+        live glow = 6 * share(light_0, 0, 100)
+    }
+    path:glow_1(live, "M-132-60H-108V40H-132Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_1, 0, 100))
+        live glow = 6 * share(light_1, 0, 100)
+    }
+    path:glow_2(live, "M-92-60H-68V40H-92Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_2, 0, 100))
+        live glow = 6 * share(light_2, 0, 100)
+    }
+    path:glow_3(live, "M-52-60H-28V40H-52Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_3, 0, 100))
+        live glow = 6 * share(light_3, 0, 100)
+    }
+    path:glow_4(live, "M-12-60H12V40H-12Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_4, 0, 100))
+        live glow = 6 * share(light_4, 0, 100)
+    }
+    path:glow_5(live, "M28-60H52V40H28Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_5, 0, 100))
+        live glow = 6 * share(light_5, 0, 100)
+    }
+    path:glow_6(live, "M68-60H92V40H68Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_6, 0, 100))
+        live glow = 6 * share(light_6, 0, 100)
+    }
+    path:glow_7(live, "M108-60H132V40H108Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_7, 0, 100))
+        live glow = 6 * share(light_7, 0, 100)
+    }
+
+    pin:anode_0(at: -160 -120)
+    pin:anode_1(at: -120 -120)
+    pin:anode_2(at: -80 -120)
+    pin:anode_3(at: -40 -120)
+    pin:anode_4(at: 0 -120)
+    pin:anode_5(at: 40 -120)
+    pin:anode_6(at: 80 -120)
+    pin:anode_7(at: 120 -120)
+    pin:cathode(at: -40 120)
+    label(name, at: 200 -60)
+    label(value, at: 200 60)
+}

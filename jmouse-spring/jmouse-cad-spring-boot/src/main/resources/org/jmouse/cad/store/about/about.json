@@ -1,0 +1,57 @@
+{
+  "name": "jMouse CAD",
+  "summary": "An electronics engine: one jM language for every document — symbols, footprints, components, circuits, boards —, a live and a batch simulator, and plugins for whatever the core does not do itself.",
+  "site": "https://github.com/ihontarenko/jmouse",
+  "roadmap": [
+    {
+      "title": "The engine on its own",
+      "state": "done",
+      "items": [
+        "One jM language for every document, read and written as a tree, never as text",
+        "A live and a batch simulator over the same circuit, measured against ngspice",
+        "Parts are components of the library: no primitives, every value written as the component names it",
+        "Sheets placed as blocks, each tuned on its own while the circuit runs"
+      ]
+    },
+    {
+      "title": "Plugins",
+      "state": "done",
+      "items": [
+        "A plugin brings what the core reads and nothing else: formats, engines, places to look for parts",
+        "SPICE with ngspice, KiCad, Nexar — plugins, each switched off without the rest noticing"
+      ]
+    },
+    {
+      "title": "Explorer",
+      "state": "now",
+      "items": [
+        "A server folder mounted as a library: browse, open, rename and keep files beside the projects",
+        "Every file opened by whatever plugin reads its kind"
+      ]
+    },
+    {
+      "title": "Plugins in the interface",
+      "state": "next",
+      "items": [
+        "Buttons, menu entries and panels contributed by plugins, not written into the screens",
+        "The formats and engines offered from what the server runs"
+      ]
+    },
+    {
+      "title": "3D",
+      "state": "later",
+      "items": [
+        "A part's body as a 3D model, seated on its footprint",
+        "The board in 3D: copper, mask, silkscreen and every part, exported as STEP"
+      ]
+    },
+    {
+      "title": "Fabrication",
+      "state": "later",
+      "items": [
+        "A board sent to JLCPCB: Gerber, drill, bill of materials and placement, with its price",
+        "Symbols, footprints and models found at Component Search Engine, UltraLibrarian and SnapEDA"
+      ]
+    }
+  ]
+}

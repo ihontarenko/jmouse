@@ -1,0 +1,142 @@
+# Nexperia 74HC595, Rev. 12 (20 March 2024). The shift register and the
+# storage register are separate. MR clears only the shift register; OE only
+# releases the parallel outputs. Q7S stays driven so parts may be cascaded.
+component:74hc595("74HC595", type: shift-register) {
+    meta {
+        designator: U
+        summary: "Eight-bit serial-in, parallel-out shift register with output latch and three-state outputs"
+        source: "Nexperia 74HC_HCT595 datasheet, Rev. 12"
+        package: "SO16"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+
+    parameter:propagation_delay(19 ns, "typical SHCP to Q7S at 4.5 V")
+    parameter:latch_delay(20 ns, "typical STCP to Qn at 4.5 V")
+    # How it warms and where it gives up (DIP-16 in still air).
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:output[0..7](digital, output, [15, 1, 2, 3, 4, 5, 6, 7], "parallel outputs Q0 to Q7")
+    pin:GND(ground, 8)
+    pin:serial_output(digital, output, 9, "Q7S, the eighth stage, for cascading")
+    pin:not_master_reset(digital, input, 10, "master reset, active low")
+    pin:shift_clock(digital, input, 11, "shift clock")
+    pin:storage_clock(digital, input, 12, "storage clock")
+    pin:not_output_enable(digital, input, 13, "output enable, active low")
+    pin:serial_data(digital, input, 14, "serial data")
+    pin:Vcc(power, 16)
+
+    symbol(box) {
+        left([serial_data, shift_clock edge, storage_clock edge])
+        top([not_master_reset bubble, not_output_enable bubble])
+        right([output, serial_output])
+        power([Vcc, GND])
+    }
+
+    # Both registers are held bit by bit: at power-up every stage is unknown, and eight shift-clock edges push the
+    # unknowns out of the end, as in the part.
+    state:shift[8](X, discrete, "the shift register, stage 0 first")
+    state:storage[8](X, discrete, "the storage register on the parallel outputs")
+
+    behaviour {
+        function serial()
+            drive('serial_output', item(shift, 7), propagation_delay * delay_scale(Vcc - GND))
+        end
+
+        function parallel()
+            let delay : time = latch_delay * delay_scale(Vcc - GND)
+            if not_output_enable == 1 then
+                drive('output', Z, delay)
+            else
+                drive('output', storage, delay)
+            end
+        end
+
+        on start do
+            if not_master_reset == 0 then
+                shift = row_of(0, 8)
+            end
+            serial()
+            parallel()
+        end
+
+        on falling 'not_master_reset' do
+            shift = row_of(0, 8)
+            serial()
+        end
+
+        on rising 'shift_clock' when not_master_reset == 1 do
+            shift = shift_in(shift, serial_data)
+            serial()
+        end
+
+        on rising 'storage_clock' do
+            storage = shift
+            parallel()
+        end
+
+        on change 'not_output_enable' do
+            parallel()
+        end
+    }
+
+    expect("serial data reaches a parallel output after latching", from: "function table and pin description") {
+        bench(for: 12 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: shift_clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V3(square-generator, [positive: storage_clock, negative: 0], high: 5 V, frequency: 100 kHz)
+            part:V4(voltage-source, [serial_data, 0], U_output: 5 V)
+            part:V5(voltage-source, [not_master_reset, 0], U_output: 5 V)
+            part:V6(voltage-source, [not_output_enable, 0], U_output: 0 V)
+            part:U1(self, [serial_data: serial_data, shift_clock: shift_clock, storage_clock: storage_clock, not_master_reset: not_master_reset, not_output_enable: not_output_enable, output_0: output_0, output_1: output_1, output_2: output_2, output_3: output_3, output_4: output_4, output_5: output_5, output_6: output_6, output_7: output_7, serial_output: serial_output, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: output_0)
+        near(1, +- 0.01)
+    }
+
+    expect("the eighth shifted bit reaches the cascade output", from: "function table, Q7S") {
+        bench(for: 12 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: shift_clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V3(square-generator, [positive: storage_clock, negative: 0], high: 5 V, frequency: 100 kHz)
+            part:V4(voltage-source, [serial_data, 0], U_output: 5 V)
+            part:V5(voltage-source, [not_master_reset, 0], U_output: 5 V)
+            part:V6(voltage-source, [not_output_enable, 0], U_output: 0 V)
+            part:U1(self, [serial_data: serial_data, shift_clock: shift_clock, storage_clock: storage_clock, not_master_reset: not_master_reset, not_output_enable: not_output_enable, output_0: output_0, serial_output: serial_output, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: serial_output)
+        near(1, +- 0.01)
+    }
+
+    expect("master reset clears the shift register before latching", from: "function table, MR low") {
+        bench(for: 12 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: shift_clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V3(square-generator, [positive: storage_clock, negative: 0], high: 5 V, frequency: 100 kHz)
+            part:V4(voltage-source, [serial_data, 0], U_output: 5 V)
+            part:V5(voltage-source, [not_master_reset, 0], U_output: 0 V)
+            part:V6(voltage-source, [not_output_enable, 0], U_output: 0 V)
+            part:U1(self, [serial_data: serial_data, shift_clock: shift_clock, storage_clock: storage_clock, not_master_reset: not_master_reset, not_output_enable: not_output_enable, output_0: output_0, serial_output: serial_output, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: output_0)
+        near(0, +- 0.01)
+    }
+
+    expect("disabled parallel outputs release the bus", from: "function table, OE high") {
+        bench(for: 12 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: shift_clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V3(square-generator, [positive: storage_clock, negative: 0], high: 5 V, frequency: 100 kHz)
+            part:V4(voltage-source, [serial_data, 0], U_output: 5 V)
+            part:V5(voltage-source, [not_master_reset, 0], U_output: 5 V)
+            part:V6(voltage-source, [not_output_enable, 0], U_output: 5 V)
+            part:U1(self, [serial_data: serial_data, shift_clock: shift_clock, storage_clock: storage_clock, not_master_reset: not_master_reset, not_output_enable: not_output_enable, output_0: output_0, serial_output: serial_output, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: output_0)
+        # L() represents a released digital node at 0.5 on a numeric trace.
+        near(0.5, +- 0.01)
+    }
+}

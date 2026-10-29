@@ -1,0 +1,17 @@
+symbol:screw-terminal-1x2-symbol("Screw terminal, 2 contacts") {
+    meta {
+        summary: "A terminal block of 2 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
+        code: "SY.TB:2"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size(80 x 100)
+    path("M-20 -10H20V50H-20ZM-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36")
+    pin:pin1(at: -40 0, "1")
+    pin:pin2(at: -40 40, "2")
+    label(name, at: 0 -24)
+    label(value, at: 0 68)
+}

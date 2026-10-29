@@ -1,0 +1,99 @@
+# Seven-segment display: 8 red LEDs with their cathodes joined — one junction law each, as a lone red LED has, written
+# once per segment. Each segment's light is its own display figure, so the drawing lights the segments that conduct.
+# A segment wants its own series resistor: nothing in the part limits its current.
+
+component:seven-segment-display("Seven-segment display", type: display) {
+    meta {
+        designator: DS
+        summary: "A red seven-segment digit and its decimal point, common cathode"
+        source: "a typical red LED die, as led-red: VF about 2.0 V at 20 mA, VR 5 V; common cathode"
+        package: "0.56 inch digit, 10 pins"
+        category: circuits
+        failure: open
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:I_saturation(0.00066 fA, "IS of each segment: the wide band gap's tiny saturation current")
+    parameter:emission_coefficient(2, "N")
+    parameter:R_series(2.5 Ohm, "RS of each segment: its bulk and its bond wire")
+    parameter:I_rated(20 mA, "the current a segment's brightness is given at")
+    parameter:I_forward_maximum(30 mA, "IF of each segment, continuous")
+    parameter:power_rating(0.4 W, "what the whole package is rated for")
+    parameter:thermal_resistance(200 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(100 °C, "past this it fails on a realistic bench")
+
+    pin:segment_a(analog, 1, "anode of segment a")
+    pin:segment_b(analog, 2, "anode of segment b")
+    pin:segment_c(analog, 3, "anode of segment c")
+    pin:segment_d(analog, 4, "anode of segment d")
+    pin:segment_e(analog, 5, "anode of segment e")
+    pin:segment_f(analog, 6, "anode of segment f")
+    pin:segment_g(analog, 7, "anode of segment g")
+    pin:segment_point(analog, 8, "anode of the decimal point")
+    pin:cathode(analog, 9, "the common cathode")
+
+    figure:light_a(100 * max(0, segment_a.current) / I_rated, unit: %, "of segment a's rated brightness")
+    figure:light_b(100 * max(0, segment_b.current) / I_rated, unit: %, "of segment b's rated brightness")
+    figure:light_c(100 * max(0, segment_c.current) / I_rated, unit: %, "of segment c's rated brightness")
+    figure:light_d(100 * max(0, segment_d.current) / I_rated, unit: %, "of segment d's rated brightness")
+    figure:light_e(100 * max(0, segment_e.current) / I_rated, unit: %, "of segment e's rated brightness")
+    figure:light_f(100 * max(0, segment_f.current) / I_rated, unit: %, "of segment f's rated brightness")
+    figure:light_g(100 * max(0, segment_g.current) / I_rated, unit: %, "of segment g's rated brightness")
+    figure:light_point(100 * max(0, segment_point.current) / I_rated, unit: %, "of the decimal point's rated brightness")
+    figure:overcurrent(100 * max(abs(segment_a.current), max(abs(segment_b.current), max(abs(segment_c.current), max(abs(segment_d.current), max(abs(segment_e.current), max(abs(segment_f.current), max(abs(segment_g.current), abs(segment_point.current)))))))) / I_forward_maximum, unit: %, "of a segment's rated current")
+
+    symbol(uses: seven-segment-symbol)
+
+    # How it looks in the hand: the digit itself, its segments lit by the same figures as the symbol.
+    portrait(uses: seven-segment-portrait)
+
+    node:junction_segment_a
+    node:junction_segment_b
+    node:junction_segment_c
+    node:junction_segment_d
+    node:junction_segment_e
+    node:junction_segment_f
+    node:junction_segment_g
+    node:junction_segment_point
+
+    equations {
+        current segment_a -> junction_segment_a = (segment_a - junction_segment_a) / R_series
+        current junction_segment_a -> cathode = junction_current(junction_segment_a - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_b -> junction_segment_b = (segment_b - junction_segment_b) / R_series
+        current junction_segment_b -> cathode = junction_current(junction_segment_b - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_c -> junction_segment_c = (segment_c - junction_segment_c) / R_series
+        current junction_segment_c -> cathode = junction_current(junction_segment_c - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_d -> junction_segment_d = (segment_d - junction_segment_d) / R_series
+        current junction_segment_d -> cathode = junction_current(junction_segment_d - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_e -> junction_segment_e = (segment_e - junction_segment_e) / R_series
+        current junction_segment_e -> cathode = junction_current(junction_segment_e - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_f -> junction_segment_f = (segment_f - junction_segment_f) / R_series
+        current junction_segment_f -> cathode = junction_current(junction_segment_f - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_g -> junction_segment_g = (segment_g - junction_segment_g) / R_series
+        current junction_segment_g -> cathode = junction_current(junction_segment_g - cathode, I_saturation, emission_coefficient, temperature)
+        current segment_point -> junction_segment_point = (segment_point - junction_segment_point) / R_series
+        current junction_segment_point -> cathode = junction_current(junction_segment_point - cathode, I_saturation, emission_coefficient, temperature)
+    }
+
+    expect("a segment's forward voltage at 20 mA", from: "VF 2.0 V typical, 2.5 V at most at 20 mA, as a red LED") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [lit, 0], I_output: 20 mA)
+            # The other segments are tied off to the cathode, as unused ones are on a board: dark, and no node left floating.
+            part:U1(self, [segment_a: lit, segment_b: 0, segment_c: 0, segment_d: 0, segment_e: 0, segment_f: 0, segment_g: 0, segment_point: 0, cathode: 0])
+        }
+        measure(operating, lit)
+        within(1.8 V .. 2.5 V)
+    }
+
+    expect("a segment lights alone", from: "common cathode: each anode drives its own segment") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [supply, lit], resistance: 150 Ohm)
+            part:R2(resistor, [supply, dark], resistance: 1 GOhm)
+            part:U1(self, [segment_a: lit, segment_b: dark, cathode: 0])
+        }
+        measure(operating, current: R1)
+        within(18 mA .. 22 mA)
+    }
+}

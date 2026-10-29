@@ -1,0 +1,17 @@
+footprint:mounting-hole-m6-pad-footprint("Mounting hole M6, a plated ring under the head") {
+    meta {
+        summary: "M6 screw, 6.4 mm hole, a plated ring under the head"
+        code: "FP.MH:M6-PAD"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#screw-m6; regenerate, never edit.
+    # Hole 6.4 (ISO 273 fine); head ⌀12, ring ⌀12.8 = head + 2 × 0.4.
+    pad:1(through-hole, circle, at: 0 0, size: 12.8 x 12.8, drill: 6.4)
+    outline(fabrication, width: 0.1, "M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0Z")
+    outline(silkscreen, width: 0.12, "M-6.66 0A6.66 6.66 0 1 0 6.66 0A6.66 6.66 0 1 0 -6.66 0Z")
+    outline(courtyard, width: 0.05, "M-6.9 0A6.9 6.9 0 1 0 6.9 0A6.9 6.9 0 1 0 -6.9 0Z")
+}

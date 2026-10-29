@@ -1,0 +1,26 @@
+symbol:solder-jumper-symbol("Solder jumper") {
+    meta {
+        summary: "Solder jumper, as drawn on a schematic: two half pads facing across a gap, bridged by solder once it is closed"
+        code: "SY.JUMPER:SOLDER"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:closed
+    input:failed
+    group:body(live) {
+        path("M-80 0H-24M24 0H80M-8-16A16 16 0 0 0-8 16ZM8-16A16 16 0 0 1 8 16Z")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    # The solder across the gap, there only while it is closed.
+    path:solder(live, "M-8-8H8V8H-8Z") {
+        fill = signal
+        live opacity = smooth(closed, 60 ms)
+    }
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -44)
+    label(value, at: 0 56)
+}

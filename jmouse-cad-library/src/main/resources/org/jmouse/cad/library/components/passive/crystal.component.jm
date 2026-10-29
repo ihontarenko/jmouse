@@ -1,0 +1,54 @@
+# A quartz crystal as its Butterworth–Van Dyke equivalent: a series motional branch (R, L, C) across the holder's shunt
+# capacitance. Generic HC-49 at 8 MHz: the series resistance is the datasheets' typical, the motional capacitance a typical
+# AT-cut value — an approximation where a datasheet gives none; the motional inductance follows from the frequency.
+# Not represented: overtones, drive-level dependence, ageing.
+component:crystal("Crystal, 8 MHz", type: crystal) {
+    meta {
+        designator: Y
+        summary: "Quartz crystal, 8 MHz fundamental, HC-49"
+        source: "ABRACON ABL HC-49/US series datasheet: ESR at most 80 Ω at 8 MHz, shunt capacitance at most 7 pF"
+        package: "HC-49/US"
+        category: circuits
+        value: frequency
+    }
+
+    parameter:frequency(8 MHz, "series resonant frequency")
+    parameter:R_motional(40 Ohm, "motional resistance, the series resistance at resonance (ESR at most 80 Ω)")
+    parameter:C_motional(15 fF, "motional capacitance: a typical AT-cut value, an approximation")
+    parameter:C_shunt(5 pF, "the holder's capacitance across the pins (at most 7 pF)")
+
+    pin:terminal_one(analog, 1, "first electrode")
+    pin:terminal_two(analog, 2, "second electrode")
+
+    state:I_motional(0, continuous, "the current in the motional branch")
+    state:q_motional(0, continuous, "the charge on the motional capacitance")
+
+    symbol(uses: crystal-symbol) {
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    equations {
+        let stored : ratio = min(detail, 1)
+        let L_motional : inductance = 1 / ((2 * pi * frequency)^2 * C_motional)
+        let V_across : voltage = terminal_one - terminal_two
+        d(I_motional)/dt = (V_across - R_motional * I_motional - q_motional / C_motional) / L_motional
+        d(q_motional)/dt = I_motional
+        current terminal_one -> terminal_two = I_motional + d(stored * C_shunt * V_across)/dt
+    }
+
+    expect("passes no direct current", from: "a crystal is two electrodes on an insulator: open at DC") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [feed, 0], U_output: 1 V)
+            part:R1(resistor, [feed, a], resistance: 1 kOhm)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, a)
+        within(0.999 V .. 1 V)
+    }
+
+    # How it looks in the hand: its HC-49/US can stamped with its frequency.
+    portrait(uses: crystal-portrait) {
+        bind:frequency(frequency)
+    }
+}

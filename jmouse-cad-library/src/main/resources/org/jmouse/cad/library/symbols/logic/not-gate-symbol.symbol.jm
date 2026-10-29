@@ -1,0 +1,22 @@
+symbol:not-gate-symbol("NOT gate") {
+    meta {
+        summary: "An inverter, as drawn on a schematic (ANSI): a triangle and the bubble that inverts"
+        code: "SY.GATE:NOT"
+        category: circuits
+        tags: electronics, schematic, logic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    path("M-32-32L24 0L-32 32ZM24 0A8 8 0 1 0 40 0A8 8 0 1 0 24 0M-80 0H-32M40 0H80M-20-25.2V-60M-20 25.2V60")
+    # The body, filled as the drawing theme fills a part's body.
+    path:body_fill("M-32-32L24 0L-32 32Z") {
+        fill = body
+    }
+    pin:a(at: -80 0)
+    pin:output(at: 80 0)
+    pin:Vcc(at: -20 -60)
+    pin:GND(at: -20 60)
+    label(name, at: 28 -60)
+    label(value, at: 28 72)
+}

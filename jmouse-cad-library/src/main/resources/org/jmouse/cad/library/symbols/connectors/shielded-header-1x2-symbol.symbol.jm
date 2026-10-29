@@ -1,0 +1,19 @@
+symbol:shielded-header-1x2-symbol("Shielded pin header, 2 contacts") {
+    meta {
+        summary: "A single-row pin header of 2, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        code: "SY.HDR:1X2-SHIELDED"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size(60 x 140)
+    path("M-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8Z")
+    pin:pin1(at: 40 0, "1")
+    pin:pin2(at: 40 40, "2")
+    path("M-14 -14H30V54H-14ZM0 54V80")
+    pin:shield(at: 0 80, "SH")
+    label(name, at: -4 -16)
+    label(value, at: -4 96)
+}

@@ -1,0 +1,34 @@
+package org.jmouse.cad.simulation;
+
+import org.jmouse.el.type.ValueType;
+import org.jmouse.units.Dimension;
+
+import java.util.Objects;
+
+/**
+ * A physical quantity as a type: {@code let I_through : current = …} is a {@code double} that is a current, in its SI
+ * unit. The carrier is always {@link Double}; what the type adds is what the value means — for a reader, and for the
+ * unit a figure is shown in.
+ *
+ * @param name      the name a document writes after the colon
+ * @param unit      the SI unit a value of it is in ({@code V}, {@code A}, {@code Ohm}); empty for a ratio
+ * @param dimension what it is measured in, as powers of the SI base units
+ */
+public record QuantityType(String name, String unit, Dimension dimension) implements ValueType {
+
+    public QuantityType {
+        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(unit, "unit");
+        Objects.requireNonNull(dimension, "dimension");
+    }
+
+    @Override
+    public Class<?> carrier() {
+        return Double.class;
+    }
+
+    @Override
+    public String toString() {
+        return name + (unit.isEmpty() ? "" : " [" + unit + "]");
+    }
+}

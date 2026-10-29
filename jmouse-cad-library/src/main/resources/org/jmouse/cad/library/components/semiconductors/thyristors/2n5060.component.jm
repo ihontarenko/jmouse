@@ -1,0 +1,103 @@
+# The 2N5060 is a sensitive-gate thyristor: a gate current of microamperes fires it, and once it conducts the gate no
+# longer matters — it holds on until the anode current falls below the holding current. The latch is a discrete
+# state: set when the gate rises past its trigger voltage with the anode forward, cleared when the conducting voltage
+# falls to where the current is the holding current. Not represented: dV/dt and breakover firing, turn-off time.
+
+component:2n5060("2N5060", type: thyristor) {
+    meta {
+        designator: Q
+        summary: "Sensitive-gate thyristor, 30 V, 0.8 A, IGT 200 µA"
+        source: "onsemi 2N5060 series datasheet, electrical characteristics"
+        package: "TO-92"
+        category: circuits
+        failure: short
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:V_gate_trigger(0.6 V, "VGT: the gate voltage that fires it (0.8 V at most)")
+    parameter:I_gate_saturation(14 fA, "the gate–cathode junction: 200 µA at VGT")
+    parameter:V_on(0.9 V, "the on-state voltage's knee")
+    parameter:R_on(0.5 Ohm, "the on-state slope: VTM 1.7 V at 1.2 A at most")
+    parameter:I_holding(3 mA, "IH: below this anode current it turns off (5 mA at most)")
+    parameter:R_off(100 MOhm, "anode to cathode while it blocks")
+    parameter:power_rating(0.6 W, "what it is rated for")
+    parameter:thermal_resistance(200 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:cathode(analog, 1, "cathode")
+    pin:gate(analog, input, 2, "gate")
+    pin:anode(analog, 3, "anode")
+
+    footprint(to-92-inline-footprint)
+
+    symbol(uses: thyristor-symbol) {
+        bind:failed(failed)
+        bind:conduction(conducting)
+        bind:a(pin: anode)
+        bind:b(pin: cathode)
+    }
+
+    state:conducting(0, discrete, "latched on: written by the behaviour, read by the equations")
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let V_anode : voltage = anode - cathode
+        current anode -> cathode = conducting * soft_positive_part(V_anode - V_on, 0.01) / R_on + V_anode / R_off
+        current gate -> cathode = junction_current(gate - cathode, I_gate_saturation, 1, T_junction)
+    }
+
+    behaviour {
+        # the gate fired it while the anode is forward
+        on above 'gate - cathode - V_gate_trigger' when (anode - cathode) > V_on do
+            conducting = 1
+        end
+
+        # the anode current fell below the holding current: it blocks again. The current is read by the same law the
+        # equations carry it by — a knee taken by the ideal line instead turned it off at once on a load of 11 mA,
+        # three times its holding current, where the smoothed knee sits a few millivolts lower
+        on below 'soft_positive_part(anode - cathode - V_on, 0.01) / R_on - I_holding' when conducting > 0 do
+            conducting = 0
+        end
+    }
+
+    expect("fired by the gate, it carries the load", from: "VTM 1.7 V at most: 12 V into 100 Ω, gate pulsed") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, anode], resistance: 100 Ohm)
+            part:V2(voltage-source, [drive, 0], U_output: 5 V)
+            part:R2(resistor, [drive, gate], resistance: 10 kOhm)
+            part:U1(self, [anode: anode, cathode: 0, gate: gate])
+        }
+        measure(final, anode)
+        within(0.8 V .. 1.7 V)
+    }
+
+    expect("holds a light load once fired", from: "IH 3 mA at most: 12 V into 1 kΩ is 11 mA, three times that, so it stays on") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, anode], resistance: 1 kOhm)
+            part:V2(voltage-source, [drive, 0], U_output: 5 V)
+            part:R2(resistor, [drive, gate], resistance: 10 kOhm)
+            part:U1(self, [anode: anode, cathode: 0, gate: gate])
+        }
+        measure(final, anode)
+        within(0.8 V .. 1.1 V)
+    }
+
+    expect("blocks with no gate current", from: "the anode held off: only R_off conducts") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, anode], resistance: 100 Ohm)
+            part:U1(self, [anode: anode, cathode: 0, gate: 0])
+        }
+        measure(final, anode)
+        within(11.9 V .. 12 V)
+    }
+
+    # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-92-portrait) {
+        bind:marking("2N5060")
+    }
+}

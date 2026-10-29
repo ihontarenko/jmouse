@@ -1,112 +1,0 @@
-ExperienceDocument
-  kind: Kind.COMPONENT
-  title: "Inverter"
-  slug: "not-gate"
-  type: Optional "gate"
-  meta: Meta
-      summary: "An inverter: high while its input is low"
-      description: null
-      category: "circuits"
-      tags: List(0)
-      source: "the gate's function table: Y = ¬A"
-      authors: List(0)
-      license: null
-      links: List(0)
-      fields: Map(2)
-          designator = Text
-              text: "U"
-          failure = Text
-              text: "short Vcc GND"
-      labels: Map(0)
-  base: Optional.empty
-  units: List(0)
-  uses: List(1)
-      - "cmos-hc"
-  blocks: List(4)
-      - Parameters
-          parameters: List(1)
-              - Parameter
-                  name: "propagation_delay"
-                  value: SourceText[16:29@589] "10"
-                  quantity: Optional Quantity
-                      value: Double 1.0E-8
-                      unit: "s"
-                      written: "10 ns"
-                  range: Optional.empty
-                  step: Optional.empty
-                  flags: List(0)
-                  description: "input to output at the family's nominal supply"
-                  values: List(0)
-      - Pins
-          pins: List(4)
-              - Pin
-                  name: "a"
-                  numbers: List(1)
-                      - Integer 2
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: "input A"
-              - Pin
-                  name: "GND"
-                  numbers: List(1)
-                      - Integer 3
-                  nature: PinNature.GROUND
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: ""
-              - Pin
-                  name: "output"
-                  numbers: List(1)
-                      - Integer 4
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.OUTPUT
-                  attributes: List(0)
-                  description: "output Y"
-              - Pin
-                  name: "Vcc"
-                  numbers: List(1)
-                      - Integer 5
-                  nature: PinNature.POWER
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: ""
-          buses: List(0)
-      - Symbol
-          uses: List(1)
-              - "not-gate-symbol"
-          ports: Map(0)
-          shape: Optional.empty
-          sides: Map(0)
-          width: Double 0.0
-          height: Double 0.0
-          paths: List(0)
-          pins: List(0)
-          labels: List(0)
-          indicators: List(0)
-          upright: List(0)
-          inputs: List(0)
-          elements: List(0)
-          bindings: Map(0)
-      - Behaviour
-          script: ScriptNode "SCRIPT['behaviour']"
-          source: SourceText[29:9@881] "function level()\n            if a == 0 then\n                return 1\n            elseif a == 1 then\n                return 0\n            end\n            return X\n        end\n\n        function show()\n            drive('output', level(), propagation_delay * delay_scale(Vcc - GND))\n        end\n\n        on start do\n            show()\n        end\n\n        on change 'a' do\n            show()\n        end"
-  line: Integer 5
-== the last brace removed
-REFUSED src/main/resources/catalogue/electronics/components/base/not-gate.jmx 5:1 component "…" is opened with '{' and never closed
-== line 11 deleted
-READS 8e7e92cb206b58a7d1a10f595516ff02
-== line 11 begun with a stray word
-READS 0b6b78050f4b1cbfdf2259912b224cd6
-== line 32 deleted
-READS 0bd056fd08aa77f108542c0df14269b6
-== line 32 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/not-gate.jmx 32:19 '==' compares two values and this statement assigns one; write a single '=' to set 'a', or move the comparison into an 'if'
-== line 39 deleted
-READS a65fbf7a71c2a8c43373d91495b928ec
-== line 39 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/not-gate.jmx 39:24 in 'behaviour': Unexpected token 0191:1113:0039 [T_COMMA] at 192
-== line 46 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/not-gate.jmx 47:9 in 'behaviour': Unexpected token 0221:1271:0047 [T_END] at 222
-== line 46 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/not-gate.jmx 46:24 in 'behaviour': Unexpected token 0220:1266:0046 [T_DO] at 221

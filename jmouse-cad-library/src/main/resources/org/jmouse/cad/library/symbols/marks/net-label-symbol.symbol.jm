@@ -1,0 +1,15 @@
+symbol:net-label-symbol("Net label") {
+    meta {
+        summary: "A net's label: a tag on a short lead, the net's name over it. Every label of one name is one net — a rail or any signal — with no wire drawn between them, as KiCad's labels are."
+        code: "SY.MARK:NET-LABEL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 80)
+    path("M0 40V20")
+    path("M0 20L-14 8V-16H14V8Z")
+    pin:label(at: 0 40)
+    label(name, at: 0 -32)
+}

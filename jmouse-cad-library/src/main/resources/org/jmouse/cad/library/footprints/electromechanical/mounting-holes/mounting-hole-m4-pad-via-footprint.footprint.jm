@@ -1,0 +1,25 @@
+footprint:mounting-hole-m4-pad-via-footprint("Mounting hole M4, a plated ring under the head, stitched by vias") {
+    meta {
+        summary: "M4 screw, 4.3 mm hole, a plated ring under the head, stitched by vias"
+        code: "FP.MH:M4-PAD-VIA"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#screw-m4; regenerate, never edit.
+    # Hole 4.3 (ISO 273 fine); head ⌀8, ring ⌀8.8 = head + 2 × 0.4.
+    pad:1(through-hole, circle, at: 0 0, size: 8.8 x 8.8, drill: 4.3)
+    pad:1(through-hole, circle, at: 3.275 0, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: 2.316 2.316, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: 0 3.275, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: -2.316 2.316, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: -3.275 0, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: -2.316 -2.316, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: 0 -3.275, size: 0.8 x 0.8, drill: 0.4)
+    pad:1(through-hole, circle, at: 2.316 -2.316, size: 0.8 x 0.8, drill: 0.4)
+    outline(fabrication, width: 0.1, "M-4 0A4 4 0 1 0 4 0A4 4 0 1 0 -4 0Z")
+    outline(silkscreen, width: 0.12, "M-4.66 0A4.66 4.66 0 1 0 4.66 0A4.66 4.66 0 1 0 -4.66 0Z")
+    outline(courtyard, width: 0.05, "M-4.9 0A4.9 4.9 0 1 0 4.9 0A4.9 4.9 0 1 0 -4.9 0Z")
+}

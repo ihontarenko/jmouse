@@ -1,0 +1,16 @@
+# A DC barrel jack: where a wall adapter's plug goes in. It joins nothing and takes nothing — the centre pin and the
+# sleeve are the nodes a design hands to the supply that is plugged in.
+component:barrel-jack("DC barrel jack", type: connector) {
+    meta {
+        designator: J
+        summary: "DC power barrel jack, centre pin and sleeve"
+        source: "generic 5.5 × 2.1 mm DC jack; no electrical behaviour"
+        package: "BarrelJack"
+        category: circuits
+    }
+
+    pin:tip(analog, 1, "centre pin, usually +")
+    pin:sleeve(analog, 2, "sleeve, usually −")
+
+    symbol(uses: barrel-jack-symbol)
+}

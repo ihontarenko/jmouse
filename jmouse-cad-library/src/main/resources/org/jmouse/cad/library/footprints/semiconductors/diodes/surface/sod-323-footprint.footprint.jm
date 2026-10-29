@@ -1,0 +1,20 @@
+footprint:sod-323-footprint("Diode SOD-323") {
+    meta {
+        summary: "Diode, SOD-323 body, reflow pads; pad 1 is the cathode"
+        code: "FP.SOD:323"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC SOD outlines, the makers' drawings (Nexperia), SOD-323"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#sod-323 and the land pattern rules; regenerate, never edit.
+    # Body 2.5…2.7 × 0.25…0.4, terminal 0.2…0.4; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 3.429, G = 1.109, X = 0.497; pad 1.15 × 0.5 centred at ±1.15.
+    pad:1(surface, rounded-rectangle, at: -1.15 0, size: 1.15 x 0.5, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 1.15 0, size: 1.15 x 0.5, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-0.85 -0.625H0.85V0.625H-0.85Z")
+    outline(silkscreen, width: 0.12, "M-0.315 -0.735H0.315M-0.315 0.735H0.315")
+    outline(silkscreen, width: 0.12, "M-1.985 -0.36V0.36")
+    outline(courtyard, width: 0.05, "M-2 -0.5H2V0.5H-2Z")
+}

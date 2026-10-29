@@ -1,0 +1,50 @@
+# A small-signal or zener diode in a DO-35 glass body as it is held: the orange glass with the leads and the die seen
+# through it, the black band at the cathode end.
+portrait:glass-diode-portrait("Glass diode") {
+    meta {
+        summary: "A DO-35 glass diode: the die seen through the orange glass, black band at the cathode"
+        code: "PT.DIODE:DO35"
+        category: circuits
+        tags: electronics, portrait, diode, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 30)
+
+    line:lead_anode(from: -80 0, to: -22 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    line:lead_cathode(from: 22 0, to: 80 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:anode(at: -80 0)
+    pin:cathode(at: 80 0)
+    path:glass("M-18-9H18C20-9 22-7 22-5V5C22 7 20 9 18 9H-18C-20 9-22 7-22 5V-5C-22-7-20-9-18-9Z") {
+        stroke = clear
+        fill = orange
+        opacity = 0.75
+    }
+    # Inside the glass: the leads' studs reaching in, and the die between them.
+    path:studs("M-22 0H-5M5 0H22") {
+        stroke = silver
+        thickness = 1.6
+    }
+    path:die("M-5-3H5V3H-5Z") {
+        stroke = clear
+        fill = black
+    }
+    path:cathode_band("M12-9H17V9H12Z") {
+        stroke = clear
+        fill = black
+    }
+    path:sheen("M-17-6H17") {
+        stroke = white
+        thickness = 0.5
+        opacity = 0.5
+    }
+    path:outline("M-18-9H18C20-9 22-7 22-5V5C22 7 20 9 18 9H-18C-20 9-22 7-22 5V-5C-22-7-20-9-18-9Z") {
+        fill = clear
+    }
+}

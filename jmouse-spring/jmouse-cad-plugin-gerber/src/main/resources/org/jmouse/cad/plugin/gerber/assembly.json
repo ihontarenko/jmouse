@@ -1,0 +1,68 @@
+{
+  "placement": {
+    "file": "pos.csv",
+    "role": "where each part stands, for assembly",
+    "sides": {
+      "top": "top",
+      "bottom": "bottom"
+    },
+    "unit": "",
+    "columns": [
+      {
+        "heading": "Ref",
+        "field": "designator"
+      },
+      {
+        "heading": "Val",
+        "field": "value"
+      },
+      {
+        "heading": "Package",
+        "field": "footprint"
+      },
+      {
+        "heading": "PosX",
+        "field": "x"
+      },
+      {
+        "heading": "PosY",
+        "field": "y"
+      },
+      {
+        "heading": "Rot",
+        "field": "rotation"
+      },
+      {
+        "heading": "Side",
+        "field": "side"
+      }
+    ]
+  },
+  "materials": {
+    "file": "bom.csv",
+    "role": "bill of materials, one line a kind of part",
+    "designatorSeparator": " ",
+    "columns": [
+      {
+        "heading": "Designators",
+        "field": "designators"
+      },
+      {
+        "heading": "Quantity",
+        "field": "quantity"
+      },
+      {
+        "heading": "Value",
+        "field": "value"
+      },
+      {
+        "heading": "Footprint",
+        "field": "footprint"
+      },
+      {
+        "heading": "Component",
+        "field": "component"
+      }
+    ]
+  }
+}

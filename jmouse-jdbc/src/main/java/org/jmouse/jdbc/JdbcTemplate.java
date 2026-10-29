@@ -624,7 +624,7 @@ public interface JdbcTemplate {
             return executor.execute(
                     sql, binder, configurer, handler,
                     StatementCallback.QUERY,
-                    new StrictSingleResultSetExtractor<>(mapper, sql)
+                    new StrictSingleResultSetExtractor<>(mapper, sql, false)
             );
         }
 
@@ -647,7 +647,8 @@ public interface JdbcTemplate {
                 StatementHandler<ResultSet> handler,
                 RowMapper<T> mapper
         ) throws SQLException {
-            return query(sql, binder, configurer, handler, new SingleResultSetExtractor<>(mapper));
+            return query(sql, binder, configurer, handler,
+                    new StrictSingleResultSetExtractor<>(mapper, sql)).orElse(null);
         }
 
         /**

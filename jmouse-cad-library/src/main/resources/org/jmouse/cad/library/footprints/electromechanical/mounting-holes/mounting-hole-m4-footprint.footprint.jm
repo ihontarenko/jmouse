@@ -1,0 +1,17 @@
+footprint:mounting-hole-m4-footprint("Mounting hole M4") {
+    meta {
+        summary: "M4 screw, 4.3 mm hole, a bare hole"
+        code: "FP.MH:M4"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#screw-m4; regenerate, never edit.
+    # Hole 4.3 (ISO 273 fine); head ⌀8.
+    pad: ""(unplated-hole, circle, at: 0 0, size: 4.3 x 4.3, drill: 4.3)
+    outline(fabrication, width: 0.1, "M-4 0A4 4 0 1 0 4 0A4 4 0 1 0 -4 0Z")
+    outline(silkscreen, width: 0.12, "M-4.26 0A4.26 4.26 0 1 0 4.26 0A4.26 4.26 0 1 0 -4.26 0Z")
+    outline(courtyard, width: 0.05, "M-4.5 0A4.5 4.5 0 1 0 4.5 0A4.5 4.5 0 1 0 -4.5 0Z")
+}

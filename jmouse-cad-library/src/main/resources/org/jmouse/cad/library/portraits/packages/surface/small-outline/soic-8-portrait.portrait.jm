@@ -1,0 +1,39 @@
+# Generated from footprint-standards/small-outline-packages.sht#soic; regenerate, never edit.
+portrait:soic-8-portrait("SOIC-8") {
+    meta {
+        summary: "8-lead SOIC, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.SOIC:8-P1.27-W3.9"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MS-012"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(98 x 120)
+    input:marking(text)
+
+    path:leads("M-43.228 30.709H-36.772V60H-43.228ZM-43.228 -30.709H-36.772V-60H-43.228ZM-23.228 30.709H-16.772V60H-23.228ZM-23.228 -30.709H-16.772V-60H-23.228ZM-3.228 30.709H3.228V60H-3.228ZM-3.228 -30.709H3.228V-60H-3.228ZM16.772 30.709H23.228V60H16.772ZM16.772 -30.709H23.228V-60H16.772Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -40 60)
+    pin:2(at: -20 60)
+    pin:3(at: 0 60)
+    pin:4(at: 20 60)
+    pin:5(at: 20 -60)
+    pin:6(at: 0 -60)
+    pin:7(at: -20 -60)
+    pin:8(at: -40 -60)
+    path:body("M-46.126 -30.709H26.126A2.457 2.457 0 0 1 28.583 -28.252V28.252A2.457 2.457 0 0 1 26.126 30.709H-46.126A2.457 2.457 0 0 1 -48.583 28.252V-28.252A2.457 2.457 0 0 1 -46.126 -30.709Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-42.195 20.329A3.992 3.992 0 1 0 -34.211 20.329A3.992 3.992 0 1 0 -42.195 20.329Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 54.016 x 13.819) {
+        fill = silver
+        text = marking
+    }
+}

@@ -1,0 +1,72 @@
+# What a board can be made with: each entry is one way of making boards — etched at home, a board house's ordinary
+# service, its fine-line one —, with the least copper, gaps and holes that way can make, and the tracks and vias a board
+# made that way is laid with unless a net class says otherwise. A board names one (`rules standard`) and may tighten or
+# loosen any value on its own line; a change of a house's capability is an edit here, never of a board.
+#
+# The least values are the ones a board's checks hold every track, via, pad and hole to — and a poured zone keeps no
+# copper narrower than the least track —; the usual ones are what the editor lays new copper with. A zone joins a pad of
+# its own net across the thermal gap by spokes this wide, so the pad can be soldered. The thicknesses are what copper
+# analysis reads: a track's resistance and the current it carries follow its copper's thickness, a via's its plating and
+# the board's thickness. 0.035 mm is 1 oz copper.
+sheet "Board rules" as board-rules {
+    description "The clearances, widths and holes a printed circuit board is checked against, by how it is made."
+    source "The published capabilities of common prototype board houses, rounded to values every one of them makes"
+    usual "standard"
+
+    home "Etched at home — toner transfer or photoresist, drilled by hand" {
+        clearance 0.4 mm
+        least-track-width 0.4 mm
+        least-drill 0.6 mm
+        least-via-drill 0.8 mm
+        least-via-ring 0.4 mm
+        hole-clearance 0.5 mm
+        edge-clearance 1 mm
+        thermal-gap 0.6 mm
+        thermal-spoke-width 0.8 mm
+        track-width 0.8 mm
+        via-drill 0.8 mm
+        via-diameter 1.8 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.035 mm
+        plating-thickness 0.02 mm
+        board-thickness 1.6 mm
+    }
+
+    standard "A board house's ordinary one- and two-layer service" {
+        clearance 0.2 mm
+        least-track-width 0.15 mm
+        least-drill 0.3 mm
+        least-via-drill 0.3 mm
+        least-via-ring 0.15 mm
+        hole-clearance 0.25 mm
+        edge-clearance 0.3 mm
+        thermal-gap 0.5 mm
+        thermal-spoke-width 0.5 mm
+        track-width 0.25 mm
+        via-drill 0.4 mm
+        via-diameter 0.8 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.0175 mm
+        plating-thickness 0.02 mm
+        board-thickness 1.6 mm
+    }
+
+    fine "A board house's fine-line multilayer service" {
+        clearance 0.1 mm
+        least-track-width 0.1 mm
+        least-drill 0.2 mm
+        least-via-drill 0.2 mm
+        least-via-ring 0.1 mm
+        hole-clearance 0.2 mm
+        edge-clearance 0.2 mm
+        thermal-gap 0.3 mm
+        thermal-spoke-width 0.3 mm
+        track-width 0.15 mm
+        via-drill 0.3 mm
+        via-diameter 0.6 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.0175 mm
+        plating-thickness 0.025 mm
+        board-thickness 1.6 mm
+    }
+}

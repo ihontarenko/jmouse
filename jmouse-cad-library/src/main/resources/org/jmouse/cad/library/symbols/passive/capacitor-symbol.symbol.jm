@@ -1,0 +1,45 @@
+symbol:capacitor-symbol("Capacitor") {
+    meta {
+        summary: "Capacitor, as drawn on a schematic: its plates take the colours of + and − as it charges, thickening and glowing as strongly as its voltage is against its rating"
+        code: "SY.CAPACITOR:FIXED"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:charge(-1 .. 1)
+    input:failed
+
+    group:body(live) {
+        path("M-60 0H-10M10 0H60")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The charge each plate holds: the plate at the higher voltage in the colour of +, the other in the colour of −,
+    # thicker and glowing as strongly as the voltage across is against the rating — which, at its capacitance, is its
+    # charge against the charge it is made to hold. A fiftieth of the rating already shows, a tenth is plain: a 5 V
+    # circuit on a 50 V part reads at a glance.
+    path:plate_a(live, "M-10-28V28") {
+        live stroke = if(failed > 0.5, burned, if(charge > 0.005, positive, if(charge < -0.005, negative, signal)))
+        live glow = curve(absolute(charge), 0 -> 0, 0.02 -> 2, 0.1 -> 5, 1 -> 8)
+        live thickness = curve(absolute(charge), 0 -> 1, 0.1 -> 1.8, 1 -> 3)
+    }
+
+    path:plate_b(live, "M10-28V28") {
+        live stroke = if(failed > 0.5, burned, if(charge > 0.005, negative, if(charge < -0.005, positive, signal)))
+        live glow = curve(absolute(charge), 0 -> 0, 0.02 -> 2, 0.1 -> 5, 1 -> 8)
+        live thickness = curve(absolute(charge), 0 -> 1, 0.1 -> 1.8, 1 -> 3)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

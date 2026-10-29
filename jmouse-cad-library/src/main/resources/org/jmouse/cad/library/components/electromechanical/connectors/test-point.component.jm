@@ -1,0 +1,14 @@
+# A test point: a pad or a loop a probe clips onto. It joins nothing and takes nothing.
+component:test-point("Test point", type: connector) {
+    meta {
+        designator: TP
+        summary: "Test point, one contact for a probe"
+        source: "generic test point; no electrical behaviour"
+        package: "TestPoint_Pad_D1.5mm"
+        category: circuits
+    }
+
+    pin:probe(analog, 1, "the point a probe touches")
+
+    symbol(uses: test-point-symbol)
+}

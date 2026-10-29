@@ -1,0 +1,25 @@
+symbol:gas-discharge-tube-symbol("Gas discharge tube") {
+    meta {
+        summary: "Gas discharge tube, as drawn on a schematic: two electrodes in a gas-filled envelope, the dot its gas"
+        code: "SY.PROTECTION:GAS-DISCHARGE-TUBE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:failed
+    group:body(live) {
+        path("M-80 0H-12M12 0H80M-12-18V18M12-18V18M-28 0A28 28 0 1 0 28 0A28 28 0 1 0-28 0M-4 12A4 4 0 1 0 4 12A4 4 0 1 0-4 12")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

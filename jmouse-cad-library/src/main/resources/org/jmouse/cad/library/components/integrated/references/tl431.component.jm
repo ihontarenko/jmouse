@@ -1,0 +1,81 @@
+# The TL431 is an adjustable shunt reference: a Zener whose knee is set by a 2.495 V reference and an amplifier. It
+# sinks from cathode to anode whatever current holds its ref pin at 2.495 V above the anode — with ref tied to the
+# cathode it is a 2.495 V Zener; with a divider, V = 2.495 · (1 + R1 / R2). Below its minimum cathode current it does
+# not regulate; reversed, the cathode–anode diode conducts. Not represented: its frequency compensation (the
+# capacitive-load stability chart) and the reference's temperature drift.
+
+component:tl431("TL431", type: reference) {
+    meta {
+        designator: U
+        summary: "Adjustable precision shunt reference, 2.495 V to 36 V, 1 mA to 100 mA"
+        source: "TI TL431 datasheet (SLVS543), electrical characteristics"
+        package: "TO-92"
+        category: circuits
+        failure: short cathode anode
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:V_reference(2.495 V, "Vref: the ref pin above the anode when it regulates")
+    parameter:reference_drift(0, "how Vref moves per kelvin, V/K: the TL431's is a shallow bowl of a few millivolts, none here")
+    parameter:T_nominal(298.15 K, "the temperature Vref is given at")
+    parameter:transconductance(10 A/V, "how hard the cathode current follows ref above Vref: dynamic impedance about 0.2 Ω")
+    parameter:I_minimum(0.4 mA, "the cathode current below which it does not regulate")
+    parameter:I_reference(2 uA, "Iref: current into the ref pin")
+    parameter:R_off(10 MOhm, "cathode to anode while it does not conduct")
+    parameter:power_rating(0.7 W, "what it is rated for")
+    parameter:thermal_resistance(160 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:ref(analog, input, 1, "reference input")
+    pin:anode(analog, 2, "anode")
+    pin:cathode(analog, 3, "cathode")
+
+    footprint(to-92-inline-footprint)
+
+    symbol(uses: shunt-reference-symbol) {
+        bind:failed(failed)
+        bind:reference(pin: ref)
+    }
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let V_cathode : voltage = cathode - anode
+        let error : voltage = ref - anode - (V_reference + reference_drift * (T_junction - T_nominal))
+        # The output transistor needs about a volt across it: below that it cannot sink whatever the error asks.
+        let headroom : ratio = soft_positive_part(V_cathode - 1, 0.1) / (soft_positive_part(V_cathode - 1, 0.1) + 0.2)
+        let regulating : current = I_minimum * soft_step(error + 0.01, 0.003) + transconductance * soft_positive_part(error, 0.002)
+
+        current cathode -> anode = regulating * headroom + V_cathode / R_off
+        current anode -> cathode = junction_current(0 - V_cathode, 1e-12, 1, T_junction)
+        current ref -> anode = I_reference
+    }
+
+    expect("a 2.5 V Zener with ref on the cathode", from: "Vref 2.44 .. 2.55 V at IKA 10 mA, VKA = Vref") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 7.5 V)
+            part:R1(resistor, [supply, cathode], resistance: 470 Ohm)
+            part:U1(self, [ref: cathode, cathode: cathode, anode: 0])
+        }
+        measure(operating, cathode)
+        within(2.44 V .. 2.55 V)
+    }
+
+    expect("5 V from a divider of two equal resistors", from: "VKA = Vref · (1 + R1 / R2) + Iref · R1") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, cathode], resistance: 470 Ohm)
+            part:R2(resistor, [cathode, ref], resistance: 10 kOhm)
+            part:R3(resistor, [ref, 0], resistance: 10 kOhm)
+            part:U1(self, [ref: ref, cathode: cathode, anode: 0])
+        }
+        measure(operating, cathode)
+        within(4.9 V .. 5.1 V)
+    }
+
+    # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-92-portrait) {
+        bind:marking("TL431")
+    }
+}

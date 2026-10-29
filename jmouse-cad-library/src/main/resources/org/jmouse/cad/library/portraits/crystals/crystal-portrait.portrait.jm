@@ -1,0 +1,58 @@
+# A quartz crystal in an HC-49/US can as it is held: the silver can on its base, its frequency in megahertz stamped on
+# it — 8.000, 16.000 — read from the part's own frequency, the two leads bent out to the sheet's grid.
+portrait:crystal-portrait("Crystal") {
+    meta {
+        summary: "An HC-49/US crystal: a silver can stamped with its frequency in MHz"
+        code: "PT.CRYSTAL:HC49-US"
+        category: circuits
+        tags: electronics, portrait, crystal, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 100)
+    input:frequency(1 MHz .. 99.999 MHz, typical: 16 MHz)
+
+    path:leads("M-10 12V30L-20 40V50M10 12V30L20 40V50") {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:terminal_one(at: -20 50)
+    pin:terminal_two(at: 20 50)
+    path:base("M-26 8H26V13H-26Z") {
+        stroke = clear
+        fill = grey
+    }
+    path:can("M-14-38H14C20-38 24-34 24-28V8H-24V-28C-24-34-20-38-14-38Z") {
+        fill = silver
+    }
+    path:sheen("M-18-30V2") {
+        stroke = white
+        thickness = 0.8
+        opacity = 0.6
+    }
+    # The frequency in megahertz to the kilohertz: two figures, the point, three more; the tens stand empty below 10 MHz.
+    glyph:tens(live, at: -15 -14, size: 6 x 10) {
+        fill = black
+        live character = if(round(frequency / 1 kHz) >= 10000, 48 + floor(round(frequency / 1 kHz) / 10000) - 10 * floor(round(frequency / 1 kHz) / 100000), 32)
+    }
+    glyph:units(live, at: -9 -14, size: 6 x 10) {
+        fill = black
+        live character = 48 + floor(round(frequency / 1 kHz) / 1000) - 10 * floor(round(frequency / 1 kHz) / 10000)
+    }
+    glyph:point(at: -3 -14, size: 6 x 10) {
+        fill = black
+        character = 46
+    }
+    glyph:tenths(live, at: 3 -14, size: 6 x 10) {
+        fill = black
+        live character = 48 + floor(round(frequency / 1 kHz) / 100) - 10 * floor(round(frequency / 1 kHz) / 1000)
+    }
+    glyph:hundredths(live, at: 9 -14, size: 6 x 10) {
+        fill = black
+        live character = 48 + floor(round(frequency / 1 kHz) / 10) - 10 * floor(round(frequency / 1 kHz) / 100)
+    }
+    glyph:thousandths(live, at: 15 -14, size: 6 x 10) {
+        fill = black
+        live character = 48 + round(frequency / 1 kHz) - 10 * floor(round(frequency / 1 kHz) / 10)
+    }
+}

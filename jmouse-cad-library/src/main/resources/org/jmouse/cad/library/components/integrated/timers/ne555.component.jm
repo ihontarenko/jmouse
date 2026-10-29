@@ -1,0 +1,144 @@
+# Mixed signal in one small part. The divider and the output stage are analog; the two comparators are crossings
+# (`on above` / `on below`); the flip-flop between them is a discrete state the equations read; the output follows it
+# with a finite edge.
+
+component:ne555("NE555", type: timer) {
+    meta {
+        designator: U
+        summary: "Precision timer, 4.5 V to 16 V"
+        source: "TI NE555 datasheet (SLFS022)"
+        package: "SOIC-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:smooth-transitions
+
+    parameter:R_divider(5 kOhm, "each of the three divider resistors")
+    parameter:V_output_high_drop(1.7 V, "output high sits this far below Vcc")
+    parameter:V_output_low(0.1 V, "output low")
+    parameter:R_output(2 Ohm)
+    parameter:I_output_limit(200 mA, "output sink and source")
+    parameter:switching_time(100 ns, "output rise and fall time")
+    parameter:R_discharge(10 Ohm, "discharge transistor, on")
+    parameter:I_discharge(50 mA, "discharge transistor, saturation")
+    parameter:V_reset(0.7 V, "reset threshold")
+    parameter:I_trigger(0.5 uA, "out of TRIG")
+    parameter:I_threshold(0.1 uA, "into THR")
+    parameter:I_quiescent(3 mA, "supply current at 5 V")
+    # How it warms and where it gives up (DIP-8 in still air).
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:GND(ground, 1)
+    pin:trigger(analog, input, 2, "trigger: sets below Vcc / 3")
+    pin:output(analog, output, 3)
+    pin:reset(analog, input, 4, "active low")
+    pin:control(analog, 5, "control voltage, the 2/3 Vcc tap")
+    pin:threshold(analog, input, 6, "threshold: resets above 2/3 Vcc")
+    pin:discharge(analog, output, 7, "discharge, open collector")
+    pin:Vcc(power, 8)
+
+    node:lower("the 1/3 Vcc tap of the internal divider")
+
+    footprint(soic-8-footprint)
+
+    # How it looks in the hand: its package from above, wired by its pin numbers and printed with its name.
+    portrait(uses: soic-8-portrait) {
+        bind:marking("NE555")
+    }
+
+    symbol(box) {
+        left([trigger, threshold, control])
+        right([output, discharge])
+        top([Vcc, reset])
+        bottom(GND)
+    }
+
+    state:latched(0, discrete, "the internal flip-flop; written by the behaviour, read by the equations")
+    state:shown(0, continuous, "the output stage following it with a finite edge")
+
+    equations {
+        current Vcc -> control = (Vcc - control) / R_divider
+        current control -> lower = (control - lower) / R_divider
+        current lower -> GND = (lower - GND) / R_divider
+
+        d(shown)/dt = (latched - shown) / switching_time
+
+        let target : voltage = GND + V_output_low + shown * ((Vcc - GND) - V_output_high_drop - V_output_low)
+        let drive : current = (target - output) / R_output
+        current Vcc -> output = I_output_limit * tanh(soft_positive_part(drive, 0.0001) / I_output_limit)
+        current output -> GND = I_output_limit * tanh(soft_positive_part(0 - drive, 0.0001) / I_output_limit)
+
+        # The discharge transistor conducts while the output is low.
+        current discharge -> GND = (1 - shown) * I_discharge * tanh((discharge - GND) / (R_discharge * I_discharge))
+
+        current Vcc -> trigger = I_trigger
+        current threshold -> GND = I_threshold
+        # Below about a volt of supply the quiescent current falls away; the knee is that volt.
+        let V_supply_knee : voltage = 1
+        current Vcc -> GND = I_quiescent * tanh((Vcc - GND) / V_supply_knee)
+    }
+
+    behaviour {
+        on start do
+            if (reset - GND) > V_reset and (trigger - lower) < 0 then
+                latched = 1
+            end
+        end
+
+        # the trigger fell under Vcc / 3: set
+        on below 'trigger - lower' when (reset - GND) > V_reset do
+            latched = 1
+        end
+
+        # the threshold rose over 2/3 Vcc: reset, unless the trigger still holds it set
+        on above 'threshold - control' when (trigger - lower) > 0 do
+            latched = 0
+        end
+
+        # the trigger let go while the threshold was already over
+        on above 'trigger - lower' when (threshold - control) > 0 do
+            latched = 0
+        end
+
+        # reset dominates
+        on below 'reset - GND - V_reset' do
+            latched = 0
+        end
+    }
+
+    expect("astable frequency", from: "applications, astable: f = 1.44 / ((RA + 2 RB) C) = 6.86 kHz") {
+        bench(for: 3 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:R1(resistor, [Vcc, discharge], resistance: 1 kOhm)
+            part:R2(resistor, [discharge, threshold], resistance: 10 kOhm)
+            part:C1(capacitor, [threshold, 0], capacitance: 10 nF)
+            part:U1(self, [Vcc: Vcc, GND: 0, trigger: threshold, threshold: threshold, discharge: discharge, output: output, reset: Vcc])
+        }
+        measure(frequency, output, above: 2.5 V, after: 1 ms)
+        near(6.86 kHz, +- 5%)
+    }
+
+    expect("astable duty cycle", from: "applications, astable: D = (RA + RB) / (RA + 2 RB) = 52.4%") {
+        bench(for: 3 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:R1(resistor, [Vcc, discharge], resistance: 1 kOhm)
+            part:R2(resistor, [discharge, threshold], resistance: 10 kOhm)
+            part:C1(capacitor, [threshold, 0], capacitance: 10 nF)
+            part:U1(self, [Vcc: Vcc, GND: 0, trigger: threshold, threshold: threshold, discharge: discharge, output: output, reset: Vcc])
+        }
+        measure(duty, output, above: 2.5 V, after: 1 ms)
+        near(0.524, +- 3%)
+    }
+
+    expect("output high sourcing 100 mA at 15 V", from: "electrical characteristics, VOH min 12.75 V") {
+        bench(for: 100 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:R1(resistor, [output, 0], resistance: 130 Ohm)
+            part:U1(self, [Vcc: Vcc, GND: 0, trigger: 0, threshold: 0, output: output, reset: Vcc])
+        }
+        measure(final, output)
+        within(12.75 V .. 15 V)
+    }
+}

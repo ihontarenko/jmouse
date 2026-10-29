@@ -1,0 +1,55 @@
+{
+  "autoClosingPairs" : [
+    {
+      "close" : "}",
+      "open" : "{"
+    },
+    {
+      "close" : "]",
+      "open" : "["
+    },
+    {
+      "close" : ")",
+      "open" : "("
+    },
+    {
+      "close" : "\"",
+      "open" : "\""
+    }
+  ],
+  "brackets" : [
+    [
+      "{",
+      "}"
+    ],
+    [
+      "[",
+      "]"
+    ],
+    [
+      "(",
+      ")"
+    ]
+  ],
+  "comments" : {
+    "lineComment" : "#"
+  },
+  "surroundingPairs" : [
+    {
+      "close" : "}",
+      "open" : "{"
+    },
+    {
+      "close" : "]",
+      "open" : "["
+    },
+    {
+      "close" : ")",
+      "open" : "("
+    },
+    {
+      "close" : "\"",
+      "open" : "\""
+    }
+  ]
+}

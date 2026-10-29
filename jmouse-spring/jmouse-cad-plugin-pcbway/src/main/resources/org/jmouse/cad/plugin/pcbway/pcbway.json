@@ -1,0 +1,84 @@
+{
+  "placement": {
+    "file": "centroid.csv",
+    "role": "where each part stands (centroid), in PCBWay's columns",
+    "sides": {
+      "top": "Top",
+      "bottom": "Bottom"
+    },
+    "unit": "mm",
+    "columns": [
+      {
+        "heading": "Designator",
+        "field": "designator"
+      },
+      {
+        "heading": "Footprint",
+        "field": "footprint"
+      },
+      {
+        "heading": "Mid X",
+        "field": "x"
+      },
+      {
+        "heading": "Mid Y",
+        "field": "y"
+      },
+      {
+        "heading": "Layer",
+        "field": "side"
+      },
+      {
+        "heading": "Rotation",
+        "field": "rotation"
+      },
+      {
+        "heading": "Comment",
+        "field": "value"
+      }
+    ]
+  },
+  "materials": {
+    "file": "bom.csv",
+    "role": "bill of materials in PCBWay's assembly template",
+    "designatorSeparator": ",",
+    "mountings": {
+      "surface": "SMD",
+      "through-hole": "THT"
+    },
+    "columns": [
+      {
+        "heading": "Item #",
+        "field": "item"
+      },
+      {
+        "heading": "Designator",
+        "field": "designators"
+      },
+      {
+        "heading": "Qty",
+        "field": "quantity"
+      },
+      {
+        "heading": "Manufacturer",
+        "field": "meta:manufacturer"
+      },
+      {
+        "heading": "Mfg Part #",
+        "field": "meta:part-number"
+      },
+      {
+        "heading": "Description / Value",
+        "field": "value"
+      },
+      {
+        "heading": "Package/Footprint",
+        "field": "footprint"
+      },
+      {
+        "heading": "Type",
+        "field": "mounting"
+      }
+    ]
+  }
+}

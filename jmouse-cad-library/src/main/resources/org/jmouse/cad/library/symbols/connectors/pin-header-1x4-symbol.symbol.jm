@@ -1,0 +1,19 @@
+symbol:pin-header-1x4-symbol("Pin header, 4 contacts") {
+    meta {
+        summary: "A single-row pin header of 4, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        code: "SY.HDR:1X4"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size(60 x 180)
+    path("M-4 -40H40M-8 -42H-4V-38H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8ZM-4 80H40M-8 78H-4V82H-8Z")
+    pin:pin1(at: 40 -40, "1")
+    pin:pin2(at: 40 0, "2")
+    pin:pin3(at: 40 40, "3")
+    pin:pin4(at: 40 80, "4")
+    label(name, at: -4 -56)
+    label(value, at: -4 100)
+}

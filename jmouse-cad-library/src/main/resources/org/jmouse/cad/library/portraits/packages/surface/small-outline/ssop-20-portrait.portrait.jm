@@ -1,0 +1,51 @@
+# Generated from footprint-standards/small-outline-packages.sht#ssop; regenerate, never edit.
+portrait:ssop-20-portrait("SSOP-20") {
+    meta {
+        summary: "20-lead SSOP, 5.3 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.SSOP:20-P0.65-W5.3"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MO-150"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(242 x 240)
+    input:marking(text)
+
+    path:leads("M-104.615 81.538H-95.385V120H-104.615ZM-104.615 -81.538H-95.385V-120H-104.615ZM-84.615 81.538H-75.385V120H-84.615ZM-84.615 -81.538H-75.385V-120H-84.615ZM-64.615 81.538H-55.385V120H-64.615ZM-64.615 -81.538H-55.385V-120H-64.615ZM-44.615 81.538H-35.385V120H-44.615ZM-44.615 -81.538H-35.385V-120H-44.615ZM-24.615 81.538H-15.385V120H-24.615ZM-24.615 -81.538H-15.385V-120H-24.615ZM-4.615 81.538H4.615V120H-4.615ZM-4.615 -81.538H4.615V-120H-4.615ZM15.385 81.538H24.615V120H15.385ZM15.385 -81.538H24.615V-120H15.385ZM35.385 81.538H44.615V120H35.385ZM35.385 -81.538H44.615V-120H35.385ZM55.385 81.538H64.615V120H55.385ZM55.385 -81.538H64.615V-120H55.385ZM75.385 81.538H84.615V120H75.385ZM75.385 -81.538H84.615V-120H75.385Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -100 120)
+    pin:2(at: -80 120)
+    pin:3(at: -60 120)
+    pin:4(at: -40 120)
+    pin:5(at: -20 120)
+    pin:6(at: 0 120)
+    pin:7(at: 20 120)
+    pin:8(at: 40 120)
+    pin:9(at: 60 120)
+    pin:10(at: 80 120)
+    pin:11(at: 80 -120)
+    pin:12(at: 60 -120)
+    pin:13(at: 40 -120)
+    pin:14(at: 20 -120)
+    pin:15(at: 0 -120)
+    pin:16(at: -20 -120)
+    pin:17(at: -40 -120)
+    pin:18(at: -60 -120)
+    pin:19(at: -80 -120)
+    pin:20(at: -100 -120)
+    path:body("M-114.246 -81.538H94.246A6.523 6.523 0 0 1 100.769 -75.015V75.015A6.523 6.523 0 0 1 94.246 81.538H-114.246A6.523 6.523 0 0 1 -120.769 75.015V-75.015A6.523 6.523 0 0 1 -114.246 -81.538Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-103.809 53.978A10.6 10.6 0 1 0 -82.609 53.978A10.6 10.6 0 1 0 -103.809 53.978Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 155.077 x 36.692) {
+        fill = silver
+        text = marking
+    }
+}

@@ -1,0 +1,109 @@
+# Block's TEZ10/D 230/2x12: a 10 VA encapsulated mains transformer for a circuit board, one 230 V primary and two separate
+# 12 V secondaries — wired in series for a centre-tapped supply, in parallel for twice the current, or apart for two
+# isolated rails. Three coupled windings, as the centre-tapped transformer writes them, with the secondaries on pins of
+# their own. The datasheet gives the rating and the no-load voltage; the copper is fitted to bring each secondary from
+# 14.5 V at no load to its rated 12 V at 0.42 A, and the core's magnetising current and loss are a small core's.
+# Not represented: the core's saturation, and the thermal fuse some versions carry.
+
+component:tez10-d-2x12("TEZ10/D 230/2x12", type: transformer) {
+    meta {
+        designator: TR
+        summary: "Mains transformer, 10 VA, 230 V to two separate 12 V secondaries, 0.42 A each"
+        source: "Block TEZ10/D series datasheet: rated power, rated and no-load secondary voltages"
+        package: "EI 48/16.8"
+        category: circuits
+        failure: open
+    }
+
+    parameter:L_primary(40 H, "primary inductance: about 18 mA of magnetising current at 230 V, 50 Hz")
+    parameter:L_secondary(158 mH, "each secondary's inductance: turns ratio √(L_primary / L_secondary) = 15.9, 230 V to 14.5 V")
+    parameter:coupling(0.998, "K between every pair of windings")
+    parameter:R_primary(300 Ohm, "primary winding resistance")
+    parameter:R_secondary(3.5 Ohm, "each secondary's winding resistance: 14.5 V at no load to 12 V at 0.42 A")
+    parameter:R_core(50 kOhm, "core loss across the primary: about a watt at 230 V")
+    parameter:C_primary(1 nF, "the primary's self-capacitance")
+    parameter:C_secondary(1 nF, "each secondary's self-capacitance")
+    parameter:C_interwinding(100 pF, "between primary and secondaries, across their insulation")
+    parameter:copper_temperature_coefficient(0.00393, "copper: the windings' resistance rises 0.393 % per kelvin")
+    parameter:T_nominal(298.15 K, "the temperature the resistances are given at")
+    parameter:power_rating(10 W, "rated power, 10 VA")
+    parameter:thermal_resistance(8 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(600 s, "how fast it warms to that")
+    parameter:T_maximum(110 °C, "insulation class: past this it fails on a realistic bench")
+
+    pin:primary_one(analog, 1, "primary, dotted end")
+    pin:primary_two(analog, 6, "primary")
+    pin:secondary_a_one(analog, 7, "first secondary, dotted end")
+    pin:secondary_a_two(analog, 8, "first secondary")
+    pin:secondary_b_one(analog, 11, "second secondary, dotted end")
+    pin:secondary_b_two(analog, 12, "second secondary")
+
+    node:primary_winding("behind the primary's copper")
+    node:secondary_a_winding("behind the first secondary's copper")
+    node:secondary_b_winding("behind the second secondary's copper")
+
+    state:flux_primary(0, continuous, "the flux the primary links, in webers")
+    state:flux_a(0, continuous, "the flux the first secondary links")
+    state:flux_b(0, continuous, "the flux the second secondary links")
+
+    symbol(uses: dual-secondary-transformer-symbol) {
+        bind:failed(failed)
+    }
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_winding : temperature = temperature
+        let warming : ratio = 1 + copper_temperature_coefficient * (T_winding - T_nominal)
+        # On a draft bench (detail 0) the windings store no charge, as a junction stores none there.
+        let stored : ratio = min(detail, 1)
+        # The inductance matrix inverted, as the centre-tapped transformer's: the secondaries' difference links only their
+        # own leakage; their sum and the primary solve as two windings.
+        let L_mutual_scale : inductance = sqrt(L_primary * L_secondary)
+        let spread : ratio = (1 - coupling) * (1 + 2 * coupling)
+        let I_primary : current = ((1 + coupling) * flux_primary / L_primary - coupling * (flux_a + flux_b) / L_mutual_scale) / spread
+        let I_secondaries_sum : current = ((flux_a + flux_b) / L_secondary - 2 * coupling * flux_primary / L_mutual_scale) / spread
+        let I_secondaries_difference : current = (flux_a - flux_b) / (L_secondary * (1 - coupling))
+        let I_a : current = (I_secondaries_sum + I_secondaries_difference) / 2
+        let I_b : current = (I_secondaries_sum - I_secondaries_difference) / 2
+
+        current primary_one -> primary_winding = (primary_one - primary_winding) / (R_primary * warming)
+        d(flux_primary)/dt = primary_winding - primary_two
+        current primary_winding -> primary_two = I_primary + (primary_winding - primary_two) / R_core
+        current primary_one -> primary_two = d(stored * C_primary * (primary_one - primary_two))/dt
+
+        current secondary_a_one -> secondary_a_winding = (secondary_a_one - secondary_a_winding) / (R_secondary * warming)
+        d(flux_a)/dt = secondary_a_winding - secondary_a_two
+        current secondary_a_winding -> secondary_a_two = I_a
+        current secondary_a_one -> secondary_a_two = d(stored * C_secondary * (secondary_a_one - secondary_a_two))/dt
+
+        current secondary_b_one -> secondary_b_winding = (secondary_b_one - secondary_b_winding) / (R_secondary * warming)
+        d(flux_b)/dt = secondary_b_winding - secondary_b_two
+        current secondary_b_winding -> secondary_b_two = I_b
+        current secondary_b_one -> secondary_b_two = d(stored * C_secondary * (secondary_b_one - secondary_b_two))/dt
+
+        current primary_one -> secondary_a_one = d(stored * C_interwinding * (primary_one - secondary_a_one))/dt
+        current primary_one -> secondary_b_one = d(stored * C_interwinding * (primary_one - secondary_b_one))/dt
+    }
+
+    expect("each secondary near 14.5 V at no load", from: "no-load secondary voltage of a 2x12 V TEZ10: about 14.5 V RMS") {
+        bench(for: 100 ms) {
+            part:V1(sine-generator, [positive: input, negative: 0], amplitude: 325 V, frequency: 50 Hz)
+            part:U1(self, [primary_one: input, primary_two: 0, secondary_a_one: a, secondary_a_two: 0, secondary_b_one: b, secondary_b_two: 0])
+            part:R1(resistor, [a, 0], resistance: 100 kOhm)
+            part:R2(resistor, [b, 0], resistance: 100 kOhm)
+        }
+        measure(maximum, a, after: 60 ms)
+        within(19.5 V .. 21.5 V)
+    }
+
+    expect("each secondary near 12 V at its rated 0.42 A", from: "rated secondary voltage 12 V RMS at 0.42 A") {
+        bench(for: 100 ms) {
+            part:V1(sine-generator, [positive: input, negative: 0], amplitude: 325 V, frequency: 50 Hz)
+            part:U1(self, [primary_one: input, primary_two: 0, secondary_a_one: a, secondary_a_two: 0, secondary_b_one: b, secondary_b_two: 0])
+            part:R1(resistor, [a, 0], resistance: 28.6 Ohm)
+            part:R2(resistor, [b, 0], resistance: 28.6 Ohm)
+        }
+        measure(maximum, a, after: 60 ms)
+        within(16 V .. 18.5 V)
+    }
+}

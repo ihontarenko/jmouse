@@ -1,0 +1,93 @@
+# 74HC02: 4 gates of Y = ¬(A + B) in one 14-pin package — the gates of a lesson's logic, each its own unit
+# (A, B, C, D) with its own inputs and output, sharing the supply. Pinout as JEDEC numbers it (DIP-14, SOIC-14).
+
+component:74hc02("74HC02", type: gate) {
+    meta {
+        designator: U
+        summary: "Quad 2-input NOR gate: each output high only while both its inputs are low"
+        source: "TI SN74HC02: tpd about 9 ns typical at 4.5 V, CL = 50 pF — taken as for the SN74HC00; not read off its own table; pinout per the JEDEC 14-pin standard"
+        package: "DIP-14, SOIC-14"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:nor-gate
+    use:cmos-hc
+    units:[A, B, C, D]
+
+    parameter:propagation_delay(9 ns, "input to output at 4.5 V, typical")
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes (DIP-14 in still air)")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:a(digital, input, 2 5 8 11, "input A")
+    pin:b(digital, input, 3 6 9 12, "input B")
+    pin:output(digital, output, 1 4 10 13, "output Y")
+    pin:GND(ground, 7)
+    pin:Vcc(power, 14)
+
+    symbol(box) {
+        left([a, b])
+        right(output)
+        power([Vcc, GND])
+    }
+
+    expect("gate A: A 0, B 0 gives 1", from: "function table: Y = ¬(A + B); VOH 4.4 V minimum, VOL 0.1 V maximum at 4.5 V") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 0 V)
+            part:V3(voltage-source, [b, 0], U_output: 0 V)
+            part:U1(self, [A.a: a, A.b: b, A.output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(4.4 V .. 5 V)
+    }
+
+    expect("gate A: A 0, B 1 gives 0", from: "function table: Y = ¬(A + B); VOH 4.4 V minimum, VOL 0.1 V maximum at 4.5 V") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 0 V)
+            part:V3(voltage-source, [b, 0], U_output: 5 V)
+            part:U1(self, [A.a: a, A.b: b, A.output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(0 V .. 0.1 V)
+    }
+
+    expect("gate A: A 1, B 0 gives 0", from: "function table: Y = ¬(A + B); VOH 4.4 V minimum, VOL 0.1 V maximum at 4.5 V") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 5 V)
+            part:V3(voltage-source, [b, 0], U_output: 0 V)
+            part:U1(self, [A.a: a, A.b: b, A.output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(0 V .. 0.1 V)
+    }
+
+    expect("gate A: A 1, B 1 gives 0", from: "function table: Y = ¬(A + B); VOH 4.4 V minimum, VOL 0.1 V maximum at 4.5 V") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 5 V)
+            part:V3(voltage-source, [b, 0], U_output: 5 V)
+            part:U1(self, [A.a: a, A.b: b, A.output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(0 V .. 0.1 V)
+    }
+
+    expect("gate D: A 1, B 1 gives 0", from: "function table: Y = ¬(A + B); VOH 4.4 V minimum, VOL 0.1 V maximum at 4.5 V") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 5 V)
+            part:V3(voltage-source, [b, 0], U_output: 5 V)
+            part:U1(self, [D.a: a, D.b: b, D.output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(0 V .. 0.1 V)
+    }
+}

@@ -1,0 +1,33 @@
+symbol:screw-terminal-1x18-symbol("Screw terminal, 18 contacts") {
+    meta {
+        summary: "A terminal block of 18 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
+        code: "SY.TB:18"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size(80 x 740)
+    path("M-20 -330H20V370H-20ZM-40 -320H-6M-6 -320A6 6 0 1 0 6 -320A6 6 0 1 0 -6 -320ZM-4 -316L4 -324M-40 -280H-6M-6 -280A6 6 0 1 0 6 -280A6 6 0 1 0 -6 -280ZM-4 -276L4 -284M-40 -240H-6M-6 -240A6 6 0 1 0 6 -240A6 6 0 1 0 -6 -240ZM-4 -236L4 -244M-40 -200H-6M-6 -200A6 6 0 1 0 6 -200A6 6 0 1 0 -6 -200ZM-4 -196L4 -204M-40 -160H-6M-6 -160A6 6 0 1 0 6 -160A6 6 0 1 0 -6 -160ZM-4 -156L4 -164M-40 -120H-6M-6 -120A6 6 0 1 0 6 -120A6 6 0 1 0 -6 -120ZM-4 -116L4 -124M-40 -80H-6M-6 -80A6 6 0 1 0 6 -80A6 6 0 1 0 -6 -80ZM-4 -76L4 -84M-40 -40H-6M-6 -40A6 6 0 1 0 6 -40A6 6 0 1 0 -6 -40ZM-4 -36L4 -44M-40 0H-6M-6 0A6 6 0 1 0 6 0A6 6 0 1 0 -6 0ZM-4 4L4 -4M-40 40H-6M-6 40A6 6 0 1 0 6 40A6 6 0 1 0 -6 40ZM-4 44L4 36M-40 80H-6M-6 80A6 6 0 1 0 6 80A6 6 0 1 0 -6 80ZM-4 84L4 76M-40 120H-6M-6 120A6 6 0 1 0 6 120A6 6 0 1 0 -6 120ZM-4 124L4 116M-40 160H-6M-6 160A6 6 0 1 0 6 160A6 6 0 1 0 -6 160ZM-4 164L4 156M-40 200H-6M-6 200A6 6 0 1 0 6 200A6 6 0 1 0 -6 200ZM-4 204L4 196M-40 240H-6M-6 240A6 6 0 1 0 6 240A6 6 0 1 0 -6 240ZM-4 244L4 236M-40 280H-6M-6 280A6 6 0 1 0 6 280A6 6 0 1 0 -6 280ZM-4 284L4 276M-40 320H-6M-6 320A6 6 0 1 0 6 320A6 6 0 1 0 -6 320ZM-4 324L4 316M-40 360H-6M-6 360A6 6 0 1 0 6 360A6 6 0 1 0 -6 360ZM-4 364L4 356")
+    pin:pin1(at: -40 -320, "1")
+    pin:pin2(at: -40 -280, "2")
+    pin:pin3(at: -40 -240, "3")
+    pin:pin4(at: -40 -200, "4")
+    pin:pin5(at: -40 -160, "5")
+    pin:pin6(at: -40 -120, "6")
+    pin:pin7(at: -40 -80, "7")
+    pin:pin8(at: -40 -40, "8")
+    pin:pin9(at: -40 0, "9")
+    pin:pin10(at: -40 40, "10")
+    pin:pin11(at: -40 80, "11")
+    pin:pin12(at: -40 120, "12")
+    pin:pin13(at: -40 160, "13")
+    pin:pin14(at: -40 200, "14")
+    pin:pin15(at: -40 240, "15")
+    pin:pin16(at: -40 280, "16")
+    pin:pin17(at: -40 320, "17")
+    pin:pin18(at: -40 360, "18")
+    label(name, at: 0 -344)
+    label(value, at: 0 388)
+}

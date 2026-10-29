@@ -1,0 +1,81 @@
+# A through-hole resistor as it is held: its value and tolerance read off its bands by IEC 60062 — four on a beige
+# carbon body down to 2 %, five on a blue metal-film body at 1 % and tighter. Every band is worked out from the value.
+portrait:axial-resistor-portrait("Axial resistor") {
+    meta {
+        summary: "A through-hole resistor with its colour bands, read from its resistance and tolerance (IEC 60062)"
+        code: "PT.RESISTOR:AXIAL"
+        category: circuits
+        tags: electronics, portrait, resistor
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 40)
+    input:resistance(1 Ω .. 1 GΩ, typical: 4.7 kΩ)
+    input:tolerance(0.05 % .. 20 %, typical: 5 %)
+
+    line:lead_one(from: -80 0, to: -30 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    line:lead_two(from: 30 0, to: 80 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    # Where a sheet wires it: the leads' ends, named as the component's pins.
+    pin:terminal_one(at: -80 0)
+    pin:terminal_two(at: 80 0)
+    box:body(live, at: 0 0, size: 60 x 24) {
+        stroke = clear
+        live fill = if(tolerance <= 1 %, blue, beige)
+    }
+    layer(live, tolerance > 1 %) {
+        box:first_figure(live, at: -24 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 100), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:second_figure(live, at: -15 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 10), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:multiplier(live, at: -6 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(floor(ln(resistance) / ln(10) + 0.000001) - 1, -2 -> silver, -1 -> gold, 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:tolerance_band(live, at: 22 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(tolerance, 0.05 % -> grey, 0.1 % -> violet, 0.25 % -> blue, 0.5 % -> green, 1 % -> brown, 2 % -> red, 5 % -> gold, 10 % -> silver)
+        }
+    }
+    layer(live, tolerance <= 1 %) {
+        box:first_figure_of_three(live, at: -26 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 100) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 1000), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:second_figure_of_three(live, at: -18 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 10) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 100), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:third_figure(live, at: -10 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 10), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:multiplier_of_three(live, at: -2 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(floor(ln(resistance) / ln(10) + 0.000001) - 2, -2 -> silver, -1 -> gold, 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+        }
+        box:tolerance_band_of_three(live, at: 24 0, size: 5 x 24) {
+            stroke = clear
+            live fill = curve(tolerance, 0.05 % -> grey, 0.1 % -> violet, 0.25 % -> blue, 0.5 % -> green, 1 % -> brown, 2 % -> red, 5 % -> gold, 10 % -> silver)
+        }
+    }
+    # The lacquer's sheen along the top, over the bands as it is on the part.
+    path:sheen("M-27-8H27") {
+        stroke = white
+        thickness = 0.6
+        opacity = 0.4
+    }
+    # The body's edge, last: the bands go round the body, so they end at its outline instead of covering it.
+    path:outline("M-30-12H30V12H-30Z") {
+        fill = clear
+    }
+}

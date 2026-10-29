@@ -36,12 +36,20 @@ public class SecurityFilterOrder {
 
     {
         setOrder(SecurityContextPersistenceFilter.class, 50);
+        setOrder(ExceptionTranslationFilter.class, 100);
+        setOrder(org.jmouse.security.web.csrf.CsrfFilter.class, 115);
         setOrder(BasicAuthenticationFilter.class, 120);
+        setOrder(org.jmouse.security.web.authentication.jwt.JwtAuthenticationFilter.class, 130);
+        setOrder(org.jmouse.security.web.authentication.remember.AutoLoginAuthenticationFilter.class, 140);
+        setOrder(org.jmouse.security.web.session.ForceEagerSessionCreationFilter.class, 40);
+        setOrder(org.jmouse.security.web.session.DisableURLEncodingFilter.class, 45);
+        setOrder(org.jmouse.security.web.session.SessionControlFilter.class, 110);
+        setOrder(org.jmouse.security.web.session.SessionManagementFilter.class, 175);
         setOrder(SubmitFormRequestAuthenticationFilter.class, 150);
         setOrder(LogoutAuthenticationFilter.class, 170);
         setOrder(AnonymousAuthenticationFilter.class, 180);
         setOrder(AuthorizationFilter.class, 190);
-        setOrder(ExceptionTranslationFilter.class, 200);
+
     }
 
     /**

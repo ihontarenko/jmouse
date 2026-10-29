@@ -1,0 +1,68 @@
+# The BZX55C5V1 is the general diode as a Zener: V_breakdown is its working voltage, reached at the test current, and
+# R_series sets how much the voltage climbs with current — the dynamic resistance a datasheet tabulates.
+
+component:bzx55c5v1("BZX55C5V1", type: diode) {
+    meta {
+        designator: D
+        summary: "Zener diode, 5.1 V ±5 %, 500 mW"
+        source: "Vishay BZX55 series datasheet, electrical characteristics"
+        package: "DO-35"
+        category: circuits
+        failure: short
+    }
+    extends:diode
+
+    parameter:I_saturation(10 fA, "IS")
+    parameter:emission_coefficient(1, "N")
+    parameter:R_series(20 Ohm, "most of the dynamic resistance, rzj 60 Ω at most at 5 mA")
+    parameter:C_junction_zero_bias(150 pF, "CJO")
+    parameter:V_breakdown(5.0 V, "BV: the Zener voltage, reached at IBV")
+    parameter:I_breakdown(5 mA, "IBV: the test current IZT")
+    parameter:breakdown_temperature_coefficient(0.0001, "TCV: a 5.1 V Zener sits near zero tempco, about +0.5 mV/K")
+    parameter:power_rating(0.5 W, "what it is rated for")
+    parameter:thermal_resistance(300 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(1 s, "how fast it warms to that")
+    parameter:T_maximum(175 °C, "past this it fails on a realistic bench")
+    parameter:I_forward_maximum(98 mA, "IZM: 0.5 W at 5.1 V; it works reversed, so only its current is a limit")
+
+    pin:anode(analog, 1, "anode")
+    pin:cathode(analog, 2, "cathode, the banded end")
+
+    symbol(uses: zener-diode-symbol) {
+        bind:failed(failed)
+        bind:a(pin: anode)
+        bind:b(pin: cathode)
+    }
+
+    expect("Zener voltage at 5 mA", from: "VZ 4.8 .. 5.4 V at IZT 5 mA: 10 V through 1 kΩ") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 10 V)
+            part:R1(resistor, [supply, cathode], resistance: 1 kOhm)
+            part:U1(self, [anode: 0, cathode: cathode])
+        }
+        measure(operating, cathode)
+        within(4.8 V .. 5.4 V)
+    }
+
+    expect("a shunt regulator holds 5 V from 12 V", from: "typical application: 12 V through 1 kΩ, 1 kΩ load") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 12 V)
+            part:R1(resistor, [input, output], resistance: 680 Ohm)
+            part:R2(resistor, [output, 0], resistance: 1 kOhm)
+            part:U1(self, [anode: 0, cathode: output])
+        }
+        measure(operating, output)
+        within(4.8 V .. 5.4 V)
+    }
+
+    expect("forward voltage at 10 mA", from: "VF, the junction conducting forward") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 10 mA)
+        }
+        measure(operating, anode)
+        within(0.6 V .. 1.0 V)
+    }
+
+    # How it looks in the hand: its die through the glass and the black band at the cathode.
+    portrait(uses: glass-diode-portrait)
+}

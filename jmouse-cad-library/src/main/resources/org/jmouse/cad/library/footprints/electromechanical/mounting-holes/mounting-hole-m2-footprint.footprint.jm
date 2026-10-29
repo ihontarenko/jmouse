@@ -1,0 +1,17 @@
+footprint:mounting-hole-m2-footprint("Mounting hole M2") {
+    meta {
+        summary: "M2 screw, 2.2 mm hole, a bare hole"
+        code: "FP.MH:M2"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#screw-m2; regenerate, never edit.
+    # Hole 2.2 (ISO 273 fine); head ⌀4.
+    pad: ""(unplated-hole, circle, at: 0 0, size: 2.2 x 2.2, drill: 2.2)
+    outline(fabrication, width: 0.1, "M-2 0A2 2 0 1 0 2 0A2 2 0 1 0 -2 0Z")
+    outline(silkscreen, width: 0.12, "M-2.26 0A2.26 2.26 0 1 0 2.26 0A2.26 2.26 0 1 0 -2.26 0Z")
+    outline(courtyard, width: 0.05, "M-2.5 0A2.5 2.5 0 1 0 2.5 0A2.5 2.5 0 1 0 -2.5 0Z")
+}

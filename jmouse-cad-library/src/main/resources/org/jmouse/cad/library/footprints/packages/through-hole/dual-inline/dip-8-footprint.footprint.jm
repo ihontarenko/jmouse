@@ -1,0 +1,25 @@
+footprint:dip-8-footprint("DIP-8, 7.62 mm rows") {
+    meta {
+        summary: "8-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
+        code: "FP.DIP:8-W7.62"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/dual-inline-packages.sht#dip and the land pattern rules; regenerate, never edit.
+    # Lead 0.56 × 0.36 at most: drill 0.9, pad 1.9, pin 1 square; body 6.35 × 9.27.
+    pad:1(through-hole, rectangle, at: -3.81 -3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:2(through-hole, circle, at: -3.81 -1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:3(through-hole, circle, at: -3.81 1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:4(through-hole, circle, at: -3.81 3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:5(through-hole, circle, at: 3.81 3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:6(through-hole, circle, at: 3.81 1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:7(through-hole, circle, at: 3.81 -1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:8(through-hole, circle, at: 3.81 -3.81, size: 1.9 x 1.9, drill: 0.9)
+    outline(fabrication, width: 0.1, "M-2.175 -4.635H3.175V4.635H-3.175V-3.635Z")
+    outline(silkscreen, width: 0.12, "M-2.6 -4.745H-0.75A0.75 0.75 0 0 0 0.75 -4.745H2.6V4.745H-2.6Z")
+    outline(silkscreen, filled, "M-2.2 -3.81A0.3 0.3 0 1 0 -1.6 -3.81A0.3 0.3 0 1 0 -2.2 -3.81Z")
+    outline(courtyard, width: 0.05, "M-5.25 -5.25H5.25V5.25H-5.25Z")
+}

@@ -1,0 +1,3 @@
+org.jmouse.cad.spring.autoconfigure.CadFlywayAutoConfiguration
+org.jmouse.cad.spring.autoconfigure.CadJpaAutoConfiguration
+org.jmouse.cad.spring.autoconfigure.CadStoreAutoConfiguration

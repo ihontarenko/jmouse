@@ -1,0 +1,47 @@
+# Generated from footprint-standards/small-outline-packages.sht#soic; regenerate, never edit.
+portrait:soic-16-portrait("SOIC-16") {
+    meta {
+        summary: "16-lead SOIC, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.SOIC:16-P1.27-W3.9"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MS-012"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(176 x 120)
+    input:marking(text)
+
+    path:leads("M-83.228 30.709H-76.772V60H-83.228ZM-83.228 -30.709H-76.772V-60H-83.228ZM-63.228 30.709H-56.772V60H-63.228ZM-63.228 -30.709H-56.772V-60H-63.228ZM-43.228 30.709H-36.772V60H-43.228ZM-43.228 -30.709H-36.772V-60H-43.228ZM-23.228 30.709H-16.772V60H-23.228ZM-23.228 -30.709H-16.772V-60H-23.228ZM-3.228 30.709H3.228V60H-3.228ZM-3.228 -30.709H3.228V-60H-3.228ZM16.772 30.709H23.228V60H16.772ZM16.772 -30.709H23.228V-60H16.772ZM36.772 30.709H43.228V60H36.772ZM36.772 -30.709H43.228V-60H36.772ZM56.772 30.709H63.228V60H56.772ZM56.772 -30.709H63.228V-60H56.772Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -80 60)
+    pin:2(at: -60 60)
+    pin:3(at: -40 60)
+    pin:4(at: -20 60)
+    pin:5(at: 0 60)
+    pin:6(at: 20 60)
+    pin:7(at: 40 60)
+    pin:8(at: 60 60)
+    pin:9(at: 60 -60)
+    pin:10(at: 40 -60)
+    pin:11(at: 20 -60)
+    pin:12(at: 0 -60)
+    pin:13(at: -20 -60)
+    pin:14(at: -40 -60)
+    pin:15(at: -60 -60)
+    pin:16(at: -80 -60)
+    path:body("M-85.496 -30.709H65.496A2.457 2.457 0 0 1 67.953 -28.252V28.252A2.457 2.457 0 0 1 65.496 30.709H-85.496A2.457 2.457 0 0 1 -87.953 28.252V-28.252A2.457 2.457 0 0 1 -85.496 -30.709Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-81.565 20.329A3.992 3.992 0 1 0 -73.581 20.329A3.992 3.992 0 1 0 -81.565 20.329Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 109.134 x 13.819) {
+        fill = silver
+        text = marking
+    }
+}

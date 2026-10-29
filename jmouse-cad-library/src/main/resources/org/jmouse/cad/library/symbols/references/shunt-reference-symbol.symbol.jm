@@ -1,0 +1,32 @@
+symbol:shunt-reference-symbol("Adjustable shunt reference") {
+    meta {
+        summary: "An adjustable shunt regulator, as drawn on a schematic: a Zener's bar on a diode, its reference input coming in from the side"
+        code: "SY.REFERENCE:SHUNT-ADJUSTABLE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Drawn upright, as the TL431's datasheet draws it: the cathode above, the anode below, the reference from the left
+    # into the diode's slanted side.
+    size(120 x 160)
+    input:failed
+
+    group:body(live) {
+        path("M0-80V-24M-34-32L-24-24H24L34-16M0 80V24M-24 24H24L0-24Z")
+        path("M-80 0H-12")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:cathode(at: 0 -80)
+    pin:anode(at: 0 80)
+    pin:reference(at: -80 0)
+    label(name, at: 44 -20)
+    label(value, at: 44 28)
+}

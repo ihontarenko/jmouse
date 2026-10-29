@@ -1,0 +1,30 @@
+symbol:low-dropout-regulator-symbol("Low-dropout regulator with set and good pins") {
+    meta {
+        summary: "A resistor-set low-dropout regulator, as drawn on a schematic: input, enable and the good-threshold on the left, the output, its sense and the good flag on the right, the set, the limit and ground below"
+        code: "SY.REGULATOR:LDO"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(320 x 320)
+    input:failed
+
+    group:body(live) {
+        path("M-120-80H120V80H-120Z")
+        path("M-160-40H-120M-160 0H-120M-160 40H-120M120-40H160M120 0H160M120 40H160M-40 80V120M0 80V120M40 80V120")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    pin:input(at: -160 -40, "IN")
+    pin:enable(at: -160 0, "EN/UV")
+    pin:power_good_feedback(at: -160 40, "PGFB")
+    pin:output(at: 160 -40, "OUT")
+    pin:output_sense(at: 160 0, "OUTS")
+    pin:power_good(at: 160 40, "PG")
+    pin:set(at: -40 120, "SET")
+    pin:current_limit(at: 0 120, "ILIM")
+    pin:GND(at: 40 120, "GND")
+    label(name, at: 0 -108)
+    label(value, at: 0 148)
+}

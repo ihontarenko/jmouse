@@ -1,0 +1,64 @@
+symbol:bridge-rectifier-symbol("Bridge rectifier") {
+    meta {
+        summary: "Bridge rectifier, as drawn on a schematic: the pair of diodes that carries the current lights — one diagonal on each half of the mains"
+        code: "SY.DIODE:BRIDGE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(240 x 240)
+    input:pair_a(0 .. 1)
+    input:pair_b(0 .. 1)
+    input:failed
+
+    # Which pair carries the current: current into ac1 runs through the upper left diode to + and back from − through the
+    # lower right one to ac2 (pair a); current into ac2 takes the other diagonal (pair b). On an alternating input the two
+    # light in turn — what a bridge is. Each with its current against the rating, as an eye takes a light
+    # (`seen`). Drawn under the outlines.
+    path:pair_a_upper(live, "M-40-20.2L-30.1-49.9L-59.8-40Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_a)
+        live glow = 9 * seen(pair_a)
+    }
+
+    path:pair_a_lower(live, "M40 59.8L49.9 30.1L20.2 40Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_a)
+        live glow = 9 * seen(pair_a)
+    }
+
+    path:pair_b_upper(live, "M59.8-40L30.1-49.9L40-20.2Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_b)
+        live glow = 9 * seen(pair_b)
+    }
+
+    path:pair_b_lower(live, "M-20.2 40L-49.9 30.1L-40 59.8Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(pair_b)
+        live glow = 9 * seen(pair_b)
+    }
+
+    group:body(live) {
+        path("M-120 0H-80M80 0H120M0-120V-80M0 80V120M-80 0L0-80L80 0L0 80ZM-40-20.2L-30.1-49.9L-59.8-40ZM-20.2-40L-40-59.8M59.8-40L30.1-49.9L40-20.2ZM40-59.8L20.2-40M-20.2 40L-49.9 30.1L-40 59.8ZM-40 20.2L-59.8 40M40 59.8L49.9 30.1L20.2 40ZM59.8 40L40 20.2M12-112H24M18-118V-106M12 112H24")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -120 0)
+    pin:b(at: 120 0)
+    pin:p(at: 0 -120)
+    pin:m(at: 0 120)
+    label(name, at: 68 -80)
+    label(value, at: 68 80)
+}

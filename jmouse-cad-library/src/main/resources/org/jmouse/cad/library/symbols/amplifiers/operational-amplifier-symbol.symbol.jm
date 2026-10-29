@@ -1,0 +1,67 @@
+symbol:operational-amplifier-symbol("Operational amplifier") {
+    meta {
+        summary: "Operational amplifier, as drawn on a schematic: a gauge shows where its output stands between its supplies, the higher input lights, and the body warms when the output is pinned at a rail"
+        code: "SY.AMPLIFIER:OPERATIONAL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # The triangle's slanted sides cross x = 0 at y = ±15; the supply leads leave from there, so the rails come in from
+    # above and below and never cross the signal path, as on every datasheet's drawing.
+    size(160 x 120)
+    input:swing(0 .. 1)
+    input:lead(-1 .. 1)
+    input:saturated(0 .. 1)
+    input:failed
+
+    # The body, filled as the drawing theme fills a part's body, with the gauge standing in it; it warms when the output
+    # is pinned at a rail — no longer amplifying, it is comparing.
+    path:triangle(live, "M-40-60V60L40 0Z") {
+        fill = body
+        live stroke = if(failed > 0.5, burned, if(saturated > 0.5, warm, signal))
+    }
+
+    # Where the output stands between its supplies: a gauge inside the body, empty at the negative rail, full at the
+    # positive one.
+    box:output_level(live, at: 8 0, size: 8 x 44) {
+        live level = swing
+        live fill = if(saturated > 0.5, warm, positive)
+    }
+
+    group:body(live) {
+        path("M-80-40H-40")
+        path("M-80 40H-40")
+        path("M40 0H80")
+        path("M0-30V-60")
+        path("M0 30V60")
+        path("M8-48H16M12-52V-44")
+        path("M8 48H16")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The higher input lights: the way the output is being driven.
+    path:inverting_sign(live, "M-30-40H-18") {
+        live stroke = if(failed > 0.5, burned, if(lead < -0.5, positive, signal))
+    }
+
+    path:non_inverting_sign(live, "M-30 40H-18M-24 34V46") {
+        live stroke = if(failed > 0.5, burned, if(lead > 0.5, positive, signal))
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    # Each stroke its own shape, so the symbol editor takes and moves one at a time: the body, the four leads, the input
+    # signs and the supply signs.
+    pin:inverting_input(at: -80 -40)
+    pin:non_inverting_input(at: -80 40)
+    pin:output(at: 80 0)
+    pin:positive_supply(at: 0 -60)
+    pin:negative_supply(at: 0 60)
+    label(name, at: 48 -48)
+    label(value, at: 48 56)
+}

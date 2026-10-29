@@ -1,0 +1,14 @@
+symbol:ground-symbol("Ground") {
+    meta {
+        summary: "Ground, as drawn on a schematic"
+        code: "SY.MARK:GROUND"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    path("M0-40V0M-32 0H32M-20 12H20M-8 24H8")
+    pin:ground(at: 0 -40)
+    label(name, at: 0 52)
+}

@@ -1,0 +1,17 @@
+# A mains plug with earth: where the line comes in. A circuit fed from the mains places a sine generator on line and
+# neutral; the plug itself joins nothing and takes nothing.
+component:mains-plug("Mains plug with earth", type: connector) {
+    meta {
+        designator: J
+        summary: "Mains inlet: line, neutral and protective earth"
+        source: "IEC 60320 C14 inlet pinout; no electrical behaviour"
+        package: "IEC_C14"
+        category: circuits
+    }
+
+    pin:line(power, 1, "L, line")
+    pin:neutral(power, 2, "N, neutral")
+    pin:earth(ground, 3, "PE, protective earth")
+
+    symbol(uses: mains-plug-symbol)
+}

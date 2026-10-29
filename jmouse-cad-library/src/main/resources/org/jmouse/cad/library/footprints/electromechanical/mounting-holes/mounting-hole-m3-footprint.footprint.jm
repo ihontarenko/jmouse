@@ -1,0 +1,17 @@
+footprint:mounting-hole-m3-footprint("Mounting hole M3") {
+    meta {
+        summary: "M3 screw, 3.2 mm hole, a bare hole"
+        code: "FP.MH:M3"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#screw-m3; regenerate, never edit.
+    # Hole 3.2 (ISO 273 fine); head ⌀5.6.
+    pad: ""(unplated-hole, circle, at: 0 0, size: 3.2 x 3.2, drill: 3.2)
+    outline(fabrication, width: 0.1, "M-2.8 0A2.8 2.8 0 1 0 2.8 0A2.8 2.8 0 1 0 -2.8 0Z")
+    outline(silkscreen, width: 0.12, "M-3.06 0A3.06 3.06 0 1 0 3.06 0A3.06 3.06 0 1 0 -3.06 0Z")
+    outline(courtyard, width: 0.05, "M-3.3 0A3.3 3.3 0 1 0 3.3 0A3.3 3.3 0 1 0 -3.3 0Z")
+}

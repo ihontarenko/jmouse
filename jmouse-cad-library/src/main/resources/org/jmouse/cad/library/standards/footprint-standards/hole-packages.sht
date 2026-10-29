@@ -1,0 +1,63 @@
+# Holes and pads a part does not bring: mounting holes for metric screws and bare pads a probe lands on.
+#
+# A screw's `hole` is ISO 273's fine clearance; `head` the pan head it is held by (ISO 7045) and `countersunk-head` a
+# countersunk one (DIN 965). Each screw is a bare hole (`mounting-hole-m3`), a plated ring under its head (`-pad`), the
+# ring stitched to the other side by vias (`-pad-via`), and a ring under a countersunk head (`-din-965-pad`).
+sheet "Holes and pads" as hole-packages {
+    description "Mounting holes for metric screws, and test points."
+    form hole
+
+    screws "Mounting hole" source standard "ISO 273 fine clearance, ISO 7045 and DIN 965 heads" {
+        name "mounting-hole-{code}"
+        head-clearance 0.4 mm
+        vias 8
+        via-drill 0.4 mm
+        via-pad 0.8 mm
+        folder "electromechanical/mounting-holes"
+        designation "MH:{code|upper}{variant|upper}"
+
+        screw-m2 "M2" {
+            code m2
+            hole 2.2 mm
+            head 4 mm
+            countersunk-head 3.8 mm
+        }
+        screw-m2-5 "M2.5" {
+            code m2-5
+            hole 2.7 mm
+            head 5 mm
+            countersunk-head 4.7 mm
+        }
+        screw-m3 "M3" {
+            code m3
+            hole 3.2 mm
+            head 5.6 mm
+            countersunk-head 5.5 mm
+        }
+        screw-m4 "M4" {
+            code m4
+            hole 4.3 mm
+            head 8 mm
+            countersunk-head 8.4 mm
+        }
+        screw-m5 "M5" {
+            code m5
+            hole 5.3 mm
+            head 9.5 mm
+            countersunk-head 9.3 mm
+        }
+        screw-m6 "M6" {
+            code m6
+            hole 6.4 mm
+            head 12 mm
+            countersunk-head 11.3 mm
+        }
+    }
+
+    test-points "Test point" source standard "Probe pad sizes, IPC-9252" {
+        name "test-point-pad-diameter-{diameter}"
+        diameters 0.5 mm, 0.75 mm, 1 mm, 1.5 mm, 2 mm, 2.5 mm, 3 mm
+        folder "electromechanical/test-points"
+        designation "TP:D{diameter|mm}"
+    }
+}

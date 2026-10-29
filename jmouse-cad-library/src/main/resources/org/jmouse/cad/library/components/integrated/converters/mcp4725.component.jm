@@ -1,0 +1,157 @@
+# MCP4725: a 12-bit DAC on the I²C bus. A code written to it puts Vout at code / 4096 of its supply, the supply being
+# its reference; a fast write is two bytes — the power-down bits and the top four bits, then the low eight —, a full
+# write three, and a write to the EEPROM as well makes the code the one it wakes up with. Powered down, the output
+# stage lets go and Vout is pulled to ground through 1 kΩ, 100 kΩ or 500 kΩ. Address 1100 A2 A1 A0, A2 A1 set at the
+# factory (00 here), A0 a pin.
+
+component:mcp4725("MCP4725", type: converter) {
+    meta {
+        designator: U
+        summary: "12-bit DAC on I²C: Vout = Vdd · code / 4096, with power-down loads and an EEPROM for its start-up code"
+        source: "Microchip MCP4725 data sheet (DS22039D): fast-mode write C2 C1 = 00, write DAC register 010 and DAC with EEPROM 011, read returns five bytes, power-down loads 1 kΩ / 100 kΩ / 500 kΩ, output impedance 1 Ω typical, EEPROM write 25 ms typical, address 1100 A2 A1 A0, pinout per the SOT-23-6 package"
+        package: "SOT-23-6"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-target
+    use:cmos-hc
+
+    parameter:address(96, "1100 000: A2 A1 as shipped, A0 low")
+    parameter:R_output(1 Ohm, "the output stage's resistance while it drives")
+    parameter:eeprom_write_time(25 ms, "how long a write to the EEPROM keeps it busy")
+
+    pin:vout(analog, 1, "the output")
+    pin:GND(ground, 2)
+    pin:Vcc(power, 3, "the supply, and the reference")
+    pin:sda(digital, bidirectional, open-drain, 4, "serial data")
+    pin:scl(digital, input, 5, "serial clock")
+    pin:a0(digital, input, 6, "address bit A0")
+
+    symbol(box) {
+        left([scl, sda, a0])
+        right(vout)
+        power([Vcc, GND])
+    }
+
+    state:code(0, discrete, "the DAC register: 0 to 4095")
+    state:power_down(0, discrete, "0 driving; 1, 2, 3 let go into 1 kΩ, 100 kΩ, 500 kΩ")
+    state:pull_down(1000, discrete, "the resistance Vout is pulled to ground with while powered down")
+    state:command(0, discrete, "the first byte of this write")
+    state:upper(0, discrete, "the second byte of a full write, waiting for the third")
+    state:stored_code(0, discrete, "the EEPROM's code, loaded at power-up")
+    state:stored_power_down(0, discrete, "the EEPROM's power-down bits")
+    state:busy(0, discrete, "1 while the EEPROM is written: read back as RDY/BSY low")
+
+    figure:output_code(code, "the code it holds")
+
+    equations {
+        let driving : ratio = 1 - min(power_down, 1)
+        current Vcc -> vout = driving * ((Vcc - GND) * code / 4096 - (vout - GND)) / R_output
+        current vout -> GND = (1 - driving) * (vout - GND) / pull_down
+    }
+
+    behaviour {
+        # It answers while its EEPROM is written: a reader learns it is busy from RDY/BSY, not from a missing ACK.
+        function own_address()
+            return address + level_or(a0, 0)
+        end
+
+        function apply(new_code, new_power_down)
+            code = new_code
+            power_down = new_power_down
+            if power_down == 1 then
+                pull_down = 1000
+            elseif power_down == 2 then
+                pull_down = 100000
+            else
+                pull_down = 500000
+            end
+        end
+
+        # A fast write is two bytes; a write of the DAC register, with or without its EEPROM, three.
+        function received(value, index)
+            if index == 0 then
+                command = value
+            elseif shift_right(command, 6) == 0 then
+                if index == 1 then
+                    apply(shift_left(low_bits(command, 4), 8, 12) + value, low_bits(shift_right(command, 4), 2))
+                end
+            elseif index == 1 then
+                upper = value
+            elseif index == 2 then
+                apply(upper * 16 + shift_right(value, 4), low_bits(shift_right(command, 1), 2))
+                if shift_right(command, 5) == 3 then
+                    stored_code = code
+                    stored_power_down = power_down
+                    busy = 1
+                    schedule('stored', eeprom_write_time)
+                end
+            end
+        end
+
+        # A read is five bytes: the settings — RDY/BSY, POR, the power-down bits —, the DAC register in two, the EEPROM in two.
+        function transmitted(index)
+            let position = index % 5
+            if position == 0 then
+                return (1 - busy) * 128 + 64 + power_down * 2
+            elseif position == 1 then
+                return shift_right(code, 4)
+            elseif position == 2 then
+                return shift_left(low_bits(code, 4), 4, 8)
+            elseif position == 3 then
+                return stored_power_down * 32 + shift_right(stored_code, 8)
+            end
+            return low_bits(stored_code, 8)
+        end
+
+        on start do
+            apply(stored_code, stored_power_down)
+        end
+
+        on timer 'stored' do
+            busy = 0
+        end
+    }
+
+    expect("mid-scale is half the supply", from: "VOUT = VDD · code / 4096: code 2048 at 5 V") {
+        bench(i2c-bus, for: 1 ms) {
+            # A fast write: 0000 1000, 0000 0000 is code 2048, driving.
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 96, bytes: "8 0")
+            part:U1(self, [vout: out, scl: scl, sda: sda, a0: 0, Vcc: Vcc, GND: 0])
+            part:R3(resistor, [out, 0], resistance: 10 kOhm)
+        }
+        measure(final, out)
+        near(2.5 V, +- 0.01 V)
+    }
+
+    expect("full scale is one step short of the supply", from: "code 4095 at 5 V: 4.9988 V") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 96, bytes: "15 255")
+            part:U1(self, [vout: out, scl: scl, sda: sda, a0: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, out)
+        within(4.99 V .. 5 V)
+    }
+
+    expect("powered down it is 500 kΩ to ground", from: "power-down PD1 PD0 = 11: Vout to VSS through 500 kΩ") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 96, bytes: "48 0")
+            part:U1(self, [vout: out, scl: scl, sda: sda, a0: 0, Vcc: Vcc, GND: 0])
+            # 100 kΩ to the supply over 500 kΩ to ground: five sixths of 5 V.
+            part:R3(resistor, [Vcc, out], resistance: 100 kOhm)
+        }
+        measure(final, out)
+        within(4.1 V .. 4.25 V)
+    }
+
+    expect("it answers while its EEPROM is written, and says it is busy", from: "read command: RDY/BSY 0 while the EEPROM is written, POR 1") {
+        bench(i2c-bus, for: 1 ms) {
+            # Write DAC register and EEPROM (011 00 → 0x60), code 0x800; then, inside the 25 ms, read the status byte.
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 96, bytes: "96 128 0")
+            part:B2(i2c-controller, [scl: scl, sda: sda, data_6: por, data_7: ready, Vcc: Vcc, GND: 0], address: 96, bytes: "", operation: "read", start_at: 600 us)
+            part:U1(self, [vout: out, scl: scl, sda: sda, a0: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [ready, por])
+        is([0,1])
+    }
+}

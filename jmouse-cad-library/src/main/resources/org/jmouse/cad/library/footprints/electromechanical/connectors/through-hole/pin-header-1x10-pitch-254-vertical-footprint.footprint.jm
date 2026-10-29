@@ -1,0 +1,27 @@
+footprint:pin-header-1x10-pitch-254-vertical-footprint("Pin header, 2.54 mm pitch, 1 × 10, vertical") {
+    meta {
+        summary: "Pin header, 2.54 mm pitch, 1 row of 10, upright, through-hole"
+        code: "FP.HDR:1X10-P2.54-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-header and the land pattern rules; regenerate, never edit.
+    # Square lead 0.64: drill 1.15, pad 2.15, pin 1 square.
+    pad:1(through-hole, rectangle, at: 0 -11.43, size: 2.15 x 2.15, drill: 1.15)
+    pad:2(through-hole, circle, at: 0 -8.89, size: 2.15 x 2.15, drill: 1.15)
+    pad:3(through-hole, circle, at: 0 -6.35, size: 2.15 x 2.15, drill: 1.15)
+    pad:4(through-hole, circle, at: 0 -3.81, size: 2.15 x 2.15, drill: 1.15)
+    pad:5(through-hole, circle, at: 0 -1.27, size: 2.15 x 2.15, drill: 1.15)
+    pad:6(through-hole, circle, at: 0 1.27, size: 2.15 x 2.15, drill: 1.15)
+    pad:7(through-hole, circle, at: 0 3.81, size: 2.15 x 2.15, drill: 1.15)
+    pad:8(through-hole, circle, at: 0 6.35, size: 2.15 x 2.15, drill: 1.15)
+    pad:9(through-hole, circle, at: 0 8.89, size: 2.15 x 2.15, drill: 1.15)
+    pad:10(through-hole, circle, at: 0 11.43, size: 2.15 x 2.15, drill: 1.15)
+    outline(fabrication, width: 0.1, "M-0.423 -12.7H1.27V12.7H-1.27V-11.853Z")
+    outline(silkscreen, width: 0.12, "M-1.38 -12.81H1.38V12.81H-1.38Z")
+    outline(silkscreen, filled, "M-2.18 -11.43A0.3 0.3 0 1 0 -1.58 -11.43A0.3 0.3 0 1 0 -2.18 -11.43Z")
+    outline(courtyard, width: 0.05, "M-1.75 -13.2H1.75V13.2H-1.75Z")
+}

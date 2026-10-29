@@ -1,0 +1,47 @@
+symbol:schottky-diode-symbol("Schottky diode") {
+    meta {
+        summary: "Schottky diode, as drawn on a schematic: the diode's triangle against a bar hooked at both ends — lit inside while it conducts, the bar thickening as it blocks"
+        code: "SY.DIODE:SCHOTTKY"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:forward(0 .. 1)
+    input:reverse(0 .. 1)
+    input:breakdown(0 .. 1)
+    input:failed
+
+    # Conducting, it fills as any diode does: with the current against its rating, as an eye takes a light.
+    path:die(live, "M-24-24L24 0-24 24Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(forward)
+        live glow = 9 * seen(forward)
+    }
+
+    group:body(live) {
+        path("M-60 0H-24V-24L24 0-24 24V0M24 0H60")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The metal–semiconductor junction's mark: the bar hooked back at both ends. A Schottky leaks more than a junction
+    # diode, so the bar thickens early as the reverse voltage nears its rating.
+    path:bar(live, "M36-14V-24H24V24H12V14") {
+        live stroke = if(failed > 0.5, burned, if(breakdown > 0.05, hot, if(reverse > 0.005, negative, signal)))
+        live thickness = curve(reverse, 0 -> 1, 0.05 -> 1.6, 1 -> 2.6)
+        live glow = curve(breakdown, 0 -> 0, 1 -> 6)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

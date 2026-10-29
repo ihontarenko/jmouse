@@ -1,0 +1,50 @@
+# A shielded SMD power inductor seen from above: the black ferrite square with its rounded corners, the silver
+# terminations at both sides, its inductance in microhenries printed as the makers do — 4R7 below ten, 101 for a
+# hundred — read from the part's own inductance. Scorched when it fails.
+portrait:power-inductor-portrait("Power inductor") {
+    meta {
+        summary: "A shielded SMD power inductor printed with its microhenry code (4R7, 101)"
+        code: "PT.INDUCTOR:POWER-SHIELDED"
+        category: circuits
+        tags: electronics, portrait, inductor, surface-mount
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 60)
+    input:inductance(1 µH .. 9.9 mH, typical: 100 µH)
+    input:failed
+
+    path:terminations("M-40-10H-24V10H-40ZM24-10H40V10H24Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:terminal_one(at: -40 0)
+    pin:terminal_two(at: 40 0)
+    path:body("M-20-26H20C24-26 26-24 26-20V20C26 24 24 26 20 26H-20C-24 26-26 24-26 20V-20C-26-24-24-26-20-26Z") {
+        fill = black
+    }
+    path:shield("M-19 0A19 19 0 1 0 19 0A19 19 0 1 0-19 0Z") {
+        stroke = grey
+        thickness = 0.5
+        fill = clear
+    }
+    glyph:code_1(live, at: -10 0, size: 9 x 14) {
+        fill = white
+        live character = 48 + floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 100)
+    }
+    glyph:code_2(live, at: 0 0, size: 9 x 14) {
+        fill = white
+        live character = if((inductance / 1 µH) < 10, 82, 48 + round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) - 10 * floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 10))
+    }
+    glyph:code_3(live, at: 10 0, size: 9 x 14) {
+        fill = white
+        live character = if((inductance / 1 µH) < 10, 48 + round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) - 10 * floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 10), 48 + floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-26-26H26V26H-26Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.5
+        }
+    }
+}

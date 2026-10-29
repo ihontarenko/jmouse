@@ -1,0 +1,16 @@
+# A row of 2 header pins: what a wire, a probe or another board is plugged into. It joins nothing and takes
+# nothing — the pins are nodes a design hands to the outside, nothing more.
+component:pin-header-1x2("Pin header, 1x2", type: connector) {
+    meta {
+        designator: J
+        summary: "Single-row pin header, 2 contacts, 2.54 mm pitch"
+        source: "generic 2.54 mm pin header; no electrical behaviour"
+        package: "PinHeader_1x02_P2.54mm"
+        category: circuits
+    }
+
+    pin:pin1(analog, 1, "contact 1")
+    pin:pin2(analog, 2, "contact 2")
+
+    symbol(uses: pin-header-1x2-symbol)
+}

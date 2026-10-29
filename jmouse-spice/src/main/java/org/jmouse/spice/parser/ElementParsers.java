@@ -199,7 +199,7 @@ final class ElementParsers {
         }
     }
 
-    /** {@code B n+ n- V=expression} or {@code I=expression}: the expression kept as written. */
+    /** {@code B n+ n- V=expression} or {@code I=expression}: the expression kept as written, the braces around it apart. */
     static final class BehaviouralParser extends CardParser {
         @Override
         boolean accepts(Token head) {
@@ -216,7 +216,27 @@ final class ElementParsers {
             }
             List<String> nodes = card.words(0, 2, shape);
             return new SpiceElement.Behavioural(card.head().value(), nodes.get(0), nodes.get(1),
-                    SpiceTokenKind.isWord(tokens.get(2), "v"), card.textFrom(4), card.position());
+                    SpiceTokenKind.isWord(tokens.get(2), "v"), unbraced(card.textFrom(4)), card.position());
+        }
+
+        /** The expression inside one pair of braces around all of it — {@code {a}*{b}} is two, and kept whole. */
+        private static String unbraced(String written) {
+            if (!written.startsWith("{") || !written.endsWith("}")) {
+                return written;
+            }
+            int depth = 0;
+            for (int index = 0; index < written.length(); index++) {
+                char character = written.charAt(index);
+                if (character == '{') {
+                    depth++;
+                } else if (character == '}') {
+                    depth--;
+                    if (depth == 0 && index < written.length() - 1) {
+                        return written;
+                    }
+                }
+            }
+            return written.substring(1, written.length() - 1).strip();
         }
     }
 

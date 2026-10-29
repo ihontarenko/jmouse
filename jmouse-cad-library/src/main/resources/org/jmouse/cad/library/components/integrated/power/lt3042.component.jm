@@ -1,0 +1,64 @@
+# Electrical macromodel of the LT3042, the 200 mA sibling of the LT3045: a precision 100 µA current flows out of SET into
+# the resistor the design puts there, and the output follows the voltage it makes — sensed at OUTS — through a smooth
+# current-limited pass device. EN/UV enables it above 1.24 V; PG pulls low while PGFB is below 300 mV. ILIM's
+# programmable limit, the noise itself, thermal shutdown and the ripple rejection's frequency dependence are outside it.
+component:lt3042("LT3042", type: regulator) {
+    meta {
+        designator: U
+        summary: "Ultralow-noise LDO, 200 mA, 0 V to 15 V out, set by one resistor (100 µA × R_SET), MSOP-10E"
+        source: "Analog Devices LT3042 datasheet (rev. D): SET pin current 100 µA ±1 %, dropout 350 mV at 200 mA, EN/UV 1.24 V"
+        package: "MSOP-10-1EP"
+        category: circuits
+        failure: open
+    }
+    use:smooth-transitions
+
+    parameter:I_set(100 uA, "SET pin current, 99 µA to 101 µA")
+    parameter:V_dropout(350 mV, "dropout at 200 mA, typical; at most 400 mV")
+    parameter:I_limit(220 mA, "internal current limit, typical")
+    parameter:I_ground(2 mA, "quiescent current into GND at no load, typical")
+    parameter:V_enable(1.24 V, "EN/UV turn-on threshold, rising")
+    parameter:V_power_good(300 mV, "PGFB threshold: PG releases above it")
+    parameter:R_power_good(100 Ohm, "PG's pull-down when the output is not yet good")
+    parameter:transconductance(50 A/V, "regulation transconductance: load regulation within the datasheet's limits")
+    parameter:thermal_resistance(40 K/W, "MSOP-10E soldered to its pad: kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(10 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:input(power, 1, "IN; pin 2 is IN too")
+    pin:enable(analog, input, 3, "EN/UV: on above 1.24 V")
+    pin:power_good(analog, output, 4, "PG: open drain, pulled low until PGFB passes 300 mV")
+    pin:current_limit(analog, 5, "ILIM: its programmable limit is not modelled")
+    pin:power_good_feedback(analog, input, 6, "PGFB")
+    pin:set(analog, 7, "SET: 100 µA out of it; the output follows its voltage")
+    pin:GND(power, 8, "GND; pin 11, the exposed pad, is GND too")
+    pin:output_sense(analog, input, 9, "OUTS: where the output is regulated")
+    pin:output(analog, output, 10, "OUT")
+
+    symbol(uses: low-dropout-regulator-symbol) {
+        bind:failed(failed)
+    }
+
+    equations {
+        let enabled : ratio = soft_step(enable - V_enable, 0.02)
+        let error : voltage = (set - GND) - (output_sense - GND)
+        let headroom : ratio = soft_step((input - output) - V_dropout, 0.05)
+        let requested : current = soft_positive_part(transconductance * error, 0.001)
+        current input -> set = enabled * I_set
+        current input -> output = enabled * headroom * I_limit * requested / sqrt(I_limit^2 + requested^2)
+        current input -> GND = I_ground
+        current power_good -> GND = (1 - soft_step((power_good_feedback - GND) - V_power_good, 0.01)) * (power_good - GND) / R_power_good
+    }
+
+    expect("5 V from a 49.9 kΩ SET resistor at 100 mA", from: "VOUT = 100 µA × R_SET") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 7 V)
+            part:R1(resistor, [set, 0], resistance: 49.9 kOhm)
+            part:R2(resistor, [output, 0], resistance: 50 Ohm)
+            part:C2(capacitor, [output, 0], capacitance: 10 uF)
+            part:U1(self, [input: input, enable: input, set: set, output: output, output_sense: output, GND: 0])
+        }
+        measure(final, output)
+        near(4.99 V, +- 2%)
+    }
+}

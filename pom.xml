@@ -96,10 +96,28 @@
         <module>jmouse-formula</module>
         <module>jmouse-spice</module>
         <module>jmouse-units</module>
+        <module>jmouse-revisions</module>
+        <module>jmouse-plugin</module>
         <module>jmouse-sheet</module>
+        <module>jmouse-gerber</module>
+        <module>jmouse-stroke-fonts</module>
+        <module>jmouse-svg-path</module>
         <module>jmouse-kicad-parser</module>
         <module>jmouse-kicad</module>
-        <module>jmouse-parallax</module>
+        <module>jmouse-numerics</module>
+        <module>jmouse-el-grammar</module>
+        <module>jmouse-cad</module>
+        <module>jmouse-cad-document</module>
+        <module>jmouse-cad-schematic</module>
+        <module>jmouse-cad-board</module>
+        <module>jmouse-cad-simulation</module>
+        <module>jmouse-cad-packages</module>
+        <module>jmouse-cad-spice</module>
+        <module>jmouse-cad-kicad</module>
+        <module>jmouse-cad-nexar</module>
+        <module>jmouse-cad-library</module>
+        <module>jmouse-cad-exchange</module>
+        <module>jmouse-cad-jpa</module>
         <module>jmouse-transaction</module>
         <module>jmouse-jdbc</module>
         <module>jmouse-security</module>
@@ -136,7 +154,6 @@
         <module>jmouse-search-text</module>
         <module>jmouse-search-jpa</module>
         <module>jmouse-files-jpa</module>
-        <module>jmouse-parallax-jpa</module>
         <module>jmouse-ai</module>
         <module>jmouse-ai-model</module>
         <module>jmouse-ai-provider</module>
@@ -275,6 +292,28 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <!--
+                  Every jar says what it is in its manifest: its title and version, who made it and under what licence.
+                  A running library reads its own version from here (Package#getImplementationVersion) — an About window,
+                  a plugin's version — rather than from a string in its code.
+                -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.1</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Implementation-Vendor>${project.developers[0].name}</Implementation-Vendor>
+                                <Bundle-License>${project.licenses[0].name}</Bundle-License>
+                                <Bundle-Description>${project.description}</Bundle-Description>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

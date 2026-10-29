@@ -1,28 +1,24 @@
 package org.jmouse.security.web.authentication.bearer;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.security.authentication.BearerTokenAuthentication;
 import org.jmouse.security.Authentication;
+import org.jmouse.security.BadCredentialsException;
+import org.jmouse.security.authentication.BearerTokenAuthentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
-import org.jmouse.http.HttpHeader;
-import org.jmouse.http.Headers;
-import org.jmouse.web.http.RequestHeaders;
+import org.jmouse.security.web.authentication.AuthorizationHeaderCredentials;
 
 public class BearerTokenAuthenticationProvider extends AbstractAuthenticationProvider {
-
     public static final String BEARER_PREFIX = "Bearer";
 
     @Override
     protected Authentication doProvide(HttpServletRequest request) {
-        Headers headers = RequestHeaders.ofRequest(request).headers();
-        String  header  = (String) headers.getHeader(HttpHeader.AUTHORIZATION);
-
-        if (header != null && header.startsWith(BEARER_PREFIX)) {
-            return new BearerTokenAuthentication(
-                    BEARER_PREFIX.toLowerCase(), header.substring(BEARER_PREFIX.length()).trim());
+        String value = AuthorizationHeaderCredentials.read(request, BEARER_PREFIX);
+        if (value == null) {
+            return null;
         }
-
-        return null;
+        if (!value.matches("[A-Za-z0-9._~+/-]+=*")) {
+            throw new BadCredentialsException("Malformed bearer token");
+        }
+        return new BearerTokenAuthentication("bearer", value);
     }
-
 }

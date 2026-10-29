@@ -1,0 +1,18 @@
+footprint:chip-capacitor-0805-footprint("Chip capacitor 0805 (2012 metric)") {
+    meta {
+        summary: "Chip capacitor, 0805 (2012 metric) body, reflow pads"
+        code: "FP.CHIP:C0805"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60384-22 dimensions, 0805 (2012 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#capacitor-0805 and the land pattern rules; regenerate, never edit.
+    # Body 1.9…2.1 × 1.15…1.35, terminal 0.25…0.75; fillets toe 0.35, heel 0, side 0.
+    # Z = 2.829, G = 0.624, X = 1.379; pad 1.1 × 1.4 centred at ±0.85.
+    pad:1(surface, rounded-rectangle, at: -0.85 0, size: 1.1 x 1.4, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0.85 0, size: 1.1 x 1.4, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-1 -0.625H1V0.625H-1Z")
+    outline(courtyard, width: 0.05, "M-1.65 -0.95H1.65V0.95H-1.65Z")
+}

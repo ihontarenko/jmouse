@@ -1,0 +1,968 @@
+# Which jM component a KiCad symbol of the standard libraries stands for — or, with no model yet, which of our symbols
+# draws it, by the symbol's `code`. Pins follow the component's package numbers
+# unless written here: KiCad's own numbering differs where a diode's 1 is its cathode, or a bridge's 1 its + output.
+sheet "KiCad symbols as jM components" as kicad-library {
+    # A design's chips — parts whose designator is one of these — are drawn as our box, laid out from their pins' facts.
+    boxed-designators U, IC
+
+    resistor "Resistor" {
+        symbol "Device:R"
+        component resistor
+        value resistance
+    }
+
+    capacitor "Capacitor, unpolarised" {
+        symbol "Device:C"
+        component capacitor
+        value capacitance
+    }
+
+    polarised-capacitor "Capacitor, polarised" {
+        symbol "Device:C_Polarized"
+        component electrolytic-capacitor
+        value capacitance
+    }
+
+    small-signal-diode "1N4148" {
+        symbol "Diode:1N4148"
+        component 1n4148
+        pins 1 = cathode, 2 = anode
+    }
+
+    bridge "Bridge rectifier, KBPC" {
+        symbol "Diode_Bridge:KBPC5010W"
+        component bridge-rectifier
+        pins 1 = plus, 2 = ac1, 3 = minus, 4 = ac2
+    }
+
+    dual-op-amp "NE5532" {
+        symbol "Amplifier_Operational:NE5532"
+        component ne5532
+    }
+
+    shunt-reference "TL431, TO-92" {
+        symbol "Reference_Voltage:TL431LP"
+        component tl431
+    }
+
+    trimmer "Trimming potentiometer" {
+        symbol "Device:R_Potentiometer_Trim"
+        component potentiometer
+        value resistance
+    }
+
+    rectifier-3-amperes "1N5408" {
+        symbol "Diode:1N5408"
+        component 1n5408
+        pins 1 = cathode, 2 = anode
+    }
+
+    power-npn "TIP41C" {
+        symbol "Transistor_BJT:TIP41"
+        component tip41c
+    }
+
+    power-pnp "TIP42C" {
+        symbol "Transistor_BJT:TIP42"
+        component tip42c
+    }
+
+    audio-power-npn "2SD1047" {
+        symbol "Transistor_BJT:2SD1047"
+        component 2sd1047
+    }
+
+    low-dropout-5-volts "AMS1117-5.0" {
+        symbol "Regulator_Linear:AMS1117-5.0"
+        component ams1117-5-0
+    }
+
+    current-sense-amplifier "INA240A1" {
+        symbol "Amplifier_Current:INA240A1D"
+        component ina240a1
+    }
+
+    mains-transformer "TEZ10/D 230/2x12" {
+        symbol "Transformer:TEZ10.0-D-2"
+        component tez10-d-2x12
+    }
+
+    header-one "Pin header, one contact" {
+        symbol "Connector:Conn_01x01_Pin"
+        component pin-header-1x1
+    }
+
+    header-two "Pin header, two contacts" {
+        symbol "Connector:Conn_01x02_Pin"
+        component pin-header-1x2
+    }
+
+    header-three "Pin header, three contacts" {
+        symbol "Connector:Conn_01x03_Pin"
+        component pin-header-1x3
+    }
+
+    header-four "Pin header, four contacts" {
+        symbol "Connector:Conn_01x04_Pin"
+        component pin-header-1x4
+    }
+
+    adjustable-regulator "LM317, TO-220" {
+        symbol "Regulator_Linear:LM317_TO-220"
+        component lm317
+    }
+
+    light-emitting-diode "LED" {
+        symbol "Device:LED"
+        component led-red
+        pins 1 = cathode, 2 = anode
+    }
+
+    bridge-plus-minus "Bridge rectifier, + − ~ ~" {
+        symbol "Device:D_Bridge_+-AA"
+        component bridge-rectifier
+        pins 1 = plus, 2 = minus, 3 = ac1, 4 = ac2
+    }
+
+    socket-one "Socket strip, one contact" {
+        symbol "Connector:Conn_01x01_Socket"
+        component pin-header-1x1
+    }
+
+    generic-one "Generic connector, one row of one" {
+        symbol "Connector_Generic:Conn_01x01"
+        component pin-header-1x1
+    }
+
+    socket-two "Socket strip, two contacts" {
+        symbol "Connector:Conn_01x02_Socket"
+        component pin-header-1x2
+    }
+
+    generic-two "Generic connector, one row of two" {
+        symbol "Connector_Generic:Conn_01x02"
+        component pin-header-1x2
+    }
+
+    socket-three "Socket strip, three contacts" {
+        symbol "Connector:Conn_01x03_Socket"
+        component pin-header-1x3
+    }
+
+    generic-three "Generic connector, one row of three" {
+        symbol "Connector_Generic:Conn_01x03"
+        component pin-header-1x3
+    }
+
+    socket-four "Socket strip, four contacts" {
+        symbol "Connector:Conn_01x04_Socket"
+        component pin-header-1x4
+    }
+
+    generic-four "Generic connector, one row of four" {
+        symbol "Connector_Generic:Conn_01x04"
+        component pin-header-1x4
+    }
+
+    header-five "Pin header, five contacts" {
+        symbol "Connector:Conn_01x05_Pin"
+        component pin-header-1x5
+    }
+
+    socket-five "Socket strip, five contacts" {
+        symbol "Connector:Conn_01x05_Socket"
+        component pin-header-1x5
+    }
+
+    generic-five "Generic connector, one row of five" {
+        symbol "Connector_Generic:Conn_01x05"
+        component pin-header-1x5
+    }
+
+    header-six "Pin header, six contacts" {
+        symbol "Connector:Conn_01x06_Pin"
+        component pin-header-1x6
+    }
+
+    socket-six "Socket strip, six contacts" {
+        symbol "Connector:Conn_01x06_Socket"
+        component pin-header-1x6
+    }
+
+    generic-six "Generic connector, one row of six" {
+        symbol "Connector_Generic:Conn_01x06"
+        component pin-header-1x6
+    }
+
+    header-seven "Pin header, seven contacts" {
+        symbol "Connector:Conn_01x07_Pin"
+        component pin-header-1x7
+    }
+
+    socket-seven "Socket strip, seven contacts" {
+        symbol "Connector:Conn_01x07_Socket"
+        component pin-header-1x7
+    }
+
+    generic-seven "Generic connector, one row of seven" {
+        symbol "Connector_Generic:Conn_01x07"
+        component pin-header-1x7
+    }
+
+    header-eight "Pin header, eight contacts" {
+        symbol "Connector:Conn_01x08_Pin"
+        component pin-header-1x8
+    }
+
+    socket-eight "Socket strip, eight contacts" {
+        symbol "Connector:Conn_01x08_Socket"
+        component pin-header-1x8
+    }
+
+    generic-eight "Generic connector, one row of eight" {
+        symbol "Connector_Generic:Conn_01x08"
+        component pin-header-1x8
+    }
+
+    header-nine "Pin header, nine contacts" {
+        symbol "Connector:Conn_01x09_Pin"
+        component pin-header-1x9
+    }
+
+    socket-nine "Socket strip, nine contacts" {
+        symbol "Connector:Conn_01x09_Socket"
+        component pin-header-1x9
+    }
+
+    generic-nine "Generic connector, one row of nine" {
+        symbol "Connector_Generic:Conn_01x09"
+        component pin-header-1x9
+    }
+
+    header-ten "Pin header, ten contacts" {
+        symbol "Connector:Conn_01x10_Pin"
+        component pin-header-1x10
+    }
+
+    socket-ten "Socket strip, ten contacts" {
+        symbol "Connector:Conn_01x10_Socket"
+        component pin-header-1x10
+    }
+
+    generic-ten "Generic connector, one row of ten" {
+        symbol "Connector_Generic:Conn_01x10"
+        component pin-header-1x10
+    }
+
+    double-row-two "Generic connector, two rows of two" {
+        symbol "Connector_Generic:Conn_02x02_Odd_Even"
+        component pin-header-2x2
+    }
+
+    double-row-three "Generic connector, two rows of three" {
+        symbol "Connector_Generic:Conn_02x03_Odd_Even"
+        component pin-header-2x3
+    }
+
+    double-row-four "Generic connector, two rows of four" {
+        symbol "Connector_Generic:Conn_02x04_Odd_Even"
+        component pin-header-2x4
+    }
+
+    double-row-five "Generic connector, two rows of five" {
+        symbol "Connector_Generic:Conn_02x05_Odd_Even"
+        component pin-header-2x5
+    }
+
+    double-row-six "Generic connector, two rows of six" {
+        symbol "Connector_Generic:Conn_02x06_Odd_Even"
+        component pin-header-2x6
+    }
+
+    double-row-seven "Generic connector, two rows of seven" {
+        symbol "Connector_Generic:Conn_02x07_Odd_Even"
+        component pin-header-2x7
+    }
+
+    double-row-eight "Generic connector, two rows of eight" {
+        symbol "Connector_Generic:Conn_02x08_Odd_Even"
+        component pin-header-2x8
+    }
+
+    double-row-nine "Generic connector, two rows of nine" {
+        symbol "Connector_Generic:Conn_02x09_Odd_Even"
+        component pin-header-2x9
+    }
+
+    double-row-ten "Generic connector, two rows of ten" {
+        symbol "Connector_Generic:Conn_02x10_Odd_Even"
+        component pin-header-2x10
+    }
+
+    screw-terminal-two "Screw terminal, two clamps" {
+        symbol "Connector:Screw_Terminal_01x02"
+        component screw-terminal-1x2
+    }
+
+    screw-terminal-three "Screw terminal, three clamps" {
+        symbol "Connector:Screw_Terminal_01x03"
+        component screw-terminal-1x3
+    }
+
+    screw-terminal-four "Screw terminal, four clamps" {
+        symbol "Connector:Screw_Terminal_01x04"
+        component screw-terminal-1x4
+    }
+
+    barrel-jack "DC barrel jack" {
+        symbol "Connector:Barrel_Jack"
+        component barrel-jack
+    }
+
+    barrel-jack-switch "DC barrel jack with switch" {
+        symbol "Connector:Barrel_Jack_Switch"
+        component barrel-jack-switch
+    }
+
+    usb-micro-b "USB micro-B receptacle" {
+        symbol "Connector:USB_B_Micro"
+        component usb-micro-b
+    }
+
+    usb-c-power "USB-C receptacle, power only" {
+        symbol "Connector:USB_C_Receptacle_PowerOnly_6P"
+        component usb-c-power
+        pins A9 = vbus, B9 = vbus, A5 = configuration_one, B5 = configuration_two, A12 = ground, B12 = ground, S1 = shield
+    }
+
+    mains-plug "Mains plug with earth" {
+        symbol "Connector:Conn_WallPlug_Earth"
+        component mains-plug
+    }
+
+    test-point "Test point" {
+        symbol "Connector:TestPoint"
+        component test-point
+    }
+
+    mounting-hole-pad "Mounting hole with pad" {
+        symbol "Mechanical:MountingHole_Pad"
+        component mounting-hole-pad
+    }
+
+    rotary-encoder "Rotary encoder with switch" {
+        symbol "Device:RotaryEncoder_Switch"
+        component rotary-encoder-switch
+        pins A = phase_a, B = phase_b, C = common, S1 = switch_one, S2 = switch_two
+    }
+
+    crystal "Crystal" {
+        symbol "Device:Crystal"
+        component crystal
+        value frequency
+    }
+
+    fuse "Fuse" {
+        symbol "Device:Fuse"
+        component fuse
+    }
+
+    varistor "Varistor" {
+        symbol "Device:Varistor"
+        component varistor-470v
+    }
+
+    thermistor "NTC thermistor" {
+        symbol "Device:Thermistor_NTC"
+        component thermistor-ntc-10k
+        value R_nominal
+    }
+
+    ferrite-bead "Ferrite bead" {
+        symbol "Device:FerriteBead"
+        component ferrite-bead
+    }
+
+    shunt-resistor "Shunt resistor, four terminals" {
+        symbol "Device:R_Shunt"
+        component shunt-resistor
+        value resistance
+    }
+
+    inductor "Inductor" {
+        symbol "Device:L"
+        component inductor
+        value inductance
+    }
+
+    inductor-small "Inductor, small" {
+        symbol "Device:L_Small"
+        component inductor
+        value inductance
+    }
+
+    resistor-small "Resistor, small" {
+        symbol "Device:R_Small"
+        component resistor
+        value resistance
+    }
+
+    capacitor-small "Capacitor, small" {
+        symbol "Device:C_Small"
+        component capacitor
+        value capacitance
+    }
+
+    polarised-capacitor-small "Capacitor, polarised, small" {
+        symbol "Device:C_Polarized_Small"
+        component electrolytic-capacitor
+        value capacitance
+    }
+
+    light-emitting-diode-small "LED, small" {
+        symbol "Device:LED_Small"
+        component led-red
+        pins 1 = cathode, 2 = anode
+    }
+
+    push-button "Push button" {
+        symbol "Switch:SW_Push"
+        component push-button
+    }
+
+    switch "Switch, single pole" {
+        symbol "Switch:SW_SPST"
+        component switch
+    }
+
+    low-dropout-3-volts "LD1117S33" {
+        symbol "Regulator_Linear:LD1117S33TR_SOT223"
+        component ld1117s33
+    }
+
+    ultralow-noise-500-milliamperes "LT3045" {
+        symbol "Regulator_Linear:LT3045xMSE"
+        component lt3045
+        pins 1 = input, 2 = input, 3 = input, 4 = enable, 5 = power_good, 6 = current_limit, 7 = power_good_feedback, 8 = set, 9 = GND, 10 = output_sense, 11 = output, 12 = output, 13 = GND
+    }
+
+    ultralow-noise-200-milliamperes "LT3042" {
+        symbol "Regulator_Linear:LT3042xMSE"
+        component lt3042
+        pins 1 = input, 2 = input, 3 = enable, 4 = power_good, 5 = current_limit, 6 = power_good_feedback, 7 = set, 8 = GND, 9 = output_sense, 10 = output, 11 = GND
+    }
+
+    p-channel-small-signal "AO3401A" {
+        symbol "Transistor_FET:AO3401A"
+        component ao3401a
+    }
+
+    mini-melf-small-signal-diode "LL4148" {
+        symbol "Diode:LL4148"
+        component 1n4148
+        pins 1 = cathode, 2 = anode
+    }
+
+    bridge-db207s "Bridge rectifier, DB207S" {
+        symbol "DB207S:DB207S"
+        component bridge-rectifier
+        pins 1 = ac1, 2 = ac2, 3 = plus, 4 = minus
+    }
+
+    # Parts with no model yet, drawn with a symbol of ours: the part stays a stub that computes nothing, but it is drawn
+    # as our library draws its kind, never with KiCad's drawing. Pins KiCad marks as not connected need no name.
+    diode-generic "Diode, no part named" {
+        symbol "Device:D"
+        code "SY.DIODE:RECTIFIER"
+        pins 1 = b, 2 = a
+    }
+
+    diode-generic-small "Diode, small, no part named" {
+        symbol "Device:D_Small"
+        code "SY.DIODE:RECTIFIER"
+        pins 1 = b, 2 = a
+    }
+
+    schottky-generic "Schottky diode, no part named" {
+        symbol "Device:D_Schottky"
+        code "SY.DIODE:SCHOTTKY"
+        pins 1 = b, 2 = a
+    }
+
+    zener-generic "Zener diode, no part named" {
+        symbol "Device:D_Zener"
+        code "SY.DIODE:ZENER"
+        pins 1 = b, 2 = a
+    }
+
+    n-channel-small-signal "2N7002" {
+        symbol "Transistor_FET:2N7002"
+        code "SY.TRANSISTOR:MOSFET-N"
+        pins 1 = gate, 2 = source, 3 = drain
+    }
+
+    npn-base-emitter-collector "NPN, pins B E C" {
+        symbol "Device:Q_NPN_BEC"
+        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        pins 1 = base, 2 = emitter, 3 = collector
+    }
+
+    npn-base-collector-emitter "NPN, pins B C E" {
+        symbol "Device:Q_NPN_BCE"
+        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        pins 1 = base, 2 = collector, 3 = emitter
+    }
+
+    npn-emitter-base-collector "NPN, pins E B C" {
+        symbol "Device:Q_NPN_EBC"
+        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        pins 1 = emitter, 2 = base, 3 = collector
+    }
+
+    npn-collector-base-emitter "NPN, pins C B E" {
+        symbol "Device:Q_NPN_CBE"
+        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        pins 1 = collector, 2 = base, 3 = emitter
+    }
+
+    pnp-base-emitter-collector "PNP, pins B E C" {
+        symbol "Device:Q_PNP_BEC"
+        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        pins 1 = base, 2 = emitter, 3 = collector
+    }
+
+    pnp-base-collector-emitter "PNP, pins B C E" {
+        symbol "Device:Q_PNP_BCE"
+        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        pins 1 = base, 2 = collector, 3 = emitter
+    }
+
+    pnp-emitter-base-collector "PNP, pins E B C" {
+        symbol "Device:Q_PNP_EBC"
+        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        pins 1 = emitter, 2 = base, 3 = collector
+    }
+
+    pnp-collector-base-emitter "PNP, pins C B E" {
+        symbol "Device:Q_PNP_CBE"
+        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        pins 1 = collector, 2 = base, 3 = emitter
+    }
+
+    n-channel-gate-source-drain "N-channel MOSFET, pins G S D" {
+        symbol "Device:Q_NMOS_GSD"
+        code "SY.TRANSISTOR:MOSFET-N"
+        pins 1 = gate, 2 = source, 3 = drain
+    }
+
+    n-channel-gate-drain-source "N-channel MOSFET, pins G D S" {
+        symbol "Device:Q_NMOS_GDS"
+        code "SY.TRANSISTOR:MOSFET-N"
+        pins 1 = gate, 2 = drain, 3 = source
+    }
+
+    p-channel-gate-source-drain "P-channel MOSFET, pins G S D" {
+        symbol "Device:Q_PMOS_GSD"
+        code "SY.TRANSISTOR:MOSFET-P"
+        pins 1 = gate, 2 = source, 3 = drain
+    }
+
+    p-channel-gate-drain-source "P-channel MOSFET, pins G D S" {
+        symbol "Device:Q_PMOS_GDS"
+        code "SY.TRANSISTOR:MOSFET-P"
+        pins 1 = gate, 2 = drain, 3 = source
+    }
+
+    current-feedback-op-amp "AD8001AN" {
+        symbol "Amplifier_Operational:AD8001AN"
+        code "SY.AMPLIFIER:OPERATIONAL-WIDE"
+        pins 2 = inverting_input, 3 = non_inverting_input, 6 = output, 7 = positive_supply, 4 = negative_supply
+    }
+
+    precision-op-amp "OPA188, SOIC-8" {
+        symbol "Amplifier_Operational:OPA188xxD"
+        code "SY.AMPLIFIER:OPERATIONAL-WIDE"
+        pins 2 = inverting_input, 3 = non_inverting_input, 6 = output, 7 = positive_supply, 4 = negative_supply
+    }
+
+    optocoupler-transistor "PC817" {
+        symbol "Isolator:PC817"
+        code "SY.OPTOCOUPLER:TRANSISTOR"
+        pins 1 = anode, 2 = cathode, 3 = emitter, 4 = collector
+    }
+
+    adjustable-regulator-3-amperes "LM350, TO-220" {
+        symbol "Regulator_Linear:LM350_TO220"
+        code "SY.REGULATOR:LINEAR-ADJUSTABLE"
+        pins 1 = adjust, 2 = output, 3 = input
+    }
+
+    buzzer "Buzzer" {
+        symbol "Device:Buzzer"
+        code "SY.TRANSDUCER:BUZZER"
+        pins 1 = negative, 2 = positive
+    }
+
+    jumper-bridged "Jumper, two pads, bridged" {
+        symbol "Jumper:Jumper_2_Bridged"
+        code "SY.JUMPER:BRIDGED"
+        pins 1 = a, 2 = b
+    }
+
+    relay-two-make-contacts "Relay RTE4, two make contacts" {
+        symbol "Relay:RTE4xxxx"
+        code "SY.RELAY:DPST"
+        pins A1 = coil_one, A2 = coil_two, 11 = first_common, 14 = first_normally_open, 21 = second_common, 24 = second_normally_open
+    }
+
+    temperature-sensor-analog "LM35, SOIC-8" {
+        symbol "Sensor_Temperature:LM35-D"
+        code "SY.SENSOR:TEMPERATURE-VOLTAGE"
+        pins 8 = supply, 4 = ground, 1 = output
+    }
+
+    # Drawn by the P1 symbols of 2026-10-21: a KiCad part of one of these kinds is drawn with our symbol, its pins named here.
+
+    tvs "TVS diode, no part named" {
+        symbol "Device:D_TVS"
+        code "SY.DIODE:TVS"
+        pins 1 = a, 2 = b
+    }
+
+    tvs-filled "TVS diode, no part named" {
+        symbol "Device:D_TVS_Filled"
+        code "SY.DIODE:TVS"
+        pins 1 = a, 2 = b
+    }
+
+    tvs-small "TVS diode, no part named" {
+        symbol "Device:D_TVS_Small"
+        code "SY.DIODE:TVS"
+        pins 1 = a, 2 = b
+    }
+
+    varicap "Varicap diode, no part named" {
+        symbol "Device:D_Capacitance"
+        code "SY.DIODE:VARICAP"
+        pins 1 = b, 2 = a
+    }
+
+    varicap-filled "Varicap diode, no part named" {
+        symbol "Device:D_Capacitance_Filled"
+        code "SY.DIODE:VARICAP"
+        pins 1 = b, 2 = a
+    }
+
+    photodiode "Photodiode, no part named" {
+        symbol "Device:D_Photo"
+        code "SY.PHOTODETECTOR:DIODE"
+        pins 1 = b, 2 = a
+    }
+
+    photodiode-filled "Photodiode, no part named" {
+        symbol "Device:D_Photo_Filled"
+        code "SY.PHOTODETECTOR:DIODE"
+        pins 1 = b, 2 = a
+    }
+
+    phototransistor "Phototransistor, pins C E" {
+        symbol "Device:Q_Photo_NPN"
+        code "SY.PHOTODETECTOR:NPN"
+        pins 1 = collector, 2 = emitter
+    }
+
+    phototransistor-emitter-collector "Phototransistor, pins E C" {
+        symbol "Device:Q_Photo_NPN_EC"
+        code "SY.PHOTODETECTOR:NPN"
+        pins 1 = emitter, 2 = collector
+    }
+
+    changeover-switch "Changeover switch" {
+        symbol "Switch:SW_SPDT"
+        code "SY.SWITCH:SPDT"
+        pins 1 = upper, 2 = common, 3 = lower
+    }
+
+    reed-switch "Reed switch" {
+        symbol "Switch:SW_Reed"
+        code "SY.SWITCH:REED"
+        pins 1 = a, 2 = b
+    }
+
+    jumper-open "Jumper, open" {
+        symbol "Jumper:Jumper_2_Open"
+        code "SY.JUMPER:OPEN"
+        pins 1 = a, 2 = b
+    }
+
+    solder-jumper-open "Solder jumper, open" {
+        symbol "Jumper:SolderJumper_2_Open"
+        code "SY.JUMPER:SOLDER"
+        pins 1 = a, 2 = b
+    }
+
+    loudspeaker "Loudspeaker" {
+        symbol "Device:Speaker"
+        code "SY.TRANSDUCER:LOUDSPEAKER"
+        pins 1 = a, 2 = b
+    }
+
+    microphone "Microphone" {
+        symbol "Device:Microphone"
+        code "SY.TRANSDUCER:MICROPHONE"
+        pins 1 = a, 2 = b
+    }
+
+    microphone-condenser "Condenser microphone" {
+        symbol "Device:Microphone_Condenser"
+        code "SY.TRANSDUCER:MICROPHONE"
+        pins 1 = a, 2 = b
+    }
+
+    battery-cell "Battery cell" {
+        symbol "Device:Battery_Cell"
+        code "SY.SOURCE:CELL"
+        pins 1 = a, 2 = b
+    }
+
+    solar-cell "Solar cell" {
+        symbol "Device:Solar_Cell"
+        code "SY.SOURCE:SOLAR-CELL"
+        pins 1 = a, 2 = b
+    }
+
+    ptc-thermistor "PTC thermistor" {
+        symbol "Device:Thermistor_PTC"
+        code "SY.RESISTOR:THERMISTOR-PTC"
+        pins 1 = a, 2 = b
+    }
+
+    variable-resistor "Variable resistor" {
+        symbol "Device:R_Variable"
+        code "SY.RESISTOR:VARIABLE"
+        pins 1 = a, 2 = b
+    }
+
+    variable-capacitor "Variable capacitor" {
+        symbol "Device:C_Variable"
+        code "SY.CAPACITOR:VARIABLE"
+        pins 1 = a, 2 = b
+    }
+
+    variable-inductor "Variable inductor" {
+        symbol "Device:L_Trim"
+        code "SY.INDUCTOR:VARIABLE"
+        pins 1 = a, 2 = b
+    }
+
+    ferrite-core-inductor "Inductor on a ferrite core" {
+        symbol "Device:L_Ferrite"
+        code "SY.INDUCTOR:MAGNETIC-CORE"
+        pins 1 = a, 2 = b
+    }
+
+    iron-core-inductor "Inductor on an iron core" {
+        symbol "Device:L_Iron"
+        code "SY.INDUCTOR:MAGNETIC-CORE"
+        pins 1 = a, 2 = b
+    }
+
+    resettable-fuse "Resettable fuse" {
+        symbol "Device:Polyfuse"
+        code "SY.FUSE:RESETTABLE"
+        pins 1 = a, 2 = b
+    }
+
+    gas-discharge-tube "Gas discharge tube" {
+        symbol "Device:GDT_2Pin"
+        code "SY.PROTECTION:GAS-DISCHARGE-TUBE"
+        pins 1 = a, 2 = b
+    }
+
+    igbt-gate-collector-emitter "IGBT, pins G C E" {
+        symbol "Device:Q_NIGBT_GCE"
+        code "SY.TRANSISTOR:IGBT-N"
+        pins 1 = gate, 2 = collector, 3 = emitter
+    }
+
+    igbt-gate-emitter-collector "IGBT, pins G E C" {
+        symbol "Device:Q_NIGBT_GEC"
+        code "SY.TRANSISTOR:IGBT-N"
+        pins 1 = gate, 2 = emitter, 3 = collector
+    }
+
+    igbt-collector-gate-emitter "IGBT, pins C G E" {
+        symbol "Device:Q_NIGBT_CGE"
+        code "SY.TRANSISTOR:IGBT-N"
+        pins 1 = collector, 2 = gate, 3 = emitter
+    }
+
+    igbt-collector-emitter-gate "IGBT, pins C E G" {
+        symbol "Device:Q_NIGBT_CEG"
+        code "SY.TRANSISTOR:IGBT-N"
+        pins 1 = collector, 2 = emitter, 3 = gate
+    }
+
+    igbt-emitter-gate-collector "IGBT, pins E G C" {
+        symbol "Device:Q_NIGBT_EGC"
+        code "SY.TRANSISTOR:IGBT-N"
+        pins 1 = emitter, 2 = gate, 3 = collector
+    }
+
+    igbt-emitter-collector-gate "IGBT, pins E C G" {
+        symbol "Device:Q_NIGBT_ECG"
+        code "SY.TRANSISTOR:IGBT-N"
+        pins 1 = emitter, 2 = collector, 3 = gate
+    }
+
+    # Families: one entry covers every count of a symbol, drawn with the connector symbols our library generates.
+
+    generic-rows "Generic connector, one row of any count" {
+        symbol "Connector_Generic:Conn_01x{count}"
+        code "SY.HDR:1X{count}"
+        pin-names "pin{number}"
+    }
+
+    pin-rows "Pin header, one row of any count" {
+        symbol "Connector:Conn_01x{count}_Pin"
+        code "SY.HDR:1X{count}"
+        pin-names "pin{number}"
+    }
+
+    socket-rows "Socket strip, one row of any count" {
+        symbol "Connector:Conn_01x{count}_Socket"
+        code "SY.HDR:1X{count}"
+        pin-names "pin{number}"
+    }
+
+    generic-double-rows "Generic connector, two rows of any count, odd and even" {
+        symbol "Connector_Generic:Conn_02x{count}_Odd_Even"
+        code "SY.HDR:2X{count}"
+        pin-names "pin{number}"
+    }
+
+    shielded-rows "Shielded connector, one row of any count" {
+        symbol "Connector_Generic_Shielded:Conn_01x{count}_Shielded"
+        code "SY.HDR:1X{count}-SHIELDED"
+        pin-names "pin{number}"
+        pins SH = shield
+    }
+
+    shielded-double-rows "Shielded connector, two rows of any count, odd and even" {
+        symbol "Connector_Generic_Shielded:Conn_02x{count}_Odd_Even_Shielded"
+        code "SY.HDR:2X{count}-SHIELDED"
+        pin-names "pin{number}"
+        pins SH = shield
+    }
+
+    screw-terminals "Screw terminal block of any count" {
+        symbol "Connector:Screw_Terminal_01x{count}"
+        code "SY.TB:{count}"
+        pin-names "pin{number}"
+    }
+
+    # Footprints: a KiCad footprint and the code of ours it is — a code is what a footprint keeps when its slug is
+    # renamed —, both ways: an import lands the part on ours instead of converting KiCad's, an export writes ours as
+    # KiCad's id, so the design opens in KiCad on its own libraries. The first entry naming a code is the id it is
+    # exported as. Pads are numbered alike on both sides.
+
+    chip-resistor-0402 "Chip resistor 0402" {
+        footprint "Resistor_SMD:R_0402_1005Metric"
+        code "FP.CHIP:R0402"
+    }
+
+    chip-capacitor-0402 "Chip capacitor 0402" {
+        footprint "Capacitor_SMD:C_0402_1005Metric"
+        code "FP.CHIP:C0402"
+    }
+
+    chip-resistor-0603 "Chip resistor 0603" {
+        footprint "Resistor_SMD:R_0603_1608Metric"
+        code "FP.CHIP:R0603"
+    }
+
+    chip-capacitor-0603 "Chip capacitor 0603" {
+        footprint "Capacitor_SMD:C_0603_1608Metric"
+        code "FP.CHIP:C0603"
+    }
+
+    chip-resistor-0805 "Chip resistor 0805" {
+        footprint "Resistor_SMD:R_0805_2012Metric"
+        code "FP.CHIP:R0805"
+    }
+
+    chip-capacitor-0805 "Chip capacitor 0805" {
+        footprint "Capacitor_SMD:C_0805_2012Metric"
+        code "FP.CHIP:C0805"
+    }
+
+    chip-resistor-1206 "Chip resistor 1206" {
+        footprint "Resistor_SMD:R_1206_3216Metric"
+        code "FP.CHIP:R1206"
+    }
+
+    chip-capacitor-1206 "Chip capacitor 1206" {
+        footprint "Capacitor_SMD:C_1206_3216Metric"
+        code "FP.CHIP:C1206"
+    }
+
+    soic-8 "SOIC-8" {
+        footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+        code "FP.SOIC:8-P1.27-W3.9"
+    }
+
+    dip-8 "DIP-8" {
+        footprint "Package_DIP:DIP-8_W7.62mm"
+        code "FP.DIP:8-W7.62"
+    }
+
+    tssop-14 "TSSOP-14" {
+        footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
+        code "FP.TSSOP:14-P0.65-W4.4"
+    }
+
+    sot-23 "SOT-23" {
+        footprint "Package_TO_SOT_SMD:SOT-23"
+        code "FP.SOT23:3"
+    }
+
+    to-92 "TO-92, inline" {
+        footprint "Package_TO_SOT_THT:TO-92_Inline"
+        code "FP.TO92:3-L"
+    }
+
+    sod-123 "SOD-123" {
+        footprint "Diode_SMD:D_SOD-123"
+        code "FP.SOD:123"
+    }
+
+    pin-header-1x1 "Pin header 1 × 1, 2.54 mm" {
+        footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
+        code "FP.HDR:1X1-P2.54-V"
+    }
+
+    pin-header-1x2 "Pin header 1 × 2, 2.54 mm" {
+        footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+        code "FP.HDR:1X2-P2.54-V"
+    }
+
+    pin-header-1x3 "Pin header 1 × 3, 2.54 mm" {
+        footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+        code "FP.HDR:1X3-P2.54-V"
+    }
+
+    pin-header-1x4 "Pin header 1 × 4, 2.54 mm" {
+        footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
+        code "FP.HDR:1X4-P2.54-V"
+    }
+
+    pin-header-1x5 "Pin header 1 × 5, 2.54 mm" {
+        footprint "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+        code "FP.HDR:1X5-P2.54-V"
+    }
+
+    pin-header-1x6 "Pin header 1 × 6, 2.54 mm" {
+        footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
+        code "FP.HDR:1X6-P2.54-V"
+    }
+}

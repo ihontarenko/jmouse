@@ -65,7 +65,8 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * @return this configurer
      */
     public C requestMatcher(MappingMatcher<RequestRoute> mappingMatcher) {
-        this.mappingMatcher = mappingMatcher;
+        this.mappingMatcher = mappingMatcher instanceof MatcherCriteria
+                ? mappingMatcher : new MatcherCriteria().add(mappingMatcher);
         return (C) this;
     }
 
@@ -76,11 +77,16 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * @return this configurer
      */
     public C requestMatcher(String... patterns) {
-        Streamable.of(patterns)
-                .filter(Objects::nonNull)
-                .filter(notBlank()::matches);
-
-        return (C) this;
+        String[] valid = java.util.Arrays.stream(patterns)
+                .filter(Objects::nonNull).filter(notBlank()::matches).toArray(String[]::new);
+        if (valid.length == 0) {
+            throw new IllegalArgumentException("At least one authentication path pattern is required");
+        }
+        java.util.List<MatcherCriteria> alternatives = java.util.Arrays.stream(valid)
+                .map(path -> new MatcherCriteria().pathPattern(path)).toList();
+        return requestMatcher(new MatcherCriteria().add(route -> org.jmouse.core.matcher.Match.or(
+                alternatives.stream().map(criterion -> criterion.apply(route))
+                        .toArray(org.jmouse.core.matcher.Match[]::new))));
     }
 
     public C anyRequest() {
@@ -132,12 +138,10 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     @Override
     @SuppressWarnings("unchecked")
     public void initialize(B builder) throws Exception {
-        if (builder.getConfigurer(ExceptionHandlingConfigurer.class)
+        if (builder.findConfigurer(ExceptionHandlingConfigurer.class).orElse(null)
                 instanceof ExceptionHandlingConfigurer<?> exceptionHandlingConfigurer
         ) {
-            exceptionHandlingConfigurer.authenticationEntryPoint(
-                    new LoginUrlAuthenticationEntryPoint(loginPage)
-            );
+            exceptionHandlingConfigurer.defaultAuthenticationEntryPoint(defaultEntryPoint());
         }
     }
 
@@ -188,6 +192,10 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     /**
      * 🟢 Default success: no-op 200 OK (override if desired).
      */
+    protected org.jmouse.security.web.AuthenticationEntryPoint defaultEntryPoint() {
+        return new LoginUrlAuthenticationEntryPoint(loginPage);
+    }
+
     protected AuthenticationSuccessHandler defaultSuccessHandler() {
         return new NoopHttp200SuccessHandler();
     }

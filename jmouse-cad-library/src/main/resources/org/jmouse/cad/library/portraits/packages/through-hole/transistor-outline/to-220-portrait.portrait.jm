@@ -1,0 +1,47 @@
+# A TO-220 package seen from the front: the black body, the metal tab above it with its mounting hole, three legs, pin 1
+# on the left. The legs are named by their numbers, as the footprint's pads are, so a part is wired by its pins' numbers
+# whatever its pinout — G D S, B C E, ADJ OUT IN.
+portrait:to-220-portrait("TO-220") {
+    meta {
+        summary: "A TO-220 package from the front: metal tab with its hole, black body, three legs, pin 1 on the left"
+        code: "PT.TO220:3"
+        category: circuits
+        tags: electronics, portrait, package, through-hole
+        source: "JEDEC TO-220AB"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 160)
+    input:marking(text)
+
+    # Each leg is wide where it leaves the body and narrow below its shoulder.
+    path:legs("M-24 28H-16V44H-18V80H-22V44H-24ZM-4 28H4V44H2V80H-2V44H-4ZM16 28H24V44H22V80H18V44H16Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -20 80)
+    pin:2(at: 0 80)
+    pin:3(at: 20 80)
+    # The tab, its hole cut through it: the circle runs against the plate, so it is left open.
+    path:tab("M-30-80H30V-22H-30ZM-7-56A7 7 0 0 0 7-56A7 7 0 0 0-7-56Z") {
+        stroke = clear
+        fill = silver
+    }
+    path:body("M-30-24H30V30H-30Z") {
+        stroke = clear
+        fill = black
+    }
+    path:sheen("M-27-20H27") {
+        stroke = white
+        thickness = 0.6
+        opacity = 0.3
+    }
+    path:outline("M-30-80H30V30H-30Z") {
+        fill = clear
+    }
+    # What the part prints on its body — its own name, from its component's binding.
+    glyph:printed_marking(at: 0 4, size: 52 x 10) {
+        fill = silver
+        text = marking
+    }
+}

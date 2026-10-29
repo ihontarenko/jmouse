@@ -8,7 +8,6 @@ import org.jmouse.spice.node.SpiceStatement;
 import org.jmouse.spice.node.SpiceValue;
 import org.jmouse.spice.node.SpiceWaveform;
 import org.jmouse.spice.parser.SpiceParser;
-import org.jmouse.spice.printer.SpicePrinter;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -176,8 +175,8 @@ class SpiceParserTest {
     void printsWhatItReadsSoThatReadingItAgainGivesTheSameDeck() throws IOException {
         for (String name : List.of("rc-sine.cir", "bridge-models.cir", "opamp-subcircuit.cir")) {
             String text = resource(name);
-            String printed = SpicePrinter.print(parser.parse(name, text));
-            String reprinted = SpicePrinter.print(parser.parse(name, printed));
+            String printed = parser.parse(name, text).toSource();
+            String reprinted = parser.parse(name, printed).toSource();
             assertEquals(printed, reprinted, name + " prints differently after a round trip");
             for (String comment : comments(text)) {
                 assertTrue(printed.contains(comment), name + " lost the comment '" + comment + "'");

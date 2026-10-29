@@ -2,6 +2,7 @@ package org.jmouse.el.node.expression.literal;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.LiteralNode;
+import org.jmouse.el.writer.SourceWriter;
 import org.jmouse.units.Quantity;
 
 /**
@@ -19,6 +20,18 @@ public class QuantityLiteralNode extends LiteralNode<Double> {
 
     public Quantity getQuantity() {
         return quantity;
+    }
+
+    /** As it was written: {@code 4.7 kOhm} stays that, never its value in SI. */
+    @Override
+    public String toSource() {
+        return quantity.written();
+    }
+
+    /** One word, as it was written — never a line of its own, as a node with only {@link #toSource()} is written. */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        writer.word(quantity.written());
     }
 
     @Override

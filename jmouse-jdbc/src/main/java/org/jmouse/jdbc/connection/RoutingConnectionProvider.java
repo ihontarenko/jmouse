@@ -19,6 +19,11 @@ public final class RoutingConnectionProvider extends AbstractConnectionProvider 
     }
 
     @Override
+    public Object getResourceKey() {
+        return resolver.resolve(lookupKey.get());
+    }
+
+    @Override
     public Connection getConnection() throws SQLException {
         return resolver.resolve(lookupKey.get()).getConnection();
     }

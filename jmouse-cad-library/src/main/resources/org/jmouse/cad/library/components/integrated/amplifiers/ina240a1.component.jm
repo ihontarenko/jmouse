@@ -1,0 +1,85 @@
+# The INA240A1 is a current-sense amplifier: it reads the few millivolts across a shunt, wherever on a rail between
+# -4 V and 80 V that shunt sits, and gives twenty times them above the reference — the mean of REF1 and REF2, so tied
+# to ground the output reads one direction of current, at half the supply it reads both. Modelled as that gain with a
+# first-order bandwidth, an output that swings to within its headroom of each rail through its output resistance, and
+# the supply's quiescent current. Not represented: the PWM rejection's enhanced suppression, offset and drift, and the
+# input stage's own common-mode limits.
+component:ina240a1("INA240A1", type: amplifier) {
+    meta {
+        designator: U
+        summary: "Current-sense amplifier, gain 20 V/V, -4 V to 80 V common mode, 400 kHz"
+        source: "TI INA240 datasheet SBOS662: electrical characteristics, the A1 gain option, VS 5 V"
+        package: "SOIC-8"
+        category: circuits
+        failure: open
+    }
+    use:smooth-transitions
+
+    parameter:gain(20, "the A1's gain, V/V")
+    parameter:bandwidth(400 kHz, "small-signal bandwidth")
+    parameter:R_output(10 Ohm, "output resistance within the loop's reach")
+    parameter:V_swing_low(5 mV, "how close the output comes to ground")
+    parameter:V_swing_high(50 mV, "how close the output comes to the supply")
+    parameter:I_quiescent(1.8 mA, "supply current, typical")
+    parameter:I_bias(90 uA, "bias current into each input, typical")
+
+    pin:inverting_input(analog, input, 1, "IN−, the shunt's load side")
+    pin:GND(power, 2, "ground")
+    pin:reference_two(analog, input, 3, "REF2: the reference is the mean of REF1 and REF2")
+    pin:not_connected(analog, 4, "NC on TI's pinout; KiCad's symbol ties it to ground")
+    pin:output(analog, output, 5, "output")
+    pin:Vcc(power, 6, "VS, the supply, 2.7 V to 5.5 V")
+    pin:reference_one(analog, input, 7, "REF1")
+    pin:non_inverting_input(analog, input, 8, "IN+, the shunt's supply side")
+
+    state:follow(0, continuous, "where the output is heading, behind the input by the bandwidth")
+
+    footprint(soic-8-footprint)
+
+    # How it looks in the hand: its package from above, wired by its pin numbers and printed with its name.
+    portrait(uses: soic-8-portrait) {
+        bind:marking("INA240A1")
+    }
+
+    symbol(uses: [current-sense-amplifier-symbol, current-sense-amplifier-wide-symbol]) {
+        bind:failed(failed)
+    }
+
+    equations {
+        let target : voltage = gain * (non_inverting_input - inverting_input) + (reference_one + reference_two) / 2
+        d(follow)/dt = 2 * pi * bandwidth * (target - follow)
+        let low : voltage = GND + V_swing_low
+        let high : voltage = Vcc - V_swing_high
+        let clamped : voltage = low + soft_positive_part(follow - low, 0.01) - soft_positive_part(follow - high, 0.01)
+        current Vcc -> output = (clamped - output) / R_output
+        current Vcc -> GND = I_quiescent
+        current non_inverting_input -> GND = I_bias
+        current inverting_input -> GND = I_bias
+    }
+
+    expect("twenty times 50 mV above a grounded reference", from: "gain 20 V/V; output = G · VSENSE + VREF") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [rail, 0], U_output: 24 V)
+            part:V3(voltage-source, [rail, load], U_output: 50 mV)
+            part:R1(resistor, [load, 0], resistance: 1 kOhm)
+            part:R2(resistor, [output, 0], resistance: 10 kOhm)
+            part:U1(self, [non_inverting_input: rail, inverting_input: load, reference_one: 0, reference_two: 0, GND: 0, Vcc: Vcc, not_connected: 0, output: output])
+        }
+        measure(final, output)
+        near(1 V, +- 2%)
+    }
+
+    expect("both directions about half the supply", from: "REF1 to VS and REF2 to GND sets the reference at VS / 2") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [rail, 0], U_output: 12 V)
+            part:V3(voltage-source, [load, rail], U_output: 25 mV)
+            part:R1(resistor, [load, 0], resistance: 1 kOhm)
+            part:R2(resistor, [output, 0], resistance: 10 kOhm)
+            part:U1(self, [non_inverting_input: rail, inverting_input: load, reference_one: Vcc, reference_two: 0, GND: 0, Vcc: Vcc, not_connected: 0, output: output])
+        }
+        measure(final, output)
+        near(2 V, +- 2%)
+    }
+}

@@ -1,0 +1,23 @@
+symbol:xor-gate-symbol("XOR gate") {
+    meta {
+        summary: "A two-input exclusive-OR gate, as drawn on a schematic (ANSI)"
+        code: "SY.GATE:XOR"
+        category: circuits
+        tags: electronics, schematic, logic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    path("M-40-40H0Q36-40 52 0Q36 40 0 40H-40Q-16 0-40-40ZM-54-40Q-30 0-54 40M-80-20H-45M-80 20H-45M52 0H80M-20-40V-60M-20 40V60")
+    # The body, filled as the drawing theme fills a part's body.
+    path:body_fill("M-40-40H0Q36-40 52 0Q36 40 0 40H-40Q-16 0-40-40Z") {
+        fill = body
+    }
+    pin:a(at: -80 -20)
+    pin:b(at: -80 20)
+    pin:output(at: 80 0)
+    pin:Vcc(at: -20 -60)
+    pin:GND(at: -20 60)
+    label(name, at: 28 -60)
+    label(value, at: 28 72)
+}

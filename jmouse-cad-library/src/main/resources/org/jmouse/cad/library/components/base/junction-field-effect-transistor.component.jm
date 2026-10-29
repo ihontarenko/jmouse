@@ -1,0 +1,92 @@
+# The JFET every junction FET part is a member of: SPICE's JFET level 1 (Shichman–Hodges) as ngspice 47 writes it.
+# A datasheet part writes `family n-jfet` (or p-jfet) and its numbers.
+#
+# What the effects are for:
+#   VTO, BETA        the pinch-off voltage and how hard the channel conducts: IDSS = BETA · VTO²
+#   LAMBDA           channel-length modulation — the drain current still rises with VDS in saturation
+#   RD, RS           the series resistances
+#   IS, N            the gate junctions: a gate driven forward conducts like a diode
+#   CGS, CGD, PB, FC the gate junctions' depletion capacitances — the input capacitance and its Miller part
+#
+# VTO keeps SPICE's sign, negative for a depletion part of either channel; polarity (1 n-channel, -1 p-channel) turns
+# every voltage and current. Not represented: the doping-tail parameter B (level 1 with B = 1), the temperature
+# coefficients of VTO and BETA, noise. SPICE import and export of `NJF` / `PJF` is not wired yet.
+
+component:junction-field-effect-transistor("Junction FET", type: jfet) {
+    meta {
+        designator: J
+        summary: "JFET level 1: square-law channel, channel-length modulation, gate junctions and their capacitances"
+        source: "JFET level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
+        category: circuits
+        failure: open
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:polarity(1, "1 for n-channel, -1 for p-channel")
+    parameter:V_threshold(-2 V, "VTO: pinch-off voltage, negative for a depletion part")
+    parameter:V_threshold_spread(0 V, "how far the pinch-off spreads from part to part: a bench's tolerance corners use it")
+    parameter:transconductance_spread(0, "how far BETA spreads from part to part, as a share")
+    parameter:threshold_temperature_coefficient(0, "VTOTC: how VTO moves per kelvin, V/K")
+    parameter:transconductance(100 uA/V^2, "BETA: IDSS = BETA · VTO²")
+    parameter:channel_length_modulation(0, "LAMBDA: per volt")
+    parameter:R_drain(1 mOhm, "RD: drain series resistance")
+    parameter:R_source(1 mOhm, "RS: source series resistance")
+    parameter:I_saturation(10 fA, "IS: gate junction saturation current")
+    parameter:emission_coefficient(1, "N: its emission coefficient")
+    parameter:C_gate_source(0 F, "CGS: gate–source zero-bias capacitance")
+    parameter:C_gate_drain(0 F, "CGD: gate–drain zero-bias capacitance")
+    parameter:V_junction(1 V, "PB: gate junction potential")
+    parameter:forward_bias_coefficient(0.5, "FC")
+    parameter:T_nominal(300.15 K, "TNOM")
+    parameter:E_gap(1.11 V, "the band gap the gate junctions' saturation current follows")
+    parameter:power_rating(0.35 W, "what it is rated for")
+    parameter:thermal_resistance(350 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    # how far the gate is from pinching the channel off: none at the pinch-off, full at no bias
+    figure:conduction(min(1, max(0, 1 - (gate - source) / V_threshold)))
+
+    pin:source(analog, 1, "source")
+    pin:gate(analog, input, 2, "gate")
+    pin:drain(analog, output, 3, "drain")
+
+    node:di("the intrinsic drain, behind the drain resistance")
+    node:si("the intrinsic source, behind the source resistance")
+
+    symbol(uses: n-channel-jfet-symbol) {
+        bind:failed(failed)
+    }
+
+    # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
+    type(transconductance_coefficient, current / voltage ^ 2)
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let V_gs : voltage = polarity * (gate - si)
+        let V_gd : voltage = polarity * (gate - di)
+        let V_ds : voltage = polarity * (di - si)
+
+        # The channel is symmetric: with VDS reversed the drain acts as the source.
+        let V_control : voltage = if(V_ds >= 0, V_gs, V_gd)
+        let V_across : voltage = abs(V_ds)
+        let beta : transconductance_coefficient = transconductance * (1 + tolerance_corner * transconductance_spread) / (T_junction / T_nominal) ^ 1.5
+        let overdrive : voltage = V_control - (V_threshold - tolerance_corner * V_threshold_spread + threshold_temperature_coefficient * (T_junction - T_nominal))
+        let square_law : current = if(V_across < overdrive, beta * V_across * (2 * overdrive - V_across), beta * overdrive ^ 2)
+        let channel : current = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
+
+        let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
+        # On a draft bench (detail 0) the junctions store no charge: no capacitance, no transit time — the
+        # switching is instant and the run cheap. From standard on, all of it.
+        let stored : ratio = min(detail, 1)
+        let Q_gate_source : charge = stored * depletion_charge(V_gs, C_gate_source, V_junction, 0.5, forward_bias_coefficient)
+        let Q_gate_drain : charge = stored * depletion_charge(V_gd, C_gate_drain, V_junction, 0.5, forward_bias_coefficient)
+
+        current drain -> di = (drain - di) / R_drain
+        current si -> source = (si - source) / R_source
+        current di -> si = polarity * if(V_ds >= 0, channel, 0 - channel)
+        current gate -> si = polarity * (junction_current(V_gs, I_saturation_now, emission_coefficient, T_junction) + d(Q_gate_source)/dt)
+        current gate -> di = polarity * (junction_current(V_gd, I_saturation_now, emission_coefficient, T_junction) + d(Q_gate_drain)/dt)
+    }
+}

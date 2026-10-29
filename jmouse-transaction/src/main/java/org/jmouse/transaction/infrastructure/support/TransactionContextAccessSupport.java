@@ -2,13 +2,14 @@ package org.jmouse.transaction.infrastructure.support;
 
 import org.jmouse.core.Verify;
 import org.jmouse.transaction.infrastructure.TransactionContextHolder;
+import org.jmouse.transaction.infrastructure.thread.ThreadBoundTransactionContextHolder;
 
 /**
  * Static access point for the active TransactionContextHolder.
  */
 public final class TransactionContextAccessSupport {
 
-    private static TransactionContextHolder HOLDER;
+    private static volatile TransactionContextHolder HOLDER = new ThreadBoundTransactionContextHolder();
 
     private TransactionContextAccessSupport() {
     }

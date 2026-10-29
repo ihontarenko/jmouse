@@ -1,0 +1,84 @@
+# The IRF9540N is the level-1 p-channel MOSFET with a power die's numbers: a threshold of about -3 V, 0.1 Ω at a
+# -10 V gate (half of it the series resistances), and the capacitances of a large die. The high-side switch.
+
+component:irf9540("IRF9540N", type: mosfet) {
+    meta {
+        designator: Q
+        summary: "P-channel power MOSFET, -100 V, -23 A, 0.117 Ω"
+        source: "Infineon IRF9540N datasheet"
+        package: "TO-220"
+        category: circuits
+        failure: short drain source
+    }
+    extends:p-mosfet
+
+    parameter:V_threshold(-3 V, "VTO: gate threshold, -2 … -4 V at -250 uA")
+    parameter:transconductance(2.86 A/V^2, "KP: with RD + RS, 0.1 Ω at VGS -10 V; 0.117 Ω is the datasheet's maximum")
+    parameter:R_drain(40 mOhm, "RD")
+    parameter:R_source(10 mOhm, "RS")
+    parameter:I_saturation(10 pA, "IS: body diode saturation current")
+    parameter:emission_coefficient(1.3, "N: body diode emission factor")
+    parameter:C_bulk_drain(160 pF, "CBD: Coss - Crss")
+    parameter:C_gate_source(1060 pF, "CGSO: Ciss - Crss")
+    parameter:C_gate_drain(240 pF, "CGDO: Crss")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:V_threshold_coefficient(-0.006, "the gate turns on earlier when hot, V/K")
+    parameter:resistance_temperature_exponent(1.5, "RDS(on) rises when hot")
+    parameter:V_breakdown(100 V, "drain-source breakdown")
+    parameter:I_breakdown(250 uA, "avalanche current at V_breakdown")
+    parameter:power_rating(2 W, "what it is rated for without a heatsink")
+    parameter:thermal_resistance(62 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(30 s, "how fast it warms to that")
+    parameter:T_maximum(175 °C, "past this it fails on a realistic bench")
+    parameter:V_threshold_spread(1 V, "VGS(th) -2 ... -4 V")
+    parameter:V_drain_source_maximum(100 V, "VDS")
+    parameter:V_gate_source_maximum(20 V, "VGS, either way")
+    parameter:I_drain_maximum(23 A, "ID at 25 C case")
+
+    pin:source(analog, 1, "source")
+    pin:gate(analog, input, 2, "gate")
+    pin:drain(analog, output, 3, "drain; the tab is drain too")
+
+    footprint(to-220-3-vertical-footprint)
+
+    symbol(uses: p-channel-mosfet-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("on-state voltage at 10 A and a -10 V gate", from: "RDS(on) at most 0.117 Ω at VGS -10 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 12 V)
+            part:V2(voltage-source, [gate, 0], U_output: 2 V)
+            part:R1(resistor, [drain, 0], resistance: 1.1 Ohm)
+            part:U1(self, [gate: gate, drain: drain, source: Vdd])
+        }
+        measure(operating, drain)
+        within(10.8 V .. 12 V)
+    }
+
+    expect("off above its threshold", from: "VGS(th) at most -2 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 12 V)
+            part:V2(voltage-source, [gate, 0], U_output: 10.5 V)
+            part:R1(resistor, [drain, 0], resistance: 1 kOhm)
+            part:U1(self, [gate: gate, drain: drain, source: Vdd])
+        }
+        measure(operating, drain)
+        within(0 V .. 0.1 V)
+    }
+
+    expect("body diode forward voltage", from: "VSD at most 1.6 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [feed, 0], U_output: 1 V)
+            part:R1(resistor, [feed, drain], resistance: 1 Ohm)
+            part:U1(self, [gate: 0, drain: drain, source: 0])
+        }
+        measure(operating, drain)
+        within(0.5 V .. 1.6 V)
+    }
+
+    # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-220-portrait) {
+        bind:marking("IRF9540N")
+    }
+}

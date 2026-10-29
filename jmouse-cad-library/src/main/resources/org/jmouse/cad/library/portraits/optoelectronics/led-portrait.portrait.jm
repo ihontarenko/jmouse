@@ -1,0 +1,50 @@
+# A 5 mm LED as it is held: its dome tinted by the colour of its light, the flat on the cathode side, the anode lead
+# on the left. On a bench it lights by its own current.
+portrait:led-portrait("LED") {
+    meta {
+        summary: "A 5 mm LED in the colour of its wavelength, glowing by its current"
+        code: "PT.LED:D5"
+        category: circuits
+        tags: electronics, portrait, light-emitting diode
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 130)
+    input:wavelength(380 nm .. 750 nm, typical: 625 nm)
+    input:light(0 .. 1)
+
+    path:lead_anode("M-6 20V40L-20 50V60") {
+        stroke = silver
+        thickness = 1.6
+    }
+    path:lead_cathode("M6 20V40L20 50V60") {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:anode(at: -20 60)
+    pin:cathode(at: 20 60)
+    # The lead frame seen through the epoxy: the anode's thin post, the cathode's anvil holding the die.
+    path:post("M-6 16V-14L-2-18") {
+        stroke = silver
+        thickness = 1.1
+    }
+    path:anvil("M6 16V-8M1-8H11L9-14H3Z") {
+        stroke = silver
+        fill = silver
+        thickness = 1.1
+    }
+    path:dome(live, "M-16 16V-36C-16-56 16-56 16-36V16Z") {
+        live fill = curve(wavelength, 380 nm -> violet, 450 nm -> blue, 495 nm -> green, 570 nm -> yellow, 590 nm -> orange, 620 nm -> red, 750 nm -> red)
+        live opacity = 0.55 + 0.45 * seen(light)
+        live glow = 10 * light
+    }
+    # The dome's highlight, high on the left.
+    path:sheen("M-11-34C-11-42-8-47-3-49") {
+        stroke = white
+        thickness = 1.8
+        opacity = 0.55
+    }
+    path:rim(live, "M-20 16H15V22H-20Z") {
+        live fill = curve(wavelength, 380 nm -> violet, 450 nm -> blue, 495 nm -> green, 570 nm -> yellow, 590 nm -> orange, 620 nm -> red, 750 nm -> red)
+    }
+}

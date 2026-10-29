@@ -1,0 +1,42 @@
+# A rectifier in a DO-41 body as it is held: a black moulded body, the silver band at its cathode end, the leads straight
+# out to the sheet's grid.
+portrait:axial-diode-portrait("Axial diode") {
+    meta {
+        summary: "A DO-41 rectifier: black body, silver band at the cathode"
+        code: "PT.DIODE:DO41"
+        category: circuits
+        tags: electronics, portrait, diode, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 40)
+
+    line:lead_anode(from: -80 0, to: -24 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    line:lead_cathode(from: 24 0, to: 80 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:anode(at: -80 0)
+    pin:cathode(at: 80 0)
+    path:body("M-21-11H21C23-11 24-10 24-8V8C24 10 23 11 21 11H-21C-23 11-24 10-24 8V-8C-24-10-23-11-21-11Z") {
+        stroke = clear
+        fill = black
+    }
+    path:cathode_band("M12-11H18V11H12Z") {
+        stroke = clear
+        fill = silver
+    }
+    # The moulding's sheen along the top.
+    path:sheen("M-20-6H20") {
+        stroke = white
+        thickness = 0.6
+        opacity = 0.3
+    }
+    # The body's edge, last, so the band ends at it.
+    path:outline("M-21-11H21C23-11 24-10 24-8V8C24 10 23 11 21 11H-21C-23 11-24 10-24 8V-8C-24-10-23-11-21-11Z") {
+        fill = clear
+    }
+}

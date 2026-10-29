@@ -42,10 +42,19 @@
         <module>jmouse-vault-management</module>
         <module>jmouse-notifier-spring-boot</module>
         <module>jmouse-scheduler-spring-boot</module>
-        <module>jmouse-parallax-spring-boot</module>
-        <module>jmouse-parallax-management</module>
-        <module>jmouse-parallax-live</module>
         <module>jmouse-taxonomy-management</module>
+        <module>jmouse-plugin-spring</module>
+        <module>jmouse-cad-spring-boot</module>
+        <module>jmouse-cad-management</module>
+        <module>jmouse-cad-plugin-spice</module>
+        <module>jmouse-cad-plugin-xyce</module>
+        <module>jmouse-cad-plugin-gerber</module>
+        <module>jmouse-cad-plugin-pcbway</module>
+        <module>jmouse-cad-plugin-jlcpcb</module>
+        <module>jmouse-cad-plugin-kicad</module>
+        <module>jmouse-cad-plugin-nexar</module>
+        <module>jmouse-cad-plugin-explorer</module>
+        <module>jmouse-cad-live</module>
     </modules>
 
 </project>

@@ -1,0 +1,18 @@
+footprint:chip-inductor-0402-footprint("Chip inductor 0402 (1005 metric)") {
+    meta {
+        summary: "Chip inductor, 0402 (1005 metric) body, reflow pads"
+        code: "FP.CHIP:L0402"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60384-22 dimensions, 0402 (1005 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#capacitor-0402 and the land pattern rules; regenerate, never edit.
+    # Body 0.95…1.05 × 0.45…0.55, terminal 0.15…0.35; fillets toe 0.2, heel -0.05, side 0.
+    # Z = 1.5, G = 0.43, X = 0.6; pad 0.55 × 0.6 centred at ±0.5.
+    pad:1(surface, rounded-rectangle, at: -0.5 0, size: 0.55 x 0.6, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0.5 0, size: 0.55 x 0.6, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-0.5 -0.25H0.5V0.25H-0.5Z")
+    outline(courtyard, width: 0.05, "M-0.95 -0.45H0.95V0.45H-0.95Z")
+}

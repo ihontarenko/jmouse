@@ -1,0 +1,14 @@
+component:screw-terminal-1x4("Screw terminal, 1x4", type: connector) {
+    meta {
+        summary: "Terminal block, 4 screw clamps, 5.08 mm pitch"
+        category: circuits
+        source: "generic connector; no electrical behaviour"
+        designator: J
+        package: "TerminalBlock_1x04_P5.08mm"
+    }
+    pin:pin1(analog, 1, "clamp 1")
+    pin:pin2(analog, 2, "clamp 2")
+    pin:pin3(analog, 3, "clamp 3")
+    pin:pin4(analog, 4, "clamp 4")
+    symbol(uses: screw-terminal-1x4-symbol)
+}

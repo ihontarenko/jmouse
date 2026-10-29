@@ -1,0 +1,188 @@
+# MCP3008: a 10-bit ADC with eight inputs, on SPI. Selected, it waits for a start bit on DIN, takes four more —
+# single-ended or differential, and which channel —, samples that input against VREF, and from the next falling clock
+# answers with a null bit and the ten bits of the result, most significant first: code = 1024 · Vin / VREF. In the usual
+# three-byte exchange (0000 0001, S D2 D1 D0 0000, 0000 0000) the result is the last two bits of the second byte and
+# the whole third. DOUT is let go while it is not selected, so several converters share one MISO.
+
+component:mcp3008("MCP3008", type: converter) {
+    meta {
+        designator: U
+        summary: "10-bit, 8-channel ADC on SPI: code = 1024 · Vin / VREF, single-ended or differential"
+        source: "Microchip MCP3004/3008 data sheet (DS21295D): start bit, SGL/DIFF, D2-D0, sampling from the 4th rising clock after the start bit, a null bit on the next falling clock, B9-B0 MSB first, configuration table 5-2, pinout per the PDIP-16 package; input leakage and the 20 pF sampling capacitor are not modelled"
+        package: "PDIP-16, SOIC-16"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+
+    parameter:output_delay(125 ns, "tDO: the clock's falling edge to DOUT valid, 5 V")
+
+    pin:channel_0(analog, 1, "CH0")
+    pin:channel_1(analog, 2, "CH1")
+    pin:channel_2(analog, 3, "CH2")
+    pin:channel_3(analog, 4, "CH3")
+    pin:channel_4(analog, 5, "CH4")
+    pin:channel_5(analog, 6, "CH5")
+    pin:channel_6(analog, 7, "CH6")
+    pin:channel_7(analog, 8, "CH7")
+    pin:GND(ground, 9, "DGND")
+    pin:cs(digital, input, 10, "CS/SHDN, active low")
+    pin:din(digital, input, 11, "serial data in")
+    pin:dout(digital, output, 12, "serial data out, let go while not selected")
+    pin:clk(digital, input, 13, "serial clock")
+    pin:analog_ground(analog, 14, "AGND, what every input is read against")
+    pin:reference(analog, 15, "VREF, full scale")
+    pin:Vcc(power, 16)
+
+    symbol(box) {
+        left([channel_0, channel_1, channel_2, channel_3, channel_4, channel_5, channel_6, channel_7, reference, analog_ground])
+        right([clk edge, din, dout, cs bubble])
+        power([Vcc, GND])
+    }
+
+    state:phase(0, discrete, "WAITING for a start bit, CHOOSING the input, or ANSWERING with the result")
+    state:clocks(0, discrete, "rising clocks since the start bit")
+    state:selection(0, discrete, "SGL/DIFF and D2 D1 D0, as they came in")
+    state:code(0, discrete, "the result of the conversion")
+
+    figure:result(code, "the last code converted")
+
+    behaviour {
+        final let WAITING = 0
+        final let CHOOSING = 1
+        final let ANSWERING = 2
+        # The null bit goes out on the falling clock after the fourth configuration bit, B9 … B0 on the ten after it.
+        final let NULL_BIT_CLOCK = 5
+        final let RESULT_BITS = 10
+
+        # Single-ended, a channel against AGND; differential, the pair's IN+ against its IN−, the order D0 chooses.
+        function sampled()
+            let index = low_bits(selection, 3)
+            if bit(selection, 3) == 1 then
+                return pin_voltage('channel_' ~ index) - analog_ground
+            end
+            let pair = index - bit(index, 0)
+            let first = pin_voltage('channel_' ~ pair)
+            let second = pin_voltage('channel_' ~ (pair + 1))
+            if bit(index, 0) == 0 then
+                return first - second
+            end
+            return second - first
+        end
+
+        # code = 1024 · Vin / VREF, clipped to its ten bits; with VREF at or below AGND there is no range, and it reads 0.
+        function convert()
+            let span = reference - analog_ground
+            if span <= 0 then
+                code = 0
+            else
+                code = min(1023, max(0, floor(1024 * sampled() / span)))
+            end
+        end
+
+        on falling 'cs' do
+            phase = WAITING
+            clocks = 0
+            selection = 0
+        end
+
+        on rising 'cs' do
+            drive('dout', Z)
+        end
+
+        on rising 'clk' when cs == 0 do
+            if not known(din) then
+                # A bit it cannot read: the request is lost, and it waits for the next start bit.
+                phase = WAITING
+                clocks = 0
+                selection = 0
+            elseif phase == WAITING then
+                if din == 1 then
+                    phase = CHOOSING
+                    clocks = 0
+                end
+            elseif phase == CHOOSING then
+                selection = selection * 2 + din
+                clocks = clocks + 1
+                if clocks == 4 then
+                    convert()
+                    phase = ANSWERING
+                end
+            else
+                clocks = clocks + 1
+            end
+        end
+
+        # From the fifth clock after the start bit: the null bit, B9 down to B0, then zeros.
+        on falling 'clk' when cs == 0 and phase == ANSWERING and clocks >= NULL_BIT_CLOCK do
+            let position = clocks - NULL_BIT_CLOCK
+            if position >= 1 and position <= RESULT_BITS then
+                drive('dout', bit(code, RESULT_BITS - position), output_delay)
+            else
+                drive('dout', 0, output_delay)
+            end
+        end
+
+        on start do
+            drive('dout', Z)
+        end
+    }
+
+    expect("1 V on CH0 against 5 V is 204", from: "code = 1024 · VIN / VREF: 0011 0011 00, the low byte 1100 1100") {
+        bench(for: 40 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [input, 0], U_output: 1 V)
+            # Start bit, then single-ended CH0: 1000 0000.
+            part:B1(spi-controller, [sck: clk, mosi: din, miso: dout, cs: cs, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], bytes: "1 128 0")
+            part:U1(self, [channel_0: input, reference: Vcc, analog_ground: 0, clk: clk, din: din, dout: dout, cs: cs, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([0,0,1,1,0,0,1,1])
+    }
+
+    expect("4 V on CH3 is 819", from: "single-ended CH3, S D2 D1 D0 = 1011: 1100 1100 11, the low byte 0011 0011") {
+        bench(for: 40 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [input, 0], U_output: 4 V)
+            part:B1(spi-controller, [sck: clk, mosi: din, miso: dout, cs: cs, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], bytes: "1 176 0")
+            part:U1(self, [channel_3: input, reference: Vcc, analog_ground: 0, clk: clk, din: din, dout: dout, cs: cs, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([1,1,0,0,1,1,0,0])
+    }
+
+    expect("the top two bits end the second byte", from: "the usual exchange: B9 B8 are the last two bits of the second byte read; 4 V is 11 there") {
+        bench(for: 32 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [input, 0], U_output: 4 V)
+            # Two bytes only: the last one read is the second.
+            part:B1(spi-controller, [sck: clk, mosi: din, miso: dout, cs: cs, data_0: d0, data_1: d1, data_2: d2, Vcc: Vcc, GND: 0], bytes: "1 176")
+            part:U1(self, [channel_3: input, reference: Vcc, analog_ground: 0, clk: clk, din: din, dout: dout, cs: cs, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2])
+        is([1,1,0])
+    }
+
+    expect("differential CH0 − CH1 = 2 V is 409", from: "table 5-2, SGL/DIFF = 0, D2 D1 D0 = 000: IN+ CH0, IN− CH1; 01 1001 1001, the low byte 1001 1001") {
+        bench(for: 40 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [plus, 0], U_output: 3 V)
+            part:V3(voltage-source, [minus, 0], U_output: 1 V)
+            part:B1(spi-controller, [sck: clk, mosi: din, miso: dout, cs: cs, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], bytes: "1 0 0")
+            part:U1(self, [channel_0: plus, channel_1: minus, reference: Vcc, analog_ground: 0, clk: clk, din: din, dout: dout, cs: cs, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([1,0,0,1,1,0,0,1])
+    }
+
+    expect("with VREF at AGND it reads 0", from: "not specified by the data sheet: with no range between AGND and VREF the model reads code 0 rather than dividing by nought") {
+        bench(for: 40 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [input, 0], U_output: 1 V)
+            part:B1(spi-controller, [sck: clk, mosi: din, miso: dout, cs: cs, data_0: d0, data_7: d7, Vcc: Vcc, GND: 0], bytes: "1 128 0")
+            part:U1(self, [channel_0: input, reference: 0, analog_ground: 0, clk: clk, din: din, dout: dout, cs: cs, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d7])
+        is([0,0])
+    }
+}

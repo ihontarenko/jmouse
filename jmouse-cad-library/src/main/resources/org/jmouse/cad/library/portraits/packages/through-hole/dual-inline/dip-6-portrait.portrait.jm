@@ -1,0 +1,42 @@
+# Generated from footprint-standards/dual-inline-packages.sht#dip; regenerate, never edit.
+portrait:dip-6-portrait("DIP-6") {
+    meta {
+        summary: "6-lead DIP, 7.62 mm rows from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.DIP:6-W7.62"
+        category: circuits
+        tags: electronics, portrait, package, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(71 x 80)
+    input:marking(text)
+
+    path:leads("M-25.984 25H-14.016V30H-25.984ZM-22.205 30H-17.795V40H-22.205ZM-25.984 -25H-14.016V-30H-25.984ZM-22.205 -30H-17.795V-40H-22.205ZM-5.984 25H5.984V30H-5.984ZM-2.205 30H2.205V40H-2.205ZM-5.984 -25H5.984V-30H-5.984ZM-2.205 -30H2.205V-40H-2.205ZM14.016 25H25.984V30H14.016ZM17.795 30H22.205V40H17.795ZM14.016 -25H25.984V-30H14.016ZM17.795 -30H22.205V-40H17.795Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -20 40)
+    pin:2(at: 0 40)
+    pin:3(at: 20 40)
+    pin:4(at: 20 -40)
+    pin:5(at: 0 -40)
+    pin:6(at: -20 -40)
+    path:body("M-33.039 -25H33.039A2 2 0 0 1 35.039 -23V23A2 2 0 0 1 33.039 25H-33.039A2 2 0 0 1 -35.039 23V-23A2 2 0 0 1 -33.039 -25Z") {
+        fill = black
+    }
+    path:notch("M-35.039 -6A6 6 0 0 1 -35.039 6Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-29.839 16.55A3.25 3.25 0 1 0 -23.339 16.55A3.25 3.25 0 1 0 -29.839 16.55Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: 0 0, size: 49.055 x 11.25) {
+        fill = silver
+        text = marking
+    }
+}

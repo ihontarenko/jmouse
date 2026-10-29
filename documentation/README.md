@@ -82,6 +82,7 @@ Coverage: **94 public reactor modules**, **76 new module manuals** in this docum
 | `jmouse-spice` | [JMOUSE_SPICE.md](JMOUSE_SPICE.md) | SPICE: the netlist language itself — a lexer, a parser into a typed syntax tree with positions, a visitor over it, and one printer back to text |
 | `jmouse-parallax` | [JMOUSE_PARALLAX.md](JMOUSE_PARALLAX.md) | Parallax engine: mathematical objects, numerical methods, the circuit engine and the computations that turn an object into datasets, with jMX — the Parallax script language, built on jMS (org.jmouse.parallax.script) |
 | `jmouse-parallax-jpa` | [JMOUSE_PARALLAX_JPA.md](JMOUSE_PARALLAX_JPA.md) | The Parallax catalogue, scenes, comparisons, collections, computed datasets, the job queue and the evaluation ledger over Jakarta Persistence |
+| `jmouse-cad-jpa` | [JMOUSE_CAD_API.md](JMOUSE_CAD_API.md) | jmCAD persistence: the catalogue of jM documents, every revision of their text and the index derived from the head, under its own migration history — and the `/jmouse/cad/api` contract built over it |
 
 ## AI
 

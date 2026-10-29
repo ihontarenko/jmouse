@@ -1,0 +1,43 @@
+symbol:lcd-84x48-symbol("84×48 graphic LCD module") {
+    meta {
+        summary: "The Nokia 5110 module: an 84×48 monochrome LCD on SPI, its screen showing the controller's display memory, three units a pixel"
+        code: "SY.DISPLAY:LCD-84X48"
+        category: circuits
+        tags: electronics, schematic, display
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(560 x 440)
+    input:screen(picture)
+    input:lit(0 .. 1)
+    input:inverted(0 .. 1)
+
+    path("M-280-200H280V220H-280Z")
+    path("M-254-126H254V166H-254Z")
+    path("M-160-200V-240")
+    path("M-120-200V-240")
+    path("M-80-200V-240")
+    path("M-40-200V-240")
+    path("M0-200V-240")
+    path("M40-200V-240")
+    path("M80-200V-240")
+    path("M120-200V-240")
+    bitmap:screen(live, at: 0 20, size: 504 x 288) {
+        live pixels = screen
+        columns = 84
+        rows = 48
+        live invert = inverted > 0.5
+        live visible = lit > 0.5
+    }
+
+    pin:reset(at: -160 -240, "RST")
+    pin:chip_enable(at: -120 -240, "CE")
+    pin:data_command(at: -80 -240, "DC")
+    pin:data_in(at: -40 -240, "DIN")
+    pin:clock(at: 0 -240, "CLK")
+    pin:Vcc(at: 40 -240, "VCC")
+    pin:light(at: 80 -240, "BL")
+    pin:GND(at: 120 -240, "GND")
+    label(name, at: 340 -80)
+    label(value, at: 340 80)
+}

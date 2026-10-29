@@ -1,0 +1,21 @@
+component:voltage-source("Voltage source", type: voltage-source) {
+    meta {
+        designator: V
+        value: U_output
+        summary: "Two-terminal voltage source: constant, or switched on at the start. A sine or a square is a generator — sine-generator, square-generator"
+        category: circuits
+    }
+    parameter:U_output(5 V, "source voltage")
+    pin:positive(analog, 1, "positive terminal")
+    pin:negative(analog, 2, "negative terminal")
+    # An ideal source: its positive pin held U_output above its negative one, whatever is drawn from it. A circuit starts
+    # from rest, so it is switched on at the start.
+    equations {
+        voltage positive -> negative = U_output
+    }
+
+    symbol(uses: voltage-source-symbol) {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+}

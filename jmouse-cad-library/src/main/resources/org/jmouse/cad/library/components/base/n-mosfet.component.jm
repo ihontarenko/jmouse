@@ -1,0 +1,30 @@
+# An n-channel MOSFET at the level-1 model's neutral defaults: what an imported `.model … NMOS(…)` becomes, the model's
+# numbers set on it. A datasheet n-channel part is a member of this family.
+
+component:n-mosfet("N-channel MOSFET", type: mosfet) {
+    meta {
+        designator: Q
+        summary: "N-channel MOSFET, the level-1 model at its defaults"
+        category: circuits
+        failure: short drain source
+    }
+    extends:mos-transistor
+
+    parameter:polarity(1, "n-channel")
+    parameter:V_threshold(1 V, "VTO: an enhancement part opens above it")
+    parameter:transconductance(0.1 A/V^2, "KP: the whole channel")
+
+    symbol(uses: n-channel-mosfet-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("on: 5 V of gate drive sinks the load's current", from: "KP 0.1 A/V², VTO 1 V: deep in the linear region") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 5 V)
+            part:R1(resistor, [Vdd, drain], resistance: 100 Ohm)
+            part:U1(self, [gate: Vdd, drain: drain, source: 0])
+        }
+        measure(operating, drain)
+        within(0.1 V .. 0.15 V)
+    }
+}

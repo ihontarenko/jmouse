@@ -1,0 +1,45 @@
+# Generated from footprint-standards/small-outline-packages.sht#tssop; regenerate, never edit.
+portrait:tssop-14-portrait("TSSOP-14") {
+    meta {
+        summary: "14-lead TSSOP, 4.4 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.TSSOP:14-P0.65-W4.4"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MO-153"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(154 x 200)
+    input:marking(text)
+
+    path:leads("M-63.769 67.692H-56.231V100H-63.769ZM-63.769 -67.692H-56.231V-100H-63.769ZM-43.769 67.692H-36.231V100H-43.769ZM-43.769 -67.692H-36.231V-100H-43.769ZM-23.769 67.692H-16.231V100H-23.769ZM-23.769 -67.692H-16.231V-100H-23.769ZM-3.769 67.692H3.769V100H-3.769ZM-3.769 -67.692H3.769V-100H-3.769ZM16.231 67.692H23.769V100H16.231ZM16.231 -67.692H23.769V-100H16.231ZM36.231 67.692H43.769V100H36.231ZM36.231 -67.692H43.769V-100H36.231ZM56.231 67.692H63.769V100H56.231ZM56.231 -67.692H63.769V-100H56.231Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -60 100)
+    pin:2(at: -40 100)
+    pin:3(at: -20 100)
+    pin:4(at: 0 100)
+    pin:5(at: 20 100)
+    pin:6(at: 40 100)
+    pin:7(at: 60 100)
+    pin:8(at: 60 -100)
+    pin:9(at: 40 -100)
+    pin:10(at: 20 -100)
+    pin:11(at: 0 -100)
+    pin:12(at: -20 -100)
+    pin:13(at: -40 -100)
+    pin:14(at: -60 -100)
+    path:body("M-71.508 -67.692H71.508A5.415 5.415 0 0 1 76.923 -62.277V62.277A5.415 5.415 0 0 1 71.508 67.692H-71.508A5.415 5.415 0 0 1 -76.923 62.277V-62.277A5.415 5.415 0 0 1 -71.508 -67.692Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-62.843 44.812A8.8 8.8 0 1 0 -45.243 44.812A8.8 8.8 0 1 0 -62.843 44.812Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: 0 0, size: 107.692 x 30.462) {
+        fill = silver
+        text = marking
+    }
+}

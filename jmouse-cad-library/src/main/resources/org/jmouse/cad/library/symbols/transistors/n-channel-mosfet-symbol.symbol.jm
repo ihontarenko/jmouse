@@ -1,0 +1,36 @@
+symbol:n-channel-mosfet-symbol("N-channel MOSFET") {
+    meta {
+        summary: "N-channel MOSFET, as drawn on a schematic"
+        code: "SY.TRANSISTOR:MOSFET-N"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:conduction
+    input:failed
+
+    group:body(live) {
+        path("M-80 0H-20M-20-26V26M-10-26V-14M-10-6V6M-10 14V26M-10-20H40V-80M-10 20H40V80M40 20V0H-8M0-8L-8 0 0 8")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    path:channel(live, "M40-80V-20H-10M-10-26V26M-10 20H40V80") {
+        stroke = positive
+        live opacity = smooth(conduction, 80 ms)
+        live glow = 6 * conduction
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:gate(at: -80 0)
+    pin:drain(at: 40 -80)
+    pin:source(at: 40 80)
+    label(name, at: 64 -16)
+    label(value, at: 64 16)
+}

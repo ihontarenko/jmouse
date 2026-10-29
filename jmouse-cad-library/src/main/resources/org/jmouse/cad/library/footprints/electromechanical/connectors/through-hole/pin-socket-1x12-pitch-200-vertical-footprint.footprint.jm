@@ -1,0 +1,29 @@
+footprint:pin-socket-1x12-pitch-200-vertical-footprint("Pin socket, 2.00 mm pitch, 1 × 12, vertical") {
+    meta {
+        summary: "Pin socket, 2.00 mm pitch, 1 row of 12, upright, through-hole"
+        code: "FP.SKT:1X12-P2-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-socket-2-00 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.5: drill 0.95, pad 1.75, pin 1 square.
+    pad:1(through-hole, rectangle, at: 0 -11, size: 1.75 x 1.75, drill: 0.95)
+    pad:2(through-hole, circle, at: 0 -9, size: 1.75 x 1.75, drill: 0.95)
+    pad:3(through-hole, circle, at: 0 -7, size: 1.75 x 1.75, drill: 0.95)
+    pad:4(through-hole, circle, at: 0 -5, size: 1.75 x 1.75, drill: 0.95)
+    pad:5(through-hole, circle, at: 0 -3, size: 1.75 x 1.75, drill: 0.95)
+    pad:6(through-hole, circle, at: 0 -1, size: 1.75 x 1.75, drill: 0.95)
+    pad:7(through-hole, circle, at: 0 1, size: 1.75 x 1.75, drill: 0.95)
+    pad:8(through-hole, circle, at: 0 3, size: 1.75 x 1.75, drill: 0.95)
+    pad:9(through-hole, circle, at: 0 5, size: 1.75 x 1.75, drill: 0.95)
+    pad:10(through-hole, circle, at: 0 7, size: 1.75 x 1.75, drill: 0.95)
+    pad:11(through-hole, circle, at: 0 9, size: 1.75 x 1.75, drill: 0.95)
+    pad:12(through-hole, circle, at: 0 11, size: 1.75 x 1.75, drill: 0.95)
+    outline(fabrication, width: 0.1, "M-0.333 -12H1V12H-1V-11.333Z")
+    outline(silkscreen, width: 0.12, "M-1.11 -12.11H1.11V12.11H-1.11Z")
+    outline(silkscreen, filled, "M-1.91 -11A0.3 0.3 0 1 0 -1.31 -11A0.3 0.3 0 1 0 -1.91 -11Z")
+    outline(courtyard, width: 0.05, "M-1.5 -12.5H1.5V12.5H-1.5Z")
+}

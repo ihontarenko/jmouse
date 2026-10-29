@@ -1,0 +1,50 @@
+# A meter nobody's engine knows: it reads how much of each period its input spends above a level. Everything it does is
+# here — when the input rises and falls through the level, what share of the last whole period that was —, and the
+# bench shows it as it shows any meter.
+
+component:duty-cycle-meter("Duty cycle meter", type: meter) {
+    meta {
+        designator: DM
+        summary: "Reads the share of each period its input spends above a level, from one rising edge to the next"
+        category: circuits
+    }
+    parameter:threshold(2.5 V, "the level the signal is read against")
+    parameter:R_input(1 MOhm, "input resistance: what it draws through, on a realistic bench")
+    pin:input(analog, 1, "signal")
+    pin:reference(analog, 2, "what the signal is read against")
+    state:rose(-1, discrete, "when the input last rose through the level; -1 before the first")
+    state:fell(-1, discrete, "when it last fell through it; -1 before the first")
+    state:duty(0, discrete, "the share of the last whole period spent above the level")
+    equations {
+        current input -> reference = realistic * (input - reference) / R_input
+    }
+    behaviour {
+        on above 'input - reference - threshold' do
+            if rose >= 0 and fell > rose then
+                duty = (fell - rose) / (time - rose)
+            end
+            rose = time
+        end
+        on below 'input - reference - threshold' do
+            fell = time
+        end
+    }
+    lead:input(yellow, stripes: blue)
+    lead:reference(grey)
+    reading:reading(100 * duty, unit: %)
+    symbol(uses: duty-cycle-meter-symbol) {
+        bind:a(pin: input)
+        bind:b(pin: reference)
+    }
+
+    expect("draws nothing on an ideal bench", from: "an ideal duty cycle meter across the lower half of a 1 MOhm divider leaves it at half") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [top, 0], U_output: 10 V)
+            part:R1(resistor, [top, middle], resistance: 1 MOhm)
+            part:R2(resistor, [middle, 0], resistance: 1 MOhm)
+            part:U1(self, [input: middle, reference: 0])
+        }
+        measure(final, middle)
+        near(5 V, +- 0.1%)
+    }
+}

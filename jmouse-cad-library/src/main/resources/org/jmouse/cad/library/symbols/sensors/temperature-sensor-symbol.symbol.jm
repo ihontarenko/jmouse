@@ -1,0 +1,44 @@
+symbol:temperature-sensor-symbol("Temperature sensor, analog output") {
+    meta {
+        summary: "A temperature sensor with a voltage output, as drawn on a schematic: a body marked with a thermometer, the supply above, ground below and the output to the right"
+        code: "SY.SENSOR:TEMPERATURE-VOLTAGE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(320 x 320)
+    input:reading(0 .. 1)
+    input:failed
+
+    group:body(live) {
+        path("M-80-80H80V80H-80Z")
+        path("M0-80V-160M0 80V160M80 0H160")
+        path("M-44-52V16M-28-52V16M-44-52A8 8 0 0 1-28-52")
+        path("M-20-180H-4M-12-188V-172")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The thermometer's bulb and its column, filled as far as the reading goes.
+    path:bulb(live, "M-52 32A16 16 0 1 0-20 32A16 16 0 1 0-52 32Z") {
+        live stroke = if(failed > 0.5, burned, signal)
+        fill = warm
+    }
+
+    box:column(live, at: -36 -16, size: 8 x 64) {
+        live level = reading
+        fill = warm
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M6-18L14-6M32-16L24-4M8 16L16 6M34 18L26 6")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:supply(at: 0 -160, "+VS")
+    pin:ground(at: 0 160, "GND")
+    pin:output(at: 160 0, "VOUT")
+    label(name, at: 120 -104)
+    label(value, at: 120 112)
+}

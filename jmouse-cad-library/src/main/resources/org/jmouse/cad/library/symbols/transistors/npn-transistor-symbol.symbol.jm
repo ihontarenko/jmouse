@@ -1,0 +1,36 @@
+symbol:npn-transistor-symbol("NPN transistor") {
+    meta {
+        summary: "NPN transistor, as drawn on a schematic"
+        code: "SY.TRANSISTOR:BIPOLAR-NPN"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:conduction
+    input:failed
+
+    group:body(live) {
+        path("M-80 0H-20M-20-28V28M-20-12L40-40V-80M-20 12L40 40V80M12.36 34.82L28 34.4L18.28 22.14")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    path:channel(live, "M40-80V-40L-20-12M-20 12L40 40V80") {
+        stroke = positive
+        live opacity = smooth(conduction, 80 ms)
+        live glow = 6 * conduction
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:base(at: -80 0)
+    pin:collector(at: 40 -80)
+    pin:emitter(at: 40 80)
+    label(name, at: 64 -16)
+    label(value, at: 64 16)
+}

@@ -1,0 +1,45 @@
+footprint:dip-28-footprint("DIP-28, 7.62 mm rows") {
+    meta {
+        summary: "28-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
+        code: "FP.DIP:28-W7.62"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/dual-inline-packages.sht#dip and the land pattern rules; regenerate, never edit.
+    # Lead 0.56 × 0.36 at most: drill 0.9, pad 1.9, pin 1 square; body 6.35 × 35.56.
+    pad:1(through-hole, rectangle, at: -3.81 -16.51, size: 1.9 x 1.9, drill: 0.9)
+    pad:2(through-hole, circle, at: -3.81 -13.97, size: 1.9 x 1.9, drill: 0.9)
+    pad:3(through-hole, circle, at: -3.81 -11.43, size: 1.9 x 1.9, drill: 0.9)
+    pad:4(through-hole, circle, at: -3.81 -8.89, size: 1.9 x 1.9, drill: 0.9)
+    pad:5(through-hole, circle, at: -3.81 -6.35, size: 1.9 x 1.9, drill: 0.9)
+    pad:6(through-hole, circle, at: -3.81 -3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:7(through-hole, circle, at: -3.81 -1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:8(through-hole, circle, at: -3.81 1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:9(through-hole, circle, at: -3.81 3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:10(through-hole, circle, at: -3.81 6.35, size: 1.9 x 1.9, drill: 0.9)
+    pad:11(through-hole, circle, at: -3.81 8.89, size: 1.9 x 1.9, drill: 0.9)
+    pad:12(through-hole, circle, at: -3.81 11.43, size: 1.9 x 1.9, drill: 0.9)
+    pad:13(through-hole, circle, at: -3.81 13.97, size: 1.9 x 1.9, drill: 0.9)
+    pad:14(through-hole, circle, at: -3.81 16.51, size: 1.9 x 1.9, drill: 0.9)
+    pad:15(through-hole, circle, at: 3.81 16.51, size: 1.9 x 1.9, drill: 0.9)
+    pad:16(through-hole, circle, at: 3.81 13.97, size: 1.9 x 1.9, drill: 0.9)
+    pad:17(through-hole, circle, at: 3.81 11.43, size: 1.9 x 1.9, drill: 0.9)
+    pad:18(through-hole, circle, at: 3.81 8.89, size: 1.9 x 1.9, drill: 0.9)
+    pad:19(through-hole, circle, at: 3.81 6.35, size: 1.9 x 1.9, drill: 0.9)
+    pad:20(through-hole, circle, at: 3.81 3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:21(through-hole, circle, at: 3.81 1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:22(through-hole, circle, at: 3.81 -1.27, size: 1.9 x 1.9, drill: 0.9)
+    pad:23(through-hole, circle, at: 3.81 -3.81, size: 1.9 x 1.9, drill: 0.9)
+    pad:24(through-hole, circle, at: 3.81 -6.35, size: 1.9 x 1.9, drill: 0.9)
+    pad:25(through-hole, circle, at: 3.81 -8.89, size: 1.9 x 1.9, drill: 0.9)
+    pad:26(through-hole, circle, at: 3.81 -11.43, size: 1.9 x 1.9, drill: 0.9)
+    pad:27(through-hole, circle, at: 3.81 -13.97, size: 1.9 x 1.9, drill: 0.9)
+    pad:28(through-hole, circle, at: 3.81 -16.51, size: 1.9 x 1.9, drill: 0.9)
+    outline(fabrication, width: 0.1, "M-2.175 -17.78H3.175V17.78H-3.175V-16.78Z")
+    outline(silkscreen, width: 0.12, "M-2.6 -17.89H-0.75A0.75 0.75 0 0 0 0.75 -17.89H2.6V17.89H-2.6Z")
+    outline(silkscreen, filled, "M-2.2 -16.51A0.3 0.3 0 1 0 -1.6 -16.51A0.3 0.3 0 1 0 -2.2 -16.51Z")
+    outline(courtyard, width: 0.05, "M-5.25 -18.3H5.25V18.3H-5.25Z")
+}

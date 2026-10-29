@@ -1,0 +1,82 @@
+symbol:seven-segment-symbol("Seven-segment display") {
+    meta {
+        summary: "A seven-segment digit and its point, cathodes common: each segment lights red as its own current flows"
+        code: "SY.DISPLAY:SEVEN-SEGMENT"
+        category: circuits
+        tags: electronics, schematic, display
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(240 x 240)
+    input:light_a(0 .. 100)
+    input:light_b(0 .. 100)
+    input:light_c(0 .. 100)
+    input:light_d(0 .. 100)
+    input:light_e(0 .. 100)
+    input:light_f(0 .. 100)
+    input:light_g(0 .. 100)
+    input:light_point(0 .. 100)
+
+    path("M-80-100H80V100H-80Z")
+    path("M0 100V120")
+    path("M-120-80H-80")
+    path("M-120-40H-80")
+    path("M-120 0H-80")
+    path("M-120 40H-80")
+    path("M120-80H80")
+    path("M120-40H80")
+    path("M120 0H80")
+    path("M120 40H80")
+    path:glow_a(live, "M-24-72H24V-64H-24Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_a, 0, 100))
+        live glow = 6 * share(light_a, 0, 100)
+    }
+    path:glow_b(live, "M28-60H36V-8H28Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_b, 0, 100))
+        live glow = 6 * share(light_b, 0, 100)
+    }
+    path:glow_c(live, "M28 8H36V60H28Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_c, 0, 100))
+        live glow = 6 * share(light_c, 0, 100)
+    }
+    path:glow_d(live, "M-24 64H24V72H-24Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_d, 0, 100))
+        live glow = 6 * share(light_d, 0, 100)
+    }
+    path:glow_e(live, "M-36 8H-28V60H-36Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_e, 0, 100))
+        live glow = 6 * share(light_e, 0, 100)
+    }
+    path:glow_f(live, "M-36-60H-28V-8H-36Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_f, 0, 100))
+        live glow = 6 * share(light_f, 0, 100)
+    }
+    path:glow_g(live, "M-24-4H24V4H-24Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_g, 0, 100))
+        live glow = 6 * share(light_g, 0, 100)
+    }
+    path:glow_point(live, "M44 64H52V72H44Z") {
+        fill = red
+        live opacity = 0.12 + 0.88 * seen(share(light_point, 0, 100))
+        live glow = 6 * share(light_point, 0, 100)
+    }
+
+    pin:segment_a(at: -120 -80)
+    pin:segment_b(at: -120 -40)
+    pin:segment_c(at: -120 0)
+    pin:segment_d(at: -120 40)
+    pin:segment_e(at: 120 -80)
+    pin:segment_f(at: 120 -40)
+    pin:segment_g(at: 120 0)
+    pin:segment_point(at: 120 40)
+    pin:cathode(at: 0 120)
+    label(name, at: 0 -116)
+    label(value, at: 100 116)
+}

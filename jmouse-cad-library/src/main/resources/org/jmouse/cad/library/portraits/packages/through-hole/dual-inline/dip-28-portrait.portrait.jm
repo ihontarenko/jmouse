@@ -1,0 +1,64 @@
+# Generated from footprint-standards/dual-inline-packages.sht#dip; regenerate, never edit.
+portrait:dip-28-portrait("DIP-28") {
+    meta {
+        summary: "28-lead DIP, 7.62 mm rows from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.DIP:28-W7.62"
+        category: circuits
+        tags: electronics, portrait, package, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(300 x 80)
+    input:marking(text)
+
+    path:leads("M-145.984 25H-134.016V30H-145.984ZM-142.205 30H-137.795V40H-142.205ZM-145.984 -25H-134.016V-30H-145.984ZM-142.205 -30H-137.795V-40H-142.205ZM-125.984 25H-114.016V30H-125.984ZM-122.205 30H-117.795V40H-122.205ZM-125.984 -25H-114.016V-30H-125.984ZM-122.205 -30H-117.795V-40H-122.205ZM-105.984 25H-94.016V30H-105.984ZM-102.205 30H-97.795V40H-102.205ZM-105.984 -25H-94.016V-30H-105.984ZM-102.205 -30H-97.795V-40H-102.205ZM-85.984 25H-74.016V30H-85.984ZM-82.205 30H-77.795V40H-82.205ZM-85.984 -25H-74.016V-30H-85.984ZM-82.205 -30H-77.795V-40H-82.205ZM-65.984 25H-54.016V30H-65.984ZM-62.205 30H-57.795V40H-62.205ZM-65.984 -25H-54.016V-30H-65.984ZM-62.205 -30H-57.795V-40H-62.205ZM-45.984 25H-34.016V30H-45.984ZM-42.205 30H-37.795V40H-42.205ZM-45.984 -25H-34.016V-30H-45.984ZM-42.205 -30H-37.795V-40H-42.205ZM-25.984 25H-14.016V30H-25.984ZM-22.205 30H-17.795V40H-22.205ZM-25.984 -25H-14.016V-30H-25.984ZM-22.205 -30H-17.795V-40H-22.205ZM-5.984 25H5.984V30H-5.984ZM-2.205 30H2.205V40H-2.205ZM-5.984 -25H5.984V-30H-5.984ZM-2.205 -30H2.205V-40H-2.205ZM14.016 25H25.984V30H14.016ZM17.795 30H22.205V40H17.795ZM14.016 -25H25.984V-30H14.016ZM17.795 -30H22.205V-40H17.795ZM34.016 25H45.984V30H34.016ZM37.795 30H42.205V40H37.795ZM34.016 -25H45.984V-30H34.016ZM37.795 -30H42.205V-40H37.795ZM54.016 25H65.984V30H54.016ZM57.795 30H62.205V40H57.795ZM54.016 -25H65.984V-30H54.016ZM57.795 -30H62.205V-40H57.795ZM74.016 25H85.984V30H74.016ZM77.795 30H82.205V40H77.795ZM74.016 -25H85.984V-30H74.016ZM77.795 -30H82.205V-40H77.795ZM94.016 25H105.984V30H94.016ZM97.795 30H102.205V40H97.795ZM94.016 -25H105.984V-30H94.016ZM97.795 -30H102.205V-40H97.795ZM114.016 25H125.984V30H114.016ZM117.795 30H122.205V40H117.795ZM114.016 -25H125.984V-30H114.016ZM117.795 -30H122.205V-40H117.795Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -140 40)
+    pin:2(at: -120 40)
+    pin:3(at: -100 40)
+    pin:4(at: -80 40)
+    pin:5(at: -60 40)
+    pin:6(at: -40 40)
+    pin:7(at: -20 40)
+    pin:8(at: 0 40)
+    pin:9(at: 20 40)
+    pin:10(at: 40 40)
+    pin:11(at: 60 40)
+    pin:12(at: 80 40)
+    pin:13(at: 100 40)
+    pin:14(at: 120 40)
+    pin:15(at: 120 -40)
+    pin:16(at: 100 -40)
+    pin:17(at: 80 -40)
+    pin:18(at: 60 -40)
+    pin:19(at: 40 -40)
+    pin:20(at: 20 -40)
+    pin:21(at: 0 -40)
+    pin:22(at: -20 -40)
+    pin:23(at: -40 -40)
+    pin:24(at: -60 -40)
+    pin:25(at: -80 -40)
+    pin:26(at: -100 -40)
+    pin:27(at: -120 -40)
+    pin:28(at: -140 -40)
+    path:body("M-148 -25H128A2 2 0 0 1 130 -23V23A2 2 0 0 1 128 25H-148A2 2 0 0 1 -150 23V-23A2 2 0 0 1 -148 -25Z") {
+        fill = black
+    }
+    path:notch("M-150 -6A6 6 0 0 1 -150 6Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-144.8 16.55A3.25 3.25 0 1 0 -138.3 16.55A3.25 3.25 0 1 0 -144.8 16.55Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 196 x 11.25) {
+        fill = silver
+        text = marking
+    }
+}

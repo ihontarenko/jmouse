@@ -1,0 +1,38 @@
+# What a drawing converted from KiCad's own libraries says of itself — whose it is, under what terms — and where each of
+# a KiCad footprint's layers lands among ours. A footprint's lines on any layer not named here — its edge cuts, its user
+# layers, its texts — are not a part's, and are left out.
+sheet "KiCad libraries" as kicad-libraries {
+    description "Who holds KiCad's own libraries, their licence, and what each KiCad layer is for."
+
+    holder "KiCad Libraries Team"
+    license "CC-BY-SA-4.0 WITH KiCad-libraries-exception"
+    home "https://gitlab.com/kicad/libraries"
+
+    # Where a converted drawing is filed, and the tags it carries.
+    category circuits
+    symbol-tags electronics, schematic, kicad
+    footprint-tags electronics, kicad, footprint
+    component-tags electronics, kicad
+    circuit-tags electronics, kicad
+
+    # The library a component with no KiCad counterpart is written under, and the symbol each mark of a sheet is drawn
+    # with — where its terminal stands.
+    own-library jmCAD
+    mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+
+    # How long a sheet's transient runs until its author says, and the time a division the oscilloscope opens on.
+    transient 20 ms
+
+    silkscreen "What is printed on the board, front and back" {
+        kicad "F.SilkS", "B.SilkS"
+    }
+    fabrication "What the assembly drawing shows" {
+        kicad "F.Fab", "B.Fab"
+    }
+    courtyard "The space the part keeps clear around it" {
+        kicad "F.CrtYd", "B.CrtYd"
+    }
+    copper "Copper drawn besides the pads" {
+        kicad "F.Cu", "B.Cu"
+    }
+}

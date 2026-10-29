@@ -1,0 +1,31 @@
+footprint:dip-14-footprint("DIP-14, 7.62 mm rows") {
+    meta {
+        summary: "14-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
+        code: "FP.DIP:14-W7.62"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/dual-inline-packages.sht#dip and the land pattern rules; regenerate, never edit.
+    # Lead 0.56 × 0.36 at most: drill 0.9, pad 1.9, pin 1 square; body 6.35 × 19.05.
+    pad:1(through-hole, rectangle, at: -3.81 -7.62, size: 1.9 x 1.9, drill: 0.9)
+    pad:2(through-hole, circle, at: -3.81 -5.08, size: 1.9 x 1.9, drill: 0.9)
+    pad:3(through-hole, circle, at: -3.81 -2.54, size: 1.9 x 1.9, drill: 0.9)
+    pad:4(through-hole, circle, at: -3.81 0, size: 1.9 x 1.9, drill: 0.9)
+    pad:5(through-hole, circle, at: -3.81 2.54, size: 1.9 x 1.9, drill: 0.9)
+    pad:6(through-hole, circle, at: -3.81 5.08, size: 1.9 x 1.9, drill: 0.9)
+    pad:7(through-hole, circle, at: -3.81 7.62, size: 1.9 x 1.9, drill: 0.9)
+    pad:8(through-hole, circle, at: 3.81 7.62, size: 1.9 x 1.9, drill: 0.9)
+    pad:9(through-hole, circle, at: 3.81 5.08, size: 1.9 x 1.9, drill: 0.9)
+    pad:10(through-hole, circle, at: 3.81 2.54, size: 1.9 x 1.9, drill: 0.9)
+    pad:11(through-hole, circle, at: 3.81 0, size: 1.9 x 1.9, drill: 0.9)
+    pad:12(through-hole, circle, at: 3.81 -2.54, size: 1.9 x 1.9, drill: 0.9)
+    pad:13(through-hole, circle, at: 3.81 -5.08, size: 1.9 x 1.9, drill: 0.9)
+    pad:14(through-hole, circle, at: 3.81 -7.62, size: 1.9 x 1.9, drill: 0.9)
+    outline(fabrication, width: 0.1, "M-2.175 -9.525H3.175V9.525H-3.175V-8.525Z")
+    outline(silkscreen, width: 0.12, "M-2.6 -9.635H-0.75A0.75 0.75 0 0 0 0.75 -9.635H2.6V9.635H-2.6Z")
+    outline(silkscreen, filled, "M-2.2 -7.62A0.3 0.3 0 1 0 -1.6 -7.62A0.3 0.3 0 1 0 -2.2 -7.62Z")
+    outline(courtyard, width: 0.05, "M-5.25 -10.05H5.25V10.05H-5.25Z")
+}

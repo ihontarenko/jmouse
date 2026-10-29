@@ -1,0 +1,65 @@
+symbol:operational-amplifier-wide-symbol("Operational amplifier, KiCad's proportions") {
+    meta {
+        summary: "Operational amplifier as KiCad draws it: the non-inverting input on top, inputs 2.54 mm apart, the supplies from the triangle's slanted side — the same living drawing as the compact one, so a KiCad design's wires land on its pins"
+        code: "SY.AMPLIFIER:OPERATIONAL-WIDE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # KiCad's Amplifier_Operational at 2.54 mm = 40: inputs at x = -120, the output at 120, the supplies at x = -40 from
+    # the slanted sides (y = ±60 there) out to ±120.
+    size(480 x 480)
+    input:swing(0 .. 1)
+    input:lead(-1 .. 1)
+    input:saturated(0 .. 1)
+    input:failed
+
+    # The body, filled as the drawing theme fills a part's body, with the gauge standing in it; it warms when the output
+    # is pinned at a rail — no longer amplifying, it is comparing.
+    path:triangle(live, "M-160-160V160L160 0Z") {
+        fill = body
+        live stroke = if(failed > 0.5, burned, if(saturated > 0.5, warm, signal))
+    }
+
+    # Where the output stands between its supplies: a gauge inside the body, empty at the negative rail, full at the
+    # positive one.
+    box:output_level(live, at: -20 0, size: 16 x 88) {
+        live level = swing
+        live fill = if(saturated > 0.5, warm, positive)
+    }
+
+    group:body(live) {
+        path("M-240-80H-160")
+        path("M-240 80H-160")
+        path("M160 0H240")
+        path("M-80-120V-240")
+        path("M-80 120V240")
+        path("M-64-200H-48M-56-208V-192")
+        path("M-64 200H-48")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The higher input lights: the way the output is being driven.
+    path:non_inverting_sign(live, "M-148-80H-124M-136-92V-68") {
+        live stroke = if(failed > 0.5, burned, if(lead > 0.5, positive, signal))
+    }
+
+    path:inverting_sign(live, "M-148 80H-124") {
+        live stroke = if(failed > 0.5, burned, if(lead < -0.5, positive, signal))
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:non_inverting_input(at: -240 -80)
+    pin:inverting_input(at: -240 80)
+    pin:output(at: 240 0)
+    pin:positive_supply(at: -80 -240)
+    pin:negative_supply(at: -80 240)
+    label(name, at: 80 -120)
+    label(value, at: 80 128)
+}

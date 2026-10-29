@@ -1,0 +1,60 @@
+# A laboratory supply as it behaves on a bench: constant voltage until the load asks for more than its current limit,
+# then constant current — the voltage sags to what the limit through the load gives.
+#
+# Inside it is a set voltage behind a small output resistance; the current that would flow is held under the limit with
+# a rounded knee, which is what the supply's own regulation loop does. Only the limit is flat: a supply driven above its
+# set voltage takes the current back through its output resistance, so Newton always has one side with a slope to land
+# on — with a flat side at both ends it jumps between them and never settles.
+
+component:bench-supply("Bench power supply", type: power-supply) {
+    meta {
+        designator: PS
+        summary: "A DC supply with a current limit: constant voltage, then constant current when the load asks for more"
+        category: circuits
+    }
+    use:smooth-transitions
+
+    parameter:V_set(12 V, in: 0 .. 30, step: 0.1, live, "the voltage it holds while the current is below the limit")
+    parameter:I_limit(1 A, in: 0.01 .. 5, step: 0.01, live, "the most current it gives; at the limit the voltage sags")
+    parameter:R_output(10 mOhm, "output resistance while it holds the voltage")
+
+    pin:positive(analog, 1, "positive output")
+    pin:negative(analog, 2, "negative output")
+
+    symbol(uses: bench-supply-symbol) {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+
+    equations {
+        let wanted : current = (V_set - (positive - negative)) / R_output
+        current negative -> positive = soft_minimum(wanted, I_limit, 0.01 * I_limit)
+    }
+
+    expect("holds the set voltage below the limit", from: "constant-voltage mode: 12 V into 100 Ohm is 120 mA") {
+        bench(for: 1 ms) {
+            part:R1(resistor, [out, 0], resistance: 100 Ohm)
+            part:U1(self, [positive: out, negative: 0])
+        }
+        measure(final, out)
+        near(12 V, +- 0.5%)
+    }
+
+    expect("limits the current and lets the voltage sag", from: "constant-current mode: 1 A limit into 5 Ohm is 5 V") {
+        bench(for: 1 ms) {
+            part:R1(resistor, [out, 0], resistance: 5 Ohm)
+            part:U1(self, [positive: out, negative: 0])
+        }
+        measure(final, out)
+        near(5 V, +- 2%)
+    }
+
+    expect("a near short takes the limit, not more", from: "constant-current mode: 1 A limit into 1 Ohm is 1 V") {
+        bench(for: 1 ms) {
+            part:R1(resistor, [out, 0], resistance: 1 Ohm)
+            part:U1(self, [positive: out, negative: 0])
+        }
+        measure(final, out)
+        near(1 V, +- 2%)
+    }
+}

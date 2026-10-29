@@ -1,5 +1,8 @@
 package org.jmouse.spice.node;
 
+import org.jmouse.el.writer.SourceWritable;
+import org.jmouse.el.writer.SourceWriter;
+import org.jmouse.el.writer.TextSourceWriter;
 import org.jmouse.spice.SpicePosition;
 
 import java.util.List;
@@ -11,7 +14,7 @@ import java.util.Optional;
  * {@code PWL(…)}, {@code EXP(…)}, {@code SFFM(…)}, {@code AM(…)} — its values in the order SPICE gives them, as
  * many as were written.
  */
-public record SpiceWaveform(Kind kind, List<SpiceValue> values, SpicePosition position) {
+public record SpiceWaveform(Kind kind, List<SpiceValue> values, SpicePosition position) implements SourceWritable {
 
     public SpiceWaveform {
         values = List.copyOf(values);
@@ -36,7 +39,13 @@ public record SpiceWaveform(Kind kind, List<SpiceValue> values, SpicePosition po
     }
 
     /** {@code SIN(0 1 50)}, as SPICE writes it. */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        writer.word(kind.name()).opening("(").each(values).join(")");
+    }
+
+    /** The waveform as SPICE writes it, on its own. */
     public String written() {
-        return kind.name() + "(" + String.join(" ", values.stream().map(SpiceValue::written).toList()) + ")";
+        return TextSourceWriter.render(this, SpiceNode.LAYOUT);
     }
 }

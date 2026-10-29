@@ -1,0 +1,37 @@
+symbol:dual-secondary-transformer-symbol("Transformer with two secondaries") {
+    meta {
+        summary: "A transformer with one primary and two separate secondaries, as drawn on a schematic: each winding on pins of its own"
+        code: "SY.TRANSFORMER:DUAL-SECONDARY"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Pins where KiCad's TEZ10 draws them (2.54 mm = 40): the primary on the left, the first secondary high and the second
+    # low on the right — so a KiCad design's wires land on them as drawn there.
+    size(320 x 680)
+    input:failed
+
+    group:body(live) {
+        path("M-160-160H-80C-40-160-40-80-80-80C-40-80-40 0-80 0C-40 0-40 80-80 80C-40 80-40 160-80 160H-160")
+        path("M-8-260V340M8-260V340")
+        path("M160-240H80C40-240 40-160 80-160C40-160 40-80 80-80C40-80 40 0 80 0H160")
+        path("M160 80H80C40 80 40 160 80 160C40 160 40 240 80 240C40 240 40 320 80 320H160")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:primary_one(at: -160 -160)
+    pin:primary_two(at: -160 160)
+    pin:secondary_a_one(at: 160 -240)
+    pin:secondary_a_two(at: 160 0)
+    pin:secondary_b_one(at: 160 80)
+    pin:secondary_b_two(at: 160 320)
+    label(name, at: 0 -292)
+    label(value, at: 0 372)
+}

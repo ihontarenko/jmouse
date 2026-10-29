@@ -1,0 +1,85 @@
+# SH1106: the controller of the common 1.3-inch monochrome OLED module, on I²C — a member of the I²C OLED controller,
+# with the SSD1306's control byte and shared commands. Its own: a display memory of 132 columns by eight pages, of which
+# the 128-column panel shows columns 2 to 129; page addressing only — the 20h, 21h and 22h of the SSD1306 are not
+# commands here, so a driver written for the SSD1306 draws on an SH1106 only page by page —; and a DC-DC converter for
+# the panel voltage that is on from reset (ADh 8Bh), where the SSD1306 must be told 8Dh 14h.
+
+component:sh1106("SH1106 OLED module", type: display) {
+    meta {
+        designator: DS
+        summary: "128×64 monochrome OLED on I²C with a 132-column display memory: page addressing, DC-DC on from reset"
+        source: "Sino Wealth SH1106 data sheet V2.3 (2008): command table (ADh 8Ah/8Bh DC-DC, 8Bh at power-on; B0h–B7h page; 00h–1Fh column), 132 × 64 display data RAM, I²C control byte Co and D/C; the 1.3-inch module's panel on RAM columns 2 to 129. Modelled, not taken from the data sheet: the column pointer past 131 goes back to 0. Not modelled: contrast, the charge pump voltage 30h–33h, read-modify-write E0h/EEh, reading the memory back"
+        package: "1.3-inch module, 4 pins"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-oled-controller
+    use:cmos-hc
+
+    parameter:memory_columns(132, in: [128, 132], "its display memory: 132 columns a page")
+    parameter:first_column(2, in: 0 .. 4, step: 1, integer, "the module's panel starts at memory column 2")
+
+    pin:GND(ground, 1)
+    pin:Vcc(power, 2)
+    pin:scl(digital, input, 3, "serial clock")
+    pin:sda(digital, bidirectional, open-drain, 4, "serial data")
+
+    symbol(uses: oled-128x64-symbol)
+
+    state:pump(1, discrete, "the DC-DC converter: on from reset")
+
+    behaviour {
+        final let DC_DC = 173               # ADh + 8Bh on, 8Ah off
+
+        function chip_arguments(code)
+            if code == DC_DC then
+                return 1
+            end
+            return 0
+        end
+
+        function chip_argument(code, index, value)
+            if code == DC_DC then
+                pump = bit(value, 0)
+            end
+        end
+    }
+
+    expect("on from reset its DC-DC lights the panel with AFh alone", from: "SH1106 V2.3: DC-DC ON at power-on (8Bh), so AFh lights the panel") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x00 0xAF")
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figure: U1.lit)
+        near(1, +- 0.01)
+    }
+
+    expect("ADh 8Ah turns the DC-DC off and the panel dark", from: "SH1106 V2.3: ADh, then 8Ah — DC-DC off") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x00 0xAD 0x8A 0xAF")
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figure: U1.lit)
+        near(0, +- 0.01)
+    }
+
+    expect("a page holds 132 columns: column 131 is the last before it wraps", from: "132 × 64 display RAM: 03h and 18h set column 83h (131), the last of a page; past it the pointer is modelled going back to 0") {
+        bench(i2c-bus, for: 2 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x00 0xB2 0x03 0x18")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x40 0xFF", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figures: [U1.cursor_column, U1.cursor_page])
+        is([0,2])
+    }
+
+    expect("the SSD1306's 20h 00h does nothing here: the page does not move on", from: "SH1106 V2.3 command table: no 20h — page addressing only; the 00h after it is the column's low nibble") {
+        bench(i2c-bus, for: 2 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x00 0xB0 0x10 0x20 0x00")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x40 0x01 0x02 0x03", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figures: [U1.cursor_column, U1.cursor_page])
+        is([3,0])
+    }
+}

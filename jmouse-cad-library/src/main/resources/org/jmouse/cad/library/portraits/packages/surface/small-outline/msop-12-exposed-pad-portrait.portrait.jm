@@ -1,0 +1,43 @@
+# Generated from footprint-standards/small-outline-packages.sht#msop-12-exposed; regenerate, never edit.
+portrait:msop-12-exposed-pad-portrait("MSOP-12, exposed-pad") {
+    meta {
+        summary: "12-lead MSOP, 3 × 4 mm body, 0.65 mm pitch, exposed pad from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.MSOP:12-P0.65-EP"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "the makers' MSE12 outline (Analog Devices)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(145 x 160)
+    input:marking(text)
+
+    path:leads("M-64.154 46.154H-55.846V80H-64.154ZM-64.154 -46.154H-55.846V-80H-64.154ZM-44.154 46.154H-35.846V80H-44.154ZM-44.154 -46.154H-35.846V-80H-44.154ZM-24.154 46.154H-15.846V80H-24.154ZM-24.154 -46.154H-15.846V-80H-24.154ZM-4.154 46.154H4.154V80H-4.154ZM-4.154 -46.154H4.154V-80H-4.154ZM15.846 46.154H24.154V80H15.846ZM15.846 -46.154H24.154V-80H15.846ZM35.846 46.154H44.154V80H35.846ZM35.846 -46.154H44.154V-80H35.846Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -60 80)
+    pin:2(at: -40 80)
+    pin:3(at: -20 80)
+    pin:4(at: 0 80)
+    pin:5(at: 20 80)
+    pin:6(at: 40 80)
+    pin:7(at: 40 -80)
+    pin:8(at: 20 -80)
+    pin:9(at: 0 -80)
+    pin:10(at: -20 -80)
+    pin:11(at: -40 -80)
+    pin:12(at: -60 -80)
+    path:body("M-68.462 -46.154H48.462A3.692 3.692 0 0 1 52.154 -42.462V42.462A3.692 3.692 0 0 1 48.462 46.154H-68.462A3.692 3.692 0 0 1 -72.154 42.462V-42.462A3.692 3.692 0 0 1 -68.462 -46.154Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-62.554 30.554A6 6 0 1 0 -50.554 30.554A6 6 0 1 0 -62.554 30.554Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 87.015 x 20.769) {
+        fill = silver
+        text = marking
+    }
+}

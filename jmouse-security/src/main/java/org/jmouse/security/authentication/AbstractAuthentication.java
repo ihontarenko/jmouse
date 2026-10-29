@@ -24,6 +24,7 @@ abstract public class AbstractAuthentication implements Authentication {
 
     public AbstractAuthentication(Object principal, Object credentials) {
         this(principal, credentials, Collections.emptyList());
+        setAuthenticated(false);
     }
 
     @Override
@@ -62,6 +63,8 @@ abstract public class AbstractAuthentication implements Authentication {
 
         if (this.getPrincipal() instanceof Principal principal) {
             username = principal.getName();
+        } else if (this.getPrincipal() != null) {
+            username = this.getPrincipal().toString();
         }
 
         return username;

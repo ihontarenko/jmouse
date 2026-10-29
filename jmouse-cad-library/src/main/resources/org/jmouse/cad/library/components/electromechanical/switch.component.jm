@@ -1,0 +1,28 @@
+# A contact that is either made or not: worked while the circuit runs, it does not start the circuit again.
+component:switch("Switch", type: switch) {
+    meta {
+        designator: SW
+        summary: "A single-pole switch, opened and closed while the circuit runs"
+        category: circuits
+    }
+
+    parameter:closed(0, in: 0 .. 1, step: 1, integer, live, "Closed")
+    parameter:R_closed(10 mOhm, "contact resistance when closed")
+    parameter:R_open(100 MOhm, "leakage resistance when open")
+
+    pin:a(analog, 1, "first contact")
+    pin:b(analog, 2, "second contact")
+
+    symbol(uses: switch-symbol) {
+        bind:closed(closed)
+    }
+
+    equations {
+        current a -> b = (a - b) / (closed * R_closed + (1 - closed) * R_open)
+    }
+
+    # How it looks in the hand: a miniature toggle whose lever is thrown by its state.
+    portrait(uses: toggle-switch-portrait) {
+        bind:closed(closed)
+    }
+}

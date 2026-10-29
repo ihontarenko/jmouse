@@ -1,0 +1,27 @@
+symbol:relay-symbol("Relay") {
+    meta {
+        summary: "A relay, as drawn on a schematic: its coil, and a changeover contact that leaves normally-closed for normally-open while the coil holds it"
+        code: "SY.RELAY:SPDT"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(200 x 160)
+    input:energized
+
+    path("M-100-60H-60V-28M-100 60H-60V28M-76-28H-44V28H-76ZM-76 28L-44-28M-36 6H-26M-18 6H-8M0 6H10M18 6H28M20 80V40M100-60H62V-28M100 20H72V-4M16 40A4 4 0 1 0 24 40A4 4 0 1 0 16 40")
+
+    group:armature(live, pivot: 20 40) {
+        path("M20 40L56-28")
+        live rotate = between(0 deg, 22 deg, smooth(energized, 40 ms))
+    }
+
+    pin:coil_one(at: -100 -60)
+    pin:coil_two(at: -100 60)
+    pin:common(at: 20 80)
+    pin:normally_closed(at: 100 -60)
+    pin:normally_open(at: 100 20)
+    label(name, at: 0 -92)
+    label(value, at: 0 104)
+}

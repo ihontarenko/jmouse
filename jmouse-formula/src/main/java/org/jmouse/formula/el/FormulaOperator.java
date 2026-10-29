@@ -11,14 +11,19 @@ import org.jmouse.formula.MathematicalFunction;
  * The operators jMF adds to jME. {@code ^} is registered on jME's caret token, so in a formula container it
  * replaces XOR: in mathematics a caret is a power. {@code FACTORIAL} is never registered — it only
  * names the operator of a {@link FactorialNode}, because a trailing {@code !} is parsed, not looked up; a leading
- * minus is jME's own negation.
+ * minus is jME's own negation. {@code PAIR} is registered only by a language that reads pairs
+ * ({@link FormulaLanguage#withPairs}): {@code a -> b} among a call's arguments is the two of them.
  */
 public enum FormulaOperator implements Operator {
 
     DIVIDE(BasicToken.T_DIVIDE, "DIVIDE", 700, FormulaOperator::divide),
     POWER(BasicToken.T_CARET, "POWER", 800, operands -> Math.pow(number(operands[0]), number(operands[1]))),
     FACTORIAL(BasicToken.T_NEGATE, "FACTORIAL", 1000,
-            operands -> MathematicalFunction.FACTORIAL.real().apply(new double[]{number(operands[0])}));
+            operands -> MathematicalFunction.FACTORIAL.real().apply(new double[]{number(operands[0])})),
+    /** {@code a -> b}: two values written as one pair, the loosest of all — {@code 0 mA -> 0} pairs the whole of each side. */
+    PAIR(BasicToken.T_ARROW, "PAIR", 50, operands -> {
+        throw new IllegalArgumentException("a pair 'a -> b' is no value: it stands among a call's arguments");
+    });
 
     private final Token.Type type;
     private final String name;

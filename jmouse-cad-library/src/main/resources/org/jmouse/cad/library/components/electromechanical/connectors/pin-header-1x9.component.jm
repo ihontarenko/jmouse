@@ -1,0 +1,19 @@
+component:pin-header-1x9("Pin header, 1x9", type: connector) {
+    meta {
+        summary: "Single-row pin header, 9 contacts, 2.54 mm pitch"
+        category: circuits
+        source: "generic connector; no electrical behaviour"
+        designator: J
+        package: "PinHeader_1x09_P2.54mm"
+    }
+    pin:pin1(analog, 1, "contact 1")
+    pin:pin2(analog, 2, "contact 2")
+    pin:pin3(analog, 3, "contact 3")
+    pin:pin4(analog, 4, "contact 4")
+    pin:pin5(analog, 5, "contact 5")
+    pin:pin6(analog, 6, "contact 6")
+    pin:pin7(analog, 7, "contact 7")
+    pin:pin8(analog, 8, "contact 8")
+    pin:pin9(analog, 9, "contact 9")
+    symbol(uses: pin-header-1x9-symbol)
+}

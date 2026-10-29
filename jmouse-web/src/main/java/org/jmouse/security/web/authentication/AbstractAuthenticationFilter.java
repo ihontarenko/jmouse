@@ -24,6 +24,7 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
     protected       AuthenticationSuccessHandler successHandler;
     protected       AuthenticationFailureHandler failureHandler;
     protected       boolean                      continueChainBeforeSuccess = false;
+    private org.jmouse.security.web.session.SessionAuthenticateHandler sessionAuthentication;
 
     protected AbstractAuthenticationFilter(
             AuthenticationManager authenticationManager,
@@ -54,25 +55,19 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
             return;
         }
 
+        Authentication after;
         try {
             Authentication before = tryAuthenticate(request);
-
-            if (before == null) {
-                chain.doFilter(request, response);
-                return;
-            }
-
-            Authentication after = authenticationManager.authenticate(before);
-
-            if (after != null && after.isAuthenticated()) {
-                doHandleSuccess(requestContext, chain, after);
-                return;
-            }
-
-            chain.doFilter(request, response);
-
+            after = before == null ? null : authenticationManager.authenticate(before);
         } catch (Exception exception) {
             doHandleFailure(requestContext, chain, exception);
+            return;
+        }
+        // Application failures must propagate to application error handling, not become 401 responses.
+        if (after != null && after.isAuthenticated()) {
+            doHandleSuccess(requestContext, chain, after);
+        } else {
+            chain.doFilter(request, response);
         }
     }
 
@@ -95,6 +90,15 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
         SecurityContext      securityContext = SecurityContext.ofAuthentication(authentication);
         RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
 
+        Authentication previous = SecurityContextHolder.getContext().getAuthentication();
+        boolean newIdentity = previous == null || !previous.isAuthenticated()
+                || previous.getClass() != authentication.getClass()
+                || !java.util.Objects.equals(previous.getName(), authentication.getName())
+                || !java.util.Objects.equals(previous.getAuthorities(), authentication.getAuthorities());
+        if (sessionAuthentication != null && newIdentity) {
+            sessionAuthentication.onAuthentication(authentication, keeper);
+            request.setAttribute(org.jmouse.security.web.session.SessionAuthenticateHandler.APPLIED_ATTRIBUTE, true);
+        }
         SecurityContextHolder.setContext(securityContext);
         contextRepository.save(securityContext, keeper);
 
@@ -125,6 +129,10 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
     ) throws IOException, ServletException {
         SecurityContextHolder.clearContext();
         failureHandler.onFailure(requestContext.request(), requestContext.response(), exception);
+    }
+
+    public void setSessionAuthenticationHandler(org.jmouse.security.web.session.SessionAuthenticateHandler handler) {
+        this.sessionAuthentication = java.util.Objects.requireNonNull(handler, "handler");
     }
 
     public void setContinueChainBeforeSuccess(boolean flag) {

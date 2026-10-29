@@ -1,0 +1,15 @@
+# A row of 1 header pin: what a wire, a probe or another board is plugged into. It joins nothing and takes
+# nothing — the pins are nodes a design hands to the outside, nothing more.
+component:pin-header-1x1("Pin header, 1x1", type: connector) {
+    meta {
+        designator: J
+        summary: "Single-row pin header, 1 contact, 2.54 mm pitch"
+        source: "generic 2.54 mm pin header; no electrical behaviour"
+        package: "PinHeader_1x01_P2.54mm"
+        category: circuits
+    }
+
+    pin:pin1(analog, 1, "contact 1")
+
+    symbol(uses: pin-header-1x1-symbol)
+}

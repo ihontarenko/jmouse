@@ -1,0 +1,86 @@
+# Electrical macromodel for an LM317 with a smooth current-limited series pass
+# device. It covers the reference, adjustment-pin current and dropout. Thermal
+# shutdown and safe-area compensation need temperature and power state and are
+# intentionally outside this three-terminal model.
+component:lm317("LM317", type: regulator) {
+    meta {
+        designator: U
+        summary: "Adjustable positive regulator, 1.25 V reference, up to 1.5 A"
+        source: "TI LM317 datasheet SLVS044Z, Rev. Z"
+        package: "TO-220"
+        category: circuits
+        failure: open
+    }
+    use:smooth-transitions
+
+    parameter:V_reference(1.25 V, "reference voltage at 25 C")
+    parameter:I_adjustment(50 uA, "adjustment pin current, typical")
+    parameter:I_maximum(1.5 A, "rated maximum output current")
+    parameter:V_dropout(2 V, "typical input-output dropout")
+    parameter:transconductance(10 A/V, "regulation transconductance; a finite loop gain")
+    # How it warms and where it gives up (TO-220 without a heatsink: RθJA about 50 K/W; past 150 °C it stops regulating).
+    parameter:thermal_resistance(50 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(30 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:adjust(analog, 1, "adjustment")
+    pin:output(analog, output, 2, "regulated output; tab is also output")
+    pin:input(power, 3, "unregulated input")
+
+    footprint(to-220-3-vertical-footprint)
+
+    symbol(uses: adjustable-regulator-symbol) {
+        bind:failed(failed)
+    }
+
+    equations {
+        let error : voltage = adjust + V_reference - output
+        let headroom : ratio = soft_step((input - output) - V_dropout, 0.2)
+        let requested : current = soft_positive_part(transconductance * error, 0.001)
+        current input -> output = headroom * I_maximum * requested / sqrt(I_maximum^2 + requested^2)
+        current input -> adjust = I_adjustment
+    }
+
+    expect("5 V output from 240 and 720 Ohm divider", from: "typical adjustable regulator circuit and V_reference = 1.25 V") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 12 V)
+            part:R1(resistor, [output, adjust], resistance: 240 Ohm)
+            part:R2(resistor, [adjust, 0], resistance: 720 Ohm)
+            part:R3(resistor, [output, 0], resistance: 1 kOhm)
+            part:C1(capacitor, [output, 0], capacitance: 1 uF)
+            part:U1(self, [input: input, output: output, adjust: adjust])
+        }
+        measure(final, output)
+        near(5 V, +- 5%)
+    }
+
+    expect("output drops when input headroom is insufficient", from: "operation with low input voltage") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 6 V)
+            part:R1(resistor, [output, adjust], resistance: 240 Ohm)
+            part:R2(resistor, [adjust, 0], resistance: 720 Ohm)
+            part:R3(resistor, [output, 0], resistance: 100 Ohm)
+            part:C1(capacitor, [output, 0], capacitance: 1 uF)
+            part:U1(self, [input: input, output: output, adjust: adjust])
+        }
+        measure(operating, output)
+        within(3.5 V .. 4.9 V)
+    }
+
+    expect("overload is limited near rated current", from: "output current rating, 1.5 A") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 12 V)
+            part:R1(resistor, [output, adjust], resistance: 240 Ohm)
+            part:R2(resistor, [adjust, 0], resistance: 720 Ohm)
+            part:R3(resistor, [output, 0], resistance: 2 Ohm)
+            part:U1(self, [input: input, output: output, adjust: adjust])
+        }
+        measure(operating, current: V1)
+        within(-1.6 A .. -1.1 A)
+    }
+
+    # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-220-portrait) {
+        bind:marking("LM317")
+    }
+}

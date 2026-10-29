@@ -1,0 +1,88 @@
+# 74HC4040: a twelve-stage binary ripple counter. Each stage is a flip-flop clocked by the one before it, so the count
+# settles stage by stage — Q0 first, Q11 last, eleven stage delays later. Between them, for a few nanoseconds, the
+# outputs read numbers the counter never held: the ripple, what a synchronous counter exists to avoid. It counts on the
+# clock's falling edge; MR high sends it to nought at once.
+
+component:74hc4040("74HC4040", type: counter) {
+    meta {
+        designator: U
+        summary: "Twelve-stage binary ripple counter: counts on the falling clock edge, its stages settling one after another"
+        source: "NXP 74HC4040 data sheet, quick reference: CP to Q0 14 ns, Qn to Qn+1 8 ns typical at 5 V, CL = 15 pF; pinout per the data sheet"
+        package: "DIP-16, SOIC-16"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+
+    parameter:clock_delay(14 ns, "clock to Q0, typical at 5 V, CL = 15 pF")
+    parameter:stage_delay(8 ns, "each stage to the next, typical at 5 V, CL = 15 pF")
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes (DIP-16 in still air)")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:output[0..11](digital, output, [9, 7, 6, 5, 3, 2, 4, 13, 12, 14, 15, 1], "Q0 to Q11, the count, Q0 the least significant")
+    pin:GND(ground, 8)
+    pin:clock(digital, input, 10, "CP, counts on its falling edge")
+    pin:master_reset(digital, input, 11, "MR, back to nought at once, active high")
+    pin:Vcc(power, 16)
+
+    symbol(box) {
+        left([clock edge bubble, master_reset])
+        right(output)
+        power([Vcc, GND])
+    }
+
+    state:value(X, discrete, "the count, unknown until the counter is reset")
+
+    behaviour {
+        # Stage by stage: bit n settles n stage delays after Q0 — the ripple a reader sees on a fast scope.
+        function show()
+            let scale = delay_scale(Vcc - GND)
+            for position in 0..11 do
+                drive('output_' ~ position, bit(value, position), (clock_delay + position * stage_delay) * scale)
+            end
+        end
+
+        on start do
+            if master_reset == 1 then
+                value = 0
+            end
+            show()
+        end
+
+        on rising 'master_reset' do
+            value = 0
+            show()
+        end
+
+        on falling 'clock' when master_reset == 0 do
+            if known(value) then
+                value = low_bits(value + 1, 12)
+            end
+            show()
+        end
+    }
+
+    expect("reset, five falling edges count to five", from: "function table: count on each falling CP edge") {
+        bench(for: 5.2 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            # MR high for the first 0.25 µs, before the clock's first falling edge at 0.5 µs.
+            part:V2(square-generator, [positive: master_reset, negative: 0], high: 5 V, low: 0 V, frequency: 40 kHz, duty: 0.01)
+            part:V3(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:U1(self, [clock: clock, master_reset: master_reset, output_0: q0, output_1: q1, output_2: q2, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [q0, q1, q2])
+        is([1,0,1])
+    }
+
+    expect("MR high holds it at nought", from: "function table: MR high clears every stage") {
+        bench(for: 5.2 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [master_reset, 0], U_output: 5 V)
+            part:V3(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:U1(self, [clock: clock, master_reset: master_reset, output_0: q0, output_2: q2, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [q0, q2])
+        is([0,0])
+    }
+}

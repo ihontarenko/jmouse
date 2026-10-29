@@ -2,9 +2,11 @@ package org.jmouse.formula;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleBiFunction;
@@ -276,6 +278,15 @@ public final class GradientCompiler {
 
         private static final Map<String, RealFunction[]> CACHE = new ConcurrentHashMap<>();
 
+        /**
+         * The functions that stand still between their jumps: their derivative is 0 wherever there is one, which is what
+         * Newton is given, as SPICE gives it. Any other function a derivative cannot be found for is no function a tape
+         * carries — its partial would be a guess, and a tape that guesses 0 for {@code min} left Newton blind.
+         */
+        private static final Set<MathematicalFunction> STEPPED = EnumSet.of(MathematicalFunction.SIGN, MathematicalFunction.FLOOR,
+                MathematicalFunction.CEIL, MathematicalFunction.ROUND, MathematicalFunction.STEP);
+
+        /** @throws Untaped when a derivative of a function that is not {@link #STEPPED} cannot be found */
         static RealFunction[] of(MathematicalFunction function, int arity) {
             return CACHE.computeIfAbsent(function.name() + "/" + arity, ignored -> {
                 List<String> names = new ArrayList<>();
@@ -288,10 +299,14 @@ public final class GradientCompiler {
                 Formula call = new Formula.Call(function, variables);
                 RealFunction[] derivatives = new RealFunction[arity];
                 for (int index = 0; index < arity; index++) {
+                    if (STEPPED.contains(function)) {
+                        derivatives[index] = values -> 0;
+                        continue;
+                    }
                     try {
                         derivatives[index] = RealCompiler.compile(Differentiation.derivative(call, names.get(index)), table, function.name());
                     } catch (RuntimeException undifferentiable) {
-                        derivatives[index] = values -> 0;
+                        throw new Untaped();
                     }
                 }
                 return derivatives;

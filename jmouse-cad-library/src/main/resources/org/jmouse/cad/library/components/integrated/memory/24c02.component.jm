@@ -1,0 +1,131 @@
+# 24C02: 2 Kbit of EEPROM on the I²C bus — 256 bytes, its address 1010 A2 A1 A0. A write names a word address and
+# then up to eight bytes, which roll round inside their 8-byte page; nothing is stored until the STOP, and then the
+# chip is busy for its write cycle and answers no one, which is how a controller polls for the end. A read starts where
+# the address pointer stands and runs on through the whole memory. WP high protects it: bytes are acknowledged and
+# dropped. It ships erased, every byte 0xFF.
+
+component:24c02("24C02", type: memory) {
+    meta {
+        designator: U
+        summary: "2 Kbit I²C EEPROM: 256 bytes, 8-byte pages, a 5 ms write cycle, write protect"
+        source: "Microchip AT24C01C/AT24C02C data sheet: device address 1010 A2 A1 A0, 8-byte page write, tWR 5 ms max, A0-A2 pulled to GND when left floating, WP high inhibits writes, pinout per the DIP-8 package"
+        package: "DIP-8, SOIC-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-target
+    use:cmos-hc
+
+    parameter:address(80, "1010 000: the address with A2 A1 A0 low")
+    parameter:write_cycle(5 ms, "tWR: how long it is busy after a STOP that ends a write")
+    parameter:page_size(8, in: 1 .. 16, step: 1, integer, "bytes a page write rolls round in: 8 here, 16 in the larger members of the family")
+
+    pin:a0(digital, input, 1, "address bit A0, read as low when left floating")
+    pin:a1(digital, input, 2, "address bit A1")
+    pin:a2(digital, input, 3, "address bit A2")
+    pin:GND(ground, 4)
+    pin:sda(digital, bidirectional, open-drain, 5, "serial data")
+    pin:scl(digital, input, 6, "serial clock")
+    pin:write_protect(digital, input, 7, "WP: high protects the whole memory")
+    pin:Vcc(power, 8)
+
+    symbol(box) {
+        left([scl, sda, a0, a1, a2, write_protect])
+        power([Vcc, GND])
+    }
+
+    state:memory[256](255, discrete, "the 256 bytes, erased")
+    state:pointer(0, discrete, "the word address the next byte is read from or written to")
+    state:page[16](0, discrete, "the bytes of a page write, waiting for the STOP: room for the family's largest page")
+    state:written[16](0, discrete, "which of them were written")
+    state:pending(0, discrete, "1 when a STOP should start a write cycle")
+    state:busy(0, discrete, "1 during the write cycle: it acknowledges nothing")
+
+    behaviour {
+        # An address pin left floating reads as low.
+        function own_address()
+            return address + level_or(a0, 0) + 2 * level_or(a1, 0) + 4 * level_or(a2, 0)
+        end
+
+        # Busy writing, it answers no one: a controller polls its address for the end of the cycle.
+        function acknowledges()
+            return busy == 0
+        end
+
+        # The first byte is the word address; every later one lands in the page buffer, rolling round inside its page.
+        function received(value, index)
+            if index == 0 then
+                pointer = value
+            elseif level_or(write_protect, 0) == 0 then
+                let slot = pointer % page_size
+                page = with(page, slot, value)
+                written = with(written, slot, 1)
+                pending = 1
+                pointer = pointer - slot + (slot + 1) % page_size
+            end
+        end
+
+        function transmitted(index)
+            let value = item(memory, pointer)
+            pointer = (pointer + 1) % 256
+            return value
+        end
+
+        function stopped()
+            if pending == 1 then
+                busy = 1
+                schedule('written', write_cycle)
+            end
+        end
+
+        on timer 'written' do
+            let base = pointer - pointer % page_size
+            for slot in 0..page_size - 1 do
+                if item(written, slot) == 1 then
+                    memory = with(memory, base + slot, item(page, slot))
+                end
+            end
+            written = filled(0, 16)
+            pending = 0
+            busy = 0
+        end
+    }
+
+    expect("a byte written reads back", from: "byte write, then random read: the byte stored at the word address") {
+        bench(i2c-bus, for: 7.5 ms) {
+            # Writes 0x5A at word 3, waits out the write cycle, reads word 3 back.
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], bytes: "3 90", operation: "write-read", pause: 5.5 ms)
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, write_protect: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([0,1,0,1,1,0,1,0])
+    }
+
+    expect("it answers no one during the write cycle", from: "tWR: the device does not acknowledge until the write is done") {
+        bench(i2c-bus, for: 2.5 ms) {
+            # The read back comes 1 ms after the STOP, inside the 5 ms cycle: nobody drives SDA, the bus reads all ones.
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_7: d7, Vcc: Vcc, GND: 0], bytes: "3 0", operation: "write-read", pause: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, write_protect: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d7])
+        is([1,1])
+    }
+
+    expect("write protect keeps it erased", from: "WP high: the bytes are acknowledged and not written") {
+        bench(i2c-bus, for: 7.5 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_7: d7, Vcc: Vcc, GND: 0], bytes: "3 0", operation: "write-read", pause: 5.5 ms)
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, write_protect: Vcc, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d7])
+        is([1,1])
+    }
+
+    expect("A0 high moves it to 0x51", from: "device address 1010 A2 A1 A0") {
+        bench(i2c-bus, for: 7.5 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, Vcc: Vcc, GND: 0], address: 81, bytes: "3 2", operation: "write-read", pause: 5.5 ms)
+            part:U1(self, [scl: scl, sda: sda, a0: Vcc, a1: 0, a2: 0, write_protect: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1])
+        is([0,1])
+    }
+}

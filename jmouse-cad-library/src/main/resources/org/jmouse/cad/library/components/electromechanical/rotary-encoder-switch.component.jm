@@ -1,0 +1,19 @@
+# An incremental rotary encoder with a push switch (EC11-style): two phases that close to the common in quadrature as the
+# shaft turns, and a switch the shaft closes when pressed. Only the contacts: the turning is not modelled.
+component:rotary-encoder-switch("Rotary encoder with switch", type: encoder) {
+    meta {
+        designator: SW
+        summary: "Incremental rotary encoder, two phases and a common, with a push switch"
+        source: "Alps EC11 series pinout; the rotation and the switch are not modelled"
+        package: "RotaryEncoder_Alps_EC11E-Switch"
+        category: circuits
+    }
+
+    pin:phase_a(analog, "A")
+    pin:phase_b(analog, "B")
+    pin:common(analog, "C, the common of the phases")
+    pin:switch_one(analog, "S1, the push switch")
+    pin:switch_two(analog, "S2, the push switch")
+
+    symbol(uses: rotary-encoder-symbol)
+}

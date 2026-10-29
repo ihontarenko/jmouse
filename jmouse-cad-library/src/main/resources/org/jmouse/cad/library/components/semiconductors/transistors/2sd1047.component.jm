@@ -1,0 +1,70 @@
+# The 2SD1047 is an audio power transistor: 140 V, 12 A and 100 W on a heatsink, in a TO-3P — the pass transistors of a
+# linear supply, several in parallel, each with its emitter resistor. A large die: a large saturation current, a gain of
+# about a hundred that holds to amperes, and small resistances behind VCE(sat). Fitted to the datasheet's gain table and
+# its ratings; the datasheet gives no SPICE model, so the charges are approximations from fT (about 15 MHz). The
+# complement is the 2SB817.
+
+component:2sd1047("2SD1047", type: bjt) {
+    meta {
+        designator: Q
+        summary: "NPN audio power transistor, 140 V, 12 A, 100 W"
+        source: "Sanken / Inchange 2SD1047 datasheet: absolute maximum ratings and electrical characteristics at 25 °C"
+        package: "TO-3P"
+        category: circuits
+        failure: short
+    }
+    extends:npn-transistor
+
+    parameter:I_saturation(20 pA, "IS: transport saturation current of a large die")
+    parameter:beta_forward(120, "BF: hFE 60 to 200 at IC 1 A, VCE 4 V (the O and Y groups)")
+    parameter:beta_reverse(5, "BR: ideal reverse current gain")
+    parameter:V_early(120 V, "VAF: forward Early voltage")
+    parameter:I_knee(6 A, "IKF: the gain falls past a few amperes")
+    parameter:R_base(1 Ohm, "RB: part of VBE(on) at amperes")
+    parameter:R_collector(0.08 Ohm, "RC: most of VCE(sat) at amperes")
+    parameter:R_emitter(0.02 Ohm, "RE: emitter resistance and bond wire")
+    parameter:C_base_emitter(1 nF, "CJE")
+    parameter:C_base_collector(250 pF, "CJC: Cob about 250 pF at VCB 10 V")
+    parameter:transit_time_forward(10 ns, "TF: from fT about 15 MHz — an approximation, the datasheet gives no model")
+    parameter:V_breakdown(140 V, "collector-emitter sustaining voltage: an inductive kick stops here")
+    parameter:I_breakdown(1 mA, "avalanche current at V_breakdown")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    # How it warms and where it gives up (TO-3P without a heatsink: about 3.5 W, RθJA about 35 K/W, TJ max 150 °C;
+    # 100 W is on an infinite heatsink, at a case of 25 °C).
+    parameter:power_rating(3.5 W, "what it is rated for without a heatsink")
+    parameter:thermal_resistance(35 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(60 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:V_collector_emitter_maximum(140 V, "VCEO")
+    parameter:I_collector_maximum(12 A, "IC, continuous")
+
+    pin:base(analog, input, 1, "base")
+    pin:collector(analog, output, 2, "collector; the tab is collector too")
+    pin:emitter(analog, 3, "emitter")
+
+    symbol(uses: npn-transistor-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("DC current gain at 1 A", from: "hFE 60 to 200 at IC 1 A, VCE 4 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [collector, 0], U_output: 4 V)
+            part:I1(current-source, [base, 0], I_output: 10 mA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(operating, current: V1)
+        within(-2 A .. -0.6 A)
+    }
+
+    expect("saturated at 7 A with 700 mA of base current", from: "VCE(sat) at most 2.5 V at IC 7 A, IB 0.7 A") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 14 V)
+            part:R1(resistor, [Vcc, collector], resistance: 2 Ohm)
+            part:C1(capacitor, [collector, 0], capacitance: 1 nF)
+            part:I1(current-source, [base, 0], I_output: 700 mA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(final, collector)
+        within(0.2 V .. 2.5 V)
+    }
+}

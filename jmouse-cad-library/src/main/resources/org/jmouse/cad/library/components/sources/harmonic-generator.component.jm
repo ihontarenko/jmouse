@@ -1,0 +1,45 @@
+# A composite voltage: a fundamental and its harmonics, each with its own amplitude and phase, summed — the way a real
+# signal is built from them, and the way a square, a triangle or a sawtooth is approximated. Eight harmonics as
+# parameters; the circuit sets the ones it needs. A tone that is not a harmonic is another generator in series.
+
+component:harmonic-generator("Harmonic generator", type: generator) {
+    meta {
+        designator: G
+        summary: "A fundamental and up to eight harmonics, summed: offset + Σ a_k · sin(2π · k · frequency · time + φ_k)"
+        category: circuits
+    }
+
+    parameter:frequency(100 Hz, "the fundamental: harmonic k is k times it")
+    parameter:a1(1 V, "amplitude of the fundamental")
+    parameter:a2(0 V, "amplitude of the 2nd harmonic")
+    parameter:a3(0 V, "amplitude of the 3rd harmonic")
+    parameter:a4(0 V, "amplitude of the 4th harmonic")
+    parameter:a5(0 V, "amplitude of the 5th harmonic")
+    parameter:a6(0 V, "amplitude of the 6th harmonic")
+    parameter:a7(0 V, "amplitude of the 7th harmonic")
+    parameter:a8(0 V, "amplitude of the 8th harmonic")
+    parameter:p1(0 rad, "phase of the fundamental")
+    parameter:p2(0 rad, "phase of the 2nd harmonic")
+    parameter:p3(0 rad, "phase of the 3rd harmonic")
+    parameter:p4(0 rad, "phase of the 4th harmonic")
+    parameter:p5(0 rad, "phase of the 5th harmonic")
+    parameter:p6(0 rad, "phase of the 6th harmonic")
+    parameter:p7(0 rad, "phase of the 7th harmonic")
+    parameter:p8(0 rad, "phase of the 8th harmonic")
+    parameter:offset(0 V, "the voltage it swings around")
+
+    pin:positive(analog, 1, "positive terminal")
+    pin:negative(analog, 2, "negative terminal")
+
+    symbol(uses: composite-source-symbol) {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+
+    equations {
+        let phase : ratio = 2 * pi * frequency * time
+        let low : voltage = a1 * sin(phase + p1) + a2 * sin(2 * phase + p2) + a3 * sin(3 * phase + p3) + a4 * sin(4 * phase + p4)
+        let high : voltage = a5 * sin(5 * phase + p5) + a6 * sin(6 * phase + p6) + a7 * sin(7 * phase + p7) + a8 * sin(8 * phase + p8)
+        voltage positive -> negative = offset + low + high
+    }
+}

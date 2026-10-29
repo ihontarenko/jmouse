@@ -1,6 +1,8 @@
 package org.jmouse.spice.node;
 
 import org.jmouse.el.node.Trivia;
+import org.jmouse.el.writer.SourceWriter;
+import org.jmouse.el.writer.TextSourceWriter;
 import org.jmouse.spice.SpicePosition;
 
 import java.util.ArrayList;
@@ -39,6 +41,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
 
         public List<SpiceParameter> parameters() {
             return parameters;
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".model").word(name).word(type).opening("(").each(parameters).join(")");
         }
 
         @Override
@@ -96,6 +103,22 @@ public abstract sealed class SpiceCard extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".subckt").word(name);
+            pins.forEach(writer::word);
+            if (!parameters.isEmpty()) {
+                writer.word("params:").each(parameters);
+            }
+        }
+
+        @Override
+        protected void writeBody(SourceWriter writer) {
+            writer.each(statements());
+            closingTrivia.forEach(trivia -> writeComment(writer, trivia));
+            writer.word(".ends").word(name).endLine();
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitSubcircuit(this);
         }
@@ -113,6 +136,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
 
         public List<SpiceParameter> parameters() {
             return parameters;
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".param").each(parameters);
         }
 
         @Override
@@ -150,6 +178,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
 
         public Optional<String> section() {
             return Optional.ofNullable(section);
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".").join(directive).text(path).word(section);
         }
 
         @Override
@@ -200,6 +233,22 @@ public abstract sealed class SpiceCard extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".tran").write(step).write(stop);
+            if (start != null) {
+                writer.write(start);
+            } else if (largestStep != null) {
+                writer.number(0);
+            }
+            if (largestStep != null) {
+                writer.write(largestStep);
+            }
+            if (initialConditions) {
+                writer.word("uic");
+            }
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitTransient(this);
         }
@@ -238,6 +287,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".ac").word(variation).write(points).write(start).write(stop);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitAc(this);
         }
@@ -258,6 +312,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".dc").each(sweeps);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitDc(this);
         }
@@ -271,23 +330,47 @@ public abstract sealed class SpiceCard extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".op");
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitOperatingPoint(this);
         }
     }
 
-    /** {@code .control} … {@code .endc}: a script for SPICE's interpreter, its lines as written. */
+    /**
+     * {@code .control} … {@code .endc}: a script for SPICE's interpreter — its lines as written when read, its commands
+     * when a program builds it.
+     */
     public static final class Control extends SpiceCard {
 
-        private final List<String> lines;
+        private final List<SpiceCommand> commands;
 
-        public Control(List<String> lines, SpicePosition position) {
+        public Control(List<SpiceCommand> commands, SpicePosition position) {
             super(position);
-            this.lines = List.copyOf(lines);
+            this.commands = List.copyOf(commands);
         }
 
+        public List<SpiceCommand> commands() {
+            return commands;
+        }
+
+        /** Each line of the script as it writes. */
         public List<String> lines() {
-            return lines;
+            return commands.stream().map(command -> TextSourceWriter.render(command, LAYOUT).strip()).toList();
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".control");
+        }
+
+        @Override
+        protected void writeBody(SourceWriter writer) {
+            commands.forEach(writer::write);
+            writer.word(".endc").endLine();
         }
 
         @Override
@@ -318,6 +401,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".").join(directive).each(arguments);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitDirective(this);
         }
@@ -328,6 +416,11 @@ public abstract sealed class SpiceCard extends SpiceStatement {
 
         public End(SpicePosition position) {
             super(position);
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(".end");
         }
 
         @Override

@@ -3,6 +3,7 @@ package org.jmouse.units;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -61,6 +62,16 @@ public final class Units {
             table.put(unit.symbol(), unit);
         }
         return Map.copyOf(table);
+    }
+
+    /** Every unit the table reads, by its symbol. */
+    public static Collection<Unit> all() {
+        return TABLE.values();
+    }
+
+    /** The signs a datasheet writes that the reader spells otherwise — {@code Ω} as {@code Ohm}, {@code µ} as {@code u}. */
+    public static Map<Character, String> writtenSigns() {
+        return SYMBOLS;
     }
 
     /** The unit read with that symbol, without a prefix: {@code Ohm}, {@code degC}; {@code Ω} is read too. */

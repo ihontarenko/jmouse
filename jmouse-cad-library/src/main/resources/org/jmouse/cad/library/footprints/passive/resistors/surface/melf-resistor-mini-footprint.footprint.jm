@@ -1,0 +1,19 @@
+footprint:melf-resistor-mini-footprint("MELF resistor MiniMELF (SOD-80, DO-213AA)") {
+    meta {
+        summary: "MELF resistor, MiniMELF (SOD-80, DO-213AA) body, reflow pads"
+        code: "FP.MELF:R-MINI"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC DO-213 and the makers' MELF outlines, MiniMELF (SOD-80, DO-213AA)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#melf-mini and the land pattern rules; regenerate, never edit.
+    # Body 3.3…3.7 × 1.4…1.6, terminal 0.25…0.5; fillets toe 0.4, heel 0.2, side 0.1.
+    # Z = 4.515, G = 2.071, X = 1.829; pad 1.2 × 1.85 centred at ±1.65.
+    pad:1(surface, rounded-rectangle, at: -1.65 0, size: 1.2 x 1.85, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 1.65 0, size: 1.2 x 1.85, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-1.75 -0.75H1.75V0.75H-1.75Z")
+    outline(silkscreen, width: 0.12, "M-0.79 -1.185H0.79M-0.79 1.185H0.79")
+    outline(courtyard, width: 0.05, "M-2.5 -1.2H2.5V1.2H-2.5Z")
+}

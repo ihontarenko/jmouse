@@ -1,0 +1,17 @@
+symbol:dual-supply-symbol("Dual power supply") {
+    meta {
+        summary: "Two DC outputs in series with their middle brought out as the common: +, 0 V and −"
+        code: "SY.SOURCE:SUPPLY-DUAL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 240)
+    path("M0-120V-78M-28-50A28 28 0 1 0 28-50A28 28 0 1 0-28-50M0-22V22M-28 50A28 28 0 1 0 28 50A28 28 0 1 0-28 50M0 78V120M0 0H80M-14-56H14M-14-44H-8M-2-44H4M8-44H14M-14 44H14M-14 56H-8M-2 56H4M8 56H14M16-110V-98M10-104H22M10 104H22")
+    pin:a(at: 0 -120)
+    pin:c(at: 80 0)
+    pin:b(at: 0 120)
+    label(name, at: -44 -96)
+    label(value, at: -44 96)
+}

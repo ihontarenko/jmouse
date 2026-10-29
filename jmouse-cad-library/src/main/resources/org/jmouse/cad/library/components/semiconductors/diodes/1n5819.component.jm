@@ -1,0 +1,69 @@
+# The 1N5819 is the general diode as a Schottky barrier: a metal–semiconductor junction has a saturation current
+# thousands of times larger than a p–n one, so it conducts at half the voltage, stores no minority charge (no reverse
+# recovery) and leaks far more in reverse. The low barrier is its E_gap.
+
+component:1n5819("1N5819", type: diode) {
+    meta {
+        designator: D
+        summary: "Schottky barrier rectifier, 40 V, 1 A"
+        source: "onsemi 1N5817–1N5819 datasheet; starting point: the common vendor SPICE model"
+        package: "DO-41"
+        category: circuits
+        failure: short
+    }
+    extends:diode
+
+    parameter:I_saturation(31.7 uA, "IS: a Schottky barrier's large saturation current")
+    parameter:emission_coefficient(1.373, "N")
+    parameter:R_series(51 mOhm, "RS")
+    parameter:C_junction_zero_bias(110 pF, "CJO")
+    parameter:V_junction(0.35 V, "VJ")
+    parameter:grading_coefficient(0.35, "M")
+    parameter:transit_time(0 s, "a majority-carrier junction stores no charge")
+    parameter:V_breakdown(50 V, "avalanche above the rated 40 V")
+    parameter:I_breakdown(1 mA, "current at V_breakdown")
+    parameter:E_gap(0.69 V, "EG: the barrier height")
+    parameter:saturation_temperature_exponent(2, "XTI")
+    parameter:power_rating(1.25 W, "what it is rated for")
+    parameter:thermal_resistance(100 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+    parameter:V_reverse_maximum(40 V, "VRRM")
+    parameter:I_forward_maximum(1 A, "IF(AV)")
+
+    pin:anode(analog, 1, "anode")
+    pin:cathode(analog, 2, "cathode, the banded end")
+
+    symbol(uses: diode-symbol) {
+        bind:failed(failed)
+        bind:a(pin: anode)
+        bind:b(pin: cathode)
+    }
+
+    expect("forward voltage at 1 A", from: "electrical characteristics, VF at most 0.6 V at 1 A") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 1 A)
+        }
+        measure(operating, anode)
+        within(0.3 V .. 0.6 V)
+    }
+
+    expect("forward voltage at 3 A", from: "electrical characteristics, VF at most 0.9 V at 3 A") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 3 A)
+        }
+        measure(operating, anode)
+        within(0.4 V .. 0.9 V)
+    }
+
+    expect("reverse current at 40 V", from: "electrical characteristics, IR at most 1 mA at 40 V, 25 C") {
+        bench(for: 1 ms) {
+            part:X1(reverse, voltage: 40 V)
+        }
+        measure(operating, current: V1)
+        within(-1 mA .. 0 A)
+    }
+
+    # How it looks in the hand: its black body and the silver band at the cathode.
+    portrait(uses: axial-diode-portrait)
+}

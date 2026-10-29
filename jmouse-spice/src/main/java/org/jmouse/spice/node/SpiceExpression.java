@@ -1,5 +1,8 @@
 package org.jmouse.spice.node;
 
+import org.jmouse.el.writer.SourceWritable;
+import org.jmouse.el.writer.SourceWriter;
+import org.jmouse.el.writer.TextSourceWriter;
 import org.jmouse.spice.SpicePosition;
 
 /**
@@ -10,7 +13,7 @@ import org.jmouse.spice.SpicePosition;
  * @param text     the text between the delimiters, as written
  * @param position where the opening delimiter stands
  */
-public record SpiceExpression(String text, Delimiter delimiter, SpicePosition position) {
+public record SpiceExpression(String text, Delimiter delimiter, SpicePosition position) implements SourceWritable {
 
     /** How an expression was delimited, so that it is written back the same way. */
     public enum Delimiter {
@@ -26,8 +29,14 @@ public record SpiceExpression(String text, Delimiter delimiter, SpicePosition po
     }
 
     /** The expression with its delimiters, as SPICE writes it. */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        writer.openingWord(delimiter.opening).join(text).join(delimiter.closing);
+    }
+
+    /** The expression as SPICE writes it, on its own. */
     public String written() {
-        return delimiter.opening + text + delimiter.closing;
+        return TextSourceWriter.render(this, SpiceNode.LAYOUT);
     }
 
     /** An expression as the lexer hands it over, delimiters included. */

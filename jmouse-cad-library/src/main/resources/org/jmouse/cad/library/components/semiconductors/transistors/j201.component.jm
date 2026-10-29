@@ -1,0 +1,62 @@
+# The J201 is the n-channel JFET with a low pinch-off: a fraction of a milliampere at zero gate voltage, cut off before
+# -1.5 V. The low-noise input of an audio preamplifier or an electret microphone's buffer.
+
+component:j201("J201", type: jfet) {
+    meta {
+        designator: J
+        summary: "N-channel JFET, 40 V, IDSS 0.2 … 1 mA"
+        source: "onsemi J201/J202 datasheet, electrical characteristics"
+        package: "TO-92"
+        category: circuits
+        failure: open
+    }
+    extends:n-jfet
+
+    parameter:V_threshold(-0.6 V, "VTO: inside VGS(off) -0.3 … -1.5 V")
+    parameter:transconductance(1.3 mA/V^2, "BETA: IDSS about 0.47 mA")
+    parameter:channel_length_modulation(0.00225, "LAMBDA")
+    parameter:R_drain(1 Ohm, "RD")
+    parameter:R_source(1 Ohm, "RS")
+    parameter:I_saturation(114.5 fA, "IS")
+    parameter:C_gate_source(4.5 pF, "CGS")
+    parameter:C_gate_drain(4.05 pF, "CGD")
+    parameter:V_junction(0.5 V, "PB")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:threshold_temperature_coefficient(0.002, "VTO moves towards zero by about 2 mV per kelvin")
+    parameter:V_threshold_spread(0.3 V, "VGS(off) -0.3 ... -1.5 V")
+    parameter:transconductance_spread(0.5, "IDSS 0.2 ... 1 mA")
+
+    pin:source(analog, 1, "source")
+    pin:gate(analog, input, 2, "gate")
+    pin:drain(analog, output, 3, "drain")
+
+    footprint(to-92-inline-footprint)
+
+    symbol(uses: n-channel-jfet-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("drain current at zero gate voltage", from: "IDSS 0.2 … 1 mA at VDS 15 V, VGS 0") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [drain, 0], U_output: 15 V)
+            part:U1(self, [gate: 0, drain: drain, source: 0])
+        }
+        measure(operating, current: V1)
+        within(-1 mA .. -0.2 mA)
+    }
+
+    expect("cut off past pinch-off", from: "VGS(off) at most -1.5 V: at VGS -1.5 V the channel is closed") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [drain, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, gate], U_output: 1.5 V)
+            part:U1(self, [gate: gate, drain: drain, source: 0])
+        }
+        measure(operating, current: V1)
+        within(-10 nA .. 0 A)
+    }
+
+    # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-92-portrait) {
+        bind:marking("J201")
+    }
+}

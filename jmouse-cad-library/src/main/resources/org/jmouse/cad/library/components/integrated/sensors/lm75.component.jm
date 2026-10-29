@@ -1,0 +1,178 @@
+# LM75: a thermometer on the I²C bus. Every conversion it reads the temperature it sits at — the bench's — to half a
+# degree and keeps it as a 9-bit two's-complement figure, the high byte whole degrees, the top bit of the low byte the
+# half. A pointer register chooses what a read returns: the temperature, the configuration, THYST or TOS. Its OS output
+# is an open-drain thermostat: in comparator mode it pulls low above TOS and lets go again below THYST, as a fan
+# controller wants. Address 1001 A2 A1 A0.
+
+component:lm75("LM75", type: sensor) {
+    meta {
+        designator: U
+        summary: "Digital thermometer on I²C: 9 bits, 0.5 °C, with an over-temperature output"
+        source: "TI LM75A data sheet (SNIS153): 9-bit temperature, 0.5 °C LSB, registers 00 temperature, 01 configuration, 02 THYST (75 °C at power-up), 03 TOS (80 °C), OS open drain active low in comparator mode, conversion time 100 ms typical, address 1001 A2 A1 A0, pinout per the SOIC-8 package; the ±2 °C accuracy is not modelled — it reads the bench exactly"
+        package: "SOIC-8, VSSOP-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-target
+    use:cmos-hc
+
+    parameter:address(72, "1001 000: the address with A2 A1 A0 low")
+    parameter:conversion_time(100 ms, "how often it reads the temperature again")
+
+    pin:sda(digital, bidirectional, open-drain, 1, "serial data")
+    pin:scl(digital, input, 2, "serial clock")
+    pin:over_temperature(digital, output, open-drain, 3, "OS: low while too hot")
+    pin:GND(ground, 4)
+    pin:a2(digital, input, 5, "address bit A2")
+    pin:a1(digital, input, 6, "address bit A1")
+    pin:a0(digital, input, 7, "address bit A0")
+    pin:Vcc(power, 8)
+
+    symbol(box) {
+        left([scl, sda, a0, a1, a2])
+        right(over_temperature bubble)
+        power([Vcc, GND])
+    }
+
+    state:pointer(0, discrete, "the register a read returns: 0 temperature, 1 configuration, 2 THYST, 3 TOS")
+    state:reading(0, discrete, "the last temperature, in half degrees")
+    state:configuration(0, discrete, "the configuration register: bit 0 shutdown, bit 1 interrupt mode, bit 2 OS polarity")
+    state:hysteresis(150, discrete, "THYST, in half degrees: 75 °C")
+    state:limit(160, discrete, "TOS, in half degrees: 80 °C")
+    state:alarm(0, discrete, "1 while OS is active")
+    state:written(0, discrete, "the high byte of a two-byte write, while the low one is awaited")
+
+    figure:celsius(reading / 2, unit: °C, "the temperature it read")
+
+    behaviour {
+        # An address pin left floating is read as low.
+        function own_address()
+            return address + level_or(a0, 0) + 2 * level_or(a1, 0) + 4 * level_or(a2, 0)
+        end
+
+        # The bench's temperature, kelvin, to the nearest half degree Celsius.
+        function convert()
+            reading = round(2 * (temperature - 273.15))
+            if reading > limit then
+                alarm = 1
+            elseif reading < hysteresis then
+                alarm = 0
+            end
+            # OS is active low unless the configuration's polarity bit makes it active high.
+            if alarm == bit(configuration, 2) then
+                drive('over_temperature', 1)
+            else
+                drive('over_temperature', 0)
+            end
+        end
+
+        # A 9-bit figure as its two register bytes: whole degrees, then the half in the top bit.
+        function high_byte(half_degrees)
+            return shift_right(low_bits(half_degrees, 9), 1)
+        end
+
+        function low_byte(half_degrees)
+            return shift_left(bit(half_degrees, 0), 7, 8)
+        end
+
+        function from_bytes(high, low)
+            let half_degrees = high * 2 + bit(low, 7)
+            if half_degrees > 255 then
+                return half_degrees - 512
+            end
+            return half_degrees
+        end
+
+        function received(value, index)
+            if index == 0 then
+                pointer = low_bits(value, 2)
+            elseif pointer == 1 then
+                configuration = value
+            elseif index == 1 then
+                written = value
+            elseif pointer == 2 then
+                hysteresis = from_bytes(written, value)
+            elseif pointer == 3 then
+                limit = from_bytes(written, value)
+            end
+        end
+
+        # The two-byte register the pointer names, in half degrees.
+        function pointed_figure()
+            if pointer == 2 then
+                return hysteresis
+            elseif pointer == 3 then
+                return limit
+            end
+            return reading
+        end
+
+        # A read repeats the pointed register's bytes for as long as it is clocked.
+        function transmitted(index)
+            if pointer == 1 then
+                return configuration
+            end
+            if index % 2 == 0 then
+                return high_byte(pointed_figure())
+            end
+            return low_byte(pointed_figure())
+        end
+
+        on start do
+            convert()
+        end
+
+        on every 'conversion_time' do
+            if bit(configuration, 0) == 0 then
+                convert()
+            end
+        end
+    }
+
+    expect("it reads the bench at 85 °C", from: "temperature register: 85.0 °C is 0101 0101 in the high byte") {
+        bench(i2c-bus, for: 1 ms, at: 85 °C) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], address: 72, bytes: "0", operation: "read")
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([1,0,1,0,1,0,1,0])
+    }
+
+    expect("below nought it reads in two's complement", from: "temperature register: -25.0 °C is 1110 0111 in the high byte") {
+        bench(i2c-bus, for: 1 ms, at: -25 °C) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], address: 72, bytes: "0", operation: "read")
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([1,1,1,0,0,1,1,1])
+    }
+
+    expect("a half degree is the low byte's top bit", from: "temperature register: 25.5 °C is 0001 1001, 1000 0000") {
+        bench(i2c-bus, for: 1 ms, at: 25.5 °C) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_7: d7, Vcc: Vcc, GND: 0], address: 72, bytes: "0", operation: "read", count: 2)
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d7])
+        is([0,1])
+    }
+
+    expect("above TOS the OS output pulls low", from: "OS, comparator mode: active low past TOS, 80 °C at power-up") {
+        bench(for: 1 ms, at: 85 °C) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:R1(resistor, [Vcc, alarm], resistance: 10 kOhm)
+            part:U1(self, [scl: Vcc, sda: Vcc, over_temperature: alarm, a0: 0, a1: 0, a2: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, alarm)
+        within(0 V .. 0.4 V)
+    }
+
+    expect("at room temperature OS is let go", from: "OS inactive below THYST, 75 °C at power-up") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:R1(resistor, [Vcc, alarm], resistance: 10 kOhm)
+            part:U1(self, [scl: Vcc, sda: Vcc, over_temperature: alarm, a0: 0, a1: 0, a2: 0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, alarm)
+        within(4.9 V .. 5 V)
+    }
+}

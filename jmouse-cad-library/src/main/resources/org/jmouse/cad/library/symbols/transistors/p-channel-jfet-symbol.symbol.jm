@@ -1,0 +1,36 @@
+symbol:p-channel-jfet-symbol("P-channel JFET") {
+    meta {
+        summary: "P-channel JFET, as drawn on a schematic: the source at the top, the gate's arrow pointing out of the channel"
+        code: "SY.TRANSISTOR:JFET-P"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:conduction
+    input:failed
+
+    group:body(live) {
+        path("M-80 20H-10M-10-30V30M-10-20H40V-80M-10 20H40V80M-26 20L-42 12M-26 20L-42 28")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    path:channel(live, "M40-80V-20H-10M-10-30V30M-10 20H40V80") {
+        stroke = positive
+        live opacity = smooth(conduction, 80 ms)
+        live glow = 6 * conduction
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:gate(at: -80 20)
+    pin:source(at: 40 -80)
+    pin:drain(at: 40 80)
+    label(name, at: 64 -16)
+    label(value, at: 64 16)
+}

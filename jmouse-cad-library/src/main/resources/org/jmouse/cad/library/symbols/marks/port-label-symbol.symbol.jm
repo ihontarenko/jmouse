@@ -1,0 +1,15 @@
+symbol:port-label-symbol("Sheet port") {
+    meta {
+        summary: "A net the sheet hands to its parent, as KiCad's hierarchical label: the pin of this sheet's block on the sheet that places it. The arrow points both ways — the signal may go either way."
+        code: "SY.MARK:PORT-LABEL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 96)
+    path("M0 48V24")
+    path("M0 24L-16 12V-16L0-28L16-16V12Z")
+    pin:label(at: 0 48)
+    label(name, at: 0 -44)
+}

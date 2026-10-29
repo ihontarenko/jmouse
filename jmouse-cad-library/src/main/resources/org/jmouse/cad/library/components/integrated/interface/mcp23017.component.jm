@@ -1,0 +1,356 @@
+# MCP23017: sixteen more I/O pins on the I²C bus, as two 8-bit ports. Every pin is an input until IODIR makes it an
+# output; then it drives what OLAT holds. GPIO reads the pins as they stand (IPOL inverts the inputs it marks), and
+# writing it writes OLAT. GPPU puts a 100 kΩ pull-up on an input. A pin GPINTEN watches raises INTA or INTB when it
+# changes — or, with INTCON, when it differs from DEFVAL —; INTF says which pin did it, INTCAP keeps the port as it was
+# then, and reading GPIO or INTCAP clears it. Registers are laid out as in BANK = 0, A and B side by side; the pointer
+# runs on through them, or with SEQOP stays on its A/B pair. Address 0100 A2 A1 A0.
+
+component:mcp23017("MCP23017", type: interface) {
+    meta {
+        designator: U
+        summary: "16-bit I/O expander on I²C: two ports of inputs or outputs, pull-ups, polarity and interrupt on change"
+        source: "Microchip MCP23017/MCP23S17 data sheet (DS20001952C): register map for IOCON.BANK = 0 (table 3-5), IODIR resets to 0xFF, GPIO writes go to OLAT, 100 kΩ pull-ups, interrupt on change against the previous value or DEFVAL, INTF and INTCAP cleared by reading GPIO or INTCAP, IOCON MIRROR, SEQOP, ODR and INTPOL, address 0100 A2 A1 A0, pinout per the PDIP-28 package; BANK = 1 is not modelled"
+        package: "PDIP-28, SOIC-28"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-target
+    use:cmos-hc
+
+    parameter:address(32, "0100 000: the address with A2 A1 A0 low")
+    parameter:R_pull_up(100 kOhm, "a GPPU pull-up")
+
+    pin:port_b[0..7](digital, bidirectional, [1, 2, 3, 4, 5, 6, 7, 8], "GPB0 to GPB7")
+    pin:Vcc(power, 9)
+    pin:GND(ground, 10)
+    pin:scl(digital, input, 12, "serial clock")
+    pin:sda(digital, bidirectional, open-drain, 13, "serial data")
+    pin:a0(digital, input, 15, "address bit A0")
+    pin:a1(digital, input, 16, "address bit A1")
+    pin:a2(digital, input, 17, "address bit A2")
+    pin:reset(digital, input, 18, "RESET, active low: every register back to its power-up value")
+    pin:interrupt_b(digital, output, 19, "INTB")
+    pin:interrupt_a(digital, output, 20, "INTA")
+    pin:port_a[0..7](digital, bidirectional, [21, 22, 23, 24, 25, 26, 27, 28], "GPA0 to GPA7")
+
+    symbol(box) {
+        left([scl, sda, a0, a1, a2, reset bubble, interrupt_a, interrupt_b])
+        right([port_a, port_b])
+        power([Vcc, GND])
+    }
+
+    # The registers, by address: 00/01 IODIR, 02/03 IPOL, 04/05 GPINTEN, 06/07 DEFVAL, 08/09 INTCON, 0A/0B IOCON,
+    # 0C/0D GPPU, 0E/0F INTF, 10/11 INTCAP, 12/13 GPIO, 14/15 OLAT — A at the even address, B at the odd one.
+    state:registers[22](0, discrete, "the register file")
+    state:pointer(0, discrete, "the register the next byte is read from or written to")
+    state:previous[2](0, discrete, "each port's inputs as they last stood, for a change to be compared with")
+
+    # A GPPU bit puts a pull-up on its pin: registers_12 is GPPUA, registers_13 GPPUB.
+    equations {
+        current Vcc -> port_a_0 = mod(floor(registers_12 / 1), 2) * (Vcc - port_a_0) / R_pull_up
+        current Vcc -> port_a_1 = mod(floor(registers_12 / 2), 2) * (Vcc - port_a_1) / R_pull_up
+        current Vcc -> port_a_2 = mod(floor(registers_12 / 4), 2) * (Vcc - port_a_2) / R_pull_up
+        current Vcc -> port_a_3 = mod(floor(registers_12 / 8), 2) * (Vcc - port_a_3) / R_pull_up
+        current Vcc -> port_a_4 = mod(floor(registers_12 / 16), 2) * (Vcc - port_a_4) / R_pull_up
+        current Vcc -> port_a_5 = mod(floor(registers_12 / 32), 2) * (Vcc - port_a_5) / R_pull_up
+        current Vcc -> port_a_6 = mod(floor(registers_12 / 64), 2) * (Vcc - port_a_6) / R_pull_up
+        current Vcc -> port_a_7 = mod(floor(registers_12 / 128), 2) * (Vcc - port_a_7) / R_pull_up
+        current Vcc -> port_b_0 = mod(floor(registers_13 / 1), 2) * (Vcc - port_b_0) / R_pull_up
+        current Vcc -> port_b_1 = mod(floor(registers_13 / 2), 2) * (Vcc - port_b_1) / R_pull_up
+        current Vcc -> port_b_2 = mod(floor(registers_13 / 4), 2) * (Vcc - port_b_2) / R_pull_up
+        current Vcc -> port_b_3 = mod(floor(registers_13 / 8), 2) * (Vcc - port_b_3) / R_pull_up
+        current Vcc -> port_b_4 = mod(floor(registers_13 / 16), 2) * (Vcc - port_b_4) / R_pull_up
+        current Vcc -> port_b_5 = mod(floor(registers_13 / 32), 2) * (Vcc - port_b_5) / R_pull_up
+        current Vcc -> port_b_6 = mod(floor(registers_13 / 64), 2) * (Vcc - port_b_6) / R_pull_up
+        current Vcc -> port_b_7 = mod(floor(registers_13 / 128), 2) * (Vcc - port_b_7) / R_pull_up
+    }
+
+    behaviour {
+        # The register map in BANK = 0: each register's A side; its B side is the next address.
+        final let IODIR = 0
+        final let IPOL = 2
+        final let GPINTEN = 4
+        final let DEFVAL = 6
+        final let INTCON = 8
+        final let IOCON = 10
+        final let GPPU = 12
+        final let INTF = 14
+        final let INTCAP = 16
+        final let GPIO = 18
+        final let OLAT = 20
+        final let REGISTER_COUNT = 22
+        # IOCON's bits.
+        final let INTPOL = 1
+        final let ODR = 2
+        final let SEQOP = 5
+        final let MIRROR = 6
+
+        # An address pin left floating is read as low.
+        function own_address()
+            return address + level_or(a0, 0) + 2 * level_or(a1, 0) + 4 * level_or(a2, 0)
+        end
+
+        # A register of one port: port 0 is A, port 1 is B.
+        function register_of(register, port)
+            return item(registers, register + port)
+        end
+
+        function put_register(index, value)
+            registers = with(registers, index, value)
+        end
+
+        function port_name(port)
+            if port == 0 then
+                return 'port_a'
+            end
+            return 'port_b'
+        end
+
+        # The port's pins as they stand, a pin not clearly high read as 0.
+        function port_levels(port)
+            return value_of(levels(port_name(port)), 0)
+        end
+
+        # GPIO as read: the pins, the inputs IPOL marks inverted.
+        function port_read(port)
+            return bit_xor(port_levels(port), bit_and(register_of(IPOL, port), register_of(IODIR, port)))
+        end
+
+        # An output drives its OLAT bit; an input lets its pin go.
+        function show_port(port)
+            for position in 0..7 do
+                if bit(register_of(IODIR, port), position) == 1 then
+                    drive(port_name(port) ~ '_' ~ position, Z)
+                else
+                    drive(port_name(port) ~ '_' ~ position, bit(register_of(OLAT, port), position))
+                end
+            end
+        end
+
+        # INTx: active low unless INTPOL; with ODR open drain, pulling low or letting go.
+        function show_interrupt(name, active)
+            let configuration = item(registers, IOCON)
+            if bit(configuration, ODR) == 1 then
+                if active == 1 then
+                    drive(name, 0)
+                else
+                    drive(name, Z)
+                end
+            elseif active == bit(configuration, INTPOL) then
+                drive(name, 1)
+            else
+                drive(name, 0)
+            end
+        end
+
+        # 1 while a port has an interrupt flagged in INTF.
+        function flagged(port)
+            if register_of(INTF, port) != 0 then
+                return 1
+            end
+            return 0
+        end
+
+        # With MIRROR each pin answers for both ports.
+        function show_interrupts()
+            if bit(item(registers, IOCON), MIRROR) == 1 then
+                show_interrupt('interrupt_a', bit_or(flagged(0), flagged(1)))
+                show_interrupt('interrupt_b', bit_or(flagged(0), flagged(1)))
+            else
+                show_interrupt('interrupt_a', flagged(0))
+                show_interrupt('interrupt_b', flagged(1))
+            end
+        end
+
+        # The watched inputs: GPINTEN over the pins IODIR makes inputs.
+        function watched(port)
+            return bit_and(register_of(GPINTEN, port), register_of(IODIR, port))
+        end
+
+        # Flags the pins that raise an interrupt; INTCAP keeps the port as it was when the first of them did.
+        function raise(port, raised)
+            if raised != 0 then
+                if register_of(INTF, port) == 0 then
+                    put_register(INTCAP + port, port_read(port))
+                end
+                put_register(INTF + port, bit_or(register_of(INTF, port), raised))
+            end
+            show_interrupts()
+        end
+
+        # Watched pins INTCON compares with DEFVAL that differ from it: the condition stands for as long as they do.
+        function differing_from_default(port)
+            let differing = bit_xor(port_levels(port), register_of(DEFVAL, port))
+            return bit_and(watched(port), bit_and(differing, register_of(INTCON, port)))
+        end
+
+        # A pin changed: watched pins compared with their last level, or with DEFVAL where INTCON says so.
+        function check_change(port)
+            let levels = port_levels(port)
+            let changed = bit_and(bit_xor(levels, item(previous, port)), bit_not(register_of(INTCON, port), 8))
+            raise(port, bit_or(bit_and(watched(port), changed), differing_from_default(port)))
+            previous = with(previous, port, levels)
+        end
+
+        # Reading GPIO or INTCAP clears the flags; a pin still differing from DEFVAL raises them again at once.
+        function clear_interrupt(port)
+            put_register(INTF + port, 0)
+            raise(port, differing_from_default(port))
+        end
+
+        function power_up()
+            registers = filled(0, REGISTER_COUNT)
+            put_register(IODIR, 255)
+            put_register(IODIR + 1, 255)
+            pointer = 0
+            show_port(0)
+            show_port(1)
+            show_interrupts()
+        end
+
+        function read_register(index)
+            if index == GPIO or index == GPIO + 1 then
+                let value = port_read(index - GPIO)
+                clear_interrupt(index - GPIO)
+                return value
+            end
+            if index == INTCAP or index == INTCAP + 1 then
+                let captured = item(registers, index)
+                clear_interrupt(index - INTCAP)
+                return captured
+            end
+            return item(registers, index)
+        end
+
+        function write_register(index, value)
+            let port = index % 2
+            if index == IOCON or index == IOCON + 1 then
+                # One IOCON, at both addresses.
+                put_register(IOCON, value)
+                put_register(IOCON + 1, value)
+                show_interrupts()
+            elseif index == GPIO or index == GPIO + 1 then
+                # A write to GPIO is a write to OLAT.
+                put_register(OLAT + port, value)
+            elseif index == INTF or index == INTF + 1 or index == INTCAP or index == INTCAP + 1 then
+                # Read only: the write is acknowledged and dropped.
+                return
+            else
+                put_register(index, value)
+            end
+            if index < IPOL or index >= GPIO then
+                show_port(port)
+            end
+            if index < GPINTEN or index > INTCON + 1 then
+                return
+            end
+            # GPINTEN, DEFVAL or INTCON changed what a pin is held against.
+            raise(port, differing_from_default(port))
+        end
+
+        # On through the registers, or with SEQOP back and forth on the A/B pair.
+        function advance_pointer()
+            if bit(item(registers, IOCON), SEQOP) == 1 then
+                pointer = bit_xor(pointer, 1)
+            else
+                pointer = (pointer + 1) % REGISTER_COUNT
+            end
+        end
+
+        function received(value, index)
+            if index == 0 then
+                pointer = value % REGISTER_COUNT
+            else
+                write_register(pointer, value)
+                advance_pointer()
+            end
+        end
+
+        function transmitted(index)
+            let value = read_register(pointer)
+            advance_pointer()
+            return value
+        end
+
+        on start do
+            power_up()
+        end
+
+        on falling 'reset' do
+            power_up()
+        end
+
+        on change 'port_a' do
+            check_change(0)
+        end
+
+        on change 'port_b' do
+            check_change(1)
+        end
+    }
+
+    expect("an output drives its latch: GPA0 high", from: "IODIRA = 0x00, OLATA = 0xA5: GPA0 is driven high") {
+        bench(i2c-bus, for: 2 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "0 0")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "20 165", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, port_a_0: lit, port_a_1: dark, a0: 0, a1: 0, a2: 0, reset: Vcc, Vcc: Vcc, GND: 0])
+            part:R3(resistor, [lit, 0], resistance: 10 kOhm)
+            part:R4(resistor, [dark, 0], resistance: 10 kOhm)
+        }
+        measure(final, lit)
+        within(4.9 V .. 5 V)
+    }
+
+    expect("an output drives its latch: GPA1 low", from: "IODIRA = 0x00, OLATA = 0xA5: GPA1 is driven low") {
+        bench(i2c-bus, for: 2 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "0 0")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "20 165", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, port_a_0: lit, port_a_1: dark, a0: 0, a1: 0, a2: 0, reset: Vcc, Vcc: Vcc, GND: 0])
+            part:R3(resistor, [Vcc, lit], resistance: 10 kOhm)
+            part:R4(resistor, [Vcc, dark], resistance: 10 kOhm)
+        }
+        measure(final, dark)
+        within(0 V .. 0.1 V)
+    }
+
+    expect("inputs read as they stand", from: "GPIOB: GPB0 high, GPB1 low, GPB2 high read as xxxx x101") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, data_2: d2, Vcc: Vcc, GND: 0], address: 32, bytes: "19", operation: "read")
+            part:U1(self, [scl: scl, sda: sda, port_b_0: Vcc, port_b_1: 0, port_b_2: Vcc, a0: 0, a1: 0, a2: 0, reset: Vcc, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2])
+        is([1,0,1])
+    }
+
+    expect("a pull-up holds an open input high", from: "GPPU: a 100 kΩ pull-up on an input left open") {
+        bench(i2c-bus, for: 2 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "13 1")
+            part:B2(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, Vcc: Vcc, GND: 0], address: 32, bytes: "19", operation: "read", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, reset: Vcc, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1])
+        is([1,0])
+    }
+
+    expect("a watched input that changes pulls INTA low", from: "GPINTENA, INTCON = 0: interrupt on change against the previous value, INTA active low") {
+        bench(i2c-bus, for: 3 ms) {
+            # GPA0 high for its first 2 ms, then low.
+            part:G1(square-generator, [positive: input, negative: 0], high: 5 V, low: 0 V, frequency: 250 Hz, duty: 0.5)
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "4 1")
+            part:U1(self, [scl: scl, sda: sda, port_a_0: input, interrupt_a: alarm, a0: 0, a1: 0, a2: 0, reset: Vcc, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: alarm)
+        near(0, +- 0.01)
+    }
+
+    expect("a pin held away from DEFVAL keeps INTA low through a read", from: "INTCON = 1: the interrupt stands while the pin differs from DEFVAL; reading GPIO clears INTF only to raise it again") {
+        bench(i2c-bus, for: 3 ms) {
+            # GPINTENA = 1, GPINTENB = 0, DEFVALA = 0, DEFVALB = 0, INTCONA = 1; GPA0 is held high, then GPIOA is read.
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "4 1 0 0 0 1")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 32, bytes: "18", operation: "read", start_at: 1.5 ms)
+            part:U1(self, [scl: scl, sda: sda, port_a_0: Vcc, interrupt_a: alarm, a0: 0, a1: 0, a2: 0, reset: Vcc, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: alarm)
+        near(0, +- 0.01)
+    }
+}

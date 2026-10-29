@@ -1,0 +1,26 @@
+symbol:changeover-switch-symbol("Changeover switch") {
+    meta {
+        summary: "Changeover switch, as drawn on a schematic: its lever lies on the upper contact while it is thrown, on the lower one otherwise"
+        code: "SY.SWITCH:SPDT"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:thrown
+
+    path("M-80 0H-26M26-40H80M26 40H80")
+    path("M-30 0A4 4 0 1 0-22 0A4 4 0 1 0-30 0M26-44A4 4 0 1 0 26-36A4 4 0 1 0 26-44M26 36A4 4 0 1 0 26 44A4 4 0 1 0 26 36")
+
+    group:lever(live, pivot: -26 0) {
+        path("M-26 0L24 34")
+        live rotate = between(0 deg, -68 deg, smooth(thrown, 60 ms))
+    }
+
+    pin:common(at: -80 0)
+    pin:upper(at: 80 -40)
+    pin:lower(at: 80 40)
+    label(name, at: 0 -72)
+    label(value, at: 0 80)
+}

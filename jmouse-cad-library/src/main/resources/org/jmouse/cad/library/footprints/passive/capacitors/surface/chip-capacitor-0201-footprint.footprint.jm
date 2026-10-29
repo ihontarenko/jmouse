@@ -1,0 +1,18 @@
+footprint:chip-capacitor-0201-footprint("Chip capacitor 0201 (0603 metric)") {
+    meta {
+        summary: "Chip capacitor, 0201 (0603 metric) body, reflow pads"
+        code: "FP.CHIP:C0201"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60384-22 dimensions, 0201 (0603 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#capacitor-0201 and the land pattern rules; regenerate, never edit.
+    # Body 0.57…0.63 × 0.27…0.33, terminal 0.1…0.2; fillets toe 0.2, heel -0.05, side 0.
+    # Z = 1.097, G = 0.287, X = 0.397; pad 0.4 × 0.4 centred at ±0.35.
+    pad:1(surface, rounded-rectangle, at: -0.35 0, size: 0.4 x 0.4, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0.35 0, size: 0.4 x 0.4, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-0.3 -0.15H0.3V0.15H-0.3Z")
+    outline(courtyard, width: 0.05, "M-0.7 -0.35H0.7V0.35H-0.7Z")
+}

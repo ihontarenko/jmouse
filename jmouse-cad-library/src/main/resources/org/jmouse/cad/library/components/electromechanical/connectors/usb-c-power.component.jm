@@ -1,0 +1,20 @@
+# A USB-C receptacle that only takes power: bus power, ground, and the two configuration pins a sink pulls down through
+# 5.1 kΩ to ask for 5 V. Its contacts are named as the USB-C specification names them (A9, B9 …), so they have no number
+# here: the KiCad map names each contact.
+component:usb-c-power("USB-C receptacle, power only", type: connector) {
+    meta {
+        designator: J
+        summary: "USB-C receptacle wired for power only: VBUS, GND, CC1, CC2 and the shield"
+        source: "USB Type-C specification, power-only receptacle; no electrical behaviour"
+        package: "USB_C_Receptacle_PowerOnly"
+        category: circuits
+    }
+
+    pin:vbus(power, "VBUS, A9 and B9")
+    pin:configuration_one(analog, "CC1, A5: a sink pulls it down through 5.1 kΩ")
+    pin:configuration_two(analog, "CC2, B5: likewise")
+    pin:ground(ground, "GND, A12 and B12")
+    pin:shield(analog, "the shell")
+
+    symbol(uses: usb-c-power-symbol)
+}

@@ -1,0 +1,56 @@
+{
+  "placement": {
+    "file": "cpl.csv",
+    "role": "where each part stands (CPL), in JLCPCB's columns",
+    "sides": {
+      "top": "Top",
+      "bottom": "Bottom"
+    },
+    "unit": "mm",
+    "columns": [
+      {
+        "heading": "Designator",
+        "field": "designator"
+      },
+      {
+        "heading": "Mid X",
+        "field": "x"
+      },
+      {
+        "heading": "Mid Y",
+        "field": "y"
+      },
+      {
+        "heading": "Layer",
+        "field": "side"
+      },
+      {
+        "heading": "Rotation",
+        "field": "rotation"
+      }
+    ]
+  },
+  "materials": {
+    "file": "bom.csv",
+    "role": "bill of materials in JLCPCB's columns",
+    "designatorSeparator": ",",
+    "columns": [
+      {
+        "heading": "Comment",
+        "field": "value"
+      },
+      {
+        "heading": "Designator",
+        "field": "designators"
+      },
+      {
+        "heading": "Footprint",
+        "field": "footprint"
+      },
+      {
+        "heading": "LCSC Part #",
+        "field": "meta:lcsc"
+      }
+    ]
+  }
+}

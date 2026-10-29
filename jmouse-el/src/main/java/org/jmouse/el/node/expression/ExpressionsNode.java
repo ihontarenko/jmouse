@@ -35,6 +35,34 @@ public class ExpressionsNode extends AbstractExpression {
         expressions.add(expression);
     }
 
+    /**
+     * Puts an expression where another stood: what an editor does to a tree it read — a line changed, the rest kept as
+     * written.
+     *
+     * @throws IndexOutOfBoundsException when nothing stands at {@code index}
+     */
+    public void replaceExpression(int index, Expression expression) {
+        expressions.set(index, expression);
+    }
+
+    /**
+     * Puts an expression before the one at {@code index}; at the size, after the last.
+     *
+     * @throws IndexOutOfBoundsException when {@code index} is past the end
+     */
+    public void insertExpression(int index, Expression expression) {
+        expressions.add(index, expression);
+    }
+
+    /**
+     * Takes away the expression at {@code index}.
+     *
+     * @throws IndexOutOfBoundsException when nothing stands at {@code index}
+     */
+    public void removeExpression(int index) {
+        expressions.remove(index);
+    }
+
     public boolean hasExpression(Class<? extends Node> nodeType) {
         return getExpressions().stream().anyMatch(nodeType::isInstance);
     }

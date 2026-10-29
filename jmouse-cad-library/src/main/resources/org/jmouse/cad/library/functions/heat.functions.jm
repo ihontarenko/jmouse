@@ -1,0 +1,20 @@
+# How a part warms — written once, here, for every part that gives a thermal_resistance and writes no heat law of its
+# own. The body takes the power its own equations dissipate (`power`, which the engine derives: the current of every
+# equation times the voltage it flows across, a capacitance's charging current left out) and settles at
+# power × thermal_resistance above the bench over thermal_time_constant: one thermal time constant, body to air.
+#
+# A part whose heat runs another way writes its own `heat { … }` — a power transistor's junction → case → heatsink as
+# two states — or names another law with `use`. `temperature` is what the law defines: the part's own, kelvin, which
+# its equations read in place of the bench's on a realistic bench. The engine advances the law after every accepted
+# step, outside Newton: heat moves in seconds, a step in microseconds.
+
+functions:heat("Heat of a part") {
+    meta {
+        summary: "The common heat law: a part settles at power × thermal_resistance above the bench over thermal_time_constant"
+    }
+
+    heat {
+        d(heating)/dt = (power * thermal_resistance - heating) / thermal_time_constant
+        temperature = ambient + heating
+    }
+}

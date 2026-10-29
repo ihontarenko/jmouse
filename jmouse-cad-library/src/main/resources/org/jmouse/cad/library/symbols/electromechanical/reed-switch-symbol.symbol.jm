@@ -1,0 +1,27 @@
+symbol:reed-switch-symbol("Reed switch") {
+    meta {
+        summary: "Reed switch, as drawn on a schematic: a switch sealed in glass, closed while a magnet is near"
+        code: "SY.SWITCH:REED"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:closed
+
+    path("M-80 0H-26M26 0H80")
+    path("M-30 0A4 4 0 1 0-22 0A4 4 0 1 0-30 0M22 0A4 4 0 1 0 30 0A4 4 0 1 0 22 0")
+    # The glass envelope around the reeds.
+    path("M-40-24H40A16 16 0 0 1 40 24H-40A16 16 0 0 1-40-24Z")
+
+    group:lever(live, pivot: -26 0) {
+        path("M-26 0H26")
+        live rotate = between(-24 deg, 0 deg, smooth(closed, 60 ms))
+    }
+
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

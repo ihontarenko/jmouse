@@ -1,0 +1,49 @@
+# A 6 × 6 mm tactile switch seen from above: the black base, its steel cover and the round plunger; four legs, the two
+# below being the contacts a sheet wires. Held, the plunger sinks and loses its shine.
+portrait:tactile-button-portrait("Tactile button") {
+    meta {
+        summary: "A 6 × 6 tactile switch from above; the plunger sinks while it is held"
+        code: "PT.SWITCH:TACTILE-6X6"
+        category: circuits
+        tags: electronics, portrait, switch, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 60)
+    input:closed(0 .. 1)
+
+    path:legs("M-36-22H-26V-18H-36ZM26-22H36V-18H26ZM-40 18H-26V22H-40ZM26 18H40V22H26Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:a(at: -40 20)
+    pin:b(at: 40 20)
+    path:base("M-26-26H26V26H-26Z") {
+        fill = black
+    }
+    path:cover("M-22-22H22V22H-22Z") {
+        stroke = clear
+        fill = silver
+    }
+    path:cover_rivets("M-17-17H-15V-15H-17ZM15-17H17V-15H15ZM-17 15H-15V17H-17ZM15 15H17V17H15Z") {
+        stroke = clear
+        fill = grey
+    }
+    # The well the plunger sinks into: seen only round a held plunger.
+    path:well(live, "M-13 0A13 13 0 1 0 13 0A13 13 0 1 0-13 0Z") {
+        stroke = clear
+        fill = black
+        live opacity = 0.6 * smooth(closed, 40 ms)
+    }
+    group:plunger(live, pivot: 0 0) {
+        path:cap("M-12 0A12 12 0 1 0 12 0A12 12 0 1 0-12 0Z") {
+            fill = grey
+        }
+        path:shine(live, "M-7-5A9 9 0 0 1 2-9") {
+            stroke = white
+            thickness = 1
+            live opacity = 0.5 * (1 - smooth(closed, 40 ms))
+        }
+        live scale = 1 - 0.22 * smooth(closed, 40 ms), 1 - 0.22 * smooth(closed, 40 ms)
+    }
+}

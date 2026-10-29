@@ -1,0 +1,40 @@
+symbol:buzzer-symbol("Buzzer") {
+    meta {
+        summary: "A buzzer, as drawn on a schematic: a sounder's dome on its body, its leads in from one side — waves leave the dome while it sounds"
+        code: "SY.TRANSDUCER:BUZZER"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Both leads in from the left, 2.54 mm apart, as a sounder is usually wired: the positive one above.
+    size(160 x 160)
+    input:sounding(0 .. 1)
+    input:failed
+
+    group:body(live) {
+        path("M-48-40H0V40H-48Z")
+        path("M0-40A40 40 0 0 1 0 40")
+        path("M-80-80H-24V-40M-80 80H-24V40")
+        path("M-68-100H-52M-60-108V-92")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # Sounding, two arcs ripple out from the dome, as loud as it is driven.
+    group:sound(live) {
+        path("M56-28A40 40 0 0 1 56 28M72-44A60 60 0 0 1 72 44")
+        stroke = positive
+        animate opacity = seen(sounding) * (0.4 + 0.6 * blink(4 Hz))
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-34-18L-26-6M-8-16L-16-4M-32 16L-24 6M-6 18L-14 6")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:positive(at: -80 -80)
+    pin:negative(at: -80 80)
+    label(name, at: 96 -24)
+    label(value, at: 96 24)
+}

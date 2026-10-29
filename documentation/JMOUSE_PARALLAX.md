@@ -641,6 +641,17 @@ HD44780 over 8 bits; `first_line`, `second_label`, `columns`).
 
 A symbol may draw characters: `live glyph c0 at x, y size 7 x 12 { live character = cell_0 }` draws the printable ASCII character of the code — the cells of `lcd-1602-symbol`.
 
+A drawing may print words: `input marking text "IC"` declares a **text input** — the words a part prints on its body,
+the quoted ones drawn while no part gives its own — and `glyph printed_marking at x, y size w x h { text = marking }`
+prints them across the glyph's cell, sized to fit. `text` names one text input and nothing else, and a text input read
+as a number anywhere is refused. It is the part's and holds still while the circuit runs, so it is written without
+`live`. A **portrait** (`portrait … as …-portrait`, how a part looks in the hand) is a living drawing whose pins land on
+the sheet's grid; a component names it with `portrait uses soic-8-portrait { marking = "NE555" }`, a number input bound
+to an expression of its parameters and a text input to quoted words. The package portraits under
+`catalogue/electronics/portraits/packages` are generated from the footprint package tables
+(`PackagePortraitGenerator`): their pins are the package's numbers, so a one-block part is wired to them by its pins'
+numbers whatever its pinout.
+
 A symbol may draw a screen of pixels: `input screen picture` declares an input that is a row of bytes, not a number, and
 `live bitmap panel at x, y size w x h { live pixels = screen; columns = 128; live rows = matrix_rows; live invert = inverted > 0.5 }`
 draws it as one image — the bytes page-major, as SSD1306, SH1106, PCD8544 and ST7565 keep them: a page a row of
@@ -817,8 +828,13 @@ footprint "SOT-223, tab on pin 2" as sot-223-footprint {
 - **`pad "NUMBER" TYPE SHAPE at x, y [rotate degrees] size width x height [drill width [x height]] [roundness share]`** —
   the type is `through-hole`, `surface`, `connector` or `unplated-hole`; the shape `circle`, `rectangle`, `oval`,
   `trapezoid`, `rounded-rectangle` or `custom`; rotation is KiCad's, counter-clockwise; `roundness` is a rounded
-  rectangle's corner radius as a share of its smaller side. A mounting hole has the number `""`.
+  rectangle's corner radius as a share of its smaller side. A mounting hole has the number `""`. A **`custom`** pad writes
+  its own outline last, path data in millimetres from the pad's centre — `pad "1" surface custom at 0, 0 size 2 x 1
+  "M-1 -0.5L1 -0.5L1.5 0L1 0.5L-1 0.5Z"` (`size` stays its box); no other shape may.
 - **`outline LAYER [width w] [filled] "path"`** — SVG path data on `silkscreen`, `fabrication`, `courtyard` or `copper`.
+- **`field reference|value at x, y size height [rotate degrees] [layer silkscreen|fabrication]`** — where a board prints
+  the part's designator or its value over the footprint, each at most once (since 2026-10-23). A footprint without one
+  leaves the text where the board puts it; the drawing JSON carries `fields` only when there are some.
 
 A component names the footprint its package lands on with **`footprint <slug>`**, one line, the only place that choice
 lives (`uses_footprint` in meta is refused); `meta package` stays as the package's name in words. On every save the
@@ -836,6 +852,91 @@ layer, stroke and fill. An import stores every footprint its parts name once —
 the same reuse rule — and a component made from a KiCad symbol gets the `footprint` line of the footprint most of its
 parts name when every pin number of the symbol is a pad there; otherwise a note says why. A footprint no library holds
 is a note, never a failure.
+
+### A pcb: a circuit laid out on a printed circuit board
+
+A `pcb` document lays out one circuit, whole: where each of its parts stands, and the copper laid between them, in
+**millimetres**, Y downwards. Its kind is `PCB`, nature `PCB`; the definition (`ObjectDefinition.Board`) carries the
+board as `BoardDrawing` JSON (`version`, `circuit`, `rules`, `netClasses`, `copperLayers`, `outline`, `placements`,
+`tracks`, `vias`) — the
+JSON the interface's `@jmouse/parallax/board` reads field for field.
+
+```
+pcb "RC discharging — pcb" as rc-discharging-pcb {
+    meta { summary "How RC discharging is laid out on a printed circuit board" }
+    circuit rc-discharging
+    rules standard edge-clearance 0.5
+    class power width 1 clearance 0.4 drill 0.6 diameter 1.2 nets vcc, 0
+    sizes tracks 0.25, 0.4, 0.6, 1
+    sizes vias drill 0.4 diameter 0.8, drill 0.3 diameter 0.6
+    layers 2
+    edge "M0 0H44V18H0Z"
+    place R1 at 12, 3
+    place C1 at 26, 9.5 rotate 90 side bottom
+    track top width 0.6 rounding 1.5 from 4, 5 to 6.54, 5 to 12, 3
+    via at 20, 9 drill 0.4 diameter 0.8
+}
+```
+
+- **`circuit <slug>`** — the circuit it lays out; required. One pcb lays out one circuit, so it is saved as
+  `<circuit>-pcb`, beside its circuit, in the circuit's project (a pcb written straight into a workspace is refused,
+  as a circuit is). A device of several boards is several sheets, each with its own pcb.
+- **`rules PROFILE [WORD value …]`** — how the board is made: an entry of `board-standards/board-rules.sht`
+  (`home`, `standard`, `fine`; `GET /board-rules` serves them as `BoardRules`), then any value this board changes,
+  by its `BoardRule` word — `clearance`, `least-track-width`, `least-drill`, `least-via-drill`, `least-via-ring`,
+  `hole-clearance`, `edge-clearance` (what the checks hold the board to), `track-width`, `via-drill`, `via-diameter`
+  (what new copper is laid with), `copper-thickness`, `inner-copper-thickness`, `plating-thickness`, `board-thickness`
+  (what copper analysis reads: a track's resistance and the current it carries, a via barrel's). Left out, the sheet's `usual` way. An unknown way or word is refused, naming the
+  ones there are.
+- **`class NAME width w clearance c [drill d diameter d] nets a, b …`** — nets laid and kept apart alike: their tracks
+  this wide, other copper this far off (never nearer than the board's `clearance`), their vias this size. A net no
+  class names is laid by the board's rules.
+- **`pair NAME width w gap g [skew s] nets positive, negative`** — two nets laid side by side as one differential
+  pair: each track `w` wide (over its class's), `g` apart edge to edge, their lengths — copper plus via barrels — no more
+  than `s` apart (absent: not matched). The board's checks hold a pair's tracks to its width and its lengths to its skew.
+- **`text top-silkscreen|bottom-silkscreen size h at x, y [rotate d] "words"`** — words lettered on a board's silkscreen,
+  `h` millimetres tall, centred on their point, turned counter-clockwise; the Gerber letters them in the stroke font.
+- **`hole at x, y drill d [ring r]`** — a hole of no part, a mounting hole: plated with a copper ring `r` across on every
+  layer (PTH) when it has one, bare (NPTH) when not. Copper and pours keep their gap off it; the checks treat it as copper
+  of no net.
+- **`sizes tracks w, w …`** and **`sizes vias drill d diameter D, …`** — the sizes this board offers new copper in, beside
+  what its classes say: what the editor's track and via lists hold. Left out, the editor offers its own.
+- **`teardrops round|surface|tracks length l width w [curved]`** — a track widened as a drop where it enters copper: a
+  via or a through-hole pad (`round`), a surface pad (`surface`), the middle of another track (`tracks`). `length` past
+  that copper's edge and `width` where it meets it are shares of its size — a via's diameter, a pad's narrower side, the
+  joined track's width; `curved` bends the drop's sides inwards. One line a target; a target with no line has no drops. A
+  board setting, not a habit: the drops are copper the board house etches, checked for clearance as any other.
+- **`layers N`** — how many copper layers: `top`, `inner-1` … `inner-(N−2)`, `bottom`; a one-layer board has its
+  `bottom` only. Two is a stack of two, never a special case.
+- **`edge "path"`** — the board's outline as SVG path data.
+- **`place DESIGNATOR at x, y [rotate degrees] [side top|bottom] [reference at x, y [rotate degrees]]`** — where a part
+  stands; rotation counter-clockwise as a footprint's pads turn; a bottom part is seen mirrored from above. **Which
+  footprint a part stands on is not here**: it is the circuit's — the part line's `footprint <slug>`, else its
+  component's —, written once. `reference at` moves the part's designator off where its footprint's field puts it — in
+  millimetres from the part's centre in the part's own frame, so it moves, turns and flips with the part; its height
+  stays the field's.
+- **`track LAYER width w [rounding r] from x, y to x, y [to x, y …]`** — copper along a line of points on one layer,
+  each corner rounded by `r` millimetres (a true arc; 0 keeps it sharp).
+- **`via at x, y drill d diameter d [from LAYER to LAYER]`** — a plated hole; `from top to bottom` (a through via) is
+  left unwritten.
+- **`arc LAYER width w from x, y through x, y to x, y`** — a track bent as a circle's arc through its middle point
+  (since 2026-10-23, as each of the three below).
+- **`zone LAYER net NAME [clearance c] [priority n] "path"`** — copper poured over an area for one net, kept `c` off
+  every other net's copper (0: the board's clearance); where zones overlap, the higher priority pours.
+- **`keepout LAYER[, LAYER …] "path"`** — an area no copper of the layers named may enter.
+- **`dimension from x, y to x, y [offset d]`** — a measured length on the board's drawing, its line set off by `d`.
+
+The board JSON carries `arcs`, `zones`, `keepouts` and `dimensions` only when there are some, so a board of tracks and
+vias alone keeps the JSON it had.
+
+**Which pads belong together is the circuit's.** The board holds geometry only; the interface reads the nets from the
+circuit's parts and their components' pin numbers (`boardPartsOf`) and draws what copper has not joined yet as the
+ratsnest. The bench's sources and instruments — a generator, a power supply, a meter — are the simulator's, never the
+board's (`isBenchEquipment`). The checks (`boardChecks`, headless) measure every pad, track, via and hole as straight
+pieces grown by a radius (`boardGeometry`): copper of two nets nearer than their clearance on a layer, copper joining
+two nets, tracks, vias, rings and holes below the board's least, hole to hole, copper to and beyond the edge,
+courtyards overlapping, track ends joined to nothing. `POST /jmx/pcb` (`source`, `drawing`, `title`, `category`) writes the editor's board into a pcb's text line
+by line, as `/jmx/footprint` does a footprint's.
 
 ## Hosting it — the SPI
 

@@ -1,0 +1,93 @@
+# A power inductor as it really is: a winding resistance (DCR) and a core that saturates. The flux it links is
+# L_air · I + (L − L_air) · I_saturation · tanh(I / I_saturation) — an inductance of L at small currents that falls,
+# past the saturation current, to the winding's own air-core inductance, so the current of a converter that runs past
+# it rises steeply and the DCR and that small L_air are what still hold it. The floor is physics, not a convenience:
+# without it the incremental inductance went to L · sech²(I / I_sat), 10⁻²² of L at 50 A, the equation stopped being
+# a differential one, and no step a solver could take settled the circuit.
+#
+# The state is the winding's current; its rate is the voltage behind the copper over the inductance the core gives at
+# that current — the flux law above, differentiated: dΦ/dI = L_air + (L − L_air) · sech²(I / I_saturation).
+#
+#   terminal_one ── R_winding ── winding ──┬── L(I) ──┬── terminal_two
+#        │                                 └─ R_core ─┘       │
+#        └───────────────────── C_winding ────────────────────┘
+#
+# R_core is the ferrite's loss at the frequencies a converter switches at, as a resistance across the inductance; C_winding
+# the capacitance between its turns, which sets its self-resonance. A datasheet gives the self-resonant frequency
+# (SRF) — C_winding = 1 / ((2π · SRF)² · L) — and a Q or a core-loss curve. Not represented: the hysteresis loop.
+
+component:power-inductor("Power inductor", type: inductor) {
+    meta {
+        designator: L
+        summary: "Power inductor: inductance, winding resistance, core saturation, core loss and self-resonance"
+        source: "the figures a power inductor's datasheet gives: L, DCR, ISAT, SRF, Q"
+        category: circuits
+        failure: open
+        value: inductance
+    }
+
+    parameter:inductance(100 uH, "inductance at small currents")
+    parameter:I_saturation(2 A, "ISAT: past it the core saturates and the inductance falls away")
+    parameter:saturated_inductance(5 uH, "what is left once the core is saturated: the winding's air-core inductance. An approximation — a datasheet gives ISAT as a 30 % drop, not this floor")
+    parameter:R_winding(50 mOhm, "DCR: the winding's resistance")
+    parameter:C_winding(1 pF, "the capacitance between its turns: with 100 µH, a self-resonance near 16 MHz, as a datasheet's SRF gives")
+    parameter:R_core(2 kOhm, "the ferrite's loss as a resistance across the inductance: a Q of about 30 at 100 kHz")
+    parameter:copper_temperature_coefficient(0.00393, "copper: the winding's resistance rises 0.393 % per kelvin")
+    parameter:saturation_temperature_coefficient(-0.004, "a ferrite core saturates earlier when hot, about 0.4 % per kelvin")
+    parameter:T_nominal(298.15 K, "the temperature the figures are given at")
+    parameter:power_rating(1 W, "what it is rated for")
+    parameter:thermal_resistance(50 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(30 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:terminal_one(analog, 1, "first terminal")
+    pin:terminal_two(analog, 2, "second terminal")
+
+    node:winding("behind the copper: where the inductance begins")
+
+    state:I_winding(0, continuous, "the current in the inductance")
+
+    symbol(uses: inductor-symbol) {
+        bind:failed(failed)
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_winding : temperature = temperature
+        let R_winding_now : resistance = R_winding * (1 + copper_temperature_coefficient * (T_winding - T_nominal))
+        let I_saturation_now : current = I_saturation * (1 + saturation_temperature_coefficient * (T_winding - T_nominal))
+        # On a draft bench (detail 0) the winding stores no charge between its turns, as a junction stores none there.
+        let stored : ratio = min(detail, 1)
+        let L_incremental : inductance = saturated_inductance + (inductance - saturated_inductance) / cosh(I_winding / I_saturation_now) ^ 2
+
+        current terminal_one -> winding = (terminal_one - winding) / R_winding_now
+        d(I_winding)/dt = (winding - terminal_two) / L_incremental
+        current winding -> terminal_two = I_winding + (winding - terminal_two) / R_core
+        current terminal_one -> terminal_two = d(stored * C_winding * (terminal_one - terminal_two))/dt
+    }
+
+    expect("a ramp of V / L below saturation", from: "1 V across 100 µH: 0.5 A after 50 µs") {
+        bench(for: 50 us) {
+            part:V1(voltage-source, [feed, 0], U_output: 1 V)
+            part:U1(self, [terminal_one: feed, terminal_two: 0])
+        }
+        measure(final, current: V1)
+        within(-0.55 A .. -0.45 A)
+    }
+
+    expect("the core saturates past ISAT", from: "the same 1 V after 250 µs: a linear inductor would carry 2.5 A") {
+        bench(for: 250 us) {
+            part:V1(voltage-source, [feed, 0], U_output: 1 V)
+            part:U1(self, [terminal_one: feed, terminal_two: 0])
+        }
+        measure(final, current: V1)
+        within(-21 A .. -4 A)
+    }
+
+    # How it looks in the hand: a shielded SMD square printed with its microhenry code.
+    portrait(uses: power-inductor-portrait) {
+        bind:inductance(inductance)
+    }
+}

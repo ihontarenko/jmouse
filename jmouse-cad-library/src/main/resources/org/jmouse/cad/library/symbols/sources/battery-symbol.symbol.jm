@@ -1,0 +1,34 @@
+symbol:battery-symbol("Battery") {
+    meta {
+        summary: "Battery, as drawn on a schematic: a gauge under it shows how full it is"
+        code: "SY.SOURCE:BATTERY"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:state_of_charge
+    input:failed
+
+    group:body(live) {
+        path("M-80 0H-18M-18-30V30M-4-16V16M10-30V30M24-16V16M24 0H80")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    box:charge(live, at: 0 44, size: 56 x 12) {
+        live level = state_of_charge
+        live fill = curve(state_of_charge, 0 -> hot, 0.2 -> warm, 0.5 -> positive)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 72)
+}

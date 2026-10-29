@@ -1,0 +1,38 @@
+symbol:photodiode-symbol("Photodiode") {
+    meta {
+        summary: "Photodiode, as drawn on a schematic: a diode with light falling on it; the arrows light up with the light it takes"
+        code: "SY.PHOTODETECTOR:DIODE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:forward(0 .. 1)
+    input:reverse(0 .. 1)
+    input:light(0 .. 1)
+    input:failed
+    path:die(live, "M-24-24L24 0-24 24Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(forward)
+        live glow = 9 * seen(forward)
+    }
+    group:body(live) {
+        path("M-60 0H-24V-24L24 0-24 24V0M24-24V24M24 0H60")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    path:light_in(live, "M-8-60L8-44M8-52V-44H0M16-60L32-44M32-52V-44H24") {
+        live stroke = if(light > 0.02, warm, signal)
+        live glow = 5 * light
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

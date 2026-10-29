@@ -1,0 +1,106 @@
+# 74HC138: a three-to-eight line decoder. While it is enabled — G1 high, G2A and G2B low — the one output the select
+# inputs name is low and the other seven high; disabled, all eight are high. The three enables are what decode a wider
+# address from several of them.
+
+component:74hc138("74HC138", type: decoder) {
+    meta {
+        designator: U
+        summary: "Three-to-eight line decoder with active-low outputs and three enables"
+        source: "TI SN74HC138 (SCLS107G, rev. Oct 2021): function table; tpd 15 ns typical — the data sheet's headline figure; pinout per the data sheet"
+        package: "DIP-16, SOIC-16"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+
+    parameter:propagation_delay(15 ns, "select or enable to an output, typical")
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes (DIP-16 in still air)")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:select[0..2](digital, input, [1, 2, 3], "A, B, C: which output is chosen, A the least significant")
+    pin:not_enable_a(digital, input, 4, "G2A, enable, active low")
+    pin:not_enable_b(digital, input, 5, "G2B, enable, active low")
+    pin:enable(digital, input, 6, "G1, enable, active high")
+    pin:not_output[0..7](digital, output, [15, 14, 13, 12, 11, 10, 9, 7], "Y0 to Y7, the chosen one low")
+    pin:GND(ground, 8)
+    pin:Vcc(power, 16)
+
+    symbol(box) {
+        left([select, enable, not_enable_a bubble, not_enable_b bubble])
+        right(not_output bubble)
+        power([Vcc, GND])
+    }
+
+    behaviour {
+        # Every output high but the chosen one: eight bits, the chosen bit low.
+        function chosen()
+            if not known(select) then
+                return X
+            end
+            return bit_not(shift_left(1, select, 8), 8)
+        end
+
+        function decoded()
+            if enable == 0 or not_enable_a == 1 or not_enable_b == 1 then
+                return 255
+            end
+            if enable == 1 and not_enable_a == 0 and not_enable_b == 0 then
+                return chosen()
+            end
+            return X
+        end
+
+        function show()
+            drive('not_output', decoded(), propagation_delay * delay_scale(Vcc - GND))
+        end
+
+        on start do
+            show()
+        end
+
+        on change 'select, enable, not_enable_a, not_enable_b' do
+            show()
+        end
+    }
+
+    expect("enabled, select five takes Y5 low alone", from: "function table: G1 H, G2 L, C B A = H L H gives Y5 low") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [select_0: high, select_1: 0, select_2: high, enable: high, not_enable_a: 0, not_enable_b: 0, not_output_4: y4, not_output_5: y5, not_output_6: y6, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [y4, y5, y6])
+        is([1,0,1])
+    }
+
+    expect("enabled, select nought takes Y0 low", from: "function table: C B A = L L L gives Y0 low") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [select_0: 0, select_1: 0, select_2: 0, enable: high, not_enable_a: 0, not_enable_b: 0, not_output_0: y0, not_output_7: y7, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [y0, y7])
+        is([0,1])
+    }
+
+    expect("G1 low keeps every output high", from: "function table: G1 L, all outputs high") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [select_0: high, select_1: 0, select_2: high, enable: 0, not_enable_a: 0, not_enable_b: 0, not_output_5: y5, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: y5)
+        is([1])
+    }
+
+    expect("G2A high keeps every output high", from: "function table: G2A H, all outputs high") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [select_0: 0, select_1: 0, select_2: 0, enable: high, not_enable_a: high, not_enable_b: 0, not_output_0: y0, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: y0)
+        is([1])
+    }
+}

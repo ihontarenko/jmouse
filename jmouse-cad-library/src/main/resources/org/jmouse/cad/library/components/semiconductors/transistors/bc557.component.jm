@@ -1,0 +1,77 @@
+# The BC557B is the bipolar transistor with NXP's published Gummel–Poon numbers for the B gain group: the everyday
+# small-signal PNP, the BC547's complement.
+
+component:bc557("BC557B", type: bjt) {
+    meta {
+        designator: Q
+        summary: "PNP general-purpose transistor, -45 V, -100 mA, gain group B"
+        source: "NXP BC557 datasheet and its SPICE model"
+        package: "TO-92"
+        category: circuits
+        failure: open
+    }
+    extends:pnp-transistor
+
+    parameter:I_saturation(38.3 fA, "IS")
+    parameter:beta_forward(344.4, "BF")
+    parameter:emission_coefficient(1.008, "NF")
+    parameter:V_early(21.11 V, "VAF")
+    parameter:I_knee(80.39 mA, "IKF")
+    parameter:I_leakage_base_emitter(12.2 fA, "ISE")
+    parameter:leakage_emission_base_emitter(1.528, "NE")
+    parameter:beta_reverse(14.84, "BR")
+    parameter:emission_coefficient_reverse(1.005, "NR")
+    parameter:V_early_reverse(32.02 V, "VAR")
+    parameter:I_knee_reverse(47 mA, "IKR")
+    parameter:I_leakage_base_collector(0.285 pA, "ISC")
+    parameter:leakage_emission_base_collector(1.28, "NC")
+    parameter:R_base(1 Ohm, "RB")
+    parameter:R_emitter(0.6202 Ohm, "RE")
+    parameter:R_collector(0.5713 Ohm, "RC")
+    parameter:C_base_emitter(12.3 pF, "CJE")
+    parameter:V_junction_base_emitter(0.6106 V, "VJE")
+    parameter:grading_base_emitter(0.378, "MJE")
+    parameter:C_base_collector(10.8 pF, "CJC")
+    parameter:V_junction_base_collector(0.1022 V, "VJC")
+    parameter:grading_base_collector(0.3563, "MJC")
+    parameter:internal_base_collector_fraction(0.6288, "XCJC")
+    parameter:transit_time_forward(0.56 ns, "TF: fT about 150 MHz")
+    parameter:transit_time_bias_dependence(3.414, "XTF")
+    parameter:transit_time_bias_voltage(5.23 V, "VTF")
+    parameter:transit_time_current(0.1483 A, "ITF")
+    parameter:transit_time_reverse(10 ns, "TR")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:V_breakdown(65 V, "avalanche onset: VCEO is guaranteed to 45 V")
+    parameter:power_rating(0.5 W, "what it is rated for")
+    parameter:thermal_resistance(250 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:beta_forward_spread(0.37, "gain group B, hFE 220 ... 475")
+    parameter:V_collector_emitter_maximum(45 V, "VCEO")
+    parameter:I_collector_maximum(100 mA, "IC, continuous")
+
+    pin:emitter(analog, 1, "emitter")
+    pin:base(analog, input, 2, "base")
+    pin:collector(analog, output, 3, "collector")
+
+    footprint(to-92-inline-footprint)
+
+    symbol(uses: pnp-transistor-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("gain group B at -2 mA", from: "hFE 220 … 475 at IC -2 mA, VCE -5 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [0, collector], U_output: 5 V)
+            part:I1(current-source, [0, base], I_output: 7 uA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(operating, current: V1)
+        within(-3.3 mA .. -1.5 mA)
+    }
+
+    # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-92-portrait) {
+        bind:marking("BC557B")
+    }
+}

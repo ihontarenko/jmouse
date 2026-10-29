@@ -1,0 +1,18 @@
+# A row of 4 header pins: what a wire, a probe or another board is plugged into. It joins nothing and takes
+# nothing — the pins are nodes a design hands to the outside, nothing more.
+component:pin-header-1x4("Pin header, 1x4", type: connector) {
+    meta {
+        designator: J
+        summary: "Single-row pin header, 4 contacts, 2.54 mm pitch"
+        source: "generic 2.54 mm pin header; no electrical behaviour"
+        package: "PinHeader_1x04_P2.54mm"
+        category: circuits
+    }
+
+    pin:pin1(analog, 1, "contact 1")
+    pin:pin2(analog, 2, "contact 2")
+    pin:pin3(analog, 3, "contact 3")
+    pin:pin4(analog, 4, "contact 4")
+
+    symbol(uses: pin-header-1x4-symbol)
+}

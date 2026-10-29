@@ -1,0 +1,111 @@
+# The TL072: two JFET-input op-amps on a split supply. Its inputs draw picoamperes and work up to V+, but not down to
+# V-: past about 3 V above it the input stage gives up and the output swings the other way — the phase reversal a
+# follower near the negative rail shows. The pin called GND is V-.
+
+component:tl072("TL072", type: opamp) {
+    meta {
+        designator: U
+        summary: "Dual JFET-input operational amplifier, ±18 V, 3 MHz, 13 V/µs"
+        source: "TI TL07x datasheet (SLOS080), electrical characteristics at ±15 V"
+        package: "SOIC-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:operational-amplifier
+    units:[A, B]
+
+    parameter:open_loop_gain(200000, "AVD 200 V/mV")
+    parameter:gain_bandwidth(3 MHz, "unity-gain bandwidth")
+    parameter:second_pole(4.5 MHz, "a phase margin near 55° at unity gain")
+    parameter:slew_rate(13 V/us, "slew rate")
+    parameter:V_input_offset(0 V, per: unit, "input offset; typically 3 mV either way")
+    parameter:I_input_bias(65 pA, "input bias current: a JFET gate's leakage")
+    parameter:R_input(1 TOhm, "input resistance")
+    parameter:V_common_mode_low(3 V, "the inputs work down to V- + 3 V (VICR -12 V at ±15 V)")
+    parameter:V_common_mode_high(0 V, "and up to V+")
+    parameter:phase_reversal(1, "past the low limit the output swings to the other rail")
+    parameter:V_noise(18 nV, "input voltage noise density at 1 kHz, 18 nV/√Hz")
+    parameter:I_noise(10 fA, "input current noise density, 0.01 pA/√Hz: a JFET gate")
+    parameter:noise_corner(100 Hz, "a JFET input's 1/f corner, about")
+    parameter:bias_doubling(10 K, "a JFET gate's leakage doubles every 10 K")
+    parameter:I_quiescent(1.4 mA, "supply current per unit")
+    parameter:R_output(75 Ohm, "output resistance")
+    parameter:I_output_source(40 mA, "output short-circuit current, about")
+    parameter:I_output_sink(40 mA, "output short-circuit current, about")
+    parameter:V_output_headroom(1.5 V, "VOM ±13.5 V into 10 kΩ at ±15 V")
+    parameter:V_output_low(1.5 V, "the same towards V-")
+    parameter:V_supply_nominal(30 V, "the supply span the figures are given at")
+    parameter:V_supply_maximum(36 V, "the supply span it is rated for")
+    parameter:V_offset_spread(10 mV, "VIO at most 10 mV")
+
+    pin:output(analog, output, 1 7)
+    pin:inverting_input(analog, input, 2 6, "inverting")
+    pin:non_inverting_input(analog, input, 3 5, "non-inverting")
+    pin:Vcc(power, 8, "V+")
+    pin:GND(power, 4, "V-")
+
+    footprint(soic-8-footprint)
+
+    symbol(uses: [operational-amplifier-symbol, operational-amplifier-wide-symbol]) {
+        bind:failed(failed)
+        bind:positive_supply(pin: Vcc)
+        bind:negative_supply(pin: GND)
+    }
+
+    expect("inverting gain of ten", from: "closed-loop application, G = -R2 / R1") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: 0.5 V)
+            part:R1(resistor, [input, inverting_input], resistance: 10 kOhm)
+            part:R2(resistor, [inverting_input, output], resistance: 100 kOhm)
+            part:U1(self, [A.non_inverting_input: 0, A.inverting_input: inverting_input, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, output)
+        near(-5 V, +- 1%)
+    }
+
+    expect("slew rate", from: "electrical characteristics, SR 13 V/µs typical") {
+        bench(for: 0.5 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: 10 V)
+            part:U1(self, [A.non_inverting_input: input, A.inverting_input: output, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(final, output)
+        near(6.5 V, +- 25%)
+    }
+
+    expect("output swing into 10 kΩ", from: "VOM ±12 V minimum at RL 10 kΩ, ±15 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: 1 V)
+            part:R1(resistor, [output, 0], resistance: 10 kOhm)
+            part:U1(self, [A.non_inverting_input: input, A.inverting_input: 0, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, output)
+        within(12 V .. 15 V)
+    }
+
+    expect("phase reversal below the input range", from: "VICR -12 V at ±15 V: a follower driven below it turns over") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:V3(voltage-source, [input, 0], U_output: -14 V)
+            part:U1(self, [A.non_inverting_input: input, A.inverting_input: output, A.output: output, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, output)
+        within(10 V .. 15 V)
+    }
+
+    expect("supply current, both units", from: "ICC 2.5 mA maximum per amplifier") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 15 V)
+            part:V2(voltage-source, [0, Vee], U_output: 15 V)
+            part:U1(self, [A.non_inverting_input: 0, A.inverting_input: a, A.output: a, B.non_inverting_input: 0, B.inverting_input: b, B.output: b, Vcc: Vcc, GND: Vee])
+        }
+        measure(operating, current: V1)
+        within(-5 mA .. 0 mA)
+    }
+}

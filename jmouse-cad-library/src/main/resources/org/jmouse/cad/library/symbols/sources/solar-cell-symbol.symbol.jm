@@ -1,0 +1,30 @@
+symbol:solar-cell-symbol("Solar cell") {
+    meta {
+        summary: "Solar cell, as drawn on a schematic: a cell with light falling on it; the arrows light up with the light it takes"
+        code: "SY.SOURCE:SOLAR-CELL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:light(0 .. 1)
+    input:failed
+    group:body(live) {
+        path("M-80 0H-8M-8-30V30M8-16V16M8 0H80")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    path:light_in(live, "M-40-64L-20-44M-20-52V-44H-28M-12-64L8-44M8-52V-44H0") {
+        live stroke = if(light > 0.02, warm, signal)
+        live glow = 5 * light
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

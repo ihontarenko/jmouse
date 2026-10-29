@@ -1,0 +1,211 @@
+# A 16×2 character LCD module with an HD44780 controller: two rows of sixteen characters out of an 80-byte display
+# memory (DDRAM), written over an 8-bit or a 4-bit parallel bus. RS chooses a command or a character, R/W a write or a
+# read, and a byte is taken as E falls. The controller wakes up in 8-bit, one-line mode with the display off; a function
+# set, a display-on and an entry mode later it writes each character at its address counter and steps it on, from the
+# end of row one (27h) to the start of row two (40h). Clearing takes 1.52 ms, every other command 37 µs, and a read with
+# RS low answers the busy flag and the address counter. The window shows what DDRAM holds at the display's shift.
+
+component:lcd-1602("16×2 LCD (HD44780)", type: display) {
+    meta {
+        designator: LCD
+        summary: "16×2 character LCD on an HD44780: 8- or 4-bit bus, DDRAM, address counter, busy flag, display shift"
+        source: "Hitachi HD44780U data sheet (ADE-207-272(Z), rev. 0.0): instruction table 6, execution times at fosc = 270 kHz (clear and home 1.52 ms, others 37 µs), DDRAM addresses 00h-27h and 40h-67h in two-line mode, initializing by internal reset (8-bit, one line, display off, increment); pinout of the common 1602 module. Not modelled: CGRAM characters (stored nowhere, drawn blank), the contrast voltage, the backlight, the ROM characters past 7Fh"
+        package: "1602 module, 16 pins"
+        category: circuits
+    }
+    use:cmos-hc
+
+    parameter:command_time(37 us, "how long a command or a character keeps it busy")
+    parameter:clear_time(1.52 ms, "how long a clear or a return home keeps it busy")
+
+    pin:ground(ground, 1, "VSS")
+    pin:supply(power, 2, "VDD")
+    pin:contrast(analog, 3, "V0, the contrast: not modelled")
+    pin:register_select(digital, input, 4, "RS: 0 a command, 1 a character")
+    pin:read_write(digital, input, 5, "R/W: 0 write, 1 read")
+    pin:enable(digital, input, 6, "E: a byte is taken as it falls")
+    pin:data[0..7](digital, bidirectional, [7, 8, 9, 10, 11, 12, 13, 14], "DB0 to DB7; a 4-bit bus uses DB4 to DB7")
+    pin:backlight_anode(analog, 15, "A, the backlight: not modelled")
+    pin:backlight_cathode(analog, 16, "K")
+
+    symbol(uses: lcd-1602-symbol)
+
+    state:ddram[80](32, discrete, "the display memory: 40 bytes a row, spaces at power-up")
+    state:shown[32](32, discrete, "the 32 characters in the window now")
+    state:address(0, discrete, "the address counter")
+    state:increment(1, discrete, "1 when the counter steps on after a character, 0 when it steps back")
+    state:follows(0, discrete, "1 when the display shifts with every character written")
+    state:display_on(0, discrete, "1 when the display is on")
+    state:two_lines(0, discrete, "1 in two-line mode; at power-up one line")
+    state:eight_bit(1, discrete, "1 on an 8-bit bus, 0 on a 4-bit one")
+    state:upper(0, discrete, "the high half of a byte on a 4-bit bus, waiting for the low")
+    state:half_taken(0, discrete, "1 while that high half waits for its low one")
+    state:shift(0, discrete, "how far the display is shifted left")
+    state:in_cgram(0, discrete, "1 while the address counter points into CGRAM")
+    state:busy_until(0, discrete, "when the last instruction is done")
+
+    figure:cell[32](shown, "the 32 characters in the window, row by row")
+
+    behaviour {
+        # Table 6: an instruction is known by its highest bit set.
+        final let SET_DDRAM_ADDRESS = 128
+        final let SET_CGRAM_ADDRESS = 64
+        final let FUNCTION_SET = 32
+        final let CURSOR_OR_DISPLAY_SHIFT = 16
+        final let DISPLAY_CONTROL = 8
+        final let ENTRY_MODE_SET = 4
+        final let RETURN_HOME = 2
+        final let CLEAR_DISPLAY = 1
+        # DDRAM: 40 bytes a row, the second row from address 40h; a space is 20h.
+        final let ROW_LENGTH = 40
+        final let SECOND_ROW = 64
+        final let VISIBLE = 16
+        final let SPACE = 32
+
+        # The bus as one number, a line not clearly high read as 0: on a 4-bit bus DB0 to DB3 are left open.
+        function bus_byte()
+            return value_of(levels('data'), 0)
+        end
+
+        function bus_nibble()
+            return shift_right(bus_byte(), 4)
+        end
+
+        # A DDRAM address as a slot of the row: 00h-27h the first 40, 40h-67h the next 40.
+        function slot_of(at)
+            if at >= SECOND_ROW then
+                return ROW_LENGTH + (at - SECOND_ROW) % ROW_LENGTH
+            end
+            return at % ROW_LENGTH
+        end
+
+        # The counter steps along a row and from one row to the other: 27h is followed by 40h, 67h by 00h.
+        function stepped(at, step)
+            let next = at + step
+            if next == ROW_LENGTH then
+                return SECOND_ROW
+            elseif next == SECOND_ROW - 1 then
+                return ROW_LENGTH - 1
+            elseif next == SECOND_ROW + ROW_LENGTH then
+                return 0
+            elseif next < 0 then
+                return SECOND_ROW + ROW_LENGTH - 1
+            end
+            return next
+        end
+
+        # The window: sixteen characters of each row from the shift on; the second row only in two-line mode.
+        function refresh()
+            for cell in 0..2 * VISIBLE - 1 do
+                let row = floor(cell / VISIBLE)
+                if display_on == 1 and (row == 0 or two_lines == 1) then
+                    shown = with(shown, cell, item(ddram, row * ROW_LENGTH + (cell % VISIBLE + shift) % ROW_LENGTH))
+                else
+                    shown = with(shown, cell, SPACE)
+                end
+            end
+        end
+
+        function busy_for(duration)
+            busy_until = time + duration
+        end
+
+        function busy_flag()
+            if time < busy_until then
+                return 1
+            end
+            return 0
+        end
+
+        function command(value)
+            if value >= SET_DDRAM_ADDRESS then
+                address = value - SET_DDRAM_ADDRESS
+                in_cgram = 0
+            elseif value >= SET_CGRAM_ADDRESS then
+                in_cgram = 1
+            elseif value >= FUNCTION_SET then
+                eight_bit = bit(value, 4)
+                two_lines = bit(value, 3)
+            elseif value >= CURSOR_OR_DISPLAY_SHIFT then
+                # Cursor or display shift: S/C is bit 3, R/L bit 2.
+                if bit(value, 3) == 1 then
+                    shift = (shift + 1 - 2 * bit(value, 2) + ROW_LENGTH) % ROW_LENGTH
+                else
+                    address = stepped(address, 2 * bit(value, 2) - 1)
+                end
+            elseif value >= DISPLAY_CONTROL then
+                display_on = bit(value, 2)
+            elseif value >= ENTRY_MODE_SET then
+                increment = bit(value, 1)
+                follows = bit(value, 0)
+            elseif value >= RETURN_HOME then
+                address = 0
+                shift = 0
+                busy_for(clear_time)
+                refresh()
+                return
+            elseif value == CLEAR_DISPLAY then
+                ddram = filled(SPACE, 2 * ROW_LENGTH)
+                address = 0
+                shift = 0
+                increment = 1
+                busy_for(clear_time)
+                refresh()
+                return
+            end
+            busy_for(command_time)
+            refresh()
+        end
+
+        function character(value)
+            if in_cgram == 0 then
+                ddram = with(ddram, slot_of(address), value)
+                address = stepped(address, 2 * increment - 1)
+                if follows == 1 then
+                    shift = (shift + 2 * increment - 1 + ROW_LENGTH) % ROW_LENGTH
+                end
+            end
+            busy_for(command_time)
+            refresh()
+        end
+
+        function take(value)
+            if register_select == 1 then
+                character(value)
+            else
+                command(value)
+            end
+        end
+
+        on falling 'enable' when read_write == 0 do
+            if eight_bit == 1 then
+                take(bus_byte())
+            elseif half_taken == 0 then
+                upper = bus_nibble()
+                half_taken = 1
+            else
+                take(upper * 16 + bus_nibble())
+                half_taken = 0
+            end
+        end
+
+        # A read: RS low answers the busy flag and the counter, RS high the character at the counter.
+        on rising 'enable' when read_write == 1 do
+            if register_select == 0 then
+                drive('data', busy_flag() * 128 + address % 128)
+            else
+                drive('data', item(ddram, slot_of(address)))
+                address = stepped(address, 2 * increment - 1)
+            end
+        end
+
+        on falling 'enable' when read_write == 1 do
+            drive('data', Z)
+        end
+
+        on start do
+            drive('data', Z)
+            refresh()
+        end
+    }
+}

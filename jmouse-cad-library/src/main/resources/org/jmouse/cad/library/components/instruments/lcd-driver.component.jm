@@ -1,0 +1,198 @@
+# A character-LCD driver for the bench: what a microcontroller's few lines of firmware do to an HD44780 on an 8-bit
+# bus. It initializes the controller — 8-bit, two lines, display on, cleared, entry to the right —, writes its first
+# line, and then every `update_every` writes the second: its label and a four-digit count of the updates. Both texts are
+# parameters, so a part line says what the display shows. Each byte is put on the bus with RS, E is raised and let fall,
+# and the driver waits out the controller's execution time before the next one rather than reading the busy flag. An
+# update that falls due while a burst is still on the bus waits for it to end; it never cuts one short.
+
+component:lcd-driver("LCD driver", type: controller) {
+    meta {
+        designator: BUS
+        summary: "Drives an HD44780 LCD on an 8-bit bus: initializes it, writes a line, and counts updates on the second"
+        source: "Hitachi HD44780U data sheet (ADE-207-272(Z)): instruction table 6, bus write timing (E pulse 230 ns minimum, data latched on its falling edge), execution times at 270 kHz"
+        category: circuits
+    }
+    use:cmos-hc
+
+    parameter:first_line("Hello, jmCAD!", "what the first line says")
+    parameter:second_label("Updates:", "what the second line says before the count")
+    parameter:columns(16, in: 8 .. 40, step: 1, integer, "how many characters a line of the display holds: 40 is all an HD44780 line has")
+    parameter:start_at(1 ms, "when it begins: a real module wants 40 ms after power-up")
+    parameter:update_every(200 ms, "how often it writes the second line again")
+    parameter:bit_time(1 us, "how long RS and the data stand before E rises, and E stays high")
+    parameter:settle(50 us, "how long it waits after a byte: more than the controller's 37 µs")
+    parameter:clear_settle(2 ms, "how long it waits after a clear or a return home: more than 1.52 ms")
+
+    pin:register_select(digital, output, 1, "RS")
+    pin:read_write(digital, output, 2, "R/W, held low: the driver only writes")
+    pin:enable(digital, output, 3, "E")
+    pin:data[0..7](digital, output, [4, 5, 6, 7, 8, 9, 10, 11], "DB0 to DB7")
+    pin:GND(ground, 12)
+    pin:Vcc(power, 13)
+
+    symbol(box) {
+        right([register_select, read_write, enable, data])
+        power([Vcc, GND])
+    }
+
+    state:bytes[96](0, discrete, "the bytes of this burst, in order: room for two lines of 40 and the commands")
+    state:characters[96](0, discrete, "1 where the byte is a character (RS high), 0 where it is a command")
+    state:planned(0, discrete, "how many bytes the burst has")
+    state:cursor(0, discrete, "the byte being written")
+    state:phase(0, discrete, "what the next tick does to the byte: SET_LINES, RAISE_ENABLE or LOWER_ENABLE")
+    state:updates(0, discrete, "how many times the second line was written")
+    state:on_the_bus(0, discrete, "1 while a burst is being written")
+    state:waiting(0, discrete, "1 when an update fell due while a burst was being written")
+
+    figure:update_count(updates, "how many times the second line was written")
+
+    behaviour {
+        # The three steps of writing one byte.
+        final let SET_LINES = 0
+        final let RAISE_ENABLE = 1
+        final let LOWER_ENABLE = 2
+
+        # The instructions of table 6, each built from its bits.
+        function clear_display()
+            return 1
+        end
+
+        function entry_mode(increment, shift)
+            return 4 + 2 * increment + shift
+        end
+
+        function display_control(display, cursor_shown, blinking)
+            return 8 + 4 * display + 2 * cursor_shown + blinking
+        end
+
+        function function_set(eight_bit, two_lines, large_font)
+            return 32 + 16 * eight_bit + 8 * two_lines + 4 * large_font
+        end
+
+        # DDRAM address: row 0 starts at 00h, row 1 at 40h.
+        function ddram_address(row, column)
+            return 128 + 64 * row + column
+        end
+
+        function add_byte(value, character)
+            bytes = with(bytes, planned, value)
+            characters = with(characters, planned, character)
+            planned = planned + 1
+        end
+
+        function add_command(value)
+            add_byte(value, 0)
+        end
+
+        # A text's characters, each its code, then spaces up to `width`.
+        function add_text(text, width)
+            let text_length = text | length
+            for index in 0..width - 1 do
+                if index < text_length then
+                    add_byte(text | sub(index, index + 1) | char | int, 1)
+                else
+                    add_byte(32, 1)
+                end
+            end
+        end
+
+        function add_digit(value)
+            add_byte(48 + value % 10, 1)
+        end
+
+        # The second line: its label, then the count in four digits at the line's end.
+        function plan_second_line()
+            add_command(ddram_address(1, 0))
+            add_text(second_label, columns - 4)
+            add_digit(floor(updates / 1000))
+            add_digit(floor(updates / 100))
+            add_digit(floor(updates / 10))
+            add_digit(updates)
+        end
+
+        function plan_initialization()
+            add_command(function_set(1, 1, 0))
+            add_command(display_control(1, 0, 0))
+            add_command(clear_display())
+            add_command(entry_mode(1, 0))
+            add_command(ddram_address(0, 0))
+            add_text(first_line, columns)
+        end
+
+        function start_burst(initializing)
+            on_the_bus = 1
+            planned = 0
+            cursor = 0
+            phase = SET_LINES
+            if initializing == 1 then
+                plan_initialization()
+            end
+            plan_second_line()
+            updates = updates + 1
+            schedule('tick', 0)
+        end
+
+        # A clear and a return home take 1.52 ms; every other byte 37 µs.
+        function wait_after(value, character)
+            if character == 0 and value < 4 then
+                return clear_settle
+            end
+            return settle
+        end
+
+        on start do
+            drive('register_select', 0)
+            drive('read_write', 0)
+            drive('enable', 0)
+            drive('data', 0)
+            schedule('initialize', start_at)
+        end
+
+        on timer 'initialize' do
+            start_burst(1)
+            schedule('update', update_every)
+        end
+
+        on timer 'update' do
+            schedule('update', update_every)
+            if on_the_bus == 1 then
+                waiting = 1
+            else
+                start_burst(0)
+            end
+        end
+
+        # The burst's last byte is executed: an update that fell due meanwhile goes now.
+        on timer 'written' do
+            on_the_bus = 0
+            if waiting == 1 then
+                waiting = 0
+                start_burst(0)
+            end
+        end
+
+        on timer 'tick' do
+            let value = item(bytes, cursor)
+            let character = item(characters, cursor)
+            if phase == SET_LINES then
+                drive('register_select', character)
+                drive('data', value)
+                phase = RAISE_ENABLE
+                schedule('tick', bit_time)
+            elseif phase == RAISE_ENABLE then
+                drive('enable', 1)
+                phase = LOWER_ENABLE
+                schedule('tick', bit_time)
+            else
+                drive('enable', 0)
+                phase = SET_LINES
+                cursor = cursor + 1
+                if cursor < planned then
+                    schedule('tick', wait_after(value, character))
+                else
+                    schedule('written', wait_after(value, character))
+                end
+            end
+        end
+    }
+}

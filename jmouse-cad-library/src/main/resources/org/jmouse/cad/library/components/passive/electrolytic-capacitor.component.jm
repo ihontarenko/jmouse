@@ -1,0 +1,89 @@
+# An aluminium electrolytic capacitor as it really is: the capacitance behind an equivalent series resistance — the
+# ESR that heats it under ripple and makes a step jump before the charge moves — with a leakage current across it.
+# Everything here follows its own temperature: the bench's, and on a realistic bench raised by the ripple's heat in its
+# ESR. Cold, the electrolyte thickens — the ESR doubles every ESR_doubling kelvin and the capacitance falls; hot, the
+# leakage doubles every leakage_doubling kelvin. Each of them is linear in the voltages at any one temperature, so the
+# engine solves it as the linear part it is.
+# Not represented: the series inductance (ESL, a few nanohenries), the capacitance's fall with frequency, and what a
+# reversed electrolytic does.
+
+component:electrolytic-capacitor("Electrolytic capacitor", type: capacitor) {
+    use:constants
+
+    meta {
+        designator: C
+        summary: "Aluminium electrolytic capacitor: capacitance, ESR, leakage"
+        source: "the equivalent circuit an electrolytic's datasheet tabulates: C, ESR at 100 kHz, leakage current"
+        category: circuits
+        failure: short
+        value: capacitance
+    }
+
+    parameter:capacitance(1000 uF, "capacitance")
+    parameter:R_equivalent_series(0.1 Ohm, "ESR")
+    parameter:R_leakage(1 MOhm, "leakage: the datasheet's I = 0.01 · C · V, as a resistance")
+    parameter:ESR_doubling(20 K, "the ESR doubles for every this many kelvin colder: an electrolyte thickens in the cold")
+    parameter:capacitance_temperature_coefficient(0.002, "the capacitance moves 0.2 % per kelvin: about −13 % at −40 °C, +12 % at 85 °C")
+    parameter:leakage_doubling(15 K, "the leakage current doubles for every this many kelvin warmer")
+    parameter:T_nominal(298.15 K, "the temperature the ESR, the capacitance and the leakage are given at")
+    parameter:power_rating(0.5 W, "what the ripple may heat it with")
+    parameter:thermal_resistance(40 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(60 s, "how fast it warms to that")
+    parameter:T_maximum(105 °C, "past this it fails on a realistic bench")
+    parameter:voltage_rating(25 V, "the rated voltage")
+
+    pin:positive(analog, 1, "positive, the longer lead")
+    pin:negative(analog, 2, "negative, the striped side")
+
+    node:plate("the capacitance, behind the ESR")
+
+    symbol(uses: polarized-capacitor-symbol) {
+        bind:failed(failed)
+        bind:charge((positive - negative) / voltage_rating)
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+
+    # Beside it on the sheet: how near its rating it is, and what its temperature moves — its ESR and its capacitance,
+    # read exactly as the equations below read them, and the temperature of its body (the bench plus its own heat).
+    figure:overvoltage(100 * abs(positive - negative) / voltage_rating, unit: %, "of its rated voltage")
+    figure:ESR(R_equivalent_series * 2 ^ ((T_nominal - temperature) / ESR_doubling), unit: Ω, "at its temperature")
+    figure:C(capacitance * (1 + capacitance_temperature_coefficient * (temperature - T_nominal)), unit: F, "at its temperature")
+    figure:body(temperature - zero_celsius, unit: °C, "the bench and its own heat")
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_body : temperature = temperature
+        let R_series_now : resistance = R_equivalent_series * 2 ^ ((T_nominal - T_body) / ESR_doubling)
+        let C_now : capacitance = capacitance * (1 + capacitance_temperature_coefficient * (T_body - T_nominal))
+        let R_leakage_now : resistance = R_leakage / 2 ^ ((T_body - T_nominal) / leakage_doubling)
+        current positive -> plate = (positive - plate) / R_series_now
+        current plate -> negative = d(C_now * (plate - negative))/dt + (plate - negative) / R_leakage_now
+    }
+
+    expect("a step jumps by its ESR share before the charge moves", from: "ESR 0.1 Ω behind 1 Ω: 1 V × 0.1 / 1.1 at once") {
+        bench(for: 10 us) {
+            part:V1(voltage-source, [input, 0], U_output: 1 V)
+            part:R1(resistor, [input, positive], resistance: 1 Ohm)
+            part:U1(self, [positive: positive, negative: 0])
+        }
+        measure(final, positive)
+        within(0.08 V .. 0.12 V)
+    }
+
+    expect("in the cold the ESR grows, and the step's jump with it", from: "at −40 °C the ESR is 0.1 Ω × 2^(65/20) ≈ 0.95 Ω: 1 V × 0.95 / 1.95 at once") {
+        bench(for: 10 us, at: -40 °C) {
+            part:V1(voltage-source, [input, 0], U_output: 1 V)
+            part:R1(resistor, [input, positive], resistance: 1 Ohm)
+            part:U1(self, [positive: positive, negative: 0])
+        }
+        measure(final, positive)
+        within(0.45 V .. 0.52 V)
+    }
+
+    # How it looks in the hand: a can with its minus stripe, its capacitance and its rating printed; burst when it fails.
+    portrait(uses: electrolytic-capacitor-portrait) {
+        bind:capacitance(capacitance)
+        bind:voltage_rating(voltage_rating)
+    }
+}

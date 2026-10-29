@@ -1,0 +1,61 @@
+footprint:tqfp-44-footprint("TQFP-44, 10 mm body") {
+    meta {
+        summary: "44-lead TQFP-44, 10 mm body, 0.8 mm pitch, body 10 × 10 mm"
+        code: "FP.TQFP:44-P0.8-10"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC MS-026 ACB"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/quad-packages.sht#tqfp-44 and the land pattern rules; regenerate, never edit.
+    # Z = 12.915, G = 9.798, X = 0.547; pad 1.55 × 0.55 centred at ±5.7.
+    pad:1(surface, rounded-rectangle, at: -5.7 -4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: -5.7 -3.2, size: 1.55 x 0.55, roundness: 0.25)
+    pad:3(surface, rounded-rectangle, at: -5.7 -2.4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:4(surface, rounded-rectangle, at: -5.7 -1.6, size: 1.55 x 0.55, roundness: 0.25)
+    pad:5(surface, rounded-rectangle, at: -5.7 -0.8, size: 1.55 x 0.55, roundness: 0.25)
+    pad:6(surface, rounded-rectangle, at: -5.7 0, size: 1.55 x 0.55, roundness: 0.25)
+    pad:7(surface, rounded-rectangle, at: -5.7 0.8, size: 1.55 x 0.55, roundness: 0.25)
+    pad:8(surface, rounded-rectangle, at: -5.7 1.6, size: 1.55 x 0.55, roundness: 0.25)
+    pad:9(surface, rounded-rectangle, at: -5.7 2.4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:10(surface, rounded-rectangle, at: -5.7 3.2, size: 1.55 x 0.55, roundness: 0.25)
+    pad:11(surface, rounded-rectangle, at: -5.7 4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:12(surface, rounded-rectangle, at: -4 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:13(surface, rounded-rectangle, at: -3.2 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:14(surface, rounded-rectangle, at: -2.4 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:15(surface, rounded-rectangle, at: -1.6 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:16(surface, rounded-rectangle, at: -0.8 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:17(surface, rounded-rectangle, at: 0 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:18(surface, rounded-rectangle, at: 0.8 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:19(surface, rounded-rectangle, at: 1.6 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:20(surface, rounded-rectangle, at: 2.4 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:21(surface, rounded-rectangle, at: 3.2 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:22(surface, rounded-rectangle, at: 4 5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:23(surface, rounded-rectangle, at: 5.7 4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:24(surface, rounded-rectangle, at: 5.7 3.2, size: 1.55 x 0.55, roundness: 0.25)
+    pad:25(surface, rounded-rectangle, at: 5.7 2.4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:26(surface, rounded-rectangle, at: 5.7 1.6, size: 1.55 x 0.55, roundness: 0.25)
+    pad:27(surface, rounded-rectangle, at: 5.7 0.8, size: 1.55 x 0.55, roundness: 0.25)
+    pad:28(surface, rounded-rectangle, at: 5.7 0, size: 1.55 x 0.55, roundness: 0.25)
+    pad:29(surface, rounded-rectangle, at: 5.7 -0.8, size: 1.55 x 0.55, roundness: 0.25)
+    pad:30(surface, rounded-rectangle, at: 5.7 -1.6, size: 1.55 x 0.55, roundness: 0.25)
+    pad:31(surface, rounded-rectangle, at: 5.7 -2.4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:32(surface, rounded-rectangle, at: 5.7 -3.2, size: 1.55 x 0.55, roundness: 0.25)
+    pad:33(surface, rounded-rectangle, at: 5.7 -4, size: 1.55 x 0.55, roundness: 0.25)
+    pad:34(surface, rounded-rectangle, at: 4 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:35(surface, rounded-rectangle, at: 3.2 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:36(surface, rounded-rectangle, at: 2.4 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:37(surface, rounded-rectangle, at: 1.6 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:38(surface, rounded-rectangle, at: 0.8 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:39(surface, rounded-rectangle, at: 0 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:40(surface, rounded-rectangle, at: -0.8 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:41(surface, rounded-rectangle, at: -1.6 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:42(surface, rounded-rectangle, at: -2.4 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:43(surface, rounded-rectangle, at: -3.2 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    pad:44(surface, rounded-rectangle, at: -4 -5.7, size: 0.55 x 1.55, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-4 -5H5V5H-5V-4Z")
+    outline(silkscreen, width: 0.12, "M-4.535 -5.11H-5.11V-4.535M-4.535 5.11H-5.11V4.535M4.535 -5.11H5.11V-4.535M4.535 5.11H5.11V4.535")
+    outline(silkscreen, filled, "M-7.335 -4A0.3 0.3 0 1 0 -6.735 -4A0.3 0.3 0 1 0 -7.335 -4Z")
+    outline(courtyard, width: 0.05, "M-6.75 -6.75H6.75V6.75H-6.75Z")
+}

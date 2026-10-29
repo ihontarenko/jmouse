@@ -1,0 +1,14 @@
+{
+  "maskExpansion": 0.05,
+  "silkscreenWidth": 0.12,
+  "edgeWidth": 0.05,
+  "letterStroke": 0.15,
+  "curveSteps": 16,
+  "cornerSteps": 6,
+  "designator": {
+    "gap": 0.6,
+    "least": 0.9,
+    "most": 1.6,
+    "widthShare": 0.25
+  }
+}

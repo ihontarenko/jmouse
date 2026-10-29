@@ -1,0 +1,186 @@
+# PCD8544: the controller of the Nokia 5110 module, an 84×48 monochrome LCD on SPI. Chip enable low selects it; it
+# shifts a byte in on rising clocks, most significant bit first, and reads D/C with the eighth: low a command, high a
+# byte of display memory. Its memory is six banks of 84 bytes, each byte eight pixels down one column, its lowest bit
+# on top — the layout every monochrome controller keeps. Commands come in two sets: the function set (20h + PD, V, H)
+# chooses which, the basic one placing the address (X, Y) and the display mode, the extended one the operating voltage
+# Vop, the temperature coefficient and the bias. Reset leaves it powered down, blank and with Vop at nought: nothing
+# shows until the function set clears PD, a display mode is chosen and Vop is set — the data sheet's own start-up.
+
+component:pcd8544("PCD8544 LCD module", type: display) {
+    meta {
+        designator: DS
+        summary: "84×48 monochrome LCD on SPI (Nokia 5110): six banks of display memory, basic and extended instructions"
+        source: "Philips PCD8544 data sheet (1999 Apr 12): serial interface (§8.1, D/C read at the eighth bit), instruction set table 1 (function set 20h + PD V H; display control 08h + D E; set Y 40h + bank; set X 80h + column; Vop 80h + value in the extended set), addressing (§7.7, figs. 5–6), reset state (§8.2: PD = 1, D = E = 0, H = V = 0, X = Y = 0, Vop = 0); the 8-pin Nokia 5110 module. Not modelled: the display mode 'all segments on' (D = 0, E = 1), temperature coefficient, bias, the backlight pin"
+        package: "Nokia 5110 module, 8 pins"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+
+    pin:reset(digital, input, 1, "RST, active low: the reset state")
+    pin:chip_enable(digital, input, 2, "SCE, active low: selects it")
+    pin:data_command(digital, input, 3, "D/C: low a command, high display data — read with the eighth bit")
+    pin:data_in(digital, input, 4, "DIN: serial data, most significant bit first")
+    pin:clock(digital, input, 5, "SCLK: a bit on every rising edge")
+    pin:Vcc(power, 6)
+    pin:light(analog, 7, "BL, the backlight: not modelled")
+    pin:GND(ground, 8)
+
+    symbol(uses: lcd-84x48-symbol)
+
+    state:memory[504](0, discrete, "the display memory: six banks of 84 bytes, each byte eight pixels down")
+    state:bits(0, discrete, "bits of the byte shifted in so far")
+    state:shift(0, discrete, "the byte coming in")
+    state:power_down(1, discrete, "PD: 1 after reset, nothing driven")
+    state:vertical(0, discrete, "V: 0 horizontal addressing, 1 vertical")
+    state:extended(0, discrete, "H: 1 while the extended instruction set is chosen")
+    state:display_mode(0, discrete, "D and E: 0 blank, 2 normal, 3 inverse (1, all segments on, not modelled)")
+    state:operating_voltage(0, discrete, "Vop: 0 after reset — no contrast at all")
+    state:column(0, discrete, "X: the column the next data byte goes to")
+    state:bank(0, discrete, "Y: the bank the next data byte goes to")
+
+    figure:screen(memory, "the display memory, as the panel shows it")
+    figure:lit((1 - power_down) * (display_mode >= 2) * (operating_voltage > 0), "1 while the panel shows its memory: powered up, a display mode, a voltage")
+    figure:inverted(display_mode > 2.5, "1 while it shows inverse video")
+    figure:cursor_column(column, "X: the column the next data byte goes to")
+    figure:cursor_bank(bank, "Y: the bank the next data byte goes to")
+
+    behaviour {
+        final let COLUMNS = 84
+        final let BANKS = 6
+        final let FUNCTION_SET = 32         # 20h + PD, V, H
+        final let DISPLAY_CONTROL = 8       # 08h + D, E — basic set
+        final let SET_Y = 64                # 40h + bank — basic set
+        final let SET_X = 128               # 80h + column in the basic set; Vop in the extended one
+        final let NORMAL = 2                # D = 1, E = 0
+        final let INVERSE = 3               # D = 1, E = 1
+
+        function reset_state()
+            bits = 0
+            shift = 0
+            power_down = 1
+            vertical = 0
+            extended = 0
+            display_mode = 0
+            operating_voltage = 0
+            column = 0
+            bank = 0
+        end
+
+        function command(code)
+            if code >= SET_X then
+                if extended == 1 then
+                    operating_voltage = code - SET_X
+                else
+                    column = min(code - SET_X, COLUMNS - 1)
+                end
+            elseif code >= SET_Y then
+                if extended == 0 then
+                    bank = min(low_bits(code, 3), BANKS - 1)
+                end
+            elseif code >= FUNCTION_SET then
+                power_down = bit(code, 2)
+                vertical = bit(code, 1)
+                extended = bit(code, 0)
+            elseif code >= DISPLAY_CONTROL and extended == 0 then
+                display_mode = bit(code, 2) * 2 + bit(code, 0)
+            end
+        end
+
+        # A byte of display memory at (X, Y), and the address on — along the bank, or down the banks.
+        function write_data(value)
+            memory = with(memory, bank * COLUMNS + column, value)
+            if vertical == 0 then
+                column = column + 1
+                if column == COLUMNS then
+                    column = 0
+                    bank = (bank + 1) % BANKS
+                end
+            else
+                bank = bank + 1
+                if bank == BANKS then
+                    bank = 0
+                    column = (column + 1) % COLUMNS
+                end
+            end
+        end
+
+        on start do
+            reset_state()
+        end
+
+        on falling 'reset' do
+            reset_state()
+        end
+
+        # Selected, a new byte begins.
+        on falling 'chip_enable' do
+            bits = 0
+            shift = 0
+        end
+
+        on rising 'clock' when chip_enable == 0 and reset == 1 do
+            if not known(data_in) then
+                # A bit it cannot read: the byte is lost, and the next one begins.
+                bits = 0
+                shift = 0
+            else
+                shift = shift * 2 + data_in
+                bits = bits + 1
+            end
+            if bits == 8 then
+                if level_or(data_command, 0) == 1 then
+                    write_data(shift)
+                else
+                    command(shift)
+                end
+                bits = 0
+                shift = 0
+            end
+        end
+    }
+
+    expect("after reset it is powered down, and a display mode alone shows nothing", from: "§8.2: the reset state has PD = 1 and Vop = 0") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 3.3 V)
+            # 0Ch: display control, normal — with D/C low, a command.
+            part:B1(spi-controller, [sck: clock, mosi: data_in, cs: chip_enable, Vcc: Vcc, GND: 0], bytes: "0x0C")
+            part:U1(self, [reset: Vcc, chip_enable: chip_enable, data_command: 0, data_in: data_in, clock: clock, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figure: U1.lit)
+        near(0, +- 0.01)
+    }
+
+    expect("the start-up sequence lights it", from: "application example: 21h (PD = 0, extended), BFh (Vop), 20h (basic), 0Ch (normal)") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 3.3 V)
+            part:B1(spi-controller, [sck: clock, mosi: data_in, cs: chip_enable, Vcc: Vcc, GND: 0], bytes: "0x21 0xBF 0x20 0x0C")
+            part:U1(self, [reset: Vcc, chip_enable: chip_enable, data_command: 0, data_in: data_in, clock: clock, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figure: U1.lit)
+        near(1, +- 0.01)
+    }
+
+    expect("horizontal addressing carries the last column onto the next bank", from: "§7.7, fig. 5: after X = 83 the address goes to X = 0 of the next bank") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 3.3 V)
+            # Basic set, X = 82, Y = 0, then three bytes of data, in one transfer. D/C is low for the commands and goes
+            # high at 40 µs, between the third byte's eighth bit (33.5 µs) and the fourth's (41.5 µs), as firmware sets it.
+            part:G1(square-generator, [positive: data_command, negative: 0], high: 0 V, low: 3.3 V, frequency: 250 Hz, duty: 0.01)
+            part:B1(spi-controller, [sck: clock, mosi: data_in, cs: chip_enable, Vcc: Vcc, GND: 0], bytes: "0x20 0xD2 0x40 0xFF 0xFF 0xFF")
+            part:U1(self, [reset: Vcc, chip_enable: chip_enable, data_command: data_command, data_in: data_in, clock: clock, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figures: [U1.cursor_column, U1.cursor_bank])
+        is([1,1])
+    }
+
+    expect("Vop is the extended set's: X is not moved by it", from: "table 1: with H = 1, 80h + value is Vop; with H = 0, 80h + value is X") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 3.3 V)
+            part:B1(spi-controller, [sck: clock, mosi: data_in, cs: chip_enable, Vcc: Vcc, GND: 0], bytes: "0x21 0xBF")
+            part:U1(self, [reset: Vcc, chip_enable: chip_enable, data_command: 0, data_in: data_in, clock: clock, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figures: [U1.cursor_column, U1.cursor_bank])
+        is([0,0])
+    }
+}

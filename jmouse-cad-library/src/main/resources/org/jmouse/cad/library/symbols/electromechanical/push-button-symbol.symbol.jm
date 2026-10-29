@@ -1,0 +1,26 @@
+symbol:push-button-symbol("Push button") {
+    meta {
+        summary: "Push button, as drawn on a schematic: its bar rests above the contacts and comes down onto them while it is held"
+        code: "SY.SWITCH:PUSH-BUTTON"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:closed
+
+    path("M-80 0H-26M26 0H80")
+    path("M-30 0A4 4 0 1 0-22 0A4 4 0 1 0-30 0M22 0A4 4 0 1 0 30 0A4 4 0 1 0 22 0")
+
+    # The bar, its stem and its cap move together: up while released, down onto the contacts while held.
+    group:plunger(live) {
+        path("M-30-20H30M0-20V-36M-12-36H12")
+        live move = 0, between(0, 14, smooth(closed, 40 ms))
+    }
+
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -56)
+    label(value, at: 0 40)
+}

@@ -1,0 +1,64 @@
+# Electrical macromodel of the LD1117S33, a fixed 3.3 V low-dropout regulator: the AMS1117's structure — a smooth
+# current-limited pass device whose error is measured against the ground pin, and the ground pin's quiescent current —
+# with ST's figures. It covers the regulated output, the dropout near 1 V and the current limit. Thermal shutdown, the
+# ripple rejection's frequency dependence and the output capacitor's stability requirement are outside it.
+component:ld1117s33("LD1117S33", type: regulator) {
+    meta {
+        designator: U
+        summary: "Fixed 3.3 V low-dropout regulator, 800 mA, 1 V dropout at 800 mA, SOT-223"
+        source: "STMicroelectronics LD1117 datasheet (rev. 35): electrical characteristics of the LD1117#33"
+        package: "SOT-223"
+        category: circuits
+        failure: open
+    }
+    use:smooth-transitions
+
+    parameter:V_output(3.3 V, "output voltage, 3.267 V to 3.333 V at 10 mA, 25 °C")
+    parameter:V_dropout(1 V, "dropout at 800 mA, typical; at most 1.2 V")
+    parameter:I_limit(1.2 A, "current limit, typical; at least 950 mA")
+    parameter:I_ground(5 mA, "quiescent current into the ground pin, typical; at most 10 mA")
+    parameter:transconductance(50 A/V, "regulation transconductance: line and load regulation within the datasheet's limits")
+    parameter:thermal_resistance(110 K/W, "SOT-223 on a minimal pad: kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(20 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:GND(power, 1, "ground; the reference the output is regulated against")
+    pin:output(analog, output, 2, "regulated output; the tab is output too")
+    pin:input(power, 3, "unregulated input")
+
+    footprint(sot-223-footprint)
+
+    symbol(uses: voltage-regulator-symbol) {
+        bind:failed(failed)
+        bind:ground(pin: GND)
+    }
+
+    equations {
+        let error : voltage = V_output - (output - GND)
+        let headroom : ratio = soft_step((input - output) - V_dropout, 0.2)
+        let requested : current = soft_positive_part(transconductance * error, 0.001)
+        current input -> output = headroom * I_limit * requested / sqrt(I_limit^2 + requested^2)
+        current input -> GND = I_ground
+    }
+
+    expect("3.3 V at 100 mA from 5 V", from: "output voltage 3.267 V to 3.333 V") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 5 V)
+            part:R1(resistor, [output, 0], resistance: 33 Ohm)
+            part:C1(capacitor, [output, 0], capacitance: 10 uF)
+            part:U1(self, [input: input, output: output, GND: 0])
+        }
+        measure(final, output)
+        near(3.3 V, +- 2%)
+    }
+
+    expect("limits a short near its current limit", from: "current limit at least 950 mA, 1.2 A typical") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 5 V)
+            part:R1(resistor, [output, 0], resistance: 1 Ohm)
+            part:U1(self, [input: input, output: output, GND: 0])
+        }
+        measure(operating, current: V1)
+        within(-1.6 A .. -0.95 A)
+    }
+}

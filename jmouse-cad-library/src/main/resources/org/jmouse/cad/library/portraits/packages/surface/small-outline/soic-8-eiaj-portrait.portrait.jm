@@ -1,0 +1,39 @@
+# Generated from footprint-standards/small-outline-packages.sht#soic-eiaj; regenerate, never edit.
+portrait:soic-8-eiaj-portrait("SOIC-8, eiaj") {
+    meta {
+        summary: "8-lead SOIC, 5.3 mm body (208 mil) from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.SOIC:8-P1.27-W5.3"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEITA EDR-7320, 208-mil SOP"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(104 x 160)
+    input:marking(text)
+
+    path:leads("M-43.307 41.732H-36.693V80H-43.307ZM-43.307 -41.732H-36.693V-80H-43.307ZM-23.307 41.732H-16.693V80H-23.307ZM-23.307 -41.732H-16.693V-80H-23.307ZM-3.307 41.732H3.307V80H-3.307ZM-3.307 -41.732H3.307V-80H-3.307ZM16.693 41.732H23.307V80H16.693ZM16.693 -41.732H23.307V-80H16.693Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -40 80)
+    pin:2(at: -20 80)
+    pin:3(at: 0 80)
+    pin:4(at: 20 80)
+    pin:5(at: 20 -80)
+    pin:6(at: 0 -80)
+    pin:7(at: -20 -80)
+    pin:8(at: -40 -80)
+    path:body("M-48.394 -41.732H28.394A3.339 3.339 0 0 1 31.732 -38.394V38.394A3.339 3.339 0 0 1 28.394 41.732H-48.394A3.339 3.339 0 0 1 -51.732 38.394V-38.394A3.339 3.339 0 0 1 -48.394 -41.732Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-43.052 27.627A5.425 5.425 0 1 0 -32.202 27.627A5.425 5.425 0 1 0 -43.052 27.627Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 58.425 x 18.78) {
+        fill = silver
+        text = marking
+    }
+}

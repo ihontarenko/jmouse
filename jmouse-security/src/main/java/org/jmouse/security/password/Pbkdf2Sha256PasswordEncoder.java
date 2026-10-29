@@ -2,125 +2,95 @@ package org.jmouse.security.password;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
 import java.util.Base64;
-
-import static java.util.Base64.getEncoder;
+import java.util.Objects;
 
 /**
- * 🔐 Password encoder using PBKDF2 with HMAC-SHA256.
- *
- * <p>Features:</p>
- * <ul>
- *   <li>🧂 Generates a random salt per password</li>
- *   <li>⏳ Configurable iteration count (≥100k recommended)</li>
- *   <li>🛡️ Derives a 256-bit (32 byte) key by default</li>
- *   <li>📦 Encodes format: {@code pbkdf2$sha256$iterations$salt$hash}</li>
- *   <li>⚖️ Secure constant-time comparison to prevent timing attacks</li>
- * </ul>
+ * PBKDF2-HMAC-SHA256 with per-password salt and self-describing stored parameters.
+ * Stored format: pbkdf2$sha256$iterations$base64-salt$base64-key.
+ * Verification work is bounded; configure the fourth argument for stronger historical records.
  */
 public final class Pbkdf2Sha256PasswordEncoder implements PasswordEncoder {
+    public static final int DEFAULT_ITERATIONS = 600_000;
+    private static final int MAXIMUM_COMPONENT_BYTES = 1024;
+    private static final int MAXIMUM_ENCODED_LENGTH = 4096;
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private final int iterations;
+    private final int saltLength;
+    private final int keyLength;
+    private final int maximumVerificationIterations;
 
-    private static final String       PBKDF2                    = "pbkdf2";
-    private static final String       SHA_256                   = "sha256";
-    private static final String       PBKDF_2_WITH_HMAC_SHA_256 = "PBKDF2WithHmacSHA256";
-    private static final SecureRandom SECURE_RANDOM             = new SecureRandom();
+    public Pbkdf2Sha256PasswordEncoder() {
+        this(DEFAULT_ITERATIONS, 16, 32);
+    }
 
-    private final int iterations;   // ≥100,000 recommended
-    private final int saltLength;   // usually 16–32 bytes
-    private final int keyLength;    // typically 32 bytes (256-bit)
-
-    /**
-     * 🏗️ Construct encoder with parameters.
-     *
-     * @param iterations number of PBKDF2 iterations (≥100k recommended)
-     * @param saltLength length of salt in bytes (16–32 recommended)
-     * @param keyLength length of derived key in bytes (32 for 256-bit)
-     */
     public Pbkdf2Sha256PasswordEncoder(int iterations, int saltLength, int keyLength) {
+        this(iterations, saltLength, keyLength, Math.max(iterations, 1_000_000));
+    }
+
+    public Pbkdf2Sha256PasswordEncoder(int iterations, int saltLength, int keyLength,
+                                       int maximumVerificationIterations) {
+        if (iterations <= 0 || maximumVerificationIterations < iterations) {
+            throw new IllegalArgumentException("Invalid PBKDF2 iteration limits");
+        }
+        if (saltLength <= 0 || keyLength <= 0 ||
+                saltLength > MAXIMUM_COMPONENT_BYTES || keyLength > MAXIMUM_COMPONENT_BYTES) {
+            throw new IllegalArgumentException("Invalid PBKDF2 salt or key length");
+        }
         this.iterations = iterations;
         this.saltLength = saltLength;
         this.keyLength = keyLength;
+        this.maximumVerificationIterations = maximumVerificationIterations;
     }
 
-    /**
-     * ⚖️ Constant-time comparison to prevent timing attacks.
-     *
-     * @param a first byte array
-     * @param b second byte array
-     * @return true if equal, false otherwise
-     */
-    private static boolean constantTime(byte[] a, byte[] b) {
-        if (a == null || b == null || a.length != b.length) {
-            return false;
-        }
-
-        int result = 0;
-
-        for (int i = 0; i < a.length; i++) {
-            result |= (a[i] ^ b[i]);
-        }
-
-        return result == 0;
-    }
-
-    /**
-     * 🔑 Encode a password with salt and PBKDF2-HMAC-SHA256.
-     *
-     * @param password raw password as char array
-     * @return encoded string: {@code pbkdf2$sha256$iterations$salt$hash}
-     */
     @Override
     public String encode(char[] password) {
+        Objects.requireNonNull(password, "password");
+        byte[] salt = new byte[saltLength];
+        RANDOM.nextBytes(salt);
+        byte[] key = derive(password, salt, iterations, keyLength);
+        return "pbkdf2$sha256$" + iterations + "$" + Base64.getEncoder().encodeToString(salt)
+                + "$" + Base64.getEncoder().encodeToString(key);
+    }
+
+    @Override
+    public boolean verify(char[] password, String encoded) {
+        if (password == null || encoded == null || encoded.length() > MAXIMUM_ENCODED_LENGTH) {
+            return false;
+        }
         try {
-            byte[] salt = new byte[saltLength];
-            SECURE_RANDOM.nextBytes(salt);
-
-            KeySpec          key        = new PBEKeySpec(password, salt, iterations, keyLength * 8);
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256);
-            byte[]           hash       = keyFactory.generateSecret(key).getEncoded();
-
-            return "%s$%s$%d$%s$%s".formatted(
-                    PBKDF2,
-                    SHA_256,
-                    iterations,
-                    getEncoder().encodeToString(salt),
-                    getEncoder().encodeToString(hash)
-            );
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+            String[] fields = encoded.split("\\$", -1);
+            if (fields.length != 5 || !"pbkdf2".equals(fields[0]) || !"sha256".equals(fields[1])) {
+                return false;
+            }
+            int work = Integer.parseInt(fields[2]);
+            if (work <= 0 || work > maximumVerificationIterations) {
+                return false;
+            }
+            byte[] salt = Base64.getDecoder().decode(fields[3]);
+            byte[] expected = Base64.getDecoder().decode(fields[4]);
+            if (salt.length == 0 || expected.length == 0 ||
+                    salt.length > MAXIMUM_COMPONENT_BYTES || expected.length > MAXIMUM_COMPONENT_BYTES) {
+                return false;
+            }
+            return MessageDigest.isEqual(expected, derive(password, salt, work, expected.length));
+        } catch (IllegalArgumentException malformed) {
+            return false;
         }
     }
 
-    /**
-     * ✅ Verify a raw password against an encoded PBKDF2-SHA256 hash.
-     *
-     * @param password raw password as char array
-     * @param encoded stored encoded string
-     * @return true if password matches, false otherwise
-     */
-    @Override
-    public boolean verify(char[] password, String encoded) {
+    private byte[] derive(char[] password, byte[] salt, int work, int bytes) {
+        PBEKeySpec specification = new PBEKeySpec(password, salt, work, Math.multiplyExact(bytes, 8));
         try {
-            String[] parts = encoded.split("\\$");
-
-            if (parts.length != 5 || !PBKDF2.equals(parts[0]) || !SHA_256.equals(parts[1])) {
-                return false;
-            }
-
-            int    iterations = Integer.parseInt(parts[2]);
-            byte[] salt       = Base64.getDecoder().decode(parts[3]);
-            byte[] expect     = Base64.getDecoder().decode(parts[4]);
-
-            KeySpec key    = new PBEKeySpec(password, salt, iterations, expect.length * 8);
-            byte[]  actual = SecretKeyFactory.getInstance(PBKDF_2_WITH_HMAC_SHA_256)
-                    .generateSecret(key)
-                    .getEncoded();
-
-            return constantTime(actual, expect);
-        } catch (Exception e) {
-            return false;
+            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+                    .generateSecret(specification).getEncoded();
+        } catch (GeneralSecurityException failure) {
+            throw new IllegalStateException("PBKDF2-HMAC-SHA256 is unavailable", failure);
+        } finally {
+            specification.clearPassword();
         }
     }
 }

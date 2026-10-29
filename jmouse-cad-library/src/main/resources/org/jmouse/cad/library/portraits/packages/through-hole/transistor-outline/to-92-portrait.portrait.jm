@@ -1,0 +1,42 @@
+# A TO-92 package seen from the front, its flat face to the reader: the half-round black body and its three legs, pin 1
+# on the left. The legs are named by their numbers, as the footprint's pads are, so a part is wired by its pins' numbers
+# whatever its pinout — E B C, S G D, K G A.
+portrait:to-92-portrait("TO-92") {
+    meta {
+        summary: "A TO-92 package from the front: flat face, three legs, pin 1 on the left"
+        code: "PT.TO92:3"
+        category: circuits
+        tags: electronics, portrait, package, through-hole
+        source: "JEDEC TO-226"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 120)
+    input:marking(text)
+
+    path:legs("M-21-1H-19V60H-21ZM-1-1H1V60H-1ZM19-1H21V60H19Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -20 60)
+    pin:2(at: 0 60)
+    pin:3(at: 20 60)
+    # The flat face, seen square on; its top follows the round of the back.
+    path:body("M-24 0V-34C-24-46-12-52 0-52C12-52 24-46 24-34V0Z") {
+        stroke = clear
+        fill = black
+    }
+    path:face("M-19-4V-33C-19-42-10-47 0-47C10-47 19-42 19-33V-4Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.25
+    }
+    path:outline("M-24 0V-34C-24-46-12-52 0-52C12-52 24-46 24-34V0Z") {
+        fill = clear
+    }
+    # What the part prints on its flat face — its own name, from its component's binding.
+    glyph:printed_marking(at: 0 -24, size: 34 x 8) {
+        fill = silver
+        text = marking
+    }
+}

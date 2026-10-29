@@ -1,0 +1,16 @@
+symbol:barrel-jack-symbol("Barrel jack") {
+    meta {
+        summary: "A DC barrel jack, as drawn on a schematic: the centre pin above, the sleeve below"
+        code: "SY.CONNECTOR:BARREL-JACK"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    path("M-60-48H-4V-32H-60ZM-4-40H80M-28 40H80M-28 40V4L-40-12M-28 4L-16-12")
+    pin:tip(at: 80 -40, "+")
+    pin:sleeve(at: 80 40, "−")
+    label(name, at: -20 -76)
+    label(value, at: -20 76)
+}

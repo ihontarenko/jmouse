@@ -1,0 +1,40 @@
+symbol:light-emitting-diode-symbol("Light-emitting diode") {
+    meta {
+        summary: "Light-emitting diode, as drawn on a schematic: its die lights in its own colour as current flows, and chars once it has burned out"
+        code: "SY.LED:SINGLE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:light(0 .. 100)
+    input:wavelength(380 nm .. 950 nm)
+    input:failed
+
+    path:die(live, "M-24-20L20 0-24 20Z") {
+        live fill = curve(wavelength, 380 nm -> violet, 450 nm -> blue, 495 nm -> green, 570 nm -> yellow, 590 nm -> orange, 620 nm -> red, 750 nm -> clear)
+        live opacity = curve(light, 0 -> 0, 2 -> 0.3, 100 -> 0.95)
+        live glow = 9 * share(light, 0, 100)
+    }
+
+    group:body(live) {
+        path("M-60 0H-24V-20L20 0-24 20V0M20-20V20M20 0H60")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    path:rays(live, "M0-26L16-42M8-42H16V-34M22-24L38-40M30-40H38V-32") {
+        live stroke = if(light > 2, curve(wavelength, 380 nm -> violet, 450 nm -> blue, 495 nm -> green, 570 nm -> yellow, 590 nm -> orange, 620 nm -> red, 750 nm -> signal), signal)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

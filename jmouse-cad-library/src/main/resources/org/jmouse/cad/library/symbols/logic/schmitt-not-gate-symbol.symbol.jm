@@ -1,0 +1,22 @@
+symbol:schmitt-not-gate-symbol("Schmitt-trigger inverter") {
+    meta {
+        summary: "An inverter with Schmitt-trigger input, as drawn on a schematic: the hysteresis loop inside the triangle"
+        code: "SY.GATE:NOT-SCHMITT"
+        category: circuits
+        tags: electronics, schematic, logic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 120)
+    path("M-32-32L24 0L-32 32ZM24 0A8 8 0 1 0 40 0A8 8 0 1 0 24 0M-80 0H-32M40 0H80M-24 8H-6V-8H2M-16 8V-8H2M-20-25.2V-60M-20 25.2V60")
+    # The body, filled as the drawing theme fills a part's body.
+    path:body_fill("M-32-32L24 0L-32 32Z") {
+        fill = body
+    }
+    pin:a(at: -80 0)
+    pin:output(at: 80 0)
+    pin:Vcc(at: -20 -60)
+    pin:GND(at: -20 60)
+    label(name, at: 28 -60)
+    label(value, at: 28 72)
+}

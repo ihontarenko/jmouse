@@ -58,6 +58,8 @@
   var APPROVE_URL   = "{{ approveUrl }}";
   var STORAGE_KEY   = "{{ tokenStorageKey }}";
   var STORAGE_FIELD = "{{ tokenStorageField }}";
+  var CSRF_COOKIE   = "{{ csrfCookieName }}";
+  var CSRF_HEADER   = "{{ csrfHeaderName }}";
 
   var parameters = new URLSearchParams(window.location.search);
 
@@ -175,6 +177,13 @@
 
     if (!sendsCookies()) {
       headers["Authorization"] = "Bearer " + token;
+    } else if (CSRF_COOKIE && CSRF_HEADER) {
+      var prefix = encodeURIComponent(CSRF_COOKIE) + "=";
+      var cookie = document.cookie.split(";").map(function (value) { return value.trim(); })
+        .find(function (value) { return value.indexOf(prefix) === 0; });
+      if (cookie) {
+        headers[CSRF_HEADER] = decodeURIComponent(cookie.substring(prefix.length));
+      }
     }
 
     return fetch(url, {

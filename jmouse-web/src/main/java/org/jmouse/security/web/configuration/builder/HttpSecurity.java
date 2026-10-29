@@ -2,8 +2,14 @@ package org.jmouse.security.web.configuration.builder;
 
 import jakarta.servlet.Filter;
 import org.jmouse.core.Customizer;
-import org.jmouse.core.Sorter;
 import org.jmouse.security.UserPrincipalService;
+import org.jmouse.security.authentication.AuthenticationManager;
+import org.jmouse.security.authentication.AuthenticationResolverRegistry;
+import org.jmouse.security.authentication.ResolversAuthenticationManager;
+import org.jmouse.security.authentication.UsernamePasswordAuthentication;
+import org.jmouse.security.authentication.dao.DaoAuthenticationResolver;
+import org.jmouse.security.password.PasswordEncoder;
+import org.jmouse.security.password.Pbkdf2Sha256PasswordEncoder;
 import org.jmouse.security.web.*;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.configuration.configurer.*;
@@ -13,7 +19,7 @@ import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.function.Supplier;
 
 public final class HttpSecurity
@@ -25,7 +31,9 @@ public final class HttpSecurity
     private final List<Filter>                 filters = new ArrayList<>();
     private       MappingMatcher<RequestRoute> matcher = MatcherCriteria.any();
 
-    public HttpSecurity() { }
+    public HttpSecurity() {
+        attach(new CsrfConfigurer<>());
+    }
 
     @Override
     public HttpSecurity addFilter(Filter filter) {
@@ -68,8 +76,8 @@ public final class HttpSecurity
 
     @Override
     public List<Filter> getFilters() {
-        List<Filter> filters = new ArrayList<>(Set.copyOf(this.filters));
-        filters.sort(Sorter.PRIORITY_COMPARATOR);
+        List<Filter> filters = new ArrayList<>(new LinkedHashSet<>(this.filters));
+        filters.sort(java.util.Comparator.comparingInt(filter -> ((OrderedFilter) filter).order()));
         return filters;
     }
 
@@ -84,6 +92,48 @@ public final class HttpSecurity
     public HttpSecurity principalService(UserPrincipalService principalService) {
         setSharedObject(UserPrincipalService.class, principalService);
         return this;
+    }
+
+    public HttpSecurity authenticationManager(AuthenticationManager manager) {
+        setSharedObject(AuthenticationManager.class, java.util.Objects.requireNonNull(manager, "manager"));
+        return this;
+    }
+
+    public HttpSecurity passwordEncoder(PasswordEncoder encoder) {
+        setSharedObject(PasswordEncoder.class, java.util.Objects.requireNonNull(encoder, "encoder"));
+        return this;
+    }
+
+    private void configureLocalAuthentication() {
+        AuthenticationManager manager = getSharedObject(AuthenticationManager.class);
+        if (manager == null) {
+            manager = new ResolversAuthenticationManager(List.of());
+            setSharedObject(AuthenticationManager.class, manager);
+        }
+        if (!(manager instanceof AuthenticationResolverRegistry registry)) {
+            return;
+        }
+        UserPrincipalService service = getObject(UserPrincipalService.class, null);
+        PasswordEncoder encoder = getObject(PasswordEncoder.class, Pbkdf2Sha256PasswordEncoder::new);
+        if (service != null && !registry.hasResolver(DaoAuthenticationResolver.class)) {
+            registry.addResolver(new DaoAuthenticationResolver(service, encoder));
+        }
+        boolean passwordAuthentication = findConfigurer(HttpBasicConfigurer.class).isPresent()
+                || findConfigurer(SubmitFormConfigurer.class).isPresent();
+        for (var resolver : registry.getResolvers()) {
+            if (resolver instanceof DaoAuthenticationResolver dao && dao.getPrincipalService() == null) {
+                if (service != null) {
+                    dao.setPrincipalService(service);
+                    dao.setPasswordEncoder(encoder);
+                } else if (passwordAuthentication) {
+                    throw new IllegalStateException("UserPrincipalService is required for password authentication");
+                }
+            }
+        }
+        if (passwordAuthentication && registry.getResolvers().stream()
+                .noneMatch(resolver -> resolver.supports(UsernamePasswordAuthentication.class))) {
+            throw new IllegalStateException("An authentication resolver is required for username/password credentials");
+        }
     }
 
     public HttpSecurity securityContext(Customizer<SecurityContextConfigurer<HttpSecurity>> customizer) {
@@ -108,6 +158,36 @@ public final class HttpSecurity
         return this;
     }
 
+    public HttpSecurity csrf(Customizer<CsrfConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new CsrfConfigurer<>()));
+        return this;
+    }
+
+    private void wireSessionAuthentication() {
+        org.jmouse.security.web.session.SessionSettings settings =
+                getSharedObject(org.jmouse.security.web.session.SessionSettings.class);
+        boolean stateless = settings != null && settings.policy().isStateless();
+        org.jmouse.security.web.session.SessionAuthenticateHandler strategy =
+                getSharedObject(org.jmouse.security.web.session.SessionAuthenticateHandler.class);
+        if (strategy == null) {
+            strategy = stateless ? new org.jmouse.security.web.session.NullAuthenticatedSessionStrategy()
+                    : new org.jmouse.security.web.session.ChangeSessionIdAuthenticateHandler();
+        }
+        org.jmouse.security.web.csrf.CsrfTokenRepository csrf =
+                getSharedObject(org.jmouse.security.web.csrf.CsrfTokenRepository.class);
+        if (csrf != null) {
+            boolean allowCreate = settings == null || settings.policy().isAllowCreate();
+            strategy = new org.jmouse.security.web.session.CompositeSessionAuthenticateHandler(strategy,
+                    new org.jmouse.security.web.csrf.CsrfAuthenticationStrategy(csrf, allowCreate));
+        }
+        for (Filter filter : filters) {
+            Filter delegate = filter instanceof OrderedFilter ordered ? ordered.filter() : filter;
+            if (delegate instanceof org.jmouse.security.web.authentication.AbstractAuthenticationFilter authentication) {
+                authentication.setSessionAuthenticationHandler(strategy);
+            }
+        }
+    }
+
     public HttpSecurity exceptionHandling(Customizer<ExceptionHandlingConfigurer<HttpSecurity>> c) {
         c.customize(attach(new ExceptionHandlingConfigurer<>()));
         return this;
@@ -120,10 +200,12 @@ public final class HttpSecurity
     @Override
     protected SecurityFilterChain doBuild() throws Exception {
         initializeConfigurers();
+        configureLocalAuthentication();
         configureConfigurers();
+        wireSessionAuthentication();
 
-        List<Filter> unique = new ArrayList<>(Set.copyOf(this.filters));
-        unique.sort(Sorter.PRIORITY_COMPARATOR);
+        List<Filter> unique = new ArrayList<>(new LinkedHashSet<>(this.filters));
+        unique.sort(java.util.Comparator.comparingInt(filter -> ((OrderedFilter) filter).order()));
 
         return new SecurityFilterChain(this.matcher, unique);
     }

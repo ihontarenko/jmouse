@@ -1,0 +1,40 @@
+# Generated from footprint-standards/dual-inline-packages.sht#dip; regenerate, never edit.
+portrait:dip-4-portrait("DIP-4") {
+    meta {
+        summary: "4-lead DIP, 7.62 mm rows from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.DIP:4-W7.62"
+        category: circuits
+        tags: electronics, portrait, package, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(57 x 80)
+    input:marking(text)
+
+    path:leads("M-25.984 25H-14.016V30H-25.984ZM-22.205 30H-17.795V40H-22.205ZM-25.984 -25H-14.016V-30H-25.984ZM-22.205 -30H-17.795V-40H-22.205ZM-5.984 25H5.984V30H-5.984ZM-2.205 30H2.205V40H-2.205ZM-5.984 -25H5.984V-30H-5.984ZM-2.205 -30H2.205V-40H-2.205Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -20 40)
+    pin:2(at: 0 40)
+    pin:3(at: 0 -40)
+    pin:4(at: -20 -40)
+    path:body("M-26.661 -25H6.661A1.449 1.449 0 0 1 8.11 -23.551V23.551A1.449 1.449 0 0 1 6.661 25H-26.661A1.449 1.449 0 0 1 -28.11 23.551V-23.551A1.449 1.449 0 0 1 -26.661 -25Z") {
+        fill = black
+    }
+    path:notch("M-28.11 -6A6 6 0 0 1 -28.11 6Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-22.91 16.55A3.25 3.25 0 1 0 -16.41 16.55A3.25 3.25 0 1 0 -22.91 16.55Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 25.354 x 11.25) {
+        fill = silver
+        text = marking
+    }
+}

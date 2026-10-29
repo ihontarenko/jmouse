@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-spring</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-plugin-explorer</artifactId>
+    <packaging>jar</packaging>
+    <name>jMouse - CAD Plugin Explorer</name>
+    <description>A file explorer for the engine: folders of the server mounted for the installation or for one owner, walked, opened, saved to, renamed and tidied, every change written to the real folder through jMouse storage.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-plugin-explorer</url>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <spring-boot.version>4.0.7</spring-boot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- The engine's routes it stands beside: their prefix, the problems, who may act — the host's seams for the engine -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-management</artifactId>
+        </dependency>
+        <!-- The folders themselves: jMouse storage, a store that is a tree -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-storage</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-plugin-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <!-- An upload is read from the request as it arrives, never held whole -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>

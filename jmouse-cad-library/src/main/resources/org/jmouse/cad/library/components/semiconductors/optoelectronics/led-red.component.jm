@@ -1,0 +1,76 @@
+# A red LED is the general diode with a wide band gap: its saturation current is some 10⁻¹⁸ A, so it conducts only
+# past 1.7 V, and its emission coefficient near 2 is a junction where most carriers recombine. It breaks down at a few
+# volts in reverse; nothing protects it there but a series resistor.
+
+component:led-red("Red LED", type: diode) {
+    meta {
+        designator: D
+        summary: "Red light-emitting diode, 5 mm, 20 mA"
+        source: "a typical 5 mm red LED datasheet (VF 2.0 V typical, 2.5 V at most at 20 mA; VR 5 V)"
+        package: "5 mm"
+        category: circuits
+        failure: open
+    }
+    extends:diode
+
+    parameter:I_saturation(0.00066 fA, "IS: the wide band gap's tiny saturation current (jMX has no atto prefix)")
+    parameter:emission_coefficient(2, "N")
+    parameter:R_series(2.5 Ohm, "RS")
+    parameter:C_junction_zero_bias(40 pF, "CJO")
+    parameter:V_breakdown(10 V, "reverse breakdown; the rating is 5 V")
+    parameter:I_breakdown(10 uA, "current at V_breakdown")
+    parameter:E_gap(1.9 V, "the band gap: red light")
+    parameter:power_rating(0.1 W, "what it is rated for")
+    parameter:thermal_resistance(400 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(1 s, "how fast it warms to that")
+    parameter:I_rated(20 mA, "the current its brightness is given at")
+    parameter:light_temperature_coefficient(-0.01, "red light falls by about 1 % per kelvin of junction temperature")
+    parameter:T_nominal(298.15 K, "the temperature its brightness is given at")
+    parameter:T_maximum(100 °C, "past this it fails on a realistic bench")
+    parameter:V_reverse_maximum(5 V, "VR")
+    parameter:I_forward_maximum(30 mA, "IF, continuous")
+
+    figure:overvoltage(100 * max(0, cathode - anode) / V_reverse_maximum, unit: %, "of VR")
+    figure:overcurrent(100 * abs(anode.current) / I_forward_maximum, unit: %, "of its rated current")
+    figure:light(100 * anode.current / I_rated * (1 + light_temperature_coefficient * (temperature - T_nominal)), unit: %, "of its rated brightness")
+
+    pin:anode(analog, 1, "anode, the longer lead")
+    pin:cathode(analog, 2, "cathode, the flat side")
+
+    symbol(uses: light-emitting-diode-symbol) {
+        bind:failed(failed)
+        # the colour it gives off, from its band gap: λ = h·c / (e·E_gap)
+        bind:wavelength(0.00000123984 / E_gap)
+        bind:a(pin: anode)
+        bind:b(pin: cathode)
+    }
+
+    expect("forward voltage at 20 mA", from: "VF 2.0 V typical, 2.5 V at most at 20 mA") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 20 mA)
+        }
+        measure(operating, anode)
+        within(1.8 V .. 2.5 V)
+    }
+
+    expect("forward voltage at 1 mA", from: "the curve: a dim LED still drops most of its voltage") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 1 mA)
+        }
+        measure(operating, anode)
+        within(1.6 V .. 2.0 V)
+    }
+
+    expect("reverse current at 5 V", from: "IR at most 10 uA at VR 5 V") {
+        bench(for: 1 ms) {
+            part:X1(reverse, voltage: 5 V)
+        }
+        measure(operating, current: V1)
+        within(-10 uA .. 0 A)
+    }
+
+    # How it looks in the hand: a dome in the colour of its light, from its band gap; it glows by its current.
+    portrait(uses: led-portrait) {
+        bind:wavelength(0.00000123984 / E_gap)
+    }
+}

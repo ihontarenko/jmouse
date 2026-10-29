@@ -1,0 +1,108 @@
+# Connected by pin name (anode = …, cathode = …) a part is solved from the equations below; connected in pin order,
+# D1 diode (a, k) I_saturation = …, it is the engine's own ideal junction, which knows I_saturation alone.
+#
+# A junction diode with every physical effect the standard model has, at its neutral defaults: what an imported
+# `.model D (…)` becomes, the numbers of the model set on it. A part that sets the same numbers as a deck gives the
+# same curve, so this is also the reference a datasheet part is checked against.
+#
+# Its junction has a temperature of its own, T_junction: the bench's, and on a realistic bench raised by the heat the
+# power it dissipates gives through thermal_resistance, over thermal_time_constant — the engine keeps that heat after
+# every step, so a diode that heats conducts more and heats further. Every drift reads it. What it does not represent: the temperature drift of
+# VJ and CJO, and a series resistance of exactly zero — SPICE drops the node then; here it is a milliohm.
+
+component:diode("Diode", type: diode) {
+    meta {
+        designator: D
+        summary: "Junction diode with every effect: recombination, high injection, depletion and diffusion charge, breakdown"
+        source: "Berkeley SPICE3 / ngspice 47 diode model, level 1; defaults are SPICE's"
+        category: circuits
+        failure: short
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:I_saturation(10 fA, "IS: saturation current")
+    parameter:emission_coefficient(1, "N: emission coefficient")
+    parameter:R_series(1 mOhm, "RS: series resistance (SPICE's 0 means none; here a milliohm)")
+    parameter:I_recombination(0 A, "ISR: recombination saturation current — the low-current excess of the forward curve")
+    parameter:recombination_emission_coefficient(2, "NR: emission coefficient of the recombination current")
+    parameter:I_knee(1000000000 A, "IKF: high-injection knee current (SPICE's none is a gigaampere here)")
+    parameter:C_junction_zero_bias(0 F, "CJO: zero-bias junction capacitance")
+    parameter:V_junction(1 V, "VJ: junction potential")
+    parameter:grading_coefficient(0.5, "M: grading coefficient")
+    parameter:forward_bias_coefficient(0.5, "FC: past FC·VJ the depletion capacitance goes on as a straight line")
+    parameter:transit_time(0 s, "TT: transit time — the stored charge behind reverse recovery")
+    parameter:V_breakdown(1 kV, "BV: reverse breakdown voltage (SPICE's none is a kilovolt here)")
+    parameter:I_breakdown(1 mA, "IBV: current at V_breakdown")
+    parameter:T_nominal(300.15 K, "TNOM: the temperature the figures above are measured at")
+    parameter:saturation_temperature_exponent(3, "XTI: how steeply I_saturation follows the temperature")
+    parameter:breakdown_temperature_coefficient(0, "TCV: BV moves by this share per kelvin")
+    parameter:resistance_temperature_coefficient(0, "TRS: RS moves by this share per kelvin")
+    parameter:E_gap(1.11 V, "EG: band gap, in volts")
+    parameter:area(1, "area factor: multiplies the currents and the capacitance, divides RS")
+    parameter:power_rating(0.5 W, "what it is rated for")
+    parameter:thermal_resistance(300 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(1 s, "how fast it warms to that")
+    parameter:T_maximum(175 °C, "past this it fails on a realistic bench")
+    parameter:V_reverse_maximum(1e6 V, "VRRM: the reverse voltage it is rated to block; none is a megavolt")
+    parameter:I_forward_maximum(1e6 A, "IF: the current it is rated to carry, either way; none is a megaampere")
+
+    pin:anode(analog, 1, "anode")
+    pin:cathode(analog, 2, "cathode, the banded end")
+
+    node:j("the junction, behind the series resistance")
+
+    figure:overvoltage(100 * max(0, cathode - anode) / V_reverse_maximum, unit: %, "of VRRM")
+    figure:overcurrent(100 * abs(anode.current) / I_forward_maximum, unit: %, "of its rated current")
+
+    symbol(uses: diode-symbol) {
+        bind:failed(failed)
+        # Forward: the current against its rating. Reversed: the voltage against what it can hold — its VRRM, or its
+        # breakdown where that comes first —, and past that the current it breaks down with, against its IBV.
+        bind:forward(max(0, anode.current) / I_forward_maximum)
+        bind:reverse(max(0, cathode - anode) / min(V_reverse_maximum, V_breakdown))
+        bind:breakdown(max(0, 0 - anode.current) / I_breakdown)
+        bind:a(pin: anode)
+        bind:b(pin: cathode)
+    }
+
+    equations {
+        let V_diode : voltage = j - cathode
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        # On a draft bench (detail 0) the junctions store no charge: no capacitance, no transit time — the
+        # switching is instant and the run cheap. From standard on, all of it.
+        let stored : ratio = min(detail, 1)
+        let R_series_now : resistance = R_series * (1 + resistance_temperature_coefficient * (T_junction - T_nominal))
+        let V_breakdown_now : voltage = V_breakdown * (1 + breakdown_temperature_coefficient * (T_junction - T_nominal))
+        let I_saturation_now : current = area * junction_saturation(I_saturation, T_junction, T_nominal, saturation_temperature_exponent, emission_coefficient, E_gap)
+        let I_recombination_now : current = area * junction_saturation(I_recombination, T_junction, T_nominal, saturation_temperature_exponent, recombination_emission_coefficient, E_gap)
+        let I_diffusion : current = high_injection(junction_current(V_diode, I_saturation_now, emission_coefficient, T_junction), area * I_knee)
+        # Recombination in the depletion layer: a few percent of a forward current, left out of a draft as well.
+        let I_generation : current = stored * junction_current(V_diode, I_recombination_now, recombination_emission_coefficient, T_junction) * recombination_factor(V_diode, V_junction, grading_coefficient)
+        let I_reverse_breakdown : current = breakdown_current(V_diode, V_breakdown_now, area * I_breakdown, emission_coefficient, T_junction)
+        let Q_junction : charge = stored * (depletion_charge(V_diode, area * C_junction_zero_bias, V_junction, grading_coefficient, forward_bias_coefficient) + transit_time * I_diffusion)
+
+        let I_through : current = (anode - j) * area / R_series_now
+
+        current anode -> j = I_through
+        # Shot noise, 2qI: what the junction current carries as a noise analysis sees it; nothing to the solution.
+        current j -> cathode = I_diffusion + I_generation - I_reverse_breakdown + d(Q_junction)/dt + noise(2 * elementary_charge * abs(I_diffusion + I_generation))
+    }
+
+    expect("the ideal law at SPICE's defaults", from: "IS 1e-14, N 1: V = N·Vt·ln(I/IS + 1) ≈ 0.656 V at 1 mA, 300 K") {
+        bench(for: 1 ms) {
+            part:X1(forward, current: 1 mA)
+        }
+        measure(operating, anode)
+        within(0.64 V .. 0.67 V)
+    }
+
+    expect("breakdown at the reverse knee", from: "BV 1 kV, IBV 1 mA") {
+        bench(for: 1 ms) {
+            part:I1(current-source, [cathode, 0], I_output: 1 mA)
+            part:U1(self, [anode: 0, cathode: cathode])
+        }
+        measure(operating, cathode)
+        within(995 V .. 1005 V)
+    }
+}

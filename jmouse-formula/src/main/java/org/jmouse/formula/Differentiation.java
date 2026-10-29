@@ -9,6 +9,8 @@ import static org.jmouse.formula.Formula.negate;
 import static org.jmouse.formula.Formula.power;
 import static org.jmouse.formula.Formula.subtract;
 
+import java.util.List;
+
 /**
  * Symbolic differentiation, so a gradient, a normal, a tangent plane or a Jacobian is exact rather than a finite
  * difference. A function without a usable derivative (floor, sign, step, mod) is refused, not approximated.
@@ -245,6 +247,13 @@ public final class Differentiation {
         return multiply(outer, inner);
     }
 
+    /** The derivative of whichever argument a choice takes: the first while {@code first relation second} holds. */
+    private static Formula taken(Formula.Relation relation, Formula first, Formula second, Formula firstDerivative,
+                                 Formula secondDerivative) {
+        return new Formula.Piecewise(List.of(new Formula.Piecewise.Branch(new Formula.Comparison(relation, first, second),
+                                                                          firstDerivative)), secondDerivative);
+    }
+
     private static Formula twoArgument(Formula.Call functionCall, Target target) {
         Formula first = functionCall.arguments().get(0);
         Formula second = functionCall.arguments().get(1);
@@ -256,6 +265,10 @@ public final class Differentiation {
                     add(power(first, constant(2)), power(second, constant(2))));
             case HYPOT -> divide(add(multiply(first, firstDerivative), multiply(second, secondDerivative)), functionCall);
             case POW -> differentiate(power(first, second), target);
+            // min(a, b)' and max(a, b)' are the derivative of the argument that is taken — exact except where the two
+            // meet, as abs' = sign is everywhere but 0; the tie goes to the first, as the function itself takes it.
+            case MIN -> taken(Formula.Relation.LESS_OR_EQUAL, first, second, firstDerivative, secondDerivative);
+            case MAX -> taken(Formula.Relation.GREATER_OR_EQUAL, first, second, firstDerivative, secondDerivative);
             default -> throw new FormulaException(functionCall.function().symbol()
                     + " has no derivative to compute exactly.", null, -1);
         };

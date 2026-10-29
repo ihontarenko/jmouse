@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-spring</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-spring-boot</artifactId>
+    <packaging>jar</packaging>
+    <name>jMouse - CAD Spring Boot</name>
+    <description>Spring Boot auto-configuration for jmCAD: the catalogue schema, migrated before the product's, its stores over the application's persistence context, the shipped library imported on start, and the application services (org.jmouse.cad.store) with their transactions</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-spring-boot</url>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- Compiled against Boot 4, which is what the products adopting this run. Boot's own Flyway classes
+             are deliberately NOT referenced: those moved package in 4, and ordering is expressed by bean name
+             instead. -->
+        <spring-boot.version>4.0.7</spring-boot.version>
+        <flyway.version>11.7.2</flyway.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- The library being integrated: the entities, the stores and the migrations. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-jpa</artifactId>
+        </dependency>
+        <!-- The engine: the language every document is read with, the shipped library, the index of a document. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-library</artifactId>
+        </dependency>
+        <!-- Plugins: the language and every other point of the engine are read from what the plugins bring -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-plugin-spring</artifactId>
+        </dependency>
+        <!-- Exchange: the points a format is brought to; the store reads them, converts nothing itself -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-exchange</artifactId>
+        </dependency>
+        <!-- JSON: the engine reads what it says of itself (about.json) -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- @AutoConfiguration and the @ConditionalOn* family; the application brings Boot itself. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- SharedEntityManagerCreator: the transaction-joining proxy the stores work over. Optional: the
+             application's JPA starter brings it. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- The library's own migrator. Optional: an application without Flyway migrates the schema itself. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- The services: @EventListener for the start-up import, and the resources the product's own documents are found by. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!-- The services' transaction boundaries: @Transactional and TransactionTemplate. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+
+        <!-- @ConfigurationProperties for jmouse.cad.*, and the ready event the library import starts on. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+
+
+
+        <!-- The migrator's and the import's log lines. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

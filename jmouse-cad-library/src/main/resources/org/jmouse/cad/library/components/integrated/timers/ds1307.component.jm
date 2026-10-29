@@ -1,0 +1,287 @@
+# DS1307: a real-time clock on the I²C bus. Eight registers keep the time and the date in BCD — seconds, minutes,
+# hours, day of the week, date, month, year — and carry from one to the next as a calendar does, leap years included;
+# 56 bytes of RAM follow them. It wakes up halted (CH, the top bit of the seconds, is 1) at 01/01/00 00:00:00 and keeps
+# time once CH is cleared; writing the seconds restarts its countdown, so the next second is a whole second away. The
+# hours are 24-hour or, with bit 6 set, 12-hour with a PM bit. SQW/OUT is an open-drain square wave of 1 Hz to
+# 32.768 kHz, or a level. Address 1101 000.
+
+component:ds1307("DS1307", type: clock) {
+    meta {
+        designator: U
+        summary: "Real-time clock on I²C: BCD time and date with a calendar, 56 bytes of RAM, a square-wave output"
+        source: "Maxim DS1307 data sheet (19-5296): timekeeper registers 00h-07h, CH halts the oscillator and is set at power-up to 01/01/00 01 00:00:00, the countdown chain resets when the seconds are written, 12/24-hour bit 6 of 02h, control register OUT, SQWE, RS1 RS0 (1 Hz, 4.096, 8.192, 32.768 kHz), RAM 08h-3Fh, address 1101000, pinout per the PDIP-8 package; the crystal's tolerance and the battery switch-over are not modelled"
+        package: "PDIP-8, SOIC-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-target
+    use:cmos-hc
+
+    parameter:address(104, "1101 000, fixed")
+    parameter:second(1 s, "one second of its crystal, 32 768 cycles")
+
+    pin:crystal_1(analog, 1, "X1: the 32.768 kHz crystal — the model keeps time without one")
+    pin:crystal_2(analog, 2, "X2")
+    pin:battery(analog, 3, "VBAT, the backup cell")
+    pin:GND(ground, 4)
+    pin:sda(digital, bidirectional, open-drain, 5, "serial data")
+    pin:scl(digital, input, 6, "serial clock")
+    pin:square_wave(digital, output, open-drain, 7, "SQW/OUT")
+    pin:Vcc(power, 8)
+
+    symbol(box) {
+        left([scl, sda, crystal_1, crystal_2, battery])
+        right(square_wave)
+        power([Vcc, GND])
+    }
+
+    state:seconds(0, discrete, "0-59")
+    state:minutes(0, discrete, "0-59")
+    state:hours(0, discrete, "0-23, whichever way they are shown")
+    state:weekday(1, discrete, "1-7")
+    state:date(1, discrete, "1-31")
+    state:month(1, discrete, "1-12")
+    state:year(0, discrete, "0-99, of 2000")
+    state:halted(1, discrete, "CH: 1 while the oscillator is stopped")
+    state:twelve_hour(0, discrete, "1 when the hours are shown 1-12 with a PM bit")
+    state:control(3, discrete, "the control register: OUT, SQWE, RS1 RS0")
+    state:ram[56](0, discrete, "08h-3Fh")
+    state:pointer(0, discrete, "the register the next byte is read from or written to")
+    state:square(1, discrete, "the square wave's level now")
+
+    figure:clock_seconds(hours * 3600 + minutes * 60 + seconds, unit: s, "the time of day it keeps")
+
+    behaviour {
+        function bcd(value)
+            return floor(value / 10) * 16 + value % 10
+        end
+
+        function from_bcd(value)
+            return shift_right(value, 4) * 10 + low_bits(value, 4)
+        end
+
+        function days_in(which_month)
+            if which_month == 2 then
+                if year % 4 == 0 then
+                    return 29
+                end
+                return 28
+            elseif which_month == 4 or which_month == 6 or which_month == 9 or which_month == 11 then
+                return 30
+            end
+            return 31
+        end
+
+        # One second on, and every carry it makes.
+        function count_second()
+            seconds = seconds + 1
+            if seconds < 60 then
+                return
+            end
+            seconds = 0
+            minutes = minutes + 1
+            if minutes < 60 then
+                return
+            end
+            minutes = 0
+            hours = hours + 1
+            if hours < 24 then
+                return
+            end
+            hours = 0
+            weekday = weekday % 7 + 1
+            date = date + 1
+            if date <= days_in(month) then
+                return
+            end
+            date = 1
+            month = month + 1
+            if month <= 12 then
+                return
+            end
+            month = 1
+            year = (year + 1) % 100
+        end
+
+        # The hour on a 12-hour face: 12, 1, 2 … 11.
+        function hour_of_twelve()
+            if hours % 12 == 0 then
+                return 12
+            end
+            return hours % 12
+        end
+
+        # 24-hour: BCD 00-23. 12-hour: bit 6 set, bit 5 PM, BCD 1-12.
+        function hours_register()
+            if twelve_hour == 0 then
+                return bcd(hours)
+            end
+            return 64 + 32 * floor(hours / 12) + bcd(hour_of_twelve())
+        end
+
+        function set_hours(value)
+            twelve_hour = bit(value, 6)
+            if twelve_hour == 0 then
+                hours = from_bcd(low_bits(value, 6))
+            else
+                hours = from_bcd(low_bits(value, 5)) % 12 + 12 * bit(value, 5)
+            end
+        end
+
+        function register_value(index)
+            if index == 0 then
+                return halted * 128 + bcd(seconds)
+            elseif index == 1 then
+                return bcd(minutes)
+            elseif index == 2 then
+                return hours_register()
+            elseif index == 3 then
+                return weekday
+            elseif index == 4 then
+                return bcd(date)
+            elseif index == 5 then
+                return bcd(month)
+            elseif index == 6 then
+                return bcd(year)
+            elseif index == 7 then
+                return control
+            end
+            return item(ram, index - 8)
+        end
+
+        function set_register(index, value)
+            if index == 0 then
+                halted = bit(value, 7)
+                seconds = from_bcd(low_bits(value, 7))
+                # Writing the seconds resets the countdown chain: the next second is a whole one away.
+                schedule('tick', second)
+                # The square wave runs from the same oscillator: CH starts or stops it too.
+                show_square()
+            elseif index == 1 then
+                minutes = from_bcd(value)
+            elseif index == 2 then
+                set_hours(value)
+            elseif index == 3 then
+                weekday = value
+            elseif index == 4 then
+                date = from_bcd(value)
+            elseif index == 5 then
+                month = from_bcd(value)
+            elseif index == 6 then
+                year = from_bcd(value)
+            elseif index == 7 then
+                control = value
+                show_square()
+            else
+                ram = with(ram, index - 8, value)
+            end
+        end
+
+        function square_period()
+            let rate = low_bits(control, 2)
+            if rate == 0 then
+                return second
+            elseif rate == 1 then
+                return second / 4096
+            elseif rate == 2 then
+                return second / 8192
+            end
+            return second / 32768
+        end
+
+        # SQWE set and the oscillator running: the square wave; otherwise the OUT bit as a level.
+        function show_square()
+            if bit(control, 4) == 1 and halted == 0 then
+                schedule('square', square_period() / 2)
+            else
+                drive('square_wave', bit(control, 7))
+            end
+        end
+
+        function received(value, index)
+            if index == 0 then
+                pointer = low_bits(value, 6)
+            else
+                set_register(pointer, value)
+                pointer = (pointer + 1) % 64
+            end
+        end
+
+        function transmitted(index)
+            let value = register_value(pointer)
+            pointer = (pointer + 1) % 64
+            return value
+        end
+
+        on start do
+            show_square()
+        end
+
+        on timer 'tick' do
+            if halted == 0 then
+                count_second()
+            end
+            schedule('tick', second)
+        end
+
+        on timer 'square' do
+            if bit(control, 4) == 1 and halted == 0 then
+                square = 1 - square
+                drive('square_wave', square)
+                schedule('square', square_period() / 2)
+            end
+        end
+    }
+
+    expect("a second after it is started it reads 31", from: "seconds register 0x30 with CH cleared, one second on: 0x31") {
+        bench(i2c-bus, for: 1.25 s) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: Vcc, GND: 0], address: 104, bytes: "0 48", operation: "write-read", pause: 1.1 s)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1, d2, d3, d4, d5, d6, d7])
+        is([1,0,0,0,1,1,0,0])
+    }
+
+    expect("halted, it keeps the time it was given", from: "CH = 1 stops the oscillator: the seconds stay at 0x30") {
+        bench(i2c-bus, for: 1.25 s) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_4: d4, data_5: d5, data_7: d7, Vcc: Vcc, GND: 0], address: 104, bytes: "0 176", operation: "write-read", pause: 1.1 s)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d4, d5, d7])
+        is([0,1,1,1])
+    }
+
+    expect("59 seconds carry into the minutes", from: "timekeeper registers: 00:00:59 and one second is 00:01:00") {
+        bench(i2c-bus, for: 1.25 s) {
+            # Reads seconds and minutes; the last byte read is the minutes.
+            part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, Vcc: Vcc, GND: 0], address: 104, bytes: "0 89", operation: "write-read", count: 2, pause: 1.1 s)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [d0, d1])
+        is([1,0])
+    }
+
+    expect("SQW at 4.096 kHz", from: "control register SQWE = 1, RS1 RS0 = 01: 4.096 kHz on SQW/OUT") {
+        bench(i2c-bus, for: 5 ms) {
+            part:R3(resistor, [Vcc, sqw], resistance: 10 kOhm)
+            # One controller starts the oscillator, a second one sets the control register.
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 104, bytes: "0 0")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 104, bytes: "7 17", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, square_wave: sqw, Vcc: Vcc, GND: 0])
+        }
+        measure(frequency, sqw, above: 2.5 V, after: 2 ms)
+        near(4.096 kHz, +- 10 Hz)
+    }
+
+    expect("started after SQWE was set, the square wave starts with it", from: "SQWE set while CH = 1, then CH cleared: the oscillator drives SQW/OUT at 1 Hz × RS") {
+        bench(i2c-bus, for: 5 ms) {
+            part:R3(resistor, [Vcc, sqw], resistance: 10 kOhm)
+            # The control register first, while it is still halted; the oscillator started a millisecond later.
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 104, bytes: "7 17")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 104, bytes: "0 0", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, square_wave: sqw, Vcc: Vcc, GND: 0])
+        }
+        measure(frequency, sqw, above: 2.5 V, after: 2 ms)
+        near(4.096 kHz, +- 10 Hz)
+    }
+}

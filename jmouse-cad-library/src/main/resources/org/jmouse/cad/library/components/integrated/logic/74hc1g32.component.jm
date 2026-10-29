@@ -1,0 +1,76 @@
+# One OR gate in a five-pin package — the gate of a lesson, drawn as the gate it is rather than as a box.
+
+component:74hc1g32("74HC1G32", type: gate) {
+    meta {
+        designator: U
+        summary: "Single 2-input OR gate: high while either input is high"
+        source: "Nexperia 74HC1G32 datasheet: Y = A + B; propagation delay 9 ns typical at 4.5 V"
+        package: "SOT353, 5 pins"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:or-gate
+    use:cmos-hc
+
+    parameter:propagation_delay(9 ns, "input to output at 4.5 V, typical")
+    parameter:thermal_resistance(400 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    # The SOT353 package's pins.
+    pin:a(digital, input, 1, "input A")
+    pin:b(digital, input, 2, "input B")
+    pin:GND(ground, 3)
+    pin:output(digital, output, 4, "output Y")
+    pin:Vcc(power, 5)
+
+    symbol(uses: or-gate-symbol)
+
+    expect("A 0, B 0 gives 0", from: "function table: Y = A + B") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 0 V)
+            part:V3(voltage-source, [b, 0], U_output: 0 V)
+            part:U1(self, [a: a, b: b, output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(0 V .. 0.1 V)
+    }
+
+    expect("A 0, B 1 gives 1", from: "function table: Y = A + B") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 0 V)
+            part:V3(voltage-source, [b, 0], U_output: 5 V)
+            part:U1(self, [a: a, b: b, output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(4.4 V .. 5 V)
+    }
+
+    expect("A 1, B 0 gives 1", from: "function table: Y = A + B") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 5 V)
+            part:V3(voltage-source, [b, 0], U_output: 0 V)
+            part:U1(self, [a: a, b: b, output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(4.4 V .. 5 V)
+    }
+
+    expect("A 1, B 1 gives 1", from: "function table: Y = A + B") {
+        bench(for: 1 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 5 V)
+            part:V3(voltage-source, [b, 0], U_output: 5 V)
+            part:U1(self, [a: a, b: b, output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(4.4 V .. 5 V)
+    }
+}

@@ -1,0 +1,22 @@
+footprint:pin-socket-1x5-pitch-200-vertical-footprint("Pin socket, 2.00 mm pitch, 1 × 5, vertical") {
+    meta {
+        summary: "Pin socket, 2.00 mm pitch, 1 row of 5, upright, through-hole"
+        code: "FP.SKT:1X5-P2-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#pin-socket-2-00 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.5: drill 0.95, pad 1.75, pin 1 square.
+    pad:1(through-hole, rectangle, at: 0 -4, size: 1.75 x 1.75, drill: 0.95)
+    pad:2(through-hole, circle, at: 0 -2, size: 1.75 x 1.75, drill: 0.95)
+    pad:3(through-hole, circle, at: 0 0, size: 1.75 x 1.75, drill: 0.95)
+    pad:4(through-hole, circle, at: 0 2, size: 1.75 x 1.75, drill: 0.95)
+    pad:5(through-hole, circle, at: 0 4, size: 1.75 x 1.75, drill: 0.95)
+    outline(fabrication, width: 0.1, "M-0.333 -5H1V5H-1V-4.333Z")
+    outline(silkscreen, width: 0.12, "M-1.11 -5.11H1.11V5.11H-1.11Z")
+    outline(silkscreen, filled, "M-1.91 -4A0.3 0.3 0 1 0 -1.31 -4A0.3 0.3 0 1 0 -1.91 -4Z")
+    outline(courtyard, width: 0.05, "M-1.5 -5.5H1.5V5.5H-1.5Z")
+}

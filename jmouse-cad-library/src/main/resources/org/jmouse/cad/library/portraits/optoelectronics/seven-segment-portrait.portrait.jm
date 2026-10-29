@@ -1,0 +1,131 @@
+# A 0.56-inch seven-segment digit seen from the front, common cathode: the grey frame, the black face, the slanted
+# segments dark until their current lights them red — each by the part's own figure, light_a … light_point, as its symbol
+# is. Ten legs, five above and five below; the second common leg is drawn, the part wires one.
+portrait:seven-segment-portrait("Seven-segment digit") {
+    meta {
+        summary: "A 0.56-inch common-cathode digit whose segments light by their current"
+        code: "PT.DISPLAY:SEVEN-SEGMENT-0.56"
+        category: circuits
+        tags: electronics, portrait, display, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 160)
+    input:light_a(0 .. 100)
+    input:light_b(0 .. 100)
+    input:light_c(0 .. 100)
+    input:light_d(0 .. 100)
+    input:light_e(0 .. 100)
+    input:light_f(0 .. 100)
+    input:light_g(0 .. 100)
+    input:light_point(0 .. 100)
+
+    path:legs("M-41.5 -60V-80H-38.5V-60ZM-41.5 60V80H-38.5V60ZM-21.5 -60V-80H-18.5V-60ZM-21.5 60V80H-18.5V60ZM-1.5 -60V-80H1.5V-60ZM-1.5 60V80H1.5V60ZM18.5 -60V-80H21.5V-60ZM18.5 60V80H21.5V60ZM38.5 -60V-80H41.5V-60ZM38.5 60V80H41.5V60Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:segment_g(at: -40 -80)
+    pin:segment_f(at: -20 -80)
+    pin:segment_a(at: 20 -80)
+    pin:segment_b(at: 40 -80)
+    pin:segment_e(at: -40 80)
+    pin:segment_d(at: -20 80)
+    pin:cathode(at: 0 80)
+    pin:segment_c(at: 20 80)
+    pin:segment_point(at: 40 80)
+    path:frame("M-38-60H38V60H-38Z") {
+        fill = grey
+    }
+    path:face("M-33-52H33V52H-33Z") {
+        stroke = clear
+        fill = black
+    }
+    path:dark_a("M-11.3 -30L-7.88 -33L17.12 -33L19.7 -30L16.28 -27L-8.72 -27Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_b("M20.99 -28.5L23.57 -25.5L20.63 -4.5L17.21 -1.5L14.63 -4.5L17.57 -25.5Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_c("M16.79 1.5L19.37 4.5L16.43 25.5L13.01 28.5L10.43 25.5L13.37 4.5Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_d("M-19.7 30L-16.28 27L8.72 27L11.3 30L7.88 33L-17.12 33Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_e("M-17.21 1.5L-14.63 4.5L-17.57 25.5L-20.99 28.5L-23.57 25.5L-20.63 4.5Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_f("M-13.01 -28.5L-10.43 -25.5L-13.37 -4.5L-16.79 -1.5L-19.37 -4.5L-16.43 -25.5Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_g("M-15.5 0L-12.08 -3L12.92 -3L15.5 0L12.08 3L-12.92 3Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_point("M16.8 30A3 3 0 1 0 22.8 30A3 3 0 1 0 16.8 30Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:lit_a(live, "M-11.3 -30L-7.88 -33L17.12 -33L19.7 -30L16.28 -27L-8.72 -27Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_a, 0, 100))
+        live glow = 6 * share(light_a, 0, 100)
+    }
+    path:lit_b(live, "M20.99 -28.5L23.57 -25.5L20.63 -4.5L17.21 -1.5L14.63 -4.5L17.57 -25.5Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_b, 0, 100))
+        live glow = 6 * share(light_b, 0, 100)
+    }
+    path:lit_c(live, "M16.79 1.5L19.37 4.5L16.43 25.5L13.01 28.5L10.43 25.5L13.37 4.5Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_c, 0, 100))
+        live glow = 6 * share(light_c, 0, 100)
+    }
+    path:lit_d(live, "M-19.7 30L-16.28 27L8.72 27L11.3 30L7.88 33L-17.12 33Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_d, 0, 100))
+        live glow = 6 * share(light_d, 0, 100)
+    }
+    path:lit_e(live, "M-17.21 1.5L-14.63 4.5L-17.57 25.5L-20.99 28.5L-23.57 25.5L-20.63 4.5Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_e, 0, 100))
+        live glow = 6 * share(light_e, 0, 100)
+    }
+    path:lit_f(live, "M-13.01 -28.5L-10.43 -25.5L-13.37 -4.5L-16.79 -1.5L-19.37 -4.5L-16.43 -25.5Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_f, 0, 100))
+        live glow = 6 * share(light_f, 0, 100)
+    }
+    path:lit_g(live, "M-15.5 0L-12.08 -3L12.92 -3L15.5 0L12.08 3L-12.92 3Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_g, 0, 100))
+        live glow = 6 * share(light_g, 0, 100)
+    }
+    path:lit_point(live, "M16.8 30A3 3 0 1 0 22.8 30A3 3 0 1 0 16.8 30Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_point, 0, 100))
+        live glow = 6 * share(light_point, 0, 100)
+    }
+}

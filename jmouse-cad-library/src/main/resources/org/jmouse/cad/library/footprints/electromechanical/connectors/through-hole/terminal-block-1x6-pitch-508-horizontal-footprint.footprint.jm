@@ -1,0 +1,23 @@
+footprint:terminal-block-1x6-pitch-508-horizontal-footprint("Screw terminal block, 5.08 mm pitch, 1 × 6, horizontal") {
+    meta {
+        summary: "Screw terminal block, 5.08 mm pitch, 1 row of 6, upright, through-hole"
+        code: "FP.TB:6-P5.08"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#terminal-block-5-08 and the land pattern rules; regenerate, never edit.
+    # Square lead 1.1: drill 1.3, pad 2.3, pin 1 square.
+    pad:1(through-hole, rectangle, at: 0 -12.7, size: 2.3 x 2.3, drill: 1.3)
+    pad:2(through-hole, circle, at: 0 -7.62, size: 2.3 x 2.3, drill: 1.3)
+    pad:3(through-hole, circle, at: 0 -2.54, size: 2.3 x 2.3, drill: 1.3)
+    pad:4(through-hole, circle, at: 0 2.54, size: 2.3 x 2.3, drill: 1.3)
+    pad:5(through-hole, circle, at: 0 7.62, size: 2.3 x 2.3, drill: 1.3)
+    pad:6(through-hole, circle, at: 0 12.7, size: 2.3 x 2.3, drill: 1.3)
+    outline(fabrication, width: 0.1, "M-2.8 -15.24H3.8V15.24H-3.8V-14.24Z")
+    outline(silkscreen, width: 0.12, "M-3.91 -15.35H3.91V15.35H-3.91Z")
+    outline(silkscreen, filled, "M-4.71 -12.7A0.3 0.3 0 1 0 -4.11 -12.7A0.3 0.3 0 1 0 -4.71 -12.7Z")
+    outline(courtyard, width: 0.05, "M-4.3 -15.75H4.3V15.75H-4.3Z")
+}

@@ -1,0 +1,44 @@
+# A chip ferrite bead, 220 Ω at 100 MHz: a small copper resistance in series with an inductance that its core's loss turns
+# into a resistance at high frequency — L in parallel with R. L and R are fitted to the datasheet's impedance at 100 MHz;
+# its curve elsewhere and its saturation with direct current are approximations.
+component:ferrite-bead("Ferrite bead, 220 Ω", type: ferrite) {
+    meta {
+        designator: FB
+        summary: "Chip ferrite bead, 220 Ω at 100 MHz, 1.4 A, 0603"
+        source: "Murata BLM18PG221SN1 datasheet: 220 Ω ±25 % at 100 MHz, DC resistance at most 0.10 Ω, 1.4 A"
+        package: "L_0603"
+        category: circuits
+    }
+
+    parameter:R_direct(50 mOhm, "DC resistance, typical; at most 0.10 Ω")
+    parameter:inductance(0.6 uH, "low-frequency inductance: an approximation fitted to its curve")
+    parameter:R_loss(250 Ohm, "core loss as a parallel resistance: the 220 Ω it shows at 100 MHz")
+
+    pin:terminal_one(analog, 1, "first terminal")
+    pin:terminal_two(analog, 2, "second terminal")
+
+    node:core("between the copper and the core")
+
+    state:I_inductance(0, continuous, "the current in the inductance")
+
+    symbol(uses: ferrite-bead-symbol) {
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    equations {
+        current terminal_one -> core = (terminal_one - core) / R_direct
+        d(I_inductance)/dt = (core - terminal_two) / inductance
+        current core -> terminal_two = I_inductance + (core - terminal_two) / R_loss
+    }
+
+    expect("fifty millivolts at an ampere of direct current", from: "DC resistance 0.05 Ω typical") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [feed, 0], U_output: 10 V)
+            part:R1(resistor, [feed, a], resistance: 9.95 Ohm)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, a)
+        within(0.04 V .. 0.06 V)
+    }
+}

@@ -1,0 +1,20 @@
+footprint:to-92-inline-footprint("TO-92, leads in line") {
+    meta {
+        summary: "3-lead TO-92, through-hole, the leads formed to 2.54 mm in one line, the flat face towards +Y"
+        code: "FP.TO92:3-L"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "JEDEC TO-226AA"
+    }
+    # Drawn from TO-226AA: body 4.8 across, 3.7 from the flat face to the back, lead b 0.56 × c 0.51 at most; the leads
+    # formed out to 2.54, since 1.27 leaves no copper ring beside a drill the leads fit.
+    # Our through-hole rule: drill = the lead's diagonal 0.76 + 0.2, up to 1.0; pad = drill + 2 × 0.5 = 2.0, under pitch −
+    # 0.25; pin 1 square. Courtyard 0.5 past copper and body. Origin at the middle lead, the body's round back towards −Y.
+    pad:1(through-hole, rectangle, at: -2.54 0, size: 2 x 2, drill: 1)
+    pad:2(through-hole, circle, at: 0 0, size: 2 x 2, drill: 1)
+    pad:3(through-hole, circle, at: 2.54 0, size: 2 x 2, drill: 1)
+    outline(fabrication, width: 0.1, "M-2.017 1.3A2.4 2.4 0 1 1 2.017 1.3Z")
+    outline(silkscreen, width: 0.12, "M-2.174 -1.255A2.51 2.51 0 0 1 2.174 -1.255M-2.08 1.41H2.08")
+    outline(silkscreen, filled, "M-2.74 1.6A0.2 0.2 0 1 0 -2.34 1.6A0.2 0.2 0 1 0 -2.74 1.6Z")
+    outline(courtyard, width: 0.05, "M-4.05 -2.9H4.05V2.05H-4.05Z")
+}

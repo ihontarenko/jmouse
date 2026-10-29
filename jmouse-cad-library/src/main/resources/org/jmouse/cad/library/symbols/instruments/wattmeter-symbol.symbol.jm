@@ -1,0 +1,19 @@
+symbol:wattmeter-symbol("Wattmeter") {
+    meta {
+        summary: "Wattmeter, as drawn on a schematic: a dial marked W, its current through left and right, its voltage top and bottom"
+        code: "SY.METER:WATTMETER"
+        category: circuits
+        tags: electronics, schematic, instrument
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    path("M-80 0H-36M36 0H80M0-80V-36M0 36V80M-36 0A36 36 0 1 0 36 0A36 36 0 1 0-36 0")
+    path("M-18-16L-10 16L0-4L10 16L18-16", upright)
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    pin:c(at: 0 -80)
+    pin:d(at: 0 80)
+    label(name, at: -52 -56)
+    label(value, at: 52 64)
+}

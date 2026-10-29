@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-spring</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-plugin-gerber</artifactId>
+    <packaging>jar</packaging>
+    <name>jMouse - CAD Plugin Gerber</name>
+    <description>A board written as the files a board house makes and assembles it from: Gerber X2, Excellon, the placement and the bill of materials; and what a board house plugin builds its own set on.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-plugin-gerber</url>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <spring-boot.version>4.0.7</spring-boot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- The formats the files are written in, built as trees -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-gerber</artifactId>
+        </dependency>
+        <!-- What is written: the board, its footprints, its circuit; the edge as a path -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-board</artifactId>
+        </dependency>
+        <!-- The rules a board is made by: the gaps a pour keeps -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-library</artifactId>
+        </dependency>
+        <!-- The letters of the silkscreen: NewStroke, laid out as strokes -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-stroke-fonts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-svg-path</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-units</artifactId>
+        </dependency>
+        <!-- The point it brings its format to -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-exchange</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-plugin-spring</artifactId>
+        </dependency>
+        <!-- The profiles a set's tables are written by: data in the jar -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

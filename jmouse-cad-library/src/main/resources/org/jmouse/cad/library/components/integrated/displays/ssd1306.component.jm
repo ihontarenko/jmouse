@@ -1,0 +1,139 @@
+# SSD1306: the controller of the common 0.96-inch monochrome OLED module, on I²C — a member of the I²C OLED controller,
+# which reads its control byte and answers the commands it shares with the SH1106. Its own: a display memory of exactly
+# 128 columns by eight pages, three addressing modes — page (after reset), horizontal and vertical — over a column and
+# a page window, and an internal charge pump that makes the panel voltage of a module powered from 3.3 V: until 8Dh 14h
+# turns it on, a display turned on shows nothing.
+
+component:ssd1306("SSD1306 OLED module", type: display) {
+    meta {
+        designator: DS
+        summary: "128×64 or 128×32 monochrome OLED on I²C: display memory in pages, three addressing modes, charge pump"
+        source: "Solomon Systech SSD1306 data sheet rev. 1.1 (2008): I²C control byte Co and D/C# (§8.1.5.2), GDDRAM pages (§8.7), addressing modes (§10.1.3–10.1.5), command table 9 (20h, 21h, 22h), charge pump 8Dh 14h (application note); slave address 0111 10 SA0 R/W; the 4-pin module GND VCC SCL SDA. Not modelled: contrast, scrolling, the start line and display offset, A5h entire display on, reading the memory back"
+        package: "0.96-inch module, 4 pins"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:i2c-oled-controller
+    use:cmos-hc
+
+    pin:GND(ground, 1)
+    pin:Vcc(power, 2)
+    pin:scl(digital, input, 3, "serial clock")
+    pin:sda(digital, bidirectional, open-drain, 4, "serial data")
+
+    symbol(uses: oled-128x64-symbol)
+
+    state:mode(2, discrete, "the addressing mode: horizontal, vertical or page — page after reset")
+    state:column_start(0, discrete, "21h: the column window")
+    state:column_end(127, discrete)
+    state:page_start(0, discrete, "22h: the page window")
+    state:page_end(7, discrete)
+
+    behaviour {
+        final let HORIZONTAL = 0
+        final let VERTICAL = 1
+        final let PAGE = 2
+        final let ADDRESSING_MODE = 32      # 20h + mode
+        final let COLUMN_WINDOW = 33        # 21h + start, end
+        final let PAGE_WINDOW = 34          # 22h + start, end
+        final let CHARGE_PUMP = 141         # 8Dh + 14h on, 10h off
+
+        function chip_arguments(code)
+            if code == COLUMN_WINDOW or code == PAGE_WINDOW then
+                return 2
+            elseif code == ADDRESSING_MODE or code == CHARGE_PUMP then
+                return 1
+            end
+            return 0
+        end
+
+        function chip_argument(code, index, value)
+            if code == ADDRESSING_MODE then
+                # 11b is invalid; page addressing is where it starts.
+                mode = min(low_bits(value, 2), PAGE)
+            elseif code == COLUMN_WINDOW and index == 0 then
+                column_start = low_bits(value, 7)
+                column = column_start
+            elseif code == COLUMN_WINDOW then
+                column_end = low_bits(value, 7)
+            elseif code == PAGE_WINDOW and index == 0 then
+                page_start = low_bits(value, 3)
+                page = page_start
+            elseif code == PAGE_WINDOW then
+                page_end = low_bits(value, 3)
+            elseif code == CHARGE_PUMP then
+                pump = bit(value, 2)
+            end
+        end
+
+        # The address pointer after a data byte, as the addressing mode moves it within the windows.
+        function advance()
+            if mode == HORIZONTAL then
+                if column == column_end then
+                    column = column_start
+                    if page == page_end then
+                        page = page_start
+                    else
+                        page = page + 1
+                    end
+                else
+                    column = column + 1
+                end
+            elseif mode == VERTICAL then
+                if page == page_end then
+                    page = page_start
+                    if column == column_end then
+                        column = column_start
+                    else
+                        column = column + 1
+                    end
+                else
+                    page = page + 1
+                end
+            elseif column == column_end then
+                column = column_start
+            else
+                column = column + 1
+            end
+        end
+    }
+
+    expect("turned on without its charge pump it shows nothing", from: "application note: the internal charge pump must be enabled (8Dh 14h) before AFh lights the panel") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0 175")
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figure: U1.lit)
+        near(0, +- 0.01)
+    }
+
+    expect("with its charge pump it lights", from: "8Dh 14h, then AFh: the panel is on") {
+        bench(i2c-bus, for: 1 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x00 0x8D 0x14 0xAF")
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figure: U1.lit)
+        near(1, +- 0.01)
+    }
+
+    expect("horizontal addressing wraps a column window onto the next page", from: "§10.1.4: in horizontal addressing the pointer returns to the window's first column and moves down a page") {
+        bench(i2c-bus, for: 2 ms) {
+            # Horizontal mode, columns 0 to 1, pages 0 to 7; then three data bytes: columns 0 and 1 of page 0, column 0 of page 1.
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x00 0x20 0x00 0x21 0 1 0x22 0 7")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x40 0xFF 0x81 0xFF", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figures: [U1.cursor_column, U1.cursor_page])
+        is([1,1])
+    }
+
+    expect("page addressing stays on its page", from: "§10.1.3: in page addressing the pointer returns to the window's first column and the page is not changed") {
+        bench(i2c-bus, for: 2 ms) {
+            part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x80 0xB3 0x00 0x21 0 1")
+            part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: Vcc, GND: 0], address: 60, bytes: "0x40 0x01 0x02 0x04", start_at: 1 ms)
+            part:U1(self, [scl: scl, sda: sda, Vcc: Vcc, GND: 0])
+        }
+        measure(final, figures: [U1.cursor_column, U1.cursor_page])
+        is([1,3])
+    }
+}

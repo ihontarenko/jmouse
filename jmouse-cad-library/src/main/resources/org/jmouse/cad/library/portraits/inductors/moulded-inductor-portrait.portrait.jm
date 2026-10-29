@@ -1,0 +1,67 @@
+# A moulded RF choke as it is held: a green body, the wide silver band of its kind, then its inductance in microhenries
+# by the colour code — two figures and the multiplier, gold for a tenth — and its tolerance, every band from the part.
+portrait:moulded-inductor-portrait("Moulded inductor") {
+    meta {
+        summary: "A moulded axial inductor: its microhenries read from its colour bands"
+        code: "PT.INDUCTOR:MOULDED-AXIAL"
+        category: circuits
+        tags: electronics, portrait, inductor, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 40)
+    input:inductance(1 µH .. 99 mH, typical: 1 mH)
+    input:tolerance(1 % .. 20 %, typical: 10 %)
+    input:failed
+
+    line:lead_one(from: -80 0, to: -26 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    line:lead_two(from: 26 0, to: 80 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:terminal_one(at: -80 0)
+    pin:terminal_two(at: 80 0)
+    path:body("M-22-10H22C24-10 26-8 26-6V6C26 8 24 10 22 10H-22C-24 10-26 8-26 6V-6C-26-8-24-10-22-10Z") {
+        stroke = clear
+        fill = green
+    }
+    box:kind_band(at: -18 0, size: 7 x 20) {
+        stroke = clear
+        fill = silver
+    }
+    box:first_figure(live, at: -8 0, size: 5 x 20) {
+        stroke = clear
+        live fill = curve(floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 100), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+    }
+    box:second_figure(live, at: 0 0, size: 5 x 20) {
+        stroke = clear
+        live fill = curve(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) - 10 * floor(round((inductance / 1 µH) / 10 ^ (floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1)) / 10), 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green, 6 -> blue, 7 -> violet, 8 -> grey, 9 -> white)
+    }
+    box:multiplier(live, at: 8 0, size: 5 x 20) {
+        stroke = clear
+        live fill = curve(floor(ln((inductance / 1 µH)) / ln(10) + 0.000001) - 1, -1 -> gold, 0 -> black, 1 -> brown, 2 -> red, 3 -> orange, 4 -> yellow, 5 -> green)
+    }
+    box:tolerance_band(live, at: 17 0, size: 5 x 20) {
+        stroke = clear
+        live fill = curve(tolerance, 5 % -> gold, 10 % -> silver, 20 % -> black)
+    }
+    path:sheen("M-22-6H22") {
+        stroke = white
+        thickness = 0.6
+        opacity = 0.35
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-22-10H22V10H-22Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.5
+        }
+    }
+    # The body's edge, last, so the bands end at it.
+    path:outline("M-22-10H22C24-10 26-8 26-6V6C26 8 24 10 22 10H-22C-24 10-26 8-26 6V-6C-26-8-24-10-22-10Z") {
+        fill = clear
+    }
+}

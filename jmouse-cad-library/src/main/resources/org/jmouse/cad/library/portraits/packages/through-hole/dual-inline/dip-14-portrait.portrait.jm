@@ -1,0 +1,50 @@
+# Generated from footprint-standards/dual-inline-packages.sht#dip; regenerate, never edit.
+portrait:dip-14-portrait("DIP-14") {
+    meta {
+        summary: "14-lead DIP, 7.62 mm rows from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.DIP:14-W7.62"
+        category: circuits
+        tags: electronics, portrait, package, through-hole
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(150 x 80)
+    input:marking(text)
+
+    path:leads("M-65.984 25H-54.016V30H-65.984ZM-62.205 30H-57.795V40H-62.205ZM-65.984 -25H-54.016V-30H-65.984ZM-62.205 -30H-57.795V-40H-62.205ZM-45.984 25H-34.016V30H-45.984ZM-42.205 30H-37.795V40H-42.205ZM-45.984 -25H-34.016V-30H-45.984ZM-42.205 -30H-37.795V-40H-42.205ZM-25.984 25H-14.016V30H-25.984ZM-22.205 30H-17.795V40H-22.205ZM-25.984 -25H-14.016V-30H-25.984ZM-22.205 -30H-17.795V-40H-22.205ZM-5.984 25H5.984V30H-5.984ZM-2.205 30H2.205V40H-2.205ZM-5.984 -25H5.984V-30H-5.984ZM-2.205 -30H2.205V-40H-2.205ZM14.016 25H25.984V30H14.016ZM17.795 30H22.205V40H17.795ZM14.016 -25H25.984V-30H14.016ZM17.795 -30H22.205V-40H17.795ZM34.016 25H45.984V30H34.016ZM37.795 30H42.205V40H37.795ZM34.016 -25H45.984V-30H34.016ZM37.795 -30H42.205V-40H37.795ZM54.016 25H65.984V30H54.016ZM57.795 30H62.205V40H57.795ZM54.016 -25H65.984V-30H54.016ZM57.795 -30H62.205V-40H57.795Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -60 40)
+    pin:2(at: -40 40)
+    pin:3(at: -20 40)
+    pin:4(at: 0 40)
+    pin:5(at: 20 40)
+    pin:6(at: 40 40)
+    pin:7(at: 60 40)
+    pin:8(at: 60 -40)
+    pin:9(at: 40 -40)
+    pin:10(at: 20 -40)
+    pin:11(at: 0 -40)
+    pin:12(at: -20 -40)
+    pin:13(at: -40 -40)
+    pin:14(at: -60 -40)
+    path:body("M-73 -25H73A2 2 0 0 1 75 -23V23A2 2 0 0 1 73 25H-73A2 2 0 0 1 -75 23V-23A2 2 0 0 1 -73 -25Z") {
+        fill = black
+    }
+    path:notch("M-75 -6A6 6 0 0 1 -75 6Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-69.8 16.55A3.25 3.25 0 1 0 -63.3 16.55A3.25 3.25 0 1 0 -69.8 16.55Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: 0 0, size: 105 x 11.25) {
+        fill = silver
+        text = marking
+    }
+}

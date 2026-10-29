@@ -72,10 +72,17 @@ public class TransactionTemplate implements TransactionCallback {
             coordinator.commit(status);
             return result;
         } catch (Throwable throwable) {
-            try {
-                coordinator.rollback(status);
-            } catch (Throwable ignored) {
-                // rollback failures are deliberately suppressed
+            if (!status.isCompleted()) {
+                try {
+                    coordinator.rollback(status);
+                } catch (Throwable rollbackFailure) {
+                    if (throwable != rollbackFailure) {
+                        throwable.addSuppressed(rollbackFailure);
+                    }
+                }
+            }
+            if (throwable instanceof Error error) {
+                throw error;
             }
             throw (throwable instanceof RuntimeException exception)
                     ? exception

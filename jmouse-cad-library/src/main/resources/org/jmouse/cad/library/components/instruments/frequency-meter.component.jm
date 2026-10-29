@@ -1,0 +1,42 @@
+component:frequency-meter("Frequency meter", type: meter) {
+    meta {
+        designator: FM
+        summary: "Reads how often its input rises through a level: one over the time between two rising edges"
+        category: circuits
+    }
+    parameter:threshold(0 V, "the level a rising edge crosses")
+    parameter:R_input(1 MOhm, "input resistance: what it draws through, on a realistic bench")
+    pin:input(analog, 1, "signal")
+    pin:reference(analog, 2, "what the signal is read against")
+    state:last_edge(-1, discrete, "when the input last rose through the level; -1 before the first")
+    state:frequency(0, discrete, "one over the time between the last two rising edges")
+    equations {
+        current input -> reference = realistic * (input - reference) / R_input
+    }
+    behaviour {
+        on above 'input - reference - threshold' do
+            if last_edge >= 0 then
+                frequency = 1 / (time - last_edge)
+            end
+            last_edge = time
+        end
+    }
+    lead:input(white, stripes: blue)
+    lead:reference(grey)
+    reading:reading(frequency, unit: Hz)
+    symbol(uses: frequency-meter-symbol) {
+        bind:a(pin: input)
+        bind:b(pin: reference)
+    }
+
+    expect("draws nothing on an ideal bench", from: "an ideal frequency meter across the lower half of a 1 MOhm divider leaves it at half") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [top, 0], U_output: 10 V)
+            part:R1(resistor, [top, middle], resistance: 1 MOhm)
+            part:R2(resistor, [middle, 0], resistance: 1 MOhm)
+            part:U1(self, [input: middle, reference: 0])
+        }
+        measure(final, middle)
+        near(5 V, +- 0.1%)
+    }
+}

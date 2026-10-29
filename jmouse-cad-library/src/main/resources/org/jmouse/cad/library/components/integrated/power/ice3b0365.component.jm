@@ -1,0 +1,316 @@
+# Infineon ICE3B0365 — CoolSET-F3: a fixed-frequency current-mode PWM controller and a 650 V CoolMOS in one DIP-8.
+#
+# Source: Infineon "CoolSET-F3" datasheet, version 2.3, 2 Apr 2013 (Infineon-COOLSET_F3-DS-v02_03-en.pdf).
+# Every number below names the section or table it was read from; "typ" is the typical column, and the min / max
+# the datasheet gives are in the expectations at the end, which the bench checks.
+#
+# What the model covers, and what it does not:
+#   covered  — startup cell and undervoltage lockout (3.2), soft start (3.3), oscillator and maximum duty (3.4.1),
+#              current-mode PWM with the PWM-OP gain and the slope ramp (3.4, 4.3.4), cycle-by-cycle current limit
+#              with leading-edge blanking (3.5, 4.3.6), overload detection and auto restart through the SoftS
+#              blanking window (3.6.1, 3.6.3), active burst mode (3.6.2), the CoolMOS as a switch with its
+#              on-resistance and effective output capacitance (4.3.7).
+#   simplified — the gate driver's 130 ns slope control (figure 11) is one exponential edge; propagation-delay
+#              compensation (3.5.2) is assumed perfect, so the limit trips at V_current_sense_threshold itself; temperature does not
+#              enter (R_drain_source_on is the 25 °C value).
+#   left out — VCC overvoltage and thermal shutdown (3.6.3, 8 ms spike blanking) and the internal RC filter on FB.
+
+component:ice3b0365("ICE3B0365", type: pwm-controller) {
+    meta {
+        designator: U
+        summary: "Off-line SMPS current-mode controller with integrated 650 V CoolMOS, 67 kHz, 6.45 Ohm"
+        source: "Infineon CoolSET-F3 datasheet v2.3, 2013-04-02"
+        package: "PG-DIP-8"
+        category: circuits
+        failure: open
+    }
+    use:smooth-transitions
+
+    # 4.3.3 Internal voltage reference — measured at FB, the same rail pulls SoftS up
+    parameter:V_reference(6.5 V, "VREF, trimmed reference (6.37 .. 6.63 V)")
+
+    # 4.3.4 PWM section
+    parameter:oscillator_frequency(67 kHz, "fOSC, fixed oscillator frequency, ICE3Bxx65 (61 .. 73 kHz)")
+    parameter:maximum_duty_cycle(0.72, "maximum duty cycle (0.67 .. 0.77)")
+    parameter:voltage_gain(3.7, "PWM-OP gain applied to the CS voltage (3.5 .. 3.9)")
+    parameter:V_ramp(0.85 V, "voltage ramp max level: slope compensation added to the amplified CS")
+    parameter:V_feedback_minimum(0.3 V, "below this FB voltage the duty cycle is zero (Dmin)")
+    parameter:R_feedback(20 kOhm, "FB pull-up resistor to VREF (16 .. 27 kOhm)")
+    parameter:R_soft_start(50 kOhm, "SoftS pull-up resistor to VREF (39 .. 62 kOhm)")
+
+    # 3.2 / 4.3.1 Supply section
+    parameter:V_supply_on(15.0 V, "VCC turn-on threshold (14.2 .. 15.8 V)")
+    parameter:V_supply_off(8.5 V, "VCC turn-off threshold (8.0 .. 9.0 V)")
+    parameter:I_charge(1.05 mA, "VCC charge current from the startup cell at VCC = 0 (0.55 .. 1.60 mA)")
+    parameter:I_start(160 uA, "start-up current before the controller is active (max 220 uA)")
+    parameter:I_supply(5.5 mA, "supply current with active gate, ICE3B0365 (max 7.0 mA)")
+    parameter:I_restart(300 uA, "supply current in auto restart mode with inactive gate")
+
+    # 3.3 / 4.3.5 Soft start and control unit
+    parameter:V_soft_start_begin(4.0 V, "soft start ends: above this SoftS voltage there is no duty limitation")
+    parameter:V_soft_start_clamp(4.4 V, "clamped SoftS voltage in normal operation (4.23 .. 4.57 V)")
+    parameter:V_soft_start_window(5.4 V, "C3: end of the blanking window, overload or burst is decided here (5.2 .. 5.6 V)")
+    parameter:V_feedback_overload(4.8 V, "C4: overload and open-loop limit (4.62 .. 4.98 V)")
+    parameter:V_feedback_burst(1.30 V, "C5: active burst mode entry level (1.23 .. 1.37 V)")
+    parameter:V_feedback_burst_on(4.0 V, "C6a: in burst mode, switching resumes above this (3.85 .. 4.15 V)")
+    parameter:V_feedback_burst_off(3.4 V, "C6b: in burst mode, switching stops below this (3.25 .. 3.55 V)")
+
+    # 3.5 / 4.3.6 Current limiting
+    parameter:V_current_sense_threshold(1.02 V, "peak current limitation, incl. propagation delay (0.97 .. 1.07 V)")
+    parameter:V_current_sense_burst(0.257 V, "VCS2, the limit during active burst mode (0.232 .. 0.282 V)")
+    parameter:leading_edge_blanking_time(220 ns, "leading-edge blanking")
+
+    # 4.3.7 CoolMOS section, ICE3B0365
+    parameter:R_drain_source_on(6.45 Ohm, "drain-source on-resistance at 25 C, 0.3 A (max 7.50 Ohm; 13.7 Ohm at 125 C)")
+    parameter:C_output_energy(3.65 pF, "Co(er), effective output capacitance, energy related, 0 .. 480 V")
+    parameter:edge_time(50 ns, "gate drive edge; the driver slows the rising slope to about 130 ns (figure 11)")
+    # How it warms and where it gives up (DIP-8 with its drain pins on copper).
+    parameter:thermal_resistance(90 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(10 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:soft_start(analog, 1, "SoftS: soft start, and the blanking window before auto restart or burst")
+    pin:feedback(analog, 2, "FB: feedback from the optocoupler; regulation, burst and overload")
+    pin:current_sense(analog, 3, "CS: current sense, and the CoolMOS source")
+    pin:drain(analog, 4, "Drain of the 650 V CoolMOS; pins 4 and 5 are shorted inside the DIP-8")
+    pin:Vcc(power, 7, "controller supply, 8.5 .. 21 V in operation")
+    pin:GND(ground, 8, "controller ground")
+
+    symbol(box) {
+        left([feedback, soft_start])
+        right([drain, current_sense])
+        top(Vcc)
+        bottom(GND)
+    }
+
+    state:running(0, discrete, "the controller is on: VCC passed V_supply_on and has not fallen below V_supply_off")
+    state:restarting(0, discrete, "auto restart: switched off by a fault, waiting for VCC to fall below V_supply_off")
+    state:gate(0, discrete, "the PWM latch FF1: the CoolMOS is commanded on")
+    state:started(0, discrete, "when the present switching cycle began, for the slope ramp and the blanking")
+    state:clamped(1, discrete, "S1 holds SoftS at 4.4 V; released while FB is out of the regulation range")
+    state:burst(0, discrete, "active burst mode is entered")
+    state:bursting(0, discrete, "inside burst mode, the switching packet is on")
+    state:shown(0, continuous, "the gate as the CoolMOS sees it, following the latch over the driver edge")
+
+    equations {
+        # The reference is on only while the controller runs: FB and SoftS are pulled up from VCC through it.
+        current Vcc -> feedback = running * (V_reference - (feedback - GND)) / R_feedback
+        current Vcc -> soft_start = running * (V_reference - (soft_start - GND)) / R_soft_start
+
+        # S1 clamps SoftS at 4.4 V in normal operation; T1 discharges it when the controller is off (3.2).
+        # The clamp and T1 as what they are: a 10 Ω and a 1 kΩ path to ground.
+        let R_clamp : resistance = 10
+        let R_discharge : resistance = 1000
+        current soft_start -> GND = running * clamped * soft_positive_part((soft_start - GND) - V_soft_start_clamp, 0.01) / R_clamp + (1 - running) * (soft_start - GND) / R_discharge
+
+        # The startup cell charges VCC from the drain until the controller is on (3.2); it stays off in auto restart.
+        # The cell is fully on a few volts above VCC; the knee is 5 V.
+        let V_startup_knee : voltage = 5
+        current drain -> Vcc = (1 - running) * (1 - restarting) * I_charge * tanh((drain - Vcc) / V_startup_knee)
+
+        # What the controller itself takes from VCC in each mode (4.3.1, 4.3.2); it falls away below a volt of VCC.
+        let V_supply_knee : voltage = 1
+        current Vcc -> GND = (running * I_supply + (1 - running) * (restarting * I_restart + (1 - restarting) * I_start)) * tanh((Vcc - GND) / V_supply_knee)
+
+        # The CoolMOS: a switch from drain to the CS pin (its source), with its output capacitance and body diode.
+        d(shown)/dt = (gate - shown) / edge_time
+        current drain -> current_sense = shown * (drain - current_sense) / R_drain_source_on + d(C_output_energy * (drain - current_sense))/dt
+        current current_sense -> drain = 1e-12 * (limit_exponential((current_sense - drain) / 0.03) - 1)
+    }
+
+    behaviour {
+        # 3.2: the controller starts once VCC passes the turn-on threshold ...
+        on above 'Vcc - GND - V_supply_on' when running == 0 and restarting == 0 do
+            running = 1
+            clamped = 1
+            burst = 0
+        end
+
+        # ... and stops, from any mode, when VCC falls below the turn-off threshold.
+        on below 'Vcc - GND - V_supply_off' do
+            running = 0
+            restarting = 0
+            gate = 0
+            burst = 0
+            bursting = 0
+        end
+
+        # 3.4.1: the oscillator sets the PWM latch every cycle — unless FB asks for no duty (Dmin) or burst mode
+        # is between packets — and maximum_duty_cycle ends the cycle if nothing else has.
+        on every '1 / oscillator_frequency' when running == 1 do
+            if (feedback - GND) > V_feedback_minimum and (burst == 0 or bursting == 1) then
+                gate = 1
+                started = time
+                schedule('blanking', leading_edge_blanking_time)
+                schedule('maximum duty', maximum_duty_cycle / oscillator_frequency)
+            end
+        end
+
+        on timer 'maximum duty' do
+            gate = 0
+        end
+
+        # 3.5.1: nothing may switch the CoolMOS off during the leading-edge blanking; once it is over, whatever
+        # crossed during it is honoured at once.
+        on timer 'blanking' when gate == 1 do
+            let command : voltage = feedback - GND
+            if (soft_start - GND) < V_soft_start_begin and (soft_start - GND) < command then
+                command = soft_start - GND
+            end
+            let limit : voltage = V_current_sense_threshold
+            if burst == 1 then
+                limit = V_current_sense_burst
+            end
+            if (current_sense - GND) >= limit or voltage_gain * (current_sense - GND) + V_ramp * (time - started) * oscillator_frequency / maximum_duty_cycle >= command then
+                gate = 0
+            end
+        end
+
+        # 3.5: cycle-by-cycle current limit — V_current_sense_threshold normally, 0.257 V in active burst mode.
+        on above 'current_sense - GND - (burst * V_current_sense_burst + (1 - burst) * V_current_sense_threshold)' when gate == 1 and time - started >= leading_edge_blanking_time do
+            gate = 0
+        end
+
+        # 3.3 and 3.4: the PWM comparator — the amplified current plus the slope ramp against FB, or against SoftS
+        # while the soft start still holds the command below FB.
+        on above 'voltage_gain * (current_sense - GND) + V_ramp * (time - started) * oscillator_frequency / maximum_duty_cycle - min((feedback - GND), (soft_start - GND) + 100 * ((soft_start - GND) > V_soft_start_begin))' when gate == 1 and time - started >= leading_edge_blanking_time do
+            gate = 0
+        end
+
+        # 3.6.1: FB outside the regulation range releases the SoftS clamp; the window then runs from 4.4 to 5.4 V.
+        on above 'feedback - GND - V_feedback_overload' when running == 1 do
+            clamped = 0
+            if burst == 1 then
+                burst = 0
+                bursting = 0
+            end
+        end
+
+        on below 'feedback - GND - V_feedback_burst' when running == 1 and burst == 0 do
+            clamped = 0
+        end
+
+        # FB back inside the range before the window closed: nothing happened, the clamp returns.
+        on below 'feedback - GND - V_feedback_overload' when running == 1 and burst == 0 and (feedback - GND) > V_feedback_burst do
+            clamped = 1
+        end
+
+        on above 'feedback - GND - V_feedback_burst' when running == 1 and burst == 0 and (feedback - GND) < V_feedback_overload do
+            clamped = 1
+        end
+
+        # 3.6.1 C3: the window closed with FB still out of range — overload means auto restart (3.6.3), light load
+        # means active burst mode (3.6.2).
+        on above 'soft_start - GND - V_soft_start_window' when running == 1 and clamped == 0 do
+            if (feedback - GND) > V_feedback_overload then
+                running = 0
+                restarting = 1
+                gate = 0
+            elseif (feedback - GND) < V_feedback_burst then
+                burst = 1
+                bursting = 0
+            end
+        end
+
+        # 3.6.2.2: in burst mode, FB rising past 4.0 V starts a packet and falling past 3.4 V ends it.
+        on above 'feedback - GND - V_feedback_burst_on' when burst == 1 do
+            bursting = 1
+        end
+
+        on below 'feedback - GND - V_feedback_burst_off' when burst == 1 do
+            bursting = 0
+        end
+    }
+
+    expect("oscillator frequency", from: "4.3.4 PWM section, fOSC, ICE3Bxx65: 61 .. 73 kHz") {
+        bench(for: 300 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 16 V)
+            part:V2(voltage-source, [high_voltage, 0], U_output: 30 V)
+            part:R1(resistor, [high_voltage, drain], resistance: 1 kOhm)
+            part:R2(resistor, [current_sense, 0], resistance: 1 Ohm)
+            part:R3(resistor, [feedback, 0], resistance: 20 kOhm)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback])
+        }
+        measure(frequency, drain, below: 15 V, after: 50 us)
+        within(61 kHz .. 73 kHz)
+    }
+
+    expect("maximum duty cycle", from: "4.3.4 PWM section, maximum_duty_cycle: 0.67 .. 0.77") {
+        bench(for: 300 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 16 V)
+            part:V2(voltage-source, [high_voltage, 0], U_output: 30 V)
+            part:R1(resistor, [high_voltage, drain], resistance: 1 kOhm)
+            part:R2(resistor, [current_sense, 0], resistance: 1 Ohm)
+            part:R3(resistor, [feedback, 0], resistance: 20 kOhm)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback])
+        }
+        measure(duty, drain, below: 15 V, after: 50 us)
+        within(0.67 .. 0.77)
+    }
+
+    expect("peak current limit with a 4.7 Ohm sense resistor", from: "4.3.6 current limiting, V_current_sense_threshold 0.97 .. 1.07 V: 0.206 .. 0.228 A") {
+        bench(for: 400 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 16 V)
+            part:V2(voltage-source, [high_voltage, 0], U_output: 30 V)
+            part:V3(voltage-source, [feedback, 0], U_output: 4.7 V)
+            part:L1(inductor, [high_voltage, drain], inductance: 1 mH)
+            part:D1(diode, [drain, high_voltage], I_saturation: 1e-14)
+            part:R2(resistor, [current_sense, 0], resistance: 4.7 Ohm)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback])
+        }
+        measure(maximum, current: L1, after: 200 us)
+        within(0.206 A .. 0.235 A)
+    }
+
+    expect("startup cell charges VCC", from: "4.3.1 VCC charge current 0.55 .. 1.60 mA into 1 uF for 10 ms") {
+        bench(for: 10 ms) {
+            part:V2(voltage-source, [high_voltage, 0], U_output: 100 V)
+            part:R1(resistor, [high_voltage, drain], resistance: 10 kOhm)
+            part:C1(capacitor, [Vcc, 0], capacitance: 1 uF)
+            part:R2(resistor, [current_sense, 0], resistance: 1 Ohm)
+            part:R3(resistor, [feedback, 0], resistance: 20 kOhm)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback])
+        }
+        measure(final, Vcc)
+        within(5.5 V .. 15.0 V)
+    }
+
+    expect("VCC turn-on threshold", from: "4.3.1 VVCCon 14.2 .. 15.8 V") {
+        bench(for: 18 ms) {
+            part:V2(voltage-source, [high_voltage, 0], U_output: 100 V)
+            part:R1(resistor, [high_voltage, drain], resistance: 10 kOhm)
+            part:C1(capacitor, [Vcc, 0], capacitance: 1 uF)
+            part:R2(resistor, [current_sense, 0], resistance: 1 Ohm)
+            part:R3(resistor, [feedback, 0], resistance: 20 kOhm)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback])
+        }
+        measure(maximum, Vcc)
+        within(14.2 V .. 15.8 V)
+    }
+
+    expect("VCC turn-off threshold", from: "4.3.1 VVCCoff 8.0 .. 9.0 V") {
+        bench(for: 18 ms) {
+            part:V2(voltage-source, [high_voltage, 0], U_output: 100 V)
+            part:R1(resistor, [high_voltage, drain], resistance: 10 kOhm)
+            part:C1(capacitor, [Vcc, 0], capacitance: 1 uF)
+            part:R2(resistor, [current_sense, 0], resistance: 1 Ohm)
+            part:R3(resistor, [feedback, 0], resistance: 20 kOhm)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback])
+        }
+        measure(minimum, Vcc, after: 15 ms)
+        within(8.0 V .. 9.0 V)
+    }
+
+    expect("open loop ends in auto restart", from: "3.6.3 auto restart: FB above 4.8 V after the SoftS window") {
+        bench(for: 20 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 16 V)
+            part:V2(voltage-source, [high_voltage, 0], U_output: 30 V)
+            part:R1(resistor, [high_voltage, drain], resistance: 1 kOhm)
+            part:R2(resistor, [current_sense, 0], resistance: 1 Ohm)
+            part:C2(capacitor, [soft_start, 0], capacitance: 100 nF)
+            part:U1(self, [Vcc: Vcc, GND: 0, drain: drain, current_sense: current_sense, feedback: feedback, soft_start: soft_start])
+        }
+        measure(duty, drain, below: 15 V, after: 15 ms)
+        within(0 .. 0.01)
+    }
+}

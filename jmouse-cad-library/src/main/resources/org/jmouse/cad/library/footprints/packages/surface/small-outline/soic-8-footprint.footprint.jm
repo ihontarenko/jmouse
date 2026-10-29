@@ -1,0 +1,25 @@
+footprint:soic-8-footprint("SOIC-8, 3.9 mm body") {
+    meta {
+        summary: "8-lead SOIC, 3.9 mm body, gull-wing, 1.27 mm pitch, body 3.9 × 4.9 mm"
+        code: "FP.SOIC:8-P1.27-W3.9"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC MS-012"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/small-outline-packages.sht#soic and the land pattern rules; regenerate, never edit.
+    # Leads span 5.8…6.2, foot 0.4…1.27, width 0.31…0.51; fillets toe 0.35, heel 0.35, side 0.03.
+    # Z = 6.915, G = 2.978, X = 0.599; pad 1.95 × 0.6 centred at ±2.45.
+    pad:1(surface, rounded-rectangle, at: -2.45 -1.905, size: 1.95 x 0.6, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: -2.45 -0.635, size: 1.95 x 0.6, roundness: 0.25)
+    pad:3(surface, rounded-rectangle, at: -2.45 0.635, size: 1.95 x 0.6, roundness: 0.25)
+    pad:4(surface, rounded-rectangle, at: -2.45 1.905, size: 1.95 x 0.6, roundness: 0.25)
+    pad:5(surface, rounded-rectangle, at: 2.45 1.905, size: 1.95 x 0.6, roundness: 0.25)
+    pad:6(surface, rounded-rectangle, at: 2.45 0.635, size: 1.95 x 0.6, roundness: 0.25)
+    pad:7(surface, rounded-rectangle, at: 2.45 -0.635, size: 1.95 x 0.6, roundness: 0.25)
+    pad:8(surface, rounded-rectangle, at: 2.45 -1.905, size: 1.95 x 0.6, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-0.95 -2.45H1.95V2.45H-1.95V-1.45Z")
+    outline(silkscreen, width: 0.12, "M-3.425 -2.56H1.95M-1.95 2.56H1.95")
+    outline(courtyard, width: 0.05, "M-3.7 -2.7H3.7V2.7H-3.7Z")
+}

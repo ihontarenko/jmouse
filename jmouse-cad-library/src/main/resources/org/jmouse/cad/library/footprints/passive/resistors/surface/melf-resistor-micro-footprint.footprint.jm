@@ -1,0 +1,19 @@
+footprint:melf-resistor-micro-footprint("MELF resistor MicroMELF") {
+    meta {
+        summary: "MELF resistor, MicroMELF body, reflow pads"
+        code: "FP.MELF:R-MICRO"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "JEDEC DO-213 and the makers' MELF outlines, MicroMELF"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#melf-micro and the land pattern rules; regenerate, never edit.
+    # Body 1.9…2.2 × 1.1…1.3, terminal 0.2…0.4; fillets toe 0.4, heel 0.2, side 0.1.
+    # Z = 3.02, G = 0.829, X = 1.529; pad 1.1 × 1.55 centred at ±0.95.
+    pad:1(surface, rounded-rectangle, at: -0.95 0, size: 1.1 x 1.55, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0.95 0, size: 1.1 x 1.55, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-1.025 -0.6H1.025V0.6H-1.025Z")
+    outline(silkscreen, width: 0.12, "M-0.14 -1.035H0.14M-0.14 1.035H0.14")
+    outline(courtyard, width: 0.05, "M-1.75 -1.05H1.75V1.05H-1.75Z")
+}

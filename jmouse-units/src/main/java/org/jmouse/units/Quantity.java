@@ -1,6 +1,7 @@
 package org.jmouse.units;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -25,9 +26,57 @@ public record Quantity(double value, String unit, String written) {
 
     private static final String PERCENT = "%";
 
+    /** Significant digits a value written with a prefix keeps: a datasheet's figure survives, a product's last bit does not. */
+    private static final MathContext PREFIXED_DIGITS = new MathContext(15);
+
+    /** The units an absolute temperature is read in. */
+    private static final String CELSIUS = "degC";
+    private static final String KELVIN  = "K";
+
     public Quantity {
         unit = unit == null ? "" : unit;
         written = written == null ? format(value) : written;
+    }
+
+    /**
+     * The value as an absolute temperature, kelvin: one in degrees Celsius counted from where water freezes, one in
+     * kelvin as it is; empty for a value that is no temperature. The units table reads °C as a step of temperature — a
+     * drift of 100 ppm/°C is per kelvin —, so a bench's temperature is read through this alone.
+     */
+    public Optional<Double> kelvin() {
+        return switch (unit) {
+            case CELSIUS -> Optional.of(Temperatures.kelvin(value));
+            case KELVIN -> Optional.of(value);
+            default -> Optional.empty();
+        };
+    }
+
+    /**
+     * A value in SI written with the prefix that puts its number between 1 and 1000: {@code 4.7e-9} in {@code F} is
+     * {@code 4.7 nF}, {@code 1500} in {@code Ohm} is {@code 1.5 kOhm}, {@code 2} in {@code V} is {@code 2 V}. A value
+     * beyond the prefixes takes the outermost one; a unit that takes no prefix — {@code rad}, {@code %},
+     * {@code ppm/K} — is written in its own scale, {@code 0.05} in {@code %} as {@code 5%}; without a unit it is a
+     * plain number.
+     *
+     * @throws IllegalArgumentException for a value that is not finite, or a unit that is none
+     */
+    public static Quantity prefixed(double value, String unit) {
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("A quantity is finite, not " + value);
+        }
+        BigDecimal number = new BigDecimal(value).round(PREFIXED_DIGITS);
+        if (unit == null || unit.isBlank()) {
+            return plain(number.doubleValue());
+        }
+        CompoundUnit read = Units.read(unit).orElseThrow(() -> new IllegalArgumentException("'" + unit + "' is not a unit"));
+        int power = value == 0 ? 0 : (int) Math.floor(Math.log10(Math.abs(value)) / 3) * 3;
+        Optional<SiPrefix> prefix = SiPrefix.ofPower(power);
+        if (read.factor() == 1 && prefix.isPresent() && Units.read(prefix.get().symbol() + unit).isPresent()) {
+            return of(number.movePointLeft(prefix.get().power()).stripTrailingZeros().doubleValue(), prefix.get().symbol() + unit)
+                    .orElseThrow();
+        }
+        return of(number.divide(BigDecimal.valueOf(read.factor()), PREFIXED_DIGITS).stripTrailingZeros().doubleValue(), unit)
+                .orElseThrow();
     }
 
     public static Quantity plain(double value) {

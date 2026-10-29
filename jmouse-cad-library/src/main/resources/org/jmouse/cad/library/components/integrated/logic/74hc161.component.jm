@@ -1,0 +1,141 @@
+# 74HC161: a four-bit synchronous binary counter. It counts on the clock's rising edge while both enables are high,
+# loads its data on that edge while LOAD is low, and clears at once — not waiting for the clock — while CLR is low.
+# RCO, the ripple carry, is high on fifteen while ENT is high: what chains one counter to the next. At power-up it holds
+# no number anyone can say until it is cleared or loaded, as the part does.
+
+component:74hc161("74HC161", type: counter) {
+    meta {
+        designator: U
+        summary: "Four-bit synchronous binary counter: synchronous load, asynchronous clear, ripple carry for cascading"
+        source: "TI SN74HC161 (SCLS297): function table; tpd 14 ns typical — the product page's figure, its supply not stated; pinout per the data sheet"
+        package: "DIP-16, SOIC-16"
+        category: circuits
+        failure: short Vcc GND
+    }
+    use:cmos-hc
+
+    parameter:propagation_delay(14 ns, "clock or clear to an output, typical")
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes (DIP-16 in still air)")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    pin:not_clear(digital, input, 1, "CLR, clear, active low, not waiting for the clock")
+    pin:clock(digital, input, 2, "CLK, counts or loads on its rising edge")
+    pin:data[0..3](digital, input, [3, 4, 5, 6], "A to D, what a load puts in, A the least significant")
+    pin:enable_p(digital, input, 7, "ENP, count enable")
+    pin:GND(ground, 8)
+    pin:not_load(digital, input, 9, "LOAD, load on the next clock edge, active low")
+    pin:enable_t(digital, input, 10, "ENT, count enable that also gates the carry")
+    pin:count[0..3](digital, output, [14, 13, 12, 11], "QA to QD, the count, QA the least significant")
+    pin:carry(digital, output, 15, "RCO, high on fifteen while ENT is high")
+    pin:Vcc(power, 16)
+
+    symbol(box) {
+        left([data, clock edge, enable_p, enable_t])
+        top(not_load bubble)
+        bottom(not_clear bubble)
+        right([count, carry])
+        power([Vcc, GND])
+    }
+
+    state:value(X, discrete, "the count, unknown until the counter is cleared or loaded")
+
+    behaviour {
+        function carry_level()
+            if not known(value) or not known(enable_t) then
+                return X
+            end
+            if value == 15 and enable_t == 1 then
+                return 1
+            end
+            return 0
+        end
+
+        function show()
+            let delay : time = propagation_delay * delay_scale(Vcc - GND)
+            drive('count', value, delay)
+            drive('carry', carry_level(), delay)
+        end
+
+        on start do
+            if not_clear == 0 then
+                value = 0
+            end
+            show()
+        end
+
+        on falling 'not_clear' do
+            value = 0
+            show()
+        end
+
+        on rising 'clock' when not_clear == 1 do
+            if not_load == 0 then
+                value = data
+            elseif enable_p == 1 and enable_t == 1 then
+                if known(value) then
+                    value = low_bits(value + 1, 4)
+                end
+            elseif !(enable_p == 0 or enable_t == 0) then
+                value = X
+            end
+            show()
+        end
+
+        on change 'enable_t' do
+            show()
+        end
+    }
+
+    expect("cleared, ten clock edges count to ten", from: "function table: count on each rising clock edge with ENP and ENT high") {
+        bench(for: 10.5 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            # CLR low for the first 0.5 µs, then high: the counter starts from nought.
+            part:V2(square-generator, [positive: not_clear, negative: 0], high: 0 V, low: 5 V, frequency: 20 kHz, duty: 0.01)
+            part:V3(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V4(voltage-source, [not_load, 0], U_output: 5 V)
+            part:V5(voltage-source, [enable_p, 0], U_output: 5 V)
+            part:V6(voltage-source, [enable_t, 0], U_output: 5 V)
+            part:U1(self, [not_clear: not_clear, clock: clock, data_0: 0, data_1: 0, data_2: 0, data_3: 0, enable_p: enable_p, enable_t: enable_t, not_load: not_load, count_0: count_0, count_1: count_1, count_2: count_2, count_3: count_3, carry: carry, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [count_0, count_1, count_2, count_3])
+        is([0,1,0,1])
+    }
+
+    expect("a load puts the data in on the clock edge", from: "function table: LOAD low loads A to D on the rising clock edge") {
+        bench(for: 2.5 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [not_clear, 0], U_output: 5 V)
+            part:V3(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V4(voltage-source, [not_load, 0], U_output: 0 V)
+            part:V5(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [not_clear: not_clear, clock: clock, data_0: high, data_1: 0, data_2: 0, data_3: high, enable_p: high, enable_t: high, not_load: not_load, count_0: count_0, count_1: count_1, count_2: count_2, count_3: count_3, carry: carry, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [count_0, count_1, count_2, count_3])
+        is([1,0,0,1])
+    }
+
+    expect("the carry is high on fifteen", from: "function table: RCO = ENT · QA · QB · QC · QD") {
+        bench(for: 15.5 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: not_clear, negative: 0], high: 0 V, low: 5 V, frequency: 20 kHz, duty: 0.01)
+            part:V3(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V4(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [not_clear: not_clear, clock: clock, data_0: 0, data_1: 0, data_2: 0, data_3: 0, enable_p: high, enable_t: high, not_load: high, count_0: count_0, count_1: count_1, count_2: count_2, count_3: count_3, carry: carry, Vcc: Vcc, GND: 0])
+        }
+        measure(final, level: carry)
+        near(1, +- 0.01)
+    }
+
+    expect("with ENP low it holds", from: "function table: ENP low, no count") {
+        bench(for: 5.5 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(square-generator, [positive: not_clear, negative: 0], high: 0 V, low: 5 V, frequency: 20 kHz, duty: 0.01)
+            part:V3(square-generator, [positive: clock, negative: 0], high: 5 V, frequency: 1 MHz)
+            part:V4(voltage-source, [high, 0], U_output: 5 V)
+            part:U1(self, [not_clear: not_clear, clock: clock, data_0: 0, data_1: 0, data_2: 0, data_3: 0, enable_p: 0, enable_t: high, not_load: high, count_0: count_0, count_1: count_1, count_2: count_2, count_3: count_3, carry: carry, Vcc: Vcc, GND: 0])
+        }
+        measure(final, levels: [count_0, count_1, count_2, count_3])
+        is([0,0,0,0])
+    }
+}

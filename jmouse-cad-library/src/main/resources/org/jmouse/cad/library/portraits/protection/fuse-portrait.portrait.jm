@@ -1,0 +1,53 @@
+# A 5 × 20 mm glass fuse with leads, as it is held: the clear tube between its two caps, the element stretched along it.
+# When it blows the element parts in the middle and the glass goes grey with its smoke.
+portrait:fuse-portrait("Glass fuse") {
+    meta {
+        summary: "A 5 × 20 mm glass fuse: its element seen through the tube; parted and smoked when it blows"
+        code: "PT.FUSE:GLASS-5X20"
+        category: circuits
+        tags: electronics, portrait, fuse, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 30)
+    input:failed
+
+    line:lead_one(from: -80 0, to: -40 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    line:lead_two(from: 40 0, to: 80 0) {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:terminal_one(at: -80 0)
+    pin:terminal_two(at: 80 0)
+    path:tube("M-29-7H29V7H-29Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.15
+    }
+    path:element(live, "M-29 0H29") {
+        stroke = copper
+        thickness = 0.5
+        live opacity = if(failed > 0.5, 0, 1)
+    }
+    layer(live, failed > 0.5) {
+        path:parted("M-29 0H-5M5 0H29") {
+            stroke = copper
+            thickness = 0.5
+        }
+        path:smoke("M-12-7H12V7H-12Z") {
+            stroke = clear
+            fill = grey
+            opacity = 0.5
+        }
+    }
+    path:tube_edge("M-29-7H29V7H-29Z") {
+        fill = clear
+        opacity = 0.6
+    }
+    path:caps("M-41-8H-29V8H-41ZM29-8H41V8H29Z") {
+        fill = silver
+    }
+}

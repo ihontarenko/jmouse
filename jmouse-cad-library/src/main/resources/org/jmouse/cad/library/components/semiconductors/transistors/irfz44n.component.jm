@@ -1,0 +1,116 @@
+# The IRFZ44N is the level-1 MOSFET with a power die's numbers: a threshold of about 3 V, 15 mΩ at a 10 V gate (half
+# of it the series resistances), a body diode that carries tens of amperes, and the capacitances of a large die.
+
+component:irfz44n("IRFZ44N", type: mosfet) {
+    meta {
+        designator: Q
+        summary: "N-channel power MOSFET, 55 V, 49 A, 17.5 mΩ"
+        source: "Infineon IRFZ44N datasheet, PD-94053"
+        package: "TO-220"
+        category: circuits
+        failure: short drain source
+    }
+    extends:n-mosfet
+
+    parameter:V_threshold(3 V, "VTO: gate threshold, 2 … 4 V at 250 uA")
+    parameter:transconductance(20.4 A/V^2, "KP: with RD + RS, 15 mΩ at VGS 10 V; 17.5 mΩ is the datasheet's maximum")
+    parameter:R_drain(6 mOhm, "RD")
+    parameter:R_source(2 mOhm, "RS")
+    parameter:I_saturation(10 pA, "IS: body diode saturation current")
+    parameter:emission_coefficient(1.2, "N: body diode emission factor")
+    parameter:C_bulk_drain(272 pF, "CBD: Coss - Crss")
+    parameter:C_gate_source(1382 pF, "CGSO: Ciss - Crss")
+    parameter:C_gate_drain(40 pF, "CGDO: the overlap Crss falls to at high VDS")
+    # Fitted to two of the datasheet's figures: Crss 88 pF at VDS 25 V, and Qgd 23 nC while the drain falls from
+    # 44 V to its on-state voltage at a 5 V plateau. Crss then reads 620 pF at 1 V and 3.6 nF with the drain at the gate.
+    parameter:C_gate_drain_zero_bias(3.63 nF, "the gate–drain depletion capacitance at zero bias")
+    parameter:V_gate_drain_potential(0.113 V, "its potential")
+    parameter:gate_drain_grading(0.8, "its grading")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    parameter:V_threshold_coefficient(-0.006, "threshold change per kelvin, V/K")
+    parameter:resistance_temperature_exponent(1.5, "RDS(on) rises when hot")
+    parameter:V_breakdown(55 V, "drain-source breakdown at 250 uA")
+    parameter:I_breakdown(250 uA, "avalanche current at V_breakdown")
+    # How it warms and where it gives up (TO-220 without a heatsink: RθJA 62 K/W, TJ max 175 °C).
+    parameter:power_rating(2 W, "what it is rated for without a heatsink")
+    parameter:thermal_resistance(62 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(30 s, "how fast it warms to that")
+    parameter:T_maximum(175 °C, "past this it fails on a realistic bench")
+    parameter:V_threshold_spread(1 V, "VGS(th) 2 ... 4 V")
+    parameter:V_drain_source_maximum(55 V, "VDS")
+    parameter:V_gate_source_maximum(20 V, "VGS, either way")
+    parameter:I_drain_maximum(49 A, "ID at 25 C case")
+
+    pin:source(analog, 1, "source")
+    pin:gate(analog, input, 2, "gate")
+    pin:drain(analog, output, 3, "drain; the tab is drain too")
+
+    footprint(to-220-3-vertical-footprint)
+
+    symbol(uses: n-channel-mosfet-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("on-state voltage at 10 A and a 10 V gate", from: "RDS(on) at most 17.5 mΩ at VGS 10 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [gate, 0], U_output: 10 V)
+            part:V2(voltage-source, [Vdd, 0], U_output: 12 V)
+            part:R1(resistor, [Vdd, drain], resistance: 1.2 Ohm)
+            part:C1(capacitor, [drain, 0], capacitance: 1 nF)
+            part:U1(self, [gate: gate, drain: drain, source: 0])
+        }
+        measure(final, drain)
+        within(0.05 V .. 0.18 V)
+    }
+
+    # A constant 1 mA into the gate, the drain on 44 V through 1.76 Ω (25 A once on): the gate climbs to the plateau,
+    # stays there while Qgd moves the drain — 23 µs at 1 mA — and only then climbs on. With the overlap capacitance
+    # alone the plateau lasted four microseconds and the gate stood near 10 V by now.
+    expect("the gate still stands on its plateau 20 µs into a 1 mA charge", from: "Qgd 23 nC at VDS 44 V, ID 25 A: a plateau of about 23 µs at 1 mA") {
+        bench(for: 20 us) {
+            part:I1(current-source, [gate, 0], I_output: 1 mA)
+            part:V2(voltage-source, [Vdd, 0], U_output: 44 V)
+            part:R1(resistor, [Vdd, drain], resistance: 1.76 Ohm)
+            part:U1(self, [gate: gate, drain: drain, source: 0])
+        }
+        measure(final, gate)
+        within(4 V .. 6.5 V)
+    }
+
+    expect("off below its threshold", from: "VGS(th) at least 2 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [gate, 0], U_output: 2 V)
+            part:V2(voltage-source, [Vdd, 0], U_output: 12 V)
+            part:R1(resistor, [Vdd, drain], resistance: 1 kOhm)
+            part:C1(capacitor, [drain, 0], capacitance: 1 nF)
+            part:U1(self, [gate: gate, drain: drain, source: 0])
+        }
+        measure(final, drain)
+        within(11.9 V .. 12 V)
+    }
+
+    expect("off-state drain current at 44 V", from: "IDSS at most 25 uA") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [drain, 0], U_output: 44 V)
+            part:U1(self, [gate: 0, drain: drain, source: 0])
+        }
+        measure(operating, current: V1)
+        within(-25 uA .. 0 A)
+    }
+
+    expect("body diode forward voltage", from: "VSD at most 1.3 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vdd, 0], U_output: 1 V)
+            part:R1(resistor, [Vdd, source], resistance: 1 Ohm)
+            part:C1(capacitor, [source, 0], capacitance: 1 nF)
+            part:U1(self, [gate: 0, drain: 0, source: source])
+        }
+        measure(final, source)
+        within(0.5 V .. 1.3 V)
+    }
+
+    # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-220-portrait) {
+        bind:marking("IRFZ44N")
+    }
+}

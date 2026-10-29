@@ -1,0 +1,56 @@
+# An NTC thermistor, 10 kΩ at 25 °C, B = 3950 K: R(T) = R25 · exp(B · (1/T − 1/T25)), read at the part's own temperature —
+# the bench's, raised on a realistic bench by its own heat. The B-parameter law is the datasheet's; the Steinhart–Hart
+# refinement is not followed.
+component:thermistor-ntc-10k("NTC thermistor, 10 kΩ", type: thermistor) {
+    meta {
+        designator: TH
+        summary: "NTC thermistor, 10 kΩ at 25 °C, B 3950 K"
+        source: "Murata NXFT15XH103FA datasheet: R25 10 kΩ ±1 %, B25/50 3950 K"
+        package: "R_Axial"
+        category: circuits
+        value: R_nominal
+    }
+
+    parameter:R_nominal(10 kOhm, "resistance at 25 °C")
+    parameter:B_constant(3950 K, "B25/50: how steeply it falls with the temperature")
+    parameter:T_nominal(298.15 K, "the temperature R_nominal is given at")
+    parameter:power_rating(0.1 W, "what it is rated for")
+    parameter:thermal_resistance(330 K/W, "dissipation constant about 3 mW/K")
+    parameter:thermal_time_constant(10 s, "thermal time constant in still air")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:terminal_one(analog, 1, "first lead")
+    pin:terminal_two(analog, 2, "second lead")
+
+    symbol(uses: thermistor-symbol) {
+        bind:failed(failed)
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    equations {
+        let R_now : resistance = R_nominal * exp(B_constant * (1 / temperature - 1 / T_nominal))
+        current terminal_one -> terminal_two = (terminal_one - terminal_two) / R_now
+    }
+
+    expect("10 kΩ at 25 °C", from: "R25 = 10 kΩ") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [a, 0], U_output: 1 V)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, current: V1)
+        within(-101 uA .. -99 uA)
+    }
+
+    expect("about 1.09 kΩ at 85 °C", from: "B 3950 K: R85 = R25 · exp(B (1/358.15 − 1/298.15))") {
+        bench(for: 1 ms, at: 85 °C) {
+            part:V1(voltage-source, [a, 0], U_output: 1 V)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, current: V1)
+        within(-0.96 mA .. -0.88 mA)
+    }
+
+    # How it looks in the hand: a black epoxy bead on two leads.
+    portrait(uses: ntc-thermistor-portrait)
+}

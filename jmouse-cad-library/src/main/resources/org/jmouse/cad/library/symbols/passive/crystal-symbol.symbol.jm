@@ -1,0 +1,16 @@
+symbol:crystal-symbol("Crystal") {
+    meta {
+        summary: "Crystal, as drawn on a schematic"
+        code: "SY.CRYSTAL:TWO-TERMINAL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    path("M-60 0H-26M-26-22V22M26-22V22M26 0H60M-14-28H14V28H-14Z")
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

@@ -1,0 +1,105 @@
+# The BT136 is a triac: two thyristors back to back with one gate, so it conducts either way once fired, by a gate
+# current of either sign. The latch is a discrete state like a thyristor's: set when the gate is driven past its
+# trigger voltage either way with the main terminals apart, cleared when the current falls below the holding current
+# — at every zero crossing of an alternating supply. Not represented: the four quadrants' different sensitivities,
+# dV/dt and commutation limits.
+
+component:bt136("BT136", type: thyristor) {
+    meta {
+        designator: Q
+        summary: "Triac, 600 V, 4 A, logic-level-sensitive gate"
+        source: "NXP / WeEn BT136 series datasheet, electrical characteristics"
+        package: "TO-220"
+        category: circuits
+        failure: short
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:V_gate_trigger(0.7 V, "VGT typical (1.5 V at most)")
+    parameter:I_gate_saturation(7 fA, "the gate junction: 5 mA at VGT, a sensitive gate's typical trigger current (50 fA asked 34 mA, past even the standard part's 35 mA at most)")
+    parameter:V_on(0.9 V, "the on-state voltage's knee")
+    parameter:R_on(0.15 Ohm, "the on-state slope: VT 1.7 V at 5 A at most")
+    parameter:I_holding(5 mA, "IH: below this current it turns off (15 mA at most)")
+    parameter:R_off(100 MOhm, "between the main terminals while it blocks")
+    parameter:power_rating(2 W, "what it is rated for without a heatsink")
+    parameter:thermal_resistance(60 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(30 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:main_terminal_one(analog, 1, "MT1, the gate's reference")
+    pin:main_terminal_two(analog, 2, "MT2, the tab")
+    pin:gate(analog, input, 3, "gate")
+
+    footprint(to-220-3-vertical-footprint)
+
+    symbol(uses: triac-symbol) {
+        bind:failed(failed)
+        bind:conduction(conducting)
+        bind:a(pin: main_terminal_two)
+        bind:b(pin: main_terminal_one)
+    }
+
+    state:conducting(0, discrete, "latched on: written by the behaviour, read by the equations")
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let V_main : voltage = main_terminal_two - main_terminal_one
+        let forward : voltage = soft_positive_part(V_main - V_on, 0.01)
+        let backward : voltage = soft_positive_part(0 - V_main - V_on, 0.01)
+        let V_gate : voltage = gate - main_terminal_one
+        current main_terminal_two -> main_terminal_one = conducting * (forward - backward) / R_on + V_main / R_off
+        current gate -> main_terminal_one = junction_current(V_gate, I_gate_saturation, 1, T_junction) - junction_current(0 - V_gate, I_gate_saturation, 1, T_junction)
+    }
+
+    behaviour {
+        # the gate fired it, either way, while the main terminals are apart
+        on above 'abs(gate - main_terminal_one) - V_gate_trigger' when abs(main_terminal_two - main_terminal_one) > V_on do
+            conducting = 1
+        end
+
+        # the current fell below the holding current: it blocks again
+        on below 'soft_positive_part(abs(main_terminal_two - main_terminal_one) - V_on, 0.01) / R_on - I_holding' when conducting > 0 do
+            conducting = 0
+        end
+    }
+
+    expect("fired by a negative gate, it carries the load", from: "VT 1.7 V at most: 12 V into 10 Ω, gate driven below MT1") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, terminal], resistance: 10 Ohm)
+            part:V2(voltage-source, [0, drive], U_output: 5 V)
+            part:R2(resistor, [drive, gate], resistance: 100 Ohm)
+            part:U1(self, [main_terminal_two: terminal, main_terminal_one: 0, gate: gate])
+        }
+        measure(final, terminal)
+        within(0.8 V .. 1.7 V)
+    }
+
+    expect("a few milliamperes of gate fire it", from: "a sensitive gate: 5 V through 680 Ω is about 6 mA, above its typical trigger current") {
+        bench(for: 2 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, terminal], resistance: 100 Ohm)
+            part:V2(voltage-source, [drive, 0], U_output: 5 V)
+            part:R2(resistor, [drive, gate], resistance: 680 Ohm)
+            part:U1(self, [main_terminal_two: terminal, main_terminal_one: 0, gate: gate])
+        }
+        measure(final, terminal)
+        within(0.8 V .. 1.7 V)
+    }
+
+    expect("blocks with no gate current", from: "the main terminals held off: only R_off conducts") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 12 V)
+            part:R1(resistor, [supply, terminal], resistance: 10 Ohm)
+            part:U1(self, [main_terminal_two: terminal, main_terminal_one: 0, gate: 0])
+        }
+        measure(final, terminal)
+        within(11.9 V .. 12 V)
+    }
+
+    # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-220-portrait) {
+        bind:marking("BT136")
+    }
+}

@@ -30,6 +30,9 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
     }
 
     public SessionManagementConfigurer<B> maximumSessions(int maximumSessions) {
+        if (maximumSessions <= 0) {
+            throw new IllegalArgumentException("maximumSessions must be positive");
+        }
         this.maximumSessions = maximumSessions;
         return this;
     }
@@ -60,6 +63,12 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
     }
 
     @Override
+    public void initialize(B http) {
+        http.setSharedObject(SessionSettings.class, new SessionSettings(
+                policy, rewrite, sessionAuthentication, sessionInvalidHandler));
+    }
+
+    @Override
     public void configure(B http) {
         http.setSharedObject(SessionSettings.class, new SessionSettings(
                 policy, rewrite, sessionAuthentication, sessionInvalidHandler));
@@ -68,7 +77,7 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
             http.addFilter(new ForceEagerSessionCreationFilter());
         }
 
-        if (rewrite) {
+        if (!rewrite) {
             http.addFilter(new DisableURLEncodingFilter());
         }
 
@@ -77,6 +86,11 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
                 (this.sessionAuthentication != null)
                         ? this.sessionAuthentication
                         : autoDetectStrategy(sessionRegistry);
+
+        if (maximumSessions != null && sessionRegistry == null && !policy.isStateless()) {
+            sessionRegistry = http.getObject(SessionRegistry.class,
+                    org.jmouse.security.session.InMemorySessionRegistry::new);
+        }
 
         // If concurrency configured -> decorate with concurrency auth handler
         if (maximumSessions != null && policy != SessionCreationPolicy.STATELESS) {
@@ -92,6 +106,7 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
             );
         }
 
+        http.setSharedObject(SessionAuthenticateHandler.class, strategy);
         http.addFilter(new SessionManagementFilter(strategy, this.sessionInvalidHandler));
 
         if (maximumSessions != null && policy != SessionCreationPolicy.STATELESS) {

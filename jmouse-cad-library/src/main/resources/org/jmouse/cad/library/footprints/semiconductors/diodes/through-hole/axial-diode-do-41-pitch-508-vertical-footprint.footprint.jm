@@ -1,0 +1,18 @@
+footprint:axial-diode-do-41-pitch-508-vertical-footprint("Axial diode DO-41 (DO-204AL), vertical, 5.08 mm") {
+    meta {
+        summary: "Axial diode DO-41 (DO-204AL), body 5.2 × ⌀2.7 mm, stood on end over pin 1, 5.08 mm between its holes; pin 1 is the cathode"
+        code: "FP.AXIAL:DO-41-P5.08-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "JEDEC DO-204 outlines"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/axial-packages.sht#diode-do-41 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.86: drill 1.1, pad 2.1, pin 1 square.
+    pad:1(through-hole, rectangle, at: -2.54 0, size: 2.1 x 2.1, drill: 1.1)
+    pad:2(through-hole, circle, at: 2.54 0, size: 2.1 x 2.1, drill: 1.1)
+    outline(fabrication, width: 0.1, "M-3.89 0A1.35 1.35 0 1 0 -1.19 0A1.35 1.35 0 1 0 -3.89 0ZM-2.54 0H2.54")
+    outline(silkscreen, width: 0.12, "M-4 0A1.46 1.46 0 1 0 -1.08 0A1.46 1.46 0 1 0 -4 0Z")
+    outline(courtyard, width: 0.05, "M-4.5 -1.95H4.1V1.95H-4.5Z")
+}

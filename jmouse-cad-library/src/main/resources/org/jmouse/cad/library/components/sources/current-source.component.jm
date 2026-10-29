@@ -1,0 +1,21 @@
+component:current-source("Current source", type: current-source) {
+    meta {
+        designator: I
+        value: I_output
+        summary: "Two-terminal DC current source"
+        category: circuits
+    }
+    parameter:I_output(1 mA, "source current")
+    pin:positive(analog, 1, "positive terminal")
+    pin:negative(analog, 2, "negative terminal")
+    # An ideal source: I_output pushed out of its positive pin, whatever the voltage across it — through the part, from
+    # its negative pin to its positive one.
+    equations {
+        current positive -> negative = 0 - I_output
+    }
+
+    symbol(uses: current-source-symbol) {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+}

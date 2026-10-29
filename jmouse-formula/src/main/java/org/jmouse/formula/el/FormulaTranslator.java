@@ -95,6 +95,9 @@ public final class FormulaTranslator {
         Formula left = translate(binary.getLeft());
         Formula right = translate(binary.getRight());
         Operator operator = binary.getOperator();
+        if (operator == FormulaOperator.PAIR) {
+            throw refusal("'" + binary.toSource() + "' is a pair: it stands among a call's arguments, 'curve(x, 0 -> 0, 1 -> 1)'.", null);
+        }
         if (operator == FormulaOperator.POWER || operator == MathematicOperator.EXPONENTIAL) {
             return Formula.power(left, right);
         }
@@ -338,17 +341,27 @@ public final class FormulaTranslator {
                 + "'" + FormulaPrinter.text(argument) + "'" + " is not a free name.", form);
     }
 
+    /** An argument, or — a pair {@code a -> b} — the two values it pairs, in order. */
+    private void addArgument(List<Formula> arguments, Expression argument) {
+        if (argument instanceof BinaryOperation pair && pair.getOperator() == FormulaOperator.PAIR) {
+            addArgument(arguments, pair.getLeft());
+            addArgument(arguments, pair.getRight());
+            return;
+        }
+        arguments.add(translate(argument));
+    }
+
     private List<Formula> arguments(FunctionNode function) {
         List<Formula> arguments = new ArrayList<>();
         Expression argumentNode = function.getArguments();
         if (argumentNode instanceof ArgumentsNode list) {
             for (Node child : list.getChildren()) {
                 if (child instanceof Expression argument) {
-                    arguments.add(translate(argument));
+                    addArgument(arguments, argument);
                 }
             }
         } else if (argumentNode != null) {
-            arguments.add(translate(argumentNode));
+            addArgument(arguments, argumentNode);
         }
         return arguments;
     }

@@ -1,0 +1,20 @@
+footprint:to-247-3-vertical-footprint("TO-247-3, standing") {
+    meta {
+        summary: "3-lead TO-247-3 standing upright, through-hole, 5.45 mm pitch, the tab at the back"
+        code: "FP.TO247:3-V"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "JEDEC TO-247 AD"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/inline-packages.sht#to-247 and the land pattern rules; regenerate, never edit.
+    # Lead 1.4 × 0.8 at most: drill 1.85, pad 2.85 × 2.85, pin 1 square.
+    pad:1(through-hole, rectangle, at: -5.45 0, size: 2.85 x 2.85, drill: 1.85)
+    pad:2(through-hole, circle, at: 0 0, size: 2.85 x 2.85, drill: 1.85)
+    pad:3(through-hole, circle, at: 5.45 0, size: 2.85 x 2.85, drill: 1.85)
+    outline(fabrication, width: 0.1, "M-8.125 -2.61H8.125V2.6H-8.125ZM-8.125 0.6H8.125")
+    outline(silkscreen, width: 0.12, "M-8.235 -2.72H8.235V2.71H-8.235Z")
+    outline(silkscreen, filled, "M-5.75 -2.19A0.3 0.3 0 1 0 -5.15 -2.19A0.3 0.3 0 1 0 -5.75 -2.19Z")
+    outline(courtyard, width: 0.05, "M-8.65 -3.1H8.65V3.1H-8.65Z")
+}

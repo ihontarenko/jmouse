@@ -1,0 +1,17 @@
+symbol:mains-plug-symbol("Mains plug with earth") {
+    meta {
+        summary: "A mains plug with an earth contact, as drawn on a schematic: line, neutral and earth leaving to the right"
+        code: "SY.CONNECTOR:MAINS-PLUG"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    path("M-60-60H12V60H-60ZM12-40H80M12 0H80M12 40H80M56 40V60M44 60H68M48 68H64")
+    pin:line(at: 80 -40, "L")
+    pin:neutral(at: 80 0, "N")
+    pin:earth(at: 80 40, "PE")
+    label(name, at: -24 -88)
+    label(value, at: -24 96)
+}

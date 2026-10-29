@@ -1,0 +1,18 @@
+footprint:axial-resistor-body-0207-pitch-2540-horizontal-footprint("Axial resistor DIN 0207, horizontal, 25.4 mm") {
+    meta {
+        summary: "Axial resistor DIN 0207, body 6.3 × ⌀2.5 mm, laid flat, 25.4 mm between its holes"
+        code: "FP.AXIAL:R0207-P25.4-H"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60286-1 bodies, DIN 44051 size codes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/axial-packages.sht#resistor-0207 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.6: drill 0.8, pad 1.8, pin 1 square.
+    pad:1(through-hole, rectangle, at: -12.7 0, size: 1.8 x 1.8, drill: 0.8)
+    pad:2(through-hole, circle, at: 12.7 0, size: 1.8 x 1.8, drill: 0.8)
+    outline(fabrication, width: 0.1, "M-3.15 -1.25H3.15V1.25H-3.15ZM-12.7 0H-3.15M3.15 0H12.7")
+    outline(silkscreen, width: 0.12, "M-3.26 -1.36H3.26V1.36H-3.26ZM-11.54 0H-3.26M3.26 0H11.54")
+    outline(courtyard, width: 0.05, "M-14.1 -1.75H14.1V1.75H-14.1Z")
+}

@@ -8,6 +8,7 @@ import org.jmouse.http.Range;
 import org.jmouse.storage.Content;
 import org.jmouse.storage.ContentTypes;
 import org.jmouse.storage.FileStore;
+import org.jmouse.storage.FileTree;
 import org.jmouse.storage.ObjectDescription;
 import org.jmouse.storage.StorageKey;
 import org.jmouse.storage.StoredObject;
@@ -26,6 +27,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 💾 The reference {@link FileStore}: objects on local disk, the storage key being their path
@@ -38,7 +43,7 @@ import java.nio.file.StandardCopyOption;
  * <p>Writes land on a temporary file in the destination directory and are then moved into place, so
  * a failed write cannot leave a truncated object behind at a key that already reads as valid.</p>
  */
-public class LocalFileStore implements FileStore {
+public class LocalFileStore implements FileStore, FileTree {
 
     /**
      * 🏷️ Name recorded against objects when configuration does not name the backend.
@@ -180,6 +185,95 @@ public class LocalFileStore implements FileStore {
             }
         } catch (IOException | RuntimeException exception) {
             LOGGER.warn("Could not delete '{}' from storage", key, exception);
+        }
+    }
+
+    @Override
+    public List<Entry> top() {
+        return entriesOf(root, null);
+    }
+
+    @Override
+    public List<Entry> list(StorageKey folder) {
+        Path directory = resolve(folder);
+        if (!Files.isDirectory(directory)) {
+            throw new ObjectNotFoundException(folder);
+        }
+        return entriesOf(directory, folder);
+    }
+
+    @Override
+    public void createFolder(StorageKey folder) {
+        try {
+            Files.createDirectories(resolve(folder));
+        } catch (IOException exception) {
+            throw new StorageException("Failed to make the folder '%s': %s".formatted(folder, exception.getMessage()), exception);
+        }
+    }
+
+    @Override
+    public void move(StorageKey from, StorageKey to) {
+        Path source = resolve(from);
+        Path target = resolve(to);
+        if (!Files.exists(source)) {
+            throw new ObjectNotFoundException(from);
+        }
+        if (Files.exists(target)) {
+            throw new StorageException("Something already stands at '%s'".formatted(to));
+        }
+        try {
+            Files.createDirectories(target.getParent());
+            Files.move(source, target);
+        } catch (IOException exception) {
+            throw new StorageException("Failed to move '%s' to '%s': %s".formatted(from, to, exception.getMessage()), exception);
+        }
+    }
+
+    @Override
+    public void deleteFolder(StorageKey folder) {
+        Path directory = resolve(folder);
+        if (!Files.isDirectory(directory)) {
+            throw new ObjectNotFoundException(folder);
+        }
+        try (Stream<Path> inside = Files.list(directory)) {
+            if (inside.findAny().isPresent()) {
+                throw new StorageException("The folder '%s' is not empty".formatted(folder));
+            }
+            Files.delete(directory);
+        } catch (IOException exception) {
+            throw new StorageException("Failed to remove the folder '%s': %s".formatted(folder, exception.getMessage()), exception);
+        }
+    }
+
+    /**
+     * 📂 A directory's entries as the tree shows them: folders first, then files, each by name. A file this store is
+     * still writing and a symbolic link — which could lead out of the root — are not shown.
+     *
+     * @param folder the directory's key; null for the root
+     */
+    private List<Entry> entriesOf(Path directory, StorageKey folder) {
+        try (Stream<Path> inside = Files.list(directory)) {
+            return inside.filter(path -> !Files.isSymbolicLink(path))
+                    .filter(path -> !path.getFileName().toString().startsWith(TEMPORARY_PREFIX))
+                    .map(path -> entryOf(path, folder))
+                    .sorted(Comparator.comparing((Entry entry) -> !entry.folder())
+                                    .thenComparing(Entry::name, String.CASE_INSENSITIVE_ORDER))
+                    .toList();
+        } catch (IOException exception) {
+            throw new StorageException("Failed to read the folder '%s': %s".formatted(folder == null ? "/" : folder,
+                                                                                    exception.getMessage()), exception);
+        }
+    }
+
+    private Entry entryOf(Path path, StorageKey folder) {
+        String name = path.getFileName().toString();
+        StorageKey key = StorageKey.of(folder == null ? name : folder.value() + "/" + name);
+        try {
+            BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
+            return new Entry(key, name, attributes.isDirectory(), attributes.isDirectory() ? 0 : attributes.size(),
+                             attributes.lastModifiedTime().toInstant());
+        } catch (IOException exception) {
+            throw new StorageException("Failed to read '%s': %s".formatted(key, exception.getMessage()), exception);
         }
     }
 

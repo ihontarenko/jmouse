@@ -1,0 +1,38 @@
+# Two resistances that share a wiper: moving it changes both while the circuit runs.
+component:potentiometer("Potentiometer", type: potentiometer) {
+    meta {
+        designator: RV
+        summary: "A resistance with a wiper, moved while the circuit runs"
+        category: circuits
+        failure: open
+        value: resistance
+    }
+
+    parameter:position(0.5, in: 0 .. 1, step: 0.01, live, "Wiper position")
+    parameter:resistance(10 kOhm, "end-to-end resistance")
+    parameter:R_wiper(1 Ohm, "wiper contact resistance")
+    # How it warms and where it gives up (a carbon-track trimmer, 0.5 W at 70 °C).
+    parameter:power_rating(0.5 W, "what it is rated for")
+    parameter:thermal_resistance(100 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(20 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:a(analog, 1, "first end")
+    pin:w(analog, 2, "wiper")
+    pin:b(analog, 3, "second end")
+
+    symbol(uses: [potentiometer-symbol, trimmer-symbol]) {
+        bind:failed(failed)
+        bind:position(position)
+    }
+
+    equations {
+        current a -> w = (a - w) / (position * resistance + R_wiper)
+        current w -> b = (w - b) / ((1 - position) * resistance + R_wiper)
+    }
+
+    # How it looks in the hand: a square trimmer whose slot turns with the wiper.
+    portrait(uses: trimmer-portrait) {
+        bind:position(position)
+    }
+}

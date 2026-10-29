@@ -1,0 +1,16 @@
+symbol:lamp-symbol("Lamp") {
+    meta {
+        summary: "Lamp, as drawn on a schematic"
+        code: "SY.LAMP:INCANDESCENT"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    path("M-80 0H-28M28 0H80M-28 0A28 28 0 1 0 28 0A28 28 0 1 0-28 0M-20-20L20 20M20-20L-20 20")
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

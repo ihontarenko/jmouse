@@ -1,0 +1,34 @@
+# Dual in-line packages by JEDEC outline. A lead is `lead` wide and `thickness` thick at its largest, and `shoulder` wide
+# where it leaves the body above the board (what a portrait shows); its hole is drilled for the diagonal. A member is its
+# lead count with its body length; it is named `dip-<leads>`, the outline's `suffix` after.
+sheet "Dual in-line packages" as dual-inline-packages {
+    description "Dual in-line packages, two rows of holes on a 2.54 mm grid."
+    form dual-inline
+
+    dip "DIP, 7.62 mm rows" source standard "JEDEC MS-001" {
+        name dip
+        pitch 2.54 mm
+        row 7.62 mm
+        lead 0.56 mm
+        shoulder 1.52 mm
+        thickness 0.36 mm
+        body-width 6.35 mm
+        members 4 = 4.6 mm, 6 = 8.9 mm, 8 = 9.27 mm, 14 = 19.05 mm, 16 = 19.3 mm, 18 = 22.86 mm, 20 = 26.16 mm, 22 = 27.94 mm, 24 = 31.75 mm, 28 = 35.56 mm
+        folder "packages/through-hole/dual-inline"
+        designation "DIP:{leads}-W{row|mm}"
+    }
+
+    dip-wide "DIP, 15.24 mm rows" source standard "JEDEC MS-011" {
+        name dip
+        suffix wide
+        pitch 2.54 mm
+        row 15.24 mm
+        lead 0.56 mm
+        shoulder 1.52 mm
+        thickness 0.38 mm
+        body-width 13.97 mm
+        members 24 = 31.75 mm, 28 = 36.83 mm, 32 = 41.91 mm, 40 = 52.07 mm
+        folder "packages/through-hole/dual-inline"
+        designation "DIP:{leads}-W{row|mm}"
+    }
+}

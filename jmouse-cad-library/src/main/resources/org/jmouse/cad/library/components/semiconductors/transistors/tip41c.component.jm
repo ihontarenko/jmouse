@@ -1,0 +1,83 @@
+# The TIP41C is the TIP31C's bigger brother: the same 100 V in the same TO-220, for 6 A instead of 3 — a larger die, so
+# a larger saturation current, a knee at a few amperes, and smaller resistances behind VCE(sat) and VBE(on). Fitted to
+# the TIP41C's gain and saturation table; the datasheet gives no SPICE model, so the charges are approximations from fT.
+
+component:tip41c("TIP41C", type: bjt) {
+    meta {
+        designator: Q
+        summary: "NPN power transistor, 100 V, 6 A, 65 W"
+        source: "onsemi TIP41/D (TIP41, TIP41A, TIP41B, TIP41C), electrical characteristics at 25 °C"
+        package: "TO-220"
+        category: circuits
+        failure: short
+    }
+    extends:npn-transistor
+
+    parameter:I_saturation(3 pA, "IS: transport saturation current")
+    parameter:beta_forward(70, "BF: ideal forward current gain")
+    parameter:beta_reverse(5, "BR: ideal reverse current gain")
+    parameter:V_early(100 V, "VAF: forward Early voltage")
+    parameter:I_knee(4 A, "IKF: forward knee current: hFE at least 15 at 3 A")
+    parameter:R_base(1.5 Ohm, "RB: part of VBE(on) at amperes")
+    parameter:R_collector(0.1 Ohm, "RC: most of VCE(sat) at amperes")
+    parameter:R_emitter(0.03 Ohm, "RE: emitter resistance and bond wire")
+    parameter:C_base_emitter(400 pF, "CJE")
+    parameter:C_base_collector(120 pF, "CJC")
+    parameter:transit_time_forward(50 ns, "TF: from fT at least 3 MHz — an approximation, the datasheet gives no model")
+    parameter:V_breakdown(100 V, "collector-emitter sustaining voltage: an inductive kick stops here")
+    parameter:I_breakdown(1 mA, "avalanche current at V_breakdown")
+    parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
+    # How it warms and where it gives up (TO-220 without a heatsink: 2 W at 25 °C, RθJA 62.5 K/W, TJ max 150 °C).
+    parameter:power_rating(2 W, "what it is rated for without a heatsink")
+    parameter:thermal_resistance(62.5 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(30 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:V_collector_emitter_maximum(100 V, "VCEO")
+    parameter:I_collector_maximum(6 A, "IC, continuous")
+
+    pin:base(analog, input, 1, "base")
+    pin:collector(analog, output, 2, "collector; the tab is collector too")
+    pin:emitter(analog, 3, "emitter")
+
+    footprint(to-220-3-vertical-footprint)
+
+    symbol(uses: npn-transistor-symbol) {
+        bind:failed(failed)
+    }
+
+    expect("DC current gain at 3 A", from: "hFE 15 to 75 at IC 3 A, VCE 4 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [collector, 0], U_output: 4 V)
+            part:I1(current-source, [base, 0], I_output: 100 mA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(operating, current: V1)
+        within(-7.5 A .. -1.5 A)
+    }
+
+    expect("saturated at 6 A with 600 mA of base current", from: "VCE(sat) at most 1.5 V at IC 6 A, IB 600 mA") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 12 V)
+            part:R1(resistor, [Vcc, collector], resistance: 2 Ohm)
+            part:C1(capacitor, [collector, 0], capacitance: 1 nF)
+            part:I1(current-source, [base, 0], I_output: 600 mA)
+            part:U1(self, [base: base, collector: collector, emitter: 0])
+        }
+        measure(final, collector)
+        within(0.2 V .. 1.5 V)
+    }
+
+    expect("off when the base is at the emitter", from: "collector cut-off current ICEO at most 0.7 mA at VCE 60 V") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [collector, 0], U_output: 60 V)
+            part:U1(self, [base: 0, collector: collector, emitter: 0])
+        }
+        measure(operating, current: V1)
+        within(-0.7 mA .. 0 A)
+    }
+
+    # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
+    portrait(uses: to-220-portrait) {
+        bind:marking("TIP41C")
+    }
+}

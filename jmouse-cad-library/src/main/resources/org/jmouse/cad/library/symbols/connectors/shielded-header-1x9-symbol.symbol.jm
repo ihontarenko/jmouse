@@ -1,0 +1,26 @@
+symbol:shielded-header-1x9-symbol("Shielded pin header, 9 contacts") {
+    meta {
+        summary: "A single-row pin header of 9, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        code: "SY.HDR:1X9-SHIELDED"
+        category: circuits
+        tags: electronics, schematic, connector
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from symbol-standards/connector-symbols.sht; regenerate, never edit.
+    size(60 x 420)
+    path("M-4 -160H40M-8 -162H-4V-158H-8ZM-4 -120H40M-8 -122H-4V-118H-8ZM-4 -80H40M-8 -82H-4V-78H-8ZM-4 -40H40M-8 -42H-4V-38H-8ZM-4 0H40M-8 -2H-4V2H-8ZM-4 40H40M-8 38H-4V42H-8ZM-4 80H40M-8 78H-4V82H-8ZM-4 120H40M-8 118H-4V122H-8ZM-4 160H40M-8 158H-4V162H-8Z")
+    pin:pin1(at: 40 -160, "1")
+    pin:pin2(at: 40 -120, "2")
+    pin:pin3(at: 40 -80, "3")
+    pin:pin4(at: 40 -40, "4")
+    pin:pin5(at: 40 0, "5")
+    pin:pin6(at: 40 40, "6")
+    pin:pin7(at: 40 80, "7")
+    pin:pin8(at: 40 120, "8")
+    pin:pin9(at: 40 160, "9")
+    path("M-14 -174H30V174H-14ZM0 174V200")
+    pin:shield(at: 0 200, "SH")
+    label(name, at: -4 -176)
+    label(value, at: -4 216)
+}

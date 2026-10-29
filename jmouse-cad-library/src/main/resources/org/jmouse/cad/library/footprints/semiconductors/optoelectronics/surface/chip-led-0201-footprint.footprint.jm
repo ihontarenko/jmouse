@@ -1,0 +1,19 @@
+footprint:chip-led-0201-footprint("Chip LED 0201 (0603 metric)") {
+    meta {
+        summary: "Chip LED, 0201 (0603 metric) body, reflow pads; pad 1 is the cathode"
+        code: "FP.CHIP:LED0201"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60115-8 dimensions, 0201 (0603 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#resistor-0201 and the land pattern rules; regenerate, never edit.
+    # Body 0.57…0.63 × 0.27…0.33, terminal 0.05…0.15; fillets toe 0.2, heel -0.05, side 0.
+    # Z = 1.097, G = 0.387, X = 0.397; pad 0.35 × 0.4 centred at ±0.35.
+    pad:1(surface, rounded-rectangle, at: -0.35 0, size: 0.35 x 0.4, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0.35 0, size: 0.35 x 0.4, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-0.3 -0.15H0.3V0.15H-0.3Z")
+    outline(silkscreen, width: 0.12, "M-0.785 -0.31V0.31")
+    outline(courtyard, width: 0.05, "M-0.7 -0.35H0.7V0.35H-0.7Z")
+}

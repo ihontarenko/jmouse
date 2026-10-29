@@ -1,0 +1,3135 @@
+{
+  "$schema" : "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "fileTypes" : [
+    "jm"
+  ],
+  "name" : "jM",
+  "patterns" : [
+    {
+      "include" : "#comment"
+    },
+    {
+      "include" : "#document"
+    },
+    {
+      "include" : "#document-term"
+    }
+  ],
+  "repository" : {
+    "argument-name" : {
+      "captures" : {
+        "1" : {
+          "name" : "variable.parameter.argument.jm"
+        },
+        "2" : {
+          "name" : "punctuation.separator.term.jm"
+        }
+      },
+      "match" : "(?<![A-Za-z0-9_.])([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(:)(?![:=])"
+    },
+    "assignment" : {
+      "comment" : "A lone '=' assigns; '==' compares, and writing the second where the first was meant is refused at load — it would otherwise evaluate and throw its answer away. They are one token type to the lexer, so they are told apart here by what surrounds them, and coloured apart because that is the mistake this language expects people to make.",
+      "match" : "(?<![=!<>+\\-*/%])=(?!=)",
+      "name" : "keyword.operator.assignment.jm"
+    },
+    "behaviour-block" : {
+      "begin" : "\\b(behaviour|behavior)\\b\\s*((\"[^\"]*\"|'[^']*'))\\s*\\b(do)\\b",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.behaviour.jm"
+        },
+        "2" : {
+          "name" : "entity.name.type.behaviour.jm"
+        },
+        "4" : {
+          "name" : "keyword.control.do.jm"
+        }
+      },
+      "comment" : "Both spellings, because the backend's lexer accepts both and a file refused over a 'u' is a file nobody enjoys.",
+      "end" : "\\b(end)\\b",
+      "endCaptures" : {
+        "1" : {
+          "name" : "keyword.control.end.jm"
+        }
+      },
+      "patterns" : [
+        {
+          "include" : "#statement"
+        }
+      ]
+    },
+    "block-analysis" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(analysis)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.analysis.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(for)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-bench" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(bench)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(realistic|for|at)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.bench.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(footprint|symbol)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-bitmap" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(bitmap)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.bitmap.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(bitmap)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.bitmap.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-box" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(box)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.box.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(box)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.box.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-circle" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(circle)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.circle.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(circle)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.circle.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-display" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(display)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.display.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(unit)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-equations" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(equations)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.equations.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(current|voltage|local|let)\\b(?![:(])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(->|:)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-expect" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(expect)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(from)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.expect.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "include" : "#block-bench"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(measure|within|near|is)\\b(?![:(])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(current|figures|figure|levels|above|after|below|level|power|with|at)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-footprint" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(footprint)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.footprint.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(footprint)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.footprint.jm",
+          "patterns" : [
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-formulas" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(formulas)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.formulas.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-glyph" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(glyph)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.glyph.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(glyph)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.glyph.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-group" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(group)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.group.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "include" : "#block-path"
+            },
+            {
+              "include" : "#block-box"
+            },
+            {
+              "include" : "#block-circle"
+            },
+            {
+              "include" : "#block-line"
+            },
+            {
+              "include" : "#block-glyph"
+            },
+            {
+              "include" : "#block-bitmap"
+            },
+            {
+              "include" : "#block-group"
+            },
+            {
+              "include" : "#block-when"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-heat" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(heat)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.heat.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(current|voltage|local|let)\\b(?![:(])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(->|:)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-layout" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(layout)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.layout.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(frame)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(readings|mirror|rotate|shows|value|name|size|wire|via|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(junction|common|global|ground|label|power|port)(?![A-Za-z0-9_:(-])",
+              "name" : "constant.language.vocabulary.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-leads" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(leads)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.leads.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(stripes)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-line" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(line)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.line.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(line)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.line.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-measure" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(measure)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.measure.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(signal|unit)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-nets" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(nets)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.nets.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(global|ground)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-nodes" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(nodes)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.nodes.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-parameters" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(parameters)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.parameters.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(animate|integer|exact|live|step|log|per|in)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-parts" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(parts)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.parts.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(footprint|symbol)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-path" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(path)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(upright|radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.path.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(path)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.path.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(upright|radius|pivot|from|size|at|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-pins" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(pins)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.pins.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(edge)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(bidirectional|open-drain|digital|analog|ground|output|input|power)(?![A-Za-z0-9_:(-])",
+              "name" : "constant.language.vocabulary.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-portrait" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(portrait)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(uses)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.portrait.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(portrait)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.portrait.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(uses)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-ports" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(ports)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.ports.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(analog|ground|output|input|power)\\b(?![:(])"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-probes" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(probes)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.probes.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(time)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(against|shows)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(current|level)(?![A-Za-z0-9_:(-])",
+              "name" : "constant.language.vocabulary.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-state" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(state)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.state.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(in)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(continuous|discrete)(?![A-Za-z0-9_:(-])",
+              "name" : "constant.language.vocabulary.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-symbol" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(symbol)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?<![A-Za-z0-9_.-])(uses|box)(?![A-Za-z0-9_:(-])",
+                  "name" : "keyword.other.clause.jm"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.symbol.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(bottom|power|right|left|top)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(symbol)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.symbol.jm",
+          "patterns" : [
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(uses|box)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-type" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(type)\\b(?![:(])",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            }
+          },
+          "end" : "(?=[;#}]|$)",
+          "name" : "meta.line.type.jm",
+          "patterns" : [
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-view" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(view)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.view.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "(?<![A-Za-z0-9_.-])(parameter|primary|points|from|to)(?![A-Za-z0-9_:(-])",
+              "name" : "keyword.other.clause.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "block-when" : {
+      "patterns" : [
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(layer|when)\\b((?:\"[^\"]*\"|[^{}\\n#;\"])*)(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "keyword.control.block.jm"
+            },
+            "2" : {
+              "patterns" : [
+                {
+                  "match" : "(?!)"
+                },
+                {
+                  "include" : "#term"
+                },
+                {
+                  "include" : "#value"
+                }
+              ]
+            },
+            "3" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "name" : "meta.block.when.jm",
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "include" : "#block-path"
+            },
+            {
+              "include" : "#block-box"
+            },
+            {
+              "include" : "#block-circle"
+            },
+            {
+              "include" : "#block-line"
+            },
+            {
+              "include" : "#block-glyph"
+            },
+            {
+              "include" : "#block-bitmap"
+            },
+            {
+              "include" : "#block-group"
+            },
+            {
+              "include" : "#block-when"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.line.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(animate|hide|live)\\b(?![:(])"
+            },
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "variable.other.declaration.jm"
+                }
+              },
+              "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=[ \\t]+[A-Za-z0-9\"(=+-])"
+            },
+            {
+              "match" : "->",
+              "name" : "keyword.operator.branch.jm"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "match" : "(?!)"
+            },
+            {
+              "include" : "#term"
+            },
+            {
+              "include" : "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "comment" : {
+      "comment" : "A '#' opens a comment everywhere EXCEPT immediately after a facade name, where it reaches a constant. #scoped-call matches at the '@', which is earlier, and the earliest match wins — so `@player#MAX` is a constant access and `# a note` is a comment, without either rule having to know about the other.",
+      "match" : "#.*$",
+      "name" : "comment.line.number-sign.jm"
+    },
+    "constant" : {
+      "match" : "\\b(true|false|null|none)\\b",
+      "name" : "constant.language.jm"
+    },
+    "declaration" : {
+      "captures" : {
+        "1" : {
+          "name" : "storage.type.declaration.jm"
+        },
+        "2" : {
+          "name" : "variable.other.declaration.jm"
+        },
+        "3" : {
+          "name" : "punctuation.separator.type.jm"
+        },
+        "4" : {
+          "name" : "entity.name.type.annotation.jm"
+        }
+      },
+      "comment" : "`let count : int = 1`, `local` (the same word), `const limit = 10`; `state hits : int = 0` and `parameter limit = 10` only where they open a declaration — a name, then `:` or `=` — because a host hands its scripts a plain `state` (`when state == 'FAILED'`). The type gets a scope of its own — entity.name.type — so it stands apart from names and keywords in every theme.",
+      "match" : "\\b(let|local|const|(?:state|parameter)(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*(?::|=(?!=))))\\b\\s+([A-Za-z_][A-Za-z0-9_]*)(?:\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?"
+    },
+    "document" : {
+      "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(component|footprint|functions|category|portrait|circuit|family|symbol|frame|pcb)\\b[ \\t]*(\"[^\"]*\")((?:[ \\t]+(?:as|type)[ \\t]+[A-Za-z0-9][A-Za-z0-9_.-]*(?:@[0-9]+)?)*)[ \\t]*(\\{)?",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.document.jm"
+        },
+        "2" : {
+          "name" : "entity.name.type.document.jm"
+        },
+        "3" : {
+          "patterns" : [
+            {
+              "captures" : {
+                "1" : {
+                  "name" : "keyword.other.identity.jm"
+                },
+                "2" : {
+                  "name" : "entity.name.tag.slug.jm"
+                }
+              },
+              "match" : "\\b(as|type)[ \\t]+([A-Za-z0-9][A-Za-z0-9_.-]*(?:@[0-9]+)?)"
+            }
+          ]
+        },
+        "4" : {
+          "name" : "punctuation.section.block.begin.jm"
+        }
+      },
+      "end" : "\\}",
+      "endCaptures" : {
+        "0" : {
+          "name" : "punctuation.section.block.end.jm"
+        }
+      },
+      "name" : "meta.document.jm",
+      "patterns" : [
+        {
+          "include" : "#document-body"
+        }
+      ]
+    },
+    "document-body" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "include" : "#meta-block"
+        },
+        {
+          "include" : "#document-declaration"
+        },
+        {
+          "include" : "#script-body"
+        },
+        {
+          "include" : "#block-path"
+        },
+        {
+          "include" : "#block-box"
+        },
+        {
+          "include" : "#block-circle"
+        },
+        {
+          "include" : "#block-line"
+        },
+        {
+          "include" : "#block-glyph"
+        },
+        {
+          "include" : "#block-bitmap"
+        },
+        {
+          "include" : "#block-group"
+        },
+        {
+          "include" : "#block-when"
+        },
+        {
+          "include" : "#block-parameters"
+        },
+        {
+          "include" : "#block-pins"
+        },
+        {
+          "include" : "#block-nodes"
+        },
+        {
+          "include" : "#block-state"
+        },
+        {
+          "include" : "#block-display"
+        },
+        {
+          "include" : "#block-measure"
+        },
+        {
+          "include" : "#block-leads"
+        },
+        {
+          "include" : "#block-equations"
+        },
+        {
+          "include" : "#block-formulas"
+        },
+        {
+          "include" : "#block-heat"
+        },
+        {
+          "include" : "#block-symbol"
+        },
+        {
+          "include" : "#block-portrait"
+        },
+        {
+          "include" : "#block-footprint"
+        },
+        {
+          "include" : "#block-type"
+        },
+        {
+          "include" : "#block-analysis"
+        },
+        {
+          "include" : "#block-bench"
+        },
+        {
+          "include" : "#block-expect"
+        },
+        {
+          "include" : "#block-parts"
+        },
+        {
+          "include" : "#block-layout"
+        },
+        {
+          "include" : "#block-ports"
+        },
+        {
+          "include" : "#block-nets"
+        },
+        {
+          "include" : "#block-probes"
+        },
+        {
+          "include" : "#block-view"
+        },
+        {
+          "include" : "#drawn-symbol"
+        },
+        {
+          "include" : "#drawn-portrait"
+        },
+        {
+          "include" : "#drawn-frame"
+        },
+        {
+          "include" : "#drawn-footprint"
+        },
+        {
+          "include" : "#drawn-pcb"
+        },
+        {
+          "include" : "#term"
+        },
+        {
+          "include" : "#value"
+        },
+        {
+          "match" : "\\{",
+          "name" : "punctuation.section.block.begin.jm"
+        }
+      ]
+    },
+    "document-declaration" : {
+      "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(extends|units|use)\\b(:?)",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.other.declaration.jm"
+        },
+        "2" : {
+          "name" : "punctuation.separator.term.jm"
+        }
+      },
+      "end" : "(?=[;#}]|$)",
+      "name" : "meta.line.declaration.jm",
+      "patterns" : [
+        {
+          "match" : "[A-Za-z0-9][A-Za-z0-9_.-]*(?:@[0-9]+)?",
+          "name" : "entity.name.type.reference.jm"
+        }
+      ]
+    },
+    "document-term" : {
+      "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(component|footprint|functions|category|portrait|circuit|family|symbol|frame|pcb)(:)([A-Za-z0-9][A-Za-z0-9_.-]*(?:@[0-9]+)?)",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.document.jm"
+        },
+        "2" : {
+          "name" : "punctuation.separator.term.jm"
+        },
+        "3" : {
+          "name" : "entity.name.tag.slug.jm"
+        }
+      },
+      "end" : "\\}",
+      "endCaptures" : {
+        "0" : {
+          "name" : "punctuation.section.block.end.jm"
+        }
+      },
+      "name" : "meta.document.term.jm",
+      "patterns" : [
+        {
+          "include" : "#document-body"
+        }
+      ]
+    },
+    "drawn-footprint" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.line.jm"
+            }
+          },
+          "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(outline|field|pad)\\b(?![:(])"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(roundness|filled|rotate|drill|layer|width|size|at)(?![A-Za-z0-9_:(-])",
+          "name" : "keyword.other.clause.jm"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(rounded-rectangle|unplated-hole|through-hole|fabrication|silkscreen|connector|courtyard|rectangle|reference|trapezoid|surface|circle|copper|custom|value|oval)(?![A-Za-z0-9_:(-])",
+          "name" : "constant.language.vocabulary.jm"
+        },
+        {
+          "include" : "#term"
+        },
+        {
+          "include" : "#value"
+        }
+      ]
+    },
+    "drawn-frame" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "include" : "#block-path"
+        },
+        {
+          "include" : "#block-box"
+        },
+        {
+          "include" : "#block-circle"
+        },
+        {
+          "include" : "#block-line"
+        },
+        {
+          "include" : "#block-glyph"
+        },
+        {
+          "include" : "#block-bitmap"
+        },
+        {
+          "include" : "#block-group"
+        },
+        {
+          "include" : "#block-when"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.line.jm"
+            }
+          },
+          "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(indicator|input|label|size|pin)\\b(?![:(])"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(picture|typical|from|text|at|to)(?![A-Za-z0-9_:(-])",
+          "name" : "keyword.other.clause.jm"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(value|name)(?![A-Za-z0-9_:(-])",
+          "name" : "constant.language.vocabulary.jm"
+        },
+        {
+          "include" : "#term"
+        },
+        {
+          "include" : "#value"
+        }
+      ]
+    },
+    "drawn-pcb" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.line.jm"
+            }
+          },
+          "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(dimension|teardrops|circuit|keepout|layers|class|place|rules|sizes|track|edge|hole|pair|text|zone|arc|via)\\b(?![:(])"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(inner-copper-thickness|least-track-width|plating-thickness|copper-thickness|board-thickness|least-via-drill|edge-clearance|hole-clearance|least-via-ring|via-diameter|least-drill|track-width|clearance|reference|via-drill|diameter|priority|rounding|through|curved|length|offset|rotate|drill|width|from|nets|ring|side|size|skew|gap|net|at|to)(?![A-Za-z0-9_:(-])",
+          "name" : "keyword.other.clause.jm"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(surface|bottom|tracks|round|vias|top)(?![A-Za-z0-9_:(-])",
+          "name" : "constant.language.vocabulary.jm"
+        },
+        {
+          "include" : "#term"
+        },
+        {
+          "include" : "#value"
+        }
+      ]
+    },
+    "drawn-portrait" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "include" : "#block-path"
+        },
+        {
+          "include" : "#block-box"
+        },
+        {
+          "include" : "#block-circle"
+        },
+        {
+          "include" : "#block-line"
+        },
+        {
+          "include" : "#block-glyph"
+        },
+        {
+          "include" : "#block-bitmap"
+        },
+        {
+          "include" : "#block-group"
+        },
+        {
+          "include" : "#block-when"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.line.jm"
+            }
+          },
+          "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(indicator|input|label|size|pin)\\b(?![:(])"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(picture|typical|from|text|at|to)(?![A-Za-z0-9_:(-])",
+          "name" : "keyword.other.clause.jm"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(value|name)(?![A-Za-z0-9_:(-])",
+          "name" : "constant.language.vocabulary.jm"
+        },
+        {
+          "include" : "#term"
+        },
+        {
+          "include" : "#value"
+        }
+      ]
+    },
+    "drawn-symbol" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "include" : "#block-path"
+        },
+        {
+          "include" : "#block-box"
+        },
+        {
+          "include" : "#block-circle"
+        },
+        {
+          "include" : "#block-line"
+        },
+        {
+          "include" : "#block-glyph"
+        },
+        {
+          "include" : "#block-bitmap"
+        },
+        {
+          "include" : "#block-group"
+        },
+        {
+          "include" : "#block-when"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.line.jm"
+            }
+          },
+          "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(indicator|input|label|size|pin)\\b(?![:(])"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(picture|typical|from|text|at|to)(?![A-Za-z0-9_:(-])",
+          "name" : "keyword.other.clause.jm"
+        },
+        {
+          "match" : "(?<![A-Za-z0-9_.-])(value|name)(?![A-Za-z0-9_:(-])",
+          "name" : "constant.language.vocabulary.jm"
+        },
+        {
+          "include" : "#term"
+        },
+        {
+          "include" : "#value"
+        }
+      ]
+    },
+    "expression" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "include" : "#string"
+        },
+        {
+          "include" : "#scoped-call"
+        },
+        {
+          "include" : "#function-call"
+        },
+        {
+          "include" : "#number"
+        },
+        {
+          "include" : "#constant"
+        },
+        {
+          "include" : "#operator-word"
+        },
+        {
+          "include" : "#assignment"
+        },
+        {
+          "include" : "#operator"
+        },
+        {
+          "include" : "#keyword"
+        },
+        {
+          "include" : "#identifier"
+        }
+      ]
+    },
+    "function-block" : {
+      "begin" : "\\b(function)\\b\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(\\()",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.function.jm"
+        },
+        "2" : {
+          "name" : "entity.name.function.jm"
+        },
+        "3" : {
+          "name" : "punctuation.definition.parameters.begin.jm"
+        }
+      },
+      "comment" : "`function share(count : int, total : int) : double` — each parameter may carry a type, and the function its result's after the closing parenthesis.",
+      "end" : "(\\))(?:\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?",
+      "endCaptures" : {
+        "1" : {
+          "name" : "punctuation.definition.parameters.end.jm"
+        },
+        "2" : {
+          "name" : "punctuation.separator.type.jm"
+        },
+        "3" : {
+          "name" : "entity.name.type.annotation.jm"
+        }
+      },
+      "patterns" : [
+        {
+          "include" : "#type-annotation"
+        },
+        {
+          "match" : "[A-Za-z_][A-Za-z0-9_]*",
+          "name" : "variable.parameter.jm"
+        },
+        {
+          "match" : ",",
+          "name" : "punctuation.separator.parameters.jm"
+        }
+      ]
+    },
+    "function-call" : {
+      "captures" : {
+        "1" : {
+          "name" : "entity.name.function.jm"
+        }
+      },
+      "match" : "\\b([A-Za-z_][A-Za-z0-9_]*)(?=\\s*\\()"
+    },
+    "identifier" : {
+      "match" : "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
+      "name" : "variable.other.jm"
+    },
+    "include-statement" : {
+      "captures" : {
+        "1" : {
+          "name" : "keyword.control.import.jm"
+        },
+        "2" : {
+          "name" : "string.quoted.jm"
+        }
+      },
+      "match" : "\\b(include)\\b\\s*((\"[^\"]*\"|'[^']*')?)"
+    },
+    "keyword" : {
+      "comment" : "Control words only. `and`, `or`, `not`, `is` and `in` are OPERATORS in this language and live in #operator-word — `not` in particular is the engine's second spelling of `!=` and the partner of `is`, never a prefix. Negation is `!`. Declarations are #declaration.",
+      "match" : "\\b(if|then|elseif|else|end|do|for|return)\\b",
+      "name" : "keyword.control.jm"
+    },
+    "meta-block" : {
+      "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(meta)\\b[ \\t]*(\\{)",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.block.jm"
+        },
+        "2" : {
+          "name" : "punctuation.section.block.begin.jm"
+        }
+      },
+      "end" : "\\}",
+      "endCaptures" : {
+        "0" : {
+          "name" : "punctuation.section.block.end.jm"
+        }
+      },
+      "name" : "meta.block.meta.jm",
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "begin" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)[ \\t]*(\\{)",
+          "beginCaptures" : {
+            "1" : {
+              "name" : "support.type.property-name.meta.jm"
+            },
+            "2" : {
+              "name" : "punctuation.section.block.begin.jm"
+            }
+          },
+          "end" : "\\}",
+          "endCaptures" : {
+            "0" : {
+              "name" : "punctuation.section.block.end.jm"
+            }
+          },
+          "patterns" : [
+            {
+              "include" : "#comment"
+            },
+            {
+              "include" : "#string"
+            }
+          ]
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "support.type.property-name.meta.jm"
+            },
+            "2" : {
+              "name" : "punctuation.separator.term.jm"
+            }
+          },
+          "match" : "(?:^|(?<=[;{]))[ \\t]*([A-Za-z_][A-Za-z0-9_]*)(:?)(?=[ \\t])"
+        },
+        {
+          "include" : "#value"
+        }
+      ]
+    },
+    "number" : {
+      "match" : "\\b[0-9]+(\\.[0-9]+)?\\b",
+      "name" : "constant.numeric.jm"
+    },
+    "on-handler" : {
+      "begin" : "\\b(on)\\b\\s+([A-Za-z_][A-Za-z0-9_-]*)(?:\\s+\\b(when)\\b)?",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.on.jm"
+        },
+        "2" : {
+          "name" : "entity.name.function.event.jm"
+        },
+        "3" : {
+          "name" : "keyword.control.when.jm"
+        }
+      },
+      "comment" : "The event name is whatever word follows 'on', INCLUDING one spelled like a keyword — a host is entitled to an event called 'end'. The optional literal of `on timer 180` falls through to #expression.",
+      "end" : "\\b(do)\\b",
+      "endCaptures" : {
+        "1" : {
+          "name" : "keyword.control.do.jm"
+        }
+      },
+      "patterns" : [
+        {
+          "include" : "#expression"
+        }
+      ]
+    },
+    "operator" : {
+      "match" : "(==|!=|<>|<=|>=|\\|\\||&&|\\?\\?|\\.\\.|->|[+\\-*/%<>!|])",
+      "name" : "keyword.operator.jm"
+    },
+    "operator-word" : {
+      "match" : "\\b(and|or|not|is|in)\\b",
+      "name" : "keyword.operator.word.jm"
+    },
+    "quantity" : {
+      "captures" : {
+        "1" : {
+          "name" : "constant.numeric.jm"
+        },
+        "2" : {
+          "name" : "keyword.other.unit.jm"
+        }
+      },
+      "match" : "((?<![A-Za-z0-9_])[+-]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)[ \\t]*((?:1/(?:(?:G|M|T|f|k|m|n|p|u|µ|μ)?(?:Ohm|Hz|Pa|Wb|A|C|F|H|J|K|N|S|V|W|g|m|s|Ω)|(?:degC|bit|deg|div|ppm|rad|dB|°C|\\%|°))(?:\\^-?[0-9]+)?|(?:(?:G|M|T|f|k|m|n|p|u|µ|μ)?(?:Ohm|Hz|Pa|Wb|A|C|F|H|J|K|N|S|V|W|g|m|s|Ω)|(?:degC|bit|deg|div|ppm|rad|dB|°C|\\%|°))(?:\\^-?[0-9]+)?)(?:[*/](?:(?:G|M|T|f|k|m|n|p|u|µ|μ)?(?:Ohm|Hz|Pa|Wb|A|C|F|H|J|K|N|S|V|W|g|m|s|Ω)|(?:degC|bit|deg|div|ppm|rad|dB|°C|\\%|°))(?:\\^-?[0-9]+)?)*(?![A-Za-z0-9_°Ω]))"
+    },
+    "reference" : {
+      "match" : "(?<![A-Za-z0-9_.-])[a-z0-9][a-z0-9]*(?:-[a-z0-9]*[a-z][a-z0-9]*)+(?:@[0-9]+)?(?![A-Za-z0-9_(-])",
+      "name" : "entity.name.type.reference.jm"
+    },
+    "scoped-call" : {
+      "comment" : "Existing jME: @bean.method(args) | @bean#CONST | @bean:$field. The one syntax in a script that reaches outside it, so it is coloured as a thing of its own.",
+      "patterns" : [
+        {
+          "captures" : {
+            "0" : {
+              "name" : "meta.scoped-call.jm"
+            },
+            "1" : {
+              "name" : "variable.other.bean.jm"
+            },
+            "2" : {
+              "name" : "entity.name.function.method.jm"
+            }
+          },
+          "match" : "@([A-Za-z_][A-Za-z0-9_]*)\\.([A-Za-z_][A-Za-z0-9_]*)"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "variable.other.bean.jm"
+            },
+            "2" : {
+              "name" : "constant.other.jm"
+            }
+          },
+          "match" : "@([A-Za-z_][A-Za-z0-9_]*)#([A-Za-z_][A-Za-z0-9_]*)"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "variable.other.bean.jm"
+            },
+            "2" : {
+              "name" : "variable.other.field.jm"
+            }
+          },
+          "match" : "@([A-Za-z_][A-Za-z0-9_]*):\\$([A-Za-z_][A-Za-z0-9_]*)"
+        }
+      ]
+    },
+    "script-block" : {
+      "begin" : "\\b(script)\\b\\s*((\"[^\"]*\"|'[^']*'))\\s*(\\{)",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.script.jm"
+        },
+        "2" : {
+          "name" : "entity.name.type.script.jm"
+        },
+        "4" : {
+          "name" : "punctuation.section.block.begin.jm"
+        }
+      },
+      "end" : "\\}",
+      "endCaptures" : {
+        "0" : {
+          "name" : "punctuation.section.block.end.jm"
+        }
+      },
+      "patterns" : [
+        {
+          "include" : "#statement"
+        }
+      ]
+    },
+    "script-body" : {
+      "begin" : "(?:^|(?<=[;{]))[ \\t]*\\b(behaviour|run)\\b[^{\\n]*(\\{)",
+      "beginCaptures" : {
+        "1" : {
+          "name" : "keyword.control.block.jm"
+        },
+        "2" : {
+          "name" : "punctuation.section.block.begin.jm"
+        }
+      },
+      "end" : "\\}",
+      "endCaptures" : {
+        "0" : {
+          "name" : "punctuation.section.block.end.jm"
+        }
+      },
+      "name" : "meta.embedded.block.jms",
+      "patterns" : [
+        {
+          "include" : "#statement"
+        }
+      ]
+    },
+    "statement" : {
+      "patterns" : [
+        {
+          "include" : "#comment"
+        },
+        {
+          "include" : "#on-handler"
+        },
+        {
+          "include" : "#function-block"
+        },
+        {
+          "include" : "#declaration"
+        },
+        {
+          "include" : "#keyword"
+        },
+        {
+          "include" : "#expression"
+        }
+      ]
+    },
+    "string" : {
+      "patterns" : [
+        {
+          "begin" : "\"",
+          "end" : "\"",
+          "name" : "string.quoted.double.jm"
+        },
+        {
+          "begin" : "'",
+          "end" : "'",
+          "name" : "string.quoted.single.jm"
+        }
+      ]
+    },
+    "term" : {
+      "patterns" : [
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.term.jm"
+            },
+            "2" : {
+              "name" : "punctuation.separator.term.jm"
+            },
+            "3" : {
+              "name" : "entity.name.tag.term.jm"
+            }
+          },
+          "match" : "\\b(parameters|component|dimension|equations|footprint|functions|indicator|parameter|teardrops|analysis|category|formulas|portrait|property|circuit|current|display|keepout|measure|outline|reading|voltage|analog|bitmap|bottom|circle|expect|family|figure|ground|layers|layout|output|probes|symbol|within|bench|class|field|frame|glyph|group|input|label|layer|leads|local|nodes|parts|place|ports|power|probe|right|rules|sizes|state|track|bind|edge|heat|hide|hole|lead|left|line|mark|near|nets|node|pair|part|path|pins|size|text|time|type|view|when|wire|zone|arc|box|let|net|pad|pcb|pin|top|via|is)(?:(:)([A-Za-z0-9][A-Za-z0-9_.-]*(?:@[0-9]+)?))?(?=[ \\t]*[({])"
+        },
+        {
+          "captures" : {
+            "1" : {
+              "name" : "keyword.other.term.jm"
+            },
+            "2" : {
+              "name" : "punctuation.separator.term.jm"
+            },
+            "3" : {
+              "name" : "entity.name.tag.term.jm"
+            }
+          },
+          "match" : "\\b(parameters|component|dimension|equations|footprint|functions|indicator|parameter|teardrops|analysis|category|formulas|portrait|property|circuit|current|display|keepout|measure|outline|reading|voltage|analog|bitmap|bottom|circle|expect|family|figure|ground|layers|layout|output|probes|symbol|within|bench|class|field|frame|glyph|group|input|label|layer|leads|local|nodes|parts|place|ports|power|probe|right|rules|sizes|state|track|bind|edge|heat|hide|hole|lead|left|line|mark|near|nets|node|pair|part|path|pins|size|text|time|type|view|when|wire|zone|arc|box|let|net|pad|pcb|pin|top|via|is)(:)([A-Za-z0-9][A-Za-z0-9_.-]*(?:@[0-9]+)?)"
+        },
+        {
+          "include" : "#argument-name"
+        }
+      ]
+    },
+    "type-annotation" : {
+      "captures" : {
+        "1" : {
+          "name" : "punctuation.separator.type.jm"
+        },
+        "2" : {
+          "name" : "entity.name.type.annotation.jm"
+        }
+      },
+      "match" : "(:)\\s*([A-Za-z_][A-Za-z0-9_]*)"
+    },
+    "value" : {
+      "patterns" : [
+        {
+          "include" : "#quantity"
+        },
+        {
+          "include" : "#string"
+        },
+        {
+          "include" : "#reference"
+        },
+        {
+          "match" : "\\.\\.",
+          "name" : "keyword.operator.range.jm"
+        },
+        {
+          "match" : "\\+-|±",
+          "name" : "keyword.operator.tolerance.jm"
+        },
+        {
+          "include" : "#expression"
+        }
+      ]
+    }
+  },
+  "scopeName" : "source.jm"
+}

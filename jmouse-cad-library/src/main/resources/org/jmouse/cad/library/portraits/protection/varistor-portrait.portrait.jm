@@ -1,0 +1,49 @@
+# A disc varistor as it is held: the blue disc printed with its voltage code — 471 for 470 V, two figures and the
+# number of noughts, read from the part's own varistor voltage. Scorched when it fails.
+portrait:varistor-portrait("Disc varistor") {
+    meta {
+        summary: "A disc varistor printed with its voltage code (471 for 470 V)"
+        code: "PT.VARISTOR:DISC"
+        category: circuits
+        tags: electronics, portrait, varistor, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 120)
+    input:V_reference(10 V .. 990 V, typical: 470 V)
+    input:failed
+
+    path:leads("M-6 16V34L-20 46V60M6 16V34L20 46V60") {
+        stroke = silver
+        thickness = 1.4
+    }
+    pin:terminal_one(at: -20 60)
+    pin:terminal_two(at: 20 60)
+    path:body("M-20 0A20 20 0 1 0 20 0A20 20 0 1 0-20 0Z") {
+        fill = blue
+    }
+    path:sheen("M-14-8C-10-15-4-17 0-18") {
+        stroke = white
+        thickness = 1
+        opacity = 0.4
+    }
+    glyph:code_1(live, at: -8 0, size: 8 x 12) {
+        fill = white
+        live character = 48 + floor(round((V_reference / 1 V) / 10 ^ (floor(ln((V_reference / 1 V)) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round((V_reference / 1 V) / 10 ^ (floor(ln((V_reference / 1 V)) / ln(10) + 0.000001) - 1)) / 100)
+    }
+    glyph:code_2(live, at: 0 0, size: 8 x 12) {
+        fill = white
+        live character = 48 + round((V_reference / 1 V) / 10 ^ (floor(ln((V_reference / 1 V)) / ln(10) + 0.000001) - 1)) - 10 * floor(round((V_reference / 1 V) / 10 ^ (floor(ln((V_reference / 1 V)) / ln(10) + 0.000001) - 1)) / 10)
+    }
+    glyph:code_3(live, at: 8 0, size: 8 x 12) {
+        fill = white
+        live character = 48 + floor(ln((V_reference / 1 V)) / ln(10) + 0.000001) - 1
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-20 0A20 20 0 1 0 20 0A20 20 0 1 0-20 0Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.6
+        }
+    }
+}

@@ -1,0 +1,131 @@
+# An eight-segment LED bar graph seen from the front: the grey body, the black face and its eight bars, dark until
+# their current lights them red — each by the part's own figure, light_0 … light_7, as its symbol is. The anodes leave
+# on the left, segment 0 at the top; the cathodes on the right, joined inside, the middle one the pin a sheet wires.
+portrait:led-bar-portrait("LED bar") {
+    meta {
+        summary: "An eight-segment LED bar graph whose bars light by their current"
+        code: "PT.DISPLAY:BAR-8"
+        category: circuits
+        tags: electronics, portrait, display, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 200)
+    input:light_0(0 .. 100)
+    input:light_1(0 .. 100)
+    input:light_2(0 .. 100)
+    input:light_3(0 .. 100)
+    input:light_4(0 .. 100)
+    input:light_5(0 .. 100)
+    input:light_6(0 .. 100)
+    input:light_7(0 .. 100)
+
+    path:legs("M-40 -71.5H-20V-68.5H-40ZM20 -71.5H40V-68.5H20ZM-40 -51.5H-20V-48.5H-40ZM20 -51.5H40V-48.5H20ZM-40 -31.5H-20V-28.5H-40ZM20 -31.5H40V-28.5H20ZM-40 -11.5H-20V-8.5H-40ZM20 -11.5H40V-8.5H20ZM-40 8.5H-20V11.5H-40ZM20 8.5H40V11.5H20ZM-40 28.5H-20V31.5H-40ZM20 28.5H40V31.5H20ZM-40 48.5H-20V51.5H-40ZM20 48.5H40V51.5H20ZM-40 68.5H-20V71.5H-40ZM20 68.5H40V71.5H20Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:anode_0(at: -40 -70)
+    pin:anode_1(at: -40 -50)
+    pin:anode_2(at: -40 -30)
+    pin:anode_3(at: -40 -10)
+    pin:anode_4(at: -40 10)
+    pin:anode_5(at: -40 30)
+    pin:anode_6(at: -40 50)
+    pin:anode_7(at: -40 70)
+    pin:cathode(at: 40 10)
+    path:body("M-20-90H20V90H-20Z") {
+        fill = grey
+    }
+    path:face("M-16-84H16V84H-16Z") {
+        stroke = clear
+        fill = black
+    }
+    path:dark_0("M-11 -76H11V-64H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_1("M-11 -56H11V-44H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_2("M-11 -36H11V-24H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_3("M-11 -16H11V-4H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_4("M-11 4H11V16H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_5("M-11 24H11V36H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_6("M-11 44H11V56H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:dark_7("M-11 64H11V76H-11Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.3
+    }
+    path:lit_0(live, "M-11 -76H11V-64H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_0, 0, 100))
+        live glow = 6 * share(light_0, 0, 100)
+    }
+    path:lit_1(live, "M-11 -56H11V-44H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_1, 0, 100))
+        live glow = 6 * share(light_1, 0, 100)
+    }
+    path:lit_2(live, "M-11 -36H11V-24H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_2, 0, 100))
+        live glow = 6 * share(light_2, 0, 100)
+    }
+    path:lit_3(live, "M-11 -16H11V-4H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_3, 0, 100))
+        live glow = 6 * share(light_3, 0, 100)
+    }
+    path:lit_4(live, "M-11 4H11V16H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_4, 0, 100))
+        live glow = 6 * share(light_4, 0, 100)
+    }
+    path:lit_5(live, "M-11 24H11V36H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_5, 0, 100))
+        live glow = 6 * share(light_5, 0, 100)
+    }
+    path:lit_6(live, "M-11 44H11V56H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_6, 0, 100))
+        live glow = 6 * share(light_6, 0, 100)
+    }
+    path:lit_7(live, "M-11 64H11V76H-11Z") {
+        stroke = clear
+        fill = red
+        live opacity = seen(share(light_7, 0, 100))
+        live glow = 6 * share(light_7, 0, 100)
+    }
+}

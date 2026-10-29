@@ -1,0 +1,100 @@
+# A push button as it really closes: its contact springs back and forth a few times before it rests, and does so again
+# when it is let go — the bounce a logic input sees as several presses. Pressed and released at set moments, so a scope
+# catches the same bounce on every run: what a debouncing lesson is built on. The contact is a resistance, closed or
+# open, so it may sit in an analog circuit or pull a logic input.
+
+component:bouncing-push-button("Bouncing push button", type: button) {
+    meta {
+        designator: SW
+        summary: "A momentary switch that bounces: pressed and released at set moments, its contact chattering each time"
+        source: "typical tactile switches: bounce of 1 to 5 ms, a few contacts before rest"
+        category: circuits
+    }
+
+    parameter:pressed_at(1 ms, "when it is pressed")
+    parameter:released_at(6 ms, "when it is let go")
+    parameter:bounces(4, in: 0 .. 20, step: 1, integer, "how many times the contact springs open before it rests")
+    parameter:bounce_time(1 ms, "how long the chatter lasts")
+    parameter:R_closed(10 mOhm, "contact resistance when made")
+    parameter:R_open(100 MOhm, "leakage resistance when open")
+
+    pin:a(analog, 1, "first contact")
+    pin:b(analog, 2, "second contact")
+
+    symbol(uses: switch-symbol) {
+        bind:closed(contact)
+    }
+
+    state:contact(0, discrete, "whether the contact is made now: 1 made, 0 open")
+    state:target(0, discrete, "where it comes to rest: 1 pressed, 0 released")
+    state:remaining(0, discrete, "how many more times it changes before it rests")
+
+    equations {
+        current a -> b = (a - b) / (contact * R_closed + (1 - contact) * R_open)
+    }
+
+    behaviour {
+        # Each bounce opens and closes once: twice as many changes as bounces, then the rest, spread over the chatter.
+        function chatter(rest)
+            target = rest
+            remaining = 2 * bounces
+            contact = rest
+            if remaining > 0 then
+                schedule('bounce', bounce_time / (2 * bounces + 1))
+            end
+        end
+
+        on start do
+            schedule('press', pressed_at)
+            schedule('release', released_at)
+        end
+
+        on timer 'press' do
+            chatter(1)
+        end
+
+        on timer 'release' do
+            chatter(0)
+        end
+
+        on timer 'bounce' do
+            remaining = remaining - 1
+            if remaining == 0 then
+                contact = target
+            else
+                contact = 1 - contact
+                schedule('bounce', bounce_time / (2 * bounces + 1))
+            end
+        end
+    }
+
+    expect("it rests closed while held", from: "the contact made after the bounce") {
+        bench(for: 4 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [supply, node], resistance: 10 kOhm)
+            part:U1(self, [a: node, b: 0])
+        }
+        measure(final, node)
+        within(0 V .. 0.01 V)
+    }
+
+    expect("it chatters while it is pressed", from: "a bounce of several contacts within bounce_time") {
+        bench(for: 1.8 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [supply, node], resistance: 10 kOhm)
+            part:U1(self, [a: node, b: 0])
+        }
+        measure(frequency, node, above: 2.5 V, after: 1 ms)
+        within(1 kHz .. 20 kHz)
+    }
+
+    expect("it rests open once let go", from: "the contact open after the release bounce") {
+        bench(for: 9 ms) {
+            part:V1(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [supply, node], resistance: 10 kOhm)
+            part:U1(self, [a: node, b: 0])
+        }
+        measure(final, node)
+        within(4.99 V .. 5 V)
+    }
+}

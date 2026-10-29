@@ -1,120 +1,0 @@
-ExperienceDocument
-  kind: Kind.COMPONENT
-  title: "AND gate"
-  slug: "and-gate"
-  type: Optional "gate"
-  meta: Meta
-      summary: "A two-input AND gate: high only while both inputs are high"
-      description: null
-      category: "circuits"
-      tags: List(0)
-      source: "the gate's function table: Y = A · B"
-      authors: List(0)
-      license: null
-      links: List(0)
-      fields: Map(2)
-          designator = Text
-              text: "U"
-          failure = Text
-              text: "short Vcc GND"
-      labels: Map(0)
-  base: Optional.empty
-  units: List(0)
-  uses: List(1)
-      - "cmos-hc"
-  blocks: List(4)
-      - Parameters
-          parameters: List(1)
-              - Parameter
-                  name: "propagation_delay"
-                  value: SourceText[16:29@653] "10"
-                  quantity: Optional Quantity
-                      value: Double 1.0E-8
-                      unit: "s"
-                      written: "10 ns"
-                  range: Optional.empty
-                  step: Optional.empty
-                  flags: List(0)
-                  description: "input to output at the family's nominal supply"
-                  values: List(0)
-      - Pins
-          pins: List(5)
-              - Pin
-                  name: "a"
-                  numbers: List(1)
-                      - Integer 1
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: "input A"
-              - Pin
-                  name: "b"
-                  numbers: List(1)
-                      - Integer 2
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: "input B"
-              - Pin
-                  name: "GND"
-                  numbers: List(1)
-                      - Integer 3
-                  nature: PinNature.GROUND
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: ""
-              - Pin
-                  name: "output"
-                  numbers: List(1)
-                      - Integer 4
-                  nature: PinNature.DIGITAL
-                  direction: PinDirection.OUTPUT
-                  attributes: List(0)
-                  description: "output Y"
-              - Pin
-                  name: "Vcc"
-                  numbers: List(1)
-                      - Integer 5
-                  nature: PinNature.POWER
-                  direction: PinDirection.INPUT
-                  attributes: List(0)
-                  description: ""
-          buses: List(0)
-      - Symbol
-          uses: List(1)
-              - "and-gate-symbol"
-          ports: Map(0)
-          shape: Optional.empty
-          sides: Map(0)
-          width: Double 0.0
-          height: Double 0.0
-          paths: List(0)
-          pins: List(0)
-          labels: List(0)
-          indicators: List(0)
-          upright: List(0)
-          inputs: List(0)
-          elements: List(0)
-          bindings: Map(0)
-      - Behaviour
-          script: ScriptNode "SCRIPT['behaviour']"
-          source: SourceText[30:9@992] "function level()\n            if a == 0 or b == 0 then\n                return 0\n            elseif a == 1 and b == 1 then\n                return 1\n            end\n            return X\n        end\n\n        function show()\n            drive('output', level(), propagation_delay * delay_scale(Vcc - GND))\n        end\n\n        on start do\n            show()\n        end\n\n        on change 'a, b' do\n            show()\n        end"
-  line: Integer 5
-== the last brace removed
-REFUSED src/main/resources/catalogue/electronics/components/base/and-gate.jmx 5:1 component "…" is opened with '{' and never closed
-== line 11 deleted
-READS a468e84ace20fd6d08dc1521fc27d55c
-== line 11 begun with a stray word
-READS 0da5a45f4f5512efc69b874c6e2147b8
-== line 25 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/and-gate.jmx 28:15 'pins' holds lines, not a nested '{ … }'
-== line 25 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/and-gate.jmx 29:15 'pins' holds lines, not a nested '{ … }'
-== line 32 deleted
-READS 9845b3e8f8c6b5c49efaa77df3ab72f2
-== line 32 begun with a stray word
-READS 5ec88a91d286fb7c57e19033afe2061f
-== line 39 deleted
-REFUSED src/main/resources/catalogue/electronics/components/base/and-gate.jmx 40:9 in 'behaviour': Unexpected token 0223:1287:0040 [T_END] at 224
-== line 39 begun with a stray word
-REFUSED src/main/resources/catalogue/electronics/components/base/and-gate.jmx 41:9 in 'behaviour': Unexpected token 0228:1307:0041 [T_END] at 229

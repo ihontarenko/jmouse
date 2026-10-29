@@ -1,0 +1,14 @@
+symbol:antenna-symbol("Antenna") {
+    meta {
+        summary: "Antenna, as drawn on a schematic"
+        code: "SY.ANTENNA:GENERIC"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    path("M0 40V-30M-30-30L0 8 30-30M-30-30H30")
+    pin:signal(at: 0 40)
+    label(name, at: 0 -52)
+}

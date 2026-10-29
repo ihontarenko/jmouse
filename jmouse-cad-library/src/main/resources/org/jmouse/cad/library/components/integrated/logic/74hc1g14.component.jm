@@ -1,0 +1,53 @@
+# One Schmitt-trigger inverter in a five-pin package, the 74HC family's: thresholds about a volt apart at 4.5 V.
+
+component:74hc1g14("74HC1G14", type: gate) {
+    meta {
+        designator: U
+        summary: "Single Schmitt-trigger inverter: two thresholds about a volt apart, so a slow or noisy edge switches it once"
+        source: "Nexperia 74HC1G14 datasheet: VT+ 2.38 V, VT− 1.40 V typical at VCC 4.5 V; propagation delay 11 ns"
+        package: "SOT353, 5 pins"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:schmitt-inverter
+
+    parameter:upper_share(0.53, "VT+ as a share of the supply: 2.38 V at 4.5 V")
+    parameter:lower_share(0.31, "VT− as a share of the supply: 1.40 V at 4.5 V")
+    parameter:edge(7 ns, "output transition time, 4.5 V, 50 pF")
+    parameter:R_output(45 Ohm, "output resistance at 4.5 V")
+    parameter:R_input(1 GOhm, "input leakage: 1 µA at most at 6 V")
+    parameter:thermal_resistance(400 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+
+    # The SOT353 package's pins.
+    pin:a(analog, input, 2, "input A")
+    pin:GND(ground, 3)
+    pin:output(analog, output, 4, "output Y")
+    pin:Vcc(power, 5)
+
+    symbol(uses: schmitt-not-gate-symbol)
+
+    # A 0 … 4.5 V triangle crosses VT+ on the way up at 2.65 ms and VT− on the way down at 8.45 ms: low for 58 % of
+    # every period, high for 42 %. One threshold at the middle would give half and half.
+    expect("the thresholds part: high 42 % of a triangle's period, not half", from: "VT+ 2.38 V, VT− 1.40 V typical at VCC 4.5 V") {
+        bench(for: 30 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 4.5 V)
+            part:G1(triangle-generator, [positive: a, negative: 0], high: 4.5 V, low: 0 V, frequency: 100 Hz)
+            part:U1(self, [a: a, output: output, Vcc: Vcc, GND: 0])
+        }
+        measure(duty, output, above: 2.25 V, after: 5 ms)
+        near(0.42, +- 5%)
+    }
+
+    expect("low output while the input is high", from: "function table: Y = ¬A") {
+        bench(for: 10 us) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [a, 0], U_output: 5 V)
+            part:U1(self, [a: a, output: output, Vcc: Vcc, GND: 0])
+            part:R1(resistor, [output, 0], resistance: 100 kOhm)
+        }
+        measure(final, output)
+        within(0 V .. 0.1 V)
+    }
+}

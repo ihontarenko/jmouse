@@ -1,0 +1,41 @@
+symbol:potentiometer-symbol("Potentiometer") {
+    meta {
+        summary: "Potentiometer, as drawn on a schematic: its wiper stands where it is turned to"
+        code: "SY.RESISTOR:POTENTIOMETER"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:position
+    input:failed
+
+    group:body(live) {
+        path("M-80 0H-32V-14H32V14H-32V0M32 0H80")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    path("M0-80V-48")
+
+    line:bridge(live, from: 0 -48, to: 2 -48, pivot: 0 -48) {
+        live scale = between(-12, 12, smooth(position, 80 ms)), 1
+    }
+
+    group:wiper(live) {
+        path("M0-48V-20M-8-28L0-20L8-28")
+        live move = between(-24, 24, smooth(position, 80 ms)), 0
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -80 0)
+    pin:w(at: 0 -80)
+    pin:b(at: 80 0)
+    label(name, at: 0 44)
+    label(value, at: 48 -52)
+}

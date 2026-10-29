@@ -26,22 +26,41 @@ public final class KiCadFootprintLibraries {
     /** Libraries that hold nothing. */
     public static final KiCadFootprintLibraries NONE = new KiCadFootprintLibraries(List.of());
 
+    /**
+     * Where a footprint was found, which says whose it is: KiCad's installed libraries — the KiCad Libraries Team's,
+     * under their licence — or a project's own, whose holder and terms are the project's.
+     */
+    public enum Origin {
+        INSTALLED, PROJECT
+    }
+
+    /** A place searched, and whose footprints it holds. */
+    private record Place(Origin origin, Function<String, Optional<String>> files) {
+    }
+
+    /** A footprint as found, and where. */
+    private record Found(KiCadFootprint footprint, Origin origin) {
+    }
+
     private static final String LIBRARY_SUFFIX = ".pretty";
     private static final String FOOTPRINT_SUFFIX = ".kicad_mod";
 
-    private final List<Function<String, Optional<String>>> places;
-    private final Map<String, Optional<KiCadFootprint>> read = new ConcurrentHashMap<>();
+    private final List<Place> places;
+    private final Map<String, Optional<Found>> read = new ConcurrentHashMap<>();
     private final KiCadParser parser = new KiCadParser();
 
-    private KiCadFootprintLibraries(List<Function<String, Optional<String>>> places) {
+    private KiCadFootprintLibraries(List<Place> places) {
         this.places = List.copyOf(places);
     }
 
-    /** The libraries in these folders: each holds {@code LIBRARY.pretty} folders. A folder that does not exist holds none. */
+    /**
+     * KiCad's installed libraries in these folders: each holds {@code LIBRARY.pretty} folders. A folder that does not
+     * exist holds none.
+     */
     public static KiCadFootprintLibraries in(List<Path> folders) {
-        List<Function<String, Optional<String>>> places = new ArrayList<>();
+        List<Place> places = new ArrayList<>();
         for (Path folder : folders) {
-            places.add(relative -> {
+            places.add(new Place(Origin.INSTALLED, relative -> {
                 Path file = folder.resolve(relative);
                 if (!Files.isRegularFile(file)) {
                     return Optional.empty();
@@ -51,7 +70,7 @@ public final class KiCadFootprintLibraries {
                 } catch (IOException unreadable) {
                     throw new UncheckedIOException("The footprint " + file + " cannot be read", unreadable);
                 }
-            });
+            }));
         }
         return new KiCadFootprintLibraries(places);
     }
@@ -70,12 +89,12 @@ public final class KiCadFootprintLibraries {
                 byRelative.put(normalized.substring(start), text);
             }
         });
-        return new KiCadFootprintLibraries(List.of(relative -> Optional.ofNullable(byRelative.get(relative))));
+        return new KiCadFootprintLibraries(List.of(new Place(Origin.PROJECT, relative -> Optional.ofNullable(byRelative.get(relative)))));
     }
 
     /** These libraries searched first, then those. */
     public KiCadFootprintLibraries then(KiCadFootprintLibraries more) {
-        List<Function<String, Optional<String>>> joined = new ArrayList<>(places);
+        List<Place> joined = new ArrayList<>(places);
         joined.addAll(more.places);
         return new KiCadFootprintLibraries(joined);
     }
@@ -86,6 +105,15 @@ public final class KiCadFootprintLibraries {
      * @throws IllegalArgumentException when the file found is not a footprint KiCad wrote
      */
     public Optional<KiCadFootprint> find(String libraryIdentifier) {
+        return located(libraryIdentifier).map(Found::footprint);
+    }
+
+    /** Where the footprint a schematic names was found — whose it is —; empty when no place holds it. */
+    public Optional<Origin> originOf(String libraryIdentifier) {
+        return located(libraryIdentifier).map(Found::origin);
+    }
+
+    private Optional<Found> located(String libraryIdentifier) {
         int separator = libraryIdentifier == null ? -1 : libraryIdentifier.indexOf(':');
         if (separator <= 0 || separator == libraryIdentifier.length() - 1) {
             return Optional.empty();
@@ -93,11 +121,11 @@ public final class KiCadFootprintLibraries {
         return read.computeIfAbsent(libraryIdentifier, identifier -> {
             String relative = identifier.substring(0, separator) + LIBRARY_SUFFIX + "/" + identifier.substring(separator + 1)
                     + FOOTPRINT_SUFFIX;
-            for (Function<String, Optional<String>> place : places) {
-                Optional<String> text = place.apply(relative);
+            for (Place place : places) {
+                Optional<String> text = place.files().apply(relative);
                 if (text.isPresent()) {
                     try {
-                        return Optional.of(KiCadFootprint.of(parser.parse(relative, text.get())));
+                        return Optional.of(new Found(KiCadFootprint.of(parser.parse(relative, text.get())), place.origin()));
                     } catch (KiCadParseException unreadable) {
                         throw new IllegalArgumentException("The footprint " + identifier + " does not read: "
                                 + unreadable.getMessage(), unreadable);

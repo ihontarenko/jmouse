@@ -1,0 +1,43 @@
+# A square single-turn trimmer seen from above, as the 3362 is: the blue body, the white rotor with its screwdriver slot
+# turned by the wiper's position over its 270°; the ends and the wiper on three legs.
+portrait:trimmer-portrait("Trimmer") {
+    meta {
+        summary: "A square single-turn trimmer: the rotor's slot turns with the wiper's position"
+        code: "PT.POTENTIOMETER:TRIMMER-SQUARE"
+        category: circuits
+        tags: electronics, portrait, potentiometer, through-hole
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 80)
+    input:position(0 .. 1, typical: 0.5)
+    input:failed
+
+    path:legs("M-22 24H-18V40H-22ZM-2 24H2V40H-2ZM18 24H22V40H18Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:a(at: -20 40)
+    pin:w(at: 0 40)
+    pin:b(at: 20 40)
+    path:body("M-24-28H24V26H-24Z") {
+        fill = blue
+    }
+    path:rotor("M-15 0A15 15 0 1 0 15 0A15 15 0 1 0-15 0Z") {
+        fill = white
+    }
+    group:slot(live, pivot: 0 0) {
+        path:slot_cut("M-12-1.5H12V1.5H-12ZM-1.5-12H1.5V-8H-1.5Z") {
+            stroke = clear
+            fill = black
+        }
+        live rotate = -135 deg + 270 deg * smooth(position, 80 ms)
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-24-28H24V26H-24Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.45
+        }
+    }
+}

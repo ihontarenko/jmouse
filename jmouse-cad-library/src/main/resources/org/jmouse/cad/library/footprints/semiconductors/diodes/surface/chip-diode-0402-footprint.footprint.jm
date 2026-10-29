@@ -1,0 +1,19 @@
+footprint:chip-diode-0402-footprint("Chip diode 0402 (1005 metric)") {
+    meta {
+        summary: "Chip diode, 0402 (1005 metric) body, reflow pads; pad 1 is the cathode"
+        code: "FP.CHIP:D0402"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "IEC 60115-8 dimensions, 0402 (1005 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#resistor-0402 and the land pattern rules; regenerate, never edit.
+    # Body 0.95…1.05 × 0.45…0.55, terminal 0.1…0.3; fillets toe 0.2, heel -0.05, side 0.
+    # Z = 1.5, G = 0.53, X = 0.6; pad 0.5 × 0.6 centred at ±0.5.
+    pad:1(surface, rounded-rectangle, at: -0.5 0, size: 0.5 x 0.6, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 0.5 0, size: 0.5 x 0.6, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-0.5 -0.25H0.5V0.25H-0.5Z")
+    outline(silkscreen, width: 0.12, "M-1.01 -0.41V0.41")
+    outline(courtyard, width: 0.05, "M-0.9 -0.45H0.9V0.45H-0.9Z")
+}

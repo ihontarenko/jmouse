@@ -32,6 +32,15 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         return JwtTokenConfigurer.this;
     }
 
+    public JwtTokenConfigurer() {
+        continueChainBeforeSuccess = true;
+    }
+
+    @Override
+    protected org.jmouse.security.web.AuthenticationEntryPoint defaultEntryPoint() {
+        return entryPoint;
+    }
+
     public JwtTokenConfigurer<B> codec(Customizer<CodecConfigurer> customizer) {
         customizer.customize(jwtCodecConfigurer);
         return JwtTokenConfigurer.this;

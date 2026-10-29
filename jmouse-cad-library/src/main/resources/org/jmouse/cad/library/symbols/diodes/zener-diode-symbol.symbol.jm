@@ -1,0 +1,47 @@
+symbol:zener-diode-symbol("Zener diode") {
+    meta {
+        summary: "Zener diode, as drawn on a schematic: lit inside while it conducts forward, its bar glowing while it regulates in breakdown"
+        code: "SY.DIODE:ZENER"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:forward(0 .. 1)
+    input:reverse(0 .. 1)
+    input:breakdown(0 .. 1)
+    input:failed
+
+    # Forward, it conducts as any diode: the triangle fills with the current against its rating.
+    path:die(live, "M-24-24L24 0-24 24Z") {
+        stroke = clear
+        fill = positive
+        live opacity = seen(forward)
+        live glow = 9 * seen(forward)
+    }
+
+    group:body(live) {
+        path("M-60 0H-24V-24L24 0-24 24V0M24 0H60")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # Reversed, its bar is where it works: below its voltage it blocks, thickening in the colour of −; in breakdown it
+    # regulates, and the bar glows in the colour of + with the current it carries against its test current.
+    path:bar(live, "M14-24H24V24H34") {
+        live stroke = if(failed > 0.5, burned, if(breakdown > 0.05, positive, if(reverse > 0.005, negative, signal)))
+        live thickness = curve(reverse, 0 -> 1, 0.05 -> 1.6, 1 -> 2.2)
+        live glow = curve(breakdown, 0 -> 0, 0.2 -> 3, 1 -> 7)
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

@@ -1,0 +1,15 @@
+footprint:test-point-pad-diameter-100-footprint("Test point, 1 mm pad") {
+    meta {
+        summary: "A bare round pad 1 mm across, for a probe"
+        code: "FP.TP:D1"
+        category: circuits
+        tags: electronics, footprint, surface
+        source: "Probe pad sizes, IPC-9252"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/hole-packages.sht#test-points; regenerate, never edit.
+    pad:1(surface, circle, at: 0 0, size: 1 x 1)
+    outline(silkscreen, width: 0.12, "M-0.76 0A0.76 0.76 0 1 0 0.76 0A0.76 0.76 0 1 0 -0.76 0Z")
+    outline(courtyard, width: 0.05, "M-1 0A1 1 0 1 0 1 0A1 1 0 1 0 -1 0Z")
+}

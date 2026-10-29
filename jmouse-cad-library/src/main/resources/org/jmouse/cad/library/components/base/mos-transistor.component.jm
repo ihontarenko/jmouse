@@ -1,0 +1,128 @@
+# The MOSFET every MOS part is a member of: SPICE's level 1 (Shichman–Hodges) as ngspice 47 writes it, with the bulk
+# junction as the body diode. A datasheet part writes `family n-mosfet` (or p-mosfet) and its numbers; the physics is here.
+#
+# What the effects are for:
+#   VTO, KP          where the channel opens, and how hard it conducts once it has — RDS(on), the transfer curve
+#   LAMBDA           channel-length modulation — the drain current still rises with VDS in saturation
+#   RD, RS           the series resistances — the part of RDS(on) the gate cannot reduce
+#   IS, N            the body diode (drain–bulk junction, the bulk being the source): freewheeling in a half-bridge
+#   CBD, PB, MJ, FC  that junction's depletion capacitance — Coss, falling as VDS rises
+#   CGSO, CGDO       the gate overlap capacitances — Ciss, and Crss: the Miller plateau of a switching gate
+#   C_gate_drain_zero_bias, V_gate_drain_potential, gate_drain_grading
+#                    not SPICE level 1: a power MOSFET's gate–drain capacitance is a depletion layer while the drain
+#                    sits above the gate — small at high VDS — and the full oxide once it falls below it. That climb is
+#                    most of the datasheet's Qgd, and with CGDO alone the Miller plateau came out a fraction as long.
+#   V_breakdown      drain–source avalanche: not part of level 1, but where an inductive kick stops
+#
+# The channel is the whole device: W = L = 1, so KP is the part's β and CGSO, CGDO are farads — an exported deck writes
+# `W=1 L=1` on the M line for that reason. The bulk is tied to the source, so the body effect (GAMMA, PHI) never acts.
+# Polarity is a parameter: 1 for n-channel, -1 for p-channel; VTO keeps SPICE's sign (negative for a p-channel
+# enhancement part). Not represented: Meyer's intrinsic gate charge (TOX), the source–bulk junction, CJ/CJSW per area,
+# KF/AF noise. Not SPICE, and left at "none" by default: the threshold's drift and the series resistances' rise with
+# temperature — what a datasheet's "RDS(on) normalised to temperature" curve needs.
+
+component:mos-transistor("MOS transistor", type: mosfet) {
+    meta {
+        designator: Q
+        summary: "Level-1 MOSFET: square-law channel, channel-length modulation, series resistances, body diode, gate and junction capacitances"
+        source: "MOS level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
+        category: circuits
+        failure: short drain source
+    }
+    use:[smooth-transitions, junctions]
+
+    parameter:polarity(1, "1 for n-channel, -1 for p-channel")
+    parameter:V_threshold(0 V, "VTO: zero-bias threshold voltage, SPICE's sign")
+    parameter:V_threshold_spread(0 V, "how far the threshold's magnitude spreads from part to part: a bench's tolerance corners use it")
+    parameter:transconductance_spread(0, "how far KP spreads from part to part, as a share")
+    parameter:transconductance(20 uA/V^2, "KP: the channel's transconductance parameter, the whole device (W/L = 1)")
+    parameter:channel_length_modulation(0, "LAMBDA: per volt")
+    parameter:R_drain(1 mOhm, "RD: drain series resistance")
+    parameter:R_source(1 mOhm, "RS: source series resistance")
+    parameter:I_saturation(10 fA, "IS: bulk junction saturation current — the body diode")
+    parameter:emission_coefficient(1, "N: its emission coefficient")
+    parameter:C_bulk_drain(0 F, "CBD: drain–bulk zero-bias capacitance")
+    parameter:V_junction(0.8 V, "PB: its built-in potential")
+    parameter:grading_coefficient(0.5, "MJ: its grading coefficient")
+    parameter:forward_bias_coefficient(0.5, "FC: past FC·PB the depletion capacitance goes on as a straight line")
+    parameter:C_gate_source(0 F, "CGSO: gate–source overlap capacitance (W = 1)")
+    parameter:C_gate_drain(0 F, "CGDO: gate–drain overlap capacitance (W = 1)")
+    parameter:C_gate_drain_zero_bias(0 F, "not SPICE: the gate–drain depletion capacitance at zero bias, and its value with the drain below the gate")
+    parameter:V_gate_drain_potential(1 V, "not SPICE: that depletion's potential")
+    parameter:gate_drain_grading(0.5, "not SPICE: that depletion's grading: how fast it falls as the drain rises above the gate")
+    parameter:R_gate(1 mOhm, "RG: the gate's internal resistance, which with Ciss sets how fast it switches")
+    parameter:body_transit_time(0 s, "the body diode's transit time: its stored charge, the reverse recovery of a freewheeling diode")
+    parameter:T_nominal(300.15 K, "TNOM: the temperature the figures above are measured at")
+    parameter:V_threshold_coefficient(0, "not SPICE: how the threshold's magnitude drifts, V/K (negative: it opens earlier when hot)")
+    parameter:resistance_temperature_exponent(0, "not SPICE: RD and RS grow as (temperature / T_nominal)^this")
+    parameter:E_gap(1.11 V, "the band gap the body diode's saturation current follows")
+    parameter:V_breakdown(1 kV, "drain–source avalanche voltage")
+    parameter:I_breakdown(1 mA, "avalanche current at V_breakdown")
+    parameter:power_rating(0.4 W, "what it is rated for")
+    parameter:thermal_resistance(312 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(2 s, "how fast it warms to that")
+    parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
+    parameter:V_drain_source_maximum(1e6 V, "VDS: the drain-source voltage it is rated for; none is a megavolt")
+    parameter:V_gate_source_maximum(1e6 V, "VGS: what the gate oxide is rated for, either way; none is a megavolt")
+    parameter:I_drain_maximum(1e6 A, "ID: the drain current it is rated for; none is a megaampere")
+
+    pin:source(analog, 1, "source, and the bulk")
+    pin:gate(analog, input, 2, "gate")
+    pin:drain(analog, output, 3, "drain")
+
+    node:di("the intrinsic drain, behind the drain resistance")
+    node:gi("the intrinsic gate, behind the gate resistance")
+    node:si("the intrinsic source, behind the source resistance")
+
+    symbol(uses: n-channel-mosfet-symbol) {
+        bind:failed(failed)
+    }
+
+    # how far the gate has opened the channel: its overdrive past the threshold, full at 2 V
+    figure:conduction(min(1, max(0, (polarity * (gate - source) - abs(V_threshold)) / 2)))
+    figure:overvoltage(100 * max(abs(drain - source) / V_drain_source_maximum, abs(gate - source) / V_gate_source_maximum), unit: %, "of VDS or VGS")
+    figure:overcurrent(100 * abs(drain.current) / I_drain_maximum, unit: %, "of its rated ID")
+
+    # SPICE's KP, the square law's beta: amperes per volt squared, a quantity jMX has no name for.
+    type(transconductance_coefficient, current / voltage ^ 2)
+
+    equations {
+        # temperature is the part's own: the bench's, and on a realistic bench raised by its own heat, which the engine keeps
+        let T_junction : temperature = temperature
+        let warmth : ratio = T_junction / T_nominal
+        let V_gs : voltage = polarity * (gi - si)
+        let V_gd : voltage = polarity * (gi - di)
+        let V_ds : voltage = polarity * (di - si)
+        let V_bd : voltage = polarity * (source - di)
+
+        # The device is symmetric: with VDS reversed the drain acts as the source.
+        let V_control : voltage = if(V_ds >= 0, V_gs, V_gd)
+        let V_across : voltage = abs(V_ds)
+        let V_threshold_now : voltage = polarity * V_threshold + tolerance_corner * V_threshold_spread + V_threshold_coefficient * (T_junction - T_nominal)
+        let beta : transconductance_coefficient = transconductance * (1 + tolerance_corner * transconductance_spread) / warmth ^ 1.5
+        let overdrive : voltage = V_control - V_threshold_now
+        let square_law : current = if(V_across < overdrive, beta * (overdrive - V_across / 2) * V_across, beta / 2 * overdrive ^ 2)
+        let channel : current = if(overdrive > 0, square_law * (1 + channel_length_modulation * V_across), 0)
+
+        let I_saturation_now : current = junction_saturation(I_saturation, T_junction, T_nominal, 0, emission_coefficient, E_gap)
+        let body : current = junction_current(V_bd, I_saturation_now, emission_coefficient, T_junction)
+        # Above the drain the gate faces the oxide alone: a constant capacitance; below it, a depletion layer that thins
+        # as the drain rises. Zero by default: level 1's overlap capacitance is all there is.
+        # On a draft bench (detail 0) the junctions store no charge: no capacitance, no transit time — the
+        # switching is instant and the run cheap. From standard on, all of it.
+        let stored : ratio = min(detail, 1)
+        let Q_gate_drain : charge = stored * (C_gate_drain * V_gd + depletion_charge(min(V_gd, 0), C_gate_drain_zero_bias, V_gate_drain_potential, gate_drain_grading, forward_bias_coefficient) + C_gate_drain_zero_bias * max(V_gd, 0))
+        let Q_bulk_drain : charge = stored * (depletion_charge(V_bd, C_bulk_drain, V_junction, grading_coefficient, forward_bias_coefficient) + body_transit_time * body)
+        let avalanche : current = I_breakdown * limit_exponential((V_ds - V_breakdown) / thermal_voltage(T_junction))
+        let resistance_drift : ratio = warmth ^ resistance_temperature_exponent
+
+        current drain -> di = (drain - di) / (R_drain * resistance_drift)
+        current si -> source = (si - source) / (R_source * resistance_drift)
+        # The channel's thermal noise, 8/3 · kT · gm, with gm = √(2 · KP · ID) in saturation: nothing to the solution.
+        current di -> si = polarity * (if(V_ds >= 0, channel, 0 - channel) + avalanche) + noise(8 / 3 * boltzmann * T_junction * sqrt(2 * beta * soft_positive_part(channel, 1e-15)))
+        current source -> di = polarity * (body + d(Q_bulk_drain)/dt)
+        current gate -> gi = (gate - gi) / R_gate
+        current gi -> si = polarity * d(stored * C_gate_source * V_gs)/dt
+        current gi -> di = polarity * d(Q_gate_drain)/dt
+    }
+}

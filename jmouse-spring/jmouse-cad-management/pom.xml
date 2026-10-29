@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-spring</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-management</artifactId>
+    <packaging>jar</packaging>
+    <name>jMouse - CAD Management</name>
+    <description>The jmCAD REST routes at /jmouse/cad/api — the catalogue of documents, an owner's documents and sheets — with the access rules a product gates them by and the problem documents they answer with</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-management</url>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- Compiled against Boot 4, which is what the products adopting this run. Every Spring type used
+             here — @RestController, the mapping annotations, @RestControllerAdvice, ProblemDetail,
+             WebMvcConfigurer — is unchanged between 3.3 and 4.x. -->
+        <spring-boot.version>4.0.7</spring-boot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- The services these routes call, with their transactions; it brings the engine, the stores and the
+             seams (CadProblem, DocumentOwner, CadCapability) with it. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-spring-boot</artifactId>
+        </dependency>
+
+        <!-- The authorization vocabulary these controllers are gated in: ExternalAccessRules and
+             @PublicEndpoint. Not optional, as in storage-management: a route this module serves is either
+             declared or refused at boot, and both need the vocabulary. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-access-enforcement</artifactId>
+        </dependency>
+
+        <!-- @RestController, the mapping annotations, ProblemDetail and the advice. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <!-- WebMvcConfigurer and HandlerMethodArgumentResolver: an owner addressed as two path segments
+             reaches the guard as one argument. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+
+        <!-- @Configuration and @Bean for the imported configuration, and the boot-time check's
+             SmartInitializingSingleton. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!-- How a drawing an editor sends is read: the trees of its values are the server's to read, never the
+             editor's to send (CadJson). -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Servlet API, which Spring MVC's argument resolution is written against. Provided by the container. -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

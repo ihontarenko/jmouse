@@ -1,5 +1,6 @@
 package org.jmouse.spice.node;
 
+import org.jmouse.el.writer.SourceWriter;
 import org.jmouse.spice.SpicePosition;
 
 import java.util.List;
@@ -78,6 +79,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(positive).word(negative).write(value).each(rest);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitPassive(this);
         }
@@ -142,6 +148,21 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(positive).word(negative);
+            if (direct != null) {
+                if (directWord) {
+                    writer.word("DC");
+                }
+                writer.write(direct);
+            }
+            if (waveform != null) {
+                writer.write(waveform);
+            }
+            writer.each(rest);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitSource(this);
         }
@@ -180,6 +201,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
 
         public List<SpiceArgument> rest() {
             return rest;
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(anode).word(cathode).word(model).each(rest);
         }
 
         @Override
@@ -235,6 +261,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(collector).word(base).word(emitter).word(substrate).word(model).each(rest);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitBipolar(this);
         }
@@ -287,6 +318,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(drain).word(gate).word(source).word(bulk).word(model).each(rest);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitMosfet(this);
         }
@@ -322,6 +358,13 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name());
+            nodes.forEach(writer::word);
+            writer.word(subcircuit).each(parameters);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitInstance(this);
         }
@@ -337,7 +380,10 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         private final boolean voltage;
         private final String  expression;
 
-        /** @param expression the expression after {@code V=} or {@code I=}, as written */
+        /**
+         * @param expression the expression after {@code V=} or {@code I=}, without the braces it is written between: braced,
+         *                   it reads alike in every SPICE — ngspice takes it either way, Xyce only braced
+         */
         public Behavioural(String name, String positive, String negative, boolean voltage, String expression,
                            SpicePosition position) {
             super(name, position);
@@ -362,6 +408,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
 
         public String expression() {
             return expression;
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(positive).word(negative).word(voltage ? "V" : "I").opening("=").word("{" + expression + "}");
         }
 
         @Override
@@ -411,6 +462,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).word(positive).word(negative).each(control);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitControlled(this);
         }
@@ -437,6 +493,13 @@ public abstract sealed class SpiceElement extends SpiceStatement {
         }
 
         @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name());
+            inductors.forEach(writer::word);
+            writer.write(coefficient);
+        }
+
+        @Override
         public <R> R accept(SpiceVisitor<R> visitor) {
             return visitor.visitCoupling(this);
         }
@@ -454,6 +517,11 @@ public abstract sealed class SpiceElement extends SpiceStatement {
 
         public List<SpiceArgument> arguments() {
             return arguments;
+        }
+
+        @Override
+        protected void writeLine(SourceWriter writer) {
+            writer.word(name()).each(arguments);
         }
 
         @Override

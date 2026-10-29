@@ -1,0 +1,16 @@
+symbol:global-label-symbol("Global net label") {
+    meta {
+        summary: "A net that is one name across every sheet of a project, as KiCad's global label: the rails a power symbol draws. Every global label of one name, on any sheet, is that net."
+        code: "SY.MARK:GLOBAL-LABEL"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 88)
+    path("M0 44V20")
+    path("M0 20L-18 8V-24H18V8Z")
+    path("M-18-14H18")
+    pin:label(at: 0 44)
+    label(name, at: 0 -40)
+}

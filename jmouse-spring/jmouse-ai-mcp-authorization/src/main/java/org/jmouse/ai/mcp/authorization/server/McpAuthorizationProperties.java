@@ -166,6 +166,15 @@ public class McpAuthorizationProperties {
         /** Where to send somebody who turns out not to be signed in at all. */
         private String signInRoute = "/";
 
+        /** Optional double-submit CSRF cookie/header used by a product's native browser sessions. */
+        private String csrfCookieName = "";
+        private String csrfHeaderName = "";
+
+        public String getCsrfCookieName() { return csrfCookieName; }
+        public void setCsrfCookieName(String name) { csrfCookieName = name; }
+        public String getCsrfHeaderName() { return csrfHeaderName; }
+        public void setCsrfHeaderName(String name) { csrfHeaderName = name; }
+
         /**
          * Which consent design this installation serves.
          *

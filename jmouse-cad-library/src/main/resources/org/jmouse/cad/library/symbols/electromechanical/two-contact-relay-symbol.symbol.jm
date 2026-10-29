@@ -1,0 +1,53 @@
+symbol:two-contact-relay-symbol("Relay with two normally-open contacts") {
+    meta {
+        summary: "A relay with two make contacts, as drawn on a schematic: its coil, and two contacts on one armature that close together while the coil holds them"
+        code: "SY.RELAY:DPST"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Pins where KiCad's RTE4 relay has them (2.54 mm = 40): the coil on the left, each contact's common below and its
+    # make side above — so a KiCad design's wires land. The drawing is ours.
+    size(800 x 480)
+    input:energized
+    input:failed
+
+    group:body(live) {
+        path("M-360-240V-80M-360 80V240M-400-80H-320V80H-400ZM-400 80L-320-80")
+        path("M-40 240V40M40-240V-40M28-40H52")
+        path("M280 240V40M360-240V-40M348-40H372")
+        path("M-46 40A6 6 0 1 0-34 40A6 6 0 1 0-46 40M274 40A6 6 0 1 0 286 40A6 6 0 1 0 274 40")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The armature's link: dashes from the coil to both contacts — they move as one.
+    path("M-312 0H-280M-260 0H-228M-208 0H-176M-156 0H-124M-104 0H-72M-52 0H-20M4 0H36M56 0H88M108 0H140M160 0H192M212 0H244M264 0H296")
+
+    group:first_blade(live, pivot: -40 40) {
+        path("M-40 40L-2-66")
+        live rotate = between(0 deg, 25 deg, smooth(energized, 40 ms))
+        live stroke = if(failed > 0.5, burned, if(energized > 0.5, positive, signal))
+    }
+
+    group:second_blade(live, pivot: 280 40) {
+        path("M280 40L318-66")
+        live rotate = between(0 deg, 25 deg, smooth(energized, 40 ms))
+        live stroke = if(failed > 0.5, burned, if(energized > 0.5, positive, signal))
+    }
+
+    layer(live, failed > 0.5) {
+        path:scorch("M-374-18L-366-6M-348-16L-356-4M-372 16L-364 6M-346 18L-354 6")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+
+    pin:coil_one(at: -360 -240)
+    pin:coil_two(at: -360 240)
+    pin:first_common(at: -40 240)
+    pin:first_normally_open(at: 40 -240)
+    pin:second_common(at: 280 240)
+    pin:second_normally_open(at: 360 -240)
+    label(name, at: -240 -120)
+    label(value, at: -240 128)
+}

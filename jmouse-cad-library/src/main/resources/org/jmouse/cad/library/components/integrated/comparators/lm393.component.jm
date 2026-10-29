@@ -1,0 +1,73 @@
+# The LM393 is the operational amplifier as a comparator: no feedback, a large gain, and an open-collector output — the
+# output stage only sinks, and a pull-up resistor makes the high level, on any rail. Its "gain bandwidth" is no
+# bandwidth: it is the rate its gain stage moves at per volt of overdrive, fitted to the datasheet's response time.
+
+component:lm393("LM393", type: opamp) {
+    meta {
+        designator: U
+        summary: "Dual comparator, open-collector outputs, single supply 2 V to 36 V, inputs to ground"
+        source: "TI LM393 datasheet (SLCS005), electrical characteristics at 5 V"
+        package: "SOIC-8"
+        category: circuits
+        failure: short Vcc GND
+    }
+    extends:operational-amplifier
+    units:[A, B]
+
+    parameter:open_loop_gain(200000, "AVD 200 V/mV")
+    parameter:gain_bandwidth(60 MHz, "not a bandwidth: fitted so 5 mV of overdrive switches it in about 1.3 µs, the datasheet's response time")
+    parameter:slew_rate(10 V/us, "the gain stage's swing rate once it moves")
+    parameter:recovery(1e8 1/s, "a comparator comes out of saturation at once")
+    parameter:open_collector(1, "open collector: it only sinks")
+    parameter:V_input_offset(0 V, per: unit, "input offset; typically 1 mV either way")
+    parameter:I_input_bias(25 nA, "input bias current, out of the input pins (PNP inputs)")
+    parameter:V_common_mode_high(1.5 V, "the inputs work up to V+ - 1.5 V")
+    parameter:I_quiescent(0.2 mA, "supply current per unit")
+    parameter:R_output(37 Ohm, "the output transistor on: VOL 150 mV at 4 mA")
+    parameter:I_output_source(0.1 nA, "open collector: only its leakage flows out")
+    parameter:I_output_sink(16 mA, "output sink current")
+    parameter:V_output_headroom(0 V, "the gain stage swings to V+")
+    parameter:V_output_low(0 V, "on, the output is pulled to ground through R_output")
+    parameter:V_supply_nominal(5 V, "the supply the figures are given at")
+    parameter:V_supply_maximum(36 V, "the supply span it is rated for")
+    parameter:V_offset_spread(5 mV, "VIO at most 5 mV")
+
+    pin:output(analog, output, 1 7)
+    pin:inverting_input(analog, input, 2 6, "inverting")
+    pin:non_inverting_input(analog, input, 3 5, "non-inverting")
+    pin:Vcc(power, 8)
+    pin:GND(ground, 4)
+
+    footprint(soic-8-footprint)
+
+    symbol(uses: [operational-amplifier-symbol, operational-amplifier-wide-symbol]) {
+        bind:failed(failed)
+        bind:positive_supply(pin: Vcc)
+        bind:negative_supply(pin: GND)
+    }
+
+    expect("output low sinking 4 mA", from: "VOL 150 mV typical, 400 mV at most at 4 mA") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [low, 0], U_output: 1 V)
+            part:V3(voltage-source, [high, 0], U_output: 2 V)
+            part:R1(resistor, [Vcc, output], resistance: 1.2 kOhm)
+            part:U1(self, [A.non_inverting_input: low, A.inverting_input: high, A.output: output, Vcc: Vcc, GND: 0])
+        }
+        measure(operating, output)
+        within(0 V .. 0.4 V)
+    }
+
+    expect("output high is the pull-up", from: "open collector: the pull-up sets the high level, here 12 V on a 5 V supply") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:V2(voltage-source, [pull, 0], U_output: 12 V)
+            part:V3(voltage-source, [low, 0], U_output: 1 V)
+            part:V4(voltage-source, [high, 0], U_output: 2 V)
+            part:R1(resistor, [pull, output], resistance: 10 kOhm)
+            part:U1(self, [A.non_inverting_input: high, A.inverting_input: low, A.output: output, Vcc: Vcc, GND: 0])
+        }
+        measure(operating, output)
+        within(11.9 V .. 12.01 V)
+    }
+}

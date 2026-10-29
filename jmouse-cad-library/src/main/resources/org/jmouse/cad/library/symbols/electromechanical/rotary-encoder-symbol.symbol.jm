@@ -1,0 +1,19 @@
+symbol:rotary-encoder-symbol("Rotary encoder with switch") {
+    meta {
+        summary: "An incremental rotary encoder with a push switch, as drawn on a schematic: its two phases and common on the left, the switch on the right"
+        code: "SY.SWITCH:ROTARY-ENCODER"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    path("M-40-60H40V60H-40ZM-80-40H-40M-80 0H-40M-80 40H-40M40-40H80M40 40H80M-20 0A20 20 0 1 0 20 0A20 20 0 1 0-20 0ZM0-20V-8")
+    pin:phase_a(at: -80 -40, "A")
+    pin:common(at: -80 0, "C")
+    pin:phase_b(at: -80 40, "B")
+    pin:switch_one(at: 80 -40, "S1")
+    pin:switch_two(at: 80 40, "S2")
+    label(name, at: 0 -88)
+    label(value, at: 0 96)
+}

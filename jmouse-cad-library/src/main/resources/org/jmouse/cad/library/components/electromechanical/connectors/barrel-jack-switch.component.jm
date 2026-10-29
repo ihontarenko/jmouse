@@ -1,0 +1,17 @@
+# A DC barrel jack with the switch a plug opens: the switch contact rests on the sleeve until a plug pushes it away, so
+# a battery can be cut off when an adapter is plugged in. Only the contacts: the switch is not modelled.
+component:barrel-jack-switch("DC barrel jack with switch", type: connector) {
+    meta {
+        designator: J
+        summary: "DC power barrel jack with a plug-operated switch contact"
+        source: "generic 5.5 × 2.1 mm DC jack with switch; the switch is not modelled"
+        package: "BarrelJack_Switch"
+        category: circuits
+    }
+
+    pin:tip(analog, 1, "centre pin, usually +")
+    pin:sleeve(analog, 2, "sleeve, usually −")
+    pin:switch(analog, 3, "switch contact, on the sleeve while no plug is in")
+
+    symbol(uses: barrel-jack-switch-symbol)
+}

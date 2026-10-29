@@ -1,0 +1,45 @@
+# A ceramic disc capacitor as it is held: an orange drop on two leads, printed with its picofarad code (104 = 100 nF).
+portrait:ceramic-disc-capacitor-portrait("Ceramic disc capacitor") {
+    meta {
+        summary: "A ceramic disc capacitor with its printed picofarad code (104 = 100 nF), read from its capacitance"
+        code: "PT.CAPACITOR:CERAMIC-DISC"
+        category: circuits
+        tags: electronics, portrait, capacitor
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(60 x 120)
+    input:capacitance(10 pF .. 1 µF, typical: 100 nF)
+
+    path:lead_one("M-8 10V34L-20 46V60") {
+        stroke = silver
+        thickness = 1.6
+    }
+    path:lead_two("M8 10V34L20 46V60") {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:terminal_one(at: -20 60)
+    pin:terminal_two(at: 20 60)
+    path:drop("M0-40C17-40 26-28 26-14C26 0 16 12 0 12C-16 12-26 0-26-14C-26-28-17-40 0-40Z") {
+        fill = orange
+    }
+    # The glaze catching the light high on the left.
+    path:sheen("M-18-26C-14-33-8-36-2-37") {
+        stroke = white
+        thickness = 1.6
+        opacity = 0.45
+    }
+    glyph:code_1(live, at: -9.799999999999999 -16, size: 9.799999999999999 x 14) {
+        fill = black
+        live character = 48 + floor(round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) / 100)
+    }
+    glyph:code_2(live, at: 0 -16, size: 9.799999999999999 x 14) {
+        fill = black
+        live character = 48 + round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) - 10 * floor(round((capacitance / 1 pF) / 10 ^ (floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1)) / 10)
+    }
+    glyph:code_3(live, at: 9.799999999999999 -16, size: 9.799999999999999 x 14) {
+        fill = black
+        live character = 48 + floor(ln((capacitance / 1 pF)) / ln(10) + 0.000001) - 1
+    }
+}

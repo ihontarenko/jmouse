@@ -1,0 +1,71 @@
+# The Songle SRD-05VDC-SL-C: the blue sugar-cube relay of every hobby board, a relay with a 5 V coil and one changeover
+# contact for 10 A. Pull-in and drop-out are the datasheet's limits: it pulls in by 3.75 V at the latest and lets go by
+# 0.5 V at the earliest.
+
+component:srd-05vdc("SRD-05VDC-SL-C", type: relay) {
+    meta {
+        designator: K
+        summary: "5 V relay: a 70 Ω coil, one changeover contact for 10 A; pulls in above 3.75 V, lets go below 0.5 V"
+        source: "Songle SRD-05VDC-SL-C datasheet: coil 70 Ω, 71.4 mA, 0.36 W; pull-in 75 %, drop-out 10 % of 5 V"
+        package: "SRD, 5 pins"
+        category: circuits
+        failure: open
+    }
+    extends:relay
+
+    parameter:R_coil(70 Ohm, "coil resistance")
+    parameter:L_coil(0.2 H, "coil inductance: the datasheet gives none; about this on a 5 V sugar-cube coil")
+    parameter:C_winding(150 pF, "winding self-capacitance: the datasheet gives none; typical of a bobbin this size — with L_coil it rings near 29 kHz")
+    parameter:R_core(100 kOhm, "core loss of the unlaminated iron at that frequency: about three times √(L/C), so a cut-off coil is quiet in two or three periods")
+    parameter:V_pull_in(3.75 V, "the coil voltage it pulls in at, at most: 75 % of 5 V")
+    parameter:V_drop_out(0.5 V, "the coil voltage it lets go below, at least: 10 % of 5 V")
+    parameter:R_contact(100 mOhm, "contact resistance, at most")
+    parameter:R_open(100 MOhm, "insulation resistance across an open contact, at least")
+
+    # The SRD package's pins: the coil, then the changeover contact.
+    pin:coil_one(analog, 1, "coil")
+    pin:coil_two(analog, 2, "coil")
+    pin:common(analog, 3, "the changeover contact's arm")
+    pin:normally_open(analog, 4, "made while the coil holds the armature")
+    pin:normally_closed(analog, 5, "made while the armature rests")
+
+    symbol(uses: relay-symbol) {
+        bind:energized(energized)
+    }
+
+    expect("pulls in at its rated 5 V", from: "the coil's rated voltage closes normally-open") {
+        bench(for: 50 ms) {
+            part:V1(voltage-source, [coil, 0], U_output: 5 V)
+            part:V2(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [made, 0], resistance: 1 kOhm)
+            part:R2(resistor, [rest, 0], resistance: 1 kOhm)
+            part:U1(self, [coil_one: coil, coil_two: 0, common: supply, normally_open: made, normally_closed: rest])
+        }
+        measure(final, made)
+        near(5 V, +- 1%)
+    }
+
+    expect("stays out at 3 V", from: "below the 3.75 V pull-in the armature rests") {
+        bench(for: 50 ms) {
+            part:V1(voltage-source, [coil, 0], U_output: 3 V)
+            part:V2(voltage-source, [supply, 0], U_output: 5 V)
+            part:R1(resistor, [made, 0], resistance: 1 kOhm)
+            part:R2(resistor, [rest, 0], resistance: 1 kOhm)
+            part:U1(self, [coil_one: coil, coil_two: 0, common: supply, normally_open: made, normally_closed: rest])
+        }
+        measure(final, rest)
+        near(5 V, +- 1%)
+    }
+
+    expect("the coil takes 71 mA at 5 V", from: "coil current 71.4 mA at the rated voltage") {
+        bench(for: 50 ms) {
+            part:V1(voltage-source, [coil, 0], U_output: 5 V)
+            part:U1(self, [coil_one: coil, coil_two: 0, common: 0, normally_open: 0, normally_closed: 0])
+        }
+        measure(final, current: V1)
+        near(-71.4 mA, +- 2%)
+    }
+
+    # How it looks in the hand: an open-frame relay whose armature pulls in while the coil is energized.
+    portrait(uses: relay-portrait)
+}

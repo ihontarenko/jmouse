@@ -53,6 +53,7 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
      * SQL string used for exception messages.
      */
     private final String sqlForMessage;
+    private final boolean required;
 
     /**
      * Creates a new {@code StrictSingleResultSetExtractor}.
@@ -61,8 +62,14 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
      * @param sqlForMessage  SQL string included in exception messages
      */
     public StrictSingleResultSetExtractor(RowMapper<T> mapper, String sqlForMessage) {
+        this(mapper, sqlForMessage, true);
+    }
+
+    /** @param required whether an empty result is an error rather than an empty Optional */
+    public StrictSingleResultSetExtractor(RowMapper<T> mapper, String sqlForMessage, boolean required) {
         this.mapper = mapper;
         this.sqlForMessage = sqlForMessage;
+        this.required = required;
     }
 
     /**
@@ -77,6 +84,9 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
     @Override
     public Optional<T> extract(ResultSet resultSet) throws SQLException {
         if (!resultSet.next()) {
+            if (!required) {
+                return Optional.empty();
+            }
             throw new EmptyResultException("Expected 1 row but got 0 for SQL: " + sqlForMessage);
         }
 

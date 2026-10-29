@@ -1,0 +1,21 @@
+footprint:terminal-block-1x4-pitch-350-horizontal-footprint("Screw terminal block, 3.50 mm pitch, 1 × 4, horizontal") {
+    meta {
+        summary: "Screw terminal block, 3.50 mm pitch, 1 row of 4, upright, through-hole"
+        code: "FP.TB:4-P3.5"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/header-packages.sht#terminal-block-3-50 and the land pattern rules; regenerate, never edit.
+    # Square lead 0.9: drill 1.1, pad 2.1, pin 1 square.
+    pad:1(through-hole, rectangle, at: 0 -5.25, size: 2.1 x 2.1, drill: 1.1)
+    pad:2(through-hole, circle, at: 0 -1.75, size: 2.1 x 2.1, drill: 1.1)
+    pad:3(through-hole, circle, at: 0 1.75, size: 2.1 x 2.1, drill: 1.1)
+    pad:4(through-hole, circle, at: 0 5.25, size: 2.1 x 2.1, drill: 1.1)
+    outline(fabrication, width: 0.1, "M-2.5 -7H3.5V7H-3.5V-6Z")
+    outline(silkscreen, width: 0.12, "M-3.61 -7.11H3.61V7.11H-3.61Z")
+    outline(silkscreen, filled, "M-4.41 -5.25A0.3 0.3 0 1 0 -3.81 -5.25A0.3 0.3 0 1 0 -4.41 -5.25Z")
+    outline(courtyard, width: 0.05, "M-4 -7.5H4V7.5H-4Z")
+}

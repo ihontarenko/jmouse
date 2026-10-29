@@ -25,6 +25,13 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
         return this;
     }
 
+    public ExceptionHandlingConfigurer<B> defaultAuthenticationEntryPoint(AuthenticationEntryPoint entryPoint) {
+        if (this.entryPoint == null) {
+            this.entryPoint = entryPoint;
+        }
+        return this;
+    }
+
     public ExceptionHandlingConfigurer<B> accessDeniedHandler(AuthorizationFailureHandler deniedHandler) {
         this.deniedHandler = deniedHandler;
         return this;
@@ -38,7 +45,11 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
     @Override
     public void configure(B http) throws Exception {
         if (requestCache == null) {
-            requestCache = new HttpSessionRequestCache();
+            org.jmouse.security.web.session.SessionSettings settings =
+                    http.getSharedObject(org.jmouse.security.web.session.SessionSettings.class);
+            requestCache = settings != null && settings.policy().isStateless()
+                    ? new org.jmouse.web.http.cache.NullRequestCache()
+                    : new HttpSessionRequestCache();
             getBuilder().setSharedObject(SharedAttributes.REQUEST_CACHE, requestCache);
         }
 

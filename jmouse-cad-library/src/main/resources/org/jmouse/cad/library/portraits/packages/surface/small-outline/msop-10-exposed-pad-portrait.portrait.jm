@@ -1,0 +1,41 @@
+# Generated from footprint-standards/small-outline-packages.sht#msop-10-exposed; regenerate, never edit.
+portrait:msop-10-exposed-pad-portrait("MSOP-10, exposed-pad") {
+    meta {
+        summary: "10-lead MSOP, 3 mm body, 0.5 mm pitch, exposed pad from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.MSOP:10-P0.5-EP"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MO-187 BA-T"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 200)
+    input:marking(text)
+
+    path:leads("M-44.4 60H-35.6V100H-44.4ZM-44.4 -60H-35.6V-100H-44.4ZM-24.4 60H-15.6V100H-24.4ZM-24.4 -60H-15.6V-100H-24.4ZM-4.4 60H4.4V100H-4.4ZM-4.4 -60H4.4V-100H-4.4ZM15.6 60H24.4V100H15.6ZM15.6 -60H24.4V-100H15.6ZM35.6 60H44.4V100H35.6ZM35.6 -60H44.4V-100H35.6Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -40 100)
+    pin:2(at: -20 100)
+    pin:3(at: 0 100)
+    pin:4(at: 20 100)
+    pin:5(at: 40 100)
+    pin:6(at: 40 -100)
+    pin:7(at: 20 -100)
+    pin:8(at: 0 -100)
+    pin:9(at: -20 -100)
+    pin:10(at: -40 -100)
+    path:body("M-55.2 -60H55.2A4.8 4.8 0 0 1 60 -55.2V55.2A4.8 4.8 0 0 1 55.2 60H-55.2A4.8 4.8 0 0 1 -60 55.2V-55.2A4.8 4.8 0 0 1 -55.2 -60Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-47.52 39.72A7.8 7.8 0 1 0 -31.92 39.72A7.8 7.8 0 1 0 -47.52 39.72Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: 0 0, size: 84 x 27) {
+        fill = silver
+        text = marking
+    }
+}

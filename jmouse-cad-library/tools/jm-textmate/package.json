@@ -1,0 +1,37 @@
+{
+  "categories" : [
+    "Programming Languages"
+  ],
+  "contributes" : {
+    "grammars" : [
+      {
+        "language" : "jm",
+        "path" : "./syntaxes/jm.tmLanguage.json",
+        "scopeName" : "source.jm"
+      }
+    ],
+    "languages" : [
+      {
+        "aliases" : [
+          "jM",
+          "jMouse CAD documents",
+          "jm"
+        ],
+        "configuration" : "./language-configuration.json",
+        "extensions" : [
+          ".jm"
+        ],
+        "id" : "jm"
+      }
+    ]
+  },
+  "description" : "Syntax highlighting for the jmCAD document language — components, circuits, symbols, portraits, frames, footprints and boards —, described from the language's own grammar.",
+  "displayName" : "jMouse CAD documents (.jm)",
+  "engines" : {
+    "vscode" : "^1.60.0"
+  },
+  "license" : "MIT",
+  "name" : "jm-textmate",
+  "publisher" : "jmouse",
+  "version" : "1.0.0"
+}

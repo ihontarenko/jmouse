@@ -1,0 +1,25 @@
+symbol:core-inductor-symbol("Inductor with a core") {
+    meta {
+        summary: "Inductor wound on a ferromagnetic core, as drawn on a schematic: a coil and the core's lines along it"
+        code: "SY.INDUCTOR:MAGNETIC-CORE"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:failed
+    group:body(live) {
+        path("M-60 0H-36C-36-32-12-32-12 0C-12-32 12-32 12 0C12-32 36-32 36 0H60M-36-32H36M-36-40H36")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

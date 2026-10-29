@@ -1,0 +1,22 @@
+symbol:ferrite-bead-symbol("Ferrite bead") {
+    meta {
+        summary: "A ferrite bead, as drawn on a schematic: a slanted block threaded on the wire"
+        code: "SY.INDUCTOR:FERRITE-BEAD"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    input:failed
+
+    group:body(live) {
+        path("M-60 0H-16M16 0H60M-32 8L4-28L32-8L-4 28Z")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    pin:a(at: -60 0)
+    pin:b(at: 60 0)
+    label(name, at: 0 -52)
+    label(value, at: 0 64)
+}

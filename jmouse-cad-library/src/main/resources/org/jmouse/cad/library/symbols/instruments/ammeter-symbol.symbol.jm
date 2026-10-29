@@ -1,0 +1,17 @@
+symbol:ammeter-symbol("Ammeter") {
+    meta {
+        summary: "Ammeter, as drawn on a schematic: a dial marked A"
+        code: "SY.METER:AMMETER"
+        category: circuits
+        tags: electronics, schematic, instrument
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    path("M-80 0H-36M36 0H80M-36 0A36 36 0 1 0 36 0A36 36 0 1 0-36 0")
+    path("M-14 16L0-16L14 16M-8 4H8", upright)
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -56)
+    label(value, at: 0 64)
+}

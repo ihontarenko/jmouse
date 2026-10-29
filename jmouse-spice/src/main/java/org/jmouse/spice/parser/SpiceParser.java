@@ -22,7 +22,7 @@ import java.util.Set;
  * <p>Reading is structural: a resistor without a value, a parenthesis that never closes, a {@code .subckt} without
  * {@code .ends} are refused with their line and column ({@link org.jmouse.spice.SpiceParseException}). A card the
  * reader has no dedicated node for — a switch, an {@code .options} line — is kept as a generic one, so nothing that was
- * written is lost on its way back through {@link org.jmouse.spice.printer.SpicePrinter}.</p>
+ * written is lost on its way back through the nodes' own {@code toSource()}.</p>
  */
 public final class SpiceParser {
 

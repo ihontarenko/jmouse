@@ -1,0 +1,64 @@
+# A multilayer ceramic capacitor (X7R) as it really is: its capacitance falls with the DC voltage across it — a
+# 10 µF 25 V part may keep a third of it at its rating —, falls a little either side of room temperature, and sits
+# behind a small ESR and a few nanohenries of ESL, which set where it stops being a capacitor. The charge is
+# C · V_half · atan(V / V_half), so the capacitance at a voltage is C / (1 + (V / V_half)²).
+# Not represented: ageing (X7R loses a few percent per decade of hours), the piezoelectric "singing", losses beyond ESR.
+
+component:ceramic-capacitor("Ceramic capacitor", type: capacitor) {
+    meta {
+        designator: C
+        summary: "MLCC, X7R: capacitance falling with DC bias and temperature, ESR, ESL"
+        source: "the DC-bias and temperature curves an X7R MLCC's datasheet gives"
+        category: circuits
+        failure: short
+        value: capacitance
+    }
+
+    parameter:capacitance(10 uF, "nominal capacitance, at 0 V and 25 C")
+    parameter:V_half(8 V, "the DC bias at which half the capacitance is left")
+    parameter:R_equivalent_series(5 mOhm, "ESR")
+    parameter:L_equivalent_series(1 nH, "ESL: package and mounting")
+    parameter:temperature_curvature(1.5e-5, "X7R: about -15 % at 100 K either side of 25 C, as a share per kelvin squared")
+    parameter:T_nominal(298.15 K, "the temperature the capacitance is given at")
+    parameter:voltage_rating(25 V, "the rated voltage")
+    parameter:power_rating(0.1 W, "what it is rated for")
+    parameter:thermal_resistance(200 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(10 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:terminal_one(analog, 1, "first terminal")
+    pin:terminal_two(analog, 2, "second terminal")
+
+    node:plate("the capacitance, behind ESR and ESL")
+    node:series_current("a node whose voltage above terminal_two is the series current, one volt per ampere")
+
+    symbol(uses: capacitor-symbol) {
+        bind:failed(failed)
+        bind:charge((terminal_one - terminal_two) / voltage_rating)
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    figure:overvoltage(100 * abs(terminal_one - terminal_two) / voltage_rating, unit: %, "of its rated voltage")
+
+    equations {
+        # The current through ESL is carried as a voltage: a charge reads voltages, not currents.
+        # One volt on that node per ampere through ESL: the scale written as what it is, a resistance.
+        let R_carrier : resistance = 1
+        let I_series : current = (series_current - terminal_two) / R_carrier
+        let C_now : capacitance = capacitance * (1 - temperature_curvature * (temperature - T_nominal) ^ 2)
+        voltage series_current -> terminal_two = R_carrier * terminal_one.current
+        voltage terminal_one -> plate = R_equivalent_series * terminal_one.current + d(L_equivalent_series * I_series)/dt
+        current plate -> terminal_two = d(C_now * V_half * atan((plate - terminal_two) / V_half))/dt
+    }
+
+    expect("charged faster than its nominal value would", from: "DC bias: 20 V through 100 Ω — a nominal 10 µF reaches 7.9 V in 0.5 ms") {
+        bench(for: 0.5 ms) {
+            part:V1(voltage-source, [input, 0], U_output: 20 V)
+            part:R1(resistor, [input, terminal_one], resistance: 100 Ohm)
+            part:U1(self, [terminal_one: terminal_one, terminal_two: 0])
+        }
+        measure(final, terminal_one)
+        within(8.5 V .. 18 V)
+    }
+}

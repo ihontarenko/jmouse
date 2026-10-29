@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <packaging>jar</packaging>
+    <artifactId>jmouse-cad-library</artifactId>
+    <name>jMouse - CAD Library</name>
+    <description>jMouse Framework - jmCAD library: the electronic parts a design is made of, as documents of the jM language written as terms — components, their families and functions, symbols, portraits, frames and footprints — with the tables they are generated from, and the catalogue that finds them by slug.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-library</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>ihontarenko</id>
+            <name>Ivan Hontarenko</name>
+            <email>ihontarenko@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-library</url>
+    </scm>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- the documents are read by the jM language with every module of jmCAD -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-schematic</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-board</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-simulation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the standard footprints and portraits it regenerates from its tables -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-packages</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the TextMate grammar the language is described as: read and written as JSON trees, never by hand -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

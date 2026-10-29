@@ -1,0 +1,60 @@
+# A surface-mount chip resistor from above: a black top between tinned ends, its value printed as the EIA code —
+# two figures and a multiplier (472 = 4.7 kΩ) down to 2 %, three and a multiplier (4701) at 1 % and tighter; below
+# 10 Ω the R stands where the decimal point is (4R7).
+portrait:chip-resistor-portrait("Chip resistor") {
+    meta {
+        summary: "A chip resistor from above with its printed EIA code, read from its resistance and tolerance"
+        code: "PT.RESISTOR:CHIP"
+        category: circuits
+        tags: electronics, portrait, resistor, surface-mount
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 44)
+    input:resistance(1 Ω .. 1 GΩ, typical: 4.7 kΩ)
+    input:tolerance(0.05 % .. 20 %, typical: 5 %)
+
+    pin:terminal_one(at: -40 0)
+    pin:terminal_two(at: 40 0)
+    box:end_one(at: -34 0, size: 12 x 36) {
+        fill = silver
+    }
+    box:end_two(at: 34 0, size: 12 x 36) {
+        fill = silver
+    }
+    box:top(at: 0 0, size: 56 x 36) {
+        fill = black
+    }
+    layer(live, tolerance > 1 %) {
+        glyph:first_character(live, at: -12 0, size: 10 x 16) {
+            fill = white
+            live character = 48 + floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 10) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 100)
+        }
+        glyph:second_character(live, at: 0 0, size: 10 x 16) {
+            fill = white
+            live character = if(floor(ln(resistance) / ln(10) + 0.000001) < 1, 82, 48 + round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 10))
+        }
+        glyph:third_character(live, at: 12 0, size: 10 x 16) {
+            fill = white
+            live character = if(floor(ln(resistance) / ln(10) + 0.000001) < 1, 48 + round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 1)) / 10), 48 + floor(ln(resistance) / ln(10) + 0.000001) - 1)
+        }
+    }
+    layer(live, tolerance <= 1 %) {
+        glyph:first_character_of_four(live, at: -18 0, size: 10 x 16) {
+            fill = white
+            live character = 48 + floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 100) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 1000)
+        }
+        glyph:second_character_of_four(live, at: -6 0, size: 10 x 16) {
+            fill = white
+            live character = if(floor(ln(resistance) / ln(10) + 0.000001) < 1, 82, 48 + floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 10) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 100))
+        }
+        glyph:third_character_of_four(live, at: 6 0, size: 10 x 16) {
+            fill = white
+            live character = if(floor(ln(resistance) / ln(10) + 0.000001) < 1, 48 + floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 10) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 100), if(floor(ln(resistance) / ln(10) + 0.000001) < 2, 82, 48 + round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 10)))
+        }
+        glyph:fourth_character(live, at: 18 0, size: 10 x 16) {
+            fill = white
+            live character = if(floor(ln(resistance) / ln(10) + 0.000001) < 2, 48 + round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) - 10 * floor(round(resistance / 10 ^ (floor(ln(resistance) / ln(10) + 0.000001) - 2)) / 10), 48 + floor(ln(resistance) / ln(10) + 0.000001) - 2)
+        }
+    }
+}

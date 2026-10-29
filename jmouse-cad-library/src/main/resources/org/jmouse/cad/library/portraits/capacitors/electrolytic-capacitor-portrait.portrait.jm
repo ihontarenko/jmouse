@@ -1,0 +1,97 @@
+# A radial aluminium electrolytic as it is held: a can in its sleeve, the grey stripe of minus signs down its negative side,
+# its leads to the sheet's grid; its capacitance in µF and its rating in V printed on the sleeve, the vent cross on top.
+# When it fails the vent opens and the top bulges, as a burst capacitor does.
+portrait:electrolytic-capacitor-portrait("Electrolytic capacitor") {
+    meta {
+        summary: "A radial electrolytic capacitor with its minus stripe, µF and voltage; burst when it fails"
+        code: "PT.CAPACITOR:ELECTROLYTIC-RADIAL"
+        category: circuits
+        tags: electronics, portrait, capacitor
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(70 x 130)
+    input:capacitance(1 µF .. 9999 µF, typical: 470 µF)
+    input:voltage_rating(1 V .. 450 V, typical: 25 V)
+    input:failed
+
+    path:lead_plus("M-9 40V46L-20 54V60") {
+        stroke = silver
+        thickness = 1.6
+    }
+    path:lead_minus("M9 40V46L20 54V60") {
+        stroke = silver
+        thickness = 1.6
+    }
+    pin:positive(at: -20 60)
+    pin:negative(at: 20 60)
+    path:sleeve("M-28-48C-28-52-26-54-22-54H22C26-54 28-52 28-48V36C28 40 26 42 22 42H-22C-26 42-28 40-28 36Z") {
+        fill = black
+    }
+    path:minus_stripe("M14-54H22C26-54 28-52 28-48V36C28 40 26 42 22 42H14Z") {
+        stroke = clear
+        fill = grey
+    }
+    # The sleeve's shine down the side nearest the light.
+    path:sheen("M-23-46V34") {
+        stroke = white
+        thickness = 1.4
+        opacity = 0.22
+    }
+    path:minus_signs("M18-40H24M18-20H24M18 0H24M18 20H24") {
+        stroke = black
+    }
+    path:top("M-22-54H22") {
+        stroke = silver
+        thickness = 2
+    }
+    glyph:capacitance_1(live, at: -22 -20, size: 6 x 10) {
+        fill = white
+        live character = if(capacitance < 9.95 µF, 32, if(round(capacitance / 1 µF) >= 1000, 48 + floor(round(capacitance / 1 µF) / 1000) - 10 * floor(round(capacitance / 1 µF) / 10000), 32))
+    }
+    glyph:capacitance_2(live, at: -16 -20, size: 6 x 10) {
+        fill = white
+        live character = if(capacitance < 9.95 µF, 48 + floor(round(capacitance / 0.1 µF) / 10) - 10 * floor(round(capacitance / 0.1 µF) / 100), if(round(capacitance / 1 µF) >= 100, 48 + floor(round(capacitance / 1 µF) / 100) - 10 * floor(round(capacitance / 1 µF) / 1000), 32))
+    }
+    glyph:capacitance_3(live, at: -10 -20, size: 6 x 10) {
+        fill = white
+        live character = if(capacitance < 9.95 µF, 46, if(round(capacitance / 1 µF) >= 10, 48 + floor(round(capacitance / 1 µF) / 10) - 10 * floor(round(capacitance / 1 µF) / 100), 32))
+    }
+    glyph:capacitance_4(live, at: -4 -20, size: 6 x 10) {
+        fill = white
+        live character = if(capacitance < 9.95 µF, 48 + round(capacitance / 0.1 µF) - 10 * floor(round(capacitance / 0.1 µF) / 10), if(round(capacitance / 1 µF) >= 1, 48 + round(capacitance / 1 µF) - 10 * floor(round(capacitance / 1 µF) / 10), 32))
+    }
+    path:capacitance_unit_micro("M1 -22.5V-15M1 -19.5C1 -17.2 3.8 -17.2 3.8 -19.5V-22.5M3.8 -19.5V-17") {
+        stroke = white
+        thickness = 0.6
+    }
+    glyph:capacitance_unit_2(at: 8 -20, size: 6 x 10) {
+        fill = white
+        character = 70
+    }
+    glyph:voltage_1(live, at: -22 4, size: 6 x 10) {
+        fill = white
+        live character = if(round(voltage_rating / 1 V) >= 100, 48 + floor(round(voltage_rating / 1 V) / 100) - 10 * floor(round(voltage_rating / 1 V) / 1000), 32)
+    }
+    glyph:voltage_2(live, at: -16 4, size: 6 x 10) {
+        fill = white
+        live character = if(round(voltage_rating / 1 V) >= 10, 48 + floor(round(voltage_rating / 1 V) / 10) - 10 * floor(round(voltage_rating / 1 V) / 100), 32)
+    }
+    glyph:voltage_3(live, at: -10 4, size: 6 x 10) {
+        fill = white
+        live character = if(round(voltage_rating / 1 V) >= 1, 48 + round(voltage_rating / 1 V) - 10 * floor(round(voltage_rating / 1 V) / 10), 32)
+    }
+    glyph:voltage_unit_1(at: -4 4, size: 6 x 10) {
+        fill = white
+        character = 86
+    }
+    layer(live, failed > 0.5) {
+        path:bulge("M-22-54C-12-66 12-66 22-54") {
+            stroke = burned
+            thickness = 2
+        }
+        path:vent_open("M-6-60L6-54M6-60L-6-54") {
+            stroke = burned
+        }
+    }
+}

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jmouse</groupId>
+  <artifactId>jmouse-cad-document</artifactId>
+  <version>1.0.1</version>
+  <name>jMouse - CAD Document</name>
+  <description>jMouse Framework - jmCAD documents: the jM document language on the jME engine. The language itself knows no kind of document: every kind, and every block a kind holds, is brought by a DocumentModule — a symbol by the schematic's module, a footprint by the board's, a circuit by the simulation's.</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-document</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>ihontarenko</id>
+      <name>Ivan Hontarenko</name>
+      <email>ihontarenko@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-document</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-plugin</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-core</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-formula</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-script-el</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-units</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-el-grammar</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-svg-path</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

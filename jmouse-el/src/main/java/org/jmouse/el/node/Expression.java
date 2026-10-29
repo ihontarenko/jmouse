@@ -1,6 +1,8 @@
 package org.jmouse.el.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.writer.SourceWritable;
+import org.jmouse.el.writer.SourceWriter;
 
 /**
  * 🧩 Represents an expression node that can be evaluated within an {@link EvaluationContext}.
@@ -8,7 +10,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface Expression extends Node {
+public interface Expression extends Node, SourceWritable {
 
     /**
      * 🏗️ Evaluates the expression within the given context.
@@ -33,6 +35,18 @@ public interface Expression extends Node {
         throw new UnsupportedOperationException(
                 "Source rendering is not supported for expression '%s'"
                         .formatted(getClass().getName()));
+    }
+
+    /**
+     * Writes this expression into a {@link SourceWriter} — the way a tree is made text. A node of a language on the
+     * writer overrides it and says its words; one that only has {@link #toSource()} is written as that text, so the two
+     * kinds of node mix in one tree.
+     *
+     * @param writer what the source is written into
+     */
+    @Override
+    default void writeSource(SourceWriter writer) {
+        writer.verbatim(toSource());
     }
 
 }

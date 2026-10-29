@@ -1,0 +1,29 @@
+symbol:bridged-jumper-symbol("Jumper, bridged") {
+    meta {
+        summary: "A jumper closed by its bridge, as drawn on a schematic: two pads and the solder or link that joins them — a connection that can be cut"
+        code: "SY.JUMPER:BRIDGED"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 80)
+    input:failed
+
+    group:body(live) {
+        path("M-80 0H-36M36 0H80")
+        path("M-36-16H-8V16H-36ZM8-16H36V16H8Z")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    # The bridge across the gap, filled: what makes it a closed jumper rather than an open one.
+    path:bridge(live, "M-12-6H12V6H-12Z") {
+        fill = signal
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+
+    pin:a(at: -80 0)
+    pin:b(at: 80 0)
+    label(name, at: 0 -44)
+    label(value, at: 0 56)
+}

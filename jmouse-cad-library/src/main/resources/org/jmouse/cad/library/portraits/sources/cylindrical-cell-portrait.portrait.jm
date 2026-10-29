@@ -1,0 +1,55 @@
+# A cylindrical lithium cell, an 18650, lying on its side: the wrapped can, the white ring and the + by the positive cap,
+# the flat negative end; tabs welded to both ends reach the sheet's grid. A cell that fails goes dark and swells.
+portrait:cylindrical-cell-portrait("Cylindrical cell") {
+    meta {
+        summary: "An 18650 lithium cell on its side, tabbed at both ends"
+        code: "PT.CELL:18650"
+        category: circuits
+        tags: electronics, portrait, battery, cell
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 50)
+    input:failed
+
+    path:tabs("M-80-2H-52V2H-80ZM58-2H80V2H58Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:negative(at: -80 0)
+    pin:positive(at: 80 0)
+    path:cap("M52-7H58V7H52Z") {
+        fill = silver
+    }
+    path:can("M-46-18H48C50-18 52-16 52-14V14C52 16 50 18 48 18H-46C-48 18-52 16-52 14V-14C-52-16-48-18-46-18Z") {
+        fill = blue
+    }
+    path:ring("M40-18H44V18H40Z") {
+        stroke = clear
+        fill = white
+    }
+    glyph:plus(at: 32 0, size: 8 x 14) {
+        fill = white
+        character = 43
+    }
+    glyph:minus(at: -42 0, size: 8 x 14) {
+        fill = white
+        character = 45
+    }
+    path:sheen("M-46-11H48") {
+        stroke = white
+        thickness = 0.8
+        opacity = 0.35
+    }
+    layer(live, failed > 0.5) {
+        path:swelling("M-30-18C-10-24 10-24 30-18") {
+            stroke = burned
+            thickness = 2
+        }
+        path:scorch("M-46-18H48V18H-46Z") {
+            stroke = clear
+            fill = burned
+            opacity = 0.5
+        }
+    }
+}

@@ -1,0 +1,67 @@
+# A solid tantalum chip capacitor (manganese dioxide cathode) as it really is: the capacitance behind an equivalent
+# series resistance a few times an aluminium can's per microfarad, and a leakage across it of about 0.01 · C · V. Unlike
+# an electrolyte, the solid cathode barely thickens in the cold, so the ESR is held constant here; the capacitance moves
+# a little with temperature. A tantalum that fails shorts — often with fire —, which is why it is derated to half its
+# rating. Linear in the voltages at any one temperature, it is solved as the linear part it is.
+# Not represented: the series inductance, the capacitance's fall with frequency, and what a reversed tantalum does.
+
+component:tantalum-capacitor("Tantalum capacitor", type: capacitor) {
+    use:constants
+
+    meta {
+        designator: C
+        summary: "Solid tantalum chip capacitor: capacitance, ESR, leakage; fails short"
+        source: "the equivalent circuit a tantalum chip's datasheet tabulates: C, ESR at 100 kHz, DC leakage 0.01 · C · V"
+        category: circuits
+        failure: short
+        value: capacitance
+    }
+
+    parameter:capacitance(100 uF, "capacitance")
+    parameter:R_equivalent_series(1 Ohm, "ESR at 100 kHz: a manganese dioxide chip of this size")
+    parameter:R_leakage(1 MOhm, "leakage: the datasheet's I = 0.01 · C · V at the rated voltage, as a resistance")
+    parameter:capacitance_temperature_coefficient(0.0005, "the capacitance moves 0.05 % per kelvin")
+    parameter:T_nominal(298.15 K, "the temperature the capacitance is given at")
+    parameter:power_rating(0.1 W, "what the ripple may heat it with")
+    parameter:thermal_resistance(120 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(5 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+    parameter:voltage_rating(16 V, "the rated voltage; a tantalum is used at no more than half of it")
+
+    pin:positive(analog, 1, "positive, the banded end")
+    pin:negative(analog, 2, "negative")
+
+    node:plate("the capacitance, behind the ESR")
+
+    symbol(uses: polarized-capacitor-symbol) {
+        bind:failed(failed)
+        bind:charge((positive - negative) / voltage_rating)
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+
+    figure:overvoltage(100 * abs(positive - negative) / voltage_rating, unit: %, "of its rated voltage")
+    figure:body(temperature - zero_celsius, unit: °C, "the bench and its own heat")
+
+    equations {
+        let C_now : capacitance = capacitance * (1 + capacitance_temperature_coefficient * (temperature - T_nominal))
+        current positive -> plate = (positive - plate) / R_equivalent_series
+        current plate -> negative = d(C_now * (plate - negative))/dt + (plate - negative) / R_leakage
+    }
+
+    expect("a step jumps by its ESR share before the charge moves", from: "ESR 1 Ω behind 1 Ω: half the step at once") {
+        bench(for: 10 us) {
+            part:V1(voltage-source, [input, 0], U_output: 1 V)
+            part:R1(resistor, [input, positive], resistance: 1 Ohm)
+            part:U1(self, [positive: positive, negative: 0])
+        }
+        measure(final, positive)
+        within(0.45 V .. 0.55 V)
+    }
+
+    # How it looks in the hand: a moulded amber chip from above, its plus band, its code and its voltage letter.
+    portrait(uses: tantalum-capacitor-portrait) {
+        bind:capacitance(capacitance)
+        bind:voltage_rating(voltage_rating)
+    }
+}

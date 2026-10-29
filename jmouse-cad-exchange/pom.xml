@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <packaging>jar</packaging>
+    <artifactId>jmouse-cad-exchange</artifactId>
+    <name>jMouse - CAD Exchange</name>
+    <description>jMouse Framework - jmCAD exchange: the points a format is brought to — reading files into jM documents, writing a document as a file —, contributed by plugins (SPICE, KiCad), read by the store.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-exchange</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>ihontarenko</id>
+            <name>Ivan Hontarenko</name>
+            <email>ihontarenko@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-exchange</url>
+    </scm>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- the documents a format reads and writes, and the components a converted part may name -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-simulation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,59 @@
+# A metal-oxide varistor, 14 mm, 470 V: a current that rises as a high power of the voltage — I = 1 mA · (V / V_1mA)^α —,
+# symmetric, so it barely conducts below its varistor voltage and clamps above it. α is the datasheets' typical for a
+# 14 mm disc. Not represented: its capacitance, its energy rating, its ageing under surges.
+component:varistor-470v("Varistor, 470 V", type: varistor) {
+    meta {
+        designator: RV
+        summary: "Metal-oxide varistor, 14 mm disc, 470 V at 1 mA"
+        source: "TDK EPCOS S14K300 datasheet: varistor voltage 470 V ±10 % at 1 mA"
+        package: "RV_Disc_D15.5mm"
+        category: circuits
+        failure: short
+    }
+
+    parameter:V_reference(470 V, "varistor voltage: the voltage at 1 mA, 423 V to 517 V")
+    parameter:I_reference(1 mA, "the current the varistor voltage is given at")
+    parameter:exponent(30, "α: how steeply the current rises with the voltage")
+    parameter:power_rating(0.6 W, "continuous dissipation")
+    parameter:thermal_resistance(100 K/W, "kelvin above the bench per watt it takes")
+    parameter:thermal_time_constant(20 s, "how fast it warms to that")
+    parameter:T_maximum(125 °C, "past this it fails on a realistic bench")
+
+    pin:terminal_one(analog, 1, "first lead")
+    pin:terminal_two(analog, 2, "second lead")
+
+    symbol(uses: varistor-symbol) {
+        bind:failed(failed)
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+
+    equations {
+        let V_across : voltage = terminal_one - terminal_two
+        let magnitude : ratio = sqrt((V_across / V_reference)^2 + 0.000000000001)
+        current terminal_one -> terminal_two = I_reference * (V_across / V_reference) * magnitude^(exponent - 1)
+    }
+
+    expect("a milliampere at its varistor voltage", from: "V at 1 mA: 470 V ±10 %") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [a, 0], U_output: 470 V)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, current: V1)
+        within(-1.1 mA .. -0.9 mA)
+    }
+
+    expect("barely conducts at the mains' peak", from: "leakage far below its varistor voltage") {
+        bench(for: 1 ms) {
+            part:V1(voltage-source, [a, 0], U_output: 325 V)
+            part:U1(self, [terminal_one: a, terminal_two: 0])
+        }
+        measure(operating, current: V1)
+        within(-10 uA .. 0 A)
+    }
+
+    # How it looks in the hand: a blue disc printed with its voltage code.
+    portrait(uses: varistor-portrait) {
+        bind:V_reference(V_reference)
+    }
+}

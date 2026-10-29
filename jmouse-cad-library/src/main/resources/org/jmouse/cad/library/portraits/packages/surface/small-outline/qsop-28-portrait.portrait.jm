@@ -1,0 +1,59 @@
+# Generated from footprint-standards/small-outline-packages.sht#qsop; regenerate, never edit.
+portrait:qsop-28-portrait("QSOP-28") {
+    meta {
+        summary: "28-lead QSOP, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
+        code: "PT.QSOP:28-P0.64"
+        category: circuits
+        tags: electronics, portrait, package, surface-mount
+        source: "JEDEC MO-137"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(332 x 200)
+    input:marking(text)
+
+    path:leads("M-143.937 61.417H-136.063V100H-143.937ZM-143.937 -61.417H-136.063V-100H-143.937ZM-123.937 61.417H-116.063V100H-123.937ZM-123.937 -61.417H-116.063V-100H-123.937ZM-103.937 61.417H-96.063V100H-103.937ZM-103.937 -61.417H-96.063V-100H-103.937ZM-83.937 61.417H-76.063V100H-83.937ZM-83.937 -61.417H-76.063V-100H-83.937ZM-63.937 61.417H-56.063V100H-63.937ZM-63.937 -61.417H-56.063V-100H-63.937ZM-43.937 61.417H-36.063V100H-43.937ZM-43.937 -61.417H-36.063V-100H-43.937ZM-23.937 61.417H-16.063V100H-23.937ZM-23.937 -61.417H-16.063V-100H-23.937ZM-3.937 61.417H3.937V100H-3.937ZM-3.937 -61.417H3.937V-100H-3.937ZM16.063 61.417H23.937V100H16.063ZM16.063 -61.417H23.937V-100H16.063ZM36.063 61.417H43.937V100H36.063ZM36.063 -61.417H43.937V-100H36.063ZM56.063 61.417H63.937V100H56.063ZM56.063 -61.417H63.937V-100H56.063ZM76.063 61.417H83.937V100H76.063ZM76.063 -61.417H83.937V-100H76.063ZM96.063 61.417H103.937V100H96.063ZM96.063 -61.417H103.937V-100H96.063ZM116.063 61.417H123.937V100H116.063ZM116.063 -61.417H123.937V-100H116.063Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -140 100)
+    pin:2(at: -120 100)
+    pin:3(at: -100 100)
+    pin:4(at: -80 100)
+    pin:5(at: -60 100)
+    pin:6(at: -40 100)
+    pin:7(at: -20 100)
+    pin:8(at: 0 100)
+    pin:9(at: 20 100)
+    pin:10(at: 40 100)
+    pin:11(at: 60 100)
+    pin:12(at: 80 100)
+    pin:13(at: 100 100)
+    pin:14(at: 120 100)
+    pin:15(at: 120 -100)
+    pin:16(at: 100 -100)
+    pin:17(at: 80 -100)
+    pin:18(at: 60 -100)
+    pin:19(at: 40 -100)
+    pin:20(at: 20 -100)
+    pin:21(at: 0 -100)
+    pin:22(at: -20 -100)
+    pin:23(at: -40 -100)
+    pin:24(at: -60 -100)
+    pin:25(at: -80 -100)
+    pin:26(at: -100 -100)
+    pin:27(at: -120 -100)
+    pin:28(at: -140 -100)
+    path:body("M-160.992 -61.417H140.992A4.913 4.913 0 0 1 145.906 -56.504V56.504A4.913 4.913 0 0 1 140.992 61.417H-160.992A4.913 4.913 0 0 1 -165.906 56.504V-56.504A4.913 4.913 0 0 1 -160.992 -61.417Z") {
+        fill = black
+    }
+    path:pin_one_dot("M-153.131 40.658A7.984 7.984 0 1 0 -137.162 40.658A7.984 7.984 0 1 0 -153.131 40.658Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 218.268 x 27.638) {
+        fill = silver
+        text = marking
+    }
+}

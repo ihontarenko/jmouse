@@ -1,0 +1,61 @@
+# A logic clock: a digital output that goes high and low for ever, its period and its share high set on the bench. It is
+# what a counter, a shift register or a flip-flop in a lesson is stepped by — a level for the logic it drives, where a
+# square generator is a voltage for a circuit. Powered like any 74HC part, so on a net with an LED or a resistor it
+# drives through its family's output resistance; on a net of logic alone it is a level and nothing more.
+
+component:clock-generator("Clock generator", type: generator) {
+    meta {
+        designator: CLK
+        summary: "A logic clock: a digital output high for the duty's share of every period, low for the rest"
+        source: "an ideal oscillator with a 74HC output stage"
+        category: circuits
+    }
+    use:cmos-hc
+
+    parameter:frequency(1 kHz, "how many periods a second")
+    parameter:duty(0.5, in: 0.01 .. 0.99, step: 0.01, "share of each period spent high")
+
+    pin:output(digital, output, 1, "the clock")
+    pin:GND(ground, 2)
+    pin:Vcc(power, 3)
+
+    symbol(box) {
+        right(output)
+        power([Vcc, GND])
+    }
+
+    behaviour {
+        on start do
+            drive('output', 1)
+            schedule('fall', duty / frequency)
+        end
+
+        on timer 'fall' do
+            drive('output', 0)
+            schedule('rise', (1 - duty) / frequency)
+        end
+
+        on timer 'rise' do
+            drive('output', 1)
+            schedule('fall', duty / frequency)
+        end
+    }
+
+    expect("it runs at its frequency", from: "the period set on the bench") {
+        bench(for: 5 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:U1(self, [output: clock, Vcc: Vcc, GND: 0], frequency: 2 kHz)
+        }
+        measure(frequency, level: clock, above: 0.5, after: 1 ms)
+        near(2 kHz, +- 20 Hz)
+    }
+
+    expect("it is high for its duty", from: "the share high set on the bench") {
+        bench(for: 5 ms) {
+            part:V1(voltage-source, [Vcc, 0], U_output: 5 V)
+            part:U1(self, [output: clock, Vcc: Vcc, GND: 0], frequency: 2 kHz, duty: 0.25)
+        }
+        measure(duty, level: clock, above: 0.5, after: 1 ms)
+        near(0.25, +- 0.02)
+    }
+}

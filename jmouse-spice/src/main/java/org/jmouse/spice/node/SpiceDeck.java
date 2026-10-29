@@ -1,6 +1,7 @@
 package org.jmouse.spice.node;
 
 import org.jmouse.el.node.Trivia;
+import org.jmouse.el.writer.SourceWriter;
 import org.jmouse.spice.SpicePosition;
 
 import java.util.ArrayList;
@@ -54,6 +55,35 @@ public final class SpiceDeck extends SpiceNode {
 
     public void ignoredAfterEnd(int cards) {
         this.ignoredAfterEnd = cards;
+    }
+
+    /**
+     * The title, the statements, the comments after them. SPICE reads a deck's first line as its title: a deck without
+     * one whose first line is not a dot card gets an empty title line, or that line would be read as the title.
+     */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        if (title != null) {
+            if (title.isEmpty()) {
+                writer.blankLine();
+            } else {
+                writer.word(title).endLine();
+            }
+        } else if (opensWithoutDotCard()) {
+            writer.blankLine();
+        }
+        writer.each(statements());
+        closingTrivia.forEach(trivia -> writeComment(writer, trivia));
+    }
+
+    /** Whether the deck's first line would be anything but a dot card: a comment, an element. */
+    private boolean opensWithoutDotCard() {
+        List<SpiceStatement> statements = statements();
+        if (statements.isEmpty()) {
+            return closingTrivia.stream().anyMatch(trivia -> !trivia.isBlank());
+        }
+        SpiceStatement first = statements.getFirst();
+        return !first.getLeadingTrivia().isEmpty() || !(first instanceof SpiceCard);
     }
 
     @Override

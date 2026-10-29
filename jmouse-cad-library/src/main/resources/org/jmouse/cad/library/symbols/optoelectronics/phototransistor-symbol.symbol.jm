@@ -1,0 +1,36 @@
+symbol:phototransistor-symbol("Phototransistor") {
+    meta {
+        summary: "NPN phototransistor, as drawn on a schematic: light falling on its base does what a base current would"
+        code: "SY.PHOTODETECTOR:NPN"
+        category: circuits
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(160 x 160)
+    input:conduction
+    input:light(0 .. 1)
+    input:failed
+    group:body(live) {
+        path("M-20-28V28M-20-12L40-40V-80M-20 12L40 40V80M12.36 34.82L28 34.4L18.28 22.14")
+        live stroke = if(failed > 0.5, burned, signal)
+    }
+    path:channel(live, "M40-80V-40L-20-12M-20 12L40 40V80") {
+        stroke = positive
+        live opacity = smooth(conduction, 80 ms)
+        live glow = 6 * conduction
+    }
+    path:light_in(live, "M-76-36L-44-12M-52-12H-44V-20M-76-4L-44 20M-52 20H-44V12") {
+        live stroke = if(light > 0.02, warm, signal)
+        live glow = 5 * light
+    }
+    layer(live, failed > 0.5) {
+        path:scorch("M-14-18L-6-6M12-16L4-4M-12 16L-4 6M14 18L6 6M-20 0H-10M20 0H10")
+        stroke = burned
+        animate opacity = 0.35 + 0.65 * blink(1 Hz)
+    }
+    pin:collector(at: 40 -80)
+    pin:emitter(at: 40 80)
+    label(name, at: 64 -16)
+    label(value, at: 64 16)
+}

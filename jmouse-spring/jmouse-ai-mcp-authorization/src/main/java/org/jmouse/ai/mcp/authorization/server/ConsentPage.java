@@ -86,6 +86,8 @@ public class ConsentPage {
         context.setValue("signInUrl",         escapeHtml(properties.browserUrl(consent.getSignInRoute())));
         context.setValue("tokenStorageKey",   escapeJavaScript(consent.getTokenStorageKey()));
         context.setValue("tokenStorageField", escapeJavaScript(consent.getTokenStorageField()));
+        context.setValue("csrfCookieName", escapeJavaScript(consent.getCsrfCookieName()));
+        context.setValue("csrfHeaderName", escapeJavaScript(consent.getCsrfHeaderName()));
 
         Renderer renderer = new TemplateRenderer(engine);
         Content  content  = renderer.render(template, context);

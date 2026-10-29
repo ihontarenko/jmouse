@@ -1,0 +1,15 @@
+# A plated mounting hole: a hole for a screw, with a pad that ties the screw to a net — usually the chassis' earth. It
+# carries nothing a circuit computes.
+component:mounting-hole-pad("Mounting hole with pad", type: mechanical) {
+    meta {
+        designator: H
+        summary: "Plated mounting hole tied to a net"
+        source: "generic M3 plated mounting hole; no electrical behaviour"
+        package: "MountingHole_3.2mm_M3_Pad"
+        category: circuits
+    }
+
+    pin:pad(analog, 1, "the pad around the hole")
+
+    symbol(uses: mounting-hole-symbol)
+}

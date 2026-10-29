@@ -1,0 +1,18 @@
+footprint:box-capacitor-length-3150-width-1100-pitch-2750-footprint("Film box capacitor, 27.5 mm pitch, 11 mm wide") {
+    meta {
+        summary: "Film box capacitor, 27.5 mm pitch, 11 mm wide, leads 27.5 mm apart"
+        code: "FP.RADIAL:CB-31.5X11-P27.5"
+        category: circuits
+        tags: electronics, footprint, through-hole
+        source: "IEC 60286-2 lead spacing, makers' box sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.sht#box-27-5 and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.8: drill 1, pad 2, pin 1 square.
+    pad:1(through-hole, rectangle, at: -13.75 0, size: 2 x 2, drill: 1)
+    pad:2(through-hole, circle, at: 13.75 0, size: 2 x 2, drill: 1)
+    outline(fabrication, width: 0.1, "M-15.75 -5.5H15.75V5.5H-15.75Z")
+    outline(silkscreen, width: 0.12, "M-15.86 -5.61H15.86V5.61H-15.86Z")
+    outline(courtyard, width: 0.05, "M-16.25 -6H16.25V6H-16.25Z")
+}
