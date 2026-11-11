@@ -1,6 +1,0 @@
-jmouse:
-  web:
-    lookup:
-      pathVariable:
-        mediaTypes:
-          yml_simple: "application/yaml"
