@@ -8,7 +8,9 @@ component:clock-generator("Clock generator", type: generator) {
         designator: CLK
         summary: "A logic clock: a digital output high for the duty's share of every period, low for the rest"
         source: "an ideal oscillator with a 74HC output stage"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 

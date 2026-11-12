@@ -61,6 +61,12 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-core</artifactId>
         </dependency>
+        <!-- a page is fetched over it: the whole fetch timed, the page read within a size -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-http-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-mapper</artifactId>
@@ -70,12 +76,8 @@
             <artifactId>jmouse-beans</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>

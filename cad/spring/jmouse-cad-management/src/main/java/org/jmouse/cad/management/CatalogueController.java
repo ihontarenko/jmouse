@@ -1,7 +1,8 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.access.enforcement.PublicEndpoint;
-import org.jmouse.cad.jpa.StoredPage;
+import org.jmouse.cad.circuit.Part;
+import org.jmouse.cad.folder.StoredPage;
 import org.jmouse.cad.simulation.elaboration.SheetInstance;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.catalogue.CatalogueViews.CategoryDraft;
@@ -14,7 +15,6 @@ import org.jmouse.cad.store.catalogue.CatalogueViews.RevisionView;
 import org.jmouse.cad.store.catalogue.CatalogueViews.SheetView;
 import org.jmouse.cad.store.catalogue.CatalogueViews.SlugList;
 import org.jmouse.cad.store.catalogue.CatalogueViews.StatusChange;
-import org.jmouse.cad.store.library.ShippedLibrary;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,11 +45,9 @@ public class CatalogueController {
     private static final int MAXIMUM_SUMMARIES = 500;
 
     private final CadCatalogue   catalogue;
-    private final ShippedLibrary library;
 
-    public CatalogueController(CadCatalogue catalogue, ShippedLibrary library) {
+    public CatalogueController(CadCatalogue catalogue) {
         this.catalogue = catalogue;
-        this.library = library;
     }
 
     // ── Categories ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -97,6 +95,12 @@ public class CatalogueController {
         return catalogue.summaries(slugs);
     }
 
+    @PostMapping("/documents/{address}/sheet/parts")
+    @PublicEndpoint("a circuit's sheets are answered only when the reader may see the circuit")
+    public List<Part> unfoldedBlocks(@PathVariable String address, @RequestBody List<Part> blocks) {
+        return catalogue.unfoldedBlocks(address, blocks);
+    }
+
     @GetMapping("/documents/{address}/sheet")
     @PublicEndpoint("a circuit's sheet is answered only when the reader may see the circuit")
     public SheetInstance placedSheet(@PathVariable String address, @RequestParam List<String> path) {
@@ -124,15 +128,6 @@ public class CatalogueController {
     @PutMapping("/documents/{id}/status")
     public DocumentDetail changeStatus(@PathVariable String id, @RequestBody StatusChange change) {
         return catalogue.changeStatus(id, change.status());
-    }
-
-    /** The shipped file's newer text taken over a curator's edit, which stays one revision back. */
-    @PostMapping("/documents/{id}/shipped")
-    public DocumentDetail takeShipped(@PathVariable String id) {
-        DocumentDetail current = catalogue.detail(id);
-        String source = library.shippedSource(current.summary().slug())
-                .orElseThrow(() -> CadProblem.conflict("Nothing ships for this document."));
-        return catalogue.takeShippedText(id, source);
     }
 
     @DeleteMapping("/documents/{id}")

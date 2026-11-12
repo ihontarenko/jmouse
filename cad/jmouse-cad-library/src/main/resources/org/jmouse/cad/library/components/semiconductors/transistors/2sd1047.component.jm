@@ -10,8 +10,10 @@ component:2sd1047("2SD1047", type: bjt) {
         summary: "NPN audio power transistor, 140 V, 12 A, 100 W"
         source: "Sanken / Inchange 2SD1047 datasheet: absolute maximum ratings and electrical characteristics at 25 °C"
         package: "TO-3P"
-        category: circuits
+        category: transistors
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:npn-transistor
 
@@ -39,10 +41,12 @@ component:2sd1047("2SD1047", type: bjt) {
     parameter:I_collector_maximum(12 A, "IC, continuous")
 
     pin:base(analog, input, 1, "base")
-    pin:collector(analog, output, 2, "collector; the tab is collector too")
+    pin:collector(analog, output, open-collector, 2, "collector; the tab is collector too")
     pin:emitter(analog, 3, "emitter")
 
-    symbol(uses: npn-transistor-symbol) {
+    footprint("FP.TO3P:3-V")
+
+    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
         bind:failed(failed)
     }
 

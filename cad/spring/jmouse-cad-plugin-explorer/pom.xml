@@ -8,16 +8,19 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
     </parent>
 
     <artifactId>jmouse-cad-plugin-explorer</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - CAD Plugin Explorer</name>
     <description>A file explorer for the engine: folders of the server mounted for the installation or for one owner, walked, opened, saved to, renamed and tidied, every change written to the real folder through jMouse storage.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-plugin-explorer</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-plugin-explorer</url>
 
     <properties>
+        <!-- what a reader is told of the plugin: one line, and the kind it is -->
+        <plugin.summary>The server's folders, opened and edited</plugin.summary>
+        <plugin.category>Workspace</plugin.category>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>

@@ -17,7 +17,9 @@ public enum CadCapability implements Capability {
     /** Run a circuit: a simulation, a live run, a check of its expectations. */
     SIMULATION_RUN,
     /** See what the installation is doing: the simulations it runs and the circuits running live. */
-    SYSTEM_READ;
+    SYSTEM_READ,
+    /** Change how the engine is set up for the whole installation: its plugins' settings. */
+    ENGINE_CONFIGURE;
 
     /** The engine's own, as {@code cad:} and the capability in words: {@code cad:owner-read}. */
     @Override

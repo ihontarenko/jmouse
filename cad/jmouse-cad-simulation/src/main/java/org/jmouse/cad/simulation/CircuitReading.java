@@ -78,7 +78,15 @@ final class CircuitReading {
         return new Part(line.name("reference").orElseThrow(), line.name("component").orElseThrow(),
                 line.slot("connections").map(ModelValues::connections).orElse(List.of()),
                 line.slot("settings").map(ModelValues::settings).orElse(List.of()),
-                line.word("symbol").orElse(null), line.word("footprint").orElse(null));
+                line.word("symbol").orElse(null), line.word("footprint").orElse(null), padsOf(line));
+    }
+
+    /** {@code pads (cathode = 1, anode = 2)}, by pad: a pin may take several pads, a pad only one pin. */
+    private static Map<String, String> padsOf(ClauseLineNode line) {
+        Map<String, String> pads = new LinkedHashMap<>();
+        line.value("pads").map(ModelValues::connections).orElse(List.of())
+                .forEach(connection -> pads.put(connection.net(), connection.pin()));
+        return pads;
     }
 
     private static Placement placement(ClauseLineNode line) {
@@ -86,6 +94,18 @@ final class CircuitReading {
         double rotation = line.quantity("rotate").orElse(0.0);
         if (line.grammar() == SimulationLines.WIRE) {
             return new Placement.Wire(reference, line.name("from").orElseThrow(), line.word("to").orElseThrow(),
+                    line.value("via").map(CircuitReading::corners).orElse(List.of()));
+        }
+        if (line.grammar() == SimulationLines.NOTE) {
+            return new Placement.Note(reference, ((org.jmouse.el.grammar.WordNode) line.slot("words").orElseThrow()).word(), ModelValues.point(line, "at").orElseThrow());
+        }
+        if (line.grammar() == SimulationLines.DRAWN) {
+            return new Placement.Drawn(reference, Placement.Drawn.Shape.named(line.name("shape").orElseThrow()),
+                    line.value("via").map(CircuitReading::corners).orElse(List.of()));
+        }
+        if (line.grammar() == SimulationLines.BUS) {
+            return new Placement.Bus(reference, line.name("name").orElseThrow(),
+                    line.value("members").map(ModelValues::groups).orElse(List.of()).stream().flatMap(List::stream).toList(),
                     line.value("via").map(CircuitReading::corners).orElse(List.of()));
         }
         if (line.grammar() == SimulationLines.MARK) {
@@ -98,11 +118,28 @@ final class CircuitReading {
             return new Point(extent.width(), extent.height());
         }).orElse(null);
         List<String> shows = line.value("shows").map(ModelValues::groups).orElse(List.of()).stream().flatMap(List::stream).toList();
+        List<Placement.PortPlace> ports = line.value("ports").map(ModelValues::groups).orElse(List.of()).stream()
+                .map(CircuitReading::portPlace).toList();
         return new Placement.PlacedPart(dot < 0 ? reference : reference.substring(0, dot), dot < 0 ? null : reference.substring(dot + 1),
                 ModelValues.point(line, "at").orElseThrow(), rotation, line.has("mirror"),
                 line.nested("name").flatMap(name -> ModelValues.point(name, "at")).orElse(null),
                 line.nested("value").flatMap(value -> ModelValues.point(value, "at")).orElse(null),
-                line.nested("readings").flatMap(readings -> ModelValues.point(readings, "at")).orElse(null), size, shows);
+                line.nested("readings").flatMap(readings -> ModelValues.point(readings, "at")).orElse(null), size, shows, ports);
+    }
+
+    /** {@code in left 60}: a port, the edge of its sheet's frame it stands on, and how far along it. */
+    private static Placement.PortPlace portPlace(List<String> words) {
+        if (words.size() != 3) {
+            throw new IllegalArgumentException("a port stands as 'port edge along' — 'in left 60' —: '" + String.join(" ", words)
+                    + "' is not");
+        }
+        double along;
+        try {
+            along = Double.parseDouble(words.get(2));
+        } catch (NumberFormatException notANumber) {
+            throw new IllegalArgumentException("how far along its edge a port stands is a number: '" + words.get(2) + "' is not");
+        }
+        return new Placement.PortPlace(words.get(0), Placement.PortPlace.Edge.named(words.get(1)), along);
     }
 
     /** A wire's corners: {@code via 1120 320, 1120 480}, each group its numbers two by two. */

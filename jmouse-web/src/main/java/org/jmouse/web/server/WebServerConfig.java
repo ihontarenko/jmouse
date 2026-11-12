@@ -11,4 +11,10 @@ package org.jmouse.web.server;
  * @param name the name of the web server instance
  */
 public record WebServerConfig(int port, WebServers name, String temporary) {
+    public WebServerConfig {
+        if (port < 0 || port > 65535) {
+            throw new IllegalArgumentException("Web server port must be between 0 and 65535");
+        }
+        java.util.Objects.requireNonNull(name, "name");
+    }
 }

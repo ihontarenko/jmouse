@@ -1,0 +1,192 @@
+# What each licence lets a work be done with, by its SPDX identifier, and what each exception lifts. A use of a work is one of
+# three: embedded — built into another work, as a footprint into a board and the board's files —, redistributed — passed on
+# as itself — and adopted — taken into a collection under that collection's own terms, as if it were the collection's.
+#
+#   redistribution  permitted — passed on under its terms; embedded-only — only built into what it came with; forbidden
+#   attribution     required — its credit travels with it; not-required
+#   share-alike     none; weak — the work keeps its licence, what it is built into does not; strong — what it is built
+#                   into takes its licence too
+#
+# An exception waives conditions for the uses it names: the KiCad libraries' lets a design use them on its own terms.
+# A licence or an exception this table does not know is held to the terms of `unknown`; a work naming none, to `unstated`.
+sheet "Licences" as licences {
+    description "The terms of the licences works are taken under, and what each exception lifts, as SPDX names them."
+    source "SPDX License List 3.25 and the text of each licence"
+
+    # Where a licence's own text is read; {id} is its SPDX identifier.
+    home "https://spdx.org/licenses/{id}.html"
+    # The file the credit of borrowed works travels in, beside what is passed on.
+    notice-file "THIRD-PARTY-NOTICES.txt"
+    unstated unstated
+    unknown unknown
+
+    licences "Licences" {
+        unstated "No licence stated: its holder named, its terms not" {
+            spdx "NOASSERTION"
+            redistribution embedded-only
+            attribution required
+            share-alike none
+        }
+        unknown "A licence this table does not know" {
+            spdx "LicenseRef-unknown"
+            redistribution embedded-only
+            attribution required
+            share-alike none
+        }
+
+        cc0-1-0 "Creative Commons Zero v1.0 Universal" {
+            spdx "CC0-1.0"
+            redistribution permitted
+            attribution not-required
+            share-alike none
+        }
+        unlicense "The Unlicense" {
+            spdx "Unlicense"
+            redistribution permitted
+            attribution not-required
+            share-alike none
+        }
+        cc-by-3-0 "Creative Commons Attribution 3.0 Unported" {
+            spdx "CC-BY-3.0"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        cc-by-4-0 "Creative Commons Attribution 4.0 International" {
+            spdx "CC-BY-4.0"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        cc-by-sa-3-0 "Creative Commons Attribution Share Alike 3.0 Unported" {
+            spdx "CC-BY-SA-3.0"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        cc-by-sa-4-0 "Creative Commons Attribution Share Alike 4.0 International" {
+            spdx "CC-BY-SA-4.0"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        mit "MIT License" {
+            spdx "MIT"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        isc "ISC License" {
+            spdx "ISC"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        bsd-2-clause "BSD 2-Clause Simplified License" {
+            spdx "BSD-2-Clause"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        bsd-3-clause "BSD 3-Clause New or Revised License" {
+            spdx "BSD-3-Clause"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        apache-2-0 "Apache License 2.0" {
+            spdx "Apache-2.0"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        cern-ohl-p-2-0 "CERN Open Hardware Licence Version 2 - Permissive" {
+            spdx "CERN-OHL-P-2.0"
+            redistribution permitted
+            attribution required
+            share-alike none
+        }
+        cern-ohl-w-2-0 "CERN Open Hardware Licence Version 2 - Weakly Reciprocal" {
+            spdx "CERN-OHL-W-2.0"
+            redistribution permitted
+            attribution required
+            share-alike weak
+        }
+        cern-ohl-s-2-0 "CERN Open Hardware Licence Version 2 - Strongly Reciprocal" {
+            spdx "CERN-OHL-S-2.0"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        tapr-ohl-1-0 "TAPR Open Hardware License v1.0" {
+            spdx "TAPR-OHL-1.0"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        mpl-2-0 "Mozilla Public License 2.0" {
+            spdx "MPL-2.0"
+            redistribution permitted
+            attribution required
+            share-alike weak
+        }
+        lgpl-2-1-only "GNU Lesser General Public License v2.1 only" {
+            spdx "LGPL-2.1-only"
+            redistribution permitted
+            attribution required
+            share-alike weak
+        }
+        lgpl-2-1-or-later "GNU Lesser General Public License v2.1 or later" {
+            spdx "LGPL-2.1-or-later"
+            redistribution permitted
+            attribution required
+            share-alike weak
+        }
+        lgpl-3-0-only "GNU Lesser General Public License v3.0 only" {
+            spdx "LGPL-3.0-only"
+            redistribution permitted
+            attribution required
+            share-alike weak
+        }
+        lgpl-3-0-or-later "GNU Lesser General Public License v3.0 or later" {
+            spdx "LGPL-3.0-or-later"
+            redistribution permitted
+            attribution required
+            share-alike weak
+        }
+        gpl-2-0-only "GNU General Public License v2.0 only" {
+            spdx "GPL-2.0-only"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        gpl-2-0-or-later "GNU General Public License v2.0 or later" {
+            spdx "GPL-2.0-or-later"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        gpl-3-0-only "GNU General Public License v3.0 only" {
+            spdx "GPL-3.0-only"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+        gpl-3-0-or-later "GNU General Public License v3.0 or later" {
+            spdx "GPL-3.0-or-later"
+            redistribution permitted
+            attribution required
+            share-alike strong
+        }
+    }
+
+    exceptions "Exceptions" {
+        # Article 3 of CC-BY-SA-4.0 — attribution and share-alike — waived for designs made with the libraries and the
+        # files made from those designs; the libraries themselves, passed on, keep every condition.
+        kicad-libraries-exception "KiCad Libraries Exception" {
+            spdx "KiCad-libraries-exception"
+            waives attribution, share-alike
+            within embedded
+        }
+    }
+}

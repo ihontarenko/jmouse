@@ -1,8 +1,7 @@
 package org.jmouse.security.authentication;
 
-import org.jmouse.security.Authority;
-
 import java.util.Collection;
+import org.jmouse.security.Authority;
 
 public class AnonymousAuthentication extends AbstractAuthentication {
 
@@ -12,12 +11,20 @@ public class AnonymousAuthentication extends AbstractAuthentication {
         this(principal, credentials, Authority.ANONYMOUS);
     }
 
-    public AnonymousAuthentication(Object principal, Object credentials, Collection<? extends Authority> authorities) {
+    public AnonymousAuthentication(
+        Object principal,
+        Object credentials,
+        Collection<? extends Authority> authorities
+    ) {
         super(principal, credentials, authorities);
+    }
+
+    @Override
+    public AuthenticationLevel level() {
+        return AuthenticationLevel.ANONYMOUS;
     }
 
     public AnonymousAuthentication(Object principal) {
         this(principal, Authority.ANONYMOUS);
     }
-
 }

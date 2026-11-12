@@ -1,6 +1,6 @@
 package org.jmouse.telegram.bot;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.jmouse.telegram.ChatReference;
 import org.jmouse.telegram.MessageHandle;
 import org.jmouse.telegram.update.Attachment;
@@ -97,8 +97,8 @@ public final class BotApiUpdates {
                 reference,
                 message.path("message_id").asInt(),
                 readUser(message.get("from")),
-                message.path("text").asText(null),
-                message.path("caption").asText(null),
+                message.path("text").asString(null),
+                message.path("caption").asString(null),
                 Instant.ofEpochSecond(message.path("date").asLong()),
                 attachments(message),
                 message.path("reply_to_message").path("message_id").isNumber()
@@ -120,10 +120,10 @@ public final class BotApiUpdates {
 
         return new Update.CallbackPressed(
                 updateId,
-                callback.path("id").asText(),
+                callback.path("id").asString(),
                 readUser(callback.get("from")),
                 handle,
-                callback.path("data").asText(null));
+                callback.path("data").asString(null));
     }
 
     private static Update readMembership(long updateId, JsonNode change, boolean mine) {
@@ -132,7 +132,7 @@ public final class BotApiUpdates {
                 ChatReference.of(change.path("chat").path("id").asLong()),
                 readUser(change.path("new_chat_member").get("user")),
                 readUser(change.get("from")),
-                change.path("new_chat_member").path("status").asText(null),
+                change.path("new_chat_member").path("status").asString(null),
                 mine);
     }
 
@@ -141,7 +141,7 @@ public final class BotApiUpdates {
                 updateId,
                 ChatReference.of(request.path("chat").path("id").asLong()),
                 readUser(request.get("from")),
-                request.path("invite_link").path("invite_link").asText(null));
+                request.path("invite_link").path("invite_link").asString(null));
     }
 
     /** ⚠️ Null for a channel post, which genuinely has no author. */
@@ -152,10 +152,10 @@ public final class BotApiUpdates {
 
         return new TelegramUser(
                 user.path("id").asLong(),
-                user.path("first_name").asText(""),
-                user.path("last_name").asText(null),
-                user.path("username").asText(null),
-                user.path("language_code").asText(null),
+                user.path("first_name").asString(""),
+                user.path("last_name").asString(null),
+                user.path("username").asString(null),
+                user.path("language_code").asString(null),
                 user.path("is_bot").asBoolean(false));
     }
 
@@ -188,11 +188,11 @@ public final class BotApiUpdates {
 
     private static Attachment attachment(JsonNode node, Attachment.Kind kind) {
         return new Attachment(
-                node.path("file_id").asText(),
-                node.path("file_unique_id").asText(null),
+                node.path("file_id").asString(),
+                node.path("file_unique_id").asString(null),
                 kind,
-                node.path("file_name").asText(null),
-                node.path("mime_type").asText(null),
+                node.path("file_name").asString(null),
+                node.path("mime_type").asString(null),
                 node.path("file_size").isNumber() ? node.path("file_size").asLong() : Attachment.UNKNOWN_SIZE);
     }
 
@@ -201,11 +201,7 @@ public final class BotApiUpdates {
      * model it can be taken with evidence rather than from a guess.
      */
     private static String firstUnknownField(JsonNode node) {
-        var fields = node.fieldNames();
-
-        while (fields.hasNext()) {
-            String field = fields.next();
-
+        for (String field : node.propertyNames()) {
             if (!"update_id".equals(field)) {
                 return field;
             }

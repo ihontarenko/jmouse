@@ -2,7 +2,7 @@ footprint:tqfp-100-footprint("TQFP-100, 14 mm body") {
     meta {
         summary: "100-lead TQFP-100, 14 mm body, 0.5 mm pitch, body 14 × 14 mm"
         code: "FP.TQFP:100-P0.5-14"
-        category: circuits
+        category: quad-flat
         tags: electronics, footprint, surface
         source: "JEDEC MS-026 AED"
         authors: "jMouse"
@@ -114,4 +114,6 @@ footprint:tqfp-100-footprint("TQFP-100, 14 mm body") {
     outline(silkscreen, width: 0.12, "M-6.41 -7.11H-7.11V-6.41M-6.41 7.11H-7.11V6.41M6.41 -7.11H7.11V-6.41M6.41 7.11H7.11V6.41")
     outline(silkscreen, filled, "M-9.335 -6A0.3 0.3 0 1 0 -8.735 -6A0.3 0.3 0 1 0 -9.335 -6Z")
     outline(courtyard, width: 0.05, "M-8.75 -8.75H8.75V8.75H-8.75Z")
+    body(height: 1.2)
+    model("MD.TQFP:100-P0.5-14")
 }

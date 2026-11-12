@@ -2,7 +2,7 @@ symbol:transformer-symbol("Transformer") {
     meta {
         summary: "Transformer, as drawn on a schematic: its windings char and smoulder once it has burned out"
         code: "SY.TRANSFORMER:MAGNETIC-CORE"
-        category: circuits
+        category: transformers
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

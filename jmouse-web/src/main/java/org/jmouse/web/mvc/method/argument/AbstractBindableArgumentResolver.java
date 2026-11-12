@@ -3,14 +3,14 @@ package org.jmouse.web.mvc.method.argument;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.web.binding.ParametersDataBinder;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.converter.MessageConverterManager;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
-import org.jmouse.web.mvc.method.converter.MessageConverterManager;
 
-abstract public class AbstractBindableArgumentResolver extends AbstractArgumentResolver {
+public abstract class AbstractBindableArgumentResolver extends AbstractArgumentResolver {
 
-    protected ParametersDataBinder    dataBinder;
+    protected ParametersDataBinder dataBinder;
     protected MessageConverterManager manager;
-    protected BeanContext             context;
+    protected BeanContext context;
 
     @Override
     public void doInitialize(WebBeanContext context) {
@@ -22,5 +22,4 @@ abstract public class AbstractBindableArgumentResolver extends AbstractArgumentR
     public MessageConverterManager getConverterManager() {
         return manager;
     }
-
 }

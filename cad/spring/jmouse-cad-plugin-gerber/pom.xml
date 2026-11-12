@@ -8,16 +8,19 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
     </parent>
 
     <artifactId>jmouse-cad-plugin-gerber</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - CAD Plugin Gerber</name>
-    <description>A board written as the files a board house makes and assembles it from: Gerber X2, Excellon, the placement and the bill of materials; and what a board house plugin builds its own set on.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-plugin-gerber</url>
+    <description>A PCB written as the files a PCB house makes and assembles it from: Gerber X2, Excellon, the placement and the bill of materials; and what a PCB house plugin builds its own set on.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-plugin-gerber</url>
 
     <properties>
+        <!-- what a reader is told of the plugin: one line, and the kind it is -->
+        <plugin.summary>Gerber X2, drill, placement and BOM</plugin.summary>
+        <plugin.category>Fabrication</plugin.category>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -44,17 +47,22 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Its settings, read from the engine's one settings tree -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-settings</artifactId>
+        </dependency>
         <!-- The formats the files are written in, built as trees -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-gerber</artifactId>
         </dependency>
-        <!-- What is written: the board, its footprints, its circuit; the edge as a path -->
+        <!-- What is written: the PCB, its footprints, its circuit; the edge as a path -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-cad-board</artifactId>
+            <artifactId>jmouse-cad-pcb</artifactId>
         </dependency>
-        <!-- The rules a board is made by: the gaps a pour keeps -->
+        <!-- The rules a PCB is made by: the gaps a pour keeps -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-library</artifactId>
@@ -89,6 +97,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

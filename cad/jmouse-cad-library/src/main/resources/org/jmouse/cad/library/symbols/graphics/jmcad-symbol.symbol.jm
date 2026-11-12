@@ -1,0 +1,23 @@
+symbol:jmcad-symbol("jmCAD") {
+    meta {
+        summary: "The jmCAD mark: this board was laid out in jmCAD, as drawn on a schematic"
+        code: "SY.GRAPHIC:JMCAD"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:fill_1("M14.063 -37.5H-15.625C-30.469 -37.5 -37.5 -29.687 -37.5 -15.625V14.063H-18.75V-13.281C-18.75 -17.187 -17.187 -18.75 -13.281 -18.75H14.063Z") {
+        fill = signal
+        stroke = clear
+    }
+    path:fill_2("M-14.062 37.5H15.625C30.469 37.5 37.5 29.688 37.5 15.625V-14.062H18.75V13.281C18.75 17.188 17.188 18.75 13.281 18.75H-14.062Z") {
+        fill = signal
+        stroke = clear
+    }
+    path:fill_3("M-7 0C-7 -3.8661000000000003 -3.8661000000000003 -7 0 -7C3.8661000000000003 -7 7 -3.8661000000000003 7 0C7 3.8661000000000003 3.8661000000000003 7 0 7C-3.8661000000000003 7 -7 3.8661000000000003 -7 0Z") {
+        fill = signal
+        stroke = clear
+    }
+}

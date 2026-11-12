@@ -6,8 +6,10 @@ component:voltage-controlled-voltage-source("Voltage-controlled voltage source",
         designator: E
         summary: "Ideal voltage-controlled voltage source: V(positive, negative) = gain · V(control_positive, control_negative)"
         source: "SPICE E element, linear form"
-        category: circuits
+        category: sources
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:gain(1, "the output voltage over the controlling voltage")

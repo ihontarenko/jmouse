@@ -1,0 +1,8 @@
+category:resistors-surface("Surface mount") {
+    meta {
+        category: resistors
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

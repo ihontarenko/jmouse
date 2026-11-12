@@ -1,4 +1,4 @@
-package org.jmouse.cad.jpa.catalogue;
+package org.jmouse.cad.document;
 
 import java.util.Optional;
 

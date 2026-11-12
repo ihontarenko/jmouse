@@ -1,6 +1,12 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.exchange.imported.ImportedNetNames;
+import org.jmouse.cad.exchange.imported.SymbolCanvas;
+import org.jmouse.cad.exchange.imported.UniqueIdentifiers;
+import org.jmouse.cad.exchange.imported.SheetMarks;
+import org.jmouse.cad.exchange.imported.SheetTracing;
 import org.jmouse.kicad.KiCadPoint;
+import org.jmouse.kicad.KiCadProperty;
 import org.jmouse.kicad.KiCadProject;
 import org.jmouse.kicad.KiCadValue;
 import org.jmouse.kicad.connectivity.KiCadConnection;
@@ -10,15 +16,17 @@ import org.jmouse.kicad.schematic.KiCadLabel;
 import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.jmouse.kicad.schematic.KiCadSheet;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
-import org.jmouse.kicad.schematic.KiCadWire;
 import org.jmouse.kicad.symbol.KiCadPin;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 import org.jmouse.cad.circuit.Circuit;
-import org.jmouse.cad.kicad.ImportedSheet.Item;
-import org.jmouse.cad.kicad.ImportedSheet.Part;
-import org.jmouse.cad.kicad.ImportedSheet.Probe;
+import org.jmouse.cad.circuit.Placement;
+import org.jmouse.cad.exchange.imported.ImportedCircuit;
+import org.jmouse.cad.exchange.imported.ImportedCircuit.Item;
+import org.jmouse.cad.exchange.imported.ImportedCircuit.Part;
+import org.jmouse.cad.exchange.imported.ImportedCircuit.Probe;
 import org.jmouse.cad.kicad.ImportedSheet.SymbolUse;
-import org.jmouse.cad.kicad.ImportedSheet.Wire;
+import org.jmouse.cad.exchange.imported.ImportedBuses;
+import org.jmouse.cad.exchange.imported.ImportedCircuit.Wire;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -51,6 +59,9 @@ import java.util.function.Function;
 public final class KiCadSheetImport {
 
     /** KiCad's standard libraries of connectors start so: {@code Connector:}, {@code Connector_Generic:}. */
+    /** What KiCad writes where a field says nothing. */
+    private static final String KICAD_UNSAID = "~";
+
     private static final String CONNECTOR_LIBRARY = "Connector";
 
     /** How many divisions a rail stands up from the screen's middle at the scale chosen for it. */
@@ -60,7 +71,7 @@ public final class KiCadSheetImport {
     private static final List<String> CHANNELS = List.of("CH1", "CH2");
 
     /** The sheet's grid in drawing units: KiCad's 1.27 mm grid, which every symbol's pins stand on. */
-    private static final double GRID = 20;
+    private static final double GRID = SymbolCanvas.GRID;
 
     /**
      * How far from its KiCad point a pin may be drawn and still be wired to it, along both axes: a catalogue symbol
@@ -68,27 +79,21 @@ public final class KiCadSheetImport {
      */
     private static final double LEAD_LIMIT = 6 * GRID;
 
-    /** Where a mark's symbol connects, in its own drawing, and which way its body goes from there. */
-    private record MarkShape(String terminal, double pinY, double bodyY) {
-    }
-
-    private static final MarkShape GROUND = new MarkShape("ground", -20, 1);
-    private static final MarkShape LABEL = new MarkShape("label", 20, -1);
-    private static final MarkShape PORT = new MarkShape("label", 24, -1);
-    private static final MarkShape GLOBAL = new MarkShape("label", 22, -1);
-
     private final KiCadSchematic schematic;
     private final KiCadLibraryMap library;
     /** What an own component's library id opens with: the own library's name and its colon. */
     private final String ownLibrary;
     private final KiCadCatalogue catalogue;
+    /** How the sheet's marks are drawn: where each one's pin stands. */
+    private final SheetMarks marks;
     private final Function<String, String> sheetSlug;
+    private final Function<String, Map<String, String>> portsOf;
 
     private final KiCadProject alone;
     private final String path;
     private final KiCadConnectivity connectivity;
-    private final KiCadNetNames nets;
-    private final Set<String> ids = new HashSet<>();
+    private final ImportedNetNames nets;
+    private final UniqueIdentifiers ids = new UniqueIdentifiers(ImportedCircuit.ID_OPENING, ImportedCircuit.ID_LONGEST);
     private final List<Part> elements = new ArrayList<>();
     private final List<Item> items = new ArrayList<>();
     private final List<Wire> wires = new ArrayList<>();
@@ -96,6 +101,8 @@ public final class KiCadSheetImport {
     private final Set<KiCadSymbolDefinition> components = new LinkedHashSet<>();
     /** Each part's KiCad footprint, by the part's id: the library id its {@code Footprint} property names. */
     private final Map<String, String> partFootprints = new LinkedHashMap<>();
+    private final Map<String, String> identifiers = new LinkedHashMap<>();
+    private final Map<String, Map<String, String>> partPads = new LinkedHashMap<>();
     /** The parts of each symbol the library map names no component for, by what was made for them: one note each. */
     private final Map<String, List<String>> unmapped = new LinkedHashMap<>();
     /** The rails KiCad's power symbols name, by net, with the voltage their value says: {@code +48V} is 48. */
@@ -125,13 +132,16 @@ public final class KiCadSheetImport {
     private final Map<String, Terminal> pinLabels = new HashMap<>();
 
     private KiCadSheetImport(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
-                             String ownLibrary, KiCadCatalogue catalogue, Function<String, String> sheetSlug) {
-        this.nets = new KiCadNetNames(ground);
+                             String ownLibrary, KiCadCatalogue catalogue, Function<String, String> sheetSlug,
+                             Function<String, Map<String, String>> portsOf, SheetMarks marks) {
+        this.marks = marks;
+        this.nets = new ImportedNetNames(ground, KiCadNetNames::local);
         this.schematic = schematic;
         this.library = library;
         this.ownLibrary = ownLibrary + ":";
         this.catalogue = catalogue;
         this.sheetSlug = sheetSlug;
+        this.portsOf = portsOf;
         this.alone = KiCadProject.single(schematic, instancePath);
         this.path = alone.root().path();
         this.connectivity = KiCadConnectivity.of(alone);
@@ -144,19 +154,22 @@ public final class KiCadSheetImport {
      * @param ownLibrary   the KiCad library an export writes a component with no KiCad counterpart under: a symbol of it
      *                     is that component again, when the catalogue holds it
      * @param sheetSlug    the slug of the circuit a sheet file becomes, for a box placing it
+     * @param portsOf      the port each hierarchical label of a sheet file is, by the label's words, for a box's pins to meet
+     * @param marks        how the sheet's marks are drawn
      */
     public static ImportedSheet of(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
-                                   String ownLibrary, KiCadCatalogue catalogue, Function<String, String> sheetSlug) {
+                                   String ownLibrary, KiCadCatalogue catalogue, Function<String, String> sheetSlug,
+                                   Function<String, Map<String, String>> portsOf, SheetMarks marks) {
         KiCadSheetImport sheet = new KiCadSheetImport(schematic, instancePath, ground, library, ownLibrary, catalogue,
-                sheetSlug);
+                sheetSlug, portsOf, marks);
         sheet.parts();
         sheet.marks();
         sheet.boxes();
         sheet.wires();
         sheet.touchingWires();
         sheet.noteConnectors();
-        return new ImportedSheet(sheet.elements, sheet.items, sheet.wires, sheet.railProbes(), sheet.ports, sheet.globals,
-                sheet.symbols, sheet.components, sheet.notes, sheet.partFootprints);
+        return new ImportedSheet(new ImportedCircuit(sheet.elements, sheet.items, sheet.wires, sheet.railProbes(), sheet.ports,
+                sheet.globals, sheet.notes, sheet.buses()), sheet.symbols, sheet.components, sheet.partFootprints, sheet.identifiers, sheet.partPads);
     }
 
     // ─── parts ──────────────────────────────────────────────────────────────────────────────────────
@@ -164,6 +177,11 @@ public final class KiCadSheetImport {
     private void parts() {
         Map<String, String> pinNets = new HashMap<>();
         for (KiCadNet net : connectivity.nets()) {
+            // A pin nothing else joins is open — KiCad names its lone net unconnected-…, a no-connect mark or none —: a
+            // contact of the part, no connection of the circuit, until it is wired.
+            if (net.name().startsWith(KiCadNetNames.UNCONNECTED)) {
+                continue;
+            }
             for (KiCadConnection pin : net.pins()) {
                 pinNets.put(pin.symbol().uuid() + ":" + pin.pin().number(), nets.of(net.name()));
             }
@@ -195,10 +213,34 @@ public final class KiCadSheetImport {
                 : Optional.of(new KiCadLibraryMap.Mapping(component, Map.of(), catalogue.valueParameterOf(component)));
     }
 
+    /**
+     * The port each hierarchical label of a sheet is, by the label's words: its net as the sheet names it, as {@link #marks}
+     * names it, so two labels on one wire are one port.
+     */
+    public static Map<String, String> portsOf(KiCadSchematic schematic, String instancePath, String ground) {
+        KiCadProject alone = KiCadProject.single(schematic, instancePath);
+        KiCadConnectivity connectivity = KiCadConnectivity.of(alone);
+        ImportedNetNames nets = new ImportedNetNames(ground, KiCadNetNames::local);
+        Map<String, String> ports = new LinkedHashMap<>();
+        for (KiCadLabel label : schematic.labels()) {
+            if (label.kind() == KiCadLabel.Kind.HIERARCHICAL) {
+                ports.put(label.text(), connectivity.netAt(instancePath, label.at()).map(nets::of).orElse(nets.of(label.text())));
+            }
+        }
+        return ports;
+    }
+
+    /** A part's value left in words: KiCad's value, unless a number of it set the component's parameter or KiCad left it unsaid. */
+    private static String wordsOfValue(KiCadSymbolInstance part, Optional<KiCadLibraryMap.Mapping> mapping) {
+        boolean set = mapping.flatMap(KiCadLibraryMap.Mapping::value).isPresent() && KiCadValue.number(part.value()).isPresent();
+        return set || part.value().equals(KICAD_UNSAID) ? null : part.value();
+    }
+
     private void part(String reference, List<KiCadSymbolInstance> units, Map<String, String> pinNets) {
         KiCadSymbolInstance first = units.getFirst();
         KiCadSymbolDefinition definition = schematic.definitionOf(first).orElseThrow();
         String id = id(reference);
+        units.forEach(unit -> identifiers.put(unit.uuid(), id));
         Optional<KiCadLibraryMap.Mapping> mapping = library.mappingOf(first.libraryId()).or(() -> ownMapping(first.libraryId()));
         // With no model, the drawing the map names for it, when that drawing places every pin.
         Optional<KiCadComponentStub.CatalogueDrawing> ownDrawing = mapping.isPresent() ? Optional.empty()
@@ -218,8 +260,11 @@ public final class KiCadSheetImport {
             Map<String, KiCadPoint> placed = unitPoints.computeIfAbsent(unit, ignored -> new LinkedHashMap<>());
             for (KiCadPin pin : definition.pinsOf(unit.unit())) {
                 String name = numbered.getOrDefault(pin.number(), KiCadSymbolDrawing.pinName(pin));
-                String net = pinNets.getOrDefault(unit.uuid() + ":" + pin.number(), nets.of(id + "_" + name + "_open"));
-                pins.putIfAbsent(name, net);
+                String net = pinNets.get(unit.uuid() + ":" + pin.number());
+                partPads.computeIfAbsent(id, ignored -> new LinkedHashMap<>()).put(pin.number(), name);
+                if (net != null) {
+                    pins.putIfAbsent(name, net);
+                }
                 // A pin not connected inside the part has no place on a drawing of ours, which draws what connects.
                 if (ownDrawing.isPresent() && !numbered.containsKey(pin.number())) {
                     continue;
@@ -273,20 +318,31 @@ public final class KiCadSheetImport {
             // A part is drawn only with a symbol its component offers: one with none stands where KiCad places it.
             notes.add(id + ": " + component + " has no symbol of its own, so it stands where KiCad places it, drawn as "
                     + "its component is.");
-            placeAsKiCad(id, first, points);
+            placeAsKiCad(id, first, drawnByBox(points, pins));
         } else {
             // A chip is drawn as our box: its part names no symbol. Only a design's own small symbol is drawn as it came.
-            if (!KiCadComponentStub.boxed(definition, library)) {
-                symbol = KiCadSymbolDrawing.slugOf(definition, first.unit());
+            boolean boxed = KiCadComponentStub.boxed(definition, library);
+            if (!boxed) {
+                symbol = KiCadSymbolDrawing.codeOf(definition, first.unit());
                 symbols.add(new SymbolUse(definition, first.unit(), Map.of()));
             }
-            placeAsKiCad(id, first, points);
+            placeAsKiCad(id, first, boxed ? drawnByBox(points, pins) : points);
         }
         if (units.size() > 1 && drawn.isEmpty()) {
             notes.add(id + " is drawn by its unit " + KiCadSymbolDrawing.unitLetter(first.unit()) + " alone: KiCad draws "
                     + "each of its units apart and a part is drawn with one symbol; the other units are wired by their nets.");
         }
-        elements.add(new Part(id, component, pins, overrides, symbol, null));
+        elements.add(new Part(id, component, pins, overrides, symbol, null).withValue(wordsOfValue(first, mapping)));
+    }
+
+    /**
+     * The pins a part drawn as our box stands at: those it is connected by. A box draws what connects, so a pin left open
+     * has no place on it, and a wire KiCad drew from one — a stub that joins nothing — has nothing here to end on.
+     */
+    private static Map<String, KiCadPoint> drawnByBox(Map<String, KiCadPoint> points, Map<String, String> pins) {
+        Map<String, KiCadPoint> drawn = new LinkedHashMap<>(points);
+        drawn.keySet().retainAll(pins.keySet());
+        return drawn;
     }
 
     /** A part drawn with KiCad's symbol: the same origin, turned and mirrored as KiCad turns and mirrors it. */
@@ -310,9 +366,12 @@ public final class KiCadSheetImport {
             }
         }
         // The symbol is drawn around the middle of its body, not KiCad's origin: the part stands that far away, turned.
-        double[] centre = turned(KiCadSymbolDrawing.centreOf(schematic.definitionOf(instance).orElseThrow(), instance.unit()),
+        double[] centre = SheetMarks.turned(KiCadSymbolDrawing.centreOf(schematic.definitionOf(instance).orElseThrow(), instance.unit()),
                 rotation, mirrored);
-        items.add(new Item(id, null, null, at[0] + centre[0], at[1] + centre[1], rotation, mirrored));
+        double x = at[0] + centre[0];
+        double y = at[1] + centre[1];
+        items.add(new Item(id, null, null, x, y, rotation, mirrored)
+                .withTexts(writtenAt(instance, KiCadProperty.REFERENCE, x, y), writtenAt(instance, KiCadProperty.VALUE, x, y)));
         points.forEach((pin, point) -> terminal(point, id + "." + pin, drawn(point)));
     }
 
@@ -341,7 +400,7 @@ public final class KiCadSheetImport {
         });
         shared.forEach((pin, point) -> {
             double[] onSymbol = drawing.pins().get(symbolPinOf(pin));
-            double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, part[2], part[3] == 1);
+            double[] turned = onSymbol == null ? new double[] {0, 0} : SheetMarks.turned(onSymbol, part[2], part[3] == 1);
             terminal(point, id + "." + pin, new double[] {part[0] + turned[0], part[1] + turned[1]}, new double[] {part[0], part[1]});
         });
     }
@@ -363,6 +422,16 @@ public final class KiCadSheetImport {
         return pin.substring(pin.indexOf('.') + 1);
     }
 
+    /** Where the sheet writes a part's property, from the part's centre; null for one it does not show. */
+    private static double[] writtenAt(KiCadSymbolInstance instance, KiCadProperty property, double x, double y) {
+        KiCadPoint written = property.writtenIn(instance.written());
+        if (written == null) {
+            return null;
+        }
+        double[] at = drawn(written);
+        return new double[] {ImportedCircuit.rounded(at[0] - x), ImportedCircuit.rounded(at[1] - y)};
+    }
+
     /**
      * A part, or one of its units, drawn with the catalogue's symbol, turned, mirrored and moved so its pins stand where
      * KiCad's do: of the eight ways it can stand, the one whose pins are nearest KiCad's.
@@ -380,14 +449,14 @@ public final class KiCadSheetImport {
         items.add(new Item(id, null, null, x, y, rotation, mirrored, unit));
         points.forEach((pin, point) -> {
             double[] onSymbol = local.get(pin);
-            double[] turned = onSymbol == null ? new double[] {0, 0} : turned(onSymbol, rotation, mirrored);
+            double[] turned = onSymbol == null ? new double[] {0, 0} : SheetMarks.turned(onSymbol, rotation, mirrored);
             terminal(point, id + "." + pin, new double[] {x + turned[0], y + turned[1]}, new double[] {x, y});
         });
         return new double[] {x, y, rotation, mirrored ? 1 : 0};
     }
 
     /** How well a symbol can stand where KiCad's pins are: the pins it lands, less a little for the distance of the rest. */
-    private static double fit(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
+    private double fit(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
         double[] best = alignment(drawing, points);
         return best[4] - best[5] / 1e9;
     }
@@ -404,8 +473,12 @@ public final class KiCadSheetImport {
         return local;
     }
 
-    /** Where a symbol stands best for these KiCad pins: x, y, rotation, 1 when mirrored, the pins landed, the error left. */
-    private static double[] alignment(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
+    /**
+     * Where a symbol stands best for these KiCad pins: x, y, rotation, 1 when mirrored, the pins landed, the error left. A
+     * place where a pin would stand on a point the sheet joins to another net — another part's pin, a label, a sheet's pin
+     * — is no place: the drawing would join that net to the pin's, in KiCad and to any eye.
+     */
+    private double[] alignment(KiCadCatalogue.PartDrawing drawing, Map<String, KiCadPoint> points) {
         Map<String, double[]> local = new LinkedHashMap<>();
         points.keySet().forEach(pin -> {
             double[] point = drawing.pins().get(symbolPinOf(pin));
@@ -430,7 +503,7 @@ public final class KiCadSheetImport {
                     boolean onAnother = false;
                     for (String pin : shared) {
                         double[] kicad = drawn(points.get(pin));
-                        double[] turned = turned(local.get(pin), rotation, mirrored);
+                        double[] turned = SheetMarks.turned(local.get(pin), rotation, mirrored);
                         double[] at = {place[0] + turned[0], place[1] + turned[1]};
                         double distance = Math.hypot(at[0] - kicad[0], at[1] - kicad[1]);
                         if (distance < 0.01) {
@@ -443,6 +516,9 @@ public final class KiCadSheetImport {
                             if (!another.equals(pin) && same(at, drawn(points.get(another))) && !same(kicad, drawn(points.get(another)))) {
                                 onAnother = true;
                             }
+                        }
+                        if (!same(at, kicad) && joinsAnotherNet(at, points.get(pin))) {
+                            onAnother = true;
                         }
                     }
                     if (onAnother) {
@@ -470,26 +546,19 @@ public final class KiCadSheetImport {
         double sumY = 0;
         for (String pin : pins) {
             double[] kicad = drawn(points.get(pin));
-            double[] turned = turned(local.get(pin), rotation, mirrored);
-            places.add(new double[] {grid(kicad[0] - turned[0]), grid(kicad[1] - turned[1])});
+            double[] turned = SheetMarks.turned(local.get(pin), rotation, mirrored);
+            places.add(new double[] {ImportedCircuit.onGrid(kicad[0] - turned[0]), ImportedCircuit.onGrid(kicad[1] - turned[1])});
             sumX += kicad[0] - turned[0];
             sumY += kicad[1] - turned[1];
         }
         if (!pins.isEmpty()) {
-            places.add(new double[] {grid(sumX / pins.size()), grid(sumY / pins.size())});
+            places.add(new double[] {ImportedCircuit.onGrid(sumX / pins.size()), ImportedCircuit.onGrid(sumY / pins.size())});
         } else {
             places.add(new double[] {0, 0});
         }
         return places;
     }
 
-    /** A point of a symbol on the sheet as jMX turns it: mirrored left to right first, then turned clockwise. */
-    private static double[] turned(double[] point, double rotation, boolean mirrored) {
-        double radians = Math.toRadians(rotation);
-        double localX = mirrored ? -point[0] : point[0];
-        return new double[] {localX * Math.cos(radians) - point[1] * Math.sin(radians),
-                localX * Math.sin(radians) + point[1] * Math.cos(radians)};
-    }
 
     // ─── marks ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -509,28 +578,34 @@ public final class KiCadSheetImport {
             String net = nets.of(value);
             boolean ground = value.toUpperCase().startsWith("GND") || value.equalsIgnoreCase("VSS");
             if (ground) {
-                mark("ground", "ground", net.equals(Circuit.GROUND) ? null : net, GROUND, point, body);
+                // A power symbol joins its net across the design, a second ground as much as a rail; only node 0 needs no saying.
+                globals.add(net);
+                mark("ground", net, SheetMarks.GROUND, point, body);
             } else {
                 globals.add(net);
                 KiCadValue.volts(value).ifPresent(volts -> rails.putIfAbsent(net, volts));
-                mark("power", "global", net, GLOBAL, point, body);
+                mark("power", net, SheetMarks.GLOBAL, point, body);
             }
         }
         for (KiCadLabel label : schematic.labels()) {
+            // A label on a bus line names the line, and joins nothing: the bus takes its words.
+            if (ImportedBuses.onAnyBus(new double[] {label.at().x(), label.at().y()}, busLines())) {
+                continue;
+            }
             String net = connectivity.netAt(path, label.at()).map(nets::of).orElse(nets.of(label.text()));
             double radians = Math.toRadians(label.angle());
             double[] body = {Math.cos(radians), -Math.sin(radians)};
             switch (label.kind()) {
-                case LOCAL -> mark("label", "label", net, LABEL, label.at(), body);
+                case LOCAL -> mark("label", net, SheetMarks.LABEL, label.at(), body);
                 case GLOBAL -> {
                     globals.add(net);
-                    mark("global", "global", net, GLOBAL, label.at(), body);
+                    mark("global", net, SheetMarks.GLOBAL, label.at(), body);
                 }
                 case HIERARCHICAL -> {
                     if (!ports.contains(net)) {
                         ports.add(net);
                     }
-                    mark("port", "port", net, PORT, label.at(), body);
+                    mark("port", net, SheetMarks.PORT, label.at(), body);
                 }
             }
         }
@@ -545,28 +620,11 @@ public final class KiCadSheetImport {
      * A mark whose symbol connects at a point and whose body goes one way from it: turned so its body goes the way
      * KiCad's does, moved so its pin stands on KiCad's point.
      */
-    private void mark(String prefix, String mark, String net, MarkShape shape, KiCadPoint point, double[] body) {
-        double rotation = rotationTowards(body, shape.bodyY());
-        double[] pin = turned(new double[] {0, shape.pinY()}, rotation, false);
+    private void mark(String prefix, String net, SheetMarks.Shape shape, KiCadPoint point, double[] body) {
         double[] at = drawn(point);
         String id = id(prefix + (items.size() + 1));
-        items.add(new Item(id, mark, net, at[0] - pin[0], at[1] - pin[1], rotation, false));
+        items.add(marks.mark(id, net, shape, at, body));
         terminal(point, id + "." + shape.terminal(), at);
-    }
-
-    /** The quarter turn that points a body drawn along Y ({@code bodyY} is its sign) along a direction on the sheet. */
-    private static double rotationTowards(double[] direction, double bodyY) {
-        double best = 0;
-        double bestDot = -Double.MAX_VALUE;
-        for (int quarter = 0; quarter < 4; quarter++) {
-            double[] turned = turned(new double[] {0, bodyY}, quarter * 90, false);
-            double dot = turned[0] * direction[0] + turned[1] * direction[1];
-            if (dot > bestDot) {
-                bestDot = dot;
-                best = quarter * 90;
-            }
-        }
-        return best;
     }
 
     private void junction(KiCadPoint point) {
@@ -584,98 +642,116 @@ public final class KiCadSheetImport {
     private void boxes() {
         for (KiCadSheet box : schematic.sheets()) {
             String id = id(box.name().isBlank() ? "sheet" : box.name());
+            identifiers.put(box.uuid(), id);
+            double[] at = drawn(box.at());
+            double[] size = {box.size().x() * SymbolCanvas.UNITS_PER_MILLIMETRE,
+                    box.size().y() * SymbolCanvas.UNITS_PER_MILLIMETRE};
+            // Drawn the size KiCad draws it, on the grid, so its name and its sheet stand where they stood there.
+            double[] drawnSize = {Math.max(GRID, ImportedCircuit.onGrid(size[0])), Math.max(GRID, ImportedCircuit.onGrid(size[1]))};
+            double[] centre = {ImportedCircuit.onGrid(at[0] + size[0] / 2), ImportedCircuit.onGrid(at[1] + size[1] / 2)};
             Map<String, String> pins = new LinkedHashMap<>();
+            List<Placement.PortPlace> placed = new ArrayList<>();
+            Map<String, String> labelled = portsOf.apply(box.file());
             for (KiCadSheet.Pin pin : box.pins()) {
-                String port = nets.of(pin.name());
+                String port = labelled.get(pin.name());
+                // Joined to nothing inside: KiCad only warns of it, and a circuit has no port to wire it to.
+                if (port == null) {
+                    notes.add(id + ": its pin " + pin.name() + " has no label of that name on " + box.file() + ", so it joins nothing.");
+                    continue;
+                }
                 String net = connectivity.netAt(path, pin.at()).map(nets::of).orElse(nets.of(id + "_" + port + "_open"));
-                pins.put(port, net);
-                terminal(pin.at(), id + "." + port, drawn(pin.at()));
+                // Two labels on one wire inside are one port; their two pins out here are then one net.
+                String joined = pins.putIfAbsent(port, net);
+                if (joined != null && !joined.equals(net)) {
+                    notes.add(id + ": its pins " + pin.name() + " and " + port + " are one net on " + box.file() + " but apart here: only "
+                            + port + " is taken.");
+                }
+                if (joined == null) {
+                    Placement.PortPlace onFrame = portPlace(port, box, pin, centre, drawnSize);
+                    placed.add(onFrame);
+                    terminal(pin.at(), id + "." + port, onFrameAt(onFrame, centre, drawnSize));
+                } else {
+                    terminal(pin.at(), id + "." + port, drawn(pin.at()));
+                }
             }
             elements.add(new Part(id, sheetSlug.apply(box.file()), pins, Map.of(), null, null));
-            double[] at = drawn(box.at());
-            double[] size = {box.size().x() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE,
-                    box.size().y() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE};
-            // Drawn the size KiCad draws it, on the grid, so its name and its sheet stand where they stood there.
-            double[] drawnSize = {Math.max(GRID, grid(size[0])), Math.max(GRID, grid(size[1]))};
-            items.add(new Item(id, null, null, grid(at[0] + size[0] / 2), grid(at[1] + size[1] / 2), 0, false, null,
-                    drawnSize));
+            items.add(new Item(id, null, null, centre[0], centre[1], 0, false, null, drawnSize).withPorts(placed));
         }
+    }
+
+    /**
+     * Where a box's pin stands on the frame the sheet draws the box with: the edge KiCad's pin is nearest — a pin stands
+     * on the box's edge —, and how far along it from its start, so a wire KiCad drew to it ends on it here too.
+     */
+    private static Placement.PortPlace portPlace(String port, KiCadSheet box, KiCadSheet.Pin pin, double[] centre, double[] size) {
+        double toLeft = Math.abs(pin.at().x() - box.at().x());
+        double toRight = Math.abs(pin.at().x() - (box.at().x() + box.size().x()));
+        double toTop = Math.abs(pin.at().y() - box.at().y());
+        double toBottom = Math.abs(pin.at().y() - (box.at().y() + box.size().y()));
+        double nearest = Math.min(Math.min(toLeft, toRight), Math.min(toTop, toBottom));
+        Placement.PortPlace.Edge edge = nearest == toLeft ? Placement.PortPlace.Edge.LEFT : nearest == toRight
+                ? Placement.PortPlace.Edge.RIGHT : nearest == toTop ? Placement.PortPlace.Edge.TOP : Placement.PortPlace.Edge.BOTTOM;
+        double[] point = drawn(pin.at());
+        double[] corner = frameCorner(centre, size);
+        boolean side = edge == Placement.PortPlace.Edge.LEFT || edge == Placement.PortPlace.Edge.RIGHT;
+        return new Placement.PortPlace(port, edge, ImportedCircuit.onGrid(side ? point[1] - corner[1] : point[0] - corner[0]));
+    }
+
+    /** A port's point on the frame the sheet draws a box of this centre and size with. */
+    private static double[] onFrameAt(Placement.PortPlace place, double[] centre, double[] size) {
+        double[] corner = frameCorner(centre, size);
+        double right = 2 * centre[0] - corner[0];
+        double bottom = 2 * centre[1] - corner[1];
+        return switch (place.edge()) {
+            case LEFT -> new double[] {corner[0], corner[1] + place.along()};
+            case RIGHT -> new double[] {right, corner[1] + place.along()};
+            case TOP -> new double[] {corner[0] + place.along(), corner[1]};
+            case BOTTOM -> new double[] {corner[0] + place.along(), bottom};
+        };
+    }
+
+    /** The top-left corner of the frame the sheet draws a box with: its half sizes rounded up to the grid. */
+    private static double[] frameCorner(double[] centre, double[] size) {
+        return new double[] {centre[0] - Math.ceil(size[0] / 2 / GRID) * GRID, centre[1] - Math.ceil(size[1] / 2 / GRID) * GRID};
     }
 
     // ─── wires ──────────────────────────────────────────────────────────────────────────────────────
 
-    /**
-     * KiCad's wires as jMX's: segments are cut wherever a connection point lies on them, and every chain of segments
-     * between two terminals is one wire whose corners are its bends. A point where three segments meet with no
-     * terminal on it is a junction; so is the loose end of a wire.
-     */
+    /** KiCad's wires as jMX's, traced between the sheet's terminals as every import traces them ({@link SheetTracing}). */
     private void wires() {
-        Map<String, KiCadPoint> places = new LinkedHashMap<>();
-        Map<String, Set<String>> neighbours = new LinkedHashMap<>();
-        List<KiCadPoint> stops = new ArrayList<>();
-        terminals.keySet().forEach(key -> stops.add(pointOf(key)));
-        for (KiCadWire wire : schematic.wires()) {
-            for (KiCadPoint corner : wire.points()) {
-                stops.add(corner);
-            }
+        List<SheetTracing.Point> stops = terminals.keySet().stream().map(key -> traced(pointOf(key))).toList();
+        List<List<SheetTracing.Point>> drawnWires = schematic.wires().stream()
+                .map(wire -> wire.points().stream().map(KiCadSheetImport::traced).toList()).toList();
+        for (SheetTracing.Chain chain : SheetTracing.trace(stops, drawnWires, point -> junction(kicad(point)))) {
+            KiCadPoint from = kicad(chain.from());
+            KiCadPoint to = kicad(chain.to());
+            wire(terminals.get(from.key()), drawn(from), chain.bends().stream().map(bend -> drawn(kicad(bend))).toList(),
+                    terminals.get(to.key()), drawn(to));
         }
-        for (KiCadWire wire : schematic.wires()) {
-            for (int index = 1; index < wire.points().size(); index++) {
-                KiCadPoint start = wire.points().get(index - 1);
-                KiCadPoint end = wire.points().get(index);
-                List<KiCadPoint> along = new ArrayList<>();
-                for (KiCadPoint stop : stops) {
-                    if (stop.liesOn(start, end) && !stop.sameAs(start) && !stop.sameAs(end)) {
-                        along.add(stop);
-                    }
-                }
-                along.sort((one, other) -> Double.compare(distance(start, one), distance(start, other)));
-                KiCadPoint previous = start;
-                along.add(end);
-                for (KiCadPoint next : along) {
-                    if (!next.sameAs(previous)) {
-                        places.put(previous.key(), previous);
-                        places.put(next.key(), next);
-                        neighbours.computeIfAbsent(previous.key(), ignored -> new LinkedHashSet<>()).add(next.key());
-                        neighbours.computeIfAbsent(next.key(), ignored -> new LinkedHashSet<>()).add(previous.key());
-                    }
-                    previous = next;
-                }
-            }
+    }
+
+    /** The sheet's bus stretches, each a line of KiCad's points. */
+    private List<List<double[]>> busLines() {
+        return schematic.buses().stream().map(bus -> bus.points().stream().map(point -> new double[] {point.x(), point.y()}).toList()).toList();
+    }
+
+    /** The sheet's bus lines, each named by the label that stands on it. */
+    private List<ImportedCircuit.Bus> buses() {
+        List<ImportedCircuit.Bus> buses = new ArrayList<>();
+        for (List<double[]> line : ImportedBuses.joined(busLines())) {
+            String written = ImportedBuses.writtenOn(line, schematic.labels(), label -> new double[] {label.at().x(), label.at().y()}, KiCadLabel::text);
+            buses.add(ImportedBuses.bus("B" + (buses.size() + 1), written,
+                    line.stream().map(point -> drawn(new KiCadPoint(point[0], point[1]))).toList(), nets::of));
         }
-        // A meeting of three or more, and a loose end, stand for a terminal of their own.
-        neighbours.forEach((key, around) -> {
-            if (!terminals.containsKey(key) && around.size() != 2) {
-                junction(places.get(key));
-            }
-        });
-        Set<String> walked = new HashSet<>();
-        for (String start : new ArrayList<>(terminals.keySet())) {
-            for (String first : neighbours.getOrDefault(start, Set.of())) {
-                if (walked.contains(edge(start, first))) {
-                    continue;
-                }
-                List<double[]> bends = new ArrayList<>();
-                String previous = start;
-                String current = first;
-                walked.add(edge(previous, current));
-                while (!terminals.containsKey(current)) {
-                    bends.add(drawn(places.get(current)));
-                    String came = previous;
-                    Optional<String> next = neighbours.get(current).stream().filter(key -> !key.equals(came)).findFirst();
-                    if (next.isEmpty()) {
-                        break;
-                    }
-                    previous = current;
-                    current = next.get();
-                    walked.add(edge(previous, current));
-                }
-                if (terminals.containsKey(current) && !current.equals(start)) {
-                    wire(terminals.get(start), drawn(places.get(start)), bends, terminals.get(current),
-                            drawn(places.get(current)));
-                }
-            }
-        }
+        return buses;
+    }
+
+    private static SheetTracing.Point traced(KiCadPoint point) {
+        return new SheetTracing.Point(point.x(), point.y());
+    }
+
+    private static KiCadPoint kicad(SheetTracing.Point point) {
+        return new KiCadPoint(point.x(), point.y());
     }
 
     /**
@@ -827,12 +903,9 @@ public final class KiCadSheetImport {
      */
     private Terminal labelAt(String net, double[] at, double[] away) {
         boolean ground = net.equals(Circuit.GROUND);
-        MarkShape shape = ground ? GROUND : LABEL;
-        double rotation = rotationTowards(away, shape.bodyY());
-        double[] pin = turned(new double[] {0, shape.pinY()}, rotation, false);
+        SheetMarks.Shape shape = ground ? SheetMarks.GROUND : SheetMarks.LABEL;
         String id = id((ground ? "ground" : "label") + (items.size() + 1));
-        items.add(new Item(id, ground ? "ground" : "label", ground ? null : net, at[0] - pin[0], at[1] - pin[1], rotation,
-                false));
+        items.add(marks.mark(id, net, shape, at, away));
         return new Terminal(id + "." + shape.terminal(), at, null);
     }
 
@@ -894,13 +967,13 @@ public final class KiCadSheetImport {
     }
 
     /**
-     * A design is plugged into the world through its connectors — mains in, a potentiometer or a load off the board —,
+     * A design is plugged into the world through its connectors — mains in, a potentiometer or a load off the pcb —,
      * and runs on the bench only once something stands at them: the note names them, so the reader knows where to put a
      * source, a load or a meter.
      */
     private void noteConnectors() {
         if (!connectors.isEmpty()) {
-            notes.add(String.join(", ", connectors) + " connect the design to what is off the board — its supply, its "
+            notes.add(String.join(", ", connectors) + " connect the design to what is off the pcb — its supply, its "
                     + "controls, its load: nothing stands at them on the bench, so place a source, a load or a meter at "
                     + "each to run it as it is used.");
         }
@@ -918,16 +991,18 @@ public final class KiCadSheetImport {
         }
     }
 
+    /**
+     * Whether the sheet joins a drawn point to another net than the one at a pin's own KiCad point: the pin standing there
+     * would be joined to it.
+     */
+    private boolean joinsAnotherNet(double[] at, KiCadPoint own) {
+        KiCadPoint point = new KiCadPoint(at[0] / SymbolCanvas.UNITS_PER_MILLIMETRE, at[1] / SymbolCanvas.UNITS_PER_MILLIMETRE);
+        Optional<String> its = connectivity.netAt(path, own);
+        return connectivity.netAt(path, point).filter(there -> !Optional.of(there).equals(its)).isPresent();
+    }
+
     private static boolean same(double[] one, double[] other) {
         return Math.abs(one[0] - other[0]) < 0.01 && Math.abs(one[1] - other[1]) < 0.01;
-    }
-
-    private static String edge(String one, String other) {
-        return one.compareTo(other) < 0 ? one + "|" + other : other + "|" + one;
-    }
-
-    private static double distance(KiCadPoint one, KiCadPoint other) {
-        return Math.hypot(one.x() - other.x(), one.y() - other.y());
     }
 
     // ─── helpers ────────────────────────────────────────────────────────────────────────────────────
@@ -954,31 +1029,13 @@ public final class KiCadSheetImport {
 
     /** A KiCad sheet point in drawing units: the same 1.27 mm grid as twenty units, Y downwards on both. */
     private static double[] drawn(KiCadPoint point) {
-        return new double[] {rounded(point.x() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE),
-                rounded(point.y() * KiCadSymbolDrawing.UNITS_PER_MILLIMETRE)};
-    }
-
-    /** The nearest point of the sheet's grid: KiCad's 1.27 mm, twenty drawing units. */
-    private static double grid(double value) {
-        return Math.round(value / GRID) * GRID;
-    }
-
-    private static double rounded(double value) {
-        return Math.round(value * 100) / 100.0;
+        return new double[] {ImportedCircuit.rounded(point.x() * SymbolCanvas.UNITS_PER_MILLIMETRE),
+                ImportedCircuit.rounded(point.y() * SymbolCanvas.UNITS_PER_MILLIMETRE)};
     }
 
     /** An id no other part or mark of the sheet has: KiCad's reference where it is a name. */
     private String id(String wanted) {
-        String base = wanted.replaceAll("[^A-Za-z0-9_]", "_");
-        if (base.isEmpty() || !Character.isLetter(base.charAt(0))) {
-            base = "P" + base;
-        }
-        base = base.length() > 28 ? base.substring(0, 28) : base;
-        String id = base;
-        for (int suffix = 2; !ids.add(id); suffix++) {
-            id = base + "_" + suffix;
-        }
-        return id;
+        return ids.of(wanted);
     }
 
     private static String plain(double number) {

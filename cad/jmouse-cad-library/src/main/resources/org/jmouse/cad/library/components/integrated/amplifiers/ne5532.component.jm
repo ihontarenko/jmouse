@@ -8,8 +8,12 @@ component:ne5532("NE5532", type: opamp) {
         summary: "Dual low-noise bipolar operational amplifier, ±22 V, 10 MHz, 9 V/µs, drives 600 Ω"
         source: "TI NE5532 datasheet (SLOS075), electrical characteristics at ±15 V"
         package: "SOIC-8"
-        category: circuits
+        manufacturer: "Texas Instruments"
+        part-number: NE5532DR
+        category: amplifiers
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:operational-amplifier
     units:[A, B]
@@ -42,9 +46,9 @@ component:ne5532("NE5532", type: opamp) {
     pin:Vcc(power, 8, "V+")
     pin:GND(power, 4, "V-")
 
-    footprint(soic-8-footprint)
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
-    symbol(uses: [operational-amplifier-symbol, operational-amplifier-wide-symbol]) {
+    symbol(uses: ["SY.AMPLIFIER:OPERATIONAL", "SY.AMPLIFIER:OPERATIONAL-WIDE"]) {
         bind:failed(failed)
         bind:positive_supply(pin: Vcc)
         bind:negative_supply(pin: GND)

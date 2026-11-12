@@ -57,6 +57,12 @@
     </properties>
 
     <dependencies>
+        <!-- a page is fetched over it: the whole fetch timed, the page read within a size -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-http-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-core</artifactId>

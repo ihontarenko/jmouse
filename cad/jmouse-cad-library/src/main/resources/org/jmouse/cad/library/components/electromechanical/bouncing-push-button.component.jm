@@ -8,7 +8,9 @@ component:bouncing-push-button("Bouncing push button", type: button) {
         designator: SW
         summary: "A momentary switch that bounces: pressed and released at set moments, its contact chattering each time"
         source: "typical tactile switches: bounce of 1 to 5 ms, a few contacts before rest"
-        category: circuits
+        category: switches
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:pressed_at(1 ms, "when it is pressed")
@@ -21,7 +23,14 @@ component:bouncing-push-button("Bouncing push button", type: button) {
     pin:a(analog, 1, "first contact")
     pin:b(analog, 2, "second contact")
 
-    symbol(uses: switch-symbol) {
+    footprint("FP.SW:TACT-6X6") {
+        pad:1(a)
+        pad:2(a)
+        pad:3(b)
+        pad:4(b)
+    }
+
+    symbol(uses: "SY.SWITCH:SPST") {
         bind:closed(contact)
     }
 

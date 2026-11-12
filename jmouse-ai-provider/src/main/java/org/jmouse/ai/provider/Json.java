@@ -1,8 +1,9 @@
 package org.jmouse.ai.provider;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,8 +25,8 @@ final class Json {
     private static final TypeReference<Map<String, Object>> MAP = new TypeReference<>() {
     };
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    private static final ObjectMapper MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     private Json() {
     }

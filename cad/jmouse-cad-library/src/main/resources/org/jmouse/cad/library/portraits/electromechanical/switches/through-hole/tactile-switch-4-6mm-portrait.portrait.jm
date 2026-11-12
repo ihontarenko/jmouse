@@ -1,0 +1,40 @@
+# Generated from footprint-standards/dual-inline-packages.sht#tactile-switch-6; regenerate, never edit.
+portrait:tactile-switch-4-6mm-portrait("TACTILE-SWITCH-4, 6mm") {
+    meta {
+        summary: "4-lead Tactile switch, 6 × 6 mm from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.SW:TACT-6X6"
+        category: switches-through-hole
+        tags: electronics, portrait, package, through-hole
+        source: "the makers' 6 mm through-hole tact switch (Omron B3F-1000): leads 6.5 mm apart along a side joined inside"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(39 x 40)
+    input:marking(text)
+
+    path:leads("M-21.538 9.231H-18.462V6.923H-21.538ZM-21.077 6.923H-18.923V20H-21.077ZM-21.538 -9.231H-18.462V-6.923H-21.538ZM-21.077 -6.923H-18.923V-20H-21.077ZM-1.538 9.231H1.538V6.923H-1.538ZM-1.077 6.923H1.077V20H-1.077ZM-1.538 -9.231H1.538V-6.923H-1.538ZM-1.077 -6.923H1.077V-20H-1.077Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -20 20)
+    pin:2(at: 0 20)
+    pin:3(at: 0 -20)
+    pin:4(at: -20 -20)
+    path:body("M-18.492 -9.231H-1.508A0.738 0.738 0 0 1 -0.769 -8.492V8.492A0.738 0.738 0 0 1 -1.508 9.231H-18.492A0.738 0.738 0 0 1 -19.231 8.492V-8.492A0.738 0.738 0 0 1 -18.492 -9.231Z") {
+        fill = black
+    }
+    path:notch("M-19.231 -2.215A2.215 2.215 0 0 1 -19.231 2.215Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-17.311 6.111A1.2 1.2 0 1 0 -14.911 6.111A1.2 1.2 0 1 0 -17.311 6.111Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: -10 0, size: 12.923 x 4.154) {
+        fill = silver
+        text = marking
+    }
+}

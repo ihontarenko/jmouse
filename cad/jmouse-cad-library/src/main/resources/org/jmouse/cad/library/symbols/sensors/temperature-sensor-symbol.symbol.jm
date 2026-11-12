@@ -2,7 +2,7 @@ symbol:temperature-sensor-symbol("Temperature sensor, analog output") {
     meta {
         summary: "A temperature sensor with a voltage output, as drawn on a schematic: a body marked with a thermometer, the supply above, ground below and the output to the right"
         code: "SY.SENSOR:TEMPERATURE-VOLTAGE"
-        category: circuits
+        category: sensors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

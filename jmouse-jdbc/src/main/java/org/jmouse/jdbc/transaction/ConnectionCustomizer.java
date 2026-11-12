@@ -1,13 +1,11 @@
 package org.jmouse.jdbc.transaction;
 
-import org.jmouse.transaction.TransactionDefinition;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.jmouse.transaction.TransactionDefinition;
 
 @FunctionalInterface
 public interface ConnectionCustomizer {
-
     RestoreAction apply(Connection connection, TransactionDefinition definition) throws SQLException;
 
     interface RestoreAction {
@@ -21,9 +19,17 @@ public interface ConnectionCustomizer {
             return () -> {
                 try {
                     this.restore();
-                } finally {
-                    next.restore();
+                } catch (SQLException | RuntimeException | Error failure) {
+                    try {
+                        next.restore();
+                    } catch (SQLException | RuntimeException | Error cleanupFailure) {
+                        if (failure != cleanupFailure) {
+                            failure.addSuppressed(cleanupFailure);
+                        }
+                    }
+                    throw failure;
                 }
+                next.restore();
             };
         }
     }

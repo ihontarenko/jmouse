@@ -3,12 +3,13 @@ package org.jmouse.ai.provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import org.jmouse.http.client.HttpCall;
+import org.jmouse.http.client.HttpCallException;
+import org.jmouse.http.client.HttpReply;
+import org.jmouse.http.client.HttpTransport;
+import org.jmouse.http.client.JdkHttpTransport;
+
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 
@@ -51,10 +52,13 @@ public abstract class HttpChatModel implements ChatModel {
     /** Long enough for a multi-tool-call answer to finish being written. */
     public static final Duration DEFAULT_READ_TIMEOUT = Duration.ofSeconds(60);
 
+    /** How much of an answer a model without a response policy reads: all of it, as it always has. */
+    private static final long UNBOUNDED = Long.MAX_VALUE;
+
     private final ProviderSettingsSource settingsSource;
-    private final HttpClient             httpClient;
+    private final HttpTransport          transport;
     private final Duration               readTimeout;
-    private final HttpResponse.BodyHandler<String> responseBody;
+    private final long                   responseLimit;
 
     protected HttpChatModel(ProviderSettingsSource settingsSource) {
         this(settingsSource, DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -63,20 +67,25 @@ public abstract class HttpChatModel implements ChatModel {
     protected HttpChatModel(
             ProviderSettingsSource settingsSource, Duration connectTimeout, Duration readTimeout) {
 
-        this(settingsSource, connectTimeout, readTimeout, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        this(settingsSource, connectTimeout, readTimeout, UNBOUNDED);
     }
 
     /** Opt-in bounded response admission; legacy constructors retain their prior response behavior. */
     protected HttpChatModel(ProviderSettingsSource settingsSource, ChatHttpPolicy policy) {
-        this(settingsSource, policy.connectTimeout(), policy.responseTimeout(), new BoundedChatResponse(policy.maximumResponseBytes()));
+        this(settingsSource, policy.connectTimeout(), policy.responseTimeout(), policy.maximumResponseBytes());
     }
 
+    /**
+     * The whole call — the answer's body read to its end — takes at most {@code readTimeout}, and reads at most
+     * {@code responseLimit} bytes of it. A redirect is never followed: the credential stays with the provider it was
+     * written for.
+     */
     private HttpChatModel(ProviderSettingsSource settingsSource, Duration connectTimeout, Duration readTimeout,
-                          HttpResponse.BodyHandler<String> responseBody) {
-        this.responseBody   = responseBody;
+                          long responseLimit) {
         this.settingsSource = settingsSource;
         this.readTimeout    = readTimeout;
-        this.httpClient     = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
+        this.responseLimit  = responseLimit;
+        this.transport      = new JdkHttpTransport(connectTimeout, JdkHttpTransport.Redirects.NEVER);
     }
 
     @Override
@@ -161,96 +170,54 @@ public abstract class HttpChatModel implements ChatModel {
     // ── The call, and the three ways it fails ────────────────────────────────────
 
     private Map<String, Object> post(String url, ProviderSettings settings, Map<String, Object> body) {
-        HttpRequest httpRequest = buildRequest(url, settings, body);
-        HttpResponse<String> response;
-
+        HttpCall call = callOf(url, settings, body);
         try {
-            response = send(httpRequest);
-
-        } catch (IOException noAnswer) {
-            for (Throwable failure = noAnswer; failure != null; failure = failure.getCause()) {
-                if (failure instanceof ChatResponseLimitException exceeded) {
-                    throw exceeded;
+            return readAnswer(transport.exchange(call));
+        } catch (HttpCallException noAnswer) {
+            throw switch (noAnswer.failure()) {
+                case RESPONSE_LIMIT -> new ChatResponseLimitException((int) Math.min(Integer.MAX_VALUE, responseLimit));
+                case INTERRUPTED -> new ProviderException(providerName() + " was still answering when this thread was "
+                                                        + "interrupted. Whether it finished is not knowable from here.", noAnswer);
+                case TIMEOUT, TRANSPORT -> {
+                    // Connection refused, a timeout, a name that does not resolve. Nothing arrived, so there is
+                    // no body to explain it and the failure's own sentence is the best there is.
+                    LOGGER.warn("{} did not answer at {}: {}", providerName(), url, noAnswer.getMessage());
+                    yield new ProviderException(providerName() + " is unreachable at " + url + ": " + noAnswer.getMessage()
+                                              + " The remote operation may have happened; do not assume a retry is safe.", noAnswer);
                 }
-            }
-            // Connection refused, a timeout, a name that does not resolve. Nothing arrived, so there is
-            // no body to explain it and the exception's own message is the best there is.
-            LOGGER.warn("{} did not answer at {}: {}", providerName(), url, noAnswer.getMessage());
-
-            throw new ProviderException(providerName() + " is unreachable at " + url + ": "
-                                      + describe(noAnswer) + ". The remote operation may have happened; do not assume a retry is safe.",
-                                        noAnswer);
-
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-
-            throw new ProviderException(providerName() + " was still answering when this thread was "
-                                      + "interrupted. Whether it finished is not knowable from here.",
-                                        interrupted);
-        }
-
-        return readAnswer(response);
-    }
-
-    /** The bounded policy times the whole body future, including a provider stalling after headers. */
-    private HttpResponse<String> send(HttpRequest request) throws IOException, InterruptedException {
-        if (!(responseBody instanceof BoundedChatResponse)) {
-            return httpClient.send(request, responseBody);
-        }
-        var pending = httpClient.sendAsync(request, responseBody);
-        try {
-            return pending.get(readTimeout.toNanos(), java.util.concurrent.TimeUnit.NANOSECONDS);
-        } catch (java.util.concurrent.TimeoutException expired) {
-            pending.cancel(true);
-            throw new java.net.http.HttpTimeoutException("CHAT response deadline reached during body reception.");
-        } catch (java.util.concurrent.ExecutionException failed) {
-            throw new IOException("CHAT HTTP body did not complete.", failed.getCause());
-        } catch (InterruptedException interrupted) {
-            pending.cancel(true);
-            throw interrupted;
+            };
         }
     }
 
-    private HttpRequest buildRequest(String url, ProviderSettings settings, Map<String, Object> body) {
-        HttpRequest.Builder request;
-
+    private HttpCall callOf(String url, ProviderSettings settings, Map<String, Object> body) {
         try {
-            request = HttpRequest.newBuilder(URI.create(url));
-
+            return HttpCall.post(URI.create(url)).headers(headers(settings)).header("accept", "application/json")
+                    .text(Json.write(body), "application/json").timeout(readTimeout).responseLimit(responseLimit).build();
         } catch (IllegalArgumentException notAnAddress) {
             // ⚠️ Thrown synchronously, before anything is sent, and so easy to let escape as an
             // unexplained IllegalArgumentException a long way from the setting that caused it.
             throw new ProviderException(
                     "'" + url + "' is not a usable address for " + providerName() + ": "
-                    + notAnAddress.getMessage() + ". It needs a scheme and a host, e.g. "
+                    + notAnAddress.getMessage() + " It needs a scheme and a host, e.g. "
                     + "'https://api.example.com/v1/messages'.", notAnAddress);
         }
-
-        headers(settings).forEach(request::header);
-
-        return request
-                .header("content-type", "application/json")
-                .header("accept", "application/json")
-                .timeout(readTimeout)
-                .POST(HttpRequest.BodyPublishers.ofString(Json.write(body), StandardCharsets.UTF_8))
-                .build();
     }
 
-    private Map<String, Object> readAnswer(HttpResponse<String> response) {
-        if (response.statusCode() >= 400) {
-            LOGGER.warn("{} refused with {}: {}",
-                    providerName(), response.statusCode(), Json.truncate(response.body()));
+    private Map<String, Object> readAnswer(HttpReply reply) {
+        String body = reply.text();
+        if (reply.status() >= 400) {
+            LOGGER.warn("{} refused with {}: {}", providerName(), reply.status(), Json.truncate(body));
 
-            throw new ProviderException(providerName() + " request failed (" + response.statusCode()
-                                      + "): " + describeProviderError(response.body()));
+            throw new ProviderException(providerName() + " request failed (" + reply.status()
+                                      + "): " + describeProviderError(body));
         }
 
-        if (response.body() == null || response.body().isBlank()) {
-            throw new ProviderException(providerName() + " answered " + response.statusCode()
+        if (body.isBlank()) {
+            throw new ProviderException(providerName() + " answered " + reply.status()
                                       + " with an empty body, so there is nothing to read.");
         }
 
-        return Json.readMap(response.body(), providerName());
+        return Json.readMap(body, providerName());
     }
 
     /**
@@ -270,10 +237,4 @@ public abstract class HttpChatModel implements ChatModel {
                 .orElseGet(() -> Json.truncate(body));
     }
 
-    /** An exception whose message is sometimes only a hostname, which on its own explains nothing. */
-    private String describe(Exception failure) {
-        return failure.getMessage() == null
-                ? failure.getClass().getSimpleName()
-                : failure.getClass().getSimpleName() + " (" + failure.getMessage() + ")";
-    }
 }

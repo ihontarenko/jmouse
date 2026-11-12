@@ -8,8 +8,10 @@ component:bridge-rectifier("Bridge rectifier, 1 A 400 V", type: rectifier-bridge
         summary: "Four junctions in one package: + and − out of two alternating inputs, two forward drops in the path"
         source: "typical 1 A, 400 V glass-passivated bridge (W04M class): VF 1.0 V max at 1 A per element"
         package: "WOM"
-        category: circuits
+        category: diodes
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -23,7 +25,7 @@ component:bridge-rectifier("Bridge rectifier, 1 A 400 V", type: rectifier-bridge
     parameter:T_nominal(298.15 K, "the temperature the figures above are measured at")
     parameter:saturation_temperature_exponent(3, "XTI: how steeply I_saturation follows the temperature")
     parameter:E_gap(1.11 V, "silicon's band gap, in volts")
-    # How it warms and where it gives up (WOM on a board: RθJA about 40 K/W, TJ max 150 °C).
+    # How it warms and where it gives up (WOM on a pcb: RθJA about 40 K/W, TJ max 150 °C).
     parameter:thermal_resistance(40 K/W, "kelvin above the bench per watt it takes")
     parameter:thermal_time_constant(5 s, "how fast it warms to that")
     parameter:T_maximum(150 °C, "past this it fails on a realistic bench")
@@ -38,7 +40,15 @@ component:bridge-rectifier("Bridge rectifier, 1 A 400 V", type: rectifier-bridge
     node:j3("junction from − to ac1")
     node:j4("junction from − to ac2")
 
-    symbol(uses: bridge-rectifier-symbol) {
+
+    # Its round WOM case: + and − across one diagonal of its square of leads, the inputs across the other.
+    footprint("FP.BRIDGE:WOM") {
+        pad:1(plus)
+        pad:2(ac1)
+        pad:3(minus)
+        pad:4(ac2)
+    }
+    symbol(uses: "SY.DIODE:BRIDGE") {
         bind:failed(failed)
         # Current into ac1 is carried by one diagonal, current into ac2 by the other: each against the rating.
         bind:pair_a(max(0, ac1.current) / I_forward_maximum)

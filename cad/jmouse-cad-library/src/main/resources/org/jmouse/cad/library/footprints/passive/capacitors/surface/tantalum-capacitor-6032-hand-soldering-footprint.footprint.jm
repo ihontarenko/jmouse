@@ -1,0 +1,22 @@
+footprint:tantalum-capacitor-6032-hand-soldering-footprint("Tantalum capacitor Case C (6032-28 metric), hand soldering") {
+    meta {
+        summary: "Tantalum capacitor, Case C (6032-28 metric) body, pads lengthened for a soldering iron; pad 1 is the positive terminal"
+        code: "FP.CHIP:CT6032-HAND"
+        category: capacitors-surface
+        tags: electronics, footprint, surface
+        source: "EIA-535-BAAC case sizes (KEMET T491), Case C (6032-28 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#tantalum-6032-28 and the land pattern rules; regenerate, never edit.
+    # Body 5.7…6.3 × 3…3.4, terminal 1…1.6; fillets toe 0.55, heel 0, side 0.05.
+    # Z = 7.41, G = 2.874, X = 3.515; pad 2.25 × 3.55 centred at ±2.55.
+    pad:1(surface, rounded-rectangle, at: -2.55 0, size: 2.25 x 3.55, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 2.55 0, size: 2.25 x 3.55, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-3 -1.6H3V1.6H-3Z")
+    outline(silkscreen, width: 0.12, "M-1.165 -2.035H1.165M-1.165 2.035H1.165")
+    outline(silkscreen, width: 0.12, "M-3.935 -1.885V1.885")
+    outline(courtyard, width: 0.05, "M-4.2 -2.3H4.2V2.3H-4.2Z")
+    body(height: 2.8)
+    model("MD.CHIP:CT6032-HAND")
+}

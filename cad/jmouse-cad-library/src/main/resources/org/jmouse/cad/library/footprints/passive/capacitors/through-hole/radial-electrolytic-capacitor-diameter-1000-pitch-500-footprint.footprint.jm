@@ -2,7 +2,7 @@ footprint:radial-electrolytic-capacitor-diameter-1000-pitch-500-footprint("Radia
     meta {
         summary: "Radial electrolytic capacitor, 10 mm can, leads 5 mm apart; pin 1 is the positive lead"
         code: "FP.RADIAL:CP-D10-P5"
-        category: circuits
+        category: capacitors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:radial-electrolytic-capacitor-diameter-1000-pitch-500-footprint("Radia
     outline(silkscreen, width: 0.12, "M-5.11 0A5.11 5.11 0 1 0 5.11 0A5.11 5.11 0 1 0 -5.11 0Z")
     outline(silkscreen, width: 0.12, "M-4.62 -1.64H-3.66M-4.14 -2.12V-1.16")
     outline(courtyard, width: 0.05, "M-5.5 -5.5H5.5V5.5H-5.5Z")
+    body(height: 16)
+    model("MD.RADIAL:CP-D10-P5")
 }

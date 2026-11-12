@@ -1,0 +1,8 @@
+category:thermistors("Thermistors") {
+    meta {
+        category: passive
+        order: 6
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

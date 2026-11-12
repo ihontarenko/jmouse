@@ -1,0 +1,17 @@
+model:axial-resistor-body-0414-pitch-508-vertical-model("Axial resistor DIN 0414, vertical, 5.08 mm") {
+    meta {
+        summary: "Axial resistor DIN 0414, vertical, 5.08 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:R0414-P5.08-V"
+        category: resistors-through-hole
+        tags: electronics, model, axial
+        source: "IEC 60286-1 bodies, DIN 44051 size codes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(lacquer, profile: [0, -5.95, 1.688, -5.95, 2.25, -5.387, 2.25, -3.57, 1.935, -3.255, 1.935, 3.255, 2.25, 3.57, 2.25, 5.388, 1.688, 5.95, 0, 5.95], at: [-2.54, 0, 5.95])
+    marking(bands, on: round, radius: 1.945, length: 6.51, at: [-2.54, 0, 5.95])
+    cylinder(tin, radius: 0.35, length: 1.6, at: [-2.54, 0, -0.8])
+    cylinder(tin, radius: 0.35, length: 1, at: [-2.54, 0, 12.4])
+    cylinder(tin, radius: 0.35, length: 14.5, at: [2.54, 0, 5.65])
+    cylinder(tin, radius: 0.35, length: 5.08, at: [0, 0, 12.9], rotate: [0, 90, 0])
+}

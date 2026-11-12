@@ -29,7 +29,7 @@ public record LandPatternRules(LibraryFiling filing, Map<String, Fillets> fillet
     public record Fillets(double toe, double heel, double side, double courtyard) {
     }
 
-    /** What the board's making and the part's placing add to a land — IPC-7351's F and P —, and the least copper gap between neighbouring pads. */
+    /** What the pcb's making and the part's placing add to a land — IPC-7351's F and P —, and the least copper gap between neighbouring pads. */
     public record Tolerances(double fabrication, double placement, double padGap) {
     }
 

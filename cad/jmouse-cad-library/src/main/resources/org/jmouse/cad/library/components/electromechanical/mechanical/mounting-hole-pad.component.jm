@@ -6,10 +6,14 @@ component:mounting-hole-pad("Mounting hole with pad", type: mechanical) {
         summary: "Plated mounting hole tied to a net"
         source: "generic M3 plated mounting hole; no electrical behaviour"
         package: "MountingHole_3.2mm_M3_Pad"
-        category: circuits
+        category: mechanical
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:pad(analog, 1, "the pad around the hole")
 
-    symbol(uses: mounting-hole-symbol)
+    footprint("FP.MH:M3-PAD")
+
+    symbol(uses: "SY.MECHANICAL:MOUNTING-HOLE")
 }

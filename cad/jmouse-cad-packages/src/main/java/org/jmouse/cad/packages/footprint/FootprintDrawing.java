@@ -1,23 +1,40 @@
 package org.jmouse.cad.packages.footprint;
 
-import org.jmouse.cad.board.FootprintLines;
+import org.jmouse.cad.pcb.FootprintLines;
+import org.jmouse.cad.packages.PackageTable;
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.svg.path.node.PathData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 /**
  * The copper and the lines of a generated footprint, before they are its document's lines: its pads, then its outlines,
- * in the order they are written.
+ * in the order they are written, and the package's body when its table says how high it stands.
+ *
+ * @param bodyHeight millimetres the package stands over the pcb; empty when its table does not say
  */
-public record FootprintDrawing(List<Pad> pads, List<Outline> outlines) {
+public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, OptionalDouble bodyHeight) {
 
     public FootprintDrawing {
         pads = List.copyOf(pads);
         outlines = List.copyOf(outlines);
     }
+
+    /** A footprint whose table says nothing of its body's height. */
+    public FootprintDrawing(List<Pad> pads, List<Outline> outlines) {
+        this(pads, outlines, OptionalDouble.empty());
+    }
+
+    /** A footprint of a package whose table writes {@code body-height}, when it does. */
+    public FootprintDrawing(List<Pad> pads, List<Outline> outlines, PackageTable outline) {
+        this(pads, outlines, outline.has(BODY_HEIGHT) ? OptionalDouble.of(outline.length(BODY_HEIGHT)) : OptionalDouble.empty());
+    }
+
+    /** The field a package table writes its body's height in: the most it stands over the pcb. */
+    private static final String BODY_HEIGHT = "body-height";
 
     /** How a pad is made, as a footprint's line says it. */
     public enum PadType {
@@ -72,6 +89,7 @@ public record FootprintDrawing(List<Pad> pads, List<Outline> outlines) {
         for (Outline outline : outlines) {
             lines.add(outlineLine(outline, lines.isEmpty() ? notes : List.of()));
         }
+        bodyHeight.ifPresent(height -> lines.add(FootprintLines.body(height, List.of())));
         return lines;
     }
 

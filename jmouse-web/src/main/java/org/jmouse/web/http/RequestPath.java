@@ -23,7 +23,6 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
 public record RequestPath(String contextPath, String servletPath, String path) {
-
     /**
      * 💾 Request attribute name for caching {@link RequestPath} instance in servlet request.
      */
@@ -37,9 +36,9 @@ public record RequestPath(String contextPath, String servletPath, String path) {
      */
     public static RequestPath ofRequest(HttpServletRequest request) {
         return new RequestPath(
-                request.getContextPath(),
-                request.getServletPath(),
-                request.getPathInfo()
+            request.getContextPath(),
+            request.getServletPath(),
+            request.getPathInfo() != null ? request.getPathInfo() : request.getServletPath()
         );
     }
 }

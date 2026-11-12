@@ -2,7 +2,7 @@ footprint:test-point-pad-diameter-075-footprint("Test point, 0.75 mm pad") {
     meta {
         summary: "A bare round pad 0.75 mm across, for a probe"
         code: "FP.TP:D0.75"
-        category: circuits
+        category: test-points
         tags: electronics, footprint, surface
         source: "Probe pad sizes, IPC-9252"
         authors: "jMouse"

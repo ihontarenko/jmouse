@@ -6,6 +6,7 @@ import org.jmouse.storage.configuration.StorageSettings;
 import org.jmouse.storage.configuration.UploadSettings;
 import org.jmouse.storage.exception.UploadRejectedException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -279,6 +280,32 @@ public final class UploadPolicy {
      */
     public AcceptanceMode mode() {
         return mode;
+    }
+
+    /**
+     * ➕ This policy, accepting these types and extensions as well — what the parts an application is built of read: a
+     * plugin's formats, added only while it runs.
+     *
+     * <p>⚠️ <strong>Only an allowlist is widened.</strong> Under a denylist the same entries would be refused, the
+     * opposite of what was asked; there they are accepted already unless somebody refused them, so the policy is
+     * returned as it is.</p>
+     *
+     * @param moreContentTypes bare {@code type/subtype} values
+     * @param moreExtensions   extensions without their dot
+     * @return the widened policy, or this one under a denylist or with nothing to add
+     */
+    public UploadPolicy accepting(Set<String> moreContentTypes, Set<String> moreExtensions) {
+        if (mode != AcceptanceMode.ALLOW_LIST || (moreContentTypes.isEmpty() && moreExtensions.isEmpty())) {
+            return this;
+        }
+
+        Set<String> types = new HashSet<>(contentTypes);
+        types.addAll(moreContentTypes);
+
+        Set<String> allExtensions = new HashSet<>(extensions);
+        allExtensions.addAll(moreExtensions);
+
+        return new UploadPolicy(mode, types, allExtensions, maxSizeBytes, reason);
     }
 
     /**

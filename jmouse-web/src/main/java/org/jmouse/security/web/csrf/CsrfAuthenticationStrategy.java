@@ -6,6 +6,7 @@ import org.jmouse.web.http.RequestContextKeeper;
 
 /** Rotates the synchronizer token after authentication, before a redirect or response commits. */
 public final class CsrfAuthenticationStrategy implements SessionAuthenticateHandler {
+
     private final CsrfTokenRepository repository;
     private final boolean allowSessionCreation;
 
@@ -16,7 +17,11 @@ public final class CsrfAuthenticationStrategy implements SessionAuthenticateHand
 
     @Override
     public void onAuthentication(Authentication authentication, RequestContextKeeper keeper) {
-        if (repository.requiresSession() && !allowSessionCreation && keeper.request().getSession(false) == null) {
+        if (
+            repository.requiresSession() &&
+            !allowSessionCreation &&
+            keeper.request().getSession(false) == null
+        ) {
             return;
         }
         repository.clear(keeper.request(), keeper.response());

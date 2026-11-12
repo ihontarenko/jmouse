@@ -5,7 +5,7 @@ portrait:relay-portrait("Relay") {
     meta {
         summary: "An open-frame relay: the armature pulls down onto the normally-open contact while the coil is energized"
         code: "PT.RELAY:OPEN-FRAME"
-        category: circuits
+        category: electromechanical
         tags: electronics, portrait, relay, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

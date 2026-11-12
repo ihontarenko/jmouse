@@ -11,8 +11,7 @@ public final class TransactionContextAccessSupport {
 
     private static volatile TransactionContextHolder HOLDER = new ThreadBoundTransactionContextHolder();
 
-    private TransactionContextAccessSupport() {
-    }
+    private TransactionContextAccessSupport() {}
 
     public static void register(TransactionContextHolder contextHolder) {
         HOLDER = Verify.argument(contextHolder, "contextHolder");

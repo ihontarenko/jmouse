@@ -2,7 +2,7 @@ footprint:msop-10-exposed-pad-footprint("MSOP-10, 3 mm body") {
     meta {
         summary: "10-lead MSOP, 3 mm body, 0.5 mm pitch, exposed pad, gull-wing, 0.5 mm pitch, body 3 × 3 mm"
         code: "FP.MSOP:10-P0.5-EP"
-        category: circuits
+        category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-187 BA-T"
         authors: "jMouse"
@@ -25,4 +25,6 @@ footprint:msop-10-exposed-pad-footprint("MSOP-10, 3 mm body") {
     outline(fabrication, width: 0.1, "M-0.5 -1.5H1.5V1.5H-1.5V-0.5Z")
     outline(silkscreen, width: 0.12, "M-2.875 -1.61H1.5M-1.5 1.61H1.5")
     outline(courtyard, width: 0.05, "M-3.15 -1.75H3.15V1.75H-3.15Z")
+    body(height: 1.1)
+    model("MD.MSOP:10-P0.5-EP")
 }

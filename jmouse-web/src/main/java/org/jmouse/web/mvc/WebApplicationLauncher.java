@@ -1,21 +1,22 @@
 package org.jmouse.web.mvc;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
 import org.jmouse.beans.WarmupEagerBeansContextInitializer;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.FeatureSelectorBeanContextInitializer;
-import org.jmouse.web.WebLauncher;
-import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.WebApplicationFactory;
+import org.jmouse.web.WebLauncher;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 import org.jmouse.web.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
-
-import java.util.List;
 
 /**
  * 🚀 Default implementation of {@link WebLauncher} for bootstrapping
@@ -35,6 +36,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
      * 📦 Application entry classes (annotated configs, bootstraps, etc.).
      */
     private final Class<?>[] applicationClasses;
+    private Consumer<WebBeanContext> contextCustomizer = context -> {};
 
     /**
      * 🏗️ Create launcher with given application base classes.
@@ -42,7 +44,13 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
      * @param applicationClasses annotated application entry points
      */
     public WebApplicationLauncher(Class<?>... applicationClasses) {
-        this.applicationClasses = applicationClasses;
+        this.applicationClasses = applicationClasses.clone();
+    }
+
+    /** Customizes discovered definitions before eager initialization and server creation. */
+    public WebApplicationLauncher configureContext(Consumer<WebBeanContext> customizer) {
+        this.contextCustomizer = Objects.requireNonNull(customizer, "customizer");
+        return this;
     }
 
     /**
@@ -61,12 +69,10 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
     @Override
     public WebBeanContext launch(String... arguments) {
         ApplicationFactory<WebBeanContext> factory = new WebApplicationFactory();
-        WebBeanContext                     context = factory.createRootContext();
+        WebBeanContext context = factory.createRootContext();
 
         context.addInitializer(new BeanScanAnnotatedContextInitializer());
-        context.addInitializer(new WarmupEagerBeansContextInitializer());
         context.addInitializer(new ApplicationContextBeansScanner());
-        context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         context.addInitializer(new WebMvcControllersInitializer());
         context.addInitializer(new WebMvcInfrastructureInitializer());
         context.addInitializer(new FeatureSelectorBeanContextInitializer());
@@ -74,9 +80,26 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         context.addBaseClasses(applicationClasses);
         context.refresh();
 
+        contextCustomizer.accept(context);
+        context.addInitializer(new WarmupEagerBeansContextInitializer());
+        context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
+        context.refresh();
         warmup(context);
 
-        createWebServer(context).start();
+        WebServer server = createWebServer(context);
+        try {
+            context.registerBean(WebServer.class, server);
+            server.start();
+        } catch (RuntimeException | Error failure) {
+            try {
+                server.close();
+            } catch (RuntimeException | Error cleanupFailure) {
+                if (failure != cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+            }
+            throw failure;
+        }
 
         return context;
     }
@@ -89,12 +112,13 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
      */
     @Override
     public WebServer createWebServer(WebBeanContext context) {
-        List<WebApplicationInitializer> registrationBeans =
-                WebBeanContext.getBeansOfType(WebApplicationInitializer.class, context);
+        List<WebApplicationInitializer> registrationBeans = WebBeanContext.getBeansOfType(
+            WebApplicationInitializer.class,
+            context
+        );
 
         WebServerFactory factory = context.getBean(WebServerFactory.class);
 
         return factory.createWebServer(registrationBeans.toArray(WebApplicationInitializer[]::new));
     }
-
 }

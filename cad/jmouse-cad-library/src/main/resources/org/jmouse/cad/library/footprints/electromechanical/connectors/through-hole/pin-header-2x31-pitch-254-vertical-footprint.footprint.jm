@@ -2,7 +2,7 @@ footprint:pin-header-2x31-pitch-254-vertical-footprint("Pin header, 2.54 mm pitc
     meta {
         summary: "Pin header, 2.54 mm pitch, 2 rows of 31, upright, through-hole"
         code: "FP.HDR:2X31-P2.54-V"
-        category: circuits
+        category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60603-13 grid"
         authors: "jMouse"
@@ -76,4 +76,6 @@ footprint:pin-header-2x31-pitch-254-vertical-footprint("Pin header, 2.54 mm pitc
     outline(silkscreen, width: 0.12, "M-2.65 -39.48H2.65V39.48H-2.65Z")
     outline(silkscreen, filled, "M-3.45 -38.1A0.3 0.3 0 1 0 -2.85 -38.1A0.3 0.3 0 1 0 -3.45 -38.1Z")
     outline(courtyard, width: 0.05, "M-3.05 -39.85H3.05V39.85H-3.05Z")
+    body(height: 8.5)
+    model("MD.HDR:2X31-P2.54-V")
 }

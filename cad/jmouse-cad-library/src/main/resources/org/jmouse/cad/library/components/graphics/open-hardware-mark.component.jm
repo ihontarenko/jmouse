@@ -1,0 +1,15 @@
+component:open-hardware-mark("Open hardware mark") {
+    meta {
+        designator: G
+        summary: "The open hardware gear, for a design that is shared as open hardware: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:OPEN-HARDWARE-10")
+    footprint("FP.GRAPHIC:OPEN-HARDWARE-5")
+    footprint("FP.GRAPHIC:OPEN-HARDWARE-20")
+
+    symbol(uses: "SY.GRAPHIC:OPEN-HARDWARE") {
+    }
+}

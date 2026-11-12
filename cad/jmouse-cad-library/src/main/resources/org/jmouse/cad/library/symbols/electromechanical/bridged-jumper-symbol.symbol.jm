@@ -2,7 +2,7 @@ symbol:bridged-jumper-symbol("Jumper, bridged") {
     meta {
         summary: "A jumper closed by its bridge, as drawn on a schematic: two pads and the solder or link that joins them — a connection that can be cut"
         code: "SY.JUMPER:BRIDGED"
-        category: circuits
+        category: electromechanical
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

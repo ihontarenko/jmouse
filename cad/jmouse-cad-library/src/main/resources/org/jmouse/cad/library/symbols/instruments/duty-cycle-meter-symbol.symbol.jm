@@ -2,7 +2,7 @@ symbol:duty-cycle-meter-symbol("Duty cycle meter") {
     meta {
         summary: "Duty cycle meter, as drawn on a schematic: a dial marked with one pulse"
         code: "SY.METER:DUTY-CYCLE"
-        category: circuits
+        category: instruments
         tags: electronics, schematic, instrument
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

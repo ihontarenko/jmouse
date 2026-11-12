@@ -1,0 +1,13 @@
+footprint:jmcad-5mm-footprint("jmCAD, 5 mm") {
+    meta {
+        summary: "The jmCAD mark: this board was laid out in jmCAD, printed 5 mm wide"
+        code: "FP.GRAPHIC:JMCAD-5"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, filled, "M0.703 -1.875H-0.781C-1.523 -1.875 -1.875 -1.484 -1.875 -0.781V0.703H-0.937V-0.664C-0.937 -0.859 -0.859 -0.937 -0.664 -0.937H0.703Z")
+    outline(silkscreen, filled, "M-0.703 1.875H0.781C1.523 1.875 1.875 1.484 1.875 0.781V-0.703H0.938V0.664C0.938 0.859 0.859 0.938 0.664 0.938H-0.703Z")
+    outline(silkscreen, filled, "M-0.35 0C-0.35 -0.193 -0.193 -0.35 0 -0.35C0.193 -0.35 0.35 -0.193 0.35 0C0.35 0.193 0.193 0.35 0 0.35C-0.193 0.35 -0.35 0.193 -0.35 0Z")
+}

@@ -1,5 +1,7 @@
 package org.jmouse.security.authentication.dao;
 
+import java.util.Arrays;
+import java.util.Objects;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.BadCredentialsException;
 import org.jmouse.security.UserPrincipal;
@@ -10,15 +12,13 @@ import org.jmouse.security.authentication.AuthenticationException;
 import org.jmouse.security.authentication.UsernamePasswordAuthentication;
 import org.jmouse.security.password.PasswordEncoder;
 import org.jmouse.security.password.Pbkdf2Sha256PasswordEncoder;
-import java.util.Arrays;
-import java.util.Objects;
 
 /** Validates enabled local users and returns an authenticated principal without password material. */
 public class DaoAuthenticationResolver extends AbstractUsernamePasswordAuthenticationResolver {
+
     private PasswordEncoder passwordEncoder = new Pbkdf2Sha256PasswordEncoder();
 
-    public DaoAuthenticationResolver() {
-    }
+    public DaoAuthenticationResolver() {}
 
     public DaoAuthenticationResolver(UserPrincipalService service, PasswordEncoder encoder) {
         setPrincipalService(Objects.requireNonNull(service, "principalService"));
@@ -35,7 +35,9 @@ public class DaoAuthenticationResolver extends AbstractUsernamePasswordAuthentic
             throw new AuthenticationException("Unsupported authentication type");
         }
         if (getPrincipalService() == null) {
-            throw new IllegalStateException("UserPrincipalService must be configured for password authentication");
+            throw new IllegalStateException(
+                "UserPrincipalService must be configured for password authentication"
+            );
         }
         if (supplied.getName() == null || supplied.getName().isBlank()) {
             throw new BadCredentialsException("Invalid credentials");
@@ -65,7 +67,11 @@ public class DaoAuthenticationResolver extends AbstractUsernamePasswordAuthentic
             Arrays.fill(password, '\0');
         }
         UserPrincipal publicPrincipal = UserPrincipal.create(
-                principal.username(), null, java.util.List.copyOf(principal.authorities()), principal.enabled());
+            principal.username(),
+            null,
+            java.util.List.copyOf(principal.authorities()),
+            principal.enabled()
+        );
         return new UsernamePasswordAuthentication(publicPrincipal, null, principal.authorities());
     }
 }

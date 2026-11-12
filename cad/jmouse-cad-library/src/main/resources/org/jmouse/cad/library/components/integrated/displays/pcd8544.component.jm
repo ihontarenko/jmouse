@@ -12,8 +12,10 @@ component:pcd8544("PCD8544 LCD module", type: display) {
         summary: "84×48 monochrome LCD on SPI (Nokia 5110): six banks of display memory, basic and extended instructions"
         source: "Philips PCD8544 data sheet (1999 Apr 12): serial interface (§8.1, D/C read at the eighth bit), instruction set table 1 (function set 20h + PD V H; display control 08h + D E; set Y 40h + bank; set X 80h + column; Vop 80h + value in the extended set), addressing (§7.7, figs. 5–6), reset state (§8.2: PD = 1, D = E = 0, H = V = 0, X = Y = 0, Vop = 0); the 8-pin Nokia 5110 module. Not modelled: the display mode 'all segments on' (D = 0, E = 1), temperature coefficient, bias, the backlight pin"
         package: "Nokia 5110 module, 8 pins"
-        category: circuits
+        category: displays
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -26,7 +28,9 @@ component:pcd8544("PCD8544 LCD module", type: display) {
     pin:light(analog, 7, "BL, the backlight: not modelled")
     pin:GND(ground, 8)
 
-    symbol(uses: lcd-84x48-symbol)
+    footprint("FP.HDR:1X8-P2.54-V")
+
+    symbol(uses: "SY.DISPLAY:LCD-84X48")
 
     state:memory[504](0, discrete, "the display memory: six banks of 84 bytes, each byte eight pixels down")
     state:bits(0, discrete, "bits of the byte shifted in so far")

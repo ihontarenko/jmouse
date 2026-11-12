@@ -69,9 +69,6 @@ mvn clean install
 # Build and install specific modules
 mvn clean install -pl jmouse-beans,jmouse-context
 
-# Build the demo web app
-mvn clean package -pl wep-app
-
 # Publish to Maven Central (needs GPG key)
 mvn clean deploy -pl jmouse-beans,jmouse-context
 ```
@@ -81,16 +78,6 @@ mvn clean deploy -pl jmouse-beans,jmouse-context
 There are **no JUnit tests**. Integration tests live as `smoke` classes inside `src/main/java` under `*/smoke/` sub-packages (e.g., `PipelineSmoke`, `Smoke1`, `SmokeA`, `StorageSmoke`). These are run manually by executing their `main` methods.
 
 Note that `mvn install` needs `-Dgpg.skip=true` unless a GPG key is configured, since the parent binds `maven-gpg-plugin` to `verify`.
-
-## Running the Demo App
-
-The `wep-app` module is the reference application. It embeds Tomcat:
-
-```bash
-java -cp wep-app/target/... org.jmouse.app.Application
-```
-
-Or call `new WebApplicationLauncher(Application.class).launch(args)` directly.
 
 ## Module Architecture
 
@@ -158,7 +145,6 @@ jmouse-web            Web MVC + embedded Tomcat — dispatcher, adapters, view e
                       resource handling, web security filter chain. Keeps the
                       servlet-bound wrappers (request/response/session/context)
 jmouse-crawler        Web crawler/scraper — JSoup, JsonPath, DLQ, politeness scheduler
-wep-app               Demo application (references all major subsystems)
 ```
 
 ## Key Coding Patterns
@@ -170,8 +156,6 @@ wep-app               Demo application (references all major subsystems)
 **Fluent lambda configurers** — `HttpSecurity`, `WebContextBuilder`, `PipelineDefinitions.pipeline(...)` use `Consumer<Builder>` style.
 
 **Logback is optional** — every module declares `logback-classic` as `<optional>true</optional>`; the consumer provides their own SLF4J binding.
-
-**Java 21 preview features** — `wep-app` enables `--enable-preview`; STR template literals appear in source files.
 
 **Typo in package name** — `jmouse-materializer` uses `org.jmouse.meterializer` (not `materializer`). Do not fix without confirming intent.
 

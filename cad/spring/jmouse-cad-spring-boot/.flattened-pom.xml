@@ -7,7 +7,7 @@
   <version>1.0.1</version>
   <name>jMouse - CAD Spring Boot</name>
   <description>Spring Boot auto-configuration for jmCAD: the catalogue schema, migrated before the product's, its stores over the application's persistence context, the shipped library imported on start, and the application services (org.jmouse.cad.store) with their transactions</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-spring-boot</url>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-spring-boot</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -29,6 +29,18 @@
   <dependencies>
     <dependency>
       <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-settings</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-folder</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
       <artifactId>jmouse-cad-jpa</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
@@ -36,6 +48,12 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-cad-library</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-vault</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
@@ -50,6 +68,13 @@
       <artifactId>jmouse-cad-exchange</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-storage-management</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>tools.jackson.core</groupId>

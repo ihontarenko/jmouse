@@ -1,0 +1,8 @@
+category:inductors-surface("Surface mount") {
+    meta {
+        category: inductors
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

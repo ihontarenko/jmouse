@@ -1,0 +1,8 @@
+category:packages("Packages") {
+    meta {
+        summary: "Footprints, portraits and 3D models many kinds of part share"
+        order: 14
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

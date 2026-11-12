@@ -9,14 +9,14 @@ import java.util.Properties;
  */
 public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 
-    public static final String     USER     = "user";
-    public static final String     PASSWORD = "password";
-    private             String     username;
-    private             String     password;
-    private             String     url;
-    private             String     catalog;
-    private             String     schema;
-    private             Properties connectionProperties;
+    public static final String USER = "user";
+    public static final String PASSWORD = "password";
+    private String username;
+    private String password;
+    private String url;
+    private String catalog;
+    private String schema;
+    private Properties connectionProperties;
 
     public String getUsername() {
         return username;
@@ -39,7 +39,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
     }
 
     public void setUrl(String url) {
-        this.url = (url != null ? url.trim() : null);
+        this.url = url != null ? url.trim() : null;
     }
 
     public String getCatalog() {
@@ -59,11 +59,11 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
     }
 
     public Properties getConnectionProperties() {
-        return connectionProperties;
+        return copyProperties(connectionProperties);
     }
 
     public void setConnectionProperties(Properties connectionProperties) {
-        this.connectionProperties = connectionProperties;
+        this.connectionProperties = copyProperties(connectionProperties);
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
         Properties driverProperties = new Properties();
-        Properties properties       = getConnectionProperties();
+        Properties properties = getConnectionProperties();
 
         if (properties != null) {
             driverProperties.putAll(properties);
@@ -86,16 +86,43 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
             driverProperties.setProperty(PASSWORD, password);
         }
 
+        if (url == null || url.isBlank()) {
+            throw new SQLException("JDBC URL must not be blank");
+        }
         Connection connection = getConnectionFor(driverProperties);
-
-        if (catalog != null) {
-            connection.setCatalog(catalog);
+        if (connection == null) {
+            throw new SQLException("JDBC driver returned no connection");
         }
-        if (schema != null) {
-            connection.setSchema(schema);
+        try {
+            if (catalog != null) {
+                connection.setCatalog(catalog);
+            }
+            if (schema != null) {
+                connection.setSchema(schema);
+            }
+            return connection;
+        } catch (SQLException | RuntimeException | Error failure) {
+            try {
+                connection.close();
+            } catch (SQLException | RuntimeException | Error closeFailure) {
+                if (failure != closeFailure) {
+                    failure.addSuppressed(closeFailure);
+                }
+            }
+            throw failure;
         }
+    }
 
-        return connection;
+    private static Properties copyProperties(Properties properties) {
+        if (properties == null) {
+            return null;
+        }
+        Properties copy = new Properties();
+        properties.forEach(copy::put);
+        for (String name : properties.stringPropertyNames()) {
+            copy.setProperty(name, properties.getProperty(name));
+        }
+        return copy;
     }
 
     protected abstract Connection getConnectionFor(Properties properties) throws SQLException;

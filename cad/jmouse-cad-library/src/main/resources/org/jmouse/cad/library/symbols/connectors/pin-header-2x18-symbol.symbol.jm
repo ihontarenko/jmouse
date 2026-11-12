@@ -1,8 +1,8 @@
 symbol:pin-header-2x18-symbol("Pin header, 2 x 18") {
     meta {
-        summary: "A two-row pin header of 36, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+        summary: "A two-row pin header of 36, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the pcb"
         code: "SY.HDR:2X18"
-        category: circuits
+        category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

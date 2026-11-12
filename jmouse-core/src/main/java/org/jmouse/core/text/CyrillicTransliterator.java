@@ -1,7 +1,6 @@
 package org.jmouse.core.text;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -77,37 +76,14 @@ public final class CyrillicTransliterator implements Transliterator {
         TABLE.put("ъ", "");
     }
 
-    /**
-     * ⚠️ Lower-cased first, so the table needs one entry per letter rather than two.
-     *
-     * <p>
-     * Everything downstream of a transliteration — a slug, a comparison key — is case-insensitive
-     * anyway, so folding case here costs nothing and halves the table. A caller that needs the case
-     * preserved needs a different table, not a flag.
-     * </p>
-     */
+    private static final LetterTable LETTERS = new LetterTable(TABLE);
+
+    /** Each letter of the table, its case kept ({@link LetterTable}). */
     @Override
     public String toLatin(String text) {
         if (text == null || text.isEmpty()) {
             return text;
         }
-
-        String        lowered = text.toLowerCase(Locale.ROOT);
-        StringBuilder latin   = new StringBuilder(lowered.length() * 2);
-
-        /*
-          ⚠️ Character by character rather than a chain of `replace` calls over the whole string.
-
-          A sequence of replacements re-reads its own output: `ц` becomes `ts`, and a later rule for
-          `с` would then find the `s` this rule just wrote. One pass over the input cannot do that.
-         */
-        for (int at = 0; at < lowered.length(); at++) {
-            String single = lowered.substring(at, at + 1);
-            String mapped = TABLE.get(single);
-
-            latin.append(mapped != null ? mapped : single);
-        }
-
-        return latin.toString();
+        return LETTERS.toLatin(text);
     }
 }

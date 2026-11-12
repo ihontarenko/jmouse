@@ -123,7 +123,7 @@ final class SmallOutlineFootprints implements FootprintFamily {
                         + "; fillets toe " + written(fillets.toe()) + ", heel " + written(fillets.heel()) + ", side " + written(fillets.side()) + ".",
                 "Z = " + written(land.outer()) + ", G = " + written(land.inner()) + ", X = " + written(land.width())
                         + "; pad " + written(padLength) + " × " + written(padWidth) + " centred at ±" + written(centre) + ".");
-        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), "surface", outline.standard(),
-                rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), outline.word("category"), "surface", outline.standard(),
+                rules, notes, new FootprintDrawing(pads, outlines, outline));
     }
 }

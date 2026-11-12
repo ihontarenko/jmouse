@@ -1,9 +1,8 @@
 package org.jmouse.security.web;
 
 import jakarta.servlet.*;
-import org.jmouse.core.Ordered;
-
 import java.io.IOException;
+import org.jmouse.core.Ordered;
 
 /**
  * 📐 OrderedFilter
@@ -21,13 +20,22 @@ import java.io.IOException;
  * specific order within a {@link FilterChain}.</p>
  */
 public record OrderedFilter(Filter filter, int order) implements Filter, Ordered {
-
     /**
      * 🚦 Delegates request/response handling to the wrapped filter.
      */
     @Override
+    public void init(FilterConfig configuration) throws ServletException {
+        filter.init(configuration);
+    }
+
+    @Override
+    public void destroy() {
+        filter.destroy();
+    }
+
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         filter.doFilter(request, response, chain);
     }
 

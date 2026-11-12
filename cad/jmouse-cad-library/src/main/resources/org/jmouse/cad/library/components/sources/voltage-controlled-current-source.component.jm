@@ -6,8 +6,10 @@ component:voltage-controlled-current-source("Voltage-controlled current source",
         designator: G
         summary: "Ideal voltage-controlled current source: I(positive → negative) = transconductance · V(control_positive, control_negative)"
         source: "SPICE G element, linear form"
-        category: circuits
+        category: sources
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:transconductance(1 mA/V, "the output current over the controlling voltage")

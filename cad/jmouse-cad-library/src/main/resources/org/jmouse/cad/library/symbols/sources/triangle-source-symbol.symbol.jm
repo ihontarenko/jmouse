@@ -2,7 +2,7 @@ symbol:triangle-source-symbol("Triangle voltage source") {
     meta {
         summary: "A voltage source that ramps up and down between two levels, as drawn on a schematic"
         code: "SY.SOURCE:VOLTAGE-TRIANGLE"
-        category: circuits
+        category: sources
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -1,0 +1,14 @@
+model:chip-led-2010-hand-soldering-model("Chip LED 2010 (5025 metric), hand soldering") {
+    meta {
+        summary: "Chip LED 2010 (5025 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:LED2010-HAND"
+        category: optoelectronics-surface
+        tags: electronics, model, chip
+        source: "IEC 60115-8 dimensions, 2010 (5025 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [5, 2.5, 0.7], at: [0, 0, 0.35])
+    box(tin, size: [1, 2.52, 0.72], at: [-2, 0, 0.35])
+    box(tin, size: [1, 2.52, 0.72], at: [2, 0, 0.35])
+}

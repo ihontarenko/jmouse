@@ -1,0 +1,18 @@
+{
+  "$schema": "./pin-rules.schema.json",
+  "noConnectReach": 1,
+  "kinds": {
+    "output": "an output",
+    "power-output": "a power output",
+    "power-input": "a power input",
+    "ground": "a ground pin"
+  },
+  "conflicts": [
+    { "between": ["output", "output"], "severity": "error" },
+    { "between": ["output", "power-output"], "severity": "error" },
+    { "between": ["power-output", "power-output"], "severity": "error" },
+    { "between": ["power-output", "ground"], "severity": "error" },
+    { "between": ["output", "ground"], "severity": "warning" },
+    { "between": ["output", "power-input"], "severity": "warning" }
+  ]
+}

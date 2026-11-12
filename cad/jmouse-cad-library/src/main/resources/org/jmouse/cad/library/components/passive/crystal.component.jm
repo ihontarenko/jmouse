@@ -8,8 +8,10 @@ component:crystal("Crystal, 8 MHz", type: crystal) {
         summary: "Quartz crystal, 8 MHz fundamental, HC-49"
         source: "ABRACON ABL HC-49/US series datasheet: ESR at most 80 Ω at 8 MHz, shunt capacitance at most 7 pF"
         package: "HC-49/US"
-        category: circuits
+        category: crystals
         value: frequency
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:frequency(8 MHz, "series resonant frequency")
@@ -23,7 +25,9 @@ component:crystal("Crystal, 8 MHz", type: crystal) {
     state:I_motional(0, continuous, "the current in the motional branch")
     state:q_motional(0, continuous, "the charge on the motional capacitance")
 
-    symbol(uses: crystal-symbol) {
+    footprint("FP.XTAL:HC49US-P4.88")
+
+    symbol(uses: "SY.CRYSTAL:TWO-TERMINAL") {
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
     }
@@ -48,7 +52,7 @@ component:crystal("Crystal, 8 MHz", type: crystal) {
     }
 
     # How it looks in the hand: its HC-49/US can stamped with its frequency.
-    portrait(uses: crystal-portrait) {
+    portrait(uses: "PT.CRYSTAL:HC49-US") {
         bind:frequency(frequency)
     }
 }

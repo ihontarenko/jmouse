@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-spice</artifactId>
     <name>jMouse - CAD SPICE</name>
     <description>jMouse Framework - jmCAD and SPICE both ways: a deck read into circuit and component documents, a circuit written as a deck, and ngspice run beside the engine.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-spice</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-spice</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-spice</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-spice</url>
     </scm>
 
     <properties>

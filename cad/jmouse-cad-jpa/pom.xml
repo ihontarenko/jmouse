@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -26,8 +26,8 @@
     <packaging>jar</packaging>
     <artifactId>jmouse-cad-jpa</artifactId>
     <name>jMouse - CAD JPA</name>
-    <description>jMouse Framework - jmCAD persistence over Jakarta Persistence: the catalogue of documents — every revision of their text, the index rows derived from the head, their sections, tags and relations — under its own migration history.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-jpa</url>
+    <description>jMouse Framework - jmCAD persistence over Jakarta Persistence: what an installation keeps besides its documents — the server folders it mounts and its plugins' settings —, under its own migration history. The documents are files (jmouse-cad-folder).</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-jpa</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-jpa</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-jpa</url>
     </scm>
 
     <properties>
@@ -59,13 +59,14 @@
     </properties>
 
     <dependencies>
-        <!-- ⚠️ No dependency on the language: a document's kind and a relation's kind are stored as the words the
-             language writes them with (component, footprint, symbol…), so a new kind needs no change here. -->
-        <!-- The name a revision is said by — 20261023_001 —: written with every revision of a document's text. -->
+        <!-- What is stored: a document of the language and its owner -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-revisions</artifactId>
+            <artifactId>jmouse-cad-document</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        <!-- ⚠️ No dependency on the language: a document's kind and a relation's kind are stored as the words the
+             language writes them with (component, footprint, symbol…), so a new kind needs no change here. -->
 
         <!-- Jakarta Persistence only. No Spring Data, no Spring: transaction demarcation belongs to
              whoever calls the stores, not to the library. -->

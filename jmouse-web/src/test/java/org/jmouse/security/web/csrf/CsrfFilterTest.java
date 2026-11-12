@@ -1,14 +1,16 @@
 package org.jmouse.security.web.csrf;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jmouse.security.web.session.SessionCreationPolicy;
 import org.jmouse.web.http.RequestContextKeeper;
 import org.jmouse.web.testing.ServletExchange;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class CsrfFilterTest {
+
     private final HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
     private final CsrfFilter filter = new CsrfFilter(repository, SessionCreationPolicy.IF_REQUIRED);
 
@@ -48,7 +50,7 @@ class CsrfFilterTest {
         ServletExchange exchange = seeded();
         CsrfToken token = token(exchange);
         exchange.method = "POST";
-        exchange.parameters.put(token.parameterName(), new String[]{token.value()});
+        exchange.parameters.put(token.parameterName(), new String[] { token.value() });
         AtomicInteger reached = new AtomicInteger();
         filter.doFilterInternal(exchange.context(), (request, response) -> reached.incrementAndGet());
         assertEquals(1, reached.get());
@@ -78,7 +80,7 @@ class CsrfFilterTest {
     void existingSessionOnlyPolicyDoesNotAllocateASession() throws Exception {
         ServletExchange exchange = new ServletExchange();
         CsrfFilter existingOnly = new CsrfFilter(repository, SessionCreationPolicy.IF_PRESENT);
-        existingOnly.doFilterInternal(exchange.context(), (request, response) -> { });
+        existingOnly.doFilterInternal(exchange.context(), (request, response) -> {});
         assertEquals(0, exchange.sessionCreations);
         exchange.method = "POST";
         existingOnly.doFilterInternal(exchange.context(), (request, response) -> fail("must not run"));
@@ -88,16 +90,19 @@ class CsrfFilterTest {
 
     @Test
     void sessionRepositoryCannotMasqueradeAsStateless() {
-        assertThrows(IllegalStateException.class,
-                () -> new CsrfFilter(repository, SessionCreationPolicy.STATELESS));
+        assertThrows(IllegalStateException.class, () ->
+            new CsrfFilter(repository, SessionCreationPolicy.STATELESS)
+        );
     }
 
     @Test
     void authenticationRotationInvalidatesThePreviousToken() throws Exception {
         ServletExchange exchange = seeded();
         CsrfToken old = token(exchange);
-        new CsrfAuthenticationStrategy(repository, true).onAuthentication(null,
-                RequestContextKeeper.ofRequestContext(exchange.context()));
+        new CsrfAuthenticationStrategy(repository, true).onAuthentication(
+            null,
+            RequestContextKeeper.ofRequestContext(exchange.context())
+        );
         CsrfToken current = token(exchange);
         assertNotEquals(old.value(), current.value());
         exchange.method = "POST";
@@ -108,7 +113,7 @@ class CsrfFilterTest {
 
     private ServletExchange seeded() throws Exception {
         ServletExchange exchange = new ServletExchange();
-        filter.doFilterInternal(exchange.context(), (request, response) -> { });
+        filter.doFilterInternal(exchange.context(), (request, response) -> {});
         return exchange;
     }
 

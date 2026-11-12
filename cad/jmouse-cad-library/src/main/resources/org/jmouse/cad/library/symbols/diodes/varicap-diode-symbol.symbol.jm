@@ -2,7 +2,7 @@ symbol:varicap-diode-symbol("Varicap diode") {
     meta {
         summary: "Variable-capacitance diode, as drawn on a schematic: a diode with a capacitor's second plate, its plates thickening as the reverse voltage narrows its capacitance"
         code: "SY.DIODE:VARICAP"
-        category: circuits
+        category: diodes
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

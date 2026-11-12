@@ -2,250 +2,168 @@ package org.jmouse.jdbc;
 
 import java.sql.*;
 import java.util.List;
-
+import java.util.Objects;
 import org.jmouse.jdbc.connection.ConnectionProvider;
+import org.jmouse.jdbc.intercept.QueryTimeoutSupport;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.*;
+import org.jmouse.jdbc.transaction.JdbcResourceHolder;
+import org.jmouse.transaction.infrastructure.TransactionContextHolder;
+import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
 
 /**
- * Default {@link JdbcExecutor} implementation performing direct JDBC execution.
- * <p>
- * {@code SQLExecutor} is the "raw" executor that:
- * <ul>
- *     <li>obtains a {@link Connection} from a {@link ConnectionProvider}</li>
- *     <li>creates {@link PreparedStatement}/{@link CallableStatement}</li>
- *     <li>binds parameters via {@link StatementBinder}/{@link CallableStatementBinder}</li>
- *     <li>applies statement configuration via {@link StatementConfigurer}</li>
- *     <li>executes JDBC operations via {@link StatementCallback}/{@link KeyUpdateCallback}/{@link CallableCallback}</li>
- *     <li>ensures resources are closed and connections are released</li>
- * </ul>
- *
- * <h3>Execution lifecycle</h3>
- * <pre>{@code
- * Connection c = valueProvider.getConnection();
- * try {
- *   PreparedStatement ps = c.prepareStatement(sql);
- *   binder.bind(ps);
- *   configurer.configure(ps);
- *   // execute via callback and/or extract results
- * } finally {
- *   close(ResultSet/Statement);
- *   valueProvider.release(c);
- * }
- * }</pre>
- *
- * <p>
- * ⚠️ Transaction participation is determined by the configured {@link ConnectionProvider}.
- * For example, a transaction-aware valueProvider may return a thread-bound connection.
- *
- * @author jMouse
+ * Direct JDBC execution with deterministic resource ownership.
+ * Statements/results close before the provider releases the connection; cleanup failures are suppressed
+ * on the original failure by try-with-resources. Transaction-bound connections are retained by the provider.
  */
 public final class SQLExecutor implements JdbcExecutor {
 
-    /**
-     * Provides JDBC connections (raw, pooled, or transaction-aware).
-     */
     private final ConnectionProvider connectionProvider;
+    private final TransactionContextHolder contexts;
 
-    /**
-     * Creates a new {@code SQLExecutor}.
-     *
-     * @param connectionProvider connection valueProvider used for all executions
-     */
     public SQLExecutor(ConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
+        this(connectionProvider, TransactionContextAccessSupport.current());
     }
 
-    /**
-     * Executes a query-like statement returning a {@link ResultSet}, then maps it using a {@link ResultSetExtractor}.
-     *
-     * @param sql        SQL to execute
-     * @param binder     binds statement parameters
-     * @param configurer configures statement options
-     * @param callback   executes the statement and returns a {@link ResultSet}
-     * @param extractor  maps the {@link ResultSet}
-     * @param <T>        result type
-     * @return extracted result
-     * @throws SQLException if JDBC access fails
-     */
+    public SQLExecutor(ConnectionProvider connectionProvider, TransactionContextHolder contexts) {
+        this.connectionProvider = Objects.requireNonNull(connectionProvider, "connectionProvider");
+        this.contexts = Objects.requireNonNull(contexts, "contexts");
+    }
+
     @Override
     public <T> T execute(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<ResultSet> handler,
-            StatementCallback<ResultSet> callback,
-            ResultSetExtractor<T> extractor
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<ResultSet> handler,
+        StatementCallback<ResultSet> callback,
+        ResultSetExtractor<T> extractor
     ) throws SQLException {
-        Connection        connection = connectionProvider.getConnection();
-        PreparedStatement statement  = null;
-        ResultSet         resultSet  = null;
-
-        try {
-            statement = connection.prepareStatement(sql);
-
+        try (
+            ConnectionLease lease = acquire();
+            PreparedStatement statement = lease.connection().prepareStatement(sql)
+        ) {
             binder.bind(statement);
-            configurer.configure(statement);
-
-            resultSet = handler.handle(statement, callback::doStatementExecute);
-            return extractor.extract(resultSet);
-
-        } finally {
-            JdbcSupport.closeQuietly(resultSet, statement);
-            connectionProvider.release(connection);
+            configure(statement, configurer);
+            try (ResultSet rows = handler.handle(statement, callback::doStatementExecute)) {
+                return extractor.extract(rows);
+            }
         }
     }
 
-    /**
-     * Executes an update-like statement (INSERT/UPDATE/DELETE) via a {@link StatementCallback}.
-     *
-     * @param sql        SQL to execute
-     * @param binder     binds statement parameters
-     * @param configurer configures statement options
-     * @param callback   executes the statement and returns update count
-     * @return update count
-     * @throws SQLException if JDBC access fails
-     */
     @Override
     public int executeUpdate(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<Integer> handler,
-            StatementCallback<Integer> callback
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<Integer> handler,
+        StatementCallback<Integer> callback
     ) throws SQLException {
-        Connection connection = connectionProvider.getConnection();
-        PreparedStatement statement = null;
-
-        try {
-            statement = connection.prepareStatement(sql);
-
+        try (
+            ConnectionLease lease = acquire();
+            PreparedStatement statement = lease.connection().prepareStatement(sql)
+        ) {
             binder.bind(statement);
-            configurer.configure(statement);
-
+            configure(statement, configurer);
             return handler.handle(statement, callback::doStatementExecute);
-        } finally {
-            JdbcSupport.closeQuietly(statement);
-            connectionProvider.release(connection);
         }
     }
 
-    /**
-     * Executes a batch update.
-     * <p>
-     * If {@code binders} is empty, this method returns an empty array and does not access the database.
-     *
-     * @param sql        SQL to execute
-     * @param binders    per-batch binders (nullable items are ignored)
-     * @param configurer configures statement options
-     * @param callback   executes the statement and returns batch results
-     * @return batch update counts
-     * @throws SQLException if JDBC access fails
-     */
     @Override
     public int[] executeBatch(
-            String sql,
-            List<? extends StatementBinder> binders,
-            StatementConfigurer configurer,
-            StatementHandler<int[]> handler,
-            StatementCallback<int[]> callback
+        String sql,
+        List<? extends StatementBinder> binders,
+        StatementConfigurer configurer,
+        StatementHandler<int[]> handler,
+        StatementCallback<int[]> callback
     ) throws SQLException {
-        if (binders.isEmpty()) {
+        Objects.requireNonNull(binders, "binders");
+        if (binders.stream().noneMatch(Objects::nonNull)) {
             return new int[0];
         }
-
-        Connection        connection = connectionProvider.getConnection();
-        PreparedStatement statement  = null;
-
-        try {
-            statement = connection.prepareStatement(sql);
-            configurer.configure(statement);
-
+        try (
+            ConnectionLease lease = acquire();
+            PreparedStatement statement = lease.connection().prepareStatement(sql)
+        ) {
+            configure(statement, configurer);
             for (StatementBinder binder : binders) {
-                if (binder != null) {
-                    binder.bind(statement);
+                if (binder == null) {
+                    continue;
                 }
+                statement.clearParameters();
+                binder.bind(statement);
                 statement.addBatch();
             }
-
             return handler.handle(statement, callback::doStatementExecute);
-        } finally {
-            JdbcSupport.closeQuietly(statement);
-            connectionProvider.release(connection);
         }
     }
 
-    /**
-     * Executes an update returning generated keys, delegating extraction to a callback.
-     * <p>
-     * This is the <b>widest</b> signature for key-returning updates and exposes a
-     * {@link StatementHandler} hook.
-     *
-     * @param sql        SQL to execute (typically INSERT)
-     * @param binder     binds statement parameters
-     * @param configurer statement configuration (may enable key retrieval)
-     * @param handler    execution hook for statement lifecycle/metadata
-     * @param callback   invoked with the executed statement and its generated keys
-     * @param <K>        key/result type
-     * @return extracted keys (or any other callback-defined result)
-     * @throws SQLException if JDBC access fails
-     */
     @Override
     public <K> K executeUpdate(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<K> handler,
-            KeyUpdateCallback<K> callback
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<K> handler,
+        KeyUpdateCallback<K> callback
     ) throws SQLException {
-        Connection connection = connectionProvider.getConnection();
-
-        try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (
+            ConnectionLease lease = acquire();
+            PreparedStatement statement = lease
+                .connection()
+                .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
             binder.bind(statement);
-            configurer.configure(statement);
-
-            return handler.handle(statement, s -> {
-                s.executeUpdate();
-                try (ResultSet keys = s.getGeneratedKeys()) {
-                    return callback.doStatementExecute(s, keys);
+            configure(statement, configurer);
+            return handler.handle(statement, prepared -> {
+                prepared.executeUpdate();
+                try (ResultSet keys = prepared.getGeneratedKeys()) {
+                    return callback.doStatementExecute(prepared, keys);
                 }
             });
-        } finally {
-            connectionProvider.release(connection);
         }
     }
 
-    /**
-     * Executes a callable statement (stored procedure / function call).
-     *
-     * @param sql        call SQL
-     * @param binder     binds callable parameters (IN / OUT)
-     * @param configurer configures statement options
-     * @param callback   executes the call and maps its result
-     * @param <T>        result type
-     * @return callback result
-     * @throws SQLException if JDBC access fails
-     */
     @Override
     public <T> T executeCall(
-            String sql,
-            CallableStatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<T> handler,
-            CallableCallback<T> callback
+        String sql,
+        CallableStatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<T> handler,
+        CallableCallback<T> callback
     ) throws SQLException {
-        Connection connection = connectionProvider.getConnection();
-        CallableStatement statement = null;
-
-        try {
-            statement = connection.prepareCall(sql);
+        try (
+            ConnectionLease lease = acquire();
+            CallableStatement statement = lease.connection().prepareCall(sql)
+        ) {
             binder.bind(statement);
-            configurer.configure(statement);
+            configure(statement, configurer);
             return handler.handle(statement, callback::doInCallable);
-        } finally {
-            JdbcSupport.closeQuietly(statement);
-            connectionProvider.release(connection);
         }
     }
 
+    private ConnectionLease acquire() throws SQLException {
+        return new ConnectionLease(
+            Objects.requireNonNull(connectionProvider.getConnection(), "ConnectionProvider returned null"),
+            connectionProvider
+        );
+    }
+
+    private void configure(Statement statement, StatementConfigurer configurer) throws SQLException {
+        configurer.configure(statement);
+        JdbcResourceHolder holder = contexts.getResource(JdbcResourceHolder.class);
+        if (holder != null && holder.belongsTo(connectionProvider.getResourceKey())) {
+            QueryTimeoutSupport.applyIfPresent(statement, contexts.getContext());
+        }
+    }
+
+    /** A lease releases through its strategy, never by directly closing a transaction-owned connection. */
+    private record ConnectionLease(
+        Connection connection,
+        ConnectionProvider provider
+    ) implements AutoCloseable {
+        @Override
+        public void close() {
+            provider.release(connection);
+        }
+    }
 }

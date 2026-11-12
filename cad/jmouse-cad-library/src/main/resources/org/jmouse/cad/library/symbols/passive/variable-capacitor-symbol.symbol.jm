@@ -2,7 +2,7 @@ symbol:variable-capacitor-symbol("Variable capacitor") {
     meta {
         summary: "Variable capacitor, as drawn on a schematic: a capacitor with an arrow through its plates"
         code: "SY.CAPACITOR:VARIABLE"
-        category: circuits
+        category: capacitors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

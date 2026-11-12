@@ -1,0 +1,8 @@
+category:connectors("Connectors") {
+    meta {
+        category: electromechanical
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

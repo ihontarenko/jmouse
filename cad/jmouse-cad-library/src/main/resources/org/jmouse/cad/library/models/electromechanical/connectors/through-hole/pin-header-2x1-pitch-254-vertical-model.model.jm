@@ -1,0 +1,14 @@
+model:pin-header-2x1-pitch-254-vertical-model("Pin header, 2.54 mm pitch, 2 × 1, vertical") {
+    meta {
+        summary: "Pin header, 2.54 mm pitch, 2 × 1, vertical — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.HDR:2X1-P2.54-V"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [5.08, 2.54, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 11.5], at: [-1.27, 0, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [1.27, 0, 2.75])
+}

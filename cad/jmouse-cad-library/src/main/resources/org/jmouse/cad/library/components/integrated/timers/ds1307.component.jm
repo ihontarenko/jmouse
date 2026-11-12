@@ -11,8 +11,10 @@ component:ds1307("DS1307", type: clock) {
         summary: "Real-time clock on I²C: BCD time and date with a calendar, 56 bytes of RAM, a square-wave output"
         source: "Maxim DS1307 data sheet (19-5296): timekeeper registers 00h-07h, CH halts the oscillator and is set at power-up to 01/01/00 01 00:00:00, the countdown chain resets when the seconds are written, 12/24-hour bit 6 of 02h, control register OUT, SQWE, RS1 RS0 (1 Hz, 4.096, 8.192, 32.768 kHz), RAM 08h-3Fh, address 1101000, pinout per the PDIP-8 package; the crystal's tolerance and the battery switch-over are not modelled"
         package: "PDIP-8, SOIC-8"
-        category: circuits
+        category: timers
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-target
     use:cmos-hc
@@ -28,6 +30,9 @@ component:ds1307("DS1307", type: clock) {
     pin:scl(digital, input, 6, "serial clock")
     pin:square_wave(digital, output, open-drain, 7, "SQW/OUT")
     pin:Vcc(power, 8)
+
+    footprint("FP.DIP:8-W7.62")
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
     symbol(box) {
         left([scl, sda, crystal_1, crystal_2, battery])

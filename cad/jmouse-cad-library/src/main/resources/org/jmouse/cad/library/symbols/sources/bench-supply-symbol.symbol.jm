@@ -2,7 +2,7 @@ symbol:bench-supply-symbol("Bench power supply") {
     meta {
         summary: "A DC supply with a current limit, as drawn on a schematic: a source with the DC mark and a limit bar"
         code: "SY.SOURCE:SUPPLY-LIMITED"
-        category: circuits
+        category: sources
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

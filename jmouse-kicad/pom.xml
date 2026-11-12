@@ -61,9 +61,14 @@
         schematic through this model and never parses a parenthesis itself.
     -->
     <dependencies>
+        <!-- A project file is JSON -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-kicad-parser</artifactId>
+            <artifactId>jmouse-sexpression</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

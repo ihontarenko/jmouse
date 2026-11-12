@@ -2,7 +2,7 @@ symbol:relay-symbol("Relay") {
     meta {
         summary: "A relay, as drawn on a schematic: its coil, and a changeover contact that leaves normally-closed for normally-open while the coil holds it"
         code: "SY.RELAY:SPDT"
-        category: circuits
+        category: relays
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

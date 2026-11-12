@@ -1,0 +1,23 @@
+footprint:shunt-vishay-wsk2512-footprint("Vishay WSK2512 four-terminal shunt") {
+    meta {
+        summary: "4-terminal four-terminal shunt, surface-mount, 6.35 × 3.18 mm body"
+        code: "FP.R:WSK2512-4T"
+        category: resistors-surface
+        tags: electronics, footprint, surface
+        source: "Vishay WSK2512 data sheet (document 30108), 0.005 Ω to 0.2 Ω: L 6.35 × W 3.18 × H 0.635 mm; the force lands 2.29 × 2.03 mm, the sense lands 1.4 × 0.76 mm, as its recommended solder pads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/pinned-packages.sht#wsk2512 and the land pattern rules; regenerate, never edit.
+    # Each land where its maker puts it and of the size its maker recommends.
+    pad:1(surface, rounded-rectangle, at: -2.985 -0.635, size: 2.29 x 2.03, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: -3.43 1.27, size: 1.4 x 0.76, roundness: 0.25)
+    pad:3(surface, rounded-rectangle, at: 3.43 -1.27, size: 1.4 x 0.76, roundness: 0.25)
+    pad:4(surface, rounded-rectangle, at: 2.985 0.635, size: 2.29 x 2.03, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-3.175 -1.59H3.175V1.59H-3.175Z")
+    outline(silkscreen, width: 0.12, "M-3.175 -1.97H3.175M-3.175 1.97H3.175")
+    outline(silkscreen, filled, "M-4.99 -0.635A0.3 0.3 0 1 0 -4.39 -0.635A0.3 0.3 0 1 0 -4.99 -0.635Z")
+    outline(courtyard, width: 0.05, "M-4.4 -2.2H4.4V2.2H-4.4Z")
+    body(height: 0.635)
+    model("MD.R:WSK2512-4T")
+}

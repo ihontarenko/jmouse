@@ -5,15 +5,17 @@ import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.www.BasicAuthenticationFilter;
-import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
+import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
-public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
-        extends AbstractAuthenticationConfigurer<B, HttpBasicConfigurer<B>> {
+public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<
+    B,
+    HttpBasicConfigurer<B>
+> {
 
-    private final BasicAuthenticationEntryPoint entryPoint         = new BasicAuthenticationEntryPoint();
-    private       boolean                       challengeOnFailure = true;
+    private final BasicAuthenticationEntryPoint entryPoint = new BasicAuthenticationEntryPoint();
+    private boolean challengeOnFailure = true;
 
     public HttpBasicConfigurer() {
         continueChainBeforeSuccess = true;
@@ -41,25 +43,28 @@ public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
 
     @Override
     protected Filter doBuildFilter(
-            AuthenticationManager authenticationManager,
-            SecurityContextRepository repository,
-            MatcherCriteria matcherCriteria,
-            AuthenticationSuccessHandler successHandler,
-            AuthenticationFailureHandler failureHandler
+        AuthenticationManager authenticationManager,
+        SecurityContextRepository repository,
+        MatcherCriteria matcherCriteria,
+        AuthenticationSuccessHandler successHandler,
+        AuthenticationFailureHandler failureHandler
     ) {
-        AuthenticationFailureHandler failure = (failureHandler != null)
-                ? failureHandler
-                : new NoopHttp401FailureHandler();
+        AuthenticationFailureHandler failure =
+            failureHandler != null ? failureHandler : new NoopHttp401FailureHandler();
 
-        AuthenticationSuccessHandler success = (successHandler != null)
-                ? successHandler
-                : new NoopHttp200SuccessHandler();
+        AuthenticationSuccessHandler success =
+            successHandler != null ? successHandler : new NoopHttp200SuccessHandler();
 
         if (challengeOnFailure) {
             failure = entryPoint::initiate;
         }
 
-        return new BasicAuthenticationFilter(authenticationManager, repository, matcherCriteria, success, failure);
+        return new BasicAuthenticationFilter(
+            authenticationManager,
+            repository,
+            matcherCriteria,
+            success,
+            failure
+        );
     }
-
 }

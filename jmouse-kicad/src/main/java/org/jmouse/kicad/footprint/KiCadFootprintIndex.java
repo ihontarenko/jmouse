@@ -1,7 +1,7 @@
 package org.jmouse.kicad.footprint;
 
-import org.jmouse.kicad.parser.KiCadParseException;
-import org.jmouse.kicad.parser.KiCadParser;
+import org.jmouse.sexpression.SExpressionParseException;
+import org.jmouse.sexpression.SExpressionParser;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -66,10 +66,10 @@ public final class KiCadFootprintIndex {
     public static KiCadFootprint read(Entry entry) {
         try {
             String text = Files.readString(entry.file(), StandardCharsets.UTF_8);
-            return KiCadFootprint.of(new KiCadParser().parse(entry.identifier(), text));
+            return KiCadFootprint.of(new SExpressionParser().parse(entry.identifier(), text));
         } catch (IOException unreadable) {
             throw new UncheckedIOException("The footprint " + entry.file() + " cannot be read", unreadable);
-        } catch (KiCadParseException unreadable) {
+        } catch (SExpressionParseException unreadable) {
             throw new IllegalArgumentException("The footprint " + entry.identifier() + " does not read: "
                     + unreadable.getMessage(), unreadable);
         }

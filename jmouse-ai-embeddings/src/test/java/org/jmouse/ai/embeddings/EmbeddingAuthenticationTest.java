@@ -1,5 +1,6 @@
 package org.jmouse.ai.embeddings;
 
+import org.jmouse.http.client.JdkHttpTransport;
 import org.jmouse.ai.model.AiCapability;
 import org.jmouse.ai.provider.ProviderSettings;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,8 @@ class EmbeddingAuthenticationTest {
         var limits = new CallLimits(1, 100, 100, 2000, 4096);
         var protocol = new CustomAuthenticationProtocol();
 
-        try (var transport = new JdkEmbeddingTransport(Duration.ofSeconds(1))) {
+        try (var http = new JdkHttpTransport(Duration.ofSeconds(1), JdkHttpTransport.Redirects.NEVER)) {
+            var transport = new HttpEmbeddingTransport(http);
             var response = new HttpEmbeddingModel(protocol, transport).embed(settings, request, limits);
             assertEquals(List.of(List.of(1.0, 2.0)), response.vectors());
             assertEquals(1, calls.get());

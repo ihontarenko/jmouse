@@ -11,7 +11,13 @@ public enum ExplorerCapability implements Capability {
     READ,
 
     /** Change a writable mount — write, make folders, rename, move, remove: {@code cad-explorer:write}. */
-    WRITE;
+    WRITE,
+
+    /**
+     * Mount a folder of the server's disk, or unmount one, across the installation: {@code cad-explorer:mount}. Whoever may
+     * names any folder the server can read, so it is the host's strongest permission, never a member's.
+     */
+    MOUNT;
 
     @Override
     public String id() {

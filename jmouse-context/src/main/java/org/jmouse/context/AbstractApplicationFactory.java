@@ -1,14 +1,15 @@
 package org.jmouse.context;
 
+import static org.jmouse.helpers.Files.removeExtension;
+
+import java.nio.file.FileSystems;
+import java.util.List;
 import org.jmouse.core.environment.*;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
+import org.jmouse.core.io.URLResource;
 import org.jmouse.helpers.Strings;
-
-import java.nio.file.FileSystems;
-
-import static org.jmouse.helpers.Files.removeExtension;
 
 /**
  * Abstract base class for implementing {@link ApplicationFactory}.
@@ -19,7 +20,8 @@ import static org.jmouse.helpers.Files.removeExtension;
  *
  * @param <T> the type of {@link ApplicationBeanContext} managed by this factory
  */
-abstract public class AbstractApplicationFactory<T extends ApplicationBeanContext> implements ApplicationFactory<T> {
+public abstract class AbstractApplicationFactory<T extends ApplicationBeanContext> implements
+    ApplicationFactory<T> {
 
     /**
      * Property source name for system properties.
@@ -51,12 +53,13 @@ abstract public class AbstractApplicationFactory<T extends ApplicationBeanContex
         environment.addPropertySource(new SystemPropertiesPropertySource(SYSTEM_PROPERTIES));
 
         // Load application properties from predefined locations
-        loadApplicationProperties("classpath:package.properties", environment);
-//        loadApplicationProperties("classpath:jmouse-application.properties", environment);
+        for (String resource : defaultPropertyResources()) {
+            loadRootClasspathProperties(resource, environment);
+        }
         loadApplicationProperties("classpath:*/jmouse*.properties", environment);
 
         // will fails
-//        loadApplicationProperties("classpath:*/jmouse*.yaml", environment);
+        //        loadApplicationProperties("classpath:*/jmouse*.yaml", environment);
 
         return environment;
     }
@@ -70,6 +73,27 @@ abstract public class AbstractApplicationFactory<T extends ApplicationBeanContex
      * @param location    the resource location pattern to search for properties
      * @param environment the environment to which the properties should be added
      */
+    protected List<String> defaultPropertyResources() {
+        return List.of("package.properties", "jmouse-application.properties");
+    }
+
+    /** Enumerates exact names: JAR files need not expose a classpath root directory entry. */
+    private void loadRootClasspathProperties(String name, Environment environment) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) loader = getClass().getClassLoader();
+        try {
+            var resources = loader.getResources(name);
+            while (resources.hasMoreElements()) {
+                var url = resources.nextElement();
+                environment.addPropertySource(
+                    new ResourcePropertySource(url.toExternalForm(), new URLResource(url))
+                );
+            }
+        } catch (java.io.IOException failure) {
+            throw new IllegalStateException("Cannot load classpath configuration: " + name, failure);
+        }
+    }
+
     protected void loadApplicationProperties(String location, Environment environment) {
         int counter = 0;
         for (Resource resource : resourceLoader.findResources(location)) {

@@ -3,9 +3,15 @@ package org.jmouse.git.local;
 import java.util.List;
 
 /**
- * Commit only these reviewed working-tree versions, against the HEAD that was shown to the user.
+ * Commit only these reviewed working-tree versions, against the HEAD that was shown to the user — by {@code author}
+ * when the application names one, else by the repository's own identity.
  */
-public record CommitSelection(String message, String expectedHead, List<SelectedFile> files) {
+public record CommitSelection(String message, String expectedHead, List<SelectedFile> files, CommitAuthor author) {
+
+    /** A commit by the repository's own identity. */
+    public CommitSelection(String message, String expectedHead, List<SelectedFile> files) {
+        this(message, expectedHead, files, null);
+    }
     private static final int MAXIMUM_MESSAGE_CHARACTERS = 65_536;
 
     public CommitSelection {

@@ -64,7 +64,7 @@ public class TransactionTemplate implements TransactionCallback {
      * @param <T>        return type
      * @return result of the work
      */
-    public <T> T inTransaction(TransactionDefinition definition, Work<T> work){
+    public <T> T inTransaction(TransactionDefinition definition, Work<T> work) {
         TransactionStatus status = coordinator.begin(definition);
 
         try {
@@ -84,10 +84,9 @@ public class TransactionTemplate implements TransactionCallback {
             if (throwable instanceof Error error) {
                 throw error;
             }
-            throw (throwable instanceof RuntimeException exception)
-                    ? exception
-                    : new RuntimeException(throwable);
+            throw throwable instanceof RuntimeException exception
+                ? exception
+                : new RuntimeException(throwable);
         }
     }
-
 }

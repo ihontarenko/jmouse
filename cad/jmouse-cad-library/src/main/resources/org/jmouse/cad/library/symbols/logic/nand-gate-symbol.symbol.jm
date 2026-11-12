@@ -2,7 +2,7 @@ symbol:nand-gate-symbol("NAND gate") {
     meta {
         summary: "A two-input NAND gate, as drawn on a schematic (ANSI): the AND body and the bubble that inverts"
         code: "SY.GATE:NAND"
-        category: circuits
+        category: logic
         tags: electronics, schematic, logic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

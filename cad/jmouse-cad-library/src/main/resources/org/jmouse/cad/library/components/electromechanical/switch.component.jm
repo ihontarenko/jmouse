@@ -3,7 +3,9 @@ component:switch("Switch", type: switch) {
     meta {
         designator: SW
         summary: "A single-pole switch, opened and closed while the circuit runs"
-        category: circuits
+        category: switches
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:closed(0, in: 0 .. 1, step: 1, integer, live, "Closed")
@@ -13,7 +15,9 @@ component:switch("Switch", type: switch) {
     pin:a(analog, 1, "first contact")
     pin:b(analog, 2, "second contact")
 
-    symbol(uses: switch-symbol) {
+
+    footprint("FP.SW:SLIDE-1")
+    symbol(uses: "SY.SWITCH:SPST") {
         bind:closed(closed)
     }
 
@@ -22,7 +26,7 @@ component:switch("Switch", type: switch) {
     }
 
     # How it looks in the hand: a miniature toggle whose lever is thrown by its state.
-    portrait(uses: toggle-switch-portrait) {
+    portrait(uses: "PT.SWITCH:TOGGLE") {
         bind:closed(closed)
     }
 }

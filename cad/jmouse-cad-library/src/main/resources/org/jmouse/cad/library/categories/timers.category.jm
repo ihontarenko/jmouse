@@ -1,0 +1,8 @@
+category:timers("Timers") {
+    meta {
+        category: integrated
+        order: 10
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

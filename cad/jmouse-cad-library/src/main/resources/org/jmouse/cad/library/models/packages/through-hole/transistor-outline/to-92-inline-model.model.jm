@@ -1,0 +1,17 @@
+# TO-92, leads in line: its body drawn by hand from its footprint's drawing and JEDEC TO-226AA, as the footprint is.
+model:to-92-inline-model("TO-92, leads in line") {
+    meta {
+        summary: "TO-92, leads in line — its body drawn by jmCAD from JEDEC TO-226AA"
+        category: through-hole-transistor-outline
+        code: "MD.TO:92-INLINE"
+        tags: model, hand-drawn
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    prism(plastic, outline: [2.017, -1.3, 2.29, -0.72, 2.398, -0.088, 2.336, 0.55, 2.107, 1.149, 1.728, 1.666, 1.225, 2.064, 0.635, 2.314, 0, 2.4, -0.635, 2.314, -1.225, 2.064, -1.728, 1.666, -2.107, 1.149, -2.336, 0.55, -2.398, -0.088, -2.29, -0.72, -2.017, -1.3], height: 4.2, at: [0, 0, 1])
+    # Its flat looks out along −Y here: its type printed across it.
+    marking(name, on: flat, size: [3.2, 1.2], at: [0, -1.31, 3.1], rotate: [90, 0, 0], ink: marking)
+    box(tin, size: [0.45, 0.45, 2.6], at: [-2.54, 0, -0.3])
+    box(tin, size: [0.45, 0.45, 2.6], at: [0, 0, -0.3])
+    box(tin, size: [0.45, 0.45, 2.6], at: [2.54, 0, -0.3])
+}

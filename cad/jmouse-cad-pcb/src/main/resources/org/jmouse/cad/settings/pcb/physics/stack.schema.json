@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/pcb/physics/stack.schema.json",
+  "title": "Stack physics",
+  "description": "What a pcb's stack means for the signals and the heat on it, as constants: the dielectric's permittivity until a reader says otherwise, how a neighbour lowers a track's impedance, light's speed, how a pcb gives off heat, and the widths searched for an impedance. Data, beside this class (#SECTION); the copper's and the pcb's thickness are its way of making, not this.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "permittivity",
+    "pair",
+    "speedOfLight",
+    "freeSpace",
+    "surfaceCoefficient",
+    "searchWidths"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "source": {
+      "description": "where each value comes from: the papers, books and makers it is read from",
+      "type": "string"
+    },
+    "permittivity": {
+      "description": "the dielectric's relative permittivity until a reader says otherwise",
+      "type": "number"
+    },
+    "pair": {
+      "description": "how much a neighbour lowers a track's impedance, by how the track stands: 2·Z·(1 − share·e^(−decay·gap/reach))",
+      "type": "object",
+      "additionalProperties": {
+        "description": "How a neighbour lowers a track's impedance.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "share",
+          "decay"
+        ],
+        "properties": {
+          "share": {
+            "description": "how much of a track's impedance a neighbour takes at no gap",
+            "type": "number"
+          },
+          "decay": {
+            "description": "how fast that falls as the gap grows, against the track's reach",
+            "type": "number"
+          }
+        }
+      }
+    },
+    "speedOfLight": {
+      "description": "millimetres per nanosecond",
+      "type": "number"
+    },
+    "freeSpace": {
+      "description": "the impedance of free space, ohms",
+      "type": "number"
+    },
+    "surfaceCoefficient": {
+      "description": "watts a square metre of pcb gives off per kelvin",
+      "type": "number"
+    },
+    "searchWidths": {
+      "description": "The widths searched for an impedance, millimetres, and how finely.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "least",
+        "most",
+        "precision"
+      ],
+      "properties": {
+        "least": {
+          "description": "the narrowest width searched, in millimetres",
+          "type": "number"
+        },
+        "most": {
+          "description": "the widest, in millimetres",
+          "type": "number"
+        },
+        "precision": {
+          "description": "how finely, in millimetres",
+          "type": "number"
+        }
+      }
+    }
+  }
+}

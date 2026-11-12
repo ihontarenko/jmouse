@@ -6,7 +6,9 @@ component:harmonic-generator("Harmonic generator", type: generator) {
     meta {
         designator: G
         summary: "A fundamental and up to eight harmonics, summed: offset + Σ a_k · sin(2π · k · frequency · time + φ_k)"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:frequency(100 Hz, "the fundamental: harmonic k is k times it")
@@ -31,7 +33,7 @@ component:harmonic-generator("Harmonic generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: composite-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-COMPOSITE") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

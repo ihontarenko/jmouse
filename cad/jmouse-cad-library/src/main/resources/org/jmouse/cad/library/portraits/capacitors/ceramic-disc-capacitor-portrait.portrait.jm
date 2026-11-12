@@ -3,7 +3,7 @@ portrait:ceramic-disc-capacitor-portrait("Ceramic disc capacitor") {
     meta {
         summary: "A ceramic disc capacitor with its printed picofarad code (104 = 100 nF), read from its capacitance"
         code: "PT.CAPACITOR:CERAMIC-DISC"
-        category: circuits
+        category: capacitors
         tags: electronics, portrait, capacitor
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

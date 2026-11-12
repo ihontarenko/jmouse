@@ -6,8 +6,10 @@ component:74hc1g14("74HC1G14", type: gate) {
         summary: "Single Schmitt-trigger inverter: two thresholds about a volt apart, so a slow or noisy edge switches it once"
         source: "Nexperia 74HC1G14 datasheet: VT+ 2.38 V, VT− 1.40 V typical at VCC 4.5 V; propagation delay 11 ns"
         package: "SOT353, 5 pins"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:schmitt-inverter
 
@@ -26,7 +28,9 @@ component:74hc1g14("74HC1G14", type: gate) {
     pin:output(analog, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: schmitt-not-gate-symbol)
+    footprint("FP.SOT353:5")
+
+    symbol(uses: "SY.GATE:NOT-SCHMITT")
 
     # A 0 … 4.5 V triangle crosses VT+ on the way up at 2.65 ms and VT− on the way down at 8.45 ms: low for 58 % of
     # every period, high for 42 %. One threshold at the middle would give half and half.

@@ -9,8 +9,10 @@ component:2n5060("2N5060", type: thyristor) {
         summary: "Sensitive-gate thyristor, 30 V, 0.8 A, IGT 200 µA"
         source: "onsemi 2N5060 series datasheet, electrical characteristics"
         package: "TO-92"
-        category: circuits
+        category: thyristors
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -29,9 +31,9 @@ component:2n5060("2N5060", type: thyristor) {
     pin:gate(analog, input, 2, "gate")
     pin:anode(analog, 3, "anode")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
 
-    symbol(uses: thyristor-symbol) {
+    symbol(uses: "SY.THYRISTOR:SCR") {
         bind:failed(failed)
         bind:conduction(conducting)
         bind:a(pin: anode)
@@ -97,7 +99,7 @@ component:2n5060("2N5060", type: thyristor) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("2N5060")
     }
 }

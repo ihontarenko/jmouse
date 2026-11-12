@@ -6,8 +6,8 @@
   <artifactId>jmouse-cad-jpa</artifactId>
   <version>1.0.1</version>
   <name>jMouse - CAD JPA</name>
-  <description>jMouse Framework - jmCAD persistence over Jakarta Persistence: the catalogue of documents — every revision of their text, the index rows derived from the head, their sections, tags and relations — under its own migration history.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-jpa</url>
+  <description>jMouse Framework - jmCAD persistence over Jakarta Persistence: what an installation keeps besides its documents — the server folders it mounts and its plugins' settings —, under its own migration history. The documents are files (jmouse-cad-folder).</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-jpa</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,12 +24,12 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-jpa</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-jpa</url>
   </scm>
   <dependencies>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-revisions</artifactId>
+      <artifactId>jmouse-cad-document</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>

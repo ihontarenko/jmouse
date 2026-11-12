@@ -1,0 +1,15 @@
+component:static-sensitive-mark("Static sensitive mark") {
+    meta {
+        designator: G
+        summary: "A warning triangle with a struck-out hand: handle against electrostatic discharge: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:STATIC-SENSITIVE-10")
+    footprint("FP.GRAPHIC:STATIC-SENSITIVE-5")
+    footprint("FP.GRAPHIC:STATIC-SENSITIVE-20")
+
+    symbol(uses: "SY.GRAPHIC:STATIC-SENSITIVE") {
+    }
+}

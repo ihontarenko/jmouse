@@ -2,7 +2,7 @@ symbol:current-sense-amplifier-symbol("Current-sense amplifier") {
     meta {
         summary: "A current-sense amplifier, as drawn on a schematic: the shunt's two inputs and the two references on the left, the output on the right, the supply above and ground below"
         code: "SY.AMPLIFIER:CURRENT-SENSE"
-        category: circuits
+        category: amplifiers
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

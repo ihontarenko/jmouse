@@ -8,8 +8,10 @@ component:ams1117-5-0("AMS1117-5.0", type: regulator) {
         summary: "Fixed 5.0 V low-dropout regulator, 1 A, 1.1 V dropout at 800 mA"
         source: "Advanced Monolithic Systems AMS1117 datasheet: electrical characteristics, fixed 5.0 V version"
         package: "SOT-223"
-        category: circuits
+        category: power
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -27,9 +29,9 @@ component:ams1117-5-0("AMS1117-5.0", type: regulator) {
     pin:output(analog, output, 2, "regulated output; the tab is output too")
     pin:input(power, 3, "unregulated input")
 
-    footprint(sot-223-footprint)
+    footprint("FP.SOT223:4")
 
-    symbol(uses: voltage-regulator-symbol) {
+    symbol(uses: "SY.REGULATOR:LINEAR-FIXED") {
         bind:failed(failed)
         bind:ground(pin: GND)
     }

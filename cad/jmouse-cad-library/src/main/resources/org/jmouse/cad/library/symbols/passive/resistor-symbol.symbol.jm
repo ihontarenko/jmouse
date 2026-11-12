@@ -1,21 +1,22 @@
 symbol:resistor-symbol("Resistor") {
     meta {
-        summary: "Resistor, as drawn on a schematic: its body fills with the share of its rated power it takes, warming in colour as it nears the rating"
+        summary: "Resistor, as drawn on a schematic: its body fills against the current with the share of its rated power it takes, warming in colour as it nears the rating"
         code: "SY.RESISTOR:FIXED"
-        category: circuits
+        category: resistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
     size(120 x 80)
-    input:load(0 .. 1)
+    input:load(0 .. 1, hold: 300 ms)
+    input:flow(-1 .. 1, hold: 300 ms)
     input:failed
 
-    # How hard it works: the body fills from its first end with the power it takes against the power it is rated for,
-    # and its colour warms as the share nears the rating — the heat it turns the current into, before it burns. Drawn
-    # under the outline, so the outline stays as drawn.
+    # How hard it works: the body fills against the current, from the end the current leaves by, with the power it takes
+    # against the power it is rated for, and its colour warms as the share nears the rating — the heat it turns the current
+    # into, before it burns. Drawn under the outline, so the outline stays as drawn.
     box:loading(live, at: 0 0, size: 64 x 28) {
-        live level = load
+        live level = if(flow > 0, 0 - load, load)
         live fill = curve(load, 0 -> positive, 0.6 -> warm, 1 -> hot)
     }
 

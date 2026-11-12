@@ -12,7 +12,7 @@ import java.time.Duration;
  * @param clientSecret its client secret
  * @param tokenUrl     where a token is asked for; blank for Nexar's own
  * @param apiUrl       the GraphQL endpoint; blank for Nexar's own
- * @param limit        how many parts one search asks Nexar for, at most 100; 0 for 10
+ * @param limit        how many parts one search asks Nexar for while nobody changed it, at most 100; 0 for 10
  * @param timeout      how long a search waits for Nexar; null for 8 seconds
  */
 public record NexarSettings(String clientId, String clientSecret, String tokenUrl, String apiUrl, int limit,
@@ -25,7 +25,7 @@ public record NexarSettings(String clientId, String clientSecret, String tokenUr
     public static final String API_URL = "https://api.nexar.com/graphql";
 
     /** The most parts Nexar answers one supply search with. */
-    private static final int MOST = 100;
+    public static final int MOST = 100;
 
     private static final int USUAL = 10;
 

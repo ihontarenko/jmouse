@@ -1,8 +1,8 @@
 symbol:shielded-header-1x23-symbol("Shielded pin header, 23 contacts") {
     meta {
-        summary: "A single-row pin header of 23, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the board"
+        summary: "A single-row pin header of 23, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the pcb"
         code: "SY.HDR:1X23-SHIELDED"
-        category: circuits
+        category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

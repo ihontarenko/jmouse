@@ -1,0 +1,8 @@
+category:sources("Sources") {
+    meta {
+        summary: "Supplies, generators and signals a bench drives a circuit with"
+        order: 15
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

@@ -10,8 +10,10 @@ component:bt136("BT136", type: thyristor) {
         summary: "Triac, 600 V, 4 A, logic-level-sensitive gate"
         source: "NXP / WeEn BT136 series datasheet, electrical characteristics"
         package: "TO-220"
-        category: circuits
+        category: thyristors
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -30,9 +32,9 @@ component:bt136("BT136", type: thyristor) {
     pin:main_terminal_two(analog, 2, "MT2, the tab")
     pin:gate(analog, input, 3, "gate")
 
-    footprint(to-220-3-vertical-footprint)
+    footprint("FP.TO220:3-V")
 
-    symbol(uses: triac-symbol) {
+    symbol(uses: "SY.THYRISTOR:TRIAC") {
         bind:failed(failed)
         bind:conduction(conducting)
         bind:a(pin: main_terminal_two)
@@ -99,7 +101,7 @@ component:bt136("BT136", type: thyristor) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-220-portrait) {
+    portrait(uses: "PT.TO220:3") {
         bind:marking("BT136")
     }
 }

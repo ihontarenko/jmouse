@@ -1,10 +1,10 @@
 package org.jmouse.web.servlet;
 
 import jakarta.servlet.SessionTrackingMode;
+import java.util.EnumSet;
+import java.util.Set;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.binding.BindDefault;
-
-import java.util.Set;
 
 /**
  * 📦 Session configuration properties used to control cookie, timeout, and tracking behavior.
@@ -39,9 +39,9 @@ import java.util.Set;
 @BeanProperties("jmouse.web.server.session")
 public class SessionProperties {
 
-    private Cookie                   cookie;
-    private int                      timeout;
-    private Set<SessionTrackingMode> trackingMode;
+    private Cookie cookie = new Cookie("JMOUSE_SESSION_ID", "/", -1, true, true);
+    private int timeout = 60;
+    private Set<SessionTrackingMode> trackingMode = EnumSet.of(SessionTrackingMode.COOKIE);
 
     /**
      * ⏱️ Session timeout in minutes.
@@ -108,8 +108,11 @@ public class SessionProperties {
      * @param httpOnly whether the cookie is HTTP-only (default: {@code true})
      * @param secure   whether the cookie is secure (sent only over HTTPS) (default: {@code true})
      */
-    public record Cookie(@BindDefault("JMOUSE_SESSION_ID") String name, @BindDefault("/") String path,
-                         @BindDefault("900000") int maxAge, @BindDefault("true") boolean httpOnly,
-                         @BindDefault("true") boolean secure) {
-    }
+    public record Cookie(
+        @BindDefault("JMOUSE_SESSION_ID") String name,
+        @BindDefault("/") String path,
+        @BindDefault("900000") int maxAge,
+        @BindDefault("true") boolean httpOnly,
+        @BindDefault("true") boolean secure
+    ) {}
 }

@@ -1,0 +1,21 @@
+model:bridge-rectifier-round-8-9mm-model("Round bridge rectifier, WOM, 8.9 mm") {
+    meta {
+        summary: "Round bridge rectifier, WOM, 8.9 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.BRIDGE:WOM"
+        category: diodes-through-hole
+        tags: electronics, model, pinned
+        source: "W005M … W10M data sheet (WOM case): 1 +, 2 ~, 3 −, 4 ~ on a 5.08 mm square, 8.9 mm round body"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    cylinder(plastic, radius: 4.45, length: 4.8, at: [0, 0, 2.9])
+    box(tin, size: [0.945, 0.945, 3], at: [-2.54, 2.54, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-2.54, -2.54, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [2.54, -2.54, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [2.54, 2.54, -1])
+    marking(value, on: flat, size: [6.23, 1.958], at: [0, 0, 5.31], ink: marking)
+    marking(text, on: flat, size: [1.2, 1.2], at: [-2.54, 2.54, 5.31], text: "+", ink: marking)
+    marking(text, on: flat, size: [1.2, 1.2], at: [-2.54, -2.54, 5.31], text: "~", ink: marking)
+    marking(text, on: flat, size: [1.2, 1.2], at: [2.54, -2.54, 5.31], text: "−", ink: marking)
+    marking(text, on: flat, size: [1.2, 1.2], at: [2.54, 2.54, 5.31], text: "~", ink: marking)
+}

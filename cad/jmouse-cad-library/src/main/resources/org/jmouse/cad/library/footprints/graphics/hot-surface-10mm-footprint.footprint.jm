@@ -1,0 +1,14 @@
+footprint:hot-surface-10mm-footprint("Hot surface, 10 mm") {
+    meta {
+        summary: "A warning triangle with rising heat: this part of the board runs hot, printed 10 mm wide"
+        code: "FP.GRAPHIC:HOT-SURFACE-10"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 0.5, "M0 -4.4L4.6 3.8H-4.6Z")
+    outline(silkscreen, width: 0.5, "M-1.4 2.6C-2.2 1.6 -0.6 0.8 -1.4 -0.2")
+    outline(silkscreen, width: 0.5, "M0 2.6C-0.8 1.6 0.8 0.8 0 -0.2")
+    outline(silkscreen, width: 0.5, "M1.4 2.6C0.6 1.6 2.2 0.8 1.4 -0.2")
+}

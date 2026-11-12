@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>jMouse · Framework workbench</title>
+        <link rel="stylesheet" href="/static/showcase.css" />
+        <script type="module" src="/static/showcase.js"></script>
+    </head>
+    <body>
+        <a class="skip" href="#main">Skip to workspace</a>
+        <header class="app-header">
+            <a class="brand" href="/" aria-label="jMouse Showcase home">
+                <svg viewBox="0 0 28 28" width="28" height="28" aria-hidden="true">
+                    <path
+                        d="M5 8L14 3l9 5v12l-9 5-9-5zM5 8l9 6 9-6M14 14v11"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    />
+                </svg>
+                <strong>jMouse</strong>
+                <span>Showcase</span>
+            </a>
+            <div class="environment">
+                <span class="status-dot"></span>
+                File-backed H2
+                <span class="divider">/</span>
+                No Spring
+            </div>
+            <a href="/static/jmouse-uik.html">UI kit ↗</a>
+        </header>
+        <div class="workspace">
+            <nav class="navigation" aria-label="Scenarios">
+                <p class="eyebrow">Framework workbench</p>
+                <a href="#routes" aria-current="page">
+                    <span>01</span>
+                    Routes
+                </a>
+                <a href="#database">
+                    <span>02</span>
+                    Database
+                </a>
+                <a href="#transactions">
+                    <span>03</span>
+                    Transactions
+                </a>
+                <a href="#security">
+                    <span>04</span>
+                    Security
+                </a>
+                <div class="navigation-note">
+                    <strong>Real requests. Real state.</strong>
+                    <p>
+                        Every action runs through jMouse MVC. Entries and balances survive application
+                        restarts.
+                    </p>
+                    <code>data/showcase.mv.db</code>
+                </div>
+            </nav>
+            <main id="main" tabindex="-1">
+                <div class="page-heading">
+                    <div>
+                        <p class="eyebrow" id="section-label">01 / Explore the contract</p>
+                        <h1 id="page-title">Routes</h1>
+                        <p id="page-description">Discover endpoints, send a request, inspect the response.</p>
+                    </div>
+                    <span class="identity" id="identity">Checking session…</span>
+                </div>
+                <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+                <section id="routes" class="scenario">
+                    <div class="section-heading">
+                        <h2>Request playground</h2>
+                        <span>Path · method · content negotiation</span>
+                    </div>
+                    <form id="route-form" class="request-bar">
+                        <label>
+                            Method
+                            <select id="request-method">
+                                <option>GET</option>
+                                <option>POST</option>
+                                <option>PUT</option>
+                                <option>DELETE</option>
+                                <option>OPTIONS</option>
+                            </select>
+                        </label>
+                        <label class="grow">
+                            Local path
+                            <input id="request-path" value="/api/hello/world" required pattern="/.*" />
+                        </label>
+                        <button class="primary" type="submit">Send request →</button>
+                    </form>
+                    <div class="quick-actions">
+                        <button type="button" data-request="/api/hello/world">Path variable</button>
+                        <button type="button" data-request="/api/absent">Missing route · 404</button>
+                        <button type="button" data-request="/api/hello/world" data-method="POST">
+                            Wrong method · 405
+                        </button>
+                    </div>
+                    <div class="section-heading">
+                        <h2>Registered scenarios</h2>
+                        <button type="button" id="refresh-routes">Refresh</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Method</th>
+                                    <th scope="col">Route</th>
+                                    <th scope="col">Behavior</th>
+                                    <th scope="col">Access</th>
+                                    <th scope="col"><span class="sr-only">Action</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="route-rows">
+                                <tr>
+                                    <td colspan="5">Loading routes…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section id="database" class="scenario" hidden>
+                    <div class="section-heading">
+                        <h2>Persistent entries</h2>
+                        <button type="button" id="refresh-entries">Refresh rows</button>
+                    </div>
+                    <p class="supporting">
+                        Read with JdbcTemplate. Write with named parameters and server-side validation.
+                    </p>
+                    <form id="entry-form" class="request-bar">
+                        <label class="grow">
+                            Entry name
+                            <input
+                                name="name"
+                                maxlength="120"
+                                required
+                                placeholder="e.g. A saved framework note"
+                            />
+                        </label>
+                        <button class="primary" type="submit">Insert row</button>
+                    </form>
+                    <p class="hint">
+                        Writing requires sign-in and a valid CSRF token. Read access is public.
+                    </p>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entry-rows">
+                                <tr>
+                                    <td colspan="2">Loading rows…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section id="transactions" class="scenario" hidden>
+                    <div class="section-heading">
+                        <h2>Atomic transfer</h2>
+                        <button type="button" id="refresh-accounts">Refresh balances</button>
+                    </div>
+                    <p class="supporting">
+                        One transaction debits a source, credits a destination and records the transfer. Force
+                        a failure after the debit to see both balances restored.
+                    </p>
+                    <div id="account-balances" class="balances" aria-live="polite"></div>
+                    <form id="transfer-form">
+                        <div class="form-grid">
+                            <label>
+                                From
+                                <select name="fromId" id="transfer-from" required></select>
+                            </label>
+                            <label>
+                                To
+                                <select name="toId" id="transfer-to" required></select>
+                            </label>
+                            <label>
+                                Amount · minor units
+                                <input
+                                    name="amount"
+                                    type="number"
+                                    min="1"
+                                    max="1000000"
+                                    step="1"
+                                    value="100"
+                                    required
+                                />
+                            </label>
+                        </div>
+                        <label class="checkbox">
+                            <input type="checkbox" name="rollback" />
+                            Force rollback after the first write
+                        </label>
+                        <button class="primary" type="submit">Run transaction →</button>
+                    </form>
+                    <div id="transfer-result" class="transaction-result" role="status" hidden></div>
+                </section>
+                <section id="security" class="scenario" hidden>
+                    <div class="section-heading">
+                        <h2>Session authentication</h2>
+                        <button type="button" id="refresh-session">Inspect identity</button>
+                    </div>
+                    <p class="supporting">
+                        Session cookies, password hashing, role checks and CSRF protection run in the
+                        framework filter chain.
+                    </p>
+                    <form id="login-form">
+                        <div class="form-grid">
+                            <label>
+                                Username
+                                <select name="username">
+                                    <option value="demo">demo · member</option>
+                                    <option value="admin">admin · administrator</option>
+                                </select>
+                            </label>
+                            <label>
+                                Password
+                                <input
+                                    name="password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    required
+                                />
+                            </label>
+                        </div>
+                        <div class="actions">
+                            <button class="primary" type="submit">Sign in</button>
+                            <button id="logout" type="button">Sign out</button>
+                        </div>
+                    </form>
+                    <p class="hint">
+                        Generated local passwords are in
+                        <code>data/credentials.properties</code>
+                        . Passwords stay out of request history.
+                    </p>
+                    <div class="section-heading">
+                        <h2>Access boundaries</h2>
+                        <span>Compare guest, member and administrator</span>
+                    </div>
+                    <div class="access-tests">
+                        <button type="button" data-request="/api/session">Current session</button>
+                        <button type="button" data-request="/api/security/member">Member endpoint</button>
+                        <button type="button" data-request="/api/security/admin">Admin endpoint</button>
+                        <button type="button" id="csrf-rejection">Write without CSRF · 403</button>
+                    </div>
+                    <dl class="facts">
+                        <div>
+                            <dt>Guest</dt>
+                            <dd>Member endpoint → 401</dd>
+                        </div>
+                        <div>
+                            <dt>Member</dt>
+                            <dd>Admin endpoint → 403</dd>
+                        </div>
+                        <div>
+                            <dt>Administrator</dt>
+                            <dd>Admin endpoint → 200</dd>
+                        </div>
+                    </dl>
+                </section>
+            </main>
+            <aside class="inspector" aria-label="HTTP response">
+                <div class="inspector-heading">
+                    <h2>Response</h2>
+                    <span id="response-status" class="response-status">Idle</span>
+                </div>
+                <p id="response-request" class="request-line">Send a request to inspect its result.</p>
+                <div class="response-meta">
+                    <span id="response-time">—</span>
+                    <button type="button" id="copy-response">Copy body</button>
+                </div>
+                <pre id="response-body" tabindex="0">No request yet.</pre>
+                <p class="hint">
+                    Responses come from the running server. HTTP errors are shown with their actual status.
+                </p>
+            </aside>
+        </div>
+        <footer>
+            jMouse Web + Security + JDBC
+            <span>Java 21 / H2 file storage</span>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,14 @@
+model:round-led-diameter-300-model("Round LED, 3 mm (T-1)") {
+    meta {
+        summary: "Round LED, 3 mm (T-1) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.LED:D3"
+        category: optoelectronics-through-hole
+        tags: electronics, model, radial
+        source: "T-1 and T-1¾ lamp bodies, 2.54 mm lead spacing"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    cylinder(lens, radius: 1.9, length: 5.3, at: [0, 0, 2.65])
+    cylinder(tin, radius: 0.245, length: 1.6, at: [-1.27, 0, -0.8])
+    cylinder(tin, radius: 0.245, length: 1.6, at: [1.27, 0, -0.8])
+}

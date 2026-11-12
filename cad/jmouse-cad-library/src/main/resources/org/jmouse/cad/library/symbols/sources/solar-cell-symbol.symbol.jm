@@ -2,7 +2,7 @@ symbol:solar-cell-symbol("Solar cell") {
     meta {
         summary: "Solar cell, as drawn on a schematic: a cell with light falling on it; the arrows light up with the light it takes"
         code: "SY.SOURCE:SOLAR-CELL"
-        category: circuits
+        category: sources
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -15,6 +15,16 @@ public interface DocumentExport extends Identified {
 
     String title();
 
+    /** Whether it can write now; one that stands on a program of the server cannot while no program is set. */
+    default boolean available() {
+        return true;
+    }
+
+    /** What its files are for: what a factory makes from is written only from a document its checks pass. */
+    default ExportPurpose purpose() {
+        return ExportPurpose.EXCHANGE;
+    }
+
     /** The kinds of document it writes. */
     Set<DocumentKind> kinds();
 

@@ -1,0 +1,8 @@
+category:capacitors("Capacitors") {
+    meta {
+        category: passive
+        order: 1
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

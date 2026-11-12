@@ -9,8 +9,10 @@ component:battery("Battery", type: source) {
         designator: B
         summary: "Battery: EMF by state of charge, internal resistance, polarisation sag and recovery"
         source: "the Thevenin battery model (EMF + R0 + one RC), a lithium-ion cell's figures"
-        category: circuits
+        category: sources
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:V_full(4.2 V, "EMF when full")
@@ -30,7 +32,7 @@ component:battery("Battery", type: source) {
     node:emf("the EMF, behind the internal resistance")
     node:polarised("behind the polarisation RC")
 
-    symbol(uses: battery-symbol) {
+    symbol(uses: "SY.SOURCE:BATTERY") {
         bind:failed(failed)
         bind:state_of_charge(state_of_charge)
         bind:a(pin: positive)
@@ -55,5 +57,5 @@ component:battery("Battery", type: source) {
     }
 
     # How it looks in the hand: an 18650 cell on its side.
-    portrait(uses: cylindrical-cell-portrait)
+    portrait(uses: "PT.CELL:18650")
 }

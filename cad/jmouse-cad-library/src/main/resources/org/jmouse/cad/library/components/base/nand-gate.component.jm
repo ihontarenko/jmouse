@@ -7,8 +7,10 @@ component:nand-gate("NAND gate", type: gate) {
         designator: U
         summary: "A two-input NAND gate: low only while both inputs are high"
         source: "the gate's function table: Y = ¬(A · B)"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -20,7 +22,7 @@ component:nand-gate("NAND gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: nand-gate-symbol)
+    symbol(uses: "SY.GATE:NAND")
 
     behaviour {
         function level()

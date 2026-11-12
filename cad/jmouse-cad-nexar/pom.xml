@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-nexar</artifactId>
     <name>jMouse - CAD Nexar</name>
     <description>jMouse Framework - jmCAD and Nexar: real parts found by number or words in Octopart's supply data, shown and never kept, as Nexar's terms allow.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-nexar</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-nexar</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-nexar</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-nexar</url>
     </scm>
 
     <properties>
@@ -65,8 +65,14 @@
 
         <!-- Nexar answers JSON: one mapper reads it as a tree; the HTTP client is the JDK's, so there is no web stack. -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- Nexar is called out to: the whole call timed, its answer read within a limit -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-http-client</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

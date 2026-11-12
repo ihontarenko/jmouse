@@ -2,7 +2,7 @@ symbol:shunt-reference-symbol("Adjustable shunt reference") {
     meta {
         summary: "An adjustable shunt regulator, as drawn on a schematic: a Zener's bar on a diode, its reference input coming in from the side"
         code: "SY.REFERENCE:SHUNT-ADJUSTABLE"
-        category: circuits
+        category: references
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

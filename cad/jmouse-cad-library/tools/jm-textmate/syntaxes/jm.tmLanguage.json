@@ -2594,7 +2594,7 @@
           "match" : "(?:^|(?<=[;{]))[ \\t]*\\b(dimension|teardrops|circuit|keepout|layers|class|place|rules|sizes|track|edge|hole|pair|text|zone|arc|via)\\b(?![:(])"
         },
         {
-          "match" : "(?<![A-Za-z0-9_.-])(inner-copper-thickness|least-track-width|plating-thickness|copper-thickness|board-thickness|least-via-drill|edge-clearance|hole-clearance|least-via-ring|via-diameter|least-drill|track-width|clearance|reference|via-drill|diameter|priority|rounding|through|curved|length|offset|rotate|drill|width|from|nets|ring|side|size|skew|gap|net|at|to)(?![A-Za-z0-9_:(-])",
+          "match" : "(?<![A-Za-z0-9_.-])(inner-copper-thickness|least-track-width|plating-thickness|copper-thickness|pcb-thickness|least-via-drill|edge-clearance|hole-clearance|least-via-ring|via-diameter|least-drill|track-width|clearance|reference|via-drill|diameter|priority|rounding|through|curved|length|offset|rotate|drill|width|from|nets|ring|side|size|skew|gap|net|at|to)(?![A-Za-z0-9_:(-])",
           "name" : "keyword.other.clause.jm"
         },
         {

@@ -4,6 +4,7 @@ import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.HandlerAdapter;
 import org.jmouse.web.mvc.MappingResult;
+import org.jmouse.web.mvc.result.ReturnValueHandler;
 
 /**
  * 🧪 Strategy for resolving method parameters from the request context.
@@ -33,7 +34,6 @@ import org.jmouse.web.mvc.MappingResult;
  * @author ihontarenko@gmail.com
  */
 public interface ArgumentResolver {
-
     /**
      * ✅ Whether this resolver supports the given method parameter.
      *
@@ -50,6 +50,9 @@ public interface ArgumentResolver {
      * @param mappingResult    resolved routing and request mapping information
      * @return the resolved value to be injected into the method argument
      */
-    Object resolveArgument(MethodParameter parameter, RequestContext requestContext, MappingResult mappingResult);
-
+    Object resolveArgument(
+        MethodParameter parameter,
+        RequestContext requestContext,
+        MappingResult mappingResult
+    );
 }

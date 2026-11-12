@@ -1,4 +1,4 @@
-# The Songle SRD-05VDC-SL-C: the blue sugar-cube relay of every hobby board, a relay with a 5 V coil and one changeover
+# The Songle SRD-05VDC-SL-C: the blue sugar-cube relay of every hobby pcb, a relay with a 5 V coil and one changeover
 # contact for 10 A. Pull-in and drop-out are the datasheet's limits: it pulls in by 3.75 V at the latest and lets go by
 # 0.5 V at the earliest.
 
@@ -8,8 +8,10 @@ component:srd-05vdc("SRD-05VDC-SL-C", type: relay) {
         summary: "5 V relay: a 70 Ω coil, one changeover contact for 10 A; pulls in above 3.75 V, lets go below 0.5 V"
         source: "Songle SRD-05VDC-SL-C datasheet: coil 70 Ω, 71.4 mA, 0.36 W; pull-in 75 %, drop-out 10 % of 5 V"
         package: "SRD, 5 pins"
-        category: circuits
+        category: relays
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:relay
 
@@ -29,7 +31,16 @@ component:srd-05vdc("SRD-05VDC-SL-C", type: relay) {
     pin:normally_open(analog, 4, "made while the coil holds the armature")
     pin:normally_closed(analog, 5, "made while the armature rests")
 
-    symbol(uses: relay-symbol) {
+
+    # The SRD's own numbering: 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed.
+    footprint("FP.RELAY:SRD-C") {
+        pad:1(common)
+        pad:2(coil_one)
+        pad:3(normally_open)
+        pad:4(normally_closed)
+        pad:5(coil_two)
+    }
+    symbol(uses: "SY.RELAY:SPDT") {
         bind:energized(energized)
     }
 
@@ -67,5 +78,5 @@ component:srd-05vdc("SRD-05VDC-SL-C", type: relay) {
     }
 
     # How it looks in the hand: an open-frame relay whose armature pulls in while the coil is energized.
-    portrait(uses: relay-portrait)
+    portrait(uses: "PT.RELAY:OPEN-FRAME")
 }

@@ -3,6 +3,8 @@ package org.jmouse.cad.kicad;
 import org.jmouse.cad.component.Component;
 import org.jmouse.cad.component.Drawing;
 import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.pcb.PcbModule;
+import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.schematic.SchematicModule;
 import org.jmouse.cad.schematic.drawing.LivingDrawing;
 import org.jmouse.cad.schematic.drawing.SymbolDrawing;
@@ -27,9 +29,29 @@ final class DocumentCatalogue implements KiCadCatalogue {
     private final ComponentFacts facts;
     private final Map<String, List<PartDrawing>> drawings = new ConcurrentHashMap<>();
 
+    @Override
+    public Optional<DocumentNode> document(String slug) {
+        return documents.find(slug);
+    }
+
     DocumentCatalogue(CatalogueDocuments documents) {
         this.documents = documents;
         this.facts = new ComponentFacts(documents);
+    }
+
+    @Override
+    public Optional<String> footprintCoded(String code) {
+        return documents.findCoded(code).filter(found -> found.kind().equals(PcbModule.FOOTPRINT)).map(DocumentNode::slug);
+    }
+
+    @Override
+    public Optional<FootprintDrawing> footprintDrawing(String footprint) {
+        return documents.find(footprint).filter(found -> found.kind().equals(PcbModule.FOOTPRINT)).map(FootprintDrawing::of);
+    }
+
+    @Override
+    public Optional<String> symbolCoded(String code) {
+        return documents.findCoded(code).filter(found -> found.kind().equals(SchematicModule.SYMBOL)).map(DocumentNode::slug);
     }
 
     @Override

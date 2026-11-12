@@ -1,0 +1,9 @@
+{
+  "$schema": "./layers.schema.json",
+  "bare": { "colour": "#1f5a36", "metallic": 0, "roughness": 0.55 },
+  "core": { "colour": "#c2b280", "metallic": 0, "roughness": 0.8 },
+  "copper": { "name": "copper", "thickness": 0.035, "finish": { "colour": "#c8913f", "metallic": 1, "roughness": 0.35 } },
+  "mask": { "name": "solder mask", "thickness": 0.02, "finish": { "colour": "#1f5a36", "metallic": 0, "roughness": 0.45 } },
+  "silkscreen": { "name": "silkscreen", "thickness": 0.012, "finish": { "colour": "#f2f2ec", "metallic": 0, "roughness": 0.85 } },
+  "body": { "colour": "#2b2b2e", "metallic": 0, "roughness": 0.6 }
+}

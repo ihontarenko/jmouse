@@ -10,8 +10,10 @@ component:mcp3008("MCP3008", type: converter) {
         summary: "10-bit, 8-channel ADC on SPI: code = 1024 · Vin / VREF, single-ended or differential"
         source: "Microchip MCP3004/3008 data sheet (DS21295D): start bit, SGL/DIFF, D2-D0, sampling from the 4th rising clock after the start bit, a null bit on the next falling clock, B9-B0 MSB first, configuration table 5-2, pinout per the PDIP-16 package; input leakage and the 20 pF sampling capacitor are not modelled"
         package: "PDIP-16, SOIC-16"
-        category: circuits
+        category: converters
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -33,6 +35,9 @@ component:mcp3008("MCP3008", type: converter) {
     pin:analog_ground(analog, 14, "AGND, what every input is read against")
     pin:reference(analog, 15, "VREF, full scale")
     pin:Vcc(power, 16)
+
+    footprint("FP.DIP:16-W7.62")
+    footprint("FP.SOIC:16-P1.27-W3.9")
 
     symbol(box) {
         left([channel_0, channel_1, channel_2, channel_3, channel_4, channel_5, channel_6, channel_7, reference, analog_ground])

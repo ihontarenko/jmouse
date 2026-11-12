@@ -2,7 +2,7 @@ symbol:zener-diode-symbol("Zener diode") {
     meta {
         summary: "Zener diode, as drawn on a schematic: lit inside while it conducts forward, its bar glowing while it regulates in breakdown"
         code: "SY.DIODE:ZENER"
-        category: circuits
+        category: diodes
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

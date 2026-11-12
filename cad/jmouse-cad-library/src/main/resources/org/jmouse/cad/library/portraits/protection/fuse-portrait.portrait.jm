@@ -4,7 +4,7 @@ portrait:fuse-portrait("Glass fuse") {
     meta {
         summary: "A 5 × 20 mm glass fuse: its element seen through the tube; parted and smoked when it blows"
         code: "PT.FUSE:GLASS-5X20"
-        category: circuits
+        category: protection
         tags: electronics, portrait, fuse, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

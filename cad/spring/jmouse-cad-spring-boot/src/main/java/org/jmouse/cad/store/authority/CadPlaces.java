@@ -1,6 +1,6 @@
 package org.jmouse.cad.store.authority;
 
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.store.problem.CadProblem;
 
 import java.time.Instant;

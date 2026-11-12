@@ -2,7 +2,7 @@ footprint:axial-resistor-body-0414-pitch-2540-horizontal-footprint("Axial resist
     meta {
         summary: "Axial resistor DIN 0414, body 11.9 × ⌀4.5 mm, laid flat, 25.4 mm between its holes"
         code: "FP.AXIAL:R0414-P25.4-H"
-        category: circuits
+        category: resistors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-1 bodies, DIN 44051 size codes"
         authors: "jMouse"
@@ -15,4 +15,6 @@ footprint:axial-resistor-body-0414-pitch-2540-horizontal-footprint("Axial resist
     outline(fabrication, width: 0.1, "M-5.95 -2.25H5.95V2.25H-5.95ZM-12.7 0H-5.95M5.95 0H12.7")
     outline(silkscreen, width: 0.12, "M-6.06 -2.36H6.06V2.36H-6.06ZM-11.44 0H-6.06M6.06 0H11.44")
     outline(courtyard, width: 0.05, "M-14.2 -2.75H14.2V2.75H-14.2Z")
+    body(height: 4.5)
+    model("MD.AXIAL:R0414-P25.4-H")
 }

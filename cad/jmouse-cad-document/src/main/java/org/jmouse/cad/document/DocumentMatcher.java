@@ -3,6 +3,7 @@ package org.jmouse.cad.document;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.grammar.TermReading;
 import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 
 /**
@@ -19,7 +20,24 @@ public final class DocumentMatcher {
     /** {@code symbol "Resistor" …}: a kind's word, then the title in quotes. */
     public static Matcher<TokenCursor> document(DocumentGrammar grammar) {
         return cursor -> cursor.isCurrent(BasicToken.T_IDENTIFIER) && grammar.kind(cursor.valueAt(0)).isPresent()
-                && cursor.isNext(BasicToken.T_STRING);
+                && cursor.isNext(BasicToken.T_STRING) && opensBlockOnItsLine(cursor);
+    }
+
+    /**
+     * Whether the line the cursor stands on opens a block: a document's head does — {@code model "SOIC-8" {} —, a line a
+     * body is drawn with that starts with the same word does not — a footprint's {@code model "soic-8-model" rotate …}.
+     */
+    private static boolean opensBlockOnItsLine(TokenCursor cursor) {
+        for (int offset = 1; offset < cursor.remaining(); offset++) {
+            Token.Type type = cursor.lookAt(offset).type();
+            if (type == BasicToken.T_OPEN_CURLY) {
+                return true;
+            }
+            if (type == BasicToken.T_NEW_LINE || type == BasicToken.T_EOL) {
+                return false;
+            }
+        }
+        return false;
     }
 
     /** {@code component:and-gate(…)}: a kind's word, then a colon against it — a document written as a term. */

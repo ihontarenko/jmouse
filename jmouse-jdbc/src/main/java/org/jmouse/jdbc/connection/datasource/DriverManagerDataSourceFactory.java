@@ -6,11 +6,21 @@ public final class DriverManagerDataSourceFactory implements DataSourceFactory {
 
     @Override
     public boolean supports(DataSourceSpecification specification) {
-        return specification.url() != null && !specification.url().isEmpty();
+        return (
+            specification.pool() == null &&
+            specification.url() != null &&
+            !specification.url().isBlank() &&
+            (specification.driverClassName() == null || specification.driverClassName().isBlank())
+        );
     }
 
     @Override
     public DataSource create(DataSourceSpecification specification) {
+        if (!supports(specification)) {
+            throw new IllegalArgumentException(
+                "Unsupported DriverManager specification: " + specification.name()
+            );
+        }
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(specification.url());
         dataSource.setUsername(specification.username());
@@ -25,5 +35,4 @@ public final class DriverManagerDataSourceFactory implements DataSourceFactory {
     public int priority() {
         return Integer.MIN_VALUE;
     }
-
 }

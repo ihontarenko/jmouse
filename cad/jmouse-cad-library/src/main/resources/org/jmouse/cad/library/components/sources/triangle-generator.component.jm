@@ -5,7 +5,9 @@ component:triangle-generator("Triangle generator", type: generator) {
     meta {
         designator: G
         summary: "An ideal triangle voltage: a straight rise and an equal straight fall between two levels"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:high(5 V, "the level at the top of every rise")
@@ -15,7 +17,7 @@ component:triangle-generator("Triangle generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: triangle-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-TRIANGLE") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

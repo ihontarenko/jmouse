@@ -2,7 +2,7 @@ footprint:tqfp-32-footprint("TQFP-32, 7 mm body") {
     meta {
         summary: "32-lead TQFP-32, 7 mm body, 0.8 mm pitch, body 7 × 7 mm"
         code: "FP.TQFP:32-P0.8-7"
-        category: circuits
+        category: quad-flat
         tags: electronics, footprint, surface
         source: "JEDEC MS-026 ABA"
         authors: "jMouse"
@@ -46,4 +46,6 @@ footprint:tqfp-32-footprint("TQFP-32, 7 mm body") {
     outline(silkscreen, width: 0.12, "M-3.335 -3.61H-3.61V-3.335M-3.335 3.61H-3.61V3.335M3.335 -3.61H3.61V-3.335M3.335 3.61H3.61V3.335")
     outline(silkscreen, filled, "M-5.835 -2.8A0.3 0.3 0 1 0 -5.235 -2.8A0.3 0.3 0 1 0 -5.835 -2.8Z")
     outline(courtyard, width: 0.05, "M-5.25 -5.25H5.25V5.25H-5.25Z")
+    body(height: 1.2)
+    model("MD.TQFP:32-P0.8-7")
 }

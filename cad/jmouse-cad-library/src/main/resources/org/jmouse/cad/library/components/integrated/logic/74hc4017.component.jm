@@ -9,8 +9,10 @@ component:74hc4017("74HC4017", type: counter) {
         summary: "Decade counter with ten decoded outputs: one high output stepping Q0 to Q9 on each clock"
         source: "TI CD74HC4017 (SCLS550): function table; CP0 to Qn 19 ns typical at 5 V, CL = 15 pF, 46 ns maximum at 4.5 V, CL = 50 pF; pinout per the data sheet"
         package: "DIP-16, SOIC-16"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -26,6 +28,9 @@ component:74hc4017("74HC4017", type: counter) {
     pin:clock(digital, input, 14, "CP0, counts on its rising edge while CP1 is low")
     pin:master_reset(digital, input, 15, "MR, back to nought at once, active high")
     pin:Vcc(power, 16)
+
+    footprint("FP.DIP:16-W7.62")
+    footprint("FP.SOIC:16-P1.27-W3.9")
 
     symbol(box) {
         left([clock edge, not_clock_enable bubble, master_reset])

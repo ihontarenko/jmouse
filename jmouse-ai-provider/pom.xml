@@ -64,6 +64,12 @@
       not inherit the other's classes.
     -->
     <dependencies>
+        <!-- every call out: the whole call timed, its answer read within a limit -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-http-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency><groupId>org.jmouse</groupId><artifactId>jmouse-ai-model</artifactId><version>1.0.1</version></dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
@@ -79,7 +85,7 @@
           blocks already are. The HTTP client is the JDK's, so there is no web stack either.
         -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>

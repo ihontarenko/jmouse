@@ -11,7 +11,9 @@ component:lcd-1602("16×2 LCD (HD44780)", type: display) {
         summary: "16×2 character LCD on an HD44780: 8- or 4-bit bus, DDRAM, address counter, busy flag, display shift"
         source: "Hitachi HD44780U data sheet (ADE-207-272(Z), rev. 0.0): instruction table 6, execution times at fosc = 270 kHz (clear and home 1.52 ms, others 37 µs), DDRAM addresses 00h-27h and 40h-67h in two-line mode, initializing by internal reset (8-bit, one line, display off, increment); pinout of the common 1602 module. Not modelled: CGRAM characters (stored nowhere, drawn blank), the contrast voltage, the backlight, the ROM characters past 7Fh"
         package: "1602 module, 16 pins"
-        category: circuits
+        category: displays
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -28,7 +30,9 @@ component:lcd-1602("16×2 LCD (HD44780)", type: display) {
     pin:backlight_anode(analog, 15, "A, the backlight: not modelled")
     pin:backlight_cathode(analog, 16, "K")
 
-    symbol(uses: lcd-1602-symbol)
+    footprint("FP.HDR:1X16-P2.54-V")
+
+    symbol(uses: "SY.DISPLAY:LCD-16X2")
 
     state:ddram[80](32, discrete, "the display memory: 40 bytes a row, spaces at power-up")
     state:shown[32](32, discrete, "the 32 characters in the window now")

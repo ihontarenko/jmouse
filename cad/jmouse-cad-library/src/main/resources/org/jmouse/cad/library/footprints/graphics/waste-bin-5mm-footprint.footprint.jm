@@ -1,0 +1,15 @@
+footprint:waste-bin-5mm-footprint("Separate collection, 5 mm") {
+    meta {
+        summary: "A crossed-out bin: not to be thrown away with household waste, printed 5 mm wide"
+        code: "FP.GRAPHIC:WASTE-BIN-5"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 0.25, "M-1.1 -1.1H1.1L0.8 1.5H-0.8Z")
+    outline(silkscreen, width: 0.25, "M-1.4 -1.1H1.4")
+    outline(silkscreen, width: 0.25, "M-0.4 -1.5H0.4")
+    outline(silkscreen, width: 0.25, "M-0.4 -0.7L-0.25 1.1M0.4 -0.7L0.25 1.1M0 -0.7V1.1")
+    outline(silkscreen, width: 0.25, "M-1.9 -1.9L1.9 1.9M1.9 -1.9L-1.9 1.9")
+}

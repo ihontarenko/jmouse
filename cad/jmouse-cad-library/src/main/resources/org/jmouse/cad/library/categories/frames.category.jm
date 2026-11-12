@@ -1,0 +1,8 @@
+category:frames("Sheet frames") {
+    meta {
+        summary: "The frames a sheet is drawn in"
+        order: 20
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

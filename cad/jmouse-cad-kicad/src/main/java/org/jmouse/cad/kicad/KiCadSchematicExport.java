@@ -1,27 +1,29 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.exchange.imported.ImportedPins;
+import org.jmouse.cad.exchange.sheet.BlockFrame;
+import org.jmouse.cad.exchange.sheet.PartPins;
+import org.jmouse.cad.exchange.sheet.SheetGeometry;
+import org.jmouse.cad.exchange.sheet.SymbolLook;
+import org.jmouse.cad.exchange.sheet.SymbolLooks;
+import org.jmouse.cad.exchange.imported.SymbolCanvas;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.Setting;
 import org.jmouse.cad.Text;
 import org.jmouse.cad.circuit.Circuit;
-import org.jmouse.cad.circuit.Connection;
 import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.circuit.Placement;
 import org.jmouse.cad.circuit.SheetBoundary;
 import org.jmouse.cad.component.Component;
-import org.jmouse.cad.component.Drawing;
 import org.jmouse.cad.component.Pin;
 import org.jmouse.cad.component.Seat;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.MetaNode;
-import org.jmouse.cad.board.BoardModule;
-import org.jmouse.cad.schematic.SchematicModule;
-import org.jmouse.cad.schematic.drawing.LivingDrawing;
 import org.jmouse.cad.schematic.drawing.SymbolDrawing;
 import org.jmouse.cad.simulation.CatalogueDocuments;
-import org.jmouse.cad.simulation.ComponentCompilation;
-import org.jmouse.cad.simulation.EvaluatedParameter;
+import org.jmouse.cad.simulation.ComponentFacts;
+import org.jmouse.cad.simulation.elaboration.SheetUnfolding;
 import org.jmouse.cad.simulation.ParameterEvaluation;
 import org.jmouse.cad.simulation.SimulatedComponent;
 import org.jmouse.cad.simulation.SimulationModule;
@@ -30,7 +32,7 @@ import org.jmouse.cad.simulation.SimulationVocabulary;
 import org.jmouse.kicad.KiCadPlacement;
 import org.jmouse.kicad.KiCadPoint;
 import org.jmouse.kicad.KiCadValue;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 import org.jmouse.kicad.schematic.KiCadLabel;
 import org.jmouse.kicad.schematic.KiCadSchematicBuilder;
 import org.jmouse.kicad.symbol.KiCadPinType;
@@ -39,6 +41,7 @@ import org.jmouse.svg.path.node.PathPolylines;
 import org.jmouse.svg.path.parser.PathParser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -47,6 +50,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
+
+import static org.jmouse.cad.exchange.sheet.SymbolLook.bare;
+import static org.jmouse.cad.exchange.sheet.SymbolLook.unitOf;
 
 /**
  * A circuit as a KiCad schematic: the way back from {@link KiCadSheetImport}. Every part is placed as a KiCad symbol
@@ -62,14 +69,21 @@ import java.util.Set;
 public final class KiCadSchematicExport {
 
     /** A sheet's twenty units are KiCad's 1.27 mm grid. */
-    private static final double MILLIMETRES_PER_UNIT = 1 / KiCadSymbolDrawing.UNITS_PER_MILLIMETRE;
+    private static final double MILLIMETRES_PER_UNIT = 1 / SymbolCanvas.UNITS_PER_MILLIMETRE;
 
     /** How a net joins what names it, among the drawing's keys. */
     private static final String NET = "net:";
 
     /** KiCad's power symbol every ground mark is, its value the net, and the name it gives node 0. */
     private static final String GROUND_SYMBOL = "power:GND";
-    private static final String NODE_ZERO = "GND";
+    private static final String NODE_ZERO = KiCadNetNames.KICAD_GROUND;
+
+    /** The field a symbol names its footprint in. */
+    private static final String FOOTPRINT_FIELD = "Footprint";
+
+    /** KiCad's power flag: what a designer stands on a net that is fed though no pin of it gives power. */
+    private static final String POWER_FLAG_SYMBOL = "power:PWR_FLAG";
+    private static final String POWER_FLAG = "PWR_FLAG";
 
     /** How many straight steps a curve of a drawing is followed in, KiCad drawing polylines. */
     private static final int CURVE_STEPS = 8;
@@ -77,53 +91,189 @@ public final class KiCadSchematicExport {
     /** The property of a box element that fills it with a figure: a gauge, empty at rest. */
     private static final String GAUGE_LEVEL = "level";
 
-    /** A box's pins stand two grid steps apart and leave it through a lead of one — as the sheet draws a box. */
-    private static final double GRID = 20;
-    private static final double BOX_PITCH = GRID * 2;
-    private static final double BOX_LEAD = GRID;
-
-    /** The sides of a box, in the order its pins are placed. */
-    private static final List<String> SIDES = List.of(SimulationVocabulary.LEFT, SimulationVocabulary.RIGHT,
-            SimulationVocabulary.TOP, SimulationVocabulary.BOTTOM);
-
-    /** A box side that draws supplies: placed on top. */
-    private static final String POWER_SIDE = "power";
-
-    /** What an export comes out as: the file's name and text, and what a KiCad sheet could not say. */
-    public record Exported(String fileName, String text, List<String> notes) {
+    /**
+     * What an export comes out as: the file's name and text, and what a KiCad sheet could not say.
+     *
+     * @param symbols the symbol each part is drawn as, by its reference: what the footprint of a board laid out from it names
+     * @param nets    what KiCad names each of the circuit's nets, by our name: what the board's copper of it must be called
+     * @param librarySymbols every library symbol its sheets draw, by its full name: what the project's own library holds of them
+     */
+    public record Exported(String fileName, String text, List<String> notes, Map<String, Symbol> symbols, Map<String, String> nets,
+                           List<ExportedSheet> sheets, Map<String, SExpressionList> librarySymbols) {
 
         public Exported {
             notes = List.copyOf(notes);
+            symbols = Map.copyOf(symbols);
+            nets = Map.copyOf(nets);
+            sheets = List.copyOf(sheets);
+            librarySymbols = Collections.unmodifiableMap(new LinkedHashMap<>(librarySymbols));
         }
     }
 
-    /** How a component is drawn and numbered, as read from its documents. */
-    private record Look(String component, String libraryId, String title, String designator, List<String> units,
-                        Map<String, Pin> pins, Set<String> shared, List<String> pinOrder, SymbolDrawing drawing,
-                        Map<String, String> ports, Map<String, List<String>> sides, Map<String, String> numbers,
-                        Optional<String> valueParameter, Map<String, Double> defaults, Optional<String> footprint,
-                        Map<String, Map<String, String>> padsOf) {
+    /** A sheet below the root, as its own file beside the root's: one for each sheet document, however often it is placed. */
+    public record ExportedSheet(String fileName, String text) {
+    }
 
-        /**
-         * The look of a part on {@code footprint}: on a package that maps its pads, a library symbol of its own whose pins
-         * carry those pads — KiCad numbers a symbol's pins as its footprint's pads, so a 2N2222 on SOT-23 is another symbol
-         * than on TO-92, as KiCad keeps 2N2222 and MMBT2222 apart. On a package numbered as the component is, this look.
-         */
-        /** The component's pin a terminal is: {@code positive} its first, {@code negative} its second, else itself. */
-        String pinOf(String terminal) {
-            int inOrder = SimulationVocabulary.IN_ORDER_TERMINALS.indexOf(terminal);
-            return inOrder >= 0 && !pins.containsKey(terminal) && inOrder < pinOrder.size() ? pinOrder.get(inOrder) : terminal;
+    /**
+     * One place a sheet stands in the design, as KiCad keeps it.
+     *
+     * @param path      its instance's path, {@code /root-uuid/sheet-uuid…}: its symbols' references are kept under it
+     * @param boardPath the same without the root, {@code /sheet-uuid…}: what a footprint of a part on it names before its symbol
+     * @param blocks    the blocks it is placed through, outermost first — what its parts and nets are named after when unfolded
+     * @param page      the page KiCad numbers it as
+     */
+    private record Place(String path, String boardPath, List<String> blocks, String page) {
+    }
+
+    /** What every sheet of a design writes into, and where each sheet stands: walked once before any sheet is written. */
+    private static final class Design {
+
+        private final String project;
+        private final String rootIdentity;
+        private final UnaryOperator<String> references;
+        private final CatalogueDocuments catalogue;
+        private final Map<String, List<Place>> places = new LinkedHashMap<>();
+        private final Map<String, Circuit> circuits = new LinkedHashMap<>();
+        private final Map<String, String> titles = new LinkedHashMap<>();
+        private final Map<String, Symbol> symbols = new LinkedHashMap<>();
+        private final Map<String, KiCadNetName> nets = new LinkedHashMap<>();
+        private final Map<String, SExpressionList> librarySymbols = new LinkedHashMap<>();
+        private final List<String> notes = new ArrayList<>();
+        private int pages;
+
+        private Design(String project, UnaryOperator<String> references, CatalogueDocuments catalogue) {
+            this.project = project;
+            this.rootIdentity = KiCadSchematicBuilder.sheetIdentity(project);
+            this.references = references;
+            this.catalogue = catalogue;
         }
 
-        Look landedOn(String footprint) {
-            Map<String, String> pads = footprint == null ? null : padsOf.get(footprint);
-            if (pads == null) {
-                return this;
+        /** A sheet where it stands, and every sheet its blocks place, each place a step further down every place of its parent. */
+        private void place(String slug, String title, Circuit circuit, List<Place> at, Set<String> walking) {
+            places.computeIfAbsent(slug, ignored -> new ArrayList<>()).addAll(at);
+            circuits.putIfAbsent(slug, circuit);
+            titles.putIfAbsent(slug, title);
+            if (!walking.add(slug)) {
+                notes.add(slug + " places itself through its blocks: its sheets are written once, not without end.");
+                return;
+            }
+            for (Part part : circuit.parts()) {
+                Optional<DocumentNode> sheet = sheetOf(catalogue, part);
+                if (sheet.isEmpty()) {
+                    continue;
+                }
+                String step = KiCadSchematicBuilder.placedSheetIdentity(slug, part.reference());
+                List<Place> below = new ArrayList<>();
+                for (Place place : at) {
+                    List<String> blocks = new ArrayList<>(place.blocks());
+                    blocks.add(part.reference());
+                    below.add(new Place(place.path() + "/" + step, place.boardPath() + "/" + step, List.copyOf(blocks), String.valueOf(++pages)));
+                }
+                place(sheet.get().slug(), sheet.get().title(), SimulationReading.circuit(sheet.get()), below, walking);
+            }
+            walking.remove(slug);
+        }
+    }
+
+    /** The sheet a part places, when it is a block: a circuit of the design rather than a component. */
+    private static Optional<DocumentNode> sheetOf(CatalogueDocuments catalogue, Part part) {
+        return catalogue.find(part.component()).filter(found -> found.kind().equals(SimulationModule.CIRCUIT));
+    }
+
+    /**
+     * A part as the schematic places it.
+     *
+     * @param path  its symbol, {@code /symbol-uuid} — its first unit's —, as a footprint names the symbol it stands for
+     * @param value its value as the symbol says it, which KiCad holds the footprint's to
+     * @param fields every other field the symbol carries — what its line sets, {@code position} of a trimmer —, which KiCad
+     *               copies onto the footprint and checks the board by: not its footprint, which the board names itself
+     */
+    public record Symbol(String path, String value, Map<String, String> fields) {
+
+        public Symbol {
+            fields = Collections.unmodifiableMap(new LinkedHashMap<>(fields));
+        }
+    }
+
+    /** How strongly a sheet names a net: KiCad calls a net by the strongest name it is given. */
+    private enum NameStrength {
+        /** A label of this sheet, or one handed to the sheet above: the net under the sheet's path. */
+        SHEET,
+        /** A global label: the net by its text, everywhere. */
+        GLOBAL,
+        /** A power symbol: the net by its value, everywhere. */
+        POWER
+    }
+
+    private record KiCadNetName(String name, NameStrength strength) {
+    }
+
+    /** What a label of this sheet names its net under: the root sheet's path. */
+    private static final String ROOT_SHEET_PATH = "/";
+
+    /**
+     * How a component is drawn and numbered in KiCad: how the sheet draws it ({@link SymbolLook}), and the library symbol
+     * KiCad holds it as — its id, its pins' numbers, its value and footprint.
+     */
+    private record Look(SymbolLook face, String libraryId, String designator, Map<String, String> numbers,
+                        Optional<String> valueParameter, Map<String, Double> defaults, Optional<String> footprint,
+                        Map<String, Map<String, String>> padsOf, Map<String, List<String>> stacked) {
+
+        String title() {
+            return face.title();
+        }
+
+        List<String> units() {
+            return face.units();
+        }
+
+        Map<String, Pin> pins() {
+            return face.pins();
+        }
+
+        Set<String> shared() {
+            return face.shared();
+        }
+
+        Map<String, String> ports() {
+            return face.ports();
+        }
+
+        /** The symbol's drawing; null for a component drawn as a box. */
+        SymbolDrawing drawing() {
+            return face.drawing().orElse(null);
+        }
+
+        /**
+         * The look of a part whose pins land on these pads ({@code pin → pad}): this one where its symbol already numbers
+         * every pin as the pad it lands on; else a library symbol of its own numbered by the pads, named after the footprint —
+         * KiCad joins a symbol's pin to the pad of its number, so a KiCad symbol numbered otherwise than the footprint the part
+         * stands on would join its pins to the wrong pads.
+         */
+        Look landedOn(String footprint, Map<String, List<String>> pads) {
+            // A pin on several pads — a regulator's input on three — is KiCad's stacked pins: one for each pad, on one point.
+            Map<String, List<String>> onPads = new LinkedHashMap<>();
+            pads.forEach((pin, numbered) -> onPads.put(pin, List.copyOf(numbered)));
+            boolean agrees = pads.entrySet().stream().allMatch(landing -> landing.getValue().getFirst().equals(numbers.get(landing.getKey())));
+            if (agrees || footprint == null) {
+                return new Look(face, libraryId, designator, numbers, valueParameter, defaults, this.footprint, padsOf, onPads);
             }
             Map<String, String> renumbered = new LinkedHashMap<>(numbers);
-            renumbered.putAll(pads);
-            return new Look(component, libraryId + "_" + footprint, title, designator, units, pins, shared, pinOrder, drawing,
-                    ports, sides, renumbered, valueParameter, defaults, this.footprint, padsOf);
+            pads.forEach((pin, numbered) -> renumbered.put(pin, numbered.getFirst()));
+            return new Look(face, libraryId + "_" + footprint, designator, renumbered, valueParameter, defaults, this.footprint,
+                    padsOf, onPads);
+        }
+
+        /** The numbers a pin is written with: every pad it lands on, its own number first; one number where it lands on one. */
+        List<String> numbersOf(String pin) {
+            List<String> onPads = stacked.get(pin);
+            String own = numbers.getOrDefault(pin, pin);
+            if (onPads == null || onPads.size() < 2) {
+                return List.of(own);
+            }
+            List<String> all = new ArrayList<>(List.of(own));
+            onPads.stream().filter(number -> !number.equals(own)).forEach(all::add);
+            return List.copyOf(all);
         }
     }
 
@@ -137,9 +287,19 @@ public final class KiCadSchematicExport {
     private final List<String> notes = new ArrayList<>();
     private final Map<String, Part> parts = new LinkedHashMap<>();
     private final Map<String, Optional<Look>> looks = new HashMap<>();
-    private final Map<String, Optional<SymbolDrawing>> symbols = new HashMap<>();
-    /** Each footprint's KiCad library id, by its slug. */
-    private final Map<String, String> footprintLibraryIds = new HashMap<>();
+    /** How the sheet draws each component, and the symbols it draws them with: the engine's, which the sheet's checks read too. */
+    private final SymbolLooks faces;
+    /** Each footprint's KiCad library id, as the board laid out from this schematic names it too. */
+    private final KiCadFootprintIds footprintIds;
+    /** Where each part's pins land: the one answer the pcb's copper follows too. */
+    private final ComponentFacts facts;
+    /** Each part's first unit placed, which its footprint names, and its value as its symbol says it. */
+    private final Map<String, Integer> firstUnits = new LinkedHashMap<>();
+    private final Map<String, String> values = new LinkedHashMap<>();
+    /** Each part's fields besides its value and footprint, by its reference: what a board copies onto its footprint. */
+    private final Map<String, Map<String, String>> partFields = new LinkedHashMap<>();
+    /** What KiCad will call each net, by our name. */
+    private final Map<String, KiCadNetName> kicadNets = new LinkedHashMap<>();
     /** Which symbol each library id is drawn with on this sheet: a library id holds one drawing. */
     private final Map<String, String> drawingOfLibraryId = new HashMap<>();
     /** Where each terminal meets its wires on the KiCad sheet, by {@code reference:pin}; a mark's by {@code reference:}. */
@@ -149,16 +309,30 @@ public final class KiCadSchematicExport {
     /** The circuit's parameters, computed: what a part's setting written over them is, where KiCad holds no parameter. */
     private final Map<String, Double> parameterValues = new LinkedHashMap<>();
     private int powerSymbols;
+    private int powerFlags;
+    /** Each net of this sheet that takes power, by its name here: what {@link #flagUndrivenPower} flags. */
+    private final Map<String, PowerNet> powerNets = new LinkedHashMap<>();
     private int misplacedPins;
+    /** The design this sheet is one of, and whether it is its root. */
+    private final Design design;
+    private final boolean root;
 
     private KiCadSchematicExport(String slug, String title, Circuit circuit, CatalogueDocuments catalogue, KiCadLibraryMap map,
-                                 KiCadLibraries libraries) {
+                                 KiCadLibraries libraries, Design design) {
         this.slug = slug;
         this.circuit = circuit;
         this.catalogue = catalogue;
         this.map = map;
         this.libraries = libraries;
-        this.schematic = KiCadSchematicBuilder.of(title == null || title.isBlank() ? slug : title, slug);
+        this.design = design;
+        this.root = slug.equals(design.project);
+        String titled = title == null || title.isBlank() ? slug : title;
+        // KiCad keeps a symbol's reference under the project's name, which is its files': the root schematic's own name.
+        this.schematic = (root ? KiCadSchematicBuilder.of(design.project, slug) : KiCadSchematicBuilder.child(design.project, slug))
+                .title(titled);
+        this.footprintIds = new KiCadFootprintIds(catalogue, map, libraries);
+        this.faces = new SymbolLooks(catalogue);
+        this.facts = new ComponentFacts(catalogue);
         circuit.parts().forEach(part -> parts.put(part.reference(), part));
         ParameterEvaluation.evaluate(slug, circuit.parameters())
                 .forEach(parameter -> parameterValues.put(parameter.name(), parameter.value()));
@@ -174,20 +348,63 @@ public final class KiCadSchematicExport {
      */
     public static Exported of(String slug, String title, Circuit circuit, CatalogueDocuments catalogue, KiCadLibraryMap map,
                               KiCadLibraries libraries) {
-        if (circuit.layout().stream().noneMatch(placement -> !(placement instanceof Placement.Wire))) {
+        return of(slug, title, circuit, catalogue, map, libraries, UnaryOperator.identity());
+    }
+
+    /**
+     * The same, each part called in KiCad what the board laid out beside it calls it.
+     *
+     * @param references what KiCad calls a part, by its name in the unfolded design ({@code S1_R1})
+     */
+    public static Exported of(String slug, String title, Circuit circuit, CatalogueDocuments catalogue, KiCadLibraryMap map,
+                              KiCadLibraries libraries, UnaryOperator<String> references) {
+        if (!drawn(circuit)) {
             throw new IllegalArgumentException("The circuit has no drawing to export: open it on the bench and save it, so "
                     + "its layout is written.");
         }
-        return new KiCadSchematicExport(slug, title, circuit, catalogue, map, libraries).export();
+        Design design = new Design(slug, references, catalogue);
+        design.pages = 1;
+        design.place(slug, title, circuit, List.of(new Place("/" + design.rootIdentity, "", List.of(), "1")), new LinkedHashSet<>());
+        String text = new KiCadSchematicExport(slug, title, circuit, catalogue, map, libraries, design).write();
+        List<ExportedSheet> sheets = new ArrayList<>();
+        for (Map.Entry<String, Circuit> sheet : design.circuits.entrySet()) {
+            if (sheet.getKey().equals(slug)) {
+                continue;
+            }
+            String written = new KiCadSchematicExport(sheet.getKey(), design.titles.get(sheet.getKey()), sheet.getValue(), catalogue, map,
+                    libraries, design).write();
+            sheets.add(new ExportedSheet(sheet.getKey() + KICAD_SCHEMATIC, written));
+        }
+        Map<String, String> nets = new LinkedHashMap<>();
+        design.nets.forEach((net, named) -> nets.put(net, named.name()));
+        return new Exported(slug + KICAD_SCHEMATIC, text, design.notes, design.symbols, nets, sheets, design.librarySymbols);
     }
 
-    private Exported export() {
+    /** What a schematic's file is named with. */
+    private static final String KICAD_SCHEMATIC = ".kicad_sch";
+
+    /**
+     * Whether a circuit is drawn — its layout places something besides wires —: a schematic is written only of one that is.
+     * A circuit of no parts is: its drawing is an empty sheet.
+     */
+    public static boolean drawn(Circuit circuit) {
+        return circuit.parts().isEmpty() || circuit.layout().stream().anyMatch(placement -> !(placement instanceof Placement.Wire));
+    }
+
+    /** This sheet's text; what it names and places for the board goes into the design. */
+    private String write() {
         Map<String, List<Placement.PlacedPart>> placements = new LinkedHashMap<>();
         for (Placement placement : circuit.layout()) {
             switch (placement) {
                 case Placement.PlacedPart placed -> placements.computeIfAbsent(placed.reference(), ignored -> new ArrayList<>())
                         .add(placed);
                 case Placement.Mark mark -> mark(mark);
+                case Placement.Bus ignored -> {
+                }
+                case Placement.Note ignored -> {
+                }
+                case Placement.Drawn ignored -> {
+                }
                 case Placement.Wire ignored -> {
                 }
             }
@@ -195,12 +412,49 @@ public final class KiCadSchematicExport {
         placements.forEach(this::part);
         circuit.layout().stream().filter(Placement.Wire.class::isInstance).map(Placement.Wire.class::cast).forEach(this::wire);
         joinUndrawnNets();
+        flagUndrivenPower();
         if (misplacedPins > 0) {
             notes.add(misplacedPins + " pins stand where KiCad's turn of the symbol puts them, a little off the sheet's "
                     + "drawing: their wires were led there.");
         }
-        String fileName = slug + ".kicad_sch";
-        return new Exported(fileName, schematic.print(fileName), notes);
+        String fileName = slug + KICAD_SCHEMATIC;
+        // Every place this sheet stands: its parts by their unfolded names, its own nets under the place's path.
+        for (Place place : places()) {
+            firstUnits.forEach((reference, unit) -> design.symbols.put(SheetUnfolding.partName(place.blocks(), reference),
+                    new Symbol(place.boardPath() + "/" + KiCadSchematicBuilder.symbolIdentity(slug, reference, unit), values.get(reference),
+                            partFields.getOrDefault(reference, Map.of()))));
+            kicadNets.forEach((net, named) -> namedAt(place, net, named));
+        }
+        notes.forEach(note -> design.notes.add(root ? note : slug + ": " + note));
+        schematic.librarySymbols().forEach(design.librarySymbols::putIfAbsent);
+        return schematic.print(fileName);
+    }
+
+    /** Where this sheet stands in the design: once for the root, once for each block that places it below. */
+    private List<Place> places() {
+        return design.places.getOrDefault(slug, List.of());
+    }
+
+    /**
+     * A net this sheet names, at one of its places, as KiCad calls it there: a label of the sheet under the place's path
+     * ({@code /S1/mid}) — but a port, which the parent names —; a global label or a power symbol by its text everywhere.
+     */
+    private void namedAt(Place place, String net, KiCadNetName named) {
+        boolean everywhere = net.equals(Circuit.GROUND) || circuit.boundary().nets().stream()
+                .anyMatch(written -> written.global() && written.name().equals(net));
+        if (named.strength() == NameStrength.SHEET) {
+            if (!root && circuit.boundary().ports().stream().anyMatch(port -> port.net().equals(net))) {
+                return;
+            }
+            String path = place.blocks().isEmpty() ? "" : ROOT_SHEET_PATH + String.join(ROOT_SHEET_PATH, place.blocks());
+            mergeName(SheetUnfolding.netName(place.blocks(), net), new KiCadNetName(path + named.name(), named.strength()));
+            return;
+        }
+        mergeName(everywhere ? net : SheetUnfolding.netName(place.blocks(), net), named);
+    }
+
+    private void mergeName(String net, KiCadNetName named) {
+        design.nets.merge(net, named, (known, given) -> given.strength().compareTo(known.strength()) > 0 ? given : known);
     }
 
     // ─── parts ──────────────────────────────────────────────────────────────────────────────────────
@@ -211,83 +465,84 @@ public final class KiCadSchematicExport {
             notes.add(reference + " is drawn but is no part of the circuit: left out.");
             return;
         }
+        Optional<DocumentNode> sheet = sheetOf(catalogue, part);
+        if (sheet.isPresent()) {
+            placeSheet(part, placed.getFirst(), sheet.get());
+            return;
+        }
         Optional<Look> found = look(part.component(), part.symbol());
         if (found.isEmpty()) {
-            notes.add(reference + ": '" + part.component() + "' is a sheet placed as a block, or no component this reader may "
-                    + "see: a hierarchical sheet is not exported yet, so it is left out with its wires.");
+            notes.add(reference + ": '" + part.component() + "' is no component this reader may see: left out with its wires.");
             return;
         }
         // The footprint the part sits on: the one its own line names, else its component's default.
-        Look look = found.get().landedOn(Optional.ofNullable(part.footprint()).or(found.get()::footprint).orElse(null));
-        Map<String, String> terminalPins = terminalPins(part, look);
-        Set<String> apart = new LinkedHashSet<>();
-        placed.stream().filter(item -> item.unit() != null).forEach(item -> apart.add(item.unit()));
-        List<String> together = look.units().stream().filter(unit -> !apart.contains(unit)).toList();
-        if (together.size() > 1 && terminalPins.keySet().stream().anyMatch(terminal -> together.subList(1, together.size())
+        Optional<String> standsOn = Optional.ofNullable(part.footprint()).or(found.get()::footprint);
+        Map<String, List<String>> pinPads = new LinkedHashMap<>();
+        facts.pinsOfPads(part, standsOn).forEach((pad, pin) -> pinPads.computeIfAbsent(pin, ignored -> new ArrayList<>()).add(pad));
+        Look look = found.get().landedOn(standsOn.orElse(null), pinPads);
+        PartPins.Arrangement arrangement = PartPins.of(part, look.face(), placed);
+        List<String> together = arrangement.together();
+        if (together.size() > 1 && look.face().terminalPins(part).keySet().stream().anyMatch(terminal -> together.subList(1, together.size())
                 .stream().anyMatch(unit -> terminal.startsWith(unit + ".")))) {
             notes.add(reference + ": units " + String.join(", ", together) + " are drawn as one on the sheet, so in KiCad their "
                     + "wires end on unit " + together.getFirst() + "'s pins.");
         }
-        for (Placement.PlacedPart item : placed) {
-            String unit = item.unit() != null ? item.unit() : together.isEmpty() ? null : together.getFirst();
-            Map<String, String> own = new LinkedHashMap<>();
-            terminalPins.forEach((terminal, pin) -> {
-                String letter = unitOf(terminal);
-                boolean mine = item.unit() != null ? item.unit().equals(letter) : letter == null || !apart.contains(letter);
-                if (mine) {
-                    own.put(terminal, pin);
-                }
-            });
-            placeSymbol(part, look, item, unit, own);
+        arrangement.placed().forEach(unit -> placeSymbol(part, look, unit));
+    }
+
+    /** The way KiCad turns a sheet's pin on each edge of its box: its text reads inwards. */
+    private static final Map<Placement.PortPlace.Edge, Integer> SHEET_PIN_ANGLES = Map.of(Placement.PortPlace.Edge.LEFT, 180,
+            Placement.PortPlace.Edge.RIGHT, 0, Placement.PortPlace.Edge.TOP, 90, Placement.PortPlace.Edge.BOTTOM, 270);
+
+    /**
+     * A block as KiCad's sheet box, framed as the sheet frames it ({@link BlockFrame}). A KiCad sheet pin stands on the box's
+     * edge, so the block's terminals are there and the lead the sheet draws is the wire's first step.
+     */
+    private void placeSheet(Part part, Placement.PlacedPart item, DocumentNode sheet) {
+        Circuit child = design.circuits.get(sheet.slug());
+        BlockFrame frame;
+        try {
+            frame = BlockFrame.of(part, item, child);
+        } catch (IllegalArgumentException misfit) {
+            notes.add(part.reference() + ": " + misfit.getMessage() + " Left out with its wires.");
+            return;
         }
+        if (Math.floorMod(Math.round(item.rotation()), 360) != 0 || item.mirrored()) {
+            notes.add(part.reference() + " is turned or mirrored, which a KiCad sheet cannot be: it stands upright.");
+        }
+        double halfWidth = frame.halfWidth();
+        double halfHeight = frame.halfHeight();
+        List<KiCadSchematicBuilder.SheetPin> pins = new ArrayList<>();
+        for (BlockFrame.PortAt placed : frame.ports()) {
+            SheetBoundary.Port port = placed.port();
+            KiCadPoint at = millimetres(item.at().x() + placed.edge().x(), item.at().y() + placed.edge().y());
+            terminals.put(part.reference() + ":" + port.net(), at);
+            pins.add(new KiCadSchematicBuilder.SheetPin(port.net(), shapeOf(port.direction()), at, SHEET_PIN_ANGLES.get(placed.place().edge())));
+        }
+        String step = KiCadSchematicBuilder.placedSheetIdentity(slug, part.reference());
+        Map<String, String> pages = new LinkedHashMap<>();
+        design.places.getOrDefault(sheet.slug(), List.of()).forEach(place -> pages.put(place.path(), place.page()));
+        List<KiCadSchematicBuilder.SheetInstance> instances = places().stream()
+                .map(place -> new KiCadSchematicBuilder.SheetInstance(place.path(), pages.getOrDefault(place.path() + "/" + step, "")))
+                .toList();
+        KiCadPoint corner = millimetres(item.at().x() - halfWidth, item.at().y() - halfHeight);
+        schematic.sheet(new KiCadSchematicBuilder.PlacedSheet(step, part.reference(), sheet.slug() + KICAD_SCHEMATIC, corner,
+                new KiCadPoint(rounded(halfWidth * 2 * MILLIMETRES_PER_UNIT), rounded(halfHeight * 2 * MILLIMETRES_PER_UNIT)), pins, instances));
     }
 
     /**
-     * Each terminal of a part — what a wire names it by — and the component's pin it is, in the order its box or its pins
-     * write them: a part wired by name by its pins' names, a two-terminal part wired in pin order as {@code positive} and
-     * {@code negative}.
+     * A part, or one block of it, as KiCad places a symbol: its library symbol — its own drawing, or a box —, turned by
+     * quarters, each pin where KiCad's turn puts it (a wire is led there), and what it says of its nets' power.
      */
-    private static Map<String, String> terminalPins(Part part, Look look) {
-        Map<String, String> terminals = new LinkedHashMap<>();
-        wiring(part, look).keySet().stream().sorted((first, second) -> Integer.compare(order(look, look.pinOf(first)),
-                order(look, look.pinOf(second)))).forEach(terminal -> terminals.put(terminal, look.pinOf(terminal)));
-        return terminals;
-    }
-
-    /**
-     * Each terminal of a part and its net: a pin's name for a part wired by name, {@code positive} and {@code negative} for
-     * a two-terminal part wired in pin order, else the component's pin in that order.
-     */
-    private static Map<String, String> wiring(Part part, Look look) {
-        Map<String, String> wired = new LinkedHashMap<>();
-        List<Connection> connections = part.connections();
-        boolean twoInOrder = part.inPinOrder() && connections.size() == SimulationVocabulary.IN_ORDER_TERMINALS.size();
-        for (int index = 0; index < connections.size(); index++) {
-            Connection connection = connections.get(index);
-            String terminal = twoInOrder ? SimulationVocabulary.IN_ORDER_TERMINALS.get(index)
-                    : connection.named().orElse(index < look.pinOrder().size() ? look.pinOrder().get(index) : null);
-            if (terminal != null) {
-                wired.put(terminal, connection.net());
-            }
-        }
-        return wired;
-    }
-
-    private void placeSymbol(Part part, Look look, Placement.PlacedPart item, String unit, Map<String, String> own) {
+    private void placeSymbol(Part part, Look look, PartPins.PlacedUnit placed) {
+        Placement.PlacedPart item = placed.item();
+        String unit = placed.unit();
+        Map<String, String> own = placed.own();
         Map<String, double[]> local = new LinkedHashMap<>();
-        boolean drawn = look.drawing() != null && own.values().stream().allMatch(pin -> symbolPoint(look, bare(pin)) != null);
-        String libraryId = drawn ? look.libraryId() : look.libraryId() + (look.drawing() != null ? "_box" : "");
-        if (drawn) {
-            own.forEach((terminal, pin) -> local.put(terminal, symbolPoint(look, bare(pin))));
-            if (!schematic.hasLibrarySymbol(libraryId)) {
-                schematic.librarySymbol(libraryId, drawnSymbol(look));
-            }
-        } else {
-            Map<String, double[]> box = boxPorts(look, own);
-            local.putAll(box);
-            if (!schematic.hasLibrarySymbol(libraryId)) {
-                schematic.librarySymbol(libraryId, boxSymbol(look, libraryId, own, box));
-            }
+        placed.local().forEach((terminal, point) -> local.put(terminal, new double[] {point.x(), point.y()}));
+        String libraryId = placed.drawn() ? look.libraryId() : look.libraryId() + (look.drawing() != null ? "_box" : "");
+        if (!schematic.hasLibrarySymbol(libraryId)) {
+            schematic.librarySymbol(libraryId, placed.drawn() ? drawnSymbol(look) : boxSymbol(look, libraryId, own, local));
         }
         double rotation = Math.floorMod(Math.round(item.rotation() / 90.0) * 90, 360);
         if (Math.abs(rotation - Math.floorMod((long) item.rotation(), 360)) > 1e-9) {
@@ -299,18 +554,39 @@ public final class KiCadSchematicExport {
                 item.mirrored() ? KiCadPlacement.Mirror.Y : KiCadPlacement.Mirror.NONE);
         local.forEach((terminal, point) -> {
             KiCadPoint onSheet = placement.place(library(point));
-            KiCadPoint drawnAt = millimetres(sheet(item.at(), item.rotation(), item.mirrored(), point));
+            KiCadPoint drawnAt = millimetres(SheetGeometry.onSheet(item, new Point(point[0], point[1])));
             if (!onSheet.sameAs(drawnAt)) {
                 misplacedPins++;
             }
             terminals.put(part.reference() + ":" + terminal, onSheet);
         });
+        // Which of its pins take power and which give it, on which net: what KiCad's checks ask a power net to have.
+        Map<String, String> nets = look.face().wiring(part);
+        own.forEach((terminal, pin) -> {
+            Pin modelled = look.pins().get(bare(pin));
+            String net = nets.get(terminal);
+            KiCadPoint at = terminals.get(part.reference() + ":" + terminal);
+            if (modelled != null && net != null && at != null) {
+                powered(net, typeOf(modelled), at);
+            }
+        });
         int kicadUnit = unit == null ? 1 : look.units().indexOf(unit) + 1;
         List<String> numbers = new ArrayList<>();
-        own.values().forEach(pin -> numbers.add(look.numbers().getOrDefault(pin, pin)));
-        schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(libraryId, placement, kicadUnit, part.reference(),
+        own.values().forEach(pin -> numbers.addAll(look.numbersOf(pin)));
+        firstUnits.merge(part.reference(), kicadUnit, Math::min);
+        values.putIfAbsent(part.reference(), value(part, look));
+        Map<String, String> carried = new LinkedHashMap<>(fields(part, look));
+        carried.remove(FOOTPRINT_FIELD);
+        partFields.putIfAbsent(part.reference(), carried);
+        List<KiCadSchematicBuilder.Instance> instances = places().stream().map(place -> new KiCadSchematicBuilder.Instance(place.path(),
+                design.references.apply(SheetUnfolding.partName(place.blocks(), part.reference())))).toList();
+        schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(libraryId, placement, kicadUnit,
+                instances.isEmpty() ? part.reference() : instances.getFirst().reference(),
                 value(part, look), fields(part, look), numbers.stream().distinct().toList(),
-                labelPoint(look, item, placement, "name", -1), labelPoint(look, item, placement, "value", 1)));
+                labelPoint(look, item, placement, "name", -1), labelPoint(look, item, placement, "value", 1),
+                KiCadSchematicBuilder.symbolIdentity(slug, part.reference(), kicadUnit), instances,
+                // The bench's equipment — a generator, a supply, a meter — is drawn and simulated, never mounted: no board, no bill.
+                facts.roleOf(part.component()).ofTheBench() ? KiCadSchematicBuilder.Presence.SCHEMATIC : KiCadSchematicBuilder.Presence.BOARD));
     }
 
     /** Where a part's name or value is written: where its symbol puts it, else beside the part. */
@@ -322,11 +598,11 @@ public final class KiCadSchematicExport {
                 }
             }
         }
-        return millimetres(item.at().x(), item.at().y() + side * 2 * GRID);
+        return millimetres(item.at().x(), item.at().y() + side * 2 * SheetGeometry.GRID);
     }
 
     /** The library copy of a part drawn with its own symbol: its body in unit 0, each pin in its unit. */
-    private KiCadList drawnSymbol(Look look) {
+    private SExpressionList drawnSymbol(Look look) {
         KiCadSymbolBuilder symbol = KiCadSymbolBuilder.named(look.libraryId())
                 .property("Reference", look.designator()).property("Value", look.title()).property("Footprint", "")
                 .property("Datasheet", "~");
@@ -352,31 +628,35 @@ public final class KiCadSchematicExport {
                     // A pin every unit shares is the first unit's, as the sheet draws it on the part's own line: in
                     // every unit (KiCad's unit 0) each unit placed apart carried an unwired copy, and KiCad reads the
                     // pad from that one.
-                    symbol.pin(1, typeOf(pin), at, angle, 0, drawnPin.label(), look.numbers().getOrDefault(pinName, pinName));
+                    for (String number : look.numbersOf(pinName)) {
+                        symbol.pin(1, typeOf(pin), at, angle, 0, drawnPin.label(), number);
+                    }
                 }
                 continue;
             }
             for (int index = 0; index < look.units().size(); index++) {
                 String unitPin = look.units().get(index) + "." + pinName;
-                symbol.pin(index + 1, typeOf(pin), at, angle, 0, drawnPin.label(), look.numbers().getOrDefault(unitPin, unitPin));
+                for (String number : look.numbersOf(unitPin)) {
+                    symbol.pin(index + 1, typeOf(pin), at, angle, 0, drawnPin.label(), number);
+                }
             }
         }
         return symbol.build();
     }
 
     /** A part without a drawing of its own, as the sheet draws it: a box, its pins on their sides, named inside. */
-    private KiCadList boxSymbol(Look look, String libraryId, Map<String, String> own, Map<String, double[]> box) {
+    private SExpressionList boxSymbol(Look look, String libraryId, Map<String, String> own, Map<String, double[]> box) {
         KiCadSymbolBuilder symbol = KiCadSymbolBuilder.named(libraryId)
                 .property("Reference", look.designator()).property("Value", look.title()).property("Footprint", "")
                 .property("Datasheet", "~");
         double halfWidth = 0;
         double halfHeight = 0;
         for (double[] point : box.values()) {
-            halfWidth = Math.max(halfWidth, Math.abs(point[0]) - (Math.abs(point[0]) >= Math.abs(point[1]) ? BOX_LEAD : 0));
-            halfHeight = Math.max(halfHeight, Math.abs(point[1]) - (Math.abs(point[1]) > Math.abs(point[0]) ? BOX_LEAD : 0));
+            halfWidth = Math.max(halfWidth, Math.abs(point[0]) - (Math.abs(point[0]) >= Math.abs(point[1]) ? SheetGeometry.BOX_LEAD : 0));
+            halfHeight = Math.max(halfHeight, Math.abs(point[1]) - (Math.abs(point[1]) > Math.abs(point[0]) ? SheetGeometry.BOX_LEAD : 0));
         }
-        halfWidth = Math.max(halfWidth, GRID);
-        halfHeight = Math.max(halfHeight, GRID);
+        halfWidth = Math.max(halfWidth, SheetGeometry.GRID);
+        halfHeight = Math.max(halfHeight, SheetGeometry.GRID);
         symbol.rectangle(0, library(new double[] {-halfWidth, -halfHeight}), library(new double[] {halfWidth, halfHeight}));
         for (Map.Entry<String, double[]> port : box.entrySet()) {
             double[] point = port.getValue();
@@ -388,8 +668,10 @@ public final class KiCadSchematicExport {
             Pin pin = look.pins().get(bare(pinName));
             String letter = unitOf(pinName);
             int unit = letter == null ? (look.units().isEmpty() ? 1 : 0) : look.units().indexOf(letter) + 1;
-            symbol.pin(unit, pin == null ? KiCadPinType.PASSIVE : typeOf(pin), library(point),
-                    inward(point[0], -point[1]), 0, bare(pinName), look.numbers().getOrDefault(pinName, pinName));
+            for (String number : look.numbersOf(pinName)) {
+                symbol.pin(unit, pin == null ? KiCadPinType.PASSIVE : typeOf(pin), library(point),
+                        inward(point[0], -point[1]), 0, bare(pinName), number);
+            }
         }
         return symbol.build();
     }
@@ -446,126 +728,86 @@ public final class KiCadSchematicExport {
         }
     }
 
-    /**
-     * Where each terminal of a part drawn as a box stands: its pins on the sides its component writes — power on top,
-     * ground below, outputs right, the rest left —, two grid steps apart, as the sheet's {@code boxGeometry} lays them.
-     */
-    private static Map<String, double[]> boxPorts(Look look, Map<String, String> own) {
-        Map<String, List<String>> sides = new LinkedHashMap<>();
-        for (String side : SIDES) {
-            sides.put(side, new ArrayList<>());
-        }
-        own.forEach((terminal, pin) -> sides.get(sideOf(look, bare(pin))).add(terminal));
-        sides.values().forEach(list -> list.sort((first, second) -> Integer.compare(order(look, own.get(first)),
-                order(look, own.get(second)))));
-        String left = SimulationVocabulary.LEFT;
-        String right = SimulationVocabulary.RIGHT;
-        String top = SimulationVocabulary.TOP;
-        String bottom = SimulationVocabulary.BOTTOM;
-        double across = Math.max(Math.max(widest(sides.get(top)), widest(sides.get(bottom))), BOX_PITCH);
-        double horizontalPitch = roundUp(across + 8, BOX_PITCH);
-        boolean nameInside = !sides.get(top).isEmpty() && !sides.get(bottom).isEmpty();
-        double inner = Math.max(Math.max(widest(sides.get(left)) + widest(sides.get(right)) + 12
-                + (nameInside ? labelWidth(look.title()) : 0), sides.get(top).size() * horizontalPitch),
-                Math.max(sides.get(bottom).size() * horizontalPitch, 48));
-        double halfWidth = roundUp(inner / 2, GRID);
-        double halfHeight = Math.max(GRID, roundUp(Math.max(sides.get(left).size(), sides.get(right).size())
-                * BOX_PITCH / 2, GRID));
-        Map<String, double[]> ports = new LinkedHashMap<>();
-        for (String side : SIDES) {
-            List<String> list = sides.get(side);
-            for (int index = 0; index < list.size(); index++) {
-                if (side.equals(left) || side.equals(right)) {
-                    double y = snap(along(list, index, BOX_PITCH));
-                    double edge = side.equals(left) ? -halfWidth : halfWidth;
-                    ports.put(list.get(index), new double[] {edge + (side.equals(left) ? -BOX_LEAD : BOX_LEAD), y});
-                } else {
-                    double x = snap(along(list, index, horizontalPitch));
-                    double edge = side.equals(top) ? -halfHeight : halfHeight;
-                    ports.put(list.get(index), new double[] {x, edge + (side.equals(top) ? -BOX_LEAD : BOX_LEAD)});
-                }
-            }
-        }
-        return ports;
-    }
-
-    private static String sideOf(Look look, String pin) {
-        for (Map.Entry<String, List<String>> side : look.sides().entrySet()) {
-            if (side.getValue().contains(pin)) {
-                return side.getKey().equals(POWER_SIDE) ? SimulationVocabulary.TOP : side.getKey();
-            }
-        }
-        Pin model = look.pins().get(pin);
-        if (model != null && model.power()) {
-            return SimulationVocabulary.TOP;
-        }
-        if (model != null && model.ground()) {
-            return SimulationVocabulary.BOTTOM;
-        }
-        return model != null && model.output() ? SimulationVocabulary.RIGHT : SimulationVocabulary.LEFT;
-    }
-
-    /** A pin's place along its side: as the box's rows write it, then as the component's pins do. */
-    private static int order(Look look, String terminal) {
-        String pin = bare(terminal);
-        int index = 0;
-        for (List<String> row : look.sides().values()) {
-            for (String written : row) {
-                if (written.equals(pin)) {
-                    return index;
-                }
-                index++;
-            }
-        }
-        int declared = look.pinOrder().indexOf(pin);
-        return declared < 0 ? Integer.MAX_VALUE : index + declared;
-    }
-
-    private static double widest(List<String> names) {
-        return names.stream().mapToDouble(KiCadSchematicExport::labelWidth).max().orElse(0);
-    }
-
-    /** How wide a pin's name is written inside a box: 9 px technical type. */
-    private static double labelWidth(String text) {
-        return text.length() * 5.5 + 6;
-    }
-
-    private static double along(List<String> list, int index, double pitch) {
-        return (index - (list.size() - 1) / 2.0) * pitch;
-    }
-
-    private static double roundUp(double value, double step) {
-        return Math.ceil(value / step) * step;
-    }
-
-    private static double snap(double value) {
-        return Math.round(value / GRID) * GRID;
-    }
-
     // ─── marks ──────────────────────────────────────────────────────────────────────────────────────
 
     private void mark(Placement.Mark item) {
-        if (item.symbol().equals("junction")) {
+        // A pin left open on purpose is said to our own checks; it joins nothing, so nothing of it is drawn here.
+        if (item.symbol().equals(SimulationVocabulary.NO_CONNECT)) {
+            return;
+        }
+        if (item.symbol().equals(SimulationVocabulary.JUNCTION)) {
             KiCadPoint at = millimetres(item.at().x(), item.at().y());
             terminals.put(item.reference() + ":", at);
             schematic.junction(at);
             return;
         }
-        double[] pin = markPin(item.symbol());
-        KiCadPoint at = millimetres(sheet(item.at(), item.rotation(), false, pin));
+        Point pin = markPin(item.symbol());
+        KiCadPoint at = millimetres(SheetGeometry.onSheet(item.at(), item.rotation(), false, pin));
         terminals.put(item.reference() + ":", at);
         join(item.reference() + ":", NET + (item.net() == null ? Circuit.GROUND : item.net()));
         // The way its body goes from the point it connects at: towards the mark's own origin.
-        double[] body = turned(new double[] {-pin[0], -pin[1]}, item.rotation(), false);
+        Point away = SheetGeometry.turned(new Point(-pin.x(), -pin.y()), item.rotation(), false);
+        double[] body = {away.x(), away.y()};
+        String ours = item.net() == null ? Circuit.GROUND : item.net();
         switch (item.symbol()) {
-            case "ground", "common" -> groundSymbol(at, body, item.net() == null ? NODE_ZERO : item.net());
-            case "label" -> schematic.label(KiCadLabel.Kind.LOCAL, net(item), at, labelAngle(body), null);
-            case "global" -> schematic.label(KiCadLabel.Kind.GLOBAL, net(item), at, labelAngle(body), "passive");
-            case "port" -> schematic.label(KiCadLabel.Kind.HIERARCHICAL, net(item), at, labelAngle(body), portShape(net(item)));
+            case "ground", "common" -> {
+                groundSymbol(at, body, net(item));
+                powered(ours, KiCadPinType.POWER_INPUT, at);
+                named(ours, net(item), NameStrength.POWER);
+            }
+            case "label" -> {
+                schematic.label(KiCadLabel.Kind.LOCAL, net(item), at, labelAngle(body), null);
+                named(ours, ROOT_SHEET_PATH + net(item), NameStrength.SHEET);
+            }
+            case "global" -> {
+                schematic.label(KiCadLabel.Kind.GLOBAL, net(item), at, labelAngle(body), "passive");
+                named(ours, net(item), NameStrength.GLOBAL);
+            }
+            case "port" -> {
+                schematic.label(KiCadLabel.Kind.HIERARCHICAL, net(item), at, labelAngle(body), portShape(net(item)));
+                named(ours, ROOT_SHEET_PATH + net(item), NameStrength.SHEET);
+            }
             default -> notes.add(item.reference() + " is a '" + item.symbol() + "' mark, which has no KiCad counterpart.");
         }
     }
 
+
+    /** A net of this sheet that takes power: where the first pin taking it stands, and whether a pin gives it. */
+    private record PowerNet(KiCadPoint input, boolean driven) {
+    }
+
+    /** A pin of a net that takes or gives power, as KiCad types it; any other pin says nothing of the net's power. */
+    private void powered(String net, KiCadPinType type, KiCadPoint at) {
+        if (type == KiCadPinType.POWER_INPUT) {
+            powerNets.merge(net, new PowerNet(at, false), (was, now) -> was);
+        } else if (type == KiCadPinType.POWER_OUTPUT) {
+            powerNets.merge(net, new PowerNet(at, true), (was, now) -> new PowerNet(was.input(), true));
+        }
+    }
+
+    /**
+     * KiCad's power flag on every net of this sheet that takes power and has no pin giving it — a regulator's input fed
+     * through a bridge's diodes, a ground that comes in on a connector —, as a designer marks one: KiCad's checks hold such a
+     * net unpowered, while on the bench and on the board it is fed. The flag stands on the first pin taking the power.
+     */
+    private void flagUndrivenPower() {
+        powerNets.values().stream().filter(net -> !net.driven()).forEach(net -> {
+            if (!schematic.hasLibrarySymbol(POWER_FLAG_SYMBOL)) {
+                schematic.librarySymbol(POWER_FLAG_SYMBOL, KiCadSymbolBuilder.named(POWER_FLAG_SYMBOL).power()
+                        .property("Reference", "#FLG").property("Value", POWER_FLAG).property("Footprint", "")
+                        .property("Datasheet", "").hidePinNumbers()
+                        .polyline(0, List.of(new KiCadPoint(0, 0), new KiCadPoint(0, 1.27), new KiCadPoint(-1.016, 1.905),
+                                new KiCadPoint(0, 2.54), new KiCadPoint(1.016, 1.905), new KiCadPoint(0, 1.27)))
+                        .pin(1, KiCadPinType.POWER_OUTPUT, new KiCadPoint(0, 0), 90, 0, "pwr", "1").build());
+            }
+            KiCadPlacement placement = new KiCadPlacement(net.input(), 0, KiCadPlacement.Mirror.NONE);
+            powerFlags++;
+            schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(POWER_FLAG_SYMBOL, placement, 1,
+                    String.format(Locale.ROOT, "#FLG%02d", powerFlags), POWER_FLAG, Map.of(), List.of("1"),
+                    placement.place(new KiCadPoint(0, -3.81)), placement.place(new KiCadPoint(0, -5.08)), null, List.of(),
+                    KiCadSchematicBuilder.Presence.SCHEMATIC));
+        });
+    }
     /** A ground: KiCad's power symbol, its value the net — GND for node 0. */
     private void groundSymbol(KiCadPoint at, double[] body, String value) {
         if (!schematic.hasLibrarySymbol(GROUND_SYMBOL)) {
@@ -592,24 +834,38 @@ public final class KiCadSchematicExport {
         powerSymbols++;
         schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(GROUND_SYMBOL, placement, 1,
                 String.format(Locale.ROOT, "#PWR%02d", powerSymbols), value, Map.of(), List.of("1"),
-                placement.place(new KiCadPoint(0, -6.35)), placement.place(new KiCadPoint(0, -3.81))));
+                placement.place(new KiCadPoint(0, -6.35)), placement.place(new KiCadPoint(0, -3.81)), null, List.of(),
+                KiCadSchematicBuilder.Presence.SCHEMATIC));
     }
 
     /** The point a mark's symbol connects at, in its own drawing. */
-    private double[] markPin(String mark) {
-        return Optional.ofNullable(libraries.markSymbols().get(mark)).flatMap(this::symbol)
+    private Point markPin(String mark) {
+        return Optional.ofNullable(libraries.markSymbols().get(mark)).flatMap(faces::symbol)
                 .filter(drawing -> !drawing.pins().isEmpty())
-                .map(drawing -> new double[] {drawing.pins().getFirst().x(), drawing.pins().getFirst().y()})
-                .orElse(new double[] {0, 0});
+                .map(drawing -> new Point(drawing.pins().getFirst().x(), drawing.pins().getFirst().y()))
+                .orElse(new Point(0, 0));
     }
 
     private static String net(Placement.Mark item) {
         return item.net() == null ? NODE_ZERO : item.net();
     }
 
+    /** A block's ports and the parent's nets they are; none when the block does not fit its sheet. */
+    private Optional<Map<String, String>> blockPorts(Part block, DocumentNode sheet) {
+        try {
+            return Optional.of(SheetUnfolding.portsOf(block, design.circuits.getOrDefault(sheet.slug(), SimulationReading.circuit(sheet))));
+        } catch (IllegalArgumentException misfit) {
+            return Optional.empty();
+        }
+    }
+
     private String portShape(String net) {
-        String direction = circuit.boundary().ports().stream().filter(port -> port.net().equals(net))
-                .map(SheetBoundary.Port::direction).findFirst().orElse(SimulationVocabulary.ANALOG);
+        return shapeOf(circuit.boundary().ports().stream().filter(port -> port.net().equals(net))
+                .map(SheetBoundary.Port::direction).findFirst().orElse(SimulationVocabulary.ANALOG));
+    }
+
+    /** What KiCad calls a port's way across a sheet's edge. */
+    private static String shapeOf(String direction) {
         return switch (direction) {
             case SimulationVocabulary.INPUT -> "input";
             case SimulationVocabulary.OUTPUT -> "output";
@@ -652,7 +908,8 @@ public final class KiCadSchematicExport {
         Map<String, List<String>> nets = new LinkedHashMap<>();
         for (Part part : circuit.parts()) {
             Optional<Look> look = look(part.component(), part.symbol());
-            Map<String, String> wired = look.map(found -> wiring(part, found)).orElseGet(() -> {
+            Optional<Map<String, String>> ports = sheetOf(catalogue, part).flatMap(sheet -> blockPorts(part, sheet));
+            Map<String, String> wired = ports.isPresent() ? ports.get() : look.map(found -> found.face().wiring(part)).orElseGet(() -> {
                 Map<String, String> named = new LinkedHashMap<>();
                 part.connections().forEach(connection -> connection.named().ifPresent(pin -> named.put(pin, connection.net())));
                 return named;
@@ -694,16 +951,26 @@ public final class KiCadSchematicExport {
     private void connector(String net, KiCadPoint at) {
         if (net.equals(Circuit.GROUND)) {
             groundSymbol(at, new double[] {0, 1}, NODE_ZERO);
+            named(net, NODE_ZERO, NameStrength.POWER);
             return;
         }
         SheetBoundary boundary = circuit.boundary();
         if (boundary.ports().stream().anyMatch(port -> port.net().equals(net))) {
             schematic.label(KiCadLabel.Kind.HIERARCHICAL, net, at, 0, portShape(net));
+            named(net, ROOT_SHEET_PATH + net, NameStrength.SHEET);
         } else if (boundary.nets().stream().anyMatch(written -> written.global() && written.name().equals(net))) {
             schematic.label(KiCadLabel.Kind.GLOBAL, net, at, 0, "passive");
+            named(net, net, NameStrength.GLOBAL);
         } else {
             schematic.label(KiCadLabel.Kind.LOCAL, net, at, 0, null);
+            named(net, ROOT_SHEET_PATH + net, NameStrength.SHEET);
         }
+    }
+
+    /** A name the sheet gives a net: kept when it is stronger than the one it had, as KiCad keeps the strongest. */
+    private void named(String net, String kicad, NameStrength strength) {
+        kicadNets.merge(net, new KiCadNetName(kicad, strength),
+                (known, given) -> given.strength().compareTo(known.strength()) > 0 ? given : known);
     }
 
     private void join(String first, String second) {
@@ -752,36 +1019,25 @@ public final class KiCadSchematicExport {
     }
 
     private Optional<Look> read(String slug, String variant) {
-        Optional<DocumentNode> document = catalogue.find(slug).filter(found -> found.kind().equals(SimulationModule.COMPONENT));
-        if (document.isEmpty()) {
-            return Optional.empty();
-        }
-        Component written = SimulationReading.component(document.get());
-        SimulatedComponent compiled = ComponentCompilation.compile(written, catalogue);
+        return faces.look(slug, variant).map(face -> kicadLook(slug, face));
+    }
+
+    /** How KiCad holds a component the sheet draws so: its library id, its pins' numbers, its value and footprint. */
+    private Look kicadLook(String slug, SymbolLook face) {
+        Component written = face.written();
+        SimulatedComponent compiled = face.compiled();
         String bare = slug.replaceFirst("@.*$", "");
         Optional<KiCadLibraryMap.Mapping> mapping = map.libraryIdOf(bare).flatMap(map::mappingOf);
         String libraryId = map.libraryIdOf(bare)
                 .or(() -> written.head().field(MetaNode.SOURCE).flatMap(KiCadSources::symbolIdOf))
                 .orElse(libraries.ownLibrary() + ":" + bare);
-        Map<String, Pin> pins = new LinkedHashMap<>();
-        Set<String> shared = new LinkedHashSet<>();
-        compiled.pins().forEach(pin -> {
-            pins.put(pin.name(), pin);
-            if (compiled.shared(pin)) {
-                shared.add(pin.name());
-            }
-        });
         Map<String, String> numbers = numbersOf(compiled);
         // A pin a number cannot say — KiCad's A, S1 or B3 — is named after it by the import, pinA: the number is read back.
-        compiled.pins().stream().filter(pin -> pin.numbers().isEmpty()).forEach(pin -> KiCadSymbolDrawing.numberOfPinName(pin.name())
+        compiled.pins().stream().filter(pin -> pin.numbers().isEmpty()).forEach(pin -> ImportedPins.numberOf(pin.name())
                 .ifPresent(number -> numbers.putIfAbsent(pin.name(), number)));
         // The map's own numbering wins: KiCad's diode is 1 = K where the catalogue's 1 is its anode.
         mapping.ifPresent(found -> found.pins().forEach((number, pin) -> numbers.put(pin, number)));
-        Optional<Drawing> uses = written.drawn();
-        // The symbol the part is drawn with: the variant it names when its component offers it, else the default.
-        Optional<String> drawnWith = uses.filter(symbol -> !symbol.uses().isEmpty()).map(symbol ->
-                variant != null && symbol.uses().contains(variant) ? variant : symbol.uses().getFirst());
-        SymbolDrawing drawing = drawnWith.flatMap(this::symbol).orElse(null);
+        Optional<String> drawnWith = face.drawnWith();
         // KiCad keeps one drawing to a library symbol: the first drawing of a component holds its library id — the one
         // the library map reads back —, a second, different one of the same component on this sheet a name of its own.
         if (drawnWith.isPresent()) {
@@ -790,12 +1046,6 @@ public final class KiCadSchematicExport {
                 libraryId = libraryId + "_" + drawnWith.get();
             }
         }
-        Map<String, List<String>> sides = new LinkedHashMap<>();
-        uses.ifPresent(symbol -> symbol.box().forEach(side -> sides.put(side.side(),
-                side.pins().stream().map(Drawing.BoxPin::pin).toList())));
-        Map<String, String> ports = new LinkedHashMap<>();
-        uses.ifPresent(symbol -> symbol.bindings().forEach(binding -> binding.boundPin()
-                .ifPresent(pin -> ports.put(binding.input(), pin))));
         Map<String, Double> defaults = new LinkedHashMap<>();
         compiled.parameters().forEach(parameter -> defaults.put(parameter.name(), parameter.value()));
         Map<String, Map<String, String>> padsOf = new LinkedHashMap<>();
@@ -806,11 +1056,10 @@ public final class KiCadSchematicExport {
                 padsOf.put(seat.footprint(), Map.copyOf(pinPads));
             }
         }
-        return Optional.of(new Look(slug, libraryId, compiled.title(), written.head().field(MetaNode.DESIGNATOR).orElse("U"),
-                List.copyOf(compiled.units()), pins, shared, List.copyOf(pins.keySet()), drawing, ports, sides, numbers,
+        return new Look(face, libraryId, written.head().field(MetaNode.DESIGNATOR).orElse("U"), numbers,
                 // The parameter its value is: the library map's, else the one the component says — meta { value: U_output }.
                 mapping.flatMap(KiCadLibraryMap.Mapping::value).or(() -> written.head().field(MetaNode.VALUE)), defaults,
-                written.seats().stream().findFirst().map(Seat::footprint), padsOf));
+                written.seats().stream().findFirst().map(Seat::footprint), padsOf, Map.of());
     }
 
     /**
@@ -837,36 +1086,7 @@ public final class KiCadSchematicExport {
 
     /** The KiCad footprint a part sits on: the one its own line names, else its component's; empty when neither does. */
     private String footprintOf(Part part, Look look) {
-        return Optional.ofNullable(part.footprint()).or(look::footprint).map(this::footprintLibraryId).orElse("");
-    }
-
-    /**
-     * A footprint as KiCad names it: the KiCad footprint the library map pairs its code with, else the library id it was
-     * imported from, else the slug in the own library.
-     */
-    private String footprintLibraryId(String footprint) {
-        return footprintLibraryIds.computeIfAbsent(footprint, slug -> {
-            Optional<MetaNode> meta = catalogue.find(slug).filter(found -> found.kind().equals(BoardModule.FOOTPRINT))
-                    .flatMap(document -> document.block(MetaNode.class));
-            return meta.flatMap(found -> found.text(MetaNode.CODE)).flatMap(map::footprintIdOf)
-                    .or(() -> meta.flatMap(found -> found.text(MetaNode.SOURCE)).flatMap(KiCadSources::footprintIdOf))
-                    .orElse(libraries.ownLibrary() + ":" + slug);
-        });
-    }
-
-    private Optional<SymbolDrawing> symbol(String slug) {
-        return symbols.computeIfAbsent(slug, wanted -> catalogue.find(wanted)
-                .filter(document -> document.kind().equals(SchematicModule.SYMBOL)).map(LivingDrawing::of));
-    }
-
-    /** The point the drawing puts a component's pin at, through the port its symbol binds to it. */
-    private static double[] symbolPoint(Look look, String pin) {
-        for (SymbolDrawing.Pin drawn : look.drawing().pins()) {
-            if (look.ports().getOrDefault(drawn.name(), drawn.name()).equals(pin)) {
-                return new double[] {drawn.x(), drawn.y()};
-            }
-        }
-        return null;
+        return Optional.ofNullable(part.footprint()).or(look::footprint).map(footprintIds::of).orElse("");
     }
 
     /**
@@ -875,6 +1095,11 @@ public final class KiCadSchematicExport {
      * parameter to read it by; one that cannot be computed is written as it stands, and an import notes it.
      */
     private String value(Part part, Look look) {
+        // What the part says in words is its value, before any parameter: a connector's OUTPUT_PLUS, as on the pcb.
+        Optional<String> words = part.valueInWords();
+        if (words.isPresent()) {
+            return words.get();
+        }
         return look.valueParameter().flatMap(parameter -> part.setting(parameter)
                         .filter(setting -> setting.value() instanceof Formula)
                         .map(setting -> written(part.reference() + "." + parameter, (Formula) setting.value()))
@@ -888,9 +1113,11 @@ public final class KiCadSchematicExport {
      */
     private Map<String, String> fields(Part part, Look look) {
         Map<String, String> fields = new LinkedHashMap<>();
-        fields.put("Footprint", footprintOf(part, look));
+        fields.put(FOOTPRINT_FIELD, footprintOf(part, look));
         for (Setting setting : part.settings()) {
-            if (look.valueParameter().filter(setting.name()::equals).isPresent() || setting.value() == null) {
+            // The value, in words or by its parameter, is the symbol's Value: KiCad reads a field of that name in any case as it.
+            if (look.valueParameter().filter(setting.name()::equals).isPresent() || setting.name().equals(Part.VALUE)
+                    || setting.value() == null) {
                 continue;
             }
             fields.put(setting.name(), switch (setting.value()) {
@@ -916,6 +1143,10 @@ public final class KiCadSchematicExport {
         if (pin.bidirectional()) {
             return KiCadPinType.BIDIRECTIONAL;
         }
+        // An output that only pulls one way shares its line, as KiCad's open collector does: transistors in parallel.
+        if (pin.pullsOneWay() && pin.output()) {
+            return KiCadPinType.OPEN_COLLECTOR;
+        }
         if (!pin.reads()) {
             return KiCadPinType.OUTPUT;
         }
@@ -935,16 +1166,6 @@ public final class KiCadSchematicExport {
 
     // ─── geometry ───────────────────────────────────────────────────────────────────────────────────
 
-    /** A block's pin, {@code A.output}, is the pin {@code output}. */
-    private static String bare(String pin) {
-        return pin == null ? "" : pin.substring(pin.indexOf('.') + 1);
-    }
-
-    private static String unitOf(String terminal) {
-        int dot = terminal.indexOf('.');
-        return dot > 0 ? terminal.substring(0, dot) : null;
-    }
-
     /** A point of a drawing (Y downwards) in a KiCad library's terms (millimetres, Y upwards). */
     private static KiCadPoint library(double[] point) {
         return new KiCadPoint(rounded(point[0] * MILLIMETRES_PER_UNIT), rounded(-point[1] * MILLIMETRES_PER_UNIT));
@@ -954,21 +1175,8 @@ public final class KiCadSchematicExport {
         return new KiCadPoint(rounded(x * MILLIMETRES_PER_UNIT), rounded(y * MILLIMETRES_PER_UNIT));
     }
 
-    private static KiCadPoint millimetres(double[] point) {
-        return millimetres(point[0], point[1]);
-    }
-
-    /** A point of a drawing on the sheet: mirrored left to right first, then turned clockwise, then moved. */
-    private static double[] sheet(Point at, double rotation, boolean mirrored, double[] point) {
-        double[] turned = turned(point, rotation, mirrored);
-        return new double[] {at.x() + turned[0], at.y() + turned[1]};
-    }
-
-    private static double[] turned(double[] point, double rotation, boolean mirrored) {
-        double radians = Math.toRadians(rotation);
-        double localX = mirrored ? -point[0] : point[0];
-        return new double[] {localX * Math.cos(radians) - point[1] * Math.sin(radians),
-                localX * Math.sin(radians) + point[1] * Math.cos(radians)};
+    private static KiCadPoint millimetres(Point point) {
+        return millimetres(point.x(), point.y());
     }
 
     /** To a hundred-thousandth of a millimetre: what is left of a binary fraction is noise, not a position. */

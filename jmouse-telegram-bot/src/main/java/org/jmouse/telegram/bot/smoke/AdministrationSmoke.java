@@ -1,7 +1,7 @@
 package org.jmouse.telegram.bot.smoke;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import org.jmouse.telegram.Capability;
 import org.jmouse.telegram.ChatReference;
@@ -191,7 +191,7 @@ public final class AdministrationSmoke {
     private static void uploadsAPhotoAsMultipart(ChatAdministration administration) {
         administration.changePhoto(GROUP, new MediaSource.Bytes("logo.png", new byte[] {1, 2, 3}, "image/png"));
 
-        check("a chat photo is uploaded as a file part", received.get("setChatPhoto").asText().contains("filename=\"logo.png\""));
+        check("a chat photo is uploaded as a file part", received.get("setChatPhoto").asString().contains("filename=\"logo.png\""));
     }
 
     private static void refusesAPhotoByAddress(ChatAdministration administration) {

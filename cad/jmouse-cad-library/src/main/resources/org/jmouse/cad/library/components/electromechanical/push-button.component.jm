@@ -3,7 +3,9 @@ component:push-button("Push button", type: button) {
     meta {
         designator: SW
         summary: "A momentary switch: closed while it is held, open when it is let go"
-        category: circuits
+        category: switches
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:closed(0, in: 0 .. 1, step: 1, integer, live, "Pressed")
@@ -13,7 +15,14 @@ component:push-button("Push button", type: button) {
     pin:a(analog, 1, "first contact")
     pin:b(analog, 2, "second contact")
 
-    symbol(uses: [push-button-symbol, switch-symbol]) {
+    footprint("FP.SW:TACT-6X6") {
+        pad:1(a)
+        pad:2(a)
+        pad:3(b)
+        pad:4(b)
+    }
+
+    symbol(uses: ["SY.SWITCH:PUSH-BUTTON", "SY.SWITCH:SPST"]) {
         bind:closed(closed)
     }
 
@@ -22,7 +31,7 @@ component:push-button("Push button", type: button) {
     }
 
     # How it looks in the hand: a tactile switch whose plunger sinks while it is held.
-    portrait(uses: tactile-button-portrait) {
+    portrait(uses: "PT.SWITCH:TACTILE-6X6") {
         bind:closed(closed)
     }
 }

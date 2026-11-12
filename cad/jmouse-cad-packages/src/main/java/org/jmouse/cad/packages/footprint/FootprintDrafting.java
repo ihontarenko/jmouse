@@ -31,7 +31,7 @@ final class FootprintDrafting {
         return pad(number, PadType.SURFACE, PadShape.ROUNDED_RECTANGLE, x, y, width, height, 0, drawing.roundness());
     }
 
-    /** A through-hole pad; the first is square so pin 1 is found on the bare board. */
+    /** A through-hole pad; the first is square so pin 1 is found on the bare pcb. */
     Pad throughHolePad(String number, double x, double y, double size, double drill) {
         PadShape shape = FIRST_PIN.equals(number) ? PadShape.RECTANGLE : PadShape.CIRCLE;
         return pad(number, PadType.THROUGH_HOLE, shape, x, y, size, size, drill, 0);

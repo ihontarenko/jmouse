@@ -1,6 +1,6 @@
 package org.jmouse.files.jpa.directory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.jmouse.files.directory.DirectoryConfigurationKind;
 import org.jmouse.files.directory.DirectoryConfigurationKinds;

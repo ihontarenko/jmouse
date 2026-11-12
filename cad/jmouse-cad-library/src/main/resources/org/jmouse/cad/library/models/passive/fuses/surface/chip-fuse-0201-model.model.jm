@@ -1,0 +1,14 @@
+model:chip-fuse-0201-model("Chip fuse 0201 (0603 metric)") {
+    meta {
+        summary: "Chip fuse 0201 (0603 metric) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:F0201"
+        category: fuses-surface
+        tags: electronics, model, chip
+        source: "IEC 60115-8 dimensions, 0201 (0603 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [0.6, 0.3, 0.28], at: [0, 0, 0.14])
+    box(tin, size: [0.12, 0.32, 0.3], at: [-0.24, 0, 0.14])
+    box(tin, size: [0.12, 0.32, 0.3], at: [0.24, 0, 0.14])
+}

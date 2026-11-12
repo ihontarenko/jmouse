@@ -6,11 +6,13 @@ component:barrel-jack("DC barrel jack", type: connector) {
         summary: "DC power barrel jack, centre pin and sleeve"
         source: "generic 5.5 × 2.1 mm DC jack; no electrical behaviour"
         package: "BarrelJack"
-        category: circuits
+        category: connectors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:tip(analog, 1, "centre pin, usually +")
     pin:sleeve(analog, 2, "sleeve, usually −")
 
-    symbol(uses: barrel-jack-symbol)
+    symbol(uses: "SY.CONNECTOR:BARREL-JACK")
 }

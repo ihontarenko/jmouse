@@ -5,14 +5,16 @@ component:pnp-transistor("PNP transistor", type: bjt) {
     meta {
         designator: Q
         summary: "PNP bipolar transistor, the Gummel–Poon model at its defaults"
-        category: circuits
+        category: base-models
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:bipolar-transistor
 
     parameter:polarity(-1, "PNP")
 
-    symbol(uses: pnp-transistor-symbol) {
+    symbol(uses: "SY.TRANSISTOR:BIPOLAR-PNP") {
         bind:failed(failed)
     }
 

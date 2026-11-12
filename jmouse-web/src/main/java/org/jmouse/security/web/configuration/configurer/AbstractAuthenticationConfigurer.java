@@ -1,13 +1,17 @@
 package org.jmouse.security.web.configuration.configurer;
 
+import static java.util.Objects.requireNonNull;
+import static org.jmouse.core.matcher.TextMatchers.notBlank;
+
 import jakarta.servlet.Filter;
+import java.util.Objects;
+import org.jmouse.core.Customizer;
 import org.jmouse.core.Streamable;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.ui.SuccessRedirectHandler;
-import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
@@ -15,11 +19,6 @@ import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 import org.jmouse.web.match.routing.MatcherCriteria;
-
-import java.util.Objects;
-
-import static java.util.Objects.requireNonNull;
-import static org.jmouse.core.matcher.TextMatchers.notBlank;
 
 /**
  * 🔧 AbstractAuthenticationConfigurer
@@ -39,13 +38,15 @@ import static org.jmouse.core.matcher.TextMatchers.notBlank;
  * @param <C> the concrete configurer type (for fluent API)
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>, C extends AbstractAuthenticationConfigurer<B, C>>
-        extends HttpSecurityConfigurer<C, B> {
+public abstract class AbstractAuthenticationConfigurer<
+    B extends HttpSecurityBuilder<B>,
+    C extends AbstractAuthenticationConfigurer<B, C>
+> extends HttpSecurityConfigurer<C, B> {
 
     public static final String DEFAULT_LOGIN_PAGE = "/login";
 
-    protected String                       loginPage                  = DEFAULT_LOGIN_PAGE;
-    protected boolean                      continueChainBeforeSuccess = false;
+    protected String loginPage = DEFAULT_LOGIN_PAGE;
+    protected boolean continueChainBeforeSuccess = false;
     protected AuthenticationSuccessHandler successHandler;
     protected AuthenticationFailureHandler failureHandler;
     protected MappingMatcher<RequestRoute> mappingMatcher = MatcherCriteria.any();
@@ -65,8 +66,10 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * @return this configurer
      */
     public C requestMatcher(MappingMatcher<RequestRoute> mappingMatcher) {
-        this.mappingMatcher = mappingMatcher instanceof MatcherCriteria
-                ? mappingMatcher : new MatcherCriteria().add(mappingMatcher);
+        this.mappingMatcher =
+            mappingMatcher instanceof MatcherCriteria
+                ? mappingMatcher
+                : new MatcherCriteria().add(mappingMatcher);
         return (C) this;
     }
 
@@ -78,15 +81,25 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      */
     public C requestMatcher(String... patterns) {
         String[] valid = java.util.Arrays.stream(patterns)
-                .filter(Objects::nonNull).filter(notBlank()::matches).toArray(String[]::new);
+            .filter(Objects::nonNull)
+            .filter(notBlank()::matches)
+            .toArray(String[]::new);
         if (valid.length == 0) {
             throw new IllegalArgumentException("At least one authentication path pattern is required");
         }
         java.util.List<MatcherCriteria> alternatives = java.util.Arrays.stream(valid)
-                .map(path -> new MatcherCriteria().pathPattern(path)).toList();
-        return requestMatcher(new MatcherCriteria().add(route -> org.jmouse.core.matcher.Match.or(
-                alternatives.stream().map(criterion -> criterion.apply(route))
-                        .toArray(org.jmouse.core.matcher.Match[]::new))));
+            .map(path -> new MatcherCriteria().pathPattern(path))
+            .toList();
+        return requestMatcher(
+            new MatcherCriteria().add(route ->
+                org.jmouse.core.matcher.Match.or(
+                    alternatives
+                        .stream()
+                        .map(criterion -> criterion.apply(route))
+                        .toArray(org.jmouse.core.matcher.Match[]::new)
+                )
+            )
+        );
     }
 
     public C anyRequest() {
@@ -138,8 +151,9 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     @Override
     @SuppressWarnings("unchecked")
     public void initialize(B builder) throws Exception {
-        if (builder.findConfigurer(ExceptionHandlingConfigurer.class).orElse(null)
-                instanceof ExceptionHandlingConfigurer<?> exceptionHandlingConfigurer
+        if (
+            builder.findConfigurer(ExceptionHandlingConfigurer.class).orElse(null) instanceof
+                ExceptionHandlingConfigurer<?> exceptionHandlingConfigurer
         ) {
             exceptionHandlingConfigurer.defaultAuthenticationEntryPoint(defaultEntryPoint());
         }
@@ -150,12 +164,16 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      */
     @Override
     public void configure(B http) {
-        AuthenticationManager     authenticationManager = http.getSharedObject(SharedAttributes.AUTHENTICATION_MANAGER);
-        SecurityContextRepository repository            = http.getSharedObject(SharedAttributes.CONTEXT_REPOSITORY);
-        MatcherCriteria           matcherCriteria       = resolveMatcher();
+        AuthenticationManager authenticationManager = http.getSharedObject(
+            SharedAttributes.AUTHENTICATION_MANAGER
+        );
+        SecurityContextRepository repository = http.getSharedObject(SharedAttributes.CONTEXT_REPOSITORY);
+        MatcherCriteria matcherCriteria = resolveMatcher();
 
         if (matcherCriteria == null) {
-            throw new IllegalStateException("MATCHER-CRITERIA must be set (use processing() or requestMatcher(...))");
+            throw new IllegalStateException(
+                "MATCHER-CRITERIA must be set (use processing() or requestMatcher(...))"
+            );
         }
 
         AuthenticationSuccessHandler successHandler = resolveSuccessHandler(http);
@@ -165,8 +183,16 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         http.setSharedObject(SharedAttributes.SUCCESS_HANDLER, successHandler);
         http.setSharedObject(SharedAttributes.FAILURE_HANDLER, failureHandler);
 
-        if (doBuildFilter(authenticationManager, repository, matcherCriteria, successHandler, failureHandler)
-                instanceof AbstractAuthenticationFilter authenticationFilter) {
+        if (
+            doBuildFilter(
+                    authenticationManager,
+                    repository,
+                    matcherCriteria,
+                    successHandler,
+                    failureHandler
+                ) instanceof
+                AbstractAuthenticationFilter authenticationFilter
+        ) {
             authenticationFilter.setContinueChainBeforeSuccess(continueChainBeforeSuccess);
             http.addFilter(authenticationFilter);
         }
@@ -183,10 +209,11 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * @return a configured {@link Filter} (typically an {@link OrderedFilter})
      */
     protected abstract Filter doBuildFilter(
-            AuthenticationManager authenticationManager,
-            SecurityContextRepository repository, MatcherCriteria matcher,
-            AuthenticationSuccessHandler successHandler,
-            AuthenticationFailureHandler failureHandler
+        AuthenticationManager authenticationManager,
+        SecurityContextRepository repository,
+        MatcherCriteria matcher,
+        AuthenticationSuccessHandler successHandler,
+        AuthenticationFailureHandler failureHandler
     );
 
     /**
@@ -237,7 +264,5 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         public void url(String redirectUrl) {
             AbstractAuthenticationConfigurer.this.successHandler(new SuccessRedirectHandler(redirectUrl));
         }
-
     }
-
 }

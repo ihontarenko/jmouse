@@ -1,9 +1,17 @@
 package org.jmouse.security.web.authentication.ui;
 
+import static java.util.Objects.requireNonNull;
+import static org.jmouse.http.HttpStatus.OK;
+import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
+import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.http.HeaderWriter;
 import org.jmouse.web.http.RequestContext;
@@ -12,38 +20,33 @@ import org.jmouse.web.match.routing.MatcherCriteria;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
-import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
-import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
-import static org.jmouse.http.HttpStatus.OK;
-
 public final class DefaultLoginPageGeneratingFilter implements BeanFilter, HeaderWriter {
 
-    private final String          action;
-    private final View            view;
-    private final String          usernameParameter;
-    private final String          passwordParameter;
+    private final String action;
+    private final View view;
+    private final String usernameParameter;
+    private final String passwordParameter;
     private final MatcherCriteria matcherCriteria;
 
     public DefaultLoginPageGeneratingFilter(
-            View view, String action,
-            String usernameParameter,
-            String passwordParameter
+        View view,
+        String action,
+        String usernameParameter,
+        String passwordParameter
     ) {
         this.action = requireNonNull(action);
         this.matcherCriteria = new MatcherCriteria().pathPattern(action);
         this.view = view;
-        this.usernameParameter = (usernameParameter != null ? usernameParameter : JMOUSE_USER_IDENTITY_USERNAME);
-        this.passwordParameter = (passwordParameter != null ? passwordParameter : JMOUSE_USER_IDENTITY_PASSWORD);
+        this.usernameParameter =
+            usernameParameter != null ? usernameParameter : JMOUSE_USER_IDENTITY_USERNAME;
+        this.passwordParameter =
+            passwordParameter != null ? passwordParameter : JMOUSE_USER_IDENTITY_PASSWORD;
     }
 
     @Override
-    public void doFilterInternal(RequestContext requestContext, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest  request = requestContext.request();
+    public void doFilterInternal(RequestContext requestContext, FilterChain chain)
+        throws IOException, ServletException {
+        HttpServletRequest request = requestContext.request();
         HttpServletResponse response = requestContext.response();
 
         if (!matcherCriteria.matches(RequestRoute.ofRequest(request))) {
@@ -51,7 +54,7 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter, Heade
             return;
         }
 
-        boolean error  = request.getParameter("error")  != null;
+        boolean error = request.getParameter("error") != null;
         boolean logout = request.getParameter("logout") != null;
 
         writeHeaders(requestContext);
@@ -62,7 +65,9 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter, Heade
     private void renderView(boolean error, boolean logout, RequestContext requestContext) {
         Map<String, Object> model = new HashMap<>();
 
-        Object csrf = requestContext.request().getAttribute(org.jmouse.security.web.csrf.CsrfToken.REQUEST_ATTRIBUTE);
+        Object csrf = requestContext
+            .request()
+            .getAttribute(org.jmouse.security.web.csrf.CsrfToken.REQUEST_ATTRIBUTE);
         if (csrf instanceof org.jmouse.security.web.csrf.CsrfToken token) {
             model.put("csrfToken", token.value());
             model.put("csrfParameterName", token.parameterName());
@@ -81,5 +86,4 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter, Heade
         response.setStatus(OK.getCode());
         response.setContentType(MediaType.TEXT_HTML_VALUE);
     }
-
 }

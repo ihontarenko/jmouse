@@ -62,11 +62,8 @@ public class TermWriter {
         }
     }
 
-    /** Whether a statement is a block with no head that only gathers named terms: its terms say what it says. */
     private static boolean gathers(Expression statement) {
-        return statement instanceof ClauseBlockNode block && block.header().isEmpty() && block.opened()
-                && !block.getExpressions().isEmpty() && block.getExpressions().stream()
-                .allMatch(line -> line instanceof ClauseLineNode clause && clause.grammar().isNamed());
+        return statement instanceof ClauseBlockNode block && block.onlyGathersTerms();
     }
 
     protected void line(SourceWriter writer, Expression statement) {
@@ -143,8 +140,7 @@ public class TermWriter {
             if (slot.role().equals(nameRole)) {
                 continue;
             }
-            boolean headMarked = slot.mark() != null && slot.mark().equals(grammar.termWord());
-            String namedBy = headMarked ? slot.termWord() : slot.namedBy();
+            String namedBy = grammar.termArgumentName(slot);
             line.slot(slot.role()).ifPresent(value -> {
                 if (value instanceof SettingsNode settings) {
                     settings.settings().forEach(setting -> arguments.add(setting.given()
@@ -182,7 +178,6 @@ public class TermWriter {
     /** A value as an argument: a list in brackets, a point as its two numbers, the rest as it writes itself. */
     protected void value(SourceWriter writer, Expression value) {
         switch (value) {
-            case AssignedNode assigned -> value(writer, assigned.value());
             case PointNode point -> point.coordinates().forEach(writer::write);
             case ListNode list -> list(writer, list);
             case ConnectionsNode connections -> connections(writer, connections);

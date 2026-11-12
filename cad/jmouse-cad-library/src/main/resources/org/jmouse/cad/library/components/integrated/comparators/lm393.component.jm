@@ -8,8 +8,10 @@ component:lm393("LM393", type: opamp) {
         summary: "Dual comparator, open-collector outputs, single supply 2 V to 36 V, inputs to ground"
         source: "TI LM393 datasheet (SLCS005), electrical characteristics at 5 V"
         package: "SOIC-8"
-        category: circuits
+        category: comparators
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:operational-amplifier
     units:[A, B]
@@ -32,15 +34,15 @@ component:lm393("LM393", type: opamp) {
     parameter:V_supply_maximum(36 V, "the supply span it is rated for")
     parameter:V_offset_spread(5 mV, "VIO at most 5 mV")
 
-    pin:output(analog, output, 1 7)
+    pin:output(analog, output, open-collector, 1 7)
     pin:inverting_input(analog, input, 2 6, "inverting")
     pin:non_inverting_input(analog, input, 3 5, "non-inverting")
     pin:Vcc(power, 8)
     pin:GND(ground, 4)
 
-    footprint(soic-8-footprint)
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
-    symbol(uses: [operational-amplifier-symbol, operational-amplifier-wide-symbol]) {
+    symbol(uses: ["SY.AMPLIFIER:OPERATIONAL", "SY.AMPLIFIER:OPERATIONAL-WIDE"]) {
         bind:failed(failed)
         bind:positive_supply(pin: Vcc)
         bind:negative_supply(pin: GND)

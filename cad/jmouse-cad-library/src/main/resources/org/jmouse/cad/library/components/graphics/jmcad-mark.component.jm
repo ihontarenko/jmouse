@@ -1,0 +1,15 @@
+component:jmcad-mark("jmCAD mark") {
+    meta {
+        designator: G
+        summary: "The jmCAD mark: this board was laid out in jmCAD: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:JMCAD-10")
+    footprint("FP.GRAPHIC:JMCAD-5")
+    footprint("FP.GRAPHIC:JMCAD-20")
+
+    symbol(uses: "SY.GRAPHIC:JMCAD") {
+    }
+}

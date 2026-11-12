@@ -2,6 +2,7 @@ package org.jmouse.cad.store.about;
 
 import org.jmouse.plugin.ArtifactFacts;
 import org.jmouse.plugin.Extensions;
+import org.jmouse.plugin.PluginIcon;
 import org.jmouse.plugin.PluginState;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -21,34 +22,35 @@ public class EngineAbout {
     private static final String ABOUT = "about.json";
 
     /** What the window shows. */
-    public record About(Engine engine, List<Plugin> plugins, Runtime runtime, List<Stage> roadmap) {
+    /** @param pluginGroups the order the plugins' kinds are listed in; a kind not named here comes after them */
+    public record About(Engine engine, List<Plugin> plugins, List<String> pluginGroups, Runtime runtime) {
     }
 
     public record Engine(String name, String summary, String version, String author, String license, String site) {
     }
 
     /**
-     * @param icon   its icon as an SVG document, drawn in the current colour; null for none
-     * @param reason why it does not run; null for one that does
+     * @param summary   what it brings, in one line; null where its jar does not say
+     * @param category  the kind it is, the list's group; null for none
+     * @param icon      its icon, and whether the page paints it in its colour or it keeps its own; null for none
+     * @param reason    why it does not run; null for one that does
+     * @param requires  the plugins it cannot run without — Gerber for a pcb house's set —, by id
+     * @param extending the running plugins it adds to when they run — KiCad's model libraries to the 3D models —, by id
      */
-    public record Plugin(String id, String title, String version, String description, String author, String icon,
-                         boolean running, String reason) {
+    public record Plugin(String id, String title, String version, String summary, String category, String author, PluginIcon icon,
+                         boolean running, String reason, List<String> requires, List<String> extending) {
     }
 
     public record Runtime(String java) {
     }
 
-    /** @param state {@code done}, {@code now}, {@code next} or {@code later} */
-    public record Stage(String title, String state, List<String> items) {
-    }
-
     /** {@code about.json}: what the manifest cannot say. */
-    private record Written(String name, String summary, String site, List<Stage> roadmap) {
+    private record Written(String name, String summary, String site, List<String> pluginGroups) {
     }
 
     private final Extensions extensions;
     private final Engine     engine;
-    private final List<Stage> roadmap;
+    private final List<String> pluginGroups;
 
     public EngineAbout(Extensions extensions) {
         this.extensions = extensions;
@@ -56,23 +58,19 @@ public class EngineAbout {
         ArtifactFacts facts = ArtifactFacts.of(EngineAbout.class);
         this.engine = new Engine(written.name(), written.summary(), facts.version(), facts.author(), facts.license(),
                                  written.site());
-        this.roadmap = written.roadmap() == null ? List.of() : List.copyOf(written.roadmap());
-    }
-
-    /** What the engine is, in a sentence: its own summary, as a reader is told it wherever the engine is listed. */
-    public static String engineSummary() {
-        return written().summary();
+        this.pluginGroups = written.pluginGroups() == null ? List.of() : List.copyOf(written.pluginGroups());
     }
 
     public About about() {
         List<Plugin> plugins = extensions.plugins().stream().map(EngineAbout::pluginOf).toList();
-        return new About(engine, plugins, new Runtime(System.getProperty("java.version")), roadmap);
+        return new About(engine, plugins, pluginGroups, new Runtime(System.getProperty("java.version")));
     }
 
     private static Plugin pluginOf(PluginState state) {
         var plugin = state.plugin();
-        return new Plugin(plugin.id(), plugin.title(), plugin.version(), plugin.description(), plugin.author(),
-                          plugin.icon(), state.status() == PluginState.Status.STARTED, state.reason());
+        return new Plugin(plugin.id(), plugin.title(), plugin.version(), plugin.summary(), plugin.category(), plugin.author(),
+                          plugin.icon(), state.status() == PluginState.Status.STARTED, state.reason(),
+                          plugin.requires().stream().sorted().toList(), state.extending().stream().sorted().toList());
     }
 
     private static Written written() {

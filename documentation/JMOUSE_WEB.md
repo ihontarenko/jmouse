@@ -37,8 +37,7 @@ new WebApplicationLauncher(Application.class).launch(arguments);
 
 `Application` is the adopter's configuration root. The launcher creates the source context and
 server using the web-context factories, feature configuration and `WebServerFactory` beans. This
-is a jMouse bootstrap path, not `SpringApplication.run`. Use the `wep-app` source as an integration
-example; its product classes are not library API.
+is a jMouse bootstrap path, not `SpringApplication.run`.
 
 A servlet request passes registered filters into the configured dispatcher, which finds a mapped
 handler, chooses an adapter, resolves arguments, invokes the handler/interceptors and processes the

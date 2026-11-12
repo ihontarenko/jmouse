@@ -7,7 +7,7 @@
   <version>1.0.1</version>
   <name>jMouse - CAD Packages</name>
   <description>jMouse Framework - jmCAD standard packages: footprints and portraits worked out from package tables and land pattern rules, built as document trees.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-packages</url>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-packages</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,12 +24,18 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-packages</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-packages</url>
   </scm>
   <dependencies>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-cad-board</artifactId>
+      <artifactId>jmouse-cad-pcb</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-mesh</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/plugin/gerber/files.schema.json",
+  "title": "Gerber files",
+  "type": "array",
+  "items": {
+    "description": "What a file of the set is, by how its name ends, for the README.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "ending",
+      "role"
+    ],
+    "properties": {
+      "ending": {
+        "description": "how the file's name ends: -F_Cu.gbr",
+        "type": "string"
+      },
+      "role": {
+        "description": "what the file is, as the set's README says it",
+        "type": "string"
+      }
+    }
+  },
+  "description": "What a file of the set is, by how its name ends, for the README."
+}

@@ -1,0 +1,8 @@
+category:graphics("Graphics") {
+    meta {
+        summary: "Drawings on a sheet or a board that are no part"
+        order: 19
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

@@ -3,33 +3,38 @@ package org.jmouse.security.web.session;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.security.SecurityContextHolder;
+import java.io.IOException;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.SecurityContext;
+import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.RequestContextKeeper;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
-import java.io.IOException;
-
 public final class SessionManagementFilter implements BeanFilter {
 
     private final SessionAuthenticateHandler sessionAuthentication;
-    private final SessionInvalidHandler      invalidSessionHandler;
+    private final SessionInvalidHandler invalidSessionHandler;
 
     public SessionManagementFilter(
-            SessionAuthenticateHandler sessionAuthentication, SessionInvalidHandler invalidSessionHandler) {
+        SessionAuthenticateHandler sessionAuthentication,
+        SessionInvalidHandler invalidSessionHandler
+    ) {
         this.sessionAuthentication = sessionAuthentication;
         this.invalidSessionHandler = invalidSessionHandler;
     }
 
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
-            throws IOException, ServletException {
-        RequestContextKeeper keeper  = RequestContextKeeper.ofRequestContext(requestContext);
-        HttpServletRequest   request = requestContext.request();
+        throws IOException, ServletException {
+        RequestContextKeeper keeper = RequestContextKeeper.ofRequestContext(requestContext);
+        HttpServletRequest request = requestContext.request();
 
-        if (invalidSessionHandler != null && request.isRequestedSessionIdFromCookie() && !request.isRequestedSessionIdValid()) {
+        if (
+            invalidSessionHandler != null &&
+            request.isRequestedSessionIdFromCookie() &&
+            !request.isRequestedSessionIdValid()
+        ) {
             invalidSessionHandler.onInvalidSession(keeper);
             return;
         }
@@ -39,11 +44,14 @@ public final class SessionManagementFilter implements BeanFilter {
         chain.doFilter(requestContext.request(), requestContext.response());
 
         if (sessionAuthentication != null) {
-            SecurityContext after              = SecurityContextHolder.getContext();
-            boolean         afterAuthenticated = isAuthenticated(after);
+            SecurityContext after = SecurityContextHolder.getContext();
+            boolean afterAuthenticated = isAuthenticated(after);
 
-            if (!beforeAuthenticated && afterAuthenticated && !Boolean.TRUE.equals(
-                    request.getAttribute(SessionAuthenticateHandler.APPLIED_ATTRIBUTE))) {
+            if (
+                !beforeAuthenticated &&
+                afterAuthenticated &&
+                !Boolean.TRUE.equals(request.getAttribute(SessionAuthenticateHandler.APPLIED_ATTRIBUTE))
+            ) {
                 Authentication authentication = after.getAuthentication();
                 if (authentication != null) {
                     sessionAuthentication.onAuthentication(authentication, keeper);

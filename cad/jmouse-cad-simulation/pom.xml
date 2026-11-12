@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-simulation</artifactId>
     <name>jMouse - CAD Simulation</name>
     <description>jMouse Framework - jmCAD simulation: components, circuits, families and functions as documents of the jM language — their parameters, pins, equations for jMF and behaviour for jMS.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-simulation</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-simulation</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-simulation</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-simulation</url>
     </scm>
 
     <properties>

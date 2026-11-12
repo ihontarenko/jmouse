@@ -5,8 +5,10 @@
   { "ending": "_Mask.gbr", "role": "solder mask (negative: what is drawn is left bare)" },
   { "ending": "_Paste.gbr", "role": "solder paste stencil" },
   { "ending": "_Silkscreen.gbr", "role": "silkscreen" },
-  { "ending": "-Edge_Cuts.gbr", "role": "board outline" },
+  { "ending": "_Assembly.gbr", "role": "assembly drawing: parts' outlines and designators" },
+  { "ending": "_Adhesive.gbr", "role": "glue that holds a part while it is soldered" },
+  { "ending": "-Edge_Cuts.gbr", "role": "PCB outline" },
   { "ending": "-PTH.drl", "role": "plated holes and slots (Excellon)" },
   { "ending": "-NPTH.drl", "role": "unplated holes (Excellon)" },
-  { "ending": "-netlist.ipc", "role": "netlist for the bare board's electrical test (IPC-D-356)" }
+  { "ending": "-netlist.ipc", "role": "netlist for the bare PCB's electrical test (IPC-D-356)" }
 ]

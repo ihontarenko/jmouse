@@ -1,0 +1,14 @@
+model:tantalum-capacitor-3528-model("Tantalum capacitor Case B (3528-21 metric)") {
+    meta {
+        summary: "Tantalum capacitor Case B (3528-21 metric) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:CT3528"
+        category: capacitors-surface
+        tags: electronics, model, chip
+        source: "EIA-535-BAAC case sizes (KEMET T491), Case B (3528-21 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(tantalum, size: [3.5, 2.8, 2.1], at: [0, 0, 1.05])
+    box(tin, size: [0.7, 2.82, 2.12], at: [-1.4, 0, 1.05])
+    box(tin, size: [0.7, 2.82, 2.12], at: [1.4, 0, 1.05])
+}

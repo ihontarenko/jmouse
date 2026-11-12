@@ -1,12 +1,11 @@
 package org.jmouse.security.web.configuration;
 
+import java.util.*;
+import java.util.function.Supplier;
 import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.beans.BeanProvider;
 import org.jmouse.core.Streamable;
 import org.jmouse.web.context.WebBeanContext;
-
-import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * 🧩 AbstractConfiguredSecurityBuilder
@@ -25,7 +24,9 @@ import java.util.function.Supplier;
  * @param <B> the concrete builder subtype (for fluent API)
  */
 public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractConfiguredSecurityBuilder<T, B>>
-        extends AbstractSecurityBuilder<T> implements BeanProvider {
+    extends AbstractSecurityBuilder<T>
+    implements BeanProvider
+{
 
     /**
      * 📚 Registered configurers in application order.
@@ -35,7 +36,7 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
     /**
      * 🗂️ Shared object registry (type → instance).
      */
-    private final Map<Class<?>, Object>          shared      = new HashMap<>();
+    private final Map<Class<?>, Object> shared = new HashMap<>();
 
     /**
      * ➕ Apply a {@link SecurityConfigurer} as-is.
@@ -88,10 +89,9 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
      * @return the first matching configurer
      * @throws java.util.NoSuchElementException if none present
      */
-    @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings({ "unchecked", "OptionalGetWithoutIsPresent" })
     public <C extends SecurityConfigurer<T, B>> C getConfigurer(Class<C> type) {
-        return (C) Streamable.of(this.configurers)
-                .filter(type::isInstance).findFirst().get();
+        return (C) Streamable.of(this.configurers).filter(type::isInstance).findFirst().get();
     }
 
     /**
@@ -103,7 +103,11 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
     /** Optional collection lookup without using exceptions for this builder's normal control flow. */
     @SuppressWarnings("unchecked")
     public <C extends SecurityConfigurer<T, B>> java.util.Optional<C> findConfigurer(Class<C> type) {
-        return configurers.stream().filter(type::isInstance).map(value -> (C) value).findFirst();
+        return configurers
+            .stream()
+            .filter(type::isInstance)
+            .map(value -> (C) value)
+            .findFirst();
     }
 
     public <U> void setSharedObject(Class<U> type, U object) {
@@ -151,7 +155,7 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
             if (getBeanContext() != null) {
                 try {
                     instance = getBean(type);
-                } catch (BeanNotFoundException ignored) { }
+                } catch (BeanNotFoundException ignored) {}
             }
 
             if (instance == null && defaultObject != null) {
@@ -181,8 +185,7 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
 
         if (instance == null) {
             throw new IllegalStateException(
-                    "❌ Required object of type '%s' could not be resolved."
-                            .formatted(type.getName())
+                "❌ Required object of type '%s' could not be resolved.".formatted(type.getName())
             );
         }
 

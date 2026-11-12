@@ -1,0 +1,32 @@
+model:qfn-16-exposed-pad-model("QFN-16, 3 mm body") {
+    meta {
+        summary: "QFN-16, 3 mm body — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.QFN:16-P0.5-3-EP1.7"
+        category: no-lead
+        tags: electronics, model, quad
+        source: "JEDEC MO-220"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [3, 3, 0.475], at: [0, 0, 0.288])
+    box(plastic, size: [2.9, 2.9, 0.475], at: [0, 0, 0.763])
+    cylinder(dimple, radius: 0.2, length: 0.01, at: [-1.05, 1.05, 1.005])
+    marking(name, on: flat, size: [2.1, 0.9], at: [0, 0, 1.01], ink: marking)
+    box(tin, size: [0.85, 0.3, 0.05], at: [-1.45, 0.75, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [-1.45, 0.25, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [-1.45, -0.25, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [-1.45, -0.75, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [-0.75, -1.45, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [-0.25, -1.45, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [0.25, -1.45, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [0.75, -1.45, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [1.45, -0.75, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [1.45, -0.25, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [1.45, 0.25, 0.025])
+    box(tin, size: [0.85, 0.3, 0.05], at: [1.45, 0.75, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [0.75, 1.45, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [0.25, 1.45, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [-0.25, 1.45, 0.025])
+    box(tin, size: [0.3, 0.85, 0.05], at: [-0.75, 1.45, 0.025])
+    box(tin, size: [1.7, 1.7, 0.05], at: [0, 0, 0.025])
+}

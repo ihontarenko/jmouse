@@ -1,3 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 4h16v16H4zM8 8h3v3H8zM14 14h2M8 16h3M14 8v3h2"/>
+  <!-- a board as it is made: its outline, a trace between two pads, a drill -->
+  <path d="M3 4h18v16H3z"/>
+  <path d="M7 9.5v4h8.5v1.5"/>
+  <circle cx="7" cy="8" r="1.5"/>
+  <circle cx="15.5" cy="16.5" r="1.5"/>
+  <circle cx="17" cy="8" r="1" fill="currentColor"/>
 </svg>

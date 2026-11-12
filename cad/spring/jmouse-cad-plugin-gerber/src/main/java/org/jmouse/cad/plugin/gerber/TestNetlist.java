@@ -1,8 +1,9 @@
 package org.jmouse.cad.plugin.gerber;
 
-import org.jmouse.cad.board.drawing.BoardDrawing;
-import org.jmouse.cad.board.drawing.FootprintDrawing;
-import org.jmouse.cad.board.geometry.CopperNets;
+import org.jmouse.cad.exchange.pcb.PcbFabrication;
+import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.FootprintDrawing;
+import org.jmouse.cad.pcb.geometry.CopperNets;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The bare board's netlist for its electrical test, as IPC-D-356 writes it and KiCad exports it: one fixed-column record
+ * The bare pcb's netlist for its electrical test, as IPC-D-356 writes it and KiCad exports it: one fixed-column record
  * a pad, via or hole — which net it is on, where it stands, how big it is, whether it is drilled, from which side a probe
- * reaches it and whether the mask leaves it bare. A board house tests every board it makes against it: two points of one
+ * reaches it and whether the mask leaves it bare. A pcb house tests every pcb it makes against it: two points of one
  * net must be joined and two of different nets apart, so a short or an open etched into the copper is found before a part
  * is soldered. Units are KiCad's: a ten-thousandth of an inch, Y upwards.
  */
@@ -45,39 +46,39 @@ final class TestNetlist {
     private TestNetlist() {
     }
 
-    static String of(BoardFabrication fabrication, CopperNets nets) {
-        BoardDrawing board = fabrication.board();
-        int bottom = board.copperLayerIds().size();
+    static String of(PcbFabrication fabrication, CopperNets nets) {
+        PcbDrawing pcb = fabrication.pcb();
+        int bottom = pcb.copperLayerIds().size();
         List<TestRecord> records = new ArrayList<>();
         for (int index = 0; index < nets.pads().size(); index++) {
             CopperNets.PlacedPad placed = nets.pads().get(index);
             FootprintDrawing.Pad pad = placed.pad();
             boolean through = !pad.isSurface();
-            boolean top = placed.placement().side().equals(BoardDrawing.TOP);
+            boolean top = placed.placement().side().equals(PcbDrawing.TOP);
             double drill = Math.min(pad.drillWidth(), pad.drillHeight() > 0 ? pad.drillHeight() : pad.drillWidth());
             records.add(new TestRecord(through ? THROUGH : SURFACE, nets.padNets().get(index).orElse(UNCONNECTED),
-                    placed.designator(), pad.number(), false, through ? drill : 0, through ? 0 : top ? 1 : bottom,
+                    placed.placement().printed(), pad.number(), false, through ? drill : 0, through ? 0 : top ? 1 : bottom,
                     placed.centre().x(), placed.centre().y(), pad.width(), pad.height(),
                     pad.rotation() + placed.placement().rotation(), through ? 3 : top ? 1 : 2));
         }
         // A footprint's own bare holes: a probe never lands in one, but the tester's fixture is drilled clear of it.
-        for (BoardFabrication.SeatedPart part : fabrication.parts()) {
+        for (PcbFabrication.SeatedPart part : fabrication.parts()) {
             for (FootprintDrawing.Pad pad : part.drawing().map(FootprintDrawing::pads).orElse(List.of())) {
                 if (pad.isUnplated()) {
-                    BoardDrawing.Point at = part.placement().placed(pad.x(), pad.y());
-                    records.add(new TestRecord(MECHANICAL, UNCONNECTED, part.designator(), pad.number(), false, pad.drillWidth(),
+                    PcbDrawing.Point at = part.placement().placed(pad.x(), pad.y());
+                    records.add(new TestRecord(MECHANICAL, UNCONNECTED, part.printed(), pad.number(), false, pad.drillWidth(),
                             0, at.x(), at.y(), pad.drillWidth(), pad.drillWidth(), 0, 0));
                 }
             }
         }
         // Vias are tented: the mask covers them, so the tester reaches them through the copper alone.
-        for (int index = 0; index < board.vias().size(); index++) {
-            BoardDrawing.Via via = board.vias().get(index);
+        for (int index = 0; index < pcb.vias().size(); index++) {
+            PcbDrawing.Via via = pcb.vias().get(index);
             records.add(new TestRecord(THROUGH, nets.viaNets().get(index).orElse(UNCONNECTED), "VIA", "", true, via.drill(), 0,
                     via.x(), via.y(), via.diameter(), via.diameter(), 0, 0));
         }
-        for (int index = 0; index < board.holes().size(); index++) {
-            BoardDrawing.Hole hole = board.holes().get(index);
+        for (int index = 0; index < pcb.holes().size(); index++) {
+            PcbDrawing.Hole hole = pcb.holes().get(index);
             boolean plated = hole.ring() > 0;
             double size = plated ? hole.ring() : hole.drill();
             records.add(new TestRecord(plated ? THROUGH : MECHANICAL, UNCONNECTED, "HOLE", String.valueOf(index + 1), false,
@@ -87,7 +88,7 @@ final class TestNetlist {
         records.stream().map(TestRecord::net).filter(net -> net.length() > NET_COLUMN).distinct()
                 .forEach(net -> aliases.put(net, "NNAME" + (aliases.size() + 1)));
         List<String> lines = new ArrayList<>(List.of(
-                "C  IPC-D-356 netlist, for the bare board's electrical test", "C", "C  Board: " + fabrication.name(), "C",
+                "C  IPC-D-356 netlist, for the bare PCB's electrical test", "C", "C  Pcb: " + fabrication.name(), "C",
                 "P  JOB   " + fabrication.name(), "P  CODE  00", "P  UNITS CUST 0", "P  DIM   N", "P  VER   IPC-D-356",
                 "P  IMAGE PRIMARY"));
         aliases.forEach((net, alias) -> lines.add("P  " + padded(alias, 6) + " " + net));

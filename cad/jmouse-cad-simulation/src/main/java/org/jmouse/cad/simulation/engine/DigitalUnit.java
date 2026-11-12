@@ -98,7 +98,7 @@ final class DigitalUnit {
             // output's, which already includes the input stage on the same pad.
             if (binding.pin().output()) {
                 DigitalDriver driver = new DigitalDriver(label, name, binding.isDigitalNode() ? binding.digitalNode() : null,
-                        binding.pin().openDrain());
+                        binding.pin().pullsOneWay());
                 drivers.put(name, driver);
                 if (!binding.isDigitalNode()) {
                     simulation.bridges.add(new OutputBridge(driver, binding.analog(), powerNode, groundNode, family));

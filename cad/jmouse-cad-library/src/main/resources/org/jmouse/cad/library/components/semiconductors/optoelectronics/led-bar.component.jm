@@ -8,8 +8,10 @@ component:led-bar("LED bar", type: display) {
         summary: "Eight red LEDs in a row, common cathode: a level meter or a byte made visible"
         source: "a typical red LED die, as led-red: VF about 2.0 V at 20 mA, VR 5 V; common cathode"
         package: "DIP-16 bar, 8 segments"
-        category: circuits
+        category: optoelectronics
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -43,7 +45,26 @@ component:led-bar("LED bar", type: display) {
     figure:light_7(100 * max(0, anode_7.current) / I_rated, unit: %, "of segment 7's rated brightness")
     figure:overcurrent(100 * max(abs(anode_0.current), max(abs(anode_1.current), max(abs(anode_2.current), max(abs(anode_3.current), max(abs(anode_4.current), max(abs(anode_5.current), max(abs(anode_6.current), abs(anode_7.current)))))))) / I_forward_maximum, unit: %, "of a segment's rated current")
 
-    symbol(uses: led-bar-symbol)
+    footprint("FP.DIP:16-W7.62") {
+        pad:1(anode_0)
+        pad:2(anode_1)
+        pad:3(anode_2)
+        pad:4(anode_3)
+        pad:5(anode_4)
+        pad:6(anode_5)
+        pad:7(anode_6)
+        pad:8(anode_7)
+        pad:9(cathode)
+        pad:10(cathode)
+        pad:11(cathode)
+        pad:12(cathode)
+        pad:13(cathode)
+        pad:14(cathode)
+        pad:15(cathode)
+        pad:16(cathode)
+    }
+
+    symbol(uses: "SY.LED:BAR-8")
 
     node:junction_anode_0
     node:junction_anode_1
@@ -76,7 +97,7 @@ component:led-bar("LED bar", type: display) {
     expect("a segment's forward voltage at 20 mA", from: "VF 2.0 V typical, 2.5 V at most at 20 mA, as a red LED") {
         bench(for: 1 ms) {
             part:I1(current-source, [lit, 0], I_output: 20 mA)
-            # The other segments are tied off to the cathode, as unused ones are on a board: dark, and no node left floating.
+            # The other segments are tied off to the cathode, as unused ones are on a pcb: dark, and no node left floating.
             part:U1(self, [anode_0: lit, anode_1: 0, anode_2: 0, anode_3: 0, anode_4: 0, anode_5: 0, anode_6: 0, anode_7: 0, cathode: 0])
         }
         measure(operating, lit)
@@ -95,5 +116,5 @@ component:led-bar("LED bar", type: display) {
     }
 
     # How it looks in the hand: the bar graph itself, its bars lit by the same figures as the symbol.
-    portrait(uses: led-bar-portrait)
+    portrait(uses: "PT.DISPLAY:BAR-8")
 }

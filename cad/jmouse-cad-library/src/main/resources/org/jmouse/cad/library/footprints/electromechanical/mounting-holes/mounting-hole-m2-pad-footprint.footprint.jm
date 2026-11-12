@@ -2,7 +2,7 @@ footprint:mounting-hole-m2-pad-footprint("Mounting hole M2, a plated ring under 
     meta {
         summary: "M2 screw, 2.2 mm hole, a plated ring under the head"
         code: "FP.MH:M2-PAD"
-        category: circuits
+        category: mounting-holes
         tags: electronics, footprint, through-hole
         source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
         authors: "jMouse"

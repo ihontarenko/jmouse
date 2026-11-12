@@ -17,8 +17,10 @@ component:i2c-target("I²C target", type: interface) {
         designator: U
         summary: "The I²C bus protocol of a target: address, ACK, bytes in and out, START and STOP"
         source: "NXP UM10204, I²C-bus specification and user manual, rev. 7.0 (2021): §3.1 bit transfer, START and STOP, byte format, ACK, 7-bit addressing"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 

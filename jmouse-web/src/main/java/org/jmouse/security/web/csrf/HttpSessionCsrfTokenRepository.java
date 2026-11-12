@@ -9,6 +9,7 @@ import java.util.Objects;
 
 /** Synchronizer tokens stored with the HTTP session; unrelated sessions cannot share a token. */
 public final class HttpSessionCsrfTokenRepository implements CsrfTokenRepository {
+
     private static final SecureRandom RANDOM = new SecureRandom();
     private final String headerName;
     private final String parameterName;
@@ -19,7 +20,12 @@ public final class HttpSessionCsrfTokenRepository implements CsrfTokenRepository
         this("X-CSRF-Token", "_csrf", HttpSessionCsrfTokenRepository.class.getName() + ".TOKEN", 32);
     }
 
-    public HttpSessionCsrfTokenRepository(String headerName, String parameterName, String attributeName, int tokenBytes) {
+    public HttpSessionCsrfTokenRepository(
+        String headerName,
+        String parameterName,
+        String attributeName,
+        int tokenBytes
+    ) {
         this.headerName = Objects.requireNonNull(headerName, "headerName");
         this.parameterName = Objects.requireNonNull(parameterName, "parameterName");
         this.attributeName = Objects.requireNonNull(attributeName, "attributeName");
@@ -38,8 +44,11 @@ public final class HttpSessionCsrfTokenRepository implements CsrfTokenRepository
             }
             byte[] bytes = new byte[tokenBytes];
             RANDOM.nextBytes(bytes);
-            CsrfToken token = new CsrfToken(headerName, parameterName,
-                    Base64.getUrlEncoder().withoutPadding().encodeToString(bytes));
+            CsrfToken token = new CsrfToken(
+                headerName,
+                parameterName,
+                Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+            );
             session.setAttribute(attributeName, token);
             return token;
         }

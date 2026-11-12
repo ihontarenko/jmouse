@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-spring</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-plugin-datasheets</artifactId>
+    <packaging>jar</packaging>
+    <name>jMouse - CAD Plugin Datasheets</name>
+    <description>A part's datasheet kept beside it as a PDF, read, added and taken away by whoever may, and the links a document gives to its datasheet on the web</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-plugin-datasheets</url>
+
+    <properties>
+        <!-- what a reader is told of the plugin: one line, and the kind it is -->
+        <plugin.summary>A part's datasheet kept beside it</plugin.summary>
+        <plugin.category>Parts</plugin.category>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <spring-boot.version>4.0.7</spring-boot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Its settings, read from the engine's one settings tree -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-settings</artifactId>
+        </dependency>
+        <!-- The engine's routes it stands beside: their prefix, the problems, the catalogue a document is read from -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-management</artifactId>
+        </dependency>
+        <!-- What an installation accepts uploads of: a plugin adds what it keeps -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-exchange</artifactId>
+        </dependency>
+        <!-- A datasheet is one of the files a document holds -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-storage-management</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-plugin-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -3,7 +3,7 @@ portrait:qsop-20-portrait("QSOP-20") {
     meta {
         summary: "20-lead QSOP, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
         code: "PT.QSOP:20-P0.64"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-137"
         authors: "jMouse"

@@ -2,7 +2,7 @@ symbol:and-gate-symbol("AND gate") {
     meta {
         summary: "A two-input AND gate, as drawn on a schematic (ANSI)"
         code: "SY.GATE:AND"
-        category: circuits
+        category: logic
         tags: electronics, schematic, logic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

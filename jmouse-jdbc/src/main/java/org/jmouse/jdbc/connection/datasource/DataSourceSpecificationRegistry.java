@@ -5,11 +5,15 @@ import java.util.Map;
 
 public final class DataSourceSpecificationRegistry {
 
-    private final Map<String, DataSourceSpecification> specifications = new LinkedHashMap<>();
+    private final Map<String, DataSourceSpecification> specifications =
+        new java.util.concurrent.ConcurrentHashMap<>();
 
     public void register(DataSourceSpecification specification) {
+        java.util.Objects.requireNonNull(specification, "specification");
         if (specifications.putIfAbsent(specification.name(), specification) != null) {
-            throw new IllegalStateException("DATA-SOURCE-SPECIFICATION already registered: " + specification.name());
+            throw new IllegalStateException(
+                "DATA-SOURCE-SPECIFICATION already registered: " + specification.name()
+            );
         }
     }
 
@@ -30,5 +34,4 @@ public final class DataSourceSpecificationRegistry {
     public Map<String, DataSourceSpecification> snapshot() {
         return Map.copyOf(specifications);
     }
-
 }

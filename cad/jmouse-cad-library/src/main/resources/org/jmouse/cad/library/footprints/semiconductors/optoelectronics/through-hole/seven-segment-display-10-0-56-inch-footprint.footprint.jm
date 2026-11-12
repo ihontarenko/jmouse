@@ -1,0 +1,29 @@
+footprint:seven-segment-display-10-0-56-inch-footprint("Seven-segment display, 0.56 in, 15.24 mm rows") {
+    meta {
+        summary: "10-lead seven-segment display, 0.56 in, through-hole, 2.54 mm pitch, rows 15.24 mm apart"
+        code: "FP.DISP:7SEG-10-W15.24"
+        category: optoelectronics-through-hole
+        tags: electronics, footprint, through-hole
+        source: "the makers' 0.56-inch single digit (Kingbright SA56-11)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/dual-inline-packages.sht#seven-segment-0-56 and the land pattern rules; regenerate, never edit.
+    # Lead 0.5 × 0.25 at most: drill 0.8, pad 1.8, pin 1 square; body 12.5 × 19.
+    pad:1(through-hole, rectangle, at: -7.62 -5.08, size: 1.8 x 1.8, drill: 0.8)
+    pad:2(through-hole, circle, at: -7.62 -2.54, size: 1.8 x 1.8, drill: 0.8)
+    pad:3(through-hole, circle, at: -7.62 0, size: 1.8 x 1.8, drill: 0.8)
+    pad:4(through-hole, circle, at: -7.62 2.54, size: 1.8 x 1.8, drill: 0.8)
+    pad:5(through-hole, circle, at: -7.62 5.08, size: 1.8 x 1.8, drill: 0.8)
+    pad:6(through-hole, circle, at: 7.62 5.08, size: 1.8 x 1.8, drill: 0.8)
+    pad:7(through-hole, circle, at: 7.62 2.54, size: 1.8 x 1.8, drill: 0.8)
+    pad:8(through-hole, circle, at: 7.62 0, size: 1.8 x 1.8, drill: 0.8)
+    pad:9(through-hole, circle, at: 7.62 -2.54, size: 1.8 x 1.8, drill: 0.8)
+    pad:10(through-hole, circle, at: 7.62 -5.08, size: 1.8 x 1.8, drill: 0.8)
+    outline(fabrication, width: 0.1, "M-5.25 -9.5H6.25V9.5H-6.25V-8.5Z")
+    outline(silkscreen, width: 0.12, "M-6.46 -9.61H-0.75A0.75 0.75 0 0 0 0.75 -9.61H6.46V9.61H-6.46Z")
+    outline(silkscreen, filled, "M-6.06 -5.08A0.3 0.3 0 1 0 -5.46 -5.08A0.3 0.3 0 1 0 -6.06 -5.08Z")
+    outline(courtyard, width: 0.05, "M-9 -10H9V10H-9Z")
+    body(height: 8)
+    model("MD.DISP:7SEG-10-W15.24")
+}

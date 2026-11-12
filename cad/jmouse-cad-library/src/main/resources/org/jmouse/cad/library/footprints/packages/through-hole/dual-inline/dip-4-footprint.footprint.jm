@@ -2,7 +2,7 @@ footprint:dip-4-footprint("DIP-4, 7.62 mm rows") {
     meta {
         summary: "4-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
         code: "FP.DIP:4-W7.62"
-        category: circuits
+        category: dual-inline
         tags: electronics, footprint, through-hole
         source: "JEDEC MS-001"
         authors: "jMouse"
@@ -18,4 +18,6 @@ footprint:dip-4-footprint("DIP-4, 7.62 mm rows") {
     outline(silkscreen, width: 0.12, "M-2.6 -2.41H-0.75A0.75 0.75 0 0 0 0.75 -2.41H2.6V2.41H-2.6Z")
     outline(silkscreen, filled, "M-2.2 -1.27A0.3 0.3 0 1 0 -1.6 -1.27A0.3 0.3 0 1 0 -2.2 -1.27Z")
     outline(courtyard, width: 0.05, "M-5.25 -2.8H5.25V2.8H-5.25Z")
+    body(height: 5.33)
+    model("MD.DIP:4-W7.62")
 }

@@ -30,12 +30,10 @@ import java.util.Objects;
 /**
  * Composes a Gerber X2 file (The Gerber Layer Format Specification, Ucamco, revision 2024.05) as a board house reads
  * it — millimetres, six decimals, multi-quadrant arcs, the file's function and polarity as attributes, every aperture
- * once with what it is for — out of drawing operations: a flash, a line, an arc, a region. It builds the
+ * once with what it is for, the net each object of copper carries — out of drawing operations: a flash, a line, an arc,
+ * a region. It builds the
  * {@link GerberDocument}, never text: the modal state a file carries — the aperture in hand, the polarity, where the
  * pen is — decides which commands the tree needs, and the text is the tree's {@code toSource()}.
- *
- * <p>The same file as {@code @jmouse/gerber}'s writer gives, command for command, so a board written by either side
- * is the same file.</p>
  */
 public final class GerberComposer {
 
@@ -48,6 +46,7 @@ public final class GerberComposer {
     private       Integer                        current;
     private       boolean                        dark        = true;
     private       GerberPoint                    at;
+    private       String                         net;
 
     public GerberComposer(GerberFile file) {
         this.file = Objects.requireNonNull(file, "file");
@@ -76,6 +75,24 @@ public final class GerberComposer {
             definitions.add(Attribute.deleteAll());
         }
         return definition.code();
+    }
+
+    /**
+     * The net what follows is copper of ({@code %TO.N,…*%}), as a Gerber X2 reader groups it; null for copper of no net.
+     * A net that is no longer in force is deleted ({@code %TD.N*%}) before another is set.
+     */
+    public GerberComposer net(String net) {
+        if (Objects.equals(net, this.net)) {
+            return this;
+        }
+        if (this.net != null) {
+            image.add(Attribute.of(AttributeScope.DELETE, ".N"));
+        }
+        if (net != null) {
+            image.add(Attribute.of(AttributeScope.OBJECT, ".N", net));
+        }
+        this.net = net;
+        return this;
     }
 
     /** What follows is drawn dark (material) or clear (taken away from what is under it). */

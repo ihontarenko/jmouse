@@ -1,7 +1,7 @@
 package org.jmouse.kicad.footprint;
 
-import org.jmouse.kicad.parser.KiCadParseException;
-import org.jmouse.kicad.parser.KiCadParser;
+import org.jmouse.sexpression.SExpressionParseException;
+import org.jmouse.sexpression.SExpressionParser;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -47,7 +47,7 @@ public final class KiCadFootprintLibraries {
 
     private final List<Place> places;
     private final Map<String, Optional<Found>> read = new ConcurrentHashMap<>();
-    private final KiCadParser parser = new KiCadParser();
+    private final SExpressionParser parser = new SExpressionParser();
 
     private KiCadFootprintLibraries(List<Place> places) {
         this.places = List.copyOf(places);
@@ -126,7 +126,7 @@ public final class KiCadFootprintLibraries {
                 if (text.isPresent()) {
                     try {
                         return Optional.of(new Found(KiCadFootprint.of(parser.parse(relative, text.get())), place.origin()));
-                    } catch (KiCadParseException unreadable) {
+                    } catch (SExpressionParseException unreadable) {
                         throw new IllegalArgumentException("The footprint " + identifier + " does not read: "
                                 + unreadable.getMessage(), unreadable);
                     }

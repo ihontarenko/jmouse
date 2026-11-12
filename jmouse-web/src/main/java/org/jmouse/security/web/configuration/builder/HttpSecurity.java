@@ -1,6 +1,12 @@
 package org.jmouse.security.web.configuration.builder;
 
 import jakarta.servlet.Filter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 import org.jmouse.core.Customizer;
 import org.jmouse.security.UserPrincipalService;
 import org.jmouse.security.authentication.AuthenticationManager;
@@ -11,25 +17,29 @@ import org.jmouse.security.authentication.dao.DaoAuthenticationResolver;
 import org.jmouse.security.password.PasswordEncoder;
 import org.jmouse.security.password.Pbkdf2Sha256PasswordEncoder;
 import org.jmouse.security.web.*;
+import org.jmouse.security.web.authentication.AbstractAuthenticationFilter;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.configuration.configurer.*;
+import org.jmouse.security.web.csrf.CsrfAuthenticationStrategy;
+import org.jmouse.security.web.csrf.CsrfTokenRepository;
+import org.jmouse.security.web.session.ChangeSessionIdAuthenticateHandler;
+import org.jmouse.security.web.session.CompositeSessionAuthenticateHandler;
+import org.jmouse.security.web.session.NullAuthenticatedSessionStrategy;
+import org.jmouse.security.web.session.SessionAuthenticateHandler;
+import org.jmouse.security.web.session.SessionSettings;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.LinkedHashSet;
-import java.util.function.Supplier;
-
 public final class HttpSecurity
-        extends AbstractConfiguredSecurityBuilder<MatchableSecurityFilterChain, HttpSecurity>
-        implements HttpSecurityBuilder<HttpSecurity> {
+    extends AbstractConfiguredSecurityBuilder<MatchableSecurityFilterChain, HttpSecurity>
+    implements HttpSecurityBuilder<HttpSecurity>
+{
 
-    private final static Supplier<SecurityFilterOrder> DEFAULT_ORDER_SUPPLIER = SecurityFilterOrder::new;
+    private static final Supplier<SecurityFilterOrder> DEFAULT_ORDER_SUPPLIER = SecurityFilterOrder::new;
 
-    private final List<Filter>                 filters = new ArrayList<>();
-    private       MappingMatcher<RequestRoute> matcher = MatcherCriteria.any();
+    private final List<Filter> filters = new ArrayList<>();
+    private MappingMatcher<RequestRoute> matcher = MatcherCriteria.any();
 
     public HttpSecurity() {
         attach(new CsrfConfigurer<>());
@@ -40,7 +50,10 @@ public final class HttpSecurity
         Filter ordered = filter;
 
         if (!(ordered instanceof OrderedFilter)) {
-            SecurityFilterOrder orders = getObject(SharedAttributes.SECURITY_FILTER_ORDER, DEFAULT_ORDER_SUPPLIER);
+            SecurityFilterOrder orders = getObject(
+                SharedAttributes.SECURITY_FILTER_ORDER,
+                DEFAULT_ORDER_SUPPLIER
+            );
             ordered = new OrderedFilter(ordered, orders.getOrder(filter.getClass()));
         }
 
@@ -60,8 +73,11 @@ public final class HttpSecurity
     }
 
     private HttpSecurity addFilterOfOffset(Filter filter, int offset, Class<? extends Filter> registered) {
-        SecurityFilterOrder orders          = getObject(SharedAttributes.SECURITY_FILTER_ORDER, DEFAULT_ORDER_SUPPLIER);
-        Filter              unwrappedFilter = filter;
+        SecurityFilterOrder orders = getObject(
+            SharedAttributes.SECURITY_FILTER_ORDER,
+            DEFAULT_ORDER_SUPPLIER
+        );
+        Filter unwrappedFilter = filter;
 
         if (filter instanceof OrderedFilter orderedFilter) {
             unwrappedFilter = orderedFilter.filter();
@@ -77,7 +93,7 @@ public final class HttpSecurity
     @Override
     public List<Filter> getFilters() {
         List<Filter> filters = new ArrayList<>(new LinkedHashSet<>(this.filters));
-        filters.sort(java.util.Comparator.comparingInt(filter -> ((OrderedFilter) filter).order()));
+        filters.sort(Comparator.comparingInt(filter -> ((OrderedFilter) filter).order()));
         return filters;
     }
 
@@ -95,12 +111,12 @@ public final class HttpSecurity
     }
 
     public HttpSecurity authenticationManager(AuthenticationManager manager) {
-        setSharedObject(AuthenticationManager.class, java.util.Objects.requireNonNull(manager, "manager"));
+        setSharedObject(AuthenticationManager.class, Objects.requireNonNull(manager, "manager"));
         return this;
     }
 
     public HttpSecurity passwordEncoder(PasswordEncoder encoder) {
-        setSharedObject(PasswordEncoder.class, java.util.Objects.requireNonNull(encoder, "encoder"));
+        setSharedObject(PasswordEncoder.class, Objects.requireNonNull(encoder, "encoder"));
         return this;
     }
 
@@ -118,21 +134,31 @@ public final class HttpSecurity
         if (service != null && !registry.hasResolver(DaoAuthenticationResolver.class)) {
             registry.addResolver(new DaoAuthenticationResolver(service, encoder));
         }
-        boolean passwordAuthentication = findConfigurer(HttpBasicConfigurer.class).isPresent()
-                || findConfigurer(SubmitFormConfigurer.class).isPresent();
+        boolean passwordAuthentication =
+            findConfigurer(HttpBasicConfigurer.class).isPresent() ||
+            findConfigurer(SubmitFormConfigurer.class).isPresent();
         for (var resolver : registry.getResolvers()) {
             if (resolver instanceof DaoAuthenticationResolver dao && dao.getPrincipalService() == null) {
                 if (service != null) {
                     dao.setPrincipalService(service);
                     dao.setPasswordEncoder(encoder);
                 } else if (passwordAuthentication) {
-                    throw new IllegalStateException("UserPrincipalService is required for password authentication");
+                    throw new IllegalStateException(
+                        "UserPrincipalService is required for password authentication"
+                    );
                 }
             }
         }
-        if (passwordAuthentication && registry.getResolvers().stream()
-                .noneMatch(resolver -> resolver.supports(UsernamePasswordAuthentication.class))) {
-            throw new IllegalStateException("An authentication resolver is required for username/password credentials");
+        if (
+            passwordAuthentication &&
+            registry
+                .getResolvers()
+                .stream()
+                .noneMatch(resolver -> resolver.supports(UsernamePasswordAuthentication.class))
+        ) {
+            throw new IllegalStateException(
+                "An authentication resolver is required for username/password credentials"
+            );
         }
     }
 
@@ -147,13 +173,13 @@ public final class HttpSecurity
     }
 
     public HttpSecurity authorization(
-            Customizer<AuthorizeRequestConfigurer<HttpSecurity>.AuthorizationRequestMatchCriterion> customizer) {
+        Customizer<AuthorizeRequestConfigurer<HttpSecurity>.AuthorizationRequestMatchCriterion> customizer
+    ) {
         customizer.customize(attach(new AuthorizeRequestConfigurer<>()).getRequestMatchCriterion());
         return this;
     }
 
-    public HttpSecurity authentication(
-            Customizer<AuthenticationConfigurer<HttpSecurity>> customizer) {
+    public HttpSecurity authentication(Customizer<AuthenticationConfigurer<HttpSecurity>> customizer) {
         customizer.customize(new AuthenticationConfigurer<>(this::attach));
         return this;
     }
@@ -164,25 +190,25 @@ public final class HttpSecurity
     }
 
     private void wireSessionAuthentication() {
-        org.jmouse.security.web.session.SessionSettings settings =
-                getSharedObject(org.jmouse.security.web.session.SessionSettings.class);
+        SessionSettings settings = getSharedObject(SessionSettings.class);
         boolean stateless = settings != null && settings.policy().isStateless();
-        org.jmouse.security.web.session.SessionAuthenticateHandler strategy =
-                getSharedObject(org.jmouse.security.web.session.SessionAuthenticateHandler.class);
+        SessionAuthenticateHandler strategy = getSharedObject(SessionAuthenticateHandler.class);
         if (strategy == null) {
-            strategy = stateless ? new org.jmouse.security.web.session.NullAuthenticatedSessionStrategy()
-                    : new org.jmouse.security.web.session.ChangeSessionIdAuthenticateHandler();
+            strategy = stateless
+                ? new NullAuthenticatedSessionStrategy()
+                : new ChangeSessionIdAuthenticateHandler();
         }
-        org.jmouse.security.web.csrf.CsrfTokenRepository csrf =
-                getSharedObject(org.jmouse.security.web.csrf.CsrfTokenRepository.class);
+        CsrfTokenRepository csrf = getSharedObject(CsrfTokenRepository.class);
         if (csrf != null) {
             boolean allowCreate = settings == null || settings.policy().isAllowCreate();
-            strategy = new org.jmouse.security.web.session.CompositeSessionAuthenticateHandler(strategy,
-                    new org.jmouse.security.web.csrf.CsrfAuthenticationStrategy(csrf, allowCreate));
+            strategy = new CompositeSessionAuthenticateHandler(
+                strategy,
+                new CsrfAuthenticationStrategy(csrf, allowCreate)
+            );
         }
         for (Filter filter : filters) {
             Filter delegate = filter instanceof OrderedFilter ordered ? ordered.filter() : filter;
-            if (delegate instanceof org.jmouse.security.web.authentication.AbstractAuthenticationFilter authentication) {
+            if (delegate instanceof AbstractAuthenticationFilter authentication) {
                 authentication.setSessionAuthenticationHandler(strategy);
             }
         }
@@ -205,7 +231,7 @@ public final class HttpSecurity
         wireSessionAuthentication();
 
         List<Filter> unique = new ArrayList<>(new LinkedHashSet<>(this.filters));
-        unique.sort(java.util.Comparator.comparingInt(filter -> ((OrderedFilter) filter).order()));
+        unique.sort(Comparator.comparingInt(filter -> ((OrderedFilter) filter).order()));
 
         return new SecurityFilterChain(this.matcher, unique);
     }

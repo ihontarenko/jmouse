@@ -1,0 +1,18 @@
+model:relay-sanyou-srd-form-c-model("SANYOU SRD relay, form C") {
+    meta {
+        summary: "SANYOU SRD relay, form C — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.RELAY:SRD-C"
+        category: relays
+        tags: electronics, model, pinned
+        source: "SANYOU SRD series data sheet, form C (one changeover): 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [19.7, 15.5, 15.1], at: [0, 0, 8.05])
+    box(tin, size: [0.945, 0.945, 3], at: [-8.45, -0.05, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-6.5, -6.1, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [5.7, -6.1, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [5.75, 5.95, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-6.5, 5.9, -1])
+    marking(value, on: flat, size: [13.79, 3.41], at: [0, 0, 15.61], ink: marking)
+}

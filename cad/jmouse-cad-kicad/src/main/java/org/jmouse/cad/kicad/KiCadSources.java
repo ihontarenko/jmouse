@@ -12,7 +12,10 @@ public final class KiCadSources {
 
     private static final String SYMBOL = "KiCad symbol ";
     private static final String FOOTPRINT = "KiCad footprint ";
+    private static final String MODEL = "KiCad 3D model ";
     private static final String PROJECT_LIBRARY = ", from the project's own library";
+    /** What a 3D model library's folder ends in, before the model's name: {@code Package_SO.3dshapes/}. */
+    static final String MODEL_LIBRARY = ".3dshapes/";
 
     private KiCadSources() {
     }
@@ -30,6 +33,11 @@ public final class KiCadSources {
         return FOOTPRINT + libraryId + (installed ? "" : PROJECT_LIBRARY);
     }
 
+    /** @param libraryPath the model's place in KiCad's model libraries: {@code Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm} */
+    public static String model(String libraryPath) {
+        return MODEL + libraryPath;
+    }
+
     /** The KiCad symbol's {@code LIBRARY:NAME} a source names; empty for a source that names none. */
     public static Optional<String> symbolIdOf(String source) {
         return idAfter(SYMBOL, source);
@@ -40,11 +48,21 @@ public final class KiCadSources {
         return idAfter(FOOTPRINT, source);
     }
 
-    /** The KiCad library a symbol's or a footprint's source names — {@code Package_SO}; empty for one from elsewhere. */
+    /** The place in KiCad's model libraries a 3D model's source names — {@code Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm}; empty for one from elsewhere. */
+    public static Optional<String> modelPathOf(String source) {
+        return idAfter(MODEL, source);
+    }
+
+    /**
+     * The KiCad library a symbol's, a footprint's or a 3D model's source names — {@code Package_SO} of
+     * {@code Package_SO:SOIC-8…} and of {@code Package_SO.3dshapes/SOIC-8…}; empty for one from elsewhere.
+     */
     public static Optional<String> libraryOf(String source) {
         return symbolIdOf(source).or(() -> footprintIdOf(source))
                 .filter(libraryId -> libraryId.indexOf(':') > 0)
-                .map(libraryId -> libraryId.substring(0, libraryId.indexOf(':')));
+                .map(libraryId -> libraryId.substring(0, libraryId.indexOf(':')))
+                .or(() -> modelPathOf(source).filter(path -> path.indexOf(MODEL_LIBRARY) > 0)
+                        .map(path -> path.substring(0, path.indexOf(MODEL_LIBRARY))));
     }
 
     private static Optional<String> idAfter(String prefix, String source) {

@@ -1,0 +1,17 @@
+model:axial-resistor-body-0411-pitch-1270-horizontal-model("Axial resistor DIN 0411, horizontal, 12.7 mm") {
+    meta {
+        summary: "Axial resistor DIN 0411, horizontal, 12.7 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:R0411-P12.7-H"
+        category: resistors-through-hole
+        tags: electronics, model, axial
+        source: "IEC 60286-1 bodies, DIN 44051 size codes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(lacquer, profile: [0, -4.95, 1.35, -4.95, 1.8, -4.5, 1.8, -2.97, 1.548, -2.718, 1.548, 2.718, 1.8, 2.97, 1.8, 4.5, 1.35, 4.95, 0, 4.95], at: [0, 0, 1.8], rotate: [0, 90, 0])
+    marking(bands, on: round, radius: 1.558, length: 5.436, at: [0, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.35, length: 1.4, at: [-5.65, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.35, length: 3.4, at: [-6.35, 0, 0.1])
+    cylinder(tin, radius: 0.35, length: 1.4, at: [5.65, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.35, length: 3.4, at: [6.35, 0, 0.1])
+}

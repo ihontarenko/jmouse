@@ -1,0 +1,16 @@
+model:terminal-block-1x4-pitch-508-horizontal-model("Screw terminal block, 5.08 mm pitch, 1 × 4, horizontal") {
+    meta {
+        summary: "Screw terminal block, 5.08 mm pitch, 1 × 4, horizontal — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.TB:4-P5.08"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [7.6, 20.32, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 7.62, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 2.54, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -2.54, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -7.62, 3.5])
+}

@@ -3,7 +3,6 @@ package org.jmouse.cad.spice;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.DocumentParser;
-import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.simulation.CatalogueDocuments;
 import org.jmouse.cad.simulation.ComponentCompilation;
@@ -18,7 +17,6 @@ import org.jmouse.cad.spice.SpiceNetlist.Element;
 import org.jmouse.cad.spice.SpiceNetlist.Model;
 import org.jmouse.cad.spice.SpiceNetlist.Parameter;
 import org.jmouse.cad.spice.SpiceNetlist.Subcircuit;
-import org.jmouse.el.grammar.AssignedNode;
 import org.jmouse.el.grammar.ClauseBlockNode;
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.ConnectionsNode;
@@ -169,7 +167,7 @@ final class SpiceImporter {
 
     private DocumentNode circuit(String name) {
         String title = titleOf(name, netlist.title().orElse(""), "Imported circuit");
-        DocumentNode document = new DocumentNode(SimulationModule.CIRCUIT, title, DocumentParser.slugOf(title), false, null, 1);
+        DocumentNode document = new DocumentNode(SimulationModule.CIRCUIT, title, DocumentParser.slugOf(title), null, 1);
         document.addExpression(meta("Imported from a SPICE netlist"
                 + netlist.title().filter(written -> !written.isBlank()).map(written -> ": " + written).orElse("")));
         addBlock(document, "parameters", parameterLines(netlist.parameters(), netlist.elements(), true));
@@ -227,7 +225,7 @@ final class SpiceImporter {
     private DocumentNode component(Subcircuit subcircuit, String name) {
         converted = subcircuit;
         String title = titleOf(name, subcircuit.name(), subcircuit.name());
-        DocumentNode document = new DocumentNode(SimulationModule.COMPONENT, title, DocumentParser.slugOf(title), false, null, 1);
+        DocumentNode document = new DocumentNode(SimulationModule.COMPONENT, title, DocumentParser.slugOf(title), null, 1);
         document.addExpression(meta("Imported from SPICE subcircuit " + subcircuit.name()));
         List<Parameter> declared = new ArrayList<>(netlist.parameters());
         declared.addAll(subcircuit.parameters());
@@ -303,7 +301,7 @@ final class SpiceImporter {
             }
             String unit = unitOf(parameter.name(), elements);
             LineBuilder line = LineBuilder.line(SimulationLines.PARAMETER).slot("name", Nodes.name(name))
-                    .slot("value", new AssignedNode(value(parameter.value(), unit)));
+                    .slot("value", value(parameter.value(), unit));
             Optional<RangeNode> range = sliders ? range(parameter.value(), unit) : Optional.empty();
             if (range.isPresent()) {
                 line.clause("in", range.get());
@@ -924,9 +922,7 @@ final class SpiceImporter {
     // ─── the document ───────────────────────────────────────────────────────────────────────────────
 
     private static MetaNode meta(String summary) {
-        MetaNode meta = new MetaNode();
-        meta.addExpression(MetaLineNode.of(MetaNode.SUMMARY, Nodes.text(summary)));
-        return meta;
+        return MetaNode.filed(summary, null, null, List.of());
     }
 
     /** A block of lines in braces, written even when empty. */

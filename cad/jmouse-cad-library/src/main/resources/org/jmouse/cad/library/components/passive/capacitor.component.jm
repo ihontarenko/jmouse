@@ -6,8 +6,10 @@ component:capacitor("Capacitor", type: capacitor) {
     meta {
         designator: C
         summary: "Two-terminal capacitor: its charge, tolerance and temperature drift"
-        category: circuits
+        category: capacitors
         value: capacitance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:capacitance(100 nF, "capacitance")
     parameter:tolerance(10 %, "how far a part may be from its value, ±; a bench's corners use it")
@@ -25,8 +27,13 @@ component:capacitor("Capacitor", type: capacitor) {
         current terminal_one -> terminal_two = d(C_now * (terminal_one - terminal_two))/dt
     }
 
+    footprint("FP.CHIP:C0805")
+    footprint("FP.CHIP:C0603")
+    footprint("FP.CHIP:C1206")
+    footprint("FP.RADIAL:CD-5X2.5-P5")
+
     # Drawn plain, or as an electrolytic — the polarized drawing, its "+" on terminal_one — by a part's `symbol` choice.
-    symbol(uses: [capacitor-symbol, polarized-capacitor-symbol]) {
+    symbol(uses: ["SY.CAPACITOR:FIXED", "SY.CAPACITOR:POLARIZED"]) {
         bind:failed(failed)
         bind:charge((terminal_one - terminal_two) / voltage_rating)
         bind:a(pin: terminal_one)
@@ -34,7 +41,7 @@ component:capacitor("Capacitor", type: capacitor) {
     }
 
     # How it looks in the hand: a ceramic disc printed with its picofarad code.
-    portrait(uses: ceramic-disc-capacitor-portrait) {
+    portrait(uses: "PT.CAPACITOR:CERAMIC-DISC") {
         bind:capacitance(capacitance)
     }
 }

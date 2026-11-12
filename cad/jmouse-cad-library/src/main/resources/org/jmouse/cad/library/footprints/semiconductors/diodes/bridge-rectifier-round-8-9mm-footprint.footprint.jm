@@ -1,0 +1,23 @@
+footprint:bridge-rectifier-round-8-9mm-footprint("Round bridge rectifier, WOM, 8.9 mm") {
+    meta {
+        summary: "4-lead bridge rectifier, through-hole, 8.9 mm round body"
+        code: "FP.BRIDGE:WOM"
+        category: diodes-through-hole
+        tags: electronics, footprint, through-hole
+        source: "W005M … W10M data sheet (WOM case): 1 +, 2 ~, 3 −, 4 ~ on a 5.08 mm square, 8.9 mm round body"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/pinned-packages.sht#wom-bridge and the land pattern rules; regenerate, never edit.
+    # Lead 0.8 × 0.8 at most: drill 1.35, pad 2.35, pin 1 square; each lead where its maker puts it.
+    pad:1(through-hole, rectangle, at: -2.54 -2.54, size: 2.35 x 2.35, drill: 1.35)
+    pad:2(through-hole, circle, at: -2.54 2.54, size: 2.35 x 2.35, drill: 1.35)
+    pad:3(through-hole, circle, at: 2.54 2.54, size: 2.35 x 2.35, drill: 1.35)
+    pad:4(through-hole, circle, at: 2.54 -2.54, size: 2.35 x 2.35, drill: 1.35)
+    outline(fabrication, width: 0.1, "M-4.45 0A4.45 4.45 0 1 0 4.45 0A4.45 4.45 0 1 0 -4.45 0Z")
+    outline(silkscreen, width: 0.12, "M-4.56 0A4.56 4.56 0 1 0 4.56 0A4.56 4.56 0 1 0 -4.56 0Z")
+    outline(silkscreen, filled, "M-4.575 -2.54A0.3 0.3 0 1 0 -3.975 -2.54A0.3 0.3 0 1 0 -4.575 -2.54Z")
+    outline(courtyard, width: 0.05, "M-4.95 -5.05H4.95V5.05H-4.95Z")
+    body(height: 5.3)
+    model("MD.BRIDGE:WOM")
+}

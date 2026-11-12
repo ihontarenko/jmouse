@@ -2,7 +2,7 @@ footprint:tqfp-44-footprint("TQFP-44, 10 mm body") {
     meta {
         summary: "44-lead TQFP-44, 10 mm body, 0.8 mm pitch, body 10 × 10 mm"
         code: "FP.TQFP:44-P0.8-10"
-        category: circuits
+        category: quad-flat
         tags: electronics, footprint, surface
         source: "JEDEC MS-026 ACB"
         authors: "jMouse"
@@ -58,4 +58,6 @@ footprint:tqfp-44-footprint("TQFP-44, 10 mm body") {
     outline(silkscreen, width: 0.12, "M-4.535 -5.11H-5.11V-4.535M-4.535 5.11H-5.11V4.535M4.535 -5.11H5.11V-4.535M4.535 5.11H5.11V4.535")
     outline(silkscreen, filled, "M-7.335 -4A0.3 0.3 0 1 0 -6.735 -4A0.3 0.3 0 1 0 -7.335 -4Z")
     outline(courtyard, width: 0.05, "M-6.75 -6.75H6.75V6.75H-6.75Z")
+    body(height: 1.2)
+    model("MD.TQFP:44-P0.8-10")
 }

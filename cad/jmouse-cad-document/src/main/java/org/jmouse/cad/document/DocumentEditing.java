@@ -55,8 +55,7 @@ public final class DocumentEditing {
      *
      * @param statements its body, in the order written
      */
-    public record DocumentForm(String kind, String slug, String title, String type, DocumentNode.Spelling spelling,
-                               List<Statement> statements) {
+    public record DocumentForm(String kind, String slug, String title, String type, List<Statement> statements) {
     }
 
     /**
@@ -93,7 +92,7 @@ public final class DocumentEditing {
             statements.add(statement(index, body.get(index)));
         }
         return new DocumentForm(document.kind().word(), document.slug(), document.title(), document.type().orElse(null),
-                                document.spelling(), statements);
+                                statements);
     }
 
     private static Statement statement(int index, Expression expression) {
@@ -220,7 +219,7 @@ public final class DocumentEditing {
             case SetAddress ignored -> {
             }
         }
-        return language.writeAsRead(written);
+        return language.write(written);
     }
 
     private void setLine(DocumentNode document, SetLine set) {
@@ -432,13 +431,26 @@ public final class DocumentEditing {
         }
     }
 
-    /** What a canvas edits beside its drawing; a null field is left as written, an empty one taken away. */
-    public record Head(String title, String summary, String category) {
+    /** What an editor edits beside the body: a null field is left as written, an empty one taken away; published takes the status away. */
+    public record Head(String title, String summary, String category, DocumentStatus status) {
+
+        /** A head of its title, summary and category, its status left as written. */
+        public Head(String title, String summary, String category) {
+            this(title, summary, category, null);
+        }
 
         /** A head without a summary: what a drawing canvas edits. */
         public Head(String title, String category) {
-            this(title, null, category);
+            this(title, null, category, null);
         }
+    }
+
+    /**
+     * A document with its head alone written anew — its title, summary or category, a null field left as written —, every
+     * other statement as written, comments with it. Filing a document in another category is this.
+     */
+    public String reheaded(DocumentNode document, Head head) {
+        return language.write(headed(document, head));
     }
 
     /**
@@ -483,7 +495,7 @@ public final class DocumentEditing {
                 }
             }
         }
-        return language.writeAsRead(headed);
+        return language.write(headed);
     }
 
     /**
@@ -501,7 +513,7 @@ public final class DocumentEditing {
         for (int index = 0; index < blocks.size(); index++) {
             redrawBlock(headed, blocks.get(index), blocks.subList(0, index));
         }
-        return language.writeAsRead(headed);
+        return language.write(headed);
     }
 
     private static void redrawBlock(DocumentNode document, BlockRedrawing redrawing, List<BlockRedrawing> earlier) {
@@ -609,6 +621,11 @@ public final class DocumentEditing {
         if (head.category() != null) {
             setMeta(headed, MetaNode.CATEGORY, head.category().isBlank() ? null
                     : MetaLineNode.of(MetaNode.CATEGORY, Nodes.word(head.category().strip())));
+        }
+        // Published is what a text that says nothing stands as: it is written by taking the line away.
+        if (head.status() != null) {
+            setMeta(headed, MetaNode.STATUS, head.status() == DocumentStatus.PUBLISHED ? null
+                    : MetaLineNode.of(MetaNode.STATUS, Nodes.word(head.status().word())));
         }
         return headed;
     }

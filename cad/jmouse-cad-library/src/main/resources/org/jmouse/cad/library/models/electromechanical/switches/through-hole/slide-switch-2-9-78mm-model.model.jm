@@ -1,0 +1,22 @@
+model:slide-switch-2-9-78mm-model("Slide switch, 1 position, 7.62 mm rows") {
+    meta {
+        summary: "Slide switch, 1 position, 7.62 mm rows — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SW:SLIDE-1"
+        category: switches-through-hole
+        tags: electronics, model, dual-inline
+        source: "a one-position DIP slide switch (CTS 206/208 series): body 9.78 × 4.72 mm, rows 7.62 mm apart"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [9.78, 4.72, 3.125], at: [0, 0, 2.063])
+    box(housing, size: [9.48, 4.42, 3.125], at: [0, 0, 5.188])
+    cylinder(dimple, radius: 0.4, length: 0.01, at: [-3.74, 0, 6.755])
+    marking(name, on: flat, size: [7.335, 1.652], at: [0, 0, 6.76], ink: marking)
+    cylinder(dimple, radius: 0.6, length: 0.01, at: [-4.14, 0, 6.755])
+    box(tin, size: [1.205, 1.52, 0.25], at: [-5.492, 0, 3.625])
+    box(tin, size: [0.25, 1.52, 3.125], at: [-3.81, 0, 2.063])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-3.81, 0, -1.25])
+    box(tin, size: [1.205, 1.52, 0.25], at: [5.493, 0, 3.625])
+    box(tin, size: [0.25, 1.52, 3.125], at: [3.81, 0, 2.063])
+    box(tin, size: [0.25, 0.46, 3.5], at: [3.81, 0, -1.25])
+}

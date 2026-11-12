@@ -12,7 +12,9 @@ component:spi-controller("SPI controller", type: controller) {
         designator: BUS
         summary: "Drives one SPI transaction in mode 0 — its bytes out, as many in — and shows the last two bytes read"
         source: "Motorola SPI block guide, V04.01: mode 0 (CPOL 0, CPHA 0) — data valid on the rising clock edge, shifted on the falling one, most significant bit first"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 

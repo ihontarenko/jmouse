@@ -1,0 +1,22 @@
+footprint:tantalum-capacitor-7343-footprint("Tantalum capacitor Case D (7343-31 metric)") {
+    meta {
+        summary: "Tantalum capacitor, Case D (7343-31 metric) body, reflow pads; pad 1 is the positive terminal"
+        code: "FP.CHIP:CT7343"
+        category: capacitors-surface
+        tags: electronics, footprint, surface
+        source: "EIA-535-BAAC case sizes (KEMET T491), Case D (7343-31 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/chip-packages.sht#tantalum-7343-31 and the land pattern rules; regenerate, never edit.
+    # Body 7…7.6 × 4…4.6, terminal 1…1.6; fillets toe 0.35, heel 0, side 0.
+    # Z = 8.31, G = 4.174, X = 4.61; pad 2.05 × 4.65 centred at ±3.1.
+    pad:1(surface, rounded-rectangle, at: -3.1 0, size: 2.05 x 4.65, roundness: 0.25)
+    pad:2(surface, rounded-rectangle, at: 3.1 0, size: 2.05 x 4.65, roundness: 0.25)
+    outline(fabrication, width: 0.1, "M-3.65 -2.15H3.65V2.15H-3.65Z")
+    outline(silkscreen, width: 0.12, "M-1.815 -2.585H1.815M-1.815 2.585H1.815")
+    outline(silkscreen, width: 0.12, "M-4.385 -2.435V2.435")
+    outline(courtyard, width: 0.05, "M-4.4 -2.6H4.4V2.6H-4.4Z")
+    body(height: 3.1)
+    model("MD.CHIP:CT7343")
+}

@@ -30,8 +30,10 @@ component:relay("Relay", type: relay) {
         designator: K
         summary: "An electromagnetic relay: a coil that pulls a changeover contact in above one voltage and lets it go below another"
         source: "behavioural armature: a latch with hysteresis and two contacts; the coil a winding with its core losses and self-capacitance"
-        category: circuits
+        category: base-models
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:R_coil(400 Ohm, "coil resistance: the copper")
@@ -52,7 +54,7 @@ component:relay("Relay", type: relay) {
     node:winding("between the coil's copper and its inductance")
     node:coil_current("a node whose voltage above coil_two is the inductance's current, one volt per ampere: what the armature's events read")
 
-    symbol(uses: relay-symbol) {
+    symbol(uses: "SY.RELAY:SPDT") {
         bind:energized(energized)
     }
 
@@ -87,5 +89,5 @@ component:relay("Relay", type: relay) {
     }
 
     # How it looks in the hand: an open-frame relay whose armature pulls in while the coil is energized.
-    portrait(uses: relay-portrait)
+    portrait(uses: "PT.RELAY:OPEN-FRAME")
 }

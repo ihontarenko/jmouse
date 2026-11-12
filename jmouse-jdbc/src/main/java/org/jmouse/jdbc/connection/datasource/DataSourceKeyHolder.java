@@ -1,61 +1,72 @@
 package org.jmouse.jdbc.connection.datasource;
 
-/**
- * Thread-bound holder for the current {@link DataSourceKey}.
- * <p>
- * {@code DataSourceKeyHolder} provides a lightweight context mechanism
- * for routing JDBC operations to different {@link javax.sql.DataSource}
- * instances based on the current thread.
- *
- * <h3>Typical usage</h3>
- * <pre>{@code
- * DataSourceKeyHolder.use("read-replica");
- * try {
- *     jdbc.query("select * from users", mapperProvider);
- * } finally {
- *     DataSourceKeyHolder.clear();
- * }
- * }</pre>
- *
- * <h3>Scope and lifecycle</h3>
- * <ul>
- *     <li>Backed by {@link ThreadLocal}</li>
- *     <li>Must be explicitly cleared to avoid context leakage</li>
- *     <li>Intended to be used together with routing {@code ConnectionProvider}</li>
- * </ul>
- *
- * <p>
- * ⚠️ This holder does not validate keys and does not enforce nesting rules.
- * Higher-level infrastructure is responsible for correct usage.
- *
- * @author jMouse
- */
-public class DataSourceKeyHolder {
+/** Synchronous thread routing context. Prefer withKey for exception-safe, nested use. */
+public final class DataSourceKeyHolder {
 
-    /**
-     * Thread-local storage for the current data source key.
-     */
     private static final ThreadLocal<String> KEY = new ThreadLocal<>();
+    private static final ThreadLocal<Scope> SCOPE = new ThreadLocal<>();
 
     private DataSourceKeyHolder() {}
 
-    /**
-     * Binds the given data source key to the current thread.
-     *
-     * @param key logical data source key
-     */
-    public static void use(String key) { KEY.set(key); }
+    /** Legacy manual binding; callers must restore or clear it themselves. */
+    public static void use(String key) {
+        if (key == null) {
+            KEY.remove();
+        } else {
+            KEY.set(key);
+        }
+    }
 
-    /**
-     * Returns the currently bound data source key.
-     *
-     * @return current key or {@code null} if none is bound
-     */
-    public static String current() { return KEY.get(); }
+    public static String current() {
+        return KEY.get();
+    }
 
-    /**
-     * Clears the currently bound data source key from the thread.
-     */
-    public static void clear() { KEY.remove(); }
+    public static void clear() {
+        KEY.remove();
+    }
 
+    public static Scope withKey(String key) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("DataSource key must not be blank");
+        }
+        Scope scope = new Scope(Thread.currentThread(), current(), SCOPE.get());
+        SCOPE.set(scope);
+        KEY.set(key);
+        return scope;
+    }
+
+    /** Restores the previous key on its owning thread, in reverse creation order. */
+    public static final class Scope implements AutoCloseable {
+
+        private final Thread owner;
+        private final String previousKey;
+        private final Scope previousScope;
+        private boolean closed;
+
+        private Scope(Thread owner, String previousKey, Scope previousScope) {
+            this.owner = owner;
+            this.previousKey = previousKey;
+            this.previousScope = previousScope;
+        }
+
+        @Override
+        public void close() {
+            if (Thread.currentThread() != owner) {
+                throw new IllegalStateException("Routing scope must close on its owning thread");
+            }
+            if (closed) {
+                return;
+            }
+            if (SCOPE.get() != this) {
+                throw new IllegalStateException("Routing scopes must close in reverse creation order");
+            }
+            use(previousKey);
+            if (previousScope == null) {
+                SCOPE.remove();
+            } else {
+                SCOPE.set(previousScope);
+            }
+            closed = true;
+        }
+    }
 }

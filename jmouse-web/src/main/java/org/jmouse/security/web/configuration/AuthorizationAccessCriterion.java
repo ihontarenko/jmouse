@@ -1,32 +1,51 @@
 package org.jmouse.security.web.configuration;
 
+import java.util.List;
+import java.util.function.Function;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.access.RoleHierarchy;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.Authentication;
-import org.jmouse.security.access.RoleHierarchy;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
-
-import java.util.List;
-import java.util.function.Function;
 
 public class AuthorizationAccessCriterion<T, C> {
 
     private final List<MappingMatcher<RequestRoute>> matchers;
-    private final T                                  owner;
-    private final MappingApplier<T, C>               applier;
-    private final RoleHierarchy                      roleHierarchy;
-    private final ContextVariables<C>                variables;
-    private       boolean                            negate = false;
+    private final T owner;
+    private final MappingApplier<T, C> applier;
+    private final RoleHierarchy roleHierarchy;
+    private final ContextVariables<C> variables;
+    private final String rolePrefix;
+    private boolean negate = false;
 
     public AuthorizationAccessCriterion(
-            MappingApplier<T, C> applier,
-            T owner,
-            List<MappingMatcher<RequestRoute>> matchers,
-            RoleHierarchy roleHierarchy,
-            ContextVariables<C> variables
+        MappingApplier<T, C> applier,
+        T owner,
+        List<MappingMatcher<RequestRoute>> matchers,
+        RoleHierarchy roleHierarchy,
+        ContextVariables<C> variables
     ) {
+        this(
+            applier,
+            owner,
+            matchers,
+            roleHierarchy,
+            variables,
+            AuthorityPolicyAuthorizationManager.ROLE_PREFIX
+        );
+    }
+
+    public AuthorizationAccessCriterion(
+        MappingApplier<T, C> applier,
+        T owner,
+        List<MappingMatcher<RequestRoute>> matchers,
+        RoleHierarchy roleHierarchy,
+        ContextVariables<C> variables,
+        String rolePrefix
+    ) {
+        this.rolePrefix = java.util.Objects.requireNonNull(rolePrefix, "rolePrefix");
         this.applier = applier;
         this.owner = owner;
         this.roleHierarchy = roleHierarchy;
@@ -64,11 +83,11 @@ public class AuthorizationAccessCriterion<T, C> {
     }
 
     public T hasRole(String role) {
-        return access(AuthorityPolicyAuthorizationManager.hasRole(role));
+        return access(AuthorityPolicyAuthorizationManager.hasRole(rolePrefix, role));
     }
 
     public T hasAnyRole(String... roles) {
-        return access(AuthorityPolicyAuthorizationManager.hasAnyRole(roles));
+        return access(AuthorityPolicyAuthorizationManager.hasAnyRole(rolePrefix, roles));
     }
 
     public AuthorizedVariable hasVariable(String variable) {
@@ -76,7 +95,10 @@ public class AuthorizationAccessCriterion<T, C> {
     }
 
     public T access(AuthorizationManager<C> authorizationManager) {
-        if (authorizationManager instanceof AuthorityPolicyAuthorizationManager<?> authorityAuthorizationManager) {
+        if (
+            authorizationManager instanceof
+                AuthorityPolicyAuthorizationManager<?> authorityAuthorizationManager
+        ) {
             authorityAuthorizationManager.setRoleHierarchy(roleHierarchy);
         }
         return applier.apply(owner, matchers, authorizationManager, negate);
@@ -92,22 +114,29 @@ public class AuthorizationAccessCriterion<T, C> {
 
         public T equalTo(Function<Authentication, String> extractor) {
             return access((authentication, context) -> {
-                String  expected  = (authentication == null) ? null : extractor.apply(authentication);
-                return (expected != null && expected.equals(variables.getValue(context, variable)))
-                        ? AccessResult.PERMIT : AccessResult.DENY;
+                String expected = authentication == null ? null : extractor.apply(authentication);
+                return expected != null && expected.equals(variables.getValue(context, variable))
+                    ? AccessResult.PERMIT
+                    : AccessResult.DENY;
             });
         }
 
         public T equalToValue(String expected) {
-            return access((authentication, context)
-                    -> expected != null && expected.equals(variables.getValue(context, variable))
-                        ? AccessResult.PERMIT : AccessResult.DENY);
+            return access((authentication, context) ->
+                expected != null && expected.equals(variables.getValue(context, variable))
+                    ? AccessResult.PERMIT
+                    : AccessResult.DENY
+            );
         }
     }
 
     @FunctionalInterface
     public interface MappingApplier<T, C> {
-        T apply(T owner, List<MappingMatcher<RequestRoute>> matchers, AuthorizationManager<C> manager, boolean negate);
+        T apply(
+            T owner,
+            List<MappingMatcher<RequestRoute>> matchers,
+            AuthorizationManager<C> manager,
+            boolean negate
+        );
     }
-
 }

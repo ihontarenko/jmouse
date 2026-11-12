@@ -25,7 +25,7 @@
       }
     ]
   },
-  "description" : "Syntax highlighting for the jmCAD document language — components, circuits, symbols, portraits, frames, footprints and boards —, described from the language's own grammar.",
+  "description" : "Syntax highlighting for the jmCAD document language — components, circuits, symbols, portraits, frames, footprints and pcbs —, described from the language's own grammar.",
   "displayName" : "jMouse CAD documents (.jm)",
   "engines" : {
     "vscode" : "^1.60.0"

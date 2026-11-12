@@ -7,7 +7,7 @@
   <version>1.0.1</version>
   <name>jMouse - CAD KiCad</name>
   <description>jMouse Framework - jmCAD and KiCad both ways: a KiCad project read into circuit, symbol, component and footprint documents, and a circuit written as a KiCad schematic.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-kicad</url>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-kicad</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,9 +24,15 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-kicad</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-kicad</url>
   </scm>
   <dependencies>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-exchange</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-cad-simulation</artifactId>
@@ -41,7 +47,13 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-cad-board</artifactId>
+      <artifactId>jmouse-cad-pcb</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-mesh</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>

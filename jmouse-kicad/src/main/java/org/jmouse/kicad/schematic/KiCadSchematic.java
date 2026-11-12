@@ -3,8 +3,8 @@ package org.jmouse.kicad.schematic;
 import static org.jmouse.kicad.KiCadKeyword.*;
 
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.KiCadDocument;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.SExpressionDocument;
+import org.jmouse.sexpression.node.SExpressionList;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 
 import java.util.ArrayList;
@@ -25,19 +25,20 @@ public final class KiCadSchematic {
     /** KiCad 7's format: the first this model reads. */
     private static final long FIRST_VERSION = 20230121L;
 
-    private final KiCadDocument document;
+    private final SExpressionDocument document;
     private final long version;
     private final String uuid;
     private final Map<String, KiCadSymbolDefinition> librarySymbols;
     private final List<KiCadSymbolInstance> symbols;
     private final List<KiCadWire> wires;
+    private final List<KiCadWire> buses;
     private final List<KiCadPoint> junctions;
     private final List<KiCadPoint> noConnects;
     private final List<KiCadLabel> labels;
     private final List<KiCadSheet> sheets;
 
-    private KiCadSchematic(KiCadDocument document, long version, String uuid, Map<String, KiCadSymbolDefinition> librarySymbols,
-                           List<KiCadSymbolInstance> symbols, List<KiCadWire> wires, List<KiCadPoint> junctions,
+    private KiCadSchematic(SExpressionDocument document, long version, String uuid, Map<String, KiCadSymbolDefinition> librarySymbols,
+                           List<KiCadSymbolInstance> symbols, List<KiCadWire> wires, List<KiCadWire> buses, List<KiCadPoint> junctions,
                            List<KiCadPoint> noConnects, List<KiCadLabel> labels, List<KiCadSheet> sheets) {
         this.document = document;
         this.version = version;
@@ -45,6 +46,7 @@ public final class KiCadSchematic {
         this.librarySymbols = librarySymbols;
         this.symbols = symbols;
         this.wires = wires;
+        this.buses = buses;
         this.junctions = junctions;
         this.noConnects = noConnects;
         this.labels = labels;
@@ -56,8 +58,8 @@ public final class KiCadSchematic {
      *
      * @throws IllegalArgumentException when it is not a schematic, or one older than KiCad 7
      */
-    public static KiCadSchematic of(KiCadDocument document) {
-        KiCadList root = document.root();
+    public static KiCadSchematic of(SExpressionDocument document) {
+        SExpressionList root = document.root();
         if (!root.is(SCHEMATIC_FILE)) {
             throw new IllegalArgumentException(document.name() + " is a " + document.kind() + ", not a schematic.");
         }
@@ -78,12 +80,13 @@ public final class KiCadSchematic {
         return new KiCadSchematic(document, version, root.wordOf(UUID).orElse(""), librarySymbols,
                 root.lists(SYMBOL).stream().map(KiCadSymbolInstance::of).toList(),
                 root.lists(WIRE).stream().map(KiCadWire::of).toList(),
+                root.lists(BUS).stream().map(KiCadWire::of).toList(),
                 root.lists(JUNCTION).stream().map(junction -> KiCadPoint.of(junction.requireList(AT))).toList(),
                 root.lists(NO_CONNECT).stream().map(mark -> KiCadPoint.of(mark.requireList(AT))).toList(),
                 List.copyOf(labels), root.lists(SHEET).stream().map(KiCadSheet::of).toList());
     }
 
-    public KiCadDocument document() {
+    public SExpressionDocument document() {
         return document;
     }
 
@@ -105,6 +108,11 @@ public final class KiCadSchematic {
 
     public List<KiCadWire> wires() {
         return wires;
+    }
+
+    /** Its bus lines: each drawn as a wire is, a straight stretch between its points. */
+    public List<KiCadWire> buses() {
+        return buses;
     }
 
     public List<KiCadPoint> junctions() {

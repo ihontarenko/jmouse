@@ -2,6 +2,7 @@ package org.jmouse.cad.component;
 
 import org.jmouse.cad.Index;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +13,8 @@ import java.util.Optional;
  * @param index     a bus's bits — {@code q[0..7]} —, each a pin of its own; null for one pin
  * @param nature    {@code analog}, {@code digital}, {@code power} or {@code ground}
  * @param direction {@code input}, {@code output}, {@code bidirectional}, or null for an analog pin that is neither
- * @param drive     how it drives — {@code open-drain} —, or null for a push-pull output and any other pin
+ * @param drive     how it drives — {@code open-drain}, {@code open-collector} ({@link Drive}) —, or null for a push-pull
+ *                  output and any other pin
  * @param numbers   its numbers on the package, in groups as written: {@code 1 7} one group, {@code 15, 1, 2} three —
  *                  a bus's pins are its groups, one a bit
  * @param edge      whether it acts on an edge rather than a level: a clock
@@ -27,7 +29,6 @@ public record Pin(String name, Index index, String nature, String direction, Str
     private static final String GROUND        = "ground";
     private static final String OUTPUT        = "output";
     private static final String BIDIRECTIONAL = "bidirectional";
-    private static final String OPEN_DRAIN    = "open-drain";
 
     public Pin {
         numbers = numbers.stream().map(List::copyOf).toList();
@@ -71,8 +72,50 @@ public record Pin(String name, Index index, String nature, String direction, Str
         return !OUTPUT.equals(direction);
     }
 
-    /** Whether it only ever pulls its line low, the line released otherwise. */
-    public boolean openDrain() {
-        return OPEN_DRAIN.equals(drive);
+    /**
+     * How a pin drives its line when it is not push-pull: it only ever pulls the line one way and lets it go otherwise, so
+     * several such pins share a line — a bus of open drains, transistors in parallel.
+     */
+    public enum Drive {
+        /** A field-effect transistor's drain, or a logic output built on one. */
+        OPEN_DRAIN("open-drain"),
+        /** A bipolar transistor's collector, or a logic output built on one. */
+        OPEN_COLLECTOR("open-collector");
+
+        private final String word;
+
+        Drive(String word) {
+            this.word = word;
+        }
+
+        /** The word the documents write it as. */
+        public String word() {
+            return word;
+        }
+
+        /** The drive a word names, if it names one. */
+        public static Optional<Drive> named(String word) {
+            for (Drive drive : values()) {
+                if (drive.word.equals(word)) {
+                    return Optional.of(drive);
+                }
+            }
+            return Optional.empty();
+        }
+
+        /** Every word a drive is written with. */
+        public static String[] words() {
+            return Arrays.stream(values()).map(Drive::word).toArray(String[]::new);
+        }
+    }
+
+    /** How it drives, when it is not push-pull. */
+    public Optional<Drive> driven() {
+        return drive == null ? Optional.empty() : Drive.named(drive);
+    }
+
+    /** Whether it only ever pulls its line one way, the line released otherwise: an open drain or an open collector. */
+    public boolean pullsOneWay() {
+        return driven().isPresent();
     }
 }

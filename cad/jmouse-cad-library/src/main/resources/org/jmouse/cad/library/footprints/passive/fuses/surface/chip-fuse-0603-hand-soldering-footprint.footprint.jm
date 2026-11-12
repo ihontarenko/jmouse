@@ -2,7 +2,7 @@ footprint:chip-fuse-0603-hand-soldering-footprint("Chip fuse 0603 (1608 metric),
     meta {
         summary: "Chip fuse, 0603 (1608 metric) body, pads lengthened for a soldering iron"
         code: "FP.CHIP:F0603-HAND"
-        category: circuits
+        category: fuses-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 0603 (1608 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-fuse-0603-hand-soldering-footprint("Chip fuse 0603 (1608 metric),
     outline(fabrication, width: 0.1, "M-0.8 -0.4H0.8V0.4H-0.8Z")
     outline(silkscreen, width: 0.12, "M-0.14 -0.785H0.14M-0.14 0.785H0.14")
     outline(courtyard, width: 0.05, "M-1.9 -1.05H1.9V1.05H-1.9Z")
+    body(height: 0.55)
+    model("MD.CHIP:F0603-HAND")
 }

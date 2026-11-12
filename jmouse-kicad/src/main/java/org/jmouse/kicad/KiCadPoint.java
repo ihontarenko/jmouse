@@ -1,6 +1,6 @@
 package org.jmouse.kicad;
 
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 
 /**
  * A point of a KiCad drawing, in millimetres. On a sheet Y grows downwards; inside a library symbol it grows upwards —
@@ -12,7 +12,7 @@ public record KiCadPoint(double x, double y) {
     private static final double SAME = 1e-6;
 
     /** The point an {@code (at x y …)} or an {@code (xy x y)} list writes. */
-    public static KiCadPoint of(KiCadList list) {
+    public static KiCadPoint of(SExpressionList list) {
         return new KiCadPoint(list.number(1), list.number(2));
     }
 

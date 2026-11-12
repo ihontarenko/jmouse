@@ -7,7 +7,9 @@ component:ferrite-bead("Ferrite bead, 220 Ω", type: ferrite) {
         summary: "Chip ferrite bead, 220 Ω at 100 MHz, 1.4 A, 0603"
         source: "Murata BLM18PG221SN1 datasheet: 220 Ω ±25 % at 100 MHz, DC resistance at most 0.10 Ω, 1.4 A"
         package: "L_0603"
-        category: circuits
+        category: inductors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:R_direct(50 mOhm, "DC resistance, typical; at most 0.10 Ω")
@@ -21,7 +23,10 @@ component:ferrite-bead("Ferrite bead, 220 Ω", type: ferrite) {
 
     state:I_inductance(0, continuous, "the current in the inductance")
 
-    symbol(uses: ferrite-bead-symbol) {
+    footprint("FP.CHIP:L0603")
+    footprint("FP.CHIP:L0805")
+
+    symbol(uses: "SY.INDUCTOR:FERRITE-BEAD") {
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
     }

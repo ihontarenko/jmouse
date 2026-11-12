@@ -6,7 +6,9 @@ component:staircase-generator("Staircase generator", type: generator) {
     meta {
         designator: G
         summary: "Equal voltage steps, each held for one period, cycling: offset + step · floor(mod(frequency · time, steps))"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:step(0.5 V, "the height of one step")
@@ -17,7 +19,7 @@ component:staircase-generator("Staircase generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: square-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-SQUARE") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

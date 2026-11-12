@@ -1,9 +1,8 @@
 package org.jmouse.security.session;
 
-import org.jmouse.core.Streamable;
-
 import java.time.Instant;
 import java.util.*;
+import org.jmouse.core.Streamable;
 
 /**
  * 🧩 <b>SessionRegistry</b> — central component for tracking active user sessions.
@@ -21,7 +20,6 @@ import java.util.*;
  * @see SessionInformation
  */
 public interface SessionRegistry {
-
     /**
      * ⚙️ Create a simple in-memory {@link SessionRegistry}.
      *
@@ -77,14 +75,13 @@ public interface SessionRegistry {
      * @return list of all active sessions for that principal
      */
     default List<SessionInformation> getSessions(Object principal) {
-        List<SessionInformation> sessions = new ArrayList<>();
-
-        Streamable.of(getSessionIds(principal))
+        return new ArrayList<>(
+            getSessionIds(principal)
+                .stream()
                 .map(this::getSessionInformation)
-                .map(Optional::get)
-                .forEach(sessions::add);
-
-        return sessions;
+                .flatMap(Optional::stream)
+                .toList()
+        );
     }
 
     /**
@@ -94,6 +91,38 @@ public interface SessionRegistry {
      * @param principal authenticated principal bound to the session
      */
     void registerSession(String sessionId, Object principal);
+
+    /**
+     * Registers and enforces a single-node concurrency limit atomically.
+     * Distributed registries must override this operation with their own atomic storage contract.
+     */
+    default void registerSession(String sessionId, Object principal, int maximumSessions) {
+        if (maximumSessions <= 0) {
+            throw new IllegalArgumentException("maximumSessions must be positive");
+        }
+        synchronized (this) {
+            registerSession(sessionId, principal);
+            List<SessionInformation> active = getSessions(principal)
+                .stream()
+                .filter(information -> !information.isExpired())
+                .sorted(
+                    Comparator.comparing((SessionInformation information) ->
+                        information.lastAccess()
+                    ).thenComparing(SessionInformation::sessionId)
+                )
+                .toList();
+            int excess = active.size() - maximumSessions;
+            for (SessionInformation information : active) {
+                if (excess <= 0) {
+                    break;
+                }
+                if (!information.sessionId().equals(sessionId)) {
+                    information.expireSession();
+                    excess--;
+                }
+            }
+        }
+    }
 
     /**
      * 🗑️ Remove a session completely from the registry.
@@ -117,10 +146,10 @@ public interface SessionRegistry {
      */
     final class SessionInformation {
 
-        private final String  sessionId;
-        private final Object  principal;
-        private       Instant lastAccess;
-        private       boolean expired;
+        private final String sessionId;
+        private final Object principal;
+        private volatile Instant lastAccess;
+        private volatile boolean expired;
 
         /**
          * Construct new session info.

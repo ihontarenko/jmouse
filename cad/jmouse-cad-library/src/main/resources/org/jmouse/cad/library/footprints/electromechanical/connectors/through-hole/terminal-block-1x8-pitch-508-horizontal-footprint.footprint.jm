@@ -2,7 +2,7 @@ footprint:terminal-block-1x8-pitch-508-horizontal-footprint("Screw terminal bloc
     meta {
         summary: "Screw terminal block, 5.08 mm pitch, 1 row of 8, upright, through-hole"
         code: "FP.TB:8-P5.08"
-        category: circuits
+        category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
         authors: "jMouse"
@@ -22,4 +22,6 @@ footprint:terminal-block-1x8-pitch-508-horizontal-footprint("Screw terminal bloc
     outline(silkscreen, width: 0.12, "M-3.91 -20.43H3.91V20.43H-3.91Z")
     outline(silkscreen, filled, "M-4.71 -17.78A0.3 0.3 0 1 0 -4.11 -17.78A0.3 0.3 0 1 0 -4.71 -17.78Z")
     outline(courtyard, width: 0.05, "M-4.3 -20.8H4.3V20.8H-4.3Z")
+    body(height: 10)
+    model("MD.TB:8-P5.08")
 }

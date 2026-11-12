@@ -1,10 +1,10 @@
 package org.jmouse.kicad.symbol;
 
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.node.KiCadAtom;
-import org.jmouse.kicad.parser.node.KiCadList;
-import org.jmouse.kicad.parser.node.KiCadNode;
-import org.jmouse.kicad.parser.node.KiCadString;
+import org.jmouse.sexpression.node.SExpressionAtom;
+import org.jmouse.sexpression.node.SExpressionList;
+import org.jmouse.sexpression.node.SExpressionNode;
+import org.jmouse.sexpression.node.SExpressionString;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,7 +18,7 @@ import java.util.TreeMap;
  * unit draws: a body all units share, a pin all units carry. Coordinates are a library's: millimetres, Y upwards.
  *
  * <pre>{@code
- * KiCadList resistor = KiCadSymbolBuilder.named("Device:R")
+ * SExpressionList resistor = KiCadSymbolBuilder.named("Device:R")
  *         .property("Reference", "R").property("Value", "R")
  *         .rectangle(0, new KiCadPoint(-1.016, -2.54), new KiCadPoint(1.016, 2.54))
  *         .pin(1, KiCadPinType.PASSIVE, new KiCadPoint(0, 3.81), 270, 1.27, "~", "1")
@@ -33,8 +33,8 @@ public final class KiCadSymbolBuilder {
     private final String libraryId;
     private final Map<String, String> properties = new LinkedHashMap<>();
     /** What each unit draws, unit 0 being what all of them draw. */
-    private final Map<Integer, List<KiCadNode>> graphics = new TreeMap<>();
-    private final Map<Integer, List<KiCadNode>> pins = new TreeMap<>();
+    private final Map<Integer, List<SExpressionNode>> graphics = new TreeMap<>();
+    private final Map<Integer, List<SExpressionNode>> pins = new TreeMap<>();
     private boolean power;
     private boolean pinNamesHidden;
     private boolean pinNumbersHidden;
@@ -77,20 +77,20 @@ public final class KiCadSymbolBuilder {
         if (points.size() < 2) {
             throw new IllegalArgumentException("A polyline runs through two points at least.");
         }
-        List<KiCadNode> through = new ArrayList<>();
+        List<SExpressionNode> through = new ArrayList<>();
         points.forEach(point -> through.add(point(point)));
-        return graphic(unit, KiCadList.of("polyline", KiCadList.of("pts", through.toArray(KiCadNode[]::new)),
+        return graphic(unit, SExpressionList.of("polyline", SExpressionList.of("pts", through.toArray(SExpressionNode[]::new)),
                 stroke(), fill()));
     }
 
     public KiCadSymbolBuilder rectangle(int unit, KiCadPoint start, KiCadPoint end) {
-        return graphic(unit, KiCadList.of("rectangle", KiCadList.of("start", number(start.x()), number(start.y())),
-                KiCadList.of("end", number(end.x()), number(end.y())), stroke(), fill()));
+        return graphic(unit, SExpressionList.of("rectangle", SExpressionList.of("start", number(start.x()), number(start.y())),
+                SExpressionList.of("end", number(end.x()), number(end.y())), stroke(), fill()));
     }
 
     public KiCadSymbolBuilder circle(int unit, KiCadPoint centre, double radius) {
-        return graphic(unit, KiCadList.of("circle", KiCadList.of("center", number(centre.x()), number(centre.y())),
-                KiCadList.of("radius", number(radius)), stroke(), fill()));
+        return graphic(unit, SExpressionList.of("circle", SExpressionList.of("center", number(centre.x()), number(centre.y())),
+                SExpressionList.of("radius", number(radius)), stroke(), fill()));
     }
 
     /**
@@ -99,69 +99,69 @@ public final class KiCadSymbolBuilder {
      */
     public KiCadSymbolBuilder pin(int unit, KiCadPinType type, KiCadPoint at, int angle, double length, String name,
                                   String number) {
-        pins.computeIfAbsent(unit, ignored -> new ArrayList<>()).add(KiCadList.of("pin", KiCadAtom.of(type.word()),
-                KiCadAtom.of("line"), KiCadList.of("at", number(at.x()), number(at.y()), KiCadAtom.of(angle)),
-                KiCadList.of("length", number(length)),
-                KiCadList.of("name", KiCadString.of(name == null || name.isBlank() ? "~" : name), effects(false)),
-                KiCadList.of("number", KiCadString.of(number), effects(false))));
+        pins.computeIfAbsent(unit, ignored -> new ArrayList<>()).add(SExpressionList.of("pin", SExpressionAtom.of(type.word()),
+                SExpressionAtom.of("line"), SExpressionList.of("at", number(at.x()), number(at.y()), SExpressionAtom.of(angle)),
+                SExpressionList.of("length", number(length)),
+                SExpressionList.of("name", SExpressionString.of(name == null || name.isBlank() ? "~" : name), effects(false)),
+                SExpressionList.of("number", SExpressionString.of(number), effects(false))));
         return this;
     }
 
     /** The symbol's tree, as KiCad 7 writes it inside {@code lib_symbols}. */
-    public KiCadList build() {
-        List<KiCadNode> items = new ArrayList<>();
-        items.add(KiCadString.of(libraryId));
+    public SExpressionList build() {
+        List<SExpressionNode> items = new ArrayList<>();
+        items.add(SExpressionString.of(libraryId));
         if (power) {
-            items.add(KiCadList.of("power"));
+            items.add(SExpressionList.of("power"));
         }
         if (pinNumbersHidden) {
-            items.add(KiCadList.of("pin_numbers", KiCadAtom.of("hide")));
+            items.add(SExpressionList.of("pin_numbers", SExpressionAtom.of("hide")));
         }
-        items.add(pinNamesHidden ? KiCadList.of("pin_names", KiCadList.of("offset", KiCadAtom.of(0)), KiCadAtom.of("hide"))
-                : KiCadList.of("pin_names", KiCadList.of("offset", KiCadAtom.of(0.254))));
-        items.add(KiCadList.of("in_bom", KiCadAtom.of(power ? "no" : "yes")));
-        items.add(KiCadList.of("on_board", KiCadAtom.of(power ? "no" : "yes")));
-        properties.forEach((name, value) -> items.add(KiCadList.of("property", KiCadString.of(name), KiCadString.of(value),
-                KiCadList.of("at", KiCadAtom.of(0), KiCadAtom.of(0), KiCadAtom.of(0)),
+        items.add(pinNamesHidden ? SExpressionList.of("pin_names", SExpressionList.of("offset", SExpressionAtom.of(0)), SExpressionAtom.of("hide"))
+                : SExpressionList.of("pin_names", SExpressionList.of("offset", SExpressionAtom.of(0.254))));
+        items.add(SExpressionList.of("in_bom", SExpressionAtom.of(power ? "no" : "yes")));
+        items.add(SExpressionList.of("on_board", SExpressionAtom.of(power ? "no" : "yes")));
+        properties.forEach((name, value) -> items.add(SExpressionList.of("property", SExpressionString.of(name), SExpressionString.of(value),
+                SExpressionList.of("at", SExpressionAtom.of(0), SExpressionAtom.of(0), SExpressionAtom.of(0)),
                 effects(!name.equals("Reference") && !name.equals("Value")))));
         // A unit's body and its pins are two children, as KiCad writes them: NAME_unit_1 holds both here.
         String bare = libraryId.substring(libraryId.indexOf(':') + 1);
-        TreeMap<Integer, List<KiCadNode>> units = new TreeMap<>();
+        TreeMap<Integer, List<SExpressionNode>> units = new TreeMap<>();
         graphics.forEach((unit, drawn) -> units.computeIfAbsent(unit, ignored -> new ArrayList<>()).addAll(drawn));
         pins.forEach((unit, placed) -> units.computeIfAbsent(unit, ignored -> new ArrayList<>()).addAll(placed));
         units.forEach((unit, drawn) -> {
-            List<KiCadNode> child = new ArrayList<>();
-            child.add(KiCadString.of(bare + "_" + unit + "_1"));
+            List<SExpressionNode> child = new ArrayList<>();
+            child.add(SExpressionString.of(bare + "_" + unit + "_1"));
             child.addAll(drawn);
-            items.add(KiCadList.of("symbol", child.toArray(KiCadNode[]::new)));
+            items.add(SExpressionList.of("symbol", child.toArray(SExpressionNode[]::new)));
         });
-        return KiCadList.of("symbol", items.toArray(KiCadNode[]::new));
+        return SExpressionList.of("symbol", items.toArray(SExpressionNode[]::new));
     }
 
-    private KiCadSymbolBuilder graphic(int unit, KiCadList graphic) {
+    private KiCadSymbolBuilder graphic(int unit, SExpressionList graphic) {
         graphics.computeIfAbsent(unit, ignored -> new ArrayList<>()).add(graphic);
         return this;
     }
 
-    private static KiCadList point(KiCadPoint point) {
-        return KiCadList.of("xy", number(point.x()), number(point.y()));
+    private static SExpressionList point(KiCadPoint point) {
+        return SExpressionList.of("xy", number(point.x()), number(point.y()));
     }
 
-    private static KiCadAtom number(double value) {
-        return KiCadAtom.of(value);
+    private static SExpressionAtom number(double value) {
+        return SExpressionAtom.of(value);
     }
 
-    private static KiCadList stroke() {
-        return KiCadList.of("stroke", KiCadList.of("width", KiCadAtom.of(0)), KiCadList.of("type", KiCadAtom.of("default")));
+    private static SExpressionList stroke() {
+        return SExpressionList.of("stroke", SExpressionList.of("width", SExpressionAtom.of(0)), SExpressionList.of("type", SExpressionAtom.of("default")));
     }
 
-    private static KiCadList fill() {
-        return KiCadList.of("fill", KiCadList.of("type", KiCadAtom.of("none")));
+    private static SExpressionList fill() {
+        return SExpressionList.of("fill", SExpressionList.of("type", SExpressionAtom.of("none")));
     }
 
     /** How a text is drawn: KiCad's size, and hidden when it is not shown on the sheet. */
-    static KiCadList effects(boolean hidden) {
-        KiCadList font = KiCadList.of("font", KiCadList.of("size", KiCadAtom.of(TEXT_SIZE), KiCadAtom.of(TEXT_SIZE)));
-        return hidden ? KiCadList.of("effects", font, KiCadAtom.of("hide")) : KiCadList.of("effects", font);
+    static SExpressionList effects(boolean hidden) {
+        SExpressionList font = SExpressionList.of("font", SExpressionList.of("size", SExpressionAtom.of(TEXT_SIZE), SExpressionAtom.of(TEXT_SIZE)));
+        return hidden ? SExpressionList.of("effects", font, SExpressionAtom.of("hide")) : SExpressionList.of("effects", font);
     }
 }

@@ -1,0 +1,14 @@
+model:chip-capacitor-0201-model("Chip capacitor 0201 (0603 metric)") {
+    meta {
+        summary: "Chip capacitor 0201 (0603 metric) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:C0201"
+        category: capacitors-surface
+        tags: electronics, model, chip
+        source: "IEC 60384-22 dimensions, 0201 (0603 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [0.6, 0.3, 0.33], at: [0, 0, 0.165])
+    box(tin, size: [0.12, 0.32, 0.35], at: [-0.24, 0, 0.165])
+    box(tin, size: [0.12, 0.32, 0.35], at: [0.24, 0, 0.165])
+}

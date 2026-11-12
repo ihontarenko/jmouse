@@ -1,0 +1,35 @@
+{
+  "$schema": "./materials.schema.json",
+  "file": "supplier-materials.csv",
+  "standings": {
+    "IN_STOCK": "In stock",
+    "SHORT": "Too few in stock",
+    "STOCK_UNSTATED": "Stock not stated",
+    "NO_OFFER": "No offer for this part",
+    "NOT_ASKED": "Could not be asked",
+    "NO_PART_NUMBER": "No part number"
+  },
+  "columns": [
+    { "heading": "Item", "field": "item" },
+    { "heading": "Designators", "field": "designators" },
+    { "heading": "Per PCB", "field": "quantity" },
+    { "heading": "Needed", "field": "needed" },
+    { "heading": "Value", "field": "value" },
+    { "heading": "Footprint", "field": "footprint" },
+    { "heading": "Component", "field": "component" },
+    { "heading": "Manufacturer", "field": "manufacturer" },
+    { "heading": "Part number", "field": "part-number" },
+    { "heading": "Supplier", "field": "supplier" },
+    { "heading": "Standing", "field": "standing" },
+    { "heading": "Order number", "field": "order-number" },
+    { "heading": "Buy", "field": "buy" },
+    { "heading": "Stock", "field": "stock" },
+    { "heading": "Minimum order", "field": "minimum-order" },
+    { "heading": "Lead time", "field": "lead-time" },
+    { "heading": "Status", "field": "status" },
+    { "heading": "Currency", "field": "currency" },
+    { "heading": "Unit price", "field": "unit-price" },
+    { "heading": "Total", "field": "total" },
+    { "heading": "Page", "field": "page" }
+  ]
+}

@@ -96,7 +96,7 @@ final class QuadFootprints implements FootprintFamily {
                 "Generated from footprint-standards/quad-packages.sht#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
                 "Z = " + written(land.outer()) + ", G = " + written(land.inner()) + ", X = " + written(land.width())
                         + "; pad " + written(padLength) + " × " + written(padWidth) + " centred at ±" + written(centre) + ".");
-        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), "surface", outline.standard(),
-                rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), outline.word("category"), "surface", outline.standard(),
+                rules, notes, new FootprintDrawing(pads, outlines, outline));
     }
 }

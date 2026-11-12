@@ -2,7 +2,7 @@ symbol:adjustable-regulator-symbol("Adjustable voltage regulator") {
     meta {
         summary: "An adjustable three-terminal linear regulator, as drawn on a schematic: input on the left, output on the right, the adjustment below"
         code: "SY.REGULATOR:LINEAR-ADJUSTABLE"
-        category: circuits
+        category: power
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

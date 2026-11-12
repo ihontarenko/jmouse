@@ -1,14 +1,13 @@
 package org.jmouse.web.server;
 
+import org.jmouse.core.reflection.InferredType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jmouse.core.reflection.InferredType;
 
 /**
  * A generic interface for managing a web server lifecycle and configuration.
  */
-public interface WebServer {
-
+public interface WebServer extends AutoCloseable {
     /**
      * A logger instance for logging server-related events.
      */
@@ -34,6 +33,12 @@ public interface WebServer {
      * @return the underlying server of type {@code T}.
      */
     Object server();
+
+    /** Releases the server. Implementations may distinguish reusable stop from terminal close. */
+    @Override
+    default void close() throws WebServerException {
+        stop();
+    }
 
     /**
      * Retrieves the name of internal server implementation
@@ -62,8 +67,8 @@ public interface WebServer {
 
         LOGGER.info("Start configuring '{}' web-server", name());
 
-        InferredType javaType   = InferredType.forInstance(configurer);
-        Class<?>     serverType = javaType.locate(Configurer.class).getFirst().getRawType();
+        InferredType javaType = InferredType.forInstance(configurer);
+        Class<?> serverType = javaType.locate(Configurer.class).getFirst().getRawType();
 
         LOGGER.info("Type of web-server '{}'", serverType);
 
@@ -77,7 +82,6 @@ public interface WebServer {
      */
     @FunctionalInterface
     interface Configurer<T> {
-
         /**
          * Configures the server instance of type {@code T}.
          *

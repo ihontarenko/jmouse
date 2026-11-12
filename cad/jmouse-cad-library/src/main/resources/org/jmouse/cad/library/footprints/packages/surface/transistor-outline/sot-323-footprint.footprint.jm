@@ -2,7 +2,7 @@ footprint:sot-323-footprint("SOT-323, 1.25 mm body") {
     meta {
         summary: "3-lead SOT-323 (SC-70), 3 leads, gull-wing, 0.65 mm pitch, body 1.25 × 2 mm"
         code: "FP.SOT323:3"
-        category: circuits
+        category: surface-transistor-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-203 AA, the makers' tighter outline (Nexperia SOT323)"
         authors: "jMouse"
@@ -17,4 +17,6 @@ footprint:sot-323-footprint("SOT-323, 1.25 mm body") {
     outline(fabrication, width: 0.1, "M-0.208 -1H0.625V1H-0.625V-0.583Z")
     outline(silkscreen, width: 0.12, "M-1.45 -1.11H0.625M-0.625 1.11H0.625")
     outline(courtyard, width: 0.05, "M-1.7 -1.25H1.7V1.25H-1.7Z")
+    body(height: 1.1)
+    model("MD.SOT323:3")
 }

@@ -8,8 +8,10 @@ component:schmitt-inverter("Schmitt-trigger inverter", type: gate) {
         designator: U
         summary: "An inverter with two input thresholds: a slow or noisy edge switches it once"
         source: "behavioural: two thresholds as shares of the supply, a latch between them"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:upper_share(0.6, "the rising threshold as a share of the supply")
@@ -23,7 +25,7 @@ component:schmitt-inverter("Schmitt-trigger inverter", type: gate) {
     pin:output(analog, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: schmitt-not-gate-symbol)
+    symbol(uses: "SY.GATE:NOT-SCHMITT")
 
     state:high(1, discrete, "the output's level: written by the behaviour, read by the equations")
     state:shown(1, continuous, "the output stage following it with a finite edge")

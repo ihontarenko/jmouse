@@ -2,7 +2,7 @@ symbol:n-channel-mosfet-symbol("N-channel MOSFET") {
     meta {
         summary: "N-channel MOSFET, as drawn on a schematic"
         code: "SY.TRANSISTOR:MOSFET-N"
-        category: circuits
+        category: transistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

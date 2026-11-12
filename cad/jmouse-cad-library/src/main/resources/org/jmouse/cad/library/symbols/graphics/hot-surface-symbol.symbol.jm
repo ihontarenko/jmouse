@@ -1,0 +1,15 @@
+symbol:hot-surface-symbol("Hot surface") {
+    meta {
+        summary: "A warning triangle with rising heat: this part of the board runs hot, as drawn on a schematic"
+        code: "SY.GRAPHIC:HOT-SURFACE"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:stroke_1("M0 -44L46 38H-46Z")
+    path:stroke_2("M-14 26C-22 16 -6 8 -14 -2")
+    path:stroke_3("M0 26C-8 16 8 8 0 -2")
+    path:stroke_4("M14 26C6 16 22 8 14 -2")
+}

@@ -6,8 +6,10 @@ component:74hc1g04("74HC1G04", type: gate) {
         summary: "Single inverter: high while its input is low"
         source: "Nexperia 74HC1G04 datasheet: Y = ¬A; propagation delay 7 ns typical at 4.5 V"
         package: "SOT353, 5 pins"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:not-gate
     use:cmos-hc
@@ -23,7 +25,9 @@ component:74hc1g04("74HC1G04", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: not-gate-symbol)
+    footprint("FP.SOT353:5")
+
+    symbol(uses: "SY.GATE:NOT")
 
     expect("A 0 gives 1", from: "function table: Y = ¬A") {
         bench(for: 1 us) {

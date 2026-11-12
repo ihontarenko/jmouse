@@ -1,8 +1,7 @@
 package org.jmouse.cad.packages.footprint;
 
-import org.jmouse.cad.board.BoardModule;
+import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.document.TechnicalClass;
 import org.jmouse.cad.packages.LibraryFiling;
@@ -17,12 +16,13 @@ import java.util.List;
  *
  * @param designation its package's designation from its kind's {@code designation} template — {@code AXIAL:R0204-P7.62-H}
  *                    —: its technical code once {@code FP} says it is a footprint
- * @param folder      where under the library's footprints it is filed — the category it shows in
+ * @param folder      where under the library's footprints its file stands
+ * @param category    the category it files itself in, as its table names it: {@code resistors-surface}
  * @param mounting    {@code surface} or {@code through-hole}
  * @param source      the standard its dimensions were read from
  * @param notes       how its copper was worked out, written above its lines for a reviewer
  */
-public record StandardFootprint(String slug, String designation, String title, String summary, String folder, String mounting,
+public record StandardFootprint(String slug, String designation, String title, String summary, String folder, String category, String mounting,
                                 String source, LandPatternRules rules, List<String> notes, FootprintDrawing drawing) {
 
     public StandardFootprint {
@@ -36,7 +36,7 @@ public record StandardFootprint(String slug, String designation, String title, S
 
     /** The footprint as the tree of its document. */
     public DocumentNode document() {
-        DocumentNode document = new DocumentNode(BoardModule.FOOTPRINT, title, slug, true, null, 1);
+        DocumentNode document = new DocumentNode(PcbModule.FOOTPRINT, title, slug, null, 1);
         document.addExpression(meta());
         drawing.lines(notes).forEach(document::addExpression);
         return document;
@@ -44,14 +44,9 @@ public record StandardFootprint(String slug, String designation, String title, S
 
     private MetaNode meta() {
         LibraryFiling filing = rules.filing();
-        MetaNode meta = new MetaNode();
-        meta.addExpression(MetaLineNode.of(MetaNode.SUMMARY, Nodes.text(summary)));
-        meta.addExpression(MetaLineNode.of(MetaNode.CODE, Nodes.text(code())));
-        meta.addExpression(MetaLineNode.of(MetaNode.CATEGORY, Nodes.word(filing.category())));
-        meta.addExpression(MetaLineNode.of(MetaNode.TAGS, Nodes.words(filing.tags(BoardModule.FOOTPRINT.word(), mounting))));
-        meta.addExpression(MetaLineNode.of(MetaNode.SOURCE, Nodes.text(source)));
-        meta.addExpression(MetaLineNode.of(MetaNode.AUTHORS, Nodes.text(filing.authors())));
-        meta.addExpression(MetaLineNode.of(MetaNode.LICENSE, Nodes.text(filing.license())));
+        MetaNode meta = MetaNode.filed(summary, code(), category,
+                filing.tags(PcbModule.FOOTPRINT.word(), mounting));
+        filing.provenance(source).writeInto(meta);
         return meta;
     }
 }

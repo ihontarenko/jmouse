@@ -5,7 +5,11 @@ import org.jmouse.access.enforcement.PublicEndpoint;
 import org.jmouse.cad.management.CadManagementRoutes;
 import org.jmouse.cad.plugin.explorer.Explorer.EntryView;
 import org.jmouse.cad.plugin.explorer.Explorer.MountView;
+import org.jmouse.cad.plugin.explorer.Explorer.MountingView;
+import org.jmouse.cad.plugin.explorer.Explorer.MountingsView;
 import org.jmouse.cad.plugin.explorer.Explorer.Opened;
+import org.jmouse.cad.plugin.explorer.ExplorerMounts.MountRequest;
+import org.jmouse.cad.store.catalogue.CatalogueViews.DocumentDetail;
 import org.jmouse.storage.Content;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -46,6 +51,60 @@ public class ExplorerController {
     }
 
     public record MoveRequest(String from, String to) {
+    }
+
+    /** What a folder holds as documents: each .jm file that reads, and why the others do not. */
+    @GetMapping("/mounts/{mount}/documents")
+    @PublicEndpoint("answered only where the reader may read the mount, checked in the service")
+    public Explorer.FolderDocuments documents(@PathVariable String mount) {
+        return explorer.documents(mount);
+    }
+
+    /** A file of a folder as the document it is: what a bench opens. */
+    @GetMapping("/mounts/{mount}/document")
+    @PublicEndpoint("answered only where the reader may read the mount, checked in the service")
+    public DocumentDetail document(@PathVariable String mount, @RequestParam String key) {
+        return explorer.document(mount, key);
+    }
+
+    /**
+     * A document written into its file: the body is its text. A version says which text it changes, and a file changed
+     * since is refused (409); none says the file is new.
+     */
+    @PutMapping("/mounts/{mount}/document")
+    @PublicEndpoint("writes only where the reader may change the mount, checked in the service")
+    public DocumentDetail writeDocument(@PathVariable String mount, @RequestParam String key, @RequestParam(required = false) Long version,
+                                        HttpServletRequest request) throws IOException {
+        return explorer.writeDocument(mount, key, version, new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8));
+    }
+
+    /** Whether the reader may mount a folder; what is mounted, and where, only for one who may. */
+    @GetMapping("/mounting")
+    @PublicEndpoint("whether the reader may mount; the folders and their paths only for one who may, checked in the service")
+    public MountingsView mountings() {
+        return explorer.mayMount() ? explorer.mountings() : new MountingsView(false, List.of());
+    }
+
+    @PostMapping("/mounting")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PublicEndpoint("mounts only for a reader who may mount across the installation, checked in the service")
+    public MountingView mount(@RequestBody MountRequest request) {
+        return explorer.mount(request);
+    }
+
+    @DeleteMapping("/mounting/{mount}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PublicEndpoint("unmounts only for a reader who may mount across the installation, checked in the service")
+    public void unmount(@PathVariable String mount) {
+        explorer.unmount(mount);
+    }
+
+    /** A file, or a folder with all it holds, copied elsewhere in the same mount. */
+    @PostMapping("/mounts/{mount}/copy")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PublicEndpoint("writes only where the reader may change the mount, checked in the service")
+    public void copy(@PathVariable String mount, @RequestBody MoveRequest request) {
+        explorer.copy(mount, request.from(), request.to());
     }
 
     @GetMapping("/mounts")

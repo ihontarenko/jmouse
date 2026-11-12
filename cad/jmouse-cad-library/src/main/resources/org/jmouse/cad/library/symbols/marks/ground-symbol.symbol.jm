@@ -2,7 +2,7 @@ symbol:ground-symbol("Ground") {
     meta {
         summary: "Ground, as drawn on a schematic"
         code: "SY.MARK:GROUND"
-        category: circuits
+        category: marks
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

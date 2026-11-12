@@ -1,11 +1,14 @@
 # Dual in-line packages by JEDEC outline. A lead is `lead` wide and `thickness` thick at its largest, and `shoulder` wide
-# where it leaves the body above the board (what a portrait shows); its hole is drilled for the diagonal. A member is its
+# where it leaves the body above the pcb (what a portrait shows); its hole is drilled for the diagonal. A member is its
 # lead count with its body length; it is named `dip-<leads>`, the outline's `suffix` after.
+# `body-height` is the most the package stands over the pcb — the standard's seated height, its "A" maximum —,
+# what a 3D view raises the body to; an outline that does not write it is shown flat.
 sheet "Dual in-line packages" as dual-inline-packages {
     description "Dual in-line packages, two rows of holes on a 2.54 mm grid."
     form dual-inline
 
     dip "DIP, 7.62 mm rows" source standard "JEDEC MS-001" {
+        body-height 5.33 mm
         name dip
         pitch 2.54 mm
         row 7.62 mm
@@ -15,10 +18,12 @@ sheet "Dual in-line packages" as dual-inline-packages {
         body-width 6.35 mm
         members 4 = 4.6 mm, 6 = 8.9 mm, 8 = 9.27 mm, 14 = 19.05 mm, 16 = 19.3 mm, 18 = 22.86 mm, 20 = 26.16 mm, 22 = 27.94 mm, 24 = 31.75 mm, 28 = 35.56 mm
         folder "packages/through-hole/dual-inline"
+        category dual-inline
         designation "DIP:{leads}-W{row|mm}"
     }
 
     dip-wide "DIP, 15.24 mm rows" source standard "JEDEC MS-011" {
+        body-height 6.35 mm
         name dip
         suffix wide
         pitch 2.54 mm
@@ -29,6 +34,58 @@ sheet "Dual in-line packages" as dual-inline-packages {
         body-width 13.97 mm
         members 24 = 31.75 mm, 28 = 36.83 mm, 32 = 41.91 mm, 40 = 52.07 mm
         folder "packages/through-hole/dual-inline"
+        category dual-inline
         designation "DIP:{leads}-W{row|mm}"
+    }
+
+seven-segment-0-56 "Seven-segment display, 0.56 in digit" source standard "the makers' 0.56-inch single digit (Kingbright SA56-11)" {
+        body-height 8 mm
+        name seven-segment-display
+        suffix "0-56-inch"
+        part "seven-segment display, 0.56 in"
+        pitch 2.54 mm
+        row 15.24 mm
+        lead 0.5 mm
+        thickness 0.25 mm
+        shoulder 1 mm
+        body-width 12.5 mm
+        members 10 = 19 mm
+        folder "semiconductors/optoelectronics/through-hole"
+        category optoelectronics-through-hole
+        designation "DISP:7SEG-{leads}-W{row|mm}"
+    }
+
+tactile-switch-6 "Tactile switch, 6 × 6 mm" source standard "the makers' 6 mm through-hole tact switch (Omron B3F-1000): leads 6.5 mm apart along a side joined inside" {
+        body-height 4.3 mm
+        name tactile-switch
+        suffix "6mm"
+        part "tactile switch, 6 × 6 mm"
+        pitch 6.5 mm
+        row 4.5 mm
+        lead 0.7 mm
+        shoulder 1 mm
+        thickness 0.3 mm
+        body-width 6 mm
+        members 4 = 6 mm
+        folder "electromechanical/switches/through-hole"
+        category switches-through-hole
+        designation "SW:TACT-6X6"
+    }
+
+    slide-switch-1 "Slide switch, 1 position" source standard "a one-position DIP slide switch (CTS 206/208 series): body 9.78 × 4.72 mm, rows 7.62 mm apart" {
+        body-height 6.75 mm
+        name slide-switch
+        suffix "9-78mm"
+        part "slide switch, 1 position"
+        pitch 2.54 mm
+        row 7.62 mm
+        lead 0.5 mm
+        shoulder 1 mm
+        thickness 0.25 mm
+        body-width 9.78 mm
+        members 2 = 4.72 mm
+        folder "electromechanical/switches/through-hole"
+        category switches-through-hole
+        designation "SW:SLIDE-1"
     }
 }

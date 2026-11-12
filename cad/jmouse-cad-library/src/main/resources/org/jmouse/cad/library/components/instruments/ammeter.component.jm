@@ -2,7 +2,9 @@ component:ammeter("Ammeter", type: meter) {
     meta {
         designator: A
         summary: "Reads the current through it, put in the break of a wire"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:R_shunt(50 mOhm, "the shunt it reads across: what it drops, on a realistic bench")
     pin:in(analog, 1, "where the current enters")
@@ -14,7 +16,7 @@ component:ammeter("Ammeter", type: meter) {
     lead:in(green, stripes: white)
     lead:out(blue, stripes: white)
     reading:reading(in.current, unit: A, signal)
-    symbol(uses: ammeter-symbol) {
+    symbol(uses: "SY.METER:AMMETER") {
         bind:a(pin: in)
         bind:b(pin: out)
     }

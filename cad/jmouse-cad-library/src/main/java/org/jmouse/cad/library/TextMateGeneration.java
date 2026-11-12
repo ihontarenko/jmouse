@@ -1,10 +1,11 @@
 package org.jmouse.cad.library;
 
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.SerializationFeature;
 import org.jmouse.cad.document.DeclarationParser;
 import org.jmouse.cad.document.LanguageWalk;
 import org.jmouse.cad.document.MetaParser;
@@ -82,10 +83,10 @@ public final class TextMateGeneration {
         Path jms = Path.of(arguments[1]);
         Path target = Path.of(arguments[2]);
         // Keys in their natural order: a rule's keys mean nothing by their order, and the bundle reads the same every run.
-        ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
         DefaultPrettyPrinter printer = new DefaultPrettyPrinter().withObjectIndenter(new DefaultIndenter("  ", "\n"))
                 .withArrayIndenter(new DefaultIndenter("  ", "\n"));
-        ObjectWriter writer = mapper.writer(printer);
+        ObjectWriter writer = mapper.writer().with(printer);
         @SuppressWarnings("unchecked")
         Map<String, Object> base = mapper.readValue(jms.resolve("syntaxes/jms.tmLanguage.json").toFile(), Map.class);
         Map<String, String> files = new LinkedHashMap<>();
@@ -424,7 +425,7 @@ public final class TextMateGeneration {
         manifest.put("name", "jm-textmate");
         manifest.put("displayName", "jMouse CAD documents (.jm)");
         manifest.put("description", "Syntax highlighting for the jmCAD document language — components, circuits, symbols, "
-                + "portraits, frames, footprints and boards —, described from the language's own grammar.");
+                + "portraits, frames, footprints and pcbs —, described from the language's own grammar.");
         manifest.put("version", "1.0.0");
         manifest.put("publisher", "jmouse");
         manifest.put("license", "MIT");

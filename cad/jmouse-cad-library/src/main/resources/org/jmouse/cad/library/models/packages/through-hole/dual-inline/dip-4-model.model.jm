@@ -1,0 +1,28 @@
+model:dip-4-model("DIP-4, 7.62 mm rows") {
+    meta {
+        summary: "DIP-4, 7.62 mm rows — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.DIP:4-W7.62"
+        category: dual-inline
+        tags: electronics, model, dual-inline
+        source: "JEDEC MS-001"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [6.35, 4.6, 1.65], at: [0, 0, 1.325])
+    box(plastic, size: [6.05, 4.3, 1.65], at: [0, 0, 2.975])
+    cylinder(dimple, radius: 0.4, length: 0.01, at: [-2.025, 1.15, 3.805])
+    marking(name, on: flat, size: [4.762, 1.61], at: [0, 0, 3.81], ink: marking)
+    cylinder(dimple, radius: 0.6, length: 0.01, at: [-2.425, 0, 3.805])
+    box(tin, size: [0.76, 1.52, 0.25], at: [-3.555, 1.27, 2.15])
+    box(tin, size: [0.25, 1.52, 1.65], at: [-3.81, 1.27, 1.325])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-3.81, 1.27, -1.25])
+    box(tin, size: [0.76, 1.52, 0.25], at: [-3.555, -1.27, 2.15])
+    box(tin, size: [0.25, 1.52, 1.65], at: [-3.81, -1.27, 1.325])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-3.81, -1.27, -1.25])
+    box(tin, size: [0.76, 1.52, 0.25], at: [3.555, -1.27, 2.15])
+    box(tin, size: [0.25, 1.52, 1.65], at: [3.81, -1.27, 1.325])
+    box(tin, size: [0.25, 0.46, 3.5], at: [3.81, -1.27, -1.25])
+    box(tin, size: [0.76, 1.52, 0.25], at: [3.555, 1.27, 2.15])
+    box(tin, size: [0.25, 1.52, 1.65], at: [3.81, 1.27, 1.325])
+    box(tin, size: [0.25, 0.46, 3.5], at: [3.81, 1.27, -1.25])
+}

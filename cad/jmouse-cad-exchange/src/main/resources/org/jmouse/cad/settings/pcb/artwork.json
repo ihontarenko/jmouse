@@ -1,0 +1,31 @@
+{
+  "$schema": "./artwork.schema.json",
+  "maskExpansion": 0.05,
+  "silkscreenWidth": 0.12,
+  "letterStroke": 0.15,
+  "curveSteps": 16,
+  "cornerSteps": 6,
+  "arcError": 0.005,
+  "designator": {
+    "gap": 0.6,
+    "least": 0.9,
+    "most": 1.6,
+    "widthShare": 0.25,
+    "advance": 0.6
+  },
+  "teardrops": {
+    "curveSteps": 8,
+    "widestShare": 0.9,
+    "insideEdge": 0.8,
+    "halvings": 14,
+    "looks": 24
+  },
+  "areas": {
+    "steps": 8,
+    "tolerance": 0.005
+  },
+  "checks": {
+    "tolerance": 0.005,
+    "namedGaps": 40
+  }
+}

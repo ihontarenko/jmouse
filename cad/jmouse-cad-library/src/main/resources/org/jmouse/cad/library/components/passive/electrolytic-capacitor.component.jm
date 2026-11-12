@@ -14,9 +14,11 @@ component:electrolytic-capacitor("Electrolytic capacitor", type: capacitor) {
         designator: C
         summary: "Aluminium electrolytic capacitor: capacitance, ESR, leakage"
         source: "the equivalent circuit an electrolytic's datasheet tabulates: C, ESR at 100 kHz, leakage current"
-        category: circuits
+        category: capacitors
         failure: short
         value: capacitance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:capacitance(1000 uF, "capacitance")
@@ -37,7 +39,12 @@ component:electrolytic-capacitor("Electrolytic capacitor", type: capacitor) {
 
     node:plate("the capacitance, behind the ESR")
 
-    symbol(uses: polarized-capacitor-symbol) {
+    footprint("FP.RADIAL:CP-D6.3-P2.5")
+    footprint("FP.RADIAL:CP-D5-P2")
+    footprint("FP.RADIAL:CP-D8-P3.5")
+    footprint("FP.RADIAL:CP-D10-P5")
+
+    symbol(uses: "SY.CAPACITOR:POLARIZED") {
         bind:failed(failed)
         bind:charge((positive - negative) / voltage_rating)
         bind:a(pin: positive)
@@ -82,7 +89,7 @@ component:electrolytic-capacitor("Electrolytic capacitor", type: capacitor) {
     }
 
     # How it looks in the hand: a can with its minus stripe, its capacitance and its rating printed; burst when it fails.
-    portrait(uses: electrolytic-capacitor-portrait) {
+    portrait(uses: "PT.CAPACITOR:ELECTROLYTIC-RADIAL") {
         bind:capacitance(capacitance)
         bind:voltage_rating(voltage_rating)
     }

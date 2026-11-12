@@ -5,7 +5,9 @@ component:sine-generator("Sine generator", type: generator) {
     meta {
         designator: G
         summary: "An ideal sine voltage: offset + amplitude · sin(2π · frequency · time + phase)"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:amplitude(1 V, "peak voltage above the offset")
@@ -16,7 +18,7 @@ component:sine-generator("Sine generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: alternating-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-ALTERNATING") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

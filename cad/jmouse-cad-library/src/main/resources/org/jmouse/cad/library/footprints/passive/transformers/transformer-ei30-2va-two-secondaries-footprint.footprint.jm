@@ -1,0 +1,29 @@
+footprint:transformer-ei30-2va-two-secondaries-footprint("EI30 printed-circuit transformer, 2 VA, two secondaries") {
+    meta {
+        summary: "10-lead printed-circuit transformer, through-hole, 27.5 × 32.5 mm body"
+        code: "FP.TRAFO:EI30-2VA-2S"
+        category: transformers
+        tags: electronics, footprint, through-hole
+        source: "ERA EI30/15.5 2 VA, schematic 2: the primary 1 (•) to 5, the secondaries 6 (•) to 7 and 9 (•) to 10; body 32.5 × 27.5 × 27 mm, pins Ø 0.8 mm"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/pinned-packages.sht#ei30-two-secondaries and the land pattern rules; regenerate, never edit.
+    # Lead 0.8 × 0.8 at most: drill 1.35, pad 2.35, pin 1 square; each lead where its maker puts it.
+    pad:1(through-hole, rectangle, at: -10 10, size: 2.35 x 2.35, drill: 1.35)
+    pad:2(through-hole, circle, at: -10 5, size: 2.35 x 2.35, drill: 1.35)
+    pad:3(through-hole, circle, at: -10 0, size: 2.35 x 2.35, drill: 1.35)
+    pad:4(through-hole, circle, at: -10 -5, size: 2.35 x 2.35, drill: 1.35)
+    pad:5(through-hole, circle, at: -10 -10, size: 2.35 x 2.35, drill: 1.35)
+    pad:6(through-hole, circle, at: 10 -10, size: 2.35 x 2.35, drill: 1.35)
+    pad:7(through-hole, circle, at: 10 -5, size: 2.35 x 2.35, drill: 1.35)
+    pad:8(through-hole, circle, at: 10 0, size: 2.35 x 2.35, drill: 1.35)
+    pad:9(through-hole, circle, at: 10 5, size: 2.35 x 2.35, drill: 1.35)
+    pad:10(through-hole, circle, at: 10 10, size: 2.35 x 2.35, drill: 1.35)
+    outline(fabrication, width: 0.1, "M-13.75 -16.25H13.75V16.25H-13.75Z")
+    outline(silkscreen, width: 0.12, "M-13.86 -16.36H13.86V16.36H-13.86Z")
+    outline(silkscreen, filled, "M-12.035 10A0.3 0.3 0 1 0 -11.435 10A0.3 0.3 0 1 0 -12.035 10Z")
+    outline(courtyard, width: 0.05, "M-14.25 -16.85H14.25V16.85H-14.25Z")
+    body(height: 27)
+    model("MD.TRAFO:EI30-2VA-2S")
+}

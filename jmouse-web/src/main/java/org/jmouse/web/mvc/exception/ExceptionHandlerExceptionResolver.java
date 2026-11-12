@@ -1,23 +1,21 @@
 package org.jmouse.web.mvc.exception;
 
+import java.lang.reflect.Method;
+import java.util.*;
+import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.core.MethodParameter;
+import org.jmouse.core.Sorter;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.web.annotation.Controller;
 import org.jmouse.web.annotation.ExceptionHandler;
-import org.jmouse.core.Sorter;
-import org.jmouse.web.mvc.AbstractExceptionResolver;
-import org.jmouse.web.http.RequestAttributes;
-import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.RequestContext;
-import org.jmouse.web.mvc.MVCResult;
+import org.jmouse.web.mvc.ExceptionResolver;
 import org.jmouse.web.mvc.MappedHandler;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.method.*;
-
-import java.lang.reflect.Method;
-import java.util.*;
+import org.jmouse.web.mvc.result.HandlerResult;
 
 /**
  * ⚠️ {@code ExceptionHandlerExceptionResolver} resolves exceptions by invoking
@@ -36,7 +34,9 @@ import java.util.*;
  * @author Ivan Hontarenko
  * @since 1.0
  */
-public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver {
+public class ExceptionHandlerExceptionResolver
+    implements ExceptionResolver, InitializingBeanSupport<WebBeanContext>
+{
 
     private ExceptionMappingRegistry exceptionMappings;
 
@@ -48,7 +48,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
     /**
      * Creates a new resolver.
      */
-    public ExceptionHandlerExceptionResolver() { }
+    public ExceptionHandlerExceptionResolver() {}
 
     /**
      * Returns whether this resolver supports the given exception.
@@ -79,10 +79,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      * @param context the web application context
      */
     @Override
-    protected void doInitialize(WebBeanContext context) {
-        List<ArgumentResolver> argumentResolvers = new ArrayList<>(
-                context.getBeans(ArgumentResolver.class)
-        );
+    public void doInitialize(WebBeanContext context) {
+        List<ArgumentResolver> argumentResolvers = new ArrayList<>(context.getBeans(ArgumentResolver.class));
 
         Sorter.sort(argumentResolvers);
 
@@ -100,10 +98,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      */
     private void initializeMethods(Collection<Method> methods, Object bean) {
         for (Method method : methods) {
-            AnnotationRepository       repository       = AnnotationRepository.ofAnnotatedElement(method);
+            AnnotationRepository repository = AnnotationRepository.ofAnnotatedElement(method);
             Optional<MergedAnnotation> exceptionHandler = repository.get(ExceptionHandler.class);
             if (exceptionHandler.isPresent()) {
-                ExceptionHandler             annotation     = exceptionHandler.get().synthesize();
+                ExceptionHandler annotation = exceptionHandler.get().synthesize();
                 Class<? extends Throwable>[] exceptionTypes = annotation.value();
                 for (Class<? extends Throwable> exceptionType : exceptionTypes) {
                     addExceptionMapping(exceptionType, bean, method);
@@ -118,26 +116,25 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      * @param requestContext the request context
      * @param mappedHandler  the original mapped handler
      * @param exception      the thrown exception
-     * @return an {@link MVCResult} containing the handler method result
+     * @return an {@link HandlerResult} containing the handler method result
      */
     @Override
-    protected MVCResult doExceptionResolve(
-            RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
+    public Optional<HandlerResult> resolveException(
+        RequestContext requestContext,
+        MappedHandler mappedHandler,
+        Exception exception
+    ) {
         HandlerMethod handlerMethod = getExceptionHandler(exception.getClass());
+        if (handlerMethod == null) return Optional.empty();
         MappingResult mappingResult = mappedHandler == null ? null : mappedHandler.mappingResult();
-        MVCResult     mvcResult     = null;
-
-        if (handlerMethod != null) {
-            HandlerMethodContext    context    = new HandlerMethodContext(requestContext, handlerMethod);
-            HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappingResult, argumentResolvers);
-            MethodParameter         returnType = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
-
-            mvcResult = new MVCResult(null, returnType, mappedHandler);
-            RequestAttributesHolder.setAttribute(RequestAttributes.MVC_RESULT_ATTRIBUTE, mvcResult);
-            mvcResult.setReturnValue(invocation.invoke());
-        }
-
-        return mvcResult;
+        HandlerMethodContext context = new HandlerMethodContext(requestContext, handlerMethod);
+        HandlerMethodInvocation invocation = new HandlerMethodInvocation(
+            context,
+            mappingResult,
+            argumentResolvers
+        );
+        MethodParameter returnType = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
+        return Optional.of(HandlerResult.returned(invocation.invoke(), returnType));
     }
 
     /**

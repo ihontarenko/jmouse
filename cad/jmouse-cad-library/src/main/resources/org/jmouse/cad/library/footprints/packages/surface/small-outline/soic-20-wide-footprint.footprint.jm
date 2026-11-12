@@ -2,7 +2,7 @@ footprint:soic-20-wide-footprint("SOIC-20, 7.5 mm body") {
     meta {
         summary: "20-lead SOIC, 7.5 mm body, gull-wing, 1.27 mm pitch, body 7.5 × 12.8 mm"
         code: "FP.SOIC:20-P1.27-W7.5"
-        category: circuits
+        category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MS-013"
         authors: "jMouse"
@@ -34,4 +34,6 @@ footprint:soic-20-wide-footprint("SOIC-20, 7.5 mm body") {
     outline(fabrication, width: 0.1, "M-2.75 -6.4H3.75V6.4H-3.75V-5.4Z")
     outline(silkscreen, width: 0.12, "M-5.675 -6.51H3.75M-3.75 6.51H3.75")
     outline(courtyard, width: 0.05, "M-5.95 -6.65H5.95V6.65H-5.95Z")
+    body(height: 2.65)
+    model("MD.SOIC:20-P1.27-W7.5")
 }

@@ -2,7 +2,7 @@ footprint:soic-24-wide-footprint("SOIC-24, 7.5 mm body") {
     meta {
         summary: "24-lead SOIC, 7.5 mm body, gull-wing, 1.27 mm pitch, body 7.5 × 15.4 mm"
         code: "FP.SOIC:24-P1.27-W7.5"
-        category: circuits
+        category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MS-013"
         authors: "jMouse"
@@ -38,4 +38,6 @@ footprint:soic-24-wide-footprint("SOIC-24, 7.5 mm body") {
     outline(fabrication, width: 0.1, "M-2.75 -7.7H3.75V7.7H-3.75V-6.7Z")
     outline(silkscreen, width: 0.12, "M-5.675 -7.81H3.75M-3.75 7.81H3.75")
     outline(courtyard, width: 0.05, "M-5.95 -7.95H5.95V7.95H-5.95Z")
+    body(height: 2.65)
+    model("MD.SOIC:24-P1.27-W7.5")
 }

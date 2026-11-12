@@ -19,6 +19,11 @@ public enum KiCadProperty {
 
     private final List<String> spellings;
 
+    /** What is kept by this property's name in any of its spellings; null for none. */
+    public <Value> Value writtenIn(java.util.Map<String, Value> written) {
+        return spellings.stream().map(written::get).filter(java.util.Objects::nonNull).findFirst().orElse(null);
+    }
+
     KiCadProperty(String... spellings) {
         this.spellings = List.of(spellings);
     }

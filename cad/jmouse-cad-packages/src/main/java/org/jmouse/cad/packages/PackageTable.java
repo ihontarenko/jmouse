@@ -191,6 +191,18 @@ public record PackageTable(SheetEntry entry) {
         return members;
     }
 
+    /** {@code pin-x 1 = 0 mm, 2 = 5.08 mm}: each name with a length, in the order written. */
+    public Map<String, Double> lengthsByName(String field) {
+        Map<String, Double> lengths = new LinkedHashMap<>();
+        for (SheetValue item : items(require(field))) {
+            if (!(item instanceof SheetValue.Assignment(String name, SheetValue length))) {
+                throw refused(field, "names with their lengths: 1 = 0 mm, 2 = 5.08 mm");
+            }
+            lengths.put(name, millimetres(length, field));
+        }
+        return lengths;
+    }
+
     /** {@code left 1 = -1, 2 = 1}: each name with a plain number, in the order written. */
     public Map<String, Double> places(String field) {
         Map<String, Double> places = new LinkedHashMap<>();

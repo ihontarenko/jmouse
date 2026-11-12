@@ -1,0 +1,14 @@
+model:chip-inductor-2220-hand-soldering-model("Chip inductor 2220 (5750 metric), hand soldering") {
+    meta {
+        summary: "Chip inductor 2220 (5750 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:L2220-HAND"
+        category: inductors-surface
+        tags: electronics, model, chip
+        source: "IEC 60384-22 dimensions, 2220 (5750 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [5.7, 5, 2.8], at: [0, 0, 1.4])
+    box(tin, size: [1.14, 5.02, 2.82], at: [-2.28, 0, 1.4])
+    box(tin, size: [1.14, 5.02, 2.82], at: [2.28, 0, 1.4])
+}

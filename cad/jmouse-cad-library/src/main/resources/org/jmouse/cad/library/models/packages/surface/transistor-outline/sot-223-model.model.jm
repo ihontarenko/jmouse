@@ -1,0 +1,27 @@
+# SOT-223: its body drawn by hand from its footprint's drawing and JEDEC TO-261AA, as the footprint is.
+model:sot-223-model("SOT-223") {
+    meta {
+        summary: "SOT-223 — its body drawn by jmCAD from JEDEC TO-261AA"
+        category: surface-transistor-outline
+        code: "MD.SOT:223"
+        tags: model, hand-drawn
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [6.5, 3.5, 0.8], at: [0, 0, 0.45])
+    box(plastic, size: [6.3, 3.3, 0.8], at: [0, 0, 1.25])
+    cylinder(dimple, radius: 0.35, length: 0.01, at: [-2.4, -0.9, 1.655])
+    marking(name, on: flat, size: [4.4, 1], at: [0, 0.3, 1.66], ink: marking)
+    box(tin, size: [0.7, 0.4, 0.25], at: [-2.3, -1.95, 0.85])
+    box(tin, size: [0.7, 0.25, 0.85], at: [-2.3, -2.15, 0.45])
+    box(tin, size: [0.7, 0.8, 0.25], at: [-2.3, -2.6, 0.125])
+    box(tin, size: [0.7, 0.4, 0.25], at: [0, -1.95, 0.85])
+    box(tin, size: [0.7, 0.25, 0.85], at: [0, -2.15, 0.45])
+    box(tin, size: [0.7, 0.8, 0.25], at: [0, -2.6, 0.125])
+    box(tin, size: [0.7, 0.4, 0.25], at: [2.3, -1.95, 0.85])
+    box(tin, size: [0.7, 0.25, 0.85], at: [2.3, -2.15, 0.45])
+    box(tin, size: [0.7, 0.8, 0.25], at: [2.3, -2.6, 0.125])
+    box(tin, size: [3, 0.4, 0.25], at: [0, 1.95, 0.85])
+    box(tin, size: [3, 0.25, 0.85], at: [0, 2.15, 0.45])
+    box(tin, size: [3, 0.8, 0.25], at: [0, 2.6, 0.125])
+}

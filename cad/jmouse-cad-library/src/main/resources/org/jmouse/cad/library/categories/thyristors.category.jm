@@ -1,0 +1,8 @@
+category:thyristors("Thyristors") {
+    meta {
+        category: semiconductors
+        order: 2
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

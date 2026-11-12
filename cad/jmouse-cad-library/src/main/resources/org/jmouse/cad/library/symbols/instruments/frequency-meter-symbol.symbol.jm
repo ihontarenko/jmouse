@@ -2,7 +2,7 @@ symbol:frequency-meter-symbol("Frequency meter") {
     meta {
         summary: "Frequency meter, as drawn on a schematic: a dial marked F"
         code: "SY.METER:FREQUENCY"
-        category: circuits
+        category: instruments
         tags: electronics, schematic, instrument
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

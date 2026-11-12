@@ -7,8 +7,10 @@ component:irf9540("IRF9540N", type: mosfet) {
         summary: "P-channel power MOSFET, -100 V, -23 A, 0.117 Ω"
         source: "Infineon IRF9540N datasheet"
         package: "TO-220"
-        category: circuits
+        category: transistors
         failure: short drain source
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:p-mosfet
 
@@ -37,11 +39,11 @@ component:irf9540("IRF9540N", type: mosfet) {
 
     pin:source(analog, 1, "source")
     pin:gate(analog, input, 2, "gate")
-    pin:drain(analog, output, 3, "drain; the tab is drain too")
+    pin:drain(analog, output, open-drain, 3, "drain; the tab is drain too")
 
-    footprint(to-220-3-vertical-footprint)
+    footprint("FP.TO220:3-V")
 
-    symbol(uses: p-channel-mosfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:MOSFET-P") {
         bind:failed(failed)
     }
 
@@ -78,7 +80,7 @@ component:irf9540("IRF9540N", type: mosfet) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-220-portrait) {
+    portrait(uses: "PT.TO220:3") {
         bind:marking("IRF9540N")
     }
 }

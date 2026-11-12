@@ -3,7 +3,7 @@ portrait:ssop-28-portrait("SSOP-28") {
     meta {
         summary: "28-lead SSOP, 5.3 mm body from above: pin 1 at the bottom left, beside the dot"
         code: "PT.SSOP:28-P0.65-W5.3"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-150"
         authors: "jMouse"

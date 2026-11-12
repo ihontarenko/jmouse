@@ -832,9 +832,14 @@ footprint "SOT-223, tab on pin 2" as sot-223-footprint {
   its own outline last, path data in millimetres from the pad's centre — `pad "1" surface custom at 0, 0 size 2 x 1
   "M-1 -0.5L1 -0.5L1.5 0L1 0.5L-1 0.5Z"` (`size` stays its box); no other shape may.
 - **`outline LAYER [width w] [filled] "path"`** — SVG path data on `silkscreen`, `fabrication`, `courtyard` or `copper`.
-- **`field reference|value at x, y size height [rotate degrees] [layer silkscreen|fabrication]`** — where a board prints
+- **`field reference|value at x, y size height [rotate degrees] [layer silkscreen|fabrication] [anchor start|end]`** — where a board prints
   the part's designator or its value over the footprint, each at most once (since 2026-10-23). A footprint without one
   leaves the text where the board puts it; the drawing JSON carries `fields` only when there are some.
+  The point is the letters' middle across them; along them, `anchor` says which part stands on it — their middle, the usual
+  and left unsaid, where they begin (`start`) or where they end (`end`) — since 2026-11-08, as a pcb `text` says it. A
+  footprint imported from a tool that places a text by where its letters begin (Altium, Eagle) keeps that point, since a
+  designator runs as long as it runs; the board, the Gerber silkscreen and the KiCad export (`justify left|right`) letter it
+  so.
 
 A component names the footprint its package lands on with **`footprint <slug>`**, one line, the only place that choice
 lives (`uses_footprint` in meta is refused); `meta package` stays as the package's name in words. On every save the

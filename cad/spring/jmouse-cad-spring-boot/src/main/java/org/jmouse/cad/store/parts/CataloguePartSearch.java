@@ -1,6 +1,6 @@
 package org.jmouse.cad.store.parts;
 
-import org.jmouse.cad.board.BoardModule;
+import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.document.part.PartCandidate;
 import org.jmouse.cad.document.part.PartSearchProvider;
 import org.jmouse.cad.document.part.ProviderState;
@@ -22,7 +22,7 @@ public final class CataloguePartSearch implements PartSearchProvider {
     private static final Map<String, PartCandidate.Kind> KINDS = Map.of(
             SimulationModule.COMPONENT.word(), PartCandidate.Kind.COMPONENT,
             SchematicModule.SYMBOL.word(), PartCandidate.Kind.SYMBOL,
-            BoardModule.FOOTPRINT.word(), PartCandidate.Kind.FOOTPRINT,
+            PcbModule.FOOTPRINT.word(), PartCandidate.Kind.FOOTPRINT,
             SimulationModule.CIRCUIT.word(), PartCandidate.Kind.CIRCUIT);
 
     private final CadCatalogue catalogue;
@@ -57,6 +57,6 @@ public final class CataloguePartSearch implements PartSearchProvider {
 
     private PartCandidate candidateOf(DocumentSummary summary) {
         return new PartCandidate(id(), summary.slug(), KINDS.getOrDefault(summary.kind(), PartCandidate.Kind.OTHER),
-                                 summary.title(), null, null, summary.summary(), null, null, null, summary.slug(), false);
+                                 summary.title(), null, null, summary.summary(), null, null, null, summary.slug(), false, null);
     }
 }

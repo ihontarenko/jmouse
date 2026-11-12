@@ -47,8 +47,7 @@
       record resolver, scope-confined, nested object-list arguments), driven through all three entry
       points - the dispatcher directly, the conversation runner, and an MCP client.
 
-      Same role pet-gallery and wep-app already play in this repository. Never published, and never
-      depended on by anything.
+      Never published, and never depended on by anything.
     -->
     <dependencies>
         <dependency>
@@ -84,12 +83,8 @@
         </dependency>
         <!-- To render what those methods return exactly as a client would receive it. -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

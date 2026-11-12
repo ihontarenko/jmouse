@@ -1,19 +1,18 @@
 package org.jmouse.web.mvc.mapping;
 
+import static org.jmouse.web.match.Route.*;
+
+import java.util.List;
 import org.jmouse.core.MediaTypeFactory;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.converter.MessageConverterManager;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
-import org.jmouse.web.mvc.method.converter.MessageConverterManager;
 import org.jmouse.web.mvc.resource.InternalResourceConfiguration;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.mvc.resource.ResourceHttpHandler;
 import org.jmouse.web.mvc.resource.ResourceRegistration;
-
-import java.util.List;
-
-import static org.jmouse.web.match.Route.*;
 
 /**
  * 🧷 Path mapping for serving static resources.
@@ -24,8 +23,8 @@ import static org.jmouse.web.match.Route.*;
 public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttpHandler> {
 
     private PatternMatcherResourceLoader resourceLoader;
-    private MediaTypeFactory             mediaTypeFactory;
-    private MessageConverterManager      messageConverterManager;
+    private MediaTypeFactory mediaTypeFactory;
+    private MessageConverterManager messageConverterManager;
 
     /**
      * ⚙️ Initialize mapping infrastructure and dependencies.
@@ -38,11 +37,13 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
         messageConverterManager = context.getBean(MessageConverterManager.class);
         mediaTypeFactory = context.getBean(MediaTypeFactory.class);
 
-        ResourceHandlerRegistry      handlerRegistry         = context.getBean(ResourceHandlerRegistry.class);
-        List<ResourceRegistration>   registrations           = handlerRegistry.getRegistrations();
+        ResourceHandlerRegistry handlerRegistry = context.getBean(ResourceHandlerRegistry.class);
+        List<ResourceRegistration> registrations = handlerRegistry.getRegistrations();
 
         if (registrations == null || registrations.isEmpty()) {
-            InternalResourceConfiguration internalConfiguration = context.getBean(InternalResourceConfiguration.class);
+            InternalResourceConfiguration internalConfiguration = context.getBean(
+                InternalResourceConfiguration.class
+            );
             registrations = internalConfiguration.getDefaultRegistrations();
         }
 
@@ -52,10 +53,16 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
     public void handleRegistrations(List<ResourceRegistration> registrations) {
         for (ResourceRegistration registration : registrations) {
             ResourceHttpHandler handler = new ResourceHttpHandler(
-                    registration, resourceLoader, messageConverterManager, mediaTypeFactory);
+                registration,
+                resourceLoader,
+                messageConverterManager,
+                mediaTypeFactory
+            );
 
             handler.setCacheControl(registration.getCacheControl());
-            handler.setCacheSeconds(registration.getCachePeriod() == null ? -1 : registration.getCachePeriod());
+            handler.setCacheSeconds(
+                registration.getCachePeriod() == null ? -1 : registration.getCachePeriod()
+            );
             handler.setVary(registration.getVary());
             handler.setSupportedMethods(registration.getAllow().toSupportedMethods());
             handler.setUseLastModified(registration.isUseLastModified());
@@ -93,5 +100,4 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
     protected MethodParameter getReturnParameter(ResourceHttpHandler handler) {
         return null;
     }
-
 }

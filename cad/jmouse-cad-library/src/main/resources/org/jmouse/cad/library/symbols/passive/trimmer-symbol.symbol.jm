@@ -2,7 +2,7 @@ symbol:trimmer-symbol("Trimmer") {
     meta {
         summary: "Trimming potentiometer, as drawn on a schematic: a potentiometer set once with a tool, so its wiper ends in a bar, not an arrow"
         code: "SY.RESISTOR:TRIMMER"
-        category: circuits
+        category: potentiometers
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

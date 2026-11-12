@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.jmouse.cad.packages.footprint.FootprintDrafting.rowY;
 import static org.jmouse.cad.packages.Measures.written;
@@ -78,14 +79,17 @@ final class DualInlineFootprints implements FootprintFamily {
         Map<String, String> words = new LinkedHashMap<>(outline.words());
         words.put("leads", String.valueOf(leads));
         String designated = PackageTable.designated(outline.word("designation"), words);
-        String title = name.toUpperCase() + "-" + leads + ", " + written(row) + " mm rows";
-        String summary = leads + "-lead dual in-line package, through-hole, " + written(pitch) + " mm pitch, rows "
-                + written(row) + " mm apart";
+        // A part of its own on the dual in-line grid — a display, a switch — is called what it is, not a package.
+        Optional<String> part = outline.optionalWord("part");
+        String title = part.map(named -> Character.toUpperCase(named.charAt(0)) + named.substring(1))
+                .orElse(name.toUpperCase() + "-" + leads) + ", " + written(row) + " mm rows";
+        String summary = leads + "-lead " + part.orElse("dual in-line package") + ", through-hole, " + written(pitch)
+                + " mm pitch, rows " + written(row) + " mm apart";
         List<String> notes = List.of(
                 "Generated from footprint-standards/dual-inline-packages.sht#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead " + written(outline.length("lead")) + " × " + written(outline.length("thickness")) + " at most: drill "
                         + written(drill) + ", pad " + written(pad) + ", pin 1 square; body " + written(bodyWidth) + " × " + written(bodyLength) + ".");
-        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), "through-hole", outline.standard(),
-                rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), outline.word("category"), "through-hole", outline.standard(),
+                rules, notes, new FootprintDrawing(pads, outlines, outline));
     }
 }

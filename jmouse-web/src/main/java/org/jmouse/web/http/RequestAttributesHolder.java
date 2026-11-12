@@ -3,7 +3,7 @@ package org.jmouse.web.http;
 /**
  * 🔒 Thread-bound holder for {@link RequestAttributes} and request-scoped metadata.
  *
- * <p>This class maintains per-thread request data using {@link InheritableThreadLocal},
+ * <p>This class maintains per-thread request data using {@link ThreadLocal},
  * allowing scoped access to {@link RequestPath}, {@link QueryParameters}, {@link RequestRoute}, and {@link RequestHeaders}.
  *
  * <p>Used internally by the Dispatcher, filters, interceptors, and other framework components
@@ -25,12 +25,22 @@ package org.jmouse.web.http;
  */
 public class RequestAttributesHolder {
 
-    private static final ThreadLocal<RequestAttributes> ATTRIBUTES_THREAD_LOCAL         = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestPath>       REQUEST_PATH_THREAD_LOCAL       = new InheritableThreadLocal<>();
-    private static final ThreadLocal<QueryParameters>   QUERY_PARAMETERS_THREAD_LOCAL   = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestRoute>      REQUEST_ROUTE_THREAD_LOCAL      = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestHeaders>    REQUEST_HEADERS_THREAD_LOCAL    = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestParameters> REQUEST_PARAMETERS_THREAD_LOCAL = new InheritableThreadLocal<>();
+    /** Clears all request metadata on the current thread. Child threads do not inherit servlet state. */
+    public static void clear() {
+        ATTRIBUTES_THREAD_LOCAL.remove();
+        REQUEST_PATH_THREAD_LOCAL.remove();
+        QUERY_PARAMETERS_THREAD_LOCAL.remove();
+        REQUEST_ROUTE_THREAD_LOCAL.remove();
+        REQUEST_HEADERS_THREAD_LOCAL.remove();
+        REQUEST_PARAMETERS_THREAD_LOCAL.remove();
+    }
+
+    private static final ThreadLocal<RequestAttributes> ATTRIBUTES_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<RequestPath> REQUEST_PATH_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<QueryParameters> QUERY_PARAMETERS_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<RequestRoute> REQUEST_ROUTE_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<RequestHeaders> REQUEST_HEADERS_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<RequestParameters> REQUEST_PARAMETERS_THREAD_LOCAL = new ThreadLocal<>();
 
     /**
      * 🧵 Get the current {@link RequestAttributes} bound to the thread.
@@ -104,8 +114,9 @@ public class RequestAttributesHolder {
         RequestPath requestPath = REQUEST_PATH_THREAD_LOCAL.get();
 
         if (requestPath == null) {
-            requestPath = (RequestPath) getRequestAttributes()
-                    .getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
+            requestPath = (RequestPath) getRequestAttributes().getAttribute(
+                RequestPath.REQUEST_PATH_ATTRIBUTE
+            );
         }
 
         return requestPath;
@@ -136,8 +147,9 @@ public class RequestAttributesHolder {
         RequestRoute requestRoute = REQUEST_ROUTE_THREAD_LOCAL.get();
 
         if (requestRoute == null) {
-            requestRoute = (RequestRoute) getRequestAttributes()
-                    .getAttribute(RequestRoute.REQUEST_ROUTE_ATTRIBUTE);
+            requestRoute = (RequestRoute) getRequestAttributes().getAttribute(
+                RequestRoute.REQUEST_ROUTE_ATTRIBUTE
+            );
         }
 
         return requestRoute;
@@ -168,8 +180,9 @@ public class RequestAttributesHolder {
         RequestHeaders requestHeaders = REQUEST_HEADERS_THREAD_LOCAL.get();
 
         if (requestHeaders == null) {
-            requestHeaders = (RequestHeaders) getRequestAttributes()
-                    .getAttribute(RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
+            requestHeaders = (RequestHeaders) getRequestAttributes().getAttribute(
+                RequestHeaders.REQUEST_HEADERS_ATTRIBUTE
+            );
         }
 
         return requestHeaders;
@@ -200,8 +213,9 @@ public class RequestAttributesHolder {
         QueryParameters queryParameters = QUERY_PARAMETERS_THREAD_LOCAL.get();
 
         if (queryParameters == null) {
-            queryParameters = (QueryParameters) getRequestAttributes()
-                    .getAttribute(QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
+            queryParameters = (QueryParameters) getRequestAttributes().getAttribute(
+                QueryParameters.QUERY_PARAMETERS_ATTRIBUTE
+            );
         }
 
         return queryParameters;
@@ -245,8 +259,9 @@ public class RequestAttributesHolder {
         RequestParameters requestParameters = REQUEST_PARAMETERS_THREAD_LOCAL.get();
 
         if (requestParameters == null) {
-            requestParameters = (RequestParameters) getRequestAttributes()
-                    .getAttribute(RequestParameters.REQUEST_PARAMETERS_ATTRIBUTE);
+            requestParameters = (RequestParameters) getRequestAttributes().getAttribute(
+                RequestParameters.REQUEST_PARAMETERS_ATTRIBUTE
+            );
         }
 
         return requestParameters;

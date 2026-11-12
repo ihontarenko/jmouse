@@ -7,8 +7,10 @@ component:varistor-470v("Varistor, 470 V", type: varistor) {
         summary: "Metal-oxide varistor, 14 mm disc, 470 V at 1 mA"
         source: "TDK EPCOS S14K300 datasheet: varistor voltage 470 V ±10 % at 1 mA"
         package: "RV_Disc_D15.5mm"
-        category: circuits
+        category: protection
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:V_reference(470 V, "varistor voltage: the voltage at 1 mA, 423 V to 517 V")
@@ -22,7 +24,9 @@ component:varistor-470v("Varistor, 470 V", type: varistor) {
     pin:terminal_one(analog, 1, "first lead")
     pin:terminal_two(analog, 2, "second lead")
 
-    symbol(uses: varistor-symbol) {
+    footprint("FP.RV:D15.5-P7.5")
+
+    symbol(uses: "SY.PROTECTION:VARISTOR") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -53,7 +57,7 @@ component:varistor-470v("Varistor, 470 V", type: varistor) {
     }
 
     # How it looks in the hand: a blue disc printed with its voltage code.
-    portrait(uses: varistor-portrait) {
+    portrait(uses: "PT.VARISTOR:DISC") {
         bind:V_reference(V_reference)
     }
 }

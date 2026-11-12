@@ -8,14 +8,14 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
     </parent>
 
     <artifactId>jmouse-cad-live</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - CAD Live</name>
     <description>The live circuit socket beside jmCAD's API at /jmouse/cad/live: one running circuit per socket, stepped on the server and streamed as binary frames of what its probes read</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-live</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-live</url>
 
     <properties>
         <java.version>21</java.version>

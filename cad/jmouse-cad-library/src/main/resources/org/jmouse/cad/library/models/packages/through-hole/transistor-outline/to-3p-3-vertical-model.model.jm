@@ -1,0 +1,16 @@
+model:to-3p-3-vertical-model("TO-3P-3, standing") {
+    meta {
+        summary: "TO-3P-3, standing — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.TO3P:3-V"
+        category: through-hole-transistor-outline
+        tags: electronics, model, inline
+        source: "JEITA SC-65"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [15.6, 4.8, 19], at: [0, -0.1, 10.5])
+    box(tin, size: [1.12, 1.12, 2.6], at: [-5.45, 0, -0.3])
+    box(tin, size: [1.12, 1.12, 2.6], at: [0, 0, -0.3])
+    box(tin, size: [1.12, 1.12, 2.6], at: [5.45, 0, -0.3])
+    marking(name, on: flat, size: [12.48, 5.7], at: [0, 2.31, 10.5], rotate: [90, 0, 180], ink: marking)
+}

@@ -8,16 +8,19 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
     </parent>
 
     <artifactId>jmouse-cad-plugin-kicad</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - CAD Plugin KiCad</name>
     <description>KiCad designs read into documents, circuits written as KiCad schematics, and the KiCad libraries installed on the server searched for parts.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-plugin-kicad</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-plugin-kicad</url>
 
     <properties>
+        <!-- what a reader is told of the plugin: one line, and the kind it is -->
+        <plugin.summary>KiCad designs in, schematics out</plugin.summary>
+        <plugin.category>Formats</plugin.category>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -44,6 +47,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Its settings, read from the engine's one settings tree -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-settings</artifactId>
+        </dependency>
         <!-- The format itself: KiCad designs read, schematics written, installed libraries indexed -->
         <dependency>
             <groupId>org.jmouse</groupId>
@@ -61,6 +69,22 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-library</artifactId>
+        </dependency>
+        <!-- The one refiling of the KiCad documents a library folder held before each KiCad library was a category
+             (KiCadLibraryRefiling): its tool writes the folder. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-folder</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

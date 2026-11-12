@@ -38,6 +38,10 @@ import java.util.regex.Pattern;
  * {@code code "FP.CHIP:R0603"}. An import lands a part naming the
  * KiCad id on ours — nothing converted, no copy of a package the library already draws —, and an export writes ours as
  * the KiCad id, so the design opens in KiCad on its own libraries. Pads are numbered alike on both sides.</p>
+ *
+ * <p>A <em>footprint family</em> covers every size of a package written once ({@link FootprintFamily}):
+ * {@code footprint "Capacitor_THT:CP_Radial_D{diameter}mm_P{pitch}mm"}, {@code code "FP.RADIAL:CP-D{diameter}-P{pitch}"}. It is
+ * a way in only; a size the library does not draw finds no footprint and is converted as KiCad draws it.</p>
  */
 public final class KiCadLibraryMap {
 
@@ -68,7 +72,7 @@ public final class KiCadLibraryMap {
         }
     }
 
-    public static final KiCadLibraryMap EMPTY = new KiCadLibraryMap(Map.of(), Map.of(), List.of(), Map.of(), Set.of());
+    public static final KiCadLibraryMap EMPTY = new KiCadLibraryMap(Map.of(), Map.of(), List.of(), Map.of(), List.of(), Set.of());
 
     private static final String COUNT = "{count}";
     private static final String NUMBER = "{number}";
@@ -103,10 +107,12 @@ public final class KiCadLibraryMap {
     private final Map<String, Drawing> drawings;
     private final List<Family> families;
     private final Map<String, String> footprints;
+    private final List<FootprintFamily> footprintFamilies;
     private final Set<String> boxedDesignators;
 
     private KiCadLibraryMap(Map<String, Mapping> mappings, Map<String, Drawing> drawings, List<Family> families,
-                            Map<String, String> footprints, Set<String> boxedDesignators) {
+                            Map<String, String> footprints, List<FootprintFamily> footprintFamilies, Set<String> boxedDesignators) {
+        this.footprintFamilies = List.copyOf(footprintFamilies);
         this.boxedDesignators = Set.copyOf(boxedDesignators);
         // In the order written: a component two symbols stand for is exported as the first.
         this.mappings = Collections.unmodifiableMap(new LinkedHashMap<>(mappings));
@@ -137,12 +143,17 @@ public final class KiCadLibraryMap {
         Map<String, Drawing> drawings = new LinkedHashMap<>();
         List<Family> families = new ArrayList<>();
         Map<String, String> footprints = new LinkedHashMap<>();
+        List<FootprintFamily> footprintFamilies = new ArrayList<>();
         for (SheetEntry entry : map.entries()) {
             Optional<String> footprint = entry.value("footprint").map(KiCadLibraryMap::word);
             if (footprint.isPresent()) {
                 String code = entry.value("code").map(KiCadLibraryMap::word).orElseThrow(() ->
                         new IllegalArgumentException("The footprint '" + entry.id() + "' names no code"));
-                footprints.put(footprint.get(), code);
+                if (FootprintFamily.writes(footprint.get())) {
+                    footprintFamilies.add(FootprintFamily.of(footprint.get(), code));
+                } else {
+                    footprints.put(footprint.get(), code);
+                }
                 continue;
             }
             Optional<String> symbol = entry.value("symbol").map(KiCadLibraryMap::word);
@@ -172,15 +183,22 @@ public final class KiCadLibraryMap {
         Set<String> boxed = new LinkedHashSet<>();
         map.field("boxed-designators").ifPresent(field -> (field.value() instanceof SheetValue.Sequence sequence
                 ? sequence.items() : List.of(field.value())).forEach(item -> boxed.add(word(item))));
-        return new KiCadLibraryMap(mappings, drawings, families, footprints, boxed);
+        return new KiCadLibraryMap(mappings, drawings, families, footprints, footprintFamilies, boxed);
     }
 
-    /** The code of this library's footprint a KiCad footprint's library id stands for, when the map pairs them: the way in. */
+    /**
+     * The code of this library's footprint a KiCad footprint's library id stands for, when the map pairs them: the way in. An entry naming
+     * the id exactly is asked first, then the families in the order written.
+     */
     public Optional<String> footprintCodeOf(String libraryId) {
-        return Optional.ofNullable(footprints.get(libraryId));
+        return Optional.ofNullable(footprints.get(libraryId))
+                .or(() -> footprintFamilies.stream().flatMap(family -> family.codeOf(libraryId).stream()).findFirst());
     }
 
-    /** The KiCad library id the footprint of this code is written as — the first entry pairing it —: the way back. */
+    /**
+     * The KiCad library id the footprint of this code is written as — the first exact entry pairing it —: the way back. A family reads
+     * a part of an id it cannot write back — a body's length KiCad names and our code does not —, so it is no way back.
+     */
     public Optional<String> footprintIdOf(String code) {
         return footprints.entrySet().stream().filter(entry -> entry.getValue().equals(code))
                 .map(Map.Entry::getKey).findFirst();

@@ -1,5 +1,6 @@
 package org.jmouse.ai.embeddings;
 
+import org.jmouse.http.client.HttpEndpoint;
 import org.jmouse.ai.model.AiCapability;
 import org.jmouse.ai.provider.ProviderSettings;
 
@@ -53,7 +54,7 @@ public final class ManagedTokenCounter implements TokenCounter {
     private Count tokenize(ProviderSettings settings, List<String> inputs, Policy policy, CallLimits limits) {
         var endpoint = EmbeddingTransport.requireEndpoint(policy.endpoint().toString());
         if (!TEI.equals(settings.providerName()) || !policy.tokenizer().equals(settings.model())
-                || !EmbeddingTransport.sameOrigin(EmbeddingTransport.requireEndpoint(settings.apiUrl()), endpoint)) {
+                || !HttpEndpoint.sameOrigin(EmbeddingTransport.requireEndpoint(settings.apiUrl()), endpoint)) {
             throw new EmbeddingException(EmbeddingException.Reason.CONFIGURATION, null);
         }
 

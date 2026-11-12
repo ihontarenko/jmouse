@@ -1,15 +1,16 @@
 package org.jmouse.jdbc.transaction;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Objects;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.exception.JdbcAccessException;
 import org.jmouse.jdbc.transaction.ConnectionCustomizer.RestoreAction;
 import org.jmouse.transaction.SavepointSupport;
 import org.jmouse.transaction.TransactionDefinition;
 import org.jmouse.transaction.TransactionSession;
+import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * JDBC-backed {@link TransactionSession} implementation.
@@ -39,42 +40,43 @@ import java.sql.SQLException;
  * }</pre>
  *
  * <p>
- * ⚠️ This session is not thread-safe. It is intended to be used within a single
+ * This session is not thread-safe. It is intended to be used within a single
  * transaction boundary and a single thread.
  *
  * @author jMouse
  */
 public final class JdbcTransactionSession implements TransactionSession, SavepointSupport {
 
-
     /**
      * Provider for obtaining and releasing JDBC connections.
      */
-    private final ConnectionProvider    provider;
+    private final ConnectionProvider provider;
+    private final TransactionContextHolder contexts;
 
     /**
      * Applies transactional settings (isolation, readOnly, etc.) and provides a restore action.
      */
-    private final ConnectionCustomizer  connectionCustomizer;
+    private final ConnectionCustomizer connectionCustomizer;
 
     /**
      * Action used to restore connection state after the transaction completes.
      */
-    private       RestoreAction         restoreAction = RestoreAction.noop();
+    private RestoreAction restoreAction = RestoreAction.noop();
 
     /**
      * The active transactional connection (non-null while active).
      */
-    private       Connection            connection;
-    private       ConnectionState       originalState;
-    private       boolean               started;
-    private       boolean               completed;
-    private       boolean               resourceBound;
+    private Connection connection;
+    private ConnectionState originalState;
+    private boolean started;
+    private boolean completed;
+    private boolean resourceBound;
+    private JdbcResourceHolder boundResource;
 
     /**
      * Definition captured by {@link #configure(TransactionDefinition)} and applied on {@link #begin()}.
      */
-    private       TransactionDefinition pendingDefinition;
+    private TransactionDefinition pendingDefinition;
 
     /**
      * Creates a new {@code JdbcTransactionSession}.
@@ -83,8 +85,17 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
      * @param connectionCustomizer customizer responsible for applying/restoring connection settings
      */
     public JdbcTransactionSession(ConnectionProvider provider, ConnectionCustomizer connectionCustomizer) {
-        this.provider = provider;
-        this.connectionCustomizer = connectionCustomizer;
+        this(provider, connectionCustomizer, TransactionContextAccessSupport.current());
+    }
+
+    public JdbcTransactionSession(
+        ConnectionProvider provider,
+        ConnectionCustomizer connectionCustomizer,
+        TransactionContextHolder contexts
+    ) {
+        this.provider = Objects.requireNonNull(provider, "provider");
+        this.connectionCustomizer = Objects.requireNonNull(connectionCustomizer, "connectionCustomizer");
+        this.contexts = Objects.requireNonNull(contexts, "contexts");
     }
 
     /**
@@ -94,9 +105,22 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
      *
      * @param definition transaction definition to apply
      */
+    private void requireActiveTransaction() {
+        if (!started || connection == null || completed) {
+            throw new IllegalStateException("No active transaction in this session");
+        }
+    }
+
+    boolean belongsTo(Object resourceKey) {
+        return provider.getResourceKey() == resourceKey;
+    }
+
     @Override
     public void configure(TransactionDefinition definition) {
-        this.pendingDefinition = definition;
+        if (connection != null) {
+            throw new IllegalStateException("Cannot configure an active transaction session");
+        }
+        this.pendingDefinition = Objects.requireNonNull(definition, "definition");
     }
 
     // Apply isolation/readOnly before disabling autocommit is acceptable.
@@ -126,8 +150,8 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
             connection.setAutoCommit(false);
             started = true;
             completed = false;
-            TransactionContextAccessSupport.bindResource(
-                    JdbcResourceHolder.class, new JdbcResourceHolder(connection, provider.getResourceKey()));
+            boundResource = new JdbcResourceHolder(connection, provider.getResourceKey());
+            contexts.bindResource(JdbcResourceHolder.class, boundResource);
             resourceBound = true;
         } catch (SQLException error) {
             JdbcAccessException failure = new JdbcAccessException(error);
@@ -156,9 +180,11 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
      */
     @Override
     public void commit() {
+        requireActiveTransaction();
         try {
             connection.commit();
             completed = true;
+            boundResource.markCompleted();
         } catch (SQLException e) {
             throw new JdbcAccessException(e);
         }
@@ -171,9 +197,11 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
      */
     @Override
     public void rollback() {
+        requireActiveTransaction();
         try {
             connection.rollback();
             completed = true;
+            boundResource.markCompleted();
         } catch (SQLException e) {
             throw new JdbcAccessException(e);
         }
@@ -210,62 +238,72 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
         if (connection == null) {
             return;
         }
-        RuntimeException failure = null;
+        Throwable failure = null;
         boolean safeToRestore = true;
-        try {
-            if (started && !completed) {
-                try {
-                    connection.rollback();
-                    completed = true;
-                } catch (SQLException error) {
-                    failure = new JdbcAccessException(error);
-                    safeToRestore = false;
-                }
-            }
-            // Changing auto-commit can commit a transaction: restore only after it was completed.
-            if (safeToRestore) {
-                try {
-                    restoreAction.restore();
-                } catch (SQLException error) {
-                    failure = append(failure, new JdbcAccessException(error));
-                }
-                if (originalState != null) {
-                    try {
-                        originalState.restore(connection);
-                    } catch (SQLException error) {
-                        failure = append(failure, new JdbcAccessException(error));
-                    }
-                }
-            }
-        } finally {
+        if (started && !completed) {
             try {
-                if (resourceBound) {
-                    TransactionContextAccessSupport.unbindResource(JdbcResourceHolder.class);
-                }
-            } finally {
+                connection.rollback();
+                completed = true;
+            } catch (SQLException | RuntimeException | Error exception) {
+                failure = translate(exception);
+                safeToRestore = false;
+            }
+        }
+        // Restoring auto-commit may commit pending work. Never do it after failed rollback.
+        if (safeToRestore) {
+            try {
+                restoreAction.restore();
+            } catch (SQLException | RuntimeException | Error exception) {
+                failure = append(failure, translate(exception));
+            }
+            if (originalState != null) {
                 try {
-                    provider.release(connection);
-                } finally {
-                    connection = null;
-                    originalState = null;
-                    pendingDefinition = null;
-                    restoreAction = RestoreAction.noop();
-                    started = false;
-                    completed = false;
-                    resourceBound = false;
+                    originalState.restore(connection);
+                } catch (SQLException | RuntimeException | Error exception) {
+                    failure = append(failure, translate(exception));
                 }
             }
         }
-        if (failure != null) {
-            throw failure;
+        try {
+            if (resourceBound) {
+                contexts.unbindResource(JdbcResourceHolder.class);
+            }
+        } catch (RuntimeException | Error exception) {
+            failure = append(failure, exception);
+        }
+        try {
+            provider.release(connection);
+        } catch (RuntimeException | Error exception) {
+            failure = append(failure, exception);
+        } finally {
+            connection = null;
+            originalState = null;
+            pendingDefinition = null;
+            restoreAction = RestoreAction.noop();
+            started = false;
+            completed = false;
+            resourceBound = false;
+            boundResource = null;
+        }
+        if (failure instanceof Error error) {
+            throw error;
+        }
+        if (failure instanceof RuntimeException exception) {
+            throw exception;
         }
     }
 
-    private static RuntimeException append(RuntimeException first, RuntimeException next) {
+    private static Throwable translate(Throwable failure) {
+        return failure instanceof SQLException sqlFailure ? new JdbcAccessException(sqlFailure) : failure;
+    }
+
+    private static Throwable append(Throwable first, Throwable next) {
         if (first == null) {
             return next;
         }
-        first.addSuppressed(next);
+        if (first != next) {
+            first.addSuppressed(next);
+        }
         return first;
     }
 
@@ -313,5 +351,4 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
             throw new JdbcAccessException(e);
         }
     }
-
 }

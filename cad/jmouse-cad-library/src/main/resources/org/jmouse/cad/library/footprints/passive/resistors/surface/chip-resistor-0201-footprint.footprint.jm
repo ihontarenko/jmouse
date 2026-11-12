@@ -2,7 +2,7 @@ footprint:chip-resistor-0201-footprint("Chip resistor 0201 (0603 metric)") {
     meta {
         summary: "Chip resistor, 0201 (0603 metric) body, reflow pads"
         code: "FP.CHIP:R0201"
-        category: circuits
+        category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 0201 (0603 metric)"
         authors: "jMouse"
@@ -15,4 +15,6 @@ footprint:chip-resistor-0201-footprint("Chip resistor 0201 (0603 metric)") {
     pad:2(surface, rounded-rectangle, at: 0.35 0, size: 0.35 x 0.4, roundness: 0.25)
     outline(fabrication, width: 0.1, "M-0.3 -0.15H0.3V0.15H-0.3Z")
     outline(courtyard, width: 0.05, "M-0.7 -0.35H0.7V0.35H-0.7Z")
+    body(height: 0.28)
+    model("MD.CHIP:R0201")
 }

@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-packages</artifactId>
     <name>jMouse - CAD Packages</name>
     <description>jMouse Framework - jmCAD standard packages: footprints and portraits worked out from package tables and land pattern rules, built as document trees.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-packages</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-packages</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-packages</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-packages</url>
     </scm>
 
     <properties>
@@ -60,7 +60,13 @@
         <!-- the footprint a package table gives -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-cad-board</artifactId>
+            <artifactId>jmouse-cad-pcb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- The 3D model document its tables draw models into -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-mesh</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- the portrait a package table gives -->

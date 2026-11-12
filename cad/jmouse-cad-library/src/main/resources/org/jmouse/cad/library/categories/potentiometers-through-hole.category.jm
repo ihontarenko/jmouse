@@ -1,0 +1,8 @@
+category:potentiometers-through-hole("Through-hole") {
+    meta {
+        category: potentiometers
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

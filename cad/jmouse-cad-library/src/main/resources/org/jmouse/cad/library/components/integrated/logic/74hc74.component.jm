@@ -8,8 +8,10 @@ component:74hc74("74HC74", type: flip-flop) {
         summary: "Dual D-type flip-flop, positive edge, asynchronous set and reset"
         source: "Nexperia 74HC74 datasheet"
         package: "SOIC-14"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
     units:[A, B]
@@ -30,6 +32,9 @@ component:74hc74("74HC74", type: flip-flop) {
     pin:not_output(digital, output, 6 8)
     pin:GND(ground, 7)
     pin:Vcc(power, 14)
+
+    footprint("FP.SOIC:14-P1.27-W3.9")
+    footprint("FP.DIP:14-W7.62")
 
     symbol(box) {
         left([data, clock edge])

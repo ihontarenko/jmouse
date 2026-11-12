@@ -1,0 +1,8 @@
+category:resistors("Resistors") {
+    meta {
+        category: passive
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

@@ -2,7 +2,7 @@ symbol:lcd-84x48-symbol("84×48 graphic LCD module") {
     meta {
         summary: "The Nokia 5110 module: an 84×48 monochrome LCD on SPI, its screen showing the controller's display memory, three units a pixel"
         code: "SY.DISPLAY:LCD-84X48"
-        category: circuits
+        category: displays
         tags: electronics, schematic, display
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

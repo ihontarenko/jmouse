@@ -1,0 +1,17 @@
+model:axial-diode-do-41-pitch-762-horizontal-model("Axial diode DO-41 (DO-204AL), horizontal, 7.62 mm") {
+    meta {
+        summary: "Axial diode DO-41 (DO-204AL), horizontal, 7.62 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:DO-41-P7.62-H"
+        category: diodes-through-hole
+        tags: electronics, model, axial
+        source: "JEDEC DO-204 outlines"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(plastic, profile: [0, -2.6, 1.013, -2.6, 1.35, -2.262, 1.35, 2.263, 1.013, 2.6, 0, 2.6], at: [0, 0, 1.35], rotate: [0, 90, 0])
+    cylinder(marking, radius: 1.36, length: 0.624, at: [-1.664, 0, 1.35], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.385, length: 1.21, at: [-3.205, 0, 1.35], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.385, length: 2.95, at: [-3.81, 0, -0.125])
+    cylinder(tin, radius: 0.385, length: 1.21, at: [3.205, 0, 1.35], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.385, length: 2.95, at: [3.81, 0, -0.125])
+}

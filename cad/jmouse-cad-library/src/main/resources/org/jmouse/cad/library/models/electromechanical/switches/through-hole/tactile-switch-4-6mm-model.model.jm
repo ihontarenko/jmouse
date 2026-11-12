@@ -1,0 +1,28 @@
+model:tactile-switch-4-6mm-model("Tactile switch, 6 × 6 mm, 4.5 mm rows") {
+    meta {
+        summary: "Tactile switch, 6 × 6 mm, 4.5 mm rows — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SW:TACT-6X6"
+        category: switches-through-hole
+        tags: electronics, model, dual-inline
+        source: "the makers' 6 mm through-hole tact switch (Omron B3F-1000): leads 6.5 mm apart along a side joined inside"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [6, 6, 1.9], at: [0, 0, 1.45])
+    box(housing, size: [5.7, 5.7, 1.9], at: [0, 0, 3.35])
+    cylinder(dimple, radius: 0.4, length: 0.01, at: [-1.85, 1.85, 4.305])
+    marking(name, on: flat, size: [4.5, 2.1], at: [0, 0, 4.31], ink: marking)
+    cylinder(dimple, radius: 0.6, length: 0.01, at: [0, 2.25, 4.305])
+    box(tin, size: [1.52, 0.375, 0.25], at: [-2.25, 3.188, 2.4])
+    box(tin, size: [1.52, 0.25, 1.9], at: [-2.25, 3.25, 1.45])
+    box(tin, size: [0.46, 0.25, 3.5], at: [-2.25, 3.25, -1.25])
+    box(tin, size: [1.52, 0.375, 0.25], at: [-2.25, -3.187, 2.4])
+    box(tin, size: [1.52, 0.25, 1.9], at: [-2.25, -3.25, 1.45])
+    box(tin, size: [0.46, 0.25, 3.5], at: [-2.25, -3.25, -1.25])
+    box(tin, size: [1.52, 0.375, 0.25], at: [2.25, -3.187, 2.4])
+    box(tin, size: [1.52, 0.25, 1.9], at: [2.25, -3.25, 1.45])
+    box(tin, size: [0.46, 0.25, 3.5], at: [2.25, -3.25, -1.25])
+    box(tin, size: [1.52, 0.375, 0.25], at: [2.25, 3.188, 2.4])
+    box(tin, size: [1.52, 0.25, 1.9], at: [2.25, 3.25, 1.45])
+    box(tin, size: [0.46, 0.25, 3.5], at: [2.25, 3.25, -1.25])
+}

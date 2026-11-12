@@ -70,8 +70,7 @@ public final class TermReading {
         Set<String> words = grammar.clauseWords();
         List<LineGrammar.Slot> positional = grammar.slots().stream()
                 .filter(slot -> !slot.role().equals(grammar.termName()))
-                .filter(slot -> slot.namedBy() == null || slot.mark() != null && slot.mark().equals(grammar.termWord())
-                        && slot.termWord() == null).toList();
+                .filter(slot -> grammar.termArgumentName(slot) == null).toList();
         LineGrammar.Slot settingsSlot = grammar.slots().stream().filter(slot -> slot.value() == Values.SETTINGS).findFirst()
                 .orElse(null);
         List<SettingsNode.Setting> settings = new ArrayList<>();

@@ -2,16 +2,17 @@ package org.jmouse.security.web.csrf;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import org.jmouse.security.web.session.SessionCreationPolicy;
-import org.jmouse.web.http.RequestContext;
-import org.jmouse.web.servlet.filter.BeanFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Objects;
 import java.util.Set;
+import org.jmouse.security.web.session.SessionCreationPolicy;
+import org.jmouse.web.http.RequestContext;
+import org.jmouse.web.servlet.filter.BeanFilter;
 
 public final class CsrfFilter implements BeanFilter {
+
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS", "TRACE");
     private final CsrfTokenRepository repository;
     private final SessionCreationPolicy policy;
@@ -25,10 +26,14 @@ public final class CsrfFilter implements BeanFilter {
     }
 
     @Override
-    public void doFilterInternal(RequestContext context, FilterChain chain) throws IOException, ServletException {
+    public void doFilterInternal(RequestContext context, FilterChain chain)
+        throws IOException, ServletException {
         boolean safe = SAFE_METHODS.contains(context.request().getMethod());
-        if (repository.requiresSession() && !policy.isAllowCreate()
-                && context.request().getSession(false) == null) {
+        if (
+            repository.requiresSession() &&
+            !policy.isAllowCreate() &&
+            context.request().getSession(false) == null
+        ) {
             if (safe) {
                 chain.doFilter(context.request(), context.response());
             } else {
@@ -62,7 +67,12 @@ public final class CsrfFilter implements BeanFilter {
                 supplied = parameters[0];
             }
         }
-        return supplied != null && MessageDigest.isEqual(
-                expected.value().getBytes(StandardCharsets.UTF_8), supplied.getBytes(StandardCharsets.UTF_8));
+        return (
+            supplied != null &&
+            MessageDigest.isEqual(
+                expected.value().getBytes(StandardCharsets.UTF_8),
+                supplied.getBytes(StandardCharsets.UTF_8)
+            )
+        );
     }
 }

@@ -3,7 +3,7 @@ portrait:msop-10-exposed-pad-portrait("MSOP-10, exposed-pad") {
     meta {
         summary: "10-lead MSOP, 3 mm body, 0.5 mm pitch, exposed pad from above: pin 1 at the bottom left, beside the dot"
         code: "PT.MSOP:10-P0.5-EP"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-187 BA-T"
         authors: "jMouse"

@@ -1,0 +1,8 @@
+category:instruments("Instruments") {
+    meta {
+        summary: "What a bench measures and shows with"
+        order: 16
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

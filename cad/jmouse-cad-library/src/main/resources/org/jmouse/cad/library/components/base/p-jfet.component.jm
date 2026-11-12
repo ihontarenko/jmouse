@@ -5,14 +5,16 @@ component:p-jfet("P-channel JFET", type: jfet) {
     meta {
         designator: J
         summary: "P-channel JFET, the level-1 model at its defaults"
-        category: circuits
+        category: base-models
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:junction-field-effect-transistor
 
     parameter:polarity(-1, "p-channel")
 
-    symbol(uses: p-channel-jfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:JFET-P") {
         bind:failed(failed)
     }
 }

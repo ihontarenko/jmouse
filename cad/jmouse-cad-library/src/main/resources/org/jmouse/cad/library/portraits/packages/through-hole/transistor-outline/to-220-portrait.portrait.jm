@@ -5,7 +5,7 @@ portrait:to-220-portrait("TO-220") {
     meta {
         summary: "A TO-220 package from the front: metal tab with its hole, black body, three legs, pin 1 on the left"
         code: "PT.TO220:3"
-        category: circuits
+        category: through-hole-transistor-outline
         tags: electronics, portrait, package, through-hole
         source: "JEDEC TO-220AB"
         authors: "jMouse"

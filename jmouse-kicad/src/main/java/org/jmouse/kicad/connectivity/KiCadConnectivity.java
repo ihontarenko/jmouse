@@ -14,6 +14,7 @@ import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -96,15 +97,22 @@ public final class KiCadConnectivity {
         private record Naming(int strength, String name) {
         }
 
-        private static final int GLOBAL = 0;
+        // KiCad's own order: a global label, then a power symbol, then a hidden power pin, whatever its name.
+        private static final int GLOBAL = -2;
+        private static final int POWER_SYMBOL = -1;
+        private static final int POWER_PIN = 0;
         private static final int HIERARCHICAL = 1;
         private static final int LOCAL = 2;
+        // A box's pin names what it meets as its child sheet's net, weaker than any label: KiCad's SHEET_PIN driver.
+        private static final int SHEET_PIN = 3;
 
         void sheet(SheetInstance instance) {
             KiCadSchematic schematic = instance.schematic();
             String sheet = instance.path();
             List<String> pointKeys = new ArrayList<>();
             List<KiCadPoint> points = new ArrayList<>();
+            // What stands at each point: a wire takes a label or a junction anywhere along it, the rest only at its ends.
+            List<PointKind> kinds = new ArrayList<>();
             // Every connection point of the sheet, each a key of its own place on it.
             for (KiCadSymbolInstance symbol : schematic.symbols()) {
                 KiCadSymbolDefinition definition = schematic.definitionOf(symbol).orElse(null);
@@ -117,12 +125,12 @@ public final class KiCadConnectivity {
                     String pinKey = "pin:" + sheet + ":" + symbol.uuid() + ":" + pin.number();
                     if (definition.power()) {
                         // A power symbol's pin is its net's name across the design, never a pin of the net.
-                        name(pinKey, GLOBAL, symbol.value());
+                        name(pinKey, POWER_SYMBOL, symbol.value());
                         union(pinKey, "global:" + symbol.value());
                     } else {
                         pins.put(pinKey, new KiCadConnection(sheet, reference, unitLetter(definition, symbol), symbol, pin, at));
                         if (pin.joinsByName()) {
-                            name(pinKey, GLOBAL, pin.name());
+                            name(pinKey, POWER_PIN, pin.name());
                             union(pinKey, "global:" + pin.name());
                         }
                     }
@@ -130,12 +138,14 @@ public final class KiCadConnectivity {
                     union(pinKey, point);
                     pointKeys.add(point);
                     points.add(at);
+                    kinds.add(PointKind.PIN);
                 }
             }
             for (KiCadLabel label : schematic.labels()) {
                 String point = point(sheet, label.at());
                 pointKeys.add(point);
                 points.add(label.at());
+                kinds.add(PointKind.LABEL);
                 switch (label.kind()) {
                     case GLOBAL -> {
                         name(point, GLOBAL, label.text());
@@ -151,18 +161,22 @@ public final class KiCadConnectivity {
                     }
                 }
             }
-            // The pins of the boxes this sheet places: each joined to its child's hierarchical labels of its name.
+            // The pins of the boxes this sheet places: each joined to its child's hierarchical labels of its name. A net
+            // reaching one is never a lone pin's — it goes on into the child, even where the child is not read with it.
             for (KiCadSheet box : schematic.sheets()) {
                 for (KiCadSheet.Pin pin : box.pins()) {
                     String point = point(sheet, pin.at());
                     pointKeys.add(point);
                     points.add(pin.at());
+                    kinds.add(PointKind.PIN);
+                    name(point, SHEET_PIN, displayPath(instance) + box.name() + "/" + pin.name());
                     union(point, "hierarchical:" + sheet + "/" + box.uuid() + ":" + pin.name());
                 }
             }
             for (KiCadPoint junction : schematic.junctions()) {
                 pointKeys.add(point(sheet, junction));
                 points.add(junction);
+                kinds.add(PointKind.JUNCTION);
             }
             for (KiCadPoint mark : schematic.noConnects()) {
                 excused.add(point(sheet, mark));
@@ -172,9 +186,18 @@ public final class KiCadConnectivity {
                 for (KiCadPoint corner : wire.points()) {
                     pointKeys.add(point(sheet, corner));
                     points.add(corner);
+                    kinds.add(PointKind.WIRE_END);
                 }
             }
-            // A wire joins the ends of its segments, and every point that lies on one of them.
+            // A wire joins what stands at the ends of its segments, and along them a junction, or a label no pin stands on —
+            // a label on a pin is that pin's —, as KiCad joins a wire (checked with kicad-cli's netlist). A pin, a sheet's pin or
+            // another wire's end meeting its middle is joined only by a junction standing there, which joins all at its point.
+            Set<String> pinPoints = new HashSet<>();
+            for (int point = 0; point < pointKeys.size(); point++) {
+                if (kinds.get(point) == PointKind.PIN) {
+                    pinPoints.add(pointKeys.get(point));
+                }
+            }
             for (KiCadWire wire : schematic.wires()) {
                 for (int index = 1; index < wire.points().size(); index++) {
                     KiCadPoint start = wire.points().get(index - 1);
@@ -182,6 +205,12 @@ public final class KiCadConnectivity {
                     String segment = point(sheet, start);
                     union(segment, point(sheet, end));
                     for (int point = 0; point < points.size(); point++) {
+                        boolean onItsEnds = points.get(point).sameAs(start) || points.get(point).sameAs(end);
+                        PointKind kind = kinds.get(point);
+                        boolean takenAlong = kind == PointKind.JUNCTION || kind == PointKind.LABEL && !pinPoints.contains(pointKeys.get(point));
+                        if (!onItsEnds && !takenAlong) {
+                            continue;
+                        }
                         if (points.get(point).liesOn(start, end)) {
                             union(segment, pointKeys.get(point));
                         }
@@ -189,6 +218,11 @@ public final class KiCadConnectivity {
                 }
             }
             this.points.addAll(pointKeys);
+        }
+
+        /** What stands at a point of a sheet, as far as a wire through it is concerned. */
+        private enum PointKind {
+            PIN, LABEL, JUNCTION, WIRE_END
         }
 
         /** A unit's letter, {@code A} for unit 1, when the symbol has more than one; else empty. */

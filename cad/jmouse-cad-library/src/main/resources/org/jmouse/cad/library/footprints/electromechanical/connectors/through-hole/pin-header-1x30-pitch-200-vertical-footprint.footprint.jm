@@ -2,7 +2,7 @@ footprint:pin-header-1x30-pitch-200-vertical-footprint("Pin header, 2.00 mm pitc
     meta {
         summary: "Pin header, 2.00 mm pitch, 1 row of 30, upright, through-hole"
         code: "FP.HDR:1X30-P2-V"
-        category: circuits
+        category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60603-13 grid"
         authors: "jMouse"
@@ -44,4 +44,6 @@ footprint:pin-header-1x30-pitch-200-vertical-footprint("Pin header, 2.00 mm pitc
     outline(silkscreen, width: 0.12, "M-1.11 -30.11H1.11V30.11H-1.11Z")
     outline(silkscreen, filled, "M-1.91 -29A0.3 0.3 0 1 0 -1.31 -29A0.3 0.3 0 1 0 -1.91 -29Z")
     outline(courtyard, width: 0.05, "M-1.5 -30.5H1.5V30.5H-1.5Z")
+    body(height: 6.1)
+    model("MD.HDR:1X30-P2-V")
 }

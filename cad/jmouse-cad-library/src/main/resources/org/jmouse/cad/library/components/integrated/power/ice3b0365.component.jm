@@ -21,8 +21,10 @@ component:ice3b0365("ICE3B0365", type: pwm-controller) {
         summary: "Off-line SMPS current-mode controller with integrated 650 V CoolMOS, 67 kHz, 6.45 Ohm"
         source: "Infineon CoolSET-F3 datasheet v2.3, 2013-04-02"
         package: "PG-DIP-8"
-        category: circuits
+        category: power
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -75,6 +77,8 @@ component:ice3b0365("ICE3B0365", type: pwm-controller) {
     pin:drain(analog, 4, "Drain of the 650 V CoolMOS; pins 4 and 5 are shorted inside the DIP-8")
     pin:Vcc(power, 7, "controller supply, 8.5 .. 21 V in operation")
     pin:GND(ground, 8, "controller ground")
+
+    footprint("FP.DIP:8-W7.62")
 
     symbol(box) {
         left([feedback, soft_start])

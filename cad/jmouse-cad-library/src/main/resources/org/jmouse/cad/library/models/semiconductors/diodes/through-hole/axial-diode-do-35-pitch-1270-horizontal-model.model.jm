@@ -1,0 +1,17 @@
+model:axial-diode-do-35-pitch-1270-horizontal-model("Axial diode DO-35 (DO-204AH), horizontal, 12.7 mm") {
+    meta {
+        summary: "Axial diode DO-35 (DO-204AH), horizontal, 12.7 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:DO-35-P12.7-H"
+        category: diodes-through-hole
+        tags: electronics, model, axial
+        source: "JEDEC DO-204 outlines"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(plastic, profile: [0, -2, 0.75, -2, 1, -1.75, 1, 1.75, 0.75, 2, 0, 2], at: [0, 0, 1], rotate: [0, 90, 0])
+    cylinder(marking, radius: 1.01, length: 0.48, at: [-1.28, 0, 1], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.28, length: 4.35, at: [-4.175, 0, 1], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.28, length: 2.6, at: [-6.35, 0, -0.3])
+    cylinder(tin, radius: 0.28, length: 4.35, at: [4.175, 0, 1], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.28, length: 2.6, at: [6.35, 0, -0.3])
+}

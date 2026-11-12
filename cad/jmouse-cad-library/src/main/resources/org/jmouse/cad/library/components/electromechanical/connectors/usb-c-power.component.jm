@@ -7,7 +7,9 @@ component:usb-c-power("USB-C receptacle, power only", type: connector) {
         summary: "USB-C receptacle wired for power only: VBUS, GND, CC1, CC2 and the shield"
         source: "USB Type-C specification, power-only receptacle; no electrical behaviour"
         package: "USB_C_Receptacle_PowerOnly"
-        category: circuits
+        category: connectors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:vbus(power, "VBUS, A9 and B9")
@@ -16,5 +18,5 @@ component:usb-c-power("USB-C receptacle, power only", type: connector) {
     pin:ground(ground, "GND, A12 and B12")
     pin:shield(analog, "the shell")
 
-    symbol(uses: usb-c-power-symbol)
+    symbol(uses: "SY.CONNECTOR:USB-C-POWER")
 }

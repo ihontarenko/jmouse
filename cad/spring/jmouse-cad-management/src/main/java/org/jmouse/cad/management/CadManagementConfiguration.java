@@ -1,7 +1,10 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.cad.store.about.EngineAbout;
+import org.jmouse.cad.store.plugin.EnginePluginSettings;
 import org.jmouse.cad.store.exchange.DocumentExchange;
+import org.jmouse.cad.store.exchange.RoutingBoards;
+import org.jmouse.cad.store.settings.SettingsTree;
 import org.jmouse.cad.store.parts.PartSearch;
 import org.jmouse.cad.store.simulation.AnalysisEngines;
 import org.jmouse.plugin.Extensions;
@@ -10,13 +13,14 @@ import org.jmouse.cad.store.simulation.CatalogueChecks;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.editing.LanguageEditing;
 import org.jmouse.cad.store.library.PartLibrary;
-import org.jmouse.cad.store.library.ShippedLibrary;
+import org.jmouse.cad.store.showcase.FeaturedDesigns;
 import org.jmouse.cad.store.simulation.Simulations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -51,8 +55,13 @@ import java.util.List;
 public class CadManagementConfiguration {
 
     @Bean
-    public CatalogueController cadCatalogueController(CadCatalogue catalogue, ShippedLibrary library) {
-        return new CatalogueController(catalogue, library);
+    CadJsonAnswers cadJsonAnswers(JsonMapper hostMapper) {
+        return new CadJsonAnswers(hostMapper);
+    }
+
+    @Bean
+    public CatalogueController cadCatalogueController(CadCatalogue catalogue) {
+        return new CatalogueController(catalogue);
     }
 
     @Bean
@@ -72,6 +81,12 @@ public class CadManagementConfiguration {
     }
 
     @Bean
+    public ShowcaseController cadShowcaseController(CadCatalogue catalogue, PartLibrary library, Simulations simulations,
+                                                    FeaturedDesigns featured, DocumentExchange exchange) {
+        return new ShowcaseController(catalogue, library, simulations, featured, exchange);
+    }
+
+    @Bean
     public AboutController cadAboutController(EngineAbout about) {
         return new AboutController(about);
     }
@@ -82,8 +97,24 @@ public class CadManagementConfiguration {
     }
 
     @Bean
-    public ExchangeController cadExchangeController(DocumentExchange exchange) {
-        return new ExchangeController(exchange);
+    public SettingsController cadSettingsController(SettingsTree tree) {
+        return new SettingsController(tree);
+    }
+
+    @Bean
+    public RoutingController cadRoutingController(RoutingBoards boards, LanguageEditing editing, CadJsonAnswers answers) {
+        return new RoutingController(boards, editing, answers);
+    }
+
+    @Bean
+    public ExchangeController cadExchangeController(DocumentExchange exchange, LanguageEditing editing) {
+        return new ExchangeController(exchange, editing);
+    }
+
+    @Bean
+    public PluginSettingsController cadPluginSettingsController(EnginePluginSettings settings) {
+        CadAccessRules.requireDecidedInside(PluginSettingsController.class);
+        return new PluginSettingsController(settings);
     }
 
     @Bean

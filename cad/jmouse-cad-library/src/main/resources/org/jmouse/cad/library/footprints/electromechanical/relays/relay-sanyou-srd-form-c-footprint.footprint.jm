@@ -1,0 +1,24 @@
+footprint:relay-sanyou-srd-form-c-footprint("SANYOU SRD relay, form C") {
+    meta {
+        summary: "5-lead SPDT relay, through-hole, 19.7 × 15.5 mm body"
+        code: "FP.RELAY:SRD-C"
+        category: relays
+        tags: electronics, footprint, through-hole
+        source: "SANYOU SRD series data sheet, form C (one changeover): 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/pinned-packages.sht#srd-relay and the land pattern rules; regenerate, never edit.
+    # Lead 1 × 0.5 at most: drill 1.35, pad 2.35, pin 1 square; each lead where its maker puts it.
+    pad:1(through-hole, rectangle, at: -8.45 0.05, size: 2.35 x 2.35, drill: 1.35)
+    pad:2(through-hole, circle, at: -6.5 6.1, size: 2.35 x 2.35, drill: 1.35)
+    pad:3(through-hole, circle, at: 5.7 6.1, size: 2.35 x 2.35, drill: 1.35)
+    pad:4(through-hole, circle, at: 5.75 -5.95, size: 2.35 x 2.35, drill: 1.35)
+    pad:5(through-hole, circle, at: -6.5 -5.9, size: 2.35 x 2.35, drill: 1.35)
+    outline(fabrication, width: 0.1, "M-9.85 -7.75H9.85V7.75H-9.85Z")
+    outline(silkscreen, width: 0.12, "M-9.96 -7.86H9.96V7.86H-9.96Z")
+    outline(silkscreen, filled, "M-10.485 0.05A0.3 0.3 0 1 0 -9.885 0.05A0.3 0.3 0 1 0 -10.485 0.05Z")
+    outline(courtyard, width: 0.05, "M-10.35 -8.35H10.35V8.35H-10.35Z")
+    body(height: 15.6)
+    model("MD.RELAY:SRD-C")
+}

@@ -2,7 +2,7 @@ footprint:chip-resistor-0603-footprint("Chip resistor 0603 (1608 metric)") {
     meta {
         summary: "Chip resistor, 0603 (1608 metric) body, reflow pads"
         code: "FP.CHIP:R0603"
-        category: circuits
+        category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 0603 (1608 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-resistor-0603-footprint("Chip resistor 0603 (1608 metric)") {
     outline(fabrication, width: 0.1, "M-0.8 -0.4H0.8V0.4H-0.8Z")
     outline(silkscreen, width: 0.12, "M-0.14 -0.735H0.14M-0.14 0.735H0.14")
     outline(courtyard, width: 0.05, "M-1.45 -0.75H1.45V0.75H-1.45Z")
+    body(height: 0.55)
+    model("MD.CHIP:R0603")
 }

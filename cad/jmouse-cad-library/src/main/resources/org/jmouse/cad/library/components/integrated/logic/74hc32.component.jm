@@ -7,8 +7,10 @@ component:74hc32("74HC32", type: gate) {
         summary: "Quad 2-input OR gate: each output high while either of its inputs is high"
         source: "TI SN74HC32: tpd about 10 ns typical at 4.5 V, CL = 50 pF — an approximation; the 18 ns maximum at 25 °C bounds it; pinout per the JEDEC 14-pin standard"
         package: "DIP-14, SOIC-14"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:or-gate
     use:cmos-hc
@@ -24,6 +26,9 @@ component:74hc32("74HC32", type: gate) {
     pin:output(digital, output, 3 6 8 11, "output Y")
     pin:GND(ground, 7)
     pin:Vcc(power, 14)
+
+    footprint("FP.DIP:14-W7.62")
+    footprint("FP.SOIC:14-P1.27-W3.9")
 
     symbol(box) {
         left([a, b])

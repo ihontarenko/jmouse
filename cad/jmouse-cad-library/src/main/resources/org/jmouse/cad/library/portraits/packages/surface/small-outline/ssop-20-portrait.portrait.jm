@@ -3,7 +3,7 @@ portrait:ssop-20-portrait("SSOP-20") {
     meta {
         summary: "20-lead SSOP, 5.3 mm body from above: pin 1 at the bottom left, beside the dot"
         code: "PT.SSOP:20-P0.65-W5.3"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-150"
         authors: "jMouse"

@@ -8,7 +8,9 @@ component:dual-supply("Dual power supply", type: dual-power-supply) {
     meta {
         designator: PS
         summary: "A bipolar supply: +V and −V around a common 0 V, each rail with its own current limit"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -22,7 +24,7 @@ component:dual-supply("Dual power supply", type: dual-power-supply) {
     pin:common(analog, 2, "common, the circuit's 0 V")
     pin:negative(analog, 3, "negative rail")
 
-    symbol(uses: dual-supply-symbol) {
+    symbol(uses: "SY.SOURCE:SUPPLY-DUAL") {
         bind:a(pin: positive)
         bind:c(pin: common)
         bind:b(pin: negative)

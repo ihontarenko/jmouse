@@ -8,8 +8,10 @@ component:tip41c("TIP41C", type: bjt) {
         summary: "NPN power transistor, 100 V, 6 A, 65 W"
         source: "onsemi TIP41/D (TIP41, TIP41A, TIP41B, TIP41C), electrical characteristics at 25 °C"
         package: "TO-220"
-        category: circuits
+        category: transistors
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:npn-transistor
 
@@ -36,12 +38,12 @@ component:tip41c("TIP41C", type: bjt) {
     parameter:I_collector_maximum(6 A, "IC, continuous")
 
     pin:base(analog, input, 1, "base")
-    pin:collector(analog, output, 2, "collector; the tab is collector too")
+    pin:collector(analog, output, open-collector, 2, "collector; the tab is collector too")
     pin:emitter(analog, 3, "emitter")
 
-    footprint(to-220-3-vertical-footprint)
+    footprint("FP.TO220:3-V")
 
-    symbol(uses: npn-transistor-symbol) {
+    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
         bind:failed(failed)
     }
 
@@ -77,7 +79,7 @@ component:tip41c("TIP41C", type: bjt) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-220-portrait) {
+    portrait(uses: "PT.TO220:3") {
         bind:marking("TIP41C")
     }
 }

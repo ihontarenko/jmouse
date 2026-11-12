@@ -16,7 +16,9 @@ component:i2c-controller("I²C controller", type: controller) {
         designator: BUS
         summary: "Drives one I²C transaction — write, read, or write then read — and shows the last byte it read"
         source: "NXP UM10204, I²C-bus specification and user manual, rev. 7.0 (2021): §3.1, a controller's view of a transfer"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 

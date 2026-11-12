@@ -5,10 +5,14 @@ component:test-point("Test point", type: connector) {
         summary: "Test point, one contact for a probe"
         source: "generic test point; no electrical behaviour"
         package: "TestPoint_Pad_D1.5mm"
-        category: circuits
+        category: connectors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:probe(analog, 1, "the point a probe touches")
 
-    symbol(uses: test-point-symbol)
+    footprint("FP.TP:D1.5")
+
+    symbol(uses: "SY.CONNECTOR:TEST-POINT")
 }

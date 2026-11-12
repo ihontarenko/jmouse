@@ -1,4 +1,4 @@
-# Block's TEZ10/D 230/2x12: a 10 VA encapsulated mains transformer for a circuit board, one 230 V primary and two separate
+# Block's TEZ10/D 230/2x12: a 10 VA encapsulated mains transformer for a circuit pcb, one 230 V primary and two separate
 # 12 V secondaries — wired in series for a centre-tapped supply, in parallel for twice the current, or apart for two
 # isolated rails. Three coupled windings, as the centre-tapped transformer writes them, with the secondaries on pins of
 # their own. The datasheet gives the rating and the no-load voltage; the copper is fitted to bring each secondary from
@@ -11,8 +11,10 @@ component:tez10-d-2x12("TEZ10/D 230/2x12", type: transformer) {
         summary: "Mains transformer, 10 VA, 230 V to two separate 12 V secondaries, 0.42 A each"
         source: "Block TEZ10/D series datasheet: rated power, rated and no-load secondary voltages"
         package: "EI 48/16.8"
-        category: circuits
+        category: transformers
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:L_primary(40 H, "primary inductance: about 18 mA of magnetising current at 230 V, 50 Hz")
@@ -46,7 +48,7 @@ component:tez10-d-2x12("TEZ10/D 230/2x12", type: transformer) {
     state:flux_a(0, continuous, "the flux the first secondary links")
     state:flux_b(0, continuous, "the flux the second secondary links")
 
-    symbol(uses: dual-secondary-transformer-symbol) {
+    symbol(uses: "SY.TRANSFORMER:DUAL-SECONDARY") {
         bind:failed(failed)
     }
 

@@ -1,0 +1,36 @@
+model:pin-header-1x24-pitch-254-vertical-model("Pin header, 2.54 mm pitch, 1 × 24, vertical") {
+    meta {
+        summary: "Pin header, 2.54 mm pitch, 1 × 24, vertical — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.HDR:1X24-P2.54-V"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [2.54, 60.96, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 29.21, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 26.67, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 24.13, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 21.59, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 19.05, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 16.51, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 13.97, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 11.43, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 8.89, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 6.35, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 3.81, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, 1.27, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -1.27, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -3.81, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -6.35, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -8.89, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -11.43, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -13.97, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -16.51, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -19.05, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -21.59, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -24.13, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -26.67, 2.75])
+    box(gold, size: [0.64, 0.64, 11.5], at: [0, -29.21, 2.75])
+}

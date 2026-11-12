@@ -2,7 +2,7 @@
 # change of taste is a change here and a regeneration, never an edit of a footprint.
 #
 # Surface leads (IPC-7351B, tolerances included): Z = the leads' smallest outer span + 2 × toe + the root sum of the
-# span's tolerance, the board's and the placement's; G = their largest inner span (its tolerance pooled) − 2 × heel −
+# span's tolerance, the pcb's and the placement's; G = their largest inner span (its tolerance pooled) − 2 × heel −
 # the same root sum; X = the lead's smallest width + 2 × side + the root sum. A pad is (Z − G) / 2 long, centred at
 # (Z + G) / 4. Through-hole leads: drill = the lead's largest cross-section (a round lead's diameter, a flat or square
 # lead's diagonal) + the allowance, up to the drill step; pad = drill + 2 × ring, narrowed to pitch − gap where
@@ -12,10 +12,9 @@ sheet "Land pattern rules" as land-pattern-rules {
     source "IPC-7351B section 3 (land pattern goals), IPC-2222 section 9 (holes)"
     authors "jMouse"
     license "CERN-OHL-W-2.0"
-    category circuits
     tags electronics
 
-    tolerances "What the board and the placing machine add" source table "IPC-7351B 3.1.5" {
+    tolerances "What the pcb and the placing machine add" source table "IPC-7351B 3.1.5" {
         fabrication 0.1 mm
         placement 0.05 mm
         pad-gap 0.2 mm

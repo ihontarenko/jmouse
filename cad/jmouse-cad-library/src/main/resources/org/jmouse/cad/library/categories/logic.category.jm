@@ -1,0 +1,8 @@
+category:logic("Logic") {
+    meta {
+        category: integrated
+        order: 5
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

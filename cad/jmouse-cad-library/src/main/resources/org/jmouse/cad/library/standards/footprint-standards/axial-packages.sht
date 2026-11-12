@@ -14,6 +14,7 @@ sheet "Axial packages" as axial-packages {
         standing-pitches 2.54 mm, 5.08 mm
         bend 1 mm
         folder "passive/resistors/through-hole"
+        category resistors-through-hole
         designation "AXIAL:R{code}-P{pitch|mm}-{standing|initial}"
 
         resistor-0204 "DIN 0204" {
@@ -67,6 +68,7 @@ sheet "Axial packages" as axial-packages {
         standing-pitches 2.54 mm, 5.08 mm
         bend 1 mm
         folder "semiconductors/diodes/through-hole"
+        category diodes-through-hole
         designation "AXIAL:{code|upper}-P{pitch|mm}-{standing|initial}"
 
         diode-do-35 "DO-35 (DO-204AH)" {

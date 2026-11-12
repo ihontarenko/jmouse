@@ -68,13 +68,21 @@ final class SheetReading {
                 || token.type() == BasicToken.T_CLOSE_CURLY;
     }
 
-    /** Whether the cursor stands on the word {@code source} beginning a citation, not inside a longer word. */
+    /**
+     * Whether the cursor stands on the word {@code source} beginning a citation, not inside a longer word — nor named in an
+     * assignment: {@code source = Source} sets a value called source, and a citation never goes on with {@code =}.
+     */
     static boolean atSource(TokenCursor cursor) {
         Token current = cursor.lookAt(0);
+        Token next = cursor.lookAt(1);
         return current != null && current.type() == SheetToken.T_SOURCE
                 && !SourceReading.touches(cursor, cursor.lookAt(-1), current)
-                && !SourceReading.touches(cursor, current, cursor.lookAt(1));
+                && !SourceReading.touches(cursor, current, next)
+                && !(next != null && ASSIGNED.equals(next.value()));
     }
+
+    /** What sets a named value: {@code name = value}. */
+    private static final String ASSIGNED = "=";
 
     /** Whether the line the cursor stands on opens a block before it ends. */
     static boolean opensBlock(TokenCursor cursor) {

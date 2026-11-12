@@ -1,0 +1,20 @@
+footprint:crystal-hc-49-us-pitch-488-footprint("Quartz crystal, HC-49/US, HC-49/US") {
+    meta {
+        summary: "Quartz crystal, HC-49/US, HC-49/US, leads 4.88 mm apart"
+        code: "FP.XTAL:HC49US-P4.88"
+        category: crystals-through-hole
+        tags: electronics, footprint, through-hole
+        source: "the HC-49/US holder: 4.88 mm lead spacing, the makers' low-profile can (Abracon AB)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/radial-packages.sht#hc-49-us and the land pattern rules; regenerate, never edit.
+    # Lead ⌀0.43: drill 0.65, pad 1.65, pin 1 square.
+    pad:1(through-hole, rectangle, at: -2.44 0, size: 1.65 x 1.65, drill: 0.65)
+    pad:2(through-hole, circle, at: 2.44 0, size: 1.65 x 1.65, drill: 0.65)
+    outline(fabrication, width: 0.1, "M-5.525 -2.325H5.525V2.325H-5.525Z")
+    outline(silkscreen, width: 0.12, "M-5.635 -2.435H5.635V2.435H-5.635Z")
+    outline(courtyard, width: 0.05, "M-6.05 -2.85H6.05V2.85H-6.05Z")
+    body(height: 3.6)
+    model("MD.XTAL:HC49US-P4.88")
+}

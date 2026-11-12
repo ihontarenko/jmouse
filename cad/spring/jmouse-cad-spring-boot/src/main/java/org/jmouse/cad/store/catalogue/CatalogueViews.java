@@ -1,6 +1,8 @@
 package org.jmouse.cad.store.catalogue;
 
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
+import org.jmouse.cad.document.source.DocumentLocation;
+import org.jmouse.cad.folder.StoredDocument;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.simulation.ParameterSliders;
 
 import java.time.Instant;
@@ -15,15 +17,51 @@ public final class CatalogueViews {
     private CatalogueViews() {
     }
 
-    /** Where a document comes from: the shared catalogue, or an owner's own. */
-    public enum Origin { CATALOGUE, OWNED }
+    /**
+     * Where a copy of a document is held, as a list says it ({@link DocumentLocation}, ADR 0001). For a copy in the
+     * database the view's own owner, id and revision say the rest.
+     *
+     * @param place the library that ships it, the mount it is in, the format another product's file is read by; null for
+     *              the database
+     * @param path  where in that place — a jar's path, a mount's key, the file —; null for the database
+     * @param entry what in the file it is, for one of several documents a foreign file holds; null otherwise
+     */
+    public record LocationView(DocumentLocation.Kind kind, DocumentLocation.Access access, String place, String path,
+                               String entry) {
 
-    /** A section of the catalogue, with how many published catalogue documents it files. */
-    public record CategoryView(String code, String title, String description, int position, long documentCount) {
+        public static LocationView of(DocumentLocation location) {
+            return switch (location) {
+                case DocumentLocation.Stored stored -> new LocationView(stored.kind(), stored.access(), null, null, null);
+                case DocumentLocation.Shipped shipped -> new LocationView(shipped.kind(), shipped.access(), shipped.library(),
+                        shipped.path(), null);
+                case DocumentLocation.Mounted mounted -> new LocationView(mounted.kind(), mounted.access(), mounted.mount(),
+                        mounted.key(), null);
+                case DocumentLocation.Foreign foreign -> new LocationView(foreign.kind(), foreign.access(), foreign.format(),
+                        foreign.file(), foreign.entry());
+            };
+        }
+
+        /** A catalogued document's copy, at its head: in the database, or the file a library ships it in. */
+        public static LocationView of(StoredDocument document) {
+            return of(DocumentTexts.locationOf(document, document.getRevision()));
+        }
     }
 
-    /** A section as a curator writes it; {@code position} left out puts it last. */
-    public record CategoryDraft(String title, String description, Integer position) {
+    /**
+     * A category — a {@code category} document —, with how many published catalogue documents it files itself, not
+     * counting those of the categories under it.
+     *
+     * @param parent the category it stands under, or null at the top
+     * @param order  where it stands among its siblings, or null where its document says nothing
+     * @param owner  whose it is — a workspace's, for the category of a library an import brought there —; null for the
+     *               catalogue's
+     */
+    public record CategoryView(String code, String title, String summary, String parent, Integer order, long documentCount,
+                               DocumentOwner owner) {
+    }
+
+    /** A category as a curator writes it: its document's title, summary, parent and order; no order puts it last. */
+    public record CategoryDraft(String title, String summary, String parent, Integer order) {
     }
 
     /** A document's text: everything a write sends. */
@@ -41,10 +79,11 @@ public final class CatalogueViews {
     /**
      * A document as a list shows it.
      *
-     * @param problem why its head text no longer reads — the language moved on since it was saved; null when it reads
+     * @param problem why the catalogue refuses its head text as its file holds it — it does not read, it is filed in what is
+     *                no category, its drawing disagrees with its parts —; null for a text it takes
      */
     public record DocumentSummary(String id, String slug, String title, String summary, String kind, String category,
-                                  String folder, boolean featured, String status, Origin origin, DocumentOwner owner,
+                                  String folder, boolean featured, String status, LocationView location, DocumentOwner owner,
                                   List<String> tags, int revision, String revisionLabel, Instant updatedAt,
                                   String problem) {
     }
@@ -62,8 +101,7 @@ public final class CatalogueViews {
      */
     public record DocumentDetail(DocumentSummary summary, String source, int sourceRevision, long version,
                                  Map<String, String> meta, List<RelatedView> related, Object model,
-                                 List<ParameterSliders.Slider> parameters, String presentation, boolean shippedUpdatePending,
-                                 boolean writable) {
+                                 List<ParameterSliders.Slider> parameters, String presentation, boolean writable) {
     }
 
     /** Another document this one names, and how. */
@@ -79,7 +117,7 @@ public final class CatalogueViews {
     }
 
     /** A circuit of an owner as a sheet of one design: what it hands its parent, and the sheets it places. */
-    public record SheetView(String id, String slug, String title, Instant updatedAt, List<String> ports,
+    public record SheetView(String id, String slug, String title, String category, Instant updatedAt, List<String> ports,
                             List<String> nets, List<SheetBlock> blocks, String problem) {
     }
 

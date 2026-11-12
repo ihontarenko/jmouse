@@ -26,8 +26,10 @@ component:mos-transistor("MOS transistor", type: mosfet) {
         designator: Q
         summary: "Level-1 MOSFET: square-law channel, channel-length modulation, series resistances, body diode, gate and junction capacitances"
         source: "MOS level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
-        category: circuits
+        category: base-models
         failure: short drain source
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -68,13 +70,13 @@ component:mos-transistor("MOS transistor", type: mosfet) {
 
     pin:source(analog, 1, "source, and the bulk")
     pin:gate(analog, input, 2, "gate")
-    pin:drain(analog, output, 3, "drain")
+    pin:drain(analog, output, open-drain, 3, "drain")
 
     node:di("the intrinsic drain, behind the drain resistance")
     node:gi("the intrinsic gate, behind the gate resistance")
     node:si("the intrinsic source, behind the source resistance")
 
-    symbol(uses: n-channel-mosfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:MOSFET-N") {
         bind:failed(failed)
     }
 

@@ -5,7 +5,7 @@ portrait:power-inductor-portrait("Power inductor") {
     meta {
         summary: "A shielded SMD power inductor printed with its microhenry code (4R7, 101)"
         code: "PT.INDUCTOR:POWER-SHIELDED"
-        category: circuits
+        category: inductors
         tags: electronics, portrait, inductor, surface-mount
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

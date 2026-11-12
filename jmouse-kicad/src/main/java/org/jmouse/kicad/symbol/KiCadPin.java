@@ -3,7 +3,7 @@ package org.jmouse.kicad.symbol;
 import static org.jmouse.kicad.KiCadKeyword.*;
 
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 
 /**
  * A pin of a library symbol: {@code (pin passive line (at 0 3.81 270) (length 1.27) (name "~") (number "1"))}.
@@ -25,8 +25,8 @@ public record KiCadPin(String number, String name, KiCadPinType type, String sha
     public static final String NO_NAME = "~";
 
     /** A pin as a symbol's unit writes it. */
-    static KiCadPin of(KiCadList pin, int unit) {
-        KiCadList at = pin.requireList(AT);
+    static KiCadPin of(SExpressionList pin, int unit) {
+        SExpressionList at = pin.requireList(AT);
         return new KiCadPin(pin.wordOf(NUMBER).orElse(""), pin.wordOf(NAME).orElse(NO_NAME), KiCadPinType.of(pin.word(1)),
                 pin.word(2), KiCadPoint.of(at), at.size() > 3 ? (int) at.number(3) : 0,
                 pin.list(LENGTH).map(length -> length.number(1)).orElse(0.0), unit, pin.says(HIDE));

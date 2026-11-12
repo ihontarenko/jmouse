@@ -2,7 +2,7 @@ footprint:chip-capacitor-2220-footprint("Chip capacitor 2220 (5750 metric)") {
     meta {
         summary: "Chip capacitor, 2220 (5750 metric) body, reflow pads"
         code: "FP.CHIP:C2220"
-        category: circuits
+        category: capacitors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 2220 (5750 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-capacitor-2220-footprint("Chip capacitor 2220 (5750 metric)") {
     outline(fabrication, width: 0.1, "M-2.85 -2.5H2.85V2.5H-2.85Z")
     outline(silkscreen, width: 0.12, "M-1.64 -2.985H1.64M-1.64 2.985H1.64")
     outline(courtyard, width: 0.05, "M-3.65 -3H3.65V3H-3.65Z")
+    body(height: 2.8)
+    model("MD.CHIP:C2220")
 }

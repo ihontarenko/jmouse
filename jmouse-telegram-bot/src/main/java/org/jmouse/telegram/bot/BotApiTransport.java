@@ -1,6 +1,6 @@
 package org.jmouse.telegram.bot;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.jmouse.telegram.CallbackAnswer;
 import org.jmouse.telegram.Capability;
 import org.jmouse.telegram.ChatReference;
@@ -160,9 +160,9 @@ public class BotApiTransport extends BotApiClient implements TelegramTransport, 
 
         return new TelegramFile(
                 fileId,
-                file.path("file_unique_id").asText(null),
+                file.path("file_unique_id").asString(null),
                 file.path("file_size").isNumber() ? file.path("file_size").asLong() : -1L,
-                file.get("file_path").asText());
+                file.get("file_path").asString());
     }
 
     @Override
@@ -467,14 +467,14 @@ public class BotApiTransport extends BotApiClient implements TelegramTransport, 
         JsonNode photo = message.path("photo");
 
         if (photo.isArray() && !photo.isEmpty()) {
-            ids.add(photo.get(photo.size() - 1).path("file_id").asText());
+            ids.add(photo.get(photo.size() - 1).path("file_id").asString());
         }
 
         for (MediaKind kind : MediaKind.values()) {
             JsonNode node = message.path(kind.field());
 
             if (node.isObject() && node.hasNonNull("file_id")) {
-                ids.add(node.get("file_id").asText());
+                ids.add(node.get("file_id").asString());
             }
         }
 

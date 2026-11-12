@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/schematic/pin-rules.schema.json",
+  "title": "Pin rules",
+  "description": "Which pins may not share a net, and how near a no-connect mark stands to a pin to be on it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "noConnectReach",
+    "kinds",
+    "conflicts"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "noConnectReach": {
+      "description": "how near a no-connect mark must stand to a pin to be on it, in the sheet's units",
+      "type": "number"
+    },
+    "kinds": {
+      "description": "how each kind of pin is said, by its word",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "conflicts": {
+      "description": "the kinds that may not meet on a net, and how much their meeting weighs",
+      "type": "array",
+      "items": {
+        "description": "Two kinds of pin that may not meet on a net — the same kind twice when two of it may not —, and its weight.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "between",
+          "severity"
+        ],
+        "properties": {
+          "between": {
+            "description": "the two kinds of pin, by their words — the same word twice for two of one kind",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severity": {
+            "description": "how much it weighs: error or warning",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

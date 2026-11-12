@@ -2,7 +2,7 @@ symbol:usb-c-power-symbol("USB-C receptacle, power only") {
     meta {
         summary: "A USB-C receptacle that only takes power, as drawn on a schematic: bus power, the two configuration pins and ground on the right, the shield below"
         code: "SY.CONNECTOR:USB-C-POWER"
-        category: circuits
+        category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

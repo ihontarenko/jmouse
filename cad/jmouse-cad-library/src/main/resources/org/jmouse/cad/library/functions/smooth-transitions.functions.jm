@@ -9,6 +9,9 @@ functions:smooth-transitions("Smooth transitions") {
 
     meta {
         summary: "Smooth replacements for corners a Newton solver cannot cross"
+        category: functions
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     formulas {

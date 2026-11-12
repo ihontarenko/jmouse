@@ -1,0 +1,8 @@
+category:amplifiers("Amplifiers") {
+    meta {
+        category: integrated
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

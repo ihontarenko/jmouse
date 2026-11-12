@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-exchange</artifactId>
     <name>jMouse - CAD Exchange</name>
     <description>jMouse Framework - jmCAD exchange: the points a format is brought to — reading files into jM documents, writing a document as a file —, contributed by plugins (SPICE, KiCad), read by the store.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-exchange</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-exchange</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-exchange</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-exchange</url>
     </scm>
 
     <properties>
@@ -57,11 +57,61 @@
     </properties>
 
     <dependencies>
+        <!-- what a name becomes: an identifier as the language reads one, a slug as every address is made -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- the documents a format reads and writes, and the components a converted part may name -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-simulation</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <!-- a symbol converted from another product: the drawing language it is written in -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-schematic</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the table an import files its documents by -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-sheet</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- a pcb as it is written out: its parts with their footprints -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-pcb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the pcb's artwork: a silkscreen's letters as strokes, a footprint's drawing as a path -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-stroke-fonts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-svg-path</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- The shipped components and symbols a sheet's checks are tried on. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-library</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

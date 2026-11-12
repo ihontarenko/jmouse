@@ -7,7 +7,6 @@ sheet "Connector symbols" as connector-symbols {
     description "Pin headers and screw terminals, one symbol per contact count."
     authors "jMouse"
     license "CERN-OHL-W-2.0"
-    category circuits
     tags electronics, schematic, connector
 
     pin-header-single "Pin header" {
@@ -16,6 +15,7 @@ sheet "Connector symbols" as connector-symbols {
         style single-row
         pins 1 .. 60
         folder "connectors"
+        category connectors
     }
 
     pin-header-double "Pin header" {
@@ -24,6 +24,7 @@ sheet "Connector symbols" as connector-symbols {
         style double-row
         pins 1 .. 60
         folder "connectors"
+        category connectors
     }
 
     screw-terminal "Screw terminal" {
@@ -32,6 +33,7 @@ sheet "Connector symbols" as connector-symbols {
         style screw
         pins 1 .. 24
         folder "connectors"
+        category connectors
     }
 
     shielded-header-single "Shielded pin header" {
@@ -41,6 +43,7 @@ sheet "Connector symbols" as connector-symbols {
         shielded yes
         pins 1 .. 60
         folder "connectors"
+        category connectors
     }
 
     shielded-header-double "Shielded pin header" {
@@ -50,5 +53,6 @@ sheet "Connector symbols" as connector-symbols {
         shielded yes
         pins 1 .. 60
         folder "connectors"
+        category connectors
     }
 }

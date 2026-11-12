@@ -12,9 +12,11 @@ component:tantalum-capacitor("Tantalum capacitor", type: capacitor) {
         designator: C
         summary: "Solid tantalum chip capacitor: capacitance, ESR, leakage; fails short"
         source: "the equivalent circuit a tantalum chip's datasheet tabulates: C, ESR at 100 kHz, DC leakage 0.01 · C · V"
-        category: circuits
+        category: capacitors
         failure: short
         value: capacitance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:capacitance(100 uF, "capacitance")
@@ -33,7 +35,12 @@ component:tantalum-capacitor("Tantalum capacitor", type: capacitor) {
 
     node:plate("the capacitance, behind the ESR")
 
-    symbol(uses: polarized-capacitor-symbol) {
+    footprint("FP.CHIP:CT3528")
+    footprint("FP.CHIP:CT3216")
+    footprint("FP.CHIP:CT6032")
+    footprint("FP.CHIP:CT7343")
+
+    symbol(uses: "SY.CAPACITOR:POLARIZED") {
         bind:failed(failed)
         bind:charge((positive - negative) / voltage_rating)
         bind:a(pin: positive)
@@ -60,7 +67,7 @@ component:tantalum-capacitor("Tantalum capacitor", type: capacitor) {
     }
 
     # How it looks in the hand: a moulded amber chip from above, its plus band, its code and its voltage letter.
-    portrait(uses: tantalum-capacitor-portrait) {
+    portrait(uses: "PT.CAPACITOR:TANTALUM-MOULDED") {
         bind:capacitance(capacitance)
         bind:voltage_rating(voltage_rating)
     }

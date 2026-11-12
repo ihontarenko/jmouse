@@ -1,6 +1,6 @@
 package org.jmouse.telegram.bot;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.jmouse.telegram.TelegramRefusal;
 
 import java.time.Duration;

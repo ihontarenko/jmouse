@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public final class KiCadValue {
 
     /** {@code 2.2u}, {@code 100nF}, {@code 1K}, {@code 15mF}: a number, a multiplier, the unit's letters. */
-    private static final Pattern DECIMAL = Pattern.compile("(\\d+(?:[.,]\\d+)?)([pnuµmkKMGT]?)(?:F|H|Ω|Ohm|ohm|R|V|A)?");
+    private static final Pattern DECIMAL = Pattern.compile("(\\d+(?:[.,]\\d+)?)([pnuµmkKMGT]?)(?:Hz|F|H|Ω|Ohm|ohm|R|V|A)?");
 
     /** {@code 4K7}, {@code 0R1}, {@code 2n2}: the multiplier stands where the decimal point does. */
     private static final Pattern LETTER_FOR_POINT = Pattern.compile("(\\d*)([RVpnuµmkKMGT])(\\d+)(?:F|H|Ω)?");

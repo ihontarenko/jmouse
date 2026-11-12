@@ -8,8 +8,10 @@ component:1n5819("1N5819", type: diode) {
         summary: "Schottky barrier rectifier, 40 V, 1 A"
         source: "onsemi 1N5817–1N5819 datasheet; starting point: the common vendor SPICE model"
         package: "DO-41"
-        category: circuits
+        category: diodes
         failure: short
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:diode
 
@@ -34,7 +36,17 @@ component:1n5819("1N5819", type: diode) {
     pin:anode(analog, 1, "anode")
     pin:cathode(analog, 2, "cathode, the banded end")
 
-    symbol(uses: diode-symbol) {
+    # Pad 1 of a diode's footprint is its cathode.
+    footprint("FP.AXIAL:DO-41-P10.16-H") {
+        pad:1(cathode)
+        pad:2(anode)
+    }
+    footprint("FP.AXIAL:DO-41-P5.08-V") {
+        pad:1(cathode)
+        pad:2(anode)
+    }
+
+    symbol(uses: "SY.DIODE:RECTIFIER") {
         bind:failed(failed)
         bind:a(pin: anode)
         bind:b(pin: cathode)
@@ -65,5 +77,5 @@ component:1n5819("1N5819", type: diode) {
     }
 
     # How it looks in the hand: its black body and the silver band at the cathode.
-    portrait(uses: axial-diode-portrait)
+    portrait(uses: "PT.DIODE:DO41")
 }

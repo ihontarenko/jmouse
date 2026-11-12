@@ -1,0 +1,36 @@
+model:pin-header-2x12-pitch-127-vertical-model("Pin header, 1.27 mm pitch, 2 × 12, vertical") {
+    meta {
+        summary: "Pin header, 1.27 mm pitch, 2 × 12, vertical — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.HDR:2X12-P1.27-V"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [2.54, 15.24, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, 6.985, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, 6.985, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, 5.715, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, 5.715, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, 4.445, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, 4.445, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, 3.175, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, 3.175, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, 1.905, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, 1.905, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, 0.635, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, 0.635, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, -0.635, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, -0.635, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, -1.905, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, -1.905, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, -3.175, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, -3.175, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, -4.445, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, -4.445, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, -5.715, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, -5.715, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [-0.635, -6.985, 0.7])
+    box(gold, size: [0.64, 0.64, 7.4], at: [0.635, -6.985, 0.7])
+}

@@ -7,8 +7,10 @@ component:74hc595("74HC595", type: shift-register) {
         summary: "Eight-bit serial-in, parallel-out shift register with output latch and three-state outputs"
         source: "Nexperia 74HC_HCT595 datasheet, Rev. 12"
         package: "SO16"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -28,6 +30,9 @@ component:74hc595("74HC595", type: shift-register) {
     pin:not_output_enable(digital, input, 13, "output enable, active low")
     pin:serial_data(digital, input, 14, "serial data")
     pin:Vcc(power, 16)
+
+    footprint("FP.SOIC:16-P1.27-W3.9")
+    footprint("FP.DIP:16-W7.62")
 
     symbol(box) {
         left([serial_data, shift_clock edge, storage_clock edge])

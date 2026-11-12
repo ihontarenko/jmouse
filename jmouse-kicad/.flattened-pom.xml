@@ -28,8 +28,14 @@
   </scm>
   <dependencies>
     <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>3.1.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-kicad-parser</artifactId>
+      <artifactId>jmouse-sexpression</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>

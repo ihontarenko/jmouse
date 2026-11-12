@@ -1,7 +1,6 @@
 package org.jmouse.cad.packages.portrait;
 
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.packages.LibraryFiling;
 import org.jmouse.cad.schematic.DrawingGrammar;
@@ -18,12 +17,13 @@ import java.util.List;
  * its pins and its elements. It becomes its document as a tree — {@link #document()} —, which writes itself.
  *
  * @param code     its technical code, {@code PT.DIP:8-W7.62}
+ * @param category the category it files itself in, as its table names it
  * @param mounting {@code through-hole} or {@code surface-mount}, its tag
  * @param source   the standard its outline was read from; empty when the table names none
  * @param note     how it was worked out, written above its head for a reviewer
  * @param input    the input its component gives the printed marking's words by
  */
-public record PackagePortrait(String slug, String code, String title, String summary, String folder, String mounting,
+public record PackagePortrait(String slug, String code, String title, String summary, String folder, String category, String mounting,
                               String source, LibraryFiling filing, String note, double width, double height, String input,
                               List<Expression> statements) {
 
@@ -36,7 +36,7 @@ public record PackagePortrait(String slug, String code, String title, String sum
 
     /** The portrait as the tree of its document. */
     public DocumentNode document() {
-        DocumentNode document = new DocumentNode(SchematicModule.PORTRAIT, title, slug, true, null, 1);
+        DocumentNode document = new DocumentNode(SchematicModule.PORTRAIT, title, slug, null, 1);
         document.addLeadingTrivia(List.of(Lines.comment(note)));
         document.addExpression(meta());
         document.addExpression(LineBuilder.line(DrawingGrammar.SIZE).slot("extent", Nodes.extent(width, height)).build());
@@ -47,16 +47,9 @@ public record PackagePortrait(String slug, String code, String title, String sum
     }
 
     private MetaNode meta() {
-        MetaNode meta = new MetaNode();
-        meta.addExpression(MetaLineNode.of(MetaNode.SUMMARY, Nodes.text(summary)));
-        meta.addExpression(MetaLineNode.of(MetaNode.CODE, Nodes.text(code)));
-        meta.addExpression(MetaLineNode.of(MetaNode.CATEGORY, Nodes.word(filing.category())));
-        meta.addExpression(MetaLineNode.of(MetaNode.TAGS, Nodes.words(filing.tags(SchematicModule.PORTRAIT.word(), PACKAGE, mounting))));
-        if (!source.isEmpty()) {
-            meta.addExpression(MetaLineNode.of(MetaNode.SOURCE, Nodes.text(source)));
-        }
-        meta.addExpression(MetaLineNode.of(MetaNode.AUTHORS, Nodes.text(filing.authors())));
-        meta.addExpression(MetaLineNode.of(MetaNode.LICENSE, Nodes.text(filing.license())));
+        MetaNode meta = MetaNode.filed(summary, code, category,
+                filing.tags(SchematicModule.PORTRAIT.word(), PACKAGE, mounting));
+        filing.provenance(source.isEmpty() ? null : source).writeInto(meta);
         return meta;
     }
 }

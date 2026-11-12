@@ -29,13 +29,16 @@ public final class TermDocumentWriter extends TermWriter {
 
     /** A document as terms. */
     public String write(DocumentNode document) {
-        StringBuilder text = new StringBuilder();
         TextSourceWriter writer = new TextSourceWriter(SourceLayout.WORDS);
+        document(writer, document);
+        return writer.text().stripTrailing() + "\n";
+    }
+
+    /** A document as terms, into a writer: what stands above it, its head, its body. */
+    public void document(SourceWriter writer, DocumentNode document) {
         StatementWriting.leading(writer, document);
         term(writer, document.kind().word(), document.slug(), head(document));
         writer.block(body -> statements(body, document.getExpressions()));
-        text.append(writer.text());
-        return text.toString().stripTrailing() + "\n";
     }
 
     private List<Consumer<SourceWriter>> head(DocumentNode document) {

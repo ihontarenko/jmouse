@@ -2,8 +2,8 @@ package org.jmouse.web.mvc.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.mvc.HandlerInterceptor;
+import org.jmouse.web.mvc.result.HandlerResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +18,13 @@ public class LoggingHandlerInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, MVCResult result) {
+    public HandlerResult postHandle(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        Object handler,
+        HandlerResult result
+    ) {
         LOGGER.info("Post-Handle: URI: {}; Handler: {};", request.getRequestURI(), handler.getClass());
+        return result;
     }
-
 }

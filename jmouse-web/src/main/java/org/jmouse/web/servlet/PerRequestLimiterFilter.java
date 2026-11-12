@@ -6,10 +6,9 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.servlet.filter.BeanFilter;
-
-import java.io.IOException;
 
 /**
  * ⏳ PerRequestLimiterFilter
@@ -32,14 +31,24 @@ public abstract class PerRequestLimiterFilter implements BeanFilter {
      * @param times number of allowed invocations for a single request
      */
     protected PerRequestLimiterFilter(int times) {
+        if (times <= 0) {
+            throw new IllegalArgumentException("Execution limit must be positive");
+        }
         this.times = times;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
+        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
+            chain.doFilter(request, response);
+            return;
+        }
         if (acquireCounter((HttpServletRequest) request)) {
-            doFilterInternal(new RequestContext((HttpServletRequest) request, (HttpServletResponse) response), chain);
+            doFilterInternal(
+                new RequestContext((HttpServletRequest) request, (HttpServletResponse) response),
+                chain
+            );
         } else {
             chain.doFilter(request, response);
         }
@@ -52,15 +61,15 @@ public abstract class PerRequestLimiterFilter implements BeanFilter {
      * @return {@code true} if filter can still run, {@code false} otherwise
      */
     private boolean acquireCounter(HttpServletRequest request) {
-        int cunter = 0;
+        int counter = 0;
 
-        if (request.getAttribute(getFilterName()) instanceof Integer integer) {
-            cunter = integer;
+        if (request.getAttribute(getFilterAttributeName()) instanceof Integer integer) {
+            counter = integer;
         }
 
-        if (cunter < times) {
-            cunter++;
-            request.setAttribute(getFilterAttributeName(), cunter);
+        if (counter < times) {
+            counter++;
+            request.setAttribute(getFilterAttributeName(), counter);
             return true;
         }
 
@@ -84,5 +93,4 @@ public abstract class PerRequestLimiterFilter implements BeanFilter {
     private String getFilterName() {
         return getClass().getName();
     }
-
 }

@@ -40,7 +40,7 @@
   <properties>
     <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <jakarta-el.version>4.0.2</jakarta-el.version>
-    <jackson.version>2.17.1</jackson.version>
+    <jackson.version>3.1.4</jackson.version>
     <jaxb.version>4.0.0</jaxb.version>
     <flatten-maven-plugin.version>1.2.7</flatten-maven-plugin.version>
     <maven-surefire.version>3.5.6</maven-surefire.version>
@@ -56,6 +56,8 @@
     <bytebuddy.version>1.17.6</bytebuddy.version>
     <maven.compiler.source>21</maven.compiler.source>
     <hibernate-validation.version>8.0.1.Final</hibernate-validation.version>
+    <plugin.summary></plugin.summary>
+    <commons-compress.version>1.28.0</commons-compress.version>
     <jaxb-runtime.version>4.0.2</jaxb-runtime.version>
     <maven-javadoc.version>3.11.2</maven-javadoc.version>
     <jdbc-mariadb>3.3.3</jdbc-mariadb>
@@ -68,6 +70,7 @@
     <jdbc-oracle11>23.3.0.23.09</jdbc-oracle11>
     <tomcat-embed.version>10.1.31</tomcat-embed.version>
     <org.jsoup>1.22.1</org.jsoup>
+    <plugin.category></plugin.category>
     <maven-compiler.version>3.15.0</maven-compiler.version>
     <jdbc-db2>11.5.9.0</jdbc-db2>
     <asm.version>9.7.1</asm.version>
@@ -244,7 +247,62 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-licence</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-gerber</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-dxf</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-pdf</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-ipc2581</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-odb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-eagle</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-libre-pcb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-compound-file</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-altium</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-http-client</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-suppliers</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -259,7 +317,12 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-kicad-parser</artifactId>
+        <artifactId>jmouse-sexpression</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-mesh</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -294,7 +357,17 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-cad-board</artifactId>
+        <artifactId>jmouse-cad-pcb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-panel</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-mesh</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -324,7 +397,27 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-eagle</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-libre-pcb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-altium</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-cad-nexar</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-suppliers</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -339,7 +432,17 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-folder</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-cad-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-settings</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -379,6 +482,16 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-drawings</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-panel</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-cad-plugin-kicad</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
@@ -389,7 +502,57 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-suppliers</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-cad-plugin-explorer</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-git</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-mesh</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-datasheets</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-step</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-ipc2581</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-odb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-eagle</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-libre-pcb</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-plugin-altium</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -713,35 +876,16 @@
         <version>${jakarta-el.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>${commons-compress.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
         <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-xml</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-properties</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${jackson.version}</version>
-        <scope>compile</scope>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>jakarta.annotation</groupId>

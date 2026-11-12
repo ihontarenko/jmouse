@@ -1,11 +1,10 @@
 package org.jmouse.security.web.session;
 
+import java.util.Comparator;
+import java.util.List;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.session.SessionRegistry;
 import org.jmouse.web.http.RequestContextKeeper;
-
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * ⏳ SessionExpirationAuthenticateHandler
@@ -29,7 +28,7 @@ public class SessionExpirationAuthenticateHandler implements SessionAuthenticate
     /**
      * 🔢 Maximum concurrent sessions allowed per principal.
      */
-    private final int             maxSessions;
+    private final int maxSessions;
     /**
      * 📇 Registry of sessions keyed by principal.
      */
@@ -42,8 +41,11 @@ public class SessionExpirationAuthenticateHandler implements SessionAuthenticate
      * @param sessionRegistry session registry to query/expire sessions
      */
     public SessionExpirationAuthenticateHandler(int maxSessions, SessionRegistry sessionRegistry) {
+        if (maxSessions <= 0) {
+            throw new IllegalArgumentException("maximumSessions must be positive");
+        }
         this.maxSessions = maxSessions;
-        this.sessionRegistry = sessionRegistry;
+        this.sessionRegistry = java.util.Objects.requireNonNull(sessionRegistry, "sessionRegistry");
     }
 
     /**
@@ -58,10 +60,16 @@ public class SessionExpirationAuthenticateHandler implements SessionAuthenticate
      */
     @Override
     public void onAuthentication(Authentication authentication, RequestContextKeeper keeper) {
-        Object principal = (authentication != null) ? authentication.getPrincipal() : null;
+        Object principal = authentication != null ? authentication.getName() : null;
         if (principal != null) {
-            List<SessionRegistry.SessionInformation> sessions = sessionRegistry.getSessions(principal);
-            if (sessions.size() > maxSessions) {
+            List<SessionRegistry.SessionInformation> sessions = new java.util.ArrayList<>(
+                sessionRegistry
+                    .getSessions(principal)
+                    .stream()
+                    .filter(information -> !information.isExpired())
+                    .toList()
+            );
+            if (sessions.size() >= maxSessions) {
                 int toExpire = sessions.size() - (maxSessions - 1);
                 sessions.sort(Comparator.comparing(SessionRegistry.SessionInformation::lastAccess));
                 List<SessionRegistry.SessionInformation> expiredSessions = sessions.subList(0, toExpire);

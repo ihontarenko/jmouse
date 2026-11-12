@@ -46,19 +46,19 @@ public final class DrawingGrammar {
 
     /** {@code size 70 x 130}: the drawing's extent, around its origin. */
     public static final LineGrammar SIZE = LineGrammar.line("size").slot("extent", EXTENT)
-            .shaped("a drawing's size is 'size width x height'");
+            .build();
 
     /** {@code pin positive at -20, 60 ["label"]}: where a pin of the part meets the drawing. */
     public static final LineGrammar PIN = LineGrammar.line("pin").slot("name", NAME).termName("name").required("at", POINT)
-            .ending("label").shaped("a pin is 'pin name at x, y [\"label\"]'");
+            .optional("to", POINT).ending("label").build();
 
     /** {@code label name at x, y}, {@code label value at x, y}: where the part's reference or value is written. */
     public static final LineGrammar LABEL = LineGrammar.line("label").slot("subject", WORD, "name", "value").required("at", POINT)
-            .shaped("a label is 'label name|value at x, y'");
+            .build();
 
     /** {@code indicator name from x, y to x, y}: a figure the drawing shows as a bar. */
     public static final LineGrammar INDICATOR = LineGrammar.line("indicator").slot("name", NAME).termName("name")
-            .required("from", POINT).required("to", POINT).shaped("an indicator is 'indicator name from x, y to x, y'");
+            .required("from", POINT).required("to", POINT).build();
 
     /**
      * {@code input capacitance 1 µF .. 9999 µF typical 470 µF}, {@code input failed}, {@code input photo picture},
@@ -66,16 +66,16 @@ public final class DrawingGrammar {
      */
     public static final LineGrammar INPUT = LineGrammar.line("input").slot("name", NAME).termName("name")
             .optionalSlot("range", RANGE)
-            .optional("typical", QUANTITY)
+            .optional("typical", QUANTITY).optional("hold", QUANTITY)
             .optional("picture", FLAG)
             .optional("text", FLAG)
             .ending("typical text")
             .check(DrawingGrammar::input)
-            .shaped("an input is 'input name [low .. high [typical v]]', 'input name picture' or 'input name text [\"typical\"]'");
+            .build();
 
     /** {@code hide body, leads}: the elements a layer hides while it is shown. */
     public static final LineGrammar HIDE = LineGrammar.line("hide").slot("names", NAMES)
-            .shaped("a layer hides 'hide name, name …'");
+            .build();
 
     /**
      * {@code fill = black}, {@code live character = …}, {@code animate opacity = …}: a property of an element, its value an
@@ -83,7 +83,7 @@ public final class DrawingGrammar {
      */
     public static final LineGrammar PROPERTY = LineGrammar.named("property", "name").prefixed(LIVE, ANIMATE)
             .slot("value", ASSIGNED).writtenAsIs()
-            .shaped("a property is '[live|animate] name = value'");
+            .build();
 
     /** The shapes an element is drawn as. */
     public static final List<String> SHAPES = List.of("path", "box", "circle", "line", "glyph", "bitmap", "group");
@@ -91,7 +91,7 @@ public final class DrawingGrammar {
     /** {@code live when failed { … }}: a layer drawn while its condition holds; the head a program makes a layer with. */
     public static final LineGrammar LAYER = LineGrammar.line("when").termed("layer").prefixed(LIVE).slot("condition", FORMULA)
             .check((layer, grammar) -> layer.has(LIVE) ? null : "a layer shown on a condition is always 'live when <condition> { … }'")
-            .shaped("a layer is 'live when <condition> { … }'");
+            .build();
 
     /** The head of every element, by its shape. */
     private static final Map<String, LineGrammar> HEADS = new LinkedHashMap<>();
@@ -146,28 +146,19 @@ public final class DrawingGrammar {
         if (shape.equals("path")) {
             head = head.optional("upright", FLAG).ending("data", DocumentValues.PATH);
         }
-        return head.check((element, grammar) -> placing(shape, element)).shaped(shapeOf(shape));
+        return head.check((element, grammar) -> placing(shape, element, grammar)).build();
     }
 
-    /** What an element of a shape must be placed by, as the refusal says it. */
-    private static String placing(String shape, ClauseLineNode element) {
-        return switch (shape) {
-            case "path" -> element.ending().isEmpty() ? shapeOf(shape) : null;
-            case "box", "glyph", "bitmap" -> element.has("at") && element.has("size") ? null : shapeOf(shape);
-            case "circle" -> element.has("at") && element.has("radius") ? null : shapeOf(shape);
-            case "line" -> element.has("from") && element.has("to") ? null : shapeOf(shape);
+    /** What an element of a shape must be placed by, said with the element's own shape. */
+    private static String placing(String shape, ClauseLineNode element, LineGrammar grammar) {
+        String missing = switch (shape) {
+            case "path" -> element.ending().isEmpty() ? "its path data" : null;
+            case "box", "glyph", "bitmap" -> element.has("at") && element.has("size") ? null : "'at' and 'size', at its centre";
+            case "circle" -> element.has("at") && element.has("radius") ? null : "'at' and 'radius'";
+            case "line" -> element.has("from") && element.has("to") ? null : "'from' and 'to'";
             default -> null;
         };
-    }
-
-    private static String shapeOf(String shape) {
-        return switch (shape) {
-            case "path" -> "a path is '[live] path [name] \"SVG path data\" [upright] [{ properties }]'";
-            case "box", "glyph", "bitmap" -> "a " + shape + " is '[live] " + shape + " [name] at x, y size width x height', placed by its centre";
-            case "circle" -> "a circle is '[live] circle [name] at x, y radius r'";
-            case "line" -> "a line is '[live] line [name] from x, y to x, y'";
-            default -> "a group is '[live] group [name] [pivot x, y] { elements }'";
-        };
+        return missing == null ? null : "a " + shape + " is placed by " + missing + ": " + grammar.shape();
     }
 
     /** An input's range runs from a lower to a higher value, and its typical value lies within it. */

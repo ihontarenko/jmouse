@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 import static org.jmouse.cad.packages.Measures.written;
 
@@ -120,7 +121,12 @@ final class AxialFootprints implements FootprintFamily {
                 "Generated from footprint-standards/axial-packages.sht#" + size.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead ⌀" + written(size.length("lead")) + ": drill " + written(drill) + ", pad " + written(pad) + ", pin 1 square.");
         return new StandardFootprint(slug, designated, title + ", " + standing + ", " + written(pitch) + " mm", summary,
-                size.word("folder"), "through-hole", size.standard(), rules, notes, new FootprintDrawing(pads, outlines));
+                size.word("folder"), size.word("category"), "through-hole", size.standard(), rules, notes, new FootprintDrawing(pads, outlines, bodyHeight(size, standing)));
+    }
+
+    /** How high the body stands: laid flat, as high as it is thick; stood on end, as high as it is long. */
+    private static OptionalDouble bodyHeight(PackageTable size, String standing) {
+        return OptionalDouble.of(size.length("vertical".equals(standing) ? "length" : "diameter"));
     }
 
     private static boolean cathode(PackageTable size) {

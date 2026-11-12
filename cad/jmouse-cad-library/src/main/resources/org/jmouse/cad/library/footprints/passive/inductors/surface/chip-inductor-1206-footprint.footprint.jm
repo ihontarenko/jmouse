@@ -2,7 +2,7 @@ footprint:chip-inductor-1206-footprint("Chip inductor 1206 (3216 metric)") {
     meta {
         summary: "Chip inductor, 1206 (3216 metric) body, reflow pads"
         code: "FP.CHIP:L1206"
-        category: circuits
+        category: inductors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 1206 (3216 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-inductor-1206-footprint("Chip inductor 1206 (3216 metric)") {
     outline(fabrication, width: 0.1, "M-1.6 -0.8H1.6V0.8H-1.6Z")
     outline(silkscreen, width: 0.12, "M-0.59 -1.185H0.59M-0.59 1.185H0.59")
     outline(courtyard, width: 0.05, "M-2.3 -1.2H2.3V1.2H-2.3Z")
+    body(height: 1.8)
+    model("MD.CHIP:L1206")
 }

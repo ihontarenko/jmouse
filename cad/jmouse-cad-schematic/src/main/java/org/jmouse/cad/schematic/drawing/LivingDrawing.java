@@ -95,7 +95,8 @@ public final class LivingDrawing {
                 }
                 case ClauseLineNode line when line.grammar() == DrawingGrammar.PIN -> {
                     PointNode at = line.point("at").orElseThrow();
-                    pins.add(new SymbolDrawing.Pin(line.name("name").orElseThrow(), at.x(), at.y(), line.ending().orElse("")));
+                    SymbolDrawing.Pin.Body body = line.point("to").map(to -> new SymbolDrawing.Pin.Body(to.x(), to.y())).orElse(null);
+                    pins.add(new SymbolDrawing.Pin(line.name("name").orElseThrow(), at.x(), at.y(), line.ending().orElse(""), body));
                 }
                 case ClauseLineNode line when line.grammar() == DrawingGrammar.LABEL -> {
                     PointNode at = line.point("at").orElseThrow();
@@ -154,7 +155,8 @@ public final class LivingDrawing {
         double low = Quantity.valueOf(range.low().orElseThrow().written());
         double high = Quantity.valueOf(range.high().orElseThrow().written());
         double typical = line.quantity("typical").orElse(low);
-        return new SymbolDrawing.Input(name, low, high, typical, TextSourceWriter.render(range, SourceLayout.WORDS), false, null);
+        return new SymbolDrawing.Input(name, low, high, typical, TextSourceWriter.render(range, SourceLayout.WORDS), false, null,
+                line.quantity("hold").orElse(0.0));
     }
 
     private void collectNames(List<ClauseBlockNode> elements) {

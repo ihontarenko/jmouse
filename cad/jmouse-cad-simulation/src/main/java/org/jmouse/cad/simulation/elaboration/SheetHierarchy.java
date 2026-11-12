@@ -44,7 +44,7 @@ import java.util.Set;
 final class SheetHierarchy {
 
     /** What joins a block's reference to what is its own inside it: its parts, {@code S1_R1}; its nets, {@code S1.mid}. */
-    private static final String PART_SEPARATOR = "_";
+    static final String PART_SEPARATOR = "_";
 
     /**
      * A block of the circuit as it was unfolded: the parts it became, so what it carries can be read off them.
@@ -176,7 +176,7 @@ final class SheetHierarchy {
     }
 
     /** Each port of the sheet a block wires — by name, or in the order the sheet writes its ports — → the parent's net. */
-    private static Map<String, String> pinsOf(Part block, Circuit sheet) {
+    static Map<String, String> pinsOf(Part block, Circuit sheet) {
         List<SheetBoundary.Port> ports = sheet.boundary().ports();
         Map<String, String> pins = new LinkedHashMap<>();
         List<Connection> connections = block.connections();
@@ -200,7 +200,7 @@ final class SheetHierarchy {
         List<Connection> connections = part.connections().stream()
                 .map(connection -> new Connection(connection.pin(), net(block, pins, boundary, connection.net()))).toList();
         List<Setting> settings = part.settings().stream().map(setting -> worked(reference, setting, sheetValues)).toList();
-        return new Part(reference, part.component(), connections, settings, part.symbol(), part.footprint());
+        return new Part(reference, part.component(), connections, settings, part.symbol(), part.footprint(), part.pads());
     }
 
     /** A setting worked out over the sheet's values: a number the parent can read; a text as it is. */

@@ -2,7 +2,7 @@ symbol:p-channel-mosfet-symbol("P-channel MOSFET") {
     meta {
         summary: "P-channel MOSFET, as drawn on a schematic: the source at the top, the arrow pointing out of the channel"
         code: "SY.TRANSISTOR:MOSFET-P"
-        category: circuits
+        category: transistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

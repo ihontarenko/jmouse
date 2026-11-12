@@ -1,0 +1,33 @@
+model:sot-23-6-model("SOT-23-6, 1.6 mm body") {
+    meta {
+        summary: "SOT-23-6, 1.6 mm body — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SOT23:6"
+        category: surface-transistor-outline
+        tags: electronics, model, gull-wing
+        source: "JEDEC MO-178 AB"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [1.6, 2.9, 0.675], at: [0, 0, 0.438])
+    box(plastic, size: [1.44, 2.74, 0.675], at: [0, 0, 1.113])
+    cylinder(dimple, radius: 0.25, length: 0.01, at: [-0.22, 0.87, 1.455])
+    marking(name, on: flat, size: [1.12, 0.48], at: [0, 0, 1.46], ink: marking)
+    box(tin, size: [0.25, 0.36, 0.2], at: [-0.925, 0.95, 0.775])
+    box(tin, size: [0.2, 0.36, 0.775], at: [-1.05, 0.95, 0.387])
+    box(tin, size: [0.45, 0.36, 0.2], at: [-1.275, 0.95, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [-0.925, 0, 0.775])
+    box(tin, size: [0.2, 0.36, 0.775], at: [-1.05, 0, 0.387])
+    box(tin, size: [0.45, 0.36, 0.2], at: [-1.275, 0, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [-0.925, -0.95, 0.775])
+    box(tin, size: [0.2, 0.36, 0.775], at: [-1.05, -0.95, 0.387])
+    box(tin, size: [0.45, 0.36, 0.2], at: [-1.275, -0.95, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [0.925, -0.95, 0.775])
+    box(tin, size: [0.2, 0.36, 0.775], at: [1.05, -0.95, 0.387])
+    box(tin, size: [0.45, 0.36, 0.2], at: [1.275, -0.95, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [0.925, 0, 0.775])
+    box(tin, size: [0.2, 0.36, 0.775], at: [1.05, 0, 0.387])
+    box(tin, size: [0.45, 0.36, 0.2], at: [1.275, 0, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [0.925, 0.95, 0.775])
+    box(tin, size: [0.2, 0.36, 0.775], at: [1.05, 0.95, 0.387])
+    box(tin, size: [0.45, 0.36, 0.2], at: [1.275, 0.95, 0.1])
+}

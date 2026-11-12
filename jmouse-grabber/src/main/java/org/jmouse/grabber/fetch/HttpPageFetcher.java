@@ -1,9 +1,9 @@
 package org.jmouse.grabber.fetch;
 
-import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import org.jmouse.http.client.HttpCall;
+import org.jmouse.http.client.HttpCallException;
+import org.jmouse.http.client.HttpReply;
+import org.jmouse.http.client.JdkHttpTransport;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -15,99 +15,61 @@ import org.jmouse.http.HttpHeader;
 import org.jmouse.http.HttpStatus;
 
 /**
- * 🌐 The standard fetcher, over {@link HttpClient}.
+ * 🌐 The standard fetcher, over the jMouse HTTP client ({@link JdkHttpTransport}).
  *
- * <p>The library ships no HTTP client abstraction of its own — {@code jmouse-http} is value types —
- * so this class is where the JDK's client is wrapped, once, behind {@link PageFetcher}. Everything
- * that would otherwise be repeated in a handler lives here: redirects followed with the final address
- * reported, the charset decided, headers translated in both directions.</p>
+ * <p>The call itself — the whole fetch timed, the page read within its size, redirects followed with the final address
+ * reported, the headers the JDK writes itself left to it — is the client's. What lives here is the grabber's: a request
+ * and a response as its {@link PageRequest} and {@link PageResponse}, headers translated in both directions.</p>
  */
 public final class HttpPageFetcher implements PageFetcher {
 
-    private final HttpClient client;
-    private final Settings   settings;
+    /** What a body is said to be when its request's headers do not say. */
+    private static final String OCTETS = "application/octet-stream";
+
+    private final JdkHttpTransport transport;
+    private final Settings         settings;
 
     HttpPageFetcher(Settings settings) {
         this.settings = settings;
-        this.client = HttpClient.newBuilder()
-                .connectTimeout(settings.connectTimeout())
-                .followRedirects(settings.followRedirects()
-                                         ? HttpClient.Redirect.NORMAL
-                                         : HttpClient.Redirect.NEVER)
-                .build();
+        this.transport = new JdkHttpTransport(settings.connectTimeout(), settings.redirects());
     }
 
     @Override
     public PageResponse fetch(PageRequest request) {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(request.address())
-                .timeout(request.timeout() == null ? settings.requestTimeout() : request.timeout());
-
-        applyHeaders(builder, request.headers());
-        applyMethod(builder, request);
-
         long start = System.nanoTime();
-
         try {
-            HttpResponse<byte[]> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofByteArray());
-
-            return new PageResponse(
-                    response.uri(),
-                    request.address(),
-                    HttpStatus.ofCode(response.statusCode()),
-                    readHeaders(response),
-                    response.body(),
-                    Duration.ofNanos(System.nanoTime() - start)
-            );
-        } catch (IOException exception) {
+            HttpReply reply = transport.exchange(callOf(request));
+            return new PageResponse(reply.uri(), request.address(), HttpStatus.ofCode(reply.status()), readHeaders(reply),
+                    reply.body(), Duration.ofNanos(System.nanoTime() - start));
+        } catch (HttpCallException exception) {
+            if (exception.failure() == HttpCallException.Failure.INTERRUPTED) {
+                throw new GrabberException("Interrupted while fetching " + request.address(), exception);
+            }
             throw new GrabberException("Cannot fetch " + request.address() + ": " + exception.getMessage(), exception);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new GrabberException("Interrupted while fetching " + request.address(), exception);
         }
     }
 
-    private void applyMethod(HttpRequest.Builder builder, PageRequest request) {
-        HttpRequest.BodyPublisher body = request.hasBody()
-                ? HttpRequest.BodyPublishers.ofByteArray(request.body())
-                : HttpRequest.BodyPublishers.noBody();
-
-        builder.method(request.method().name(), body);
-    }
-
-    private void applyHeaders(HttpRequest.Builder builder, Headers headers) {
-        for (Map.Entry<HttpHeader, Object> entry : headers.asMap().entrySet()) {
-            Object value = entry.getValue();
-
-            if (value == null) {
-                continue;
+    /** The request as a call: its method, its headers, and its body of the type its own headers say. */
+    private HttpCall callOf(PageRequest request) {
+        HttpCall.Builder call = HttpCall.to(request.method(), request.address())
+                .timeout(request.timeout() == null ? settings.requestTimeout() : request.timeout())
+                .responseLimit(settings.maximumResponseBytes());
+        for (Map.Entry<HttpHeader, Object> entry : request.headers().asMap().entrySet()) {
+            if (entry.getValue() != null && !(request.hasBody() && entry.getKey() == HttpHeader.CONTENT_TYPE)) {
+                call.header(entry.getKey().value(), String.valueOf(entry.getValue()));
             }
-
-            if (isRestricted(entry.getKey())) {
-                continue;
-            }
-
-            builder.header(entry.getKey().value(), String.valueOf(value));
         }
+        if (request.hasBody()) {
+            Object type = request.headers().getHeader(HttpHeader.CONTENT_TYPE);
+            call.body(request.body(), type == null ? OCTETS : String.valueOf(type));
+        }
+        return call.build();
     }
 
-    /**
-     * 🚫 Headers the JDK client refuses to let a caller set, throwing if one tries.
-     *
-     * <p>Dropping them silently is right here: a run's standing headers are written once for every
-     * site it will ever visit, and one of them being a name the client manages itself should not
-     * fail every fetch.</p>
-     */
-    private boolean isRestricted(HttpHeader header) {
-        return header == HttpHeader.HOST
-                || header == HttpHeader.CONNECTION
-                || header == HttpHeader.CONTENT_LENGTH
-                || header == HttpHeader.UPGRADE;
-    }
-
-    private Headers readHeaders(HttpResponse<byte[]> response) {
+    private Headers readHeaders(HttpReply reply) {
         Headers headers = new Headers();
 
-        response.headers().map().forEach((name, values) -> {
+        reply.headers().forEach((name, values) -> {
             if (values.isEmpty()) {
                 return;
             }
@@ -125,7 +87,7 @@ public final class HttpPageFetcher implements PageFetcher {
             }
         });
 
-        headers.setStatus(HttpStatus.ofCode(response.statusCode()));
+        headers.setStatus(HttpStatus.ofCode(reply.status()));
 
         return headers;
     }
@@ -149,25 +111,32 @@ public final class HttpPageFetcher implements PageFetcher {
      * request, while the connect timeout and the redirect behaviour are properties of the client and
      * cannot vary per call.</p>
      */
-    public record Settings(Duration connectTimeout, Duration requestTimeout, boolean followRedirects) {
+    public record Settings(Duration connectTimeout, Duration requestTimeout, JdkHttpTransport.Redirects redirects,
+                           long maximumResponseBytes) {
 
         public static Settings defaults() {
-            return new Settings(Duration.ofSeconds(10), Duration.ofSeconds(30), true);
+            return new Settings(Duration.ofSeconds(10), Duration.ofSeconds(30), JdkHttpTransport.Redirects.NORMAL,
+                    HttpCall.USUAL_RESPONSE_LIMIT);
         }
 
         public Settings connectingWithin(Duration timeout) {
-            return new Settings(timeout, requestTimeout, followRedirects);
+            return new Settings(timeout, requestTimeout, redirects, maximumResponseBytes);
         }
 
         public Settings requestingWithin(Duration timeout) {
-            return new Settings(connectTimeout, timeout, followRedirects);
+            return new Settings(connectTimeout, timeout, redirects, maximumResponseBytes);
+        }
+
+        /** 📏 Reads a page up to this many bytes; past them the fetch fails. */
+        public Settings readingAtMost(long bytes) {
+            return new Settings(connectTimeout, requestTimeout, redirects, bytes);
         }
 
         /**
          * 🔁 Stops following redirects, so a 301 arrives as a response to be decided on.
          */
         public Settings withoutFollowingRedirects() {
-            return new Settings(connectTimeout, requestTimeout, false);
+            return new Settings(connectTimeout, requestTimeout, JdkHttpTransport.Redirects.NEVER, maximumResponseBytes);
         }
     }
 

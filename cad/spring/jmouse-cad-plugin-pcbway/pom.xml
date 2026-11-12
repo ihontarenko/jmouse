@@ -8,16 +8,19 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
     </parent>
 
     <artifactId>jmouse-cad-plugin-pcbway</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - CAD Plugin PCBWay</name>
     <description>PCBWay's set: the Gerber set, the placement and the bill of materials in PCBWay's assembly template, the maker and its part number from the component's meta manufacturer and part-number lines.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-plugin-pcbway</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-plugin-pcbway</url>
 
     <properties>
+        <!-- what a reader is told of the plugin: one line, and the kind it is -->
+        <plugin.summary>Fabrication files in PCBWay's template</plugin.summary>
+        <plugin.category>PCB houses</plugin.category>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -44,6 +47,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Its settings, read from the engine's one settings tree -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-settings</artifactId>
+        </dependency>
         <!-- The set it writes its own on: the Gerber plugin, which it requires -->
         <dependency>
             <groupId>org.jmouse</groupId>
@@ -56,6 +64,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

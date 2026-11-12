@@ -1,13 +1,12 @@
 package org.jmouse.web.annotation;
 
-import org.jmouse.core.reflection.annotation.MapTo;
-import org.jmouse.web.mvc.ViewResolver;
-import org.jmouse.web.mvc.method.ViewResolverReturnValueHandler;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.jmouse.core.reflection.annotation.MapTo;
+import org.jmouse.web.mvc.ViewResolver;
+import org.jmouse.web.mvc.result.ViewResolverReturnValueHandler;
 
 /**
  * 🖼️ Maps a controller method to a named view.
@@ -31,7 +30,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface ViewMapping {
-
     /**
      * 🏷️ View name.
      */
@@ -43,5 +41,4 @@ public @interface ViewMapping {
      */
     @MapTo(attribute = "value")
     String name() default "";
-
 }

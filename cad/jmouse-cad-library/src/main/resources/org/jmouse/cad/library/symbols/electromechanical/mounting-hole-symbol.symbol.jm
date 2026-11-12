@@ -2,7 +2,7 @@ symbol:mounting-hole-symbol("Mounting hole with pad") {
     meta {
         summary: "A plated mounting hole, as drawn on a schematic: the hole, and the pad that ties it to a net below"
         code: "SY.MECHANICAL:MOUNTING-HOLE"
-        category: circuits
+        category: mounting-holes
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

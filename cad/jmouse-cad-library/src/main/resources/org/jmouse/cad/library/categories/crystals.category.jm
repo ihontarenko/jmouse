@@ -1,0 +1,8 @@
+category:crystals("Crystals") {
+    meta {
+        category: passive
+        order: 8
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

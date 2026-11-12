@@ -1,5 +1,7 @@
 package org.jmouse.cad.simulation;
 
+import org.jmouse.cad.component.Pin;
+
 import java.util.List;
 import java.util.Set;
 
@@ -23,8 +25,8 @@ public final class SimulationVocabulary {
     public static final String BIDIRECTIONAL = "bidirectional";
     public static final String[] PIN_DIRECTIONS = {INPUT, OUTPUT, BIDIRECTIONAL};
 
-    /** How a pin drives. */
-    public static final String[] PIN_DRIVES = {"open-drain"};
+    /** How a pin drives, when it is not push-pull. */
+    public static final String[] PIN_DRIVES = Pin.Drive.words();
 
     /** How a state changes: in steps, or as a quantity the solver integrates. */
     public static final String[] STATE_KINDS = {"discrete", "continuous"};
@@ -32,8 +34,16 @@ public final class SimulationVocabulary {
     /** What a probe reads other than a net's voltage. */
     public static final String[] PROBE_READINGS = {"current", "level"};
 
+    /** The marks a layout draws that are no part: where wires cross joined, a pin left open on purpose, the net names. */
+    public static final String JUNCTION   = "junction";
+    public static final String NO_CONNECT = "no-connect";
+    public static final String LABEL      = "label";
+    public static final String COMMON     = "common";
+    public static final String PORT       = "port";
+    public static final String GLOBAL     = "global";
+
     /** The marks a layout draws that are no part. */
-    public static final String[] LAYOUT_MARKS = {"junction", GROUND, "label", "common", POWER, "port", "global"};
+    public static final String[] LAYOUT_MARKS = {JUNCTION, NO_CONNECT, GROUND, LABEL, COMMON, POWER, PORT, GLOBAL};
 
     /** Which way a sheet's port goes, as its {@code ports} block writes it. */
     public static final String[] PORT_DIRECTIONS = {INPUT, OUTPUT, POWER, GROUND, ANALOG};

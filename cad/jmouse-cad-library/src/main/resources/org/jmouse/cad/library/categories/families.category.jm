@@ -1,0 +1,8 @@
+category:families("Families") {
+    meta {
+        summary: "Series of values parts are made in"
+        order: 22
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

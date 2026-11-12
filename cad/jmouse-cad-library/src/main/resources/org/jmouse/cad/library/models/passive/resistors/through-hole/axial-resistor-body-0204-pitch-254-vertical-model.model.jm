@@ -1,0 +1,17 @@
+model:axial-resistor-body-0204-pitch-254-vertical-model("Axial resistor DIN 0204, vertical, 2.54 mm") {
+    meta {
+        summary: "Axial resistor DIN 0204, vertical, 2.54 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:R0204-P2.54-V"
+        category: resistors-through-hole
+        tags: electronics, model, axial
+        source: "IEC 60286-1 bodies, DIN 44051 size codes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(lacquer, profile: [0, -1.8, 0.6, -1.8, 0.8, -1.6, 0.8, -1.08, 0.688, -0.968, 0.688, 0.968, 0.8, 1.08, 0.8, 1.6, 0.6, 1.8, 0, 1.8], at: [-1.27, 0, 1.8])
+    marking(bands, on: round, radius: 0.698, length: 1.936, at: [-1.27, 0, 1.8])
+    cylinder(tin, radius: 0.245, length: 1.6, at: [-1.27, 0, -0.8])
+    cylinder(tin, radius: 0.245, length: 1, at: [-1.27, 0, 4.1])
+    cylinder(tin, radius: 0.245, length: 6.2, at: [1.27, 0, 1.5])
+    cylinder(tin, radius: 0.245, length: 2.54, at: [0, 0, 4.6], rotate: [0, 90, 0])
+}

@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -113,7 +114,7 @@ public final class Plugins implements Extensions, AutoCloseable {
             try {
                 registered.plugin.start(this);
                 started.add(registered);
-                states.put(registered.plugin, PluginState.started(registered.descriptor()));
+                states.put(registered.plugin, PluginState.started(registered.descriptor(), extendedBy(registered, ordered)));
             } catch (RuntimeException failure) {
                 LOGGER.log(System.Logger.Level.WARNING, "Plugin '" + registered.id() + "' failed to start", failure);
                 refuseWithDependents(ordered, registered, "failed to start: " + messageOf(failure));
@@ -187,8 +188,28 @@ public final class Plugins implements Extensions, AutoCloseable {
         return null;
     }
 
-    /** The first point the plugin reaches that is not declared as it reaches it. */
+    /** The started plugins whose points a plugin adds to when they run: the declarers of its optional points that are here. */
+    private Set<String> extendedBy(Registered registered, List<Registered> ordered) {
+        Set<String> extended = new LinkedHashSet<>();
+        for (ExtensionPoint<?> point : registered.extended()) {
+            ordered.stream().filter(candidate -> !isRefused(candidate))
+                    .filter(candidate -> candidate.declared.stream().anyMatch(own -> own.name().equals(point.name())))
+                    .findFirst().ifPresent(declarer -> extended.add(declarer.id()));
+        }
+        return extended;
+    }
+
+    /**
+     * The first point the plugin reaches that is not declared as it reaches it; a point it adds to only when declared is
+     * held to its kind when it is.
+     */
     private static String unreachedPoint(Registered registered, Map<String, Declaration> points) {
+        for (ExtensionPoint<?> point : registered.extended()) {
+            Declaration declaration = points.get(point.name());
+            if (declaration != null && !declaration.point.equals(point)) {
+                return "adds to '" + point.name() + "' as " + describe(point) + ", but it is " + describe(declaration.point);
+            }
+        }
         for (ExtensionPoint<?> point : registered.reached()) {
             Declaration declaration = points.get(point.name());
             if (declaration == null) {
@@ -236,6 +257,8 @@ public final class Plugins implements Extensions, AutoCloseable {
             Set<Registered> below = new LinkedHashSet<>();
             registered.descriptor().requires().forEach(required -> below.add(byId.get(required)));
             registered.reached().forEach(point -> below.add(declarers.get(point.name())));
+            // A point it adds to when declared: after its declarer, when there is one.
+            registered.extended().stream().map(point -> declarers.get(point.name())).filter(Objects::nonNull).forEach(below::add);
             below.remove(registered);
             standsOn.put(registered, below);
         }
@@ -270,12 +293,19 @@ public final class Plugins implements Extensions, AutoCloseable {
         decorators.clear();
         listeners.clear();
         for (Registered registered : ordered) {
+            if (!isRefused(registered)) {
+                registered.declared.forEach(point -> declared.put(point.name(), point));
+            }
+        }
+        for (Registered registered : ordered) {
             if (isRefused(registered)) {
                 continue;
             }
-            registered.declared.forEach(point -> declared.put(point.name(), point));
-            registered.contributions.forEach(contribution -> contributions
-                    .computeIfAbsent(contribution.point.name(), name -> new ArrayList<>()).add(contribution.value));
+            // An optional contribution counts only where its point is declared by a plugin that runs.
+            registered.contributions.stream()
+                    .filter(contribution -> contribution.reach == Reach.REQUIRED || declared.containsKey(contribution.point.name()))
+                    .forEach(contribution -> contributions
+                            .computeIfAbsent(contribution.point.name(), name -> new ArrayList<>()).add(contribution.value));
             registered.decorations.forEach(decoration -> decorators
                     .computeIfAbsent(decoration.point.name(), name -> new ArrayList<>()).add(decoration.decorator));
             registered.subscriptions.forEach(subscription -> listeners
@@ -336,7 +366,7 @@ public final class Plugins implements Extensions, AutoCloseable {
     private record Declaration(ExtensionPoint<?> point, Registered owner) {
     }
 
-    private record Contribution(Contributions<?> point, Object value) {
+    private record Contribution(Contributions<?> point, Object value, Reach reach) {
     }
 
     private record Decoration(Decorations<?> point, Decorator<?> decorator) {
@@ -368,14 +398,21 @@ public final class Plugins implements Extensions, AutoCloseable {
             return descriptor;
         }
 
-        /** Every point it brings something to — the points it declared itself left out. */
+        /** Every point it stands on — the points it declared itself, and those it only adds to when declared, left out. */
         private List<ExtensionPoint<?>> reached() {
             List<ExtensionPoint<?>> reached = new ArrayList<>();
-            contributions.forEach(contribution -> reached.add(contribution.point));
+            contributions.stream().filter(contribution -> contribution.reach == Reach.REQUIRED)
+                    .forEach(contribution -> reached.add(contribution.point));
             decorations.forEach(decoration -> reached.add(decoration.point));
             subscriptions.forEach(subscription -> reached.add(subscription.topic));
             reached.removeIf(point -> declared.stream().anyMatch(own -> own.name().equals(point.name())));
             return reached;
+        }
+
+        /** The points it adds to only when another plugin declares them. */
+        private List<ExtensionPoint<?>> extended() {
+            return contributions.stream().filter(contribution -> contribution.reach == Reach.OPTIONAL)
+                    .<ExtensionPoint<?>>map(Contribution::point).toList();
         }
 
         @Override
@@ -389,7 +426,14 @@ public final class Plugins implements Extensions, AutoCloseable {
                 throw new IllegalArgumentException("'" + point.name() + "' holds " + point.type().getSimpleName()
                         + ", not " + (contribution == null ? "nothing" : contribution.getClass().getSimpleName()));
             }
-            contributions.add(new Contribution(point, contribution));
+            contributions.add(new Contribution(point, contribution, Reach.REQUIRED));
+        }
+
+        @Override
+        public <T> void contributeWhenDeclared(Contributions<T> point, T contribution) {
+            contribute(point, contribution);
+            Contribution taken = contributions.removeLast();
+            contributions.add(new Contribution(taken.point, taken.value, Reach.OPTIONAL));
         }
 
         @Override

@@ -3,7 +3,7 @@ package org.jmouse.cad.management;
 import org.jmouse.access.enforcement.ExternalAccessRules;
 import org.jmouse.access.enforcement.ExternalAccessRules.Declaration;
 import org.jmouse.access.enforcement.PublicEndpoint;
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.store.authority.CadCapability;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ClassUtils;

@@ -19,7 +19,8 @@ import static org.jmouse.cad.packages.Measures.written;
  * MELF cylinders —: for every kind and every size of the body table it reads, a reflow footprint and, unless the kind
  * says {@code hand-soldering no}, a hand-soldering one. A kind names its fillets ({@code chip} unless written); a body
  * shorter than 1608 takes the {@code -small} set where the rules have one. A kind with {@code polarity cathode} has
- * pad 1 as its cathode, marked on the silkscreen.
+ * pad 1 as its cathode, one with {@code polarity positive} — a tantalum capacitor — as its positive terminal; either is
+ * marked on the silkscreen by a bar beside pad 1.
  */
 final class ChipFootprints implements FootprintFamily {
 
@@ -81,7 +82,8 @@ final class ChipFootprints implements FootprintFamily {
             outlines.add(drafting.silkscreen(MeasuredPath.path().moveTo(-lineEnd, -lineY).horizontalTo(lineEnd)
                     .moveTo(-lineEnd, lineY).horizontalTo(lineEnd)));
         }
-        boolean polarised = "cathode".equals(kind.optionalWord("polarity").orElse(""));
+        String polarity = kind.optionalWord("polarity").orElse("none");
+        boolean polarised = !"none".equals(polarity);
         double padOuter = centre + padLength / 2;
         if (polarised) {
             double barX = padOuter + drawing.silkscreenClearance() + drawing.silkscreenWidth() / 2;
@@ -100,7 +102,8 @@ final class ChipFootprints implements FootprintFamily {
         String designated = PackageTable.designated(kind.word("designation"), words);
         String title = kindTitle + " " + size.title() + (handSoldering ? ", hand soldering" : "");
         String summary = kindTitle + ", " + size.title() + " body, " + (handSoldering
-                ? "pads lengthened for a soldering iron" : "reflow pads") + (polarised ? "; pad 1 is the cathode" : "");
+                ? "pads lengthened for a soldering iron" : "reflow pads") + ("cathode".equals(polarity) ? "; pad 1 is the cathode"
+                : "positive".equals(polarity) ? "; pad 1 is the positive terminal" : "");
         List<String> notes = List.of(
                 "Generated from footprint-standards/chip-packages.sht#" + size.id() + " and the land pattern rules; regenerate, never edit.",
                 "Body " + written(length.minimum()) + "…" + written(length.maximum()) + " × " + written(width.minimum()) + "…"
@@ -108,7 +111,7 @@ final class ChipFootprints implements FootprintFamily {
                         + "; fillets toe " + written(fillets.toe()) + ", heel " + written(fillets.heel()) + ", side " + written(fillets.side()) + ".",
                 "Z = " + written(land.outer()) + ", G = " + written(land.inner()) + ", X = " + written(land.width())
                         + "; pad " + written(padLength) + " × " + written(padWidth) + " centred at ±" + written(centre) + ".");
-        return new StandardFootprint(slug, designated, title, summary, kind.word("folder"), "surface",
-                sizes.standard() + ", " + size.title(), rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, kind.word("folder"), kind.word("category"), "surface",
+                sizes.standard() + ", " + size.title(), rules, notes, new FootprintDrawing(pads, outlines, size));
     }
 }

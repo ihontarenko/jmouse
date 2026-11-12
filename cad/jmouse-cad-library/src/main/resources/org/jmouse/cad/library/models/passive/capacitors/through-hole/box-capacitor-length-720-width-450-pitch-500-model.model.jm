@@ -1,0 +1,14 @@
+model:box-capacitor-length-720-width-450-pitch-500-model("Film box capacitor, 5 mm pitch, 4.5 mm wide") {
+    meta {
+        summary: "Film box capacitor, 5 mm pitch, 4.5 mm wide — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.RADIAL:CB-7.2X4.5-P5"
+        category: capacitors-through-hole
+        tags: electronics, model, radial
+        source: "IEC 60286-2 lead spacing, makers' box sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(sleeve, size: [7.2, 4.5, 6.5], at: [0, 0, 3.25])
+    cylinder(tin, radius: 0.245, length: 1.6, at: [-2.5, 0, -0.8])
+    cylinder(tin, radius: 0.245, length: 1.6, at: [2.5, 0, -0.8])
+}

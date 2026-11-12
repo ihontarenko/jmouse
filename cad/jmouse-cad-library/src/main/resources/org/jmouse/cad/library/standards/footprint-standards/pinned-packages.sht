@@ -1,0 +1,98 @@
+# Bodies whose leads stand where their maker put them: each lead at `pin-x`, `pin-y` in the maker's frame
+# (pin 1 at the origin, Y down as a drawing reads), the body's centre at `body-x`, `body-y`, `body-width` across X and
+# `body-depth` across Y — a round body (`outline round`) is `body-width` across. A lead is `lead` × `thickness` at its
+# largest, its hole drilled for the diagonal; a surface part (`mount surface`) has its maker's lands, `pad-width` by
+# `pad-height` each. `body-height` is the most the body stands over the pcb.
+# The leads' places are the makers' drawings, as KiCad's libraries hold them (Relay_THT, Transformer_THT, Diode_THT, Resistor_SMD,
+# CC-BY-SA-4.0 with the KiCad libraries' exception); the heights the makers' or their 3D models'.
+sheet "Pinned packages" as pinned-packages {
+    description "Through-hole bodies with their leads where their maker puts them: relays, printed-circuit transformers, round bridges."
+    form pinned
+
+    srd-relay "SANYOU SRD relay, form C" source standard "SANYOU SRD series data sheet, form C (one changeover): 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed" {
+        body-height 15.6 mm
+        name relay-sanyou-srd-form-c
+        part "SPDT relay"
+        lead 1 mm
+        thickness 0.5 mm
+        pin-x 1 = 0 mm, 2 = 1.95 mm, 3 = 14.15 mm, 4 = 14.2 mm, 5 = 1.95 mm
+        pin-y 1 = 0 mm, 2 = 6.05 mm, 3 = 6.05 mm, 4 = -6 mm, 5 = -5.95 mm
+        body-x 8.45 mm
+        body-y -0.05 mm
+        body-width 19.7 mm
+        body-depth 15.5 mm
+        folder "electromechanical/relays"
+        category relays
+        designation "RELAY:SRD-C"
+    }
+
+    ei30-one-secondary "EI30 printed-circuit transformer, 2 VA, one secondary" source standard "ERA EI30/15.5 2 VA, schematic 1: the primary 1 (•) to 5, the secondary 7 (•) to 9; body 32.5 × 27.5 × 27 mm, pins Ø 0.8 mm" {
+        body-height 27 mm
+        name transformer-ei30-2va-one-secondary
+        part "printed-circuit transformer"
+        lead 0.8 mm
+        thickness 0.8 mm
+        pin-x 1 = 0 mm, 2 = 0 mm, 3 = 0 mm, 4 = 0 mm, 5 = 0 mm, 6 = 20 mm, 7 = 20 mm, 8 = 20 mm, 9 = 20 mm, 10 = 20 mm
+        pin-y 1 = 0 mm, 2 = -5 mm, 3 = -10 mm, 4 = -15 mm, 5 = -20 mm, 6 = -20 mm, 7 = -15 mm, 8 = -10 mm, 9 = -5 mm, 10 = 0 mm
+        body-x 10 mm
+        body-y -10 mm
+        body-width 27.5 mm
+        body-depth 32.5 mm
+        folder "passive/transformers"
+        category transformers
+        designation "TRAFO:EI30-2VA-1S"
+    }
+
+    ei30-two-secondaries "EI30 printed-circuit transformer, 2 VA, two secondaries" source standard "ERA EI30/15.5 2 VA, schematic 2: the primary 1 (•) to 5, the secondaries 6 (•) to 7 and 9 (•) to 10; body 32.5 × 27.5 × 27 mm, pins Ø 0.8 mm" {
+        body-height 27 mm
+        name transformer-ei30-2va-two-secondaries
+        part "printed-circuit transformer"
+        lead 0.8 mm
+        thickness 0.8 mm
+        pin-x 1 = 0 mm, 2 = 0 mm, 3 = 0 mm, 4 = 0 mm, 5 = 0 mm, 6 = 20 mm, 7 = 20 mm, 8 = 20 mm, 9 = 20 mm, 10 = 20 mm
+        pin-y 1 = 0 mm, 2 = -5 mm, 3 = -10 mm, 4 = -15 mm, 5 = -20 mm, 6 = -20 mm, 7 = -15 mm, 8 = -10 mm, 9 = -5 mm, 10 = 0 mm
+        body-x 10 mm
+        body-y -10 mm
+        body-width 27.5 mm
+        body-depth 32.5 mm
+        folder "passive/transformers"
+        category transformers
+        designation "TRAFO:EI30-2VA-2S"
+    }
+
+    wom-bridge "Round bridge rectifier, WOM, 8.9 mm" source standard "W005M … W10M data sheet (WOM case): 1 +, 2 ~, 3 −, 4 ~ on a 5.08 mm square, 8.9 mm round body" {
+        body-height 5.3 mm
+        name bridge-rectifier-round-8-9mm
+        part "bridge rectifier"
+        outline round
+        lead 0.8 mm
+        thickness 0.8 mm
+        pin-x 1 = 0 mm, 2 = 0 mm, 3 = 5.08 mm, 4 = 5.08 mm
+        pin-y 1 = 0 mm, 2 = 5.08 mm, 3 = 5.08 mm, 4 = 0 mm
+        body-x 2.54 mm
+        body-y 2.54 mm
+        body-width 8.9 mm
+        body-depth 8.9 mm
+        folder "semiconductors/diodes"
+        category diodes-through-hole
+        designation "BRIDGE:WOM"
+    }
+
+    wsk2512 "Vishay WSK2512 four-terminal shunt" source standard "Vishay WSK2512 data sheet (document 30108), 0.005 Ω to 0.2 Ω: L 6.35 × W 3.18 × H 0.635 mm; the force lands 2.29 × 2.03 mm, the sense lands 1.4 × 0.76 mm, as its recommended solder pads" {
+        body-height 0.635 mm
+        name shunt-vishay-wsk2512
+        part "four-terminal shunt"
+        mount surface
+        pin-x 1 = -2.985 mm, 2 = -3.43 mm, 3 = 3.43 mm, 4 = 2.985 mm
+        pin-y 1 = -0.635 mm, 2 = 1.27 mm, 3 = -1.27 mm, 4 = 0.635 mm
+        pad-width 1 = 2.29 mm, 2 = 1.4 mm, 3 = 1.4 mm, 4 = 2.29 mm
+        pad-height 1 = 2.03 mm, 2 = 0.76 mm, 3 = 0.76 mm, 4 = 2.03 mm
+        body-x 0 mm
+        body-y 0 mm
+        body-width 6.35 mm
+        body-depth 3.18 mm
+        folder "passive/resistors"
+        category resistors-surface
+        designation "R:WSK2512-4T"
+    }
+}

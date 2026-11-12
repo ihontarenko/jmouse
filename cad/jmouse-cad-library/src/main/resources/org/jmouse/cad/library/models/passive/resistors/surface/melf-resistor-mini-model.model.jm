@@ -1,0 +1,14 @@
+model:melf-resistor-mini-model("MELF resistor MiniMELF (SOD-80, DO-213AA)") {
+    meta {
+        summary: "MELF resistor MiniMELF (SOD-80, DO-213AA) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.MELF:R-MINI"
+        category: resistors-surface
+        tags: electronics, model, chip
+        source: "JEDEC DO-213 and the makers' MELF outlines, MiniMELF (SOD-80, DO-213AA)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [3.5, 1.5, 1.6], at: [0, 0, 0.8])
+    box(tin, size: [0.7, 1.52, 1.62], at: [-1.4, 0, 0.8])
+    box(tin, size: [0.7, 1.52, 1.62], at: [1.4, 0, 0.8])
+}

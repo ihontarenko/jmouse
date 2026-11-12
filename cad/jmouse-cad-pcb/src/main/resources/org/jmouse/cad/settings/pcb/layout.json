@@ -1,0 +1,20 @@
+{
+  "$schema": "./layout.schema.json",
+  "circuit": {
+    "partsShare": 0.3,
+    "gap": 1.5,
+    "grid": 0.5,
+    "margin": 3,
+    "passes": 400,
+    "planeInset": 0.5,
+    "planeClearance": 0.4,
+    "corner": 1,
+    "connector": { "footprint": "FP.HDR:1X{pins}-P2.54-V", "designator": "J", "beforeSheet": 160 }
+  },
+  "unseated": { "width": 4, "height": 3, "courtyard": 0.25, "designatorHeight": 1 },
+  "setOut": { "rowWidth": 80, "margin": 5, "least": { "width": 50, "height": 40 } },
+  "fiducials": { "footprint": "FP.GRAPHIC:FIDUCIAL-1", "designator": "FID", "inset": 3 },
+  "ownPlacementDesignator": "G",
+  "edgeJoinReach": 0.5,
+  "copperStacks": [1, 2, 4, 6, 8]
+}

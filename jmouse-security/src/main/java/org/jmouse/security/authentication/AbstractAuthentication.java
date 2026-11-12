@@ -1,21 +1,24 @@
 package org.jmouse.security.authentication;
 
-import org.jmouse.security.Authentication;
-import org.jmouse.security.Authority;
-
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.Authority;
 
-abstract public class AbstractAuthentication implements Authentication {
+public abstract class AbstractAuthentication implements Authentication {
 
-    protected boolean               authenticated = false;
-    protected Object                principal;
+    protected boolean authenticated = false;
+    protected Object principal;
     protected Collection<Authority> authorities;
-    protected Object                credentials;
+    protected Object credentials;
 
-    public AbstractAuthentication(Object principal, Object credentials, Collection<? extends Authority> authorities) {
+    public AbstractAuthentication(
+        Object principal,
+        Object credentials,
+        Collection<? extends Authority> authorities
+    ) {
         this.principal = principal;
         this.authorities = List.copyOf(authorities);
         this.credentials = credentials;

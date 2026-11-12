@@ -2,7 +2,7 @@ symbol:resettable-fuse-symbol("Resettable fuse") {
     meta {
         summary: "Resettable (PTC) fuse, as drawn on a schematic: a fuse whose resistance steps up once it trips"
         code: "SY.FUSE:RESETTABLE"
-        category: circuits
+        category: fuses
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

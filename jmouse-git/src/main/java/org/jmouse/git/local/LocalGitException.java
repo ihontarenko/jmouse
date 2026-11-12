@@ -4,6 +4,8 @@ package org.jmouse.git.local;
 public final class LocalGitException extends RuntimeException {
     public enum Reason {
         NOT_A_REPOSITORY,
+        /** A branch or a commit named that is not there. */
+        NOT_FOUND,
         CONFLICT,
         INVALID_PATH,
         TOO_LARGE,

@@ -200,4 +200,9 @@ public record SimulatedComponent(String slug, String title, String type, List<Ev
     public Component written() {
         return lineage.getLast();
     }
+
+    /** What a part of it does in a circuit ({@link PartRole}): by its kind, and an instrument where it or a base of it reads the circuit. */
+    public PartRole role() {
+        return PartRole.of(type, lineage.stream().anyMatch(base -> !base.readings().isEmpty()));
+    }
 }

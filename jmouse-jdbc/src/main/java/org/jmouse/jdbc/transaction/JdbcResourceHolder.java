@@ -5,9 +5,11 @@ import java.util.Objects;
 
 /** A bound connection and the datasource/provider resource that owns it. */
 public final class JdbcResourceHolder {
+
     private final Connection connection;
     private final Object resourceKey;
     private boolean synchronizedWithTransaction;
+    private boolean completed;
 
     /** Legacy unkeyed holder for integrations managing a single resource. */
     public JdbcResourceHolder(Connection connection) {
@@ -25,6 +27,14 @@ public final class JdbcResourceHolder {
 
     public boolean belongsTo(Object key) {
         return resourceKey == null || resourceKey == key;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    void markCompleted() {
+        completed = true;
     }
 
     public boolean isSynchronized() {

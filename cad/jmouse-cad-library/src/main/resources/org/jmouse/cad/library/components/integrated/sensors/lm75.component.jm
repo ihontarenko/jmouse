@@ -10,8 +10,10 @@ component:lm75("LM75", type: sensor) {
         summary: "Digital thermometer on I²C: 9 bits, 0.5 °C, with an over-temperature output"
         source: "TI LM75A data sheet (SNIS153): 9-bit temperature, 0.5 °C LSB, registers 00 temperature, 01 configuration, 02 THYST (75 °C at power-up), 03 TOS (80 °C), OS open drain active low in comparator mode, conversion time 100 ms typical, address 1001 A2 A1 A0, pinout per the SOIC-8 package; the ±2 °C accuracy is not modelled — it reads the bench exactly"
         package: "SOIC-8, VSSOP-8"
-        category: circuits
+        category: sensors
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-target
     use:cmos-hc
@@ -27,6 +29,9 @@ component:lm75("LM75", type: sensor) {
     pin:a1(digital, input, 6, "address bit A1")
     pin:a0(digital, input, 7, "address bit A0")
     pin:Vcc(power, 8)
+
+    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("FP.MSOP:8-P0.65")
 
     symbol(box) {
         left([scl, sda, a0, a1, a2])

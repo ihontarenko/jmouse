@@ -1,9 +1,11 @@
 package org.jmouse.jdbc.transaction;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.h2.jdbcx.JdbcDataSource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.jmouse.jdbc.JdbcTemplate;
 import org.jmouse.jdbc.SQLExecutor;
 import org.jmouse.jdbc.connection.ConnectionProvider;
@@ -14,14 +16,15 @@ import org.jmouse.transaction.infrastructure.*;
 import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
 import org.jmouse.transaction.infrastructure.thread.ThreadBoundTransactionContextHolder;
 import org.jmouse.transaction.synchronization.ThreadBoundSynchronizationContextHolder;
-import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class JdbcPropagationTest {
+
     private final ThreadBoundTransactionContextHolder contexts = new ThreadBoundTransactionContextHolder();
-    private final ThreadBoundSynchronizationContextHolder synchronizations = new ThreadBoundSynchronizationContextHolder();
+    private final ThreadBoundSynchronizationContextHolder synchronizations =
+        new ThreadBoundSynchronizationContextHolder();
     private ConnectionProvider raw;
     private JdbcTemplate jdbc;
     private TransactionTemplate transactions;
@@ -46,44 +49,55 @@ class JdbcPropagationTest {
     @Test
     void requiredJoinsWithoutPrematureCommit() {
         RuntimeException original = new IllegalStateException("outer rollback");
-        assertSame(original, assertThrows(RuntimeException.class, () -> transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
-            jdbc.update("insert into entries values (1)");
-            transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
-                jdbc.update("insert into entries values (2)");
-                return null;
-            });
-            assertNotNull(contexts.getContext());
-            throw original;
-        })));
+        assertSame(
+            original,
+            assertThrows(RuntimeException.class, () ->
+                transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
+                    jdbc.update("insert into entries values (1)");
+                    transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
+                        jdbc.update("insert into entries values (2)");
+                        return null;
+                    });
+                    assertNotNull(contexts.getContext());
+                    throw original;
+                })
+            )
+        );
         assertEquals(0, count());
         assertNull(contexts.getContext());
     }
 
     @Test
     void caughtFailureInRequiredMarksTheOuterTransactionRollbackOnly() {
-        transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
-            jdbc.update("insert into entries values (1)");
-            assertThrows(IllegalStateException.class, () -> transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
-                throw new IllegalStateException("joined failure");
-            }));
-            assertTrue(contexts.getContext().isRollbackOnly());
-            jdbc.update("insert into entries values (2)");
-            return null;
-        });
+        assertThrows(UnexpectedRollbackException.class, () ->
+            transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
+                jdbc.update("insert into entries values (1)");
+                assertThrows(IllegalStateException.class, () ->
+                    transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
+                        throw new IllegalStateException("joined failure");
+                    })
+                );
+                assertTrue(contexts.getContext().isRollbackOnly());
+                jdbc.update("insert into entries values (2)");
+                return null;
+            })
+        );
         assertEquals(0, count());
         assertNull(contexts.getContext());
     }
 
     @Test
     void requiresNewCommitSurvivesOuterRollback() {
-        assertThrows(IllegalStateException.class, () -> transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
-            jdbc.update("insert into entries values (1)");
-            transactions.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> {
-                jdbc.update("insert into entries values (2)");
-                return null;
-            });
-            throw new IllegalStateException("outer failure");
-        }));
+        assertThrows(IllegalStateException.class, () ->
+            transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
+                jdbc.update("insert into entries values (1)");
+                transactions.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> {
+                    jdbc.update("insert into entries values (2)");
+                    return null;
+                });
+                throw new IllegalStateException("outer failure");
+            })
+        );
         assertEquals(1, count());
         assertNull(contexts.getContext());
     }
@@ -92,10 +106,12 @@ class JdbcPropagationTest {
     void requiresNewRollbackDoesNotCommitItsWrites() {
         transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
             jdbc.update("insert into entries values (1)");
-            assertThrows(IllegalStateException.class, () -> transactions.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> {
-                jdbc.update("insert into entries values (2)");
-                throw new IllegalStateException("inner failure");
-            }));
+            assertThrows(IllegalStateException.class, () ->
+                transactions.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> {
+                    jdbc.update("insert into entries values (2)");
+                    throw new IllegalStateException("inner failure");
+                })
+            );
             return null;
         });
         assertEquals(1, count());
@@ -105,10 +121,12 @@ class JdbcPropagationTest {
     void nestedFailureRollsBackOnlyToSavepoint() {
         transactions.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
             jdbc.update("insert into entries values (1)");
-            assertThrows(IllegalStateException.class, () -> transactions.inTransaction(definition(TransactionPropagation.NESTED), () -> {
-                jdbc.update("insert into entries values (2)");
-                throw new IllegalStateException("savepoint rollback");
-            }));
+            assertThrows(IllegalStateException.class, () ->
+                transactions.inTransaction(definition(TransactionPropagation.NESTED), () -> {
+                    jdbc.update("insert into entries values (2)");
+                    throw new IllegalStateException("savepoint rollback");
+                })
+            );
             jdbc.update("insert into entries values (3)");
             return null;
         });
@@ -127,7 +145,9 @@ class JdbcPropagationTest {
         });
         special.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
             TransactionContext original = contexts.getContext();
-            assertThrows(RuntimeException.class, () -> special.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> null));
+            assertThrows(RuntimeException.class, () ->
+                special.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> null)
+            );
             assertSame(original, contexts.getContext());
             jdbc.update("insert into entries values (1)");
             return null;
@@ -140,13 +160,17 @@ class JdbcPropagationTest {
         AtomicInteger calls = new AtomicInteger();
         TransactionTemplate special = template((connection, definition) -> {
             if (calls.incrementAndGet() == 2) {
-                return () -> { throw new SQLException("inner close failure"); };
+                return () -> {
+                    throw new SQLException("inner close failure");
+                };
             }
             return new IsolationReadOnlyConnectionCustomizer().apply(connection, definition);
         });
         special.inTransaction(definition(TransactionPropagation.REQUIRED), () -> {
             TransactionContext original = contexts.getContext();
-            assertThrows(RuntimeException.class, () -> special.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> null));
+            assertThrows(RuntimeException.class, () ->
+                special.inTransaction(definition(TransactionPropagation.REQUIRES_NEW), () -> null)
+            );
             assertSame(original, contexts.getContext());
             jdbc.update("insert into entries values (1)");
             return null;
@@ -156,10 +180,19 @@ class JdbcPropagationTest {
 
     private TransactionTemplate template(ConnectionCustomizer customizer) {
         JoinTransactionValidator validator = new JoinTransactionValidator(
-                JoinAttributePolicy.FAIL, JoinAttributePolicy.FAIL, JoinAttributePolicy.FAIL,
-                (message, failure) -> { });
-        return new TransactionTemplate(new JdbcTransactionCoordinator(contexts,
-                new JdbcTransactionSessionFactory(raw, customizer), synchronizations, validator));
+            JoinAttributePolicy.FAIL,
+            JoinAttributePolicy.FAIL,
+            JoinAttributePolicy.FAIL,
+            (message, failure) -> {}
+        );
+        return new TransactionTemplate(
+            new JdbcTransactionCoordinator(
+                contexts,
+                new JdbcTransactionSessionFactory(raw, customizer),
+                synchronizations,
+                validator
+            )
+        );
     }
 
     private TransactionDefinition definition(TransactionPropagation propagation) {

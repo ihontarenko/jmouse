@@ -1,0 +1,52 @@
+# How a drawing converted from an Eagle design is filed, and where each of an Eagle package's layers lands among ours.
+# An Eagle design carries its libraries inside it: a converted drawing is the design's, its holder and terms the design's.
+# A package's lines on any layer not named here — its names, values, keepouts, documentation of the other kind — are not
+# a part's, and are left out.
+sheet "Eagle libraries" as eagle-libraries {
+    description "Where an Eagle design's converted documents are filed, and what each Eagle layer is for."
+
+    # Where a converted drawing is filed, and the tags it carries.
+    category circuits
+    # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
+    library-category eagle
+    symbol-tags electronics, schematic, eagle
+    footprint-tags electronics, eagle, footprint
+    component-tags electronics, eagle
+    circuit-tags electronics, eagle
+
+    # The symbol each mark of a sheet is drawn with — where its terminal stands.
+    mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+
+    # The net that is a design's reference ground, node 0: what Eagle's supply libraries name it.
+    ground GND
+
+    # How far apart a design's sheets are laid, side by side on the one circuit Eagle's shared nets make them.
+    sheet-gap 50.8 mm
+
+    # How long a sheet's transient runs until its author says.
+    transient 20 ms
+
+    # A pad or a via whose ring Eagle leaves to the design rules: the rules' default restring, a share of the drill kept
+    # between a least and a most — Eagle's own defaults.
+    ring-share 0.25
+    ring-least 0.254 mm
+    ring-most 0.508 mm
+
+    # tNames and bNames print with the silkscreen, as Eagle's own CAM job prints them; tValues and bValues are the assembly
+    # drawing's.
+    silkscreen "What is printed on the pcb, front and back" {
+        eagle "21", "22", "25", "26"
+    }
+    fabrication "What the assembly drawing shows" {
+        eagle "51", "52", "27", "28"
+    }
+    mask "What the solder mask leaves open: tStop and bStop" {
+        eagle "29", "30"
+    }
+    paste "What takes solder paste: tCream and bCream" {
+        eagle "31", "32"
+    }
+    copper "Copper drawn besides the pads" {
+        eagle "1", "16"
+    }
+}

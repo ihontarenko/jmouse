@@ -1,0 +1,8 @@
+category:diodes-surface("Surface mount") {
+    meta {
+        category: diodes
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

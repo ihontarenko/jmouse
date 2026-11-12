@@ -97,6 +97,9 @@ public final class DrawingStatements {
         for (SymbolDrawing.Pin pin : drawing.pins()) {
             LineBuilder line = LineBuilder.line(DrawingGrammar.PIN).slot("name", Nodes.name(pin.name()))
                     .clause("at", Nodes.point(pin.x(), pin.y()));
+            if (pin.body() != null) {
+                line.clause("to", Nodes.point(pin.body().x(), pin.body().y()));
+            }
             if (pin.label() != null && !pin.label().isEmpty()) {
                 line.ending(Nodes.text(pin.label()));
             }
@@ -142,6 +145,9 @@ public final class DrawingStatements {
             line.slot("range", read(DrawingGrammar.INPUT, Values.RANGE, input.range()));
             if (input.typical() != input.low()) {
                 line.clause("typical", Nodes.number(input.typical()));
+            }
+            if (input.hold() > 0) {
+                line.clause("hold", Nodes.number(input.hold()));
             }
         }
         return line.build();

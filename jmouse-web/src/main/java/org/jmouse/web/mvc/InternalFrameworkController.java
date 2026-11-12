@@ -1,20 +1,19 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.beans.BeanInitializationException;
-import org.jmouse.context.BeanIfPropertyMatch;
-import org.jmouse.core.MediaType;
-import org.jmouse.web.annotation.*;
-import org.jmouse.http.*;
-import org.jmouse.web.http.*;
-import org.jmouse.web.mvc.resource.ResourceNotFoundException;
-import org.jmouse.web.mvc.resource.ResourceValidationFailedException;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import org.jmouse.beans.BeanInitializationException;
+import org.jmouse.context.BeanIfPropertyMatch;
+import org.jmouse.core.MediaType;
+import org.jmouse.http.*;
+import org.jmouse.web.annotation.*;
+import org.jmouse.web.http.*;
+import org.jmouse.web.mvc.resource.ResourceNotFoundException;
+import org.jmouse.web.mvc.resource.ResourceValidationFailedException;
 
 /**
  * 🧰 Built-in MVC fallback controller for framework-level errors.
@@ -43,9 +42,7 @@ public class InternalFrameworkController {
      * @param model     MVC model for rendering error view
      * @return generated response view name or body
      */
-    @ExceptionHandler({
-            TooManyRequestsException.class
-    })
+    @ExceptionHandler({ TooManyRequestsException.class })
     public String handle429(HttpServletResponse response, Exception exception, Model model) {
         return getGeneratedResponse(model, HttpStatus.TOO_MANY_REQUESTS, exception, response);
     }
@@ -60,12 +57,7 @@ public class InternalFrameworkController {
      * @see HandlerMappingException
      * @see HandlerAdapterException
      */
-    @ExceptionHandler({
-            HandlerMappingException.class,
-            NotFoundException.class,
-            HandlerAdapterException.class,
-            ResourceNotFoundException.class,
-    })
+    @ExceptionHandler({ NotFoundException.class, ResourceNotFoundException.class })
     public String handle404(HttpServletResponse response, Exception exception, Model model) {
         return getGeneratedResponse(model, HttpStatus.NOT_FOUND, exception, response);
     }
@@ -79,9 +71,7 @@ public class InternalFrameworkController {
      * @see ResourceValidationFailedException
      * @see HttpStatus#UNPROCESSABLE_ENTITY
      */
-    @ExceptionHandler({
-            ResourceValidationFailedException.class,
-    })
+    @ExceptionHandler({ ResourceValidationFailedException.class })
     public void handle422(HttpServletResponse response, Exception exception, Model model) {
         response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.getCode());
         response.setHeader(HttpHeader.X_JMOUSE_DEBUG.value(), exception.getMessage());
@@ -96,9 +86,11 @@ public class InternalFrameworkController {
      * @return view name of the framework error page
      */
     @ExceptionHandler({
-            BeanInitializationException.class,
-            IllegalStateException.class,
-            IllegalArgumentException.class,
+        BeanInitializationException.class,
+        HandlerMappingException.class,
+        HandlerAdapterException.class,
+        IllegalStateException.class,
+        IllegalArgumentException.class
     })
     public Map<String, Object> handle500(HttpServletResponse response, Exception exception, Model model) {
         getGeneratedResponse(model, HttpStatus.INTERNAL_SERVER_ERROR, exception, response);
@@ -124,10 +116,15 @@ public class InternalFrameworkController {
      * @param response   target servlet response
      * @return {@code "view:jmouse/error"} view name
      */
-    private String getGeneratedResponse(Model model, HttpStatus httpStatus, Exception exception, HttpServletResponse response) {
-        Headers         headers         = RequestAttributesHolder.getRequestHeaders().headers();
+    private String getGeneratedResponse(
+        Model model,
+        HttpStatus httpStatus,
+        Exception exception,
+        HttpServletResponse response
+    ) {
+        Headers headers = RequestAttributesHolder.getRequestHeaders().headers();
         QueryParameters queryParameters = RequestAttributesHolder.getQueryParameters();
-        RequestPath     requestPath     = RequestAttributesHolder.getRequestPath();
+        RequestPath requestPath = RequestAttributesHolder.getRequestPath();
 
         // overwrite content type for unified response
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -138,7 +135,10 @@ public class InternalFrameworkController {
         model.addAttribute("requestMethod", headers.getMethod());
         model.addAttribute("requestPath", requestPath.path());
         model.addAttribute("queryString", queryParameters.getQueryString().toQueryString());
-        model.addAttribute("message", getExceptionMessage(exception));
+        model.addAttribute(
+            "message",
+            httpStatus.getCode() >= 500 ? httpStatus.getText() : getExceptionMessage(exception)
+        );
         model.addAttribute("timestamp", Instant.now().toString());
 
         response.setStatus(httpStatus.getCode());
@@ -155,8 +155,8 @@ public class InternalFrameworkController {
      * @return ordered map of messages to stack-trace strings (sourceRoot followed by causes)
      */
     private Map<String, String> getDetailedStackTrace(Throwable throwable) {
-        Map<String, String> stack     = new HashMap<>();
-        Throwable           exception = throwable.getCause();
+        Map<String, String> stack = new HashMap<>();
+        Throwable exception = throwable.getCause();
 
         stack.put(getExceptionMessage(throwable), toStringStackTrace(throwable));
         while (exception != null) {

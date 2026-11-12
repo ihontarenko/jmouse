@@ -1,7 +1,8 @@
 package org.jmouse.cad.store.catalogue;
 
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
-import org.jmouse.cad.jpa.catalogue.StoredDocument;
+import org.jmouse.cad.document.DocumentStatus;
+import org.jmouse.cad.folder.DocumentStore;
+import org.jmouse.cad.folder.StoredDocument;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadCapability;
 import org.jmouse.cad.store.authority.CadPlace;
@@ -37,7 +38,7 @@ public class DocumentAccess {
 
     public boolean canRead(StoredDocument document) {
         if (document.isCatalogue()) {
-            return document.getStatus() == StoredDocument.Status.PUBLISHED
+            return document.getStatus() == DocumentStatus.PUBLISHED
                     || authority.permitsGlobally(CadCapability.CATALOGUE_WRITE);
         }
         return authority.permits(CadCapability.OWNER_READ, placeOf(document));
@@ -45,6 +46,9 @@ public class DocumentAccess {
 
     /** Whether the reader may write the document's next revision — the rule {@link #requireWritable} enforces. */
     public boolean canWrite(StoredDocument document) {
+        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+            return false;
+        }
         if (document.isCatalogue()) {
             return authority.permitsGlobally(CadCapability.CATALOGUE_WRITE);
         }
@@ -52,11 +56,35 @@ public class DocumentAccess {
     }
 
     public void requireWritable(StoredDocument document) {
+        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+            throw CadProblem.conflict("'" + document.getSlug() + "' ships with the installation and is read only: save a copy"
+                                      + " of it to change it.");
+        }
         if (document.isCatalogue()) {
             authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
         } else {
             authority.require(CadCapability.OWNER_WRITE, placeOf(document));
         }
+    }
+
+    /**
+     * Whether the reader may keep files beside the document. A shipped document's text is the jar's and stays read only;
+     * what an installation keeps beside it is the installation's own, and is for whoever curates its catalogue.
+     */
+    public boolean canFileBeside(StoredDocument document) {
+        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+            return authority.permitsGlobally(CadCapability.CATALOGUE_WRITE);
+        }
+        return canWrite(document);
+    }
+
+    /** The rule {@link #canFileBeside} says, enforced. */
+    public void requireFilingBeside(StoredDocument document) {
+        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+            authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
+            return;
+        }
+        requireWritable(document);
     }
 
     /** Where an owned document is: its owner's whole chain, as the host gives it. */

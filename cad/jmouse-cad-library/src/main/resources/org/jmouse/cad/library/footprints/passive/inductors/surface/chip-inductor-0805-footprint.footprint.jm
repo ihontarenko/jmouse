@@ -2,7 +2,7 @@ footprint:chip-inductor-0805-footprint("Chip inductor 0805 (2012 metric)") {
     meta {
         summary: "Chip inductor, 0805 (2012 metric) body, reflow pads"
         code: "FP.CHIP:L0805"
-        category: circuits
+        category: inductors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 0805 (2012 metric)"
         authors: "jMouse"
@@ -15,4 +15,6 @@ footprint:chip-inductor-0805-footprint("Chip inductor 0805 (2012 metric)") {
     pad:2(surface, rounded-rectangle, at: 0.85 0, size: 1.1 x 1.4, roundness: 0.25)
     outline(fabrication, width: 0.1, "M-1 -0.625H1V0.625H-1Z")
     outline(courtyard, width: 0.05, "M-1.65 -0.95H1.65V0.95H-1.65Z")
+    body(height: 1.35)
+    model("MD.CHIP:L0805")
 }

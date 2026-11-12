@@ -1,0 +1,18 @@
+model:pin-socket-1x6-pitch-200-vertical-model("Pin socket, 2.00 mm pitch, 1 × 6, vertical") {
+    meta {
+        summary: "Pin socket, 2.00 mm pitch, 1 × 6, vertical — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SKT:1X6-P2-V"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [2, 12, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 5, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 3, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 1, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -1, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -3, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -5, 1.7])
+}

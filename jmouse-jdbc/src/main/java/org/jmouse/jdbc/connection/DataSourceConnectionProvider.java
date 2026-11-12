@@ -1,11 +1,10 @@
 package org.jmouse.jdbc.connection;
 
-import org.jmouse.core.Verify;
-import org.jmouse.jdbc.connection.support.AbstractConnectionProvider;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.jmouse.core.Verify;
+import org.jmouse.jdbc.connection.support.AbstractConnectionProvider;
 
 /**
  * {@link ConnectionProvider} backed by a {@link DataSource}.

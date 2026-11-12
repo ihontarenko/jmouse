@@ -73,7 +73,7 @@ public record MeasuredCircuit(Circuit circuit, CatalogueDocuments catalogue, Ben
             named.remove(part.reference());
             List<Setting> settings = new ArrayList<>(part.settings());
             settings.addAll(changed);
-            return new Part(part.reference(), part.component(), part.connections(), settings, part.symbol(), part.footprint());
+            return new Part(part.reference(), part.component(), part.connections(), settings, part.symbol(), part.footprint(), part.pads());
         }).toList();
         if (!named.isEmpty()) {
             throw new IllegalArgumentException("'with' names no part of the circuit: " + String.join(", ", named));

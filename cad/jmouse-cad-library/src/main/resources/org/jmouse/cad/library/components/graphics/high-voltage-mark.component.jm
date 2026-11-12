@@ -1,0 +1,15 @@
+component:high-voltage-mark("High voltage mark") {
+    meta {
+        designator: G
+        summary: "A warning triangle with a bolt: dangerous voltage on this part of the board: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:HIGH-VOLTAGE-10")
+    footprint("FP.GRAPHIC:HIGH-VOLTAGE-5")
+    footprint("FP.GRAPHIC:HIGH-VOLTAGE-20")
+
+    symbol(uses: "SY.GRAPHIC:HIGH-VOLTAGE") {
+    }
+}

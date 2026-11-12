@@ -8,6 +8,9 @@
 functions:junctions("Semiconductor junctions") {
     meta {
         summary: "The SPICE p–n junction: saturation over temperature, current, depletion charge, recombination, high injection"
+        category: functions
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     formulas {

@@ -6,6 +6,7 @@ import org.jmouse.cad.component.Pin;
 import org.jmouse.cad.component.Seat;
 import org.jmouse.cad.document.MetaNode;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * What a set of documents says about a component a part is, by slug — what a format writing a part needs whatever the
  * format: the parameter its value is, the footprints it sits on with the pads each pin takes, and which pin a package's
- * number is. A KiCad schematic, a bill of materials and a board house's placement file all ask the same; each answer is
+ * number is. A KiCad schematic, a bill of materials and a pcb house's placement file all ask the same; each answer is
  * worked out once.
  */
 public final class ComponentFacts {
@@ -45,6 +46,11 @@ public final class ComponentFacts {
                 return Optional.empty();
             }
         });
+    }
+
+    /** What a part of the component does in a circuit ({@link PartRole}); a component that does not compile dissipates. */
+    public PartRole roleOf(String component) {
+        return compiled(component).map(SimulatedComponent::role).orElse(PartRole.DISSIPATING);
     }
 
     /** The parameter the component's value is — a resistor's {@code resistance} —; empty when it names none. */
@@ -84,18 +90,30 @@ public final class ComponentFacts {
      */
     public Map<String, String> padNets(Part part, Optional<String> footprint) {
         Map<String, String> byPin = netsByPin(part);
-        Optional<Seat> mapped = footprint.flatMap(slug -> seatsOf(part.component()).stream()
-                .filter(seat -> seat.footprint().equals(slug) && !seat.pads().isEmpty()).findFirst());
-        Map<String, String> pinsOfPads = mapped.map(Seat::pads).orElseGet(() -> pinsByNumber(part.component()));
         Map<String, String> nets = new LinkedHashMap<>();
-        pinsOfPads.forEach((pad, pin) -> {
+        pinsOfPads(part, footprint).forEach((pad, pin) -> {
             // A block's pin, B.output, is wired as such or, shared by the blocks, by its name alone.
             String net = byPin.getOrDefault(pin, byPin.get(pin.substring(pin.indexOf('.') + 1)));
             if (net != null) {
                 nets.put(pad, net);
             }
         });
-        return Map.copyOf(nets);
+        // In pad order, every time: a copy would hand the pads out in an order that changes from one run to the next.
+        return Collections.unmodifiableMap(nets);
+    }
+
+    /**
+     * The pin each pad of a part is, by pad number, on a footprint: the part's own pad map when its line writes one, else
+     * its component's map of that footprint, else the package numbers of its pins — the one answer to where a pin lands,
+     * which the pcb's copper and every format the part is written in follow.
+     */
+    public Map<String, String> pinsOfPads(Part part, Optional<String> footprint) {
+        if (!part.pads().isEmpty()) {
+            return part.pads();
+        }
+        Optional<Seat> mapped = footprint.flatMap(slug -> seatsOf(part.component()).stream()
+                .filter(seat -> seat.footprint().equals(slug) && !seat.pads().isEmpty()).findFirst());
+        return mapped.map(Seat::pads).orElseGet(() -> pinsByNumber(part.component()));
     }
 
     /** The net on each of a part's pins: by the pin each connection names, or in the component's pin order. */
@@ -134,6 +152,6 @@ public final class ComponentFacts {
                 pins.putIfAbsent(group.get(unit), component.units().get(unit) + "." + pin.name());
             }
         }
-        return Map.copyOf(pins);
+        return Collections.unmodifiableMap(pins);
     }
 }

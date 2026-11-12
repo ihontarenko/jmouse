@@ -1,6 +1,13 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.exchange.imported.SheetMarks;
+
+import org.jmouse.core.text.Slugifier;
+import org.jmouse.cad.exchange.imported.ImportedCircuit;
+import org.jmouse.cad.exchange.imported.ImportedCircuitDocument;
 import org.jmouse.kicad.KiCadProject;
+import org.jmouse.kicad.pcb.KiCadPcb;
+import org.jmouse.kicad.pcb.KiCadPcbFootprint;
 import org.jmouse.kicad.KiCadProject.SheetInstance;
 import org.jmouse.kicad.footprint.KiCadFootprint;
 import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
@@ -8,6 +15,7 @@ import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 
 import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.pcb.FootprintLines;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -36,9 +44,11 @@ import java.util.TreeSet;
  *                   {@code Device} for {@code kicad-device-r-shunt} —, so a host can file them as KiCad does
  * @param notes    what the import could not carry, by part: a component the library map does not name, a value that is
  *                 not a number, a unit drawn by another's place, a footprint no library holds
+ * @param ground   the KiCad net that became node 0, the design's reference ground: {@code GND}, else its first ground
  */
 public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode> symbols, List<DocumentNode> components,
-                                 List<DocumentNode> footprints, Map<String, String> libraries, List<String> notes) {
+                                 List<DocumentNode> footprints, Map<String, String> libraries, List<String> notes,
+                                 Map<String, String> identifiers, String ground) {
 
     /** The property a KiCad part names its footprint by. */
     private static final String FOOTPRINT = "Footprint";
@@ -51,6 +61,16 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
     public static KiCadProjectImport of(KiCadProject project, String name, KiCadLibraryMap library,
                                         KiCadCatalogue catalogue, KiCadFootprintLibraries footprints,
                                         KiCadLibraries filing) {
+        return of(project, name, library, catalogue, footprints, Optional.empty(), filing);
+    }
+
+    /**
+     * @param board the design's board, when it is read with it: each part then lands on the footprint that stands on the
+     *              board, as the board holds it. It is what was laid out, whatever a library has become since.
+     */
+    public static KiCadProjectImport of(KiCadProject project, String name, KiCadLibraryMap library,
+                                        KiCadCatalogue catalogue, KiCadFootprintLibraries footprints,
+                                        Optional<KiCadPcb> board, KiCadLibraries filing) {
         String root = slugOf(name);
         Map<String, String> slugs = new LinkedHashMap<>();
         for (SheetInstance sheet : project.sheets()) {
@@ -67,22 +87,32 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
             notes.add("The design has no GND: " + ground + " is node 0, the ground everything is measured from; its other "
                     + "grounds stay nets of their own.");
         }
+        Map<String, String> landedOnBoard = new LinkedHashMap<>();
+        Map<String, String> relinked = board.map(read -> relinkedSymbols(read, project, notes)).orElse(Map.of());
+        Map<String, KiCadFootprint> onBoard = board.map(read -> footprintsOnBoard(read, relinked, landedOnBoard, notes)).orElse(Map.of());
         Map<String, String> paired = pairedFootprints(project, library, catalogue);
-        Map<String, KiCadFootprint> found = footprintsNamed(project, footprints, paired, notes);
+        // The board's own copy of a paired footprint is the board's copper; ours lends it only its body.
+        Map<String, String> pairedOnBoard = new LinkedHashMap<>(paired);
+        pairedOnBoard.keySet().retainAll(onBoard.keySet());
+        paired.keySet().removeAll(onBoard.keySet());
+        Map<String, KiCadFootprint> found = footprintsNamed(project, footprints, paired, onBoard, landedOnBoard, notes);
         Map<String, String> footprintOfSymbol = footprintOfSymbol(project);
         Set<String> imported = new LinkedHashSet<>();
+        Map<String, String> identifiers = new LinkedHashMap<>();
+        SheetMarks marks = SheetMarks.of(catalogue::document, filing.markSymbols());
         for (SheetInstance sheet : project.sheets()) {
             String file = sheet.schematic().name();
             if (!imported.add(file)) {
                 continue;
             }
             ImportedSheet read = KiCadSheetImport.of(sheet.schematic(), sheet.path(), ground, library, filing.ownLibrary(),
-                    catalogue, placed -> slugs.getOrDefault(placed, slugOf(placed)));
+                    catalogue, placed -> slugs.getOrDefault(placed, slugOf(placed)), placed -> labelledPorts(project, placed, ground), marks);
             // A sheet is called what KiCad calls it; the project it belongs to is said by where it is filed.
             String title = sheet.root() ? name : sheet.name();
-            ImportedSheet sheetOnFootprints = onTheirFootprints(read, found, paired, catalogue, notes);
-            circuits.add(KiCadCircuitDocument.of(slugs.get(file), title, "Imported from KiCad: " + file, sheetOnFootprints,
-                    filing));
+            identifiers.putAll(read.identifiers());
+            ImportedSheet sheetOnFootprints = onTheirFootprints(read, found, paired, partsOnBoard(read, landedOnBoard), catalogue, notes);
+            circuits.add(ImportedCircuitDocument.of(slugs.get(file), title, "Imported from KiCad: " + file,
+                    sheetOnFootprints.circuit(), filing));
             uses.addAll(read.symbols());
             for (KiCadSymbolDefinition definition : read.components()) {
                 String component = KiCadSymbolDrawing.componentSlugOf(definition);
@@ -92,15 +122,17 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
                 Optional<String> footprint = landing(definition, footprintOfSymbol.get(definition.name()), found, paired, notes);
                 components.put(component, KiCadComponentStub.documentOf(definition, footprint,
                         KiCadComponentStub.drawnWith(definition, library, catalogue),
-                        KiCadComponentStub.boxed(definition, library), filing));
+                        KiCadComponentStub.boxed(definition, library), filing, false));
                 libraries.putIfAbsent(component, KiCadSymbolDrawing.libraryOf(definition));
             }
-            read.notes().forEach(note -> notes.add(file + ": " + note));
+            read.circuit().notes().forEach(note -> notes.add(file + ": " + note));
         }
+        // A board's old identity of a symbol names the part that symbol became.
+        relinked.forEach((old, current) -> Optional.ofNullable(identifiers.get(current)).ifPresent(id -> identifiers.put(old, id)));
         List<DocumentNode> symbols = new ArrayList<>();
         Set<String> drawn = new LinkedHashSet<>();
         for (ImportedSheet.SymbolUse use : uses) {
-            DocumentNode symbol = KiCadSymbolDrawing.documentOf(use.symbol(), use.unit(), use.pinNames(), filing);
+            DocumentNode symbol = KiCadSymbolDrawing.documentOf(use.symbol(), use.unit(), use.pinNames(), filing, false);
             if (drawn.add(symbol.slug())) {
                 symbols.add(symbol);
                 libraries.putIfAbsent(symbol.slug(), KiCadSymbolDrawing.libraryOf(use.symbol()));
@@ -108,12 +140,14 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
         }
         List<DocumentNode> footprintDocuments = new ArrayList<>();
         found.forEach((libraryId, footprint) -> {
+            Optional<List<FootprintLines.Model>> bodies = Optional.ofNullable(pairedOnBoard.get(libraryId)).flatMap(catalogue::footprintDrawing)
+                    .flatMap(ours -> OwnBodies.of(KiCadFootprintDrawing.padsOf(footprint), ours));
             footprintDocuments.add(KiCadFootprintDrawing.documentOf(libraryId, footprint,
-                    footprints.originOf(libraryId).orElse(KiCadFootprintLibraries.Origin.PROJECT), filing));
+                    footprints.originOf(libraryId).orElse(KiCadFootprintLibraries.Origin.PROJECT), filing, bodies));
             libraries.putIfAbsent(KiCadFootprintDrawing.slugOf(libraryId), KiCadFootprintDrawing.libraryOf(libraryId));
         });
         return new KiCadProjectImport(List.copyOf(circuits), List.copyOf(symbols), List.copyOf(components.values()),
-                List.copyOf(footprintDocuments), Map.copyOf(libraries), List.copyOf(notes));
+                List.copyOf(footprintDocuments), Map.copyOf(libraries), List.copyOf(notes), Map.copyOf(identifiers), ground);
     }
 
 
@@ -129,26 +163,124 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
             for (KiCadSymbolInstance symbol : sheet.schematic().symbols()) {
                 String libraryId = symbol.property(FOOTPRINT).strip();
                 if (!libraryId.isEmpty() && !paired.containsKey(libraryId)) {
-                    library.footprintCodeOf(libraryId).flatMap(catalogue::footprintCoded)
-                            .ifPresent(slug -> paired.put(libraryId, slug));
+                    // Paired by the code the map gives, and named by it: the catalogue holding a footprint of it is the pair.
+                    library.footprintCodeOf(libraryId).filter(code -> catalogue.footprintCoded(code).isPresent())
+                            .ifPresent(code -> paired.put(libraryId, code));
                 }
             }
         }
         return paired;
     }
+    /** What a box placing a sheet file can wire a pin to: the port each of its hierarchical labels is. */
+    private static Map<String, String> labelledPorts(KiCadProject project, String file, String ground) {
+        return project.sheets().stream().filter(sheet -> sheet.schematic().name().equals(file)).findFirst()
+                .map(sheet -> KiCadSheetImport.portsOf(sheet.schematic(), sheet.path(), ground)).orElse(Map.of());
+    }
+
+    /**
+     * The footprints standing on a board, by library id, each as the first of its kind stands there; and the library id each
+     * symbol landed on, by the symbol's uuid. A kind whose copies differ — one edited on the board — is said.
+     */
+    private static Map<String, KiCadFootprint> footprintsOnBoard(KiCadPcb board, Map<String, String> relinked, Map<String, String> landed,
+                                                                 List<String> notes) {
+        Map<String, KiCadFootprint> onBoard = new LinkedHashMap<>();
+        Set<String> differing = new TreeSet<>();
+        for (KiCadPcbFootprint placed : board.footprints()) {
+            KiCadFootprint first = onBoard.putIfAbsent(placed.libraryId(), placed.footprint());
+            if (first != null && !samePads(first, placed.footprint())) {
+                differing.add(placed.libraryId());
+            }
+            placed.path().map(KiCadProjectImport::symbolOf).ifPresent(symbol -> landed.put(relinked.getOrDefault(symbol, symbol), placed.libraryId()));
+        }
+        if (!differing.isEmpty()) {
+            notes.add("Copies of " + String.join(", ", differing) + " on the board differ from each other: every part of them "
+                    + "stands on the first copy's pads.");
+        }
+        return onBoard;
+    }
+
+    private static String symbolOf(String path) {
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
+
+    /**
+     * The symbols a board knows under an older identity, by that identity → the one they have now. A symbol placed anew keeps
+     * its reference and loses its uuid, and KiCad itself relinks such a one by the reference. That can be trusted only of a
+     * board that otherwise belongs to its schematic: of one drawn before the schematic was drawn anew, a reference is a
+     * reused word and would seat another part.
+     */
+    private static Map<String, String> relinkedSymbols(KiCadPcb board, KiCadProject project, List<String> notes) {
+        Map<String, String> uuidOfReference = new LinkedHashMap<>();
+        Set<String> uuids = new LinkedHashSet<>();
+        Set<String> ambiguous = new LinkedHashSet<>();
+        for (SheetInstance sheet : project.sheets()) {
+            for (KiCadSymbolInstance symbol : sheet.schematic().symbols()) {
+                uuids.add(symbol.uuid());
+                String known = uuidOfReference.putIfAbsent(symbol.reference(sheet.path()), symbol.uuid());
+                if (known != null && !known.equals(symbol.uuid()) && symbol.unit() <= 1) {
+                    ambiguous.add(symbol.reference(sheet.path()));
+                }
+            }
+        }
+        List<KiCadPcbFootprint> ofSchematic = board.footprints().stream().filter(KiCadPcbFootprint::ofSchematic).toList();
+        long found = ofSchematic.stream().filter(placed -> uuids.contains(symbolOf(placed.path().orElseThrow()))).count();
+        if (found * 2 <= ofSchematic.size()) {
+            return Map.of();
+        }
+        Map<String, String> relinked = new LinkedHashMap<>();
+        Set<String> names = new TreeSet<>();
+        for (KiCadPcbFootprint placed : ofSchematic) {
+            String symbol = symbolOf(placed.path().orElseThrow());
+            String current = uuidOfReference.get(placed.reference());
+            if (!uuids.contains(symbol) && current != null && !ambiguous.contains(placed.reference())) {
+                relinked.put(symbol, current);
+                names.add(placed.reference());
+            }
+        }
+        if (!names.isEmpty()) {
+            notes.add(String.join(", ", names) + ": placed anew on the schematic since the board was laid out, so found by their reference.");
+        }
+        return relinked;
+    }
+
+    private static boolean samePads(KiCadFootprint first, KiCadFootprint second) {
+        return padsOf(first).equals(padsOf(second));
+    }
+
+    /** A footprint's pads to a thousandth of a millimetre, the least a copy of it differs by in anything but rounding. */
+    private static List<String> padsOf(KiCadFootprint footprint) {
+        return footprint.pads().stream().map(pad -> String.format(Locale.ROOT, "%s %.3f %.3f %.3f %.3f", pad.number(), pad.at().x(),
+                pad.at().y(), pad.width(), pad.height())).toList();
+    }
+
+    /** The library id each part of a sheet stands on on the board, by the part's id. */
+    private static Map<String, String> partsOnBoard(ImportedSheet read, Map<String, String> landed) {
+        Map<String, String> parts = new LinkedHashMap<>();
+        read.identifiers().forEach((uuid, id) -> {
+            String libraryId = landed.get(uuid);
+            if (libraryId != null) {
+                parts.put(id, libraryId);
+            }
+        });
+        return parts;
+    }
+
     /**
      * Every footprint a part of the design names, by its library id, each once; one the libraries do not hold is said
-     * in a note with the parts that name it — the design still imports. One paired with ours is not among them.
+     * in a note with the parts that name it — the design still imports. One paired with ours is not among them. What
+     * stands on the board comes first, and answers for its name.
      */
     private static Map<String, KiCadFootprint> footprintsNamed(KiCadProject project, KiCadFootprintLibraries footprints,
-                                                               Map<String, String> paired, List<String> notes) {
-        Map<String, KiCadFootprint> found = new LinkedHashMap<>();
+                                                               Map<String, String> paired, Map<String, KiCadFootprint> onBoard,
+                                                               Map<String, String> landedOnBoard, List<String> notes) {
+        Map<String, KiCadFootprint> found = new LinkedHashMap<>(onBoard);
         Map<String, Set<String>> missing = new TreeMap<>();
         for (SheetInstance sheet : project.sheets()) {
             for (KiCadSymbolInstance symbol : sheet.schematic().symbols()) {
                 String libraryId = symbol.property(FOOTPRINT).strip();
                 // A footprint the map pairs with ours is not read: the part lands on ours, and KiCad need not be installed.
-                if (libraryId.isEmpty() || found.containsKey(libraryId) || paired.containsKey(libraryId)) {
+                if (libraryId.isEmpty() || found.containsKey(libraryId) || paired.containsKey(libraryId)
+                        || landedOnBoard.containsKey(symbol.uuid())) {
                     continue;
                 }
                 Optional<KiCadFootprint> read;
@@ -192,37 +324,39 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
      * pin number of the component.
      */
     private static ImportedSheet onTheirFootprints(ImportedSheet read, Map<String, KiCadFootprint> found,
-                                                   Map<String, String> paired, KiCadCatalogue catalogue, List<String> notes) {
+                                                   Map<String, String> paired, Map<String, String> onBoard,
+                                                   KiCadCatalogue catalogue, List<String> notes) {
         Set<String> made = new LinkedHashSet<>();
         read.components().forEach(definition -> made.add(KiCadSymbolDrawing.componentSlugOf(definition)));
-        List<ImportedSheet.Part> parts = new ArrayList<>();
-        for (ImportedSheet.Part part : read.parts()) {
-            String libraryId = read.footprints().get(part.id());
+        List<ImportedCircuit.Part> parts = new ArrayList<>();
+        for (ImportedCircuit.Part part : read.circuit().parts()) {
+            String boardFootprint = onBoard.get(part.id());
+            // What stands on the board is what was laid out: the part stands on it whatever the schematic's field says.
+            Map<String, String> kicadPads = read.pads().getOrDefault(part.id(), Map.of());
+            if (boardFootprint != null && made.contains(part.component())) {
+                parts.add(part.onFootprint(KiCadFootprintDrawing.codeOf(boardFootprint)));
+                continue;
+            }
+            String libraryId = boardFootprint != null ? boardFootprint : read.footprints().get(part.id());
             Optional<String> ours = libraryId == null ? Optional.empty() : Optional.ofNullable(paired.get(libraryId));
             if (libraryId == null || (ours.isEmpty() && !found.containsKey(libraryId)) || made.contains(part.component())) {
                 parts.add(part);
                 continue;
             }
-            String slug = ours.orElseGet(() -> KiCadFootprintDrawing.slugOf(libraryId));
+            String slug = ours.orElseGet(() -> KiCadFootprintDrawing.codeOf(libraryId));
             if (catalogue.footprintOf(part.component()).map(slug::equals).orElse(false)) {
                 parts.add(part);
                 continue;
             }
-            if (ours.isEmpty()) {
-                Set<String> pads = found.get(libraryId).padNumbers();
-                List<String> missing = catalogue.pinsByNumber(part.component()).keySet().stream()
-                        .filter(number -> !pads.contains(number)).toList();
-                if (!missing.isEmpty()) {
-                    notes.add(part.id() + " keeps " + part.component() + "'s footprint: " + libraryId
-                            + " has no pad " + String.join(", ", missing));
-                    parts.add(part);
-                    continue;
-                }
+            // On KiCad's own footprint a pad is its symbol's pin number, which need not be the component's: a KiCad diode's
+            // pad 1 is its cathode. Ours is numbered as our component is.
+            if (ours.isEmpty() && !kicadPads.equals(catalogue.pinsByNumber(part.component()))) {
+                parts.add(part.onFootprint(slug, kicadPads));
+                continue;
             }
             parts.add(part.onFootprint(slug));
         }
-        return new ImportedSheet(parts, read.items(), read.wires(), read.probes(), read.ports(), read.globals(), read.symbols(),
-                read.components(), read.notes(), read.footprints());
+        return new ImportedSheet(read.circuit().withParts(parts), read.symbols(), read.components(), read.footprints(), read.identifiers(), read.pads());
     }
 
     /**
@@ -250,7 +384,7 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
                     + String.join(", ", missing) + " are no pad there (pads " + String.join(", ", pads) + ").");
             return Optional.empty();
         }
-        return Optional.of(KiCadFootprintDrawing.slugOf(libraryId));
+        return Optional.of(KiCadFootprintDrawing.codeOf(libraryId));
     }
 
     /**
@@ -272,7 +406,6 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
     }
 
     private static String slugOf(String name) {
-        String slug = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
-        return slug.isEmpty() ? "kicad-design" : slug;
+        return Slugifier.standard().fallingBackTo("kicad-design").slug(name);
     }
 }

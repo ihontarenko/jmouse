@@ -3,35 +3,36 @@ package org.jmouse.security.web.authentication;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.security.SecurityContextHolder;
-import org.jmouse.security.authentication.AuthenticationManager;
+import java.io.IOException;
+import java.util.Objects;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.SecurityContext;
+import org.jmouse.security.SecurityContextHolder;
+import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.SecurityFilter;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.security.web.session.SessionAuthenticateHandler;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.RequestContextKeeper;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
-import java.io.IOException;
-
 public abstract class AbstractAuthenticationFilter implements SecurityFilter {
 
-    protected final SecurityContextRepository    contextRepository;
-    protected final MatcherCriteria              matcherCriteria;
-    protected final AuthenticationManager        authenticationManager;
-    protected       AuthenticationSuccessHandler successHandler;
-    protected       AuthenticationFailureHandler failureHandler;
-    protected       boolean                      continueChainBeforeSuccess = false;
-    private org.jmouse.security.web.session.SessionAuthenticateHandler sessionAuthentication;
+    protected final SecurityContextRepository contextRepository;
+    protected final MatcherCriteria matcherCriteria;
+    protected final AuthenticationManager authenticationManager;
+    protected AuthenticationSuccessHandler successHandler;
+    protected AuthenticationFailureHandler failureHandler;
+    protected boolean continueChainBeforeSuccess = false;
+    private SessionAuthenticateHandler sessionAuthentication;
 
     protected AbstractAuthenticationFilter(
-            AuthenticationManager authenticationManager,
-            SecurityContextRepository contextRepository,
-            MatcherCriteria matcherCriteria,
-            AuthenticationSuccessHandler successHandler,
-            AuthenticationFailureHandler failureHandler
+        AuthenticationManager authenticationManager,
+        SecurityContextRepository contextRepository,
+        MatcherCriteria matcherCriteria,
+        AuthenticationSuccessHandler successHandler,
+        AuthenticationFailureHandler failureHandler
     ) {
         this.contextRepository = contextRepository;
         this.authenticationManager = authenticationManager;
@@ -44,11 +45,10 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
 
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
-            throws IOException, ServletException {
-
-        HttpServletRequest  request      = requestContext.request();
-        RequestRoute        requestRoute = RequestRoute.ofRequest(request);
-        HttpServletResponse response     = requestContext.response();
+        throws IOException, ServletException {
+        HttpServletRequest request = requestContext.request();
+        RequestRoute requestRoute = RequestRoute.ofRequest(request);
+        HttpServletResponse response = requestContext.response();
 
         if (!matcherCriteria.matches(requestRoute)) {
             chain.doFilter(request, response);
@@ -82,22 +82,26 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
      * </ul>
      */
     protected void doHandleSuccess(
-            RequestContext requestContext, FilterChain chain, Authentication authentication
+        RequestContext requestContext,
+        FilterChain chain,
+        Authentication authentication
     ) throws IOException, ServletException {
-        HttpServletRequest  request  = requestContext.request();
+        HttpServletRequest request = requestContext.request();
         HttpServletResponse response = requestContext.response();
 
-        SecurityContext      securityContext = SecurityContext.ofAuthentication(authentication);
-        RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
+        SecurityContext securityContext = SecurityContext.ofAuthentication(authentication);
+        RequestContextKeeper keeper = RequestContextKeeper.ofRequestContext(requestContext);
 
         Authentication previous = SecurityContextHolder.getContext().getAuthentication();
-        boolean newIdentity = previous == null || !previous.isAuthenticated()
-                || previous.getClass() != authentication.getClass()
-                || !java.util.Objects.equals(previous.getName(), authentication.getName())
-                || !java.util.Objects.equals(previous.getAuthorities(), authentication.getAuthorities());
+        boolean newIdentity =
+            previous == null ||
+            !previous.isAuthenticated() ||
+            previous.getClass() != authentication.getClass() ||
+            !Objects.equals(previous.getName(), authentication.getName()) ||
+            !Objects.equals(previous.getAuthorities(), authentication.getAuthorities());
         if (sessionAuthentication != null && newIdentity) {
             sessionAuthentication.onAuthentication(authentication, keeper);
-            request.setAttribute(org.jmouse.security.web.session.SessionAuthenticateHandler.APPLIED_ATTRIBUTE, true);
+            request.setAttribute(SessionAuthenticateHandler.APPLIED_ATTRIBUTE, true);
         }
         SecurityContextHolder.setContext(securityContext);
         contextRepository.save(securityContext, keeper);
@@ -124,15 +128,14 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
      * for example to ignore invalid auto-login cookies and continue the chain.
      * </p>
      */
-    protected void doHandleFailure(
-            RequestContext requestContext, FilterChain chain, Exception exception
-    ) throws IOException, ServletException {
+    protected void doHandleFailure(RequestContext requestContext, FilterChain chain, Exception exception)
+        throws IOException, ServletException {
         SecurityContextHolder.clearContext();
         failureHandler.onFailure(requestContext.request(), requestContext.response(), exception);
     }
 
-    public void setSessionAuthenticationHandler(org.jmouse.security.web.session.SessionAuthenticateHandler handler) {
-        this.sessionAuthentication = java.util.Objects.requireNonNull(handler, "handler");
+    public void setSessionAuthenticationHandler(SessionAuthenticateHandler handler) {
+        this.sessionAuthentication = Objects.requireNonNull(handler, "handler");
     }
 
     public void setContinueChainBeforeSuccess(boolean flag) {
@@ -166,5 +169,4 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
     public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
         this.failureHandler = failureHandler;
     }
-
 }

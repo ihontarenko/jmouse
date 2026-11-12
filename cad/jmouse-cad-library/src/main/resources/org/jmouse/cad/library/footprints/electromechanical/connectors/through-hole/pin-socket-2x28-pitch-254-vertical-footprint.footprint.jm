@@ -2,7 +2,7 @@ footprint:pin-socket-2x28-pitch-254-vertical-footprint("Pin socket, 2.54 mm pitc
     meta {
         summary: "Pin socket, 2.54 mm pitch, 2 rows of 28, upright, through-hole"
         code: "FP.SKT:2X28-P2.54-V"
-        category: circuits
+        category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60603-13 grid"
         authors: "jMouse"
@@ -70,4 +70,6 @@ footprint:pin-socket-2x28-pitch-254-vertical-footprint("Pin socket, 2.54 mm pitc
     outline(silkscreen, width: 0.12, "M-2.65 -35.67H2.65V35.67H-2.65Z")
     outline(silkscreen, filled, "M-3.45 -34.29A0.3 0.3 0 1 0 -2.85 -34.29A0.3 0.3 0 1 0 -3.45 -34.29Z")
     outline(courtyard, width: 0.05, "M-3.05 -36.05H3.05V36.05H-3.05Z")
+    body(height: 8.5)
+    model("MD.SKT:2X28-P2.54-V")
 }

@@ -2,7 +2,7 @@ symbol:fuse-symbol("Fuse") {
     meta {
         summary: "Fuse, as drawn on a schematic"
         code: "SY.FUSE:FIXED"
-        category: circuits
+        category: fuses
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

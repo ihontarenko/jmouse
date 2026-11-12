@@ -4,6 +4,7 @@ import org.jmouse.cad.Formula;
 import org.jmouse.cad.Parameter;
 import org.jmouse.cad.Setting;
 import org.jmouse.cad.Text;
+import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.component.Component;
 import org.jmouse.cad.simulation.EvaluatedParameter;
 import org.jmouse.cad.simulation.ParameterEvaluation;
@@ -83,6 +84,10 @@ public record ElaboratedCircuit(List<ElaboratedPart> parts, List<EngineElement> 
             String name = separator < 0 ? key : key.substring(separator + 1);
             if (texts.containsKey(name)) {
                 // A text is not a number: it is the part's, read by its behaviour, never by its equations.
+                continue;
+            }
+            if (name.equals(Part.VALUE) && setting.value() instanceof Text && !parameters.containsKey(name)) {
+                // The value a person reads, for what prints it; nothing computes with it.
                 continue;
             }
             if (!parameters.containsKey(name)) {

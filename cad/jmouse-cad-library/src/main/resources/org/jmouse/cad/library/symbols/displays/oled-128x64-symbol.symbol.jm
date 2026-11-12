@@ -2,7 +2,7 @@ symbol:oled-128x64-symbol("128×64 OLED module") {
     meta {
         summary: "A monochrome OLED module on I²C: its 128-column screen shows the controller's display memory, two units a pixel"
         code: "SY.DISPLAY:OLED-128X64"
-        category: circuits
+        category: displays
         tags: electronics, schematic, display
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

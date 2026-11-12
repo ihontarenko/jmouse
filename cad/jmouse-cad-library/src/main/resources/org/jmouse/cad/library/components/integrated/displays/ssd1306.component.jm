@@ -10,8 +10,10 @@ component:ssd1306("SSD1306 OLED module", type: display) {
         summary: "128×64 or 128×32 monochrome OLED on I²C: display memory in pages, three addressing modes, charge pump"
         source: "Solomon Systech SSD1306 data sheet rev. 1.1 (2008): I²C control byte Co and D/C# (§8.1.5.2), GDDRAM pages (§8.7), addressing modes (§10.1.3–10.1.5), command table 9 (20h, 21h, 22h), charge pump 8Dh 14h (application note); slave address 0111 10 SA0 R/W; the 4-pin module GND VCC SCL SDA. Not modelled: contrast, scrolling, the start line and display offset, A5h entire display on, reading the memory back"
         package: "0.96-inch module, 4 pins"
-        category: circuits
+        category: displays
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-oled-controller
     use:cmos-hc
@@ -21,7 +23,9 @@ component:ssd1306("SSD1306 OLED module", type: display) {
     pin:scl(digital, input, 3, "serial clock")
     pin:sda(digital, bidirectional, open-drain, 4, "serial data")
 
-    symbol(uses: oled-128x64-symbol)
+    footprint("FP.HDR:1X4-P2.54-V")
+
+    symbol(uses: "SY.DISPLAY:OLED-128X64")
 
     state:mode(2, discrete, "the addressing mode: horizontal, vertical or page — page after reset")
     state:column_start(0, discrete, "21h: the column window")

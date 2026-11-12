@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    How the schema's types become classes where their own names would not do: the schema has simple and complex types
+    whose names differ only by case (surfaceFinishType / SurfaceFinishType, stepType / StepType), and a file system that
+    ignores case cannot hold both classes. The simple ones, enumerations, are named for what they are.
+-->
+<jaxb:bindings xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="3.0">
+    <jaxb:bindings schemaLocation="../xsd/IPC-2581C.xsd" node="/xsd:schema">
+        <jaxb:bindings node="xsd:simpleType[@name='surfaceFinishType']">
+            <jaxb:typesafeEnumClass name="SurfaceFinishKind"/>
+        </jaxb:bindings>
+        <jaxb:bindings node="xsd:simpleType[@name='stepType']">
+            <jaxb:typesafeEnumClass name="StepKind"/>
+        </jaxb:bindings>
+    </jaxb:bindings>
+</jaxb:bindings>

@@ -72,12 +72,12 @@ final class InlineFootprints implements FootprintFamily {
         String designated = PackageTable.designated(outline.word("designation"), outline.words());
         String title = outline.title() + ", standing";
         String summary = leads + "-lead " + outline.title() + " standing upright, through-hole, " + written(pitch)
-                + " mm pitch, the tab at the back";
+                + " mm pitch" + (tab > 0 ? ", the tab at the back" : "");
         List<String> notes = List.of(
                 "Generated from footprint-standards/inline-packages.sht#" + outline.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead " + written(outline.length("lead")) + " × " + written(outline.length("thickness")) + " at most: drill "
                         + written(drill) + ", pad " + written(padWidth) + " × " + written(padHeight) + ", pin 1 square.");
-        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), "through-hole", outline.standard(),
-                rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, outline.word("folder"), outline.word("category"), "through-hole", outline.standard(),
+                rules, notes, new FootprintDrawing(pads, outlines, outline));
     }
 }

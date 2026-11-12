@@ -1,0 +1,14 @@
+model:chip-fuse-2512-model("Chip fuse 2512 (6332 metric)") {
+    meta {
+        summary: "Chip fuse 2512 (6332 metric) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:F2512"
+        category: fuses-surface
+        tags: electronics, model, chip
+        source: "IEC 60115-8 dimensions, 2512 (6332 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [6.35, 3.2, 0.7], at: [0, 0, 0.35])
+    box(tin, size: [1.27, 3.22, 0.72], at: [-2.54, 0, 0.35])
+    box(tin, size: [1.27, 3.22, 0.72], at: [2.54, 0, 0.35])
+}

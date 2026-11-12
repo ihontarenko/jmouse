@@ -3,7 +3,6 @@ package org.jmouse.jdbc.mapping;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
-
 import org.jmouse.jdbc.exception.EmptyResultException;
 import org.jmouse.jdbc.exception.NonUniqueResultException;
 
@@ -100,8 +99,8 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
             }
 
             throw new NonUniqueResultException(
-                    count,
-                    "Expected 1 row but got " + count + " for SQL: " + sqlForMessage
+                count,
+                "Expected 1 row but got " + count + " for SQL: " + sqlForMessage
             );
         }
 

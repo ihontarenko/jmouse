@@ -1,0 +1,8 @@
+category:diodes-through-hole("Through-hole") {
+    meta {
+        category: diodes
+        order: 1
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

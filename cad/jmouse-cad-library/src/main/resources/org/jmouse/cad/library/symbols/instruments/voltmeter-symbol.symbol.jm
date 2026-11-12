@@ -2,7 +2,7 @@ symbol:voltmeter-symbol("Voltmeter") {
     meta {
         summary: "Voltmeter, as drawn on a schematic: a dial marked V"
         code: "SY.METER:VOLTMETER"
-        category: circuits
+        category: instruments
         tags: electronics, schematic, instrument
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

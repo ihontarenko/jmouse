@@ -1,0 +1,39 @@
+model:soic-8-eiaj-model("SOIC-8, 5.3 mm body") {
+    meta {
+        summary: "SOIC-8, 5.3 mm body — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SOIC:8-P1.27-W5.3"
+        category: small-outline
+        tags: electronics, model, gull-wing
+        source: "JEITA EDR-7320, 208-mil SOP"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [5.3, 5.3, 1], at: [0, 0, 0.6])
+    box(plastic, size: [5.14, 5.14, 1], at: [0, 0, 1.6])
+    cylinder(dimple, radius: 0.25, length: 0.01, at: [-2.07, 2.07, 2.105])
+    marking(name, on: flat, size: [3.71, 1.59], at: [0, 0, 2.11], ink: marking)
+    box(tin, size: [0.25, 0.36, 0.2], at: [-2.775, 1.905, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [-2.9, 1.905, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [-3.45, 1.905, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [-2.775, 0.635, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [-2.9, 0.635, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [-3.45, 0.635, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [-2.775, -0.635, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [-2.9, -0.635, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [-3.45, -0.635, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [-2.775, -1.905, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [-2.9, -1.905, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [-3.45, -1.905, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [2.775, -1.905, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [2.9, -1.905, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [3.45, -1.905, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [2.775, -0.635, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [2.9, -0.635, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [3.45, -0.635, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [2.775, 0.635, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [2.9, 0.635, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [3.45, 0.635, 0.1])
+    box(tin, size: [0.25, 0.36, 0.2], at: [2.775, 1.905, 1.1])
+    box(tin, size: [0.2, 0.36, 1.1], at: [2.9, 1.905, 0.55])
+    box(tin, size: [1.1, 0.36, 0.2], at: [3.45, 1.905, 0.1])
+}

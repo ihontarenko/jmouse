@@ -1,0 +1,148 @@
+# How a package's 3D model is drawn from its footprint, form by form: the footprint already holds the body's outline on
+# its fabrication layer, its height and its pads; this table holds what a footprint does not — how high a body stands
+# off the pcb, how thick its moulding is, how its leads are bent, where its marks are, what each part is made of.
+# Millimetres; a material is a row of jmouse-cad-mesh's model materials.
+#
+# A field written `word = value, word = value` applies to a package whose name holds the word: `materials diode = glass`
+# makes a diode's body glass, `body-thickness dip = 3.3` gives a DIP its nominal moulding rather than its seated height.
+#
+# A body says where it is marked (`marking`, `print`, `print-face`, `pin-marks`): what a part shows there — its colour bands,
+# its value, its component's name (`print name`: the words its portrait is bound with, `LM317`),
+# a sign by a pin — is painted from the part by the view that stands it on a pcb, for a model is one per package.
+#
+# A moulded body is drawn in two halves at its parting line, the upper `draft` narrower all round, a dimple marking pin
+# one `mark-inset` in from its corner.
+sheet "Package models" as package-models {
+    description "How each form of package is drawn in 3D from its footprint: moulding, leads, marks, materials."
+
+    chip "Chip resistors and capacitors" {
+        material ceramic
+        terminal tin
+        termination-share 0.2
+        termination-proud 0.01
+        materials tantalum = tantalum
+    }
+    gull-wing "Small-outline packages with gull-wing leads" {
+        material plastic
+        lead tin
+        mark dimple
+        standoff 0.1
+        draft 0.08
+        mark-radius 0.25
+        mark-inset 0.5
+        lead-thickness 0.2
+        lead-width-share 0.6
+        shoulder 0.25
+        print name
+        print-width-share 0.7
+        print-height-share 0.3
+        print-ink marking
+    }
+    quad "Quad flat packages with no leads" {
+        material plastic
+        lead tin
+        mark dimple
+        land-thickness 0.05
+        draft 0.05
+        mark-radius 0.2
+        mark-inset 0.4
+        print name
+        print-width-share 0.7
+        print-height-share 0.3
+        print-ink marking
+    }
+    axial "Axial leaded parts, lying or standing" {
+        material lacquer
+        lead tin
+        lead-share 0.35
+        below 1.6
+        standing-bend 1
+        materials diode = plastic, rectifier = plastic
+        band diode = 0.12, rectifier = 0.12
+        band-material marking
+        end-share 0.2
+        end-round 0.25
+        waist resistor = 0.86
+        marking resistor = bands
+    }
+    radial "Radial leaded parts" {
+        material sleeve
+        lead tin
+        lead-share 0.35
+        below 1.6
+        cap-height 0.3
+        materials crystal = aluminium, varistor = tantalum, led = lens, ceramic = tantalum
+        cap capacitor = aluminium, electrolytic = aluminium
+        can-round 0.4
+        lip 0.3
+        bead-depth 0.2
+        bead-width 0.6
+        bead-below-top 1.2
+        vent-from 2.5
+        vent-share 0.6
+        vent-width 0.25
+        vent-material vent
+        stripe-arc 50
+        stripe-material marking
+        stripe-text "−"
+        print-arc 120
+        print-ink marking
+        stripe-ink sleeve
+    }
+    inline "Single-row leaded packages: transistors, regulators, trimmers" {
+        material plastic
+        lead tin
+        lead-share 0.35
+        below 1.6
+        standoff 1.0
+        profile to-92 = d
+        print name
+        print-face front
+        print-width-share 0.8
+        print-height-share 0.3
+        print-ink marking
+    }
+    pinned "Bodies with their leads where their makers put them: relays, transformers, round bridges" {
+        material housing
+        lead tin
+        lead-share 0.35
+        below 2.5
+        standoff 0.5
+        termination-thickness 0.1
+        profile round = round
+        materials transformer = laminations, bridge = plastic, shunt = plastic
+        print bridge = value, relay = value
+        print-width-share 0.7
+        print-height-share 0.22
+        pin-marks bridge = "+ ~ − ~"
+        pin-mark-size 1.2
+        print-ink marking
+    }
+    dual-inline "Dual in-line packages" {
+        material plastic
+        lead tin
+        mark dimple
+        standoff 0.5
+        draft 0.15
+        mark-radius 0.4
+        mark-inset 1.0
+        notch-radius 0.6
+        lead-thickness 0.25
+        shoulder-width 1.52
+        lead-width 0.46
+        below 3.0
+        body-thickness dip = 3.3
+        materials switch = housing, segment = housing
+        print name
+        print-width-share 0.75
+        print-height-share 0.35
+        print-ink marking
+    }
+    header "Pin headers" {
+        material housing
+        lead gold
+        housing-height 2.5
+        pin-size 0.64
+        below 3.0
+    }
+}

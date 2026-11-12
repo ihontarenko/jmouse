@@ -2,7 +2,7 @@ symbol:pnp-transistor-symbol("PNP transistor") {
     meta {
         summary: "PNP transistor, as drawn on a schematic"
         code: "SY.TRANSISTOR:BIPOLAR-PNP"
-        category: circuits
+        category: transistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

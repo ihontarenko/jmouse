@@ -2,15 +2,16 @@ package org.jmouse.kicad.schematic;
 
 import org.jmouse.kicad.KiCadPlacement;
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.KiCadDocument;
-import org.jmouse.kicad.parser.KiCadPrinter;
-import org.jmouse.kicad.parser.node.KiCadAtom;
-import org.jmouse.kicad.parser.node.KiCadList;
-import org.jmouse.kicad.parser.node.KiCadNode;
-import org.jmouse.kicad.parser.node.KiCadString;
+import org.jmouse.sexpression.SExpressionDocument;
+import org.jmouse.sexpression.SExpressionPrinter;
+import org.jmouse.sexpression.node.SExpressionAtom;
+import org.jmouse.sexpression.node.SExpressionList;
+import org.jmouse.sexpression.node.SExpressionNode;
+import org.jmouse.sexpression.node.SExpressionString;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,30 +38,92 @@ public final class KiCadSchematicBuilder {
     private record Paper(String name, double width, double height) {
     }
 
-    /** A symbol placed: its library copy's id, where and how it stands, its unit, its reference and value. */
+    /**
+     * A symbol placed: its library copy's id, where and how it stands, its unit, its reference and value.
+     *
+     * @param identity  its UUID; null for one made from the seed, its reference and its unit ({@link #symbolIdentity})
+     * @param instances its reference in each instance of the sheet it is on, by the instance's path; none on a root
+     *                  sheet, where it has one, under the root's own path
+     * @param presence  whether it is a part of the board, or of the schematic alone — a power symbol, a power flag, the
+     *                  bench's generator —, which KiCad keeps off its board and out of its bill
+     */
     public record PlacedSymbol(String libraryId, KiCadPlacement placement, int unit, String reference, String value,
                                Map<String, String> properties, List<String> pinNumbers, KiCadPoint referenceAt,
-                               KiCadPoint valueAt) {
+                               KiCadPoint valueAt, String identity, List<Instance> instances, Presence presence) {
         public PlacedSymbol {
             properties = Map.copyOf(properties);
             pinNumbers = List.copyOf(pinNumbers);
+            instances = instances == null ? List.of() : List.copyOf(instances);
         }
+
+        /** A symbol of a root sheet, its identity made from the seed. */
+        public PlacedSymbol(String libraryId, KiCadPlacement placement, int unit, String reference, String value,
+                            Map<String, String> properties, List<String> pinNumbers, KiCadPoint referenceAt, KiCadPoint valueAt) {
+            this(libraryId, placement, unit, reference, value, properties, pinNumbers, referenceAt, valueAt, null, List.of(), Presence.BOARD);
+        }
+    }
+
+    /** Where a placed symbol exists: a part of the board too, or of the schematic alone. */
+    public enum Presence {
+        /** A part the board carries and the bill lists ({@code in_bom yes}, {@code on_board yes}). */
+        BOARD,
+        /** Of the schematic alone ({@code in_bom no}, {@code on_board no}): a power symbol, a power flag, the bench's equipment. */
+        SCHEMATIC
+    }
+
+    /** One place a sheet stands in the design: its path — {@code /root-uuid/sheet-uuid} — and what it is called there. */
+    public record Instance(String path, String reference) {
+    }
+
+    /**
+     * A sheet placed on this one: the box of a child schematic, its pins on its left and right edges.
+     *
+     * @param identity  its UUID: the child's instances are the paths of this sheet's instances with it added
+     * @param name      what the box is called ({@code Sheetname}): the block it stands for
+     * @param file      the child's file, beside this one
+     * @param at        its top-left corner
+     * @param pins      each pin, where it stands on the box's edge
+     * @param instances each instance of this box — one for each instance of the sheet it is on —, its path and its page
+     */
+    public record PlacedSheet(String identity, String name, String file, KiCadPoint at, KiCadPoint size, List<SheetPin> pins,
+                              List<SheetInstance> instances) {
+        public PlacedSheet {
+            pins = List.copyOf(pins);
+            instances = List.copyOf(instances);
+        }
+    }
+
+    /** One instance of a placed sheet: its path, and the page KiCad numbers it as. */
+    public record SheetInstance(String path, String page) {
+    }
+
+    /**
+     * A pin of a placed sheet: the child's hierarchical label of its name, on the box's edge.
+     *
+     * @param shape {@code input}, {@code output}, {@code bidirectional}, {@code passive}
+     * @param angle which way it points out of the box: 180 on the left edge, 0 on the right
+     */
+    public record SheetPin(String name, String shape, KiCadPoint at, int angle) {
     }
 
     private final String project;
     private final String seed;
     private final String uuid;
-    private final Map<String, KiCadList> librarySymbols = new LinkedHashMap<>();
-    private final List<KiCadList> symbols = new ArrayList<>();
-    private final List<KiCadList> connections = new ArrayList<>();
+    private final Map<String, SExpressionList> librarySymbols = new LinkedHashMap<>();
+    private final List<SExpressionList> symbols = new ArrayList<>();
+    private final List<SExpressionList> connections = new ArrayList<>();
     private int identities;
+    private String title;
+    private final boolean root;
+    private final List<SExpressionList> sheets = new ArrayList<>();
     private double right;
     private double bottom;
 
-    private KiCadSchematicBuilder(String project, String seed) {
+    private KiCadSchematicBuilder(String project, String seed, boolean root) {
         this.project = project;
         this.seed = seed;
-        this.uuid = identity("sheet");
+        this.uuid = sheetIdentity(seed);
+        this.root = root;
     }
 
     /**
@@ -68,12 +131,49 @@ public final class KiCadSchematicBuilder {
      * @param seed    what makes this schematic's identities its own: the same seed, the same UUIDs
      */
     public static KiCadSchematicBuilder of(String project, String seed) {
-        return new KiCadSchematicBuilder(project, seed);
+        return new KiCadSchematicBuilder(project, seed, true);
+    }
+
+    /**
+     * A sheet placed below the root: its symbols' references are kept under the paths of its instances, which each
+     * {@link PlacedSymbol} carries; only the root lists the design's sheets.
+     */
+    public static KiCadSchematicBuilder child(String project, String seed) {
+        return new KiCadSchematicBuilder(project, seed, false);
+    }
+
+    /**
+     * A placed symbol's identity: made from the seed, its reference and its unit alone, so a board laid out from the same
+     * schematic names the symbol a footprint stands for ({@code (path "/…")}) without the schematic in hand.
+     */
+    public static String symbolIdentity(String seed, String reference, int unit) {
+        return UUID.nameUUIDFromBytes((seed + "/symbol " + reference + " " + unit).getBytes(StandardCharsets.UTF_8)).toString();
+    }
+
+    /** A schematic's own identity, made from its seed alone: a root's is the first step of every path in the design. */
+    public static String sheetIdentity(String seed) {
+        return UUID.nameUUIDFromBytes((seed + "/sheet").getBytes(StandardCharsets.UTF_8)).toString();
+    }
+
+    /** The identity of a sheet placed as {@code block} on the schematic of this seed: the step its instances add to a path. */
+    public static String placedSheetIdentity(String seed, String block) {
+        return UUID.nameUUIDFromBytes((seed + "/placed sheet " + block).getBytes(StandardCharsets.UTF_8)).toString();
+    }
+
+    /** What the schematic is called on its title block. */
+    public KiCadSchematicBuilder title(String title) {
+        this.title = title;
+        return this;
     }
 
     /** The schematic's own identity: the root of every placed symbol's instance path. */
     public String uuid() {
         return uuid;
+    }
+
+    /** Every library symbol this schematic keeps a copy of, by its full name, in the order it was first drawn. */
+    public Map<String, SExpressionList> librarySymbols() {
+        return Collections.unmodifiableMap(librarySymbols);
     }
 
     /** Whether the schematic already keeps a copy of that library symbol. */
@@ -82,7 +182,7 @@ public final class KiCadSchematicBuilder {
     }
 
     /** A library symbol's copy, as {@code KiCadSymbolBuilder} builds one; the first of a name is kept. */
-    public KiCadSchematicBuilder librarySymbol(String libraryId, KiCadList symbol) {
+    public KiCadSchematicBuilder librarySymbol(String libraryId, SExpressionList symbol) {
         librarySymbols.putIfAbsent(libraryId, symbol);
         return this;
     }
@@ -90,28 +190,66 @@ public final class KiCadSchematicBuilder {
     public KiCadSchematicBuilder symbol(PlacedSymbol placed) {
         KiCadPlacement placement = placed.placement();
         reach(placement.at());
-        List<KiCadNode> items = new ArrayList<>();
-        items.add(KiCadList.of("lib_id", KiCadString.of(placed.libraryId())));
-        items.add(KiCadList.of("at", number(placement.at().x()), number(placement.at().y()), KiCadAtom.of(placement.angle())));
+        List<SExpressionNode> items = new ArrayList<>();
+        items.add(SExpressionList.of("lib_id", SExpressionString.of(placed.libraryId())));
+        items.add(SExpressionList.of("at", number(placement.at().x()), number(placement.at().y()), SExpressionAtom.of(placement.angle())));
         if (placement.mirror() != KiCadPlacement.Mirror.NONE) {
-            items.add(KiCadList.of("mirror", KiCadAtom.of(placement.mirror().word())));
+            items.add(SExpressionList.of("mirror", SExpressionAtom.of(placement.mirror().word())));
         }
-        items.add(KiCadList.of("unit", KiCadAtom.of(placed.unit())));
-        items.add(KiCadList.of("in_bom", KiCadAtom.of("yes")));
-        items.add(KiCadList.of("on_board", KiCadAtom.of("yes")));
-        items.add(KiCadList.of("dnp", KiCadAtom.of("no")));
-        String identity = identity("symbol " + placed.reference() + " " + placed.unit());
-        items.add(KiCadList.of("uuid", KiCadString.of(identity)));
+        items.add(SExpressionList.of("unit", SExpressionAtom.of(placed.unit())));
+        String onBoard = placed.presence() == Presence.BOARD ? "yes" : "no";
+        items.add(SExpressionList.of("in_bom", SExpressionAtom.of(onBoard)));
+        items.add(SExpressionList.of("on_board", SExpressionAtom.of(onBoard)));
+        items.add(SExpressionList.of("dnp", SExpressionAtom.of("no")));
+        String identity = placed.identity() != null ? placed.identity() : symbolIdentity(seed, placed.reference(), placed.unit());
+        items.add(SExpressionList.of("uuid", SExpressionString.of(identity)));
         items.add(property("Reference", placed.reference(), placed.referenceAt(), false));
         items.add(property("Value", placed.value(), placed.valueAt(), false));
         placed.properties().forEach((name, value) -> items.add(property(name, value, placement.at(), true)));
-        placed.pinNumbers().forEach(number -> items.add(KiCadList.of("pin", KiCadString.of(number),
-                KiCadList.of("uuid", KiCadString.of(identity(identity + " pin " + number))))));
-        items.add(KiCadList.of("instances", KiCadList.of("project", KiCadString.of(project),
-                KiCadList.of("path", KiCadString.of("/" + uuid), KiCadList.of("reference", KiCadString.of(placed.reference())),
-                        KiCadList.of("unit", KiCadAtom.of(placed.unit()))))));
-        symbols.add(KiCadList.of("symbol", items.toArray(KiCadNode[]::new)));
+        placed.pinNumbers().forEach(number -> items.add(SExpressionList.of("pin", SExpressionString.of(number),
+                SExpressionList.of("uuid", SExpressionString.of(identity(identity + " pin " + number))))));
+        List<Instance> instances = placed.instances().isEmpty() ? List.of(new Instance("/" + uuid, placed.reference())) : placed.instances();
+        List<SExpressionNode> paths = new ArrayList<>();
+        paths.add(SExpressionString.of(project));
+        instances.forEach(instance -> paths.add(SExpressionList.of("path", SExpressionString.of(instance.path()),
+                SExpressionList.of("reference", SExpressionString.of(instance.reference())), SExpressionList.of("unit", SExpressionAtom.of(placed.unit())))));
+        items.add(SExpressionList.of("instances", SExpressionList.of("project", paths.toArray(SExpressionNode[]::new))));
+        symbols.add(SExpressionList.of("symbol", items.toArray(SExpressionNode[]::new)));
         return this;
+    }
+
+    /** A sheet placed on this one, as KiCad 7 writes a hierarchical sheet. */
+    public KiCadSchematicBuilder sheet(PlacedSheet placed) {
+        reach(placed.at());
+        reach(new KiCadPoint(placed.at().x() + placed.size().x(), placed.at().y() + placed.size().y()));
+        List<SExpressionNode> items = new ArrayList<>();
+        items.add(SExpressionList.of("at", number(placed.at().x()), number(placed.at().y())));
+        items.add(SExpressionList.of("size", number(placed.size().x()), number(placed.size().y())));
+        items.add(SExpressionList.of("stroke", SExpressionList.of("width", SExpressionAtom.of(0)), SExpressionList.of("type", SExpressionAtom.of("solid"))));
+        items.add(SExpressionList.of("fill", SExpressionList.of("color", SExpressionAtom.of(0), SExpressionAtom.of(0), SExpressionAtom.of(0),
+                SExpressionAtom.of(0))));
+        items.add(SExpressionList.of("uuid", SExpressionString.of(placed.identity())));
+        items.add(sheetField("Sheetname", placed.name(), placed.at(), "bottom"));
+        items.add(sheetField("Sheetfile", placed.file(), new KiCadPoint(placed.at().x(), placed.at().y() + placed.size().y()), "top"));
+        for (SheetPin pin : placed.pins()) {
+            items.add(SExpressionList.of("pin", SExpressionString.of(pin.name()), SExpressionAtom.of(pin.shape()),
+                    SExpressionList.of("at", number(pin.at().x()), number(pin.at().y()), SExpressionAtom.of(pin.angle())),
+                    SExpressionList.of("effects", font(), SExpressionList.of("justify", SExpressionAtom.of(pin.angle() == 180 ? "left" : "right"))),
+                    SExpressionList.of("uuid", SExpressionString.of(identity(placed.identity() + " pin " + pin.name())))));
+        }
+        List<SExpressionNode> paths = new ArrayList<>();
+        paths.add(SExpressionString.of(project));
+        placed.instances().forEach(instance -> paths.add(SExpressionList.of("path", SExpressionString.of(instance.path()),
+                SExpressionList.of("page", SExpressionString.of(instance.page())))));
+        items.add(SExpressionList.of("instances", SExpressionList.of("project", paths.toArray(SExpressionNode[]::new))));
+        sheets.add(SExpressionList.of("sheet", items.toArray(SExpressionNode[]::new)));
+        return this;
+    }
+
+    private SExpressionList sheetField(String name, String value, KiCadPoint at, String across) {
+        return SExpressionList.of("property", SExpressionString.of(name), SExpressionString.of(value),
+                SExpressionList.of("at", number(at.x()), number(at.y()), SExpressionAtom.of(0)),
+                SExpressionList.of("effects", font(), SExpressionList.of("justify", SExpressionAtom.of("left"), SExpressionAtom.of(across))));
     }
 
     /** A wire through the points, a segment between each two, as KiCad keeps its wires. */
@@ -124,18 +262,18 @@ public final class KiCadSchematicBuilder {
             }
             reach(start);
             reach(end);
-            connections.add(KiCadList.of("wire", KiCadList.of("pts", point(start), point(end)),
-                    KiCadList.of("stroke", KiCadList.of("width", KiCadAtom.of(0)), KiCadList.of("type", KiCadAtom.of("default"))),
-                    KiCadList.of("uuid", KiCadString.of(identity("wire")))));
+            connections.add(SExpressionList.of("wire", SExpressionList.of("pts", point(start), point(end)),
+                    SExpressionList.of("stroke", SExpressionList.of("width", SExpressionAtom.of(0)), SExpressionList.of("type", SExpressionAtom.of("default"))),
+                    SExpressionList.of("uuid", SExpressionString.of(identity("wire")))));
         }
         return this;
     }
 
     public KiCadSchematicBuilder junction(KiCadPoint at) {
         reach(at);
-        connections.add(KiCadList.of("junction", KiCadList.of("at", number(at.x()), number(at.y())),
-                KiCadList.of("diameter", KiCadAtom.of(0)), KiCadList.of("color", KiCadAtom.of(0), KiCadAtom.of(0),
-                        KiCadAtom.of(0), KiCadAtom.of(0)), KiCadList.of("uuid", KiCadString.of(identity("junction")))));
+        connections.add(SExpressionList.of("junction", SExpressionList.of("at", number(at.x()), number(at.y())),
+                SExpressionList.of("diameter", SExpressionAtom.of(0)), SExpressionList.of("color", SExpressionAtom.of(0), SExpressionAtom.of(0),
+                        SExpressionAtom.of(0), SExpressionAtom.of(0)), SExpressionList.of("uuid", SExpressionString.of(identity("junction")))));
         return this;
     }
 
@@ -148,58 +286,64 @@ public final class KiCadSchematicBuilder {
      */
     public KiCadSchematicBuilder label(KiCadLabel.Kind kind, String text, KiCadPoint at, int angle, String shape) {
         reach(at);
-        List<KiCadNode> items = new ArrayList<>();
-        items.add(KiCadString.of(text));
+        List<SExpressionNode> items = new ArrayList<>();
+        items.add(SExpressionString.of(text));
         if (kind != KiCadLabel.Kind.LOCAL) {
-            items.add(KiCadList.of("shape", KiCadAtom.of(shape == null ? "passive" : shape)));
+            items.add(SExpressionList.of("shape", SExpressionAtom.of(shape == null ? "passive" : shape)));
         }
-        items.add(KiCadList.of("at", number(at.x()), number(at.y()), KiCadAtom.of(angle)));
-        items.add(KiCadList.of("effects", KiCadList.of("font", KiCadList.of("size", KiCadAtom.of(1.27), KiCadAtom.of(1.27))),
-                KiCadList.of("justify", KiCadAtom.of("left"), KiCadAtom.of("bottom"))));
-        items.add(KiCadList.of("uuid", KiCadString.of(identity("label " + text))));
-        connections.add(KiCadList.of(kind.keyword().word(), items.toArray(KiCadNode[]::new)));
+        items.add(SExpressionList.of("at", number(at.x()), number(at.y()), SExpressionAtom.of(angle)));
+        items.add(SExpressionList.of("effects", SExpressionList.of("font", SExpressionList.of("size", SExpressionAtom.of(1.27), SExpressionAtom.of(1.27))),
+                SExpressionList.of("justify", SExpressionAtom.of("left"), SExpressionAtom.of("bottom"))));
+        items.add(SExpressionList.of("uuid", SExpressionString.of(identity("label " + text))));
+        connections.add(SExpressionList.of(kind.keyword().word(), items.toArray(SExpressionNode[]::new)));
         return this;
     }
 
     /** The schematic's tree. */
-    public KiCadDocument document(String fileName) {
+    public SExpressionDocument document(String fileName) {
         Paper paper = PAPERS.stream().filter(candidate -> right + MARGIN <= candidate.width()
                 && bottom + MARGIN <= candidate.height()).findFirst().orElse(PAPERS.getLast());
-        List<KiCadNode> items = new ArrayList<>();
-        items.add(KiCadList.of("version", KiCadAtom.of(String.valueOf(VERSION))));
-        items.add(KiCadList.of("generator", KiCadAtom.of("jmouse")));
-        items.add(KiCadList.of("uuid", KiCadString.of(uuid)));
-        items.add(KiCadList.of("paper", KiCadString.of(paper.name())));
-        items.add(KiCadList.of("lib_symbols", librarySymbols.values().toArray(KiCadNode[]::new)));
+        List<SExpressionNode> items = new ArrayList<>();
+        items.add(SExpressionList.of("version", SExpressionAtom.of(String.valueOf(VERSION))));
+        items.add(SExpressionList.of("generator", SExpressionAtom.of("jmouse")));
+        items.add(SExpressionList.of("uuid", SExpressionString.of(uuid)));
+        items.add(SExpressionList.of("paper", SExpressionString.of(paper.name())));
+        if (title != null && !title.isBlank()) {
+            items.add(SExpressionList.of("title_block", SExpressionList.of("title", SExpressionString.of(title))));
+        }
+        items.add(SExpressionList.of("lib_symbols", librarySymbols.values().toArray(SExpressionNode[]::new)));
         items.addAll(connections);
         items.addAll(symbols);
-        items.add(KiCadList.of("sheet_instances", KiCadList.of("path", KiCadString.of("/"),
-                KiCadList.of("page", KiCadString.of("1")))));
-        return KiCadDocument.of(fileName, KiCadList.of("kicad_sch", items.toArray(KiCadNode[]::new)));
+        items.addAll(sheets);
+        if (root) {
+            items.add(SExpressionList.of("sheet_instances", SExpressionList.of("path", SExpressionString.of("/"),
+                    SExpressionList.of("page", SExpressionString.of("1")))));
+        }
+        return SExpressionDocument.of(fileName, SExpressionList.of("kicad_sch", items.toArray(SExpressionNode[]::new)));
     }
 
-    /** The schematic's text, printed by {@link KiCadPrinter}. */
+    /** The schematic's text, printed by {@link SExpressionPrinter}. */
     public String print(String fileName) {
-        return new KiCadPrinter().print(document(fileName));
+        return new SExpressionPrinter().print(document(fileName));
     }
 
-    private KiCadList property(String name, String value, KiCadPoint at, boolean hidden) {
+    private SExpressionList property(String name, String value, KiCadPoint at, boolean hidden) {
         reach(at);
-        return KiCadList.of("property", KiCadString.of(name), KiCadString.of(value == null ? "" : value),
-                KiCadList.of("at", number(at.x()), number(at.y()), KiCadAtom.of(0)),
-                hidden ? KiCadList.of("effects", font(), KiCadAtom.of("hide")) : KiCadList.of("effects", font()));
+        return SExpressionList.of("property", SExpressionString.of(name), SExpressionString.of(value == null ? "" : value),
+                SExpressionList.of("at", number(at.x()), number(at.y()), SExpressionAtom.of(0)),
+                hidden ? SExpressionList.of("effects", font(), SExpressionAtom.of("hide")) : SExpressionList.of("effects", font()));
     }
 
-    private static KiCadList font() {
-        return KiCadList.of("font", KiCadList.of("size", KiCadAtom.of(1.27), KiCadAtom.of(1.27)));
+    private static SExpressionList font() {
+        return SExpressionList.of("font", SExpressionList.of("size", SExpressionAtom.of(1.27), SExpressionAtom.of(1.27)));
     }
 
-    private static KiCadList point(KiCadPoint point) {
-        return KiCadList.of("xy", number(point.x()), number(point.y()));
+    private static SExpressionList point(KiCadPoint point) {
+        return SExpressionList.of("xy", number(point.x()), number(point.y()));
     }
 
-    private static KiCadAtom number(double value) {
-        return KiCadAtom.of(value);
+    private static SExpressionAtom number(double value) {
+        return SExpressionAtom.of(value);
     }
 
     /** How far the drawing reaches: the paper is chosen to hold it. */

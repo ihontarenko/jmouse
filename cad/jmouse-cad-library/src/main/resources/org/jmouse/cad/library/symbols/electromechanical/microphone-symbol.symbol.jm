@@ -2,7 +2,7 @@ symbol:microphone-symbol("Microphone") {
     meta {
         summary: "Microphone, as drawn on a schematic: a capsule with its diaphragm on top"
         code: "SY.TRANSDUCER:MICROPHONE"
-        category: circuits
+        category: electromechanical
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

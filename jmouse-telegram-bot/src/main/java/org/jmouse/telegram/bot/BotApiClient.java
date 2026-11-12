@@ -1,19 +1,22 @@
 package org.jmouse.telegram.bot;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jmouse.http.client.HttpCall;
+import org.jmouse.http.client.HttpCallException;
+import org.jmouse.http.client.HttpReply;
+import org.jmouse.http.client.HttpTransport;
+import org.jmouse.http.client.JdkHttpTransport;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.jmouse.telegram.TelegramException;
 import org.jmouse.telegram.TelegramIdentity;
 import org.jmouse.telegram.TelegramRefusal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
 
@@ -59,15 +62,22 @@ public abstract class BotApiClient {
 
     protected final ObjectMapper mapper = new ObjectMapper();
 
-    private final HttpClient httpClient;
-    private final Duration   readTimeout;
+    /** The largest file Telegram serves a bot: 20 MB. */
+    public static final long LARGEST_FILE = 20L * 1024 * 1024;
+
+    /** How much of a method's reply is read at most: replies are small, a page of updates the largest. */
+    private static final long LARGEST_REPLY = 4L * 1024 * 1024;
+
+    private final HttpTransport transport;
+    private final Duration      readTimeout;
 
     protected BotApiClient() {
         this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
     protected BotApiClient(Duration connectTimeout, Duration readTimeout) {
-        this.httpClient  = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
+        // Never a redirect: the address carries the bot's token, which must not be carried anywhere else.
+        this.transport   = new JdkHttpTransport(connectTimeout, JdkHttpTransport.Redirects.NEVER);
         this.readTimeout = readTimeout;
     }
 
@@ -84,108 +94,98 @@ public abstract class BotApiClient {
     protected JsonNode call(
             TelegramIdentity identity, String method, Map<String, Object> fields, Duration timeout) {
 
-        byte[] body = writeJson(fields);
+        HttpCall call = callTo(identity, addressOf(identity, "bot%s/" + method), timeout, LARGEST_REPLY)
+                .body(writeJson(fields), "application/json; charset=utf-8").build();
 
-        HttpRequest request = requestFor(identity, method, timeout)
-                .header("Content-Type", "application/json; charset=utf-8")
-                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
-                .build();
-
-        return exchange(identity, method, request, fields);
+        return exchange(identity, method, call, fields);
     }
 
     /** Calls a method that carries bytes, as {@code multipart/form-data}. */
     protected JsonNode upload(
             TelegramIdentity identity, String method, MultipartBody body) {
 
-        HttpRequest request = requestFor(identity, method, readTimeout)
-                .header("Content-Type", body.contentType())
-                .POST(HttpRequest.BodyPublishers.ofByteArray(body.content()))
-                .build();
+        HttpCall call = callTo(identity, addressOf(identity, "bot%s/" + method), readTimeout, LARGEST_REPLY)
+                .body(body.content(), body.contentType()).build();
 
-        return exchange(identity, method, request, Map.of());
+        return exchange(identity, method, call, Map.of());
     }
 
     /**
-     * Opens a file Telegram is holding, at {@code <api base>/file/bot<token>/<path>}, as a stream.
+     * Opens a file Telegram is holding, at {@code <api base>/file/bot<token>/<path>}, read whole — Telegram serves a
+     * bot no file larger than {@link #LARGEST_FILE} — and handed over as a stream.
      *
      * <p>⚠️ Not {@code exchange}: the answer is the file, not JSON, and a failure is an HTTP status with no
      * Telegram description to translate. And the address carries the token, so nothing here ever puts it
      * into a message.
      */
     protected InputStream download(TelegramIdentity identity, String path) {
-        requireCredential(identity);
-
-        String address = "%s/file/bot%s/%s".formatted(
-                trimTrailingSlash(identity.apiBaseOrDefault()), identity.credential(), path);
-
+        HttpCall call = HttpCall.get(fileAddressOf(identity, path)).timeout(readTimeout).responseLimit(LARGEST_FILE).build();
+        HttpReply reply;
         try {
-            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(address)).timeout(readTimeout).GET().build();
-            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            reply = transport.exchange(call);
+        } catch (HttpCallException exception) {
+            throw new TelegramException(new TelegramRefusal.TransportFailure(downloadFailure(exception)), exception);
+        }
+        if (reply.status() != 200) {
+            throw new TelegramException(new TelegramRefusal.TransportFailure(
+                    "the file could not be downloaded (HTTP %d)".formatted(reply.status())));
+        }
+        return new ByteArrayInputStream(reply.body());
+    }
 
-            if (response.statusCode() != 200) {
-                response.body().close();
-                throw new TelegramException(new TelegramRefusal.TransportFailure(
-                        "the file could not be downloaded (HTTP %d)".formatted(response.statusCode())));
-            }
+    private static String downloadFailure(HttpCallException exception) {
+        return switch (exception.failure()) {
+            case INTERRUPTED -> "the download was interrupted";
+            case RESPONSE_LIMIT -> "the file is larger than Telegram serves a bot";
+            case TIMEOUT, TRANSPORT -> exception.getMessage();
+        };
+    }
 
-            return response.body();
+    /** A file's address; one that is not a valid address is said without the token it carries. */
+    private URI fileAddressOf(TelegramIdentity identity, String path) {
+        requireCredential(identity);
+        try {
+            return URI.create("%s/file/bot%s/%s".formatted(trimTrailingSlash(identity.apiBaseOrDefault()), identity.credential(), path));
         } catch (IllegalArgumentException exception) {
             throw new TelegramException(new TelegramRefusal.TransportFailure("the file path is not a valid address"), exception);
-        } catch (IOException exception) {
-            String detail = exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage();
-            throw new TelegramException(new TelegramRefusal.TransportFailure(detail), exception);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new TelegramException(new TelegramRefusal.TransportFailure("the download was interrupted"), exception);
         }
     }
 
-    private HttpRequest.Builder requestFor(TelegramIdentity identity, String method, Duration timeout) {
+    /** A method's address: {@code <api base>/bot<token>/<method>}, the token put in where {@code pattern} says. */
+    private URI addressOf(TelegramIdentity identity, String pattern) {
         requireCredential(identity);
-
-        String address = "%s/bot%s/%s".formatted(
-                trimTrailingSlash(identity.apiBaseOrDefault()), identity.credential(), method);
-
         try {
-            return HttpRequest.newBuilder().uri(URI.create(address)).timeout(timeout);
+            return URI.create(trimTrailingSlash(identity.apiBaseOrDefault()) + "/" + pattern.formatted(identity.credential()));
         } catch (IllegalArgumentException exception) {
             // ⚠️ Thrown before any request is made, and its message quotes the whole URL — which
             // contains the bot token. Rebuilt here without it.
             throw new TelegramException(new TelegramRefusal.Unauthorized(
-                    identity.name(),
-                    "the configured API base is not a valid address: " + identity.apiBaseOrDefault()),
+                    identity.name(), "the configured API base is not a valid address: " + identity.apiBaseOrDefault()),
                     exception);
         }
     }
 
-    private JsonNode exchange(
-            TelegramIdentity identity, String method, HttpRequest request, Map<String, Object> fields) {
-
-        LOGGER.debug("bot api: identity={}, method={}, fields={}",
-                identity.name(), method, fields.keySet());
-
-        HttpResponse<byte[]> response;
-
+    private static HttpCall.Builder callTo(TelegramIdentity identity, URI address, Duration timeout, long limit) {
         try {
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-        } catch (IOException exception) {
-            // ⚠️ A refused connection arrives as a ConnectException with no message at all, which made the
-            // sentence "Telegram could not be reached: null". The type is the information then.
-            String detail = exception.getMessage() == null
-                    ? exception.getClass().getSimpleName()
-                    : exception.getMessage();
-
-            throw new TelegramException(new TelegramRefusal.TransportFailure(detail), exception);
-        } catch (InterruptedException exception) {
-            // Restoring the flag matters: a polling loop is shut down by interrupting it, and a
-            // swallowed interrupt is a thread that will not stop.
-            Thread.currentThread().interrupt();
-            throw new TelegramException(
-                    new TelegramRefusal.TransportFailure("the call was interrupted"), exception);
+            return HttpCall.post(address).timeout(timeout).responseLimit(limit);
+        } catch (IllegalArgumentException exception) {
+            throw new TelegramException(new TelegramRefusal.Unauthorized(
+                    identity.name(), "the configured API base is not an HTTP address: " + identity.apiBaseOrDefault()),
+                    exception);
         }
+    }
 
-        return readReply(identity, method, response.body(), fields);
+    private JsonNode exchange(TelegramIdentity identity, String method, HttpCall call, Map<String, Object> fields) {
+        LOGGER.debug("bot api: identity={}, method={}, fields={}", identity.name(), method, fields.keySet());
+        try {
+            return readReply(identity, method, transport.exchange(call).body(), fields);
+        } catch (HttpCallException exception) {
+            // The client's sentence names the host alone, never the address: the address carries the bot's token.
+            // An interrupted call keeps the thread's flag — a polling loop is shut down by interrupting it.
+            String detail = exception.failure() == HttpCallException.Failure.INTERRUPTED ? "the call was interrupted"
+                    : exception.getMessage();
+            throw new TelegramException(new TelegramRefusal.TransportFailure(detail), exception);
+        }
     }
 
     private JsonNode readReply(
@@ -195,7 +195,7 @@ public abstract class BotApiClient {
 
         try {
             reply = mapper.readTree(body);
-        } catch (IOException exception) {
+        } catch (JacksonException exception) {
             // A non-JSON body means something between us and Telegram answered - a proxy, a captive
             // portal, a misconfigured local Bot API server. Retryable, because it usually is.
             throw new TelegramException(new TelegramRefusal.TransportFailure(
@@ -208,7 +208,7 @@ public abstract class BotApiClient {
 
         throw new TelegramException(BotApiErrors.translate(
                 reply.path("error_code").asInt(),
-                reply.path("description").asText(null),
+                reply.path("description").asString(null),
                 reply.get("parameters"),
                 String.valueOf(fields.getOrDefault("chat_id", identity.name()))));
     }
@@ -223,7 +223,7 @@ public abstract class BotApiClient {
     private byte[] writeJson(Map<String, Object> fields) {
         try {
             return mapper.writeValueAsBytes(fields);
-        } catch (IOException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("a request field could not be serialised", exception);
         }
     }
@@ -240,7 +240,7 @@ public abstract class BotApiClient {
     protected String writeValueAsString(Object value) {
         try {
             return mapper.writeValueAsString(value);
-        } catch (IOException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("a request field could not be serialised", exception);
         }
     }

@@ -1,0 +1,9 @@
+category:protection("Protection") {
+    meta {
+        summary: "Varistors, gas discharge tubes and the like"
+        category: passive
+        order: 5
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

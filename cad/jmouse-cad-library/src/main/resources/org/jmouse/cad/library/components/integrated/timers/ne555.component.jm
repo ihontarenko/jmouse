@@ -8,8 +8,12 @@ component:ne555("NE555", type: timer) {
         summary: "Precision timer, 4.5 V to 16 V"
         source: "TI NE555 datasheet (SLFS022)"
         package: "SOIC-8"
-        category: circuits
+        manufacturer: "Texas Instruments"
+        part-number: NE555DR
+        category: timers
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -41,10 +45,10 @@ component:ne555("NE555", type: timer) {
 
     node:lower("the 1/3 Vcc tap of the internal divider")
 
-    footprint(soic-8-footprint)
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
     # How it looks in the hand: its package from above, wired by its pin numbers and printed with its name.
-    portrait(uses: soic-8-portrait) {
+    portrait(uses: "PT.SOIC:8-P1.27-W3.9") {
         bind:marking("NE555")
     }
 

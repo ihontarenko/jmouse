@@ -1,6 +1,6 @@
 package org.jmouse.telegram.spring;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.jmouse.telegram.bot.BotApiUpdates;
 import org.jmouse.telegram.update.Update;
 import org.jmouse.telegram.update.UpdateDispatcher;

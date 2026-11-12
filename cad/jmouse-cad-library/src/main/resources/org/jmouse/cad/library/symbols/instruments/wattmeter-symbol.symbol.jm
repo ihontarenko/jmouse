@@ -2,7 +2,7 @@ symbol:wattmeter-symbol("Wattmeter") {
     meta {
         summary: "Wattmeter, as drawn on a schematic: a dial marked W, its current through left and right, its voltage top and bottom"
         code: "SY.METER:WATTMETER"
-        category: circuits
+        category: instruments
         tags: electronics, schematic, instrument
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -2,7 +2,7 @@ symbol:variable-resistor-symbol("Variable resistor") {
     meta {
         summary: "Variable resistor, as drawn on a schematic: a resistor with an arrow through it, two terminals"
         code: "SY.RESISTOR:VARIABLE"
-        category: circuits
+        category: resistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

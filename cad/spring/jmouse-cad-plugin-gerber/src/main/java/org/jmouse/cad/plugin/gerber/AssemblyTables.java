@@ -1,6 +1,9 @@
 package org.jmouse.cad.plugin.gerber;
 
+import org.jmouse.cad.exchange.pcb.BillOfMaterials;
+import org.jmouse.cad.exchange.pcb.PcbFabrication;
 import org.jmouse.cad.exchange.ExportedFile;
+import org.jmouse.core.text.CsvText;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,10 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
- * The assembly tables of a board, written by a profile: where each seated part stands — the placement, pick-and-place —
+ * The assembly tables of a pcb, written by a profile: where each seated part stands — the placement, pick-and-place —
  * and what to buy — the bill of materials, one line a kind of part, a kind being its component, value and footprint.
  * Millimetres, Y up as an assembler's machine reads it, degrees counter-clockwise; CSV, a field quoted when it must be.
  */
@@ -21,29 +23,30 @@ public final class AssemblyTables {
     /** The prefix of a field read from the component's own head: {@code meta:lcsc}. */
     private static final String META = "meta:";
 
-    /** What makes a field need quotes: a comma, a quote, a line break. */
-    private static final Pattern QUOTED = Pattern.compile("[\",\\n]");
-
     private AssemblyTables() {
     }
 
     /** Both tables, named after the set. */
-    public static List<ExportedFile> of(BoardFabrication fabrication, AssemblyProfile profile) {
+    public static List<ExportedFile> of(PcbFabrication fabrication, AssemblyProfile profile) {
         return List.of(
                 new ExportedFile(fabrication.name() + "-" + profile.placement().file(), placement(fabrication, profile.placement())),
                 new ExportedFile(fabrication.name() + "-" + profile.materials().file(), materials(fabrication, profile.materials())));
     }
 
     /** Where each seated part stands. */
-    public static String placement(BoardFabrication fabrication, AssemblyProfile.Table table) {
+    public static String placement(PcbFabrication fabrication, AssemblyProfile.PlacementTable table) {
         List<String> lines = new ArrayList<>();
         lines.add(headings(table));
         int item = 0;
-        for (BoardFabrication.SeatedPart part : fabrication.parts()) {
+        for (PcbFabrication.SeatedPart part : fabrication.parts()) {
+            // Nothing a machine places.
+            if (part.nothingToMount()) {
+                continue;
+            }
             Map<String, String> fields = new LinkedHashMap<>();
             fields.put("item", String.valueOf(++item));
             fields.put("mounting", mounting(part, table));
-            fields.put("designator", part.designator());
+            fields.put("designator", uniquelyNamed(part, fabrication));
             fields.put("value", part.value());
             fields.put("footprint", part.footprint().orElse(""));
             fields.put("component", part.component());
@@ -56,46 +59,47 @@ public final class AssemblyTables {
         return String.join("\n", lines) + "\n";
     }
 
-    /** What to buy: the seated parts grouped by component, value and footprint, a part with no footprint listed too. */
-    public static String materials(BoardFabrication fabrication, AssemblyProfile.Table table) {
-        Map<String, List<BoardFabrication.SeatedPart>> kinds = new LinkedHashMap<>();
-        for (BoardFabrication.SeatedPart part : fabrication.parts()) {
-            String kind = part.component() + "\u0000" + part.value() + "\u0000" + part.footprint().orElse("");
-            kinds.computeIfAbsent(kind, ignored -> new ArrayList<>()).add(part);
-        }
+    /**
+     * What a placement table calls a part, which a machine goes by, so each name must be one part's: what it prints, unless
+     * another part prints the same — the copies of a board on a panel —, and then its own name on the pcb.
+     */
+    private static String uniquelyNamed(PcbFabrication.SeatedPart part, PcbFabrication fabrication) {
+        long printedAlike = fabrication.parts().stream().filter(other -> other.printed().equals(part.printed())).count();
+        return printedAlike > 1 ? part.designator() : part.printed();
+    }
+
+    /** What to buy: the pcb's bill of materials, a line a kind of part, a part with no footprint listed too. */
+    public static String materials(PcbFabrication fabrication, AssemblyProfile.MaterialsTable table) {
         List<String> lines = new ArrayList<>();
         lines.add(headings(table));
         int item = 0;
-        for (List<BoardFabrication.SeatedPart> kind : kinds.values()) {
-            BoardFabrication.SeatedPart first = kind.getFirst();
+        for (BillOfMaterials.Line kind : BillOfMaterials.of(fabrication).lines()) {
+            PcbFabrication.SeatedPart first = kind.parts().getFirst();
             Map<String, String> fields = new LinkedHashMap<>();
             fields.put("item", String.valueOf(++item));
             fields.put("mounting", mounting(first, table));
-            fields.put("designators", String.join(table.designatorSeparator(),
-                    kind.stream().map(BoardFabrication.SeatedPart::designator).toList()));
-            fields.put("designator", first.designator());
-            fields.put("quantity", String.valueOf(kind.size()));
-            fields.put("value", first.value());
-            fields.put("footprint", first.footprint().orElse(""));
-            fields.put("component", first.component());
-            lines.add(row(table, fields, fabrication, first.component()));
+            fields.put("designators", String.join(table.designatorSeparator(), kind.designators()));
+            fields.put("designator", first.printed());
+            fields.put("quantity", String.valueOf(kind.quantity()));
+            fields.put("value", kind.value());
+            fields.put("footprint", kind.footprint().orElse(""));
+            fields.put("component", kind.component());
+            lines.add(row(table, fields, fabrication, kind.component()));
         }
         return String.join("\n", lines) + "\n";
     }
 
-    /** How a part is mounted, by its pads — any through a hole makes it {@code through-hole} —, as the table says it. */
-    private static String mounting(BoardFabrication.SeatedPart part, AssemblyProfile.Table table) {
-        boolean throughHole = part.drawing().stream().flatMap(drawing -> drawing.pads().stream())
-                .anyMatch(pad -> "through-hole".equals(pad.type()));
-        String way = throughHole ? "through-hole" : "surface";
+    /** How a part is mounted — through a hole or on the surface —, as the table says it. */
+    private static String mounting(PcbFabrication.SeatedPart part, AssemblyProfile.Table table) {
+        String way = part.throughHole() ? "through-hole" : "surface";
         return table.mountings().getOrDefault(way, way);
     }
 
     private static String headings(AssemblyProfile.Table table) {
-        return String.join(",", table.columns().stream().map(column -> field(column.heading())).toList());
+        return CsvText.row(table.columns().stream().map(AssemblyProfile.Column::heading).toList());
     }
 
-    private static String row(AssemblyProfile.Table table, Map<String, String> fields, BoardFabrication fabrication,
+    private static String row(AssemblyProfile.Table table, Map<String, String> fields, PcbFabrication fabrication,
                               String component) {
         List<String> cells = new ArrayList<>();
         for (AssemblyProfile.Column column : table.columns()) {
@@ -108,17 +112,17 @@ public final class AssemblyTables {
                 throw new IllegalStateException("The profile's column '" + column.heading() + "' shows '" + column.field()
                         + "', which no table has.");
             }
-            cells.add(field(value));
+            cells.add(value);
         }
-        return String.join(",", cells);
+        return CsvText.row(cells);
     }
 
     /** A line of the component's own head: {@code meta lcsc C25804} for {@code lcsc}. */
-    private static Optional<String> meta(BoardFabrication fabrication, String component, String name) {
+    private static Optional<String> meta(PcbFabrication fabrication, String component, String name) {
         return fabrication.facts().component(component).flatMap(written -> written.head().field(name));
     }
 
-    private static String length(double millimetres, AssemblyProfile.Table table) {
+    private static String length(double millimetres, AssemblyProfile.PlacementTable table) {
         return plain(millimetres) + table.unit();
     }
 
@@ -129,9 +133,5 @@ public final class AssemblyTables {
             return "0";
         }
         return rounded.toPlainString();
-    }
-
-    private static String field(String text) {
-        return QUOTED.matcher(text).find() ? "\"" + text.replace("\"", "\"\"") + "\"" : text;
     }
 }

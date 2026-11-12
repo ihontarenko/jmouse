@@ -11,13 +11,15 @@ import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.web.http.cache.HttpSessionRequestCache;
 import org.jmouse.web.http.cache.RequestCache;
 
-public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
-        extends HttpSecurityConfigurer<ExceptionHandlingConfigurer<B>, B> {
+public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>> extends HttpSecurityConfigurer<
+    ExceptionHandlingConfigurer<B>,
+    B
+> {
 
     public static final String DEFAULT_LOGIN_URL = "/login";
 
-    private RequestCache                requestCache;
-    private AuthenticationEntryPoint    entryPoint;
+    private RequestCache requestCache;
+    private AuthenticationEntryPoint entryPoint;
     private AuthorizationFailureHandler deniedHandler;
 
     public ExceptionHandlingConfigurer<B> authenticationEntryPoint(AuthenticationEntryPoint entryPoint) {
@@ -25,7 +27,9 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
         return this;
     }
 
-    public ExceptionHandlingConfigurer<B> defaultAuthenticationEntryPoint(AuthenticationEntryPoint entryPoint) {
+    public ExceptionHandlingConfigurer<B> defaultAuthenticationEntryPoint(
+        AuthenticationEntryPoint entryPoint
+    ) {
         if (this.entryPoint == null) {
             this.entryPoint = entryPoint;
         }
@@ -45,9 +49,11 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
     @Override
     public void configure(B http) throws Exception {
         if (requestCache == null) {
-            org.jmouse.security.web.session.SessionSettings settings =
-                    http.getSharedObject(org.jmouse.security.web.session.SessionSettings.class);
-            requestCache = settings != null && settings.policy().isStateless()
+            org.jmouse.security.web.session.SessionSettings settings = http.getSharedObject(
+                org.jmouse.security.web.session.SessionSettings.class
+            );
+            requestCache =
+                settings != null && settings.policy().isStateless()
                     ? new org.jmouse.web.http.cache.NullRequestCache()
                     : new HttpSessionRequestCache();
             getBuilder().setSharedObject(SharedAttributes.REQUEST_CACHE, requestCache);
@@ -59,12 +65,11 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
 
         http.setSharedObject(SharedAttributes.ENTRY_POINT, entryPoint);
 
-        http.addFilter(new ExceptionTranslationFilter(
-                requestCache, entryPoint, resolveFailureHandler()));
+        http.addFilter(new ExceptionTranslationFilter(requestCache, entryPoint, resolveFailureHandler()));
     }
 
     private AuthorizationFailureHandler resolveFailureHandler() {
-        B                           builder = getBuilder();
+        B builder = getBuilder();
         AuthorizationFailureHandler handler = builder.getObject(AuthorizationFailureHandler.class);
         if (handler == null) {
             handler = deniedHandler == null ? defaultFailureHandler() : deniedHandler;
@@ -76,5 +81,4 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
     private AuthorizationFailureHandler defaultFailureHandler() {
         return new ForbiddenAuthorizationFailureHandler();
     }
-
 }

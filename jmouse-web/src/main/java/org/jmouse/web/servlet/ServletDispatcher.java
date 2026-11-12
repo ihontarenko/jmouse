@@ -4,11 +4,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.http.RequestPath;
-
-import java.io.IOException;
 
 /**
  * Base servlet for handling HTTP requests in jMouse framework 🌐
@@ -40,7 +39,7 @@ import java.io.IOException;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-abstract public class ServletDispatcher extends HttpServlet {
+public abstract class ServletDispatcher extends HttpServlet {
 
     /**
      * Optional pre-injected web application context.
@@ -80,7 +79,7 @@ abstract public class ServletDispatcher extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        RequestPath requestPath = RequestAttributesHolder.getRequestPath();
+        RequestPath requestPath = (RequestPath) request.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
 
         if (requestPath == null) {
             request.setAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE, RequestPath.ofRequest(request));
@@ -92,14 +91,14 @@ abstract public class ServletDispatcher extends HttpServlet {
     /**
      * Lifecycle method called by {@link #init()}. Used to initialize servlet without explicit context.
      */
-    abstract protected void doInitialize();
+    protected abstract void doInitialize();
 
     /**
      * Lifecycle method for manual context-based initialization.
      *
      * @param context injected {@link WebBeanContext}
      */
-    abstract protected void doInitialize(WebBeanContext context);
+    protected abstract void doInitialize(WebBeanContext context);
 
     /**
      * Dispatch method to handle request by method type.
@@ -108,6 +107,6 @@ abstract public class ServletDispatcher extends HttpServlet {
      * @param response    HTTP response
      * @throws IOException in case of I/O failure
      */
-    abstract protected void doDispatch(HttpServletRequest request, HttpServletResponse response)
-            throws IOException;
+    protected abstract void doDispatch(HttpServletRequest request, HttpServletResponse response)
+        throws IOException;
 }

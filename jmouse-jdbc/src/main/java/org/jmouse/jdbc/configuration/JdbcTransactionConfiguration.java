@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.configuration;
 
+import java.util.List;
 import org.jmouse.beans.annotation.*;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.transaction.*;
@@ -9,8 +10,6 @@ import org.jmouse.transaction.infrastructure.JoinTransactionValidator;
 import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 import org.jmouse.transaction.infrastructure.TransactionSessionFactory;
 import org.jmouse.transaction.synchronization.SynchronizationContextHolder;
-
-import java.util.List;
 
 /**
  * 🧩 JDBC-based transaction configuration.
@@ -55,7 +54,7 @@ public class JdbcTransactionConfiguration {
     /**
      * 🔑 Bean name for {@link ConnectionCustomizer}.
      */
-    public static final String CONNECTION_CUSTOMIZER   = "connectionCustomizer";
+    public static final String CONNECTION_CUSTOMIZER = "connectionCustomizer";
 
     /**
      * 🔑 Bean name for {@link TransactionSessionFactory}.
@@ -65,7 +64,7 @@ public class JdbcTransactionConfiguration {
     /**
      * 🔑 Bean name for {@link TransactionManager}.
      */
-    public static final String JDBC_TX_MANAGER         = "jdbcTransactionManager";
+    public static final String JDBC_TX_MANAGER = "jdbcTransactionManager";
 
     /**
      * 🏭 Creates {@link TransactionSessionFactory} backed by JDBC.
@@ -81,10 +80,11 @@ public class JdbcTransactionConfiguration {
      */
     @Bean(JDBC_TX_SESSION_FACTORY)
     public TransactionSessionFactory jdbcTransactionSessionFactory(
-            @Qualifier(JdbcConnectionProviderConfiguration.PRIMARY_CONNECTION_PROVIDER) ConnectionProvider rawProvider,
-            @Qualifier(CONNECTION_CUSTOMIZER) ConnectionCustomizer customizer
+        @Qualifier(JdbcConnectionProviderConfiguration.RAW_PROVIDER) ConnectionProvider rawProvider,
+        @Qualifier(CONNECTION_CUSTOMIZER) ConnectionCustomizer customizer,
+        TransactionContextHolder contextHolder
     ) {
-        return new JdbcTransactionSessionFactory(rawProvider, customizer);
+        return new JdbcTransactionSessionFactory(rawProvider, customizer, contextHolder);
     }
 
     /**
@@ -102,9 +102,7 @@ public class JdbcTransactionConfiguration {
      */
     @Bean(CONNECTION_CUSTOMIZER)
     public ConnectionCustomizer connectionCustomizer() {
-        return new CompositeConnectionCustomizer(List.of(
-                new IsolationReadOnlyConnectionCustomizer()
-        ));
+        return new CompositeConnectionCustomizer(List.of(new IsolationReadOnlyConnectionCustomizer()));
     }
 
     /**
@@ -134,13 +132,16 @@ public class JdbcTransactionConfiguration {
     @Bean(JDBC_TX_MANAGER)
     @PrimaryBean
     public TransactionManager jdbcTransactionManager(
-            TransactionContextHolder contextHolder,
-            @Qualifier(JDBC_TX_SESSION_FACTORY) TransactionSessionFactory sessionFactory,
-            SynchronizationContextHolder synchronizationHolder,
-            JoinTransactionValidator joinTransactionValidator
+        TransactionContextHolder contextHolder,
+        @Qualifier(JDBC_TX_SESSION_FACTORY) TransactionSessionFactory sessionFactory,
+        SynchronizationContextHolder synchronizationHolder,
+        JoinTransactionValidator joinTransactionValidator
     ) {
         return new JdbcTransactionCoordinator(
-                contextHolder, sessionFactory, synchronizationHolder, joinTransactionValidator
+            contextHolder,
+            sessionFactory,
+            synchronizationHolder,
+            joinTransactionValidator
         );
     }
 }

@@ -1,6 +1,9 @@
 # Bodies standing over two leads in one row: aluminium cans and round LEDs seen from above as circles, ceramic discs and
 # film boxes as rectangles. A kind writes the name template, the outline, which pin is marked and the folder; a size its
 # body and its pitch — or, for a box family of one length and pitch, every width it is made in.
+# `body-height` is the most a body stands over the pcb, seated on its leads: a can's commonest length for its
+# diameter (IEC 60384-4 series), a lamp's T-1 or T-1¾ height, a disc's diameter with its lead kink, a box's height
+# in the makers' commonest range for its pitch. A 3D view raises the body to it.
 sheet "Radial packages" as radial-packages {
     description "Bodies standing over two leads in a row."
     form radial
@@ -10,54 +13,65 @@ sheet "Radial packages" as radial-packages {
         outline circle
         polarity positive
         folder "passive/capacitors/through-hole"
+        category capacitors-through-hole
         designation "RADIAL:CP-D{diameter|mm}-P{pitch|mm}"
 
         can-4 "4 mm can" {
+            body-height 7 mm
             diameter 4 mm
             pitch 1.5 mm
             lead 0.45 mm
         }
         can-5 "5 mm can" {
+            body-height 11 mm
             diameter 5 mm
             pitch 2 mm
             lead 0.5 mm
         }
         can-6-3 "6.3 mm can" {
+            body-height 11 mm
             diameter 6.3 mm
             pitch 2.5 mm
             lead 0.5 mm
         }
         can-8 "8 mm can" {
+            body-height 11.5 mm
             diameter 8 mm
             pitch 3.5 mm
             lead 0.6 mm
         }
         can-10 "10 mm can" {
+            body-height 16 mm
             diameter 10 mm
             pitch 5 mm
             lead 0.6 mm
         }
         can-12-5 "12.5 mm can" {
+            body-height 20 mm
             diameter 12.5 mm
             pitch 5 mm
             lead 0.6 mm
         }
         can-16 "16 mm can" {
+            body-height 25 mm
             diameter 16 mm
             pitch 7.5 mm
             lead 0.8 mm
         }
         can-18 "18 mm can" {
+            body-height 35 mm
             diameter 18 mm
             pitch 7.5 mm
             lead 0.8 mm
         }
         can-22 "22 mm can" {
+            body-height 40 mm
             diameter 22 mm
             pitch 10 mm
             lead 1 mm
         }
         can-25 "25 mm can" {
+            body-height 45 mm
             diameter 25 mm
             pitch 10 mm
             lead 1 mm
@@ -69,15 +83,18 @@ sheet "Radial packages" as radial-packages {
         outline circle
         polarity cathode
         folder "semiconductors/optoelectronics/through-hole"
+        category optoelectronics-through-hole
         designation "LED:D{body|mm}"
 
         led-3 "3 mm (T-1)" {
+            body-height 5.3 mm
             diameter 3.8 mm
             body 3 mm
             pitch 2.54 mm
             lead 0.5 mm
         }
         led-5 "5 mm (T-1¾)" {
+            body-height 8.6 mm
             diameter 5.8 mm
             body 5 mm
             pitch 2.54 mm
@@ -90,39 +107,46 @@ sheet "Radial packages" as radial-packages {
         outline rectangle
         polarity none
         folder "passive/capacitors/through-hole"
+        category capacitors-through-hole
         designation "RADIAL:CD-{length|mm}X{width|mm}-P{pitch|mm}"
 
         disc-3-2-5 "3 mm disc, 2.5 mm pitch" {
+            body-height 5 mm
             length 3 mm
             width 1.6 mm
             pitch 2.5 mm
             lead 0.5 mm
         }
         disc-4-3-5 "4.3 mm disc, 5 mm pitch" {
+            body-height 6 mm
             length 4.3 mm
             width 1.9 mm
             pitch 5 mm
             lead 0.5 mm
         }
         disc-5-2-5 "5 mm disc, 2.5 mm pitch" {
+            body-height 7 mm
             length 5 mm
             width 2.5 mm
             pitch 2.5 mm
             lead 0.5 mm
         }
         disc-5-5 "5 mm disc, 5 mm pitch" {
+            body-height 7 mm
             length 5 mm
             width 2.5 mm
             pitch 5 mm
             lead 0.5 mm
         }
         disc-7-5-5 "7.5 mm disc, 5 mm pitch" {
+            body-height 9.5 mm
             length 7.5 mm
             width 2.5 mm
             pitch 5 mm
             lead 0.6 mm
         }
         disc-10-7-5 "10 mm disc, 7.5 mm pitch" {
+            body-height 12.5 mm
             length 10 mm
             width 2.5 mm
             pitch 7.5 mm
@@ -135,48 +159,104 @@ sheet "Radial packages" as radial-packages {
         outline rectangle
         polarity none
         folder "passive/capacitors/through-hole"
+        category capacitors-through-hole
         designation "RADIAL:CB-{length|mm}X{width|mm}-P{pitch|mm}"
 
         box-5 "5 mm pitch" {
+            body-height 6.5 mm
             length 7.2 mm
             widths 2.5 mm, 3 mm, 3.5 mm, 4.5 mm, 5.5 mm, 7.2 mm
             pitch 5 mm
             lead 0.5 mm
         }
         box-7-5 "7.5 mm pitch" {
+            body-height 9 mm
             length 10 mm
             widths 3 mm, 4 mm, 5 mm
             pitch 7.5 mm
             lead 0.6 mm
         }
         box-10 "10 mm pitch" {
+            body-height 12 mm
             length 13 mm
             widths 4 mm, 5 mm, 6 mm
             pitch 10 mm
             lead 0.6 mm
         }
         box-15 "15 mm pitch" {
+            body-height 15 mm
             length 18 mm
             widths 5 mm, 6 mm, 7 mm, 8 mm, 9 mm
             pitch 15 mm
             lead 0.8 mm
         }
         box-22-5 "22.5 mm pitch" {
+            body-height 20 mm
             length 26.5 mm
             widths 6 mm, 7 mm, 8.5 mm, 10.5 mm, 11 mm
             pitch 22.5 mm
             lead 0.8 mm
         }
         box-22-5-long "22.5 mm pitch, long body" {
+            body-height 22 mm
             length 28 mm
             widths 10 mm, 12 mm
             pitch 22.5 mm
             lead 0.8 mm
         }
         box-27-5 "27.5 mm pitch" {
+            body-height 25 mm
             length 31.5 mm
             widths 9 mm, 11 mm, 13 mm
             pitch 27.5 mm
+            lead 0.8 mm
+        }
+    }
+
+crystals "Quartz crystal, HC-49/US" source standard "the HC-49/US holder: 4.88 mm lead spacing, the makers' low-profile can (Abracon AB)" {
+        name "crystal-hc-49-us-pitch-{pitch}"
+        outline rectangle
+        polarity none
+        folder "passive/crystals/through-hole"
+        category crystals-through-hole
+        designation "XTAL:HC49US-P{pitch|mm}"
+
+        hc-49-us "HC-49/US" {
+            body-height 3.6 mm
+            length 11.05 mm
+            width 4.65 mm
+            pitch 4.88 mm
+            lead 0.43 mm
+        }
+    }
+
+disc-varistors "Metal-oxide disc varistor" source standard "IEC 61051-2 varistors, the makers' disc sizes (TDK SIOV-S)" {
+        name "disc-varistor-diameter-{length}-pitch-{pitch}"
+        outline rectangle
+        polarity none
+        folder "passive/protection/through-hole"
+        category protection-through-hole
+        designation "RV:D{length|mm}-P{pitch|mm}"
+
+        varistor-7 "7 mm disc" {
+            body-height 12 mm
+            length 9 mm
+            width 4.5 mm
+            pitch 5 mm
+            lead 0.6 mm
+        }
+        varistor-10 "10 mm disc" {
+            body-height 15.5 mm
+            length 12 mm
+            width 5 mm
+            pitch 7.5 mm
+            lead 0.8 mm
+        }
+        varistor-14 "14 mm disc" {
+            body-height 19 mm
+            length 15.5 mm
+            width 5.5 mm
+            pitch 7.5 mm
             lead 0.8 mm
         }
     }

@@ -53,4 +53,13 @@ public class ClauseBlockNode extends BlockNode {
             writer.block(body -> StatementWriting.statements(body, getExpressions()));
         }
     }
+
+    /**
+     * Whether it is a block with no head that only gathers named terms — {@code parameters}, {@code parts} —: its terms
+     * say what it says, so the language writes them in the body that holds it, never inside it.
+     */
+    public boolean onlyGathersTerms() {
+        return header().isEmpty() && opened() && !getExpressions().isEmpty() && getExpressions().stream()
+                .allMatch(line -> line instanceof ClauseLineNode clause && clause.grammar().isNamed());
+    }
 }

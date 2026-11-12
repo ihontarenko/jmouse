@@ -1,0 +1,24 @@
+model:terminal-block-1x12-pitch-508-horizontal-model("Screw terminal block, 5.08 mm pitch, 1 × 12, horizontal") {
+    meta {
+        summary: "Screw terminal block, 5.08 mm pitch, 1 × 12, horizontal — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.TB:12-P5.08"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [7.6, 60.96, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 27.94, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 22.86, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 17.78, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 12.7, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 7.62, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, 2.54, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -2.54, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -7.62, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -12.7, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -17.78, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -22.86, 3.5])
+    box(gold, size: [0.64, 0.64, 13], at: [0, -27.94, 3.5])
+}

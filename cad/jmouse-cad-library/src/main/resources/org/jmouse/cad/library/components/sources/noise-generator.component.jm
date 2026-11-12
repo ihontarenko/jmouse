@@ -6,7 +6,9 @@ component:noise-generator("Noise generator", type: generator) {
     meta {
         designator: G
         summary: "Band-limited noise: white (flat to the bandwidth) or pink (equal power per octave), at an RMS level"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     use:signals
@@ -21,7 +23,7 @@ component:noise-generator("Noise generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: noise-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-NOISE") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

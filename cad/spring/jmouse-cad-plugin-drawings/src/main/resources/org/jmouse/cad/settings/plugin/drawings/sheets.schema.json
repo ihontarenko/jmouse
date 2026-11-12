@@ -1,0 +1,612 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/plugin/drawings/sheets.schema.json",
+  "title": "Drawing sheets",
+  "description": "How a drawing's sheets are made, as data (the settings tree's plugin/drawings/sheets): their papers and scales, their measures in millimetres on paper, their pens and every word they print.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "papers",
+    "scales",
+    "margin",
+    "columnWidth",
+    "columnGap",
+    "titleHeight",
+    "viewMargin",
+    "rowHeight",
+    "dimensionArrow",
+    "curveSteps",
+    "circleSteps",
+    "schematicPaper",
+    "fontFamilies",
+    "fontFolders",
+    "text",
+    "ink",
+    "cover",
+    "layers",
+    "words",
+    "fabricationNotes"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "papers": {
+      "description": "from the smallest up: the first a pcb fits on at full size or larger is taken",
+      "type": "array",
+      "items": {
+        "description": "A sheet's paper, lying on its long side.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "width",
+          "height"
+        ],
+        "properties": {
+          "name": {
+            "description": "what the paper is called: A4",
+            "type": "string"
+          },
+          "width": {
+            "description": "its long side, in millimetres",
+            "type": "number"
+          },
+          "height": {
+            "description": "its short side, in millimetres",
+            "type": "number"
+          }
+        }
+      }
+    },
+    "scales": {
+      "description": "from the largest down",
+      "type": "array",
+      "items": {
+        "description": "How large a pcb is drawn: factor millimetres of paper to one of pcb.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "factor"
+        ],
+        "properties": {
+          "label": {
+            "description": "how the scale is printed: 10:1",
+            "type": "string"
+          },
+          "factor": {
+            "description": "millimetres of paper to one of pcb",
+            "type": "number"
+          }
+        }
+      }
+    },
+    "margin": {
+      "description": "from the paper's edge to the frame",
+      "type": "number"
+    },
+    "columnWidth": {
+      "description": "how wide a column of tables is",
+      "type": "number"
+    },
+    "columnGap": {
+      "description": "between columns, and between a column and the view",
+      "type": "number"
+    },
+    "titleHeight": {
+      "description": "how high the title block is; it is as wide as a column",
+      "type": "number"
+    },
+    "viewMargin": {
+      "description": "kept free round a view of the pcb: its overall dimensions stand there",
+      "type": "number"
+    },
+    "rowHeight": {
+      "description": "how high a table's row is, for one line",
+      "type": "number"
+    },
+    "dimensionArrow": {
+      "description": "how long a dimension's arrowhead is",
+      "type": "number"
+    },
+    "curveSteps": {
+      "description": "how many straight pieces a letter's arc is drawn with",
+      "type": "integer"
+    },
+    "circleSteps": {
+      "description": "how many straight pieces a circle is drawn with where a format has no circles",
+      "type": "integer"
+    },
+    "schematicPaper": {
+      "description": "the paper a schematic is drawn on",
+      "type": "string"
+    },
+    "fontFamilies": {
+      "description": "the families a document is set in, the one wanted first: the first installed is taken",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fontFolders": {
+      "description": "where fonts are usually installed, on any system: those that exist are looked through by default",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "text": {
+      "description": "Heights of a capital, by what is printed.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "heading",
+        "body",
+        "label",
+        "holeMark",
+        "schematicLeast",
+        "stroke"
+      ],
+      "properties": {
+        "title": {
+          "description": "a sheet's title, in millimetres on paper",
+          "type": "number"
+        },
+        "heading": {
+          "description": "a table's heading, in millimetres",
+          "type": "number"
+        },
+        "body": {
+          "description": "a table's text, in millimetres",
+          "type": "number"
+        },
+        "label": {
+          "description": "a label on a view, in millimetres",
+          "type": "number"
+        },
+        "holeMark": {
+          "description": "a hole's mark on the drill drawing, in millimetres",
+          "type": "number"
+        },
+        "schematicLeast": {
+          "description": "the least a schematic's text is printed at, however small its scale, in millimetres",
+          "type": "number"
+        },
+        "stroke": {
+          "description": "how wide a letter's stroke is, as a share of its height",
+          "type": "number"
+        }
+      }
+    },
+    "ink": {
+      "description": "The colours a pcb is printed in.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "copperTop",
+        "copperBottom",
+        "copperInner",
+        "silkscreen",
+        "substrate"
+      ],
+      "properties": {
+        "copperTop": {
+          "description": "the top copper's colour, #rrggbb",
+          "type": "string"
+        },
+        "copperBottom": {
+          "description": "the bottom copper's colour, #rrggbb",
+          "type": "string"
+        },
+        "copperInner": {
+          "description": "an inner copper's colour, #rrggbb",
+          "type": "string"
+        },
+        "silkscreen": {
+          "description": "the silkscreen's colour, #rrggbb",
+          "type": "string"
+        },
+        "substrate": {
+          "description": "the pcb's own colour, #rrggbb",
+          "type": "string"
+        }
+      }
+    },
+    "cover": {
+      "description": "A document's front.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "product",
+        "subtitle",
+        "markSize",
+        "productHeight",
+        "titleHeight",
+        "titleAtShare",
+        "factColumns",
+        "markBox",
+        "markPrimary",
+        "markAccent",
+        "markDot",
+        "primary",
+        "accent",
+        "muted"
+      ],
+      "properties": {
+        "product": {
+          "description": "the product the documents are made by",
+          "type": "string"
+        },
+        "subtitle": {
+          "description": "what the document is",
+          "type": "string"
+        },
+        "markSize": {
+          "description": "how large the mark is printed, in millimetres",
+          "type": "number"
+        },
+        "productHeight": {
+          "description": "how high the product's name is printed, in millimetres",
+          "type": "number"
+        },
+        "titleHeight": {
+          "description": "how high the design's name is printed, in millimetres",
+          "type": "number"
+        },
+        "titleAtShare": {
+          "description": "how far up the paper the design's name stands",
+          "type": "number"
+        },
+        "factColumns": {
+          "description": "how many facts of the design stand in a row",
+          "type": "integer"
+        },
+        "markBox": {
+          "description": "the size of the box the mark's paths are drawn in",
+          "type": "number"
+        },
+        "markPrimary": {
+          "description": "the mark's first path, as SVG path data in the box",
+          "type": "string"
+        },
+        "markAccent": {
+          "description": "the mark's second path, as SVG path data in the box",
+          "type": "string"
+        },
+        "markDot": {
+          "description": "the dot at the mark's middle",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y",
+            "radius"
+          ],
+          "properties": {
+            "x": {
+              "description": "its centre across the mark's box",
+              "type": "number"
+            },
+            "y": {
+              "description": "its centre down the box",
+              "type": "number"
+            },
+            "radius": {
+              "description": "its radius, in the box's units",
+              "type": "number"
+            }
+          }
+        },
+        "primary": {
+          "description": "the front's main colour, #rrggbb",
+          "type": "string"
+        },
+        "accent": {
+          "description": "its second colour, #rrggbb",
+          "type": "string"
+        },
+        "muted": {
+          "description": "the colour of what is said quietly, #rrggbb",
+          "type": "string"
+        }
+      }
+    },
+    "layers": {
+      "description": "what each layer of a sheet is drawn with",
+      "type": "object",
+      "additionalProperties": {
+        "description": "What a layer of a sheet is drawn with.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pen",
+          "colour",
+          "hex"
+        ],
+        "properties": {
+          "pen": {
+            "description": "how wide its lines are, in millimetres on paper",
+            "type": "number"
+          },
+          "colour": {
+            "description": "its colour in a DXF: AutoCAD's index",
+            "type": "integer"
+          },
+          "hex": {
+            "description": "its colour in a PDF",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "words": {
+      "description": "Every word a sheet prints that does not come from the pcb.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fabricationSheet",
+        "assemblyTopSheet",
+        "assemblyBottomSheet",
+        "holesHeading",
+        "holeMark",
+        "holeSize",
+        "holeSlot",
+        "holePlating",
+        "holeCount",
+        "plated",
+        "unplated",
+        "stackHeading",
+        "stackLayer",
+        "stackThickness",
+        "stackTotal",
+        "stackSilkscreen",
+        "stackMask",
+        "stackCopper",
+        "stackCore",
+        "partsHeading",
+        "partsDesignators",
+        "partsValue",
+        "partsFootprint",
+        "partsCount",
+        "notesHeading",
+        "titleDrawing",
+        "titleSheet",
+        "titleOf",
+        "titleRevision",
+        "titleScale",
+        "titleUnits",
+        "titlePaper",
+        "units",
+        "unsaved",
+        "schematicScale",
+        "schematicSheet",
+        "overviewSheet",
+        "copperSheet",
+        "tablesSheet",
+        "materialsSheet",
+        "contentsSheet",
+        "partsItem",
+        "factAuthor",
+        "factDate",
+        "factSize",
+        "factLayers",
+        "factThickness",
+        "factParts",
+        "factHoles",
+        "factSheets"
+      ],
+      "properties": {
+        "fabricationSheet": {
+          "description": "the fabrication drawing's title",
+          "type": "string"
+        },
+        "assemblyTopSheet": {
+          "description": "the top placement drawing's title",
+          "type": "string"
+        },
+        "assemblyBottomSheet": {
+          "description": "the bottom placement drawing's title",
+          "type": "string"
+        },
+        "holesHeading": {
+          "description": "the holes table's heading",
+          "type": "string"
+        },
+        "holeMark": {
+          "description": "the holes table's mark column",
+          "type": "string"
+        },
+        "holeSize": {
+          "description": "its size column",
+          "type": "string"
+        },
+        "holeSlot": {
+          "description": "its slot column",
+          "type": "string"
+        },
+        "holePlating": {
+          "description": "its walls column",
+          "type": "string"
+        },
+        "holeCount": {
+          "description": "its count column",
+          "type": "string"
+        },
+        "plated": {
+          "description": "how a plated hole's walls are said",
+          "type": "string"
+        },
+        "unplated": {
+          "description": "how a bare hole's walls are said",
+          "type": "string"
+        },
+        "stackHeading": {
+          "description": "the stack table's heading",
+          "type": "string"
+        },
+        "stackLayer": {
+          "description": "its layer column",
+          "type": "string"
+        },
+        "stackThickness": {
+          "description": "its thickness column",
+          "type": "string"
+        },
+        "stackTotal": {
+          "description": "its total row",
+          "type": "string"
+        },
+        "stackSilkscreen": {
+          "description": "its silkscreen row",
+          "type": "string"
+        },
+        "stackMask": {
+          "description": "its solder mask row",
+          "type": "string"
+        },
+        "stackCopper": {
+          "description": "its copper row",
+          "type": "string"
+        },
+        "stackCore": {
+          "description": "its core and prepreg row",
+          "type": "string"
+        },
+        "partsHeading": {
+          "description": "the parts table's heading",
+          "type": "string"
+        },
+        "partsDesignators": {
+          "description": "its designators column",
+          "type": "string"
+        },
+        "partsValue": {
+          "description": "its value column",
+          "type": "string"
+        },
+        "partsFootprint": {
+          "description": "its footprint column",
+          "type": "string"
+        },
+        "partsCount": {
+          "description": "its count column",
+          "type": "string"
+        },
+        "notesHeading": {
+          "description": "the notes' heading",
+          "type": "string"
+        },
+        "titleDrawing": {
+          "description": "the title block's drawing field",
+          "type": "string"
+        },
+        "titleSheet": {
+          "description": "its sheet field",
+          "type": "string"
+        },
+        "titleOf": {
+          "description": "the word between a sheet's number and their count",
+          "type": "string"
+        },
+        "titleRevision": {
+          "description": "its revision field",
+          "type": "string"
+        },
+        "titleScale": {
+          "description": "its scale field",
+          "type": "string"
+        },
+        "titleUnits": {
+          "description": "its units field",
+          "type": "string"
+        },
+        "titlePaper": {
+          "description": "its paper field",
+          "type": "string"
+        },
+        "units": {
+          "description": "how the units are said",
+          "type": "string"
+        },
+        "unsaved": {
+          "description": "what a revision of a design never saved is called",
+          "type": "string"
+        },
+        "schematicScale": {
+          "description": "a schematic's scale, drawn to fit its paper",
+          "type": "string"
+        },
+        "schematicSheet": {
+          "description": "a schematic sheet's title",
+          "type": "string"
+        },
+        "overviewSheet": {
+          "description": "the whole pcb's sheet title",
+          "type": "string"
+        },
+        "copperSheet": {
+          "description": "a copper layer's sheet title",
+          "type": "string"
+        },
+        "tablesSheet": {
+          "description": "the sheet of tables' title",
+          "type": "string"
+        },
+        "materialsSheet": {
+          "description": "the bill of materials' sheet title",
+          "type": "string"
+        },
+        "contentsSheet": {
+          "description": "the contents' sheet title",
+          "type": "string"
+        },
+        "partsItem": {
+          "description": "the parts table's item column",
+          "type": "string"
+        },
+        "factAuthor": {
+          "description": "the cover's author fact",
+          "type": "string"
+        },
+        "factDate": {
+          "description": "its date fact",
+          "type": "string"
+        },
+        "factSize": {
+          "description": "its pcb size fact",
+          "type": "string"
+        },
+        "factLayers": {
+          "description": "its copper layers fact",
+          "type": "string"
+        },
+        "factThickness": {
+          "description": "its thickness fact",
+          "type": "string"
+        },
+        "factParts": {
+          "description": "its parts fact",
+          "type": "string"
+        },
+        "factHoles": {
+          "description": "its holes fact",
+          "type": "string"
+        },
+        "factSheets": {
+          "description": "its schematic sheets fact",
+          "type": "string"
+        }
+      }
+    },
+    "fabricationNotes": {
+      "description": "the general notes; {thickness}, {copperLayers} and {rules} are filled in",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

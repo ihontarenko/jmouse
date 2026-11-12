@@ -1,10 +1,9 @@
 package org.jmouse.transaction.infrastructure.thread;
 
-import org.jmouse.transaction.infrastructure.TransactionContext;
-import org.jmouse.transaction.infrastructure.TransactionContextHolder;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.jmouse.transaction.infrastructure.TransactionContext;
+import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 
 /**
  * Thread-bound implementation of {@link TransactionContextHolder}.
@@ -33,8 +32,7 @@ import java.util.Map;
  *
  * @author jMouse
  */
-public final class ThreadBoundTransactionContextHolder
-        implements TransactionContextHolder {
+public final class ThreadBoundTransactionContextHolder implements TransactionContextHolder {
 
     /**
      * Thread-local stack of transaction contexts.
@@ -47,8 +45,9 @@ public final class ThreadBoundTransactionContextHolder
      * Thread-local storage for transaction-scoped resources
      * (e.g. JDBC connections, sessions).
      */
-    private static final ThreadLocal<Map<Class<?>, Object>> RESOURCE_HOLDER =
-            ThreadLocal.withInitial(HashMap::new);
+    private static final ThreadLocal<Map<Class<?>, Object>> RESOURCE_HOLDER = ThreadLocal.withInitial(
+        HashMap::new
+    );
 
     /**
      * Returns the currently active {@link TransactionContext} for this thread.
@@ -90,7 +89,11 @@ public final class ThreadBoundTransactionContextHolder
             return null;
         }
 
-        CONTEXT_STACK.set(head.parent());
+        if (head.parent() == null) {
+            CONTEXT_STACK.remove();
+        } else {
+            CONTEXT_STACK.set(head.parent());
+        }
 
         return head.context();
     }
@@ -108,13 +111,11 @@ public final class ThreadBoundTransactionContextHolder
     @Override
     public <T> void bindResource(Class<T> key, T resource) {
         Map<Class<?>, Object> resources = RESOURCE_HOLDER.get();
-        Object                previous  = resources.put(key, resource);
+        Object previous = resources.put(key, resource);
 
         if (previous != null) {
             resources.put(key, previous);
-            throw new IllegalStateException(
-                    "Resource already bound for key: " + key.getName()
-            );
+            throw new IllegalStateException("Resource already bound for key: " + key.getName());
         }
     }
 
@@ -154,7 +155,6 @@ public final class ThreadBoundTransactionContextHolder
     public boolean hasResource(Class<?> key) {
         return RESOURCE_HOLDER.get().containsKey(key);
     }
-
 
     /**
      * Creates a snapshot of the current thread-bound resources and clears them from this thread.
@@ -213,9 +213,7 @@ public final class ThreadBoundTransactionContextHolder
         Map<Class<?>, Object> current = RESOURCE_HOLDER.get();
 
         if (!current.isEmpty()) {
-            throw new IllegalStateException(
-                    "Cannot apply snapshot: current state is not empty"
-            );
+            throw new IllegalStateException("Cannot apply snapshot: current state is not empty");
         }
 
         current.putAll(snapshot);
@@ -236,6 +234,5 @@ public final class ThreadBoundTransactionContextHolder
      * Internal stack node representing a single transaction context
      * and a reference to its parent (outer) context.
      */
-    private record Node(TransactionContext context, Node parent) { }
-
+    private record Node(TransactionContext context, Node parent) {}
 }

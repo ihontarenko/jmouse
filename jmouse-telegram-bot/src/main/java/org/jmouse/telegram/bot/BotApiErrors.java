@@ -1,6 +1,6 @@
 package org.jmouse.telegram.bot;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.jmouse.telegram.TelegramRefusal;
 
 import java.time.Duration;

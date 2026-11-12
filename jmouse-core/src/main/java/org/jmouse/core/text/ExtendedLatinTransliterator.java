@@ -1,7 +1,6 @@
 package org.jmouse.core.text;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -47,23 +46,14 @@ public final class ExtendedLatinTransliterator implements Transliterator {
         TABLE.put("ı", "i");
     }
 
-    /** ⚠️ Lower-cased first, for the same reason {@link CyrillicTransliterator} does it. */
+    private static final LetterTable LETTERS = new LetterTable(TABLE);
+
+    /** Each letter of the table, its case kept ({@link LetterTable}). */
     @Override
     public String toLatin(String text) {
         if (text == null || text.isEmpty()) {
             return text;
         }
-
-        String        lowered = text.toLowerCase(Locale.ROOT);
-        StringBuilder latin   = new StringBuilder(lowered.length() + 4);
-
-        for (int at = 0; at < lowered.length(); at++) {
-            String single = lowered.substring(at, at + 1);
-            String mapped = TABLE.get(single);
-
-            latin.append(mapped != null ? mapped : single);
-        }
-
-        return latin.toString();
+        return LETTERS.toLatin(text);
     }
 }

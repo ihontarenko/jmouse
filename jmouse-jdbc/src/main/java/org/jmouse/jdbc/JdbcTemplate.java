@@ -1,12 +1,11 @@
 package org.jmouse.jdbc;
 
-import org.jmouse.jdbc.mapping.*;
-import org.jmouse.jdbc.statement.*;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import org.jmouse.jdbc.mapping.*;
+import org.jmouse.jdbc.statement.*;
 
 /**
  * High-level JDBC operations facade.
@@ -56,7 +55,6 @@ import java.util.Optional;
  * @author jMouse
  */
 public interface JdbcTemplate {
-
     /**
      * Executes a query expected to return <b>at most one</b> row.
      *
@@ -70,21 +68,21 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     <T> Optional<T> querySingle(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<ResultSet> handler,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<ResultSet> handler,
+        RowMapper<T> mapper
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default <T> Optional<T> querySingle(
-            String sql,
-            StatementBinder binder,
-            StatementHandler<ResultSet> handler,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementHandler<ResultSet> handler,
+        RowMapper<T> mapper
     ) throws SQLException {
         return querySingle(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
@@ -93,10 +91,10 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <T> Optional<T> querySingle(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        RowMapper<T> mapper
     ) throws SQLException {
         return querySingle(sql, binder, configurer, StatementHandler.noop(), mapper);
     }
@@ -104,11 +102,8 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()()}.
      */
-    default <T> Optional<T> querySingle(
-            String sql,
-            StatementBinder binder,
-            RowMapper<T> mapper
-    ) throws SQLException {
+    default <T> Optional<T> querySingle(String sql, StatementBinder binder, RowMapper<T> mapper)
+        throws SQLException {
         return querySingle(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), mapper);
     }
 
@@ -116,11 +111,14 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementBinder#noop()}, {@link StatementConfigurer#noop()},
      * and {@link StatementHandler#noop()}.
      */
-    default <T> Optional<T> querySingle(
-            String sql,
-            RowMapper<T> mapper
-    ) throws SQLException {
-        return querySingle(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.noop(), mapper);
+    default <T> Optional<T> querySingle(String sql, RowMapper<T> mapper) throws SQLException {
+        return querySingle(
+            sql,
+            StatementBinder.NOOP,
+            StatementConfigurer.NOOP,
+            StatementHandler.noop(),
+            mapper
+        );
     }
 
     /**
@@ -138,21 +136,21 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     <T> T queryOne(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<ResultSet> handler,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<ResultSet> handler,
+        RowMapper<T> mapper
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <T> T queryOne(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        RowMapper<T> mapper
     ) throws SQLException {
         return queryOne(sql, binder, configurer, StatementHandler.noop(), mapper);
     }
@@ -161,10 +159,10 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default <T> T queryOne(
-            String sql,
-            StatementBinder binder,
-            StatementHandler<ResultSet> handler,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementHandler<ResultSet> handler,
+        RowMapper<T> mapper
     ) throws SQLException {
         return queryOne(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
@@ -172,11 +170,7 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()}.
      */
-    default <T> T queryOne(
-            String sql,
-            StatementBinder binder,
-            RowMapper<T> mapper
-    ) throws SQLException {
+    default <T> T queryOne(String sql, StatementBinder binder, RowMapper<T> mapper) throws SQLException {
         return queryOne(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), mapper);
     }
 
@@ -184,10 +178,7 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementBinder#noop()}, {@link StatementConfigurer#noop()},
      * and {@link StatementHandler#noop()}.
      */
-    default <T> T queryOne(
-            String sql,
-            RowMapper<T> mapper
-    ) throws SQLException {
+    default <T> T queryOne(String sql, RowMapper<T> mapper) throws SQLException {
         return queryOne(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.noop(), mapper);
     }
 
@@ -204,21 +195,21 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     <T> List<T> query(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<ResultSet> handler,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<ResultSet> handler,
+        RowMapper<T> mapper
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <T> List<T> query(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        RowMapper<T> mapper
     ) throws SQLException {
         return query(sql, binder, configurer, StatementHandler.noop(), mapper);
     }
@@ -227,10 +218,10 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default <T> List<T> query(
-            String sql,
-            StatementBinder binder,
-            StatementHandler<ResultSet> handler,
-            RowMapper<T> mapper
+        String sql,
+        StatementBinder binder,
+        StatementHandler<ResultSet> handler,
+        RowMapper<T> mapper
     ) throws SQLException {
         return query(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
@@ -238,11 +229,7 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()}.
      */
-    default <T> List<T> query(
-            String sql,
-            StatementBinder binder,
-            RowMapper<T> mapper
-    ) throws SQLException {
+    default <T> List<T> query(String sql, StatementBinder binder, RowMapper<T> mapper) throws SQLException {
         return query(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), mapper);
     }
 
@@ -250,10 +237,7 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementBinder#noop()}, {@link StatementConfigurer#noop()},
      * and {@link StatementHandler#noop()}.
      */
-    default <T> List<T> query(
-            String sql,
-            RowMapper<T> mapper
-    ) throws SQLException {
+    default <T> List<T> query(String sql, RowMapper<T> mapper) throws SQLException {
         return query(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.noop(), mapper);
     }
 
@@ -270,21 +254,21 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     <T> T query(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<ResultSet> handler,
-            ResultSetExtractor<T> extractor
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<ResultSet> handler,
+        ResultSetExtractor<T> extractor
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <T> T query(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            ResultSetExtractor<T> extractor
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        ResultSetExtractor<T> extractor
     ) throws SQLException {
         return query(sql, binder, configurer, StatementHandler.noop(), extractor);
     }
@@ -293,10 +277,10 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default <T> T query(
-            String sql,
-            StatementBinder binder,
-            StatementHandler<ResultSet> handler,
-            ResultSetExtractor<T> extractor
+        String sql,
+        StatementBinder binder,
+        StatementHandler<ResultSet> handler,
+        ResultSetExtractor<T> extractor
     ) throws SQLException {
         return query(sql, binder, StatementConfigurer.NOOP, handler, extractor);
     }
@@ -304,22 +288,16 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementBinder#noop()}.
      */
-    default <T> T query(
-            String sql,
-            StatementHandler<ResultSet> handler,
-            ResultSetExtractor<T> extractor
-    ) throws SQLException {
+    default <T> T query(String sql, StatementHandler<ResultSet> handler, ResultSetExtractor<T> extractor)
+        throws SQLException {
         return query(sql, StatementBinder.noop(), StatementConfigurer.noop(), handler, extractor);
     }
 
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()}.
      */
-    default <T> T query(
-            String sql,
-            StatementBinder binder,
-            ResultSetExtractor<T> extractor
-    ) throws SQLException {
+    default <T> T query(String sql, StatementBinder binder, ResultSetExtractor<T> extractor)
+        throws SQLException {
         return query(sql, binder, StatementConfigurer.noop(), StatementHandler.noop(), extractor);
     }
 
@@ -327,10 +305,7 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementBinder#noop()}, {@link StatementConfigurer#noop()},
      * and {@link StatementHandler#noop()}.
      */
-    default <T> T query(
-            String sql,
-            ResultSetExtractor<T> extractor
-    ) throws SQLException {
+    default <T> T query(String sql, ResultSetExtractor<T> extractor) throws SQLException {
         return query(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.noop(), extractor);
     }
 
@@ -345,41 +320,32 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     int update(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<Integer> handler
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<Integer> handler
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
-    default int update(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer
-    ) throws SQLException {
+    default int update(String sql, StatementBinder binder, StatementConfigurer configurer)
+        throws SQLException {
         return update(sql, binder, configurer, StatementHandler.noop());
     }
 
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
-    default int update(
-            String sql,
-            StatementBinder binder,
-            StatementHandler<Integer> handler
-    ) throws SQLException {
+    default int update(String sql, StatementBinder binder, StatementHandler<Integer> handler)
+        throws SQLException {
         return update(sql, binder, StatementConfigurer.NOOP, handler);
     }
 
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()}.
      */
-    default int update(
-            String sql,
-            StatementBinder binder
-    ) throws SQLException {
+    default int update(String sql, StatementBinder binder) throws SQLException {
         return update(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop());
     }
 
@@ -402,19 +368,19 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     int[] batchUpdate(
-            String sql,
-            List<? extends StatementBinder> binders,
-            StatementConfigurer configurer,
-            StatementHandler<int[]> handler
+        String sql,
+        List<? extends StatementBinder> binders,
+        StatementConfigurer configurer,
+        StatementHandler<int[]> handler
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default int[] batchUpdate(
-            String sql,
-            List<? extends StatementBinder> binders,
-            StatementConfigurer configurer
+        String sql,
+        List<? extends StatementBinder> binders,
+        StatementConfigurer configurer
     ) throws SQLException {
         return batchUpdate(sql, binders, configurer, StatementHandler.noop());
     }
@@ -423,9 +389,9 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default int[] batchUpdate(
-            String sql,
-            List<? extends StatementBinder> binders,
-            StatementHandler<int[]> handler
+        String sql,
+        List<? extends StatementBinder> binders,
+        StatementHandler<int[]> handler
     ) throws SQLException {
         return batchUpdate(sql, binders, StatementConfigurer.NOOP, handler);
     }
@@ -433,10 +399,7 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()}.
      */
-    default int[] batchUpdate(
-            String sql,
-            List<? extends StatementBinder> binders
-    ) throws SQLException {
+    default int[] batchUpdate(String sql, List<? extends StatementBinder> binders) throws SQLException {
         return batchUpdate(sql, binders, StatementConfigurer.NOOP, StatementHandler.noop());
     }
 
@@ -453,21 +416,21 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     <K> K update(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<K> handler,
-            KeyExtractor<K> extractor
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<K> handler,
+        KeyExtractor<K> extractor
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <K> K update(
-            String sql,
-            StatementBinder binder,
-            StatementConfigurer configurer,
-            KeyExtractor<K> extractor
+        String sql,
+        StatementBinder binder,
+        StatementConfigurer configurer,
+        KeyExtractor<K> extractor
     ) throws SQLException {
         return update(sql, binder, configurer, StatementHandler.noop(), extractor);
     }
@@ -476,10 +439,10 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default <K> K update(
-            String sql,
-            StatementBinder binder,
-            StatementHandler<K> handler,
-            KeyExtractor<K> extractor
+        String sql,
+        StatementBinder binder,
+        StatementHandler<K> handler,
+        KeyExtractor<K> extractor
     ) throws SQLException {
         return update(sql, binder, StatementConfigurer.NOOP, handler, extractor);
     }
@@ -487,11 +450,7 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()} and {@link StatementHandler#noop()}.
      */
-    default <K> K update(
-            String sql,
-            StatementBinder binder,
-            KeyExtractor<K> extractor
-    ) throws SQLException {
+    default <K> K update(String sql, StatementBinder binder, KeyExtractor<K> extractor) throws SQLException {
         return update(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), extractor);
     }
 
@@ -508,21 +467,21 @@ public interface JdbcTemplate {
      * @throws SQLException if JDBC access fails
      */
     <T> T call(
-            String sql,
-            CallableStatementBinder binder,
-            StatementConfigurer configurer,
-            StatementHandler<T> handler,
-            CallableCallback<T> callback
+        String sql,
+        CallableStatementBinder binder,
+        StatementConfigurer configurer,
+        StatementHandler<T> handler,
+        CallableCallback<T> callback
     ) throws SQLException;
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <T> T call(
-            String sql,
-            CallableStatementBinder binder,
-            StatementConfigurer configurer,
-            CallableCallback<T> callback
+        String sql,
+        CallableStatementBinder binder,
+        StatementConfigurer configurer,
+        CallableCallback<T> callback
     ) throws SQLException {
         return call(sql, binder, configurer, StatementHandler.noop(), callback);
     }
@@ -531,10 +490,10 @@ public interface JdbcTemplate {
      * Convenience overload: uses {@link StatementConfigurer#noop()}.
      */
     default <T> T call(
-            String sql,
-            CallableStatementBinder binder,
-            StatementHandler<T> handler,
-            CallableCallback<T> callback
+        String sql,
+        CallableStatementBinder binder,
+        StatementHandler<T> handler,
+        CallableCallback<T> callback
     ) throws SQLException {
         return call(sql, binder, StatementConfigurer.NOOP, handler, callback);
     }
@@ -542,11 +501,8 @@ public interface JdbcTemplate {
     /**
      * Convenience overload: uses {@link StatementConfigurer#noop()}, {@link StatementHandler#noop()}.
      */
-    default <T> T call(
-            String sql,
-            CallableStatementBinder binder,
-            CallableCallback<T> callback
-    ) throws SQLException {
+    default <T> T call(String sql, CallableStatementBinder binder, CallableCallback<T> callback)
+        throws SQLException {
         return call(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), callback);
     }
 
@@ -615,16 +571,19 @@ public interface JdbcTemplate {
          */
         @Override
         public <T> Optional<T> querySingle(
-                String sql,
-                StatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<ResultSet> handler,
-                RowMapper<T> mapper
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<ResultSet> handler,
+            RowMapper<T> mapper
         ) throws SQLException {
             return executor.execute(
-                    sql, binder, configurer, handler,
-                    StatementCallback.QUERY,
-                    new StrictSingleResultSetExtractor<>(mapper, sql, false)
+                sql,
+                binder,
+                configurer,
+                handler,
+                StatementCallback.QUERY,
+                new StrictSingleResultSetExtractor<>(mapper, sql, false)
             );
         }
 
@@ -641,14 +600,19 @@ public interface JdbcTemplate {
          */
         @Override
         public <T> T queryOne(
-                String sql,
-                StatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<ResultSet> handler,
-                RowMapper<T> mapper
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<ResultSet> handler,
+            RowMapper<T> mapper
         ) throws SQLException {
-            return query(sql, binder, configurer, handler,
-                    new StrictSingleResultSetExtractor<>(mapper, sql)).orElse(null);
+            return query(
+                sql,
+                binder,
+                configurer,
+                handler,
+                new StrictSingleResultSetExtractor<>(mapper, sql)
+            ).orElse(null);
         }
 
         /**
@@ -664,11 +628,11 @@ public interface JdbcTemplate {
          */
         @Override
         public <T> List<T> query(
-                String sql,
-                StatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<ResultSet> handler,
-                RowMapper<T> mapper
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<ResultSet> handler,
+            RowMapper<T> mapper
         ) throws SQLException {
             return query(sql, binder, configurer, handler, new ListResultSetExtractor<>(mapper));
         }
@@ -686,11 +650,11 @@ public interface JdbcTemplate {
          */
         @Override
         public <T> T query(
-                String sql,
-                StatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<ResultSet> handler,
-                ResultSetExtractor<T> extractor
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<ResultSet> handler,
+            ResultSetExtractor<T> extractor
         ) throws SQLException {
             return executor.execute(sql, binder, configurer, handler, StatementCallback.QUERY, extractor);
         }
@@ -706,10 +670,10 @@ public interface JdbcTemplate {
          */
         @Override
         public int update(
-                String sql,
-                StatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<Integer> handler
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<Integer> handler
         ) throws SQLException {
             return executor.executeUpdate(sql, binder, configurer, handler, StatementCallback.UPDATE);
         }
@@ -725,10 +689,10 @@ public interface JdbcTemplate {
          */
         @Override
         public int[] batchUpdate(
-                String sql,
-                List<? extends StatementBinder> binders,
-                StatementConfigurer configurer,
-                StatementHandler<int[]> handler
+            String sql,
+            List<? extends StatementBinder> binders,
+            StatementConfigurer configurer,
+            StatementHandler<int[]> handler
         ) throws SQLException {
             return executor.executeBatch(sql, binders, configurer, handler, StatementCallback.BATCH);
         }
@@ -746,14 +710,14 @@ public interface JdbcTemplate {
          */
         @Override
         public <K> K update(
-                String sql,
-                StatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<K> handler,
-                KeyExtractor<K> extractor
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<K> handler,
+            KeyExtractor<K> extractor
         ) throws SQLException {
-            return executor.executeUpdate(
-                    sql, binder, configurer, handler, (statement, keys) -> extractor.extract(keys)
+            return executor.executeUpdate(sql, binder, configurer, handler, (statement, keys) ->
+                extractor.extract(keys)
             );
         }
 
@@ -770,11 +734,11 @@ public interface JdbcTemplate {
          */
         @Override
         public <T> T call(
-                String sql,
-                CallableStatementBinder binder,
-                StatementConfigurer configurer,
-                StatementHandler<T> handler,
-                CallableCallback<T> callback
+            String sql,
+            CallableStatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler<T> handler,
+            CallableCallback<T> callback
         ) throws SQLException {
             return executor.executeCall(sql, binder, configurer, handler, callback);
         }
@@ -790,5 +754,4 @@ public interface JdbcTemplate {
             return executor;
         }
     }
-
 }

@@ -1,5 +1,8 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.document.DocumentNode;
+
+import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.simulation.CatalogueDocuments;
 
 import java.util.List;
@@ -25,7 +28,15 @@ public interface KiCadCatalogue {
         public Map<String, String> pinsByNumber(String component) {
             return Map.of();
         }
+
+        @Override
+        public Optional<DocumentNode> document(String slug) {
+            return Optional.empty();
+        }
     };
+
+    /** A document of the catalogue by its slug: a mark's symbol, which the sheet's marks are drawn with. */
+    Optional<DocumentNode> document(String slug);
 
     /** The catalogue a set of documents is, by slug: components and symbols alike. */
     static KiCadCatalogue of(CatalogueDocuments documents) {
@@ -88,6 +99,11 @@ public interface KiCadCatalogue {
      * KiCad footprint with. Empty where the catalogue keeps no index of codes, and the import then converts KiCad's.
      */
     default Optional<String> footprintCoded(String code) {
+        return Optional.empty();
+    }
+
+    /** The drawing of one of this library's footprints: its pads and the models it stands with; empty for one it does not hold. */
+    default Optional<FootprintDrawing> footprintDrawing(String footprint) {
         return Optional.empty();
     }
 

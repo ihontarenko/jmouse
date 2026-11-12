@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- the whole board in one file: a page holding a trace between two pads -->
+  <path d="M5 3h10l4 4v14H5z"/>
+  <path d="M15 3v4h4"/>
+  <path d="M10 16.5l3-3h1.5"/>
+  <circle cx="9" cy="17.5" r="1.3"/>
+  <circle cx="16" cy="13.5" r="1.3"/>
+</svg>

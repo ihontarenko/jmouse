@@ -1,0 +1,16 @@
+footprint:recycle-10mm-footprint("Recycling, 10 mm") {
+    meta {
+        summary: "Three chasing arrows: the board and its materials can be recycled, printed 10 mm wide"
+        code: "FP.GRAPHIC:RECYCLE-10"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 0.5, "M0.48 -3.36L2.686 0.5")
+    outline(silkscreen, width: 0.5, "M3.04 2.8L-1.36 2.8")
+    outline(silkscreen, width: 0.5, "M-3.52 1.96L-1.314 -1.9")
+    outline(silkscreen, filled, "M3.44 1.82L1.991 0.897L3.381 0.103Z")
+    outline(silkscreen, filled, "M-2.88 2.8L-1.36 2L-1.36 3.6Z")
+    outline(silkscreen, filled, "M-0.56 -3.22L-0.619 -1.503L-2.009 -2.297Z")
+}

@@ -1,0 +1,8 @@
+category:surface-transistor-outline("Transistor outlines") {
+    meta {
+        category: packages-surface
+        order: 1
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

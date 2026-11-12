@@ -3,7 +3,7 @@ portrait:dip-18-portrait("DIP-18") {
     meta {
         summary: "18-lead DIP, 7.62 mm rows from above: pin 1 at the bottom left, beside the notch and dot"
         code: "PT.DIP:18-W7.62"
-        category: circuits
+        category: dual-inline
         tags: electronics, portrait, package, through-hole
         source: "JEDEC MS-001"
         authors: "jMouse"

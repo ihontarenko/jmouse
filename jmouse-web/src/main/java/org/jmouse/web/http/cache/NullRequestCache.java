@@ -5,9 +5,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /** No saved request or session allocation for stateless authentication. */
 public final class NullRequestCache implements RequestCache {
+
     @Override
-    public void saveRequest(HttpServletRequest request, HttpServletResponse response) {
-    }
+    public void saveRequest(HttpServletRequest request, HttpServletResponse response) {}
 
     @Override
     public SavedRequest getRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -15,6 +15,5 @@ public final class NullRequestCache implements RequestCache {
     }
 
     @Override
-    public void removeRequest(HttpServletRequest request, HttpServletResponse response) {
-    }
+    public void removeRequest(HttpServletRequest request, HttpServletResponse response) {}
 }

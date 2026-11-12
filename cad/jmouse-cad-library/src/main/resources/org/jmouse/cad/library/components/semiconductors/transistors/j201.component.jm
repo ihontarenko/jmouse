@@ -7,8 +7,10 @@ component:j201("J201", type: jfet) {
         summary: "N-channel JFET, 40 V, IDSS 0.2 … 1 mA"
         source: "onsemi J201/J202 datasheet, electrical characteristics"
         package: "TO-92"
-        category: circuits
+        category: transistors
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:n-jfet
 
@@ -28,11 +30,11 @@ component:j201("J201", type: jfet) {
 
     pin:source(analog, 1, "source")
     pin:gate(analog, input, 2, "gate")
-    pin:drain(analog, output, 3, "drain")
+    pin:drain(analog, output, open-drain, 3, "drain")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
 
-    symbol(uses: n-channel-jfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:JFET-N") {
         bind:failed(failed)
     }
 
@@ -56,7 +58,7 @@ component:j201("J201", type: jfet) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("J201")
     }
 }

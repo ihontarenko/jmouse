@@ -2,10 +2,10 @@ package org.jmouse.kicad.symbol;
 
 import org.jmouse.el.StringSource;
 import org.jmouse.el.lexer.Token;
-import org.jmouse.kicad.parser.lexer.KiCadTokenKind;
-import org.jmouse.kicad.parser.lexer.KiCadTokenizer;
-import org.jmouse.kicad.parser.node.KiCadPosition;
-import org.jmouse.kicad.parser.node.KiCadString;
+import org.jmouse.sexpression.lexer.SExpressionTokenKind;
+import org.jmouse.sexpression.lexer.SExpressionTokenizer;
+import org.jmouse.sexpression.node.SExpressionPosition;
+import org.jmouse.sexpression.node.SExpressionString;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -66,14 +66,14 @@ public final class KiCadSymbolIndex {
      * @param text    the {@code .kicad_sym} file's text
      */
     public static List<Entry> read(String library, String text) {
-        List<Token> tokens = new KiCadTokenizer().tokenize(new StringSource(library, text));
+        List<Token> tokens = new SExpressionTokenizer().tokenize(new StringSource(library, text));
         List<Entry> entries = new ArrayList<>();
         int depth = 0;
         String symbol = null;
         Map<String, String> properties = new LinkedHashMap<>();
         for (int index = 0; index < tokens.size(); index++) {
             Token token = tokens.get(index);
-            if (token.type() == KiCadTokenKind.OPEN) {
+            if (token.type() == SExpressionTokenKind.OPEN) {
                 depth++;
                 if (depth == SYMBOL_DEPTH && isHead(tokens, index, SYMBOL)) {
                     symbol = textOf(tokens.get(index + 2));
@@ -82,7 +82,7 @@ public final class KiCadSymbolIndex {
                         && isString(tokens, index + 3)) {
                     properties.put(textOf(tokens.get(index + 2)), textOf(tokens.get(index + 3)));
                 }
-            } else if (token.type() == KiCadTokenKind.CLOSE) {
+            } else if (token.type() == SExpressionTokenKind.CLOSE) {
                 if (depth == SYMBOL_DEPTH && symbol != null) {
                     entries.add(new Entry(library, symbol, properties));
                     symbol = null;
@@ -95,15 +95,15 @@ public final class KiCadSymbolIndex {
 
     /** The list opened at {@code open} is {@code (head "…" …}. */
     private static boolean isHead(List<Token> tokens, int open, String head) {
-        return open + 2 < tokens.size() && tokens.get(open + 1).type() == KiCadTokenKind.ATOM
+        return open + 2 < tokens.size() && tokens.get(open + 1).type() == SExpressionTokenKind.ATOM
                 && tokens.get(open + 1).value().equals(head) && isString(tokens, open + 2);
     }
 
     private static boolean isString(List<Token> tokens, int index) {
-        return index < tokens.size() && tokens.get(index).type() == KiCadTokenKind.STRING;
+        return index < tokens.size() && tokens.get(index).type() == SExpressionTokenKind.STRING;
     }
 
     private static String textOf(Token token) {
-        return KiCadString.read(token.value(), KiCadPosition.NONE, null).text();
+        return SExpressionString.read(token.value(), SExpressionPosition.NONE, null).text();
     }
 }

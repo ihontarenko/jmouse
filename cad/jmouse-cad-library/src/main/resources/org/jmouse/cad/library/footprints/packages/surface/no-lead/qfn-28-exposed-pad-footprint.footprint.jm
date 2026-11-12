@@ -2,7 +2,7 @@ footprint:qfn-28-exposed-pad-footprint("QFN-28, 5 mm body") {
     meta {
         summary: "28-lead QFN-28, 5 mm body, 0.5 mm pitch, body 5 × 5 mm, exposed pad 3.25 mm"
         code: "FP.QFN:28-P0.5-5-EP3.25"
-        category: circuits
+        category: no-lead
         tags: electronics, footprint, surface
         source: "JEDEC MO-220"
         authors: "jMouse"
@@ -43,4 +43,6 @@ footprint:qfn-28-exposed-pad-footprint("QFN-28, 5 mm body") {
     outline(silkscreen, width: 0.12, "M-1.91 -2.61H-2.61V-1.91M-1.91 2.61H-2.61V1.91M1.91 -2.61H2.61V-1.91M1.91 2.61H2.61V1.91")
     outline(silkscreen, filled, "M-3.735 -1.5A0.3 0.3 0 1 0 -3.135 -1.5A0.3 0.3 0 1 0 -3.735 -1.5Z")
     outline(courtyard, width: 0.05, "M-3.15 -3.15H3.15V3.15H-3.15Z")
+    body(height: 1)
+    model("MD.QFN:28-P0.5-5-EP3.25")
 }

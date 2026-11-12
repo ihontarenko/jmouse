@@ -1,4 +1,5 @@
 {
+  "$schema": "./assembly.schema.json",
   "placement": {
     "file": "cpl.csv",
     "role": "where each part stands (CPL), in JLCPCB's columns",
@@ -7,6 +8,7 @@
       "bottom": "Bottom"
     },
     "unit": "mm",
+    "mountings": {},
     "columns": [
       {
         "heading": "Designator",
@@ -34,6 +36,7 @@
     "file": "bom.csv",
     "role": "bill of materials in JLCPCB's columns",
     "designatorSeparator": ",",
+    "mountings": {},
     "columns": [
       {
         "heading": "Comment",

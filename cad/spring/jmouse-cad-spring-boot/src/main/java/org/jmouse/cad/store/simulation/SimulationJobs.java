@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -34,16 +35,17 @@ public class SimulationJobs implements AutoCloseable {
 
     private final ExecutorService        workers;
     private final Map<String, JobRecord> jobs = new ConcurrentHashMap<>();
-    private final Duration               retention;
+    private final Supplier<Duration>     retention;
     private final Clock                  clock;
 
-    public SimulationJobs(CadProperties properties, Clock clock) {
+    /** @param retention how long a finished job is kept, read each time the old ones are forgotten */
+    public SimulationJobs(CadProperties properties, Supplier<Duration> retention, Clock clock) {
         this.workers = Executors.newFixedThreadPool(properties.simulation().workers(), work -> {
             Thread thread = new Thread(work, "cad-simulation");
             thread.setDaemon(true);
             return thread;
         });
-        this.retention = properties.simulation().jobRetention();
+        this.retention = retention;
         this.clock = clock;
     }
 
@@ -108,7 +110,7 @@ public class SimulationJobs implements AutoCloseable {
     }
 
     private void forgetExpired() {
-        Instant oldest = clock.instant().minus(retention);
+        Instant oldest = clock.instant().minus(retention.get());
         jobs.values().removeIf(job -> job.finishedAt != null && job.finishedAt.isBefore(oldest));
     }
 

@@ -1,15 +1,18 @@
 package org.jmouse.security;
 
-import org.jmouse.core.Streamable;
-
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.jmouse.core.Streamable;
 
 public interface UserPrincipal extends Principal {
-
-    static UserPrincipal create(String username, String password, Collection<Authority> authorities, boolean enabled) {
+    static UserPrincipal create(
+        String username,
+        String password,
+        Collection<Authority> authorities,
+        boolean enabled
+    ) {
         return new User(username, password, authorities, enabled);
     }
 
@@ -22,11 +25,22 @@ public interface UserPrincipal extends Principal {
     boolean enabled();
 
     record User(
-            String username,
-            String password,
-            Collection<? extends Authority> authorities,
-            boolean enabled
+        String username,
+        String password,
+        Collection<? extends Authority> authorities,
+        boolean enabled
     ) implements UserPrincipal {
+        public User {
+            java.util.Objects.requireNonNull(username, "username");
+            authorities = List.copyOf(authorities);
+        }
+
+        @Override
+        public String toString() {
+            return (
+                "User[username=" + username + ", enabled=" + enabled + ", authorities=" + authorities + "]"
+            );
+        }
 
         public User(Builder builder) {
             this(builder.username, builder.password, builder.authorities, builder.enabled);
@@ -38,10 +52,10 @@ public interface UserPrincipal extends Principal {
 
         public static Builder builder(UserPrincipal user) {
             return builder()
-                    .username(user.username())
-                    .password(user.password())
-                    .authorities(user.authorities())
-                    .enabled(user.enabled());
+                .username(user.username())
+                .password(user.password())
+                .authorities(user.authorities())
+                .enabled(user.enabled());
         }
 
         @Override
@@ -52,12 +66,11 @@ public interface UserPrincipal extends Principal {
         public static class Builder {
 
             private final List<Authority> authorities = new ArrayList<>();
-            private       String          username;
-            private       String          password;
-            private       boolean         enabled     = true;
+            private String username;
+            private String password;
+            private boolean enabled = true;
 
-            public Builder() {
-            }
+            public Builder() {}
 
             public Builder username(String username) {
                 this.username = username;
@@ -100,9 +113,6 @@ public interface UserPrincipal extends Principal {
             public User build() {
                 return new User(this);
             }
-
         }
-
     }
-
 }

@@ -1,12 +1,10 @@
 package org.jmouse.web.http;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.http.Headers;
-import org.jmouse.http.HttpHeader;
-import org.jmouse.http.HttpMethod;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import org.jmouse.http.Headers;
+import org.jmouse.http.HttpMethod;
 
 /**
  * 🌐 Abstraction over a web request.
@@ -19,8 +17,7 @@ import java.net.UnknownHostException;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
 public interface WebRequest extends RequestAttributes {
-
-    String WEB_REQUEST_HEADERS_ATTRIBUTE   = "WEB_REQUEST_HEADERS_ATTRIBUTE";
+    String WEB_REQUEST_HEADERS_ATTRIBUTE = "WEB_REQUEST_HEADERS_ATTRIBUTE";
     String WEB_REQUEST_CLIENT_IP_ATTRIBUTE = "WEB_REQUEST_CLIENT_IP_ATTRIBUTE";
 
     /**
@@ -49,43 +46,21 @@ public interface WebRequest extends RequestAttributes {
         return headers;
     }
 
+    /** The servlet container owns trusted proxy normalization. Raw forwarding headers are not trusted here. */
     default InetAddress getClientIp() {
-        InetAddress clientIp = (InetAddress) getRequest().getAttribute(WEB_REQUEST_CLIENT_IP_ATTRIBUTE);;
-
-        if (clientIp == null) {
-            Headers headers       = getHeaders();
-            String  xForwardedFor = (String) headers.getHeader(HttpHeader.X_FORWARDED_FOR);
-
-            if (xForwardedFor != null) {
-                String ip    = xForwardedFor;
-                int    comma = xForwardedFor.indexOf(',');
-
-                if (comma != -1) {
-                    ip = xForwardedFor.substring(0, comma);
-                }
-
-                try {
-                    clientIp = InetAddress.getByName(ip.trim());
-                } catch (UnknownHostException ignored) {}
-            }
-
-            if (clientIp == null) {
-                String xRealIp       = (String) getHeaders().getHeader(HttpHeader.X_REAL_IP);
-                String remoteAddress = getRequest().getRemoteAddr();
-
-                if (xRealIp != null) {
-                    remoteAddress = xRealIp;
-                }
-
-                try {
-                    clientIp = InetAddress.getByName(remoteAddress.trim());
-                } catch (UnknownHostException ignored) {}
-            }
-
-            getRequest().setAttribute(WEB_REQUEST_CLIENT_IP_ATTRIBUTE, clientIp);
-        }
-
-        return clientIp;
+        return resolveClientAddress(getRequest());
     }
 
+    static InetAddress resolveClientAddress(HttpServletRequest request) {
+        if (request.getAttribute(WEB_REQUEST_CLIENT_IP_ATTRIBUTE) instanceof InetAddress cached) {
+            return cached;
+        }
+        try {
+            InetAddress address = InetAddress.getByName(request.getRemoteAddr());
+            request.setAttribute(WEB_REQUEST_CLIENT_IP_ATTRIBUTE, address);
+            return address;
+        } catch (UnknownHostException failure) {
+            throw new IllegalStateException("Invalid remote address supplied by servlet container", failure);
+        }
+    }
 }

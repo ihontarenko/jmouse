@@ -1,7 +1,8 @@
 package org.jmouse.cad.plugin.xyce;
 
 import org.jmouse.cad.spice.SpiceProcess;
-import org.jmouse.cad.spice.SpiceSimulator;
+import org.jmouse.plugin.PluginSettingValues;
+import org.jmouse.plugin.PluginSettings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 /** 🧩 The Xyce plugin, on the classpath: its plugin bean, Xyce as the server names it. */
 @AutoConfiguration
@@ -34,9 +34,9 @@ public class XycePluginConfiguration {
     }
 
     @Bean
-    public XycePlugin cadXycePlugin(XyceProperties properties) {
-        Optional<SpiceSimulator> simulator = properties.command().isEmpty() ? Optional.empty()
-                : Optional.of(new SpiceProcess("Xyce", properties.command(), properties.timeout()));
-        return new XycePlugin(simulator);
+    public XycePlugin cadXycePlugin(XyceProperties properties, PluginSettings settings) {
+        PluginSettingValues values = settings.valuesOf(XycePlugin.ID);
+        SpiceProcess simulator = new SpiceProcess("Xyce", () -> values.command(SpiceProcess.COMMAND), () -> values.duration(SpiceProcess.TIMEOUT));
+        return new XycePlugin(simulator, properties.command(), properties.timeout());
     }
 }

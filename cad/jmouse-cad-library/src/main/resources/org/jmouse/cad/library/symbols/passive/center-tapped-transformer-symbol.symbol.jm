@@ -2,7 +2,7 @@ symbol:center-tapped-transformer-symbol("Transformer with a centre tap") {
     meta {
         summary: "A transformer whose secondary is tapped in its middle, as drawn on a schematic: two halves of one winding"
         code: "SY.TRANSFORMER:CENTER-TAPPED"
-        category: circuits
+        category: transformers
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

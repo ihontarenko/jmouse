@@ -18,6 +18,16 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
     private WebServerFactoryConfiguration.WebServerConfigHolder configuration;
 
     private BeanContext context;
+    private final WebServerConfig explicitConfiguration;
+
+    public TomcatWebServerFactory() {
+        this.explicitConfiguration = null;
+    }
+
+    /** Programmatic factory configuration without a bean container. */
+    public TomcatWebServerFactory(WebServerConfig configuration) {
+        this.explicitConfiguration = java.util.Objects.requireNonNull(configuration, "configuration");
+    }
 
     /**
      * Retrieves the {@link BeanContext} associated with this component.
@@ -41,16 +51,32 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
 
     @Override
     public WebServer createWebServer(WebApplicationInitializer... initializers) {
-        WebServer                    webServer  = new TomcatWebServer();
-        WebServerConfig              config     = configuration.getWebServerConfig(WebServers.TOMCAT);
+        WebServer webServer = new TomcatWebServer();
+        WebServerConfig config =
+            explicitConfiguration != null
+                ? explicitConfiguration
+                : java.util.Objects.requireNonNull(
+                      configuration,
+                      "Web server configuration is not initialized"
+                  ).getWebServerConfig(WebServers.TOMCAT);
+        java.util.Objects.requireNonNull(config, "Tomcat server configuration is missing");
         WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(
-                config, new jMouseServletContainerInitializer(initializers));
+            config,
+            new jMouseServletContainerInitializer(initializers)
+        );
 
-        if (webServer.server() != null) {
+        try {
             webServer.configure(configurer);
+            return webServer;
+        } catch (RuntimeException | Error failure) {
+            try {
+                webServer.close();
+            } catch (RuntimeException | Error cleanupFailure) {
+                if (failure != cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+            }
+            throw failure;
         }
-
-        return webServer;
     }
-
 }

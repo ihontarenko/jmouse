@@ -8,22 +8,64 @@ sheet "KiCad libraries" as kicad-libraries {
     license "CC-BY-SA-4.0 WITH KiCad-libraries-exception"
     home "https://gitlab.com/kicad/libraries"
 
+    # Whose a footprint is travels with it into KiCad and back, as fields of the footprint KiCad keeps and shows in its
+    # properties: the word of our meta each part of its provenance is, and the field it is written as. A footprint that
+    # names a holder or a licence so is read back as theirs.
+    provenance-fields source = Source, authors = Author, license = License
+
     # Where a converted drawing is filed, and the tags it carries.
     category circuits
+    # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
+    library-category kicad
     symbol-tags electronics, schematic, kicad
     footprint-tags electronics, kicad, footprint
+    model-tags electronics, kicad, model
+
+    # Where KiCad's own model files keep another convention than their format's standard, by format: its VRML is written
+    # in tenths of an inch (2.54 mm a unit) and stands up along Z, as its pcbs do.
+    model-scales vrml = 2.54
+    model-ups vrml = z
     component-tags electronics, kicad
     circuit-tags electronics, kicad
 
     # The library a component with no KiCad counterpart is written under, and the symbol each mark of a sheet is drawn
     # with — where its terminal stands.
     own-library jmCAD
+    # What a project's tables say of that library, written beside the project: the footprints and symbols it draws.
+    own-library-description "The footprints and symbols of this design that no KiCad library holds, as jmCAD draws them"
     mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+
+    # The way of making a pcb a board is set against, and which of its rules each of KiCad's design rules is. KiCad's
+    # usual clearance and sizes come from its Default net class.
+    pcb-rules standard
+    pcb-rule-names least-track-width = min_track_width, least-drill = min_through_hole_diameter, least-via-drill = min_through_hole_diameter, least-via-ring = min_via_annular_width, hole-clearance = min_hole_clearance, edge-clearance = min_copper_edge_clearance
+
+    # What a footprint only the board has is called when it has no reference, and what a net class's name opens with
+    # where KiCad's opens with no letter.
+    pcb-own-part PCB
+    pcb-class-opening class_
+
+    # How far apart a board's lines of words stand, as a share of their height, as KiCad's own font sets them.
+    text-line-spacing 1.62
+
+    # How far an area written as points — a pour's outline, a filled shape — may stray from the arcs and curves it steps:
+    # as far as KiCad's own steps stray when it fills one.
+    area-step 0.005 mm
+
+    # The file a board's footprint names a model of KiCad's own model libraries by: its place there, under the path KiCad
+    # resolves to the installed libraries, as the VRML KiCad's own footprints name.
+    model-file "${KICAD8_3DMODEL_DIR}/%s.wrl"
+
+    # The width a board's edge is drawn with on Edge.Cuts, as KiCad draws a new one: the router cuts along its middle.
+    edge-width 0.05 mm
+
+    # What the footprint of a hole the board drills of its own — no part's — is named in the own library, by its drill.
+    hole-footprint "MountingHole_%s"
 
     # How long a sheet's transient runs until its author says, and the time a division the oscilloscope opens on.
     transient 20 ms
 
-    silkscreen "What is printed on the board, front and back" {
+    silkscreen "What is printed on the pcb, front and back" {
         kicad "F.SilkS", "B.SilkS"
     }
     fabrication "What the assembly drawing shows" {
@@ -31,6 +73,21 @@ sheet "KiCad libraries" as kicad-libraries {
     }
     courtyard "The space the part keeps clear around it" {
         kicad "F.CrtYd", "B.CrtYd"
+    }
+    mask "A window in the solder mask, besides what the pads open" {
+        kicad "F.Mask", "B.Mask"
+    }
+    paste "Solder paste, besides what the pads take" {
+        kicad "F.Paste", "B.Paste"
+    }
+    adhesive "The glue that holds a part while it is soldered" {
+        kicad "F.Adhes", "B.Adhes"
+    }
+    documentation "A drawing of the pcb, which no factory makes" {
+        kicad "Dwgs.User", "Eco1.User", "Eco2.User", "User.1", "User.2", "User.3", "User.4", "User.5", "User.6", "User.7", "User.8", "User.9"
+    }
+    comments "A note on the pcb, which no factory makes" {
+        kicad "Cmts.User"
     }
     copper "Copper drawn besides the pads" {
         kicad "F.Cu", "B.Cu"

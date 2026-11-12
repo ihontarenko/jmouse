@@ -3,7 +3,7 @@ portrait:soic-28-wide-portrait("SOIC-28, wide") {
     meta {
         summary: "28-lead SOIC, 7.5 mm body from above: pin 1 at the bottom left, beside the dot"
         code: "PT.SOIC:28-P1.27-W7.5"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MS-013"
         authors: "jMouse"

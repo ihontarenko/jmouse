@@ -2,7 +2,7 @@ package org.jmouse.kicad.symbol;
 
 import static org.jmouse.kicad.KiCadKeyword.*;
 
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * @param tree       the list it was read from, for a consumer that wants its drawing
  */
 public record KiCadSymbolDefinition(String name, String extendsName, boolean power, Map<String, String> properties,
-                                    List<KiCadPin> pins, KiCadList tree) {
+                                    List<KiCadPin> pins, SExpressionList tree) {
 
     private static final Pattern UNIT = Pattern.compile(".*_(\\d+)_(\\d+)$");
     private static final int DE_MORGAN = 2;
@@ -35,11 +35,11 @@ public record KiCadSymbolDefinition(String name, String extendsName, boolean pow
     }
 
     /** A symbol list: {@code (symbol "Device:R" … (symbol "R_1_1" (pin …)))}. */
-    public static KiCadSymbolDefinition of(KiCadList symbol) {
+    public static KiCadSymbolDefinition of(SExpressionList symbol) {
         Map<String, String> properties = new LinkedHashMap<>();
         symbol.lists(PROPERTY).forEach(property -> properties.put(property.word(1), property.word(2)));
         List<KiCadPin> pins = new ArrayList<>();
-        for (KiCadList body : symbol.lists(SYMBOL)) {
+        for (SExpressionList body : symbol.lists(SYMBOL)) {
             Matcher unit = UNIT.matcher(body.word(1));
             if (unit.matches() && Integer.parseInt(unit.group(2)) == DE_MORGAN) {
                 continue;
@@ -49,6 +49,19 @@ public record KiCadSymbolDefinition(String name, String extendsName, boolean pow
         }
         return new KiCadSymbolDefinition(symbol.word(1), symbol.wordOf(EXTENDS).orElse(""),
                 symbol.list(POWER).isPresent(), properties, pins, symbol);
+    }
+
+    /**
+     * The symbol as KiCad names it outside its library file — {@code Device:Buzzer} of {@code Buzzer} in
+     * {@code Device.kicad_sym} —, as a schematic's cache writes it; one already named so is kept.
+     *
+     * @param library the library's name: its file's, without {@code .kicad_sym}
+     */
+    public KiCadSymbolDefinition inLibrary(String library) {
+        if (name.contains(":") || library == null || library.isBlank()) {
+            return this;
+        }
+        return new KiCadSymbolDefinition(library + ":" + name, extendsName, power, properties, pins, tree);
     }
 
     /** The pins a unit of it has: its own and every unit's. */

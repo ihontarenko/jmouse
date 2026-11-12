@@ -1,8 +1,8 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.access.enforcement.PublicEndpoint;
-import org.jmouse.cad.board.drawing.BoardDrawing;
-import org.jmouse.cad.board.drawing.FootprintDrawing;
+import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.document.LanguageSchema;
 import org.jmouse.cad.schematic.drawing.SymbolDrawing;
 import org.jmouse.cad.simulation.CircuitSheet;
@@ -34,6 +34,10 @@ public class LanguageController {
     public record EditRequest(String source, LineEdit edit) {
     }
 
+    /** A text and the head fields to write anew in it; a null field is left as written, an empty one taken away. */
+    public record HeadRequest(String source, String title, String summary, String category) {
+    }
+
     /** What a canvas sends: the text it holds, what it drew, and the head fields it edits beside the drawing. */
     public record DrawingRequest<T>(String source, T drawing, String title, String category) {
     }
@@ -63,6 +67,13 @@ public class LanguageController {
         return editing.edit(request.source(), request.edit());
     }
 
+    /** The text with its head written anew: another title, summary or category. */
+    @PostMapping("/language/head")
+    @PublicEndpoint("a text the caller sent; nothing stored is read")
+    public EditedDocument head(@RequestBody HeadRequest request) {
+        return editing.head(request.source(), request.title(), request.summary(), request.category());
+    }
+
     /** The text after a schematic editor's sheet, written line by line, each known by its reference. */
     @PostMapping("/language/circuit")
     @PublicEndpoint("a text the caller sent; nothing stored is read")
@@ -84,11 +95,11 @@ public class LanguageController {
         return editing.footprint(request.source(), request.drawing(), request.title(), request.category());
     }
 
-    /** The text after a board editor's layout, written line by line. */
-    @PostMapping("/language/board")
+    /** The text after a pcb editor's layout, written line by line. */
+    @PostMapping("/language/pcb")
     @PublicEndpoint("a text the caller sent; nothing stored is read")
-    public EditedDocument board(@RequestBody DrawingRequest<BoardDrawing> request) {
-        return editing.board(request.source(), request.drawing(), request.title(), request.category());
+    public EditedDocument pcb(@RequestBody DrawingRequest<PcbDrawing> request) {
+        return editing.pcb(request.source(), request.drawing(), request.title(), request.category());
     }
 
     /** A text read as the document it would be, without saving it: what a draft is previewed by. */

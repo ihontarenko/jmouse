@@ -2,7 +2,7 @@ symbol:connector-symbol("Connector") {
     meta {
         summary: "Connector, as drawn on a schematic"
         code: "SY.CONNECTOR:GENERIC"
-        category: circuits
+        category: connectors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

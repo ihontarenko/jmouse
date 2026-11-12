@@ -2,7 +2,7 @@ symbol:led-bar-symbol("LED bar") {
     meta {
         summary: "Eight LEDs in a row, cathodes common: each segment lights red as its own current flows"
         code: "SY.LED:BAR-8"
-        category: circuits
+        category: optoelectronics
         tags: electronics, schematic, display
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -20,8 +20,10 @@ component:bipolar-transistor("Bipolar transistor", type: bjt) {
         designator: Q
         summary: "Gummel–Poon bipolar transistor: gain falling at both ends, Early effect, stored charge, junction capacitances"
         source: "Gummel–Poon model as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
-        category: circuits
+        category: base-models
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -72,13 +74,13 @@ component:bipolar-transistor("Bipolar transistor", type: bjt) {
 
     pin:emitter(analog, 1, "emitter")
     pin:base(analog, input, 2, "base")
-    pin:collector(analog, output, 3, "collector")
+    pin:collector(analog, output, open-collector, 3, "collector")
 
     node:bi("the intrinsic base, behind the base resistance")
     node:ci("the intrinsic collector, behind the collector resistance")
     node:ei("the intrinsic emitter, behind the emitter resistance")
 
-    symbol(uses: npn-transistor-symbol) {
+    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
         bind:failed(failed)
     }
 

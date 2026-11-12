@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/plugin/datasheets/format.schema.json",
+  "title": "Datasheet format",
+  "description": "What counts as a datasheet: the plugin's data (settings/plugin/datasheets/format), and the two refusals that follow from it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "extensions",
+    "mediaType",
+    "signature",
+    "linkLabel"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "extensions": {
+      "description": "what a datasheet's file name ends in",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mediaType": {
+      "description": "what it is served as",
+      "type": "string"
+    },
+    "signature": {
+      "description": "what its first bytes say: a file only called a PDF is refused",
+      "type": "string"
+    },
+    "linkLabel": {
+      "description": "what a document's links call its datasheet on the web",
+      "type": "string"
+    }
+  }
+}

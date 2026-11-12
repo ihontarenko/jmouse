@@ -2,7 +2,7 @@ symbol:push-button-symbol("Push button") {
     meta {
         summary: "Push button, as drawn on a schematic: its bar rests above the contacts and comes down onto them while it is held"
         code: "SY.SWITCH:PUSH-BUTTON"
-        category: circuits
+        category: switches
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

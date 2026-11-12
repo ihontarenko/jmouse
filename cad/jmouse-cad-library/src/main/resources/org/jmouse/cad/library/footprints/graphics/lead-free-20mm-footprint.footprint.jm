@@ -1,0 +1,14 @@
+footprint:lead-free-20mm-footprint("Lead free, 20 mm") {
+    meta {
+        summary: "Pb struck out: made without lead, printed 20 mm wide"
+        code: "FP.GRAPHIC:LEAD-FREE-20"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 1, "M-8.8 0C-8.8 -4.86 -4.86 -8.8 0 -8.8C4.86 -8.8 8.8 -4.86 8.8 0C8.8 4.86 4.86 8.8 0 8.8C-4.86 8.8 -8.8 4.86 -8.8 0Z")
+    outline(silkscreen, width: 1, "M-6 -6L6 6")
+    outline(silkscreen, width: 1, "M-4.4 4V-3.6H-2C0 -3.6 0 0.4 -2 0.4H-4.4")
+    outline(silkscreen, width: 1, "M1.2 -4.4V4M1.2 1.2C1.6 -0.8 5.2 -0.8 5.2 1.4C5.2 3.8 1.6 3.8 1.2 1.8")
+}

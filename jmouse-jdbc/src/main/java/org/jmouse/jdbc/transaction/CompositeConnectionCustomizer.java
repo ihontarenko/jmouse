@@ -1,11 +1,10 @@
 package org.jmouse.jdbc.transaction;
 
-import org.jmouse.core.Verify;
-import org.jmouse.transaction.TransactionDefinition;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import org.jmouse.core.Verify;
+import org.jmouse.transaction.TransactionDefinition;
 
 public final class CompositeConnectionCustomizer implements ConnectionCustomizer {
 
@@ -18,9 +17,23 @@ public final class CompositeConnectionCustomizer implements ConnectionCustomizer
     @Override
     public RestoreAction apply(Connection connection, TransactionDefinition definition) throws SQLException {
         RestoreAction restore = RestoreAction.noop();
-        for (ConnectionCustomizer customizer : delegates) {
-            restore = restore.andThen(customizer.apply(connection, definition));
+        try {
+            for (ConnectionCustomizer customizer : delegates) {
+                restore = java.util.Objects.requireNonNull(
+                    customizer.apply(connection, definition),
+                    "ConnectionCustomizer returned null"
+                ).andThen(restore);
+            }
+            return restore;
+        } catch (SQLException | RuntimeException | Error failure) {
+            try {
+                restore.restore();
+            } catch (SQLException | RuntimeException | Error cleanupFailure) {
+                if (failure != cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+            }
+            throw failure;
         }
-        return restore;
     }
 }

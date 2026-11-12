@@ -1,0 +1,14 @@
+model:sod-323-model("Diode SOD-323") {
+    meta {
+        summary: "Diode SOD-323 — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SOD:323"
+        category: diodes-surface
+        tags: electronics, model, chip
+        source: "JEDEC SOD outlines, the makers' drawings (Nexperia), SOD-323"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [1.7, 1.25, 1.1], at: [0, 0, 0.55])
+    box(tin, size: [0.34, 1.27, 1.12], at: [-0.68, 0, 0.55])
+    box(tin, size: [0.34, 1.27, 1.12], at: [0.68, 0, 0.55])
+}

@@ -1,0 +1,15 @@
+component:waste-bin-mark("Separate collection mark") {
+    meta {
+        designator: G
+        summary: "A crossed-out bin: not to be thrown away with household waste: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:WASTE-BIN-10")
+    footprint("FP.GRAPHIC:WASTE-BIN-5")
+    footprint("FP.GRAPHIC:WASTE-BIN-20")
+
+    symbol(uses: "SY.GRAPHIC:WASTE-BIN") {
+    }
+}

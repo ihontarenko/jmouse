@@ -4,7 +4,7 @@ portrait:varistor-portrait("Disc varistor") {
     meta {
         summary: "A disc varistor printed with its voltage code (471 for 470 V)"
         code: "PT.VARISTOR:DISC"
-        category: circuits
+        category: protection
         tags: electronics, portrait, varistor, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

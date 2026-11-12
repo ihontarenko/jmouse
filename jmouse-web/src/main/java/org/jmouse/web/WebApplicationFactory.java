@@ -1,26 +1,27 @@
 package org.jmouse.web;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
 import org.jmouse.beans.WarmupEagerBeansContextInitializer;
 import org.jmouse.context.AbstractApplicationFactory;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.conversion.ContextConversion;
+import org.jmouse.core.StandardPlaceholderReplacer;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.environment.Environment;
 import org.jmouse.core.events.EventManager;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.ResourceLoader;
 import org.jmouse.el.ExpressionLanguage;
-import org.jmouse.web.mvc.context.WebMvcControllersInitializer;
-import org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer;
-import org.jmouse.core.StandardPlaceholderReplacer;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
-
-import java.util.HashSet;
-import java.util.Set;
+import org.jmouse.web.mvc.context.WebMvcControllersInitializer;
+import org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer;
 
 /**
  * 🕸️ Factory class for creating and configuring {@link WebBeanContext} instances
@@ -40,7 +41,15 @@ import java.util.Set;
  */
 public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanContext> {
 
-    public static final String ROUTE_REPLACER_BEAN_NAME   = "routeReplacer";
+    @Override
+    protected List<String> defaultPropertyResources() {
+        var resources = new ArrayList<>(super.defaultPropertyResources());
+        resources.add("jmouse-firewall.properties");
+        resources.add("jmouse-security.properties");
+        return List.copyOf(resources);
+    }
+
+    public static final String ROUTE_REPLACER_BEAN_NAME = "routeReplacer";
     public static final String DEFAULT_REPLACER_BEAN_NAME = "defaultReplacer";
     public static final String PRIMARY_EXPRESSION_LANGUAGE_BEAN_NAME = "primaryExpressionLanguage";
 
@@ -110,7 +119,11 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
      * @return initialized web application context.
      */
     @Override
-    public WebBeanContext createApplicationContext(String contextId, WebBeanContext rootContext, Class<?>... classes) {
+    public WebBeanContext createApplicationContext(
+        String contextId,
+        WebBeanContext rootContext,
+        Class<?>... classes
+    ) {
         WebBeanContext context = createContext(contextId, rootContext, classes);
 
         // Add common application initializers

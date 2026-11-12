@@ -4,7 +4,7 @@ portrait:toggle-switch-portrait("Toggle switch") {
     meta {
         summary: "A miniature toggle switch whose lever is thrown by the part's state"
         code: "PT.SWITCH:TOGGLE"
-        category: circuits
+        category: electromechanical
         tags: electronics, portrait, switch, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

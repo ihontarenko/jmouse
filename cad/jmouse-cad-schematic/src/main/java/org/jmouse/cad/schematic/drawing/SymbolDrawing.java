@@ -32,8 +32,16 @@ public record SymbolDrawing(double width, double height, List<String> paths, Lis
         elements = List.copyOf(elements);
     }
 
-    /** Where a pin meets the drawing, and the text printed beside it; an empty label prints nothing. */
-    public record Pin(String name, double x, double y, String label) {
+    /**
+     * Where a pin meets the drawing, and the text printed beside it; an empty label prints nothing.
+     *
+     * @param body where its lead reaches the body, which its label stands inside; null for a pin whose lead is not its own
+     */
+    public record Pin(String name, double x, double y, String label, Body body) {
+
+        /** A point on the body. */
+        public record Body(double x, double y) {
+        }
     }
 
     /** Where a part's {@code name} or {@code value} is printed, the text centred on the point. */
@@ -52,8 +60,15 @@ public record SymbolDrawing(double width, double height, List<String> paths, Lis
      * @param range   the range as written, empty for the default 0 … 1 and for a picture or a text
      * @param picture whether it is a picture: a row of bytes, in hexadecimal
      * @param text    the words a text input is drawn with while no part gives its own; null for any other input
+     * @param hold    how long the value takes to settle, in seconds: what a symbol shows of a figure that moves many times a
+     *                second — a resistor's power on an alternating current — is read as it settles, not as it flickers. 0 follows it at once.
      */
-    public record Input(String name, double low, double high, double typical, String range, boolean picture, String text) {
+    public record Input(String name, double low, double high, double typical, String range, boolean picture, String text, double hold) {
+
+        /** An input followed at once. */
+        public Input(String name, double low, double high, double typical, String range, boolean picture, String text) {
+            this(name, low, high, typical, range, picture, text, 0);
+        }
     }
 
     /** How a value moves: not at all, with the inputs it reads, or in time by itself. */

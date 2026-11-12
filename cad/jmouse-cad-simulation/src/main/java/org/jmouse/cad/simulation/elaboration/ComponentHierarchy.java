@@ -107,7 +107,7 @@ final class ComponentHierarchy {
                 }
             }
             String reference = alone ? part.reference() : childReference(part, line);
-            Part placed = new Part(reference, line.component(), line.connections(), texts, line.symbol(), line.footprint());
+            Part placed = new Part(reference, line.component(), line.connections(), texts, line.symbol(), line.footprint(), line.pads());
             ElaboratedPart elaborated = parts.elaborated(placed, child, conditioned, texts);
             Map<String, String> nets = new LinkedHashMap<>();
             elaborated.connections().forEach((pin, local) -> nets.put(pin, net(part, local)));

@@ -15,8 +15,10 @@ component:center-tapped-transformer("Transformer with a centre tap", type: trans
         designator: T
         summary: "A primary and two equal secondary halves on one core: a centre-tapped secondary, with core loss and winding capacitance"
         source: "coupled inductors as in Berkeley SPICE3 / ngspice 47 (three L, their K lines), with the core loss and capacitances of a small mains transformer"
-        category: circuits
+        category: transformers
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:L_primary(10 H, "primary inductance")
@@ -49,7 +51,17 @@ component:center-tapped-transformer("Transformer with a centre tap", type: trans
     state:flux_first(0, continuous, "the flux the first secondary half links")
     state:flux_second(0, continuous, "the flux the second secondary half links")
 
-    symbol(uses: center-tapped-transformer-symbol) {
+
+    # An EI30 with two secondaries, schematic 2, in series on the board: 6 (•) to 7, then 9 (•) to 10 — 7 and 9 the tap.
+    footprint("FP.TRAFO:EI30-2VA-2S") {
+        pad:1(primary_one)
+        pad:5(primary_two)
+        pad:6(secondary_one)
+        pad:7(center_tap)
+        pad:9(center_tap)
+        pad:10(secondary_two)
+    }
+    symbol(uses: "SY.TRANSFORMER:CENTER-TAPPED") {
         bind:failed(failed)
     }
 

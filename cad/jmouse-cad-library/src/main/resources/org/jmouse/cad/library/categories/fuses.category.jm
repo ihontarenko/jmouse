@@ -1,0 +1,8 @@
+category:fuses("Fuses") {
+    meta {
+        category: passive
+        order: 4
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

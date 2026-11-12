@@ -83,7 +83,7 @@ final class HeaderFootprints implements FootprintFamily {
         List<String> notes = List.of(
                 "Generated from footprint-standards/header-packages.sht#" + header.id() + " and the land pattern rules; regenerate, never edit.",
                 "Square lead " + written(header.length("lead")) + ": drill " + written(drill) + ", pad " + written(pad) + ", pin 1 square.");
-        return new StandardFootprint(slug, designated, title, summary, header.word("folder"), "through-hole", header.standard(),
-                rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, header.word("folder"), header.word("category"), "through-hole", header.standard(),
+                rules, notes, new FootprintDrawing(pads, outlines, header));
     }
 }

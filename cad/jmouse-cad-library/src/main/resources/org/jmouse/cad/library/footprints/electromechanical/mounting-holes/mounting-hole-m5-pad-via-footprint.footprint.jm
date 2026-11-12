@@ -2,7 +2,7 @@ footprint:mounting-hole-m5-pad-via-footprint("Mounting hole M5, a plated ring un
     meta {
         summary: "M5 screw, 5.3 mm hole, a plated ring under the head, stitched by vias"
         code: "FP.MH:M5-PAD-VIA"
-        category: circuits
+        category: mounting-holes
         tags: electronics, footprint, through-hole
         source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"
         authors: "jMouse"

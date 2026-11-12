@@ -10,7 +10,9 @@ component:bench-supply("Bench power supply", type: power-supply) {
     meta {
         designator: PS
         summary: "A DC supply with a current limit: constant voltage, then constant current when the load asks for more"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -21,7 +23,7 @@ component:bench-supply("Bench power supply", type: power-supply) {
     pin:positive(analog, 1, "positive output")
     pin:negative(analog, 2, "negative output")
 
-    symbol(uses: bench-supply-symbol) {
+    symbol(uses: "SY.SOURCE:SUPPLY-LIMITED") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

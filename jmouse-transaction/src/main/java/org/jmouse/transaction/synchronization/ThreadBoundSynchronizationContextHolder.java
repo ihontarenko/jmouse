@@ -29,8 +29,7 @@ import org.jmouse.core.Verify;
  *
  * @author jMouse
  */
-final public class ThreadBoundSynchronizationContextHolder
-        implements SynchronizationContextHolder {
+public final class ThreadBoundSynchronizationContextHolder implements SynchronizationContextHolder {
 
     /**
      * Thread-local stack of synchronization contexts.
@@ -80,7 +79,11 @@ final public class ThreadBoundSynchronizationContextHolder
             return null;
         }
 
-        STACK.set(head.parent());
+        if (head.parent() == null) {
+            STACK.remove();
+        } else {
+            STACK.set(head.parent());
+        }
         return head.context();
     }
 
@@ -98,9 +101,5 @@ final public class ThreadBoundSynchronizationContextHolder
      * Internal stack node representing a single synchronization context
      * and a reference to its parent (outer) context.
      */
-    private record Node(
-            SynchronizationContext context,
-            Node parent
-    ) { }
-
+    private record Node(SynchronizationContext context, Node parent) {}
 }

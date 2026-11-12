@@ -9,8 +9,10 @@ component:lt3045("LT3045", type: regulator) {
         summary: "Ultralow-noise LDO, 500 mA, 0 V to 15 V out, set by one resistor (100 µA × R_SET), MSOP-12E"
         source: "Analog Devices LT3045 datasheet (rev. C): SET pin current 100 µA ±1 %, dropout 260 mV at 500 mA, EN/UV 1.24 V"
         package: "MSOP-12-1EP"
-        category: circuits
+        category: power
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -28,7 +30,7 @@ component:lt3045("LT3045", type: regulator) {
 
     pin:input(power, 1, "IN; pins 2 and 3 are IN too")
     pin:enable(analog, input, 4, "EN/UV: on above 1.24 V")
-    pin:power_good(analog, output, 5, "PG: open drain, pulled low until PGFB passes 300 mV")
+    pin:power_good(analog, output, open-drain, 5, "PG: open drain, pulled low until PGFB passes 300 mV")
     pin:current_limit(analog, 6, "ILIM: its programmable limit is not modelled")
     pin:power_good_feedback(analog, input, 7, "PGFB")
     pin:set(analog, 8, "SET: 100 µA out of it; the output follows its voltage")
@@ -36,7 +38,23 @@ component:lt3045("LT3045", type: regulator) {
     pin:output_sense(analog, input, 10, "OUTS: where the output is regulated")
     pin:output(analog, output, 11, "OUT; pin 12 is OUT too")
 
-    symbol(uses: low-dropout-regulator-symbol) {
+    footprint("FP.MSOP:12-P0.65-EP") {
+        pad:1(input)
+        pad:2(input)
+        pad:3(input)
+        pad:4(enable)
+        pad:5(power_good)
+        pad:6(current_limit)
+        pad:7(power_good_feedback)
+        pad:8(set)
+        pad:9(GND)
+        pad:10(output_sense)
+        pad:11(output)
+        pad:12(output)
+        pad:13(GND)
+    }
+
+    symbol(uses: "SY.REGULATOR:LDO") {
         bind:failed(failed)
     }
 

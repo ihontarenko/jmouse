@@ -1,14 +1,17 @@
 package org.jmouse.cad.store.simulation;
 
+import org.jmouse.cad.store.showcase.FeaturedDesigns;
+import org.jmouse.cad.document.DocumentStatus;
+import org.jmouse.cad.store.CadRead;
 import org.jmouse.cad.store.catalogue.WrittenOwners;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Setting;
 import org.jmouse.cad.circuit.Analysis;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.component.Component;
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
-import org.jmouse.cad.jpa.catalogue.StoredDocument;
+import org.jmouse.cad.document.DocumentOwner;
+import org.jmouse.cad.folder.DocumentStore;
+import org.jmouse.cad.folder.StoredDocument;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.simulation.SimulationVocabulary;
 import org.jmouse.cad.simulation.elaboration.BenchConditions;
@@ -17,7 +20,6 @@ import org.jmouse.cad.simulation.engine.CircuitSimulation;
 import org.jmouse.cad.simulation.engine.Expectations;
 import org.jmouse.cad.simulation.engine.MeasuredCircuit;
 import org.jmouse.cad.simulation.engine.TransientRun;
-import org.jmouse.cad.store.CadProperties;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadCapability;
 import org.jmouse.cad.store.authority.CadPlace;
@@ -27,6 +29,7 @@ import org.jmouse.cad.store.catalogue.DocumentAccess;
 import org.jmouse.cad.store.catalogue.DocumentReading;
 import org.jmouse.cad.store.catalogue.ReadDocument;
 import org.jmouse.cad.store.catalogue.StoredDocuments;
+import org.jmouse.cad.store.plugin.EngineConfiguration;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.cad.store.simulation.SimulationViews.ExpectationRequest;
 import org.jmouse.cad.store.simulation.SimulationViews.Job;
@@ -38,7 +41,6 @@ import org.jmouse.cad.store.simulation.SimulationViews.Transient;
 import org.jmouse.cad.store.simulation.SimulationViews.Verdict;
 import org.jmouse.cad.store.simulation.SimulationViews.DocumentVerdicts;
 import org.jmouse.numerics.ComputationProgress;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +62,12 @@ public class Simulations {
     private final CadAuthority    authority;
     private final CadPlaces       places;
     private final SimulationJobs  jobs;
-    private final CadProperties   properties;
+    private final EngineConfiguration configuration;
+    private final FeaturedDesigns featured;
 
     public Simulations(CadCatalogue catalogue, DocumentAccess access, DocumentStore documents, DocumentReading reading,
-                       CadAuthority authority, CadPlaces places, SimulationJobs jobs, CadProperties properties) {
+                       CadAuthority authority, CadPlaces places, SimulationJobs jobs, EngineConfiguration configuration,
+                       FeaturedDesigns featured) {
         this.catalogue = catalogue;
         this.access = access;
         this.documents = documents;
@@ -71,11 +75,12 @@ public class Simulations {
         this.authority = authority;
         this.places = places;
         this.jobs = jobs;
-        this.properties = properties;
+        this.configuration = configuration;
+        this.featured = featured;
     }
 
     /** Runs a circuit: its result now, or a job when it asks for more samples than an answer holds. */
-    @Transactional(readOnly = true)
+    @CadRead
     public SimulationAnswer simulate(SimulationRequest request) {
         DocumentOwner owner = WrittenOwners.optional(request.owner());
         String actor = requireRun(owner);
@@ -92,7 +97,7 @@ public class Simulations {
             return operatingPoint(named, elaborated);
         }
         int samples = samplesOf(request.samples());
-        if (samples <= properties.simulation().inlineSamples()) {
+        if (samples <= configuration.inlineSamples()) {
             return transientRun(named, elaborated, samples, request.recordsEveryPart(), ComputationProgress.NONE);
         }
         return jobs.submit(actor, progress -> transientRun(named, elaborated, samples, request.recordsEveryPart(), progress));
@@ -105,17 +110,10 @@ public class Simulations {
      *
      * @throws CadProblem.NotFound when the circuit is not a featured, published circuit of the catalogue
      */
-    @Transactional(readOnly = true)
+    @CadRead
     public SimulationResult preview(String slug, int samples) {
-        StoredDocument document = documents.findBySlug(slug)
-                .filter(StoredDocument::isCatalogue).filter(StoredDocument::isFeatured)
-                .filter(found -> found.getStatus() == StoredDocument.Status.PUBLISHED)
-                .filter(found -> found.getKind().equals(SimulationModule.CIRCUIT.word()))
-                .orElseThrow(() -> CadProblem.notFound("The featured circuit"));
+        Circuit written = featured.requireCircuitModel(slug);
         StoredDocuments scope = catalogue.scope(null);
-        if (!(scope.head(document).model().orElse(null) instanceof Circuit written)) {
-            throw CadProblem.notFound("The featured circuit");
-        }
         String analysis = written.run().map(Analysis::kind).orElse(SimulationVocabulary.TRANSIENT);
         ElaboratedCircuit elaborated = elaborated(withDuration(written, analysis, null), scope, Map.of());
         if (analysis.equals(SimulationVocabulary.OPERATING)) {
@@ -137,7 +135,7 @@ public class Simulations {
     }
 
     /** Every expectation a circuit or a component states of itself, measured on the nominal bench. */
-    @Transactional(readOnly = true)
+    @CadRead
     public List<Verdict> expectations(ExpectationRequest request) {
         DocumentOwner owner = WrittenOwners.optional(request.owner());
         requireRun(owner);
@@ -164,12 +162,12 @@ public class Simulations {
      * The published catalogue documents a catalogue check measures — every circuit and every component —, by slug. For
      * {@link CatalogueChecks}, which asked to run at the installation when it started.
      */
-    @Transactional(readOnly = true)
+    @CadRead
     List<String> catalogueCheckable() {
         List<String> slugs = new ArrayList<>();
         for (String kind : List.of(SimulationModule.CIRCUIT.word(), SimulationModule.COMPONENT.word())) {
             for (StoredDocument document : documents.findByKind(kind)) {
-                if (document.isCatalogue() && document.getStatus() == StoredDocument.Status.PUBLISHED) {
+                if (document.isCatalogue() && document.getStatus() == DocumentStatus.PUBLISHED) {
                     slugs.add(document.getSlug());
                 }
             }
@@ -178,7 +176,7 @@ public class Simulations {
     }
 
     /** One catalogue document's expectations, measured; null for a document gone since the check began. */
-    @Transactional(readOnly = true)
+    @CadRead
     DocumentVerdicts checkCatalogueDocument(String slug) {
         return documents.findBySlug(slug).map(document -> verdictsOf(document, catalogue.scope(null))).orElse(null);
     }
@@ -254,8 +252,9 @@ public class Simulations {
 
     private int samplesOf(Integer asked) {
         int samples = asked == null ? 2000 : asked;
-        if (samples < 2 || samples > properties.simulation().maximumSamples()) {
-            throw CadProblem.invalid("A transient is read at 2–" + properties.simulation().maximumSamples() + " samples.");
+        int maximumSamples = configuration.maximumSamples();
+        if (samples < 2 || samples > maximumSamples) {
+            throw CadProblem.invalid("A transient is read at 2–" + maximumSamples + " samples.");
         }
         return samples;
     }

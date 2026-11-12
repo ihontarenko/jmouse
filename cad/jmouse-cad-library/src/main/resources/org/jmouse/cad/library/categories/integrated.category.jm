@@ -1,0 +1,7 @@
+category:integrated("Integrated circuits") {
+    meta {
+        order: 12
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

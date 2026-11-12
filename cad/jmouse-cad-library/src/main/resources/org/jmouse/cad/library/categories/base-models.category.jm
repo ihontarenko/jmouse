@@ -1,0 +1,8 @@
+category:base-models("Base models") {
+    meta {
+        summary: "The general models the catalogue's parts are written from"
+        order: 17
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

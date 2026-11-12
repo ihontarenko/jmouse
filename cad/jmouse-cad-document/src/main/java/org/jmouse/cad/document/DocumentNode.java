@@ -1,7 +1,6 @@
 package org.jmouse.cad.document;
 
 import org.jmouse.el.grammar.BlockNode;
-import org.jmouse.el.grammar.StatementWriting;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.ExpressionsNode;
@@ -20,36 +19,26 @@ public class DocumentNode extends ExpressionsNode {
     private final DocumentKind kind;
     private final String       title;
     private final String       slug;
-    private final boolean      slugWritten;
     private final String       type;
     private final int          line;
-    private Spelling           spelling = Spelling.BLOCKS;
-
-    /** How a document is written: its blocks with their words, or as terms — {@code component:diode("Diode") { … }}. */
-    public enum Spelling { BLOCKS, TERMS }
 
     /**
-     * @param slugWritten whether the head writes {@code as slug}, rather than the slug following from the title
      * @param type        the role within the kind — {@code resistor}, {@code timer} —, or null
      */
-    public DocumentNode(DocumentKind kind, String title, String slug, boolean slugWritten, String type, int line) {
+    public DocumentNode(DocumentKind kind, String title, String slug, String type, int line) {
         this.kind = kind;
         this.title = title;
         this.slug = slug;
-        this.slugWritten = slugWritten;
         this.type = type;
         this.line = line;
     }
 
     /**
-     * The same document under another title, holding what it holds, spelled as it was and written where it was. Its slug
-     * stays: a slug that followed from the old title is written out when the new one would give another, since a title
-     * is what a document is called and a slug is where it is found.
+     * The same document under another title, holding what it holds and written where it was. Its slug stays: a title is
+     * what a document is called and a slug is where it is found.
      */
     public DocumentNode retitled(String newTitle) {
-        boolean written = slugWritten || !DocumentParser.slugOf(newTitle).equals(slug);
-        DocumentNode retitled = new DocumentNode(kind, newTitle, slug, written, type, line);
-        retitled.spelledAs(spelling);
+        DocumentNode retitled = new DocumentNode(kind, newTitle, slug, type, line);
         retitled.addLeadingTrivia(getLeadingTrivia());
         retitled.setTrailingTrivia(getTrailingTrivia());
         getExpressions().forEach(retitled::addExpression);
@@ -57,12 +46,10 @@ public class DocumentNode extends ExpressionsNode {
     }
 
     /**
-     * The same document at another address, holding what it holds, spelled as it was: its title stays, and its slug is
-     * written out unless the title gives it.
+     * The same document at another address, holding what it holds: its title stays.
      */
     public DocumentNode readdressed(String newSlug) {
-        DocumentNode readdressed = new DocumentNode(kind, title, newSlug, !DocumentParser.slugOf(title).equals(newSlug), type, line);
-        readdressed.spelledAs(spelling);
+        DocumentNode readdressed = new DocumentNode(kind, title, newSlug, type, line);
         readdressed.addLeadingTrivia(getLeadingTrivia());
         readdressed.setTrailingTrivia(getTrailingTrivia());
         getExpressions().forEach(readdressed::addExpression);
@@ -81,22 +68,20 @@ public class DocumentNode extends ExpressionsNode {
         return slug;
     }
 
+    /**
+     * The word a reference names this document by: its technical code ({@code meta { code "FP.CHIP:R0805" }}), or its
+     * slug where it writes none — what every writer of a reference writes, and what a reader matches a reference against.
+     */
+    public String referenceName() {
+        return block(MetaNode.class).flatMap(meta -> meta.text(MetaNode.CODE)).filter(code -> !code.isBlank()).orElse(slug);
+    }
+
     public Optional<String> type() {
         return Optional.ofNullable(type);
     }
 
     public int line() {
         return line;
-    }
-
-    /** How its text spelled it, so that what is written back of it after an edit is spelled the same. */
-    public Spelling spelling() {
-        return spelling;
-    }
-
-    /** Records how its text spelled it: the reader's, once it has read a term's head. */
-    public void spelledAs(Spelling spelling) {
-        this.spelling = spelling;
     }
 
     /** Every block of the body, in the order written. */
@@ -136,17 +121,10 @@ public class DocumentNode extends ExpressionsNode {
         return this;
     }
 
+    /** Written as the language writes every document: as terms. */
     @Override
     public void writeSource(SourceWriter writer) {
-        StatementWriting.leading(writer, this);
-        writer.word(kind.word()).text(title);
-        if (slugWritten) {
-            writer.word("as").word(slug);
-        }
-        if (type != null) {
-            writer.word("type").word(type);
-        }
-        writer.block(body -> StatementWriting.statements(body, getExpressions()));
+        new TermDocumentWriter(true).document(writer, this);
     }
 
     @Override

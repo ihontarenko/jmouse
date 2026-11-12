@@ -2,7 +2,7 @@ symbol:dual-secondary-transformer-symbol("Transformer with two secondaries") {
     meta {
         summary: "A transformer with one primary and two separate secondaries, as drawn on a schematic: each winding on pins of its own"
         code: "SY.TRANSFORMER:DUAL-SECONDARY"
-        category: circuits
+        category: transformers
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-kicad</artifactId>
     <name>jMouse - CAD KiCad</name>
     <description>jMouse Framework - jmCAD and KiCad both ways: a KiCad project read into circuit, symbol, component and footprint documents, and a circuit written as a KiCad schematic.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-kicad</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-kicad</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-kicad</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-kicad</url>
     </scm>
 
     <properties>
@@ -57,6 +57,12 @@
     </properties>
 
     <dependencies>
+        <!-- what every import builds its documents with: the sheet as it is read, the circuit's document, the filing -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-exchange</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- the circuits and components a sheet becomes -->
         <dependency>
             <groupId>org.jmouse</groupId>
@@ -72,7 +78,13 @@
         <!-- the footprints KiCad's are drawn as -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-cad-board</artifactId>
+            <artifactId>jmouse-cad-pcb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the model document KiCad's 3D models are written as, and the place footprints' models come from -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-mesh</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- KiCad itself: its files as trees that write themselves -->

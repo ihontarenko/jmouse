@@ -1,10 +1,12 @@
 package org.jmouse.security.password;
 
-import org.junit.jupiter.api.Test;
-import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+import org.junit.jupiter.api.Test;
+
 class Pbkdf2Sha256PasswordEncoderTest {
+
     private final PasswordEncoder encoder = new Pbkdf2Sha256PasswordEncoder(1000, 16, 32);
 
     @Test
@@ -20,8 +22,13 @@ class Pbkdf2Sha256PasswordEncoderTest {
 
     @Test
     void malformedRecordsAreRejected() {
-        for (String record : new String[]{"", "pbkdf2", "pbkdf2$sha256$0$YQ==$Yg==",
-                "pbkdf2$sha256$1$$", "pbkdf2$sha256$1$?$?"}) {
+        for (String record : new String[] {
+            "",
+            "pbkdf2",
+            "pbkdf2$sha256$0$YQ==$Yg==",
+            "pbkdf2$sha256$1$$",
+            "pbkdf2$sha256$1$?$?"
+        }) {
             assertFalse(encoder.verify("secret".toCharArray(), record));
         }
         assertFalse(encoder.verify((char[]) null, null));
@@ -30,8 +37,8 @@ class Pbkdf2Sha256PasswordEncoderTest {
     @Test
     void untrustedWorkFactorIsBoundedBeforeDeriving() {
         assertTimeout(Duration.ofSeconds(1), () ->
-                assertFalse(encoder.verify("secret".toCharArray(),
-                        "pbkdf2$sha256$2147483647$YQ==$Yg==")));
+            assertFalse(encoder.verify("secret".toCharArray(), "pbkdf2$sha256$2147483647$YQ==$Yg=="))
+        );
     }
 
     @Test

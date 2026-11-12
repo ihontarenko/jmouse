@@ -6,12 +6,14 @@ component:mains-plug("Mains plug with earth", type: connector) {
         summary: "Mains inlet: line, neutral and protective earth"
         source: "IEC 60320 C14 inlet pinout; no electrical behaviour"
         package: "IEC_C14"
-        category: circuits
+        category: connectors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:line(power, 1, "L, line")
     pin:neutral(power, 2, "N, neutral")
     pin:earth(ground, 3, "PE, protective earth")
 
-    symbol(uses: mains-plug-symbol)
+    symbol(uses: "SY.CONNECTOR:MAINS-PLUG")
 }

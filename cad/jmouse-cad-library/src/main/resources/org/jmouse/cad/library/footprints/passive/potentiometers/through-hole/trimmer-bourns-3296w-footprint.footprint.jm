@@ -1,0 +1,22 @@
+footprint:trimmer-bourns-3296w-footprint("Bourns 3296W trimming potentiometer, standing") {
+    meta {
+        summary: "3-lead Bourns 3296W trimming potentiometer standing upright, through-hole, 2.54 mm pitch"
+        code: "FP.POT:3296W"
+        category: potentiometers-through-hole
+        tags: electronics, footprint, through-hole
+        source: "Bourns 3296 data sheet: the W, top adjust, pins in line"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    # Generated from footprint-standards/inline-packages.sht#trimmer-3296w and the land pattern rules; regenerate, never edit.
+    # Lead 0.51 × 0.51 at most: drill 0.95, pad 1.95 × 1.95, pin 1 square.
+    pad:1(through-hole, rectangle, at: -2.54 0, size: 1.95 x 1.95, drill: 0.95)
+    pad:2(through-hole, circle, at: 0 0, size: 1.95 x 1.95, drill: 0.95)
+    pad:3(through-hole, circle, at: 2.54 0, size: 1.95 x 1.95, drill: 0.95)
+    outline(fabrication, width: 0.1, "M-4.765 -2.415H4.765V2.415H-4.765Z")
+    outline(silkscreen, width: 0.12, "M-4.875 -2.525H4.875V2.525H-4.875Z")
+    outline(silkscreen, filled, "M-2.84 -1.995A0.3 0.3 0 1 0 -2.24 -1.995A0.3 0.3 0 1 0 -2.84 -1.995Z")
+    outline(courtyard, width: 0.05, "M-5.25 -2.9H5.25V2.9H-5.25Z")
+    body(height: 10.03)
+    model("MD.POT:3296W")
+}

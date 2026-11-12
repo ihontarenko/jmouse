@@ -3,97 +3,43 @@ package org.jmouse.web.servlet;
 import jakarta.servlet.ServletRequestEvent;
 import jakarta.servlet.ServletRequestListener;
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanScope;
+import org.jmouse.web.http.*;
 
-import java.util.function.Consumer;
-
-/**
- * 🧩 Servlet listener that manages {@link RequestAttributesHolder} for each HTTP request.
- *
- * <p>It initializes per-thread request-scoped context at the start of the request
- * and removes it after the request is completed.
- *
- * <p>Useful for enabling global access to request metadata (path, headers, query, route)
- * without passing {@link HttpServletRequest} through the entire call chain.
- *
- * <p><b>Registered via:</b> <br>
- * In {@code web.xml} or via {@code @WebListener} or programmatically via ServletContext.
- *
- * @author Ivan Hontarenko
- * @since jMouse Web 1.0
- */
+/** Synchronous servlet request context. Partial initialization never leaves thread-bound metadata behind. */
 public class RequestContextListener implements ServletRequestListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestContextListener.class);
-
-    /**
-     * Initializes thread-local request context at the beginning of a request.
-     * <p>Called automatically by the Servlet container.
-     *
-     * @param event the request event fired when a new request is initialized
-     */
     @Override
     public void requestInitialized(ServletRequestEvent event) {
-        if (event.getServletRequest() instanceof HttpServletRequest servletRequest) {
-
-            // Attach objects to thread-local context (if present)
-            attach(servletRequest, RequestAttributesHolder::setRequestPath,
-                   RequestPath.ofRequest(servletRequest), RequestPath.REQUEST_PATH_ATTRIBUTE);
-            attach(servletRequest, RequestAttributesHolder::setRequestRoute,
-                   RequestRoute.ofRequest(servletRequest), RequestRoute.REQUEST_ROUTE_ATTRIBUTE);
-            attach(servletRequest, RequestAttributesHolder::setQueryParameters,
-                   RequestAttributesHolder.getRequestRoute().queryParameters(), QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
-            attach(servletRequest, RequestAttributesHolder::setRequestHeaders,
-                   RequestHeaders.ofRequest(servletRequest), RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
-            attach(servletRequest, RequestAttributesHolder::setRequestParameters,
-                   RequestParameters.ofRequest(servletRequest), RequestParameters.REQUEST_PARAMETERS_ATTRIBUTE);
-
-            // Set core request attributes (used as fallback context container)
+        if (!(event.getServletRequest() instanceof HttpServletRequest request)) {
+            return;
+        }
+        RequestAttributesHolder.clear();
+        try {
             RequestAttributesHolder.setRequestAttributes(
-                    RequestAttributes.ofRequest(BeanScope.REQUEST, servletRequest)
+                RequestAttributes.ofRequest(BeanScope.REQUEST, request)
             );
-
-            LOGGER.debug("✅ Initialized request context for [{}]", servletRequest.getRequestURI());
+            RequestPath path = RequestPath.ofRequest(request);
+            request.setAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE, path);
+            RequestAttributesHolder.setRequestPath(path);
+            RequestRoute route = RequestRoute.ofRequest(request);
+            RequestAttributesHolder.setRequestRoute(route);
+            request.setAttribute(QueryParameters.QUERY_PARAMETERS_ATTRIBUTE, route.queryParameters());
+            RequestAttributesHolder.setQueryParameters(route.queryParameters());
+            RequestHeaders headers = RequestHeaders.ofRequest(request);
+            request.setAttribute(RequestHeaders.REQUEST_HEADERS_ATTRIBUTE, headers);
+            RequestAttributesHolder.setRequestHeaders(headers);
+            RequestParameters parameters = RequestParameters.ofRequest(request);
+            request.setAttribute(RequestParameters.REQUEST_PARAMETERS_ATTRIBUTE, parameters);
+            RequestAttributesHolder.setRequestParameters(parameters);
+        } catch (RuntimeException | Error failure) {
+            RequestAttributesHolder.clear();
+            throw failure;
         }
     }
 
-    /**
-     * Removes all thread-local request context on request destruction.
-     *
-     * @param event the request event fired when a request is about to be destroyed
-     */
     @Override
     public void requestDestroyed(ServletRequestEvent event) {
-        remove(RequestAttributesHolder::removeRequestAttributes, RequestAttributes.class);
-        remove(RequestAttributesHolder::removeRequestPath, RequestPath.class);
-        remove(RequestAttributesHolder::removeQueryParameters, QueryParameters.class);
-        remove(RequestAttributesHolder::removeRequestRoute, RequestRoute.class);
-        remove(RequestAttributesHolder::removeRequestHeaders, RequestHeaders.class);
-        remove(RequestAttributesHolder::removeRequestParameters, RequestParameters.class);
-
-        LOGGER.debug("🧹 Cleaned up request context for [{}]",
-                ((HttpServletRequest) event.getServletRequest()).getRequestURI());
-    }
-
-    /**
-     * Helper method to attach an object to both the request and the thread-local holder.
-     */
-    private <T> void attach(HttpServletRequest request, Consumer<T> attacher, T object, String attributeKey) {
-        if (object != null) {
-            request.setAttribute(attributeKey, object);
-            attacher.accept(object);
-            LOGGER.debug("🔗 Attached [{}] to request with key [{}]", object.getClass().getSimpleName(), attributeKey);
-        }
-    }
-
-    /**
-     * Helper method to log and remove an object from thread-local holder.
-     */
-    private <T> void remove(Runnable remover, Class<T> type) {
-        remover.run();
-        LOGGER.debug("❌ Removed thread-local [{}]", type.getSimpleName());
+        RequestAttributesHolder.clear();
     }
 }

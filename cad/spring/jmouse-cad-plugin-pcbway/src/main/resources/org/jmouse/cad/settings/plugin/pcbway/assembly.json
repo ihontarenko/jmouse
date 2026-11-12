@@ -1,4 +1,5 @@
 {
+  "$schema": "./assembly.schema.json",
   "placement": {
     "file": "centroid.csv",
     "role": "where each part stands (centroid), in PCBWay's columns",
@@ -7,6 +8,7 @@
       "bottom": "Bottom"
     },
     "unit": "mm",
+    "mountings": {},
     "columns": [
       {
         "heading": "Designator",

@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.configuration;
 
+import javax.sql.DataSource;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.PrimaryBean;
@@ -11,12 +12,10 @@ import org.jmouse.transaction.configuration.TransactionInfrastructureConfigurati
 import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
 
-import javax.sql.DataSource;
-
 @BeanFactories
 public class JdbcConnectionProviderConfiguration {
 
-    public static final String RAW_PROVIDER                = "rawConnectionProvider";
+    public static final String RAW_PROVIDER = "rawConnectionProvider";
     public static final String PRIMARY_CONNECTION_PROVIDER = "connectionProvider";
 
     @Bean(RAW_PROVIDER)
@@ -27,11 +26,11 @@ public class JdbcConnectionProviderConfiguration {
     @PrimaryBean
     @Bean(PRIMARY_CONNECTION_PROVIDER)
     public ConnectionProvider primaryConnectionProvider(
-            @Qualifier(RAW_PROVIDER) ConnectionProvider connectionProvider,
-            @Qualifier(TransactionInfrastructureConfiguration.TX_CONTEXT_HOLDER) TransactionContextHolder transactionContextHolder
+        @Qualifier(RAW_PROVIDER) ConnectionProvider connectionProvider,
+        @Qualifier(
+            TransactionInfrastructureConfiguration.TX_CONTEXT_HOLDER
+        ) TransactionContextHolder transactionContextHolder
     ) {
-        TransactionContextAccessSupport.register(transactionContextHolder);
-        return new TransactionAwareConnectionProvider(connectionProvider);
+        return new TransactionAwareConnectionProvider(connectionProvider, transactionContextHolder);
     }
 }
-

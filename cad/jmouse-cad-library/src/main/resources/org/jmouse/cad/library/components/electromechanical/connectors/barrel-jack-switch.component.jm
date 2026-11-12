@@ -6,12 +6,14 @@ component:barrel-jack-switch("DC barrel jack with switch", type: connector) {
         summary: "DC power barrel jack with a plug-operated switch contact"
         source: "generic 5.5 × 2.1 mm DC jack with switch; the switch is not modelled"
         package: "BarrelJack_Switch"
-        category: circuits
+        category: connectors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:tip(analog, 1, "centre pin, usually +")
     pin:sleeve(analog, 2, "sleeve, usually −")
     pin:switch(analog, 3, "switch contact, on the sleeve while no plug is in")
 
-    symbol(uses: barrel-jack-switch-symbol)
+    symbol(uses: "SY.CONNECTOR:BARREL-JACK-SWITCH")
 }

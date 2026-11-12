@@ -26,8 +26,10 @@ component:operational-amplifier("Operational amplifier", type: opamp) {
         designator: U
         summary: "Op-amp macromodel: gain, two poles, slew rate, offset, bias currents, CMRR, PSRR, input range, output limits"
         source: "behavioural macromodel; the figures a datasheet's electrical table gives"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -74,7 +76,7 @@ component:operational-amplifier("Operational amplifier", type: opamp) {
     pin:Vcc(power, 7, "positive supply")
     pin:GND(ground, 4, "negative supply, or ground on a single supply")
 
-    symbol(uses: operational-amplifier-symbol) {
+    symbol(uses: "SY.AMPLIFIER:OPERATIONAL") {
         bind:failed(failed)
         # Where the output stands between the supplies; which input is higher, past ten millivolts; and how near the
         # output is pinned at a rail — within a twentieth of the supply it counts as there.

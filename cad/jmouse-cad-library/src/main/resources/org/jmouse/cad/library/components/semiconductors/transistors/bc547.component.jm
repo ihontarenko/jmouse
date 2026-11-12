@@ -7,8 +7,10 @@ component:bc547("BC547B", type: bjt) {
         summary: "NPN general-purpose transistor, 45 V, 100 mA, gain group B"
         source: "NXP BC547 datasheet and its SPICE model"
         package: "TO-92"
-        category: circuits
+        category: transistors
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:npn-transistor
 
@@ -52,11 +54,11 @@ component:bc547("BC547B", type: bjt) {
 
     pin:emitter(analog, 1, "emitter")
     pin:base(analog, input, 2, "base")
-    pin:collector(analog, output, 3, "collector")
+    pin:collector(analog, output, open-collector, 3, "collector")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
 
-    symbol(uses: npn-transistor-symbol) {
+    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
         bind:failed(failed)
     }
 
@@ -82,7 +84,7 @@ component:bc547("BC547B", type: bjt) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("BC547B")
     }
 }

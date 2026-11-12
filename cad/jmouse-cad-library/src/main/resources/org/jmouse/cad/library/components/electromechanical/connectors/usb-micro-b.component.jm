@@ -6,7 +6,9 @@ component:usb-micro-b("USB micro-B receptacle", type: connector) {
         summary: "USB 2.0 micro-B receptacle, 5 contacts and the shield"
         source: "USB 2.0 micro-B pinout; no electrical behaviour"
         package: "USB_Micro-B"
-        category: circuits
+        category: connectors
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     pin:vbus(power, 1, "VBUS, 5 V from the host")
@@ -16,5 +18,5 @@ component:usb-micro-b("USB micro-B receptacle", type: connector) {
     pin:ground(ground, 5, "GND")
     pin:shield(analog, 6, "the shell")
 
-    symbol(uses: usb-micro-b-symbol)
+    symbol(uses: "SY.CONNECTOR:USB-MICRO-B")
 }

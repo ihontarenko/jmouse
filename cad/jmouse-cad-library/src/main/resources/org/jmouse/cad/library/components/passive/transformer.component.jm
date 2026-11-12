@@ -23,8 +23,10 @@ component:transformer("Transformer", type: transformer) {
         designator: T
         summary: "Two coupled windings: self and mutual inductance, leakage, winding resistance, core loss and winding capacitance"
         source: "coupled inductors as in Berkeley SPICE3 / ngspice 47 (L, L, K), with the core loss and capacitances of a small mains transformer"
-        category: circuits
+        category: transformers
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:L_primary(10 H, "primary inductance: the magnetising inductance seen from the primary")
@@ -54,7 +56,15 @@ component:transformer("Transformer", type: transformer) {
     state:flux_primary(0, continuous, "the flux the primary links, Φ1, in webers")
     state:flux_secondary(0, continuous, "the flux the secondary links, Φ2")
 
-    symbol(uses: [transformer-symbol, transformer-air-core-symbol]) {
+
+    # An EI30 printed-circuit transformer, schematic 1: the primary 1 (•) to 5, the secondary 7 (•) to 9.
+    footprint("FP.TRAFO:EI30-2VA-1S") {
+        pad:1(primary_one)
+        pad:5(primary_two)
+        pad:7(secondary_one)
+        pad:9(secondary_two)
+    }
+    symbol(uses: ["SY.TRANSFORMER:MAGNETIC-CORE", "SY.TRANSFORMER:AIR-CORE"]) {
         bind:failed(failed)
     }
 

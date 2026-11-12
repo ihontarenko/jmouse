@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <packaging>jar</packaging>
+    <artifactId>jmouse-cad-folder</artifactId>
+    <name>jMouse - CAD Folder</name>
+    <description>jMouse Framework - jmCAD documents kept as the files of a library folder, a git repository: each document a file, each revision a commit, the index read from the files into memory.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-folder</url>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>ihontarenko</id>
+            <name>Ivan Hontarenko</name>
+            <email>ihontarenko@gmail.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-folder</url>
+    </scm>
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+    <dependencies>
+        <!-- What is kept: a document of the language and its owner -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-document</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- ⚠️ No dependency on the language: a document's kind and its category are kept as the words its text writes them
+             with, handed in by whoever reads the text. -->
+        <!-- The name a revision is said by — 20261023_001 —: read from each commit's time. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-revisions</artifactId>
+        </dependency>
+        <!-- Every revision is a commit of the library folder's repository. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-git</artifactId>
+        </dependency>
+        <!-- The one move of the documents out of the database they were kept in (ADR 0002): its tool reads MySQL. -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

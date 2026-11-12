@@ -1,0 +1,14 @@
+model:disc-capacitor-diameter-750-width-250-pitch-500-model("Ceramic disc capacitor, 7.5 mm disc, 5 mm pitch") {
+    meta {
+        summary: "Ceramic disc capacitor, 7.5 mm disc, 5 mm pitch — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.RADIAL:CD-7.5X2.5-P5"
+        category: capacitors-through-hole
+        tags: electronics, model, radial
+        source: "IEC 60286-2 lead spacing, makers' disc sizes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(sleeve, size: [7.5, 2.5, 9.5], at: [0, 0, 4.75])
+    cylinder(tin, radius: 0.28, length: 1.6, at: [-2.5, 0, -0.8])
+    cylinder(tin, radius: 0.28, length: 1.6, at: [2.5, 0, -0.8])
+}

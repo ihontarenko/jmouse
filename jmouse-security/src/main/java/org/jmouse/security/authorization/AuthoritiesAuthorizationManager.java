@@ -1,11 +1,10 @@
 package org.jmouse.security.authorization;
 
+import java.util.Collection;
+import java.util.Set;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.Authority;
 import org.jmouse.security.access.RoleHierarchy;
-
-import java.util.Collection;
-import java.util.Set;
 
 public class AuthoritiesAuthorizationManager implements AuthorizationManager<Collection<String>> {
 
@@ -21,10 +20,20 @@ public class AuthoritiesAuthorizationManager implements AuthorizationManager<Col
 
     @Override
     public AccessResult check(Authentication authentication, Collection<String> authorities) {
-        return new AuthoritiesAccessResult(isAuthorized(authentication, authorities), Authority.ofCollection(authorities));
+        return new AuthoritiesAccessResult(
+            isAuthorized(authentication, authorities),
+            Authority.ofCollection(authorities)
+        );
     }
 
     private boolean isAuthorized(Authentication authentication, Collection<String> authorities) {
+        if (
+            authentication == null ||
+            !authentication.isAuthenticated() ||
+            authentication.level() == org.jmouse.security.authentication.AuthenticationLevel.ANONYMOUS
+        ) {
+            return false;
+        }
         Set<Authority> granted = getRoleHierarchy().getReachableRoles(authentication.getAuthorities());
 
         for (String authority : authorities) {
@@ -35,5 +44,4 @@ public class AuthoritiesAuthorizationManager implements AuthorizationManager<Col
 
         return false;
     }
-
 }

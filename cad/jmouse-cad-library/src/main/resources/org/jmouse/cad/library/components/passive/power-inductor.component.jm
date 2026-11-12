@@ -21,9 +21,11 @@ component:power-inductor("Power inductor", type: inductor) {
         designator: L
         summary: "Power inductor: inductance, winding resistance, core saturation, core loss and self-resonance"
         source: "the figures a power inductor's datasheet gives: L, DCR, ISAT, SRF, Q"
-        category: circuits
+        category: inductors
         failure: open
         value: inductance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:inductance(100 uH, "inductance at small currents")
@@ -47,7 +49,11 @@ component:power-inductor("Power inductor", type: inductor) {
 
     state:I_winding(0, continuous, "the current in the inductance")
 
-    symbol(uses: inductor-symbol) {
+    footprint("FP.CHIP:L1812")
+    footprint("FP.CHIP:L2220")
+    footprint("FP.CHIP:L1210")
+
+    symbol(uses: "SY.INDUCTOR:FIXED") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -87,7 +93,7 @@ component:power-inductor("Power inductor", type: inductor) {
     }
 
     # How it looks in the hand: a shielded SMD square printed with its microhenry code.
-    portrait(uses: power-inductor-portrait) {
+    portrait(uses: "PT.INDUCTOR:POWER-SHIELDED") {
         bind:inductance(inductance)
     }
 }

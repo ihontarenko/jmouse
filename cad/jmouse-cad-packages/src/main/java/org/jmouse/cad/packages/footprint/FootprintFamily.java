@@ -9,7 +9,7 @@ import java.util.List;
  * table says which it is by its {@code form}, and the family emits a footprint for every member it lists.
  */
 public sealed interface FootprintFamily permits ChipFootprints, SmallOutlineFootprints, DualInlineFootprints,
-        HeaderFootprints, AxialFootprints, RadialFootprints, InlineFootprints, HoleFootprints, QuadFootprints {
+        HeaderFootprints, AxialFootprints, RadialFootprints, InlineFootprints, HoleFootprints, QuadFootprints, PinnedFootprints {
 
     /** The {@code form} a package table names this family with: {@code gull-wing}. */
     String form();

@@ -34,7 +34,7 @@ final class CadJson {
      */
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
     @JsonSubTypes({@JsonSubTypes.Type(Placement.PlacedPart.class), @JsonSubTypes.Type(Placement.Mark.class),
-                   @JsonSubTypes.Type(Placement.Wire.class)})
+                   @JsonSubTypes.Type(Placement.Wire.class), @JsonSubTypes.Type(Placement.Bus.class), @JsonSubTypes.Type(Placement.Note.class), @JsonSubTypes.Type(Placement.Drawn.class)})
     private interface PlacementByFields {
     }
 

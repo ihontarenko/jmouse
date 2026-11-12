@@ -1,0 +1,14 @@
+model:melf-diode-model("MELF diode MELF (DO-213AB)") {
+    meta {
+        summary: "MELF diode MELF (DO-213AB) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.MELF:D-"
+        category: diodes-surface
+        tags: electronics, model, chip
+        source: "JEDEC DO-213 and the makers' MELF outlines, MELF (DO-213AB)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [5, 2.5, 2.6], at: [0, 0, 1.3])
+    box(tin, size: [1, 2.52, 2.62], at: [-2, 0, 1.3])
+    box(tin, size: [1, 2.52, 2.62], at: [2, 0, 1.3])
+}

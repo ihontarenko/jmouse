@@ -9,8 +9,10 @@ component:bs250("BS250", type: mosfet) {
         summary: "P-channel enhancement MOSFET, -45 V, -230 mA continuous"
         source: "Diodes Inc. BS250P datasheet, electrical characteristics (limits only)"
         package: "TO-92"
-        category: circuits
+        category: transistors
         failure: short drain source
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:p-mosfet
 
@@ -35,11 +37,11 @@ component:bs250("BS250", type: mosfet) {
 
     pin:source(analog, 1, "source")
     pin:gate(analog, input, 2, "gate")
-    pin:drain(analog, output, 3, "drain")
+    pin:drain(analog, output, open-drain, 3, "drain")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
 
-    symbol(uses: p-channel-mosfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:MOSFET-P") {
         bind:failed(failed)
     }
 
@@ -73,7 +75,7 @@ component:bs250("BS250", type: mosfet) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("BS250")
     }
 }

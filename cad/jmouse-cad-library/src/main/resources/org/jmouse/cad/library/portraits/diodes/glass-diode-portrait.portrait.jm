@@ -4,7 +4,7 @@ portrait:glass-diode-portrait("Glass diode") {
     meta {
         summary: "A DO-35 glass diode: the die seen through the orange glass, black band at the cathode"
         code: "PT.DIODE:DO35"
-        category: circuits
+        category: diodes
         tags: electronics, portrait, diode, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

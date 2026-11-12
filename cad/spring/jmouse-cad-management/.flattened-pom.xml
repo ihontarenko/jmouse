@@ -7,7 +7,7 @@
   <version>1.0.1</version>
   <name>jMouse - CAD Management</name>
   <description>The jmCAD REST routes at /jmouse/cad/api — the catalogue of documents, an owner's documents and sheets — with the access rules a product gates them by and the problem documents they answer with</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-management</url>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-management</url>
   <licenses>
     <license>
       <name>MIT License</name>

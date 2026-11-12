@@ -1,8 +1,8 @@
 symbol:operational-amplifier-wide-symbol("Operational amplifier, KiCad's proportions") {
     meta {
-        summary: "Operational amplifier as KiCad draws it: the non-inverting input on top, inputs 2.54 mm apart, the supplies from the triangle's slanted side — the same living drawing as the compact one, so a KiCad design's wires land on its pins"
+        summary: "Operational amplifier, as drawn on a schematic: its body tints with where its output stands between its supplies, the higher input lit"
         code: "SY.AMPLIFIER:OPERATIONAL-WIDE"
-        category: circuits
+        category: amplifiers
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
@@ -22,11 +22,11 @@ symbol:operational-amplifier-wide-symbol("Operational amplifier, KiCad's proport
         live stroke = if(failed > 0.5, burned, if(saturated > 0.5, warm, signal))
     }
 
-    # Where the output stands between its supplies: a gauge inside the body, empty at the negative rail, full at the
-    # positive one.
-    box:output_level(live, at: -20 0, size: 16 x 88) {
-        live level = swing
+    # Where the output stands between its supplies: the body itself, clear at the negative rail, tinted at the positive one.
+    path:output_tone(live, "M-160-160V160L160 0Z") {
+        stroke = clear
         live fill = if(saturated > 0.5, warm, positive)
+        live opacity = swing * 0.6
     }
 
     group:body(live) {

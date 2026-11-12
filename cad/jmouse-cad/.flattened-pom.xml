@@ -7,7 +7,7 @@
   <version>1.0.1</version>
   <name>jMouse - CAD</name>
   <description>jMouse Framework - jmCAD: the model of the CAD engine — circuits, their parts and nets, components, their parameters, pins and expectations — as plain data, read from documents by the modules that read them. No I/O, no documents.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad</url>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad</url>
   </scm>
   <build>
     <plugins>

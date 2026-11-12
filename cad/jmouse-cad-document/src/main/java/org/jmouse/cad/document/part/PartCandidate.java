@@ -1,5 +1,8 @@
 package org.jmouse.cad.document.part;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 /**
  * A part a provider found.
  *
@@ -17,13 +20,38 @@ package org.jmouse.cad.document.part;
  * @param license      the license its documents come under once fetched; null when they are ours
  * @param slug         the catalogue object it already is; null when it is not ours yet
  * @param fetchable    whether {@link PartSearchProvider#fetch} makes it the reader's own
+ * @param supply       what a distributor has of it right now; null where the source sells nothing
  */
 public record PartCandidate(String provider, String identifier, Kind kind, String title, String partNumber,
                             String manufacturer, String description, String datasheet, Link link, String license,
-                            String slug, boolean fetchable) {
+                            String slug, boolean fetchable, Supply supply) {
 
     /** A page of the source's own: what it is called — {@code Octopart} — and where it is. */
     public record Link(String title, String address) {
+    }
+
+    /**
+     * What a distributor has of a part right now. Whatever it did not say is null, never zero: a stock of zero is a
+     * statement.
+     *
+     * @param orderNumber  its own number for the part, the one it is ordered by
+     * @param status       its life cycle, in the distributor's words
+     * @param stock        how many it holds
+     * @param minimumOrder the fewest it sells
+     * @param leadTime     how long it takes to get more, in the distributor's words
+     * @param currency     what {@code prices} are in
+     * @param prices       what one costs, by how many are bought
+     */
+    public record Supply(String orderNumber, String status, Long stock, Long minimumOrder, String leadTime, String currency,
+                         List<Price> prices) {
+
+        public Supply {
+            prices = prices == null ? List.of() : List.copyOf(prices);
+        }
+    }
+
+    /** What one costs when at least {@code quantity} are bought. */
+    public record Price(long quantity, BigDecimal unitPrice) {
     }
 
     public enum Kind {
@@ -31,7 +59,7 @@ public record PartCandidate(String provider, String identifier, Kind kind, Strin
         COMPONENT,
         /** How a part is drawn on a sheet. */
         SYMBOL,
-        /** How a part sits on a board. */
+        /** How a part sits on a pcb. */
         FOOTPRINT,
         /** A circuit. */
         CIRCUIT,

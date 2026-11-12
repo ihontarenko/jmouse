@@ -1,17 +1,16 @@
 package org.jmouse.security.web;
 
 import jakarta.servlet.Filter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.authentication.AnonymousAuthenticationFilter;
-import org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.LogoutAuthenticationFilter;
+import org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.www.BasicAuthenticationFilter;
 import org.jmouse.security.web.authorization.AuthorizationFilter;
 import org.jmouse.security.web.context.SecurityContextPersistenceFilter;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * 🧱 Defines recommended filter ordering in the jMouse Security web pipeline.
@@ -49,7 +48,6 @@ public class SecurityFilterOrder {
         setOrder(LogoutAuthenticationFilter.class, 170);
         setOrder(AnonymousAuthenticationFilter.class, 180);
         setOrder(AuthorizationFilter.class, 190);
-
     }
 
     /**
@@ -104,5 +102,4 @@ public class SecurityFilterOrder {
         Integer order = orders.get(filter);
         return order == null ? -1 : order;
     }
-
 }

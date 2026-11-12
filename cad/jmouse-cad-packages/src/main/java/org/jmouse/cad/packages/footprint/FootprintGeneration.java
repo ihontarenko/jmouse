@@ -18,7 +18,7 @@ public final class FootprintGeneration {
 
     private static final List<FootprintFamily> FAMILIES = List.of(new ChipFootprints(), new SmallOutlineFootprints(),
             new DualInlineFootprints(), new HeaderFootprints(), new AxialFootprints(), new RadialFootprints(),
-            new InlineFootprints(), new HoleFootprints(), new QuadFootprints());
+            new InlineFootprints(), new HoleFootprints(), new QuadFootprints(), new PinnedFootprints());
 
     private FootprintGeneration() {
     }
@@ -28,13 +28,22 @@ public final class FootprintGeneration {
         return table.field(FORM).map(field -> field.value() instanceof SheetValue.Word(String word) ? word : field.value().written());
     }
 
+    /** A footprint and the form of the table it comes from: what its 3D model is drawn by. */
+    public record FormedFootprint(String form, StandardFootprint footprint) {
+    }
+
     /** Every footprint the tables list, in the order of the tables and of their entries. */
     public static List<StandardFootprint> generate(LandPatternRules rules, List<Sheet> tables) {
-        List<StandardFootprint> footprints = new ArrayList<>();
+        return generateFormed(rules, tables).stream().map(FormedFootprint::footprint).toList();
+    }
+
+    /** Every footprint the tables list, each with its table's form, in the order of the tables and of their entries. */
+    public static List<FormedFootprint> generateFormed(LandPatternRules rules, List<Sheet> tables) {
+        List<FormedFootprint> footprints = new ArrayList<>();
         for (Sheet table : tables) {
             String form = form(table).orElseThrow(() -> new IllegalArgumentException(
                     "The package table '" + table.slug() + "' names no form"));
-            footprints.addAll(family(form).footprints(table, rules));
+            family(form).footprints(table, rules).forEach(footprint -> footprints.add(new FormedFootprint(form, footprint)));
         }
         return footprints;
     }

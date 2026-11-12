@@ -1,0 +1,58 @@
+# The open formats a 3D body comes in, whoever drew it. A file is kept as it came — a STEP file stays exact geometry —
+# and read into a mesh by its format's reader.
+#
+# `unit` is the millimetres one unit of a file is, and `up` the axis a file stands up along, each as the format's own
+# standard says; a source whose files keep another convention says so beside each file. A format whose standard names
+# no unit is read as millimetres.
+sheet "Mesh formats" as mesh-formats {
+    description "The formats a 3D body is read from: their extensions, their media type, whether they hold exact geometry or a mesh, and their unit and up axis."
+
+    gltf-binary "glTF binary" {
+        extensions glb
+        media-type "model/gltf-binary"
+        geometry mesh
+        unit 1000
+        up y
+        standard "Khronos glTF 2.0"
+    }
+    gltf "glTF" {
+        extensions gltf
+        media-type "model/gltf+json"
+        geometry mesh
+        unit 1000
+        up y
+        standard "Khronos glTF 2.0"
+    }
+    vrml "VRML" {
+        extensions wrl, vrml
+        media-type "model/vrml"
+        geometry mesh
+        unit 1000
+        up y
+        standard "ISO/IEC 14772-1 (VRML97)"
+    }
+    step "STEP" {
+        extensions step, stp
+        media-type "model/step"
+        geometry exact
+        unit 1
+        up z
+        standard "ISO 10303-21"
+    }
+    stl "STL" {
+        extensions stl
+        media-type "model/stl"
+        geometry mesh
+        unit 1
+        up z
+        standard "3D Systems stereolithography"
+    }
+    obj "Wavefront OBJ" {
+        extensions obj
+        media-type "model/obj"
+        geometry mesh
+        unit 1
+        up y
+        standard "Wavefront OBJ"
+    }
+}

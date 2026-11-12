@@ -146,4 +146,19 @@ class SheetReaderTest {
                 () -> SheetReader.read("broken.sht", "sheet \"Broken\" as broken {\n    value 2..6\n}\n"));
         assertTrue(joinedRange.detail().contains("2 V .. 6 V"), joinedRange.detail());
     }
+
+    @Test
+    void aValueNamedSourceIsAssignedNotACitation() {
+        Sheet sheet = SheetReader.read("fields.sht", """
+                sheet "Fields" as fields {
+                    names Author = authors, source = Source, License = license source page 2
+                }
+                """);
+        SheetField names = sheet.field("names").orElseThrow();
+        SheetValue.Sequence written = assertInstanceOf(SheetValue.Sequence.class, names.value());
+        assertEquals(new SheetValue.Assignment("source", new SheetValue.Word("Source")), written.items().get(1));
+        assertEquals(3, written.items().size());
+        // A citation still begins with the word where nothing is assigned to it.
+        assertEquals(2, names.source().orElseThrow().page().orElseThrow());
+    }
 }

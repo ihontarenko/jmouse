@@ -9,7 +9,10 @@
 family:cmos-hc("74HC CMOS logic") {
     meta {
         summary: "74HC high-speed CMOS, 2 V to 6 V"
+        category: families
         source: "74HC family characteristics (Nexperia, TI)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:input_low_share(0.3, "VIL as a share of the supply")

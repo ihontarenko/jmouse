@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-spring-modules</artifactId>
+    <packaging>pom</packaging>
+    <name>jMouse - CAD Spring modules</name>
+    <description>jMouse Framework - CAD on Spring: the engine's services, its management routes, its live socket and its plugins. Each module's parent is jmouse-spring, as every Spring module's is.</description>
+
+    <modules>
+        <module>jmouse-cad-settings</module>
+        <module>jmouse-cad-spring-boot</module>
+        <module>jmouse-cad-management</module>
+        <module>jmouse-cad-plugin-spice</module>
+        <module>jmouse-cad-plugin-xyce</module>
+        <module>jmouse-cad-plugin-gerber</module>
+        <module>jmouse-cad-plugin-pcbway</module>
+        <module>jmouse-cad-plugin-jlcpcb</module>
+        <module>jmouse-cad-plugin-drawings</module>
+        <module>jmouse-cad-plugin-panel</module>
+        <module>jmouse-cad-plugin-kicad</module>
+        <module>jmouse-cad-plugin-nexar</module>
+        <module>jmouse-cad-plugin-suppliers</module>
+        <module>jmouse-cad-plugin-explorer</module>
+        <module>jmouse-cad-plugin-git</module>
+        <module>jmouse-cad-plugin-mesh</module>
+        <module>jmouse-cad-plugin-datasheets</module>
+        <module>jmouse-cad-plugin-step</module>
+        <module>jmouse-cad-plugin-ipc2581</module>
+        <module>jmouse-cad-plugin-odb</module>
+        <module>jmouse-cad-plugin-eagle</module>
+        <module>jmouse-cad-plugin-libre-pcb</module>
+        <module>jmouse-cad-plugin-altium</module>
+        <module>jmouse-cad-live</module>
+    </modules>
+</project>

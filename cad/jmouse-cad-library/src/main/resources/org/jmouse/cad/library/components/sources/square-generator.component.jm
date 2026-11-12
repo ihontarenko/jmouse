@@ -6,7 +6,9 @@ component:square-generator("Square generator", type: generator) {
     meta {
         designator: G
         summary: "An ideal square voltage: high for the duty's share of every period, low for the rest"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:high(5 V, "the level while on")
@@ -17,7 +19,7 @@ component:square-generator("Square generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: square-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-SQUARE") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

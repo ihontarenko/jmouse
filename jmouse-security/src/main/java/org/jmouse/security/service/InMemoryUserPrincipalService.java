@@ -1,16 +1,20 @@
 package org.jmouse.security.service;
 
+import java.util.Arrays;
+import java.util.Objects;
 import org.jmouse.security.PasswordMismatchException;
 import org.jmouse.security.UserPrincipal;
 import org.jmouse.security.UserPrincipalNotFoundException;
 import org.jmouse.security.UserPrincipalService;
 import org.jmouse.security.password.PasswordEncoder;
 import org.jmouse.security.password.Pbkdf2Sha256PasswordEncoder;
-import java.util.Arrays;
-import java.util.Objects;
 
 /** In-memory users contain encoded passwords; callers encode initial records explicitly. */
-public class InMemoryUserPrincipalService extends InMemoryUserPrincipalRepository implements UserPrincipalService {
+public class InMemoryUserPrincipalService
+    extends InMemoryUserPrincipalRepository
+    implements UserPrincipalService
+{
+
     private final PasswordEncoder encoder;
 
     public InMemoryUserPrincipalService(UserPrincipal... users) {

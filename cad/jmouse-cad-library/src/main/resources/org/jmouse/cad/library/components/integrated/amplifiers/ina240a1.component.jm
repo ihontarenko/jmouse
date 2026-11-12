@@ -10,8 +10,10 @@ component:ina240a1("INA240A1", type: amplifier) {
         summary: "Current-sense amplifier, gain 20 V/V, -4 V to 80 V common mode, 400 kHz"
         source: "TI INA240 datasheet SBOS662: electrical characteristics, the A1 gain option, VS 5 V"
         package: "SOIC-8"
-        category: circuits
+        category: amplifiers
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -34,14 +36,14 @@ component:ina240a1("INA240A1", type: amplifier) {
 
     state:follow(0, continuous, "where the output is heading, behind the input by the bandwidth")
 
-    footprint(soic-8-footprint)
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
     # How it looks in the hand: its package from above, wired by its pin numbers and printed with its name.
-    portrait(uses: soic-8-portrait) {
+    portrait(uses: "PT.SOIC:8-P1.27-W3.9") {
         bind:marking("INA240A1")
     }
 
-    symbol(uses: [current-sense-amplifier-symbol, current-sense-amplifier-wide-symbol]) {
+    symbol(uses: ["SY.AMPLIFIER:CURRENT-SENSE", "SY.AMPLIFIER:CURRENT-SENSE-WIDE"]) {
         bind:failed(failed)
     }
 

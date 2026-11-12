@@ -2,17 +2,18 @@ symbol:shunt-resistor-symbol("Shunt resistor, four terminals") {
     meta {
         summary: "A current-sense shunt with Kelvin terminals, as drawn on a schematic: the current runs top to bottom, the voltage is taken from the right"
         code: "SY.RESISTOR:SHUNT-KELVIN"
-        category: circuits
+        category: resistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
     size(160 x 160)
-    input:load(0 .. 1)
+    input:load(0 .. 1, hold: 300 ms)
+    input:flow(-1 .. 1, hold: 300 ms)
     input:failed
 
     box:loading(live, at: 0 0, size: 28 x 56) {
-        live level = load
+        live level = if(flow > 0, 0 - load, load)
         live fill = curve(load, 0 -> positive, 0.6 -> warm, 1 -> hot)
     }
 

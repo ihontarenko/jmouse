@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/pcb/physics/copper.schema.json",
+  "title": "Copper physics",
+  "description": "What copper is, as the engine works out a pcb's copper as an electrical network: its resistivity and how it changes with temperature, the temperature a pcb stands in, IPC-2221's current-carrying constants, and how finely the network is solved. Data, beside this class (#SECTION); the copper's thickness is the pcb's way of making, not this.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "resistivity",
+    "referenceTemperature",
+    "temperatureCoefficient",
+    "ambient",
+    "capacity",
+    "carrying",
+    "edgeHalvings",
+    "solver"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "source": {
+      "description": "where each value comes from: the standards and books it is read from",
+      "type": "string"
+    },
+    "resistivity": {
+      "description": "Ω·m at the reference temperature",
+      "type": "number"
+    },
+    "referenceTemperature": {
+      "description": "°C the resistivity is given at",
+      "type": "number"
+    },
+    "temperatureCoefficient": {
+      "description": "per kelvin",
+      "type": "number"
+    },
+    "ambient": {
+      "description": "°C the pcb stands in: a resistance is given at it",
+      "type": "number"
+    },
+    "capacity": {
+      "description": "IPC-2221's I = k·ΔT^riseExponent·A^areaExponent, A in square mils.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outer",
+        "inner",
+        "riseExponent",
+        "areaExponent",
+        "squareMilsPerSquareMillimetre"
+      ],
+      "properties": {
+        "outer": {
+          "description": "k on an outer layer",
+          "type": "number"
+        },
+        "inner": {
+          "description": "k on an inner layer",
+          "type": "number"
+        },
+        "riseExponent": {
+          "description": "the power the temperature rise is raised to",
+          "type": "number"
+        },
+        "areaExponent": {
+          "description": "the power the cross-section is raised to",
+          "type": "number"
+        },
+        "squareMilsPerSquareMillimetre": {
+          "description": "square mils in a square millimetre: the formula's unit of area",
+          "type": "number"
+        }
+      }
+    },
+    "carrying": {
+      "description": "the share of the current below which a piece is taken as carrying none of it",
+      "type": "number"
+    },
+    "edgeHalvings": {
+      "description": "how many halvings find where a piece crosses an area's edge",
+      "type": "integer"
+    },
+    "solver": {
+      "description": "How the nodal equations are solved: conjugate gradients until the residual is this small, at most this many iterations for each node and these more.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tolerance",
+        "iterationsPerNode",
+        "iterations"
+      ],
+      "properties": {
+        "tolerance": {
+          "description": "the residual the conjugate gradients stop at",
+          "type": "number"
+        },
+        "iterationsPerNode": {
+          "description": "iterations allowed for each node of the network",
+          "type": "integer"
+        },
+        "iterations": {
+          "description": "iterations allowed beyond those",
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

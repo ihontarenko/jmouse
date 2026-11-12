@@ -10,6 +10,9 @@
 functions:signals("Signals") {
     meta {
         summary: "Band-limited white and pink noise as functions of the time: smooth, repeatable, RMS 1"
+        category: functions
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     formulas {

@@ -2,7 +2,7 @@
 
 > The HTTP and socket contract of the jmCAD engine: what every route takes, what it answers, and an example of each.
 > Spring integration modules `jmouse-cad-spring-boot` (services, storage, migrations) · `jmouse-cad-management` (these
-> routes) · `jmouse-cad-live` (the live socket). Storage: [jmouse-cad-jpa](../jmouse-cad-jpa/pom.xml).
+> routes) · `jmouse-cad-live` (the live socket). Storage: [jmouse-cad-jpa](../cad/jmouse-cad-jpa/pom.xml).
 
 ⚠️ **This is the contract the modules are built against, written before them.** The **State** column of every table
 says which routes answer today: **✅ built** or **📐 contract** (agreed, not built yet). A route not listed here does not
@@ -47,7 +47,7 @@ the head revision of that text. So:
   | `portrait` | `portrait(uses: …)` | how it looks in the hand |
   | `footprint` | `footprint(uses: …)` / a seat | a footprint its package lands on |
   | `parts` | `R1 resistor …` in `parts { }` | a component (or a sheet) a circuit places |
-  | `circuit` | `circuit rc-discharging` in a `pcb` | the circuit a board is laid out for |
+  | `circuit` | `circuit rc-discharging` in a `pcb` | the circuit a pcb is laid out for |
   | `frame` | `frame …` | the drawing frame a sheet is printed in |
   | `see_also` | `meta { see_also: … }` | a curator's link |
 
@@ -153,7 +153,7 @@ neither a rule nor `@PublicEndpoint`: an ungated route is a failure to boot.
 | GET | `/owners/{type}/{id}/sheets` | — | `SheetView[]` — every circuit of the owner as a sheet of one design | OWNER_READ | ✅ |
 | GET | `/documents/{id}/sheet` | `?path=S1,S2` the blocks, outermost first | `SheetInstance` — that block as it runs inside the circuit | public, per document | ✅ |
 
-### 2.3 The library — what a sheet and a board are built from
+### 2.3 The library — what a sheet and a pcb are built from
 
 | Method | Path | Takes | Answers | Capability | State |
 |---|---|---|---|---|---|
@@ -165,7 +165,7 @@ neither a rule nor `@PublicEndpoint`: an ungated route is a failure to boot.
 | GET | `/footprints` | — | `DrawnDocument<FootprintDrawing>[]` | public | ✅ |
 | GET | `/footprints/{slug}` | — | `{ "footprint": DrawnDocument, "usedBy": DocumentSummary[] }` | public | ✅ |
 | GET | `/footprint-rules` | — | `LandPatternRules` — the land-pattern table the footprints are generated from | public | ✅ |
-| GET | `/board-rules` | — | `BoardRules` — the board standards table | public | ✅ |
+| GET | `/pcb-rules` | — | `PcbRules` — the pcb standards table | public | ✅ |
 
 ### 2.4 Simulation
 
@@ -190,7 +190,7 @@ written by the language's own writer. The interface keeps no grammar of its own.
 | POST | `/language/circuit` | `{ "source", "circuit": CircuitSheet, "title", "summary", "category" }` | `EditedDocument` — a schematic editor's sheet as the next text | public | ✅ |
 | POST | `/language/drawing` | `{ "source", "drawing": SymbolDrawing, "title", "category" }` | `EditedDocument` — a symbol, portrait or frame | public | ✅ |
 | POST | `/language/footprint` | `{ "source", "drawing": FootprintDrawing, "title", "category" }` | `EditedDocument` | public | ✅ |
-| POST | `/language/board` | `{ "source", "drawing": BoardDrawing, "title", "category" }` | `EditedDocument` — a `pcb` | public | ✅ |
+| POST | `/language/pcb` | `{ "source", "drawing": PcbDrawing, "title", "category" }` | `EditedDocument` — a `pcb` | public | ✅ |
 | POST | `/language/drawn` | `{ "source" }` | `DrawnText` — a drawn kind's text drawn without saving it | public | ✅ |
 
 ### 2.6 Exchange — formats the plugins bring
@@ -205,7 +205,25 @@ is said and how what an import made is stored beside what the owner holds are th
 | GET | `/exchange` | — | `[{ "id", "title", "reads": ["*.cir"], "writes": ["circuit"] }]` | public | ✅ |
 | POST | `/exchange/{format}/read` | `{ "files": { "path": "text" }, "main", "title", "owner" }` | `{ "documents": [{ "slug", "kind", "source" }], "notes": [] }` — converted, nothing stored; the one the files stand for first | public | ✅ |
 | POST | `/owners/{type}/{id}/exchange/{format}/import` | `{ "files", "main", "title" }` | 201 `{ "root", "created": [], "updated": [], "reused": [], "notes": [] }` | OWNER_WRITE, in the service | ✅ |
-| POST | `/exchange/{format}/export` | `{ "source", "owner" }` | `{ "name", "files": [{ "fileName", "text" }], "notes": [] }` — one file or a set (a board's fabrication files); ⚠️ since 2026-10-29, was `{ fileName, text, notes }` | public | ✅ |
+| POST | `/exchange/{format}/export` | `{ "source", "owner" }` | `{ "name", "files": [{ "fileName", "text" }], "notes": [] }` — one file or a set (a pcb's fabrication files); ⚠️ since 2026-10-29, was `{ fileName, text, notes }` | public | ✅ |
+| POST | `/pcb/checks` | `{ "source", "owner" }` | `[{ "severity", "message", "keys": ["track:3"], "at": [x, y] }]` — severity `error`, `warning` or `notice`, `at` null where it is nowhere — the engine's one set of pcb checks (`PcbChecks`, jmouse-cad-pcb), since 2026-11-11; the editor shows these | public | ✅ |
+| POST | `/pcb/derived` | `{ "source", "drawing"?, "owner" }` — `drawing` the layout the pcb editor holds (as `/language/pcb` takes it), written into `source` first | `{ "copper": { "pads": [{ "designator", "pad", "net", "group" }], "tracks" | "arcs" | "vias": [{ "net", "group" }], "drawn": [{ "shape", "net", "group" }], "shorts", "unlaid": [{ "net", "from", "to" }], "pours": ["path data"], "teardrops": [{ "layer", "track", "path" }] }, "masks": { "top" | "bottom": { "openings", "windows", "paste" } }, "findings": [...], "lengths": { "net": { "copper", "vias", "barrels", "total" } } }` — masks as path data (even-odd), since 2026-11-11 stage C; `lengths` each net's run (`NetLengths`), since 2026-11-12 — what the engine makes of a pcb, the one place it is worked out: the editor draws its copper and shows its checks from it, since 2026-11-11 | public | ✅ |
+| POST | `/pcb/solid` | as `/pcb/derived` | `{ "thickness", "copperThickness", "substrate": rings, "sides": { "top" | "bottom": { "copper", "bare", "laminate", "paste", "silkscreen" } }, "bodies": [{ "designator", "side", "rings", "height" }] }` — the pcb as made (`PcbSolid`, the same the GLB and STEP files are raised from), rings of `[x, y]`, outlines one way and holes the other; for a 3D view | public | ✅ |
+| POST | `/pcb/copper-path` | `{ "source", "drawing"?, "owner", "from": { "x", "y", "layer", "reach" }, "to", "current", "temperatureRise" }` | `{ "path": { "resistance", "current", "temperatureRise", "drop", "power", "flows": [{ "branch", "current", "power", "rise", "overloaded", "neededWidth", "neededVias" }], "weakest", "pours" }, "refusal" }` — exactly one of the two; the copper as an electrical network (`CopperPaths`, jmouse-cad-pcb `physics`; constants `copper-physics.json`), since 2026-11-11 | public | ✅ |
+| POST | `/pcb/stack` | `{ "source", "drawing"?, "owner", "layer", "width", "height"?, "permittivity"?, "impedances": [], "power" }` | `{ "refusal", "line", "height", "thickness", "permittivity", "impedance", "delay", "widths": [{ "impedance", "width" }], "pairs": [{ "name", "impedance" }], "warmth" }` — `TrackStacks`, constants `stack-physics.json`; `warmth` null without an outline | public | ✅ |
+| POST | `/pcb/stitching` | `{ "source", "drawing"?, "owner", "zone", "pitch", "via": { "drill", "diameter" } | null }` | `{ "vias": [...], "refusal" }` — exactly one; a zone stitched to its net's pours on the other layers, vias on the pcb's grid where both pours lie under a whole pad and everything else keeps its gap (`ViaRows`, jmouse-cad-pcb `routing`); `via` null: the net's class's, since 2026-11-12 | public | ✅ |
+| POST | `/pcb/fence` | `{ "source", "drawing"?, "owner", "track", "net", "pitch", "via" | null }` | as `/pcb/stitching` — a track fenced by a net's vias down each side, past the gap the net's pour keeps from it | public | ✅ |
+| POST | `/pcb/new` | `{ "circuit": "slug", "owner" }` | a pcb drawing — placements, edge, ground zone, no copper — laid out from the circuit's sheet (`CircuitLayout`, data `pcb-layout.json`; `CircuitBoards` reads the circuit): the bench's sources and instruments left off, the nets they reach brought out on a header, since 2026-11-12 | public | ✅ |
+| POST | `/pcb/routing` | `{ "source", "drawing"?, "owner" }` — the layout's parts, rules and layers are what matter: the client sends it with no copper | `{ "board": "name" }` — a routing board opened (or found) for the pcb: its footprints, part nets and rules read once (`RoutingBoards`, `jmouse.cad.documents.routing-boards` kept, least recently asked let go) | public | ✅ |
+| POST | `/pcb/routing/{board}/leg` | `{ "drawing", "layer", "net"?, "width", "from": {x,y}, "to", "angleStep", "mode": "walkaround"|"shove", "rounding" }` | `{ "points", "tracks"|null, "reached", "rounding" }` — the rest of a track to the pointer; `tracks` every track as a shove left them; `rounding` the reader's corners as far as the leg's gaps let them. An unknown board is 404: open it again | public | ✅ |
+| POST | `/pcb/routing/{board}/segment`, `/corner` | `{ "drawing", "track", "segment"|"corner", "dx","dy"|"to", "style": { "mode", "angleStep", "jogs": "kept"|"merged" }, "pressed"? }` | `{ "tracks" }` — every track after a stretch or a corner carried (`tracks` null: it cannot move) | public | ✅ |
+| POST | `/pcb/routing/{board}/following`, `/laid` | `{ "before", "moved", "angleStep" }` | `{ "tracks" }` — a moved part's tracks laid again a frame at a time (`following`, within `carrying.frameBudget`), or whole on release (`laid`) | public | ✅ |
+| POST | `/pcb/routing/{board}/jogs`, `/corners` | `{ "drawing", "chosen": [track] , "rounding"? }` | `{ "tracks" }` — jogs merged, corners rounded, each only as far as its gaps let it | public | ✅ |
+| POST | `/pcb/routing/{board}/tune`, `/tune-track` | `{ "drawing", "layer", "point", "reach", "length"? }` / `{ "drawing", "track", "length"? }` | `{ "track", "points", "added", "net", "from", "to", "refusal" }` — a meander to a length, or the pair partner's (`LengthTuning`) | public | ✅ |
+| POST | `/pcb/routing/{board}/autoroute` | `{ "run", "drawing", "angleStep", "rounding", "crossing": "vias"|"links", "onlyNets"? }` | `application/x-ndjson`: a line `{ "moment": { "step", "line", "attempt", "reason", "refused", "laid", "tried", "total", "round", "added": { "tracks", "vias", "placements" } } }` per moment, the last `{ "done": { "laid", "unrouted", "stopped", "added" } }` — `added` the copper beyond the layout sent (`Autorouter`) | public | ✅ |
+| POST | `/pcb/routing/{board}/autoroute/{run}/stop` | — | the run named so stops and answers what it laid as its last line; dropping the stream drops the run with no answer | public | ✅ |
+| GET | `/showcase/{slug}/pcb/derived`, `/showcase/{slug}/pcb/solid` | — | as `/pcb/derived` and `/pcb/solid`, of a featured design's stored pcb only: what a visitor's landing page draws | public | ✅ |
+| POST | `/circuit/checks` | `{ "source", "circuit"?, "owner" }` — `circuit` the sheet a schematic editor drew (as `/language/circuit` takes it), written into `source` first, so an edit is checked in one call | `[{ "severity", "message", "keys": ["item:R1"], "at": [x, y] }]` — the sheet's electrical rules (`SheetChecks`, jmouse-cad-exchange; which pins may not share a net is `pin-rules.json` beside it): open pins, a no-connect on a joined pin, conflicting drivers, inputs nothing drives, power pins nothing powers, a label on nothing; since 2026-11-11; the bench shows these | public | ✅ |
 
 An import stores what a design is built from first — one already called so is kept, an earlier import's untouched
 first revision excepted —, then the circuits, each placed sheet before the sheet placing it, written over where an
@@ -228,8 +246,10 @@ Every route decides inside its service through the host's `CadAuthority`, so it 
 ### 2.7 Parts from suppliers
 
 ⚠️ **The search is the engine's; the places beyond the catalogue are the plugins'.** It asks the catalogue first, then
-every provider brought to `cad.parts.providers` — Nexar (`cad-nexar`, `jmouse-cad-plugin-nexar`) and KiCad's installed
-libraries (`cad-kicad`). A provider that cannot answer is listed all the same, saying why; one that fails while
+every provider brought to `cad.parts.providers` — Nexar (`cad-nexar`, `jmouse-cad-plugin-nexar`), Mouser and DigiKey
+(`cad-suppliers`, `jmouse-cad-plugin-suppliers`, over the library `jmouse-suppliers`) and KiCad's installed libraries
+(`cad-kicad`). A distributor's candidate carries `supply` — its order number, status, stock, minimum order, lead time,
+currency and `prices` by quantity; whatever it did not say is null, never zero — and is shown, never kept. A provider that cannot answer is listed all the same, saying why; one that fails while
 searching does not fail the others.
 
 | Setting | Means |
@@ -237,7 +257,27 @@ searching does not fail the others.
 | `jmouse.cad.parts.limit` (24) | how many candidates each provider answers with at most |
 | `jmouse.cad.parts.nexar.client-id`, `.client-secret` | a Nexar application's client; without it Nexar is `NOT_CONFIGURED` |
 | `jmouse.cad.parts.nexar.limit` (10), `.timeout` (8 s), `.token-url`, `.api-url` | Nexar counts every part a search returns against the application's allowance |
+| `jmouse.cad.parts.suppliers.mouser.api-key` | Mouser's search key; without it Mouser is `NOT_CONFIGURED` |
+| `jmouse.cad.parts.suppliers.digi-key.client-id`, `.client-secret` | a DigiKey application's client; without it DigiKey is `NOT_CONFIGURED` |
+| `jmouse.cad.parts.suppliers.digi-key.site`, `.language`, `.currency` (`US`, `en`, `USD`) | which of DigiKey's sites answers, and in what |
+| `jmouse.cad.parts.suppliers.limit` (10), `.timeout` (8 s), `.mouser.address`, `.digi-key.address` | how many offers a search asks each for; where each is called, blank for its own |
 | `jmouse.cad.kicad.symbol-folders`, `.footprint-folders` | KiCad's installed libraries, read on a virtual thread the first time they are asked about |
+
+⚠️ **A pcb's bill of materials is priced by the export `supplier-materials`** (`POST /exchange/supplier-materials/export`,
+the same plugin): a CSV with one row a kind of part at one distributor, the buying quantity, its price break and the total;
+`notes` say what each distributor came to and who could not be asked. How many pcbs it buys for is the plugin's setting
+`pcbs`. Only the number in the component's head (`meta { part-number: TL072CDR }`) is looked for, and only an offer naming
+exactly that number counts: a kind with no number reads `No part number`, its value is never searched for. With no
+distributor configured the export refuses, saying what each lacks.
+
+⚠️ **The rule sets of `GET /pcb-rules` include pcb houses' own** (`jlcpcb-two-layer`, `jlcpcb-multilayer`, `pcbway-standard`): data in
+`pcb-rules.sht`, from each house's published capabilities. **An ODB++ job carries its nets**: `steps/<step>/eda/data` and the
+`comp_+_top`, `comp_+_bot` components.
+
+Git's routes under `/plugins/cad-git/mounts/{mount}`, beside `status`, `initialize`, `log`, `diff`, `commit`: `GET /branches`, `POST /branches`
+`{ "name" }` (made at the head, switched to, changes kept), `POST /switch` `{ "name" }` (409 while a tracked file differs), `POST /restore`
+`{ "path", "version" }` (409 when the file is no longer that version), `GET /commits/{id}`, `GET /commits/{id}/diff?path=`. A commit is named by
+its full id. A repository whose own configuration declares a `filter` is refused what rewrites the tree.
 
 | Method | Path | Takes | Answers | Capability | State |
 |---|---|---|---|---|---|
@@ -287,6 +327,32 @@ engine's seam: the plugin's capabilities `cad-explorer:read` and `cad-explorer:w
 its mounts and at the owner for an owner's — the host maps them as it maps the engine's. A mount the reader may not read
 is not listed and answers 404. A `key` is where a thing is from its mount's top — `notes/readme.txt` —; one that would
 climb out is refused (400). Every listing reads the folder again: what changed on the disk is there at the next look.
+
+**A folder that belongs to an owner is that place's** (`PlaceSource`, ADR 0001): every `.jm` file in it is a document, found before the store's
+by whatever asks the place for one — a run, a compiled part, the palette, the footprints, an export — with nothing imported. `GET /mounts/{mount}/documents`
+answers `{ owner, documents: [{ key, slug, title, kind, source }], unread: [{ key, problem }] }`: a file that does not read, or says an address another
+already says, is told apart and left out. `GET /mounts/{mount}/document?key=` answers a file as a document's detail, `summary.location.kind` being
+`MOUNTED`; a file that does not read is refused in the language's words. A document so held has no revisions, so a reference pinning one (`slug@3`) is the store's.
+`POST /exchange/{format}/export` finds what a text names at the `owner` it is sent with.
+
+⚠️ **A factory's files of a pcb are refused while its checks find an error** (since 2026-11-11). Each format says what its files are for (`DocumentExport.purpose()`: `FABRICATION`, `EXCHANGE`, `DOCUMENTATION`); an export of purpose `FABRICATION` — Gerber, JLCPCB, PCBWay, IPC-2581, ODB++ — runs `PcbChecks` first and answers 400 naming the errors. A KiCad project, a 3D model, drawings and bills are written as the pcb stands. A release runs each of its formats so.
+
+`PUT /mounts/{mount}/document?key=&version=` writes a document into its file, the body its text: read first, so a file never holds what does not read; a `version`
+that is no longer the file's is refused (409), and none says the file is new. Git adds `GET`, `POST /remote` `{ "address" }` (only `https://`, no credentials) `POST /pull` (only forward; refused where the histories went two ways or a change in hand stands in the way) and `POST /push`:
+the current branch, never forced, its token sent only to the host the address really goes to; a repository with its own `pre-push`, `hooksPath` or `http` section is refused.
+
+**A plugin's keys** are settings of kind `SECRET`: `GET /plugin-settings` tells a key's `secret` state (`NONE`, `DEPLOYED`, `KEPT`), never its value, and `keepsSecrets` whether one can be kept:
+the host's `jmouse.cad.secret-key`, base64 of 32 bytes. `PUT /plugin-settings/{plugin}` seals one; `null` takes it away. Each setting may name a `group`, each plugin its deployment's `facts`, told only to a reader who may set the engine up.
+
+### 2.11 Datasheets — the plugin `cad-datasheets`
+
+PDFs kept beside a document, as files it holds (`jmouse-cad-plugin-datasheets`); keeping one changes nothing in its text, so a shipped part has its
+datasheet without a copy. Under `/plugins/cad-datasheets/documents/{address}`: `GET` answers `{ keeping, files: [{ name, size }], links }`, `keeping` being
+`CHANGEABLE`, `READ_ONLY` or `NOT_KEPT` (the installation keeps no files), `links` the web addresses its `meta` calls `Datasheet` in `links: { … }`.
+`GET /file?name=` serves it `inline`, `application/pdf`, `nosniff`. `PUT /file?name=` takes the bytes as the body: 400 for a name that is a path or of another
+kind, or a body that does not begin as a PDF, 409 for a name it already holds. `DELETE /file?name=` takes it away. With `?owner=TYPE:id` a part held in a folder of that place answers too: its datasheets are the PDFs beside its file named after it, and `GET /plugins/cad-mesh/models/{address}/mesh?owner=` reads a model from the files beside it. Reading follows the document; changing
+follows writing it, and for a shipped document the catalogue's curators. Deleting a document lets go of every file it holds. Without the plugin a PDF is
+refused as an upload and no part has such a section.
 
 | Method | Path (under `/plugins/cad-explorer`) | Takes | Answers | State |
 |---|---|---|---|---|
@@ -389,7 +455,7 @@ it last.
 | `version` | the optimistic version a `PUT` sends back (`?version=7`) |
 | `meta` | every `meta` field the text writes besides summary, category and tags, as written |
 | `sourceRevision` | the revision `source` is |
-| `model` | the text read by the engine — `Component`, `Family`, `Circuit`, `SymbolDrawing`, `FootprintDrawing` or `BoardDrawing`, which `summary.kind` names; null when the text does not read (`summary.problem` says why) or is of a kind the engine keeps no model of (`functions`, `category`) |
+| `model` | the text read by the engine — `Component`, `Family`, `Circuit`, `SymbolDrawing`, `FootprintDrawing` or `PcbDrawing`, which `summary.kind` names; null when the text does not read (`summary.problem` says why) or is of a kind the engine keeps no model of (`functions`, `category`) |
 | `writable` | whether the reader may write its next revision — told before a save is tried |
 
 A **`Component`** model (abridged — every field of `org.jmouse.cad.component.Component`):
@@ -739,23 +805,23 @@ holding a line of its own is not edited yet.
 `POST /language/read { source }` answers `ReadText` — `{ kind, slug, title, model, parameters, presentation, problems }`: an
 unsaved text read as the document it would be, what a draft is previewed by. `presentation` — here and on every
 `DocumentDetail` — says how the document is shown, read off its model: `drawing` (a symbol, portrait, frame), `part` (a
-component), `instrument` (a circuit), `footprint`, `board`; null for one that is not shown.
+component), `instrument` (a circuit), `footprint`, `pcb`; null for one that is not shown.
 
 #### The canvases
 
 A canvas sends the text it holds and **what it drew, as the model it was answered** — a `SymbolDrawing`, a
-`FootprintDrawing`, a `BoardDrawing` from `/language/drawn` or a document's `model`, or a `CircuitSheet` made of a
+`FootprintDrawing`, a `PcbDrawing` from `/language/drawn` or a document's `model`, or a `CircuitSheet` made of a
 circuit's `model` —, changed. The server builds every drawn line on the grammar that reads it, reads every value an
 author wrote (a property, a range, a formula) with the language, and writes the drawing into the tree beside what is
 written:
 
 | Canvas | Lines matched | So |
 |---|---|---|
-| `drawing`, `footprint`, `board` | by **class and place** — the third `pin` drawn against the third `pin` written | a pad moved rewrites that pad's line alone |
+| `drawing`, `footprint`, `pcb` | by **class and place** — the third `pin` drawn against the third `pin` written | a pad moved rewrites that pad's line alone |
 | `circuit` | by **key**, inside its `parts`, `layout` and `probes` blocks — `R1`, `W3`, `CH1`, `frame`, `time` | a part added is written after the one drawn before it |
 
-A board's offered sizes are lines of their own, drawn with it: `sizes tracks 0.25, 0.4` and `sizes vias drill 0.3, 0.4
-diameter 0.6, 0.8` — each via's drill and diameter in the same place —, carried as `BoardDrawing.sizes`.
+A pcb's offered sizes are lines of their own, drawn with it: `sizes tracks 0.25, 0.4` and `sizes vias drill 0.3, 0.4
+diameter 0.6, 0.8` — each via's drill and diameter in the same place —, carried as `PcbDrawing.sizes`.
 
 A line the drawing did not change **stays as written**, comments above and beside it included; a changed one takes its
 place and keeps its comments; one fewer drawn takes one away. What no canvas draws — `meta`, declarations, a circuit's

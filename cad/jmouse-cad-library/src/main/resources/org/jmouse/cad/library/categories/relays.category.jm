@@ -1,0 +1,8 @@
+category:relays("Relays") {
+    meta {
+        category: electromechanical
+        order: 2
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

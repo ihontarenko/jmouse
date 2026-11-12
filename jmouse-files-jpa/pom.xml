@@ -84,7 +84,7 @@
              the binder's source is a property tree, so a JSON string would still need a parser to
              become one — and jmouse-ai-jpa already stores documents exactly this way. -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 

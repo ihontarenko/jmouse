@@ -1,41 +1,22 @@
 package org.jmouse.web.mvc.method.argument;
 
-import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
-import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.Model;
+import org.jmouse.web.mvc.RequestModel;
+import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 
-import static org.jmouse.web.http.RequestAttributes.MVC_RESULT_ATTRIBUTE;
+/** Resolves view state directly from request scope; invocation results are never used as a mutable context. */
+public final class ModelArgumentResolver extends AbstractArgumentResolver {
 
-public class ModelArgumentResolver extends AbstractArgumentResolver {
-
-    /**
-     * ✅ Supports parameters of type {@link Model}.
-     *
-     * @param parameter the method parameter to check
-     * @return true if the parameter is assignable to Model
-     */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.isParameter() && parameter.getParameterType() == Model.class;
     }
 
-    /**
-     * 📦 Returns the {@link Model} instance from the current proxyInvocation result.
-     *
-     * @param parameter the target parameter
-     * @param requestContext   the current web request context (includes headers, session, etc.)
-     * @param mappingResult the mapping result
-     * @return the current Model instance
-     */
     @Override
-    public Object resolveArgument(
-            MethodParameter parameter,
-            RequestContext requestContext,
-            MappingResult mappingResult
-    ) {
-        return requestContext.getRequestAttribute(MVC_RESULT_ATTRIBUTE, MVCResult.class, true).getModel();
+    public Object resolveArgument(MethodParameter parameter, RequestContext context, MappingResult mapping) {
+        return RequestModel.get(context.request());
     }
 }

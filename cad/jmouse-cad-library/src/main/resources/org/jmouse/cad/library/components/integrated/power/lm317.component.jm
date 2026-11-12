@@ -8,8 +8,10 @@ component:lm317("LM317", type: regulator) {
         summary: "Adjustable positive regulator, 1.25 V reference, up to 1.5 A"
         source: "TI LM317 datasheet SLVS044Z, Rev. Z"
         package: "TO-220"
-        category: circuits
+        category: power
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -27,9 +29,9 @@ component:lm317("LM317", type: regulator) {
     pin:output(analog, output, 2, "regulated output; tab is also output")
     pin:input(power, 3, "unregulated input")
 
-    footprint(to-220-3-vertical-footprint)
+    footprint("FP.TO220:3-V")
 
-    symbol(uses: adjustable-regulator-symbol) {
+    symbol(uses: "SY.REGULATOR:LINEAR-ADJUSTABLE") {
         bind:failed(failed)
     }
 
@@ -80,7 +82,7 @@ component:lm317("LM317", type: regulator) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-220-portrait) {
+    portrait(uses: "PT.TO220:3") {
         bind:marking("LM317")
     }
 }

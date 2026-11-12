@@ -4,10 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.Scope;
 import org.jmouse.web.context.WebContextException;
 
-
 public interface RequestAttributes {
-
-    String MVC_RESULT_ATTRIBUTE     = RequestAttributes.class.getName() + ".MVC_RESULT";
     String PRODUCES_TYPES_ATTRIBUTE = RequestAttributes.class.getName() + ".PRODUCES_TYPES";
 
     /**
@@ -76,13 +73,17 @@ public interface RequestAttributes {
      * @return appropriate {@link RequestAttributes} implementation
      * @throws WebContextException if scope is unsupported
      */
-    static RequestAttributes ofRequest(Scope scope, HttpServletRequest request, boolean allowSessionCreation) {
+    static RequestAttributes ofRequest(
+        Scope scope,
+        HttpServletRequest request,
+        boolean allowSessionCreation
+    ) {
         return switch (scope.id()) {
             case REQUEST -> new WebHttpRequest(request);
             case SESSION -> new WebHttpSession(request, allowSessionCreation);
             default -> throw new WebContextException(
-                    "Unsupported scope ID '%s' type. Available only REQUEST and SESSION".formatted(scope.id()));
+                "Unsupported scope ID '%s' type. Available only REQUEST and SESSION".formatted(scope.id())
+            );
         };
     }
-
 }

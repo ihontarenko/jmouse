@@ -8,8 +8,10 @@ component:seven-segment-display("Seven-segment display", type: display) {
         summary: "A red seven-segment digit and its decimal point, common cathode"
         source: "a typical red LED die, as led-red: VF about 2.0 V at 20 mA, VR 5 V; common cathode"
         package: "0.56 inch digit, 10 pins"
-        category: circuits
+        category: optoelectronics
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -43,10 +45,23 @@ component:seven-segment-display("Seven-segment display", type: display) {
     figure:light_point(100 * max(0, segment_point.current) / I_rated, unit: %, "of the decimal point's rated brightness")
     figure:overcurrent(100 * max(abs(segment_a.current), max(abs(segment_b.current), max(abs(segment_c.current), max(abs(segment_d.current), max(abs(segment_e.current), max(abs(segment_f.current), max(abs(segment_g.current), abs(segment_point.current)))))))) / I_forward_maximum, unit: %, "of a segment's rated current")
 
-    symbol(uses: seven-segment-symbol)
+    footprint("FP.DISP:7SEG-10-W15.24") {
+        pad:1(segment_e)
+        pad:2(segment_d)
+        pad:3(cathode)
+        pad:4(segment_c)
+        pad:5(segment_point)
+        pad:6(segment_b)
+        pad:7(segment_a)
+        pad:8(cathode)
+        pad:9(segment_f)
+        pad:10(segment_g)
+    }
+
+    symbol(uses: "SY.DISPLAY:SEVEN-SEGMENT")
 
     # How it looks in the hand: the digit itself, its segments lit by the same figures as the symbol.
-    portrait(uses: seven-segment-portrait)
+    portrait(uses: "PT.DISPLAY:SEVEN-SEGMENT-0.56")
 
     node:junction_segment_a
     node:junction_segment_b
@@ -79,7 +94,7 @@ component:seven-segment-display("Seven-segment display", type: display) {
     expect("a segment's forward voltage at 20 mA", from: "VF 2.0 V typical, 2.5 V at most at 20 mA, as a red LED") {
         bench(for: 1 ms) {
             part:I1(current-source, [lit, 0], I_output: 20 mA)
-            # The other segments are tied off to the cathode, as unused ones are on a board: dark, and no node left floating.
+            # The other segments are tied off to the cathode, as unused ones are on a pcb: dark, and no node left floating.
             part:U1(self, [segment_a: lit, segment_b: 0, segment_c: 0, segment_d: 0, segment_e: 0, segment_f: 0, segment_g: 0, segment_point: 0, cathode: 0])
         }
         measure(operating, lit)

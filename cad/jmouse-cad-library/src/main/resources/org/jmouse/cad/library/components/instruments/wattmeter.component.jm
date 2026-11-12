@@ -2,7 +2,9 @@ component:wattmeter("Wattmeter", type: meter) {
     meta {
         designator: WM
         summary: "Reads the power a load takes: its current through in and out, its voltage across plus and minus"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:R_input(10 MOhm, "voltage input resistance: what it draws through, on a realistic bench")
     pin:in(analog, 1, "current in")
@@ -18,7 +20,7 @@ component:wattmeter("Wattmeter", type: meter) {
     lead:plus(red, stripes: black)
     lead:minus(black, stripes: white)
     reading:reading((plus - minus) * in.current, unit: W, signal)
-    symbol(uses: wattmeter-symbol) {
+    symbol(uses: "SY.METER:WATTMETER") {
         bind:a(pin: in)
         bind:b(pin: out)
         bind:c(pin: plus)

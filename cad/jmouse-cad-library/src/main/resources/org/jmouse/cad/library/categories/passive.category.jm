@@ -1,0 +1,8 @@
+category:passive("Passive") {
+    meta {
+        summary: "Resistors, capacitors, inductors and the other parts that only take energy"
+        order: 10
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

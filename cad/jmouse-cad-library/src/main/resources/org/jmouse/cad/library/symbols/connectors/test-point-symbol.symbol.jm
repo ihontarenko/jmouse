@@ -2,7 +2,7 @@ symbol:test-point-symbol("Test point") {
     meta {
         summary: "Test point, as drawn on a schematic"
         code: "SY.CONNECTOR:TEST-POINT"
-        category: circuits
+        category: connectors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

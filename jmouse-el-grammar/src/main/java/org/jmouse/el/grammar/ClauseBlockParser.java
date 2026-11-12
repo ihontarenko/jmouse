@@ -130,8 +130,10 @@ public class ClauseBlockParser extends BlockParser<ClauseBlockNode> implements L
         }
         boolean term = (cursor.isCurrent(BasicToken.T_OPEN_PAREN) || cursor.isCurrent(BasicToken.T_COLON))
                 && SourceReading.touches(cursor, opening, cursor.current());
-        return new ClauseBlockNode(word, term ? header.headerTerm(cursor, context, opening)
-                : header.header(cursor, context, opening, prefixes));
+        if (!term || !prefixes.isEmpty()) {
+            throw GrammarRefusal.at(cursor, opening, "a block's head is written as a term: " + header.grammar().shape() + " { … }");
+        }
+        return new ClauseBlockNode(word, header.headerTerm(cursor, context, opening));
     }
 
     @Override
@@ -148,6 +150,10 @@ public class ClauseBlockParser extends BlockParser<ClauseBlockNode> implements L
         }
         node.open();
         super.parseBlock(cursor, node, context);
+        if (node.onlyGathersTerms()) {
+            throw GrammarRefusal.here(cursor, "the terms of '" + word + "' stand in the body that holds them, without '"
+                    + word + " { … }'");
+        }
     }
 
     @Override

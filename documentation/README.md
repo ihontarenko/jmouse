@@ -160,7 +160,5 @@ Coverage: **94 public reactor modules**, **76 new module manuals** in this docum
 | Module | Reason |
 |---|---|
 | `jmouse-dependencies` | BOM; dependency/version management, no runtime API. |
-| `pet-gallery` | Reference/demo application, not a public library. |
-| `wep-app` | Reference/demo application, not a public library. |
 | `jmouse-ai-sandbox` | Executable reference application, not a published library. |
 | `jmouse-vendor` | Vendored CGLIB/ASM shade, currently outside the reactor; no separate consumer API manual. |

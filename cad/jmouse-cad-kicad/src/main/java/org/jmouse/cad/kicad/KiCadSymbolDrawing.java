@@ -1,28 +1,25 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.document.TechnicalClass;
+import org.jmouse.cad.exchange.imported.ImportedNames;
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.document.MetaLineNode;
+import org.jmouse.cad.exchange.imported.ImportedPins;
+import org.jmouse.cad.exchange.imported.RoundedPath;
+import org.jmouse.cad.exchange.imported.SymbolCanvas;
 import org.jmouse.cad.document.MetaNode;
-import org.jmouse.cad.document.PathTextNode;
-import org.jmouse.cad.schematic.DrawingGrammar;
+import org.jmouse.cad.document.Provenance;
 import org.jmouse.cad.schematic.SchematicModule;
-import org.jmouse.el.grammar.AssignedNode;
-import org.jmouse.el.grammar.ClauseBlockNode;
-import org.jmouse.el.grammar.ClauseLineNode;
-import org.jmouse.el.grammar.LineBuilder;
-import org.jmouse.el.grammar.Nodes;
 import org.jmouse.el.node.Expression;
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 import org.jmouse.kicad.symbol.KiCadPin;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
-import org.jmouse.svg.path.node.PathData;
 
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,36 +34,12 @@ import java.util.regex.Pattern;
  */
 public final class KiCadSymbolDrawing {
 
-    /** KiCad's 1.27 mm grid is twenty drawing units. */
-    static final double UNITS_PER_MILLIMETRE = 20 / 1.27;
-
-    /** The grid a symbol's size is rounded up to. */
-    private static final double GRID = 20;
-
-    /** A coordinate to a hundredth of a drawing unit: KiCad's nanometres are far below what a drawing shows. */
-    private static final int PLACES = 2;
-
-    /** What a pin named by its KiCad number starts with: {@code pin1}, {@code pinA}. */
-    private static final String PIN_PREFIX = "pin";
-
-    /** The radius of the bubble an inverted pin carries at the body, millimetres. */
-    private static final double BUBBLE_RADIUS = 0.635;
+    /** What every slug of a document converted from KiCad opens with. */
+    static final String KICAD = "kicad";
 
     /** A sub-symbol's name: {@code NE5532_2_1} is unit 2 in style 1; unit 0 is every unit's, style 2 De Morgan's. */
     private static final Pattern BODY = Pattern.compile(".*_(\\d+)_(\\d+)$");
     private static final int DE_MORGAN = 2;
-
-    /** What an outline KiCad fills with its line colour ({@code fill (type outline)}) is filled with: the drawing's ink. */
-    private static final String INK = "signal";
-
-    /**
-     * What an outline KiCad fills as a body ({@code fill (type background)}) is filled with: the body fill of the drawing
-     * theme — pale yellow on drafting paper —, its outline stroked over it.
-     */
-    private static final String BODY_FILL = "body";
-
-    private static final String FILL = "fill";
-    private static final String PATH = "path";
 
     private KiCadSymbolDrawing() {
     }
@@ -74,7 +47,7 @@ public final class KiCadSymbolDrawing {
     /** The units a symbol draws apart, in order: {@code [1]} for a symbol of one. */
     public static List<Integer> units(KiCadSymbolDefinition symbol) {
         TreeSet<Integer> units = new TreeSet<>();
-        for (KiCadList body : symbol.tree().lists("symbol")) {
+        for (SExpressionList body : symbol.tree().lists("symbol")) {
             Matcher name = BODY.matcher(body.word(1));
             if (name.matches() && Integer.parseInt(name.group(1)) > 0) {
                 units.add(Integer.parseInt(name.group(1)));
@@ -89,17 +62,9 @@ public final class KiCadSymbolDrawing {
         return String.valueOf((char) ('A' + unit - 1));
     }
 
-    /** What a pin is called here: {@code pin} and its number, the package's name for it — {@code pin1}, {@code pinA3}. */
+    /** What a KiCad pin is called here: by its number, as every import names a pin ({@link ImportedPins#nameOf}). */
     public static String pinName(KiCadPin pin) {
-        return PIN_PREFIX + pin.number().replaceAll("[^A-Za-z0-9]", "_");
-    }
-
-    /**
-     * The KiCad number a pin named by {@link #pinName} stands for: {@code pinA} is {@code A}. A sign the name could not
-     * keep was written as {@code _} and stays one.
-     */
-    public static Optional<String> numberOfPinName(String name) {
-        return name.matches(PIN_PREFIX + "[A-Za-z0-9_]+") ? Optional.of(name.substring(PIN_PREFIX.length())) : Optional.empty();
+        return ImportedPins.nameOf(pin.number());
     }
 
     /**
@@ -109,10 +74,8 @@ public final class KiCadSymbolDrawing {
     public static String componentSlugOf(KiCadSymbolDefinition symbol) {
         // A part library of its own is named as its one part (AD5292BRUZ-100-RL7:AD5292BRUZ-100-RL7): said once.
         String library = symbol.name().contains(":") ? symbol.name().substring(0, symbol.name().indexOf(':')) : "";
-        String named = library.equalsIgnoreCase(titleOf(symbol)) ? titleOf(symbol) : symbol.name();
-        // A sign that opens a name is a word: power:+12V and power:-12V are two symbols.
-        String signed = named.replaceAll("(^|:)\\+", "$1plus-").replaceAll("(^|:)-", "$1minus-");
-        return "kicad-" + signed.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+        return library.equalsIgnoreCase(titleOf(symbol)) ? ImportedNames.slug(KICAD, titleOf(symbol))
+                : ImportedNames.slug(KICAD, library, titleOf(symbol));
     }
 
     /** The KiCad library a symbol comes from: {@code Regulator_Linear} of {@code Regulator_Linear:LM317_TO-220}; empty for none. */
@@ -125,6 +88,30 @@ public final class KiCadSymbolDrawing {
     public static String titleOf(KiCadSymbolDefinition symbol) {
         return symbol.name().substring(symbol.name().indexOf(':') + 1);
     }
+
+    /**
+     * The code a unit's symbol is named by, and every component drawn with it names it by: its library and name in
+     * capitals — {@code Device:R} is {@code SY.DEVICE:R}, a dual's second unit {@code …-UNIT-B}.
+     */
+    public static String codeOf(KiCadSymbolDefinition symbol, int unit) {
+        return codeOf(symbol.name(), units(symbol).size() > 1 ? Optional.of(unitLetter(unit)) : Optional.empty());
+    }
+
+    /** The code of a symbol by its KiCad id — {@code Device:R} — and the letter of its unit where it has several. */
+    public static String codeOf(String libraryId, Optional<String> unit) {
+        int colon = libraryId.indexOf(':');
+        String library = colon < 0 ? "" : libraryId.substring(0, colon);
+        String name = libraryId.substring(colon + 1) + unit.map(letter -> " unit " + letter).orElse("");
+        return ImportedNames.code(TechnicalClass.SYMBOL, library.isEmpty() ? KICAD : library, name);
+    }
+
+    /** The unit a symbol document is of, as its slug says it ({@link #slugOf}); empty for a symbol of one unit. */
+    public static Optional<String> unitOfSlug(String slug) {
+        Matcher unit = UNIT_IN_SLUG.matcher(slug);
+        return unit.find() ? Optional.of(unit.group(1).toUpperCase(Locale.ROOT)) : Optional.empty();
+    }
+
+    private static final Pattern UNIT_IN_SLUG = Pattern.compile("-unit-([a-z])-symbol$");
 
     /**
      * The slug of a unit's symbol, a symbol's as the catalogue's are: {@code Device:R} is {@code kicad-device-r-symbol},
@@ -140,76 +127,37 @@ public final class KiCadSymbolDrawing {
      *
      * @param pinNames the name each pin is drawn by, by its number, where a component names it — {@code 1} is
      *                 {@code ref} on a TL431 —; a pin it does not name is {@link #pinName}
+     * @param installed whether the symbol is read from KiCad's installed libraries, and so is theirs
      */
     public static DocumentNode documentOf(KiCadSymbolDefinition symbol, int unit, Map<String, String> pinNames,
-                                          KiCadLibraries libraries) {
+                                          KiCadLibraries libraries, boolean installed) {
         String title = titleOf(symbol) + (units(symbol).size() > 1 ? " unit " + unitLetter(unit) : "");
         String summary = firstOf(symbol.property("Description"), symbol.property("ki_description"), symbol.name())
                 + ", drawn as KiCad draws it";
-        DocumentNode document = new DocumentNode(SchematicModule.SYMBOL, title, slugOf(symbol, unit), true, null, 1);
-        MetaNode meta = new MetaNode();
-        meta.addExpression(MetaLineNode.of(MetaNode.SUMMARY, Nodes.text(summary)));
-        meta.addExpression(MetaLineNode.of(MetaNode.CATEGORY, Nodes.word(libraries.category())));
-        meta.addExpression(MetaLineNode.of(MetaNode.TAGS, Nodes.words(libraries.symbolTags())));
-        meta.addExpression(MetaLineNode.of(MetaNode.SOURCE, Nodes.text(KiCadSources.symbol(symbol.name()))));
+        DocumentNode document = new DocumentNode(SchematicModule.SYMBOL, title, slugOf(symbol, unit), null, 1);
+        Provenance provenance = libraries.provenance(KiCadSources.symbol(symbol.name()), installed);
+        MetaNode meta = MetaNode.filed(summary, codeOf(symbol, unit), libraries.libraryCategory(provenance), libraries.symbolTags());
+        provenance.writeInto(meta);
         document.addExpression(meta);
         drawing(symbol, unit, pinNames).forEach(document::addExpression);
         return document;
     }
 
     /** One unit of a symbol as the lines of its drawing, each pin drawn by the name {@code pinNames} gives its number. */
-    private static List<Expression> drawing(KiCadSymbolDefinition symbol, int unit,
-                                                               Map<String, String> pinNames) {
+    private static List<Expression> drawing(KiCadSymbolDefinition symbol, int unit, Map<String, String> pinNames) {
         double[] centre = centreOf(symbol, unit);
-        Shapes shapes = new Shapes(centre[0], centre[1]);
-        outline(symbol, unit, shapes);
+        SymbolCanvas canvas = new SymbolCanvas(centre[0], centre[1]);
+        outline(symbol, unit, canvas);
         boolean namesShown = symbol.tree().list("pin_names").map(names -> !names.says("hide")).orElse(true);
-        List<ClauseLineNode> pins = new ArrayList<>();
         for (KiCadPin pin : symbol.pinsOf(unit)) {
-            shapes.pin(pin);
-            double[] at = shapes.point(pin.at());
+            pinLine(canvas, pin);
+            double[] at = point(canvas, pin.at());
             boolean named = namesShown && !pin.name().equals(KiCadPin.NO_NAME) && !pin.name().isBlank();
-            LineBuilder line = LineBuilder.line(DrawingGrammar.PIN)
-                    .slot("name", Nodes.name(pinNames.getOrDefault(pin.number(), pinName(pin))))
-                    .clause("at", Nodes.point(at[0], at[1]));
-            if (named) {
-                line.ending(Nodes.text(pin.name()));
-            }
-            pins.add(line.build());
+            canvas.pin(pinNames.getOrDefault(pin.number(), pinName(pin)), at, pin.length() > 0 ? point(canvas, bodyEndOf(pin)) : null, named ? pin.name() : null);
         }
-        List<ClauseLineNode> labels = new ArrayList<>();
-        label(symbol, "Reference", "name", shapes).ifPresent(labels::add);
-        label(symbol, "Value", "value", shapes).ifPresent(labels::add);
-        List<Expression> lines = new ArrayList<>();
-        lines.add(LineBuilder.line(DrawingGrammar.SIZE).slot("extent", Nodes.extent(shapes.width(), shapes.height())).build());
-        if (!shapes.strokes.isEmpty()) {
-            lines.add(element(null, shapes.strokes.build(), null));
-        }
-        lines.addAll(pins);
-        lines.addAll(labels);
-        // The bodies first, under what is filled solid: a body is the ground a part's marks stand on.
-        for (int index = 0; index < shapes.bodies.size(); index++) {
-            lines.add(element("body_" + (index + 1), shapes.bodies.get(index).build(), BODY_FILL));
-        }
-        for (int index = 0; index < shapes.fills.size(); index++) {
-            lines.add(element("filled_" + (index + 1), shapes.fills.get(index).build(), INK));
-        }
-        return lines;
-    }
-
-    /** {@code path [name] "data" [{ fill = … }]}. */
-    private static ClauseBlockNode element(String name, PathData path, String fill) {
-        LineBuilder head = LineBuilder.line(DrawingGrammar.element(PATH));
-        if (name != null) {
-            head.slot("name", Nodes.name(name));
-        }
-        ClauseBlockNode element = new ClauseBlockNode(PATH, head.ending(new PathTextNode(path)).build());
-        if (fill != null) {
-            element.open();
-            element.addExpression(LineBuilder.line(DrawingGrammar.PROPERTY).slot("name", Nodes.name(FILL))
-                    .slot("value", new AssignedNode(Nodes.formula(Nodes.word(fill)))).build());
-        }
-        return element;
+        label(symbol, "Reference", "name", canvas);
+        label(symbol, "Value", "value", canvas);
+        return canvas.lines();
     }
 
     /**
@@ -218,183 +166,116 @@ public final class KiCadSymbolDrawing {
      * drawing in one quarter of its own box. The drawing is moved by this, and a part placed with it by the same turned.
      */
     public static double[] centreOf(KiCadSymbolDefinition symbol, int unit) {
-        Shapes measured = new Shapes(0, 0);
+        SymbolCanvas measured = new SymbolCanvas(0, 0);
         outline(symbol, unit, measured);
         symbol.pinsOf(unit).forEach(pin -> {
-            measured.pin(pin);
-            measured.point(pin.at());
+            pinLine(measured, pin);
+            point(measured, pin.at());
         });
-        if (measured.minimumX > measured.maximumX) {
-            return new double[] {0, 0};
-        }
-        return new double[] {Math.round((measured.minimumX + measured.maximumX) / 2 / GRID) * GRID,
-                Math.round((measured.minimumY + measured.maximumY) / 2 / GRID) * GRID};
+        return measured.centre();
     }
 
     /** A unit's body — every shape of its own and of every unit's, the De Morgan alternative left out. */
-    private static void outline(KiCadSymbolDefinition symbol, int unit, Shapes shapes) {
-        for (KiCadList body : symbol.tree().lists("symbol")) {
+    private static void outline(KiCadSymbolDefinition symbol, int unit, SymbolCanvas canvas) {
+        for (SExpressionList body : symbol.tree().lists("symbol")) {
             Matcher name = BODY.matcher(body.word(1));
             int bodyUnit = name.matches() ? Integer.parseInt(name.group(1)) : 0;
             int style = name.matches() ? Integer.parseInt(name.group(2)) : 1;
             if (style == DE_MORGAN || (bodyUnit != 0 && bodyUnit != unit)) {
                 continue;
             }
-            body.lists("polyline").forEach(shapes::polyline);
-            body.lists("rectangle").forEach(shapes::rectangle);
-            body.lists("circle").forEach(shapes::circle);
-            body.lists("arc").forEach(shapes::arc);
-            body.lists("bezier").forEach(shapes::bezier);
+            body.lists("polyline").forEach(shape -> polyline(canvas, shape));
+            body.lists("rectangle").forEach(shape -> rectangle(canvas, shape));
+            body.lists("circle").forEach(shape -> circle(canvas, shape));
+            body.lists("arc").forEach(shape -> arc(canvas, shape));
+            body.lists("bezier").forEach(shape -> bezier(canvas, shape));
         }
     }
 
-    private static Optional<ClauseLineNode> label(KiCadSymbolDefinition symbol, String property, String subject,
-                                                  Shapes shapes) {
-        return symbol.tree().lists("property").stream().filter(list -> list.word(1).equals(property)).findFirst()
-                .flatMap(list -> list.list("at")).map(at -> {
-                    double[] point = shapes.point(KiCadPoint.of(at));
-                    return LineBuilder.line(DrawingGrammar.LABEL).slot("subject", Nodes.word(subject))
-                            .clause("at", Nodes.point(point[0], point[1])).build();
-                });
+    private static void label(KiCadSymbolDefinition symbol, String property, String subject, SymbolCanvas canvas) {
+        symbol.tree().lists("property").stream().filter(list -> list.word(1).equals(property)).findFirst()
+                .flatMap(list -> list.list("at")).ifPresent(at -> canvas.label(subject, point(canvas, KiCadPoint.of(at))));
     }
 
-    /** The paths of a unit, gathered shape by shape, and how far it reaches. */
-    private static final class Shapes {
-
-        private final RoundedPath strokes = new RoundedPath(PLACES);
-        private final List<RoundedPath> fills = new ArrayList<>();
-        /** The outlines KiCad fills as a part's body: filled with the theme's body fill, and stroked. */
-        private final List<RoundedPath> bodies = new ArrayList<>();
-        /** Where the drawing's origin stands in KiCad's, in drawing units: every point is drawn from it. */
-        private final double originX;
-        private final double originY;
-        private double reachX;
-        private double reachY;
-        private double minimumX = Double.POSITIVE_INFINITY;
-        private double maximumX = Double.NEGATIVE_INFINITY;
-        private double minimumY = Double.POSITIVE_INFINITY;
-        private double maximumY = Double.NEGATIVE_INFINITY;
-
-        Shapes(double originX, double originY) {
-            this.originX = originX;
-            this.originY = originY;
+    private static void polyline(SymbolCanvas canvas, SExpressionList shape) {
+        List<double[]> points = points(canvas, shape);
+        if (points.isEmpty()) {
+            return;
         }
-
-        void polyline(KiCadList shape) {
-            List<double[]> points = points(shape);
-            if (points.isEmpty()) {
-                return;
-            }
-            RoundedPath path = target(shape);
-            path.moveTo(points.getFirst()[0], points.getFirst()[1]);
-            for (double[] point : points.subList(1, points.size())) {
-                path.lineTo(point[0], point[1]);
-            }
+        RoundedPath path = canvas.path(fillOf(shape));
+        path.moveTo(points.getFirst()[0], points.getFirst()[1]);
+        for (double[] point : points.subList(1, points.size())) {
+            path.lineTo(point[0], point[1]);
         }
+    }
 
-        void rectangle(KiCadList shape) {
-            double[] start = point(KiCadPoint.of(shape.requireList("start")));
-            double[] end = point(KiCadPoint.of(shape.requireList("end")));
-            target(shape).moveTo(start[0], start[1]).horizontalTo(end[0]).verticalTo(end[1]).horizontalTo(start[0]).close();
-        }
+    private static void rectangle(SymbolCanvas canvas, SExpressionList shape) {
+        double[] start = point(canvas, KiCadPoint.of(shape.requireList("start")));
+        double[] end = point(canvas, KiCadPoint.of(shape.requireList("end")));
+        canvas.path(fillOf(shape)).moveTo(start[0], start[1]).horizontalTo(end[0]).verticalTo(end[1]).horizontalTo(start[0]).close();
+    }
 
-        void circle(KiCadList shape) {
-            double[] center = point(KiCadPoint.of(shape.requireList("center")));
-            double radius = shape.requireList("radius").number(1) * UNITS_PER_MILLIMETRE;
-            reach(center[0] - radius, center[1] - radius);
-            reach(center[0] + radius, center[1] + radius);
-            target(shape).circle(center[0], center[1], radius);
-        }
+    private static void circle(SymbolCanvas canvas, SExpressionList shape) {
+        double[] center = point(canvas, KiCadPoint.of(shape.requireList("center")));
+        double radius = shape.requireList("radius").number(1) * SymbolCanvas.UNITS_PER_MILLIMETRE;
+        canvas.reach(center[0] - radius, center[1] - radius);
+        canvas.reach(center[0] + radius, center[1] + radius);
+        canvas.path(fillOf(shape)).circle(center[0], center[1], radius);
+    }
 
-        /** {@code (arc (start …) (mid …) (end …))}: the circle through the three, from start through mid to end. */
-        void arc(KiCadList shape) {
-            if (shape.list("mid").isEmpty()) {
-                return;
-            }
-            double[] start = point(KiCadPoint.of(shape.requireList("start")));
-            double[] middle = point(KiCadPoint.of(shape.requireList("mid")));
-            double[] end = point(KiCadPoint.of(shape.requireList("end")));
-            target(shape).arcThrough(start[0], start[1], middle[0], middle[1], end[0], end[1]);
+    /** {@code (arc (start …) (mid …) (end …))}: the circle through the three, from start through mid to end. */
+    private static void arc(SymbolCanvas canvas, SExpressionList shape) {
+        if (shape.list("mid").isEmpty()) {
+            return;
         }
+        double[] start = point(canvas, KiCadPoint.of(shape.requireList("start")));
+        double[] middle = point(canvas, KiCadPoint.of(shape.requireList("mid")));
+        double[] end = point(canvas, KiCadPoint.of(shape.requireList("end")));
+        canvas.path(fillOf(shape)).arcThrough(start[0], start[1], middle[0], middle[1], end[0], end[1]);
+    }
 
-        void bezier(KiCadList shape) {
-            List<double[]> points = points(shape);
-            if (points.size() != 4) {
-                return;
-            }
-            target(shape).moveTo(points.get(0)[0], points.get(0)[1]).cubicTo(points.get(1)[0], points.get(1)[1],
-                    points.get(2)[0], points.get(2)[1], points.get(3)[0], points.get(3)[1]);
+    private static void bezier(SymbolCanvas canvas, SExpressionList shape) {
+        List<double[]> points = points(canvas, shape);
+        if (points.size() != 4) {
+            return;
         }
+        canvas.path(fillOf(shape)).moveTo(points.get(0)[0], points.get(0)[1]).cubicTo(points.get(1)[0], points.get(1)[1],
+                points.get(2)[0], points.get(2)[1], points.get(3)[0], points.get(3)[1]);
+    }
 
-        /** A pin's line, from where it connects to the body, and the bubble of an inverted one. */
-        void pin(KiCadPin pin) {
-            double[] at = point(pin.at());
-            if (pin.hidden()) {
-                return;
-            }
-            double radians = Math.toRadians(pin.angle());
-            double dx = Math.cos(radians);
-            double dy = Math.sin(radians);
-            KiCadPoint body = new KiCadPoint(pin.at().x() + dx * pin.length(), pin.at().y() + dy * pin.length());
-            if (pin.shape().startsWith("inverted")) {
-                double[] shortened = point(new KiCadPoint(body.x() - dx * 2 * BUBBLE_RADIUS, body.y() - dy * 2 * BUBBLE_RADIUS));
-                double[] bubble = point(new KiCadPoint(body.x() - dx * BUBBLE_RADIUS, body.y() - dy * BUBBLE_RADIUS));
-                strokes.moveTo(at[0], at[1]).lineTo(shortened[0], shortened[1]);
-                strokes.circle(bubble[0], bubble[1], BUBBLE_RADIUS * UNITS_PER_MILLIMETRE);
-            } else {
-                double[] reached = point(body);
-                strokes.moveTo(at[0], at[1]).lineTo(reached[0], reached[1]);
-            }
-        }
+    /** Where a pin's lead reaches the body. */
+    private static KiCadPoint bodyEndOf(KiCadPin pin) {
+        double radians = Math.toRadians(pin.angle());
+        return new KiCadPoint(pin.at().x() + Math.cos(radians) * pin.length(), pin.at().y() + Math.sin(radians) * pin.length());
+    }
 
-        /** Where a shape is drawn: among the strokes, as a solid fill of its own, or as a body of its own. */
-        private RoundedPath target(KiCadList shape) {
-            String fill = shape.list("fill").flatMap(written -> written.wordOf("type")).orElse("none");
-            switch (fill) {
-                case "outline" -> {
-                    fills.add(new RoundedPath(PLACES));
-                    return fills.getLast();
-                }
-                case "background" -> {
-                    bodies.add(new RoundedPath(PLACES));
-                    return bodies.getLast();
-                }
-                default -> {
-                    return strokes;
-                }
-            }
+    /** A pin's line, from where it connects to the body, and the bubble of an inverted one; nothing for a hidden one. */
+    private static void pinLine(SymbolCanvas canvas, KiCadPin pin) {
+        double[] at = point(canvas, pin.at());
+        if (pin.hidden()) {
+            return;
         }
+        canvas.pinLine(at, point(canvas, bodyEndOf(pin)), pin.shape().startsWith("inverted"));
+    }
 
-        private List<double[]> points(KiCadList shape) {
-            List<double[]> points = new ArrayList<>();
-            shape.list("pts").ifPresent(pts -> pts.lists("xy").forEach(xy -> points.add(point(KiCadPoint.of(xy)))));
-            return points;
-        }
+    /** How KiCad fills a shape: with its line colour, solid; as a body; or not at all, a stroke. */
+    private static SymbolCanvas.Fill fillOf(SExpressionList shape) {
+        return switch (shape.list("fill").flatMap(written -> written.wordOf("type")).orElse("none")) {
+            case "outline" -> SymbolCanvas.Fill.SOLID;
+            case "background" -> SymbolCanvas.Fill.BODY;
+            default -> SymbolCanvas.Fill.STROKE;
+        };
+    }
 
-        /** A KiCad point in drawing units, Y turned downwards; the drawing's reach grows to hold it. */
-        double[] point(KiCadPoint point) {
-            double[] drawn = {strokes.rounded(point.x() * UNITS_PER_MILLIMETRE - originX),
-                    strokes.rounded(-point.y() * UNITS_PER_MILLIMETRE - originY)};
-            reach(drawn[0], drawn[1]);
-            return drawn;
-        }
+    private static List<double[]> points(SymbolCanvas canvas, SExpressionList shape) {
+        List<double[]> points = new ArrayList<>();
+        shape.list("pts").ifPresent(pts -> pts.lists("xy").forEach(xy -> points.add(point(canvas, KiCadPoint.of(xy)))));
+        return points;
+    }
 
-        private void reach(double x, double y) {
-            reachX = Math.max(reachX, Math.abs(x));
-            reachY = Math.max(reachY, Math.abs(y));
-            minimumX = Math.min(minimumX, x);
-            maximumX = Math.max(maximumX, x);
-            minimumY = Math.min(minimumY, y);
-            maximumY = Math.max(maximumY, y);
-        }
-
-        double width() {
-            return Math.max(GRID, Math.ceil(2 * reachX / GRID) * GRID);
-        }
-
-        double height() {
-            return Math.max(GRID, Math.ceil(2 * reachY / GRID) * GRID);
-        }
+    /** A KiCad point, millimetres with Y upwards, on the canvas. */
+    private static double[] point(SymbolCanvas canvas, KiCadPoint point) {
+        return canvas.point(point.x() * SymbolCanvas.UNITS_PER_MILLIMETRE, -point.y() * SymbolCanvas.UNITS_PER_MILLIMETRE);
     }
 
     private static String firstOf(String... candidates) {

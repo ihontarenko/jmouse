@@ -1,7 +1,7 @@
 package org.jmouse.cad.store.catalogue;
 
-import org.jmouse.cad.board.drawing.BoardDrawing;
-import org.jmouse.cad.board.drawing.FootprintDrawing;
+import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.component.Component;
 import org.jmouse.cad.schematic.drawing.SymbolDrawing;
@@ -23,8 +23,8 @@ public final class ModelFacts {
     public static final String INSTRUMENT = "instrument";
     /** A footprint: its pads and outlines. */
     public static final String FOOTPRINT  = "footprint";
-    /** A printed circuit board: laid out in the board editor. */
-    public static final String BOARD      = "board";
+    /** A printed circuit board: laid out in the pcb editor. */
+    public static final String PCB      = "pcb";
 
     private ModelFacts() {
     }
@@ -36,7 +36,7 @@ public final class ModelFacts {
             case Component ignored -> PART;
             case Circuit ignored -> INSTRUMENT;
             case FootprintDrawing ignored -> FOOTPRINT;
-            case BoardDrawing ignored -> BOARD;
+            case PcbDrawing ignored -> PCB;
             case null, default -> null;
         };
     }

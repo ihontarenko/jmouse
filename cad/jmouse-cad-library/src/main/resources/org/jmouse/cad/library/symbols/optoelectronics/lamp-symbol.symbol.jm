@@ -2,7 +2,7 @@ symbol:lamp-symbol("Lamp") {
     meta {
         summary: "Lamp, as drawn on a schematic"
         code: "SY.LAMP:INCANDESCENT"
-        category: circuits
+        category: optoelectronics
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -27,7 +27,8 @@ final class LiveCircuitSocket extends Endpoint {
 
     static final String PROTOCOL = "cad.live";
     static final String TOKEN_PREFIX = "bearer.";
-    private static final int MAXIMUM_PROTOCOLS_LENGTH = 300;
+    /** The host's token is whatever the host issues: a signed one runs past a thousand characters. It is still one header. */
+    private static final int MAXIMUM_PROTOCOLS_LENGTH = 8192;
     private static final String PRINCIPAL = "principal";
     /** The largest message a reader may send, in characters: a circuit and its sheet, with room to spare. */
     private static final int MAXIMUM_MESSAGE_CHARACTERS = 2 * 1024 * 1024;

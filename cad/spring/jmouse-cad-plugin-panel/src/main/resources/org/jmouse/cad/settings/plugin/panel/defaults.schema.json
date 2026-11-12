@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/plugin/panel/defaults.schema.json",
+  "title": "Panel defaults",
+  "description": "What a panel takes where its lines say nothing, in millimetres.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rail",
+    "boardGap",
+    "fiducialDiameter",
+    "fiducialOpening",
+    "toolingDrill",
+    "tabWidth",
+    "tabSpacing",
+    "biteDrill",
+    "bitePitch"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "rail": {
+      "description": "how wide a frame's rail is",
+      "type": "number"
+    },
+    "boardGap": {
+      "description": "between boards that are routed apart, and between them and the rails",
+      "type": "number"
+    },
+    "fiducialDiameter": {
+      "description": "a fiducial's copper",
+      "type": "number"
+    },
+    "fiducialOpening": {
+      "description": "the opening in the mask round it",
+      "type": "number"
+    },
+    "toolingDrill": {
+      "description": "a tooling hole",
+      "type": "number"
+    },
+    "tabWidth": {
+      "description": "how wide a mouse-bite tab is",
+      "type": "number"
+    },
+    "tabSpacing": {
+      "description": "how much of a board's side one tab holds",
+      "type": "number"
+    },
+    "biteDrill": {
+      "description": "a hole of a tab's row",
+      "type": "number"
+    },
+    "bitePitch": {
+      "description": "between the holes of a row",
+      "type": "number"
+    }
+  }
+}

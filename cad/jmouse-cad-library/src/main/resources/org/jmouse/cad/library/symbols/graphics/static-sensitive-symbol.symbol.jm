@@ -1,0 +1,14 @@
+symbol:static-sensitive-symbol("Static sensitive") {
+    meta {
+        summary: "A warning triangle with a struck-out hand: handle against electrostatic discharge, as drawn on a schematic"
+        code: "SY.GRAPHIC:STATIC-SENSITIVE"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:stroke_1("M0 -44L46 38H-46Z")
+    path:stroke_2("M-11 26V6M-4 26V-2M3 26V-2M10 26V6M-11 8L-20 0")
+    path:stroke_3("M-22 30L22 -14")
+}

@@ -11,6 +11,9 @@
 functions:heat("Heat of a part") {
     meta {
         summary: "The common heat law: a part settles at power × thermal_resistance above the bench over thermal_time_constant"
+        category: functions
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     heat {

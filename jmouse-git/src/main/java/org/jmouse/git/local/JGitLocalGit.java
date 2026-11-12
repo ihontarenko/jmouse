@@ -3,17 +3,13 @@ package org.jmouse.git.local;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffAlgorithm;
-import org.eclipse.jgit.diff.RawText;
-import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -33,6 +32,13 @@ import java.util.TreeSet;
 public final class JGitLocalGit implements LocalGit {
     private final LocalGitLimits limits;
     private final LocalCommitWriter commits;
+    private final CommitReader history;
+    private final TextComparison comparison;
+    private final WorkingTreeChanger changer;
+    private final RepositoryPusher   pusher = new RepositoryPusher();
+    private final PathCommits        paths  = new PathCommits();
+
+    private static final String FIRST_BRANCH = "main";
 
     public JGitLocalGit() {
         this(LocalGitLimits.DEFAULT);
@@ -41,10 +47,55 @@ public final class JGitLocalGit implements LocalGit {
     public JGitLocalGit(LocalGitLimits limits) {
         this.limits = java.util.Objects.requireNonNull(limits);
         this.commits = new LocalCommitWriter(limits);
+        this.history = new CommitReader(limits);
+        this.comparison = new TextComparison(limits);
+        this.changer = new WorkingTreeChanger(limits, history);
     }
 
     @Override
-    public WorkingTreeStatus status(Path directory) {
+    public void initialize(Path directory) {
+        initialize(directory, FIRST_BRANCH);
+    }
+
+    @Override
+    public void initialize(Path directory, String firstBranch) {
+        try (Repository existing = RepositoryAccess.open(directory)) {
+            if (existing != null) {
+                throw new LocalGitException(LocalGitException.Reason.UNSUPPORTED_STATE, "This folder is already in a Git repository.");
+            }
+        } catch (IOException exception) {
+            throw storage("The folder could not be read: " + exception.getMessage());
+        }
+        try (Git ignored = Git.init().setDirectory(directory.toFile()).setInitialBranch(firstBranch).call()) {
+            // Made: nothing else is done to the folder.
+        } catch (GitAPIException exception) {
+            throw storage("The folder could not be made a Git repository: " + exception.getMessage());
+        }
+    }
+
+
+    @Override
+    public void configure(Path directory, String key, String value) {
+        int dot = key.lastIndexOf('.');
+        if (dot <= 0 || dot == key.length() - 1) {
+            throw new LocalGitException(LocalGitException.Reason.UNSUPPORTED_STATE, "A setting is its section and its name, a dot between: '" + key + "'.");
+        }
+        try (Repository repository = RepositoryAccess.open(directory)) {
+            if (repository == null) {
+                throw new LocalGitException(LocalGitException.Reason.UNSUPPORTED_STATE, "This folder is no Git repository.");
+            }
+            StoredConfig settings = repository.getConfig();
+            String section = key.substring(0, dot);
+            int subsection = section.indexOf('.');
+            settings.setString(subsection < 0 ? section : section.substring(0, subsection), subsection < 0 ? null : section.substring(subsection + 1),
+                    key.substring(dot + 1), value);
+            settings.save();
+        } catch (IOException exception) {
+            throw storage("The repository's settings could not be written: " + exception.getMessage());
+        }
+    }
+    @Override
+    public WorkingTreeStatus status(Path directory, CommitAuthor committing) {
         try (Repository repository = RepositoryAccess.open(directory)) {
             if (repository == null) {
                 return WorkingTreeStatus.absent();
@@ -80,7 +131,7 @@ public final class JGitLocalGit implements LocalGit {
                                 version,
                                 WorkingTreeFiles.selectable(version)));
             }
-            GitAuthor author = GitAuthor.read(repository);
+            GitAuthor author = committing == null ? GitAuthor.read(repository) : new GitAuthor(committing.name(), committing.email());
             ObjectId head = repository.resolve(Constants.HEAD);
             boolean canCommit =
                     repository.getRepositoryState() == RepositoryState.SAFE
@@ -163,70 +214,99 @@ public final class JGitLocalGit implements LocalGit {
                 after = new byte[0];
             }
             files.requireSize(after.length);
-            byte[] before = baseline(repository, source);
-            if (RawText.isBinary(before) || RawText.isBinary(after)) {
-                throw new LocalGitException(
-                        LocalGitException.Reason.UNSUPPORTED_STATE,
-                        "Binary files cannot be shown as a text diff.");
-            }
-            // A line's content is independent of whether the working tree uses LF or CRLF.
-            RawText left = lines(before);
-            RawText right = lines(after);
-            if (left.size() > limits.maximumDiffLines()
-                    || right.size() > limits.maximumDiffLines()) {
-                throw new LocalGitException(
-                        LocalGitException.Reason.TOO_LARGE,
-                        "The diff exceeds the interactive line limit.");
-            }
-            var edits =
-                    DiffAlgorithm.getAlgorithm(DiffAlgorithm.SupportedAlgorithm.HISTOGRAM)
-                            .diff(RawTextComparator.DEFAULT, left, right)
-                            .stream()
-                            .map(
-                                    edit ->
-                                            new WorkingTreeDiff.LineEdit(
-                                                    edit.getBeginA(),
-                                                    edit.getEndA(),
-                                                    edit.getBeginB(),
-                                                    edit.getEndB()))
-                            .toList();
-            return new WorkingTreeDiff(
-                    source,
-                    new String(before, StandardCharsets.UTF_8),
-                    new String(after, StandardCharsets.UTF_8),
-                    edits);
+            return comparison.of(source, history.atHead(repository, source), after);
         } catch (IOException exception) {
             throw storage("The local Git diff could not be read.");
-        }
-    }
-
-    private static RawText lines(byte[] bytes) {
-        return new RawText(
-                new String(bytes, StandardCharsets.UTF_8)
-                        .replace("\r\n", "\n")
-                        .getBytes(StandardCharsets.UTF_8));
-    }
-
-    private byte[] baseline(Repository repository, String source) throws IOException {
-        ObjectId head = repository.resolve(Constants.HEAD);
-        if (head == null) {
-            return new byte[0];
-        }
-        try (RevWalk walk = new RevWalk(repository);
-                TreeWalk tree =
-                        TreeWalk.forPath(repository, source, walk.parseCommit(head).getTree())) {
-            if (tree == null) {
-                return new byte[0];
-            }
-            return repository
-                    .open(tree.getObjectId(0), Constants.OBJ_BLOB)
-                    .getBytes(limits.maximumFileBytes());
         }
     }
 
     @Override
     public CommitResult commit(Path directory, CommitSelection selection) {
         return commits.commit(directory, selection);
+    }
+
+    @Override
+    public CommitResult commitPaths(Path directory, PathsCommit change) {
+        return paths.commit(directory, change);
+    }
+
+    @Override
+    public List<PathRevision> history(Path directory, String path) {
+        return paths.history(directory, path);
+    }
+
+    @Override
+    public Map<String, List<PathRevision>> histories(Path directory, Predicate<String> wanted) {
+        return paths.histories(directory, wanted);
+    }
+
+    @Override
+    public Optional<String> textAt(Path directory, String commit, String path) {
+        return paths.textAt(directory, commit, path);
+    }
+
+    @Override
+    public String text(Path directory, String content) {
+        return paths.text(directory, content);
+    }
+
+    @Override
+    public CommitDetail commit(Path directory, String id) {
+        try (Repository repository = RepositoryAccess.require(directory)) {
+            return history.detail(repository, id);
+        } catch (IOException exception) {
+            throw storage("The commit could not be read.");
+        }
+    }
+
+    @Override
+    public WorkingTreeDiff commitDiff(Path directory, String id, String source) {
+        try (Repository repository = RepositoryAccess.require(directory)) {
+            new WorkingTreeFiles(repository.getWorkTree().toPath().toRealPath(), limits).path(source);
+            return history.diff(repository, id, source, comparison);
+        } catch (IOException exception) {
+            throw storage("The commit's file could not be read.");
+        }
+    }
+
+    @Override
+    public List<BranchInfo> branches(Path directory) {
+        return changer.branches(directory);
+    }
+
+    @Override
+    public void createBranch(Path directory, String name) {
+        changer.createBranch(directory, name);
+    }
+
+    @Override
+    public void switchBranch(Path directory, String name) {
+        changer.switchBranch(directory, name);
+    }
+
+    @Override
+    public Optional<String> remote(Path directory) {
+        return pusher.remote(directory);
+    }
+
+    @Override
+    public void setRemote(Path directory, String address) {
+        pusher.setRemote(directory, address);
+    }
+
+    @Override
+    public PushOutcome push(Path directory, Function<String, Optional<String>> tokenFor) {
+        return pusher.push(directory, tokenFor);
+    }
+
+    @Override
+    public PullOutcome pull(Path directory, Function<String, Optional<String>> tokenFor) {
+        return pusher.pull(directory, tokenFor);
+    }
+
+    @Override
+    public void restore(Path directory, String source, String expectedVersion) {
+        changer.restore(directory, source, expectedVersion);
     }
 
     private static WorkingTreeChange.Kind staged(Status status, String source) {

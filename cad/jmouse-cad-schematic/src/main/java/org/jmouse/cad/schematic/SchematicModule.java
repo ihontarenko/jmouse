@@ -1,5 +1,9 @@
 package org.jmouse.cad.schematic;
 
+import java.util.function.Function;
+import java.util.Map;
+import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.schematic.drawing.LivingDrawing;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.el.parser.Parser;
@@ -20,6 +24,11 @@ public final class SchematicModule implements DocumentModule {
     @Override
     public List<DocumentKind> kinds() {
         return List.of(SYMBOL, PORTRAIT, FRAME);
+    }
+
+    @Override
+    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
+        return Map.of(SYMBOL, LivingDrawing::of, PORTRAIT, LivingDrawing::of, FRAME, LivingDrawing::of);
     }
 
     @Override

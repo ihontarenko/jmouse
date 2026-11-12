@@ -1,18 +1,18 @@
 package org.jmouse.cad.nexar;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jmouse.cad.document.part.PartCandidate;
 import org.jmouse.cad.document.part.PartSearchProvider;
 import org.jmouse.cad.document.part.ProviderState;
+import org.jmouse.http.client.HttpCall;
+import org.jmouse.http.client.HttpCallException;
+import org.jmouse.http.client.HttpReply;
+import org.jmouse.http.client.HttpTransport;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -52,18 +55,28 @@ public final class NexarParts implements PartSearchProvider {
     private static final String JSON = "application/json";
     private static final String FORM = "application/x-www-form-urlencoded";
 
-    private final NexarSettings settings;
+    private final Supplier<NexarSettings> settings;
+    /** How many parts one search asks Nexar for, read at each search: it may be changed while the server runs. */
+    private final IntSupplier   limit;
     private final ObjectMapper  mapper = new ObjectMapper();
-    private final HttpClient    client;
+    private final HttpTransport transport;
     private final Clock         clock;
     private String          token;
     private Instant         tokenExpires = Instant.MIN;
-    private volatile String failure;
+    /** Which client the token is of: another one set while the server runs asks for its own. */
+    private int             tokenClient;
 
-    public NexarParts(NexarSettings settings, Clock clock) {
+    /** @param transport what Nexar is called through: one that never follows a redirect, its token staying with Nexar */
+    public NexarParts(NexarSettings settings, IntSupplier limit, Clock clock, HttpTransport transport) {
+        this(() -> settings, limit, clock, transport);
+    }
+
+    /** @param settings what it is reached with, read at each call: a client changed while the server runs is the next call's */
+    public NexarParts(Supplier<NexarSettings> settings, IntSupplier limit, Clock clock, HttpTransport transport) {
         this.settings = settings;
+        this.limit = limit;
         this.clock = clock;
-        this.client = HttpClient.newBuilder().connectTimeout(settings.timeout()).build();
+        this.transport = transport;
     }
 
     @Override
@@ -78,42 +91,39 @@ public final class NexarParts implements PartSearchProvider {
 
     @Override
     public ProviderState state() {
-        if (!settings.configured()) {
+        if (!settings.get().configured()) {
             return ProviderState.notConfigured("A Nexar application's client id and secret are not set, so suppliers' parts "
                     + "are not searched. Results are shown, never kept: Nexar's terms.");
-        }
-        if (failure != null) {
-            return ProviderState.failed(failure);
         }
         return ProviderState.ready("Live supplier data from Octopart; shown, not kept.");
     }
 
     @Override
     public List<PartCandidate> search(String query, int limit) {
-        if (!settings.configured() || query == null || query.isBlank()) {
+        if (!settings.get().configured() || query == null || query.isBlank()) {
             return List.of();
         }
         try {
             Map<String, Object> variables = new LinkedHashMap<>();
             variables.put("q", query.strip());
-            variables.put("limit", Math.min(limit, settings.limit()));
-            JsonNode answer = post(settings.apiUrl(), JSON, mapper.writeValueAsString(Map.of("query", SEARCH,
+            variables.put("limit", Math.min(limit, Math.min(this.limit.getAsInt(), NexarSettings.MOST)));
+            JsonNode answer = post(settings.get().apiUrl(), JSON, mapper.writeValueAsString(Map.of("query", SEARCH,
                     "variables", variables)), "Bearer " + token());
             if (answer.path("errors").isArray() && !answer.path("errors").isEmpty()) {
-                throw new IllegalStateException(answer.path("errors").get(0).path("message").asText());
+                throw new IllegalStateException(answer.path("errors").get(0).path("message").asString());
             }
             List<PartCandidate> candidates = new ArrayList<>();
             for (JsonNode result : answer.path("data").path("supSearch").path("results")) {
                 candidates.add(candidateOf(result.path("part")));
             }
-            failure = null;
             return candidates;
-        } catch (IOException | IllegalStateException refused) {
-            failure = "Nexar did not answer: " + refused.getMessage();
-            throw new IllegalStateException(failure, refused);
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("The search was interrupted.", interrupted);
+        } catch (HttpCallException noAnswer) {
+            if (noAnswer.failure() == HttpCallException.Failure.INTERRUPTED) {
+                throw new IllegalStateException("The search was interrupted.", noAnswer);
+            }
+            throw new IllegalStateException("Nexar did not answer: " + noAnswer.getMessage(), noAnswer);
+        } catch (IllegalStateException refused) {
+            throw new IllegalStateException("Nexar did not answer: " + refused.getMessage(), refused);
         }
     }
 
@@ -121,7 +131,7 @@ public final class NexarParts implements PartSearchProvider {
         String partNumber = textOrNull(part.path("mpn"));
         return new PartCandidate(id(), textOrNull(part.path("id")), PartCandidate.Kind.PART, partNumber, partNumber,
                 textOrNull(part.path("manufacturer").path("name")), textOrNull(part.path("shortDescription")),
-                textOrNull(part.path("bestDatasheet").path("url")), octopartLink(textOrNull(part.path("octopartUrl"))), null, null, false);
+                textOrNull(part.path("bestDatasheet").path("url")), octopartLink(textOrNull(part.path("octopartUrl"))), null, null, false, null);
     }
 
     /** Octopart's page for the part: Nexar's terms ask that what it answers be shown with it. */
@@ -130,15 +140,18 @@ public final class NexarParts implements PartSearchProvider {
     }
 
     /** The application's token, asked for again shortly before it expires. */
-    private synchronized String token() throws IOException, InterruptedException {
+    private synchronized String token() {
         Instant now = clock.instant();
-        if (token != null && now.isBefore(tokenExpires)) {
+        NexarSettings client = settings.get();
+        int asked = Objects.hash(client.clientId(), client.clientSecret());
+        if (token != null && now.isBefore(tokenExpires) && asked == tokenClient) {
             return token;
         }
+        tokenClient = asked;
         Map<String, String> fields = new LinkedHashMap<>(GRANT);
-        fields.put("client_id", settings.clientId());
-        fields.put("client_secret", settings.clientSecret());
-        JsonNode answer = post(settings.tokenUrl(), FORM, form(fields), null);
+        fields.put("client_id", client.clientId());
+        fields.put("client_secret", client.clientSecret());
+        JsonNode answer = post(settings.get().tokenUrl(), FORM, form(fields), null);
         String issued = textOrNull(answer.path("access_token"));
         if (issued == null) {
             throw new IllegalStateException("Nexar issued no token: check the client id and secret.");
@@ -156,26 +169,24 @@ public final class NexarParts implements PartSearchProvider {
                 .collect(Collectors.joining("&"));
     }
 
-    private JsonNode post(String url, String contentType, String body, String authorization)
-            throws IOException, InterruptedException {
-        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url)).timeout(settings.timeout())
-                .header("Content-Type", contentType).header("Accept", JSON)
-                .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+    private JsonNode post(String url, String contentType, String body, String authorization) {
+        HttpCall.Builder call = HttpCall.post(URI.create(url)).header("Accept", JSON).text(body, contentType)
+                .timeout(settings.get().timeout());
         if (authorization != null) {
-            request.header("Authorization", authorization);
+            call.header("Authorization", authorization);
         }
-        HttpResponse<String> response = client.send(request.build(), HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() >= 400) {
-            throw new IllegalStateException("HTTP " + response.statusCode() + " from " + URI.create(url).getHost());
+        HttpReply reply = transport.exchange(call.build());
+        if (reply.status() >= 400) {
+            throw new IllegalStateException("HTTP " + reply.status() + " from " + URI.create(url).getHost());
         }
         try {
-            return mapper.readTree(response.body());
-        } catch (JsonProcessingException unreadable) {
+            return mapper.readTree(reply.text());
+        } catch (JacksonException unreadable) {
             throw new IllegalStateException("Nexar's answer is not JSON: " + unreadable.getOriginalMessage(), unreadable);
         }
     }
 
     private static String textOrNull(JsonNode node) {
-        return node == null || node.isMissingNode() || node.isNull() || node.asText().isBlank() ? null : node.asText();
+        return node == null || node.isMissingNode() || node.isNull() || node.asString().isBlank() ? null : node.asString();
     }
 }

@@ -5,7 +5,7 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.websocket.DeploymentException;
 import jakarta.websocket.server.ServerContainer;
 import jakarta.websocket.server.ServerEndpointConfig;
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
+import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadPlaces;
 import org.jmouse.cad.store.catalogue.CadCatalogue;

@@ -1,22 +1,22 @@
 package org.jmouse.crawler.adapter.http;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.core.MimeParser;
 import org.jmouse.core.Verify;
 import org.jmouse.crawler.api.FetchRequest;
 import org.jmouse.crawler.api.FetchResult;
 import org.jmouse.crawler.api.Fetcher;
+import org.jmouse.http.client.HttpCall;
+import org.jmouse.http.client.HttpCallException;
+import org.jmouse.http.client.HttpReply;
+import org.jmouse.http.client.JdkHttpTransport;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * {@link Fetcher} implementation based on Java's {@link HttpClient}. 🌐
+ * {@link Fetcher} implementation over the jMouse HTTP client ({@link JdkHttpTransport}). 🌐
  *
  * <p>This fetcher performs simple HTTP GET requests and returns a {@link FetchResult}
  * containing status, effective URI, headers, body bytes, and content type.</p>
@@ -26,6 +26,7 @@ import java.util.Map;
  *   <li>connect timeout</li>
  *   <li>request timeout</li>
  *   <li>redirect policy</li>
+ *   <li>how much of a page is read</li>
  *   <li>User-Agent header</li>
  * </ul>
  *
@@ -37,81 +38,42 @@ public final class HttpClientFetcher implements Fetcher {
     private static final String HEADER_USER_AGENT   = "User-Agent";
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
 
-    private final HttpClient        client;
+    private final JdkHttpTransport  transport;
     private final HttpFetcherConfig config;
 
     /**
      * Create a new {@code HttpClientFetcher}.
      *
-     * @param config configuration for timeouts, redirects, and default headers
+     * @param config configuration for timeouts, redirects, the page size read, and default headers
      */
     public HttpClientFetcher(HttpFetcherConfig config) {
         this.config = Verify.nonNull(config, "config");
-
-        this.client = HttpClient.newBuilder()
-                .connectTimeout(this.config.connectTimeout())
-                .followRedirects(
-                        this.config.followRedirects() ? HttpClient.Redirect.NORMAL : HttpClient.Redirect.NEVER)
-                .build();
+        this.transport = new JdkHttpTransport(this.config.connectTimeout(), this.config.redirects());
     }
 
     /**
-     * Execute an HTTP GET request for the given {@link FetchRequest}.
+     * Execute an HTTP GET request for the given {@link FetchRequest}: the whole fetch timed, the page read within the
+     * configured size.
      *
      * @param request fetch request (must be non-null)
      * @return fetch result with response details
-     * @throws Exception if the underlying {@link HttpClient} request fails
+     * @throws HttpCallException when no answer came: too slow, too long, the connection failed
      */
     @Override
-    public FetchResult fetch(FetchRequest request) throws Exception {
+    public FetchResult fetch(FetchRequest request) {
         Verify.nonNull(request, "request");
-
-        URI         uri         = Verify.nonNull(request.url(), "request.url");
-        HttpRequest httpRequest = buildRequest(uri, request);
-
-        HttpResponse<byte[]> response =
-                client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
-
-        return toResult(response);
+        URI uri = Verify.nonNull(request.url(), "request.url");
+        // Request-specific headers are added after the user agent, so a request may name its own.
+        HttpCall call = HttpCall.get(uri).header(HEADER_USER_AGENT, config.userAgent()).headers(request.headers())
+                .timeout(config.requestTimeout()).responseLimit(config.maximumResponseBytes()).build();
+        return toResult(transport.exchange(call));
     }
 
-    /**
-     * Build an {@link HttpRequest} for the provided URI and request metadata.
-     */
-    private HttpRequest buildRequest(URI uri, FetchRequest request) {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(uri)
-                .timeout(config.requestTimeout())
-                .GET()
-                .header(HEADER_USER_AGENT, config.userAgent());
-
-        // Add request-specific headers (may override defaults depending on HttpClient behavior).
-        for (Map.Entry<String, String> entry : request.headers().entrySet()) {
-            builder.header(entry.getKey(), entry.getValue());
-        }
-
-        return builder.build();
-    }
-
-    /**
-     * Convert the Java {@link HttpResponse} to a framework {@link FetchResult}.
-     */
-    private static FetchResult toResult(HttpResponse<byte[]> response) {
-        String contentType = firstHeaderValue(response, HEADER_CONTENT_TYPE);
-        return new FetchResult(
-                response.uri(),
-                response.statusCode(),
-                flattenHeaders(response.headers().map()),
-                response.body(),
-                MediaType.forString(contentType),
-                contentType
-        );
-    }
-
-    /**
-     * Read the first header value for the given name, or {@code null} if missing.
-     */
-    private static String firstHeaderValue(HttpResponse<?> response, String name) {
-        return response.headers().firstValue(name).orElse(null);
+    /** The answer as a framework {@link FetchResult}. */
+    private static FetchResult toResult(HttpReply reply) {
+        String contentType = reply.header(HEADER_CONTENT_TYPE).orElse(null);
+        return new FetchResult(reply.uri(), reply.status(), flattenHeaders(reply.headers()), reply.body(),
+                MediaType.forString(contentType), contentType);
     }
 
     /**

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-modules</artifactId>
+    <packaging>pom</packaging>
+    <name>jMouse - CAD modules</name>
+    <description>jMouse Framework - CAD: every module of the CAD engine in one place — the model, its documents, the pcb, the schematic, simulation, the libraries and exchange — and, under spring/, its Spring layer and plugins.</description>
+
+    <modules>
+        <module>jmouse-cad</module>
+        <module>jmouse-cad-document</module>
+        <module>jmouse-cad-schematic</module>
+        <module>jmouse-cad-pcb</module>
+        <module>jmouse-cad-panel</module>
+        <module>jmouse-cad-mesh</module>
+        <module>jmouse-cad-simulation</module>
+        <module>jmouse-cad-packages</module>
+        <module>jmouse-cad-spice</module>
+        <module>jmouse-cad-kicad</module>
+        <module>jmouse-cad-eagle</module>
+        <module>jmouse-cad-libre-pcb</module>
+        <module>jmouse-cad-altium</module>
+        <module>jmouse-cad-nexar</module>
+        <module>jmouse-cad-suppliers</module>
+        <module>jmouse-cad-library</module>
+        <module>jmouse-cad-exchange</module>
+        <module>jmouse-cad-folder</module>
+        <module>jmouse-cad-jpa</module>
+        <module>spring</module>
+    </modules>
+</project>

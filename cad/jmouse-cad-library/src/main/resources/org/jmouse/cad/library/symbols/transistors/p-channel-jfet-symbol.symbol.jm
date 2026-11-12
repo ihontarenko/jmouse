@@ -2,7 +2,7 @@ symbol:p-channel-jfet-symbol("P-channel JFET") {
     meta {
         summary: "P-channel JFET, as drawn on a schematic: the source at the top, the gate's arrow pointing out of the channel"
         code: "SY.TRANSISTOR:JFET-P"
-        category: circuits
+        category: transistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

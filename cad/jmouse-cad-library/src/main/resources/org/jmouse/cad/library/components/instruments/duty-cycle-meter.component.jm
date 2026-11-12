@@ -6,7 +6,9 @@ component:duty-cycle-meter("Duty cycle meter", type: meter) {
     meta {
         designator: DM
         summary: "Reads the share of each period its input spends above a level, from one rising edge to the next"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:threshold(2.5 V, "the level the signal is read against")
     parameter:R_input(1 MOhm, "input resistance: what it draws through, on a realistic bench")
@@ -32,7 +34,7 @@ component:duty-cycle-meter("Duty cycle meter", type: meter) {
     lead:input(yellow, stripes: blue)
     lead:reference(grey)
     reading:reading(100 * duty, unit: %)
-    symbol(uses: duty-cycle-meter-symbol) {
+    symbol(uses: "SY.METER:DUTY-CYCLE") {
         bind:a(pin: input)
         bind:b(pin: reference)
     }

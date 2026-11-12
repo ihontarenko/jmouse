@@ -3,7 +3,9 @@ component:voltage-source("Voltage source", type: voltage-source) {
         designator: V
         value: U_output
         summary: "Two-terminal voltage source: constant, or switched on at the start. A sine or a square is a generator — sine-generator, square-generator"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:U_output(5 V, "source voltage")
     pin:positive(analog, 1, "positive terminal")
@@ -14,7 +16,7 @@ component:voltage-source("Voltage source", type: voltage-source) {
         voltage positive -> negative = U_output
     }
 
-    symbol(uses: voltage-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-DC") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

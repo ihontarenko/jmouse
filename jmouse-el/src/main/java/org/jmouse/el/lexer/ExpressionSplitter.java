@@ -77,13 +77,13 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
     }
 
     private static Pattern expressionPattern(Dialect dialect) {
-        String typeSuffix = dialect.typedNumbers() ? "(?:[FLIDSBClfidsbc](?![A-Za-z0-9_]))?" : "";
+        String typeSuffix = dialect.typedNumbers() ? "(?:[FLIDSBClfidsbc](?!" + Identifiers.CHARACTER + "))?" : "";
         String steps = dialect.stepOperators() ? "\\+\\+|--|" : "";
         // Tried before a quoted string, which would otherwise read its first two quotes as an empty string.
         String longText = dialect.longTexts() ? "\"\"\"[\\s\\S]*?(?:\"\"\"|\\z)|" : "";
         String comment = dialect.lineComments() ? "|(?<COMMENT>#[^\\n\\r]*)" : "";
         return Pattern.compile(
-                "[^\\S\\r\\n]*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
+                "[^\\S\\r\\n]*(?:(?<IDENTIFIER>" + Identifiers.PATTERN + ")" +
                 "|(?<NUMBER>(?<!\\d)(\\d+(\\.\\d+)?([Ee][+-]?\\d+)?" + typeSuffix + "))" +
                 // ⚠️ The character classes below must NOT exclude '|'. They used to read [^'|\n\r], which
                 // looks like alternation and is not: inside a character class the pipe is a literal, so the

@@ -106,7 +106,7 @@ final class RadialFootprints implements FootprintFamily {
         List<String> notes = List.of(
                 "Generated from footprint-standards/radial-packages.sht#" + size.id() + " and the land pattern rules; regenerate, never edit.",
                 "Lead ⌀" + written(size.length("lead")) + ": drill " + written(drill) + ", pad " + written(pad) + ", pin 1 square.");
-        return new StandardFootprint(slug, designated, title, summary, size.word("folder"), "through-hole", size.standard(),
-                rules, notes, new FootprintDrawing(pads, outlines));
+        return new StandardFootprint(slug, designated, title, summary, size.word("folder"), size.word("category"), "through-hole", size.standard(),
+                rules, notes, new FootprintDrawing(pads, outlines, size));
     }
 }

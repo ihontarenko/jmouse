@@ -7,8 +7,10 @@ component:2n2222("2N2222A", type: bjt) {
         summary: "NPN small-signal switching transistor, 40 V, 600 mA"
         source: "onsemi P2N2222A datasheet P2N2222A/D, Rev. 7, and its SPICE model"
         package: "TO-92"
-        category: circuits
+        category: transistors
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:npn-transistor
 
@@ -45,18 +47,18 @@ component:2n2222("2N2222A", type: bjt) {
 
     pin:emitter(analog, 1, "emitter")
     pin:base(analog, input, 2, "base")
-    pin:collector(analog, output, 3, "collector")
+    pin:collector(analog, output, open-collector, 3, "collector")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
     # The same die in SOT-23 is the MMBT2222A, numbered as the onsemi MMBT2222A data sheet numbers it: base, emitter,
     # collector — not the TO-92 order of the pins.
-    footprint(sot-23-footprint) {
+    footprint("FP.SOT23:3") {
         pad:1(base)
         pad:2(emitter)
         pad:3(collector)
     }
 
-    symbol(uses: npn-transistor-symbol) {
+    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
         bind:failed(failed)
     }
 
@@ -124,7 +126,7 @@ component:2n2222("2N2222A", type: bjt) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("2N2222A")
     }
 }

@@ -3,7 +3,7 @@ package org.jmouse.kicad.schematic;
 import static org.jmouse.kicad.KiCadKeyword.*;
 
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public record KiCadWire(List<KiCadPoint> points) {
         points = List.copyOf(points);
     }
 
-    static KiCadWire of(KiCadList wire) {
+    static KiCadWire of(SExpressionList wire) {
         return new KiCadWire(wire.requireList(POINTS).lists(POINT).stream().map(KiCadPoint::of).toList());
     }
 

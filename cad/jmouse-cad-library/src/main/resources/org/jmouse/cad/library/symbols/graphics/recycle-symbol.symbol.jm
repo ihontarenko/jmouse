@@ -1,0 +1,26 @@
+symbol:recycle-symbol("Recycling") {
+    meta {
+        summary: "Three chasing arrows: the board and its materials can be recycled, as drawn on a schematic"
+        code: "SY.GRAPHIC:RECYCLE"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:stroke_1("M4.8 -33.6L26.859 5.003")
+    path:stroke_2("M30.4 28L-13.6 28")
+    path:stroke_3("M-35.2 19.6L-13.141 -19.003")
+    path:fill_1("M34.4 18.2L19.913 8.972L33.805 1.034Z") {
+        fill = signal
+        stroke = clear
+    }
+    path:fill_2("M-28.8 28L-13.6 20L-13.6 36Z") {
+        fill = signal
+        stroke = clear
+    }
+    path:fill_3("M-5.6 -32.2L-6.195 -15.034L-20.087 -22.972Z") {
+        fill = signal
+        stroke = clear
+    }
+}

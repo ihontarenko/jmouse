@@ -1,0 +1,19 @@
+# TO-220-3, standing: its body drawn by hand from its footprint's drawing and JEDEC TO-220AB, as the footprint is.
+model:to-220-3-vertical-model("TO-220-3, standing") {
+    meta {
+        summary: "TO-220-3, standing — its body drawn by jmCAD from JEDEC TO-220AB"
+        category: through-hole-transistor-outline
+        code: "MD.TO:220-3-V"
+        tags: model, hand-drawn
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [10.16, 3.2, 9], at: [0, 0.45, 6.5])
+    box(tin, size: [10.16, 1.25, 13.9], at: [0, -1.775, 8.95])
+    cylinder(dimple, radius: 1.8, length: 0.01, at: [0, -2.405, 13.1], rotate: [90, 0, 0])
+    # The front, away from the tab, is what a TO-220 is read from: its type printed up its middle.
+    marking(name, on: flat, size: [7.1, 2.7], at: [0, 2.06, 6.5], rotate: [90, 0, 180], ink: marking)
+    box(tin, size: [0.8, 0.5, 3.6], at: [-2.54, 0, 0.2])
+    box(tin, size: [0.8, 0.5, 3.6], at: [0, 0, 0.2])
+    box(tin, size: [0.8, 0.5, 3.6], at: [2.54, 0, 0.2])
+}

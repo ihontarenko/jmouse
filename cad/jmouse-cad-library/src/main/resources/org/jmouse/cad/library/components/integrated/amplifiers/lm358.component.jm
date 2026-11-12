@@ -8,8 +8,12 @@ component:lm358("LM358", type: opamp) {
         summary: "Dual operational amplifier, single supply 3 V to 32 V, inputs and output to ground"
         source: "TI LM358 datasheet (SLOS068)"
         package: "SOIC-8"
-        category: circuits
+        manufacturer: "Texas Instruments"
+        part-number: LM358DR
+        category: amplifiers
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:operational-amplifier
     units:[A, B]
@@ -43,9 +47,9 @@ component:lm358("LM358", type: opamp) {
     pin:Vcc(power, 8)
     pin:GND(ground, 4)
 
-    footprint(soic-8-footprint)
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
-    symbol(uses: [operational-amplifier-symbol, operational-amplifier-wide-symbol]) {
+    symbol(uses: ["SY.AMPLIFIER:OPERATIONAL", "SY.AMPLIFIER:OPERATIONAL-WIDE"]) {
         bind:failed(failed)
         bind:positive_supply(pin: Vcc)
         bind:negative_supply(pin: GND)

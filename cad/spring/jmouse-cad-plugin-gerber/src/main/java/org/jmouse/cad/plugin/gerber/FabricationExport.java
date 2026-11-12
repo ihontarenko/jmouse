@@ -1,6 +1,8 @@
 package org.jmouse.cad.plugin.gerber;
 
-import org.jmouse.cad.board.BoardModule;
+import org.jmouse.cad.exchange.ExportPurpose;
+import org.jmouse.cad.exchange.pcb.PcbFabrication;
+import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.DocumentExport;
@@ -11,8 +13,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A board written as a set for a board house: the Gerber set, its assembly tables by the house's profile. The plain set
- * is one, in KiCad's columns; a board house's plugin brings another with its own profile — JLCPCB's, PCBWay's.
+ * A pcb written as a set for a pcb house: the Gerber set, its assembly tables by the house's profile. The plain set
+ * is one, in KiCad's columns; a pcb house's plugin brings another with its own profile — JLCPCB's, PCBWay's.
  */
 public final class FabricationExport implements DocumentExport {
 
@@ -42,14 +44,20 @@ public final class FabricationExport implements DocumentExport {
         return title;
     }
 
+    /** A pcb house makes the pcb from these files: written only from a pcb its checks pass. */
+    @Override
+    public ExportPurpose purpose() {
+        return ExportPurpose.FABRICATION;
+    }
+
     @Override
     public Set<DocumentKind> kinds() {
-        return Set.of(BoardModule.PCB);
+        return Set.of(PcbModule.PCB);
     }
 
     @Override
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
-        BoardFabrication fabrication = BoardFabrication.of(document, catalogue);
+        PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
         return new ExportedFiles(fabrication.name() + "-" + id, set.write(fabrication, profile, fabrication.notes()),
                 fabrication.notes());
     }

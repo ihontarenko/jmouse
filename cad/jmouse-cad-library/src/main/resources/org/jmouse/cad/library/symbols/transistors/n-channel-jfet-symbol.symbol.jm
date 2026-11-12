@@ -2,7 +2,7 @@ symbol:n-channel-jfet-symbol("N-channel JFET") {
     meta {
         summary: "N-channel JFET, as drawn on a schematic: the gate's arrow points into the channel"
         code: "SY.TRANSISTOR:JFET-N"
-        category: circuits
+        category: transistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

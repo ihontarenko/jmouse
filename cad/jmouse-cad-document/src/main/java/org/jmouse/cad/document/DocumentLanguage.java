@@ -114,15 +114,12 @@ public final class DocumentLanguage {
         return documents.getFirst();
     }
 
-    /** A document as text: each node writes itself. */
+    /**
+     * A document as text, in the language's one written form — terms, {@code component:diode("Diode") { … }} —, whoever
+     * made it: a text read, an edit, an import, a converter. A text is never written in another form than it is read in.
+     */
     public String write(DocumentNode document) {
-        return TextSourceWriter.render(document, SourceLayout.WORDS);
-    }
-
-    /** A document as text, spelled as its own text was — as terms when it was read as terms, else with its blocks. */
-    public String writeAsRead(DocumentNode document) {
-        return document.spelling() == DocumentNode.Spelling.TERMS ? new TermDocumentWriter(true).write(document)
-                : write(document);
+        return new TermDocumentWriter(true).write(document);
     }
 
     /** The documents of one text, in order — each after what its author wrote above it, or after a blank line. */

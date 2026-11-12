@@ -1,0 +1,16 @@
+model:shunt-vishay-wsk2512-model("Vishay WSK2512 four-terminal shunt") {
+    meta {
+        summary: "Vishay WSK2512 four-terminal shunt — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.R:WSK2512-4T"
+        category: resistors-surface
+        tags: electronics, model, pinned
+        source: "Vishay WSK2512 data sheet (document 30108), 0.005 Ω to 0.2 Ω: L 6.35 × W 3.18 × H 0.635 mm; the force lands 2.29 × 2.03 mm, the sense lands 1.4 × 0.76 mm, as its recommended solder pads"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [6.35, 3.18, 0.635], at: [0, 0, 0.318])
+    box(tin, size: [2.29, 2.03, 0.1], at: [-2.985, 0.635, 0.05])
+    box(tin, size: [1.4, 0.76, 0.1], at: [-3.43, -1.27, 0.05])
+    box(tin, size: [1.4, 0.76, 0.1], at: [3.43, 1.27, 0.05])
+    box(tin, size: [2.29, 2.03, 0.1], at: [2.985, -0.635, 0.05])
+}

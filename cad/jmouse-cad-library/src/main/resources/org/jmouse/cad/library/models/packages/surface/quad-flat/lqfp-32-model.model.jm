@@ -1,0 +1,47 @@
+model:lqfp-32-model("LQFP-32, 7 mm body") {
+    meta {
+        summary: "LQFP-32, 7 mm body — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.LQFP:32-P0.8-7"
+        category: quad-flat
+        tags: electronics, model, quad
+        source: "JEDEC MS-026 BBA"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [7, 7, 0.775], at: [0, 0, 0.438])
+    box(plastic, size: [6.9, 6.9, 0.775], at: [0, 0, 1.213])
+    cylinder(dimple, radius: 0.2, length: 0.01, at: [-3.05, 3.05, 1.605])
+    marking(name, on: flat, size: [4.9, 2.1], at: [0, 0, 1.61], ink: marking)
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, 2.8, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, 2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, 1.2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, 0.4, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, -0.4, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, -1.2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, -2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [-4.2, -2.8, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-2.8, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-2, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-1.2, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-0.4, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [0.4, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [1.2, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [2, -4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [2.8, -4.2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, -2.8, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, -2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, -1.2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, -0.4, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, 0.4, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, 1.2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, 2, 0.025])
+    box(tin, size: [1.55, 0.55, 0.05], at: [4.2, 2.8, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [2.8, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [2, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [1.2, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [0.4, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-0.4, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-1.2, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-2, 4.2, 0.025])
+    box(tin, size: [0.55, 1.55, 0.05], at: [-2.8, 4.2, 0.025])
+}

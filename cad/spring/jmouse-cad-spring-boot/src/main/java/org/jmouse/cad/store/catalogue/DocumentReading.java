@@ -2,11 +2,11 @@ package org.jmouse.cad.store.catalogue;
 
 import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
+import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.library.DocumentIndex;
-import org.jmouse.cad.library.DocumentModels;
 import org.jmouse.cad.store.CadProperties;
+import org.jmouse.cad.store.plugin.EngineConfiguration;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.el.grammar.GrammarRefusal;
 
@@ -25,13 +25,13 @@ import java.util.function.Supplier;
  */
 public class DocumentReading {
 
-    private final int                       maximumLength;
+    private final EngineConfiguration       configuration;
     private final Map<String, ReadDocument> cache;
     private final CadLanguage               language;
 
-    public DocumentReading(CadProperties properties, CadLanguage language) {
+    public DocumentReading(CadProperties properties, EngineConfiguration configuration, CadLanguage language) {
         this.language = language;
-        this.maximumLength = properties.documents().maximumLength();
+        this.configuration = configuration;
         int capacity = properties.documents().cachedReadings();
         this.cache = Collections.synchronizedMap(new LinkedHashMap<>(capacity, 0.75f, true) {
             @Override
@@ -56,6 +56,7 @@ public class DocumentReading {
         if (source == null || source.isBlank()) {
             throw CadProblem.invalid("A document is its text: send it as 'source'.");
         }
+        int maximumLength = configuration.maximumDocumentLength();
         if (source.length() > maximumLength) {
             throw CadProblem.invalid("A document is at most " + maximumLength + " characters.");
         }
@@ -96,7 +97,7 @@ public class DocumentReading {
             throw CadProblem.invalidDocument(refused.getMessage(), 0, 0);
         }
         try {
-            Optional<Object> model = DocumentModels.of(document);
+            Optional<Object> model = language.modelOf(document);
             return new ReadDocument(source, checksum, document, DocumentIndex.of(document), model);
         } catch (GrammarRefusal refusal) {
             throw CadProblem.invalidDocument(refusal.detail(), refusal.line(), refusal.column());

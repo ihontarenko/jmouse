@@ -1,0 +1,14 @@
+model:chip-inductor-1812-hand-soldering-model("Chip inductor 1812 (4532 metric), hand soldering") {
+    meta {
+        summary: "Chip inductor 1812 (4532 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:L1812-HAND"
+        category: inductors-surface
+        tags: electronics, model, chip
+        source: "IEC 60384-22 dimensions, 1812 (4532 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [4.5, 3.2, 2.8], at: [0, 0, 1.4])
+    box(tin, size: [0.9, 3.22, 2.82], at: [-1.8, 0, 1.4])
+    box(tin, size: [0.9, 3.22, 2.82], at: [1.8, 0, 1.4])
+}

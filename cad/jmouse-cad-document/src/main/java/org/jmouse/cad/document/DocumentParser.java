@@ -48,32 +48,10 @@ public class DocumentParser extends AbstractBodyParser<DocumentNode, BasicToken>
     protected DocumentNode createNode(TokenCursor cursor, ParserContext context) {
         Token head = cursor.lookAt(-1);
         DocumentKind kind = grammar.kind(head.value()).orElseThrow();
-        if (cursor.isCurrent(BasicToken.T_COLON)) {
-            return termHead(cursor, kind, head);
+        if (!cursor.isCurrent(BasicToken.T_COLON)) {
+            throw GrammarRefusal.at(cursor, head, "a document opens as " + kind.word() + ":slug(\"Title\") { … }");
         }
-        String title = QuotedText.of(cursor.ensure(BasicToken.T_STRING));
-        String slug = SLUGS.slug(title);
-        boolean slugWritten = false;
-        String type = null;
-        while (!cursor.isCurrent(BasicToken.T_OPEN_CURLY)) {
-            Token word = cursor.current();
-            if (Lines.lineEnd().matches(cursor)) {
-                throw GrammarRefusal.at(cursor, head, kind.word() + " \"" + title + "\" is opened with '{'");
-            }
-            cursor.next();
-            if (word.value().equals("as")) {
-                slug = SourceReading.touchingWord(cursor, Lines.WORD_SEPARATORS);
-                slugWritten = true;
-            } else if (word.value().equals("type")) {
-                type = SourceReading.touchingWord(cursor, Lines.WORD_SEPARATORS);
-            } else {
-                throw GrammarRefusal.at(cursor, word, "after the title come 'as slug' and 'type role', then '{'");
-            }
-        }
-        if (!slug.matches(SLUG)) {
-            throw GrammarRefusal.at(cursor, head, "'" + slug + "' is not a slug: lowercase words and digits joined by hyphens");
-        }
-        return new DocumentNode(kind, title, slug, slugWritten, type, head.lineNumber());
+        return termHead(cursor, kind, head);
     }
 
     /** {@code component:and-gate("AND gate", type: gate)}: the slug as the term's name, the title, the role. */
@@ -103,10 +81,7 @@ public class DocumentParser extends AbstractBodyParser<DocumentNode, BasicToken>
         if (!slug.matches(SLUG)) {
             throw GrammarRefusal.at(cursor, head, "'" + slug + "' is not a slug: lowercase words and digits joined by hyphens");
         }
-        // Written only where the title would not give it: the same document, however it is spelled.
-        DocumentNode document = new DocumentNode(kind, title, slug, !slug.equals(SLUGS.slug(title)), type, head.lineNumber());
-        document.spelledAs(DocumentNode.Spelling.TERMS);
-        return document;
+        return new DocumentNode(kind, title, slug, type, head.lineNumber());
     }
 
     /**

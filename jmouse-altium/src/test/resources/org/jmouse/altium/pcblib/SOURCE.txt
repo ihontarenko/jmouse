@@ -1,0 +1,3 @@
+rcl.PcbLib — Libraries/rcl_lib/rcl.PcbLib of https://github.com/pseudoincorrect/Altium_Libraries
+at commit 6bd9b1b3b9c52c3320fc346bcc390080c05a521b, MIT License, Copyright (c) 2021 Maxime Clement (LICENSE.txt beside it).
+Kept unchanged as the sample the PCB library reading is checked against.

@@ -2,7 +2,7 @@ footprint:qsop-20-footprint("QSOP-20, 3.9 mm body") {
     meta {
         summary: "20-lead QSOP, 3.9 mm body, gull-wing, 0.635 mm pitch, body 3.9 × 8.65 mm"
         code: "FP.QSOP:20-P0.64"
-        category: circuits
+        category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-137"
         authors: "jMouse"
@@ -34,4 +34,6 @@ footprint:qsop-20-footprint("QSOP-20, 3.9 mm body") {
     outline(fabrication, width: 0.1, "M-0.95 -4.325H1.95V4.325H-1.95V-3.325Z")
     outline(silkscreen, width: 0.12, "M-3.425 -4.435H1.95M-1.95 4.435H1.95")
     outline(courtyard, width: 0.05, "M-3.7 -4.6H3.7V4.6H-3.7Z")
+    body(height: 1.75)
+    model("MD.QSOP:20-P0.64")
 }

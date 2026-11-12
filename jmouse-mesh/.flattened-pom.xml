@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jmouse</groupId>
+  <artifactId>jmouse-mesh</artifactId>
+  <version>1.0.1</version>
+  <name>jMouse - Mesh</name>
+  <description>jMouse Framework - Mesh: a 3D body as triangles with materials, read from open formats — glTF 2.0, STL, Wavefront OBJ, VRML97 on the jME engine — and written as binary glTF (GLB), the one form a viewer draws without knowing where the body came from</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-mesh</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>ihontarenko</id>
+      <name>Ivan Hontarenko</name>
+      <email>ihontarenko@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-mesh</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-el</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-sheet</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>3.1.4</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

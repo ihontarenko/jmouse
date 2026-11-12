@@ -1,7 +1,6 @@
 package org.jmouse.cad.packages.symbol;
 
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.document.PathTextNode;
 import org.jmouse.cad.document.TechnicalClass;
@@ -113,14 +112,14 @@ public final class ConnectorSymbols {
                 String slug = PackageTable.named(family.word("name"), words) + "-symbol";
                 String code = TechnicalClass.SYMBOL.code(PackageTable.designated(family.word("designation"), words));
                 symbols.add(new ConnectorSymbol(family.word("folder"),
-                        symbol(style, shielded, slug, code, family.title(), contacts, filing, note)));
+                        symbol(style, shielded, slug, code, family.title(), contacts, family.word("category"), filing, note)));
             }
         }
         return symbols;
     }
 
     private static DocumentNode symbol(Style style, boolean shielded, String slug, String code, String family, int contacts,
-                                       LibraryFiling filing, String note) {
+                                       String category, LibraryFiling filing, String note) {
         int first = -PITCH * ((contacts - 1) / 2);
         int last = first + (contacts - 1) * PITCH;
         int shieldPin = last + PITCH;
@@ -144,7 +143,7 @@ public final class ConnectorSymbols {
                 }
                 title = family + ", " + counted;
                 summary = "A single-row pin header of " + contacts + ", " + drawn
-                        + ": each contact a pin leaving to the right, numbered as on the board";
+                        + ": each contact a pin leaving to the right, numbered as on the pcb";
                 width = SINGLE_WIDTH;
                 labelX = SINGLE_LEAD;
                 nameY = first - SINGLE_NAME;
@@ -160,7 +159,7 @@ public final class ConnectorSymbols {
                 }
                 title = family + ", 2 x " + contacts;
                 summary = "A two-row pin header of " + 2 * contacts + ", " + drawn
-                        + ": odd contacts on the left, even on the right, numbered as on the board";
+                        + ": odd contacts on the left, even on the right, numbered as on the pcb";
                 width = DOUBLE_WIDTH;
                 labelX = 0;
                 nameY = first - BLOCK_NAME;
@@ -184,8 +183,8 @@ public final class ConnectorSymbols {
             }
         }
         int height = PITCH * (contacts - 1) + MARGIN;
-        DocumentNode document = new DocumentNode(SchematicModule.SYMBOL, title, slug, true, null, 1);
-        document.addExpression(meta(summary, code, filing));
+        DocumentNode document = new DocumentNode(SchematicModule.SYMBOL, title, slug, null, 1);
+        document.addExpression(meta(summary, code, category, filing));
         document.addExpression(LineBuilder.line(DrawingGrammar.SIZE)
                 .slot("extent", Nodes.extent(width, shielded ? height + PITCH : height)).comment(note).build());
         document.addExpression(path(path));
@@ -203,14 +202,10 @@ public final class ConnectorSymbols {
         return document;
     }
 
-    private static MetaNode meta(String summary, String code, LibraryFiling filing) {
-        MetaNode meta = new MetaNode();
-        meta.addExpression(MetaLineNode.of(MetaNode.SUMMARY, Nodes.text(summary)));
-        meta.addExpression(MetaLineNode.of(MetaNode.CODE, Nodes.text(code)));
-        meta.addExpression(MetaLineNode.of(MetaNode.CATEGORY, Nodes.word(filing.category())));
-        meta.addExpression(MetaLineNode.of(MetaNode.TAGS, Nodes.words(filing.tags())));
-        meta.addExpression(MetaLineNode.of(MetaNode.AUTHORS, Nodes.text(filing.authors())));
-        meta.addExpression(MetaLineNode.of(MetaNode.LICENSE, Nodes.text(filing.license())));
+    private static MetaNode meta(String summary, String code, String category, LibraryFiling filing) {
+        MetaNode meta = MetaNode.filed(summary, code, category,
+                filing.tags());
+        filing.provenance(null).writeInto(meta);
         return meta;
     }
 

@@ -2,7 +2,9 @@ component:frequency-meter("Frequency meter", type: meter) {
     meta {
         designator: FM
         summary: "Reads how often its input rises through a level: one over the time between two rising edges"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:threshold(0 V, "the level a rising edge crosses")
     parameter:R_input(1 MOhm, "input resistance: what it draws through, on a realistic bench")
@@ -24,7 +26,7 @@ component:frequency-meter("Frequency meter", type: meter) {
     lead:input(white, stripes: blue)
     lead:reference(grey)
     reading:reading(frequency, unit: Hz)
-    symbol(uses: frequency-meter-symbol) {
+    symbol(uses: "SY.METER:FREQUENCY") {
         bind:a(pin: input)
         bind:b(pin: reference)
     }

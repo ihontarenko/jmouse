@@ -1,0 +1,8 @@
+category:test-points("Test points") {
+    meta {
+        category: electromechanical
+        order: 5
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

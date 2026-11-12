@@ -1,0 +1,20 @@
+model:radial-electrolytic-capacitor-diameter-1800-pitch-750-model("Radial electrolytic capacitor, 18 mm can") {
+    meta {
+        summary: "Radial electrolytic capacitor, 18 mm can — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.RADIAL:CP-D18-P7.5"
+        category: capacitors-through-hole
+        tags: electronics, model, radial
+        source: "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(sleeve, profile: [0, 0, 8.6, 0, 9, 0.4, 9, 33.5, 8.8, 33.8, 9, 34.1, 9, 34.7, 8.7, 35, 8.7, 34.7, 0, 34.7], at: [0, 0, 0])
+    cylinder(aluminium, radius: 8.7, length: 0.15, at: [0, 0, 34.775])
+    box(vent, size: [10.44, 0.25, 0.01], at: [0, 0, 34.855])
+    box(vent, size: [0.25, 10.44, 0.01], at: [0, 0, 34.855])
+    revolved(marking, profile: [9.01, 0.4, 9.01, 33.5], from: -25, to: 25, at: [0, 0, 0])
+    marking(text, on: round, radius: 9.02, length: 33.1, from: -25, to: 25, at: [0, 0, 16.95], text: "−", ink: sleeve)
+    marking(value, on: round, radius: 9.01, length: 33.1, from: 120, to: 240, at: [0, 0, 16.95], ink: marking)
+    cylinder(tin, radius: 0.35, length: 1.6, at: [-3.75, 0, -0.8])
+    cylinder(tin, radius: 0.35, length: 1.6, at: [3.75, 0, -0.8])
+}

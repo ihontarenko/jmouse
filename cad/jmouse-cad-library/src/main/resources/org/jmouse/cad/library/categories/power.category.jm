@@ -1,0 +1,8 @@
+category:power("Power") {
+    meta {
+        category: integrated
+        order: 7
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

@@ -1,23 +1,35 @@
 package org.jmouse.cad.store.parts;
 
+import org.jmouse.cad.folder.RevisionOrigin;
 import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.part.FetchCompletion;
+import org.jmouse.cad.document.part.FetchedFile;
 import org.jmouse.cad.document.part.FetchedPart;
 import org.jmouse.cad.document.part.PartCandidate;
 import org.jmouse.cad.document.part.PartSearchProvider;
 import org.jmouse.cad.document.part.ProviderState;
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
+import org.jmouse.cad.document.DocumentOwner;
+import org.jmouse.cad.folder.DocumentStore;
+import org.jmouse.cad.folder.StoredDocument;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadCapability;
 import org.jmouse.cad.store.authority.CadPlaces;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
+import org.jmouse.cad.store.catalogue.CatalogueViews.DocumentDetail;
+import org.jmouse.cad.store.catalogue.DocumentAccess;
+import org.jmouse.cad.store.catalogue.StoredDocuments;
+import org.jmouse.cad.store.files.DocumentFiles;
+import org.jmouse.cad.store.plugin.EngineConfiguration;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.plugin.Extensions;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 🔎 Parts looked for in every provider at once, and a found one made an owner's documents — {@code JMOUSE_CAD_API.md}
@@ -29,7 +41,8 @@ import java.util.List;
  * <p>A provider that cannot answer is answered for by its state — not configured, still indexing, failed — and never
  * left out, so a reader sees which places were asked. A provider that fails while searching does not fail the others.</p>
  *
- * <p>A fetch converts first and stores after: the provider's reading — a KiCad library file, a supplier's answer — is
+ * <p>A fetch converts first — the provider, then every completion a plugin brought ({@link FetchCompletion#POINT}) —
+ * and stores after: the provider's reading — a KiCad library file, a supplier's answer — is
  * done outside the transaction that writes the documents.</p>
  */
 public class PartSearch {
@@ -50,7 +63,7 @@ public class PartSearch {
      *
      * @param open    the slug to open
      * @param created what was stored new, by slug
-     * @param reused  what was there already under the same slug and was left as it is
+     * @param reused  what was there already under the same slug: its text left as it is, a file it lacked added
      * @param notes   what the source said that the documents could not carry
      */
     public record Fetched(String open, List<String> created, List<String> reused, List<String> notes) {
@@ -63,13 +76,17 @@ public class PartSearch {
     private final CadAuthority             authority;
     private final CadPlaces                places;
     private final TransactionTemplate      transactions;
-    private final int                      limit;
+    private final EngineConfiguration      configuration;
     private final CadLanguage              language;
+    private final DocumentFiles            files;
+    private final DocumentAccess           access;
 
     public PartSearch(CataloguePartSearch catalogueSearch, Extensions extensions, CadCatalogue catalogue,
                       DocumentStore documents, CadAuthority authority, CadPlaces places, TransactionTemplate transactions,
-                      int limit, CadLanguage language) {
+                      EngineConfiguration configuration, CadLanguage language, DocumentFiles files, DocumentAccess access) {
         this.language = language;
+        this.files = files;
+        this.access = access;
         this.catalogueSearch = catalogueSearch;
         this.extensions = extensions;
         this.catalogue = catalogue;
@@ -77,7 +94,7 @@ public class PartSearch {
         this.authority = authority;
         this.places = places;
         this.transactions = transactions;
-        this.limit = limit;
+        this.configuration = configuration;
     }
 
     /** Every provider and whether it can answer, with nothing searched. */
@@ -102,7 +119,7 @@ public class PartSearch {
                 continue;
             }
             try {
-                answered.add(new ProviderResults(candidate.id(), candidate.name(), state, candidate.search(query, limit)));
+                answered.add(new ProviderResults(candidate.id(), candidate.name(), state, candidate.search(query, configuration.partLimit())));
             } catch (RuntimeException failed) {
                 answered.add(new ProviderResults(candidate.id(), candidate.name(), ProviderState.failed(failed.getMessage()),
                         List.of()));
@@ -135,21 +152,49 @@ public class PartSearch {
         } catch (IllegalStateException failed) {
             throw new CadProblem.Unprocessable("fetch-failed", failed.getMessage());
         }
-        return transactions.execute(status -> store(owner, made));
+        for (FetchCompletion completion : extensions.contributions(FetchCompletion.POINT)) {
+            made = completion.completed(made);
+        }
+        FetchedPart completed = made;
+        return transactions.execute(status -> store(owner, completed));
     }
 
+    /**
+     * The documents, then their files: every file of a document stored new, and of a reused one the reader may write,
+     * the files it does not hold yet — an earlier fetch where no files were kept is completed, never written over. Where
+     * this installation keeps no files, a note says what was not kept. A document held where the owner cannot see it —
+     * by another project — is refused rather than reused: what the owner would place could not be found.
+     */
     private Fetched store(DocumentOwner owner, FetchedPart made) {
         List<String> created = new ArrayList<>();
         List<String> reused = new ArrayList<>();
+        Map<String, String> filed = new HashMap<>();
+        StoredDocuments scope = catalogue.scope(owner);
         for (DocumentNode document : made.documents()) {
-            if (documents.findBySlug(document.slug()).isPresent()) {
+            Optional<StoredDocument> taken = documents.findBySlug(document.slug());
+            if (taken.isPresent()) {
+                StoredDocument held = taken.get();
+                if (!scope.visible(held)) {
+                    throw CadProblem.conflict("'" + document.slug() + "' is already held by another owner this one cannot"
+                            + " see; fetch the part into the workspace to share it between its projects.");
+                }
+                if (access.canWrite(held)) {
+                    filed.put(document.slug(), held.getId());
+                }
                 reused.add(document.slug());
                 continue;
             }
-            catalogue.createOwned(owner, language.language().write(document));
+            DocumentDetail detail = catalogue.createOwned(owner, language.language().write(document), RevisionOrigin.IMPORTED);
+            filed.put(document.slug(), detail.summary().id());
             created.add(document.slug());
         }
-        return new Fetched(made.open(), created, reused, made.notes());
+        List<String> notes = new ArrayList<>(made.notes());
+        new FetchedFilesKeeper(files).keep(made.files(), filed).ifPresent(notes::add);
+        return new Fetched(made.open(), created, reused, notes);
+    }
+
+    private boolean holds(String documentId, String name) {
+        return files.of(documentId).stream().anyMatch(file -> name.equals(file.name()));
     }
 
     private List<PartSearchProvider> chosen(String provider) {

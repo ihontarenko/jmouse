@@ -55,8 +55,7 @@ abstract public class CollectionBinder extends AbstractBinder {
         // Check if the bindable is a collection
         if (typeDescriptor.isCollection()) {
             @SuppressWarnings({"unchecked"}) Collection<Object> elements = (Collection<Object>) getCollection(bindable);
-            int index   = 0;
-            int maxSize = 16; // todo: move this value to context
+            int index = 0;
 
             InferredType elementType = bindable.getType().getFirst();
             PropertyPath zeroName    = root.append(INDEX_ZERO);
@@ -64,7 +63,9 @@ abstract public class CollectionBinder extends AbstractBinder {
             if (accessor.navigate(zeroName).isNull() && accessor.navigate(root).isSimple()) {
                 bindCollectionElement(root, of(elementType), accessor, elements, callback);
             } else {
-                while (maxSize > index) {
+                // Every index until the first the source does not hold: a cap here once cut any longer list off at
+                // sixteen in silence — an upload allow-list of forty extensions bound sixteen.
+                while (true) {
                     // Append the index to the path for element binding
                     PropertyPath elementName = root.append("[" + index++ + "]");
 

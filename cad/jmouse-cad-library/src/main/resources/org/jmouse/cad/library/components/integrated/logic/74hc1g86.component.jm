@@ -6,8 +6,10 @@ component:74hc1g86("74HC1G86", type: gate) {
         summary: "Single 2-input exclusive-OR gate: high while the inputs differ"
         source: "Nexperia 74HC1G86 datasheet: Y = A ⊕ B; propagation delay 11 ns typical at 4.5 V"
         package: "SOT353, 5 pins"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:xor-gate
     use:cmos-hc
@@ -24,7 +26,9 @@ component:74hc1g86("74HC1G86", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: xor-gate-symbol)
+    footprint("FP.SOT353:5")
+
+    symbol(uses: "SY.GATE:XOR")
 
     expect("A 0, B 0 gives 0", from: "function table: Y = A ⊕ B") {
         bench(for: 1 us) {

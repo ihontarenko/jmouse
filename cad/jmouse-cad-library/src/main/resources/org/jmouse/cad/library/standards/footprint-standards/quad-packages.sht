@@ -1,11 +1,14 @@
 # Square packages with leads on all four sides, one entry a package: its lead count, pitch, square body, the leads'
 # span tip to tip (for a QFN, the body's own edges), the length of a lead's foot and its width, the thermal pad when
 # there is one, and which fillets its leads take — gull-wing for a QFP, no-lead for a QFN.
+# `body-height` is the most the package stands over the pcb — the standard's seated height, its "A" maximum —,
+# what a 3D view raises the body to; an outline that does not write it is shown flat.
 sheet "Quad packages" as quad-packages {
     description "QFP and QFN packages, leads on four sides."
     form quad
 
     lqfp-32 "LQFP-32, 7 mm body" source standard "JEDEC MS-026 BBA" {
+        body-height 1.6 mm
         name lqfp-32
         fillets gull-wing
         leads 32
@@ -15,10 +18,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.3 mm .. 0.45 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "LQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     lqfp-48 "LQFP-48, 7 mm body" source standard "JEDEC MS-026 BBC" {
+        body-height 1.6 mm
         name lqfp-48
         fillets gull-wing
         leads 48
@@ -28,10 +33,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.17 mm .. 0.27 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "LQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     lqfp-64 "LQFP-64, 10 mm body" source standard "JEDEC MS-026 BCD" {
+        body-height 1.6 mm
         name lqfp-64
         fillets gull-wing
         leads 64
@@ -41,10 +48,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.17 mm .. 0.27 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "LQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     lqfp-100 "LQFP-100, 14 mm body" source standard "JEDEC MS-026 BED" {
+        body-height 1.6 mm
         name lqfp-100
         fillets gull-wing
         leads 100
@@ -54,10 +63,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.17 mm .. 0.27 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "LQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     lqfp-144 "LQFP-144, 20 mm body" source standard "JEDEC MS-026 BFB" {
+        body-height 1.6 mm
         name lqfp-144
         fillets gull-wing
         leads 144
@@ -67,10 +78,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.17 mm .. 0.27 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "LQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     tqfp-32 "TQFP-32, 7 mm body" source standard "JEDEC MS-026 ABA" {
+        body-height 1.2 mm
         name tqfp-32
         fillets gull-wing
         leads 32
@@ -80,10 +93,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.3 mm .. 0.45 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "TQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     tqfp-44 "TQFP-44, 10 mm body" source standard "JEDEC MS-026 ACB" {
+        body-height 1.2 mm
         name tqfp-44
         fillets gull-wing
         leads 44
@@ -93,10 +108,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.3 mm .. 0.45 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "TQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     tqfp-64 "TQFP-64, 10 mm body" source standard "JEDEC MS-026 ACD" {
+        body-height 1.2 mm
         name tqfp-64
         fillets gull-wing
         leads 64
@@ -106,10 +123,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.17 mm .. 0.27 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "TQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     tqfp-100 "TQFP-100, 14 mm body" source standard "JEDEC MS-026 AED" {
+        body-height 1.2 mm
         name tqfp-100
         fillets gull-wing
         leads 100
@@ -119,10 +138,12 @@ sheet "Quad packages" as quad-packages {
         foot 0.45 mm .. 0.75 mm
         lead 0.17 mm .. 0.27 mm
         folder "packages/surface/quad-flat"
+        category quad-flat
         designation "TQFP:{leads}-P{pitch|mm}-{body|mm}"
     }
 
     qfn-16-exposed-pad "QFN-16, 3 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-16-exposed-pad
         fillets no-lead
         leads 16
@@ -133,10 +154,12 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 1.7 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 
     qfn-20-exposed-pad "QFN-20, 4 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-20-exposed-pad
         fillets no-lead
         leads 20
@@ -147,10 +170,12 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 2.6 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 
     qfn-24-exposed-pad "QFN-24, 4 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-24-exposed-pad
         fillets no-lead
         leads 24
@@ -161,10 +186,12 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 2.6 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 
     qfn-28-exposed-pad "QFN-28, 5 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-28-exposed-pad
         fillets no-lead
         leads 28
@@ -175,10 +202,12 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 3.25 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 
     qfn-32-exposed-pad "QFN-32, 5 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-32-exposed-pad
         fillets no-lead
         leads 32
@@ -189,10 +218,12 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 3.45 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 
     qfn-48-exposed-pad "QFN-48, 7 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-48-exposed-pad
         fillets no-lead
         leads 48
@@ -203,10 +234,12 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 5.15 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 
     qfn-64-exposed-pad "QFN-64, 9 mm body" source standard "JEDEC MO-220" {
+        body-height 1 mm
         name qfn-64-exposed-pad
         fillets no-lead
         leads 64
@@ -217,6 +250,7 @@ sheet "Quad packages" as quad-packages {
         lead 0.18 mm .. 0.3 mm
         exposed-pad 7.15 mm
         folder "packages/surface/no-lead"
+        category no-lead
         designation "QFN:{leads}-P{pitch|mm}-{body|mm}-EP{exposed-pad|mm}"
     }
 }

@@ -1,8 +1,8 @@
 symbol:shielded-header-2x20-symbol("Shielded pin header, 2 x 20") {
     meta {
-        summary: "A two-row pin header of 40, inside its shield, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the board"
+        summary: "A two-row pin header of 40, inside its shield, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the pcb"
         code: "SY.HDR:2X20-SHIELDED"
-        category: circuits
+        category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

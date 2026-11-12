@@ -1,0 +1,16 @@
+model:to-247-3-vertical-model("TO-247-3, standing") {
+    meta {
+        summary: "TO-247-3, standing — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.TO247:3-V"
+        category: through-hole-transistor-outline
+        tags: electronics, model, inline
+        source: "JEDEC TO-247 AD"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [16.25, 5.21, 20], at: [0, 0.005, 11])
+    box(tin, size: [1.295, 1.295, 2.6], at: [-5.45, 0, -0.3])
+    box(tin, size: [1.295, 1.295, 2.6], at: [0, 0, -0.3])
+    box(tin, size: [1.295, 1.295, 2.6], at: [5.45, 0, -0.3])
+    marking(name, on: flat, size: [13, 6], at: [0, 2.62, 11], rotate: [90, 0, 180], ink: marking)
+}

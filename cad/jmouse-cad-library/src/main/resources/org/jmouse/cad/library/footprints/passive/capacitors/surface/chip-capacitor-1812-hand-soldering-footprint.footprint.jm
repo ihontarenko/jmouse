@@ -2,7 +2,7 @@ footprint:chip-capacitor-1812-hand-soldering-footprint("Chip capacitor 1812 (453
     meta {
         summary: "Chip capacitor, 1812 (4532 metric) body, pads lengthened for a soldering iron"
         code: "FP.CHIP:C1812-HAND"
-        category: circuits
+        category: capacitors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 1812 (4532 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-capacitor-1812-hand-soldering-footprint("Chip capacitor 1812 (453
     outline(fabrication, width: 0.1, "M-2.25 -1.6H2.25V1.6H-2.25Z")
     outline(silkscreen, width: 0.12, "M-1.19 -2.085H1.19M-1.19 2.085H1.19")
     outline(courtyard, width: 0.05, "M-3.45 -2.35H3.45V2.35H-3.45Z")
+    body(height: 2.8)
+    model("MD.CHIP:C1812-HAND")
 }

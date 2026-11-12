@@ -1,0 +1,58 @@
+model:pin-header-2x23-pitch-200-vertical-model("Pin header, 2.00 mm pitch, 2 × 23, vertical") {
+    meta {
+        summary: "Pin header, 2.00 mm pitch, 2 × 23, vertical — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.HDR:2X23-P2-V"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [4, 46, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 22, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 22, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 20, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 20, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 18, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 18, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 16, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 16, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 14, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 14, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 12, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 12, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 10, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 10, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 8, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 8, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 6, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 6, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 4, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 4, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 2, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 2, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, 0, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, 0, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -2, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -2, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -4, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -4, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -6, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -6, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -8, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -8, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -10, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -10, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -12, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -12, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -14, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -14, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -16, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -16, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -18, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -18, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -20, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -20, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [-1, -22, 1.55])
+    box(gold, size: [0.64, 0.64, 9.1], at: [1, -22, 1.55])
+}

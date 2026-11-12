@@ -3,7 +3,9 @@ component:current-source("Current source", type: current-source) {
         designator: I
         value: I_output
         summary: "Two-terminal DC current source"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:I_output(1 mA, "source current")
     pin:positive(analog, 1, "positive terminal")
@@ -14,7 +16,7 @@ component:current-source("Current source", type: current-source) {
         current positive -> negative = 0 - I_output
     }
 
-    symbol(uses: current-source-symbol) {
+    symbol(uses: "SY.SOURCE:CURRENT") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

@@ -1,7 +1,7 @@
 package org.jmouse.ai.jpa;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.ai.AffectedRecords;
 import org.jmouse.ai.guard.PendingConfirmation;

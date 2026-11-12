@@ -2,9 +2,9 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.core.MediaType;
-
 import java.util.Map;
+import org.jmouse.core.MediaType;
+import org.jmouse.web.mvc.result.ReturnValueHandler;
 
 /**
  * 🖼️ Interface representing a view that can render output to a HTTP response.
@@ -18,7 +18,6 @@ import java.util.Map;
  * @since 1.0
  */
 public interface View {
-
     /**
      * 🚀 Renders the view using the provided model and HTTP request/response.
      *

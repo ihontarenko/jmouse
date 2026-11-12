@@ -11,8 +11,10 @@ component:mcp23017("MCP23017", type: interface) {
         summary: "16-bit I/O expander on I²C: two ports of inputs or outputs, pull-ups, polarity and interrupt on change"
         source: "Microchip MCP23017/MCP23S17 data sheet (DS20001952C): register map for IOCON.BANK = 0 (table 3-5), IODIR resets to 0xFF, GPIO writes go to OLAT, 100 kΩ pull-ups, interrupt on change against the previous value or DEFVAL, INTF and INTCAP cleared by reading GPIO or INTCAP, IOCON MIRROR, SEQOP, ODR and INTPOL, address 0100 A2 A1 A0, pinout per the PDIP-28 package; BANK = 1 is not modelled"
         package: "PDIP-28, SOIC-28"
-        category: circuits
+        category: interface
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-target
     use:cmos-hc
@@ -32,6 +34,9 @@ component:mcp23017("MCP23017", type: interface) {
     pin:interrupt_b(digital, output, 19, "INTB")
     pin:interrupt_a(digital, output, 20, "INTA")
     pin:port_a[0..7](digital, bidirectional, [21, 22, 23, 24, 25, 26, 27, 28], "GPA0 to GPA7")
+
+    footprint("FP.DIP:28-W7.62")
+    footprint("FP.SOIC:28-P1.27-W7.5")
 
     symbol(box) {
         left([scl, sda, a0, a1, a2, reset bubble, interrupt_a, interrupt_b])

@@ -8,8 +8,10 @@ component:ld1117s33("LD1117S33", type: regulator) {
         summary: "Fixed 3.3 V low-dropout regulator, 800 mA, 1 V dropout at 800 mA, SOT-223"
         source: "STMicroelectronics LD1117 datasheet (rev. 35): electrical characteristics of the LD1117#33"
         package: "SOT-223"
-        category: circuits
+        category: power
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:smooth-transitions
 
@@ -26,9 +28,9 @@ component:ld1117s33("LD1117S33", type: regulator) {
     pin:output(analog, output, 2, "regulated output; the tab is output too")
     pin:input(power, 3, "unregulated input")
 
-    footprint(sot-223-footprint)
+    footprint("FP.SOT223:4")
 
-    symbol(uses: voltage-regulator-symbol) {
+    symbol(uses: "SY.REGULATOR:LINEAR-FIXED") {
         bind:failed(failed)
         bind:ground(pin: GND)
     }

@@ -7,6 +7,11 @@ package org.jmouse.cad.spice;
  */
 public interface SpiceSimulator {
 
+    /** Whether there is a program to run now; one reached by a command set while the server runs may have none yet. */
+    default boolean isSet() {
+        return true;
+    }
+
     /**
      * Runs one deck in batch mode.
      *

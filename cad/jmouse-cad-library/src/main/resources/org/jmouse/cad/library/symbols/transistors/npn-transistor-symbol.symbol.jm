@@ -2,7 +2,7 @@ symbol:npn-transistor-symbol("NPN transistor") {
     meta {
         summary: "NPN transistor, as drawn on a schematic"
         code: "SY.TRANSISTOR:BIPOLAR-NPN"
-        category: circuits
+        category: transistors
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

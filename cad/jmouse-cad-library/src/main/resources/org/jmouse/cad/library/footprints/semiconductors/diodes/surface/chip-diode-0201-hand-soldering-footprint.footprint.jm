@@ -2,7 +2,7 @@ footprint:chip-diode-0201-hand-soldering-footprint("Chip diode 0201 (0603 metric
     meta {
         summary: "Chip diode, 0201 (0603 metric) body, pads lengthened for a soldering iron; pad 1 is the cathode"
         code: "FP.CHIP:D0201-HAND"
-        category: circuits
+        category: diodes-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 0201 (0603 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-diode-0201-hand-soldering-footprint("Chip diode 0201 (0603 metric
     outline(fabrication, width: 0.1, "M-0.3 -0.15H0.3V0.15H-0.3Z")
     outline(silkscreen, width: 0.12, "M-0.91 -0.36V0.36")
     outline(courtyard, width: 0.05, "M-0.85 -0.45H0.85V0.45H-0.85Z")
+    body(height: 0.28)
+    model("MD.CHIP:D0201-HAND")
 }

@@ -13,15 +13,17 @@
 # the frequencies a circuit works at, far below the self-resonance, both are invisible: 1 mH with 10 pF resonates at
 # 1.6 MHz.
 #
-# Written in pin order on a sheet — L1 inductor (a, b) inductance = 10 mH — the first pin is a, the second b. Linear at
+# Written in pin order on a sheet — part:L1(inductor, [a, b], inductance: 10 mH) — the first pin is a, the second b. Linear at
 # any one temperature, it is integrated as every charge and state is.
 
 component:inductor("Inductor", type: inductor) {
     meta {
         designator: L
         summary: "Two-terminal inductor: its flux, winding resistance, self-capacitance and core loss"
-        category: circuits
+        category: inductors
         value: inductance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     parameter:inductance(1 mH, "inductance")
     parameter:R_winding(0 Ohm, "the copper's resistance (DCR); 0 leaves it to the circuit")
@@ -30,7 +32,11 @@ component:inductor("Inductor", type: inductor) {
     pin:terminal_one(analog, 1, "first terminal")
     pin:terminal_two(analog, 2, "second terminal")
     state:I_inductance(0, continuous, "the current in the inductance")
-    symbol(uses: inductor-symbol) {
+    footprint("FP.CHIP:L0805")
+    footprint("FP.CHIP:L0603")
+    footprint("FP.CHIP:L1206")
+
+    symbol(uses: "SY.INDUCTOR:FIXED") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -47,7 +53,7 @@ component:inductor("Inductor", type: inductor) {
     }
 
     # How it looks in the hand: a moulded choke whose colour bands read its microhenries.
-    portrait(uses: moulded-inductor-portrait) {
+    portrait(uses: "PT.INDUCTOR:MOULDED-AXIAL") {
         bind:inductance(inductance)
     }
 }

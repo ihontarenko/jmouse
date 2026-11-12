@@ -1,0 +1,46 @@
+# Generated from footprint-standards/dual-inline-packages.sht#seven-segment-0-56; regenerate, never edit.
+portrait:seven-segment-display-10-0-56-inch-portrait("SEVEN-SEGMENT-DISPLAY-10, 0-56-inch") {
+    meta {
+        summary: "10-lead Seven-segment display, 0.56 in digit from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.DISP:7SEG-10-W15.24"
+        category: optoelectronics-through-hole
+        tags: electronics, portrait, package, through-hole
+        source: "the makers' 0.56-inch single digit (Kingbright SA56-11)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(150 x 120)
+    input:marking(text)
+
+    path:leads("M-43.937 49.213H-36.063V60H-43.937ZM-41.969 60H-38.031V60H-41.969ZM-43.937 -49.213H-36.063V-60H-43.937ZM-41.969 -60H-38.031V-60H-41.969ZM-23.937 49.213H-16.063V60H-23.937ZM-21.969 60H-18.031V60H-21.969ZM-23.937 -49.213H-16.063V-60H-23.937ZM-21.969 -60H-18.031V-60H-21.969ZM-3.937 49.213H3.937V60H-3.937ZM-1.969 60H1.969V60H-1.969ZM-3.937 -49.213H3.937V-60H-3.937ZM-1.969 -60H1.969V-60H-1.969ZM16.063 49.213H23.937V60H16.063ZM18.031 60H21.969V60H18.031ZM16.063 -49.213H23.937V-60H16.063ZM18.031 -60H21.969V-60H18.031ZM36.063 49.213H43.937V60H36.063ZM38.031 60H41.969V60H38.031ZM36.063 -49.213H43.937V-60H36.063ZM38.031 -60H41.969V-60H38.031Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: -40 60)
+    pin:2(at: -20 60)
+    pin:3(at: 0 60)
+    pin:4(at: 20 60)
+    pin:5(at: 40 60)
+    pin:6(at: 40 -60)
+    pin:7(at: 20 -60)
+    pin:8(at: 0 -60)
+    pin:9(at: -20 -60)
+    pin:10(at: -40 -60)
+    path:body("M-70.866 -49.213H70.866A3.937 3.937 0 0 1 74.803 -45.276V45.276A3.937 3.937 0 0 1 70.866 49.213H-70.866A3.937 3.937 0 0 1 -74.803 45.276V-45.276A3.937 3.937 0 0 1 -70.866 -49.213Z") {
+        fill = black
+    }
+    path:notch("M-74.803 -11.811A11.811 11.811 0 0 1 -74.803 11.811Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-64.567 32.579A6.398 6.398 0 1 0 -51.772 32.579A6.398 6.398 0 1 0 -64.567 32.579Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: 0 0, size: 104.724 x 22.146) {
+        fill = silver
+        text = marking
+    }
+}

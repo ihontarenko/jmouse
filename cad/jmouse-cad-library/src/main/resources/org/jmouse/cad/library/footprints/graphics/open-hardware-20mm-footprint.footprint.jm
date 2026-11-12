@@ -1,0 +1,12 @@
+footprint:open-hardware-20mm-footprint("Open hardware, 20 mm") {
+    meta {
+        summary: "The open hardware gear, for a design that is shared as open hardware, printed 20 mm wide"
+        code: "FP.GRAPHIC:OPEN-HARDWARE-20"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 1, "M0.958 -6.732L2.148 -8.946L4.807 -7.844L4.083 -5.438L5.438 -4.083L7.844 -4.807L8.946 -2.148L6.732 -0.958L6.732 0.958L8.946 2.148L7.844 4.807L5.438 4.083L4.083 5.438L4.807 7.844L-4.807 7.844L-4.083 5.438L-5.438 4.083L-7.844 4.807L-8.946 2.148L-6.732 0.958L-6.732 -0.958L-8.946 -2.148L-7.844 -4.807L-5.438 -4.083L-4.083 -5.438L-4.807 -7.844L-2.148 -8.946L-0.958 -6.732")
+    outline(silkscreen, width: 1, "M-3 0C-3 -1.657 -1.657 -3 0 -3C1.657 -3 3 -1.657 3 0C3 1.657 1.657 3 0 3C-1.657 3 -3 1.657 -3 0Z")
+}

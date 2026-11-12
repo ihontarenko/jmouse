@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/plugin/ipc2581/export.schema.json",
+  "title": "IPC-2581 export",
+  "description": "The export's data (settings/plugin/ipc2581/export).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "sender",
+    "copper",
+    "mask",
+    "paste",
+    "silkscreen",
+    "dielectric",
+    "drill",
+    "packageMargin"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "id": {
+      "description": "its word on the exchange routes",
+      "type": "string"
+    },
+    "title": {
+      "description": "what the export is called where formats are offered",
+      "type": "string"
+    },
+    "sender": {
+      "description": "Who the file is from and what wrote it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enterprise",
+        "person",
+        "software",
+        "vendor",
+        "revision"
+      ],
+      "properties": {
+        "enterprise": {
+          "description": "the enterprise the file is from",
+          "type": "string"
+        },
+        "person": {
+          "description": "the person it is from",
+          "type": "string"
+        },
+        "software": {
+          "description": "the software that wrote it",
+          "type": "string"
+        },
+        "vendor": {
+          "description": "who makes that software",
+          "type": "string"
+        },
+        "revision": {
+          "description": "the software's revision",
+          "type": "string"
+        }
+      }
+    },
+    "copper": {
+      "description": "What the copper layers are called: the two outer ones, and every one between by its number from the top.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bottom",
+        "inner",
+        "function"
+      ],
+      "properties": {
+        "top": {
+          "description": "how the top one is called",
+          "type": "string"
+        },
+        "bottom": {
+          "description": "how the bottom one is called",
+          "type": "string"
+        },
+        "inner": {
+          "description": "how an inner layer is called, by its number from the top: INNER_%d",
+          "type": "string"
+        },
+        "function": {
+          "description": "the function IPC-2581 gives the group",
+          "type": "string"
+        }
+      }
+    },
+    "mask": {
+      "description": "What a layer on each face is called — the mask, the paste, the silkscreen — and the function the standard gives it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bottom",
+        "function"
+      ],
+      "properties": {
+        "top": {
+          "description": "how the top one is called",
+          "type": "string"
+        },
+        "bottom": {
+          "description": "how the bottom one is called",
+          "type": "string"
+        },
+        "function": {
+          "description": "the function IPC-2581 gives the group",
+          "type": "string"
+        }
+      }
+    },
+    "paste": {
+      "description": "What a layer on each face is called — the mask, the paste, the silkscreen — and the function the standard gives it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bottom",
+        "function"
+      ],
+      "properties": {
+        "top": {
+          "description": "how the top one is called",
+          "type": "string"
+        },
+        "bottom": {
+          "description": "how the bottom one is called",
+          "type": "string"
+        },
+        "function": {
+          "description": "the function IPC-2581 gives the group",
+          "type": "string"
+        }
+      }
+    },
+    "silkscreen": {
+      "description": "What a layer on each face is called — the mask, the paste, the silkscreen — and the function the standard gives it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bottom",
+        "function"
+      ],
+      "properties": {
+        "top": {
+          "description": "how the top one is called",
+          "type": "string"
+        },
+        "bottom": {
+          "description": "how the bottom one is called",
+          "type": "string"
+        },
+        "function": {
+          "description": "the function IPC-2581 gives the group",
+          "type": "string"
+        }
+      }
+    },
+    "dielectric": {
+      "description": "What the dielectric between two copper layers is called.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "between",
+        "function"
+      ],
+      "properties": {
+        "between": {
+          "description": "how it is called, by its number from the top: DIELECTRIC_%d",
+          "type": "string"
+        },
+        "function": {
+          "description": "the function IPC-2581 gives it",
+          "type": "string"
+        }
+      }
+    },
+    "drill": {
+      "description": "what the layer of the through holes is called",
+      "type": "string"
+    },
+    "packageMargin": {
+      "description": "how far a package's outline stands off its pads, in millimetres",
+      "type": "number"
+    }
+  }
+}

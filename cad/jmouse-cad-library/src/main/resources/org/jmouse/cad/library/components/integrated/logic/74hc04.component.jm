@@ -7,8 +7,10 @@ component:74hc04("74HC04", type: gate) {
         summary: "Hex inverter: each output high while its input is low"
         source: "TI SN74HC04-Q1: tpd 9 ns typical, 19 ns maximum at 4.5 V, CL = 50 pF, 25 °C; pinout per the JEDEC 14-pin standard"
         package: "DIP-14, SOIC-14"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:not-gate
     use:cmos-hc
@@ -23,6 +25,9 @@ component:74hc04("74HC04", type: gate) {
     pin:output(digital, output, 2 4 6 8 10 12, "output Y")
     pin:GND(ground, 7)
     pin:Vcc(power, 14)
+
+    footprint("FP.DIP:14-W7.62")
+    footprint("FP.SOIC:14-P1.27-W3.9")
 
     symbol(box) {
         left(a)

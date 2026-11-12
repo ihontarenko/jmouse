@@ -2,7 +2,7 @@ symbol:common-symbol("Common, 0 V") {
     meta {
         summary: "The circuit's 0 V — the common of a bipolar supply —, drawn as an open triangle rather than an earth"
         code: "SY.MARK:COMMON"
-        category: circuits
+        category: marks
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

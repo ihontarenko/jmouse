@@ -1,25 +1,25 @@
 package org.jmouse.cad.store.simulation;
 
+import org.jmouse.cad.store.CadRead;
 import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.simulation.AnalysisEngine;
 import org.jmouse.cad.simulation.EngineTransient;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.simulation.SimulationVocabulary;
-import org.jmouse.cad.store.CadProperties;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadCapability;
 import org.jmouse.cad.store.authority.CadPlace;
 import org.jmouse.cad.store.authority.CadPlaces;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.catalogue.StoredDocuments;
+import org.jmouse.cad.store.plugin.EngineConfiguration;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.cad.store.simulation.SimulationViews.Transient;
 import org.jmouse.el.grammar.GrammarRefusal;
 import org.jmouse.plugin.Extensions;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -47,18 +47,16 @@ public class AnalysisEngines {
     private final CadAuthority authority;
     private final CadPlaces    places;
     private final CadLanguage  language;
-    private final int          defaultSamples;
-    private final int          maximumSamples;
+    private final EngineConfiguration configuration;
 
     public AnalysisEngines(Extensions extensions, CadCatalogue catalogue, CadAuthority authority, CadPlaces places,
-                           CadLanguage language, CadProperties properties) {
+                           CadLanguage language, EngineConfiguration configuration) {
         this.extensions = extensions;
         this.catalogue = catalogue;
         this.authority = authority;
         this.places = places;
         this.language = language;
-        this.defaultSamples = properties.simulation().engineSamples();
-        this.maximumSamples = properties.simulation().maximumSamples();
+        this.configuration = configuration;
     }
 
     public List<Engine> engines() {
@@ -71,7 +69,7 @@ public class AnalysisEngines {
      * @param samples    how many even steps it is printed in; null for this server's own
      * @param owner      whose components its parts may also name, and where it is run; null for the catalogue's
      */
-    @Transactional(readOnly = true)
+    @CadRead
     public EngineRun runTransient(String engineId, String source, Map<String, Double> parameters, Integer samples,
                                   DocumentOwner owner) {
         AnalysisEngine engine = extensions.contributions(AnalysisEngine.POINT).stream()
@@ -80,7 +78,8 @@ public class AnalysisEngines {
         if (!engine.available()) {
             throw new CadProblem.Unprocessable("engine-unavailable", engine.title() + " does not run on this server.");
         }
-        int printed = samples == null ? defaultSamples : samples;
+        int printed = samples == null ? configuration.engineSamples() : samples;
+        int maximumSamples = configuration.maximumSamples();
         if (printed < 2 || printed > maximumSamples) {
             throw CadProblem.invalid("A run is printed in 2 to " + maximumSamples + " samples, not " + printed + ".");
         }

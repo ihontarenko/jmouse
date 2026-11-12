@@ -1,16 +1,14 @@
 package org.jmouse.security.web.configuration;
 
 import jakarta.servlet.Filter;
+import java.util.List;
+import java.util.function.Supplier;
 import org.jmouse.core.Customizer;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
-import java.util.List;
-import java.util.function.Supplier;
-
-public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
-        extends SecurityBuilder<MatchableSecurityFilterChain> {
-
+public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>> extends
+    SecurityBuilder<MatchableSecurityFilterChain> {
     default <U> U getObject(Class<U> type) {
         return getObject(type, () -> null);
     }
@@ -34,7 +32,10 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
     <C extends SecurityConfigurer<MatchableSecurityFilterChain, H>> C getConfigurer(Class<C> type);
 
     /** Optional lookup; the existing getConfigurer method retains its strict contract. */
-    default <C extends SecurityConfigurer<MatchableSecurityFilterChain, H>> java.util.Optional<C> findConfigurer(Class<C> type) {
+    default <C extends SecurityConfigurer<
+        MatchableSecurityFilterChain,
+        H
+    >> java.util.Optional<C> findConfigurer(Class<C> type) {
         try {
             return java.util.Optional.ofNullable(getConfigurer(type));
         } catch (java.util.NoSuchElementException absent) {
@@ -43,5 +44,4 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
     }
 
     H chainMatcher(Customizer<MatcherCriteria> customizer);
-
 }

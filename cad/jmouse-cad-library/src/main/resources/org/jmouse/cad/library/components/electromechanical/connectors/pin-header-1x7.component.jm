@@ -1,10 +1,12 @@
 component:pin-header-1x7("Pin header, 1x7", type: connector) {
     meta {
         summary: "Single-row pin header, 7 contacts, 2.54 mm pitch"
-        category: circuits
+        category: connectors
         source: "generic connector; no electrical behaviour"
         designator: J
         package: "PinHeader_1x07_P2.54mm"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     pin:pin1(analog, 1, "contact 1")
     pin:pin2(analog, 2, "contact 2")
@@ -13,5 +15,7 @@ component:pin-header-1x7("Pin header, 1x7", type: connector) {
     pin:pin5(analog, 5, "contact 5")
     pin:pin6(analog, 6, "contact 6")
     pin:pin7(analog, 7, "contact 7")
-    symbol(uses: pin-header-1x7-symbol)
+    footprint("FP.HDR:1X7-P2.54-V")
+
+    symbol(uses: "SY.HDR:1X7")
 }

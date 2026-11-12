@@ -8,8 +8,10 @@ component:74hc138("74HC138", type: decoder) {
         summary: "Three-to-eight line decoder with active-low outputs and three enables"
         source: "TI SN74HC138 (SCLS107G, rev. Oct 2021): function table; tpd 15 ns typical — the data sheet's headline figure; pinout per the data sheet"
         package: "DIP-16, SOIC-16"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -25,6 +27,9 @@ component:74hc138("74HC138", type: decoder) {
     pin:not_output[0..7](digital, output, [15, 14, 13, 12, 11, 10, 9, 7], "Y0 to Y7, the chosen one low")
     pin:GND(ground, 8)
     pin:Vcc(power, 16)
+
+    footprint("FP.DIP:16-W7.62")
+    footprint("FP.SOIC:16-P1.27-W3.9")
 
     symbol(box) {
         left([select, enable, not_enable_a bubble, not_enable_b bubble])

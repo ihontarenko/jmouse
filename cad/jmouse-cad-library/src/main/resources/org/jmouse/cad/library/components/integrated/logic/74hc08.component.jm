@@ -7,8 +7,10 @@ component:74hc08("74HC08", type: gate) {
         summary: "Quad 2-input AND gate: each output high only while both its inputs are high"
         source: "TI SN74HC08-Q1: tpd 10 ns typical, 20 ns maximum at 4.5 V, CL = 50 pF, 25 °C; pinout per the JEDEC 14-pin standard"
         package: "DIP-14, SOIC-14"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:and-gate
     use:cmos-hc
@@ -24,6 +26,9 @@ component:74hc08("74HC08", type: gate) {
     pin:output(digital, output, 3 6 8 11, "output Y")
     pin:GND(ground, 7)
     pin:Vcc(power, 14)
+
+    footprint("FP.DIP:14-W7.62")
+    footprint("FP.SOIC:14-P1.27-W3.9")
 
     symbol(box) {
         left([a, b])

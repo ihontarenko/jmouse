@@ -1,0 +1,8 @@
+category:sensors("Sensors") {
+    meta {
+        category: integrated
+        order: 9
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

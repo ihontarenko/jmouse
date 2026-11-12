@@ -2,7 +2,7 @@ footprint:ssop-20-footprint("SSOP-20, 5.3 mm body") {
     meta {
         summary: "20-lead SSOP, 5.3 mm body, gull-wing, 0.65 mm pitch, body 5.3 × 7.2 mm"
         code: "FP.SSOP:20-P0.65-W5.3"
-        category: circuits
+        category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-150"
         authors: "jMouse"
@@ -34,4 +34,6 @@ footprint:ssop-20-footprint("SSOP-20, 5.3 mm body") {
     outline(fabrication, width: 0.1, "M-1.65 -3.6H2.65V3.6H-2.65V-2.6Z")
     outline(silkscreen, width: 0.12, "M-4.45 -3.71H2.65M-2.65 3.71H2.65")
     outline(courtyard, width: 0.05, "M-4.7 -3.85H4.7V3.85H-4.7Z")
+    body(height: 2)
+    model("MD.SSOP:20-P0.65-W5.3")
 }

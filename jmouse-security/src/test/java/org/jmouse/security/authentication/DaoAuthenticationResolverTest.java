@@ -1,13 +1,15 @@
 package org.jmouse.security.authentication;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.jmouse.security.*;
 import org.jmouse.security.authentication.dao.DaoAuthenticationResolver;
 import org.jmouse.security.password.Pbkdf2Sha256PasswordEncoder;
 import org.jmouse.security.service.InMemoryUserPrincipalService;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class DaoAuthenticationResolverTest {
+
     private final Pbkdf2Sha256PasswordEncoder encoder = new Pbkdf2Sha256PasswordEncoder(1000, 16, 32);
 
     @Test
@@ -20,8 +22,9 @@ class DaoAuthenticationResolverTest {
     @Test
     void authenticatesOnlyAfterPasswordVerificationAndErasesReturnedSecrets() {
         InMemoryUserPrincipalService users = users(true);
-        Authentication result = new DaoAuthenticationResolver(users, encoder)
-                .authenticate(new UsernamePasswordAuthentication("ivan", " secret "));
+        Authentication result = new DaoAuthenticationResolver(users, encoder).authenticate(
+            new UsernamePasswordAuthentication("ivan", " secret ")
+        );
         assertTrue(result.isAuthenticated());
         assertEquals("ivan", result.getName());
         assertNull(result.getCredentials());
@@ -30,19 +33,27 @@ class DaoAuthenticationResolverTest {
 
     @Test
     void rejectsWrongPasswordAndDisabledUsers() {
-        assertThrows(BadCredentialsException.class, () -> new DaoAuthenticationResolver(users(true), encoder)
-                .authenticate(new UsernamePasswordAuthentication("ivan", "wrong")));
-        assertThrows(BadCredentialsException.class, () -> new DaoAuthenticationResolver(users(false), encoder)
-                .authenticate(new UsernamePasswordAuthentication("ivan", " secret ")));
+        assertThrows(BadCredentialsException.class, () ->
+            new DaoAuthenticationResolver(users(true), encoder).authenticate(
+                new UsernamePasswordAuthentication("ivan", "wrong")
+            )
+        );
+        assertThrows(BadCredentialsException.class, () ->
+            new DaoAuthenticationResolver(users(false), encoder).authenticate(
+                new UsernamePasswordAuthentication("ivan", " secret ")
+            )
+        );
     }
 
     @Test
     void missingAndInvalidPasswordsHaveTheSamePublicFailure() {
         DaoAuthenticationResolver resolver = new DaoAuthenticationResolver(users(true), encoder);
-        BadCredentialsException missing = assertThrows(BadCredentialsException.class,
-                () -> resolver.authenticate(new UsernamePasswordAuthentication("missing", "wrong")));
-        BadCredentialsException invalid = assertThrows(BadCredentialsException.class,
-                () -> resolver.authenticate(new UsernamePasswordAuthentication("ivan", "wrong")));
+        BadCredentialsException missing = assertThrows(BadCredentialsException.class, () ->
+            resolver.authenticate(new UsernamePasswordAuthentication("missing", "wrong"))
+        );
+        BadCredentialsException invalid = assertThrows(BadCredentialsException.class, () ->
+            resolver.authenticate(new UsernamePasswordAuthentication("ivan", "wrong"))
+        );
         assertEquals(missing.getMessage(), invalid.getMessage());
     }
 
@@ -56,8 +67,12 @@ class DaoAuthenticationResolverTest {
     }
 
     private InMemoryUserPrincipalService users(boolean enabled) {
-        UserPrincipal user = UserPrincipal.User.builder().username("ivan")
-                .password(encoder.encode(" secret ".toCharArray())).enabled(enabled).authority("ROLE_USER").build();
+        UserPrincipal user = UserPrincipal.User.builder()
+            .username("ivan")
+            .password(encoder.encode(" secret ".toCharArray()))
+            .enabled(enabled)
+            .authority("ROLE_USER")
+            .build();
         return new InMemoryUserPrincipalService(encoder, user);
     }
 }

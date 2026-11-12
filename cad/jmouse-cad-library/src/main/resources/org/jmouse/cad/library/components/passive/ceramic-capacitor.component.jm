@@ -9,9 +9,11 @@ component:ceramic-capacitor("Ceramic capacitor", type: capacitor) {
         designator: C
         summary: "MLCC, X7R: capacitance falling with DC bias and temperature, ESR, ESL"
         source: "the DC-bias and temperature curves an X7R MLCC's datasheet gives"
-        category: circuits
+        category: capacitors
         failure: short
         value: capacitance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:capacitance(10 uF, "nominal capacitance, at 0 V and 25 C")
@@ -32,7 +34,12 @@ component:ceramic-capacitor("Ceramic capacitor", type: capacitor) {
     node:plate("the capacitance, behind ESR and ESL")
     node:series_current("a node whose voltage above terminal_two is the series current, one volt per ampere")
 
-    symbol(uses: capacitor-symbol) {
+    footprint("FP.CHIP:C0805")
+    footprint("FP.CHIP:C0603")
+    footprint("FP.CHIP:C1206")
+    footprint("FP.RADIAL:CD-5X2.5-P5")
+
+    symbol(uses: "SY.CAPACITOR:FIXED") {
         bind:failed(failed)
         bind:charge((terminal_one - terminal_two) / voltage_rating)
         bind:a(pin: terminal_one)

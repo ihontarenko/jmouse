@@ -10,8 +10,10 @@ component:24c02("24C02", type: memory) {
         summary: "2 Kbit I²C EEPROM: 256 bytes, 8-byte pages, a 5 ms write cycle, write protect"
         source: "Microchip AT24C01C/AT24C02C data sheet: device address 1010 A2 A1 A0, 8-byte page write, tWR 5 ms max, A0-A2 pulled to GND when left floating, WP high inhibits writes, pinout per the DIP-8 package"
         package: "DIP-8, SOIC-8"
-        category: circuits
+        category: memory
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-target
     use:cmos-hc
@@ -28,6 +30,9 @@ component:24c02("24C02", type: memory) {
     pin:scl(digital, input, 6, "serial clock")
     pin:write_protect(digital, input, 7, "WP: high protects the whole memory")
     pin:Vcc(power, 8)
+
+    footprint("FP.DIP:8-W7.62")
+    footprint("FP.SOIC:8-P1.27-W3.9")
 
     symbol(box) {
         left([scl, sda, a0, a1, a2, write_protect])

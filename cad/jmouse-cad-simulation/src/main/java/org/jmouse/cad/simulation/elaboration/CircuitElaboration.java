@@ -11,8 +11,6 @@ import org.jmouse.cad.component.Pin;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.simulation.CatalogueDocuments;
 import org.jmouse.cad.simulation.ComponentCompilation;
-import org.jmouse.cad.simulation.EvaluatedParameter;
-import org.jmouse.cad.simulation.ParameterEvaluation;
 import org.jmouse.cad.simulation.SimulatedComponent;
 import org.jmouse.cad.simulation.SimulationReading;
 
@@ -45,11 +43,7 @@ public final class CircuitElaboration {
      */
     public static ElaboratedCircuit of(Circuit circuit, CatalogueDocuments catalogue, BenchConditions bench,
                                        List<EngineElement> fixtures) {
-        String title = circuit.head().title();
-        Map<String, Double> values = new LinkedHashMap<>();
-        for (EvaluatedParameter parameter : ParameterEvaluation.evaluate(title, circuit.parameters())) {
-            values.put(parameter.name(), parameter.value());
-        }
+        Map<String, Double> values = SheetUnfolding.valuesOf(circuit);
         SheetHierarchy.Unfolded unfolded = SheetHierarchy.unfold(circuit, values, catalogue);
         Map<String, SimulatedComponent> compiled = new HashMap<>();
         Map<String, SimulatedFamily> families = new HashMap<>();

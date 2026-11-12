@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * 🏷️ This argument is the owner the address names, as one string — {@code TYPE:id}, the form
- * {@link org.jmouse.cad.jpa.catalogue.DocumentOwner#parse(String)} reads.
+ * {@link org.jmouse.cad.document.DocumentOwner#parse(String)} reads.
  *
  * <h3>Why one string rather than two path variables</h3>
  *

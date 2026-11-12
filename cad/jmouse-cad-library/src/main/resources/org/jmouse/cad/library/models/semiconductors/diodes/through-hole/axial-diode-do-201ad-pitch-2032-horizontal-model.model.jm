@@ -1,0 +1,17 @@
+model:axial-diode-do-201ad-pitch-2032-horizontal-model("Axial diode DO-201AD, horizontal, 20.32 mm") {
+    meta {
+        summary: "Axial diode DO-201AD, horizontal, 20.32 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:DO-201AD-P20.32-H"
+        category: diodes-through-hole
+        tags: electronics, model, axial
+        source: "JEDEC DO-204 outlines"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(plastic, profile: [0, -4.75, 1.987, -4.75, 2.65, -4.088, 2.65, 4.088, 1.987, 4.75, 0, 4.75], at: [0, 0, 2.65], rotate: [0, 90, 0])
+    cylinder(marking, radius: 2.66, length: 1.14, at: [-3.04, 0, 2.65], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.525, length: 5.41, at: [-7.455, 0, 2.65], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.525, length: 4.25, at: [-10.16, 0, 0.525])
+    cylinder(tin, radius: 0.525, length: 5.41, at: [7.455, 0, 2.65], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.525, length: 4.25, at: [10.16, 0, 0.525])
+}

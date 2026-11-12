@@ -1,12 +1,11 @@
 package org.jmouse.web.mvc.proxy;
 
+import java.lang.reflect.Method;
+import org.jmouse.core.proxy.Intercept;
 import org.jmouse.core.proxy.InvocationContext;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.throttle.*;
-import org.jmouse.core.proxy.Intercept;
 import org.jmouse.web.mvc.TooManyRequestsException;
-
-import java.lang.reflect.Method;
 
 /**
  * 🚦 Concrete interceptor binding {@link AbstractRateLimitMethodInterceptor}
@@ -27,7 +26,7 @@ import java.lang.reflect.Method;
  * @see RateLimitEnable
  * @see RateLimit
  */
-@Intercept({Object.class})
+@Intercept({ Object.class })
 public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInterceptor {
 
     @Override
@@ -50,11 +49,5 @@ public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInt
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         return super.invoke(invocation);
-    }
-
-    @Override
-    public void after(InvocationContext context, Method method, Object[] arguments, Object result) {
-        MethodInvocation invocation = context.invocation();
-        System.out.println("proxyInvocation.getReturnValue() : " + " " + method + " " + invocation.getReturnValue());
     }
 }

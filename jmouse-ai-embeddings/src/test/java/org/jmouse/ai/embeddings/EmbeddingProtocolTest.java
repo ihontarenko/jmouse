@@ -1,5 +1,6 @@
 package org.jmouse.ai.embeddings;
 
+import org.jmouse.http.client.JdkHttpTransport;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -45,7 +46,8 @@ class EmbeddingProtocolTest {
         String base = "http://127.0.0.1:" + server.getAddress().getPort();
         var limits = new CallLimits(4, 1000, 4000, 2000, 1024);
         var request = new EmbeddingModel.Request(List.of("Україна 😀", "JDBC"), 2);
-        try (var transport = new JdkEmbeddingTransport(Duration.ofSeconds(1))) {
+        try (var http = new JdkHttpTransport(Duration.ofSeconds(1), JdkHttpTransport.Redirects.NEVER)) {
+            var transport = new HttpEmbeddingTransport(http);
             var openai = new HttpEmbeddingModel(new OpenAiEmbeddingProtocol(), transport);
             var settings = settings("openai", base + "/openai");
             var answer = openai.embed(settings, request, limits);

@@ -1,7 +1,8 @@
 package org.jmouse.cad.plugin.spice;
 
 import org.jmouse.cad.spice.SpiceProcess;
-import org.jmouse.cad.spice.SpiceSimulator;
+import org.jmouse.plugin.PluginSettingValues;
+import org.jmouse.plugin.PluginSettings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 /** 🧩 The SPICE plugin, on the classpath: its plugin bean, ngspice as the server names it. */
 @AutoConfiguration
@@ -34,9 +34,9 @@ public class SpicePluginConfiguration {
     }
 
     @Bean
-    public SpicePlugin cadSpicePlugin(SpiceProperties properties) {
-        Optional<SpiceSimulator> simulator = properties.command().isEmpty() ? Optional.empty()
-                : Optional.of(new SpiceProcess("ngspice", properties.command(), properties.timeout()));
-        return new SpicePlugin(simulator);
+    public SpicePlugin cadSpicePlugin(SpiceProperties properties, PluginSettings settings) {
+        PluginSettingValues values = settings.valuesOf(SpicePlugin.ID);
+        SpiceProcess simulator = new SpiceProcess("ngspice", () -> values.command(SpiceProcess.COMMAND), () -> values.duration(SpiceProcess.TIMEOUT));
+        return new SpicePlugin(simulator, properties.command(), properties.timeout());
     }
 }

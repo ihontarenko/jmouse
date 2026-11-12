@@ -2,7 +2,7 @@ footprint:soic-16-wide-footprint("SOIC-16, 7.5 mm body") {
     meta {
         summary: "16-lead SOIC, 7.5 mm body, gull-wing, 1.27 mm pitch, body 7.5 × 10.3 mm"
         code: "FP.SOIC:16-P1.27-W7.5"
-        category: circuits
+        category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MS-013"
         authors: "jMouse"
@@ -30,4 +30,6 @@ footprint:soic-16-wide-footprint("SOIC-16, 7.5 mm body") {
     outline(fabrication, width: 0.1, "M-2.75 -5.15H3.75V5.15H-3.75V-4.15Z")
     outline(silkscreen, width: 0.12, "M-5.675 -5.26H3.75M-3.75 5.26H3.75")
     outline(courtyard, width: 0.05, "M-5.95 -5.4H5.95V5.4H-5.95Z")
+    body(height: 2.65)
+    model("MD.SOIC:16-P1.27-W7.5")
 }

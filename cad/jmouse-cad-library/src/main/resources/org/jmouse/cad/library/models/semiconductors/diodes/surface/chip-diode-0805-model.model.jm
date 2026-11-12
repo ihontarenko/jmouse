@@ -1,0 +1,14 @@
+model:chip-diode-0805-model("Chip diode 0805 (2012 metric)") {
+    meta {
+        summary: "Chip diode 0805 (2012 metric) — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.CHIP:D0805"
+        category: diodes-surface
+        tags: electronics, model, chip
+        source: "IEC 60115-8 dimensions, 0805 (2012 metric)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(ceramic, size: [2, 1.25, 0.6], at: [0, 0, 0.3])
+    box(tin, size: [0.4, 1.27, 0.62], at: [-0.8, 0, 0.3])
+    box(tin, size: [0.4, 1.27, 0.62], at: [0.8, 0, 0.3])
+}

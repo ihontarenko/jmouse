@@ -7,8 +7,10 @@ component:fuse("Fuse, 1 A fast", type: fuse) {
         summary: "Fast-acting fuse, 1 A, 250 V, 5 × 20 mm"
         source: "Littelfuse 217 series datasheet: 1 A, cold resistance about 0.1 Ω"
         package: "Fuse_5x20mm"
-        category: circuits
+        category: protection
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:R_cold(100 mOhm, "cold resistance of the 1 A rating")
@@ -20,7 +22,7 @@ component:fuse("Fuse, 1 A fast", type: fuse) {
     pin:terminal_one(analog, 1, "first cap")
     pin:terminal_two(analog, 2, "second cap")
 
-    symbol(uses: fuse-symbol) {
+    symbol(uses: "SY.FUSE:FIXED") {
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
     }
@@ -40,5 +42,5 @@ component:fuse("Fuse, 1 A fast", type: fuse) {
     }
 
     # How it looks in the hand: a glass tube whose element parts when it blows.
-    portrait(uses: fuse-portrait)
+    portrait(uses: "PT.FUSE:GLASS-5X20")
 }

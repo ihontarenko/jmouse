@@ -1,0 +1,13 @@
+footprint:static-sensitive-5mm-footprint("Static sensitive, 5 mm") {
+    meta {
+        summary: "A warning triangle with a struck-out hand: handle against electrostatic discharge, printed 5 mm wide"
+        code: "FP.GRAPHIC:STATIC-SENSITIVE-5"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 0.25, "M0 -2.2L2.3 1.9H-2.3Z")
+    outline(silkscreen, width: 0.25, "M-0.55 1.3V0.3M-0.2 1.3V-0.1M0.15 1.3V-0.1M0.5 1.3V0.3M-0.55 0.4L-1 0")
+    outline(silkscreen, width: 0.25, "M-1.1 1.5L1.1 -0.7")
+}

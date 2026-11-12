@@ -1,0 +1,46 @@
+model:seven-segment-display-10-0-56-inch-model("Seven-segment display, 0.56 in, 15.24 mm rows") {
+    meta {
+        summary: "Seven-segment display, 0.56 in, 15.24 mm rows — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.DISP:7SEG-10-W15.24"
+        category: optoelectronics-through-hole
+        tags: electronics, model, dual-inline
+        source: "the makers' 0.56-inch single digit (Kingbright SA56-11)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [12.5, 19, 3.75], at: [0, 0, 2.375])
+    box(housing, size: [12.2, 18.7, 3.75], at: [0, 0, 6.125])
+    cylinder(dimple, radius: 0.4, length: 0.01, at: [-5.1, 8.35, 8.005])
+    marking(name, on: flat, size: [9.375, 4.375], at: [0, 0, 8.01], ink: marking)
+    cylinder(dimple, radius: 0.6, length: 0.01, at: [0, 8.75, 8.005])
+    box(tin, size: [1.495, 1.52, 0.25], at: [-6.998, 5.08, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [-7.62, 5.08, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-7.62, 5.08, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [-6.998, 2.54, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [-7.62, 2.54, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-7.62, 2.54, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [-6.998, 0, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [-7.62, 0, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-7.62, 0, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [-6.998, -2.54, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [-7.62, -2.54, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-7.62, -2.54, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [-6.998, -5.08, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [-7.62, -5.08, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [-7.62, -5.08, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [6.998, -5.08, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [7.62, -5.08, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [7.62, -5.08, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [6.998, -2.54, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [7.62, -2.54, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [7.62, -2.54, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [6.998, 0, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [7.62, 0, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [7.62, 0, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [6.998, 2.54, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [7.62, 2.54, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [7.62, 2.54, -1.25])
+    box(tin, size: [1.495, 1.52, 0.25], at: [6.998, 5.08, 4.25])
+    box(tin, size: [0.25, 1.52, 3.75], at: [7.62, 5.08, 2.375])
+    box(tin, size: [0.25, 0.46, 3.5], at: [7.62, 5.08, -1.25])
+}

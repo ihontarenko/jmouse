@@ -1,5 +1,8 @@
 package org.jmouse.cad.simulation;
 
+import java.util.function.Function;
+import java.util.Map;
+import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.el.grammar.ClauseBlockParser;
 import org.jmouse.el.grammar.ClauseBlockParser.Body;
 import org.jmouse.el.grammar.ClauseLineParser;
@@ -44,7 +47,7 @@ public final class SimulationModule implements DocumentModule {
     private static final ClauseBlockParser BENCH = new ClauseBlockParser("bench",
             LineGrammar.line("bench").optionalSlot("name", WORD).optional("for", QUANTITY).optional("at", QUANTITY)
                     .optional("realistic", FLAG)
-                    .shaped("a bench is 'bench [name] [for time] [at temperature] [realistic] { parts … }'"), Body.REQUIRED, PARTS);
+                    .build(), Body.REQUIRED, PARTS);
 
     private static final List<BlockParser<?>> BLOCKS = List.of(
             ClauseBlockParser.of("parameters", LineSet.of(List.of(SimulationLines.PARAMETER))),
@@ -66,14 +69,14 @@ public final class SimulationModule implements DocumentModule {
                     LineSet.of(List.of(SimulationLines.PAD))),
             ClauseBlockParser.headed("type",
                     LineGrammar.line("type").slot("name", NAME).slot("value", ASSIGNED)
-                            .shaped("a type is 'type name = quantity / quantity ^ n'")),
+                            .build()),
             ClauseBlockParser.headed("analysis", SimulationLines.ANALYSIS),
             BENCH,
             new ClauseBlockParser("expect", SimulationLines.EXPECTATION, Body.REQUIRED,
                     LineSet.of(BENCH, line(SimulationLines.MEASURE), line(SimulationLines.NEAR),
                             line(SimulationLines.WITHIN), line(SimulationLines.IS))),
             ClauseBlockParser.of(SimulationVocabulary.PARTS, PARTS),
-            ClauseBlockParser.of("layout", LineSet.of(List.of(SimulationLines.FRAME, SimulationLines.WIRE, SimulationLines.MARK,
+            ClauseBlockParser.of("layout", LineSet.of(List.of(SimulationLines.FRAME, SimulationLines.WIRE, SimulationLines.BUS, SimulationLines.NOTE, SimulationLines.DRAWN, SimulationLines.MARK,
                     SimulationLines.PLACE))),
             ClauseBlockParser.of("ports", LineSet.of(SimulationLines.PORTS)),
             ClauseBlockParser.of("nets", LineSet.of(List.of(SimulationLines.NET))),
@@ -94,6 +97,12 @@ public final class SimulationModule implements DocumentModule {
     @Override
     public List<DocumentKind> kinds() {
         return List.of(COMPONENT, CIRCUIT, FAMILY, FUNCTIONS, CATEGORY);
+    }
+
+    @Override
+    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
+        return Map.of(COMPONENT, SimulationReading::component, FAMILY, SimulationReading::family,
+                      CIRCUIT, SimulationReading::circuit);
     }
 
     @Override

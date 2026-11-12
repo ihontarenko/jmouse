@@ -8,16 +8,19 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-spring</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../../jmouse-spring/pom.xml</relativePath>
     </parent>
 
     <artifactId>jmouse-cad-spring-boot</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - CAD Spring Boot</name>
     <description>Spring Boot auto-configuration for jmCAD: the catalogue schema, migrated before the product's, its stores over the application's persistence context, the shipped library imported on start, and the application services (org.jmouse.cad.store) with their transactions</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-cad-spring-boot</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/spring/jmouse-cad-spring-boot</url>
 
     <properties>
+        <!-- what a reader is told of the plugin: one line, and the kind it is -->
+        <plugin.summary>The jM language, the catalogue and the simulators</plugin.summary>
+        <plugin.category>Engine</plugin.category>
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -49,7 +52,17 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- The library being integrated: the entities, the stores and the migrations. -->
+        <!-- Its settings, read from the engine's one settings tree -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-settings</artifactId>
+        </dependency>
+        <!-- The documents: the library folder's files and their commits, and the index read from them. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-folder</artifactId>
+        </dependency>
+        <!-- What the installation keeps besides documents: its mounted folders and its plugins' settings. -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-jpa</artifactId>
@@ -62,12 +75,22 @@
         <!-- Plugins: the language and every other point of the engine are read from what the plugins bring -->
         <dependency>
             <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-vault</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
             <artifactId>jmouse-plugin-spring</artifactId>
         </dependency>
         <!-- Exchange: the points a format is brought to; the store reads them, converts nothing itself -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-exchange</artifactId>
+        </dependency>
+        <!-- The files a document holds besides its text, where the installation keeps managed files. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-storage-management</artifactId>
+            <optional>true</optional>
         </dependency>
         <!-- JSON: the engine reads what it says of itself (about.json) -->
         <dependency>
@@ -121,6 +144,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

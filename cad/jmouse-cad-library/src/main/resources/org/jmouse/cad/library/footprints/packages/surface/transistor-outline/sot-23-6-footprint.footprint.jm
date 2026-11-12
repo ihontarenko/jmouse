@@ -2,7 +2,7 @@ footprint:sot-23-6-footprint("SOT-23-6, 1.6 mm body") {
     meta {
         summary: "6-lead SOT-23, 6 leads, gull-wing, 0.95 mm pitch, body 1.6 × 2.9 mm"
         code: "FP.SOT23:6"
-        category: circuits
+        category: surface-transistor-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-178 AB"
         authors: "jMouse"
@@ -20,4 +20,6 @@ footprint:sot-23-6-footprint("SOT-23-6, 1.6 mm body") {
     outline(fabrication, width: 0.1, "M-0.267 -1.45H0.8V1.45H-0.8V-0.917Z")
     outline(silkscreen, width: 0.12, "M-1.85 -1.56H0.8M-0.8 1.56H0.8")
     outline(courtyard, width: 0.05, "M-2.1 -1.7H2.1V1.7H-2.1Z")
+    body(height: 1.45)
+    model("MD.SOT23:6")
 }

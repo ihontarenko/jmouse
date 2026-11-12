@@ -5,7 +5,9 @@ component:sawtooth-generator("Sawtooth generator", type: generator) {
     meta {
         designator: G
         summary: "An ideal sawtooth voltage: a straight rise over the whole period and an instant fall"
-        category: circuits
+        category: sources
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:high(5 V, "the level each ramp reaches")
@@ -15,7 +17,7 @@ component:sawtooth-generator("Sawtooth generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: sawtooth-source-symbol) {
+    symbol(uses: "SY.SOURCE:VOLTAGE-SAWTOOTH") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

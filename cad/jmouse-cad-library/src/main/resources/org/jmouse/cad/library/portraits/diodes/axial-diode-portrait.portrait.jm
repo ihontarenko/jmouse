@@ -4,7 +4,7 @@ portrait:axial-diode-portrait("Axial diode") {
     meta {
         summary: "A DO-41 rectifier: black body, silver band at the cathode"
         code: "PT.DIODE:DO41"
-        category: circuits
+        category: diodes
         tags: electronics, portrait, diode, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

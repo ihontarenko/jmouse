@@ -5,6 +5,9 @@
 functions:constants("Physical constants") {
     meta {
         summary: "Boltzmann's constant, the elementary charge, 0 °C in kelvin"
+        category: functions
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     formulas {

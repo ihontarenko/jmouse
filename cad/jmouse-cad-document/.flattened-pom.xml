@@ -6,8 +6,8 @@
   <artifactId>jmouse-cad-document</artifactId>
   <version>1.0.1</version>
   <name>jMouse - CAD Document</name>
-  <description>jMouse Framework - jmCAD documents: the jM document language on the jME engine. The language itself knows no kind of document: every kind, and every block a kind holds, is brought by a DocumentModule — a symbol by the schematic's module, a footprint by the board's, a circuit by the simulation's.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-document</url>
+  <description>jMouse Framework - jmCAD documents: the jM document language on the jME engine. The language itself knows no kind of document: every kind, and every block a kind holds, is brought by a DocumentModule — a symbol by the schematic's module, a footprint by the pcb's, a circuit by the simulation's.</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-document</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-document</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-document</url>
   </scm>
   <dependencies>
     <dependency>

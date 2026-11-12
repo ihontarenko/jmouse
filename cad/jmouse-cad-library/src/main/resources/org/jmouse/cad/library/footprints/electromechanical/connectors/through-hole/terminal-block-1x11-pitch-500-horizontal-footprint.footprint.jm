@@ -2,7 +2,7 @@ footprint:terminal-block-1x11-pitch-500-horizontal-footprint("Screw terminal blo
     meta {
         summary: "Screw terminal block, 5.00 mm pitch, 1 row of 11, upright, through-hole"
         code: "FP.TB:11-P5"
-        category: circuits
+        category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
         authors: "jMouse"
@@ -25,4 +25,6 @@ footprint:terminal-block-1x11-pitch-500-horizontal-footprint("Screw terminal blo
     outline(silkscreen, width: 0.12, "M-3.91 -27.61H3.91V27.61H-3.91Z")
     outline(silkscreen, filled, "M-4.71 -25A0.3 0.3 0 1 0 -4.11 -25A0.3 0.3 0 1 0 -4.71 -25Z")
     outline(courtyard, width: 0.05, "M-4.3 -28H4.3V28H-4.3Z")
+    body(height: 10)
+    model("MD.TB:11-P5")
 }

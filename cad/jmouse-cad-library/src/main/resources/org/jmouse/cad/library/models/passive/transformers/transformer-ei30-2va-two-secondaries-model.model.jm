@@ -1,0 +1,22 @@
+model:transformer-ei30-2va-two-secondaries-model("EI30 printed-circuit transformer, 2 VA, two secondaries") {
+    meta {
+        summary: "EI30 printed-circuit transformer, 2 VA, two secondaries — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.TRAFO:EI30-2VA-2S"
+        category: transformers
+        tags: electronics, model, pinned
+        source: "ERA EI30/15.5 2 VA, schematic 2: the primary 1 (•) to 5, the secondaries 6 (•) to 7 and 9 (•) to 10; body 32.5 × 27.5 × 27 mm, pins Ø 0.8 mm"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(laminations, size: [27.5, 32.5, 26.5], at: [0, 0, 13.75])
+    box(tin, size: [0.945, 0.945, 3], at: [-10, -10, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-10, -5, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-10, 0, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-10, 5, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [-10, 10, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [10, 10, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [10, 5, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [10, 0, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [10, -5, -1])
+    box(tin, size: [0.945, 0.945, 3], at: [10, -10, -1])
+}

@@ -1,6 +1,6 @@
 package org.jmouse.kicad;
 
-import org.jmouse.kicad.parser.KiCadParser;
+import org.jmouse.sexpression.SExpressionParser;
 import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.jmouse.kicad.schematic.KiCadSheet;
 
@@ -43,7 +43,7 @@ public final class KiCadProject {
      */
     public static KiCadProject load(Path rootSchematic) {
         Path folder = rootSchematic.toAbsolutePath().getParent();
-        KiCadParser parser = new KiCadParser();
+        SExpressionParser parser = new SExpressionParser();
         Map<String, KiCadSchematic> read = new HashMap<>();
         return of(rootSchematic.getFileName().toString(), file -> read.computeIfAbsent(file, name -> {
             try {

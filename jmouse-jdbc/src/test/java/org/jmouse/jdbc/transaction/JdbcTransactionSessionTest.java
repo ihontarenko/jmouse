@@ -1,22 +1,22 @@
 package org.jmouse.jdbc.transaction;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.jdbc.exception.JdbcAccessException;
-import org.jmouse.transaction.DefaultTransactionDefinition;
-import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
-import org.jmouse.transaction.infrastructure.thread.ThreadBoundTransactionContextHolder;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.jmouse.jdbc.connection.ConnectionProvider;
+import org.jmouse.jdbc.exception.JdbcAccessException;
+import org.jmouse.transaction.DefaultTransactionDefinition;
+import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
+import org.jmouse.transaction.infrastructure.thread.ThreadBoundTransactionContextHolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class JdbcTransactionSessionTest {
+
     private final ThreadBoundTransactionContextHolder holder = new ThreadBoundTransactionContextHolder();
     private String url;
 
@@ -25,7 +25,10 @@ class JdbcTransactionSessionTest {
         holder.clear();
         TransactionContextAccessSupport.register(holder);
         url = "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
-        try (Connection connection = DriverManager.getConnection(url); var statement = connection.createStatement()) {
+        try (
+            Connection connection = DriverManager.getConnection(url);
+            var statement = connection.createStatement()
+        ) {
             statement.execute("create table entries (id integer primary key)");
         }
     }
@@ -150,26 +153,34 @@ class JdbcTransactionSessionTest {
     }
 
     private int count() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(url);
-             var statement = connection.createStatement();
-             var result = statement.executeQuery("select count(*) from entries")) {
+        try (
+            Connection connection = DriverManager.getConnection(url);
+            var statement = connection.createStatement();
+            var result = statement.executeQuery("select count(*) from entries")
+        ) {
             result.next();
             return result.getInt(1);
         }
     }
 
     private final class Probe implements ConnectionProvider {
+
         final Connection connection = DriverManager.getConnection(url);
         int acquisitions;
         int releases;
         boolean autoCommitAtRelease;
         int isolationAtRelease;
 
-        Probe() throws SQLException { }
+        Probe() throws SQLException {}
 
-        @Override public Connection getConnection() { acquisitions++; return connection; }
+        @Override
+        public Connection getConnection() {
+            acquisitions++;
+            return connection;
+        }
 
-        @Override public void release(Connection released) {
+        @Override
+        public void release(Connection released) {
             releases++;
             try {
                 autoCommitAtRelease = released.getAutoCommit();

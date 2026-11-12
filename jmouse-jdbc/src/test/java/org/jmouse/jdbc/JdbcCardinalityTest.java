@@ -1,15 +1,17 @@
 package org.jmouse.jdbc;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.UUID;
 import org.h2.jdbcx.JdbcDataSource;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.jmouse.jdbc.connection.DataSourceConnectionProvider;
 import org.jmouse.jdbc.exception.EmptyResultException;
 import org.jmouse.jdbc.exception.NonUniqueResultException;
-import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class JdbcCardinalityTest {
+
     private JdbcTemplate jdbc;
 
     @BeforeEach
@@ -27,17 +29,20 @@ class JdbcCardinalityTest {
 
     @Test
     void requiredQueryRejectsNoRows() {
-        assertThrows(EmptyResultException.class,
-                () -> jdbc.queryOne("select id from entries", (row, index) -> row.getInt(1)));
+        assertThrows(EmptyResultException.class, () ->
+            jdbc.queryOne("select id from entries", (row, index) -> row.getInt(1))
+        );
     }
 
     @Test
     void bothSingleRowContractsRejectMultipleRows() throws Exception {
         jdbc.update("insert into entries values (1), (2)");
-        assertThrows(NonUniqueResultException.class,
-                () -> jdbc.querySingle("select id from entries", (row, index) -> row.getInt(1)));
-        assertThrows(NonUniqueResultException.class,
-                () -> jdbc.queryOne("select id from entries", (row, index) -> row.getInt(1)));
+        assertThrows(NonUniqueResultException.class, () ->
+            jdbc.querySingle("select id from entries", (row, index) -> row.getInt(1))
+        );
+        assertThrows(NonUniqueResultException.class, () ->
+            jdbc.queryOne("select id from entries", (row, index) -> row.getInt(1))
+        );
     }
 
     @Test

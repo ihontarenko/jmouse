@@ -2,7 +2,7 @@ footprint:qfn-64-exposed-pad-footprint("QFN-64, 9 mm body") {
     meta {
         summary: "64-lead QFN-64, 9 mm body, 0.5 mm pitch, body 9 × 9 mm, exposed pad 7.15 mm"
         code: "FP.QFN:64-P0.5-9-EP7.15"
-        category: circuits
+        category: no-lead
         tags: electronics, footprint, surface
         source: "JEDEC MO-220"
         authors: "jMouse"
@@ -79,4 +79,6 @@ footprint:qfn-64-exposed-pad-footprint("QFN-64, 9 mm body") {
     outline(silkscreen, width: 0.12, "M-4.16 -4.61H-4.61V-4.16M-4.16 4.61H-4.61V4.16M4.16 -4.61H4.61V-4.16M4.16 4.61H4.61V4.16")
     outline(silkscreen, filled, "M-5.735 -3.75A0.3 0.3 0 1 0 -5.135 -3.75A0.3 0.3 0 1 0 -5.735 -3.75Z")
     outline(courtyard, width: 0.05, "M-5.15 -5.15H5.15V5.15H-5.15Z")
+    body(height: 1)
+    model("MD.QFN:64-P0.5-9-EP7.15")
 }

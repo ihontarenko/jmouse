@@ -965,4 +965,129 @@ sheet "KiCad symbols as jM components" as kicad-library {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
         code "FP.HDR:1X6-P2.54-V"
     }
+
+    to-220 "TO-220, three leads, standing" {
+        footprint "Package_TO_SOT_THT:TO-220-3_Vertical"
+        code "FP.TO220:3-V"
+    }
+
+    to-3p "TO-3P, three leads, standing" {
+        footprint "Package_TO_SOT_THT:TO-3P-3_Vertical"
+        code "FP.TO3P:3-V"
+    }
+
+    to-247 "TO-247, three leads, standing" {
+        footprint "Package_TO_SOT_THT:TO-247-3_Vertical"
+        code "FP.TO247:3-V"
+    }
+
+    to-126 "TO-126, three leads, standing" {
+        footprint "Package_TO_SOT_THT:TO-126-3_Vertical"
+        code "FP.TO126:3-V"
+    }
+
+    # Footprint families: every size of a package KiCad names by its sizes, written once — {name} a part of the id read, {*} a
+    # part passed over; in the code {name|number} writes a size plain (10.00 is 10, 03 is 3; a code as 0207 is written as it is), {name|upper} in capitals,
+    # {name|initial} its first letter. A size the library does not draw finds no footprint and is converted as KiCad
+    # draws it. A family is a way in only: the parts it passes over cannot be written back.
+
+    chip-resistors "Chip resistors, every size" {
+        footprint "Resistor_SMD:R_{size}_{metric}Metric"
+        code "FP.CHIP:R{size}"
+    }
+
+    chip-capacitors "Chip capacitors, every size" {
+        footprint "Capacitor_SMD:C_{size}_{metric}Metric"
+        code "FP.CHIP:C{size}"
+    }
+
+    chip-inductors "Chip inductors, every size" {
+        footprint "Inductor_SMD:L_{size}_{metric}Metric"
+        code "FP.CHIP:L{size}"
+    }
+
+    axial-resistors "Axial resistors, every DIN body, pitch and standing" {
+        footprint "Resistor_THT:R_Axial_DIN{code}_L{*}mm_D{*}mm_P{pitch}mm_{standing}"
+        code "FP.AXIAL:R{code}-P{pitch|number}-{standing|initial}"
+    }
+
+    axial-diodes "Axial diodes, every body, pitch and standing" {
+        footprint "Diode_THT:D_{code}_P{pitch}mm_{standing}"
+        code "FP.AXIAL:{code|upper}-P{pitch|number}-{standing|initial}"
+    }
+
+    axial-diodes-named-twice "Axial diodes whose body KiCad names twice" {
+        footprint "Diode_THT:D_{code}_{*}_P{pitch}mm_{standing}"
+        code "FP.AXIAL:{code|upper}-P{pitch|number}-{standing|initial}"
+    }
+
+    radial-electrolytic-capacitors "Radial electrolytic capacitors, every can and pitch" {
+        footprint "Capacitor_THT:CP_Radial_D{diameter}mm_P{pitch}mm"
+        code "FP.RADIAL:CP-D{diameter|number}-P{pitch|number}"
+    }
+
+    disc-capacitors "Ceramic disc capacitors, every disc and pitch" {
+        footprint "Capacitor_THT:C_Disc_D{diameter}mm_W{width}mm_P{pitch}mm"
+        code "FP.RADIAL:CD-{diameter|number}X{width|number}-P{pitch|number}"
+    }
+
+    box-capacitors "Film box capacitors, every box and pitch" {
+        footprint "Capacitor_THT:C_Rect_L{length}mm_W{width}mm_P{pitch}mm"
+        code "FP.RADIAL:CB-{length|number}X{width|number}-P{pitch|number}"
+    }
+
+    box-capacitors-of-a-series "Film box capacitors, every box and pitch, a maker's series named after them" {
+        footprint "Capacitor_THT:C_Rect_L{length}mm_W{width}mm_P{pitch}mm_{*}"
+        code "FP.RADIAL:CB-{length|number}X{width|number}-P{pitch|number}"
+    }
+
+    dual-inline-packages "Dual inline packages, every count and row" {
+        footprint "Package_DIP:DIP-{leads}_W{row}mm"
+        code "FP.DIP:{leads|number}-W{row|number}"
+    }
+
+    small-outline-packages "Small outline packages, every count, body and pitch" {
+        footprint "Package_SO:SOIC-{leads}_{width}x{*}mm_P{pitch}mm"
+        code "FP.SOIC:{leads|number}-P{pitch|number}-W{width|number}"
+    }
+
+    wide-small-outline-packages "Wide small outline packages, every count, body and pitch: KiCad marks the wide body after the count" {
+        footprint "Package_SO:SOIC-{leads}W_{width}x{*}mm_P{pitch}mm"
+        code "FP.SOIC:{leads|number}-P{pitch|number}-W{width|number}"
+    }
+
+    thin-shrink-small-outline-packages "Thin shrink small outline packages, every count, body and pitch" {
+        footprint "Package_SO:TSSOP-{leads}_{width}x{*}mm_P{pitch}mm"
+        code "FP.TSSOP:{leads|number}-P{pitch|number}-W{width|number}"
+    }
+
+    pin-headers "Pin headers, every row, count, pitch and standing" {
+        footprint "Connector_PinHeader_{pitch}mm:PinHeader_{rows}x{pins}_P{*}mm_{standing}"
+        code "FP.HDR:{rows|number}X{pins|number}-P{pitch|number}-{standing|initial}"
+    }
+
+    pin-sockets "Pin sockets, every row, count, pitch and standing" {
+        footprint "Connector_PinSocket_{pitch}mm:PinSocket_{rows}x{pins}_P{*}mm_{standing}"
+        code "FP.SKT:{rows|number}X{pins|number}-P{pitch|number}-{standing|initial}"
+    }
+
+    mounting-holes "Mounting holes, bare" {
+        footprint "MountingHole:MountingHole_{*}_M{metric}"
+        code "FP.MH:M{metric|number}"
+    }
+
+    mounting-holes-with-a-pad "Mounting holes with a pad" {
+        footprint "MountingHole:MountingHole_{*}_M{metric}_Pad"
+        code "FP.MH:M{metric|number}-PAD"
+    }
+
+    mounting-holes-with-a-pad-and-vias "Mounting holes with a pad and vias round it" {
+        footprint "MountingHole:MountingHole_{*}_M{metric}_Pad_Via"
+        code "FP.MH:M{metric|number}-PAD-VIA"
+    }
+
+    mounting-holes-din-965 "Mounting holes for DIN 965 heads, with a pad" {
+        footprint "MountingHole:MountingHole_{*}_M{metric}_DIN965_Pad"
+        code "FP.MH:M{metric|number}-DIN-965-PAD"
+    }
 }

@@ -8,6 +8,7 @@ import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
 import org.jmouse.security.web.authentication.AuthorizationHeaderCredentials;
 
 public class BearerTokenAuthenticationProvider extends AbstractAuthenticationProvider {
+
     public static final String BEARER_PREFIX = "Bearer";
 
     @Override

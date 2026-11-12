@@ -2,8 +2,8 @@ package org.jmouse.kicad.symbol;
 
 import static org.jmouse.kicad.KiCadKeyword.*;
 
-import org.jmouse.kicad.parser.KiCadDocument;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.SExpressionDocument;
+import org.jmouse.sexpression.node.SExpressionList;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,12 +29,12 @@ public final class KiCadSymbolLibrary {
      *
      * @throws IllegalArgumentException when it is not a symbol library, or a symbol extends one it does not hold
      */
-    public static KiCadSymbolLibrary of(KiCadDocument document) {
+    public static KiCadSymbolLibrary of(SExpressionDocument document) {
         if (!document.root().is(SYMBOL_LIBRARY_FILE)) {
             throw new IllegalArgumentException(document.name() + " is a " + document.kind() + ", not a symbol library.");
         }
         Map<String, KiCadSymbolDefinition> written = new LinkedHashMap<>();
-        for (KiCadList symbol : document.root().lists(SYMBOL)) {
+        for (SExpressionList symbol : document.root().lists(SYMBOL)) {
             KiCadSymbolDefinition definition = KiCadSymbolDefinition.of(symbol);
             written.put(definition.name(), definition);
         }

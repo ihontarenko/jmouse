@@ -1,0 +1,8 @@
+category:mechanical("Mechanical") {
+    meta {
+        category: electromechanical
+        order: 3
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

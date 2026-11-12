@@ -1,10 +1,12 @@
 component:pin-header-2x9("Pin header, 2x9", type: connector) {
     meta {
         summary: "Double-row pin header, 18 contacts, 2.54 mm pitch"
-        category: circuits
+        category: connectors
         source: "generic connector; no electrical behaviour"
         designator: J
         package: "PinHeader_2x09_P2.54mm_Vertical"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     pin:pin1(analog, 1, "contact 1")
     pin:pin2(analog, 2, "contact 2")
@@ -24,5 +26,7 @@ component:pin-header-2x9("Pin header, 2x9", type: connector) {
     pin:pin16(analog, 16, "contact 16")
     pin:pin17(analog, 17, "contact 17")
     pin:pin18(analog, 18, "contact 18")
-    symbol(uses: pin-header-2x9-symbol)
+    footprint("FP.HDR:2X9-P2.54-V")
+
+    symbol(uses: "SY.HDR:2X9")
 }

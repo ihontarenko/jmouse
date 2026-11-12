@@ -1,0 +1,17 @@
+model:axial-resistor-body-0617-pitch-3048-horizontal-model("Axial resistor DIN 0617, horizontal, 30.48 mm") {
+    meta {
+        summary: "Axial resistor DIN 0617, horizontal, 30.48 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:R0617-P30.48-H"
+        category: resistors-through-hole
+        tags: electronics, model, axial
+        source: "IEC 60286-1 bodies, DIN 44051 size codes"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(lacquer, profile: [0, -8.5, 2.25, -8.5, 3, -7.75, 3, -5.1, 2.58, -4.68, 2.58, 4.68, 3, 5.1, 3, 7.75, 2.25, 8.5, 0, 8.5], at: [0, 0, 3], rotate: [0, 90, 0])
+    marking(bands, on: round, radius: 2.59, length: 9.36, at: [0, 0, 3], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.35, length: 6.74, at: [-11.87, 0, 3], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.35, length: 4.6, at: [-15.24, 0, 0.7])
+    cylinder(tin, radius: 0.35, length: 6.74, at: [11.87, 0, 3], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.35, length: 4.6, at: [15.24, 0, 0.7])
+}

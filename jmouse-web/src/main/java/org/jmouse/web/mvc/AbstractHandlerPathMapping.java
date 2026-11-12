@@ -1,27 +1,29 @@
 package org.jmouse.web.mvc;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.core.matcher.Match;
-import org.jmouse.http.HttpMethod;
-import org.jmouse.web.match.PathPattern;
-import org.jmouse.web.match.Route;
-import org.jmouse.web.match.RouteMatch;
-import org.jmouse.web.mvc.cors.CorsConfiguration;
-import org.jmouse.web.mvc.mapping.RequestHttpHandlerMapping;
-import org.jmouse.web.match.routing.MappingRegistration;
-import org.jmouse.web.match.routing.MappingRegistry;
-import org.jmouse.web.match.routing.MappingCriteria;
-import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.core.MethodParameter;
-import org.jmouse.web.http.RequestRoute;
-import org.jmouse.web.match.routing.condition.HttpMethodMatcher;
-import org.jmouse.web.match.routing.condition.RequestPathMatcher;
-
-import java.util.*;
-
 import static org.jmouse.core.AnsiColors.colorize;
 import static org.jmouse.core.Streamable.of;
 import static org.jmouse.helpers.Commons.unwrap;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.*;
+import org.jmouse.core.MethodParameter;
+import org.jmouse.core.matcher.Match;
+import org.jmouse.http.HttpMethod;
+import org.jmouse.http.HttpStatus;
+import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.PathPattern;
+import org.jmouse.web.match.Route;
+import org.jmouse.web.match.RouteMatch;
+import org.jmouse.web.match.routing.MappingCriteria;
+import org.jmouse.web.match.routing.MappingRegistration;
+import org.jmouse.web.match.routing.MappingRegistry;
+import org.jmouse.web.match.routing.condition.ConsumesMatcher;
+import org.jmouse.web.match.routing.condition.HttpMethodMatcher;
+import org.jmouse.web.match.routing.condition.ProducesMatcher;
+import org.jmouse.web.match.routing.condition.RequestPathMatcher;
+import org.jmouse.web.mvc.cors.CorsConfiguration;
+import org.jmouse.web.mvc.mapping.RequestHttpHandlerMapping;
 
 /**
  * 🧭 Abstract base class for route-based handler mappings.
@@ -55,7 +57,7 @@ import static org.jmouse.helpers.Commons.unwrap;
  */
 public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping {
 
-    private MappingRegistry<H>         mappingRegistry;
+    private MappingRegistry<H> mappingRegistry;
     private HandlerInterceptorRegistry interceptorRegistry;
 
     /**
@@ -97,8 +99,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @return {@link MappedHandler} with parsed route and handler, or {@code null} if no match found
      */
     public MappedHandler getMappedHandler(HttpServletRequest request) {
-        RequestRoute    requestRoute = RequestRoute.ofRequest(request);
-        MappingCriteria winner       = getWinner(requestRoute);
+        RequestRoute requestRoute = RequestRoute.ofRequest(request);
+        MappingCriteria winner = getWinner(requestRoute);
 
         if (winner == null) {
             Set<HttpMethod> methods = getAllowedMethods(requestRoute);
@@ -109,28 +111,63 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
                     return getOptionsHttpRequestHandler(methods);
                 }
 
-                throw new MethodNotAllowedException(
-                        methods, "HTTP method '%s' for path '%s' is disallowed. Allowed only '%s'.".formatted(
-                                requestRoute.method(), requestRoute.requestPath().path(), of(methods).joining(", ")));
+                if (!methods.contains(requestRoute.method())) {
+                    throw new MethodNotAllowedException(methods, "HTTP method is not allowed for this path");
+                }
+                List<MappingCriteria> methodMappings = getRequestPathMappings(requestRoute)
+                    .stream()
+                    .filter(criteria -> criteria.getMatcher(HttpMethodMatcher.class).matches(requestRoute))
+                    .toList();
+                List<MappingCriteria> consumableMappings = methodMappings
+                    .stream()
+                    .filter(criteria -> {
+                        ConsumesMatcher condition = criteria.getMatcher(ConsumesMatcher.class);
+                        return condition == null || condition.matches(requestRoute);
+                    })
+                    .toList();
+                if (!methodMappings.isEmpty() && consumableMappings.isEmpty()) {
+                    throw new HttpRequestException(
+                        HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                        "Request content type is not supported for this path"
+                    );
+                }
+                boolean producible = consumableMappings.stream().anyMatch(criteria -> {
+                    ProducesMatcher condition = criteria.getMatcher(ProducesMatcher.class);
+                    return condition == null || condition.matches(requestRoute);
+                });
+                if (!consumableMappings.isEmpty() && !producible) {
+                    throw new HttpRequestException(
+                        HttpStatus.NOT_ACCEPTABLE,
+                        "No acceptable representation is available for this path"
+                    );
+                }
             }
 
-            LOGGER.info(colorize(
-                    "❌\uD83E\uDD7A ${RED_BOLD_BRIGHT}UNMATCHED:${RESET} ${YELLOW_BOLD_BRIGHT}%s${RESET}", requestRoute));
+            LOGGER.info(
+                colorize(
+                    "❌\uD83E\uDD7A ${RED_BOLD_BRIGHT}UNMATCHED:${RESET} ${YELLOW_BOLD_BRIGHT}%s${RESET}",
+                    requestRoute
+                )
+            );
 
             return null;
         }
 
         MappingRegistration<H> registration = mappingRegistry.getRegistration(winner);
-        H                      handler      = registration.handler();
+        H handler = registration.handler();
 
         if (!supportsMappedHandler(handler)) {
             return null;
         }
 
-        Route         route         = winner.getRoute();
-        RouteMatch    match         = route.pathPattern().match(requestRoute.requestPath().path());
+        Route route = winner.getRoute();
+        RouteMatch match = route.pathPattern().match(requestRoute.requestPath().path());
         MappingResult mappingResult = MappingResult.of(match, route);
-        MappedHandler mappedHandler = new RouteMappedHandler(handler, mappingResult, getReturnParameter(handler));
+        MappedHandler mappedHandler = new RouteMappedHandler(
+            handler,
+            mappingResult,
+            getReturnParameter(handler)
+        );
 
         request.setAttribute(MATCHED_ROUTE_ATTRIBUTE, route);
         request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
@@ -149,23 +186,34 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      */
     private void logMatchResult(Match match) {
         HttpMethod method = unwrap(match.get(HttpMethod.class));
-        RouteMatch route  = unwrap(match.get(RouteMatch.class));
+        RouteMatch route = unwrap(match.get(RouteMatch.class));
 
         StringBuilder message = new StringBuilder(128);
 
-        message.append(colorize("🚀 ${RED_BOLD_BRIGHT}MATCH${RESET} "))
-                .append(method).append(" ").append(route).append(" ");
+        message
+            .append(colorize("🚀 ${RED_BOLD_BRIGHT}MATCH${RESET} "))
+            .append(method)
+            .append(" ")
+            .append(route)
+            .append(" ");
 
         message.append("\n\t").append("${BLUE_BOLD_BRIGHT}VARIABLES:${RESET} ").append(route.variables());
 
         for (Class<?> type : match.types()) {
-            message.append("\n\t").append(switch (type.getSimpleName()) {
-                case "PathPattern" -> colorize("${PURPLE_BOLD_BRIGHT}PATH_PATTERN${RESET}");
-                case "RouteMatch" -> colorize("${CYAN_BOLD_BRIGHT}ROUTE${RESET}");
-                case "MediaType" -> colorize("${YELLOW_BOLD_BRIGHT}PRODUCES${RESET}");
-                case "HttpMethod" -> colorize("${BLUE_BOLD_BRIGHT}METHOD${RESET}");
-                default -> colorize("${GREEN_BOLD_BRIGHT}%s${RESET}".formatted(type.getSimpleName()));
-            }).append("=").append(unwrap(match.get(type))).append(" ");
+            message
+                .append("\n\t")
+                .append(
+                    switch (type.getSimpleName()) {
+                        case "PathPattern" -> colorize("${PURPLE_BOLD_BRIGHT}PATH_PATTERN${RESET}");
+                        case "RouteMatch" -> colorize("${CYAN_BOLD_BRIGHT}ROUTE${RESET}");
+                        case "MediaType" -> colorize("${YELLOW_BOLD_BRIGHT}PRODUCES${RESET}");
+                        case "HttpMethod" -> colorize("${BLUE_BOLD_BRIGHT}METHOD${RESET}");
+                        default -> colorize("${GREEN_BOLD_BRIGHT}%s${RESET}".formatted(type.getSimpleName()));
+                    }
+                )
+                .append("=")
+                .append(unwrap(match.get(type)))
+                .append(" ");
         }
 
         LOGGER.info(colorize("${BLUE_BOLD_BRIGHT}%s${RESET}", message.toString().trim()));
@@ -182,7 +230,11 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      */
     private MappedHandler getOptionsHttpRequestHandler(Set<HttpMethod> allowedMethods) {
         OptionsRequestHttpHandler handler = new OptionsRequestHttpHandler(allowedMethods);
-        return new RouteMappedHandler(handler, MappingResult.EMPTY, RequestHttpHandlerMapping.METHOD_PARAMETER);
+        return new RouteMappedHandler(
+            handler,
+            MappingResult.EMPTY,
+            RequestHttpHandlerMapping.METHOD_PARAMETER
+        );
     }
 
     /**
@@ -227,7 +279,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param handler the handler object containing the controller method
      * @return a {@link MethodParameter} describing the target method parameter
      */
-    abstract protected MethodParameter getReturnParameter(H handler);
+    protected abstract MethodParameter getReturnParameter(H handler);
 
     /**
      * 🥇 Selects the most specific and applicable {@link MappingCriteria}
@@ -284,7 +336,6 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         return candidates;
     }
 
-
     /**
      * 🧱 Returns all registered {@link HandlerInterceptor}s to be applied
      * to the current request processing pipeline.
@@ -337,5 +388,4 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         setMappingRegistry(context.getBean(MappingRegistry.class));
         super.initialize(context);
     }
-
 }

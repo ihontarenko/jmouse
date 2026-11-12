@@ -42,7 +42,7 @@ public final class PackagePortraits {
     private enum Leads {
         /** A dual in-line lead: its wide shoulder out to the row, where it bends down, then the narrow lead into the hole. */
         THROUGH_HOLE("dual-inline"),
-        /** A gull wing: one flat lead from the body out to its foot on the board. */
+        /** A gull wing: one flat lead from the body out to its foot on the pcb. */
         GULL_WING("gull-wing");
 
         private final String form;
@@ -141,7 +141,7 @@ public final class PackagePortraits {
         Map<String, String> words = new LinkedHashMap<>(outline.words());
         words.put("leads", String.valueOf(count));
         String code = TechnicalClass.PORTRAIT.code(PackageTable.designated(outline.word("designation"), words));
-        return new PackagePortrait(name + "-" + count + suffix + "-portrait", code, title, summary, outline.word("folder"),
+        return new PackagePortrait(name + "-" + count + suffix + "-portrait", code, title, summary, outline.word("folder"), outline.word("category"),
                 mounting, outline.standard(), filing, note, Math.ceil(2 * Math.max(Math.abs(left), centre + halfLength)),
                 2 * tip, rules.markingInput(), statements);
     }

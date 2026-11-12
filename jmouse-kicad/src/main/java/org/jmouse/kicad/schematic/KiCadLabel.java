@@ -4,7 +4,7 @@ import static org.jmouse.kicad.KiCadKeyword.*;
 
 import org.jmouse.kicad.KiCadKeyword;
 import org.jmouse.kicad.KiCadPoint;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 
 /**
  * A net's name written on a sheet: a {@code label} joins what touches it to every label of its name on the same sheet,
@@ -32,8 +32,8 @@ public record KiCadLabel(Kind kind, String text, KiCadPoint at, int angle) {
         }
     }
 
-    static KiCadLabel of(Kind kind, KiCadList label) {
-        KiCadList at = label.requireList(AT);
+    static KiCadLabel of(Kind kind, SExpressionList label) {
+        SExpressionList at = label.requireList(AT);
         return new KiCadLabel(kind, label.word(1), KiCadPoint.of(at), at.size() > 3 ? (int) at.number(3) : 0);
     }
 }

@@ -3,7 +3,7 @@ portrait:ntc-thermistor-portrait("NTC thermistor") {
     meta {
         summary: "A bead NTC thermistor: a black epoxy drop on two leads"
         code: "PT.THERMISTOR:NTC-BEAD"
-        category: circuits
+        category: protection
         tags: electronics, portrait, thermistor, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

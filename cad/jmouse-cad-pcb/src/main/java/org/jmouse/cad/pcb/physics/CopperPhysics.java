@@ -1,0 +1,75 @@
+package org.jmouse.cad.pcb.physics;
+
+import org.jmouse.cad.settings.SettingsOwner;
+import org.jmouse.cad.settings.SettingsSection;
+/**
+ * What copper is, as the engine works out a pcb's copper as an electrical network: its resistivity and how it changes with
+ * temperature, the temperature a pcb stands in, IPC-2221's current-carrying constants, and how finely the network is solved.
+ * Data, beside this class ({@link #SECTION}); the copper's thickness is the pcb's way of making, not this.
+ *
+ * @param source                 where each value comes from: the standards and books it is read from
+ * @param resistivity            Ω·m at the reference temperature
+ * @param referenceTemperature   °C the resistivity is given at
+ * @param temperatureCoefficient per kelvin
+ * @param ambient                °C the pcb stands in: a resistance is given at it
+ * @param capacity               IPC-2221's constants for the current a cross-section carries
+ * @param carrying               the share of the current below which a piece is taken as carrying none of it
+ * @param edgeHalvings           how many halvings find where a piece crosses an area's edge
+ * @param solver                 how finely the copper's network is solved
+ */
+public record CopperPhysics(String source, double resistivity, double referenceTemperature, double temperatureCoefficient, double ambient,
+                            Capacity capacity, double carrying, int edgeHalvings, Solver solver) {
+
+    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/pcb/physics/copper. */
+    public static final SettingsSection<CopperPhysics> SECTION = new SettingsSection<>("pcb/physics/copper", "Copper physics", SettingsOwner.ENGINE_DATA, CopperPhysics.class);
+
+    /**
+     * IPC-2221's I = k·ΔT^riseExponent·A^areaExponent, A in square mils.
+     *
+     * @param outer                         k on an outer layer
+     * @param inner                         k on an inner layer
+     * @param riseExponent                  the power the temperature rise is raised to
+     * @param areaExponent                  the power the cross-section is raised to
+     * @param squareMilsPerSquareMillimetre square mils in a square millimetre: the formula's unit of area
+     */
+    public record Capacity(double outer, double inner, double riseExponent, double areaExponent, double squareMilsPerSquareMillimetre) {
+    }
+
+    /**
+     * How the nodal equations are solved: conjugate gradients until the residual is this small, at most this many
+     * iterations for each node and these more.
+     *
+     * @param tolerance         the residual the conjugate gradients stop at
+     * @param iterationsPerNode iterations allowed for each node of the network
+     * @param iterations        iterations allowed beyond those
+     */
+    public record Solver(double tolerance, int iterationsPerNode, int iterations) {
+    }
+
+    /** Ω·mm at the ambient temperature. */
+    public double resistivityAtAmbient() {
+        return resistivity * 1000 * (1 + temperatureCoefficient * (ambient - referenceTemperature));
+    }
+
+    /** The current a cross-section, mm², carries within a rise, kelvin, by IPC-2221. */
+    public double capacityOf(double section, double temperatureRise, boolean inner) {
+        return factor(inner) * Math.pow(temperatureRise, capacity.riseExponent())
+               * Math.pow(section * capacity.squareMilsPerSquareMillimetre(), capacity.areaExponent());
+    }
+
+    /** The cross-section, mm², that carries a current within a rise — IPC-2221 turned round. */
+    public double sectionFor(double current, double temperatureRise, boolean inner) {
+        double carried = factor(inner) * Math.pow(temperatureRise, capacity.riseExponent());
+        return Math.pow(current / carried, 1 / capacity.areaExponent()) / capacity.squareMilsPerSquareMillimetre();
+    }
+
+    /** How many kelvin a cross-section warms by carrying a current, by IPC-2221. */
+    public double riseOf(double current, double section, boolean inner) {
+        double carried = factor(inner) * Math.pow(section * capacity.squareMilsPerSquareMillimetre(), capacity.areaExponent());
+        return Math.pow(current / carried, 1 / capacity.riseExponent());
+    }
+
+    private double factor(boolean inner) {
+        return inner ? capacity.inner() : capacity.outer();
+    }
+}

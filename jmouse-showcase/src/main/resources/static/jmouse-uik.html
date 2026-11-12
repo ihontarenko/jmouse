@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>jMouse Showcase · UI kit</title>
+        <link rel="stylesheet" href="/static/showcase.css" />
+    </head>
+    <body>
+        <main class="kit">
+            <a href="/">← Showcase</a>
+            <p class="eyebrow">Design system / 01</p>
+            <h1>Framework workbench</h1>
+            <p class="supporting">Shared controls, data surfaces and interaction states.</p>
+            <section>
+                <h2>Controls</h2>
+                <div class="request-bar">
+                    <label>
+                        Text field
+                        <input value="A persistent entry" />
+                    </label>
+                    <label>
+                        Method
+                        <select>
+                            <option>GET</option>
+                            <option>POST</option>
+                        </select>
+                    </label>
+                    <button class="primary">Primary action</button>
+                    <button>Secondary action</button>
+                    <button disabled>Working…</button>
+                </div>
+                <label class="checkbox">
+                    <input type="checkbox" checked />
+                    Selected option
+                </label>
+            </section>
+            <section>
+                <h2>Feedback</h2>
+                <p class="notice">Committed. Both records were saved.</p>
+                <p class="notice" data-error="true">HTTP 403. This action needs administrator access.</p>
+                <span class="identity">Guest · public access</span>
+            </section>
+            <section>
+                <h2>Data table</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Method</th>
+                            <th scope="col">Route</th>
+                            <th scope="col">Access</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="method">GET</td>
+                            <td><code>/api/entries</code></td>
+                            <td>Public</td>
+                        </tr>
+                        <tr>
+                            <td class="method">POST</td>
+                            <td><code>/api/transfers</code></td>
+                            <td>Signed in + CSRF</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Response inspector</h2>
+                <div class="inspector">
+                    <div class="inspector-heading">
+                        <h2>Response</h2>
+                        <span class="response-status">200 OK</span>
+                    </div>
+                    <p class="request-line">GET /api/hello/world</p>
+                    <pre tabindex="0">{ "hello": "world" }</pre>
+                </div>
+            </section>
+            <section>
+                <h2>Empty state</h2>
+                <p class="supporting">No entries yet. Sign in and insert your first row.</p>
+                <p class="hint">
+                    All fields and actions use the same control height, focus outline and spacing scale.
+                    Keyboard focus is visible; narrow layouts move the inspector below the workspace.
+                </p>
+            </section>
+        </main>
+    </body>
+</html>

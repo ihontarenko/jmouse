@@ -1,35 +1,44 @@
 package org.jmouse.cad.store.catalogue;
 
+import org.jmouse.cad.document.DocumentStatus;
+import org.jmouse.cad.store.CadRead;
 import org.jmouse.cad.circuit.Circuit;
+import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.circuit.SheetBoundary;
+import org.jmouse.cad.document.DocumentEditing;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
-import org.jmouse.cad.jpa.StoredPage;
-import org.jmouse.cad.jpa.catalogue.CategoryStore;
-import org.jmouse.cad.jpa.catalogue.DocumentCategory;
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
-import org.jmouse.cad.jpa.catalogue.DocumentRevision;
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
-import org.jmouse.cad.jpa.catalogue.StoredDocument;
+import org.jmouse.cad.document.source.DocumentLocation;
+import org.jmouse.cad.folder.StoredPage;
+import org.jmouse.cad.folder.RevisionOrigin;
+import org.jmouse.cad.folder.DocumentRevision;
+import org.jmouse.cad.folder.DocumentStore;
+import org.jmouse.cad.folder.StoredDocument;
+import org.jmouse.cad.simulation.CategoryDocument;
 import org.jmouse.cad.library.DocumentIndex;
 import org.jmouse.cad.simulation.LayoutAgreement;
 import org.jmouse.cad.simulation.ParameterEvaluation;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.simulation.elaboration.SheetInstance;
-import org.jmouse.cad.store.CadProperties;
+import org.jmouse.cad.simulation.elaboration.SheetUnfolding;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadCapability;
+import org.jmouse.cad.store.authority.CadPlace;
 import org.jmouse.cad.store.authority.CadPlaces;
+import org.jmouse.cad.store.files.DocumentFiles;
 import org.jmouse.cad.store.catalogue.CatalogueViews.CategoryDraft;
 import org.jmouse.cad.store.catalogue.CatalogueViews.CategoryView;
 import org.jmouse.cad.store.catalogue.CatalogueViews.DocumentDetail;
 import org.jmouse.cad.store.catalogue.CatalogueViews.DocumentSummary;
-import org.jmouse.cad.store.catalogue.CatalogueViews.Origin;
+import org.jmouse.cad.store.catalogue.CatalogueViews.LocationView;
 import org.jmouse.cad.store.catalogue.CatalogueViews.RelatedView;
 import org.jmouse.cad.store.catalogue.CatalogueViews.RevisionSource;
 import org.jmouse.cad.store.catalogue.CatalogueViews.RevisionView;
 import org.jmouse.cad.store.catalogue.CatalogueViews.SheetBlock;
 import org.jmouse.cad.store.catalogue.CatalogueViews.SheetView;
+import org.jmouse.cad.store.library.ShippedDocuments;
+import org.jmouse.cad.store.plugin.EngineConfiguration;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.revisions.RevisionLabel;
 import org.slf4j.Logger;
@@ -41,16 +50,17 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -59,110 +69,172 @@ import java.util.stream.Collectors;
  *
  * <p>A document is its text. Writing keeps a new revision of that text and derives the index from it
  * ({@link DocumentIndex}); every write is checked as a whole first: the text reads and its model reads, its slug is
- * free, its category exists, everything it names exists and is of the kind the naming needs, and a circuit's drawing
+ * free, it is filed in a category the catalogue holds, everything it names exists and is of the kind the naming needs, and a circuit's drawing
  * agrees with its netlist. An unchanged text writes nothing.</p>
  */
 public class CadCatalogue {
 
-    /** A category's code: lowercase words joined by hyphens, as a document's {@code meta { category … }} writes it. */
-    private static final Pattern CATEGORY_CODE = Pattern.compile("[a-z][a-z0-9-]{1,39}");
-
-    /** The meta fields the index keeps as columns, and so leaves out of a detail's {@code meta}. */
+    /** The meta fields the index keeps of its own, and so leaves out of a detail's {@code meta}. */
     private static final Set<String> INDEXED_META = Set.of(MetaNode.SUMMARY, MetaNode.CATEGORY, MetaNode.TAGS);
 
+    /** The longest summary: the one sentence a list shows under a title. */
     private static final int SUMMARY_LENGTH = 500;
+    /** The longest title: what a list, a tab and a sheet's frame show whole. */
     private static final int TITLE_LENGTH   = 160;
+    /** The longest address: a document's file is named by it, and a file's name is bounded. */
     private static final int SLUG_LENGTH    = 120;
-    private static final int TAG_LENGTH     = 64;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CadCatalogue.class);
 
     private final DocumentStore   documents;
-    private final CategoryStore   categories;
     private final DocumentAccess  access;
     private final DocumentReading reading;
     private final CadAuthority    authority;
     private final CadPlaces       places;
-    private final CadProperties   properties;
+    private final EngineConfiguration configuration;
     private final Clock           clock;
+    private final DocumentFiles   files;
+    private final DocumentTexts   texts;
+    /** What writes a text's head anew: a status said, a document filed elsewhere. */
+    private final DocumentEditing editing;
+    private final Supplier<List<PlaceSource>> placeSources;
 
-    public CadCatalogue(DocumentStore documents, CategoryStore categories, DocumentAccess access, DocumentReading reading,
-                        CadAuthority authority, CadPlaces places, CadProperties properties, Clock clock) {
+    /** @param placeSources the places documents are held besides the library folder, as the plugins brought them, read on each asking */
+    public CadCatalogue(DocumentStore documents, DocumentAccess access, DocumentReading reading,
+                        CadAuthority authority, CadPlaces places, EngineConfiguration configuration, Clock clock, DocumentFiles files,
+                        DocumentTexts texts, Supplier<List<PlaceSource>> placeSources) {
         this.documents = documents;
-        this.categories = categories;
         this.access = access;
         this.reading = reading;
         this.authority = authority;
         this.places = places;
-        this.properties = properties;
+        this.configuration = configuration;
         this.clock = clock;
+        this.files = files;
+        this.texts = texts;
+        this.editing = new DocumentEditing(reading.language().language(), reading.language().modules());
+        this.placeSources = placeSources;
     }
 
     // ── Categories ───────────────────────────────────────────────────────────────────────────────────────────────
 
-    /** The sections, each counting its published catalogue documents — of one kind when {@code kind} names one. */
-    @Transactional(readOnly = true)
+    /**
+     * The categories the reader may see — the catalogue's published {@code category} documents, and those of the places
+     * the reader reads, such as the category of a KiCad library an import brought into a workspace —, each filed under
+     * its parent as every document files itself in its category, parents before their children, each counting the
+     * published catalogue documents filed in it itself; of one kind when {@code kind} names one. A category standing
+     * under one the reader cannot see is left out with what stands under it.
+     */
+    @CadRead
     public List<CategoryView> categories(String kind) {
-        String counted = blankToNull(kind);
-        return categories.allInOrder().stream().map(category -> categoryView(category, counted)).toList();
+        Map<String, Long> counted = documents.countCatalogueByCategory(DocumentStatus.PUBLISHED, blankToNull(kind));
+        Map<String, CategoryDocument> seen = new LinkedHashMap<>();
+        Map<String, DocumentOwner> owners = new HashMap<>();
+        for (StoredDocument document : documents.findByKind(SimulationModule.CATEGORY.word())) {
+            if (document.getStatus() == DocumentStatus.PUBLISHED && access.canRead(document)) {
+                seen.put(document.getSlug(), categoryOf(document));
+                document.owner().ifPresent(owner -> owners.put(document.getSlug(), owner));
+            }
+        }
+        List<CategoryDocument> tree = seen.values().stream()
+                .filter(category -> CategoryDocument.ringOrOrphan(category, seen::get).isEmpty()).toList();
+        return CategoryDocument.parentsFirst(tree).stream()
+                .map(category -> categoryView(category, counted.getOrDefault(category.slug(), 0L), owners.get(category.slug())))
+                .toList();
     }
 
-    /** Creates a section, or renames and moves one; its code never changes, documents point at it. */
+    /**
+     * Writes a category's document: a new one is created and published, one that is there takes the next revision. Its
+     * address never changes — every document filed in it names it —; moving it under another parent rewrites its own
+     * document alone. An order left out keeps the one it has, or puts a new category last among its siblings.
+     */
     @Transactional
     public CategoryView saveCategory(String code, CategoryDraft draft) {
         authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
-        if (code == null || !CATEGORY_CODE.matcher(code).matches()) {
-            throw CadProblem.invalid("A category code is 2–40 lowercase letters, digits and hyphens, as a document's"
-                                     + " 'category' writes it.");
+        Optional<StoredDocument> held = documents.findBySlug(code);
+        if (held.isPresent() && !isCategory(held.get())) {
+            throw CadProblem.conflict("'" + code + "' is a " + held.get().getKind() + ", not a category.");
         }
-        if (draft.title() == null || draft.title().isBlank()) {
-            throw CadProblem.invalid("Give the category a title.");
-        }
-        String title = draft.title().strip();
-        String description = blankToNull(draft.description());
-        int position = draft.position() != null ? draft.position() : nextCategoryPosition();
-        DocumentCategory category = categories.find(code).orElse(null);
-        if (category == null) {
-            category = categories.save(new DocumentCategory(code, title, description, position));
+        String parent = blankToNull(draft.parent());
+        Integer order = draft.order() != null ? draft.order()
+                : held.map(found -> categoryOf(found).order()).orElseGet(() -> nextOrderUnder(parent));
+        CategoryDocument category = new CategoryDocument(code, blankToNull(draft.title()), blankToNull(draft.summary()), parent, order);
+        String source = reading.language().language().write(category.document());
+        if (held.isPresent()) {
+            update(held.get().getId(), source, held.get().getVersion());
         } else {
-            category.describe(title, description, position);
+            changeStatus(createInCatalogue(source).summary().id(), DocumentStatus.PUBLISHED.name());
         }
-        return categoryView(category, null);
+        return categoryView(category, documents.countCatalogueByCategory(DocumentStatus.PUBLISHED, null)
+                .getOrDefault(code, 0L), null);
     }
 
-    /** Removes an empty section; one that still files documents is refused, so no document loses its place. */
+    /**
+     * Takes a category out of the catalogue as any catalogue document is taken out: archived once published, removed while
+     * a draft. One that still files a document or a category is refused, so nothing loses its place.
+     */
     @Transactional
     public void deleteCategory(String code) {
         authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
-        if (!categories.exists(code)) {
-            throw CadProblem.notFound("The category");
-        }
+        StoredDocument category = documents.findBySlug(code).filter(CadCatalogue::isCategory)
+                .orElseThrow(() -> CadProblem.notFound("The category"));
         if (documents.anyInCategory(code)) {
-            throw CadProblem.conflict("Documents are filed in this category; file them elsewhere first.");
+            throw CadProblem.conflict("Documents or categories are filed in '" + code + "'; file them elsewhere first.");
         }
-        categories.delete(code);
-    }
-
-    /** A section the shipped documents declare, written when it is missing and never rewritten: a curator owns it. */
-    @Transactional
-    public boolean seedCategory(String code, String title, String description, Integer position) {
-        if (categories.exists(code)) {
-            return false;
+        if (category.getStatus() == DocumentStatus.PUBLISHED) {
+            changeStatus(category.getId(), DocumentStatus.ARCHIVED.name());
+        } else {
+            delete(category.getId());
         }
-        categories.save(new DocumentCategory(code, title, description, position != null ? position : nextCategoryPosition()));
-        categories.flush();
-        return true;
     }
 
-    private int nextCategoryPosition() {
-        return categories.allInOrder().stream().mapToInt(DocumentCategory::getPosition).max().orElse(0) + 1;
+    private List<CategoryDocument> catalogueCategories() {
+        return documents.findByKind(SimulationModule.CATEGORY.word()).stream()
+                .filter(document -> document.isCatalogue() && document.getStatus() == DocumentStatus.PUBLISHED)
+                .map(this::categoryOf).toList();
     }
 
-    /** @param kind the kind counted, or null for every kind */
-    private CategoryView categoryView(DocumentCategory category, String kind) {
-        long count = documents.countCatalogueInCategory(category.getCode(), StoredDocument.Status.PUBLISHED, kind);
-        return new CategoryView(category.getCode(), category.getTitle(), category.getDescription(),
-                                category.getPosition(), count);
+    /** A category as its head revision says it. */
+    private CategoryDocument categoryOf(StoredDocument document) {
+        return CategoryDocument.of(scope(document.owner().orElse(null)).head(document).document());
+    }
+
+    /** The order after the last of a parent's categories in the catalogue; the first, under one that has none. */
+    private int nextOrderUnder(String parent) {
+        return catalogueCategories().stream().filter(category -> Objects.equals(category.parent(), parent))
+                .map(CategoryDocument::order).filter(Objects::nonNull).mapToInt(Integer::intValue).max().orElse(-1) + 1;
+    }
+
+    private static boolean isCategory(StoredDocument document) {
+        return SimulationModule.CATEGORY.word().equals(document.getKind());
+    }
+
+    /** @param owner whose the category is; null for the catalogue's */
+    private static CategoryView categoryView(CategoryDocument category, long documentCount, DocumentOwner owner) {
+        return new CategoryView(category.slug(), category.title(), category.summary(), category.parent(), category.order(),
+                                documentCount, owner);
+    }
+
+    /**
+     * What is wrong with where a text files itself, if anything: in what is no category the catalogue holds — archived,
+     * or another kind —, or, for a category, under itself through its parents.
+     */
+    private Optional<String> misfiled(ReadDocument read) {
+        String category = read.index().category();
+        if (category == null) {
+            return Optional.empty();
+        }
+        boolean held = documents.findBySlug(category)
+                .filter(found -> isCategory(found) && found.getStatus() != DocumentStatus.ARCHIVED).isPresent();
+        if (!held) {
+            return Optional.of("'" + category + "' is not a category.");
+        }
+        if (!read.document().kind().equals(SimulationModule.CATEGORY)) {
+            return Optional.empty();
+        }
+        CategoryDocument written = CategoryDocument.of(read.document());
+        return CategoryDocument.ringOrOrphan(written, slug -> slug.equals(written.slug()) ? written
+                : documents.findBySlug(slug).filter(CadCatalogue::isCategory).map(this::categoryOf).orElse(null));
     }
 
     // ── Reading ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -171,42 +243,42 @@ public class CadCatalogue {
      * The catalogue listing: published documents — drafts too, for a curator who asks —, narrowed by every filter that
      * is given, featured first and then by title.
      */
-    @Transactional(readOnly = true)
+    @CadRead
     public StoredPage<DocumentSummary> browse(String text, String category, String kind, String tag, Boolean featured,
                                               boolean includeDrafts, int page, int size) {
         requirePage(page, size);
-        Set<StoredDocument.Status> statuses = includeDrafts && authority.permitsGlobally(CadCapability.CATALOGUE_WRITE)
-                ? EnumSet.of(StoredDocument.Status.PUBLISHED, StoredDocument.Status.DRAFT)
-                : EnumSet.of(StoredDocument.Status.PUBLISHED);
+        Set<DocumentStatus> statuses = includeDrafts && authority.permitsGlobally(CadCapability.CATALOGUE_WRITE)
+                ? EnumSet.of(DocumentStatus.PUBLISHED, DocumentStatus.DRAFT)
+                : EnumSet.of(DocumentStatus.PUBLISHED);
         String pattern = text == null || text.isBlank() ? null : "%" + text.strip().toLowerCase(Locale.ROOT) + "%";
         return documents.browse(statuses, blankToNull(category), blankToNull(kind), featured, pattern,
-                                blankToNull(tag), page, size).map(this::summary);
+                                blankToNull(tag), page, size).map(CadCatalogue::summary);
     }
 
     /** One owner's documents, most recently changed first; of one kind when {@code kind} names one. */
-    @Transactional(readOnly = true)
+    @CadRead
     public StoredPage<DocumentSummary> owned(DocumentOwner owner, String kind, int page, int size) {
         requirePage(page, size);
         authority.require(CadCapability.OWNER_READ, places.requireOwner(owner));
         if (kind != null && !kind.isBlank()) {
-            List<DocumentSummary> rows = documents.owned(owner, kind.strip()).stream().map(this::summary).toList();
+            List<DocumentSummary> rows = documents.owned(owner, kind.strip()).stream().map(CadCatalogue::summary).toList();
             int from = Math.min(page * size, rows.size());
             return new StoredPage<>(rows.subList(from, Math.min(from + size, rows.size())), page, size, rows.size());
         }
-        return documents.owned(owner, page, size).map(this::summary);
+        return documents.owned(owner, page, size).map(CadCatalogue::summary);
     }
 
     /** Readable documents by slug, in the order asked; a slug the reader cannot see is left out. */
-    @Transactional(readOnly = true)
+    @CadRead
     public List<DocumentSummary> summaries(List<String> slugs) {
         Map<String, StoredDocument> found = documents.findBySlugs(slugs).stream()
                 .collect(Collectors.toMap(StoredDocument::getSlug, Function.identity()));
         return slugs.stream().map(found::get).filter(document -> document != null && access.canRead(document))
-                .map(this::summary).toList();
+                .map(CadCatalogue::summary).toList();
     }
 
     /** A document's page: its head, or the revision {@code address@revision} pins. */
-    @Transactional(readOnly = true)
+    @CadRead
     public DocumentDetail detail(String reference) {
         String address = DocumentIndex.slugOf(reference);
         StoredDocument document = access.requireReadable(address);
@@ -214,10 +286,8 @@ public class CadCatalogue {
             return detail(document);
         }
         String written = reference.substring(address.length() + DocumentIndex.REVISION_MARK.length());
-        int revision = documents.revisionWritten(document.getId(), written)
-                .orElseThrow(() -> CadProblem.notFound("The revision"));
-        String source = documents.sourceAt(document.getId(), revision)
-                .orElseThrow(() -> CadProblem.notFound("The revision"));
+        int revision = texts.revisionWritten(document, written).orElseThrow(() -> CadProblem.notFound("The revision"));
+        String source = texts.at(document, revision).orElseThrow(() -> CadProblem.notFound("The revision"));
         return detail(document, source, revision);
     }
 
@@ -225,58 +295,74 @@ public class CadCatalogue {
      * One placed sheet of a readable circuit as it runs inside it — the block a path of references reaches, outermost
      * first —, read with the components and sheets of the circuit's own owner.
      */
-    @Transactional(readOnly = true)
+    @CadRead
     public SheetInstance placedSheet(String address, List<String> path) {
         StoredDocument document = access.requireReadable(address);
         StoredDocuments scope = scope(document.owner().orElse(null));
         if (!(scope.head(document).model().orElse(null) instanceof Circuit circuit)) {
             throw CadProblem.invalid("Only a circuit places sheets.");
         }
-        Map<String, Double> values = new LinkedHashMap<>();
-        ParameterEvaluation.evaluate(circuit.head().title(), circuit.parameters())
-                .forEach(parameter -> values.put(parameter.name(), parameter.value()));
         try {
-            return SheetInstance.of(circuit, values, scope, path == null ? List.of() : path);
+            return SheetInstance.of(circuit, SheetUnfolding.valuesOf(circuit), scope, path == null ? List.of() : path);
+        } catch (IllegalArgumentException refused) {
+            throw CadProblem.invalid(refused.getMessage());
+        }
+    }
+
+    /**
+     * The parts a circuit's blocks become, however deep, named as a bench runs them. The blocks are said by the reader — a
+     * sheet being drawn wires them its own way before it is saved —; the sheets they place are read as stored, with the
+     * components and sheets of the circuit's own owner.
+     */
+    @CadRead
+    public List<Part> unfoldedBlocks(String address, List<Part> blocks) {
+        StoredDocument document = access.requireReadable(address);
+        StoredDocuments scope = scope(document.owner().orElse(null));
+        if (!(scope.head(document).model().orElse(null) instanceof Circuit circuit)) {
+            throw CadProblem.invalid("Only a circuit places sheets.");
+        }
+        Circuit placing = new Circuit(circuit.head(), circuit.parameters(), blocks, circuit.layout(), circuit.probes(),
+                circuit.timeBase(), circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(), circuit.boundary());
+        try {
+            return SheetUnfolding.of(placing, scope).parts();
         } catch (IllegalArgumentException refused) {
             throw CadProblem.invalid(refused.getMessage());
         }
     }
 
     /** Every revision of a readable document's text, newest first. */
-    @Transactional(readOnly = true)
+    @CadRead
     public List<RevisionView> revisions(String address) {
         StoredDocument document = access.requireReadable(address);
-        return documents.revisions(document.getId()).stream().map(CadCatalogue::revisionView).toList();
+        return texts.revisions(document).stream().map(CadCatalogue::revisionView).toList();
     }
 
     /** One revision's text, named as after an {@code @}: its number, its label, a day — its last — or {@code latest}. */
-    @Transactional(readOnly = true)
+    @CadRead
     public RevisionSource revision(String address, String written) {
         StoredDocument document = access.requireReadable(address);
-        int revision = documents.revisionWritten(document.getId(), written)
-                .orElseThrow(() -> CadProblem.notFound("The revision"));
-        String label = documents.revisions(document.getId()).stream()
+        int revision = texts.revisionWritten(document, written).orElseThrow(() -> CadProblem.notFound("The revision"));
+        String label = texts.revisions(document).stream()
                 .filter(candidate -> candidate.revision() == revision).findFirst()
                 .map(candidate -> candidate.label().token())
                 .orElseThrow(() -> CadProblem.notFound("The revision"));
-        String source = documents.sourceAt(document.getId(), revision)
-                .orElseThrow(() -> CadProblem.notFound("The revision"));
+        String source = texts.at(document, revision).orElseThrow(() -> CadProblem.notFound("The revision"));
         return new RevisionSource(revision, label, source);
     }
 
     /** The readable documents whose text names this one — by one relation when {@code relation} names it. */
-    @Transactional(readOnly = true)
+    @CadRead
     public List<DocumentSummary> usedBy(String address, String relation) {
         StoredDocument document = access.requireReadable(address);
         return documents.findRelating(document.getId(), blankToNull(relation)).stream()
-                .filter(access::canRead).map(this::summary).toList();
+                .filter(access::canRead).map(CadCatalogue::summary).toList();
     }
 
     /**
      * The circuits one owner holds as the sheets of one design: each with its ports, its shared nets and the blocks it
      * places the others with. A part counts as a block only when it names another circuit of the same owner.
      */
-    @Transactional(readOnly = true)
+    @CadRead
     public List<SheetView> sheets(DocumentOwner owner) {
         authority.require(CadCapability.OWNER_READ, places.requireOwner(owner));
         List<StoredDocument> circuits = documents.owned(owner, SimulationModule.CIRCUIT.word());
@@ -291,47 +377,59 @@ public class CadCatalogue {
             circuit = scope.head(document).model().filter(Circuit.class::isInstance).map(Circuit.class::cast)
                     .orElseThrow(() -> CadProblem.invalid("Its text is no longer a circuit."));
         } catch (CadProblem unreadable) {
-            return new SheetView(document.getId(), document.getSlug(), document.getTitle(), document.getUpdatedAt(),
+            return new SheetView(document.getId(), document.getSlug(), document.getTitle(), document.getCategoryCode(), document.getUpdatedAt(),
                                  List.of(), List.of(), List.of(), unreadable.getMessage());
         }
         List<SheetBlock> blocks = circuit.parts().stream()
                 .filter(part -> sheets.contains(DocumentIndex.slugOf(part.component())))
                 .map(part -> new SheetBlock(part.reference(), DocumentIndex.slugOf(part.component()))).toList();
         SheetBoundary boundary = circuit.boundary();
-        return new SheetView(document.getId(), document.getSlug(), document.getTitle(), document.getUpdatedAt(),
+        return new SheetView(document.getId(), document.getSlug(), document.getTitle(), document.getCategoryCode(), document.getUpdatedAt(),
                              boundary.ports().stream().map(SheetBoundary.Port::net).toList(),
-                             boundary.nets().stream().map(SheetBoundary.Net::name).toList(), blocks, null);
+                             boundary.nets().stream().map(SheetBoundary.Net::name).toList(), blocks,
+                             document.refusal().orElse(null));
     }
 
-    /** The catalogue the engine reads a document of this owner against — null for the shared catalogue's. */
+    /**
+     * The catalogue the engine reads a document of this owner against: the shared catalogue's, and every owner of the
+     * owner's place — a project sees its own and its workspace's. Null for the shared catalogue's alone.
+     */
     public StoredDocuments scope(DocumentOwner owner) {
-        return new StoredDocuments(documents, reading, owner);
+        CadPlace place = owner == null ? CadPlace.installation() : places.requireOwner(owner);
+        return new StoredDocuments(documents, reading, place, files, texts, () -> place.isInstallation() ? List.of()
+                : placeSources.get().stream().map(source -> source.holding(place)).toList());
     }
 
     // ── Writing ──────────────────────────────────────────────────────────────────────────────────────────────────
 
-    /** A new document of the shared catalogue, a draft until it is published. */
+    /** A new document of the shared catalogue, a draft until it is published: its text says so. */
     @Transactional
     public DocumentDetail createInCatalogue(String source) {
         authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
         String actor = authority.requireActor();
-        ReadDocument read = readNew(source);
-        StoredDocument document = new StoredDocument(newIdentifier(), read.index().slug(), null, actor, clock.instant());
-        return detail(writeRevision(document, read, actor, Strictness.REFUSE));
+        ReadDocument written = readNew(source);
+        ReadDocument read = asNew(written, written.index().status() == DocumentStatus.PUBLISHED ? DocumentStatus.DRAFT : null);
+        StoredDocument document = new StoredDocument(read.index().slug(), null, actor, clock.instant());
+        return detail(writeRevision(document, read, actor, RevisionOrigin.WRITTEN, Strictness.REFUSE));
     }
 
     /** A new document of an owner's — published at once: an owner's document has no curator to wait for. */
     @Transactional
     public DocumentDetail createOwned(DocumentOwner owner, String source) {
+        return createOwned(owner, source, RevisionOrigin.WRITTEN);
+    }
+
+    /** The same, its first revision saying where it came from: a person's, or an import's. */
+    @Transactional
+    public DocumentDetail createOwned(DocumentOwner owner, String source, RevisionOrigin origin) {
         authority.require(CadCapability.OWNER_WRITE, places.requireOwner(owner));
         places.requireAcceptsNew(owner);
         String actor = authority.requireActor();
-        ReadDocument read = readNew(source);
+        ReadDocument read = asNew(readNew(source), null);
         places.requireHolds(owner, read.index().kind());
         Instant now = clock.instant();
-        StoredDocument document = new StoredDocument(newIdentifier(), read.index().slug(), owner, actor, now);
-        document.changeStatus(StoredDocument.Status.PUBLISHED, now);
-        StoredDocument written = writeRevision(document, read, actor, Strictness.REFUSE);
+        StoredDocument written = writeRevision(new StoredDocument(read.index().slug(), owner, actor, now), read, actor, origin,
+                                               Strictness.REFUSE);
         places.recordChange(owner, now);
         return detail(written);
     }
@@ -339,6 +437,12 @@ public class CadCatalogue {
     /** Appends a text as the document's next revision; the same text as the head writes nothing. */
     @Transactional
     public DocumentDetail update(String id, String source, long expectedVersion) {
+        return update(id, source, expectedVersion, RevisionOrigin.WRITTEN);
+    }
+
+    /** The same, the revision saying where it came from: a person's, or an import's. */
+    @Transactional
+    public DocumentDetail update(String id, String source, long expectedVersion, RevisionOrigin origin) {
         StoredDocument document = access.requireReadable(id);
         access.requireWritable(document);
         if (document.getVersion() != expectedVersion) {
@@ -352,12 +456,15 @@ public class CadCatalogue {
         if (read.checksum().equals(document.getSourceChecksum())) {
             return detail(document);
         }
-        StoredDocument written = writeRevision(document, read, authority.requireActor(), Strictness.REFUSE);
+        StoredDocument written = writeRevision(document, read, authority.requireActor(), origin, Strictness.REFUSE);
         document.owner().ifPresent(owner -> places.recordChange(owner, clock.instant()));
         return detail(written);
     }
 
-    /** Moves a catalogue document to a status; an owner's document has none to move. */
+    /**
+     * Moves a catalogue document to a status — its text written anew to say it, as the next revision —; an owner's
+     * document has none to move.
+     */
     @Transactional
     public DocumentDetail changeStatus(String id, String status) {
         authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
@@ -365,8 +472,34 @@ public class CadCatalogue {
         if (!document.isCatalogue()) {
             throw CadProblem.conflict("Only a catalogue document is published or archived.");
         }
-        document.changeStatus(statusOf(status), clock.instant());
-        return detail(document);
+        DocumentStatus wanted = statusOf(status);
+        if (document.getStatus() == wanted) {
+            return detail(document);
+        }
+        ReadDocument head = scope(null).head(document);
+        return update(id, headed(head, new DocumentEditing.Head(null, null, null, wanted)), document.getVersion());
+    }
+
+    /**
+     * A new text as the catalogue keeps it: one naming no category filed in the installation's category for those
+     * ({@link EngineConfiguration#defaultCategory()}) — so every document's file says where it stands, whoever wrote it,
+     * a person or an import —, and its status written anew when one is given. A category is never filed so: naming no
+     * parent, it stands at the top.
+     *
+     * @param status the status its text is to say; null to leave it as written
+     */
+    private ReadDocument asNew(ReadDocument written, DocumentStatus status) {
+        String category = written.index().category() == null && !written.document().kind().equals(SimulationModule.CATEGORY)
+                ? configuration.defaultCategory().orElse(null) : null;
+        if (category == null && status == null) {
+            return written;
+        }
+        return reading.read(headed(written, new DocumentEditing.Head(null, null, category, status)), "the new document");
+    }
+
+    /** A text with its head written anew. */
+    private String headed(ReadDocument read, DocumentEditing.Head head) {
+        return editing.reheaded(read.document(), head);
     }
 
     /**
@@ -377,7 +510,7 @@ public class CadCatalogue {
     public void delete(String id) {
         StoredDocument document = access.requireReadable(id);
         access.requireWritable(document);
-        if (document.isCatalogue() && document.getStatus() == StoredDocument.Status.PUBLISHED) {
+        if (document.isCatalogue() && document.getStatus() == DocumentStatus.PUBLISHED) {
             throw CadProblem.conflict("A published catalogue document is archived, not deleted: links to it are out there.");
         }
         List<String> naming = documents.findRelating(document.getId(), null).stream().map(StoredDocument::getSlug).toList();
@@ -385,106 +518,89 @@ public class CadCatalogue {
             throw CadProblem.conflict("'" + document.getSlug() + "' is named by " + String.join(", ", naming)
                                       + ": change those first.");
         }
-        documents.remove(document);
+        documents.remove(document, authority.requireActor());
         document.owner().ifPresent(owner -> places.recordChange(owner, clock.instant()));
     }
 
-    // ── The shipped library ──────────────────────────────────────────────────────────────────────────────────────
+    // ── What is indexed at start ─────────────────────────────────────────────────────────────────────────────────
 
-    /** What writing one shipped text did. */
+    /** What indexing one shipped document did. */
     public enum ShippedOutcome {
-        /** The document did not exist and was created from the text. */
+        /** The document is indexed. */
         CREATED,
-        /** Nobody had edited it, so the newer text became its next revision. */
-        REVISED,
-        /** The text is the one already taken. */
-        UNCHANGED,
-        /** A curator edited it since; the edit is kept and the newer text recorded as waiting. */
-        KEPT_EDIT,
-        /** An owner's own document holds the address; it is left alone and nothing is written. */
+        /** A document of the library folder holds the address; it is left alone and nothing is indexed. */
         ADDRESS_TAKEN
     }
 
     /**
-     * Whether a shipped text is already the one taken, without reading it: the start-up import's fast path, which
-     * reads only what moved.
+     * Indexes one document a library ships, without a caller — never copying its text, which stays in its file (ADR
+     * 0001) —, as the index is made on every start; its relations afterwards, by {@link #indexRelations}, once
+     * everything they may name exists.
      */
-    @Transactional(readOnly = true)
-    public boolean shippedUnchanged(String slug, String checksum) {
-        return documents.findBySlug(slug).filter(StoredDocument::isCatalogue)
-                .filter(document -> checksum.equals(document.getShippedChecksum()) && !document.isShippedUpdatePending())
-                .isPresent();
-    }
-
-    /**
-     * Writes one document the shipped library holds, without a caller. A new document is created and published; one
-     * nobody has edited takes a newer text as its next revision; one a curator has edited keeps the edit. Relations are
-     * indexed afterwards, by {@link #indexShippedRelations}, once everything they may name exists.
-     *
-     * @param folder where its file stands under the library's root
-     */
-    @Transactional
-    public ShippedOutcome writeShipped(String source, String origin, String folder) {
-        ReadDocument read = reading.read(source, origin);
-        StoredDocument document = documents.findBySlug(read.index().slug()).orElse(null);
-        Instant now = clock.instant();
-        if (document == null) {
-            document = new StoredDocument(newIdentifier(), read.index().slug(), null, null, now);
-            document.fileUnder(folder);
-            document.changeStatus(StoredDocument.Status.PUBLISHED, now);
-            document.recordShippedText(read.checksum());
-            writeRevision(document, read, null, Strictness.LATER);
-            return ShippedOutcome.CREATED;
-        }
-        if (!document.isCatalogue()) {
-            LOGGER.warn("An owner's document already holds the address '{}'; the shipped document is not written.",
-                        document.getSlug());
+    public ShippedOutcome indexShipped(ShippedDocuments.ShippedDocument shipped) {
+        StoredDocument held = documents.findBySlug(shipped.slug()).orElse(null);
+        if (held != null && held.getHolding() != StoredDocument.Holding.SHIPPED) {
+            LOGGER.warn("A document of the library folder already holds the address '{}'; the shipped one is not indexed.", shipped.slug());
             return ShippedOutcome.ADDRESS_TAKEN;
         }
-        document.fileUnder(folder);
-        if (read.checksum().equals(document.getShippedChecksum()) && !document.isShippedUpdatePending()) {
-            return ShippedOutcome.UNCHANGED;
-        }
-        if (read.checksum().equals(document.getSourceChecksum())) {
-            document.recordShippedText(read.checksum());
-            return ShippedOutcome.UNCHANGED;
-        }
-        if (documents.isHeadEdited(document.getId())) {
-            document.recordShippedUpdateKept(read.checksum());
-            return ShippedOutcome.KEPT_EDIT;
-        }
-        document.recordShippedText(read.checksum());
-        writeRevision(document, read, null, Strictness.LATER);
-        return ShippedOutcome.REVISED;
+        Instant now = clock.instant();
+        StoredDocument document = new StoredDocument(shipped.slug(), null, null, now);
+        document.holdShipped(shipped.library(), shipped.path());
+        RevisionLabel label = RevisionLabel.next(LocalDate.ofInstant(now, configuration.revisionZone()), 0);
+        // What its file's name says, until its text is read.
+        document.indexRevision(1, label, DocumentStore.checksumOf(shipped.source()), shipped.kind(), shipped.slug(), null, null,
+                               null, false, now);
+        indexFile(document, shipped.source(), shipped.origin(), 1, label, now);
+        return ShippedOutcome.CREATED;
     }
 
     /**
-     * Derives a shipped document's relations from its head, once the whole library is written. A reference to
-     * something the catalogue does not hold is left out and logged, never fatal: the application must start.
+     * Indexes one document of the library folder, as the folder opened it: its head text read from its file, its
+     * revision and its time its last commit's; its relations afterwards, by {@link #indexRelations}.
      */
-    @Transactional
-    public void indexShippedRelations(String slug) {
-        documents.findBySlug(slug).filter(StoredDocument::isCatalogue).ifPresent(document -> document.replaceRelations(
-                relationsOf(document, scope(null).head(document), Strictness.LEAVE_OUT)));
+    public void indexHeld(StoredDocument held) {
+        DocumentRevision head = documents.headOf(held);
+        indexFile(held, documents.heldText(held), held.getSlug(), head.revision(), head.label(), head.writtenAt());
     }
 
     /**
-     * Takes the shipped file's newer text for a document a curator had edited: the file's text becomes the next
-     * revision and nothing waits any more. The curator's edit stays in the history, one revision back.
+     * Indexes a document from the text its file holds. The file is the truth: a text the catalogue would refuse to write
+     * — one put in the folder by hand, one a library ships wrong — is indexed all the same, as far as it reads, and says
+     * why it is refused ({@link StoredDocument#refusal()}); it never stops the catalogue being made.
      */
-    @Transactional
-    public DocumentDetail takeShippedText(String id, String shippedSource) {
-        StoredDocument document = access.requireReadable(id);
-        access.requireWritable(document);
-        if (!document.isCatalogue() || !document.isShippedUpdatePending()) {
-            throw CadProblem.conflict("Nothing newer ships for this document.");
+    private void indexFile(StoredDocument document, String source, String origin, int revision, RevisionLabel label, Instant at) {
+        ReadDocument read;
+        try {
+            read = reading.read(source, origin);
+        } catch (CadProblem unreadable) {
+            // What its place says stands; a text that does not read says no status, so the catalogue's is a draft until
+            // it reads — an owner's is published, as every owner's is.
+            refuse(document, unreadable);
+            document.changeStatus(document.isCatalogue() ? DocumentStatus.DRAFT : DocumentStatus.PUBLISHED, at);
+            documents.save(document);
+            return;
         }
-        ReadDocument read = reading.read(shippedSource, document.getSlug());
-        document.recordShippedText(read.checksum());
-        if (read.checksum().equals(document.getSourceChecksum())) {
-            return detail(document);
+        try {
+            validate(document, read);
+            document.judge(Optional.empty());
+        } catch (CadProblem refused) {
+            refuse(document, refused);
         }
-        return detail(writeRevision(document, read, authority.requireActor(), Strictness.REFUSE));
+        index(document, read, revision, label, at, Strictness.LATER);
+    }
+
+    private static void refuse(StoredDocument document, CadProblem refusal) {
+        LOGGER.warn("The document '{}' is indexed as its file holds it, refused: {}", document.getSlug(), refusal.getMessage());
+        document.judge(Optional.of(refusal.getMessage()));
+    }
+
+    /**
+     * Derives a document's relations from its text, once everything it may name is indexed. A reference to something
+     * the catalogue does not hold is left out and logged, never fatal: the application must start.
+     */
+    public void indexRelations(String slug) {
+        documents.findBySlug(slug).ifPresent(document -> document.replaceRelations(
+                relationsOf(document, scope(document.owner().orElse(null)).head(document), Strictness.LEAVE_OUT)));
     }
 
     // ── One revision ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -513,24 +629,36 @@ public class CadCatalogue {
      *
      * @return the stored document, now managed
      */
-    private StoredDocument writeRevision(StoredDocument document, ReadDocument read, String writtenBy,
+    private StoredDocument writeRevision(StoredDocument document, ReadDocument read, String writtenBy, RevisionOrigin origin,
                                          Strictness strictness) {
         validate(document, read);
+        document.judge(Optional.empty());
         Instant now = clock.instant();
         int revision = document.getRevision() + 1;
-        LocalDate day = LocalDate.ofInstant(now, properties.revisions().zone());
-        RevisionLabel label = documents.nextLabel(document.getId(), day);
+        RevisionLabel label = documents.nextLabel(document.getId(), LocalDate.ofInstant(now, configuration.revisionZone()));
+        StoredDocument stored = index(document, read, revision, label, now, strictness);
+        documents.appendSource(stored.getId(), revision, label, read.source(), writtenBy, origin, now);
+        return stored;
+    }
+
+    /**
+     * Takes the document's index from a text at a revision — what a written revision and a file are both indexed by —,
+     * the text checked before: refused for a write, judged for a file.
+     *
+     * @return the document, indexed
+     */
+    private StoredDocument index(StoredDocument document, ReadDocument read, int revision, RevisionLabel label, Instant now,
+                                 Strictness strictness) {
         DocumentIndex index = read.index();
-        document.indexRevision(revision, label, read.checksum(), index.kind(), index.title().strip(), index.summary(),
+        // Where a catalogue document stands is what its text says; an owner's is published, having no curator to wait for.
+        document.changeStatus(document.isCatalogue() ? index.status() : DocumentStatus.PUBLISHED, now);
+        document.indexRevision(revision, label, read.checksum(), index.kind(), index.title().strip(), index.code(), index.summary(),
                                index.category(), index.featured(), now);
         document.replaceTags(tagsOf(index));
         if (strictness != Strictness.LATER) {
             document.replaceRelations(relationsOf(document, read, strictness));
         }
-        StoredDocument stored = documents.save(document);
-        documents.flush();
-        documents.appendSource(stored.getId(), revision, label, read.source(), writtenBy, now);
-        return stored;
+        return documents.save(document);
     }
 
     private void validate(StoredDocument document, ReadDocument read) {
@@ -544,9 +672,9 @@ public class CadCatalogue {
         if (index.summary() != null && index.summary().length() > SUMMARY_LENGTH) {
             throw CadProblem.invalid("A summary is at most " + SUMMARY_LENGTH + " characters.");
         }
-        if (index.category() != null && !categories.exists(index.category())) {
-            throw CadProblem.invalid("'" + index.category() + "' is not a category.");
-        }
+        misfiled(read).ifPresent(refusal -> {
+            throw CadProblem.invalid(refusal);
+        });
         if (read.model().orElse(null) instanceof Circuit circuit) {
             List<String> contradictions = LayoutAgreement.contradictions(circuit, scope(document.owner().orElse(null)));
             if (!contradictions.isEmpty()) {
@@ -558,9 +686,6 @@ public class CadCatalogue {
     private static Set<String> tagsOf(DocumentIndex index) {
         Set<String> tags = new LinkedHashSet<>();
         for (String tag : index.tags()) {
-            if (tag.length() > TAG_LENGTH) {
-                throw CadProblem.invalid("A tag is at most " + TAG_LENGTH + " characters: '" + tag + "' is not.");
-            }
             tags.add(tag.toLowerCase(Locale.ROOT));
         }
         return tags;
@@ -574,7 +699,8 @@ public class CadCatalogue {
         StoredDocuments scope = scope(document.owner().orElse(null));
         List<StoredDocument.Relation> relations = new ArrayList<>();
         for (DocumentIndex.Reference reference : read.index().references()) {
-            Optional<StoredDocument> related = documents.findBySlug(reference.slug()).filter(scope::visible);
+            // A reference names a document by its slug or by its code, found as the scope finds every name.
+            Optional<StoredDocument> related = scope.addressed(reference.slug());
             String refusal = null;
             if (related.isEmpty()) {
                 refusal = "it names '" + reference.slug() + "' (" + reference.relation() + "), which the catalogue does not hold";
@@ -608,25 +734,45 @@ public class CadCatalogue {
         StoredDocuments scope = scope(document.owner().orElse(null));
         String text = source != null ? source : scope.headSource(document);
         ReadDocument read = null;
-        String problem = null;
+        // The head's problem is what the index found; an earlier revision's, what reading it finds.
+        String problem = source == null ? document.refusal().orElse(null) : null;
         try {
             read = source != null ? reading.read(source, document.getSlug()) : scope.head(document);
         } catch (CadProblem unreadable) {
             problem = unreadable.getMessage();
         }
         Map<String, StoredDocument> related = documents.findByIds(document.getRelations().stream()
-                        .map(StoredDocument.Relation::getRelatedDocumentId).toList()).stream()
+                        .map(StoredDocument.Relation::relatedDocumentId).toList()).stream()
                 .collect(Collectors.toMap(StoredDocument::getId, Function.identity()));
         List<RelatedView> relatedViews = document.getRelations().stream()
-                .map(relation -> Optional.ofNullable(related.get(relation.getRelatedDocumentId()))
+                .map(relation -> Optional.ofNullable(related.get(relation.relatedDocumentId()))
                         .filter(access::canRead)
-                        .map(found -> new RelatedView(found.getSlug(), found.getTitle(), found.getKind(), relation.getKind())))
+                        .map(found -> new RelatedView(found.getSlug(), found.getTitle(), found.getKind(), relation.kind())))
                 .flatMap(Optional::stream).toList();
         Object model = read == null ? null : read.model().orElse(null);
         return new DocumentDetail(summary(document, problem), text, revision, document.getVersion(),
                                   read == null ? Map.of() : metaOf(read), relatedViews,
                                   model, ModelFacts.slidersOf(model), ModelFacts.presentationOf(model),
-                                  document.isShippedUpdatePending(), access.canWrite(document));
+                                  access.canWrite(document));
+    }
+
+    /**
+     * A document held besides the store — a file of a mounted folder —, as a page shows one of the store's: it has no
+     * revisions and no stored identity, so its identity is where it is, and its version the source's own word for its text.
+     *
+     * @param version  what says which text this is: a write of another is refused by the source
+     * @param owner    the place it belongs to; null for a folder that belongs to none
+     * @param writable whether the place it is held in lets the reader write it
+     */
+    public DocumentDetail heldDetail(ReadDocument read, DocumentLocation location, String identity, DocumentOwner owner,
+                                     Instant changed, long version, boolean writable) {
+        DocumentIndex index = read.index();
+        Object model = read.model().orElse(null);
+        DocumentSummary summary = new DocumentSummary(identity, index.slug(), index.title(), index.summary(), index.kind(),
+                index.category(), null, index.featured(), DocumentStatus.PUBLISHED.name(), LocationView.of(location), owner,
+                index.tags(), 0, null, changed, null);
+        return new DocumentDetail(summary, read.source(), 0, version, metaOf(read), List.of(), model, ModelFacts.slidersOf(model),
+                                  ModelFacts.presentationOf(model), writable);
     }
 
     private static Map<String, String> metaOf(ReadDocument read) {
@@ -641,21 +787,16 @@ public class CadCatalogue {
         return meta;
     }
 
-    private DocumentSummary summary(StoredDocument document) {
-        String problem = null;
-        try {
-            scope(document.owner().orElse(null)).head(document);
-        } catch (CadProblem unreadable) {
-            problem = unreadable.getMessage();
-        }
-        return summary(document, problem);
+    /** A document as a list shows it, its problem what the catalogue finds wrong with its head text. */
+    private static DocumentSummary summary(StoredDocument document) {
+        return summary(document, document.refusal().orElse(null));
     }
 
     private static DocumentSummary summary(StoredDocument document, String problem) {
         return new DocumentSummary(document.getId(), document.getSlug(), document.getTitle(), document.getSummary(),
                                    document.getKind(), document.getCategoryCode(), document.getFolder(),
                                    document.isFeatured(), document.getStatus().name(),
-                                   document.isCatalogue() ? Origin.CATALOGUE : Origin.OWNED,
+                                   LocationView.of(document),
                                    document.owner().orElse(null), List.copyOf(document.getTags()),
                                    document.getRevision(), document.getRevisionLabel(), document.getUpdatedAt(),
                                    problem);
@@ -666,13 +807,18 @@ public class CadCatalogue {
                                 revision.writtenBy());
     }
 
+    /** Whether a document is still as an import left it: its head revision the engine's, not a person's. */
+    public boolean leftByAnImport(StoredDocument document) {
+        return documents.originOf(document.getId(), document.getRevision()).leftByAnImport(document.getRevision());
+    }
+
     // ── Small things ─────────────────────────────────────────────────────────────────────────────────────────────
 
-    private static StoredDocument.Status statusOf(String status) {
+    private static DocumentStatus statusOf(String status) {
         try {
-            return StoredDocument.Status.valueOf(status == null ? "" : status.strip().toUpperCase(Locale.ROOT));
+            return DocumentStatus.written(Optional.ofNullable(status).map(word -> word.toLowerCase(Locale.ROOT)));
         } catch (IllegalArgumentException unknown) {
-            throw CadProblem.invalid("A status is DRAFT, PUBLISHED or ARCHIVED.");
+            throw CadProblem.invalid(unknown.getMessage() + ".");
         }
     }
 
@@ -680,10 +826,6 @@ public class CadCatalogue {
         if (page < 0 || size < 1 || size > 200) {
             throw CadProblem.invalid("A page is from 0, and holds 1–200 rows.");
         }
-    }
-
-    private static String newIdentifier() {
-        return UUID.randomUUID().toString();
     }
 
     private static String blankToNull(String text) {

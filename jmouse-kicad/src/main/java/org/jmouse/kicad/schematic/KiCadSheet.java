@@ -4,7 +4,7 @@ import static org.jmouse.kicad.KiCadKeyword.*;
 
 import org.jmouse.kicad.KiCadPoint;
 import org.jmouse.kicad.KiCadProperty;
-import org.jmouse.kicad.parser.node.KiCadList;
+import org.jmouse.sexpression.node.SExpressionList;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ public record KiCadSheet(String uuid, String name, String file, KiCadPoint at, K
         pins = List.copyOf(pins);
     }
 
-    static KiCadSheet of(KiCadList sheet) {
+    static KiCadSheet of(SExpressionList sheet) {
         Map<String, String> properties = new LinkedHashMap<>();
         sheet.lists(PROPERTY).forEach(property -> properties.put(property.word(1), property.word(2)));
         List<Pin> pins = sheet.lists(PIN).stream()

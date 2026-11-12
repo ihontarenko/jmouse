@@ -1,0 +1,44 @@
+model:pin-socket-1x32-pitch-200-vertical-model("Pin socket, 2.00 mm pitch, 1 × 32, vertical") {
+    meta {
+        summary: "Pin socket, 2.00 mm pitch, 1 × 32, vertical — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SKT:1X32-P2-V"
+        category: connectors-through-hole
+        tags: electronics, model, header
+        source: "IEC 60603-13 grid"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(housing, size: [2, 64, 2.5], at: [0, 0, 1.25])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 31, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 29, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 27, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 25, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 23, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 21, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 19, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 17, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 15, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 13, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 11, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 9, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 7, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 5, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 3, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, 1, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -1, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -3, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -5, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -7, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -9, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -11, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -13, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -15, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -17, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -19, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -21, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -23, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -25, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -27, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -29, 1.7])
+    box(gold, size: [0.64, 0.64, 9.4], at: [0, -31, 1.7])
+}

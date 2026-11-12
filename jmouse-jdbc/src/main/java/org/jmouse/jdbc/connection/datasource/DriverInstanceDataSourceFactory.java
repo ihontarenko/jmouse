@@ -1,40 +1,52 @@
 package org.jmouse.jdbc.connection.datasource;
 
-import org.jmouse.core.reflection.Reflections;
-
-import javax.sql.DataSource;
-import java.lang.reflect.Constructor;
 import java.sql.Driver;
+import javax.sql.DataSource;
 
+/** Explicit-driver alternative to JDBC service discovery. Does not implement connection pooling. */
 public class DriverInstanceDataSourceFactory implements DataSourceFactory {
 
     @Override
     public boolean supports(DataSourceSpecification specification) {
-        return specification.driverClassName() != null && !specification.driverClassName().isEmpty();
+        return (
+            specification.pool() == null &&
+            specification.url() != null &&
+            !specification.url().isBlank() &&
+            specification.driverClassName() != null &&
+            !specification.driverClassName().isBlank()
+        );
     }
 
     @Override
     public DataSource create(DataSourceSpecification specification) {
+        if (!supports(specification)) {
+            throw new IllegalArgumentException(
+                "Unsupported driver DataSource specification: " + specification.name()
+            );
+        }
         DriverInstanceDataSource dataSource = new DriverInstanceDataSource(
-                instantiateDriver(specification.driverClassName())
+            instantiateDriver(specification.driverClassName())
         );
         dataSource.setUrl(specification.url());
         dataSource.setUsername(specification.username());
         dataSource.setPassword(specification.password());
+        dataSource.setCatalog(specification.catalog());
+        dataSource.setSchema(specification.schema());
+        dataSource.setConnectionProperties(specification.properties());
         return dataSource;
     }
 
     private Driver instantiateDriver(String driverClassName) {
-        Driver driver = null;
-
         try {
-            @SuppressWarnings("unchecked")
-            Class<? extends Driver> driverClass = (Class<? extends Driver>) Class.forName(driverClassName);
-            Constructor<?>          constructor = Reflections.findFirstConstructor(driverClass);
-            driver = (Driver) Reflections.instantiate(constructor);
-        } catch (Exception ignore) { }
-
-        return driver;
+            return Class.forName(driverClassName)
+                .asSubclass(Driver.class)
+                .getDeclaredConstructor()
+                .newInstance();
+        } catch (ReflectiveOperationException | ClassCastException exception) {
+            throw new IllegalArgumentException(
+                "Cannot instantiate JDBC driver: " + driverClassName,
+                exception
+            );
+        }
     }
-
 }

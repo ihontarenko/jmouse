@@ -2,7 +2,7 @@ symbol:low-dropout-regulator-symbol("Low-dropout regulator with set and good pin
     meta {
         summary: "A resistor-set low-dropout regulator, as drawn on a schematic: input, enable and the good-threshold on the left, the output, its sense and the good flag on the right, the set, the limit and ground below"
         code: "SY.REGULATOR:LDO"
-        category: circuits
+        category: power
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

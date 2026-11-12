@@ -1,64 +1,23 @@
 package org.jmouse.cad.kicad;
 
-import org.jmouse.cad.circuit.Circuit;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * KiCad's net names as jMX names them: a name a part line can write — {@code +12V} is {@code plus_12V},
- * {@code /control/IN} is {@code IN}, {@code Net-(R5-Pad1)} is {@code net_R5_Pad1} —, each KiCad net one jMX net, and
- * the design's reference ground — KiCad's {@code GND}, or the ground a design of isolated grounds is measured from —
- * node {@value Circuit#GROUND}.
+ * What KiCad writes into a net's name that is no part of the net: the path of the sheet it is on — {@code /control/IN}
+ * is {@code IN} — and the name it makes up for an unnamed one — {@code Net-(R5-Pad1)} is {@code net_R5_Pad1}. The rest of
+ * naming a net is every import's ({@link org.jmouse.cad.exchange.imported.ImportedNetNames}).
  */
 final class KiCadNetNames {
 
     /** What KiCad's ground symbol names its net. */
     static final String KICAD_GROUND = "GND";
+    /** What a net of one pad nothing else joins opens with: it is on no net of the schematic. */
+    static final String UNCONNECTED = "unconnected-";
 
-    /** How long a jMX net's name is at most. */
-    private static final int LONGEST = 32;
-
-    /** The KiCad net that is node 0. */
-    private final String ground;
-
-    private final Map<String, String> named = new HashMap<>();
-    private final Set<String> taken = new HashSet<>();
-
-    /** @param ground the KiCad net that is node 0 */
-    KiCadNetNames(String ground) {
-        this.ground = ground;
+    private KiCadNetNames() {
     }
 
-    /** The jMX net a KiCad net is, the same every time it is asked. */
-    String of(String kicad) {
-        return named.computeIfAbsent(kicad, this::fresh);
-    }
-
-    private String fresh(String kicad) {
-        if (kicad.equals(ground)) {
-            return Circuit.GROUND;
-        }
+    /** A KiCad net's name without its sheet's path, an unnamed one's made-up name as a word. */
+    static String local(String kicad) {
         String name = kicad.replaceAll(".*/", "");
-        if (name.startsWith("Net-(")) {
-            name = "net_" + name.substring(5).replace(")", "");
-        }
-        name = name.replaceAll("^\\+", "plus_").replaceAll("^-", "minus_").replace("+", "_plus").replace("~", "not_")
-                .replaceAll("[^A-Za-z0-9_]+", "_").replaceAll("_+", "_").replaceAll("^_|_$", "");
-        if (name.isEmpty() || !Character.isLetter(name.charAt(0))) {
-            name = "net_" + name;
-        }
-        if (name.length() > LONGEST) {
-            name = name.substring(0, LONGEST);
-        }
-        String unique = name;
-        for (int suffix = 2; !taken.add(unique.toLowerCase(Locale.ROOT)); suffix++) {
-            String ending = "_" + suffix;
-            unique = name.substring(0, Math.min(name.length(), LONGEST - ending.length())) + ending;
-        }
-        return unique;
+        return name.startsWith("Net-(") ? "net_" + name.substring(5).replace(")", "") : name;
     }
 }

@@ -57,6 +57,12 @@
     </properties>
 
     <dependencies>
+        <!-- Telegram is called over it: the whole call timed, its answer read within a limit, never redirected -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-http-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-telegram</artifactId>
@@ -70,7 +76,7 @@
           deliberately.
         -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 

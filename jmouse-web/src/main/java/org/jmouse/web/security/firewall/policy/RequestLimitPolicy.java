@@ -1,134 +1,41 @@
 package org.jmouse.web.security.firewall.policy;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import org.jmouse.core.net.CIDR;
 import org.jmouse.core.throttle.RateLimiter;
 import org.jmouse.http.HttpStatus;
 import org.jmouse.web.http.WebRequest;
-import org.jmouse.web.security.firewall.Decision;
-import org.jmouse.web.security.firewall.EvaluationInput;
-import org.jmouse.web.security.firewall.FirewallPolicy;
-import org.jmouse.web.security.firewall.RateLimitProperties;
+import org.jmouse.web.security.firewall.*;
 
-import java.net.InetAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+/** Per-client token bucket. Uses the address normalized by the servlet container, never raw forwarding headers. */
+public class RequestLimitPolicy implements FirewallPolicy {
 
-/**
- * 🚦 Firewall policy that enforces request <b>rate limiting</b>.
- *
- * <p>This policy applies a {@link RateLimiter} algorithm to limit the number of
- * requests per client IP within a defined time window. It helps prevent abuse,
- * brute-force attacks, and denial-of-service scenarios by throttling excessive traffic.</p>
- *
- * <h3>Key features</h3>
- * <ul>
- *   <li>Each client IP is tracked using its own {@link RateLimiter}.</li>
- *   <li>Rate limits are defined by {@link RateLimitProperties}:
- *     <ul>
- *       <li>{@code refillRate} → requests per second</li>
- *       <li>{@code burst} → maximum burst capacity</li>
- *     </ul>
- *   </li>
- *   <li>Trusted proxies can optionally bypass rate limiting via {@link CIDR} ranges.</li>
- *   <li>If the client exceeds the limit → request is blocked with {@code 429 TOO MANY REQUESTS}.</li>
- * </ul>
- *
- * <h3>Algorithm</h3>
- * <p>Uses a token bucket strategy:</p>
- * <pre>
- * - Tokens are refilled over time at {@code refillRate}.
- * - Each request consumes one token.
- * - If no tokens remain, the request is rejected.
- * </pre>
- *
- * <h3>Example configuration</h3>
- * <pre>
- * jmouse.web.servlet.firewall.rateLimit.refillRate = 5
- * jmouse.web.servlet.firewall.rateLimit.burst      = 10
- * jmouse.web.servlet.firewall.trustedProxy[0]      = 10.0.0.0/8
- * jmouse.web.servlet.firewall.trustedProxy[1]      = 192.168.0.0/16
- * </pre>
- *
- * @see FirewallPolicy
- * @see RateLimiter
- * @see RateLimitProperties
- */
-public final class RequestLimitPolicy implements FirewallPolicy {
-
-    /**
-     * Configured rate limit properties (refill rate and burst size).
-     */
     private final RateLimitProperties properties;
-
-    /**
-     * List of CIDR ranges representing trusted proxies.
-     */
-    private final List<CIDR> trustedProxies;
-
-    /**
-     * Per-client IP token buckets.
-     */
     private final Map<String, RateLimiter> windows = new ConcurrentHashMap<>();
 
+    public RequestLimitPolicy(RateLimitProperties properties) {
+        this.properties = Objects.requireNonNull(properties, "properties");
+    }
+
     /**
-     * Creates a new request rate limiting policy.
-     *
-     * @param properties    rate limiting parameters
-     * @param trustedProxies optional list of trusted proxy ranges
+     * Compatibility constructor. Trusted forwarding is a server/adapter concern;
+     * configure a trusted proxy valve before requests enter the servlet application.
      */
     public RequestLimitPolicy(RateLimitProperties properties, List<CIDR> trustedProxies) {
-        this.properties = properties;
-        this.trustedProxies = trustedProxies;
+        this(properties);
     }
 
-    /**
-     * Applies rate limiting to the given request.
-     *
-     * @param evaluationInput encapsulated request and evaluation context
-     * @return {@link Decision#allow()} if the request is within the allowed rate,
-     *         {@link Decision#challenge(int, String)} with 429 if the limit is exceeded
-     */
     @Override
-    public Decision apply(EvaluationInput evaluationInput) {
-        InetAddress clientIp = null;
-
-        if (evaluationInput.requestContext().request() instanceof WebRequest webRequest) {
-            clientIp = webRequest.getClientIp();
-        }
-
-        if (clientIp != null /* && isTrustedProxy(clientIp) */) {
-            int         refillRate = properties.refillRate();
-            int         burst      = properties.burst();
-            RateLimiter limiter    = windows.computeIfAbsent(clientIp.getHostAddress(), k
-                    -> RateLimiter.fixed(refillRate, burst));
-
-            if (!limiter.tryAcquire()) {
-                return Decision.challenge(HttpStatus.TOO_MANY_REQUESTS, "TOO MANY REQUESTS");
-            }
-        }
-
-        return Decision.allow();
-    }
-
-    /**
-     * Checks whether the given IP belongs to a trusted proxy.
-     *
-     * @param clientIp client IP to check
-     * @return {@code true} if trusted, {@code false} otherwise
-     */
-    private boolean isTrustedProxy(InetAddress clientIp) {
-        boolean trusted = trustedProxies.isEmpty();
-
-        if (!trusted) {
-            for (CIDR trustedProxy : trustedProxies) {
-                if (trustedProxy.contains(clientIp)) {
-                    trusted = true;
-                    break;
-                }
-            }
-        }
-
-        return trusted;
+    public Decision apply(EvaluationInput input) {
+        String address = WebRequest.resolveClientAddress(input.requestContext().request()).getHostAddress();
+        RateLimiter limiter = windows.computeIfAbsent(address, key ->
+            RateLimiter.fixed(properties.refillRate(), properties.burst())
+        );
+        return limiter.tryAcquire()
+            ? Decision.allow()
+            : Decision.challenge(HttpStatus.TOO_MANY_REQUESTS, "Request rate limit exceeded");
     }
 }

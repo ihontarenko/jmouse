@@ -1,0 +1,12 @@
+footprint:open-hardware-5mm-footprint("Open hardware, 5 mm") {
+    meta {
+        summary: "The open hardware gear, for a design that is shared as open hardware, printed 5 mm wide"
+        code: "FP.GRAPHIC:OPEN-HARDWARE-5"
+        category: graphics
+        tags: electronics, footprint, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    outline(silkscreen, width: 0.25, "M0.24 -1.683L0.537 -2.236L1.202 -1.961L1.021 -1.359L1.359 -1.021L1.961 -1.202L2.236 -0.537L1.683 -0.24L1.683 0.24L2.236 0.537L1.961 1.202L1.359 1.021L1.021 1.359L1.202 1.961L-1.202 1.961L-1.021 1.359L-1.359 1.021L-1.961 1.202L-2.236 0.537L-1.683 0.24L-1.683 -0.24L-2.236 -0.537L-1.961 -1.202L-1.359 -1.021L-1.021 -1.359L-1.202 -1.961L-0.537 -2.236L-0.24 -1.683")
+    outline(silkscreen, width: 0.25, "M-0.75 0C-0.75 -0.414 -0.414 -0.75 0 -0.75C0.414 -0.75 0.75 -0.414 0.75 0C0.75 0.414 0.414 0.75 0 0.75C-0.414 0.75 -0.75 0.414 -0.75 0Z")
+}

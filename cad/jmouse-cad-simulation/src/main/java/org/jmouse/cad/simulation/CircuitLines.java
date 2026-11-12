@@ -19,6 +19,8 @@ import org.jmouse.el.grammar.Values;
 import org.jmouse.el.node.Expression;
 import org.jmouse.units.Quantity;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -52,7 +54,7 @@ public final class CircuitLines {
         }
         LineGrammar grammar = line.grammar();
         if (grammar == SimulationLines.PART || grammar == SimulationLines.PLACE || grammar == SimulationLines.MARK
-                || grammar == SimulationLines.WIRE) {
+                || grammar == SimulationLines.WIRE || grammar == SimulationLines.BUS || grammar == SimulationLines.NOTE || grammar == SimulationLines.DRAWN) {
             return line.name("reference");
         }
         if (grammar == SimulationLines.PROBE) {
@@ -81,6 +83,11 @@ public final class CircuitLines {
         if (part.footprint() != null) {
             line.clause("footprint", Nodes.word(part.footprint()));
         }
+        if (!part.pads().isEmpty()) {
+            List<ConnectionsNode.Connection> pads = new ArrayList<>();
+            part.pads().forEach((pad, pin) -> pads.add(new ConnectionsNode.Connection(pin, pad)));
+            line.clause("pads", new ConnectionsNode(pads));
+        }
         return line.build();
     }
 
@@ -95,6 +102,11 @@ public final class CircuitLines {
             case Placement.PlacedPart part -> placed(part);
             case Placement.Mark mark -> mark(mark);
             case Placement.Wire wire -> wire(wire);
+            case Placement.Bus bus -> bus(bus);
+            case Placement.Drawn drawn -> LineBuilder.line(SimulationLines.DRAWN).slot("reference", Nodes.name(drawn.reference()))
+                    .slot("shape", Nodes.word(drawn.shape().word())).clause("via", cornersOf(drawn.via())).build();
+            case Placement.Note note -> LineBuilder.line(SimulationLines.NOTE).slot("reference", Nodes.name(note.reference()))
+                    .slot("words", Nodes.text(note.words())).clause("at", point(note.at())).build();
         };
     }
 
@@ -143,7 +155,15 @@ public final class CircuitLines {
         if (!part.shows().isEmpty()) {
             line.clause("shows", Nodes.groups(List.of(part.shows())));
         }
+        if (!part.ports().isEmpty()) {
+            line.clause("ports", portPlaces(part.ports()));
+        }
         return line.build();
+    }
+
+    /** {@code in left 60, out right 60}: where a placed sheet's ports stand on its frame. */
+    public static Expression portPlaces(List<Placement.PortPlace> ports) {
+        return Nodes.groups(ports.stream().map(place -> List.of(place.port(), place.edge().word(), BigDecimal.valueOf(place.along()).stripTrailingZeros().toPlainString())).toList());
     }
 
     /** {@code GND1 ground [net] at x, y [rotate r]}. */
@@ -158,6 +178,21 @@ public final class CircuitLines {
             line.clause("rotate", Nodes.number(mark.rotation()));
         }
         return line.build();
+    }
+
+    /** {@code B1 bus D [members D0, D1] via x y, x y …}. */
+    private static ClauseLineNode bus(Placement.Bus bus) {
+        LineBuilder line = LineBuilder.line(SimulationLines.BUS).slot("reference", Nodes.name(bus.reference())).slot("name", Nodes.word(bus.name()));
+        if (!bus.members().isEmpty()) {
+            line.clause("members", Nodes.groups(List.of(bus.members())));
+        }
+        line.clause("via", cornersOf(bus.via()));
+        return line.build();
+    }
+
+    /** Points as the language writes a line of them: {@code 240 120, 400 120}. */
+    private static org.jmouse.el.grammar.ListNode cornersOf(List<org.jmouse.cad.Point> corners) {
+        return Nodes.groups(corners.stream().map(corner -> List.of(Quantity.plain(corner.x()).written(), Quantity.plain(corner.y()).written())).toList());
     }
 
     /** {@code W1 wire R1.b to C1.a [via x y, x y …]}. */

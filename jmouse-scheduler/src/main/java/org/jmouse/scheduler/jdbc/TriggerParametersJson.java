@@ -1,9 +1,10 @@
 package org.jmouse.scheduler.jdbc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.jmouse.scheduler.TriggerParameters;
 
 import java.util.Map;
@@ -14,9 +15,9 @@ final class TriggerParametersJson {
     private static final TypeReference<Map<String, Object>> OBJECT = new TypeReference<>() {
     };
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    private static final ObjectMapper MAPPER = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-            .enable(DeserializationFeature.USE_LONG_FOR_INTS);
+            .enable(DeserializationFeature.USE_LONG_FOR_INTS).build();
 
     private TriggerParametersJson() {
     }
@@ -24,7 +25,7 @@ final class TriggerParametersJson {
     static String write(TriggerParameters parameters) {
         try {
             return MAPPER.writeValueAsString(parameters.asMap());
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("Trigger parameters could not be written as JSON.", exception);
         }
     }
@@ -32,7 +33,7 @@ final class TriggerParametersJson {
     static TriggerParameters read(String json) {
         try {
             return TriggerParameters.of(MAPPER.readValue(json, OBJECT));
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalArgumentException("A stored trigger's parameters are not a JSON object.", exception);
         }
     }

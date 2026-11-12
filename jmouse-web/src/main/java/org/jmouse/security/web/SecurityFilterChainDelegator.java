@@ -2,142 +2,137 @@ package org.jmouse.security.web;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
-import org.jmouse.core.Streamable;
+import org.jmouse.security.SecurityContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.jmouse.core.AnsiColors.colorize;
-
-/**
- * 🛡️ SecurityFilterChainDelegator
- *
- * Delegates incoming requests to the first matching {@link MatchableSecurityFilterChain}.
- *
- * <p>Responsibilities:</p>
- * <ul>
- *   <li>🔍 Iterate over all configured {@link MatchableSecurityFilterChain}s</li>
- *   <li>✅ Select the first one whose {@link MatchableSecurityFilterChain#matches(HttpServletRequest)} returns true</li>
- *   <li>🔗 Wrap its filters in a {@link Virtual} {@link FilterChain} for sequential execution</li>
- *   <li>📢 Log which chain matched and for which URI</li>
- * </ul>
- *
- * <p>💡 Similar to Spring Security’s {@code FilterChainProxy}, but streamlined for jMouse.</p>
- */
+/** Owns chain filter lifecycle and isolates authentication to a matched HTTP request. */
 @Bean
 public class SecurityFilterChainDelegator implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityFilterChainDelegator.class);
-
-    /**
-     * 🔗 All registered security filter chains (aggregated from beans).
-     */
     private final List<MatchableSecurityFilterChain> chains;
+    private final List<Filter> lifecycleFilters;
+    private final List<Filter> initializedFilters = new ArrayList<>();
+    private boolean initialized;
 
-    /**
-     * 🏗️ Construct delegator with injected chains.
-     *
-     * @param chains aggregated security filter chains
-     */
     @BeanConstructor
     public SecurityFilterChainDelegator(@AggregatedBeans List<MatchableSecurityFilterChain> chains) {
-        this.chains = chains;
-    }
-
-    /**
-     * 🔄 Delegates request to the first matching {@link MatchableSecurityFilterChain}.
-     *
-     * @param request  incoming servlet request
-     * @param response servlet response
-     * @param chain    outer application filter chain
-     */
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-
-        for (MatchableSecurityFilterChain securityChain : chains) {
-            if (securityChain.matches((HttpServletRequest) request)) {
-                Virtual virtual = new Virtual(chain, securityChain.getFilters());
-
-                logMatcherRequest((HttpServletRequest) request);
-
-                for (Filter filter : securityChain.getFilters()) {
-                    Filter original = unwrap(filter);
-                    logFilterName(original);
+        this.chains = List.copyOf(chains);
+        Set<Filter> unique = Collections.newSetFromMap(new IdentityHashMap<>());
+        List<Filter> filters = new ArrayList<>();
+        for (MatchableSecurityFilterChain chain : this.chains) {
+            for (Filter filter : chain.getFilters()) {
+                Filter original = filter instanceof OrderedFilter ordered ? ordered.filter() : filter;
+                if (unique.add(original)) {
+                    filters.add(original);
                 }
-
-                virtual.doFilter(request, response);
-                return;
             }
         }
-
-        // no match -> fall back to outer chain
-        chain.doFilter(request, response);
+        lifecycleFilters = List.copyOf(filters);
     }
 
-    private Filter unwrap(Filter filter) {
-        Filter original = filter;
-        if (filter instanceof OrderedFilter orderedFilter) {
-            original = orderedFilter.filter();
+    @Override
+    public synchronized void init(FilterConfig configuration) throws ServletException {
+        if (initialized) {
+            return;
         }
-        return original;
+        int initializedCount = 0;
+        try {
+            for (Filter filter : lifecycleFilters) {
+                filter.init(configuration);
+                initializedCount++;
+                initializedFilters.add(filter);
+            }
+        } catch (ServletException | RuntimeException | Error failure) {
+            for (int index = initializedCount - 1; index >= 0; index--) {
+                try {
+                    lifecycleFilters.get(index).destroy();
+                } catch (RuntimeException | Error cleanupFailure) {
+                    if (failure != cleanupFailure) {
+                        failure.addSuppressed(cleanupFailure);
+                    }
+                }
+            }
+            initializedFilters.clear();
+            throw failure;
+        }
+        initialized = true;
     }
 
-    private void logMatcherRequest(HttpServletRequest request) {
-        LOGGER.info(colorize("\uD83D\uDEE1\uFE0F\uD83D\uDD10 ${BLUE_BOLD_BRIGHT}SECURITY${RESET} ➡️ URI: ${RED_BOLD_BRIGHT}{}${RESET}"),
-                    request.getRequestURI());
+    @Override
+    public synchronized void destroy() {
+        Throwable failure = null;
+        List<Filter> active = new ArrayList<>(initializedFilters.reversed());
+        initializedFilters.clear();
+        initialized = false;
+        for (Filter filter : active) {
+            try {
+                filter.destroy();
+            } catch (RuntimeException | Error exception) {
+                if (failure == null) {
+                    failure = exception;
+                } else if (failure != exception) {
+                    failure.addSuppressed(exception);
+                }
+            }
+        }
+        if (failure instanceof Error error) {
+            throw error;
+        }
+        if (failure instanceof RuntimeException exception) {
+            throw exception;
+        }
     }
 
-    private void logFilterName(Filter original) {
-        LOGGER.info(colorize("➡️ ${BLUE_BOLD_BRIGHT}FILTER:${RESET} ${YELLOW_BOLD_BRIGHT}{}${RESET}"),
-                    original.getClass().getName());
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain outer)
+        throws IOException, ServletException {
+        if (request instanceof HttpServletRequest httpRequest) {
+            for (MatchableSecurityFilterChain chain : chains) {
+                if (chain.matches(httpRequest)) {
+                    LOGGER.debug("Security chain matched {}", httpRequest.getRequestURI());
+                    SecurityContextHolder.clearContext();
+                    try {
+                        new Virtual(outer, chain.getFilters()).doFilter(request, response);
+                    } finally {
+                        SecurityContextHolder.clearContext();
+                    }
+                    return;
+                }
+            }
+        }
+        outer.doFilter(request, response);
     }
 
-    /**
-     * 🔗 Virtual chain — executes the filters of a matched {@link MatchableSecurityFilterChain}
-     * before delegating back to the outer application {@link FilterChain}.
-     */
     private static final class Virtual implements FilterChain {
 
+        private final FilterChain outer;
         private final List<Filter> filters;
-        private final FilterChain  outer;
-        private       int          index = 0;
+        private int index;
 
-        Virtual(FilterChain outer, List<Filter> filters) {
+        private Virtual(FilterChain outer, List<Filter> filters) {
             this.outer = outer;
             this.filters = filters;
         }
 
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+        public void doFilter(ServletRequest request, ServletResponse response)
+            throws IOException, ServletException {
             if (index < filters.size()) {
-                Filter next = filters.get(index++);
-                next.doFilter(request, response, this);
+                filters.get(index++).doFilter(request, response, this);
             } else {
                 outer.doFilter(request, response);
             }
-        }
-
-        /**
-         * 📝 Returns a formatted representation of the virtual chain,
-         * listing the filters (resolving {@link OrderedFilter} to its delegate name).
-         */
-        @Override
-        public String toString() {
-            return "Virtual[%s]".formatted(
-                    Streamable.of(filters).map(f -> {
-                        String name = f.getClass().getSimpleName();
-                        if (f instanceof OrderedFilter of) {
-                            name = of.filter().getClass().getSimpleName();
-                        }
-                        return name;
-                    }).joining(", ")
-            );
         }
     }
 }

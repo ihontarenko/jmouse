@@ -1,0 +1,16 @@
+symbol:high-voltage-symbol("High voltage") {
+    meta {
+        summary: "A warning triangle with a bolt: dangerous voltage on this part of the board, as drawn on a schematic"
+        code: "SY.GRAPHIC:HIGH-VOLTAGE"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:stroke_1("M0 -44L46 38H-46Z")
+    path:fill_1("M5 -22L-13 8H-1L-6 28L13 -4H1Z") {
+        fill = signal
+        stroke = clear
+    }
+}

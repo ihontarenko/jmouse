@@ -33,18 +33,23 @@ public final class Values {
     /** Nothing: the clause's word says it all — {@code filled}. */
     public static final ValueKind FLAG = reading -> null;
 
-    /** One word, hyphens and all: {@code through-hole}; one of the slot's allowed words when it names them. */
+    /**
+     * One word, hyphens and all: {@code through-hole}; one of the slot's allowed words when it names them. A word holding
+     * what a bare word cannot — {@code "FP.CHIP:R0805"} — is written in quotes, and reads as the word inside them.
+     */
     public static final ValueKind WORD = reading -> {
         TokenCursor cursor = reading.cursor();
         if (Lines.lineEnd().matches(cursor)) {
             throw reading.refusal();
         }
         Token written = cursor.current();
-        String word = Lines.word(cursor);
+        // A word holding what a word cannot — a technical code, FP.CHIP:R0805 — is written in quotes, and is that word.
+        WordNode quoted = cursor.isCurrent(BasicToken.T_STRING) ? reading.quoted() : null;
+        String word = quoted != null ? quoted.word() : Lines.word(cursor);
         if (!reading.allowed().isEmpty() && !reading.allowed().contains(word)) {
             throw GrammarRefusal.at(cursor, written, "'" + word + "' is not one of " + reading.allowed().stream().sorted().toList());
         }
-        return new WordNode(word, false);
+        return quoted != null ? quoted : new WordNode(word, false);
     };
 
     /** A name, an index written against it and all: {@code R1}, {@code q[0..7]}, {@code memory[256]}. */
@@ -112,9 +117,17 @@ public final class Values {
         /** {@code [a, b]}, or one name alone. */
         @Override
         public Expression readTerm(ValueReading reading) {
-            return listed(reading, item -> new WordNode(Lines.word(item.cursor()), false));
+            return listed(reading, item -> nameItem(item.cursor()));
         }
     };
+
+    /**
+     * One name of a list: a bare word, or — for a name holding what a bare word cannot, a technical code — a quoted one,
+     * which is the word inside its quotes, as {@link #WORD} reads it.
+     */
+    private static WordNode nameItem(TokenCursor cursor) {
+        return cursor.isCurrent(BasicToken.T_STRING) ? new WordNode(QuotedText.of(cursor.next()), true) : new WordNode(Lines.word(cursor), false);
+    }
 
     private static ListNode names(ValueReading reading) {
         TokenCursor cursor = reading.cursor();
@@ -124,7 +137,7 @@ public final class Values {
                 cursor.next();
                 continue;
             }
-            names.add(new WordNode(Lines.word(cursor), false));
+            names.add(nameItem(cursor));
             if (reading.bounded().hasNext() && !cursor.isCurrent(BasicToken.T_COMMA)) {
                 throw GrammarRefusal.here(cursor, "names stand between commas: '" + cursor.current().value() + "' follows one without");
             }
@@ -244,10 +257,13 @@ public final class Values {
             return true;
         }
 
-        /** The value alone: a term's argument is what the name is given. */
+        /**
+         * The value alone: a term's argument is what the name is given, and a term writes no '=' — that is mathematics
+         * written as it is, the only place an assignment stands.
+         */
         @Override
         public Expression readTerm(ValueReading reading) {
-            return new AssignedNode(reading.cursor().isCurrent(BasicToken.T_STRING) ? reading.quoted() : reading.formula());
+            return reading.cursor().isCurrent(BasicToken.T_STRING) ? reading.quoted() : reading.formula();
         }
     };
 

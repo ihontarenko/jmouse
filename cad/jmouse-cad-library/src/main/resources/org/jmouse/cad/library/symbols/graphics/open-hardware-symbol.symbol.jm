@@ -1,0 +1,13 @@
+symbol:open-hardware-symbol("Open hardware") {
+    meta {
+        summary: "The open hardware gear, for a design that is shared as open hardware, as drawn on a schematic"
+        code: "SY.GRAPHIC:OPEN-HARDWARE"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:stroke_1("M4.791 -33.661L10.738 -44.729L24.035 -39.221L20.414 -27.189L27.189 -20.414L39.221 -24.035L44.729 -10.738L33.661 -4.791L33.661 4.791L44.729 10.738L39.221 24.035L27.189 20.414L20.414 27.189L24.035 39.221L-24.035 39.221L-20.414 27.189L-27.189 20.414L-39.221 24.035L-44.729 10.738L-33.661 4.791L-33.661 -4.791L-44.729 -10.738L-39.221 -24.035L-27.189 -20.414L-20.414 -27.189L-24.035 -39.221L-10.738 -44.729L-4.791 -33.661")
+    path:stroke_2("M-15 0C-15 -8.2845 -8.2845 -15 0 -15C8.2845 -15 15 -8.2845 15 0C15 8.2845 8.2845 15 0 15C-8.2845 15 -15 8.2845 -15 0Z")
+}

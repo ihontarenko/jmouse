@@ -1,0 +1,15 @@
+component:hot-surface-mark("Hot surface mark") {
+    meta {
+        designator: G
+        summary: "A warning triangle with rising heat: this part of the board runs hot: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:HOT-SURFACE-10")
+    footprint("FP.GRAPHIC:HOT-SURFACE-5")
+    footprint("FP.GRAPHIC:HOT-SURFACE-20")
+
+    symbol(uses: "SY.GRAPHIC:HOT-SURFACE") {
+    }
+}

@@ -35,7 +35,6 @@ import java.sql.SQLException;
  * @author jMouse
  */
 public interface ConnectionProvider {
-
     /**
      * Obtains a JDBC {@link Connection}.
      * <p>
@@ -72,5 +71,4 @@ public interface ConnectionProvider {
      * @param connection connection to release
      */
     void release(Connection connection);
-
 }

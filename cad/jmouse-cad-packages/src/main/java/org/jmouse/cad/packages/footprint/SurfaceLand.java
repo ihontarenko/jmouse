@@ -12,7 +12,7 @@ import org.jmouse.cad.packages.PackageTable;
  * X = W(min) + 2 Js + √(C(W)² + F² + P²)
  * </pre>
  *
- * F is the board's fabrication tolerance, P the placement's. A range's tolerance is its width.
+ * F is the pcb's fabrication tolerance, P the placement's. A range's tolerance is its width.
  */
 record SurfaceLand(double outer, double inner, double width) {
 

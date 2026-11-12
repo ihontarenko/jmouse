@@ -1,8 +1,8 @@
 package org.jmouse.cad.library;
 
-import org.jmouse.cad.board.BoardModule;
-import org.jmouse.cad.board.BoardVocabulary;
-import org.jmouse.cad.board.drawing.BoardDrawing;
+import org.jmouse.cad.pcb.PcbModule;
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.component.Component;
@@ -11,6 +11,7 @@ import org.jmouse.cad.component.Family;
 import org.jmouse.cad.component.Seat;
 import org.jmouse.cad.document.DeclarationParser;
 import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.schematic.SchematicModule;
 import org.jmouse.cad.simulation.SimulationLines;
@@ -37,14 +38,17 @@ import java.util.Set;
  * @param slug       its slug
  * @param title      its title
  * @param kind       the word its head opens with
+ * @param code       {@code meta { code … }} — its technical code, {@code FP.CHIP:R0805}, by which it may be named
+ *                   besides its slug —, or null
  * @param summary    {@code meta { summary … }}, or null
  * @param category   {@code meta { category … }}, or null when it is filed nowhere
  * @param tags       {@code meta { tags … }}, in order
  * @param featured   {@code meta { featured true }}
+ * @param status     {@code meta { status … }} — where a catalogue document stands —; published when it says none
  * @param references every other document it names, each way once, in the order the text names them
  */
-public record DocumentIndex(String slug, String title, String kind, String summary, String category, List<String> tags,
-                            boolean featured, List<Reference> references) {
+public record DocumentIndex(String slug, String title, String kind, String code, String summary, String category, List<String> tags,
+                            boolean featured, DocumentStatus status, List<Reference> references) {
 
     /** What separates a slug from the revision it pins: {@code resistor@3}. */
     public static final String REVISION_MARK = "@";
@@ -58,10 +62,10 @@ public record DocumentIndex(String slug, String title, String kind, String summa
             DeclarationParser.USE, Set.of(SimulationModule.FAMILY.word(), SimulationModule.FUNCTIONS.word()),
             SimulationLines.SYMBOL.word(), Set.of(SchematicModule.SYMBOL.word()),
             SimulationLines.PORTRAIT.word(), Set.of(SchematicModule.PORTRAIT.word()),
-            SimulationLines.FOOTPRINT.word(), Set.of(BoardModule.FOOTPRINT.word()),
+            SimulationLines.FOOTPRINT.word(), Set.of(PcbModule.FOOTPRINT.word()),
             SimulationLines.FRAME.word(), Set.of(SchematicModule.FRAME.word()),
             SimulationVocabulary.PARTS, Set.of(SimulationModule.COMPONENT.word(), SimulationModule.CIRCUIT.word()),
-            BoardVocabulary.CIRCUIT, Set.of(SimulationModule.CIRCUIT.word()));
+            PcbVocabulary.CIRCUIT, Set.of(SimulationModule.CIRCUIT.word()));
 
     public DocumentIndex {
         tags = List.copyOf(tags);
@@ -89,17 +93,19 @@ public record DocumentIndex(String slug, String title, String kind, String summa
             family(SimulationReading.family(document), references);
         } else if (kind.equals(SimulationModule.CIRCUIT.word())) {
             circuit(SimulationReading.circuit(document), references);
-        } else if (kind.equals(BoardModule.PCB.word())) {
-            references.add(BoardDrawing.of(document).circuit(), BoardVocabulary.CIRCUIT);
+        } else if (kind.equals(PcbModule.PCB.word())) {
+            references.add(PcbDrawing.of(document).circuit(), PcbVocabulary.CIRCUIT);
         }
         meta.ifPresent(found -> found.words(MetaNode.SEE_ALSO)
                 .forEach(slug -> references.add(slug, MetaNode.SEE_ALSO)));
 
         return new DocumentIndex(document.slug(), document.title(), kind,
+                                 meta.flatMap(found -> found.text(MetaNode.CODE)).orElse(null),
                                  meta.flatMap(found -> found.text(MetaNode.SUMMARY)).orElse(null),
                                  meta.flatMap(found -> found.text(MetaNode.CATEGORY)).orElse(null),
                                  meta.map(found -> found.words(MetaNode.TAGS)).orElse(List.of()),
                                  meta.flatMap(found -> found.text(MetaNode.FEATURED)).map(YES::equals).orElse(false),
+                                 DocumentStatus.written(meta.flatMap(found -> found.text(MetaNode.STATUS))),
                                  references.all());
     }
 

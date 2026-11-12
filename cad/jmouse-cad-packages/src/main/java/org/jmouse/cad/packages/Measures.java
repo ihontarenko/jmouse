@@ -3,7 +3,7 @@ package org.jmouse.cad.packages;
 import java.math.BigDecimal;
 
 /**
- * A generated measure as the library keeps it: to the thousandth of its unit — a micrometre on a board, a thousandth of
+ * A generated measure as the library keeps it: to the thousandth of its unit — a micrometre on a pcb, a thousandth of
  * a grid step on a sheet —, without the float noise sums leave.
  */
 public final class Measures {

@@ -1,4 +1,5 @@
 {
+  "$schema": "./assembly.schema.json",
   "placement": {
     "file": "pos.csv",
     "role": "where each part stands, for assembly",
@@ -7,6 +8,7 @@
       "bottom": "bottom"
     },
     "unit": "",
+    "mountings": {},
     "columns": [
       {
         "heading": "Ref",
@@ -42,6 +44,7 @@
     "file": "bom.csv",
     "role": "bill of materials, one line a kind of part",
     "designatorSeparator": " ",
+    "mountings": {},
     "columns": [
       {
         "heading": "Designators",

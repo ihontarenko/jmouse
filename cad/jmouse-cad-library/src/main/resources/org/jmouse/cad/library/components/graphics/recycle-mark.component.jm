@@ -1,0 +1,15 @@
+component:recycle-mark("Recycling mark") {
+    meta {
+        designator: G
+        summary: "Three chasing arrows: the board and its materials can be recycled: printed on the board, nothing to buy"
+        category: graphics
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    footprint("FP.GRAPHIC:RECYCLE-10")
+    footprint("FP.GRAPHIC:RECYCLE-5")
+    footprint("FP.GRAPHIC:RECYCLE-20")
+
+    symbol(uses: "SY.GRAPHIC:RECYCLE") {
+    }
+}

@@ -1,6 +1,6 @@
 package org.jmouse.ai.conversation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * What a handler returned, as the string a tool result carries.

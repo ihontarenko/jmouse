@@ -1,6 +1,6 @@
 package org.jmouse.cad.management;
 
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

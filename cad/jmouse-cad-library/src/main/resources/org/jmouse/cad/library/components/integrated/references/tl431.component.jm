@@ -10,8 +10,10 @@ component:tl431("TL431", type: reference) {
         summary: "Adjustable precision shunt reference, 2.495 V to 36 V, 1 mA to 100 mA"
         source: "TI TL431 datasheet (SLVS543), electrical characteristics"
         package: "TO-92"
-        category: circuits
+        category: references
         failure: short cathode anode
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -31,9 +33,9 @@ component:tl431("TL431", type: reference) {
     pin:anode(analog, 2, "anode")
     pin:cathode(analog, 3, "cathode")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
 
-    symbol(uses: shunt-reference-symbol) {
+    symbol(uses: "SY.REFERENCE:SHUNT-ADJUSTABLE") {
         bind:failed(failed)
         bind:reference(pin: ref)
     }
@@ -75,7 +77,7 @@ component:tl431("TL431", type: reference) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("TL431")
     }
 }

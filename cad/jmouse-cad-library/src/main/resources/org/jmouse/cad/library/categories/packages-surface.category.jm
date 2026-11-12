@@ -1,0 +1,8 @@
+category:packages-surface("Surface mount") {
+    meta {
+        category: packages
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

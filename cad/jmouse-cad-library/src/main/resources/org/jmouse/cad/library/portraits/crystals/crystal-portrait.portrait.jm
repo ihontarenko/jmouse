@@ -4,7 +4,7 @@ portrait:crystal-portrait("Crystal") {
     meta {
         summary: "An HC-49/US crystal: a silver can stamped with its frequency in MHz"
         code: "PT.CRYSTAL:HC49-US"
-        category: circuits
+        category: crystals
         tags: electronics, portrait, crystal, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

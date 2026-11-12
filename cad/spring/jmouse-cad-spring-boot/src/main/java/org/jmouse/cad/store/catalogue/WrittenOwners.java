@@ -1,6 +1,6 @@
 package org.jmouse.cad.store.catalogue;
 
-import org.jmouse.cad.jpa.catalogue.DocumentOwner;
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.store.problem.CadProblem;
 
 /** An owner a request names in words — {@code PROJECT:42} —, read once for every route and service that takes one. */

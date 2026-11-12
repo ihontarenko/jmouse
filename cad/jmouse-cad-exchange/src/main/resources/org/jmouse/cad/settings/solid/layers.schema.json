@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org/jmouse/cad/settings/solid/layers.schema.json",
+  "title": "PCB layers in 3D",
+  "description": "The layers' data: the settings tree's solid/layers (#SECTION).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bare",
+    "core",
+    "copper",
+    "mask",
+    "silkscreen",
+    "body"
+  ],
+  "properties": {
+    "$schema": {
+      "description": "the schema this file is written to",
+      "type": "string"
+    },
+    "bare": {
+      "description": "How a solid looks, as glTF's metallic-roughness model says it; a format that knows colours alone takes the colour.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "colour",
+        "metallic",
+        "roughness"
+      ],
+      "properties": {
+        "colour": {
+          "description": "#rrggbb",
+          "type": "string"
+        },
+        "metallic": {
+          "description": "0 a dielectric — epoxy, ink —, 1 a bare metal",
+          "type": "number"
+        },
+        "roughness": {
+          "description": "0 a mirror, 1 matte",
+          "type": "number"
+        }
+      }
+    },
+    "core": {
+      "description": "How a solid looks, as glTF's metallic-roughness model says it; a format that knows colours alone takes the colour.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "colour",
+        "metallic",
+        "roughness"
+      ],
+      "properties": {
+        "colour": {
+          "description": "#rrggbb",
+          "type": "string"
+        },
+        "metallic": {
+          "description": "0 a dielectric — epoxy, ink —, 1 a bare metal",
+          "type": "number"
+        },
+        "roughness": {
+          "description": "0 a mirror, 1 matte",
+          "type": "number"
+        }
+      }
+    },
+    "copper": {
+      "description": "A thin layer over a face of the pcb.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "thickness",
+        "finish"
+      ],
+      "properties": {
+        "name": {
+          "description": "what its solid is called after the pcb and the side: copper",
+          "type": "string"
+        },
+        "thickness": {
+          "description": "how thick it is, in millimetres",
+          "type": "number"
+        },
+        "finish": {
+          "description": "How a solid looks, as glTF's metallic-roughness model says it; a format that knows colours alone takes the colour.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "colour",
+            "metallic",
+            "roughness"
+          ],
+          "properties": {
+            "colour": {
+              "description": "#rrggbb",
+              "type": "string"
+            },
+            "metallic": {
+              "description": "0 a dielectric — epoxy, ink —, 1 a bare metal",
+              "type": "number"
+            },
+            "roughness": {
+              "description": "0 a mirror, 1 matte",
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "mask": {
+      "description": "A thin layer over a face of the pcb.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "thickness",
+        "finish"
+      ],
+      "properties": {
+        "name": {
+          "description": "what its solid is called after the pcb and the side: copper",
+          "type": "string"
+        },
+        "thickness": {
+          "description": "how thick it is, in millimetres",
+          "type": "number"
+        },
+        "finish": {
+          "description": "How a solid looks, as glTF's metallic-roughness model says it; a format that knows colours alone takes the colour.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "colour",
+            "metallic",
+            "roughness"
+          ],
+          "properties": {
+            "colour": {
+              "description": "#rrggbb",
+              "type": "string"
+            },
+            "metallic": {
+              "description": "0 a dielectric — epoxy, ink —, 1 a bare metal",
+              "type": "number"
+            },
+            "roughness": {
+              "description": "0 a mirror, 1 matte",
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "silkscreen": {
+      "description": "A thin layer over a face of the pcb.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "thickness",
+        "finish"
+      ],
+      "properties": {
+        "name": {
+          "description": "what its solid is called after the pcb and the side: copper",
+          "type": "string"
+        },
+        "thickness": {
+          "description": "how thick it is, in millimetres",
+          "type": "number"
+        },
+        "finish": {
+          "description": "How a solid looks, as glTF's metallic-roughness model says it; a format that knows colours alone takes the colour.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "colour",
+            "metallic",
+            "roughness"
+          ],
+          "properties": {
+            "colour": {
+              "description": "#rrggbb",
+              "type": "string"
+            },
+            "metallic": {
+              "description": "0 a dielectric — epoxy, ink —, 1 a bare metal",
+              "type": "number"
+            },
+            "roughness": {
+              "description": "0 a mirror, 1 matte",
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "body": {
+      "description": "How a solid looks, as glTF's metallic-roughness model says it; a format that knows colours alone takes the colour.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "colour",
+        "metallic",
+        "roughness"
+      ],
+      "properties": {
+        "colour": {
+          "description": "#rrggbb",
+          "type": "string"
+        },
+        "metallic": {
+          "description": "0 a dielectric — epoxy, ink —, 1 a bare metal",
+          "type": "number"
+        },
+        "roughness": {
+          "description": "0 a mirror, 1 matte",
+          "type": "number"
+        }
+      }
+    }
+  }
+}

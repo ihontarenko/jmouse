@@ -38,9 +38,13 @@ public class DeclarationParser extends LineParser<DeclarationNode> {
     @Override
     protected DeclarationNode line(TokenCursor cursor, ParserContext context) {
         Token word = cursor.next();
+        if (!cursor.isCurrent(BasicToken.T_COLON)) {
+            throw GrammarRefusal.at(cursor, word, "a declaration is '" + word.value() + ":name' or '" + word.value()
+                    + ":[one, other]'");
+        }
         List<String> names = new ArrayList<>();
         while (!Lines.lineEnd().matches(cursor)) {
-            // A term writes it 'use:[smooth-transitions, junctions]': its colon and brackets only separate.
+            // 'use:[smooth-transitions, junctions]': its colon and brackets only separate.
             if (cursor.isCurrent(BasicToken.T_COMMA) || cursor.isCurrent(BasicToken.T_COLON)
                     || cursor.isCurrent(BasicToken.T_OPEN_BRACKET) || cursor.isCurrent(BasicToken.T_CLOSE_BRACKET)) {
                 cursor.next();

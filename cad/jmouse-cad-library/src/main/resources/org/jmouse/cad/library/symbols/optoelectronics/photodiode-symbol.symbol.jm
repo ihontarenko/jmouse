@@ -2,7 +2,7 @@ symbol:photodiode-symbol("Photodiode") {
     meta {
         summary: "Photodiode, as drawn on a schematic: a diode with light falling on it; the arrows light up with the light it takes"
         code: "SY.PHOTODETECTOR:DIODE"
-        category: circuits
+        category: optoelectronics
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

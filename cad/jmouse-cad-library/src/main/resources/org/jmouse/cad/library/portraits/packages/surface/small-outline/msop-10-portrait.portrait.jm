@@ -3,7 +3,7 @@ portrait:msop-10-portrait("MSOP-10") {
     meta {
         summary: "10-lead MSOP, 3 mm body, 0.5 mm pitch from above: pin 1 at the bottom left, beside the dot"
         code: "PT.MSOP:10-P0.5"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-187 BA"
         authors: "jMouse"

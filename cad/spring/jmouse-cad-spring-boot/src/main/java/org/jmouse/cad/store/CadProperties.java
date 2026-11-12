@@ -4,11 +4,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.Duration;
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
 
 /**
  * {@code jmouse.cad.*}: what an installation tunes about the catalogue.
+ *
+ * <p>Most of this is only what the engine's settings start from ({@code EngineConfiguration}): it is changed there, while
+ * the engine runs.</p>
  *
  * @param documents what a document may be, and how many read documents are kept
  * @param library   the shipped library and the product's own shipped documents
@@ -28,17 +32,38 @@ public record CadProperties(@DefaultValue Documents documents, @DefaultValue Lib
     /**
      * @param maximumLength the longest text a document may be, in characters
      * @param cachedReadings how many read documents are kept by checksum, so a document is read once per revision
+     * @param defaultCategory the category a new document whose text names none is filed in — its text then says so —; none
+     *                        when blank, the document left unfiled. A category itself is never filed by it: one naming no
+     *                        parent stands at the top.
+     * @param routingBoards how many pcbs an editor lays copper on are kept read at once, for the router to answer every move
      */
-    public record Documents(@DefaultValue("1000000") int maximumLength, @DefaultValue("2000") int cachedReadings) {
+    public record Documents(@DefaultValue("1000000") int maximumLength, @DefaultValue("2000") int cachedReadings,
+                            @DefaultValue("") String defaultCategory, @DefaultValue("16") int routingBoards) {
     }
 
     /**
-     * @param importOnStart import the shipped documents into the catalogue when the application is ready
-     * @param includeEngine whether jmouse-cad-library's own documents are among them
+     * @param includeEngine whether jmouse-cad-library's own documents are among the shipped ones
      * @param locations     the product's own shipped documents, as resource patterns: {@code classpath:catalogue/**}
+     * @param folder        the library folder: every document written here is a file of it, every revision a commit
+     *                      (ADR 0002); the installation's, set by whoever runs it
+     * @param identity      who a commit is by when no person is named: the engine writing, a file found in the folder
      */
-    public record Library(@DefaultValue("true") boolean importOnStart, @DefaultValue("true") boolean includeEngine,
-                          @DefaultValue List<String> locations) {
+    public record Library(@DefaultValue("true") boolean includeEngine, @DefaultValue List<String> locations, Path folder,
+                          @DefaultValue Identity identity) {
+
+        public Library {
+            if (folder == null) {
+                throw new IllegalStateException("jmouse.cad.library.folder names no library folder: the documents written here are "
+                        + "its files, so the installation says where it is");
+            }
+        }
+    }
+
+    /**
+     * @param name  the name a commit nobody named is by
+     * @param email its address
+     */
+    public record Identity(@DefaultValue("jMouse CAD") String name, @DefaultValue("library@jmouse.invalid") String email) {
     }
 
     /**

@@ -2,7 +2,7 @@ symbol:light-emitting-diode-symbol("Light-emitting diode") {
     meta {
         summary: "Light-emitting diode, as drawn on a schematic: its die lights in its own colour as current flows, and chars once it has burned out"
         code: "SY.LED:SINGLE"
-        category: circuits
+        category: optoelectronics
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

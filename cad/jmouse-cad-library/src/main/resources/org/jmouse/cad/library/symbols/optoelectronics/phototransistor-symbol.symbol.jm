@@ -2,7 +2,7 @@ symbol:phototransistor-symbol("Phototransistor") {
     meta {
         summary: "NPN phototransistor, as drawn on a schematic: light falling on its base does what a base current would"
         code: "SY.PHOTODETECTOR:NPN"
-        category: circuits
+        category: optoelectronics
         tags: electronics, schematic
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

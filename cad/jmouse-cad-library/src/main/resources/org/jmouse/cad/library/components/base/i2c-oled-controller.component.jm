@@ -16,8 +16,10 @@ component:i2c-oled-controller("I²C OLED controller", type: display) {
         designator: DS
         summary: "The I²C protocol and the shared commands of a monochrome OLED controller: control byte, display memory in pages"
         source: "Solomon Systech SSD1306 rev. 1.1 (2008) §8.1.5.2, §8.7, table 9; Sino Wealth SH1106 V2.3 (2008) — the commands the two share"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-target
     use:cmos-hc

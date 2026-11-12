@@ -8,8 +8,10 @@ component:2n7000("2N7000", type: mosfet) {
         summary: "N-channel enhancement MOSFET, 60 V, 200 mA continuous"
         source: "onsemi 2N7000/2N7002/NDS7002A datasheet NDS7002A/D, Rev. 11"
         package: "TO-92"
-        category: circuits
+        category: transistors
         failure: short drain source
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:n-mosfet
 
@@ -39,11 +41,11 @@ component:2n7000("2N7000", type: mosfet) {
 
     pin:source(analog, 1, "source")
     pin:gate(analog, input, 2, "gate")
-    pin:drain(analog, output, 3, "drain")
+    pin:drain(analog, output, open-drain, 3, "drain")
 
-    footprint(to-92-inline-footprint)
+    footprint("FP.TO92:3-L")
 
-    symbol(uses: n-channel-mosfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:MOSFET-N") {
         bind:failed(failed)
     }
 
@@ -113,7 +115,7 @@ component:2n7000("2N7000", type: mosfet) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: to-92-portrait) {
+    portrait(uses: "PT.TO92:3") {
         bind:marking("2N7000")
     }
 }

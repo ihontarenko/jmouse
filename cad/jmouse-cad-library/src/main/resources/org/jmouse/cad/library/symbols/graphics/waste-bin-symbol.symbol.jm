@@ -1,0 +1,16 @@
+symbol:waste-bin-symbol("Separate collection") {
+    meta {
+        summary: "A crossed-out bin: not to be thrown away with household waste, as drawn on a schematic"
+        code: "SY.GRAPHIC:WASTE-BIN"
+        category: graphics
+        tags: electronics, schematic, graphic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(100 x 100)
+    path:stroke_1("M-22 -22H22L16 30H-16Z")
+    path:stroke_2("M-28 -22H28")
+    path:stroke_3("M-8 -30H8")
+    path:stroke_4("M-8 -14L-5 22M8 -14L5 22M0 -14V22")
+    path:stroke_5("M-38 -38L38 38M38 -38L-38 38")
+}

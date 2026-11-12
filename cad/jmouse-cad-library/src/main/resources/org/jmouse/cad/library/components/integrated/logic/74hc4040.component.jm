@@ -9,8 +9,10 @@ component:74hc4040("74HC4040", type: counter) {
         summary: "Twelve-stage binary ripple counter: counts on the falling clock edge, its stages settling one after another"
         source: "NXP 74HC4040 data sheet, quick reference: CP to Q0 14 ns, Qn to Qn+1 8 ns typical at 5 V, CL = 15 pF; pinout per the data sheet"
         package: "DIP-16, SOIC-16"
-        category: circuits
+        category: logic
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -25,6 +27,9 @@ component:74hc4040("74HC4040", type: counter) {
     pin:clock(digital, input, 10, "CP, counts on its falling edge")
     pin:master_reset(digital, input, 11, "MR, back to nought at once, active high")
     pin:Vcc(power, 16)
+
+    footprint("FP.DIP:16-W7.62")
+    footprint("FP.SOIC:16-P1.27-W3.9")
 
     symbol(box) {
         left([clock edge bubble, master_reset])

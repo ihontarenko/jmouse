@@ -1,114 +1,52 @@
 package org.jmouse.security.session;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.concurrent.ConcurrentHashMap.newKeySet;
+/** Single-node registry. All index changes are atomic; returned ID sets are immutable snapshots. */
+public class InMemorySessionRegistry implements SessionRegistry {
 
-/**
- * 💾 <b>InMemorySessionRegistry</b> — simple thread-safe {@link SessionRegistry} implementation.
- *
- * <p>Stores all session–principal mappings directly in memory using concurrent maps.</p>
- *
- * <h3>Characteristics</h3>
- * <ul>
- *   <li>⚡ Backed by {@link ConcurrentHashMap} — suitable for lightweight concurrent use.</li>
- *   <li>🧍 Tracks each {@code principal → Set<sessionId>} and session metadata.</li>
- *   <li>🧩 No persistence — data is lost when the application stops.</li>
- * </ul>
- *
- * <h3>Use cases</h3>
- * <ul>
- *   <li>Ideal for prototypes, local testing, or single-node applications.</li>
- *   <li>For distributed systems, replace with a persistent or clustered registry (e.g. Redis).</li>
- * </ul>
- *
- * @see SessionRegistry
- * @see SessionRegistry.SessionInformation
- */
-class InMemorySessionRegistry implements SessionRegistry {
+    private final Map<String, SessionInformation> sessions = new HashMap<>();
+    private final Map<Object, Set<String>> sessionIds = new HashMap<>();
 
-    /**
-     * Maps session ID → principal.
-     */
-    private final Map<String, Object> principals = new ConcurrentHashMap<>();
-
-    /**
-     * Maps principal → active session IDs.
-     */
-    private final Map<Object, Set<String>> sessionIds = new ConcurrentHashMap<>();
-
-    /**
-     * Maps session ID → session metadata.
-     */
-    private final Map<String, SessionInformation> metadata = new ConcurrentHashMap<>();
-
-    /**
-     * 🏷️ Register a new session for a given principal.
-     *
-     * @param sessionId unique session identifier
-     * @param principal the authenticated user or system identity
-     */
     @Override
-    public void registerSession(String sessionId, Object principal) {
-        principals.put(sessionId, principal);
-        metadata.put(sessionId, new SessionInformation(sessionId, principal, Instant.now()));
-        sessionIds.computeIfAbsent(principal, __ -> newKeySet()).add(sessionId);
+    public synchronized void registerSession(String sessionId, Object principal) {
+        Objects.requireNonNull(sessionId, "sessionId");
+        Objects.requireNonNull(principal, "principal");
+        removeSession(sessionId);
+        sessions.put(sessionId, new SessionInformation(sessionId, principal, Instant.now()));
+        sessionIds.computeIfAbsent(principal, key -> new HashSet<>()).add(sessionId);
     }
 
-    /**
-     * 🗑️ Remove a session and clean up any principal references.
-     *
-     * @param sessionId the session ID to remove
-     */
     @Override
-    public void removeSession(String sessionId) {
-        Object principal = principals.remove(sessionId);
-        metadata.remove(sessionId);
-        if (principal != null) {
-            Set<String> sessionIds = this.sessionIds.get(principal);
-            if (sessionIds != null) {
-                sessionIds.remove(sessionId);
-                if (sessionIds.isEmpty()) {
-                    this.sessionIds.remove(principal);
-                }
+    public synchronized void removeSession(String sessionId) {
+        SessionInformation removed = sessions.remove(sessionId);
+        if (removed != null) {
+            Set<String> identifiers = sessionIds.get(removed.principal());
+            identifiers.remove(sessionId);
+            if (identifiers.isEmpty()) {
+                sessionIds.remove(removed.principal());
             }
         }
     }
 
-    /**
-     * 👤 Get the principal bound to a session ID.
-     *
-     * @param sessionId the session identifier
-     * @return optional principal, or empty if unknown
-     */
     @Override
-    public Optional<Object> getPrincipal(String sessionId) {
-        return Optional.ofNullable(principals.get(sessionId));
+    public synchronized Optional<Object> getPrincipal(String sessionId) {
+        return getSessionInformation(sessionId).map(SessionInformation::principal);
     }
 
-    /**
-     * 🔗 Retrieve all session IDs associated with a given principal.
-     *
-     * @param principal the principal identity
-     * @return set of session IDs, or empty set if none
-     */
     @Override
-    public Set<String> getSessionIds(Object principal) {
-        return sessionIds.getOrDefault(principal, Set.of());
+    public synchronized Set<String> getSessionIds(Object principal) {
+        return Set.copyOf(sessionIds.getOrDefault(principal, Set.of()));
     }
 
-    /**
-     * 🔍 Retrieve full {@link SessionInformation} metadata for a session ID.
-     *
-     * @param sessionId the session identifier
-     * @return optional session metadata, or empty if not found
-     */
     @Override
-    public Optional<SessionInformation> getSessionInformation(String sessionId) {
-        return Optional.ofNullable(metadata.get(sessionId));
+    public synchronized Optional<SessionInformation> getSessionInformation(String sessionId) {
+        return Optional.ofNullable(sessions.get(sessionId));
     }
 }

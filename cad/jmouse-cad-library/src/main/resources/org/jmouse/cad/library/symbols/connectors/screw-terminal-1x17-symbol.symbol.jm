@@ -2,7 +2,7 @@ symbol:screw-terminal-1x17-symbol("Screw terminal, 17 contacts") {
     meta {
         summary: "A terminal block of 17 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
         code: "SY.TB:17"
-        category: circuits
+        category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

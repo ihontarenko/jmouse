@@ -2,7 +2,7 @@ footprint:chip-diode-1210-hand-soldering-footprint("Chip diode 1210 (3225 metric
     meta {
         summary: "Chip diode, 1210 (3225 metric) body, pads lengthened for a soldering iron; pad 1 is the cathode"
         code: "FP.CHIP:D1210-HAND"
-        category: circuits
+        category: diodes-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"
         authors: "jMouse"
@@ -17,4 +17,6 @@ footprint:chip-diode-1210-hand-soldering-footprint("Chip diode 1210 (3225 metric
     outline(silkscreen, width: 0.12, "M-0.59 -1.71H0.59M-0.59 1.71H0.59")
     outline(silkscreen, width: 0.12, "M-2.41 -1.56V1.56")
     outline(courtyard, width: 0.05, "M-2.65 -1.95H2.65V1.95H-2.65Z")
+    body(height: 0.7)
+    model("MD.CHIP:D1210-HAND")
 }

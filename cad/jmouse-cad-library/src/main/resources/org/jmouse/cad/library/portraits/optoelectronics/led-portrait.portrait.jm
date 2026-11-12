@@ -4,7 +4,7 @@ portrait:led-portrait("LED") {
     meta {
         summary: "A 5 mm LED in the colour of its wavelength, glowing by its current"
         code: "PT.LED:D5"
-        category: circuits
+        category: optoelectronics
         tags: electronics, portrait, light-emitting diode
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

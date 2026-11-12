@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 public class GerberPluginConfiguration {
 
-    /** The set every board house plugin writes its own on. */
+    /** The set every pcb house plugin writes its own on. */
     @Bean
     public GerberSet cadGerberSet() {
         return GerberSet.shipped();

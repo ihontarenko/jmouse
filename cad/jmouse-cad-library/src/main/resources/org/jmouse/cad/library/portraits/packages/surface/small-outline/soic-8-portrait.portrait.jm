@@ -3,7 +3,7 @@ portrait:soic-8-portrait("SOIC-8") {
     meta {
         summary: "8-lead SOIC, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
         code: "PT.SOIC:8-P1.27-W3.9"
-        category: circuits
+        category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MS-012"
         authors: "jMouse"

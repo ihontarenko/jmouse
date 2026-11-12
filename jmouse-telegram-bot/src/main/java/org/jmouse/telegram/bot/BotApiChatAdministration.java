@@ -1,6 +1,6 @@
 package org.jmouse.telegram.bot;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.jmouse.telegram.Capability;
 import org.jmouse.telegram.ChatReference;
 import org.jmouse.telegram.IdentityKind;
@@ -252,7 +252,7 @@ public class BotApiChatAdministration extends BotApiClient implements Administra
         JsonNode topic = call(identity, "createForumTopic", fields);
 
         return new ForumTopic(chat.inChat().inThread(topic.path("message_thread_id").asInt()),
-                              topic.path("name").asText(name));
+                              topic.path("name").asString(name));
     }
 
     @Override
@@ -336,7 +336,7 @@ public class BotApiChatAdministration extends BotApiClient implements Administra
     private static ChatDetails readChat(JsonNode chat) {
         return new ChatDetails(
                 ChatReference.of(chat.path("id").asLong()),
-                chat.path("type").asText(null),
+                chat.path("type").asString(null),
                 textOrNull(chat, "title"),
                 textOrNull(chat, "username"),
                 textOrNull(chat, "description"),
@@ -345,7 +345,7 @@ public class BotApiChatAdministration extends BotApiClient implements Administra
     }
 
     private static ChatMember readMember(JsonNode member) {
-        MemberStatus status = MemberStatus.fromWire(member.path("status").asText());
+        MemberStatus status = MemberStatus.fromWire(member.path("status").asString());
 
         Set<AdministratorRight> rights = EnumSet.noneOf(AdministratorRight.class);
         for (AdministratorRight right : AdministratorRight.values()) {
@@ -381,7 +381,7 @@ public class BotApiChatAdministration extends BotApiClient implements Administra
         Integer memberLimit   = link.hasNonNull("member_limit") ? link.get("member_limit").asInt() : null;
 
         return new InviteLink(
-                link.path("invite_link").asText(),
+                link.path("invite_link").asString(),
                 textOrNull(link, "name"),
                 expireSeconds == 0 ? null : Instant.ofEpochSecond(expireSeconds),
                 memberLimit,
@@ -391,7 +391,7 @@ public class BotApiChatAdministration extends BotApiClient implements Administra
     }
 
     private static String textOrNull(JsonNode node, String field) {
-        return node.hasNonNull(field) ? node.get(field).asText() : null;
+        return node.hasNonNull(field) ? node.get(field).asString() : null;
     }
 
     private static IllegalArgumentException notAnUpload() {

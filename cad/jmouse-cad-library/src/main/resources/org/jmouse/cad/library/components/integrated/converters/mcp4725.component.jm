@@ -10,8 +10,10 @@ component:mcp4725("MCP4725", type: converter) {
         summary: "12-bit DAC on I²C: Vout = Vdd · code / 4096, with power-down loads and an EEPROM for its start-up code"
         source: "Microchip MCP4725 data sheet (DS22039D): fast-mode write C2 C1 = 00, write DAC register 010 and DAC with EEPROM 011, read returns five bytes, power-down loads 1 kΩ / 100 kΩ / 500 kΩ, output impedance 1 Ω typical, EEPROM write 25 ms typical, address 1100 A2 A1 A0, pinout per the SOT-23-6 package"
         package: "SOT-23-6"
-        category: circuits
+        category: converters
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     extends:i2c-target
     use:cmos-hc
@@ -26,6 +28,8 @@ component:mcp4725("MCP4725", type: converter) {
     pin:sda(digital, bidirectional, open-drain, 4, "serial data")
     pin:scl(digital, input, 5, "serial clock")
     pin:a0(digital, input, 6, "address bit A0")
+
+    footprint("FP.SOT23:6")
 
     symbol(box) {
         left([scl, sda, a0])

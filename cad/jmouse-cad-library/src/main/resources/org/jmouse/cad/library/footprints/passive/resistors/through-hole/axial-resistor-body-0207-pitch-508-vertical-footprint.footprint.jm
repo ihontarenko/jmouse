@@ -2,7 +2,7 @@ footprint:axial-resistor-body-0207-pitch-508-vertical-footprint("Axial resistor 
     meta {
         summary: "Axial resistor DIN 0207, body 6.3 × ⌀2.5 mm, stood on end over pin 1, 5.08 mm between its holes"
         code: "FP.AXIAL:R0207-P5.08-V"
-        category: circuits
+        category: resistors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-1 bodies, DIN 44051 size codes"
         authors: "jMouse"
@@ -15,4 +15,6 @@ footprint:axial-resistor-body-0207-pitch-508-vertical-footprint("Axial resistor 
     outline(fabrication, width: 0.1, "M-3.79 0A1.25 1.25 0 1 0 -1.29 0A1.25 1.25 0 1 0 -3.79 0ZM-2.54 0H2.54")
     outline(silkscreen, width: 0.12, "M-3.9 0A1.36 1.36 0 1 0 -1.18 0A1.36 1.36 0 1 0 -3.9 0Z")
     outline(courtyard, width: 0.05, "M-4.4 -1.85H3.95V1.85H-4.4Z")
+    body(height: 6.3)
+    model("MD.AXIAL:R0207-P5.08-V")
 }

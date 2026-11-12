@@ -1,15 +1,17 @@
 package org.jmouse.jdbc.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.Priority;
 import org.jmouse.core.Sorter;
 import org.jmouse.core.chain.Chain;
-import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.InterceptableJdbcExecutor;
-import org.jmouse.jdbc.SQLExecutor;
 import org.jmouse.jdbc.JdbcExecutor;
+import org.jmouse.jdbc.SQLExecutor;
+import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.exception.SQLExceptionTranslator;
 import org.jmouse.jdbc.exception.SQLStateSQLExceptionTranslator;
 import org.jmouse.jdbc.intercept.JdbcCall;
@@ -20,9 +22,6 @@ import org.jmouse.jdbc.intercept.guard.SQLGuardPolicy;
 import org.jmouse.jdbc.intercept.guard.SQLSafetyGuardLink;
 import org.jmouse.jdbc.intercept.link.JdbcCallExecutorLink;
 import org.jmouse.jdbc.intercept.link.JdbcExceptionTranslationLink;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 📦 JDBC executor + interception chain configuration.
@@ -46,10 +45,10 @@ public class JdbcExecutorConfiguration {
      */
     @Bean(scope = BeanScope.PROTOTYPE)
     public Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> jdbcChainBuilder(
-            List<JdbcChainContributor> contributors
+        List<JdbcChainContributor> contributors
     ) {
         Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder = Chain.builder();
-        List<JdbcChainContributor>                               sorted  = new ArrayList<>(contributors);
+        List<JdbcChainContributor> sorted = new ArrayList<>(contributors);
 
         Sorter.sort(sorted);
         sorted = sorted.reversed();
@@ -114,10 +113,11 @@ public class JdbcExecutorConfiguration {
      */
     @Bean
     public JdbcExecutor jdbcExecutor(
-            ConnectionProvider connectionProvider,
-            Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder
+        ConnectionProvider connectionProvider,
+        Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder,
+        org.jmouse.transaction.infrastructure.TransactionContextHolder contextHolder
     ) {
-        JdbcExecutor executor = new SQLExecutor(connectionProvider);
+        JdbcExecutor executor = new SQLExecutor(connectionProvider, contextHolder);
         Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain = JdbcChainFactory.build(builder);
         return new InterceptableJdbcExecutor(executor, chain);
     }
@@ -130,6 +130,7 @@ public class JdbcExecutorConfiguration {
      */
     @Priority(Integer.MIN_VALUE)
     public static class JdbcCallExecutorLinkContributor implements JdbcChainContributor {
+
         @Override
         public void contribute(Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder) {
             builder.addLast(new JdbcCallExecutorLink());
@@ -143,6 +144,7 @@ public class JdbcExecutorConfiguration {
      */
     @Priority(Integer.MIN_VALUE + 1)
     public static class JdbcExceptionTranslationLinkContributor implements JdbcChainContributor {
+
         private final SQLExceptionTranslator translator;
 
         public JdbcExceptionTranslationLinkContributor(SQLExceptionTranslator translator) {
@@ -163,10 +165,10 @@ public class JdbcExecutorConfiguration {
      */
     @Priority(Integer.MAX_VALUE)
     public static class SQLSafetyGuardLinkContributor implements JdbcChainContributor {
+
         @Override
         public void contribute(Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder) {
             builder.addFirst(new SQLSafetyGuardLink(SQLGuardPolicy.strict()));
         }
     }
-
 }

@@ -8,7 +8,7 @@
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
         <version>1.0.1</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencyManagement>
@@ -27,7 +27,7 @@
     <artifactId>jmouse-cad-schematic</artifactId>
     <name>jMouse - CAD Schematic</name>
     <description>jMouse Framework - jmCAD schematic: the documents a part is drawn with — symbols, portraits and frames, living drawings bound to a part's figures — as a module of the jM document language.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-schematic</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-schematic</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-cad-schematic</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-schematic</url>
     </scm>
 
     <properties>

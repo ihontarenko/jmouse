@@ -2,7 +2,7 @@ footprint:qfn-16-exposed-pad-footprint("QFN-16, 3 mm body") {
     meta {
         summary: "16-lead QFN-16, 3 mm body, 0.5 mm pitch, body 3 × 3 mm, exposed pad 1.7 mm"
         code: "FP.QFN:16-P0.5-3-EP1.7"
-        category: circuits
+        category: no-lead
         tags: electronics, footprint, surface
         source: "JEDEC MO-220"
         authors: "jMouse"
@@ -31,4 +31,6 @@ footprint:qfn-16-exposed-pad-footprint("QFN-16, 3 mm body") {
     outline(silkscreen, width: 0.12, "M-1.16 -1.61H-1.61V-1.16M-1.16 1.61H-1.61V1.16M1.16 -1.61H1.61V-1.16M1.16 1.61H1.61V1.16")
     outline(silkscreen, filled, "M-2.735 -0.75A0.3 0.3 0 1 0 -2.135 -0.75A0.3 0.3 0 1 0 -2.735 -0.75Z")
     outline(courtyard, width: 0.05, "M-2.15 -2.15H2.15V2.15H-2.15Z")
+    body(height: 1)
+    model("MD.QFN:16-P0.5-3-EP1.7")
 }

@@ -7,8 +7,10 @@ component:and-gate("AND gate", type: gate) {
         designator: U
         summary: "A two-input AND gate: high only while both inputs are high"
         source: "the gate's function table: Y = A · B"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -20,7 +22,7 @@ component:and-gate("AND gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: and-gate-symbol)
+    symbol(uses: "SY.GATE:AND")
 
     behaviour {
         function level()

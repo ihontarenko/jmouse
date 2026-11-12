@@ -3,15 +3,16 @@ package org.jmouse.web.testing;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.*;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.RequestRoute;
-import org.jmouse.http.HttpMethod;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.InvocationHandler;
-import java.util.*;
 
 /** Minimal stateful servlet exchange for boundary tests, independent from an application container. */
 public final class ServletExchange {
+
     public String method = "GET";
     public final Map<String, List<String>> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public final Map<String, String[]> parameters = new HashMap<>();
@@ -32,7 +33,9 @@ public final class ServletExchange {
                 case "getMethod" -> method;
                 case "getRequestURI", "getServletPath" -> "/";
                 case "getContextPath" -> "";
-                case "getSession" -> session(arguments == null || arguments.length == 0 || Boolean.TRUE.equals(arguments[0]));
+                case "getSession" -> session(
+                    arguments == null || arguments.length == 0 || Boolean.TRUE.equals(arguments[0])
+                );
                 case "changeSessionId" -> {
                     if (session == null) {
                         throw new IllegalStateException("No session");
@@ -41,7 +44,11 @@ public final class ServletExchange {
                     sessionId = UUID.randomUUID().toString();
                     yield sessionId;
                 }
-                case "getHeader" -> headers.getOrDefault(arguments[0], List.of()).stream().findFirst().orElse(null);
+                case "getHeader" -> headers
+                    .getOrDefault(arguments[0], List.of())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
                 case "getHeaders" -> Collections.enumeration(headers.getOrDefault(arguments[0], List.of()));
                 case "getHeaderNames" -> Collections.enumeration(headers.keySet());
                 case "getParameter" -> {
@@ -76,8 +83,10 @@ public final class ServletExchange {
                 default -> defaultValue(call.getReturnType());
             };
         });
-        attributes.put(RequestRoute.REQUEST_ROUTE_ATTRIBUTE,
-                new RequestRoute(HttpMethod.GET, null, null, null, null, Set.of(), request));
+        attributes.put(
+            RequestRoute.REQUEST_ROUTE_ATTRIBUTE,
+            new RequestRoute(HttpMethod.GET, null, null, null, null, Set.of(), request)
+        );
     }
 
     public RequestContext context() {
@@ -110,7 +119,7 @@ public final class ServletExchange {
     }
 
     private static <T> T proxy(Class<T> type, InvocationHandler handler) {
-        return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, handler));
+        return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, handler));
     }
 
     private static Object defaultValue(Class<?> type) {

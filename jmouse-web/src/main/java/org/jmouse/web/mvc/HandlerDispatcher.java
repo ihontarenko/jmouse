@@ -2,311 +2,167 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.EagerBean;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.context.FrameworkFactories;
+import org.jmouse.core.Sorter;
 import org.jmouse.core.WrappedException;
 import org.jmouse.core.proxy.ProxyInvocationException;
 import org.jmouse.core.reflection.ReflectionException;
-import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.multipart.MultipartResolver;
-import org.jmouse.web.http.multipart.SimpleMultipartResolver;
-import org.jmouse.web.mvc.method.ReturnValueHandler;
-import org.jmouse.web.mvc.method.ReturnValueProcessor;
 import org.jmouse.web.http.ExceptionHolder;
 import org.jmouse.web.http.RequestContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jmouse.web.http.multipart.MultipartResolver;
+import org.jmouse.web.http.multipart.SimpleMultipartResolver;
+import org.jmouse.web.mvc.result.HandlerResult;
+import org.jmouse.web.mvc.result.ReturnValueProcessor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * 🧭 Core dispatcher responsible for delegating HTTP requests to appropriate handlers.
- *
- * <p>Initializes and coordinates handler mappings, adapters, and exception resolvers.
- * This is the internal backbone of the MVC framework request processing pipeline.</p>
- *
- * @see HandlerMapping
- * @see ExceptionResolver
- * @see HandlerAdapter
- */
+/** Coordinates mapping, invocation, interceptor completion and one response-processing stage. */
 public class HandlerDispatcher implements InitializingBean, EagerBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HandlerDispatcher.class);
-
-    /**
-     * ⚙️ Framework configuration and fallback factory mechanism.
-     */
     protected FrameworkFactories frameworkProperties = FrameworkFactories.load(FrameworkDispatcher.class);
 
-    /**
-     * List of configured or auto-created {@link ExceptionResolver}s.
-     */
-    private List<ExceptionResolver> exceptionResolvers;
-
-    /**
-     * List of configured or fallback {@link HandlerMapping}s used to match requests to handlers.
-     */
-    private List<HandlerMapping> handlerMappings;
-
-    /**
-     * List of available {@link HandlerAdapter}s to invoke matched handlers.
-     */
-    private List<HandlerAdapter> handlerAdapters;
-
-    /**
-     * List of available {@link ReturnValueHandler}s to handle return value
-     */
-    private List<ReturnValueHandler> returnValueHandlers;
-
-    /**
-     * 📂 Multipart resolver to handle file upload requests.
-     *
-     * <p>Defaults to {@link SimpleMultipartResolver}.</p>
-     */
+    private List<ExceptionResolver> exceptionResolvers = List.of();
+    private List<HandlerMapping> handlerMappings = List.of();
+    private List<HandlerAdapter> handlerAdapters = List.of();
+    private ReturnValueProcessor returnValueProcessor;
     private final MultipartResolver multipartResolver = new SimpleMultipartResolver();
 
-    /**
-     * Initializes return value handlers
-     */
-    private void initReturnValueHandlers(WebBeanContext context) {
-        List<ReturnValueHandler> returnValueHandlers = context.getBeans(ReturnValueHandler.class);
+    public HandlerDispatcher() {}
 
-        if (returnValueHandlers.isEmpty()) {
-            returnValueHandlers = frameworkProperties.createFactories(ReturnValueHandler.class);
-        }
-
-        returnValueHandlers = new ArrayList<>(returnValueHandlers);
-        Sorter.sort(returnValueHandlers);
-
-        this.returnValueHandlers = List.copyOf(returnValueHandlers);
+    /** Programmatic composition uses the same execution path as bean-context discovery. */
+    public HandlerDispatcher(
+        List<HandlerMapping> mappings,
+        List<HandlerAdapter> adapters,
+        List<ExceptionResolver> resolvers,
+        ReturnValueProcessor processor
+    ) {
+        handlerMappings = ordered(mappings);
+        handlerAdapters = ordered(adapters);
+        exceptionResolvers = ordered(resolvers);
+        returnValueProcessor = Objects.requireNonNull(processor, "returnValueProcessor");
     }
 
-    /**
-     * Initializes handler mappings from the given context or fallback factory mechanism.
-     */
-    private void initHandlerMappings(WebBeanContext context) {
-        List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
-
-        if (handlerMappings.isEmpty()) {
-            handlerMappings = frameworkProperties.createFactories(HandlerMapping.class);
-        }
-
-        handlerMappings = new ArrayList<>(handlerMappings);
-        Sorter.sort(handlerMappings);
-
-        this.handlerMappings = List.copyOf(handlerMappings);
-    }
-
-    /**
-     * Initializes exception resolvers from the context or fallback factory.
-     */
-    private void initExceptionResolver(WebBeanContext context) {
-        List<ExceptionResolver> exceptionResolvers = context.getBeans(ExceptionResolver.class);
-
-        if (exceptionResolvers.isEmpty()) {
-            exceptionResolvers = frameworkProperties.createFactories(ExceptionResolver.class);
-        }
-
-        exceptionResolvers = new ArrayList<>(exceptionResolvers);
-        Sorter.sort(exceptionResolvers);
-
-        this.exceptionResolvers = List.copyOf(exceptionResolvers);
-    }
-
-    /**
-     * Initializes handler adapters from the context or fallback factory.
-     */
-    private void initHandlerAdapters(WebBeanContext context) {
-        List<HandlerAdapter> handlerAdapters = context.getBeans(HandlerAdapter.class);
-
-        if (handlerAdapters.isEmpty()) {
-            handlerAdapters = frameworkProperties.createFactories(HandlerAdapter.class);
-        }
-
-        this.handlerAdapters = List.copyOf(handlerAdapters);
-    }
-
-    /**
-     * 🚀 Main entry point for dispatching a request.
-     *
-     * <p>Resolves the handler and invokes the appropriate {@link HandlerAdapter}.
-     * If pre-handle passes, invokes the handler and performs post-handle logic.</p>
-     *
-     * @param request  the incoming HTTP request
-     * @param response the outgoing HTTP response
-     */
     public void dispatch(HttpServletRequest request, HttpServletResponse response) {
-        Exception      dispatchException = null;
-        MappedHandler  handler           = null;
-
+        HttpServletRequest currentRequest = request;
+        MappedHandler handler = null;
         try {
-            request = performMultipart(request);
+            currentRequest = performMultipart(request);
+            RequestContext context = new RequestContext(currentRequest, response);
+            Handler chain = getMappedHandler(currentRequest);
+            handler = Objects.requireNonNull(chain.getHandler(), "Mapped handler is required");
+            if (!chain.preHandle(currentRequest, response)) return;
 
-            Handler handlerContainer = getMappedHandler(request);
-
-            if (handlerContainer != null) {
-                handler = handlerContainer.getHandler();
-                HandlerAdapter adapter = getHandlerAdapter(handler);
-
-                if (handlerContainer.preHandle(request, response)) {
-                    MVCResult result = adapter.handle(request, response, handler);
-                    handlerContainer.postHandle(request, response, result);
-                }
-            }
-        } catch (ReflectionException | ProxyInvocationException | WrappedException wrapped) {
-            dispatchException = (Exception) wrapped.getCause();
-        } catch (Exception exception) {
-            dispatchException = exception;
-        }
-
-        try {
-            if (dispatchException != null) {
-                RequestContext requestContext = new RequestContext(request, response);
-
-                ExceptionHolder.setException(request, dispatchException);
-                MVCResult exceptionResult = processHandlerException(requestContext, handler, dispatchException);
-
-                if (handler != null && exceptionResult.getReturnValue() == null) {
-                    exceptionResult.setReturnType(handler.returnParameter());
-                }
-
-                new ReturnValueProcessor(returnValueHandlers).process(exceptionResult, requestContext);
-            }
-        } catch (Exception exception) {
-            LOGGER.error("HANDLER DISPATCHER FAILED!", exception);
-
-            if (exception instanceof RuntimeException runtimeException) {
-                throw runtimeException;
-            }
+            HandlerResult result = Objects.requireNonNull(
+                getHandlerAdapter(handler).handle(context, handler),
+                "HandlerAdapter must return an explicit outcome"
+            );
+            result = chain.postHandle(currentRequest, response, result);
+            returnValueProcessor.process(result, context);
+        } catch (Exception failure) {
+            resolveFailure(new RequestContext(currentRequest, response), handler, invocationFailure(failure));
         }
     }
 
-    /**
-     * 🔄 Locates the suitable {@link HandlerAdapter} that supports the given handler.
-     *
-     * @param handler the resolved mapped handler
-     * @return the adapter capable of invoking the handler
-     * @throws HandlerMappingException if no adapter supports the handler
-     */
+    private void resolveFailure(RequestContext context, MappedHandler handler, Exception original) {
+        ExceptionHolder.setException(context.request(), original);
+        try {
+            HandlerResult result = processHandlerException(context, handler, original);
+            returnValueProcessor.process(result, context);
+        } catch (Exception resolutionFailure) {
+            if (resolutionFailure != original) resolutionFailure.addSuppressed(original);
+            if (resolutionFailure instanceof RuntimeException runtime) throw runtime;
+            throw new HandlerAdapterException("Handler exception resolution failed", resolutionFailure);
+        }
+    }
+
     protected HandlerAdapter getHandlerAdapter(MappedHandler handler) {
         for (HandlerAdapter adapter : handlerAdapters) {
-            if (adapter.supportsHandler(handler)) {
-                return adapter;
-            }
+            if (adapter.supportsHandler(handler)) return adapter;
         }
-
-        throw new HandlerMappingException("NO HANDLER FOUND!");
+        throw new HandlerAdapterException(
+            "No adapter supports the mapped handler: " + handler.handler().getClass().getName()
+        );
     }
 
-    /**
-     * 🔍 Iterates through all {@link HandlerMapping}s to find a suitable handler.
-     *
-     * @param request the current HTTP request
-     * @return the matching handler, if any
-     * @throws HandlerMappingException if no handler mapping applies
-     */
     protected Handler getMappedHandler(HttpServletRequest request) {
         for (HandlerMapping mapping : handlerMappings) {
             Handler handler = mapping.getHandler(request);
-            if (handler != null) {
-                return handler;
-            }
+            if (handler != null) return handler;
         }
-
-        throw new HandlerMappingException("NO MAPPING FOUND!");
+        throw new NotFoundException("No handler mapping found");
     }
 
-    /**
-     * 📛 Find a suitable {@link ExceptionResolver} for the given exception.
-     *
-     * @param exception the thrown exception
-     * @return matching {@link ExceptionResolver}, or {@code null} if none found
-     */
-    protected ExceptionResolver getExceptionResolver(Exception exception) {
-        ExceptionResolver exceptionResolver = null;
-
+    protected HandlerResult processHandlerException(
+        RequestContext context,
+        MappedHandler handler,
+        Exception failure
+    ) throws Exception {
+        if (context.response().isCommitted()) throw failure;
+        context.response().resetBuffer();
         for (ExceptionResolver resolver : exceptionResolvers) {
-            if (resolver.supportsException(exception)) {
-                exceptionResolver = resolver;
-                break;
-            }
+            if (!resolver.supportsException(failure)) continue;
+            Optional<HandlerResult> result = Objects.requireNonNull(
+                resolver.resolveException(context, handler, failure),
+                "ExceptionResolver must explicitly resolve or decline"
+            );
+            if (result.isPresent()) return result.get();
         }
-
-        return exceptionResolver;
+        throw failure;
     }
 
-    /**
-     * ⚠️ Processes a thrown exception during handler execution.
-     *
-     * Delegates to a matching {@link ExceptionResolver} if available.
-     * Re-throws the original exception if not resolved.
-     *
-     * @param requestContext the current request context
-     * @param mappedHandler  the handler involved in the request
-     * @param exception      the exception that occurred
-     * @throws Exception rethrows the original exception if not handled
-     */
-    protected MVCResult processHandlerException(
-            RequestContext requestContext, MappedHandler mappedHandler, Exception exception) throws Exception {
-        HttpServletResponse servletResponse   = requestContext.response();
-        ExceptionResolver   exceptionResolver = getExceptionResolver(exception);
-
-        try {
-            servletResponse.resetBuffer();
-        } catch (IllegalStateException ignore) {
-            // response already commited
-        }
-
-        if (exceptionResolver != null) {
-            return exceptionResolver.resolveException(requestContext, mappedHandler, exception);
-        }
-
-        throw exception;
-    }
-
-    /**
-     * 📂 Wrap request into a multipart-capable request if needed.
-     *
-     * <ul>
-     *   <li>Checks whether the request is multipart via {@link MultipartResolver}.</li>
-     *   <li>If yes — delegates to {@link MultipartResolver#wrapRequest}.</li>
-     *   <li>Otherwise returns the original request.</li>
-     * </ul>
-     *
-     * @param request incoming HTTP request
-     * @return multipart-enabled request or the original one
-     */
     protected HttpServletRequest performMultipart(HttpServletRequest request) {
-        HttpServletRequest multipartRequest = request;
-
-        if (multipartResolver.isMultipart(request)) {
-            multipartRequest = multipartResolver.wrapRequest(request);
-        }
-
-        return multipartRequest;
+        return multipartResolver.isMultipart(request) ? multipartResolver.wrapRequest(request) : request;
     }
 
-    /**
-     * 🧱 Lifecycle hook from {@link InitializingBean} to trigger initialization.
-     */
+    private static Exception invocationFailure(Exception failure) {
+        Throwable cause = failure;
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        while (isInvocationWrapper(cause) && cause.getCause() != null && visited.add(cause)) {
+            cause = cause.getCause();
+        }
+        if (cause instanceof Error error) throw error;
+        return cause instanceof Exception exception
+            ? exception
+            : new HandlerAdapterException("Handler invocation failed", cause);
+    }
+
+    private static boolean isInvocationWrapper(Throwable failure) {
+        return (
+            failure instanceof ReflectionException ||
+            failure instanceof ProxyInvocationException ||
+            failure instanceof WrappedException
+        );
+    }
+
     @Override
     public void afterCompletion(BeanContext context) {
         initialize((WebBeanContext) context);
     }
 
-    /**
-     * 🏗️ Initializes this dispatcher with context-aware components.
-     *
-     * @param context the web bean context
-     */
     public void initialize(WebBeanContext context) {
-        initHandlerMappings(context);
-        initExceptionResolver(context);
-        initHandlerAdapters(context);
-        initReturnValueHandlers(context);
+        handlerMappings = components(HandlerMapping.class, context);
+        handlerAdapters = components(HandlerAdapter.class, context);
+        exceptionResolvers = components(ExceptionResolver.class, context);
+        returnValueProcessor = context.getBean(ReturnValueProcessor.class);
+    }
+
+    private <T> List<T> components(Class<T> type, WebBeanContext context) {
+        List<T> components = context.getBeans(type);
+        return ordered(components.isEmpty() ? frameworkProperties.createFactories(type) : components);
+    }
+
+    private static <T> List<T> ordered(List<T> components) {
+        var ordered = new ArrayList<>(components);
+        Sorter.sort(ordered);
+        return List.copyOf(ordered);
     }
 }

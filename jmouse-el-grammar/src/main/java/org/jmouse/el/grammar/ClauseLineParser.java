@@ -24,9 +24,9 @@ import java.util.Set;
  */
 public class ClauseLineParser implements LineReader {
 
-    /** How a line is read: a line of its own, the clauses after a nested clause's word, or the head of a block. */
+    /** How a line is read: a line of its own, or the clauses after a nested clause's word. */
     private enum Reading {
-        LINE, NESTED, HEADER
+        LINE, NESTED
     }
 
     private final LineGrammar grammar;
@@ -98,23 +98,21 @@ public class ClauseLineParser implements LineReader {
         return grammar.isNamed() ? "a line opening with its name" : grammar.word();
     }
 
+    /**
+     * A line written as words: only one its grammar keeps as written, mathematics; any other line is written as a term,
+     * and its words are refused with the term it is.
+     */
     @Override
     public ClauseLineNode read(TokenCursor cursor, ParserContext context) {
+        if (!grammar.asWritten()) {
+            throw GrammarRefusal.here(cursor, "a line is written as a term: " + grammar.shape());
+        }
         List<String> prefixes = new ArrayList<>();
         for (int count = grammar.prefixesAt(cursor); count > 0; count--) {
             prefixes.add(cursor.next().value());
         }
         Token first = grammar.isNamed() ? cursor.current() : cursor.next();
         return read(grammar, Reading.LINE, prefixes, cursor, context, first, Set.of());
-    }
-
-    /**
-     * What stands after a block's word, before its body: {@code "title" from "source"}, {@code uses one, other}.
-     *
-     * @param prefixes the words written before the block's word: {@code live} of {@code live glyph …}
-     */
-    public ClauseLineNode header(TokenCursor cursor, ParserContext context, Token word, List<String> prefixes) {
-        return read(grammar, Reading.HEADER, prefixes, cursor, context, word, Set.of());
     }
 
     /**

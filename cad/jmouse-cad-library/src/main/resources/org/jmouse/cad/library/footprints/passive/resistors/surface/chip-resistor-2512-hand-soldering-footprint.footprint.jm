@@ -2,7 +2,7 @@ footprint:chip-resistor-2512-hand-soldering-footprint("Chip resistor 2512 (6332 
     meta {
         summary: "Chip resistor, 2512 (6332 metric) body, pads lengthened for a soldering iron"
         code: "FP.CHIP:R2512-HAND"
-        category: circuits
+        category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 2512 (6332 metric)"
         authors: "jMouse"
@@ -16,4 +16,6 @@ footprint:chip-resistor-2512-hand-soldering-footprint("Chip resistor 2512 (6332 
     outline(fabrication, width: 0.1, "M-3.175 -1.6H3.175V1.6H-3.175Z")
     outline(silkscreen, width: 0.12, "M-2.14 -2.01H2.14M-2.14 2.01H2.14")
     outline(courtyard, width: 0.05, "M-4.3 -2.25H4.3V2.25H-4.3Z")
+    body(height: 0.7)
+    model("MD.CHIP:R2512-HAND")
 }

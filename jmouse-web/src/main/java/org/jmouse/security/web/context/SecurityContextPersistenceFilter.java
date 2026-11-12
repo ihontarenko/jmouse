@@ -2,14 +2,13 @@ package org.jmouse.security.web.context;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import java.io.IOException;
 import org.jmouse.security.SecurityContext;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.web.session.SessionPersistenceResponseWrapper;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.RequestContextKeeper;
 import org.jmouse.web.servlet.filter.BeanFilter;
-
-import java.io.IOException;
 
 /** Loads request authentication and always clears thread state, including repository failures. */
 public class SecurityContextPersistenceFilter implements BeanFilter {
@@ -22,7 +21,7 @@ public class SecurityContextPersistenceFilter implements BeanFilter {
 
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         RequestContextKeeper keeper = RequestContextKeeper.ofRequestContext(requestContext);
         boolean loaded = false;
         Throwable failure = null;

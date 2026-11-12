@@ -10,7 +10,9 @@ component:lcd-driver("LCD driver", type: controller) {
         designator: BUS
         summary: "Drives an HD44780 LCD on an 8-bit bus: initializes it, writes a line, and counts updates on the second"
         source: "Hitachi HD44780U data sheet (ADE-207-272(Z)): instruction table 6, bus write timing (E pulse 230 ns minimum, data latched on its falling edge), execution times at 270 kHz"
-        category: circuits
+        category: instruments
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 

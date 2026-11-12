@@ -2,13 +2,18 @@ package org.jmouse.cad.spring.autoconfigure;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import org.jmouse.cad.jpa.catalogue.CategoryStore;
-import org.jmouse.cad.jpa.catalogue.DocumentStore;
+import org.jmouse.cad.jpa.mount.MountedFolderRecords;
+import org.jmouse.cad.jpa.plugin.PluginSettingRecords;
+import org.jmouse.cad.store.plugin.CadPluginSettingStore;
+import org.jmouse.plugin.PluginSettingStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+
+
+import java.time.Clock;
 
 /**
  * 🗃️ The jmCAD stores, over the application's own persistence unit.
@@ -32,31 +37,31 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
  * }</pre>
  */
 @AutoConfiguration
-@ConditionalOnClass({EntityManagerFactory.class, SharedEntityManagerCreator.class, DocumentStore.class})
+@ConditionalOnClass({EntityManagerFactory.class, SharedEntityManagerCreator.class})
 public class CadJpaAutoConfiguration {
 
     /**
-     * 📚 The documents and every revision of their texts.
+     * 🎚️ Where the values the engine's plugins' settings were changed to are kept, installation-wide.
      *
      * @param entityManagerFactory the application's persistence unit
      * @return the store
      */
     @Bean
-    @ConditionalOnMissingBean
-    public DocumentStore cadDocumentStore(EntityManagerFactory entityManagerFactory) {
-        return new DocumentStore(sharedEntityManager(entityManagerFactory));
+    @ConditionalOnMissingBean(PluginSettingStore.class)
+    public PluginSettingStore cadPluginSettingStore(EntityManagerFactory entityManagerFactory) {
+        return new CadPluginSettingStore(new PluginSettingRecords(sharedEntityManager(entityManagerFactory), Clock.systemUTC()));
     }
 
     /**
-     * 🗂️ The catalogue's sections.
+     * 📁 The folders of the server a curator mounted, opened by an explorer.
      *
      * @param entityManagerFactory the application's persistence unit
      * @return the store
      */
     @Bean
     @ConditionalOnMissingBean
-    public CategoryStore cadCategoryStore(EntityManagerFactory entityManagerFactory) {
-        return new CategoryStore(sharedEntityManager(entityManagerFactory));
+    public MountedFolderRecords cadMountedFolderRecords(EntityManagerFactory entityManagerFactory) {
+        return new MountedFolderRecords(sharedEntityManager(entityManagerFactory));
     }
 
     private static EntityManager sharedEntityManager(EntityManagerFactory entityManagerFactory) {

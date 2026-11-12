@@ -7,8 +7,10 @@ component:or-gate("OR gate", type: gate) {
         designator: U
         summary: "A two-input OR gate: high while either input is high"
         source: "the gate's function table: Y = A + B"
-        category: circuits
+        category: base-models
         failure: short Vcc GND
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:cmos-hc
 
@@ -20,7 +22,7 @@ component:or-gate("OR gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: or-gate-symbol)
+    symbol(uses: "SY.GATE:OR")
 
     behaviour {
         function level()

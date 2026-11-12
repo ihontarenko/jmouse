@@ -1,0 +1,38 @@
+# Generated from footprint-standards/dual-inline-packages.sht#slide-switch-1; regenerate, never edit.
+portrait:slide-switch-2-9-78mm-portrait("SLIDE-SWITCH-2, 9-78mm") {
+    meta {
+        summary: "2-lead Slide switch, 1 position from above: pin 1 at the bottom left, beside the notch and dot"
+        code: "PT.SW:SLIDE-1"
+        category: switches-through-hole
+        tags: electronics, portrait, package, through-hole
+        source: "a one-position DIP slide switch (CTS 206/208 series): body 9.78 × 4.72 mm, rows 7.62 mm apart"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(38 x 120)
+    input:marking(text)
+
+    path:leads("M-3.937 38.504H3.937V30H-3.937ZM-1.969 30H1.969V60H-1.969ZM-3.937 -38.504H3.937V-30H-3.937ZM-1.969 -30H1.969V-60H-1.969Z") {
+        stroke = clear
+        fill = silver
+    }
+    pin:1(at: 0 60)
+    pin:2(at: 0 -60)
+    path:body("M-17.096 -38.504H17.096A1.487 1.487 0 0 1 18.583 -37.017V37.017A1.487 1.487 0 0 1 17.096 38.504H-17.096A1.487 1.487 0 0 1 -18.583 37.017V-37.017A1.487 1.487 0 0 1 -17.096 -38.504Z") {
+        fill = black
+    }
+    path:notch("M-18.583 -9.241A9.241 9.241 0 0 1 -18.583 9.241Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    path:pin_one_dot("M-10.574 25.49A5.006 5.006 0 1 0 -0.563 25.49A5.006 5.006 0 1 0 -10.574 25.49Z") {
+        stroke = clear
+        fill = grey
+        opacity = 0.6
+    }
+    glyph:printed_marking(at: 0 0, size: 26.016 x 17.327) {
+        fill = silver
+        text = marking
+    }
+}

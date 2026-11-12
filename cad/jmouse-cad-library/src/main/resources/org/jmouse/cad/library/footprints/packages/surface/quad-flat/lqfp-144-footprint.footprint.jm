@@ -2,7 +2,7 @@ footprint:lqfp-144-footprint("LQFP-144, 20 mm body") {
     meta {
         summary: "144-lead LQFP-144, 20 mm body, 0.5 mm pitch, body 20 × 20 mm"
         code: "FP.LQFP:144-P0.5-20"
-        category: circuits
+        category: quad-flat
         tags: electronics, footprint, surface
         source: "JEDEC MS-026 BFB"
         authors: "jMouse"
@@ -158,4 +158,6 @@ footprint:lqfp-144-footprint("LQFP-144, 20 mm body") {
     outline(silkscreen, width: 0.12, "M-9.16 -10.11H-10.11V-9.16M-9.16 10.11H-10.11V9.16M9.16 -10.11H10.11V-9.16M9.16 10.11H10.11V9.16")
     outline(silkscreen, filled, "M-12.335 -8.75A0.3 0.3 0 1 0 -11.735 -8.75A0.3 0.3 0 1 0 -12.335 -8.75Z")
     outline(courtyard, width: 0.05, "M-11.75 -11.75H11.75V11.75H-11.75Z")
+    body(height: 1.6)
+    model("MD.LQFP:144-P0.5-20")
 }

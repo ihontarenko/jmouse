@@ -2,6 +2,9 @@ package org.jmouse.web.mvc.resource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.MediaTypeFactory;
 import org.jmouse.core.Streamable;
@@ -10,16 +13,12 @@ import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceSegment;
 import org.jmouse.http.*;
 import org.jmouse.web.http.*;
+import org.jmouse.web.http.converter.*;
 import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
-import org.jmouse.web.mvc.method.converter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 🗂️ HTTP handler for serving static {@link Resource}s.
@@ -45,7 +44,7 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
     /**
      * 📋 Registration containing patterns, locations, chain and cache settings.
      */
-    private final ResourceRegistration         registration;
+    private final ResourceRegistration registration;
 
     /**
      * 🔎 Loader to resolve location strings into {@link Resource}s (classpath/file, etc.).
@@ -55,12 +54,12 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
     /**
      * 🔁 Finds an {@link HttpMessageConverter} that can write the resolved resource.
      */
-    private final MessageConverterManager      messageConverterManager;
+    private final MessageConverterManager messageConverterManager;
 
     /**
      * 🏭 Determines response {@link MediaType} based on resource name/extension.
      */
-    private final MediaTypeFactory             mediaTypeFactory;
+    private final MediaTypeFactory mediaTypeFactory;
 
     /**
      * Controls emission of the {@code Last-Modified} response header when a valid timestamp is available.
@@ -88,10 +87,10 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * @param mediaTypeFactory        factory for media type lookups
      */
     public ResourceHttpHandler(
-            ResourceRegistration registration,
-            PatternMatcherResourceLoader resourceLoader,
-            MessageConverterManager messageConverterManager,
-            MediaTypeFactory mediaTypeFactory
+        ResourceRegistration registration,
+        PatternMatcherResourceLoader resourceLoader,
+        MessageConverterManager messageConverterManager,
+        MediaTypeFactory mediaTypeFactory
     ) {
         this.registration = registration;
         this.resourceLoader = resourceLoader;
@@ -123,16 +122,17 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ResourceResolverChain chain           = getResolverChain(registration.getChainRegistration().getResolvers());
-        ResourceQuery         query           = getResourceQuery(request, registration.getLocations());
-        Resource   resource       = chain.resolve(request, query);
-        Headers    requestHeaders = RequestAttributesHolder.getRequestHeaders().headers();
-        HttpMethod httpMethod     = requestHeaders.getMethod();
-        Headers               responseHeaders = getHeaders();
+        ResourceResolverChain chain = getResolverChain(registration.getChainRegistration().getResolvers());
+        ResourceQuery query = getResourceQuery(request, registration.getLocations());
+        Resource resource = chain.resolve(request, query);
+        Headers requestHeaders = RequestAttributesHolder.getRequestHeaders().headers();
+        HttpMethod httpMethod = requestHeaders.getMethod();
+        Headers responseHeaders = getHeaders();
 
         if (resource == null || !resource.isReadable()) {
             throw new ResourceNotFoundException(
-                    "RESOURCE NOT FOUND! URI: " + RequestAttributesHolder.getRequestPath().path());
+                "RESOURCE NOT FOUND! URI: " + RequestAttributesHolder.getRequestPath().path()
+            );
         }
 
         if (maybeHandleOptions(httpMethod, response)) {
@@ -141,10 +141,10 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
 
         checkRequest(httpMethod, false);
 
-        ETag                etag            = getGeneratedETag(resource);
+        ETag etag = getGeneratedETag(resource);
         HttpExchangeSupport exchangeSupport = new HttpExchangeSupport(requestHeaders, responseHeaders);
-        long                modified        = isUseLastModified() ? resource.getLastModified() : -1;
-        boolean             notModified     = exchangeSupport.checkNotModified(etag, modified);
+        long modified = isUseLastModified() ? resource.getLastModified() : -1;
+        boolean notModified = exchangeSupport.checkNotModified(etag, modified);
 
         prepareResponse();
 
@@ -154,8 +154,8 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
             return;
         }
 
-        HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
-        Headers           messageHeaders = httpMessage.getHeaders();
+        HttpOutputMessage httpMessage = new ServletHttpOutputMessage(response);
+        Headers messageHeaders = httpMessage.getHeaders();
 
         writeHeaders(messageHeaders, resource);
         writeMessage(httpMessage, resource, request);
@@ -172,10 +172,12 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * @param resource resolved resource to write
      */
     private void writeMessage(HttpOutputMessage httpMessage, Resource resource, HttpServletRequest request) {
-        Object                       writable         = resource;
-        List<Range>                  ranges           = null;
-        HttpMessageConverter<Object> messageConverter = messageConverterManager
-                .getMessageConverter(writable, null);
+        Object writable = resource;
+        List<Range> ranges = null;
+        HttpMessageConverter<Object> messageConverter = messageConverterManager.getMessageConverter(
+            writable,
+            httpMessage.getHeaders().getContentType().toString()
+        );
 
         if (request instanceof WebHttpRequest webHttpRequest) {
             ranges = webHttpRequest.getHeaders().getRange();
@@ -185,13 +187,14 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
             List<ResourceSegment> segments = getResourceSegments(ranges, resource);
 
             if (segments != null && !segments.isEmpty()) {
-                messageConverter = messageConverterManager
-                        .getMessageConverter(segments.getFirst(), null);
+                messageConverter = messageConverterManager.getMessageConverter(segments.getFirst(), null);
                 if (messageConverter != null) {
                     writable = segments;
                 }
             }
-        } else if (request instanceof WebRequest webRequest && webRequest.getHttpMethod() == HttpMethod.HEAD) {
+        } else if (
+            request instanceof WebRequest webRequest && webRequest.getHttpMethod() == HttpMethod.HEAD
+        ) {
             if (messageConverter instanceof AbstractHttpMessageConverter<Object> httpMessageConverter) {
                 MediaType mediaType = mediaTypeFactory.getMediaType(resource.getName());
                 httpMessageConverter.writeDefaultHeaders(httpMessage, writable, mediaType);
@@ -231,8 +234,10 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
         headers.setContentType(mediaType);
 
         if (resource instanceof HttpResource httpResource) {
-            httpResource.getHeaders().asMap().forEach(
-                    (httpHeader, value) -> headers.setHeader(httpHeader, String.valueOf(value)));
+            httpResource
+                .getHeaders()
+                .asMap()
+                .forEach((httpHeader, value) -> headers.setHeader(httpHeader, String.valueOf(value)));
         }
 
         headers.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");
@@ -287,7 +292,7 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      */
     private String getResourcePath(HttpServletRequest request) {
         String resourcePath = "";
-        String queryString  = request.getQueryString();
+        String queryString = request.getQueryString();
 
         if (request.getAttribute(HandlerMapping.ROUTE_MATCH_ATTRIBUTE) instanceof RouteMatch match) {
             resourcePath = match.extracted();
@@ -386,5 +391,4 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
     public void setGenerator(ETagGenerator generator) {
         this.generator = generator;
     }
-
 }

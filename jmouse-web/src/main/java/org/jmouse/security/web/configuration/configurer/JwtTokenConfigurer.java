@@ -1,7 +1,10 @@
 package org.jmouse.security.web.configuration.configurer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
+import java.time.Clock;
+import org.jmouse.core.Customizer;
+import org.jmouse.http.WWWAuthenticate.Bearer.ErrorCode;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.authentication.AuthenticationResolverRegistry;
 import org.jmouse.security.authentication.jwt.JwtTokenAuthenticationResolver;
@@ -11,21 +14,20 @@ import org.jmouse.security.jwt.codec.RS256JwtCodec;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.jwt.JwtAuthenticationFilter;
-import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.jwt.JacksonJsonMapper;
-import org.jmouse.http.WWWAuthenticate.Bearer.ErrorCode;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
-import java.time.Clock;
+public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<
+    B,
+    JwtTokenConfigurer<B>
+> {
 
-public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
-        extends AbstractAuthenticationConfigurer<B, JwtTokenConfigurer<B>> {
-
-    private final EntryPointConfigurer                  entryPointConfigurer = new EntryPointConfigurer();
-    private final AbstractRealmAuthenticationEntryPoint entryPoint           = new BearerTokenAuthenticationEntryPoint();
-    private final CodecConfigurer                       jwtCodecConfigurer   = new CodecConfigurer();
+    private final EntryPointConfigurer entryPointConfigurer = new EntryPointConfigurer();
+    private final AbstractRealmAuthenticationEntryPoint entryPoint =
+        new BearerTokenAuthenticationEntryPoint();
+    private final CodecConfigurer jwtCodecConfigurer = new CodecConfigurer();
 
     public JwtTokenConfigurer<B> entryPoint(Customizer<EntryPointConfigurer> customizer) {
         customizer.customize(entryPointConfigurer);
@@ -53,11 +55,11 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
 
     @Override
     protected Filter doBuildFilter(
-            AuthenticationManager authenticationManager,
-            SecurityContextRepository repository,
-            MatcherCriteria matcherCriteria,
-            AuthenticationSuccessHandler successHandler,
-            AuthenticationFailureHandler failureHandler
+        AuthenticationManager authenticationManager,
+        SecurityContextRepository repository,
+        MatcherCriteria matcherCriteria,
+        AuthenticationSuccessHandler successHandler,
+        AuthenticationFailureHandler failureHandler
     ) {
         if (entryPoint instanceof BearerTokenAuthenticationEntryPoint bearerEntryPoint) {
             bearerEntryPoint.setRealmName(entryPointConfigurer.realmName());
@@ -73,23 +75,26 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
             }
 
             if (!resolverRegistry.hasResolver(JwtTokenAuthenticationResolver.class)) {
-                resolverRegistry.addResolver(new JwtTokenAuthenticationResolver(
-                        jwtCodecConfigurer.codec()
-                ));
+                resolverRegistry.addResolver(new JwtTokenAuthenticationResolver(jwtCodecConfigurer.codec()));
             }
         }
 
-        AuthenticationFailureHandler failure = failureHandler != null
-                ? failureHandler : entryPoint::initiate;
-        AuthenticationSuccessHandler success = successHandler != null
-                ? successHandler : new NoopHttp200SuccessHandler();
+        AuthenticationFailureHandler failure = failureHandler != null ? failureHandler : entryPoint::initiate;
+        AuthenticationSuccessHandler success =
+            successHandler != null ? successHandler : new NoopHttp200SuccessHandler();
 
-        return new JwtAuthenticationFilter(authenticationManager, repository, matcherCriteria, success, failure);
+        return new JwtAuthenticationFilter(
+            authenticationManager,
+            repository,
+            matcherCriteria,
+            success,
+            failure
+        );
     }
 
     public static class CodecConfigurer {
 
-        private JwtCodec             codec;
+        private JwtCodec codec;
         private JwtCodec.AdapterJson adapter = new JacksonJsonMapper(new ObjectMapper());
 
         public JwtCodec codec() {
@@ -115,29 +120,29 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         public CodecConfigurer rs256(Customizer<Rs256JwtCodecConfigurer> customizer) {
             Rs256JwtCodecConfigurer configurer = new Rs256JwtCodecConfigurer();
             customizer.customize(configurer);
-//            this.codec = configurer.build();
+            //            this.codec = configurer.build();
             return this;
         }
 
         public CodecConfigurer ed25519(Customizer<EdDSAJwtCodecConfigurer> customizer) {
             EdDSAJwtCodecConfigurer configurer = new EdDSAJwtCodecConfigurer();
             customizer.customize(configurer);
-//            this.codec = configurer.build();
+            //            this.codec = configurer.build();
             return this;
         }
 
         public CodecConfigurer es256(Customizer<Es256JwtCodecConfigurer> customizer) {
             Es256JwtCodecConfigurer configurer = new Es256JwtCodecConfigurer();
             customizer.customize(configurer);
-//            this.codec = configurer.build();
+            //            this.codec = configurer.build();
             return this;
         }
 
         public class Hs256JwtCodecConfigurer {
 
             private byte[] secret;
-            private long   skew;
-            private Clock  clock;
+            private long skew;
+            private Clock clock;
 
             public Hs256JwtCodecConfigurer secret(String secret) {
                 return secret(secret.getBytes());
@@ -161,7 +166,6 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
             public JwtCodec build() {
                 return new HS256JwtCodec(CodecConfigurer.this.adapter, secret, clock, skew);
             }
-
         }
 
         public class Rs256JwtCodecConfigurer {
@@ -169,7 +173,6 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
             public JwtCodec build() {
                 return new RS256JwtCodec(CodecConfigurer.this.adapter, null, null);
             }
-
         }
 
         public class EdDSAJwtCodecConfigurer {
@@ -179,14 +182,12 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         public class Es256JwtCodecConfigurer {
             // todo: not implemented yet
         }
-
     }
-
 
     public static class EntryPointConfigurer {
 
-        private String    realmName;
-        private String    errorDescription;
+        private String realmName;
+        private String errorDescription;
         private ErrorCode errorCode;
 
         public String realmName() {
@@ -215,7 +216,5 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
             this.errorCode = errorCode;
             return this;
         }
-
     }
-
 }

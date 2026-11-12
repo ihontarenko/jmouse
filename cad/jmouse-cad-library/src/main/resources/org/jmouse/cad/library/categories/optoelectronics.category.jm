@@ -1,0 +1,8 @@
+category:optoelectronics("Optoelectronics") {
+    meta {
+        category: semiconductors
+        order: 3
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

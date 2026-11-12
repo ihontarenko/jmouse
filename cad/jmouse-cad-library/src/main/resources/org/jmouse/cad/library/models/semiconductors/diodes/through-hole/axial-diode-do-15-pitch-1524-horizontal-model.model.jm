@@ -1,0 +1,17 @@
+model:axial-diode-do-15-pitch-1524-horizontal-model("Axial diode DO-15 (DO-204AC), horizontal, 15.24 mm") {
+    meta {
+        summary: "Axial diode DO-15 (DO-204AC), horizontal, 15.24 mm — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.AXIAL:DO-15-P15.24-H"
+        category: diodes-through-hole
+        tags: electronics, model, axial
+        source: "JEDEC DO-204 outlines"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    revolved(plastic, profile: [0, -3.8, 1.35, -3.8, 1.8, -3.35, 1.8, 3.35, 1.35, 3.8, 0, 3.8], at: [0, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(marking, radius: 1.81, length: 0.912, at: [-2.432, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.385, length: 3.82, at: [-5.71, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.385, length: 3.4, at: [-7.62, 0, 0.1])
+    cylinder(tin, radius: 0.385, length: 3.82, at: [5.71, 0, 1.8], rotate: [0, 90, 0])
+    cylinder(tin, radius: 0.385, length: 3.4, at: [7.62, 0, 0.1])
+}

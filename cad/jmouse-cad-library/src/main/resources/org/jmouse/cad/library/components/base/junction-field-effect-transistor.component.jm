@@ -17,8 +17,10 @@ component:junction-field-effect-transistor("Junction FET", type: jfet) {
         designator: J
         summary: "JFET level 1: square-law channel, channel-length modulation, gate junctions and their capacitances"
         source: "JFET level 1 as in Berkeley SPICE3 / ngspice 47; defaults are that model's"
-        category: circuits
+        category: base-models
         failure: open
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
     use:[smooth-transitions, junctions]
 
@@ -49,12 +51,12 @@ component:junction-field-effect-transistor("Junction FET", type: jfet) {
 
     pin:source(analog, 1, "source")
     pin:gate(analog, input, 2, "gate")
-    pin:drain(analog, output, 3, "drain")
+    pin:drain(analog, output, open-drain, 3, "drain")
 
     node:di("the intrinsic drain, behind the drain resistance")
     node:si("the intrinsic source, behind the source resistance")
 
-    symbol(uses: n-channel-jfet-symbol) {
+    symbol(uses: "SY.TRANSISTOR:JFET-N") {
         bind:failed(failed)
     }
 

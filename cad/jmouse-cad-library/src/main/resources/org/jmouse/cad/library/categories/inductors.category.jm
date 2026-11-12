@@ -1,0 +1,8 @@
+category:inductors("Inductors") {
+    meta {
+        category: passive
+        order: 2
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

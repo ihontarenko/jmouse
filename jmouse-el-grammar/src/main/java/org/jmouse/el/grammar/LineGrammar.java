@@ -21,7 +21,6 @@ import java.util.function.BiFunction;
  * @param clauses     what follows, each once unless repeatable, in any order
  * @param ending      whether a text in quotes may end the line, and what it is
  * @param endingValue what that text holds: words ({@link Values#TEXT}), or a kind of a language's own
- * @param shape       the line as an author writes it, said in a refusal
  * @param check       a refusal the line's values earn beyond its grammar — a custom pad's outline, a range's order —, or
  *                    null; given the line and its grammar, it answers the refusal's words or null
  * @param term        the word a term writes a line that opens with a name under — {@code pin:out(…)} —; a line that
@@ -33,7 +32,7 @@ import java.util.function.BiFunction;
  *                    {@code animate opacity = …}; a term writes them as flags
  */
 public record LineGrammar(String word, List<Slot> slots, List<Clause> clauses, String ending, ValueKind endingValue,
-                          String shape, BiFunction<ClauseLineNode, LineGrammar, String> check, String term,
+                          BiFunction<ClauseLineNode, LineGrammar, String> check, String term,
                           String termName, boolean asWritten, Set<String> prefixes) {
 
     /**
@@ -96,6 +95,61 @@ public record LineGrammar(String word, List<Slot> slots, List<Clause> clauses, S
     /** The word a term writes the line under: the one it was given for terms, else its own word. */
     public String termWord() {
         return term != null ? term : word;
+    }
+
+    /**
+     * The word a term names a slot's value by — {@code to:} of {@code wire:W1(a, to: b)} —, or null for a slot a term
+     * writes in its place, by position. A slot marked by the term's own head word stands by position: the head says it.
+     */
+    public String termArgumentName(Slot slot) {
+        boolean headMarked = slot.mark() != null && slot.mark().equals(termWord());
+        return headMarked ? slot.termWord() : slot.namedBy();
+    }
+
+    /**
+     * The line as an author writes it — said in a refusal and in an editor's help —, derived from the grammar: a term,
+     * {@code part:name(component, [pins], value: …)}, or, for mathematics written as it is, its words. Nothing else says
+     * how a line is written, so it cannot say it otherwise than the language reads it.
+     */
+    public String shape() {
+        return asWritten ? writtenShape() : termShape();
+    }
+
+    private String termShape() {
+        List<String> arguments = new ArrayList<>();
+        prefixes.stream().sorted().forEach(prefix -> arguments.add("[" + prefix + "]"));
+        for (Slot slot : slots) {
+            if (slot.role().equals(termName)) {
+                continue;
+            }
+            String named = termArgumentName(slot);
+            String written = named == null ? slot.role() : named + ": " + slot.role();
+            arguments.add(slot.optional() ? "[" + written + "]" : written);
+        }
+        for (Clause clause : clauses) {
+            String written = clause.isNested() ? clause.nested().termShape().replaceFirst("^[^(]*", clause.word())
+                    : clause.value() == Values.FLAG ? clause.word() : clause.word() + ": …";
+            arguments.add(clause.required() ? written : "[" + written + "]");
+        }
+        if (ending != null) {
+            arguments.add("[\"" + ending + "\"]");
+        }
+        String head = termWord() + (termName == null ? "" : ":" + termName);
+        return arguments.isEmpty() ? head : head + "(" + String.join(", ", arguments) + ")";
+    }
+
+    private String writtenShape() {
+        List<String> words = new ArrayList<>();
+        prefixes.stream().sorted().forEach(prefix -> words.add("[" + prefix + "]"));
+        if (word != null) {
+            words.add(word);
+        }
+        slots.forEach(slot -> words.add(slot.optional() ? "[" + slot.role() + "]" : slot.role()));
+        clauses.forEach(clause -> words.add(clause.required() ? clause.word() + " …" : "[" + clause.word() + " …]"));
+        if (ending != null) {
+            words.add("[\"" + ending + "\"]");
+        }
+        return String.join(" ", words);
     }
 
     /** Whether the line opens with a name rather than a word of the grammar. */
@@ -230,8 +284,8 @@ public record LineGrammar(String word, List<Slot> slots, List<Clause> clauses, S
             return this;
         }
 
-        public LineGrammar shaped(String shape) {
-            return new LineGrammar(word, slots, clauses, ending, endingValue, shape, check, term, termName, asWritten, prefixes);
+        public LineGrammar build() {
+            return new LineGrammar(word, slots, clauses, ending, endingValue, check, term, termName, asWritten, prefixes);
         }
     }
 }

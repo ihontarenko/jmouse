@@ -15,7 +15,7 @@ import java.util.Map;
 import static org.jmouse.cad.packages.Measures.written;
 
 /**
- * What a board needs that no part brings: mounting holes for metric screws — bare, ringed under the screw's head,
+ * What a pcb needs that no part brings: mounting holes for metric screws — bare, ringed under the screw's head,
  * ringed and stitched by vias, ringed under a countersunk head — and round test pads a probe lands on.
  */
 final class HoleFootprints implements FootprintFamily {
@@ -87,7 +87,7 @@ final class HoleFootprints implements FootprintFamily {
                 "Generated from footprint-standards/hole-packages.sht#" + screw.id() + "; regenerate, never edit.",
                 "Hole " + written(hole) + " (ISO 273 fine); head ⌀" + written(head)
                         + (ring == null ? "" : ", ring ⌀" + written(pad) + " = head + 2 × " + written(screw.length("head-clearance"))) + ".");
-        return new StandardFootprint(slug, designated, title, summary, screw.word("folder"), "through-hole", screw.standard(),
+        return new StandardFootprint(slug, designated, title, summary, screw.word("folder"), screw.word("category"), "through-hole", screw.standard(),
                 rules, notes, new FootprintDrawing(pads, outlines));
     }
 
@@ -106,7 +106,7 @@ final class HoleFootprints implements FootprintFamily {
         String title = "Test point, " + written(diameter) + " mm pad";
         String summary = "A bare round pad " + written(diameter) + " mm across, for a probe";
         List<String> notes = List.of("Generated from footprint-standards/hole-packages.sht#" + testPoints.id() + "; regenerate, never edit.");
-        return new StandardFootprint(slug, designated, title, summary, testPoints.word("folder"), "surface", testPoints.standard(),
+        return new StandardFootprint(slug, designated, title, summary, testPoints.word("folder"), testPoints.word("category"), "surface", testPoints.standard(),
                 rules, notes, new FootprintDrawing(List.of(drafting.roundSurfacePad("1", diameter)), outlines));
     }
 }

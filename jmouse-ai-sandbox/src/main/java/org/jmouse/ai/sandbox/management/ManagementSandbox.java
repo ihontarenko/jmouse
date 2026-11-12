@@ -1,7 +1,8 @@
 package org.jmouse.ai.sandbox.management;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.SerializationFeature;
 import org.jmouse.ai.ToolDispatcher;
 import org.jmouse.ai.ToolRefusedException;
 import org.jmouse.ai.conversation.SettingsProviderRegistry;
@@ -45,9 +46,10 @@ public final class ManagementSandbox {
 
     private final Transcript      transcript = new Transcript();
     private final SandboxWorkshop workshop   = new SandboxWorkshop();
-    private final ObjectMapper    json       = new ObjectMapper()
-            .findAndRegisterModules()
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    private final ObjectMapper    json       = JsonMapper.builder()
+            .findAndAddModules()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .build();
 
     private final ToolCatalogView           tools;
     private final ToolCatalogController     catalogue;

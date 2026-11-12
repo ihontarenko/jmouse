@@ -2,7 +2,7 @@ footprint:axial-diode-do-35-pitch-254-vertical-footprint("Axial diode DO-35 (DO-
     meta {
         summary: "Axial diode DO-35 (DO-204AH), body 4 × ⌀2 mm, stood on end over pin 1, 2.54 mm between its holes; pin 1 is the cathode"
         code: "FP.AXIAL:DO-35-P2.54-V"
-        category: circuits
+        category: diodes-through-hole
         tags: electronics, footprint, through-hole
         source: "JEDEC DO-204 outlines"
         authors: "jMouse"
@@ -15,4 +15,6 @@ footprint:axial-diode-do-35-pitch-254-vertical-footprint("Axial diode DO-35 (DO-
     outline(fabrication, width: 0.1, "M-2.27 0A1 1 0 1 0 -0.27 0A1 1 0 1 0 -2.27 0ZM-1.27 0H1.27")
     outline(silkscreen, width: 0.12, "M-2.38 0A1.11 1.11 0 1 0 -0.16 0A1.11 1.11 0 1 0 -2.38 0Z")
     outline(courtyard, width: 0.05, "M-2.9 -1.6H2.65V1.6H-2.9Z")
+    body(height: 4)
+    model("MD.AXIAL:DO-35-P2.54-V")
 }

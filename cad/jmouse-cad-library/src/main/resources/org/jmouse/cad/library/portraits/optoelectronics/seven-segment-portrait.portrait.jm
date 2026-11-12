@@ -5,7 +5,7 @@ portrait:seven-segment-portrait("Seven-segment digit") {
     meta {
         summary: "A 0.56-inch common-cathode digit whose segments light by their current"
         code: "PT.DISPLAY:SEVEN-SEGMENT-0.56"
-        category: circuits
+        category: optoelectronics
         tags: electronics, portrait, display, through-hole
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

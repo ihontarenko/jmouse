@@ -1,0 +1,33 @@
+model:sot-363-model("SOT-363, 1.25 mm body") {
+    meta {
+        summary: "SOT-363, 1.25 mm body — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.SOT363:6"
+        category: surface-transistor-outline
+        tags: electronics, model, gull-wing
+        source: "JEDEC MO-203 AB, the makers' tighter outline (Nexperia SOT323)"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [1.25, 2, 0.5], at: [0, 0, 0.35])
+    box(plastic, size: [1.09, 1.84, 0.5], at: [0, 0, 0.85])
+    cylinder(dimple, radius: 0.25, length: 0.01, at: [-0.045, 0.42, 1.105])
+    marking(name, on: flat, size: [0.875, 0.375], at: [0, 0, 1.11], ink: marking)
+    box(tin, size: [0.25, 0.24, 0.2], at: [-0.75, 0.65, 0.6])
+    box(tin, size: [0.2, 0.24, 0.6], at: [-0.875, 0.65, 0.3])
+    box(tin, size: [0.275, 0.24, 0.2], at: [-1.012, 0.65, 0.1])
+    box(tin, size: [0.25, 0.24, 0.2], at: [-0.75, 0, 0.6])
+    box(tin, size: [0.2, 0.24, 0.6], at: [-0.875, 0, 0.3])
+    box(tin, size: [0.275, 0.24, 0.2], at: [-1.012, 0, 0.1])
+    box(tin, size: [0.25, 0.24, 0.2], at: [-0.75, -0.65, 0.6])
+    box(tin, size: [0.2, 0.24, 0.6], at: [-0.875, -0.65, 0.3])
+    box(tin, size: [0.275, 0.24, 0.2], at: [-1.012, -0.65, 0.1])
+    box(tin, size: [0.25, 0.24, 0.2], at: [0.75, -0.65, 0.6])
+    box(tin, size: [0.2, 0.24, 0.6], at: [0.875, -0.65, 0.3])
+    box(tin, size: [0.275, 0.24, 0.2], at: [1.013, -0.65, 0.1])
+    box(tin, size: [0.25, 0.24, 0.2], at: [0.75, 0, 0.6])
+    box(tin, size: [0.2, 0.24, 0.6], at: [0.875, 0, 0.3])
+    box(tin, size: [0.275, 0.24, 0.2], at: [1.013, 0, 0.1])
+    box(tin, size: [0.25, 0.24, 0.2], at: [0.75, 0.65, 0.6])
+    box(tin, size: [0.2, 0.24, 0.6], at: [0.875, 0.65, 0.3])
+    box(tin, size: [0.275, 0.24, 0.2], at: [1.013, 0.65, 0.1])
+}

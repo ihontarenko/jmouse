@@ -8,5 +8,4 @@ public final class PasswordEncoderFactory {
             default -> throw new IllegalStateException("UNEXPECTED ALGORITHM: " + algorithm);
         };
     }
-
 }

@@ -1,15 +1,13 @@
 package org.jmouse.security;
 
-import org.jmouse.security.authentication.AuthenticationLevel;
-
 import java.security.Principal;
 import java.util.Collection;
+import org.jmouse.security.authentication.AuthenticationLevel;
 
 /**
  * 🔐 Authentication token: principal + credentials + authorities.
  */
 public interface Authentication extends Principal {
-
     Object getCredentials();
 
     Collection<? extends Authority> getAuthorities();
@@ -21,7 +19,6 @@ public interface Authentication extends Principal {
     Object getPrincipal();
 
     default AuthenticationLevel level() {
-        return AuthenticationLevel.ANONYMOUS;
+        return isAuthenticated() ? AuthenticationLevel.FULL : AuthenticationLevel.ANONYMOUS;
     }
-
 }

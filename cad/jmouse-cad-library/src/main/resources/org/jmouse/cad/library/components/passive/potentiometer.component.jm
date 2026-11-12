@@ -3,9 +3,11 @@ component:potentiometer("Potentiometer", type: potentiometer) {
     meta {
         designator: RV
         summary: "A resistance with a wiper, moved while the circuit runs"
-        category: circuits
+        category: potentiometers
         failure: open
         value: resistance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
     }
 
     parameter:position(0.5, in: 0 .. 1, step: 0.01, live, "Wiper position")
@@ -21,7 +23,9 @@ component:potentiometer("Potentiometer", type: potentiometer) {
     pin:w(analog, 2, "wiper")
     pin:b(analog, 3, "second end")
 
-    symbol(uses: [potentiometer-symbol, trimmer-symbol]) {
+    footprint("FP.POT:3296W")
+
+    symbol(uses: ["SY.RESISTOR:POTENTIOMETER", "SY.RESISTOR:TRIMMER"]) {
         bind:failed(failed)
         bind:position(position)
     }
@@ -32,7 +36,7 @@ component:potentiometer("Potentiometer", type: potentiometer) {
     }
 
     # How it looks in the hand: a square trimmer whose slot turns with the wiper.
-    portrait(uses: trimmer-portrait) {
+    portrait(uses: "PT.POTENTIOMETER:TRIMMER-SQUARE") {
         bind:position(position)
     }
 }

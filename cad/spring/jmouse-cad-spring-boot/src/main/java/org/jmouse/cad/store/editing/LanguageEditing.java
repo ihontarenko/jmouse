@@ -1,8 +1,8 @@
 package org.jmouse.cad.store.editing;
 
-import org.jmouse.cad.board.BoardModule;
-import org.jmouse.cad.board.drawing.BoardDrawing;
-import org.jmouse.cad.board.drawing.FootprintDrawing;
+import org.jmouse.cad.pcb.PcbModule;
+import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.document.DocumentEditing;
 import org.jmouse.cad.document.DocumentEditing.AddBlock;
 import org.jmouse.cad.document.DocumentEditing.AddLine;
@@ -99,7 +99,7 @@ public class LanguageEditing {
     /**
      * A text's drawing as the engine draws it, unsaved: what a canvas previews while its text is being written.
      *
-     * @param drawing a {@code SymbolDrawing}, a {@code FootprintDrawing} or a {@code BoardDrawing}; null when the text does
+     * @param drawing a {@code SymbolDrawing}, a {@code FootprintDrawing} or a {@code PcbDrawing}; null when the text does
      *                not read, and then {@code problems} says why
      */
     public record DrawnText(String source, String kind, Object drawing, List<Problem> problems) {
@@ -192,7 +192,7 @@ public class LanguageEditing {
      * drawing did not change stays as it is written, with its comments.
      */
     public EditedDocument footprint(String source, FootprintDrawing drawing, String title, String category) {
-        DocumentNode document = readKind(source, Set.of(BoardModule.FOOTPRINT));
+        DocumentNode document = readKind(source, Set.of(PcbModule.FOOTPRINT));
         if (drawing == null) {
             throw CadProblem.invalid("A footprint editor sends what it drew as 'drawing'.");
         }
@@ -202,16 +202,16 @@ public class LanguageEditing {
     }
 
     /**
-     * What a board editor laid out, written into the board's text line by line: a line the layout did not change stays as
+     * What a pcb editor laid out, written into the pcb's text line by line: a line the layout did not change stays as
      * it is written, with its comments; its {@code sizes}, which the layout does not hold, are never touched.
      */
-    public EditedDocument board(String source, BoardDrawing drawing, String title, String category) {
-        DocumentNode document = readKind(source, Set.of(BoardModule.PCB));
+    public EditedDocument pcb(String source, PcbDrawing drawing, String title, String category) {
+        DocumentNode document = readKind(source, Set.of(PcbModule.PCB));
         if (drawing == null) {
-            throw CadProblem.invalid("A board editor sends what it laid out as 'drawing'.");
+            throw CadProblem.invalid("A PCB editor sends what it laid out as 'drawing'.");
         }
-        Redrawing redrawing = new Redrawing(drawnOrNone(() -> BoardDrawing.of(document).lines()), drawnLines(drawing::lines),
-                                            BoardDrawing::classOf);
+        Redrawing redrawing = new Redrawing(drawnOrNone(() -> PcbDrawing.of(document).lines()), drawnLines(drawing::lines),
+                                            PcbDrawing::classOf);
         return redrawn(document, redrawing, new Head(title, category));
     }
 
@@ -258,10 +258,22 @@ public class LanguageEditing {
         } catch (CadProblem refused) {
             return new DrawnText(source, kind, null, List.of(problemOf(refused)));
         }
-        if (!(model instanceof SymbolDrawing || model instanceof FootprintDrawing || model instanceof BoardDrawing)) {
-            throw CadProblem.invalid("A " + kind + " is not drawn: a symbol, a portrait, a frame, a footprint and a board are.");
+        if (!(model instanceof SymbolDrawing || model instanceof FootprintDrawing || model instanceof PcbDrawing)) {
+            throw CadProblem.invalid("A " + kind + " is not drawn: a symbol, a portrait, a frame, a footprint and a PCB are.");
         }
         return new DrawnText(source, kind, model, List.of());
+    }
+
+    /**
+     * A text with its head alone written anew — its title, summary or category; a null field left as written, an empty one
+     * taken away —, every other statement as written. Filing a document in another category is this, whatever holds it.
+     */
+    public EditedDocument head(String source, String title, String summary, String category) {
+        try {
+            return form(editing.reheaded(readFresh(source), new Head(title, summary, category)));
+        } catch (GrammarRefusal refused) {
+            throw CadProblem.invalidDocument(refused.detail(), refused.line(), refused.column());
+        }
     }
 
     private EditedDocument redrawn(DocumentNode document, Redrawing redrawing, Head head) {

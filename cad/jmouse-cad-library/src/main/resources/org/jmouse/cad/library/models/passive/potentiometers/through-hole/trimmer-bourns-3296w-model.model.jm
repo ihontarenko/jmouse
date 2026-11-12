@@ -1,0 +1,16 @@
+model:trimmer-bourns-3296w-model("Bourns 3296W trimming potentiometer, standing") {
+    meta {
+        summary: "Bourns 3296W trimming potentiometer, standing — its body drawn by jmCAD from the footprint and its package table"
+        code: "MD.POT:3296W"
+        category: potentiometers-through-hole
+        tags: electronics, model, inline
+        source: "Bourns 3296 data sheet: the W, top adjust, pins in line"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    box(plastic, size: [9.53, 4.83, 9.03], at: [0, 0, 5.515])
+    box(tin, size: [0.665, 0.665, 2.6], at: [-2.54, 0, -0.3])
+    box(tin, size: [0.665, 0.665, 2.6], at: [0, 0, -0.3])
+    box(tin, size: [0.665, 0.665, 2.6], at: [2.54, 0, -0.3])
+    marking(name, on: flat, size: [7.624, 2.709], at: [0, 2.425, 5.515], rotate: [90, 0, 180], ink: marking)
+}
