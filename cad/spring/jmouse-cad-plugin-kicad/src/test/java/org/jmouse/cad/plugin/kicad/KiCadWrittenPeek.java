@@ -1,5 +1,8 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.kicad.KiCadLibraries;
+import org.jmouse.cad.kicad.KiCadLibraryMap;
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.ExchangeFiles;
 import org.jmouse.cad.exchange.ImportedDocuments;
@@ -36,7 +39,7 @@ class KiCadWrittenPeek {
                 }
             }
         }
-        ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS)
+        ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, project, null), CadLibrary.library());
         StringBuilder out = new StringBuilder();
         String library = System.getProperty("kicad.peek.library");

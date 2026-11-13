@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation;
 
+import org.jmouse.cad.document.ArrangementLines;
 import org.jmouse.el.grammar.LineGrammar;
 
 import java.util.Arrays;
@@ -169,6 +170,7 @@ public final class SimulationLines {
                     .build())
             .optional("shows", ITEMS)
             .optional("ports", ITEMS)
+            .including(ArrangementLines.CLAUSES)
             .build();
 
     /** {@code frame iso-a4-landscape-frame}: the frame a circuit's sheet stands in. */
@@ -192,6 +194,7 @@ public final class SimulationLines {
             .optionalSlot("net", WORD)
             .required("at", POINT)
             .optional("rotate", QUANTITY)
+            .including(ArrangementLines.CLAUSES)
             .build();
 
     /** {@code W1 wire R1.negative to C1.positive via 240 120}: a wire from one pin to another, through its corners. */
@@ -199,18 +202,21 @@ public final class SimulationLines {
             .requiredMarkedSlot("from", "wire", WORD)
             .required("to", WORD)
             .optional("via", NUMBERS)
+            .including(ArrangementLines.CLAUSES)
             .build();
 
     /** {@code T1 note "Keep this loop short" at 240, 120}: words on the sheet. */
     public static final LineGrammar NOTE = LineGrammar.named("note", "reference")
             .requiredMarkedSlot("words", "note", TEXT)
             .required("at", POINT)
+            .including(ArrangementLines.CLAUSES)
             .build();
 
     /** {@code S1 shape rectangle via 240 120, 400 200}: a line or a shape drawn on the sheet. */
     public static final LineGrammar DRAWN = LineGrammar.named("drawn", "reference")
             .requiredMarkedSlot("shape", "shape", WORD)
             .required("via", NUMBERS)
+            .including(ArrangementLines.CLAUSES)
             .build();
 
     /** {@code B1 bus D members D0, D1, D2 via 240 120, 400 120}: a bus by its name, the nets it carries and its corners. */
@@ -218,6 +224,7 @@ public final class SimulationLines {
             .requiredMarkedSlot("name", "bus", WORD)
             .optional("members", ITEMS)
             .required("via", NUMBERS)
+            .including(ArrangementLines.CLAUSES)
             .build();
 
     /** {@code CH1 out 2 V/div}, {@code CH3 current R1 1 mA/div}, {@code L1 level clock}, {@code CH2 a against b 1 V/div}. */

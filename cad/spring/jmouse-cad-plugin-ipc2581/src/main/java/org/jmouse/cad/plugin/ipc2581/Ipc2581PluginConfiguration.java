@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.ipc2581;
 
+import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbLayers;
@@ -14,10 +15,8 @@ import java.time.Clock;
 public class Ipc2581PluginConfiguration {
 
     @Bean
-    public Ipc2581Plugin cadIpc2581Plugin() {
-        PcbIpc2581Export.Settings settings = CadSettings.read(Ipc2581Plugin.EXPORT);
-        PcbArtwork.Settings artwork = CadSettings.read(PcbArtwork.SECTION);
-        PcbLayers.Settings layers = CadSettings.read(PcbLayers.SECTION);
-        return new Ipc2581Plugin(new PcbIpc2581Export(settings, artwork, layers, StrokeFont.newStroke(), Clock.systemUTC()));
+    public Ipc2581Plugin cadIpc2581Plugin(CadSettings sections, CadStandards standards) {
+        return new Ipc2581Plugin(new PcbIpc2581Export(() -> sections.read(Ipc2581Plugin.EXPORT), () -> sections.read(PcbArtwork.SECTION),
+                () -> sections.read(PcbLayers.SECTION), StrokeFont.newStroke(), Clock.systemUTC(), standards));
     }
 }

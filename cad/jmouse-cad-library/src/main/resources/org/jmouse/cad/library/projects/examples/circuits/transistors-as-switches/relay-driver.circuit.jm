@@ -1,0 +1,100 @@
+# TR-03. A 2N2222 driving the coil of an SRD-05VDC relay from 5 V, the relay's contact switching a 12 V load. A switch
+# puts a 1N4007 across the coil or takes it away. Without it, the coil's current has nowhere to go when the transistor
+# turns off, and the coil drives the collector up until the transistor breaks down — tens of volts on a 5 V circuit.
+# With it, the current circulates through the diode and the collector stops one diode drop above the supply.
+circuit:relay-driver("Relay driver and flyback diode") {
+    meta {
+        summary: "A transistor switching a relay coil: without a flyback diode the collector spikes to tens of volts; with one it stops at 5.7 V."
+        description: """
+            Idea: a coil keeps its current flowing. While the transistor is on, about 70 mA builds up in the relay's
+            coil; when the transistor turns off, that current must go somewhere in the instant, and the coil raises
+            whatever voltage it takes to push it on. A diode across the coil, pointing back to the supply, gives the
+            current a path to circulate in until the coil's resistance has spent it.
+
+            Try: run it with the switch open — no diode. Every time the drive falls, the collector leaps to tens of
+            volts, where the transistor breaks down and takes the coil's energy itself. Close the switch: the spike
+            is gone, the collector stops at about 5.7 V, and the coil's current fades over milliseconds instead.
+
+            Watch: the collector (CH2) at each falling edge of the drive; the ammeter in the coil — rising slowly
+            when the transistor turns on, and with the diode in, falling slowly after it turns off; the load (CH3)
+            following the contact, made about 4 ms after the drive rises, and let go 0.3 ms after it falls without
+            the diode but 4.5 ms after it with the diode in.
+
+            Ask: the coil holds L · I² / 2 of energy — how much is that at 0.2 H and 71 mA, and where does it go
+            with the diode and without it? Why does the relay let go later with the diode in?
+            """
+        category: transistors-as-switches
+        tags: transistors, example, tr-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:f(10 Hz, in: 1 Hz .. 50 Hz, step: 1 Hz, "Drive frequency")
+    parameter:R_base(1 kΩ, in: 470 Ω .. 10 kΩ, step: 10 Ω, "Base resistor")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:G1(square-generator, [positive: drive, negative: 0], high: 5 V, frequency: f, duty: 0.5)
+    part:RB(resistor, [drive, base], resistance: R_base)
+    part:Q1(2n2222, [base: base, collector: collector, emitter: 0])
+    part:A1(ammeter, [in: vcc, out: coil])
+    part:K1(srd-05vdc, [coil_one: coil, coil_two: collector, common: load_supply, normally_open: load, normally_closed: rest])
+    part:D1(1n4007, [anode: clamp, cathode: vcc])
+    part:SW1(switch, [a: clamp, b: collector], closed: 0)
+    part:V2(voltage-source, [positive: load_supply, negative: 0], U_output: 12 V)
+    part:RL(resistor, [load, 0], resistance: 120 Ω, power_rating: 2 W)
+    place:V1(at: 240 600, rotate: 90)
+    place:G1(at: 560 760, rotate: 90)
+    place:RB(at: 720 600)
+    place:Q1(at: 960 600)
+    place:A1(at: 1000 160, rotate: 90)
+    place:K1(at: 1100 340)
+    place:D1(at: 800 240, rotate: 270)
+    place:SW1(at: 800 400, rotate: 90)
+    place:V2(at: 1400 640, rotate: 90)
+    place:RL(at: 1640 560, rotate: 90)
+    mark:Jv(junction, at: 800 80)
+    mark:Jc(junction, at: 1000 480)
+    mark:Jg1(junction, at: 240 920)
+    mark:Jg2(junction, at: 560 920)
+    mark:Jg3(junction, at: 1000 920)
+    mark:Jg4(junction, at: 1400 920)
+    mark:Jg5(junction, at: 1640 920)
+    mark:GND1(ground, at: 560 1000)
+    wire:W1(V1.positive, to: Jv.j, via: 240 80)
+    wire:W2(Jv.j, to: A1.in, via: 1000 80)
+    wire:W3(A1.out, to: K1.coil_one)
+    wire:W4(Jv.j, to: D1.cathode)
+    wire:W5(D1.anode, to: SW1.a)
+    wire:W6(SW1.b, to: Jc.j, via: 800 480)
+    wire:W7(K1.coil_two, to: Jc.j)
+    wire:W8(Jc.j, to: Q1.collector)
+    wire:W9(G1.positive, to: RB.positive, via: 560 600)
+    wire:W10(RB.negative, to: Q1.base)
+    wire:W11(K1.common, to: V2.positive, via: [1120 480, 1400 480])
+    wire:W12(K1.normally_open, to: RL.positive, via: 1640 360)
+    wire:W13(V1.negative, to: Jg1.j)
+    wire:W14(Jg1.j, to: Jg2.j)
+    wire:W15(G1.negative, to: Jg2.j)
+    wire:W16(Jg2.j, to: GND1.ground)
+    wire:W17(Jg2.j, to: Jg3.j)
+    wire:W18(Q1.emitter, to: Jg3.j)
+    wire:W19(Jg3.j, to: Jg4.j)
+    wire:W20(V2.negative, to: Jg4.j)
+    wire:W21(Jg4.j, to: Jg5.j)
+    wire:W22(RL.negative, to: Jg5.j)
+    probe:CH1(drive, 5 V/div)
+    probe:CH2(collector, 20 V/div)
+    probe:CH3(load, 5 V/div)
+    expect("no diode: the collector spikes far above the 5 V supply", from: "V = L · dI/dt: the coil drives its current on until the 2N2222 breaks down near 60 V") {
+        measure(maximum, collector, after: 10 ms)
+        within(30 V .. 80 V)
+    }
+    expect("the coil takes about 70 mA while the transistor is on", from: "SRD-05VDC: coil 70 Ω; I = (5 V − VCE(sat)) / 70 Ω") {
+        measure(maximum, current: A1, after: 10 ms)
+        within(65 mA .. 72 mA)
+    }
+    expect("the contact makes: the load gets 12 V", from: "pull-in at 3.75 V at most, so the armature closes normally-open") {
+        measure(maximum, load, after: 10 ms)
+        within(11.9 V .. 12.1 V)
+    }
+    analysis(transient, for: 120 ms)
+    view:transient_response(primary)
+}

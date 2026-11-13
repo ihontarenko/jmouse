@@ -1,0 +1,112 @@
+# DG-09. A character LCD driven over an 8-bit parallel bus, as a microcontroller drives one: the driver initializes the
+# HD44780 — 8-bit, two lines, display on, cleared, entry to the right —, writes "Hello, Parallax!" on the first line and
+# rewrites the second every 200 ms with a count of its updates. RS picks command or character, E strobes each byte, and
+# R/W stays low.
+circuit:lcd-hello("A character LCD") {
+    meta {
+        summary: "An HD44780 16×2 LCD initialized and written over its 8-bit bus: a greeting, and a count that keeps rising."
+        description: """
+            Idea: a character LCD has a controller of its own, the HD44780, that keeps the text in a little memory and
+            draws it. The circuit only sends bytes: with RS low a byte is a command — clear, turn the display on, move
+            the cursor —; with RS high it is a character, written where the cursor stands, and the cursor steps on.
+
+            Try: open the Logic view with E, RS and four data lines on the channels and catch a byte: the data stands
+            still while E is high and is taken as E falls. Zoom into the LCD to read its window.
+
+            Watch: the first burst — 0x38, 0x0C, 0x01, 0x06, 0x80 and the sixteen characters of the greeting — and
+            then, every 200 ms, 0xC0 and the second line again with the count one higher.
+
+            Ask: why does the driver wait 2 ms after the clear and only 50 µs after every other byte? What would it
+            send to write the count at the right-hand end of the first line instead?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-09
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:B1(lcd-driver, [register_select: rs, read_write: rw, enable: e, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: vcc, GND: 0])
+    part:LCD1(lcd-1602, [ground: 0, supply: vcc, register_select: rs, read_write: rw, enable: e, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7])
+    place:V1(at: -600 840, rotate: 90)
+    mark:N1(label, vcc, at: -600 680)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: -600 1040)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:B1(at: -80 600)
+    mark:N2(label, rs, at: 240 400, rotate: 90)
+    wire:WN2(B1.register_select, to: N2.label)
+    mark:N3(label, rw, at: 240 440, rotate: 90)
+    wire:WN3(B1.read_write, to: N3.label)
+    mark:N4(label, e, at: 240 480, rotate: 90)
+    wire:WN4(B1.enable, to: N4.label)
+    mark:N5(label, d0, at: 240 520, rotate: 90)
+    wire:WN5(B1.data_0, to: N5.label)
+    mark:N6(label, d1, at: 240 560, rotate: 90)
+    wire:WN6(B1.data_1, to: N6.label)
+    mark:N7(label, d2, at: 240 600, rotate: 90)
+    wire:WN7(B1.data_2, to: N7.label)
+    mark:N8(label, d3, at: 240 640, rotate: 90)
+    wire:WN8(B1.data_3, to: N8.label)
+    mark:N9(label, d4, at: 240 680, rotate: 90)
+    wire:WN9(B1.data_4, to: N9.label)
+    mark:N10(label, d5, at: 240 720, rotate: 90)
+    wire:WN10(B1.data_5, to: N10.label)
+    mark:N11(label, d6, at: 240 760, rotate: 90)
+    wire:WN11(B1.data_6, to: N11.label)
+    mark:N12(label, d7, at: 240 800, rotate: 90)
+    wire:WN12(B1.data_7, to: N12.label)
+    mark:N13(label, vcc, at: -120 40)
+    wire:WN13(B1.Vcc, to: N13.label)
+    mark:G2(ground, at: -40 40, rotate: 180)
+    wire:WG2(B1.GND, to: G2.ground)
+    place:LCD1(at: 840 600)
+    mark:N14(label, d7, at: 960 840, rotate: 180)
+    wire:WN14(LCD1.data_7, to: N14.label)
+    mark:N15(label, d6, at: 920 840, rotate: 180)
+    wire:WN15(LCD1.data_6, to: N15.label)
+    mark:G3(ground, at: 680 400, rotate: 180)
+    wire:WG3(LCD1.ground, to: G3.ground)
+    mark:N16(label, rs, at: 800 400)
+    wire:WN16(LCD1.register_select, to: N16.label)
+    mark:N17(label, d5, at: 880 840, rotate: 180)
+    wire:WN17(LCD1.data_5, to: N17.label)
+    mark:N18(label, d4, at: 840 840, rotate: 180)
+    wire:WN18(LCD1.data_4, to: N18.label)
+    mark:N19(label, vcc, at: 720 400)
+    wire:WN19(LCD1.supply, to: N19.label)
+    mark:N20(label, d3, at: 800 840, rotate: 180)
+    wire:WN20(LCD1.data_3, to: N20.label)
+    mark:N21(label, d2, at: 760 840, rotate: 180)
+    wire:WN21(LCD1.data_2, to: N21.label)
+    mark:N22(label, d1, at: 720 840, rotate: 180)
+    wire:WN22(LCD1.data_1, to: N22.label)
+    mark:N23(label, d0, at: 680 840, rotate: 180)
+    wire:WN23(LCD1.data_0, to: N23.label)
+    mark:N24(label, e, at: 880 400)
+    wire:WN24(LCD1.enable, to: N24.label)
+    mark:N25(label, rw, at: 840 400)
+    wire:WN25(LCD1.read_write, to: N25.label)
+    probes {
+        time(20 us/div)
+        probe:L1(level, e)
+        probe:L2(level, rs)
+        probe:L3(level, d0)
+        probe:L4(level, d1)
+        probe:L5(level, d2)
+        probe:L6(level, d3)
+    }
+    expect("every byte is strobed by E", from: "HD44780 bus timing: one E pulse a byte") {
+        measure(final, level: e)
+        near(0, +- 0.01)
+    }
+    expect("the first line begins Hello", from: "the driver's first_line, written at DDRAM 00h on: H e l l o are 48h 65h 6Ch 6Ch 6Fh") {
+        measure(final, figures: [LCD1.cell_0, LCD1.cell_1, LCD1.cell_2, LCD1.cell_3, LCD1.cell_4])
+        is([72,101,108,108,111])
+    }
+    expect("and ends with its exclamation mark", from: "the sixteenth character of 'Hello, Parallax!' is 21h") {
+        measure(final, figure: LCD1.cell_15)
+        near(33, +- 0.1)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+}

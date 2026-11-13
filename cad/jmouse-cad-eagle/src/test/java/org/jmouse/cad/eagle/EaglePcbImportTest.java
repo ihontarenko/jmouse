@@ -70,7 +70,7 @@ class EaglePcbImportTest {
         EagleSchematic schematic = EagleReader.read("divider.sch", EagleSchematicImportTest.SCHEMATIC).schematic().orElseThrow();
         EagleBoard pcb = EagleReader.read("divider.brd", PCB).board().orElseThrow();
         return EagleDesignImport.read(schematic, "divider.sch", Optional.of(new EagleDesignImport.Read(pcb, "divider.brd")),
-                "Divider", EagleLibraries.standard(), SheetMarks.of(CadLibrary.library(), EagleLibraries.standard().markSymbols()));
+                "Divider", EagleLibraries.shipped(), SheetMarks.of(CadLibrary.library(), EagleLibraries.shipped().markSymbols()));
     }
 
     @Test

@@ -1,5 +1,8 @@
 package org.jmouse.cad.libre.pcb;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ShippedTables;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.Provenance;
 import org.jmouse.cad.exchange.imported.FilingTable;
@@ -27,7 +30,11 @@ import java.util.Optional;
 public record LibrePcbFiling(SheetFiling sheet, String ground, double sheetGap, double sheetGrid, double lineSpacing, Map<String, String> layers,
                              String pcbRules, Map<String, String> pcbRuleNames, String classOpening) implements ImportFiling {
 
-    private static final String RESOURCE = "libre-pcb-libraries.sht";
+    /** The table's address in the catalogue. */
+    public static final String TABLE = "libre-pcb-libraries";
+
+    /** Where its module ships it. */
+    public static final ShippedTables SHIPPED = ShippedTables.in(LibrePcbFiling.class, "jmouse-cad-libre-pcb", "org/jmouse/cad/libre/pcb/tables");
 
     public LibrePcbFiling {
         layers = Map.copyOf(layers);
@@ -35,8 +42,16 @@ public record LibrePcbFiling(SheetFiling sheet, String ground, double sheetGap, 
     }
 
     /** The table this library ships. */
-    public static LibrePcbFiling standard() {
-        return of(FilingTable.shipped(LibrePcbFiling.class, RESOURCE));
+    public static LibrePcbFiling shipped() {
+        return readFrom(SHIPPED).current();
+    }
+
+    /**
+     * As its source answers at each use — the engine's catalogue table, its curator's revision where one is kept —, read again
+     * only when another revision answers.
+     */
+    public static ReadTable<LibrePcbFiling> readFrom(TableSource tables) {
+        return new ReadTable<>(tables, TABLE, sheet -> of(FilingTable.of(TABLE, sheet)));
     }
 
     public static LibrePcbFiling of(FilingTable table) {

@@ -23,10 +23,11 @@ import java.util.Set;
  *
  * @param copper its copper layers, front first, as KiCad names them
  * @param images how many pictures it holds, which this model does not read
+ * @param groups its groups: each names its members by their identities
  */
 public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint> footprints, List<Track> tracks, List<Arc> arcs,
                        List<Via> vias, List<Zone> zones, List<KiCadFootprintGraphic> graphics, List<Text> texts,
-                       List<Dimension> dimensions, int images) {
+                       List<Dimension> dimensions, int images, List<Group> groups) {
 
     public KiCadPcb {
         copper = List.copyOf(copper);
@@ -38,14 +39,32 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
         graphics = List.copyOf(graphics);
         texts = List.copyOf(texts);
         dimensions = List.copyOf(dimensions);
+        groups = groups == null ? List.of() : List.copyOf(groups);
+    }
+
+    /**
+     * A group of the board — {@code (group "front panel" (uuid …) (locked yes) (members "…" "…"))} —: its name, how it stands
+     * itself, and its members by their identities.
+     */
+    public record Group(String name, KiCadStanding standing, List<String> members) {
+
+        public Group {
+            members = List.copyOf(members);
+        }
+
+        static Group of(SExpressionList group) {
+            String name = group.size() > 1 && !(group.item(1) instanceof SExpressionList) ? group.word(1) : "";
+            List<String> members = group.list(MEMBERS).map(KiCadPcb::wordsOf).orElse(List.of());
+            return new Group(name, KiCadStanding.of(group), members);
+        }
     }
 
     /** A straight run of copper. */
-    public record Track(KiCadPoint start, KiCadPoint end, double width, String layer) {
+    public record Track(KiCadPoint start, KiCadPoint end, double width, String layer, KiCadStanding standing) {
     }
 
     /** A curved run of copper, from its start through its middle to its end. */
-    public record Arc(KiCadPoint start, KiCadPoint middle, KiCadPoint end, double width, String layer) {
+    public record Arc(KiCadPoint start, KiCadPoint middle, KiCadPoint end, double width, String layer, KiCadStanding standing) {
     }
 
     /**
@@ -53,7 +72,7 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
      *
      * @param layers the two layers it runs between
      */
-    public record Via(KiCadPoint at, double diameter, double drill, List<String> layers, Tenting tenting) {
+    public record Via(KiCadPoint at, double diameter, double drill, List<String> layers, Tenting tenting, KiCadStanding standing) {
 
         public Via {
             layers = List.copyOf(layers);
@@ -118,7 +137,7 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
                 root.lists(VIA).stream().map(via -> via(via, usualTenting(root))).toList(), root.lists(ZONE).stream().map(KiCadPcb::zone).toList(),
                 graphicsOf(root), root.lists(BOARD_TEXT).stream().map(KiCadPcb::text).toList(),
                 root.lists(DIMENSION).stream().flatMap(written -> dimension(written).stream()).toList(),
-                root.lists(IMAGE).size());
+                root.lists(IMAGE).size(), root.lists(GROUP).stream().map(Group::of).toList());
     }
 
     /** {@code (layers (0 "F.Cu" signal) … (31 "B.Cu" signal) (32 "B.Adhes" user …))}: those of copper, as they are written. */
@@ -146,7 +165,7 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
 
     private static Track track(SExpressionList segment) {
         return new Track(KiCadPoint.of(segment.requireList(START)), KiCadPoint.of(segment.requireList(END)),
-                segment.requireList(WIDTH).number(1), segment.wordOf(LAYER).orElse(""));
+                segment.requireList(WIDTH).number(1), segment.wordOf(LAYER).orElse(""), KiCadStanding.of(segment));
     }
 
     /**
@@ -167,12 +186,12 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
 
     private static Arc arc(SExpressionList arc) {
         return new Arc(KiCadPoint.of(arc.requireList(START)), KiCadPoint.of(arc.requireList(MIDDLE)),
-                KiCadPoint.of(arc.requireList(END)), arc.requireList(WIDTH).number(1), arc.wordOf(LAYER).orElse(""));
+                KiCadPoint.of(arc.requireList(END)), arc.requireList(WIDTH).number(1), arc.wordOf(LAYER).orElse(""), KiCadStanding.of(arc));
     }
 
     private static Via via(SExpressionList via, Tenting usual) {
         return new Via(KiCadPoint.of(via.requireList(AT)), via.requireList(SIZE).number(1), via.requireList(DRILL).number(1),
-                wordsOf(via.requireList(LAYERS)), via.list(TENTING).map(Tenting::of).orElse(usual));
+                wordsOf(via.requireList(LAYERS)), via.list(TENTING).map(Tenting::of).orElse(usual), KiCadStanding.of(via));
     }
 
     /** What the board says of a via that says nothing; a board that says nothing covers both sides, as KiCad makes one. */

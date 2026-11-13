@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 🧩 Which plugins this application runs — {@code JMOUSE_CAD_API.md} §2.8: an interface switches its own halves on by
+ * 🧩 Which plugins this application runs — {@code JMOUSE_CAD_API.md} §2.9: an interface switches its own halves on by
  * this list, and a plugin left off says why.
  */
 @RestController

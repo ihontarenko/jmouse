@@ -15,7 +15,7 @@ import java.util.Map;
 final class SpicePrintout {
 
     /** What opens a section: the control block echoes it with the section's name after it. */
-    static final String MARKER = "@@jmcad";
+    static final String MARKER = "@@jm_cad";
 
     private static final String INDEX = "Index";
 

@@ -1,0 +1,111 @@
+# DG-01. Four single-gate chips — a 74HC1G04 inverter, a 74HC1G08 AND, a 74HC1G32 OR and a 74HC1G86 XOR — on one 5 V
+# supply, fed from two square generators, A at 1 kHz and B at 500 Hz. Because B is half A's frequency, every half
+# millisecond brings the next of the four input combinations round — AB = 11, 01, 10, 00 — and each output walks
+# through its truth table. Each chip takes its supply on its own Vcc and GND pins, as on a pcb.
+circuit:logic-gates("NOT, AND, OR and XOR") {
+    meta {
+        summary: "Four 74HC single gates fed from two squares at 1 kHz and 500 Hz: every truth table walked through every two milliseconds."
+        description: """
+            Idea: a logic gate answers a yes-or-no question about its inputs. NOT is high when A is low; AND only
+            when both are high; OR when either is; XOR when they differ. A 74HC gate says high by putting its output
+            at its own supply and low by putting it at ground — a real chip with Vcc and GND pins of its own.
+
+            Try: watch one two-millisecond stretch — A changes every half millisecond, B every millisecond, so the
+            inputs AB go 11, 01, 10, 00 in turn. Change B's frequency to something unrelated to A's and the
+            combinations come round in a scrambled order, but every output still obeys its table.
+
+            Watch: A and B on CH1 and CH2, and the four outputs as logic levels under them. AND is
+            high a quarter of the time, OR three quarters, XOR and NOT half.
+
+            Ask: which gate's output is the opposite of the XOR's? Built from these four chips, how would you make a
+            gate that is high only when A is high and B is low?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:f_a(1 kHz, in: 100 Hz .. 10 kHz, step: 100 Hz, "Input A frequency")
+    parameter:f_b(500 Hz, in: 100 Hz .. 10 kHz, step: 100 Hz, "Input B frequency")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:G1(square-generator, [positive: a, negative: 0], high: 5 V, frequency: f_a, duty: 0.5)
+    part:G2(square-generator, [positive: b, negative: 0], high: 5 V, frequency: f_b, duty: 0.5)
+    part:U1(74hc1g04, [a: a, output: not_a, Vcc: vcc, GND: 0])
+    part:U2(74hc1g08, [a: a, b: b, output: a_and_b, Vcc: vcc, GND: 0])
+    part:U3(74hc1g32, [a: a, b: b, output: a_or_b, Vcc: vcc, GND: 0])
+    part:U4(74hc1g86, [a: a, b: b, output: a_xor_b, Vcc: vcc, GND: 0])
+    place:V1(at: 120 920, rotate: 90)
+    place:G1(at: 320 760, rotate: 90)
+    place:G2(at: 560 840, rotate: 90)
+    place:U1(at: 1040 200)
+    place:U2(at: 1040 480)
+    place:U3(at: 1040 760)
+    place:U4(at: 1040 1040)
+    mark:L0(label, vcc, at: 120 760)
+    mark:L1(label, vcc, at: 1020 100)
+    mark:L2(label, vcc, at: 1020 380)
+    mark:L3(label, vcc, at: 1020 660)
+    mark:L4(label, vcc, at: 1020 940)
+    mark:JA0(junction, at: 800 600)
+    mark:JA1(junction, at: 800 460)
+    mark:JA2(junction, at: 800 740)
+    mark:JB0(junction, at: 880 640)
+    mark:JB2(junction, at: 880 780)
+    mark:Jg1(junction, at: 320 1200)
+    mark:Jg2(junction, at: 560 1200)
+    mark:GND1(ground, at: 560 1280)
+    mark:GND2(ground, at: 1020 300)
+    mark:GND3(ground, at: 1020 580)
+    mark:GND4(ground, at: 1020 860)
+    mark:GND5(ground, at: 1020 1140)
+    wire:W1(L0.label, to: V1.positive)
+    wire:W2(G1.positive, to: JA0.j, via: 320 600)
+    wire:W3(JA0.j, to: JA1.j)
+    wire:W4(JA1.j, to: U1.a, via: 800 200)
+    wire:W5(JA1.j, to: U2.a)
+    wire:W6(JA0.j, to: JA2.j)
+    wire:W7(JA2.j, to: U3.a)
+    wire:W8(JA2.j, to: U4.a, via: 800 1020)
+    wire:W9(G2.positive, to: JB0.j, via: 560 640)
+    wire:W10(JB0.j, to: U2.b, via: 880 500)
+    wire:W11(JB0.j, to: JB2.j)
+    wire:W12(JB2.j, to: U3.b)
+    wire:W13(JB2.j, to: U4.b, via: 880 1060)
+    wire:W14(L1.label, to: U1.Vcc)
+    wire:W15(L2.label, to: U2.Vcc)
+    wire:W16(L3.label, to: U3.Vcc)
+    wire:W17(L4.label, to: U4.Vcc)
+    wire:W18(U1.GND, to: GND2.ground)
+    wire:W19(U2.GND, to: GND3.ground)
+    wire:W20(U3.GND, to: GND4.ground)
+    wire:W21(U4.GND, to: GND5.ground)
+    wire:W22(V1.negative, to: Jg1.j, via: 120 1200)
+    wire:W23(G1.negative, to: Jg1.j)
+    wire:W24(Jg1.j, to: Jg2.j)
+    wire:W25(G2.negative, to: Jg2.j)
+    wire:W26(Jg2.j, to: GND1.ground)
+    probe:CH1(a, 5 V/div)
+    probe:CH2(b, 5 V/div)
+    probe:L1(level, not_a)
+    probe:L2(level, a_and_b)
+    probe:L3(level, a_or_b)
+    probe:L4(level, a_xor_b)
+    expect("AND is high a quarter of the time", from: "Y = A · B: high only for 11, one combination of four") {
+        measure(average, level: a_and_b)
+        near(0.25, +- 3%)
+    }
+    expect("OR is high three quarters of the time", from: "Y = A + B: low only for 00") {
+        measure(average, level: a_or_b)
+        near(0.75, +- 3%)
+    }
+    expect("XOR is high half the time", from: "Y = A ⊕ B: high for 10 and 01") {
+        measure(average, level: a_xor_b)
+        near(0.5, +- 3%)
+    }
+    expect("NOT is high whenever A is low", from: "Y = ¬A, A high half the time") {
+        measure(average, level: not_a)
+        near(0.5, +- 3%)
+    }
+    analysis(transient, for: 8 ms)
+    view:transient_response(primary)
+}

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** ℹ️ What the engine is — {@code JMOUSE_CAD_API.md} §2.8: the window every product embedding it shows the same. */
+/** ℹ️ What the engine is — {@code JMOUSE_CAD_API.md} §2.9: the window every product embedding it shows the same. */
 @RestController
 @RequestMapping(CadManagementRoutes.PREFIX)
 public class AboutController {

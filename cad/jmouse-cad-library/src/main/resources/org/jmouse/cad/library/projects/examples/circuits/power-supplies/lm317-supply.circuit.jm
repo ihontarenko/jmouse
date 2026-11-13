@@ -1,0 +1,142 @@
+# PW-04. An adjustable bench supply on an LM317: an 18 V transformer winding on J1, a bridge of four 1N4007, a 1000 µF
+# reservoir, and the regulator holding its output 1.25 V above its adjustment pin. R1 carries 1.25 V / 240 Ω ≈ 5.2 mA
+# from the output to the adjustment pin; that current through the trimmer's share sets the output,
+# Vout = 1.25 V · (1 + R_adjust / 240 Ω): about 12 V with the wiper at 0.41 of the 5 kΩ trimmer. The load is the bench's
+# — an electronic load drawing a set current from J2 —, so the board carries only what a real one would.
+circuit:lm317-supply("Adjustable supply on an LM317") {
+    meta {
+        summary: "A bridge, a 1000 µF reservoir and an LM317 set by a 240 Ω resistor and a 5 kΩ trimmer: about 12 V at 300 mA while the reservoir ripples by 3 V."
+        description: """
+            Idea: the LM317 does not know what voltage it gives; it only keeps 1.25 V between its output and its
+            adjustment pin. Put a resistor across that gap and a fixed current flows through it; let that current
+            flow on through a second resistor to ground, and the output stands 1.25 V above whatever that resistor
+            drops. A trimmer for the second resistor makes a supply you set with a screwdriver.
+
+            Try: turn the trimmer. The output follows Vout = 1.25 · (1 + R_adjust / 240); at the top it meets the
+            reservoir's troughs less the regulator's 2 V of dropout, and the ripple comes through. Raise the load:
+            the reservoir's ripple grows as I / (2 f C), the output stays flat until the troughs come too close.
+
+            Watch: CH1 the reservoir, rippling at 100 Hz between its peaks and its troughs; CH2 the output, flat.
+            The difference between them is what the LM317 burns, at the load's current.
+
+            Ask: what trimmer setting gives 5 V? At 300 mA and 21 V on the reservoir, how many watts does the TO-220
+            have to lose, and how hot does it get without a heatsink at 50 K/W?
+            """
+        category: power-supplies
+        tags: power, example, pw-04
+        featured: yes
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:V_peak(25 V, in: 12 V .. 30 V, step: 0.5 V, "The winding's peak: 18 V RMS")
+    parameter:I_load(300 mA, in: 10 mA .. 1 A, step: 10 mA, "What the bench's electronic load draws")
+    part:G1(sine-generator, [positive: ac1, negative: ac2], amplitude: V_peak, frequency: 50 Hz)
+    part:J1(pin-header-1x2, [pin1: ac1, pin2: ac2])
+    part:D1(1n4007, [anode: ac1, cathode: raw])
+    part:D2(1n4007, [anode: ac2, cathode: raw])
+    part:D3(1n4007, [anode: 0, cathode: ac1])
+    part:D4(1n4007, [anode: 0, cathode: ac2])
+    part:C1(electrolytic-capacitor, [positive: raw, negative: 0], capacitance: 1000 µF, footprint: "FP.RADIAL:CP-D10-P5")
+    part:U1(lm317, [input: raw, output: out, adjust: adjust])
+    part:R1(resistor, [out, adjust], resistance: 240 Ω, footprint: "FP.AXIAL:R0207-P10.16-H")
+    part:RV1(potentiometer, [a: adjust, w: 0, b: 0], resistance: 5 kΩ, position: 0.41)
+    part:C2(electrolytic-capacitor, [positive: out, negative: 0], capacitance: 10 µF, footprint: "FP.RADIAL:CP-D5-P2")
+    part:J2(pin-header-1x2, [pin1: out, pin2: 0])
+    part:LOAD(current-source, [positive: 0, negative: out], I_output: I_load)
+    place:J1(at: 120 400)
+    place:G1(at: 280 420, rotate: 90)
+    place:D1(at: 480 260, rotate: 270)
+    place:D3(at: 480 380, rotate: 270)
+    place:D2(at: 640 460, rotate: 270)
+    place:D4(at: 640 580, rotate: 270)
+    place:C1(at: 800 480, rotate: 90)
+    place:U1(at: 1080 200)
+    place:R1(at: 1280 320, rotate: 90)
+    place:RV1(at: 1280 560, rotate: 90)
+    place:C2(at: 1520 480, rotate: 90)
+    place:LOAD(at: 1760 480, rotate: 270)
+    place:J2(at: 1960 200, mirror)
+    mark:Ja1(junction, at: 280 320)
+    mark:Ja2(junction, at: 280 520)
+    mark:Jb1(junction, at: 480 320)
+    mark:Jb2(junction, at: 640 520)
+    mark:Jr1(junction, at: 640 200)
+    mark:Jr2(junction, at: 800 200)
+    mark:Jo1(junction, at: 1280 200)
+    mark:Jo2(junction, at: 1520 200)
+    mark:Jo3(junction, at: 1760 200)
+    mark:Jadj(junction, at: 1280 440)
+    mark:Jg1(junction, at: 640 760)
+    mark:Jg2(junction, at: 800 760)
+    mark:Jg3(junction, at: 1040 760)
+    mark:Jg4(junction, at: 1280 760)
+    mark:Jg5(junction, at: 1360 760)
+    mark:Jg6(junction, at: 1520 760)
+    mark:Jg7(junction, at: 1760 760)
+    mark:GND1(ground, at: 1040 800)
+    # The winding: J1 and the bench's generator on the same two lines into the bridge.
+    wire:W1(J1.pin1, to: Ja1.j, via: [200 400, 200 320])
+    wire:W2(J1.pin2, to: Ja2.j, via: [200 440, 200 520])
+    wire:W3(G1.positive, to: Ja1.j)
+    wire:W4(G1.negative, to: Ja2.j)
+    wire:W5(Ja1.j, to: Jb1.j)
+    wire:W6(Ja2.j, to: Jb2.j)
+    # The bridge: two diodes up to the reservoir's rail, two up from ground.
+    wire:W7(Jb1.j, to: D1.anode)
+    wire:W8(Jb1.j, to: D3.cathode)
+    wire:W9(Jb2.j, to: D2.anode)
+    wire:W10(Jb2.j, to: D4.cathode)
+    wire:W11(D1.cathode, to: Jr1.j, via: 480 200)
+    wire:W12(D2.cathode, to: Jr1.j)
+    wire:W13(Jr1.j, to: Jr2.j)
+    wire:W14(Jr2.j, to: C1.positive)
+    wire:W15(Jr2.j, to: U1.input)
+    # The regulator and its divider: R1 across the 1.25 V, the trimmer from the adjustment pin to ground.
+    wire:W16(U1.output, to: Jo1.j)
+    wire:W17(Jo1.j, to: R1.positive)
+    wire:W18(R1.negative, to: Jadj.j)
+    wire:W19(U1.adjust, to: Jadj.j, via: 1080 440)
+    wire:W20(Jadj.j, to: RV1.a)
+    wire:W21(Jo1.j, to: Jo2.j)
+    wire:W22(Jo2.j, to: C2.positive)
+    wire:W23(Jo2.j, to: Jo3.j)
+    wire:W24(Jo3.j, to: LOAD.negative)
+    wire:W25(Jo3.j, to: J2.pin1)
+    # Ground: one rail under everything.
+    wire:W26(D3.anode, to: Jg1.j, via: 480 760)
+    wire:W27(D4.anode, to: Jg1.j)
+    wire:W28(Jg1.j, to: Jg2.j)
+    wire:W29(C1.negative, to: Jg2.j)
+    wire:W30(Jg2.j, to: Jg3.j)
+    wire:W31(Jg3.j, to: GND1.ground)
+    wire:W32(Jg3.j, to: Jg4.j)
+    wire:W33(RV1.b, to: Jg4.j)
+    wire:W34(Jg4.j, to: Jg5.j)
+    wire:W35(RV1.w, to: Jg5.j, via: 1360 560)
+    wire:W36(Jg5.j, to: Jg6.j)
+    wire:W37(C2.negative, to: Jg6.j)
+    wire:W38(Jg6.j, to: Jg7.j)
+    wire:W39(LOAD.positive, to: Jg7.j)
+    wire:W40(Jg7.j, to: J2.pin2, via: [1880 760, 1880 240])
+    probes {
+        probe:CH1(raw, 5 V/div)
+        probe:CH2(out, 5 V/div)
+        time(5 ms/div)
+    }
+    expect("about 12 V out with the trimmer at 0.41", from: "Vout = 1.25 V · (1 + 0.41 · 5 kΩ / 240 Ω) ≈ 11.9 V") {
+        measure(average, out, after: 60 ms)
+        within(11.4 V .. 12.4 V)
+    }
+    expect("the reservoir peaks two diode drops below the winding", from: "25 V − 2 · 0.85 V ≈ 23.3 V") {
+        measure(maximum, raw, after: 60 ms)
+        within(22.6 V .. 24 V)
+    }
+    expect("and sags about 3 V by the next peak at 300 mA", from: "ΔV ≈ I / (2 f C) = 0.3 A / (100 Hz · 1000 µF) = 3 V") {
+        measure(minimum, raw, after: 60 ms)
+        within(19.6 V .. 21.4 V)
+    }
+    analysis(transient, for: 120 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: V_peak, from: 12, to: 30, points: 37)
+}

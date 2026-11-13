@@ -1,8 +1,10 @@
 package org.jmouse.cad.plugin.spice;
 
+import org.jmouse.cad.spice.SpiceDevices;
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.spice.SpiceProcess;
-import org.jmouse.plugin.PluginSettingValues;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.ParameterValues;
+import org.jmouse.settings.Settings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,7 +23,7 @@ public class SpicePluginConfiguration {
      * {@code jmouse.cad.spice.*}: how this server reaches ngspice.
      *
      * @param command the program that runs a deck read from its standard input, word by word — {@code ngspice_con -b} on
-     *                this machine, {@code docker run --rm -i jmcad-ngspice} in a container —; empty for a server without
+     *                this machine, {@code docker run --rm -i jm_cad-ngspice} in a container —; empty for a server without
      *                it, whose engine is then listed as off while reading and writing netlists still work
      * @param timeout how long one run may take before its process is killed
      */
@@ -34,9 +36,9 @@ public class SpicePluginConfiguration {
     }
 
     @Bean
-    public SpicePlugin cadSpicePlugin(SpiceProperties properties, PluginSettings settings) {
-        PluginSettingValues values = settings.valuesOf(SpicePlugin.ID);
+    public SpicePlugin cadSpicePlugin(SpiceProperties properties, Settings settings, TableSource tables) {
+        ParameterValues values = settings.parameters(SpicePlugin.ID, SpiceProcess.PROGRAM);
         SpiceProcess simulator = new SpiceProcess("ngspice", () -> values.command(SpiceProcess.COMMAND), () -> values.duration(SpiceProcess.TIMEOUT));
-        return new SpicePlugin(simulator, properties.command(), properties.timeout());
+        return new SpicePlugin(simulator, properties.command(), properties.timeout(), SpiceDevices.readFrom(tables));
     }
 }

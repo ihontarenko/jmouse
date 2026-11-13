@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.suppliers;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.suppliers.SupplierMaterials;
 
 import java.util.List;
@@ -7,13 +8,15 @@ import java.util.Map;
 
 /**
  * How a priced bill of materials is written — which columns, under what headings, how a standing is said —: data, in the
- * plugin's jar ({@code settings/plugin/suppliers/materials}).
+ * plugin's jar ({@code settings/plugin/cad-suppliers/materials}).
  *
  * @param file      what its file is called after the pcb's name: {@code supplier-materials.csv}
  * @param standings how each standing is said
  * @param columns   the columns, in order
  */
-public record SupplierMaterialsTable(String file, Map<SupplierMaterials.Standing, String> standings, List<Column> columns) {
+public record SupplierMaterialsTable(@Label("File") String file,
+                                     @Label("Standings") Map<SupplierMaterials.Standing, String> standings,
+                                     @Label("Columns") List<Column> columns) {
 
     /**
      * A column: its heading, and the field it shows — {@code item}, {@code designators}, {@code quantity} (on one pcb),
@@ -25,7 +28,8 @@ public record SupplierMaterialsTable(String file, Map<SupplierMaterials.Standing
      * @param heading what the column is headed with
      * @param field   what it shows, by the field's word
      */
-    public record Column(String heading, String field) {
+    public record Column(@Label("Heading") String heading,
+                         @Label("Field") String field) {
     }
 
     public SupplierMaterialsTable {

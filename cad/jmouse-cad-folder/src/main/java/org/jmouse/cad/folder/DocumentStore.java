@@ -1,8 +1,14 @@
 package org.jmouse.cad.folder;
 
+import java.io.InputStream;
+import org.jmouse.storage.local.LocalFileStore;
+import org.jmouse.storage.exception.ObjectNotFoundException;
+import org.jmouse.storage.StorageKey;
+import org.jmouse.storage.Content;
 import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.cad.document.TechnicalClass;
+import org.jmouse.core.io.PortablePaths;
 import org.jmouse.git.local.CommitAuthor;
 import org.jmouse.git.local.CommitAuthors;
 import org.jmouse.git.local.LocalGit;
@@ -11,7 +17,6 @@ import org.jmouse.git.local.PathsCommit;
 import org.jmouse.git.local.WorkingTreeChange;
 import org.jmouse.revisions.RevisionLabel;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +39,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -46,11 +52,9 @@ import java.util.stream.Stream;
  *
  * <h3>Where a document stands in the folder</h3>
  *
- * <p>In the folder of its category: {@code catalogue/<category>/<slug>.<kind>.jm} for the shared catalogue's,
- * {@code owners/<owner type>/<owner id>/<category>/<slug>.<kind>.jm} for an owner's; one filed in no category stands
- * directly in its owner's folder. A category document is a document like any other: it stands in the folder of the
- * category above it. Its files stand beside it, in {@code <slug>.files/}. A document filed elsewhere moves, and its
- * commit says so, so its history goes on.</p>
+ * <p>Every place in words, as the {@link FolderLayout} says them both ways — {@code libraries/owner/symbols/op-amps/lm358.symbol.jm}
+ * —; the store composes and reads no path of its own. A document's files stand beside it, in {@code <slug>.files/}. A document
+ * filed elsewhere moves, and its commit says so, so its history goes on.</p>
  *
  * <h3>What a commit says</h3>
  *
@@ -63,15 +67,13 @@ import java.util.stream.Stream;
  */
 public class DocumentStore {
 
-    /** Where the shared catalogue's documents stand. */
-    private static final String CATALOGUE = "catalogue";
-    /** Where every owner's documents stand, by the owner's type and identifier. */
-    private static final String OWNERS = "owners";
     /** A document's file ends so: {@code resistor.component.jm}. */
-    private static final String SUFFIX = ".jm";
+    private static final String SUFFIX = FolderLayout.SUFFIX;
+    /** The words the folder ignores a document's own files by: they are bytes, kept beside the history, never in it. */
+    private static final String IGNORED_FILES = "*" + ".files/";
     /** A document's own files stand beside it in a folder ending so: {@code resistor.files}. */
     private static final String FILES = ".files";
-    private static final String SEPARATOR = "/";
+    private static final String SEPARATOR = PortablePaths.SEPARATOR;
 
     private static final String WRITTEN_BY = "Written-By";
     private static final String ORIGIN = "Origin";
@@ -120,11 +122,23 @@ public class DocumentStore {
         }
     }
 
+    /** The storage backend a document's own files are kept through: the library folder, on this disk. */
+    private static final String FILES_BACKEND = "library";
+    /** The trailer a kept file is said by: {@code File: <path> sha256=<hex> bytes=<n>}. */
+    private static final String FILE_LINE = "File: ";
+
     /** The repository setting that lets git on Windows read a path longer than 260 characters. */
     private static final String LONG_PATHS = "core.longpaths";
 
-    private final Path folder;
+    /** Where the folder is, asked each time the store opens: another folder is another library. */
+    private final Supplier<Path> folders;
+    /** The folder the store holds now: the one it was last opened on. */
+    private volatile Path folder;
+    /** The documents' own files, through jMouse storage, rooted at the folder the store holds now. */
+    private volatile LocalFileStore files;
     private final LocalGit git;
+    /** How a place is written in words. */
+    private final FolderLayout layout;
     private final CommitAuthors authors;
     private final CommitAuthor identity;
     private final Supplier<ZoneId> revisionZone;
@@ -133,13 +147,16 @@ public class DocumentStore {
     private final Map<String, List<Kept>> histories = new HashMap<>();
 
     /**
-     * @param folder       the library folder; made a repository when it is not one yet
+     * @param folders      where the library folder is, asked each time it is opened; made a repository when it is not one yet
+     * @param layout       how a place is written in words: an owner's folder, a kind's
      * @param authors      who a person's commit is by
      * @param identity     who a commit nobody named is by: the engine's, the folder's
      * @param revisionZone where the day a revision is said by begins, as the installation says it now
      */
-    public DocumentStore(Path folder, LocalGit git, CommitAuthors authors, CommitAuthor identity, Supplier<ZoneId> revisionZone) {
-        this.folder = folder;
+    public DocumentStore(Supplier<Path> folders, FolderLayout layout, LocalGit git, CommitAuthors authors, CommitAuthor identity,
+                         Supplier<ZoneId> revisionZone) {
+        this.folders = folders;
+        this.layout = layout;
         this.git = git;
         this.authors = authors;
         this.identity = identity;
@@ -149,6 +166,15 @@ public class DocumentStore {
     /**
      * 🔐 The checksum a text is cached and compared under: its SHA-256, in lowercase hex.
      */
+    /** The checksum of a file's bytes: its SHA-256, in lowercase hex. */
+    public static String checksumOf(byte[] content) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("SHA-256 is not available in this JVM", impossible);
+        }
+    }
+
     public static String checksumOf(String source) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(source.getBytes(StandardCharsets.UTF_8));
@@ -161,11 +187,16 @@ public class DocumentStore {
     // ── The folder ───────────────────────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Opens the library folder: makes it a repository when it is none, records what was put or changed there by hand,
-     * and answers every document it holds — each with its revisions and its place, its index left to whoever reads its
-     * text ({@link #heldText}).
+     * Opens the library folder — where it is now: another folder is another library, its documents and their revisions alone
+     * —: makes it a repository when it is none, records what was put or changed there by hand, and answers every document it
+     * holds — each with its revisions and its place, its index left to whoever reads its text ({@link #heldText}). What the
+     * store held before is let go.
      */
     public synchronized List<StoredDocument> open() {
+        folder = folders.get();
+        files = new LocalFileStore(FILES_BACKEND, folder);
+        documents.clear();
+        histories.clear();
         try {
             Files.createDirectories(folder);
         } catch (IOException unwritable) {
@@ -177,9 +208,10 @@ public class DocumentStore {
         // A document's path — its owner, its category, its slug and kind — runs past 260 characters on Windows, where git
         // reads a longer one only when the repository says so: set every time, for a folder made before this was.
         git.configure(folder, LONG_PATHS, "true");
+        ignoreFiles();
         recordFound();
         // Every document file's history in one walk of the repository, however many there are.
-        Map<String, List<PathRevision>> all = git.histories(folder, DocumentStore::isDocumentPath);
+        Map<String, List<PathRevision>> all = git.histories(folder, this::isDocumentPath);
         List<StoredDocument> held = new ArrayList<>();
         for (String path : documentPaths()) {
             String file = path.substring(path.lastIndexOf(SEPARATOR) + 1);
@@ -190,10 +222,11 @@ public class DocumentStore {
             }
             Kept first = history.getFirst();
             Kept head = history.getLast();
-            StoredDocument document = new StoredDocument(slug, ownerOf(path), first.writtenBy, first.writtenAt);
+            FolderLayout.Placed placed = placedAt(path).orElseThrow();
+            StoredDocument document = new StoredDocument(slug, placed.owner(), first.writtenBy, first.writtenAt);
             // What its place says, until its text is read: its kind from its name, its category from its folder.
             document.indexRevision(head.number, head.label, null, file.substring(slug.length() + 1,
-                    file.length() - SUFFIX.length()), slug, null, null, categoryOf(path), false, head.writtenAt);
+                    file.length() - SUFFIX.length()), slug, null, null, placed.category(), false, head.writtenAt);
             histories.put(slug, history);
             documents.put(slug, document);
             held.add(document);
@@ -211,6 +244,27 @@ public class DocumentStore {
         return histories.get(document.getId()).getLast().revision();
     }
 
+    /**
+     * Keeps a document's own files out of the history: bytes — a model, a datasheet — are not text a revision compares, and a
+     * history that holds every one only grows. The folder's {@code .gitignore} says so, written once; each kept file's commit says
+     * its sha256 and its size instead ({@link #keepFile}).
+     */
+    private void ignoreFiles() {
+        Path ignore = folder.resolve(".gitignore");
+        try {
+            String written = Files.exists(ignore) ? Files.readString(ignore, StandardCharsets.UTF_8) : "";
+            if (written.lines().anyMatch(line -> line.strip().equals(IGNORED_FILES))) {
+                return;
+            }
+            Files.writeString(ignore, (written.isEmpty() || written.endsWith("\n") ? written : written + "\n") + IGNORED_FILES + "\n",
+                              StandardCharsets.UTF_8);
+        } catch (IOException unwritable) {
+            throw new UncheckedIOException("The library folder's .gitignore cannot be written", unwritable);
+        }
+        git.commitPaths(folder, new PathsCommit("Its own files kept beside the history\n\n" + ORIGIN + ": " + RevisionOrigin.WRITTEN,
+                identity, null, List.of(".gitignore")));
+    }
+
     /** Commits every document file put into the folder, changed or taken away there by hand, as found. */
     private void recordFound() {
         List<String> found = git.status(folder).changes().stream().map(WorkingTreeChange::path)
@@ -221,32 +275,28 @@ public class DocumentStore {
         }
     }
 
-    /** Whether a path of the folder is a document's file: none of a repository's own, none of a document's files. */
-    private static boolean isDocumentPath(String path) {
-        return path.endsWith(SUFFIX) && !path.startsWith(".git") && !path.contains(FILES + SEPARATOR);
+    /**
+     * Whether a path of the folder is a document's file: in an owner's folder or the catalogue's, none of a repository's own, none
+     * of a document's files.
+     */
+    private boolean isDocumentPath(String path) {
+        return path.endsWith(SUFFIX) && !path.startsWith(".git") && !path.contains(FILES + SEPARATOR)
+               && placedAt(path).isPresent();
     }
 
     /** Every document file of the folder, relative to it. */
     private List<String> documentPaths() {
         try (Stream<Path> walked = Files.walk(folder)) {
-            return walked.filter(Files::isRegularFile).map(path -> folder.relativize(path).toString().replace(File.separatorChar, '/'))
-                    .filter(DocumentStore::isDocumentPath).sorted().toList();
+            return walked.filter(Files::isRegularFile).map(path -> PortablePaths.below(folder, path))
+                    .filter(this::isDocumentPath).sorted().toList();
         } catch (IOException unreadable) {
             throw new UncheckedIOException("The library folder " + folder + " cannot be read", unreadable);
         }
     }
 
-    /** The owner a path is a document of: none under {@value #CATALOGUE}, the owner named under {@value #OWNERS}. */
-    private static DocumentOwner ownerOf(String path) {
-        String[] parts = path.split(SEPARATOR);
-        return parts[0].equals(OWNERS) && parts.length > 3 ? DocumentOwner.of(parts[1], parts[2]) : null;
-    }
-
-    /** The category whose folder a path stands in; none for one standing directly in its owner's folder. */
-    private static String categoryOf(String path) {
-        String[] parts = path.split(SEPARATOR);
-        int ownerDepth = parts[0].equals(OWNERS) ? 3 : 1;
-        return parts.length > ownerDepth + 1 ? parts[parts.length - 2] : null;
+    /** What a path of the folder says of the document at it, as the layout reads it. */
+    private Optional<FolderLayout.Placed> placedAt(String path) {
+        return layout.placedAt(List.of(path.split(SEPARATOR)));
     }
 
     /** A file's revisions as its commits say them, the oldest first; their texts are not read. */
@@ -268,19 +318,10 @@ public class DocumentStore {
         return found.find() ? Optional.of(found.group(1).strip()) : Optional.empty();
     }
 
-    /**
-     * Where a document stands in the folder: in its owner's folder, in the folder of its category, named by its slug and
-     * kind.
-     */
-    private static String placeOf(StoredDocument document) {
-        StringBuilder path = new StringBuilder();
-        document.owner().ifPresentOrElse(
-                owner -> path.append(OWNERS).append(SEPARATOR).append(owner.type()).append(SEPARATOR).append(owner.id()),
-                () -> path.append(CATALOGUE));
-        if (document.getCategoryCode() != null) {
-            path.append(SEPARATOR).append(document.getCategoryCode());
-        }
-        return path.append(SEPARATOR).append(document.getSlug()).append('.').append(document.getKind()).append(SUFFIX).toString();
+    /** Where a document stands in the folder, as the layout says it. */
+    private String placeOf(StoredDocument document) {
+        return layout.pathOf(new FolderLayout.Place(document.owner().orElse(null), document.getKind(), document.getCategoryCode(),
+                document.getSlug()));
     }
 
     private String pathOf(String documentId) {
@@ -351,7 +392,7 @@ public class DocumentStore {
 
     /** Every document indexed as one a library ships, held in its file. */
     public synchronized List<StoredDocument> findShipped() {
-        return select(document -> document.getHolding() == StoredDocument.Holding.SHIPPED);
+        return select(document -> document.isShipped());
     }
 
     public synchronized boolean existsBySlug(String slug) {
@@ -382,18 +423,23 @@ public class DocumentStore {
      * 📖 The catalogue listing: catalogue documents in the statuses asked for, narrowed by every filter that is not
      * {@code null}, featured first and then by title.
      *
+     * @param categories the categories a document may be filed in — one and every category under it —; null for any
      * @param text a text the title, summary or slug holds, any case; null for any
      */
-    public synchronized StoredPage<StoredDocument> browse(Collection<DocumentStatus> statuses, String category, String kind,
-                                                          Boolean featured, String text, String tag, int page, int size) {
+    /** The role that asks for every document that is anything to a bench. */
+    public static final String ANY_BENCH_ROLE = "any";
+
+    public synchronized StoredPage<StoredDocument> browse(Collection<DocumentStatus> statuses, Set<String> categories, String kind,
+                                                          Boolean featured, String text, String tag, String benchRole, int page, int size) {
         String wanted = text == null ? null : text.toLowerCase(Locale.ROOT);
         List<StoredDocument> listed = select(document -> document.isCatalogue() && statuses.contains(document.getStatus())
-                && (category == null || category.equals(document.getCategoryCode()))
+                && (categories == null || categories.contains(document.getCategoryCode()))
                 && (kind == null || kind.equals(document.getKind()))
                 && (featured == null || featured == document.isFeatured())
                 && (wanted == null || holds(document.getTitle(), wanted) || holds(document.getSummary(), wanted)
                     || holds(document.getSlug(), wanted))
-                && (tag == null || document.getTags().contains(tag)));
+                && (tag == null || document.getTags().contains(tag))
+                && (benchRole == null || (ANY_BENCH_ROLE.equals(benchRole) ? document.getBenchRole() != null : benchRole.equals(document.getBenchRole()))));
         return StoredPage.of(listed.stream().sorted(Comparator.comparing(StoredDocument::isFeatured).reversed()
                 .thenComparing(StoredDocument::getTitle, Comparator.nullsLast(Comparator.naturalOrder()))).toList(), page, size);
     }
@@ -403,9 +449,14 @@ public class DocumentStore {
     }
 
     /** 📂 One owner's documents, most recently changed first. */
+    public synchronized List<StoredDocument> owned(DocumentOwner owner) {
+        return select(document -> document.owner().filter(owner::equals).isPresent()).stream()
+                .sorted(Comparator.comparing(StoredDocument::getUpdatedAt).reversed()).toList();
+    }
+
+    /** 📂 One owner's documents, most recently changed first, a page of them. */
     public synchronized StoredPage<StoredDocument> owned(DocumentOwner owner, int page, int size) {
-        return StoredPage.of(select(document -> document.owner().filter(owner::equals).isPresent()).stream()
-                .sorted(Comparator.comparing(StoredDocument::getUpdatedAt).reversed()).toList(), page, size);
+        return StoredPage.of(owned(owner), page, size);
     }
 
     /** 📋 Every document of one kind an owner holds, by title — a project's sheets. */
@@ -596,37 +647,30 @@ public class DocumentStore {
 
     /** Every file a document holds, by the path it stands at in the folder. */
     private List<String> fileEntries(String documentPath) {
-        Path files = folder.resolve(filesOf(documentPath));
-        if (!Files.isDirectory(files)) {
+        try {
+            return files.list(StorageKey.of(filesOf(documentPath))).stream().filter(entry -> !entry.folder())
+                    .map(entry -> entry.key().value()).sorted().toList();
+        } catch (ObjectNotFoundException none) {
             return List.of();
-        }
-        try (Stream<Path> listed = Files.list(files)) {
-            return listed.map(path -> folder.relativize(path).toString().replace('\\', '/')).sorted().toList();
-        } catch (IOException unreadable) {
-            throw new UncheckedIOException("The files of " + documentPath + " cannot be read", unreadable);
         }
     }
 
     private void moveFiles(String from, String to) {
-        Path source = folder.resolve(filesOf(from));
-        if (!Files.isDirectory(source)) {
-            return;
-        }
         try {
-            Path target = folder.resolve(filesOf(to));
-            Files.createDirectories(target.getParent());
-            Files.move(source, target);
-        } catch (IOException unmovable) {
-            throw new UncheckedIOException("The files of " + from + " cannot be moved", unmovable);
+            files.move(StorageKey.of(filesOf(from)), StorageKey.of(filesOf(to)));
+        } catch (ObjectNotFoundException none) {
+            // A document that holds no files moves alone.
         }
     }
 
     private void deleteFiles(String documentPath) {
+        fileEntries(documentPath).forEach(entry -> files.delete(StorageKey.of(entry)));
         try {
-            for (String entry : fileEntries(documentPath)) {
-                Files.deleteIfExists(folder.resolve(entry));
-            }
-            Files.deleteIfExists(folder.resolve(filesOf(documentPath)));
+            files.deleteFolder(StorageKey.of(filesOf(documentPath)));
+        } catch (ObjectNotFoundException none) {
+            // It held no files.
+        }
+        try {
             Files.deleteIfExists(folder.resolve(documentPath));
         } catch (IOException undeletable) {
             throw new UncheckedIOException("The document file " + documentPath + " cannot be removed", undeletable);
@@ -648,9 +692,11 @@ public class DocumentStore {
         if (history == null || history.isEmpty()) {
             return Optional.empty();
         }
-        Path file = folder.resolve(filesOf(history.getLast().path)).resolve(name);
-        try {
-            return Files.isRegularFile(file) ? Optional.of(Files.readAllBytes(file)) : Optional.empty();
+        StorageKey key = StorageKey.of(filesOf(history.getLast().path) + SEPARATOR + name);
+        try (InputStream content = files.read(key).getInputStream()) {
+            return Optional.of(content.readAllBytes());
+        } catch (ObjectNotFoundException none) {
+            return Optional.empty();
         } catch (IOException unreadable) {
             throw new UncheckedIOException("The file " + name + " of " + documentId + " cannot be read", unreadable);
         }
@@ -674,26 +720,25 @@ public class DocumentStore {
             throw new IllegalStateException("'" + documentId + "' is no document of the library folder: it holds no files");
         }
         String entry = filesOf(history.getLast().path) + SEPARATOR + name;
-        try {
-            Path file = folder.resolve(entry);
-            if (content == null) {
-                if (!Files.deleteIfExists(file)) {
-                    return;
-                }
-            } else {
-                Files.createDirectories(file.getParent());
-                Files.write(file, content);
+        StorageKey key = StorageKey.of(entry);
+        if (content == null) {
+            if (fileEntries(history.getLast().path).stream().noneMatch(entry::equals)) {
+                return;
             }
-        } catch (IOException unwritable) {
-            throw new UncheckedIOException("The file " + name + " of " + documentId + " cannot be kept", unwritable);
+            files.delete(key);
+        } else {
+            files.write(key, Content.ofBytes(name, null, content));
         }
-        git.commitPaths(folder, new PathsCommit(messageOf(content == null ? "Removed the file " + name + " of" : "Kept the file " + name + " of",
-                documentId, actor, RevisionOrigin.WRITTEN), authorOf(actor), when, List.of(entry)));
+        // The bytes stay out of the history; the commit says which they were.
+        String said = messageOf(content == null ? "Removed the file " + name + " of" : "Kept the file " + name + " of", documentId, actor,
+                RevisionOrigin.WRITTEN) + (content == null ? "" : "\n" + FILE_LINE + entry + " sha256=" + checksumOf(content) + " bytes=" + content.length);
+        git.commitPaths(folder, new PathsCommit(said, authorOf(actor), when, List.of(entry)));
     }
 
-    /** The folder the documents are kept in. */
+    /** The folder the documents are kept in: the one the store was last opened on, where it is now before it was ever opened. */
     public Path folder() {
-        return folder;
+        Path opened = folder;
+        return opened != null ? opened : folders.get();
     }
 
     /** Where a document of the library folder stands in it, by its address: what a host shows as where a copy is held. */

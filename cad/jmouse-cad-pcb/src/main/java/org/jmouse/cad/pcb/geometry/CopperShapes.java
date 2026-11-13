@@ -25,7 +25,7 @@ public final class CopperShapes {
             List<PcbDrawing.Point> along = switch (piece) {
                 case RoundedTrack.Run run -> run.points();
                 case RoundedTrack.Bend bend -> CopperNets.arcPoints(new PcbDrawing.Arc(track.layer(), track.width(), bend.from(),
-                        bend.through(), bend.to(), "", ""), curveSteps);
+                        bend.through(), bend.to(), track.arrangement(), track.finish()), curveSteps);
             };
             for (PcbDrawing.Point point : along) {
                 if (points.isEmpty() || !points.getLast().equals(point)) {

@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
 import java.util.ArrayList;
@@ -42,7 +43,11 @@ public final class Teardrops {
      * @param halvings    how many halvings find where copper ends along a line, or how wide a drop's side may be
      * @param looks       how many steps a line beside the track is looked along for any of the copper
      */
-    public record Shape(int curveSteps, double widestShare, double insideEdge, int halvings, int looks) {
+    public record Shape(@Label("Curve steps") int curveSteps,
+                        @Label("Widest share") double widestShare,
+                        @Label("Inside edge") double insideEdge,
+                        @Label("Halvings") int halvings,
+                        @Label("Looks") int looks) {
     }
 
     /** A drop: the layer it is on, the track it widens, and its outline in millimetres. */

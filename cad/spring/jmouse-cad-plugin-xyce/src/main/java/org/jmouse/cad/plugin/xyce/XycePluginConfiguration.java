@@ -1,8 +1,10 @@
 package org.jmouse.cad.plugin.xyce;
 
+import org.jmouse.cad.spice.SpiceDevices;
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.spice.SpiceProcess;
-import org.jmouse.plugin.PluginSettingValues;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.ParameterValues;
+import org.jmouse.settings.Settings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,7 +23,7 @@ public class XycePluginConfiguration {
      * {@code jmouse.cad.xyce.*}: how this server reaches Xyce.
      *
      * @param command the program that runs a deck read from its standard input and prints the run's CSV on its output,
-     *                word by word — {@code docker run --rm -i jmcad-xyce} in a container —; empty for a server without it,
+     *                word by word — {@code docker run --rm -i jm_cad-xyce} in a container —; empty for a server without it,
      *                whose engine is then listed as off
      * @param timeout how long one run may take before its process is killed
      */
@@ -34,9 +36,9 @@ public class XycePluginConfiguration {
     }
 
     @Bean
-    public XycePlugin cadXycePlugin(XyceProperties properties, PluginSettings settings) {
-        PluginSettingValues values = settings.valuesOf(XycePlugin.ID);
+    public XycePlugin cadXycePlugin(XyceProperties properties, Settings settings, TableSource tables) {
+        ParameterValues values = settings.parameters(XycePlugin.ID, SpiceProcess.PROGRAM);
         SpiceProcess simulator = new SpiceProcess("Xyce", () -> values.command(SpiceProcess.COMMAND), () -> values.duration(SpiceProcess.TIMEOUT));
-        return new XycePlugin(simulator, properties.command(), properties.timeout());
+        return new XycePlugin(simulator, properties.command(), properties.timeout(), SpiceDevices.readFrom(tables));
     }
 }

@@ -1,12 +1,16 @@
 package org.jmouse.cad.plugin.mesh;
 
+import org.jmouse.cad.mesh.ModelMaterials;
+import org.jmouse.cad.table.ShippedTable;
+import org.jmouse.cad.settings.CadSettings;
+import org.jmouse.settings.Section;
 import org.jmouse.cad.settings.SettingsSection;
-import org.jmouse.cad.settings.SettingsOwner;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.cad.document.part.FetchCompletion;
 import org.jmouse.cad.exchange.AcceptedFiles;
 import org.jmouse.cad.exchange.DocumentExport;
 import org.jmouse.cad.exchange.DocumentImport;
+import org.jmouse.cad.mesh.MarkingCodes;
 import org.jmouse.cad.mesh.ModelCompletion;
 import org.jmouse.cad.mesh.ModelMeshes;
 import org.jmouse.cad.mesh.ModelModule;
@@ -27,10 +31,13 @@ import java.util.function.Supplier;
  */
 public final class MeshPlugin implements Plugin {
 
-    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/mesh/glb. */
-    public static final SettingsSection<PcbGlbExport.Settings> GLB = new SettingsSection<>("plugin/mesh/glb", "PCB as GLB", SettingsOwner.ENGINE_DATA, PcbGlbExport.Settings.class);
-
     public static final String ID = "cad-mesh";
+
+    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/cad-mesh/glb. */
+    public static final SettingsSection<PcbGlbExport.Settings> GLB = SettingsSection.ofPlugin(ID, "glb", "PCB as GLB", PcbGlbExport.Settings.class);
+
+    /** Its section of the settings tree (ADR 0004): what a model's markings are read by — the colour code, a part's mark words. */
+    public static final SettingsSection<MarkingCodes> MARKINGS = SettingsSection.ofPlugin(ID, "markings", "Model markings", MarkingCodes.class);
 
     private final Supplier<List<ModelSource>> sources;
     private final List<DocumentExport>        exports;
@@ -45,13 +52,19 @@ public final class MeshPlugin implements Plugin {
     }
 
     @Override
+    public List<Section> settings() {
+        return List.of(CadSettings.declarationOf(GLB), CadSettings.declarationOf(MARKINGS));
+    }
+
+    @Override
     public PluginDescriptor descriptor() {
         return PluginDescriptor.ofArtifact(ID, "3D models", MeshPlugin.class).drawnBy(MeshPlugin.class, "mesh.svg");
     }
 
     @Override
     public void register(PluginRegistration registration) {
-        registration.contribute(SettingsSection.POINT, GLB);
+        // The tables its module reads, as pages of the library.
+        registration.contribute(ShippedTable.POINT, ModelMaterials.SHIPPED.shipping(ModelMaterials.TABLE));
         registration.declare(ModelSource.POINT);
         registration.declare(ModelMeshes.READERS);
         registration.contribute(DocumentModule.POINT, new ModelModule());

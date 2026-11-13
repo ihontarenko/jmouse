@@ -1,0 +1,84 @@
+# OA-03. A TL072 as an inverting amplifier: the non-inverting input sits on the common, and feedback through Rf holds
+# the inverting input there too — a virtual earth. The input current is then in / Rin, all of it goes on through Rf,
+# and the output is whatever pushes it: out = −(Rf / Rin) · in. With 10 kΩ and 100 kΩ a 0.5 V sine comes out 5 V and
+# upside down; past about 1.35 V of input the output meets the rails, near ±13.5 V, and clips.
+circuit:inverting-amplifier("Inverting amplifier") {
+    meta {
+        summary: "A TL072 with its non-inverting input on the common: Av = −Rf / Rin, the output upside down, 180° from the input."
+        description: """
+            Idea: feedback holds the inverting input at the common's 0 V, a virtual earth. The input resistor then
+            carries in / Rin, the same current must leave through Rf, and the output has to stand on the other side
+            of zero to pull it: out = −(Rf / Rin) · in.
+
+            Try: change Rf and Rin — only their ratio matters. Make them equal: the output is the input turned over,
+            a gain of −1. Raise the amplitude past about 1.35 V and the output meets the rails and clips.
+
+            Watch: CH1 the input, CH2 the output. When CH1 is at its top, CH2 is at its bottom: the two are 180°
+            apart. The inverting input itself hardly moves — a few millivolts while the output swings volts.
+
+            Ask: what input resistance does the generator see? Why can the gain be less than one here, and not in
+            the non-inverting amplifier?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(0.5 V, in: 0.05 V .. 3 V, step: 0.05 V, "Input amplitude: past 1.35 V the output clips")
+    parameter:F(1 kHz, in: 100 Hz .. 20 kHz, step: 100 Hz, "Input frequency")
+    parameter:R_input(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Rin, the input resistor")
+    parameter:R_feedback(100 kΩ, in: 1 kΩ .. 1000 kΩ, step: 1 kΩ, "Rf, the feedback resistor")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:RI(resistor, [in, inverting], resistance: R_input)
+    part:RF(resistor, [inverting, out], resistance: R_feedback)
+    part:U1(tl072, [A.non_inverting_input: 0, A.inverting_input: inverting, A.output: out, Vcc: vp, GND: vn])
+    part:RL(resistor, [out, 0], resistance: 10 kΩ)
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:GND1(common, at: 360 360)
+    place:G1(at: 400 840, rotate: 90)
+    place:RI(at: 600 520)
+    mark:Ji(junction, at: 720 520)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    place:RF(at: 880 200)
+    mark:Jo(junction, at: 1040 560)
+    place:RL(at: 1280 760, rotate: 90)
+    mark:Jr(junction, at: 760 1040)
+    mark:GND2(common, at: 760 1120)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: RI.positive, via: 400 520)
+    wire:W5(RI.negative, to: Ji.j)
+    wire:W6(Ji.j, to: U1.A.inverting_input)
+    wire:W7(Ji.j, to: RF.positive, via: 720 200)
+    wire:W8(RF.negative, to: Jo.j, via: 1040 200)
+    wire:W9(LP2.label, to: U1.Vcc)
+    wire:W10(U1.GND, to: LN2.label)
+    wire:W11(U1.A.output, to: Jo.j)
+    wire:W12(Jo.j, to: RL.positive, via: 1280 560)
+    wire:W13(U1.A.non_inverting_input, to: Jr.j, via: 760 600)
+    wire:W14(G1.negative, to: Jr.j, via: 400 1040)
+    wire:W15(RL.negative, to: Jr.j, via: 1280 1040)
+    wire:W16(Jr.j, to: GND2.common)
+    probe:CH1(in, 0.5 V/div)
+    probe:CH2(out, 2 V/div)
+    expect("the output is ten times the input", from: "|Av| = Rf / Rin = 100 kΩ / 10 kΩ = 10, so 0.5 V in gives 5 V out") {
+        measure(maximum, out, after: 1 ms)
+        near(5 V, +- 2%)
+    }
+    expect("and upside down", from: "Av = −10: out − in peaks at (10 + 1) · 0.5 V = 5.5 V when inverted; in phase it would be 4.5 V") {
+        measure(maximum, out - in, after: 1 ms)
+        near(5.5 V, +- 2%)
+    }
+    expect("the inverting input is a virtual earth", from: "the inputs differ by out / A(f): 5 V over the TL072's gain at 1 kHz, GBW / f = 3 MHz / 1 kHz = 3000: 1.67 mV") {
+        measure(maximum, inverting, after: 1 ms)
+        near(1.67 mV, +- 5%)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+}

@@ -1,8 +1,9 @@
 package org.jmouse.cad.spice;
 
+import org.jmouse.settings.Section;
+import org.jmouse.settings.Parameter;
 import org.jmouse.core.process.PipedProgram;
 import org.jmouse.core.process.PipedProgramException;
-import org.jmouse.plugin.PluginSetting;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -11,7 +12,7 @@ import java.util.function.Supplier;
 
 /**
  * A SPICE program as a process that reads a deck from its standard input and prints its answer on its output — {@code
- * ngspice_con -b} on this machine, {@code docker run --rm -i jmcad-ngspice} or {@code jmcad-xyce} in a container. One
+ * ngspice_con -b} on this machine, {@code docker run --rm -i jm_cad-ngspice} or {@code jm_cad-xyce} in a container. One
  * process a run; it is killed when it outlives its time. What the deck asks it to print is its dialect's business
  * ({@link SpiceDialect}); this only starts it, feeds it and says why it failed, in its own name.
  */
@@ -47,8 +48,17 @@ public final class SpiceProcess implements SpiceSimulator {
      * The setting a plugin running a SPICE program declares for how it is started; {@code usual} is what the server is
      * configured with.
      */
-    public static PluginSetting commandSetting(String program, String answer, List<String> usual) {
-        return PluginSetting.command(COMMAND, "Program", "How " + program + " is started on the server, one word to a line. "
+    /** The section a simulator's program stands in. */
+    public static final String PROGRAM = "program";
+
+    /** A simulator's section of settings: how it is started, and how long a run may take. */
+    public static Section programSection(String program, String answer, List<String> usual, Duration usualTimeout) {
+        return Section.fixed(PROGRAM, "Program", "How " + program + " is started on the server, and how long it may run.",
+                             List.of(commandSetting(program, answer, usual), timeoutSetting(program, usualTimeout)));
+    }
+
+    public static Parameter commandSetting(String program, String answer, List<String> usual) {
+        return Parameter.command(COMMAND, "Program", "How " + program + " is started on the server, one word to a line. "
                 + "It is handed a deck on its standard input and prints " + answer + ". Empty turns the engine off.", usual);
     }
 
@@ -56,8 +66,8 @@ public final class SpiceProcess implements SpiceSimulator {
      * The setting a plugin running a SPICE program declares for how long one run may take, from a second to half an
      * hour; {@code usual} is what the server is configured with.
      */
-    public static PluginSetting timeoutSetting(String program, Duration usual) {
-        return PluginSetting.duration(TIMEOUT, "Longest run", "How long one " + program + " run may take before it is "
+    public static Parameter timeoutSetting(String program, Duration usual) {
+        return Parameter.duration(TIMEOUT, "Longest run", "How long one " + program + " run may take before it is "
                 + "stopped.", usual, Duration.ofSeconds(1), Duration.ofMinutes(30));
     }
 

@@ -75,11 +75,21 @@ final class SheetReading {
     static boolean atSource(TokenCursor cursor) {
         Token current = cursor.lookAt(0);
         Token next = cursor.lookAt(1);
-        return current != null && current.type() == SheetToken.T_SOURCE
+        return current != null && namesSource(current)
                 && !SourceReading.touches(cursor, cursor.lookAt(-1), current)
                 && !SourceReading.touches(cursor, current, next)
                 && !(next != null && ASSIGNED.equals(next.value()));
     }
+
+    /**
+     * Whether a token is the word {@code source}: by its kind where this language lexed it, by its written word where a host
+     * language lexed the sheet's lines — a CAD table — and knows no such kind.
+     */
+    private static boolean namesSource(Token token) {
+        return token.type() == SheetToken.T_SOURCE || SOURCE_WORD.equals(token.value());
+    }
+
+    private static final String SOURCE_WORD = SheetToken.T_SOURCE.getTokenTemplates()[0];
 
     /** What sets a named value: {@code name = value}. */
     private static final String ASSIGNED = "=";
@@ -99,7 +109,7 @@ final class SheetReading {
 
     /** {@code source page 7 table "6.3 Recommended"}, to the end of the line; the cursor stands on {@code source}. */
     static SheetSource citation(TokenCursor cursor) {
-        Token source = cursor.ensure(SheetToken.T_SOURCE);
+        Token source = cursor.next();
         Map<String, String> citation = new LinkedHashMap<>();
         while (!atLineEnd(cursor)) {
             if (!atWord(cursor)) {

@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.odb;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.PcbDrills;
@@ -25,6 +26,7 @@ import org.jmouse.odb.OdbSymbol;
 import org.jmouse.strokefont.StrokeFont;
 
 import java.time.Clock;
+import java.util.function.Supplier;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +47,8 @@ public final class PcbOdbExport implements DocumentExport {
      * @param top    how the top one is called
      * @param bottom how the bottom one is called
      */
-    public record FaceNames(String top, String bottom) {
+    public record FaceNames(@Label("Top") String top,
+                            @Label("Bottom") String bottom) {
 
         /** The one on a side: {@code top} or {@code bottom}. */
         String of(String side) {
@@ -60,7 +63,9 @@ public final class PcbOdbExport implements DocumentExport {
      * @param bottom how the bottom one is called
      * @param inner  how an inner layer is called, by its number from the top: {@code inner%d}
      */
-    public record CopperNames(String top, String bottom, String inner) {
+    public record CopperNames(@Label("Top") String top,
+                              @Label("Bottom") String bottom,
+                              @Label("Inner") String inner) {
 
         /** The outer one on a side: {@code top} or {@code bottom}. */
         String of(String side) {
@@ -69,7 +74,7 @@ public final class PcbOdbExport implements DocumentExport {
     }
 
     /**
-     * The export's data ({@code settings/plugin/odb/export}).
+     * The export's data ({@code settings/plugin/cad-odb/export}).
      *
      * @param id         its word on the exchange routes
      * @param title      what the export is called where formats are offered
@@ -81,12 +86,19 @@ public final class PcbOdbExport implements DocumentExport {
      * @param silkscreen how the silkscreen layers are called
      * @param drill      what the layer of the through holes is called
      */
-    public record Settings(String id, String title, OdbJob.Origin origin, String step, CopperNames copper, FaceNames mask,
-                           FaceNames paste, FaceNames silkscreen, String drill) {
+    public record Settings(@Label("ID") String id,
+                           @Label("Title") String title,
+                           @Label("Origin") OdbJob.Origin origin,
+                           @Label("Step") String step,
+                           @Label("Copper") CopperNames copper,
+                           @Label("Mask") FaceNames mask,
+                           @Label("Paste") FaceNames paste,
+                           @Label("Silkscreen") FaceNames silkscreen,
+                           @Label("Drill") String drill) {
     }
 
-    private final Settings              settings;
-    private final PcbArtwork.Settings artwork;
+    private final Supplier<Settings>              settings;
+    private final Supplier<PcbArtwork.Settings> artwork;
     private final StrokeFont            font;
     private final Clock                 clock;
 
@@ -94,7 +106,11 @@ public final class PcbOdbExport implements DocumentExport {
      * @param artwork what the copper, the mask, the paste and the silkscreen are drawn with, as every format draws them
      * @param clock   when the job is written, as its history says
      */
-    public PcbOdbExport(Settings settings, PcbArtwork.Settings artwork, StrokeFont font, Clock clock) {
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
+
+    public PcbOdbExport(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, StrokeFont font, Clock clock, CadStandards standards) {
+        this.standards = standards;
         this.settings = settings;
         this.artwork = artwork;
         this.font = font;
@@ -103,12 +119,12 @@ public final class PcbOdbExport implements DocumentExport {
 
     @Override
     public String id() {
-        return settings.id();
+        return settings.get().id();
     }
 
     @Override
     public String title() {
-        return settings.title();
+        return settings.get().title();
     }
 
     /** A factory makes the pcb from these files: written only from a pcb its checks pass. */
@@ -126,9 +142,9 @@ public final class PcbOdbExport implements DocumentExport {
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
         PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
         List<String> notes = new ArrayList<>(fabrication.notes());
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork, font);
-        OdbJob job = new OdbJob(fabrication.name(), settings.step(), settings.origin(), OffsetDateTime.now(clock));
+        Map<String, Double> rules = standards.pcbRules().valuesOf(fabrication.pcb().rules());
+        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork.get(), font);
+        OdbJob job = new OdbJob(fabrication.name(), settings.get().step(), settings.get().origin(), OffsetDateTime.now(clock));
         PcbProfile profile = PcbProfile.of(drawn);
         notes.addAll(profile.notes());
         job.profile(new OdbFeatures().surface(contour(profile.outline()), profile.cutouts().stream().map(PcbOdbExport::contour).toList(), true));
@@ -137,22 +153,22 @@ public final class PcbOdbExport implements DocumentExport {
         String bottom = PcbDrawing.BOTTOM;
         List<String> copper = fabrication.pcb().copperLayerIds();
         List<String> linked = new ArrayList<>(copper.stream().map(layer -> copperName(layer, copper)).toList());
-        linked.add(settings.drill());
+        linked.add(settings.get().drill());
         OdbEda eda = new OdbEda(linked);
         PcbOdbConnectivity connectivity = new PcbOdbConnectivity(fabrication, eda, notes);
         job.layer(OdbLayer.of(OdbComponents.Side.TOP.layer(), OdbLayer.Type.COMPONENT), new OdbFeatures());
-        job.layer(OdbLayer.of(settings.silkscreen().of(top), OdbLayer.Type.SILK_SCREEN), featuresOf(drawn.silkscreen(top), outlines))
-                .layer(OdbLayer.of(settings.paste().of(top), OdbLayer.Type.SOLDER_PASTE), featuresOf(drawn.paste(top), outlines))
-                .layer(OdbLayer.of(settings.mask().of(top), OdbLayer.Type.SOLDER_MASK), featuresOf(drawn.maskOpenings(top), outlines));
+        job.layer(OdbLayer.of(settings.get().silkscreen().of(top), OdbLayer.Type.SILK_SCREEN), featuresOf(drawn.silkscreen(top), outlines))
+                .layer(OdbLayer.of(settings.get().paste().of(top), OdbLayer.Type.SOLDER_PASTE), featuresOf(drawn.paste(top), outlines))
+                .layer(OdbLayer.of(settings.get().mask().of(top), OdbLayer.Type.SOLDER_MASK), featuresOf(drawn.maskOpenings(top), outlines));
         for (String layer : copper) {
             String name = copperName(layer, copper);
             job.layer(OdbLayer.of(name, OdbLayer.Type.SIGNAL), featuresOf(drawn.copper(layer), outlines,
                     (feature, first, end) -> connectivity.copper(feature, name, first, end)));
         }
-        job.layer(OdbLayer.of(settings.mask().of(bottom), OdbLayer.Type.SOLDER_MASK), featuresOf(drawn.maskOpenings(bottom), outlines))
-                .layer(OdbLayer.of(settings.paste().of(bottom), OdbLayer.Type.SOLDER_PASTE), featuresOf(drawn.paste(bottom), outlines))
-                .layer(OdbLayer.of(settings.silkscreen().of(bottom), OdbLayer.Type.SILK_SCREEN), featuresOf(drawn.silkscreen(bottom), outlines))
-                .layer(OdbLayer.drill(settings.drill(), copperName(copper.getFirst(), copper), copperName(copper.getLast(), copper)),
+        job.layer(OdbLayer.of(settings.get().mask().of(bottom), OdbLayer.Type.SOLDER_MASK), featuresOf(drawn.maskOpenings(bottom), outlines))
+                .layer(OdbLayer.of(settings.get().paste().of(bottom), OdbLayer.Type.SOLDER_PASTE), featuresOf(drawn.paste(bottom), outlines))
+                .layer(OdbLayer.of(settings.get().silkscreen().of(bottom), OdbLayer.Type.SILK_SCREEN), featuresOf(drawn.silkscreen(bottom), outlines))
+                .layer(OdbLayer.drill(settings.get().drill(), copperName(copper.getFirst(), copper), copperName(copper.getLast(), copper)),
                         holes(fabrication, connectivity))
                 .layer(OdbLayer.of(OdbComponents.Side.BOTTOM.layer(), OdbLayer.Type.COMPONENT), new OdbFeatures());
         for (OdbComponents.Side side : OdbComponents.Side.values()) {
@@ -164,9 +180,9 @@ public final class PcbOdbExport implements DocumentExport {
 
     private String copperName(String layer, List<String> copper) {
         if (PcbDrawing.TOP.equals(layer) || PcbDrawing.BOTTOM.equals(layer)) {
-            return settings.copper().of(layer);
+            return settings.get().copper().of(layer);
         }
-        return settings.copper().inner().formatted(copper.indexOf(layer));
+        return settings.get().copper().inner().formatted(copper.indexOf(layer));
     }
 
     /**
@@ -228,7 +244,7 @@ public final class PcbOdbExport implements DocumentExport {
         OdbFeatures features = new OdbFeatures();
         for (PcbDrills.Drill drill : PcbDrills.of(fabrication.pcb(), fabrication.footprints())) {
             OdbSymbol bit = new OdbSymbol.Round(drill.width());
-            connectivity.hole(drill.from(), settings.drill(), features.count());
+            connectivity.hole(drill.from(), settings.get().drill(), features.count());
             if (drill.round()) {
                 features.pad(upward(drill.from()), bit, 0, true);
             } else {

@@ -1,0 +1,66 @@
+# D-05. A BZX55C5V1 Zener diode, reversed, through a series resistor across an adjustable source. Below about 5 V the
+# Zener blocks and the output follows the input; above it, the Zener breaks down and conducts whatever it takes to hold
+# its 5.1 V. Every volt more at the input stands across the resistor, and the extra current goes down the Zener: the
+# output stops rising. The sweep from 0 V to 20 V draws the bent line.
+circuit:zener-limiter("Zener limiter") {
+    meta {
+        summary: "A BZX55C5V1 through a resistor: the output follows the input up to about 5 V and stops there."
+        description: """
+            Idea: a Zener diode, turned against the current, blocks until its breakdown voltage and then conducts
+            as much as it must to stay there. With a resistor in front, it clamps its node: below 5.1 V the output is
+            the input, above it the output stays put and the resistor takes the rest.
+
+            Try: start with the input at 3 V: the output follows it, nothing flows. Raise it past 5 V: the output
+            stops near 5.2 V while the input climbs on. Change R: the clamp holds, only the current changes.
+
+            Watch: the voltmeter across the Zener, the ammeter in the loop, and the sweep from 0 V to 20 V — a line
+            that rises with the input and then bends flat at the Zener voltage, creeping only through the Zener's own
+            resistance.
+
+            Ask: at 12 V in, how much power does the resistor take, and how much the Zener? What happens to the clamp
+            if a load resistor of 470 Ω is put across the output?
+            """
+        category: diodes-and-rectifiers
+        tags: diodes, example, d-05
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 0 V .. 20 V, step: 0.1 V, "Input voltage")
+    parameter:R(680 Ω, in: 100 Ω .. 4.7 kΩ, step: 10 Ω, "Series resistor")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A1(ammeter, [in: in, out: top])
+    part:R1(resistor, [top, out], resistance: R)
+    part:D1(bzx55c5v1, [anode: 0, cathode: out])
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:V1(at: 320 560, rotate: 90)
+    place:A1(at: 520 360)
+    place:R1(at: 800 360)
+    place:D1(at: 1040 560, rotate: 270)
+    place:VM1(at: 1280 560, rotate: 90)
+    mark:Jo(junction, at: 1040 360)
+    mark:Jb(junction, at: 1040 800)
+    mark:GND1(ground, at: 1040 880)
+    wire:W1(V1.positive, to: A1.in, via: 320 360)
+    wire:W2(A1.out, to: R1.positive)
+    wire:W3(R1.negative, to: Jo.j)
+    wire:W4(Jo.j, to: D1.cathode)
+    wire:W5(Jo.j, to: VM1.plus, via: 1280 360)
+    wire:W6(V1.negative, to: Jb.j, via: 320 800)
+    wire:W7(D1.anode, to: Jb.j)
+    wire:W8(VM1.minus, to: Jb.j, via: 1280 800)
+    wire:W9(Jb.j, to: GND1.ground)
+    probe:CH1(in, 5 V/div)
+    probe:CH2(out, 1 V/div)
+    expect("the output stops at the Zener voltage", from: "BZX55C5V1 datasheet: VZ 4.8 … 5.4 V at IZ 5 mA; about 5.2 V at 10 mA, its 20 Ω adding 0.1 V") {
+        measure(final, out)
+        within(4.95 V .. 5.3 V)
+    }
+    expect("and the resistor takes the rest of the input", from: "I = (U − VZ) / R = (12 V − 5.2 V) / 680 Ω ≈ 10 mA") {
+        measure(final, current: R1)
+        within(9.7 mA .. 10.4 mA)
+    }
+    analysis(transient, for: 1 ms)
+    view:operating_point
+    view:dc_sweep(parameter: U, from: 0, to: 20, points: 201)
+    view:transient_response(primary)
+}

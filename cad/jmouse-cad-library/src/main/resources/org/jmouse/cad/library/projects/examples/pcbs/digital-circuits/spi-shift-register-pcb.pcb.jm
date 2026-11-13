@@ -1,0 +1,72 @@
+# The SPI shift register laid out as a pcb one could order: the 74HC595 in SOIC-16, its outputs facing the LED bar
+# in DIP-16 — turned over so its anodes face the register —, a column of 0805 series resistors between them, one
+# opposite each anode, and a 1×6 header on the bus side where the bench's supply, ground, clock, data, select and the
+# data back meet the pcb. Two layers — the signals on the top, what must cross under on the bottom; the bottom a
+# ground plane the bar's cathodes reach through their holes and the register's ground pins through vias of their own.
+pcb:spi-shift-register-pcb("SPI into a shift register — pcb") {
+    meta {
+        summary: "The SPI shift register as a two-layer pcb: a 74HC595 in SOIC-16, the LED bar in DIP-16, the series resistors in 0805, a header to the bench's bus, a ground plane under it all."
+        category: digital-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(spi-shift-register)
+    rules(standard)
+    layers(2)
+    edge("M1 0H52A1 1 0 0 1 53 1V29A1 1 0 0 1 52 30H1A1 1 0 0 1 0 29V1A1 1 0 0 1 1 0Z")
+    place(DS1, at: 6 15, rotate: 180)
+    place(R8, at: 13 6.11, rotate: 180)
+    place(R7, at: 13 8.65, rotate: 180)
+    place(R6, at: 13 11.19, rotate: 180)
+    place(R5, at: 13 13.73, rotate: 180)
+    place(R4, at: 13 16.27, rotate: 180)
+    place(R3, at: 13 18.81, rotate: 180)
+    place(R2, at: 13 21.35, rotate: 180)
+    place(R1, at: 13 23.89, rotate: 180)
+    place(U1, at: 31 15)
+    place(J1, at: 48 15)
+    track(top, width: 0.4, from: 28.55 19.445, to: 28.55 21.045)
+    track(top, width: 0.4, from: 33.45 14.365, to: 35.05 14.365)
+    track(top, width: 0.4, from: 9.81 23.89, to: 12 23.89)
+    track(top, width: 0.4, from: 9.81 21.35, to: 12 21.35)
+    track(top, width: 0.4, from: 9.81 18.81, to: 12 18.81)
+    track(top, width: 0.4, from: 9.81 16.27, to: 12 16.27)
+    track(top, width: 0.4, from: 9.81 13.73, to: 12 13.73)
+    track(top, width: 0.4, from: 9.81 11.19, to: 12 11.19)
+    track(top, width: 0.4, from: 9.81 8.65, to: 12 8.65)
+    track(top, width: 0.4, from: 9.81 6.11, to: 12 6.11)
+    track(top, width: 0.6, from: 33.45 18.175, to: 31.85 18.175, to: 31.85 10.555, to: 33.45 10.555)
+    track(top, width: 0.4, from: 14 13.73, to: 14.635 14.365, to: 28.55 14.365)
+    track(top, width: 0.4, from: 33.45 19.445, to: 46.095 19.445, to: 48 21.35)
+    track(top, width: 0.6, from: 33.45 10.555, to: 46.095 10.555, to: 48 8.65)
+    track(top, width: 0.4, from: 33.45 16.905, to: 44.825 16.905, to: 48 13.73)
+    track(top, width: 0.4, from: 33.45 15.635, to: 34.65 15.635)
+    track(bottom, width: 0.4, from: 34.65 15.635, to: 44.825 15.635, to: 48 18.81)
+    track(top, width: 0.4, from: 33.45 13.095, to: 34.65 13.095)
+    track(bottom, width: 0.4, from: 34.65 13.095, to: 44.825 13.095, to: 48 16.27)
+    track(top, width: 0.4, from: 14 16.27, to: 13.1 15.37, to: 13.1 12.37, to: 25.7 12.37, to: 26.425 13.095, to: 28.55 13.095)
+    track(top, width: 0.4, from: 14 11.19, to: 15.5 9.69, to: 30.2 9.69, to: 30.2 15.635, to: 28.55 15.635)
+    track(top, width: 0.4, from: 14 18.81, to: 14 17.61)
+    track(top, width: 0.4, from: 27.35 11.825, to: 28.55 11.825)
+    track(bottom, width: 0.4, from: 14 17.61, to: 21.565 17.61, to: 27.35 11.825)
+    track(top, width: 0.4, from: 14 8.65, to: 30.8 8.65, to: 30.8 16.905, to: 28.55 16.905)
+    track(top, width: 0.4, from: 14 21.35, to: 14 20.15)
+    track(top, width: 0.4, from: 27.35 10.555, to: 28.55 10.555)
+    track(bottom, width: 0.4, from: 14 20.15, to: 20.3 20.15, to: 28.622 11.828, to: 27.35 10.555)
+    track(top, width: 0.4, from: 14 6.11, to: 12.5 4.61, to: 8.3 4.61, to: 8.3 25.31, to: 14.6 25.31, to: 21.735 18.175, to: 28.55 18.175)
+    track(top, width: 0.4, from: 14 23.89, to: 14 22.69)
+    track(top, width: 0.4, from: 34.65 11.825, to: 33.45 11.825)
+    track(bottom, width: 0.4, from: 14 22.69, to: 23.785 22.69, to: 34.65 11.825)
+    via(at: 28.55 21.045, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 35.05 14.365, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 34.65 15.635, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 34.65 13.095, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 14 17.61, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 27.35 11.825, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 14 20.15, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 27.35 10.555, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 14 22.69, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 34.65 11.825, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.3, "M0.5 0.5H52.5V29.5H0.5Z")
+}

@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EagleSchematicImportTest {
 
     /** The marks as the shipped library draws them. */
-    private static final SheetMarks MARKS = SheetMarks.of(CadLibrary.library(), EagleLibraries.standard().markSymbols());
+    private static final SheetMarks MARKS = SheetMarks.of(CadLibrary.library(), EagleLibraries.shipped().markSymbols());
 
     /**
      * A divider and a dual amplifier: a resistor turned a quarter, one mirrored, a ground supply, a net with a label,
@@ -157,7 +157,7 @@ class EagleSchematicImportTest {
                 </segment></bus></busses>
                 <nets>""");
         EagleSchematic schematic = EagleReader.read("divider.sch", withBus).schematic().orElseThrow();
-        String written = language.write(EagleSchematicImport.read(schematic, "divider.sch", "Divider", EagleLibraries.standard(), MARKS).documents().designs().getFirst());
+        String written = language.write(EagleSchematicImport.read(schematic, "divider.sch", "Divider", EagleLibraries.shipped(), MARKS).documents().designs().getFirst());
         assertTrue(written.contains("bus:B1(D"), written);
         assertTrue(written.contains("D0") && written.contains("D1") && written.contains("CLK"), written);
     }
@@ -166,7 +166,7 @@ class EagleSchematicImportTest {
     @DisplayName("files each Eagle library as a category of its own, under Eagle's, standing before what it holds")
     void eachLibraryIsACategory() {
         EagleSchematic schematic = EagleReader.read("divider.sch", SCHEMATIC).schematic().orElseThrow();
-        EagleLibraries filing = EagleLibraries.standard();
+        EagleLibraries filing = EagleLibraries.shipped();
         ImportedDocuments read = EagleDesignImport.read(schematic, "divider.sch", Optional.empty(), "Divider", filing, MARKS);
         String category = filing.libraryCategory() + "-test-library";
         List<DocumentNode> library = read.library();
@@ -179,7 +179,7 @@ class EagleSchematicImportTest {
 
     private ImportedDocuments imported() {
         EagleSchematic schematic = EagleReader.read("divider.sch", SCHEMATIC).schematic().orElseThrow();
-        return EagleSchematicImport.read(schematic, "divider.sch", "Divider", EagleLibraries.standard(), MARKS).documents();
+        return EagleSchematicImport.read(schematic, "divider.sch", "Divider", EagleLibraries.shipped(), MARKS).documents();
     }
 
     private String text(DocumentNode document) {

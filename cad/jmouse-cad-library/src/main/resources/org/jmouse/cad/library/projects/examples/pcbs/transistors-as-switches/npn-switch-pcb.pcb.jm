@@ -1,0 +1,31 @@
+# NPN transistor as a switch laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:npn-switch-pcb("NPN transistor as a switch — pcb") {
+    meta {
+        summary: "NPN transistor as a switch laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: transistors-as-switches
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(npn-switch)
+    layers(2)
+    edge("M1 0H35A1 1 0 0 1 36 1V25A1 1 0 0 1 35 26H1A1 1 0 0 1 0 25V1A1 1 0 0 1 1 0Z")
+    place(RB, at: 18.5 17.5)
+    place(RL, at: 29 5, rotate: 270)
+    place(D1, at: 29 12.5, rotate: 270)
+    place(Q1, at: 28 20.5)
+    place(J1, footprint: "FP.HDR:1X6-P2.54-V", nets: [0: 1, base: 2, collector: 3, control: 4, drive: 5, vcc: 6], at: 5.5 14.5)
+    track(top, width: 0.25, from: 29 6, to: 30.35 7.35, to: 30.35 12.42, to: 29 13.77)
+    track(bottom, width: 0.25, from: 29 11.23, to: 30.54 12.77, to: 30.54 20.5)
+    track(top, width: 0.25, from: 17.5 17.5, to: 6.31 17.5, to: 5.5 18.31)
+    track(top, width: 0.25, from: 19.5 17.5, to: 17.77 15.77, to: 5.5 15.77)
+    track(top, width: 0.25, from: 29 11.23, to: 27 13.23, to: 5.5 13.23)
+    track(bottom, width: 0.25, from: 28 20.5, to: 18.1 10.6)
+    track(top, width: 0.25, from: 18.1 10.6, to: 5.59 10.6, to: 5.5 10.69)
+    track(top, width: 0.25, from: 29 4, to: 22.25 4)
+    track(bottom, width: 0.25, from: 22.25 4, to: 22.25 4.1, to: 5.5 20.85)
+    via(at: 18.1 10.6, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 22.25 4, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H35.5V25.5H0.5Z")
+}

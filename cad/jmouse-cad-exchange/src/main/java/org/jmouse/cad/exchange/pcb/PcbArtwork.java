@@ -1,6 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
-import org.jmouse.cad.settings.SettingsOwner;
+import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
@@ -38,7 +38,7 @@ import java.util.function.ToDoubleFunction;
 public final class PcbArtwork {
 
     /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/pcb/artwork. */
-    public static final SettingsSection<Settings> SECTION = new SettingsSection<>("pcb/artwork", "PCB artwork", SettingsOwner.ENGINE_DATA, Settings.class);
+    public static final SettingsSection<Settings> SECTION = new SettingsSection<>("pcb/artwork", "PCB artwork", Settings.class);
 
     private static final String SILKSCREEN  = "silkscreen";
     private static final String FABRICATION = "fabrication";
@@ -63,8 +63,16 @@ public final class PcbArtwork {
      * @param checks          how the pcb's checks measure
      * @param areas           how the pcb as made is drawn as areas for an editor and its 3D view
      */
-    public record Settings(double maskExpansion, double silkscreenWidth, double letterStroke, int curveSteps, int cornerSteps, double arcError,
-                           PlacedDesignator.Rules designator, Teardrops.Shape teardrops, Checks checks, Areas areas) {
+    public record Settings(@Label("Mask expansion") double maskExpansion,
+                           @Label("Silkscreen width") double silkscreenWidth,
+                           @Label("Letter stroke") double letterStroke,
+                           @Label("Curve steps") int curveSteps,
+                           @Label("Corner steps") int cornerSteps,
+                           @Label("Arc error") double arcError,
+                           @Label("Designator") PlacedDesignator.Rules designator,
+                           @Label("Teardrops") Teardrops.Shape teardrops,
+                           @Label("Checks") Checks checks,
+                           @Label("Areas for the editor and 3D") Areas areas) {
 
         /** The checks' own settings, the rest theirs as the artwork's. */
         public PcbChecks.Settings forChecks() {
@@ -73,17 +81,19 @@ public final class PcbArtwork {
     }
 
     /**
-     * @param tolerance how much nearer than a rule a value may be and still pass, in millimetres
+     * @param tolerance how much nearer than a rule a value may be and still pass
      * @param namedGaps how many narrow gaps are named one by one
      */
-    public record Checks(double tolerance, int namedGaps) {
+    public record Checks(@Label(value = "Tolerance", unit = "mm") double tolerance,
+                         @Label("Named gaps") int namedGaps) {
     }
 
     /**
      * @param steps     how many straight steps a quarter of a round end, a disc, an arc or a drill is drawn with
-     * @param tolerance how far an area's outline may move when it is simplified for a view, in millimetres
+     * @param tolerance how far an area's outline may move when it is simplified for a view
      */
-    public record Areas(int steps, double tolerance) {
+    public record Areas(@Label("Steps a quarter round takes") int steps,
+                        @Label(value = "Tolerance", unit = "mm") double tolerance) {
     }
 
     private final PcbFabrication         fabrication;

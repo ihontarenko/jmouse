@@ -1,0 +1,80 @@
+{
+  "colourCode": {
+    "source": "IEC 60062:2016, colour code for resistors",
+    "digits": [
+      "black",
+      "brown",
+      "red",
+      "orange",
+      "yellow",
+      "green",
+      "blue",
+      "violet",
+      "grey",
+      "white"
+    ],
+    "multipliers": {
+      "0": "black",
+      "1": "brown",
+      "2": "red",
+      "3": "orange",
+      "4": "yellow",
+      "5": "green",
+      "6": "blue",
+      "7": "violet",
+      "8": "grey",
+      "9": "white",
+      "-2": "silver",
+      "-1": "gold"
+    },
+    "tolerances": [
+      {
+        "share": 0.0005,
+        "colour": "grey"
+      },
+      {
+        "share": 0.001,
+        "colour": "violet"
+      },
+      {
+        "share": 0.0025,
+        "colour": "blue"
+      },
+      {
+        "share": 0.005,
+        "colour": "green"
+      },
+      {
+        "share": 0.01,
+        "colour": "brown"
+      },
+      {
+        "share": 0.02,
+        "colour": "red"
+      },
+      {
+        "share": 0.05,
+        "colour": "gold"
+      },
+      {
+        "share": 0.1,
+        "colour": "silver"
+      }
+    ],
+    "usualTolerance": 0.05,
+    "digitsByTolerance": [
+      {
+        "atMost": 0.02,
+        "digits": 3
+      },
+      {
+        "atMost": 1,
+        "digits": 2
+      }
+    ]
+  },
+  "part": {
+    "bodyText": "marking",
+    "toleranceParameter": "tolerance"
+  }
+}

@@ -19,11 +19,16 @@ import java.util.List;
  * @param revisions  the zone a revision's day is written in
  * @param simulation how much a simulation may ask, and how the longer ones are run
  * @param parts      how parts are looked for beyond the catalogue
+ * @param projects   what a reader's projects start as
  */
 @ConfigurationProperties("jmouse.cad")
 public record CadProperties(@DefaultValue Documents documents, @DefaultValue Library library,
                             @DefaultValue Revisions revisions, @DefaultValue Simulation simulation,
-                            @DefaultValue Parts parts) {
+                            @DefaultValue Parts parts, @DefaultValue Projects projects) {
+
+    /** @param draftsTitle what the place a reader's loose work is kept in is called when the engine makes it */
+    public record Projects(@DefaultValue("Drafts") String draftsTitle) {
+    }
 
     /** @param limit how many candidates each place parts are looked for in answers with at most */
     public record Parts(@DefaultValue("24") int limit) {
@@ -32,13 +37,13 @@ public record CadProperties(@DefaultValue Documents documents, @DefaultValue Lib
     /**
      * @param maximumLength the longest text a document may be, in characters
      * @param cachedReadings how many read documents are kept by checksum, so a document is read once per revision
-     * @param defaultCategory the category a new document whose text names none is filed in — its text then says so —; none
-     *                        when blank, the document left unfiled. A category itself is never filed by it: one naming no
-     *                        parent stands at the top.
+     * @param defaultCategory the category a new document whose text names none is filed in — its text then says so —: the
+     *                        library's own «Other» unless the installation names another; none when blank, the document left
+     *                        unfiled. A category itself is never filed by it: one naming no parent stands at the top.
      * @param routingBoards how many pcbs an editor lays copper on are kept read at once, for the router to answer every move
      */
     public record Documents(@DefaultValue("1000000") int maximumLength, @DefaultValue("2000") int cachedReadings,
-                            @DefaultValue("") String defaultCategory, @DefaultValue("16") int routingBoards) {
+                            @DefaultValue("general") String defaultCategory, @DefaultValue("16") int routingBoards) {
     }
 
     /**

@@ -1,0 +1,85 @@
+# DG-02. A dirty input made clean. The "button" is a 10 Hz square, and riding on it is noise — the ragged signal a
+# bouncing contact or a long wire delivers, crossing the logic threshold far more often than the button changes. An
+# RC low-pass and a 74HC1G14 Schmitt-trigger inverter turn it into one clean edge per change of the button: the RC
+# takes the spikes' speed away, and the Schmitt's two thresholds a volt apart take away what is left near the
+# switching point.
+circuit:debounce("RC and Schmitt trigger: debouncing") {
+    meta {
+        summary: "A noisy input through an RC and a 74HC1G14 Schmitt inverter: the raw signal crosses its threshold dozens of times, the output once per press."
+        description: """
+            Idea: a mechanical contact never changes cleanly — it bounces, and a wire picks up spikes. Logic reads
+            every crossing of its threshold as a new press. An RC low-pass slows the signal so a spike cannot carry
+            it far, and a Schmitt trigger switches up at one threshold (about 2.6 V at 5 V) and back down only at a
+            lower one (about 1.6 V), so the small wobble left after the filter cannot cross back.
+
+            Try: the default R and C give a time constant of 4.7 ms. Lower R to 1 kΩ: the filter passes more of
+            the spikes and the clean output starts to stutter. Raise the noise: the raw signal grows wilder, the
+            clean output does not care until the wobble after the filter is as large as the gap between the two
+            thresholds. Raise C: the output stays clean but lags the press further — a debouncer trades speed for
+            certainty.
+
+            Watch: the press (CH1), the raw signal (CH2) — dipping through 2.5 V again and again — the filtered
+            one (CH3) and the Schmitt's output (CH4), which changes once per edge of the press, about 3.5 ms late
+            and inverted.
+
+            Ask: how long after the press does the filtered signal fall to 2.4 V from 5 V with τ = 4.7 ms? Why would
+            a plain inverter, with one threshold, after the same RC still not be safe?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:R(47 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Filter resistor")
+    parameter:C(100 nF, in: 10 nF .. 1 µF, step: 10 nF, "Filter capacitor")
+    parameter:noise(1.5 V, in: 0 V .. 2.5 V, step: 0.1 V, "Noise on the input, RMS")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:G1(square-generator, [positive: press, negative: 0], high: 5 V, frequency: 10 Hz, duty: 0.5)
+    part:G2(noise-generator, [positive: raw, negative: press], level: noise, bandwidth: 2 kHz)
+    part:R1(resistor, [raw, filtered], resistance: R)
+    part:C1(capacitor, [filtered, 0], capacitance: C)
+    part:U1(74hc1g14, [a: filtered, output: clean, Vcc: vcc, GND: 0])
+    place:G2(at: 240 440, rotate: 90)
+    place:G1(at: 240 680, rotate: 90)
+    place:R1(at: 560 360)
+    place:C1(at: 720 520, rotate: 90)
+    place:U1(at: 960 360)
+    place:V1(at: 1280 600, rotate: 90)
+    mark:L1(label, vcc, at: 940 240)
+    mark:L2(label, vcc, at: 1280 440)
+    mark:Jf(junction, at: 720 360)
+    mark:Jg1(junction, at: 240 840)
+    mark:Jg2(junction, at: 720 840)
+    mark:Jg3(junction, at: 940 840)
+    mark:Jg4(junction, at: 1280 840)
+    mark:GND1(ground, at: 720 920)
+    wire:W1(G1.positive, to: G2.negative)
+    wire:W2(G2.positive, to: R1.positive, via: 240 360)
+    wire:W3(R1.negative, to: Jf.j)
+    wire:W4(Jf.j, to: C1.positive)
+    wire:W5(Jf.j, to: U1.a)
+    wire:W6(L1.label, to: U1.Vcc)
+    wire:W7(L2.label, to: V1.positive)
+    wire:W8(G1.negative, to: Jg1.j)
+    wire:W9(Jg1.j, to: Jg2.j)
+    wire:W10(C1.negative, to: Jg2.j)
+    wire:W11(Jg2.j, to: GND1.ground)
+    wire:W12(Jg2.j, to: Jg3.j)
+    wire:W13(U1.GND, to: Jg3.j)
+    wire:W14(Jg3.j, to: Jg4.j)
+    wire:W15(V1.negative, to: Jg4.j)
+    probe:CH1(press, 5 V/div)
+    probe:CH2(raw, 5 V/div)
+    probe:CH3(filtered, 5 V/div)
+    probe:CH4(clean, 5 V/div)
+    expect("raw: the noise crosses the threshold many times per press", from: "1.5 V RMS of noise on a 0 … 5 V signal dips through 2.5 V again and again") {
+        measure(frequency, raw, above: 2.5 V, after: 20 ms)
+        within(30 Hz .. 10 kHz)
+    }
+    expect("after RC and Schmitt: one change per press, 10 Hz", from: "τ = R · C = 4.7 ms; VT+ − VT− about 1 V at 5 V") {
+        measure(frequency, clean, above: 2.5 V, after: 20 ms)
+        near(10 Hz, +- 2%)
+    }
+    analysis(transient, for: 220 ms)
+    view:transient_response(primary)
+}

@@ -3,6 +3,7 @@ component:voltmeter("Voltmeter", type: meter) {
         designator: VM
         summary: "Reads the voltage of its red lead against its black one"
         category: instruments
+        bench: instrument
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }

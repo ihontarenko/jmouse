@@ -56,7 +56,7 @@ public final class CadLibrary implements CatalogueDocuments {
      * program carries of its own library, which owe it nothing ({@link LicenceLedger}).
      */
     public String holder() {
-        return CadStandards.landPatternRules().filing().authors();
+        return CadStandards.shipped().landPatternRules().filing().authors();
     }
 
     /** The slug of every document the library holds, in alphabetical order. */

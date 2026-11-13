@@ -5,11 +5,15 @@ import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.el.grammar.Nodes;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +87,24 @@ public record CategoryDocument(String slug, String title, String summary, String
         List<CategoryDocument> ordered = new ArrayList<>();
         addUnder(null, children, ordered);
         return ordered;
+    }
+
+    /**
+     * A category and every category under it, however deep: what a document filed "in" a category means to a reader looking
+     * there. A category that is none of {@code categories} is itself alone.
+     */
+    public static Set<String> within(String code, Collection<CategoryDocument> categories) {
+        Map<String, List<String>> children = new HashMap<>();
+        categories.forEach(category -> children.computeIfAbsent(category.parent(), ignored -> new ArrayList<>()).add(category.slug()));
+        Set<String> within = new LinkedHashSet<>();
+        Deque<String> waiting = new ArrayDeque<>(List.of(code));
+        while (!waiting.isEmpty()) {
+            String next = waiting.pop();
+            if (within.add(next)) {
+                waiting.addAll(children.getOrDefault(next, List.of()));
+            }
+        }
+        return within;
     }
 
     /**

@@ -11,6 +11,7 @@ component:bench-supply("Bench power supply", type: power-supply) {
         designator: PS
         summary: "A DC supply with a current limit: constant voltage, then constant current when the load asks for more"
         category: sources
+        bench: source
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }

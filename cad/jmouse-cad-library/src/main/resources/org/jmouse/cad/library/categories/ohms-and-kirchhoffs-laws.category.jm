@@ -1,0 +1,8 @@
+category:ohms-and-kirchhoffs-laws("Ohm's and Kirchhoff's laws") {
+    meta {
+        category: circuits
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

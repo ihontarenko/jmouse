@@ -1,0 +1,32 @@
+# Four waveforms laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:four-waveforms-pcb("Four waveforms — pcb") {
+    meta {
+        summary: "Four waveforms laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: signal-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(four-waveforms)
+    layers(2)
+    edge("M1 0H26A1 1 0 0 1 27 1V19A1 1 0 0 1 26 20H1A1 1 0 0 1 0 19V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 10 10, rotate: 270)
+    place(R2, at: 14 10, rotate: 270)
+    place(R3, at: 18 10, rotate: 270)
+    place(R4, at: 22.5 10, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, sawtooth: 2, sine: 3, square: 4, triangle: 5], at: 5.5 10)
+    track(top, width: 0.25, from: 10 11, to: 10 12.05)
+    track(top, width: 0.25, from: 14 11, to: 14 12.05)
+    track(top, width: 0.25, from: 18 11, to: 18 12.05)
+    track(top, width: 0.25, from: 22.5 11, to: 22.5 12.05)
+    track(top, width: 0.25, from: 10 9, to: 6.5 9, to: 5.5 10)
+    track(top, width: 0.25, from: 14 9, to: 13.1 9.9, to: 8.14 9.9, to: 5.5 12.54)
+    track(top, width: 0.25, from: 18 9, to: 18 9.45, to: 12.37 15.08, to: 5.5 15.08)
+    track(top, width: 0.25, from: 22.5 9, to: 20.96 7.46, to: 5.5 7.46)
+    via(at: 10 12.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 14 12.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 18 12.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 22.5 12.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H26.5V19.5H0.5Z")
+}

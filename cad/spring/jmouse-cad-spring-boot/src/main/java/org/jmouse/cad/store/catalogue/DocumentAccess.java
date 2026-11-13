@@ -46,7 +46,7 @@ public class DocumentAccess {
 
     /** Whether the reader may write the document's next revision — the rule {@link #requireWritable} enforces. */
     public boolean canWrite(StoredDocument document) {
-        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+        if (document.isShipped()) {
             return false;
         }
         if (document.isCatalogue()) {
@@ -56,7 +56,7 @@ public class DocumentAccess {
     }
 
     public void requireWritable(StoredDocument document) {
-        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+        if (document.isShipped()) {
             throw CadProblem.conflict("'" + document.getSlug() + "' ships with the installation and is read only: save a copy"
                                       + " of it to change it.");
         }
@@ -72,7 +72,7 @@ public class DocumentAccess {
      * what an installation keeps beside it is the installation's own, and is for whoever curates its catalogue.
      */
     public boolean canFileBeside(StoredDocument document) {
-        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+        if (document.isShipped()) {
             return authority.permitsGlobally(CadCapability.CATALOGUE_WRITE);
         }
         return canWrite(document);
@@ -80,7 +80,7 @@ public class DocumentAccess {
 
     /** The rule {@link #canFileBeside} says, enforced. */
     public void requireFilingBeside(StoredDocument document) {
-        if (document.getHolding() == StoredDocument.Holding.SHIPPED) {
+        if (document.isShipped()) {
             authority.requireGlobally(CadCapability.CATALOGUE_WRITE);
             return;
         }

@@ -102,7 +102,9 @@
         <module>jmouse-formula</module>
         <module>jmouse-spice</module>
         <module>jmouse-units</module>
+        <module>jmouse-descriptions</module>
         <module>jmouse-revisions</module>
+        <module>jmouse-settings</module>
         <module>jmouse-plugin</module>
         <module>jmouse-sheet</module>
         <module>jmouse-licence</module>
@@ -137,6 +139,7 @@
         <module>jmouse-access</module>
         <module>jmouse-access-enforcement</module>
         <module>jmouse-access-jpa</module>
+        <module>jmouse-settings-jpa</module>
         <module>jmouse-access-policy</module>
         <module>jmouse-access-el</module>
         <module>jmouse-script-el</module>
@@ -213,6 +216,11 @@
                           its name out fails at request time with a 400, never at build time.
                         -->
                         <parameters>true</parameters>
+                        <!--
+                          Run the annotation processors found on the class path — jmouse-descriptions keeps every record's
+                          Javadoc so — rather than rely on the compiler's default, which newer ones turn off.
+                        -->
+                        <proc>full</proc>
                     </configuration>
                 </plugin>
                 <plugin>

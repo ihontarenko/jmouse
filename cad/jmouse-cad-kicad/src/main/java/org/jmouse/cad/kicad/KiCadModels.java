@@ -43,7 +43,7 @@ public final class KiCadModels implements ModelSource {
 
     @Override
     public String id() {
-        return "kicad";
+        return InstalledKiCadParts.ID;
     }
 
     @Override

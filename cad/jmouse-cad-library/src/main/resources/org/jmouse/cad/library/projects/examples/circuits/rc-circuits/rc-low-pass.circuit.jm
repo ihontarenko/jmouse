@@ -1,0 +1,86 @@
+# RC-03. A sine through a resistor into a capacitor, read across the capacitor. Slow changes have time to fill the
+# capacitor and pass; fast ones do not, and come out smaller and later. At the cut-off fc = 1 / (2πRC) the output is
+# 0.707 of the input, 45° behind it, and the resistor holds as much voltage as the capacitor.
+circuit:rc-low-pass("RC low-pass filter") {
+    meta {
+        featured: yes
+        summary: "A sine through R into C: below fc = 1 / (2πRC) it passes, above it shrinks and lags; at fc it is 0.707 and 45° behind."
+        description: """
+            Idea: a capacitor needs time to change its voltage, and the resistor sets how much time. A slow sine leaves
+            it all the time it needs, so the output follows the input; a fast one turns back before the capacitor
+            catches up, so the output is smaller and later. The boundary is the cut-off, fc = 1 / (2πRC).
+
+            Try: the generator starts at the cut-off, 1.59 kHz for 1 kΩ and 100 nF. Turn the frequency down to 100 Hz:
+            the output is almost the input. Turn it up to 16 kHz: the output is a tenth of it and nearly a quarter of
+            a period behind. Change R or C instead and the cut-off moves.
+
+            Watch: CH1 and CH2 together — the output's peaks come after the input's. At the cut-off the output's peak
+            is 0.707 of the input's and 45° later. In the frequency response the gain is flat, bends down by 3 dB at
+            fc, then falls 20 dB for every decade; the phase goes from 0 to −90°, passing −45° at fc.
+
+            Ask: why is the output at the cut-off 0.707 and not a half? What happens to a square wave sent through
+            this filter — which of its parts survive?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-03, filters
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:F(1.59 kHz, in: 10 Hz .. 50 kHz, step: 10 Hz, "Generator frequency")
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R, the series resistor")
+    parameter:C(100 nF, in: 10 nF .. 1 µF, step: 10 nF, "C, the capacitor across the output")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:R1(resistor, [in, out], resistance: R)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    place:G1(at: 320 600, rotate: 90)
+    place:R1(at: 600 360)
+    place:C1(at: 880 600, rotate: 90)
+    mark:Jo(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: R1.positive, via: 320 360)
+    wire:W2(R1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: C1.positive)
+    wire:W4(G1.negative, to: Jb1.j)
+    wire:W5(Jb1.j, to: Jb2.j)
+    wire:W6(C1.negative, to: Jb2.j)
+    wire:W7(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 500 mV/div)
+        probe:CH2(out, 500 mV/div)
+        time(200 µs/div)
+    }
+    expect("at the cut-off the output is 0.707 of the input", from: "|H| = 1 / √(1 + (f / fc)²) = 1 / √2 at f = fc = 1 / (2π · 1 kΩ · 100 nF) = 1.59 kHz") {
+        measure(maximum, out, after: 2 ms)
+        near(0.707 V, +- 2%)
+    }
+    expect("and swings as far below zero", from: "a sine through a linear filter stays a sine about zero") {
+        measure(minimum, out, after: 2 ms)
+        near(-0.707 V, +- 2%)
+    }
+    expect("at the cut-off the resistor holds as much as the capacitor", from: "|1 − H| = |jf/fc| / |1 + jf/fc| = 1 / √2 at f = fc") {
+        measure(maximum, in - out, after: 2 ms)
+        near(0.707 V, +- 2%)
+    }
+    expect("the response is 3 dB down at the cut-off", from: "20 log10(1 / √2) = −3.01 dB") {
+        measure(gain, out, at: 1.59 kHz)
+        within(-3.1 .. -2.9)
+    }
+    expect("and 45° behind", from: "arg H = −arctan(f / fc) = −45° at f = fc") {
+        measure(phase, out, at: 1.59 kHz)
+        within(-45.5 .. -44.5)
+    }
+    expect("a decade above, it falls 20 dB", from: "|H| ≈ fc / f = 1 / 10 at f = 10 fc") {
+        measure(gain, out, at: 15.9 kHz)
+        within(-20.5 .. -19.5)
+    }
+    expect("the cut-off is where 1 / (2πRC) puts it", from: "fc = 1 / (2π · 1 kΩ · 100 nF) = 1.59 kHz") {
+        measure(corner, out)
+        near(1.59 kHz, +- 1%)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 10, to: 1000000, points: 200)
+}

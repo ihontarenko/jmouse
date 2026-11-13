@@ -1,5 +1,8 @@
 package org.jmouse.cad.plugin.step;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
@@ -81,15 +84,18 @@ public final class PcbStepExport implements DocumentExport {
     private static final PathParser PATHS = new PathParser();
 
     /**
-     * The plugin's data ({@code settings/plugin/step/export}).
+     * The plugin's data ({@code settings/plugin/cad-step/export}).
      *
      * @param ellipseSteps how many straight steps follow an arc of an ellipse, which a pcb's edge has no exact form for
      * @param areaSteps    how many straight steps a quarter of a round end, a disc or an arc of the copper, the mask and the
      *                     silkscreen is drawn with: each is a face of the file, so fewer than Gerber's curves
-     * @param areaTolerance how far a layer's outline may move when it is simplified, in millimetres
+     * @param areaTolerance how far a layer's outline may move when it is simplified
      * @param exports      the exports the plugin brings, each a format of its own
      */
-    public record Settings(int ellipseSteps, int areaSteps, double areaTolerance, List<Variant> exports) {
+    public record Settings(@Label("Ellipse steps") int ellipseSteps,
+                           @Label("Area steps") int areaSteps,
+                           @Label(value = "Area tolerance", unit = "mm") double areaTolerance,
+                           @Label("Exports") List<Variant> exports) {
     }
 
     /**
@@ -99,7 +105,9 @@ public final class PcbStepExport implements DocumentExport {
      * @param title  what the export is called where formats are offered
      * @param layers whether the outer copper, the solder mask and the silkscreen are written over the pcb's faces
      */
-    public record Variant(String id, String title, boolean layers) {
+    public record Variant(@Label("ID") String id,
+                          @Label("Title") String title,
+                          @Label("Layers") boolean layers) {
     }
 
     /** What OpenCascade is handed: millimetres, Z up, the pcb's Y turned upwards, its bottom face at 0. */
@@ -168,10 +176,10 @@ public final class PcbStepExport implements DocumentExport {
 
     private final PipedProgram             program;
     private final Supplier<ModelDocuments> models;
-    private final Settings                 settings;
+    private final Supplier<Settings>                 settings;
     private final Variant                  variant;
-    private final PcbArtwork.Settings    artwork;
-    private final PcbLayers              layers;
+    private final Supplier<PcbArtwork.Settings>    artwork;
+    private final Supplier<PcbLayers.Settings>              layers;
     private final StrokeFont               font;
     private final MeshFormats              formats = MeshFormats.standard();
 
@@ -180,14 +188,21 @@ public final class PcbStepExport implements DocumentExport {
      * @param artwork what the copper, the mask and the silkscreen are drawn with, as every format draws them
      * @param layers  how thick the layers over the pcb's faces are and how each looks, as every 3D format models them
      */
-    public PcbStepExport(PipedProgram program, Supplier<ModelDocuments> models, Settings settings, Variant variant,
-                           PcbArtwork.Settings artwork, PcbLayers.Settings layers, StrokeFont font) {
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
+    /** What a drawn model is made of, as the engine's table says it at each use. */
+    private final ReadTable<ModelMaterials> materials;
+
+    public PcbStepExport(PipedProgram program, Supplier<ModelDocuments> models, Supplier<Settings> settings, Variant variant,
+                           Supplier<PcbArtwork.Settings> artwork, Supplier<PcbLayers.Settings> layers, StrokeFont font, CadStandards standards, TableSource tables) {
+        this.standards = standards;
+        this.materials = ModelMaterials.readFrom(tables);
         this.program = program;
         this.models = models;
         this.settings = settings;
         this.variant = variant;
         this.artwork = artwork;
-        this.layers = new PcbLayers(layers);
+        this.layers = layers;
         this.font = font;
     }
 
@@ -216,7 +231,7 @@ public final class PcbStepExport implements DocumentExport {
         PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
         PcbDrawing pcb = fabrication.pcb();
         List<String> notes = new ArrayList<>(fabrication.notes());
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(pcb.rules());
+        Map<String, Double> rules = standards.pcbRules().valuesOf(pcb.rules());
         double thickness = rules.get(THICKNESS);
         List<Contour> outline = outlineOf(pcb.outline(), notes);
         if (outline.isEmpty()) {
@@ -229,11 +244,11 @@ public final class PcbStepExport implements DocumentExport {
         Map<String, ModelFile> modelFiles = new LinkedHashMap<>();
         List<PlacedPart> parts = new ArrayList<>();
         List<RaisedSolid> solids = new ArrayList<>();
-        PartBodies bodies = new PartBodies(artwork.curveSteps());
+        PartBodies bodies = new PartBodies(artwork.get().curveSteps());
         for (PcbFabrication.SeatedPart part : fabrication.parts()) {
             List<FootprintDrawing.Model> shown = part.drawing().map(ModelPlacement::shownOf).orElse(List.of());
             if (shown.isEmpty()) {
-                bodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> solids.add(solidOf(layers.bodyOf(body, thickness), false)),
+                bodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> solids.add(solidOf(new PcbLayers(layers.get()).bodyOf(body, thickness), false)),
                         () -> notes.add(part.designator() + " has neither a 3D model nor a body; left out."));
                 continue;
             }
@@ -253,12 +268,12 @@ public final class PcbStepExport implements DocumentExport {
             }
         }
         if (variant.layers()) {
-            PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork, font);
-            PcbSolid made = PcbSolid.of(drawn, new ArtworkAreas(drawn.outlines(), settings.areaSteps()), drilled, settings.areaSteps(), bodies);
-            layers.layersOf(made, drawn, thickness)
+            PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork.get(), font);
+            PcbSolid made = PcbSolid.of(drawn, new ArtworkAreas(drawn.outlines(), settings.get().areaSteps()), drilled, settings.get().areaSteps(), bodies);
+            new PcbLayers(layers.get()).layersOf(made, drawn, thickness)
                     .forEach(layer -> solids.add(solidOf(layer, true)));
         }
-        String pcbColour = (variant.layers() ? layers.settings().core() : layers.settings().bare()).colour();
+        String pcbColour = (variant.layers() ? new PcbLayers(layers.get()).settings().core() : new PcbLayers(layers.get()).settings().bare()).colour();
         Request request = new Request(fabrication.name(), thickness, colourOf(pcbColour), outline, drills, stepModels, parts,
                 solids);
         PipedProgram.Ran ran;
@@ -280,7 +295,7 @@ public final class PcbStepExport implements DocumentExport {
      * first, as far as {@code areaTolerance}, so it is not written with a face for every step of every curve.
      */
     private RaisedSolid solidOf(PcbLayers.RaisedArea raised, boolean simplified) {
-        Geometry area = simplified ? TopologyPreservingSimplifier.simplify(raised.area(), settings.areaTolerance()) : raised.area();
+        Geometry area = simplified ? TopologyPreservingSimplifier.simplify(raised.area(), settings.get().areaTolerance()) : raised.area();
         return new RaisedSolid(raised.name(), colourOf(raised.finish().colour()), raised.bottom(), raised.thickness(),
                 polygonsOf(area));
     }
@@ -332,7 +347,7 @@ public final class PcbStepExport implements DocumentExport {
         }
         List<ModelShapes.Shape> shapes = ModelShapes.of(opened.document());
         if (!shapes.isEmpty()) {
-            stepModels.add(new StepModel(reference, null, shapes.stream().map(PcbStepExport::stepShapeOf).toList()));
+            stepModels.add(new StepModel(reference, null, shapes.stream().map(this::stepShapeOf).toList()));
             return Optional.of(stepModels.size() - 1);
         }
         List<ModelFile> files = ModelFile.of(opened.document());
@@ -355,8 +370,8 @@ public final class PcbStepExport implements DocumentExport {
     }
 
     /** A drawn model's shape as OpenCascade makes it: its kind, its dimensions, its placement and its material's colour. */
-    private static StepShape stepShapeOf(ModelShapes.Shape shape) {
-        double[] colour = ModelMaterials.standard().colour(shape.material()).orElseThrow().stream().mapToDouble(Double::doubleValue).toArray();
+    private StepShape stepShapeOf(ModelShapes.Shape shape) {
+        double[] colour = materials.current().colour(shape.material()).orElseThrow().stream().mapToDouble(Double::doubleValue).toArray();
         double[] placement = ModelShapes.placementOf(shape).matrix();
         return switch (shape) {
             case ModelShapes.Box box -> new StepBox(box.size().stream().mapToDouble(Double::doubleValue).toArray(), placement, colour);
@@ -399,8 +414,8 @@ public final class PcbStepExport implements DocumentExport {
             case PathSegment.EllipticalArc arc -> {
                 List<Map<String, List<double[]>>> steps = new ArrayList<>();
                 PathPoint from = arc.from();
-                for (int step = 1; step <= settings.ellipseSteps(); step++) {
-                    PathPoint to = step == settings.ellipseSteps() ? arc.to() : arc.at((double) step / settings.ellipseSteps());
+                for (int step = 1; step <= settings.get().ellipseSteps(); step++) {
+                    PathPoint to = step == settings.get().ellipseSteps() ? arc.to() : arc.at((double) step / settings.get().ellipseSteps());
                     steps.add(Map.of("line", List.of(upward(from), upward(to))));
                     from = to;
                 }

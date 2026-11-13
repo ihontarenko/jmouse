@@ -1,0 +1,84 @@
+# RL-03. One sine feeds two RL dividers. In the lower row the inductor is in the path and the output is read across
+# the resistor: slow changes pass, fast ones are held back — a low-pass. In the upper row the parts are swapped and the
+# output is read across the inductor: a high-pass. Both share the cut-off fc = R / (2πL); the generator starts there,
+# where both outputs are 0.707 of the input — one 45° behind it, the other 45° ahead.
+circuit:rl-filters("RL low-pass and high-pass") {
+    meta {
+        summary: "One sine into two RL dividers: across R it is a low-pass, across L a high-pass; at fc = R / (2πL) both give 0.707."
+        description: """
+            Idea: an inductor's opposition grows with frequency — its reactance is 2πfL — while a resistor's stays
+            put. So a divider of R and L shares the input differently at every frequency: read across R, slow signals
+            win (a low-pass); read across L, fast ones do (a high-pass). Where 2πfL equals R, at fc = R / (2πL), both
+            parts hold 0.707 of the input.
+
+            Try: the generator starts at fc, 1.59 kHz for 100 Ω and 10 mH. Turn it down to 160 Hz: the low-pass
+            output is almost the input, the high-pass one a tenth. Turn it up to 16 kHz: the other way round. Change
+            R or L and the crossing point moves.
+
+            Watch: CH1, the input; CH2, across R (low-pass), its peaks after the input's; CH3, across L
+            (high-pass), its peaks before them; CH4, the current — in phase with CH2, so it too lags the input.
+            The frequency response shows the two gains crossing at −3 dB at fc.
+
+            Ask: why is the current through an inductor always behind the voltage across it? Compare with the RC
+            filters: which part plays the capacitor's role, and why are the outputs swapped?
+            """
+        category: rl-circuits
+        tags: rl, example, rl-03, filters
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:F(1.59 kHz, in: 10 Hz .. 50 kHz, step: 10 Hz, "Generator frequency")
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:R(100 Ω, in: 10 Ω .. 1 kΩ, step: 10 Ω, "R, in both dividers")
+    parameter:L(10 mH, in: 1 mH .. 100 mH, step: 1 mH, "L, in both dividers")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:R2(resistor, [in, high], resistance: R)
+    part:L2(inductor, [high, 0], inductance: L)
+    part:L1(inductor, [in, low], inductance: L)
+    part:R1(resistor, [low, 0], resistance: R)
+    place:G1(at: 320 600, rotate: 90)
+    place:R2(at: 600 200)
+    place:L2(at: 1200 600, rotate: 90)
+    place:L1(at: 600 360)
+    place:R1(at: 880 600, rotate: 90)
+    mark:Ji(junction, at: 320 360)
+    mark:Jl(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:Jb3(junction, at: 1200 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: Ji.j)
+    wire:W2(Ji.j, to: R2.positive, via: 320 200)
+    wire:W3(R2.negative, to: L2.positive, via: 1200 200)
+    wire:W4(Ji.j, to: L1.positive)
+    wire:W5(L1.negative, to: Jl.j)
+    wire:W6(Jl.j, to: R1.positive)
+    wire:W7(G1.negative, to: Jb1.j)
+    wire:W8(Jb1.j, to: Jb2.j)
+    wire:W9(R1.negative, to: Jb2.j)
+    wire:W10(Jb2.j, to: Jb3.j)
+    wire:W11(L2.negative, to: Jb3.j)
+    wire:W12(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 500 mV/div)
+        probe:CH2(low, 500 mV/div)
+        probe:CH3(high, 500 mV/div)
+        probe:CH4(current, L1, 5 mA/div)
+        time(200 µs/div)
+    }
+    expect("at the cut-off the low-pass gives 0.707", from: "across R: |H| = 1 / √(1 + (f / fc)²) = 1 / √2 at f = fc = R / (2πL) = 100 Ω / (2π · 10 mH) = 1.59 kHz") {
+        measure(maximum, low, after: 2 ms)
+        near(0.707 V, +- 2%)
+    }
+    expect("at the cut-off the high-pass gives 0.707 too", from: "across L: |H| = (f / fc) / √(1 + (f / fc)²) = 1 / √2 at f = fc") {
+        measure(maximum, high, after: 2 ms)
+        near(0.707 V, +- 2%)
+    }
+    expect("the current through the inductor is the low-pass output over R", from: "I = 0.707 · A / R = 0.707 V / 100 Ω") {
+        measure(maximum, current: L1, after: 2 ms)
+        near(7.07 mA, +- 2%)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 10, to: 1000000, points: 200)
+}

@@ -1,0 +1,91 @@
+# PW-01. A whole small power supply: a mains-like 230 V, 50 Hz sine into a 20 : 1 transformer, a bridge rectifier, a
+# reservoir capacitor and a load. The secondary's 16 V peaks are flipped by the bridge into 100 Hz humps; the capacitor
+# fills at the top of each and feeds the load between them, so the output is a DC level with a sawtooth ripple whose
+# depth is the load's current over 2 f C.
+circuit:rectifier-supply("Rectifier supply") {
+    meta {
+        summary: "Transformer, bridge, reservoir capacitor and load: about 14 V DC from mains, with a ripple of I / (2 f C)."
+        description: """
+            Idea: a supply is built in three steps. The transformer brings the mains down to a safe voltage and
+            isolates it; the bridge turns both halves of every cycle into humps of one polarity; the capacitor
+            fills at the top of each hump and holds the output up while the hump falls away. Between the tops the
+            load drains the capacitor, so the output sags by ΔV = I / (2 f C) before the next top refills it.
+
+            Try: halve the capacitor — the ripple doubles. Lower the load resistor so the load takes more current —
+            the ripple deepens and the average sinks. Remove most of the capacitance (100 µF) and the output is
+            almost the bare humps again.
+
+            Watch: the secondary (CH1, read across its two ends) against the output (CH2): the output is two diode
+            drops below the secondary's peak, and the ammeter and voltmeter give the load's current and voltage.
+
+            Ask: with 1000 µF and 140 mA, how deep is the ripple at 100 Hz? Why does a bridge, not a single diode,
+            halve it?
+            """
+        category: power-supplies
+        tags: power, example, pw-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:C(1000 µF, in: 100 µF .. 4700 µF, step: 100 µF, "Reservoir capacitor")
+    parameter:R_load(100 Ω, in: 22 Ω .. 1 kΩ, step: 1 Ω, "Load resistor")
+    part:AC1(sine-generator, [positive: line, negative: 0], amplitude: 325 V, frequency: 50 Hz)
+    part:T1(transformer, [primary_one: line, primary_two: 0, secondary_one: secondary_a, secondary_two: secondary_b], L_primary: 10 H, L_secondary: 25 mH)
+    part:BR1(bridge-rectifier, [ac1: secondary_a, ac2: secondary_b, plus: out, minus: 0])
+    part:C1(capacitor, [out, 0], capacitance: C, symbol: "SY.CAPACITOR:POLARIZED")
+    part:A1(ammeter, [in: out, out: load])
+    part:RL(resistor, [load, 0], resistance: R_load, power_rating: 5 W, thermal_resistance: 25 K/W)
+    part:VM1(voltmeter, [plus: load, minus: 0])
+    place:AC1(at: 200 600, rotate: 90)
+    place:T1(at: 480 600)
+    place:BR1(at: 840 600)
+    place:C1(at: 1200 600, rotate: 90)
+    place:A1(at: 1360 400)
+    place:RL(at: 1520 600, rotate: 90)
+    place:VM1(at: 1760 600, rotate: 90)
+    mark:Jn(junction, at: 200 760)
+    mark:Jp(junction, at: 1200 400)
+    mark:Jl(junction, at: 1520 400)
+    mark:Jg1(junction, at: 840 920)
+    mark:Jg2(junction, at: 1200 920)
+    mark:Jg3(junction, at: 1520 920)
+    mark:GND1(ground, at: 1200 1000)
+    mark:GND2(ground, at: 200 920)
+    wire:W1(AC1.positive, to: T1.primary_one, via: [200 480, 320 480, 320 560])
+    wire:W2(AC1.negative, to: Jn.j)
+    wire:W3(Jn.j, to: T1.primary_two, via: [320 760, 320 640])
+    wire:W4(Jn.j, to: GND2.ground)
+    wire:W5(T1.secondary_one, to: BR1.ac1, via: 720 560)
+    wire:W6(T1.secondary_two, to: BR1.ac2, via: [640 640, 640 840, 1040 840, 1040 600])
+    wire:W7(BR1.plus, to: Jp.j, via: 840 400)
+    wire:W8(Jp.j, to: C1.positive)
+    wire:W9(Jp.j, to: A1.in)
+    wire:W10(A1.out, to: Jl.j)
+    wire:W11(Jl.j, to: RL.positive)
+    wire:W12(Jl.j, to: VM1.plus, via: 1760 400)
+    wire:W13(BR1.minus, to: Jg1.j)
+    wire:W14(Jg1.j, to: Jg2.j)
+    wire:W15(C1.negative, to: Jg2.j)
+    wire:W16(Jg2.j, to: GND1.ground)
+    wire:W17(Jg2.j, to: Jg3.j)
+    wire:W18(RL.negative, to: Jg3.j)
+    wire:W19(VM1.minus, to: Jg3.j, via: 1760 920)
+    probes {
+        probe:CH1(secondary_a, against: secondary_b, 10 V/div)
+        probe:CH2(out, 5 V/div)
+        time(10 ms/div)
+    }
+    expect("the output peaks two diode drops below the secondary's 16 V", from: "secondary 325 V / 20 = 16.3 V peak, minus two bridge diodes") {
+        measure(maximum, out, after: 200 ms)
+        within(13.5 V .. 15.5 V)
+    }
+    expect("the ripple is about I / (2 f C)", from: "ΔV = 0.14 A / (2 · 50 Hz · 1000 µF) ≈ 1.4 V") {
+        measure(minimum, out, after: 200 ms)
+        within(12 V .. 13.8 V)
+    }
+    expect("the load takes about 140 mA", from: "I = Vout / R_load ≈ 13.8 V / 100 Ω") {
+        measure(average, current: RL, after: 200 ms)
+        within(125 mA .. 150 mA)
+    }
+    analysis(transient, for: 300 ms)
+    view:transient_response(primary)
+}

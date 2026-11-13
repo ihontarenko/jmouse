@@ -1,0 +1,144 @@
+# DG-06. An SPI controller sends one byte, 0xA5, every millisecond into a 74HC595: MOSI is its serial data, SCK its
+# shift clock, and CS its storage clock — while CS is low the byte walks in a bit at a time, and the moment CS rises the
+# eight bits appear together on Q0 to Q7, which light an LED bar through 330 Ω each. Q7S, the bit pushed out of the far
+# end, goes back to MISO: what the controller reads is the byte it sent the time before.
+circuit:spi-shift-register("SPI into a shift register") {
+    meta {
+        summary: "An SPI controller shifts 0xA5 into a 74HC595; CS latches it onto an LED bar, and MISO hears the byte before."
+        description: """
+            Idea: SPI is a clock and two data lines, one each way, and a select line that says who is spoken to. A
+            74HC595 is the simplest SPI receiver there is: each rising SCK pushes the bit on its serial input one place
+            along, and the rising edge of its storage clock copies all eight to the outputs at once. Wire CS to that
+            clock and the outputs change only when a whole byte has arrived.
+
+            Try: open the Logic view and choose the SPI decoder — SCK on L1, MOSI on L2, CS on L3, MISO on L4. Each
+            transfer reads MOSI 0xA5. Change the controller's first byte and watch the LED bar take the new pattern
+            the moment CS rises — not bit by bit.
+
+            Watch: MISO carries 0xA5 too, one transfer late — it is the byte that fell out of the far end of the
+            register as the new one went in, which is how several 595s are chained.
+
+            Ask: why would the LEDs flicker through every half-shifted pattern if RCLK were tied to SCK instead of CS?
+            How many bytes would a controller send to fill three chained 595s?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-06
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:pattern(165, in: 0 .. 255, step: 1, "The byte sent")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:B1(spi-controller, [sck: sck, mosi: mosi, miso: miso, cs: cs, Vcc: vcc, GND: 0], bytes: "{pattern}", clock_frequency: 1 MHz, start_at: 20 us, repeat_every: 1 ms)
+    part:U1(74hc595, [serial_data: mosi, shift_clock: sck, storage_clock: cs, not_output_enable: 0, not_master_reset: vcc, serial_output: miso, output_0: q0, output_1: q1, output_2: q2, output_3: q3, output_4: q4, output_5: q5, output_6: q6, output_7: q7, Vcc: vcc, GND: 0])
+    part:R1(resistor, [q0, a0], resistance: 330 Ω)
+    part:R2(resistor, [q1, a1], resistance: 330 Ω)
+    part:R3(resistor, [q2, a2], resistance: 330 Ω)
+    part:R4(resistor, [q3, a3], resistance: 330 Ω)
+    part:R5(resistor, [q4, a4], resistance: 330 Ω)
+    part:R6(resistor, [q5, a5], resistance: 330 Ω)
+    part:R7(resistor, [q6, a6], resistance: 330 Ω)
+    part:R8(resistor, [q7, a7], resistance: 330 Ω)
+    part:DS1(led-bar, [anode_0: a0, anode_1: a1, anode_2: a2, anode_3: a3, anode_4: a4, anode_5: a5, anode_6: a6, anode_7: a7, cathode: 0])
+    # Where the pcb meets the bench: the supply, ground and the four lines of the bus, on one header.
+    part:J1(pin-header-1x6, [pin1: vcc, pin2: 0, pin3: sck, pin4: mosi, pin5: cs, pin6: miso])
+    place:V1(at: -880 880, rotate: 90)
+    mark:N1(label, vcc, at: -880 720)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: -880 1080)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:B1(at: -360 600, mirror)
+    mark:N2(label, sck, at: -40 540, rotate: 90)
+    wire:WN2(B1.sck, to: N2.label)
+    mark:N3(label, mosi, at: -40 580, rotate: 90)
+    wire:WN3(B1.mosi, to: N3.label)
+    mark:N4(label, miso, at: -40 620, rotate: 90)
+    wire:WN4(B1.miso, to: N4.label)
+    mark:N5(label, cs, at: -40 660, rotate: 90)
+    wire:WN5(B1.cs, to: N5.label)
+    mark:N6(label, vcc, at: -320 320)
+    wire:WN6(B1.Vcc, to: N6.label)
+    mark:G2(ground, at: -400 320, rotate: 180)
+    wire:WG2(B1.GND, to: G2.ground)
+    place:U1(at: 920 600)
+    mark:N7(label, mosi, at: 320 560, rotate: 270)
+    wire:WN7(U1.serial_data, to: N7.label)
+    mark:N8(label, sck, at: 320 600, rotate: 270)
+    wire:WN8(U1.shift_clock, to: N8.label)
+    mark:N9(label, cs, at: 320 640, rotate: 270)
+    wire:WN9(U1.storage_clock, to: N9.label)
+    mark:N10(label, miso, at: 1320 760, rotate: 90)
+    wire:WN10(U1.serial_output, to: N10.label)
+    mark:N11(label, vcc, at: 740 120)
+    wire:WN11(U1.not_master_reset, to: N11.label)
+    mark:G3(ground, at: 860 120, rotate: 180)
+    wire:WG3(U1.not_output_enable, to: G3.ground)
+    mark:N12(label, vcc, at: 980 120)
+    wire:WN12(U1.Vcc, to: N12.label)
+    mark:G4(ground, at: 1100 120, rotate: 180)
+    wire:WG4(U1.GND, to: G4.ground)
+    place:R1(at: 1920 280, name(at: -52 -32), value(at: 52 -32))
+    place:R2(at: 1920 360, name(at: -52 -32), value(at: 52 -32))
+    place:R3(at: 1920 440, name(at: -52 -32), value(at: 52 -32))
+    place:R4(at: 1920 520, name(at: -52 -32), value(at: 52 -32))
+    place:R5(at: 1920 600, name(at: -52 -32), value(at: 52 -32))
+    place:R6(at: 1920 680, name(at: -52 -32), value(at: 52 -32))
+    place:R7(at: 1920 760, name(at: -52 -32), value(at: 52 -32))
+    place:R8(at: 1920 840, name(at: -52 -32), value(at: 52 -32))
+    place:DS1(at: 2320 560, rotate: 270, mirror)
+    mark:G5(ground, at: 2560 520, rotate: 270)
+    wire:WG5(DS1.cathode, to: G5.ground)
+    wire:W1(U1.output_0, to: R1.positive, via: [1480 440, 1480 280])
+    wire:W2(R1.negative, to: DS1.anode_0, via: [2140 280, 2140 400])
+    wire:W3(U1.output_1, to: R2.positive, via: [1520 480, 1520 360])
+    wire:W4(R2.negative, to: DS1.anode_1, via: [2100 360, 2100 440])
+    wire:W5(U1.output_2, to: R3.positive, via: [1560 520, 1560 440])
+    wire:W6(R3.negative, to: DS1.anode_2, via: [2060 440, 2060 480])
+    wire:W7(U1.output_3, to: R4.positive, via: [1600 560, 1600 520])
+    wire:W8(R4.negative, to: DS1.anode_3)
+    wire:W9(U1.output_4, to: R5.positive)
+    wire:W10(R5.negative, to: DS1.anode_4, via: [2060 600, 2060 560])
+    wire:W11(U1.output_5, to: R6.positive, via: [1560 640, 1560 680])
+    wire:W12(R6.negative, to: DS1.anode_5, via: [2100 680, 2100 600])
+    wire:W13(U1.output_6, to: R7.positive, via: [1520 680, 1520 760])
+    wire:W14(R7.negative, to: DS1.anode_6, via: [2140 760, 2140 640])
+    wire:W15(U1.output_7, to: R8.positive, via: [1480 720, 1480 840])
+    wire:W16(R8.negative, to: DS1.anode_7, via: [2180 840, 2180 680])
+    place:J1(at: 2880 600)
+    mark:NJ1(label, vcc, at: 3080 500, rotate: 90)
+    mark:GJ(ground, at: 3240 540, rotate: 270)
+    mark:NJ3(label, sck, at: 3080 580, rotate: 90)
+    mark:NJ4(label, mosi, at: 3240 620, rotate: 90)
+    mark:NJ5(label, cs, at: 3080 660, rotate: 90)
+    mark:NJ6(label, miso, at: 3240 700, rotate: 90)
+    wire:W17(J1.pin1, to: NJ1.label)
+    wire:W18(J1.pin2, to: GJ.ground)
+    wire:W19(J1.pin3, to: NJ3.label)
+    wire:W20(J1.pin4, to: NJ4.label)
+    wire:W21(J1.pin5, to: NJ5.label)
+    wire:W22(J1.pin6, to: NJ6.label)
+    probes {
+        time(1 us/div)
+        probe:L1(level, sck)
+        probe:L2(level, mosi)
+        probe:L3(level, cs)
+        probe:L4(level, miso)
+    }
+    expect("Q0 lights: 0xA5 ends in 1", from: "74HC595 function table: after eight shift clocks and a storage clock, Qn holds bit n") {
+        measure(final, a0)
+        within(1.8 V .. 2.2 V)
+    }
+    expect("Q1 stays dark: 0xA5 is ··0 1", from: "the same byte: bit 1 is 0") {
+        measure(final, a1)
+        near(0 V, +- 0.1 V)
+    }
+    expect("Q7 lights: 0xA5 begins with 1", from: "the most significant bit, sent first, ends in Q7") {
+        measure(final, a7)
+        within(1.8 V .. 2.2 V)
+    }
+    expect("the slider's byte is the one sent: 0x5A lights Q1", from: "the controller sends {pattern}; 0x5A = 0101 1010, bit 1 is 1") {
+        measure(final, a1, with: [pattern: 90])
+        within(1.8 V .. 2.2 V)
+    }
+    analysis(transient, for: 1.5 ms)
+    view:transient_response(primary)
+}

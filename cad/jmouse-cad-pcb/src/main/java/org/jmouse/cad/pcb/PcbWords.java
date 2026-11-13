@@ -29,7 +29,6 @@ public final class PcbWords {
     public static final String FORMATS = "formats";
     public static final String FROM = "from";
     public static final String GAP = "gap";
-    public static final String GROUP = "group";
     public static final String HEIGHT = "height";
     public static final String HIDDEN = "hidden";
     public static final String HOLE = "hole";

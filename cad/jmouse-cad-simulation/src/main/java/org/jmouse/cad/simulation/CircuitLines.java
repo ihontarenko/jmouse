@@ -1,5 +1,7 @@
 package org.jmouse.cad.simulation;
 
+import org.jmouse.cad.document.ArrangementLines;
+import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.Setting;
@@ -63,6 +65,9 @@ public final class CircuitLines {
         if (grammar == SimulationLines.FRAME || grammar == SimulationLines.TIME_BASE) {
             return Optional.of(grammar.word());
         }
+        if (grammar == ArrangementLines.GROUP_LINE) {
+            return line.name("name").map(name -> ArrangementLines.GROUP + " " + name);
+        }
         return Optional.empty();
     }
 
@@ -98,16 +103,23 @@ public final class CircuitLines {
 
     /** A part where it stands, a mark, or a wire: the {@code layout} block's line for it. */
     public ClauseLineNode placement(Placement placement) {
-        return switch (placement) {
+        LineBuilder line = switch (placement) {
             case Placement.PlacedPart part -> placed(part);
             case Placement.Mark mark -> mark(mark);
             case Placement.Wire wire -> wire(wire);
             case Placement.Bus bus -> bus(bus);
             case Placement.Drawn drawn -> LineBuilder.line(SimulationLines.DRAWN).slot("reference", Nodes.name(drawn.reference()))
-                    .slot("shape", Nodes.word(drawn.shape().word())).clause("via", cornersOf(drawn.via())).build();
+                    .slot("shape", Nodes.word(drawn.shape().word())).clause("via", cornersOf(drawn.via()));
             case Placement.Note note -> LineBuilder.line(SimulationLines.NOTE).slot("reference", Nodes.name(note.reference()))
-                    .slot("words", Nodes.text(note.words())).clause("at", point(note.at())).build();
+                    .slot("words", Nodes.text(note.words())).clause("at", point(note.at()));
         };
+        ArrangementLines.write(line, placement.arrangement());
+        return line.build();
+    }
+
+    /** A group of the layout as its own line: {@code group(front-panel, state: locked)}. */
+    public ClauseLineNode group(DrawnGroup group) {
+        return ArrangementLines.groupLine(group);
     }
 
     /** {@code CH1 out 2 V/div}, {@code CH3 current R1 1 mA/div}, {@code CH2 a against b 1 V/div [shows …]}. */
@@ -136,7 +148,7 @@ public final class CircuitLines {
     }
 
     /** {@code R1 at x, y [rotate r] [mirror] [size w x h] [name at x, y] [value at x, y] [readings at x, y] [shows …]}. */
-    private ClauseLineNode placed(Placement.PlacedPart part) {
+    private LineBuilder placed(Placement.PlacedPart part) {
         String reference = part.unit() == null ? part.reference() : part.reference() + "." + part.unit();
         LineBuilder line = LineBuilder.line(SimulationLines.PLACE).slot("reference", Nodes.name(reference))
                 .clause("at", point(part.at()));
@@ -158,7 +170,7 @@ public final class CircuitLines {
         if (!part.ports().isEmpty()) {
             line.clause("ports", portPlaces(part.ports()));
         }
-        return line.build();
+        return line;
     }
 
     /** {@code in left 60, out right 60}: where a placed sheet's ports stand on its frame. */
@@ -167,7 +179,7 @@ public final class CircuitLines {
     }
 
     /** {@code GND1 ground [net] at x, y [rotate r]}. */
-    private static ClauseLineNode mark(Placement.Mark mark) {
+    private static LineBuilder mark(Placement.Mark mark) {
         LineBuilder line = LineBuilder.line(SimulationLines.MARK).slot("reference", Nodes.name(mark.reference()))
                 .slot("symbol", Nodes.word(mark.symbol()));
         if (mark.net() != null) {
@@ -177,17 +189,17 @@ public final class CircuitLines {
         if (mark.rotation() != 0) {
             line.clause("rotate", Nodes.number(mark.rotation()));
         }
-        return line.build();
+        return line;
     }
 
     /** {@code B1 bus D [members D0, D1] via x y, x y …}. */
-    private static ClauseLineNode bus(Placement.Bus bus) {
+    private static LineBuilder bus(Placement.Bus bus) {
         LineBuilder line = LineBuilder.line(SimulationLines.BUS).slot("reference", Nodes.name(bus.reference())).slot("name", Nodes.word(bus.name()));
         if (!bus.members().isEmpty()) {
             line.clause("members", Nodes.groups(List.of(bus.members())));
         }
         line.clause("via", cornersOf(bus.via()));
-        return line.build();
+        return line;
     }
 
     /** Points as the language writes a line of them: {@code 240 120, 400 120}. */
@@ -196,14 +208,14 @@ public final class CircuitLines {
     }
 
     /** {@code W1 wire R1.b to C1.a [via x y, x y …]}. */
-    private static ClauseLineNode wire(Placement.Wire wire) {
+    private static LineBuilder wire(Placement.Wire wire) {
         LineBuilder line = LineBuilder.line(SimulationLines.WIRE).slot("reference", Nodes.name(wire.reference()))
                 .slot("from", Nodes.word(wire.from())).clause("to", Nodes.word(wire.to()));
         if (!wire.via().isEmpty()) {
             line.clause("via", Nodes.groups(wire.via().stream()
                     .map(corner -> List.of(Quantity.plain(corner.x()).written(), Quantity.plain(corner.y()).written())).toList()));
         }
-        return line.build();
+        return line;
     }
 
     /** {@code name at x, y}: where a part's name, value or readings stand, when they stand elsewhere than the sheet puts them. */

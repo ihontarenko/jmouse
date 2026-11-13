@@ -59,9 +59,9 @@ final class EaglePcbImport {
         reading.layers();
         PcbDrawing drawing = new PcbDrawing(circuit.circuit(), Optional.empty(), List.of(), PcbDrawing.Sizes.NONE, List.of(),
                 List.of(), reading.copper.size(), reading.outline(), reading.placements(), reading.tracks(), reading.arcs(),
-                reading.vias(), reading.zones(), List.of(), List.of(), List.of(), List.of(), reading.shapes(), List.of());
+                reading.vias(), reading.zones(), List.of(), List.of(), List.of(), List.of(), reading.shapes(), List.of(), List.of());
         DocumentNode document = new DocumentNode(PcbModule.PCB, title, EagleNames.pcb(title), null, 1);
-        document.addExpression(MetaNode.filed(SUMMARY + file, null, filing.category(), filing.circuitTags()));
+        document.addExpression(MetaNode.filed(SUMMARY + file, null, null, filing.circuitTags()));
         drawing.lines().forEach(document::addExpression);
         return new Pcb(document, reading.notes);
     }

@@ -1,15 +1,20 @@
 package org.jmouse.cad.store.plugin;
 
+import org.jmouse.cad.table.ShippedTable;
+
+import org.jmouse.settings.Label;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbLayers;
 import org.jmouse.cad.exchange.sheet.SheetChecks;
+import org.jmouse.cad.document.DocumentKindNames;
+import org.jmouse.cad.pcb.PcbLayerCodes;
 import org.jmouse.cad.pcb.layout.PcbLayout;
+import org.jmouse.cad.schematic.drawing.SheetLettering;
 import org.jmouse.cad.pcb.physics.CopperPhysics;
 import org.jmouse.cad.pcb.physics.StackPhysics;
 import org.jmouse.cad.pcb.routing.RoutingSettings;
-import org.jmouse.cad.settings.CadSettings;
-import org.jmouse.cad.settings.SettingsOwner;
 import org.jmouse.cad.settings.SettingsSection;
+import org.jmouse.cad.store.habits.CadHabits;
 import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.cad.document.part.FetchCompletion;
@@ -25,10 +30,12 @@ import org.jmouse.cad.store.catalogue.PlaceSource;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
 import org.jmouse.plugin.PluginRegistration;
-import org.jmouse.plugin.PluginSetting;
+import org.jmouse.cad.settings.CadSettings;
+import org.jmouse.settings.Section;
 import org.jmouse.cad.store.CadProperties;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * The engine itself, as the first plugin: it opens the points the engine reads — the language's modules, the formats a
@@ -37,35 +44,38 @@ import java.util.List;
  */
 public final class CadEnginePlugin implements Plugin {
 
-    public static final String ID = "cad-engine";
+    public static final String ID = SettingsSection.ENGINE;
 
     /**
      * The output jobs any installation offers.
      *
      * @param jobs every job: a name, the outputs it writes, and how each is written
      */
-    public record OutputJobs(List<OutputJob> jobs) {
+    public record OutputJobs(@Label("Jobs") List<OutputJob> jobs) {
     }
 
     /** Its section of the settings tree (ADR 0004): the output jobs every installation offers. */
-    public static final SettingsSection<OutputJobs> OUTPUT_JOBS = new SettingsSection<>("output/jobs", "Output jobs", SettingsOwner.ENGINE_DATA, OutputJobs.class);
+    public static final SettingsSection<OutputJobs> OUTPUT_JOBS = new SettingsSection<>("output/jobs", "Output jobs", OutputJobs.class);
 
     /**
-     * The core's sections of the settings tree: what the engine itself computes and makes with. A plugin contributes its own the
-     * same way.
+     * The core's sections of the settings tree: what the engine itself computes and makes with — its settings, as a plugin's
+     * sections are the plugin's.
      */
     static final List<SettingsSection<?>> CORE_SECTIONS = List.of(PcbLayout.SECTION, RoutingSettings.SECTION, CopperPhysics.SECTION,
-            StackPhysics.SECTION, PcbArtwork.SECTION, PcbLayers.SECTION, SheetChecks.SECTION, OUTPUT_JOBS);
+            StackPhysics.SECTION, PcbArtwork.SECTION, PcbLayers.SECTION, PcbLayerCodes.SECTION, SheetChecks.SECTION, SheetLettering.SECTION,
+            DocumentKindNames.SECTION, OUTPUT_JOBS);
 
-    private final List<PluginSetting> settings;
+    private final List<Section> settings;
 
     /** @param properties what the engine's settings start from */
     public CadEnginePlugin(CadProperties properties) {
-        this.settings = EngineConfiguration.settingsFrom(properties);
+        this.settings = Stream.concat(EngineConfiguration.sectionsFrom(properties).stream(),
+                Stream.concat(CORE_SECTIONS.stream().map(CadSettings::declarationOf),
+                        Stream.of(CadSettings.declarationOf(CadHabits.SECTION).forEachReader()))).toList();
     }
 
     @Override
-    public List<PluginSetting> settings() {
+    public List<Section> settings() {
         return settings;
     }
 
@@ -77,13 +87,12 @@ public final class CadEnginePlugin implements Plugin {
     @Override
     public void register(PluginRegistration registration) {
         registration.declare(DocumentModule.POINT);
+        // The tables a module ships, brought by its plugin as pages of the library.
+        registration.declare(ShippedTable.POINT);
         registration.declare(DocumentImport.POINT);
         registration.declare(DocumentExport.POINT);
         registration.declare(DocumentFlattening.POINT);
         registration.declare(OutputJob.POINT);
-        CadSettings.read(OUTPUT_JOBS).jobs().forEach(job -> registration.contribute(OutputJob.POINT, job));
-        registration.declare(SettingsSection.POINT);
-        CORE_SECTIONS.forEach(section -> registration.contribute(SettingsSection.POINT, section));
         registration.declare(AnalysisEngine.POINT);
         registration.declare(PartSearchProvider.POINT);
         registration.declare(FetchCompletion.POINT);

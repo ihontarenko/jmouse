@@ -1,0 +1,8 @@
+category:tables("Tables") {
+    meta {
+        summary: "What a program reads instead of holding it: the land patterns and pcb rules, an import's filing, SPICE's devices, model materials"
+        order: 150
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

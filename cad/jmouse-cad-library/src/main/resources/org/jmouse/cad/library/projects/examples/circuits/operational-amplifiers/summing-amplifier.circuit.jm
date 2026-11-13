@@ -1,0 +1,111 @@
+# OA-04. A TL072 summing amplifier: three inputs, each through its own resistor, into one virtual earth. Feedback holds
+# the inverting input at 0 V, so each source pushes its own current in / R into the node without seeing the others,
+# and Rf turns their sum back into a voltage: out = −Rf · (in1 / R1 + in2 / R2 + in3 / R3). With every resistor 10 kΩ
+# it is −(in1 + in2 + in3): a 200 Hz sine, a 1.2 kHz ripple riding on it, and a 1 V level that shifts the whole sum
+# down by a volt. Each input's share is what it would give alone — superposition.
+circuit:summing-amplifier("Summing amplifier") {
+    meta {
+        summary: "Three inputs into a TL072's virtual earth: out = −Rf · (in1 / R1 + in2 / R2 + in3 / R3), each input added on its own."
+        description: """
+            Idea: the inverting input is held at 0 V, so every input resistor carries its own current, set by its own
+            source alone. The currents add in the node, and Rf turns the sum back into a voltage. The output is a
+            weighted sum of the inputs, each weighted by Rf over its own resistor.
+
+            Try: set any amplitude to zero — that input's part disappears and the rest stay exactly as they were.
+            Change the level of the third input: the whole output moves up or down without changing shape. Raise R2:
+            the ripple gets quieter — a mixer with a volume control per channel.
+
+            Watch: CH1 the slow sine, CH3 the fast one, CH4 the steady level, CH2 the output: the fast ripple riding
+            on the slow sine, upside down, centred a volt below zero.
+
+            Ask: why does one input not disturb the others? What would the output be with Rf = 5 kΩ — the average of
+            the three, or something else?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-04
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A1(1 V, in: 0 V .. 3 V, step: 0.1 V, "First input: sine amplitude")
+    parameter:F1(200 Hz, in: 50 Hz .. 2 kHz, step: 10 Hz, "First input: sine frequency")
+    parameter:A2(0.5 V, in: 0 V .. 3 V, step: 0.1 V, "Second input: sine amplitude")
+    parameter:F2(1.2 kHz, in: 50 Hz .. 10 kHz, step: 10 Hz, "Second input: sine frequency")
+    parameter:U3(1 V, in: -3 V .. 3 V, step: 0.1 V, "Third input: a steady level")
+    parameter:R2_input(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "R2: the second input's weight is Rf / R2")
+    parameter:R_feedback(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Rf, the feedback resistor")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(sine-generator, [positive: in1, negative: 0], amplitude: A1, frequency: F1)
+    part:G2(sine-generator, [positive: in2, negative: 0], amplitude: A2, frequency: F2)
+    part:V3(voltage-source, [positive: in3, negative: 0], U_output: U3)
+    part:R1(resistor, [in1, sum], resistance: 10 kΩ)
+    part:R2(resistor, [in2, sum], resistance: R2_input)
+    part:R3(resistor, [in3, sum], resistance: 10 kΩ)
+    part:RF(resistor, [sum, out], resistance: R_feedback)
+    part:U1(tl072, [A.non_inverting_input: 0, A.inverting_input: sum, A.output: out, Vcc: vp, GND: vn])
+    part:RL(resistor, [out, 0], resistance: 10 kΩ)
+    place:PS1(at: 1520 320)
+    mark:LP1(label, vp, at: 1520 120)
+    mark:LN1(label, vn, at: 1520 520, rotate: 180)
+    mark:GND1(common, at: 1680 360)
+    place:G1(at: 200 640, rotate: 90)
+    place:G2(at: 320 800, rotate: 90)
+    place:V3(at: 440 960, rotate: 90)
+    place:R1(at: 600 520)
+    place:R2(at: 600 680)
+    place:R3(at: 600 840)
+    mark:Js(junction, at: 720 520)
+    mark:Js2(junction, at: 720 680)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    place:RF(at: 880 200)
+    mark:Jo(junction, at: 1040 560)
+    place:RL(at: 1280 760, rotate: 90)
+    mark:Jr1(junction, at: 320 1160)
+    mark:Jr2(junction, at: 440 1160)
+    mark:Jr3(junction, at: 760 1160)
+    mark:GND2(common, at: 760 1240)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: R1.positive, via: 200 520)
+    wire:W5(G2.positive, to: R2.positive, via: 320 680)
+    wire:W6(V3.positive, to: R3.positive, via: 440 840)
+    wire:W7(R1.negative, to: Js.j)
+    wire:W8(R2.negative, to: Js2.j)
+    wire:W9(R3.negative, to: Js2.j, via: 720 840)
+    wire:W10(Js2.j, to: Js.j)
+    wire:W11(Js.j, to: U1.A.inverting_input)
+    wire:W12(Js.j, to: RF.positive, via: 720 200)
+    wire:W13(RF.negative, to: Jo.j, via: 1040 200)
+    wire:W14(LP2.label, to: U1.Vcc)
+    wire:W15(U1.GND, to: LN2.label)
+    wire:W16(U1.A.output, to: Jo.j)
+    wire:W17(Jo.j, to: RL.positive, via: 1280 560)
+    wire:W18(G1.negative, to: Jr1.j, via: 200 1160)
+    wire:W19(G2.negative, to: Jr1.j)
+    wire:W20(Jr1.j, to: Jr2.j)
+    wire:W21(V3.negative, to: Jr2.j)
+    wire:W22(Jr2.j, to: Jr3.j)
+    wire:W23(U1.A.non_inverting_input, to: Jr3.j, via: 760 600)
+    wire:W24(RL.negative, to: Jr3.j, via: 1280 1160)
+    wire:W25(Jr3.j, to: GND2.common)
+    probe:CH1(in1, 0.5 V/div)
+    probe:CH2(out, 0.5 V/div)
+    probe:CH3(in2, 0.5 V/div)
+    probe:CH4(in3, 0.5 V/div)
+    expect("the steady input moves the whole output down a volt", from: "out = −(in1 + in2 + in3); the sines average to zero, so the mean is −U3 = −1 V") {
+        measure(average, out, after: 5 ms)
+        near(-1 V, +- 2%)
+    }
+    expect("the bottom: both sine peaks and the level together", from: "the largest value of sin θ + ½ sin 6θ is 1.468, so −(1.468 V + 1 V) = −2.468 V") {
+        measure(minimum, out, after: 1 ms)
+        near(-2.468 V, +- 2%)
+    }
+    expect("the top: the sines at their lowest, still minus the level", from: "−(−1.468 V + 1 V) = 0.468 V") {
+        measure(maximum, out, after: 1 ms)
+        near(0.468 V, +- 3%)
+    }
+    analysis(transient, for: 15 ms)
+    view:transient_response(primary)
+}

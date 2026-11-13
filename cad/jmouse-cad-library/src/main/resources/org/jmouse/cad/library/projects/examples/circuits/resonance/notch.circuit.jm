@@ -1,0 +1,64 @@
+# RLC-05. A resistor in series, then a coil and a capacitor in series to ground, read across the pair. At
+# f0 = 1/(2π√LC) the pair's reactances cancel, it becomes a short, and the output falls to nothing; away from f0 one
+# reactance wins, the pair stands up to the resistor, and the signal passes. A band-stop: the band-pass turned over.
+circuit:notch("RLC notch filter") {
+    meta {
+        summary: "A resistor into a series LC to ground: everything passes except a narrow band around f0 = 1/(2π√LC)."
+        description: """
+            Idea: a coil and a capacitor in series cancel each other at f0 = 1/(2π√LC) and become a plain wire. Hang
+            that pair from the output to ground and, at f0 only, it shorts the output away. Every other frequency
+            sees one reactance left over and passes.
+
+            Try: start at f0 — 1592 Hz: the output is gone. Move the frequency a few hundred hertz either way: it comes
+            back. Raise R: the notch gets wider; lower it and only a hair of a band is cut out. Change L or C to tune it — this is how a mains hum is removed.
+
+            Watch: the frequency response — flat on both sides, a deep dip at f0. On the screen CH2 is flat at f0
+            while CH3 shows the whole input's current, A / R, flowing straight through the pair to ground.
+
+            Ask: why is the output zero exactly where the series pair carries the most current? The notch is R / (2πL) wide — how
+            many hertz is that here, and what R doubles it?
+            """
+        category: resonance
+        tags: rlc, example, rlc-05
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:F(1592 Hz, in: 200 Hz .. 10 kHz, step: 1 Hz, "Generator frequency")
+    parameter:R(100 Ω, in: 10 Ω .. 2 kΩ, step: 10 Ω, "Series resistance: the larger, the wider the notch")
+    parameter:L(100 mH, in: 10 mH .. 1000 mH, step: 10 mH, "Inductance")
+    parameter:C(100 nF, in: 10 nF .. 1 µF, step: 10 nF, "Capacitance")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:R1(resistor, [in, out], resistance: R)
+    part:L1(inductor, [out, middle], inductance: L)
+    part:C1(capacitor, [middle, 0], capacitance: C)
+    place:G1(at: 320 680, rotate: 90)
+    place:R1(at: 600 440)
+    place:L1(at: 880 600, rotate: 90)
+    place:C1(at: 880 800, rotate: 90)
+    mark:Jb(junction, at: 880 960)
+    mark:GND1(ground, at: 880 1040)
+    wire:W1(G1.positive, to: R1.positive, via: 320 440)
+    wire:W2(R1.negative, to: L1.positive, via: 880 440)
+    wire:W3(L1.negative, to: C1.positive)
+    wire:W4(G1.negative, to: Jb.j, via: 320 960)
+    wire:W5(C1.negative, to: Jb.j)
+    wire:W6(Jb.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 0.5 V/div)
+        probe:CH2(out, 0.5 V/div)
+        probe:CH3(current, R1, 5 mA/div)
+        time(200 µs/div)
+    }
+    expect("at f0 the output is all but gone", from: "the series LC is a short at f0 = 1/(2π√LC) = 1592 Hz: out ≈ 0, under 3 % of the input") {
+        measure(maximum, out, after: 16 ms)
+        within(0 V .. 0.03 V)
+    }
+    expect("because the whole input drives current through the pair", from: "the source sees R alone: I = A / R = 1 V / 100 Ω = 10 mA") {
+        measure(maximum, current: R1, after: 16 ms)
+        near(10 mA, +- 3%)
+    }
+    analysis(transient, for: 20 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 100, to: 20000, points: 300)
+}

@@ -1,0 +1,91 @@
+# DC-02. Three resistors in series across a source: one current through all three, set by their sum, and the source
+# voltage shared out in proportion to the resistances. One ammeter is enough — every point of the loop carries the same
+# current —, and the three voltmeters add up to the source.
+circuit:series-resistors("Series resistors") {
+    meta {
+        summary: "Three resistors in series: one current I = U / (R1 + R2 + R3), the voltage shared in proportion."
+        description: """
+            Idea: in a series loop there is only one path, so every resistor carries the same current. The loop
+            behaves as one resistor of R1 + R2 + R3, and each resistor drops its own share I · R of the source.
+
+            Try: raise R3 — the current falls, the drop across R3 grows and the drops across R1 and R2 shrink. Set
+            all three equal: each takes a third of the source. Change the source: all three drops follow it.
+
+            Watch: the ammeter reads the one current of the loop; the three voltmeters read 2 V, 4 V and 6 V — in
+            the ratio 1 : 2 : 3 of the resistances — and add up to the 12 V of the source.
+
+            Ask: if R2 is shorted, what does the ammeter read? Which resistor takes the most power, and why the
+            largest one?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 1 V .. 24 V, step: 0.5 V, "Source voltage")
+    parameter:R_first(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R1")
+    parameter:R_second(2 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R2")
+    parameter:R_third(3 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R3")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A1(ammeter, [in: in, out: first])
+    part:R1(resistor, [first, second], resistance: R_first)
+    part:R2(resistor, [second, third], resistance: R_second)
+    part:R3(resistor, [third, 0], resistance: R_third)
+    part:VM1(voltmeter, [plus: first, minus: second])
+    part:VM2(voltmeter, [plus: second, minus: third])
+    part:VM3(voltmeter, [plus: third, minus: 0])
+    place:V1(at: 240 600, rotate: 90)
+    place:A1(at: 400 320)
+    place:R1(at: 760 320)
+    place:R2(at: 1080 320)
+    place:R3(at: 1440 640, rotate: 90)
+    place:VM1(at: 760 160)
+    place:VM2(at: 1080 480)
+    place:VM3(at: 1680 640, rotate: 90)
+    mark:J1(junction, at: 600 320)
+    mark:J2(junction, at: 920 320)
+    mark:J3(junction, at: 1280 320)
+    mark:J4(junction, at: 1440 440)
+    mark:Jb(junction, at: 1440 880)
+    mark:GND1(ground, at: 1440 960)
+    wire:W1(V1.positive, to: A1.in, via: 240 320)
+    wire:W2(A1.out, to: J1.j)
+    wire:W3(J1.j, to: R1.positive)
+    wire:W4(R1.negative, to: J2.j)
+    wire:W5(J2.j, to: R2.positive)
+    wire:W6(R2.negative, to: J3.j)
+    wire:W7(J3.j, to: J4.j, via: 1440 320)
+    wire:W8(J4.j, to: R3.positive)
+    wire:W9(VM1.plus, to: J1.j, via: 600 160)
+    wire:W10(VM1.minus, to: J2.j, via: 920 160)
+    wire:W11(VM2.plus, to: J2.j, via: 920 480)
+    wire:W12(VM2.minus, to: J3.j, via: 1280 480)
+    wire:W13(VM3.plus, to: J4.j, via: 1680 440)
+    wire:W14(R3.negative, to: Jb.j)
+    wire:W15(VM3.minus, to: Jb.j, via: 1680 880)
+    wire:W16(V1.negative, to: Jb.j, via: 240 880)
+    wire:W17(Jb.j, to: GND1.ground)
+    probe:CH1(first, 5 V/div)
+    probe:CH2(second, 5 V/div)
+    probe:CH3(third, 5 V/div)
+    expect("one current through the loop: 2 mA", from: "I = U / (R1 + R2 + R3) = 12 V / 6 kΩ") {
+        measure(final, current: R2)
+        near(2 mA, +- 0.5%)
+    }
+    expect("R1 drops its share: 2 V", from: "U1 = I · R1 = 2 mA · 1 kΩ") {
+        measure(final, first - second)
+        near(2 V, +- 0.5%)
+    }
+    expect("R2 drops twice as much: 4 V", from: "U2 = I · R2 = 2 mA · 2 kΩ") {
+        measure(final, second - third)
+        near(4 V, +- 0.5%)
+    }
+    expect("R3 takes the rest: 6 V, and 2 + 4 + 6 = 12 V", from: "U3 = I · R3 = 2 mA · 3 kΩ; U1 + U2 + U3 = U") {
+        measure(final, third)
+        near(6 V, +- 0.5%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: R_third, from: 100, to: 10000, points: 100)
+}

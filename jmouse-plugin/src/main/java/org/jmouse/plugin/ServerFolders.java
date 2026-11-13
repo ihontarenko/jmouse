@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * 📁 The server's folders, as whoever sets a {@link PluginSetting.Kind#FOLDERS} is shown them to choose from instead of
+ * 📁 The server's folders, as whoever sets a {@code FOLDERS} parameter is shown them to choose from instead of
  * typing a path: only folders, never a file's name. Who may ask is the application's to decide.
  */
 public final class ServerFolders {

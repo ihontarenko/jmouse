@@ -63,7 +63,7 @@ public final class CadAccessRules {
      * Every controller this module serves. The boot check walks exactly these, so a controller added here and not
      * declared in {@link #build()} fails the first start rather than serving ungated.
      */
-    static final List<Class<?>> CONTROLLERS = List.of(CatalogueController.class, LibraryController.class,
+    static final List<Class<?>> CONTROLLERS = List.of(CatalogueController.class, ProjectsController.class, LibraryController.class,
             SimulationController.class, LanguageController.class);
 
     /** The capabilities some route here is gated by; each must be mapped before the rules can be built. */
@@ -125,6 +125,7 @@ public final class CadAccessRules {
                 .publicType(LanguageController.class, "the language and texts the caller sent; nothing stored is read")
                 .publicType(SimulationController.class, "every run decides inside its service, where the owner it is for is")
                 .publicType(LibraryController.class, "the library's documents, each answered only when the reader may see it")
+                .publicType(ProjectsController.class, "every route decides inside its service, at the project's place or the reader's own")
                 .build();
 
         ExternalAccessRules rules = new PublicEndpointsHonoured(declared);

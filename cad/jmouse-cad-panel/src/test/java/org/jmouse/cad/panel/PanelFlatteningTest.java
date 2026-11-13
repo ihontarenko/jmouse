@@ -1,5 +1,6 @@
 package org.jmouse.cad.panel;
 
+import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.document.DocumentLanguage;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.cad.document.DocumentNode;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PanelFlatteningTest {
 
     private static final PanelDefaults DEFAULTS = new PanelDefaults(5, 2, 1, 2, 3.2, 5, 40, 0.5, 0.8);
-    private static final PanelFlattening FLATTENING = new PanelFlattening(() -> DEFAULTS);
+    private static final PanelFlattening FLATTENING = new PanelFlattening(() -> DEFAULTS, CadStandards.shipped());
     private static final DocumentLanguage LANGUAGE = language();
 
     private static DocumentLanguage language() {

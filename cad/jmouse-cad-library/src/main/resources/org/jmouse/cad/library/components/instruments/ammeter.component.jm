@@ -3,6 +3,7 @@ component:ammeter("Ammeter", type: meter) {
         designator: A
         summary: "Reads the current through it, put in the break of a wire"
         category: instruments
+        bench: instrument
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }

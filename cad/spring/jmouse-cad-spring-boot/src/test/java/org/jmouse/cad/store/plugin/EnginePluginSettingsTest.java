@@ -1,9 +1,10 @@
 package org.jmouse.cad.store.plugin;
 
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadPlace;
 import org.jmouse.cad.store.authority.Capability;
-import org.jmouse.cad.store.plugin.EnginePluginSettings.SettingView;
+import org.jmouse.cad.store.plugin.EnginePluginSettings.ParameterView;
 import org.jmouse.plugin.Contributions;
 import org.jmouse.plugin.Decorations;
 import org.jmouse.plugin.ExtensionPoint;
@@ -11,11 +12,13 @@ import org.jmouse.plugin.Extensions;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
 import org.jmouse.plugin.PluginRegistration;
-import org.jmouse.plugin.PluginSetting;
-import org.jmouse.plugin.PluginSettingStore;
-import org.jmouse.plugin.PluginSettings;
 import org.jmouse.plugin.PluginState;
 import org.jmouse.plugin.Topic;
+import org.jmouse.settings.Parameter;
+import org.jmouse.settings.ParameterStore;
+import org.jmouse.settings.Section;
+import org.jmouse.settings.SettingHolder;
+import org.jmouse.settings.Settings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -35,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EnginePluginSettingsTest {
 
     private static final String PLUGIN = "holding";
+    private static final String SECTION = "programs";
 
     /** Refused by a test's authority: what it stands for is that the caller was stopped, however a product says so. */
     private static final class Stopped extends RuntimeException {
@@ -50,6 +54,11 @@ class EnginePluginSettingsTest {
             @Override
             public String requireActor() {
                 return "reader";
+            }
+
+            @Override
+            public Optional<DocumentOwner> actorOwner() {
+                return Optional.empty();
             }
 
             @Override
@@ -78,10 +87,11 @@ class EnginePluginSettingsTest {
             }
 
             @Override
-            public List<PluginSetting> settings() {
-                return List.of(PluginSetting.folders("libraries", "Libraries", null, List.of(folder, folder.resolve("absent"))),
-                               PluginSetting.command("program", "Program", null, List.of("/usr/bin/program", "-b")),
-                               PluginSetting.text("label", "Label", null, "plain"));
+            public List<Section> settings() {
+                return List.of(Section.fixed(SECTION, "Holding", null, List.of(
+                        Parameter.folders("libraries", "Libraries", null, List.of(folder, folder.resolve("absent"))),
+                        Parameter.command("program", "Program", null, List.of("/usr/bin/program", "-b")),
+                        Parameter.text("label", "Label", null, "plain"))));
             }
         };
         PluginState started = new PluginState(plugin.descriptor(), PluginState.Status.STARTED, null, Set.of());
@@ -110,23 +120,35 @@ class EnginePluginSettingsTest {
                 return List.of();
             }
         };
-        Map<String, Map<String, String>> kept = new HashMap<>();
-        PluginSettingStore store = new PluginSettingStore() {
+        Map<String, String> kept = new HashMap<>();
+        ParameterStore store = new ParameterStore() {
             @Override
-            public Map<String, String> changed(String owner) {
-                return kept.getOrDefault(owner, Map.of());
+            public Map<String, String> kept(SettingHolder holder, String owner, String section) {
+                return Map.copyOf(kept);
             }
 
             @Override
-            public void keep(String owner, Map<String, String> values) {
-                kept.computeIfAbsent(owner, unknown -> new HashMap<>()).putAll(values);
+            public void keep(SettingHolder holder, String owner, String section, Map<String, String> values) {
+                kept.putAll(values);
+            }
+
+            @Override
+            public void forget(SettingHolder holder, String owner, String section, java.util.Set<String> keys) {
+                keys.forEach(kept::remove);
+            }
+
+            @Override
+            public void replace(SettingHolder holder, String owner, String section, Map<String, String> values) {
+                kept.clear();
+                kept.putAll(values);
             }
         };
-        return new EnginePluginSettings(extensions, new PluginSettings(() -> List.of(plugin), Optional.of(store)), authority(curator));
+        return new EnginePluginSettings(extensions, new Settings(() -> Map.of(PLUGIN, plugin.settings()), Optional.of(store),
+                                                                 Optional.empty(), Optional.empty()), authority(curator));
     }
 
-    private static SettingView settingOf(EnginePluginSettings settings, String key) {
-        return settings.settings().plugins().getFirst().settings().stream()
+    private static ParameterView settingOf(EnginePluginSettings settings, String key) {
+        return settings.settings().plugins().getFirst().sections().getFirst().parameters().stream()
                 .filter(setting -> setting.key().equals(key)).findFirst().orElseThrow();
     }
 
@@ -134,7 +156,7 @@ class EnginePluginSettingsTest {
     void aReaderWhoMayNotSetTheEngineUpIsToldNothingOfTheServer(@TempDir Path folder) {
         EnginePluginSettings settings = settings(false, folder);
         for (String key : List.of("libraries", "program")) {
-            SettingView setting = settingOf(settings, key);
+            ParameterView setting = settingOf(settings, key);
             assertEquals("", setting.value(), key);
             assertEquals("", setting.defaultValue(), key);
             assertEquals(List.of(), setting.absent(), key);
@@ -148,13 +170,13 @@ class EnginePluginSettingsTest {
         EnginePluginSettings settings = settings(false, folder);
         assertThrows(Stopped.class, settings::serverRoots);
         assertThrows(Stopped.class, () -> settings.serverFolder(folder.toString()));
-        assertThrows(Stopped.class, () -> settings.change(PLUGIN, Map.of("program", "/usr/bin/other")));
+        assertThrows(Stopped.class, () -> settings.change(PLUGIN, SECTION, Map.of("program", "/usr/bin/other")));
     }
 
     @Test
     void whoMaySetTheEngineUpSeesThemAndWhichFolderIsNotThere(@TempDir Path folder) {
         EnginePluginSettings settings = settings(true, folder);
-        SettingView libraries = settingOf(settings, "libraries");
+        ParameterView libraries = settingOf(settings, "libraries");
         assertTrue(libraries.value().contains(folder.toString()));
         assertEquals(List.of(folder.resolve("absent").toString()), libraries.absent());
         assertEquals("/usr/bin/program\n-b", settingOf(settings, "program").value());

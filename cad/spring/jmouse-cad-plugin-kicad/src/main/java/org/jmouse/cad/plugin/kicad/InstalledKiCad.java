@@ -1,5 +1,8 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.kicad.symbol.KiCadSymbolLibraries;
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.document.DocumentNode;
 
 import org.jmouse.cad.document.part.FetchedPart;
@@ -12,7 +15,7 @@ import org.jmouse.cad.kicad.KiCadModels;
 import org.jmouse.cad.mesh.ModelSource;
 import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.jmouse.mesh.MeshFormats;
-import org.jmouse.plugin.PluginSettingValues;
+import org.jmouse.settings.ParameterValues;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -32,24 +35,25 @@ final class InstalledKiCad {
     private record Folders(List<Path> symbols, List<Path> footprints, List<Path> models) {
     }
 
-    private record Libraries(Folders folders, KiCadFootprintLibraries footprints, InstalledKiCadParts parts, KiCadModels models) {
+    private record Libraries(Folders folders, KiCadLibraries filing, InstalledKiCadLibraries installed, InstalledKiCadParts parts, KiCadModels models) {
     }
 
-    private final PluginSettingValues settings;
-    private final KiCadLibraries      libraries;
+    private final ParameterValues settings;
+    /** KiCad's filing — whose its libraries are —, as the engine's table says it now. */
+    private final ReadTable<KiCadLibraries> filings;
     private final Executor            indexing;
     private Libraries                 current;
 
     /** @param indexing where the libraries are read the first time they are asked about */
-    InstalledKiCad(PluginSettingValues settings, KiCadLibraries libraries, Executor indexing) {
+    InstalledKiCad(ParameterValues settings, ReadTable<KiCadLibraries> filings, Executor indexing) {
         this.settings = settings;
-        this.libraries = libraries;
+        this.filings = filings;
         this.indexing = indexing;
     }
 
-    /** The footprints a design's parts are looked up in after its own. */
-    KiCadFootprintLibraries footprints() {
-        return current().footprints();
+    /** The footprints a design's parts are looked up in after its own, and the symbols that say which of its symbols are KiCad's. */
+    InstalledKiCadLibraries libraries() {
+        return current().installed();
     }
 
     /** The installed libraries as a place parts are looked for. */
@@ -57,12 +61,12 @@ final class InstalledKiCad {
         return new PartSearchProvider() {
             @Override
             public String id() {
-                return current().parts().id();
+                return InstalledKiCadParts.ID;
             }
 
             @Override
             public String name() {
-                return current().parts().name();
+                return InstalledKiCadParts.NAME;
             }
 
             @Override
@@ -87,7 +91,7 @@ final class InstalledKiCad {
         return new ModelSource() {
             @Override
             public String id() {
-                return current().models().id();
+                return InstalledKiCadParts.ID;
             }
 
             @Override
@@ -99,16 +103,18 @@ final class InstalledKiCad {
 
     private synchronized Libraries current() {
         Folders folders = new Folders(settings.folders(SYMBOL_FOLDERS), settings.folders(FOOTPRINT_FOLDERS), settings.folders(MODEL_FOLDERS));
-        if (current == null || !current.folders().equals(folders)) {
-            current = librariesIn(folders);
+        KiCadLibraries filing = filings.current();
+        if (current == null || !current.folders().equals(folders) || current.filing() != filing) {
+            current = librariesIn(folders, filing);
         }
         return current;
     }
 
-    private Libraries librariesIn(Folders folders) {
+    private Libraries librariesIn(Folders folders, KiCadLibraries libraries) {
         KiCadFootprintLibraries footprints = folders.footprints().isEmpty() ? KiCadFootprintLibraries.NONE
                 : KiCadFootprintLibraries.in(folders.footprints());
-        return new Libraries(folders, footprints,
+        KiCadSymbolLibraries symbols = folders.symbols().isEmpty() ? KiCadSymbolLibraries.NONE : KiCadSymbolLibraries.in(folders.symbols());
+        return new Libraries(folders, libraries, new InstalledKiCadLibraries(footprints, symbols),
                 new InstalledKiCadParts(folders.symbols(), folders.footprints(), footprints, indexing, libraries),
                 new KiCadModels(folders.models(), footprints, MeshFormats.standard(), libraries));
     }

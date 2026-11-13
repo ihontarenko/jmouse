@@ -1,0 +1,58 @@
+# How a drawing converted from an Altium schematic is filed. An Altium sheet carries each part's drawing inside it: a
+# converted drawing is the design's, its holder and terms the design's. Its footprints live in PCB libraries the sheet
+# only names, so a part keeps its footprint's name and lands on none until one is drawn or fetched.
+table:altium-libraries("Altium libraries") {
+    meta {
+        summary: "Where an Altium schematic's converted documents are filed."
+        category: tables
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+
+    # The tags a converted drawing carries; it is filed in no category, for the project it is imported into is its place.
+    # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
+    library-category altium
+    symbol-tags electronics, schematic, altium
+    footprint-tags electronics, altium, footprint
+    component-tags electronics, altium
+    circuit-tags electronics, altium
+
+    # The symbol each mark of a sheet is drawn with — where its terminal stands.
+    mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+
+    # The net that is a design's reference ground, node 0: what Altium's ground ports name it.
+    ground GND
+
+    # How long a sheet's transient runs until its author says.
+    transient 20 ms
+
+    # Where a PCB library's layers land among ours. A fixed layer by Altium's number; a mechanical layer by the kind its
+    # library names for it (Library/LayerKindMapping: Altium's numbers — 1 and 2 assembly, 9 and 10 component outline,
+    # 11 and 12 courtyard, 15 to 18 dimensions and fabrication notes, 26 and 27 3D body), for a library chooses its own
+    # mechanical layers. A primitive on a layer named nowhere here — a keep-out, a 3D body's outline — is left out and said.
+    silkscreen "What is printed on the pcb, front and back: Top and Bottom Overlay" {
+        altium "33", "34"
+    }
+    paste "What takes solder paste: Top and Bottom Paste" {
+        altium "35", "36"
+    }
+    mask "What the solder mask leaves open: Top and Bottom Solder" {
+        altium "37", "38"
+    }
+    copper "Copper drawn besides the pads: Top and Bottom Layer" {
+        altium "1", "32"
+    }
+    fabrication "What the assembly drawing shows" {
+        mechanical-kind "1", "2", "9", "10"
+    }
+    courtyard "Where the part's room ends" {
+        mechanical-kind "11", "12"
+    }
+    documentation "Dimensions and fabrication notes" {
+        mechanical-kind "15", "16", "17", "18"
+    }
+
+    # The layers whose numbers say a pad's side: one stands through the board, one on the far side.
+    multi-layer 74
+    bottom-layer 32
+}

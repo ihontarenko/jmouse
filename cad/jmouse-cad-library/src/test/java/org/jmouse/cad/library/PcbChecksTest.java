@@ -46,7 +46,7 @@ class PcbChecksTest {
         FootprintDrawing chip = FootprintDrawing.of(CadLibrary.library().findCoded("FP.CHIP:R0805").orElseThrow());
         Map<String, FootprintDrawing> footprints = Map.of("R1", chip, "R2", chip);
         PcbChecks.Subject subject = new PcbChecks.Subject(pcb, footprints, Map.of("R1", Optional.of("FP.CHIP:R0805"), "R2", Optional.of("FP.CHIP:R0805")),
-                NETS, Optional.of(CadStandards.pcbRules().valuesOf(pcb.rules())));
+                NETS, Optional.of(CadStandards.shipped().pcbRules().valuesOf(pcb.rules())));
         CopperNets nets = CopperNets.of(pcb, footprints, NETS, new PadOutline(CURVE_STEPS, 6), CURVE_STEPS);
         return PcbChecks.of(subject, nets, SETTINGS);
     }

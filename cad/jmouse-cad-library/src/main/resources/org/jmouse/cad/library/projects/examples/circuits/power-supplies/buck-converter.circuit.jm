@@ -1,0 +1,103 @@
+# PW-03. A buck converter, idealised for teaching: an IRFZ44N as the switch, its gate driven by a floating square
+# generator between gate and source (what a bootstrapped gate driver does on a real pcb), a 1N5819 Schottky as the
+# freewheeling diode, then an L-C filter and a load. The switch node is a square between 12 V and minus a diode drop;
+# the filter keeps its average: Vout ≈ duty · Vin. The inductor's current rises while the switch is on and falls
+# while the diode carries it — a triangle around the load's current.
+circuit:buck-converter("Buck converter") {
+    meta {
+        summary: "A switch, a Schottky, an inductor and a capacitor: 12 V in, about duty · 12 V out, the inductor's current a triangle around the load's."
+        description: """
+            Idea: a buck converter lowers a voltage by chopping it, not by burning it. The switch connects the
+            input to the inductor for a share of every period — the duty — and the diode takes the inductor's
+            current for the rest. The inductor and capacitor average the chopped square, so the output is about
+            duty · Vin; and since neither the switch nor the inductor drops much, little is lost on the way.
+
+            Try: move the duty from 0.5 to 0.25 and to 0.75 — the output follows, 3 V, 6 V, 9 V, a little less for
+            the diode's drop. Halve the frequency: the inductor's ripple doubles. Lower the load resistor: the
+            average current rises, the triangle keeps its height.
+
+            Watch: the switch node (CH1) — a square between 12 V and −0.3 V —, the output (CH2) settling and then
+            flat, and the inductor's current (CH3) rising along one slope while the switch is on and falling along
+            another while it is off.
+
+            Ask: the inductor's ripple is (Vin − Vout) · duty / (f · L). What is it at 0.5, 20 kHz and 330 µH? If
+            the load takes less than half of that, what happens to the current at the bottom of the triangle?
+            """
+        category: power-supplies
+        tags: power, example, pw-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:duty(0.5, in: 0.05 .. 0.95, step: 0.01, "Duty: the share of each period the switch is on")
+    parameter:f(20 kHz, in: 5 kHz .. 100 kHz, step: 1 kHz, "Switching frequency")
+    parameter:L(330 µH, in: 47 µH .. 1 mH, step: 1 µH, "Inductor")
+    parameter:R_load(10 Ω, in: 4.7 Ω .. 100 Ω, step: 0.1 Ω, "Load resistor")
+    part:V1(voltage-source, [positive: vin, negative: 0], U_output: 12 V)
+    part:Q1(irfz44n, [gate: gate, drain: vin, source: switch])
+    part:G1(square-generator, [positive: gate, negative: switch], high: 10 V, frequency: f, duty: duty)
+    part:D1(1n5819, [anode: 0, cathode: switch])
+    part:L1(inductor, [switch, out], inductance: L)
+    part:C1(capacitor, [out, 0], capacitance: 22 µF)
+    part:RL(resistor, [out, 0], resistance: R_load, power_rating: 10 W)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:V1(at: 200 600, rotate: 90)
+    place:Q1(at: 600 280, rotate: 270)
+    place:G1(at: 800 440, rotate: 270)
+    place:D1(at: 960 600, rotate: 270)
+    place:L1(at: 1120 240)
+    place:C1(at: 1280 600, rotate: 90)
+    place:RL(at: 1520 600, rotate: 90)
+    place:VM1(at: 1760 600, rotate: 90)
+    mark:Js1(junction, at: 800 240)
+    mark:Js2(junction, at: 960 240)
+    mark:Jo1(junction, at: 1280 240)
+    mark:Jo2(junction, at: 1520 240)
+    mark:Jg2(junction, at: 960 920)
+    mark:Jg3(junction, at: 1280 920)
+    mark:Jg4(junction, at: 1520 920)
+    mark:GND1(ground, at: 1280 1000)
+    wire:W1(V1.positive, to: Q1.drain, via: 200 240)
+    wire:W2(Q1.source, to: Js1.j)
+    wire:W3(G1.negative, to: Js1.j)
+    wire:W4(G1.positive, to: Q1.gate, via: 600 520)
+    wire:W5(Js1.j, to: Js2.j)
+    wire:W6(Js2.j, to: D1.cathode)
+    wire:W7(Js2.j, to: L1.positive)
+    wire:W8(L1.negative, to: Jo1.j)
+    wire:W9(Jo1.j, to: C1.positive)
+    wire:W10(Jo1.j, to: Jo2.j)
+    wire:W11(Jo2.j, to: RL.positive)
+    wire:W12(Jo2.j, to: VM1.plus, via: 1760 240)
+    wire:W13(V1.negative, to: Jg2.j, via: 200 920)
+    wire:W14(D1.anode, to: Jg2.j)
+    wire:W15(Jg2.j, to: Jg3.j)
+    wire:W16(C1.negative, to: Jg3.j)
+    wire:W17(Jg3.j, to: GND1.ground)
+    wire:W18(Jg3.j, to: Jg4.j)
+    wire:W19(RL.negative, to: Jg4.j)
+    wire:W20(VM1.minus, to: Jg4.j, via: 1760 920)
+    probes {
+        probe:CH1(switch, 5 V/div)
+        probe:CH2(out, 2 V/div)
+        probe:CH3(current, L1, 200 mA/div)
+        time(20 µs/div)
+    }
+    expect("half the time on: about half the input", from: "Vout ≈ duty · Vin − (1 − duty) · VF = 0.5 · 12 V − 0.5 · 0.35 V") {
+        measure(average, out, after: 3 ms)
+        near(5.8 V, +- 3%)
+    }
+    expect("the inductor carries the load's current on average", from: "I = Vout / R_load ≈ 5.8 V / 10 Ω") {
+        measure(average, current: L1, after: 3 ms)
+        near(0.58 A, +- 4%)
+    }
+    expect("the triangle's top", from: "ripple ΔI = (Vin − Vout) · duty / (f · L) ≈ 6 V · 0.5 / (20 kHz · 330 µH) ≈ 0.45 A; top = 0.58 A + ΔI / 2") {
+        measure(maximum, current: L1, after: 3 ms)
+        within(0.74 A .. 0.86 A)
+    }
+    expect("the triangle's bottom", from: "bottom = 0.58 A − ΔI / 2") {
+        measure(minimum, current: L1, after: 3 ms)
+        within(0.3 A .. 0.42 A)
+    }
+    analysis(transient, for: 4 ms)
+    view:transient_response(primary)
+}

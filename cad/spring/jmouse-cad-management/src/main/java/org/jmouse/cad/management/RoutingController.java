@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 🛤 The router an editor lays copper with — {@code JMOUSE_CAD_API.md} §2.6. A board is opened for a pcb's text once; then
+ * 🛤 The router an editor lays copper with — {@code JMOUSE_CAD_API.md} §2.7. A board is opened for a pcb's text once; then
  * every gesture names it and sends the layout it is asked of, and is answered with the tracks as they come out: a track laid
  * toward the pointer, a stretch or a corner carried, a part's tracks following it, jogs merged, corners rounded. A whole pcb is
  * routed as a stream of moments, one JSON line each, the last its answer.

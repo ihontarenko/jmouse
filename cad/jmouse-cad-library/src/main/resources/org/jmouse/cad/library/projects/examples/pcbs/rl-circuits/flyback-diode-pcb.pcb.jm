@@ -1,0 +1,28 @@
+# Coil and flyback diode laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:flyback-diode-pcb("Coil and flyback diode — pcb") {
+    meta {
+        summary: "Coil and flyback diode laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: rl-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(flyback-diode)
+    layers(2)
+    edge("M1 0H43A1 1 0 0 1 44 1V26A1 1 0 0 1 43 27H1A1 1 0 0 1 0 26V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 25.5 8.5, rotate: 270)
+    place(L1, at: 26 14, rotate: 270)
+    place(Q1, at: 25 20.5)
+    place(SW1, at: 31.5 8.5, rotate: 270)
+    place(D1, at: 38.5 13.5, rotate: 90)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, drive: 2, vcc: 3], at: 5.5 16.5)
+    track(top, width: 0.25, from: 25.5 9.5, to: 25.5 12.65, to: 26 13.15)
+    track(top, width: 0.25, from: 26 14.85, to: 26 18.96, to: 27.54 20.5)
+    track(top, width: 0.25, from: 25.5 7.5, to: 28.69 7.5, to: 31.5 4.69)
+    track(top, width: 0.25, from: 31.5 12.31, to: 32.23 12.31, to: 38.5 18.58)
+    track(top, width: 0.25, from: 26 14.85, to: 32.43 8.42, to: 38.5 8.42)
+    track(top, width: 0.25, from: 25 20.5, to: 25 20.05, to: 21.45 16.5, to: 5.5 16.5)
+    track(top, width: 0.25, from: 25.5 7.5, to: 9.3 7.5, to: 1.63 15.17, to: 5.5 19.04)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H43.5V26.5H0.5Z")
+}

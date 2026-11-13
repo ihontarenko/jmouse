@@ -1,5 +1,10 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
+import org.jmouse.cad.drawing.DrawnState;
+import org.jmouse.cad.kicad.KiCadLibraries;
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,7 +146,7 @@ class KiCadBoardImportTest {
         files.put("design.kicad_sch", SCHEMATIC);
         files.put("design.kicad_pcb", BOARD);
         files.put("design.kicad_pro", "{}");
-        ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> ONE_MODEL)
+        ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> ONE_MODEL, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
         List<String> slugs = imported.library().stream().map(DocumentNode::slug).toList();
         assertEquals(1, slugs.stream().filter(TEST_POINT_MODEL::equals).count(), slugs.toString());
@@ -158,7 +163,7 @@ class KiCadBoardImportTest {
         files.put("design.kicad_sch", SCHEMATIC);
         files.put("design.kicad_pcb", BOARD);
         files.put("design.kicad_pro", "{}");
-        ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> ONE_MODEL)
+        ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> ONE_MODEL, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
         List<String> standing = new ArrayList<>();
         for (DocumentNode document : imported.library()) {
@@ -184,7 +189,7 @@ class KiCadBoardImportTest {
         files.put("design.kicad_pro", "{}");
         CatalogueDocuments holding = slug -> slug.equals(TEST_POINT_MODEL_CODE)
                 ? Optional.of(new DocumentNode(ModelModule.MODEL, "Body", slug, null, 1)) : CadLibrary.library().find(slug);
-        ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> ONE_MODEL)
+        ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> ONE_MODEL, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), holding);
         assertTrue(imported.library().stream().noneMatch(document -> document.slug().equals(TEST_POINT_MODEL)));
         assertTrue(imported.files().isEmpty());
@@ -192,7 +197,7 @@ class KiCadBoardImportTest {
 
     @Test
     void theLibraryFindsAFootprintByTheCodeTheMapPairsKiCadsWith() {
-        String code = KiCadLibraryMap.standard().footprintCodeOf("Capacitor_THT:CP_Radial_D10.0mm_P5.00mm").orElseThrow();
+        String code = KiCadLibraryMap.shipped().footprintCodeOf("Capacitor_THT:CP_Radial_D10.0mm_P5.00mm").orElseThrow();
         DocumentNode ours = CadLibrary.library().findCoded(code).orElseThrow();
         assertEquals("footprint", ours.kind().word());
         assertTrue(CadLibrary.library().findCoded("FP.NOTHING:AT-ALL").isEmpty());
@@ -203,7 +208,7 @@ class KiCadBoardImportTest {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("design.kicad_sch", SCHEMATIC.replace("\"Diode_THT:D_DO-35\"", "\"Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal\""));
         files.put("design.kicad_pro", "{}");
-        ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> NO_MODELS)
+        ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
         // The part names ours, by its code, wherever the design keeps what it sits on: its component, or the circuit itself.
         DocumentLanguage language = CadLanguage.standard().language();
@@ -216,11 +221,15 @@ class KiCadBoardImportTest {
     }
 
     private ImportedDocuments imported() {
+        return imported(BOARD);
+    }
+
+    private ImportedDocuments imported(String board) {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("design.kicad_sch", SCHEMATIC);
-        files.put("design.kicad_pcb", BOARD);
+        files.put("design.kicad_pcb", board);
         files.put("design.kicad_pro", "{}");
-        return new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> NO_MODELS).read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
+        return new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED)).read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
     }
 
     private PcbFabrication fabricated(ImportedDocuments imported) {
@@ -244,6 +253,27 @@ class KiCadBoardImportTest {
         // Two stretches meeting end to end, one line of three corners; its label is the bus's and no net of the sheet.
         assertEquals(1, written.lines().filter(line -> line.contains("bus:B")).count(), written);
         assertTrue(!written.contains("D[0..2]"), written);
+    }
+
+    /** The board with its diode and hole in a locked group, the hole locked itself, its track locked as KiCad 7 writes it. */
+    static final String LOCKED_BOARD = BOARD
+            .replace("(footprint \"Diode_THT:D_DO-35\" (layer \"B.Cu\")", "(footprint \"Diode_THT:D_DO-35\" (layer \"B.Cu\") (uuid \"diode-1\")")
+            .replace("(footprint \"MountingHole:M3\" (layer \"F.Cu\")", "(footprint \"MountingHole:M3\" (locked yes) (layer \"F.Cu\") (uuid \"hole-1\")")
+            .replace("(segment (start 110 60)", "(segment locked (start 110 60)")
+            .replace("(zone (net 1) (net_name \"CATHODE\") (layer \"F.Cu\")",
+                    "(group \"Front panel\" (uuid \"group-1\") (locked yes) (members \"diode-1\" \"hole-1\")) (zone (net 1) (net_name \"CATHODE\") (layer \"F.Cu\")");
+
+    @Test
+    void whatKiCadLockedAndGroupedStaysLockedAndGrouped() {
+        String board = LOCKED_BOARD;
+        PcbDrawing pcb = fabricated(imported(board)).pcb();
+        assertEquals(List.of(new DrawnGroup("front-panel", DrawnState.LOCKED)), pcb.groups());
+        PcbDrawing.Placement diode = pcb.placements().stream().filter(placement -> placement.designator().equals("D1")).findFirst().orElseThrow();
+        PcbDrawing.Placement hole = pcb.placements().stream().filter(placement -> placement.printed().equals("H1")).findFirst().orElseThrow();
+        assertEquals(Arrangement.in("front-panel"), diode.arrangement());
+        assertEquals(new Arrangement("front-panel", DrawnState.LOCKED), hole.arrangement());
+        assertTrue(pcb.tracks().getFirst().arrangement().locked());
+        assertTrue(pcb.drawnGroups().holds(diode.arrangement()));
     }
 
     @Test
@@ -326,7 +356,7 @@ class KiCadBoardImportTest {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("copy.kicad_pro", "{}");
         files.put("design.kicad_sch", SCHEMATIC);
-        ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> NO_MODELS).read(new ExchangeFiles(files, "copy.kicad_pro", "Copy"), CadLibrary.library());
+        ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED)).read(new ExchangeFiles(files, "copy.kicad_pro", "Copy"), CadLibrary.library());
         assertTrue(imported.notes().stream().anyMatch(note -> note.contains("design.kicad_sch")));
     }
 }

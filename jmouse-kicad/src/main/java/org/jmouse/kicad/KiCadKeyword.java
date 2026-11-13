@@ -15,6 +15,13 @@ public enum KiCadKeyword implements SExpressionName {
     VERSION("version"),
     GENERATOR("generator"),
     UUID("uuid"),
+    /** KiCad 6's name for an item's identity, before {@code uuid}. */
+    TSTAMP("tstamp"),
+    /** KiCad 6's name for a group's identity. */
+    ID("id"),
+    LOCKED("locked"),
+    GROUP("group"),
+    MEMBERS("members"),
 
     // ─── placing ──────────────────────────────────────────────────────────────────────────────────
     AT("at"),

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * How documents converted from another product's files are filed, as that product's table says it: what every table
- * says alike ({@link SheetFiling}) — the category and tags, the transient, the mark symbols —, our layer each of its
+ * says alike ({@link SheetFiling}) — the library's category and the tags, the transient, the mark symbols —, our layer each of its
  * layers is, and whose a converted drawing is. KiCad's table is one; Eagle's and Altium's others.
  */
 public interface ImportFiling {
@@ -25,11 +25,6 @@ public interface ImportFiling {
 
     /** What the table says as every product's does. */
     SheetFiling sheet();
-
-    /** The category a converted circuit or pcb is filed in. */
-    default String category() {
-        return sheet().category();
-    }
 
     /** The category a symbol, a footprint, a 3D model or a component an import brings is filed in: the other program's own. */
     default String libraryCategory() {

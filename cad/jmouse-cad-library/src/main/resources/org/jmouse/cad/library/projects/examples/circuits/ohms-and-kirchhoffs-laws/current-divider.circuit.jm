@@ -1,0 +1,98 @@
+# DC-08. Four branches whose resistances double — 1, 2, 4 and 8 kΩ — across one source: each takes half the current of
+# the one before, so the total divides 53 %, 27 %, 13 % and 7 %. The light on each branch's wires is as wide and as
+# bright as its share of the busiest current, so the division is seen before it is read off the ammeters.
+circuit:current-divider("Current divider") {
+    meta {
+        summary: "Four branches of 1, 2, 4 and 8 kΩ share one source's current 8 : 4 : 2 : 1 — seen in the light on their wires."
+        description: """
+            Idea: branches in parallel all see the same voltage, so each takes a current in inverse proportion to its
+            resistance: twice the resistance, half the current. The share of the total a branch takes is its
+            conductance over the sum of all of them, G / (G1 + G2 + G3 + G4).
+
+            Try: watch the light on the four branches — each is half as wide and half as bright as the one to its
+            left. Lower R4 to 1 kΩ and its branch catches up with the first; raise R1 and the others take a larger
+            share of a smaller total. Change the source: every current scales, the shares stay.
+
+            Watch: the branch ammeters read 8, 4, 2 and 1 mA, the total ammeter their sum, 15 mA. As shares of the
+            total that is 53.3 %, 26.7 %, 13.3 % and 6.7 %.
+
+            Ask: what share does the 2 kΩ branch take if R4 is removed? Why does the share of a branch not depend on
+            the source voltage at all?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-08
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(8 V, in: 1 V .. 24 V, step: 0.5 V, "Source voltage")
+    parameter:R_first(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R1")
+    parameter:R_second(2 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R2")
+    parameter:R_third(4 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R3")
+    parameter:R_fourth(8 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R4")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A0(ammeter, [in: in, out: bus])
+    part:A1(ammeter, [in: bus, out: first])
+    part:R1(resistor, [first, 0], resistance: R_first)
+    part:A2(ammeter, [in: bus, out: second])
+    part:R2(resistor, [second, 0], resistance: R_second)
+    part:A3(ammeter, [in: bus, out: third])
+    part:R3(resistor, [third, 0], resistance: R_third)
+    part:A4(ammeter, [in: bus, out: fourth])
+    part:R4(resistor, [fourth, 0], resistance: R_fourth)
+    place:V1(at: 240 640, rotate: 90)
+    place:A0(at: 440 320)
+    place:A1(at: 680 480, rotate: 90)
+    place:R1(at: 680 720, rotate: 90)
+    place:A2(at: 960 480, rotate: 90)
+    place:R2(at: 960 720, rotate: 90)
+    place:A3(at: 1240 480, rotate: 90)
+    place:R3(at: 1240 720, rotate: 90)
+    place:A4(at: 1520 480, rotate: 90)
+    place:R4(at: 1520 720, rotate: 90)
+    mark:J1(junction, at: 680 320)
+    mark:J2(junction, at: 960 320)
+    mark:J3(junction, at: 1240 320)
+    mark:Jb1(junction, at: 680 960)
+    mark:Jb2(junction, at: 960 960)
+    mark:Jb3(junction, at: 1240 960)
+    mark:GND1(ground, at: 960 1040)
+    wire:W1(V1.positive, to: A0.in, via: 240 320)
+    wire:W2(A0.out, to: J1.j)
+    wire:W3(J1.j, to: A1.in)
+    wire:W4(J1.j, to: J2.j)
+    wire:W5(J2.j, to: A2.in)
+    wire:W6(J2.j, to: J3.j)
+    wire:W7(J3.j, to: A3.in)
+    wire:W8(J3.j, to: A4.in, via: 1520 320)
+    wire:W9(A1.out, to: R1.positive)
+    wire:W10(A2.out, to: R2.positive)
+    wire:W11(A3.out, to: R3.positive)
+    wire:W12(A4.out, to: R4.positive)
+    wire:W13(R1.negative, to: Jb1.j)
+    wire:W14(R2.negative, to: Jb2.j)
+    wire:W15(R3.negative, to: Jb3.j)
+    wire:W16(R4.negative, to: Jb3.j, via: 1520 960)
+    wire:W17(V1.negative, to: Jb1.j, via: 240 960)
+    wire:W18(Jb1.j, to: Jb2.j)
+    wire:W19(Jb2.j, to: Jb3.j)
+    wire:W20(Jb2.j, to: GND1.ground)
+    probe:CH1(current, R1, 2 mA/div)
+    probe:CH2(current, R2, 2 mA/div)
+    probe:CH3(current, R3, 2 mA/div)
+    probe:CH4(current, R4, 2 mA/div)
+    expect("the 1 kΩ branch takes 8 mA, 53.3 % of the total", from: "I1 = U / R1 = 8 V / 1 kΩ; 8 / 15 = 53.3 %") {
+        measure(final, current: R1)
+        near(8 mA, +- 0.5%)
+    }
+    expect("the 8 kΩ branch takes 1 mA, 6.7 % of the total", from: "I4 = U / R4 = 8 V / 8 kΩ; 1 / 15 = 6.7 %") {
+        measure(final, current: R4)
+        near(1 mA, +- 0.5%)
+    }
+    expect("the source gives the sum, 15 mA", from: "I = 8 + 4 + 2 + 1 mA") {
+        measure(final, current: A0)
+        near(15 mA, +- 0.5%)
+    }
+    analysis(transient, for: 2 ms)
+    view:transient_response(primary)
+    view:operating_point
+}

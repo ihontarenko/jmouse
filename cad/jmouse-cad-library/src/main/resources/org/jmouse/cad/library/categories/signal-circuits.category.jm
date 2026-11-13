@@ -1,0 +1,8 @@
+category:signal-circuits("Signal circuits") {
+    meta {
+        category: circuits
+        order: 7
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

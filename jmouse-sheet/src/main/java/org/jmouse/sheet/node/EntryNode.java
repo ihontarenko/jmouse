@@ -1,5 +1,7 @@
 package org.jmouse.sheet.node;
 
+import org.jmouse.el.grammar.TermWriter;
+import org.jmouse.el.writer.SourceWriter;
 import org.jmouse.sheet.SheetSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.ExpressionsNode;
@@ -45,5 +47,18 @@ public class EntryNode extends ExpressionsNode {
     @Override
     public String toString() {
         return "%s { … }".formatted(id);
+    }
+
+    /** {@code id ["title"] [source …] { … }}, its body's lines written with what their author wrote above and beside them. */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        writer.word(id);
+        if (title != null) {
+            writer.text(title);
+        }
+        if (source != null) {
+            writer.word(source.written());
+        }
+        writer.block(body -> new TermWriter().statements(body, getExpressions()));
     }
 }

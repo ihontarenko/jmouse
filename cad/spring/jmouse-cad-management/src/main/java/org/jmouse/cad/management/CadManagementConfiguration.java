@@ -1,6 +1,7 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.cad.store.about.EngineAbout;
+import org.jmouse.cad.store.habits.CadHabits;
 import org.jmouse.cad.store.plugin.EnginePluginSettings;
 import org.jmouse.cad.store.exchange.DocumentExchange;
 import org.jmouse.cad.store.exchange.RoutingBoards;
@@ -11,6 +12,7 @@ import org.jmouse.plugin.Extensions;
 import org.jmouse.cad.store.activity.CadActivity;
 import org.jmouse.cad.store.simulation.CatalogueChecks;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
+import org.jmouse.cad.store.project.CadProjects;
 import org.jmouse.cad.store.editing.LanguageEditing;
 import org.jmouse.cad.store.library.PartLibrary;
 import org.jmouse.cad.store.showcase.FeaturedDesigns;
@@ -65,6 +67,11 @@ public class CadManagementConfiguration {
     }
 
     @Bean
+    public ProjectsController cadProjectsController(CadProjects projects) {
+        return new ProjectsController(projects);
+    }
+
+    @Bean
     public LibraryController cadLibraryController(PartLibrary library) {
         return new LibraryController(library);
     }
@@ -97,8 +104,15 @@ public class CadManagementConfiguration {
     }
 
     @Bean
-    public SettingsController cadSettingsController(SettingsTree tree) {
-        return new SettingsController(tree);
+    public HabitsController cadHabitsController(CadHabits habits) {
+        CadAccessRules.requireDecidedInside(HabitsController.class);
+        return new HabitsController(habits);
+    }
+
+    @Bean
+    public SettingsController cadSettingsController(SettingsTree tree, EnginePluginSettings settings) {
+        CadAccessRules.requireDecidedInside(SettingsController.class);
+        return new SettingsController(tree, settings);
     }
 
     @Bean

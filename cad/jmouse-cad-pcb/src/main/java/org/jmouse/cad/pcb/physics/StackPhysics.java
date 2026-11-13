@@ -1,6 +1,6 @@
 package org.jmouse.cad.pcb.physics;
 
-import org.jmouse.cad.settings.SettingsOwner;
+import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import java.util.Locale;
 import java.util.Map;
@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * What a pcb's stack means for the signals and the heat on it, as constants: the dielectric's permittivity until a reader
  * says otherwise, how a neighbour lowers a track's impedance, light's speed, how a pcb gives off heat, and the widths
- * searched for an impedance. Data, beside this class ({@link #SECTION}); the copper's and the pcb's thickness are its way
+ * searched for an impedance. Data, a section of the settings tree; the copper's and the pcb's thickness are its way
  * of making, not this.
  *
  * @param source             where each value comes from: the papers, books and makers it is read from
@@ -20,11 +20,16 @@ import java.util.Map;
  * @param surfaceCoefficient watts a square metre of pcb gives off per kelvin
  * @param searchWidths       the widths searched for a track giving an impedance
  */
-public record StackPhysics(String source, double permittivity, Map<String, Coupling> pair, double speedOfLight, double freeSpace,
-                           double surfaceCoefficient, Search searchWidths) {
+public record StackPhysics(@Label("Source") String source,
+                           @Label("Permittivity") double permittivity,
+                           @Label("Pair coupling") Map<String, Coupling> pair,
+                           @Label("Speed of light") double speedOfLight,
+                           @Label("Free space") double freeSpace,
+                           @Label("Surface coefficient") double surfaceCoefficient,
+                           @Label("Search widths") Search searchWidths) {
 
     /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/pcb/physics/stack. */
-    public static final SettingsSection<StackPhysics> SECTION = new SettingsSection<>("pcb/physics/stack", "Stack physics", SettingsOwner.ENGINE_DATA, StackPhysics.class);
+    public static final SettingsSection<StackPhysics> SECTION = new SettingsSection<>("pcb/physics/stack", "Stack physics", StackPhysics.class);
 
     public StackPhysics {
         pair = Map.copyOf(pair);
@@ -41,17 +46,20 @@ public record StackPhysics(String source, double permittivity, Map<String, Coupl
      * @param share how much of a track's impedance a neighbour takes at no gap
      * @param decay how fast that falls as the gap grows, against the track's reach
      */
-    public record Coupling(double share, double decay) {
+    public record Coupling(@Label("Share") double share,
+                           @Label("Decay") double decay) {
     }
 
     /**
      * The widths searched for an impedance, millimetres, and how finely.
      *
-     * @param least     the narrowest width searched, in millimetres
-     * @param most      the widest, in millimetres
-     * @param precision how finely, in millimetres
+     * @param least     the narrowest width searched
+     * @param most      the widest
+     * @param precision how finely
      */
-    public record Search(double least, double most, double precision) {
+    public record Search(@Label(value = "Narrowest width", unit = "mm") double least,
+                         @Label(value = "Widest width", unit = "mm") double most,
+                         @Label(value = "Precision", unit = "mm") double precision) {
     }
 
     /** How a track stands against its plane. */

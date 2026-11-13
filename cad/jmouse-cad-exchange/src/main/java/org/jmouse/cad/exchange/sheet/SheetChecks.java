@@ -1,6 +1,6 @@
 package org.jmouse.cad.exchange.sheet;
 
-import org.jmouse.cad.settings.SettingsOwner;
+import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.circuit.Circuit;
@@ -41,7 +41,7 @@ import static org.jmouse.cad.document.FindingSeverity.WARNING;
 public final class SheetChecks {
 
     /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/schematic/pin-rules. */
-    public static final SettingsSection<PinRules> SECTION = new SettingsSection<>("schematic/pin-rules", "Pin rules", SettingsOwner.ENGINE_DATA, PinRules.class);
+    public static final SettingsSection<PinRules> SECTION = new SettingsSection<>("schematic/pin-rules", "Pin rules", PinRules.class);
 
     /**
      * Which pins may not share a net, and how near a no-connect mark stands to a pin to be on it.
@@ -50,7 +50,9 @@ public final class SheetChecks {
      * @param kinds          how each kind of pin is said, by its word
      * @param conflicts      the kinds that may not meet on a net, and how much their meeting weighs
      */
-    public record PinRules(double noConnectReach, Map<String, String> kinds, List<Conflict> conflicts) {
+    public record PinRules(@Label("No connect reach") double noConnectReach,
+                           @Label("Kinds") Map<String, String> kinds,
+                           @Label("Conflicts") List<Conflict> conflicts) {
 
         public PinRules {
             kinds = Map.copyOf(kinds);
@@ -72,7 +74,8 @@ public final class SheetChecks {
          * @param between  the two kinds of pin, by their words — the same word twice for two of one kind
          * @param severity how much it weighs: error or warning
          */
-        public record Conflict(List<String> between, String severity) {
+        public record Conflict(@Label("Pin kinds") List<String> between,
+                               @Label("Severity") String severity) {
 
             public Conflict {
                 between = List.copyOf(between);

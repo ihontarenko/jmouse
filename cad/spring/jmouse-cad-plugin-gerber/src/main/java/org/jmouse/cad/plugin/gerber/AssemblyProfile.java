@@ -1,18 +1,20 @@
 package org.jmouse.cad.plugin.gerber;
 
+import org.jmouse.settings.Label;
 import java.util.List;
 import java.util.Map;
 
 /**
  * How a set's assembly tables are written — which columns, in what order, under what headings, how a side and a unit are
  * said —: data, a section of the settings tree each plugin that makes such files declares. The plain set has its own
- * ({@code settings/plugin/gerber/assembly}, KiCad's columns); a pcb house brings its own and the same writer writes it
+ * ({@code settings/plugin/cad-gerber/assembly}, KiCad's columns); a pcb house brings its own and the same writer writes it
  * ({@link AssemblyTables}).
  *
  * @param placement the placement table: where each part stands and how it is turned
  * @param materials the bill of materials: what each line of parts is
  */
-public record AssemblyProfile(PlacementTable placement, MaterialsTable materials) {
+public record AssemblyProfile(@Label("Placement") PlacementTable placement,
+                              @Label("Materials") MaterialsTable materials) {
 
     /**
      * What both tables are: a file of the set, a line of its README, and columns. Every word a table says is in its file — a
@@ -43,8 +45,12 @@ public record AssemblyProfile(PlacementTable placement, MaterialsTable materials
      * @param mountings how each way a part is mounted is said: {@code surface} → {@code SMD}; a way not named is said as it is
      * @param columns   its columns, in order
      */
-    public record PlacementTable(String file, String role, Map<String, String> sides, String unit, Map<String, String> mountings,
-                                 List<Column> columns) implements Table {
+    public record PlacementTable(@Label("File") String file,
+                                 @Label("Role") String role,
+                                 @Label("Sides") Map<String, String> sides,
+                                 @Label("Unit") String unit,
+                                 @Label("Mountings") Map<String, String> mountings,
+                                 @Label("Columns") List<Column> columns) implements Table {
 
         public PlacementTable {
             sides = Map.copyOf(sides);
@@ -63,8 +69,11 @@ public record AssemblyProfile(PlacementTable placement, MaterialsTable materials
      *                            it is
      * @param columns             its columns, in order
      */
-    public record MaterialsTable(String file, String role, String designatorSeparator, Map<String, String> mountings,
-                                 List<Column> columns) implements Table {
+    public record MaterialsTable(@Label("File") String file,
+                                 @Label("Role") String role,
+                                 @Label("Designator separator") String designatorSeparator,
+                                 @Label("Mountings") Map<String, String> mountings,
+                                 @Label("Columns") List<Column> columns) implements Table {
 
         public MaterialsTable {
             mountings = Map.copyOf(mountings);
@@ -81,7 +90,8 @@ public record AssemblyProfile(PlacementTable placement, MaterialsTable materials
      * @param heading what the column is headed with
      * @param field   what it shows, by the field's word
      */
-    public record Column(String heading, String field) {
+    public record Column(@Label("Heading") String heading,
+                         @Label("Field") String field) {
     }
 
 }

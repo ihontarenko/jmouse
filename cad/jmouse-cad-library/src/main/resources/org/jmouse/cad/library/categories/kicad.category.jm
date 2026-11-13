@@ -1,0 +1,8 @@
+category:kicad("KiCad's") {
+    meta {
+        summary: "Symbols, footprints, 3D models and components brought by a KiCad import; KiCad's own libraries credited to the KiCad Libraries Team under their licence"
+        order: 100
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

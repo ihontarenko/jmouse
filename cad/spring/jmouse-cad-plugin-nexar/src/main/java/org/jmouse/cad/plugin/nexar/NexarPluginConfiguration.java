@@ -3,8 +3,8 @@ package org.jmouse.cad.plugin.nexar;
 import org.jmouse.http.client.JdkHttpTransport;
 import org.jmouse.cad.nexar.NexarParts;
 import org.jmouse.cad.nexar.NexarSettings;
-import org.jmouse.plugin.PluginSettingValues;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.ParameterValues;
+import org.jmouse.settings.Settings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -40,12 +40,13 @@ public class NexarPluginConfiguration {
 
     /** The plugin over its client; how many parts a search asks for is its setting, read at each search. */
     @Bean
-    public NexarPlugin cadNexarPlugin(NexarProperties properties, PluginSettings settings, JdkHttpTransport nexarHttpTransport) {
+    public NexarPlugin cadNexarPlugin(NexarProperties properties, Settings settings, JdkHttpTransport nexarHttpTransport) {
         NexarSettings nexar = properties.settings();
-        PluginSettingValues values = settings.valuesOf(NexarPlugin.ID);
+        ParameterValues values = settings.parameters(NexarPlugin.ID, NexarPlugin.CONNECTION);
+        ParameterValues searches = settings.parameters(NexarPlugin.ID, NexarPlugin.SEARCHES);
         NexarParts parts = new NexarParts(() -> new NexarSettings(values.text(NexarPlugin.CLIENT), values.secret(NexarPlugin.SECRET),
                 nexar.tokenUrl(), nexar.apiUrl(), nexar.limit(), nexar.timeout()),
-                () -> Math.toIntExact(values.wholeNumber(NexarPlugin.LIMIT)), Clock.systemUTC(), nexarHttpTransport);
+                () -> Math.toIntExact(searches.wholeNumber(NexarPlugin.LIMIT)), Clock.systemUTC(), nexarHttpTransport);
         return new NexarPlugin(parts, nexar.limit(), nexar.clientId(), nexar.clientSecret());
     }
 }

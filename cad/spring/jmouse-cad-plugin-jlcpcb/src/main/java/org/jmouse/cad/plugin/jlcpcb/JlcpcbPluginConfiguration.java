@@ -1,6 +1,7 @@
 package org.jmouse.cad.plugin.jlcpcb;
 
 import org.jmouse.cad.plugin.gerber.GerberSet;
+import org.jmouse.cad.settings.CadSettings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 public class JlcpcbPluginConfiguration {
 
     @Bean
-    public JlcpcbPlugin cadJlcpcbPlugin(GerberSet set) {
-        return new JlcpcbPlugin(set);
+    public JlcpcbPlugin cadJlcpcbPlugin(GerberSet set, CadSettings sections) {
+        return new JlcpcbPlugin(set, sections);
     }
 }

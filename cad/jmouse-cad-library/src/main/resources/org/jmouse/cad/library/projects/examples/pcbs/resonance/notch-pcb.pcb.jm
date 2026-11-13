@@ -1,0 +1,24 @@
+# RLC notch filter laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:notch-pcb("RLC notch filter — pcb") {
+    meta {
+        summary: "RLC notch filter laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: resonance
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(notch)
+    layers(2)
+    edge("M1 0H21A1 1 0 0 1 22 1V15A1 1 0 0 1 21 16H1A1 1 0 0 1 0 15V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 13 4)
+    place(L1, at: 17.5 5.5, rotate: 270)
+    place(C1, at: 17.5 11, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 7)
+    track(top, width: 0.25, from: 17.5 11.85, to: 17.5 13.05)
+    track(top, width: 0.25, from: 14 4, to: 16.85 4, to: 17.5 4.65)
+    track(top, width: 0.25, from: 17.5 6.35, to: 17.5 10.15)
+    track(top, width: 0.25, from: 12 4, to: 7.73 8.27, to: 5.5 8.27)
+    via(at: 17.5 13.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H21.5V15.5H0.5Z")
+}

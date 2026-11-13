@@ -25,10 +25,11 @@ import java.util.Optional;
  * @param angle     degrees it is turned, counter-clockwise as seen from the front
  * @param padNets   the net each pad carries on the board, by pad number, as KiCad names the net
  * @param lettering where its reference is printed, in the footprint's own frame; empty when the board does not say
+ * @param standing  its identity on the board and whether KiCad locked it
  */
 public record KiCadPcbFootprint(String libraryId, Optional<String> path, String reference, KiCadSide side, KiCadPoint at,
                                 double angle, KiCadFootprint footprint, Map<String, String> padNets,
-                                Optional<Lettering> lettering) {
+                                Optional<Lettering> lettering, KiCadStanding standing) {
 
     /** Reference is what KiCad 8 names the property, and what KiCad 7 names the text. */
     private static final String REFERENCE_FIELD = "Reference";
@@ -56,7 +57,7 @@ public record KiCadPcbFootprint(String libraryId, Optional<String> path, String 
         int separator = libraryId.indexOf(':');
         String name = separator < 0 ? libraryId : libraryId.substring(separator + 1);
         return new KiCadPcbFootprint(libraryId, list.wordOf(PATH), reference, side, KiCadPoint.of(at), angle,
-                asInLibrary(written, name, side, angle), padNetsOf(list), letteringOf(list, side, angle));
+                asInLibrary(written, name, side, angle), padNetsOf(list), letteringOf(list, side, angle), KiCadStanding.of(list));
     }
 
     /** Where a point of the footprint, as a library holds it, stands on the board. */

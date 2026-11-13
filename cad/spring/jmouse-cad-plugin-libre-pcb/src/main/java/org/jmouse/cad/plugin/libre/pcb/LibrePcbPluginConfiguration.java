@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.libre.pcb;
 
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.libre.pcb.LibrePcbFiling;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 public class LibrePcbPluginConfiguration {
 
     @Bean
-    public LibrePcbPlugin cadLibrePcbPlugin() {
-        return new LibrePcbPlugin(new LibrePcbDesignReading(LibrePcbFiling.standard()));
+    public LibrePcbPlugin cadLibrePcbPlugin(TableSource tables) {
+        return new LibrePcbPlugin(new LibrePcbDesignReading(LibrePcbFiling.readFrom(tables)));
     }
 }

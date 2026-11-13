@@ -258,8 +258,9 @@ public class LanguageEditing {
         } catch (CadProblem refused) {
             return new DrawnText(source, kind, null, List.of(problemOf(refused)));
         }
-        if (!(model instanceof SymbolDrawing || model instanceof FootprintDrawing || model instanceof PcbDrawing)) {
-            throw CadProblem.invalid("A " + kind + " is not drawn: a symbol, a portrait, a frame, a footprint and a PCB are.");
+        // Whatever the module that brings its kind reads it to — a drawing, a 3D model's files, a table's lines —, as a shelf lists it.
+        if (model == null) {
+            throw CadProblem.invalid("A " + kind + " has no model the engine keeps: it is read as its text alone.");
         }
         return new DrawnText(source, kind, model, List.of());
     }

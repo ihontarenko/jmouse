@@ -1,0 +1,53 @@
+# The active low-pass filter laid out as a pcb one could order: a TL072 in SOIC-8, the resistors and the capacitor in
+# 0805, and a 1×5 header where the bench's supplies, ground, input and output come in. Two layers — the signals on the
+# top, the bottom a ground plane that two short runs (the output back to the header, the negative supply under the
+# input) cross on their way; each ground pad of the top reaches the plane through its own via.
+pcb:active-low-pass-pcb("Active low-pass filter — pcb") {
+    meta {
+        summary: "The active low-pass filter as a two-layer pcb: SOIC-8 and 0805 parts, a header to the bench, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(active-low-pass)
+    rules(standard)
+    teardrops(round, length: 0.5, width: 1, curved)
+    teardrops(surface, length: 0.5, width: 1, curved)
+    layers(2)
+    edge("M1 3H31A1 1 0 0 1 32 4V24A1 1 0 0 1 31 25H1A1 1 0 0 1 0 24V4A1 1 0 0 1 1 3Z")
+    place(J1, at: 4 14.095, reference(at: -2.3 0, rotate: 90))
+    place(U1, at: 24 16)
+    place(R1, at: 13 16.635)
+    place(C1, at: 14.85 20, reference(at: 2.6 0))
+    place(RF, at: 21 10.5)
+    place(RG, at: 16 10.5, rotate: 180)
+    place(RL, at: 9 21.5)
+    # The input into the filter's resistor, and on to the amplifier's non-inverting input, the capacitor tapped below.
+    track(top, width: 0.4, rounding: 0.5, from: 4 16.635, to: 12 16.635)
+    track(top, width: 0.4, rounding: 0.5, from: 14 16.635, to: 21.55 16.635)
+    track(top, width: 0.4, rounding: 0.5, from: 14 16.635, to: 14 20)
+    # The inverting input up to the feedback pair, the output up to the feedback resistor's other end.
+    track(top, width: 0.4, rounding: 0.5, from: 21.55 15.365, to: 19.5 15.365, to: 19.5 11, to: 20 10.5)
+    track(top, width: 0.4, rounding: 0.5, from: 17 10.5, to: 20 10.5)
+    track(top, width: 0.4, rounding: 0.5, from: 21.55 14.095, to: 22 13.645, to: 22 8)
+    # The output back to the header under the plane, and on the top from the header to the load.
+    track(bottom, width: 0.4, rounding: 0.5, from: 22 8, to: 7 8, to: 7 17.175, to: 5 19.175, to: 4 19.175)
+    track(top, width: 0.4, rounding: 0.5, from: 4 19.175, to: 6.325 21.5, to: 8 21.5)
+    # The positive supply round the top edge to pin 8; the negative one under the input to pin 4.
+    track(top, width: 0.6, rounding: 1, from: 4 9.015, to: 4 6, to: 28.5 6, to: 28.5 12.045, to: 26.45 14.095)
+    track(top, width: 0.6, rounding: 0.5, from: 4 14.095, to: 11 14.095)
+    track(bottom, width: 0.6, rounding: 0.5, from: 11 14.095, to: 14.81 17.905, to: 19.5 17.905)
+    track(top, width: 0.6, rounding: 0.5, from: 19.5 17.905, to: 21.55 17.905)
+    # Each ground pad of the top to the plane.
+    track(top, width: 0.4, from: 15 10.5, to: 13.6 10.5)
+    track(top, width: 0.4, from: 15.7 20, to: 15.7 21.8)
+    track(top, width: 0.4, from: 10 21.5, to: 11.6 21.5)
+    via(at: 22 8, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 11 14.095, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 19.5 17.905, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 13.6 10.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 15.7 21.8, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 11.6 21.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.3, "M1.5 4.5H30.5V23.5H1.5Z")
+}

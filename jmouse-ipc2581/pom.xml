@@ -61,6 +61,18 @@
         written by JAXB: the structure, the order and the required parts are the schema's, never hand-written.
     -->
     <dependencies>
+        <!-- What a reader is shown a value of its settings as (@Label): the settings library, which depends on nothing. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-settings</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Compiled with the descriptions processor, so a record a settings section reads carries its Javadoc; nothing at run time -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>

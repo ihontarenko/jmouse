@@ -1,0 +1,89 @@
+# OA-08. A Schmitt trigger: a TL072 used as a comparator, the signal on its inverting input and its non-inverting
+# input fed from its own output through R2 and R1 — positive feedback. Whatever the output does, the divider moves the
+# threshold to agree with it: with the output high at +13.5 V the threshold is 13.5 V · R1 / (R1 + R2) = +2.37 V, with
+# it low it is −2.37 V. The input has to cross the far threshold to flip it back. The input here is a slow 20 Hz
+# triangle with noise on it: a plain comparator would chatter a dozen times at every crossing, but 4.7 V of hysteresis
+# is wider than the noise, so the output switches exactly once each way.
+#
+# The input is two generators in series, the triangle and the noise.
+circuit:schmitt-trigger("Schmitt trigger") {
+    meta {
+        summary: "A TL072 comparator with positive feedback: two thresholds, ±13.5 V · R1 / (R1 + R2), so a noisy slow input flips it only once."
+        description: """
+            Idea: feed part of a comparator's output back to its non-inverting input and the threshold follows the
+            output. While the output is high the threshold sits high; while it is low the threshold sits low. A signal
+            that has just crossed one threshold must travel all the way to the other before the output flips back.
+
+            Try: raise the noise — as long as its swing stays inside the gap between the thresholds, the output still
+            switches once per crossing. Now raise R2: the thresholds close in on zero, the gap shrinks below the noise,
+            and the output chatters at every crossing like a plain comparator.
+
+            Watch: CH1 the noisy triangle, CH3 the threshold jumping between +2.4 V and −2.4 V, CH2 the output. The
+            output goes low where the input rises through the upper threshold and high only where it falls through the
+            lower one. Switch the oscilloscope to XY, CH1 across and CH2 up: the loop it draws is the hysteresis.
+
+            Ask: what are the two thresholds with R2 = 100 kΩ? Why does the output switch once per crossing, and when
+            would it not?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-08
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(5 V, in: 1 V .. 10 V, step: 0.5 V, "Triangle height either side of the common")
+    parameter:F(20 Hz, in: 5 Hz .. 200 Hz, step: 5 Hz, "Triangle frequency")
+    parameter:Noise(0.3 V, in: 0 V .. 2 V, step: 0.05 V, "Noise on the input, RMS")
+    parameter:R_feedback(47 kΩ, in: 10 kΩ .. 1000 kΩ, step: 1 kΩ, "R2, from the output to the threshold")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(triangle-generator, [positive: in, negative: noisy], high: A, low: -A, frequency: F)
+    part:G2(noise-generator, [positive: noisy, negative: 0], level: Noise, bandwidth: 2 kHz)
+    part:U1(tl072, [A.non_inverting_input: threshold, A.inverting_input: in, A.output: out, Vcc: vp, GND: vn])
+    part:R1(resistor, [threshold, 0], resistance: 10 kΩ)
+    part:R2(resistor, [threshold, out], resistance: R_feedback)
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:GND1(common, at: 360 360)
+    place:G1(at: 400 760, rotate: 90)
+    place:G2(at: 400 1000, rotate: 90)
+    mark:GND2(common, at: 400 1160)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    mark:Jt(junction, at: 720 600)
+    place:R1(at: 720 760, rotate: 90)
+    mark:GND3(common, at: 720 880)
+    place:R2(at: 880 1000)
+    mark:Jo(junction, at: 1040 560)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: U1.A.inverting_input, via: 400 520)
+    wire:W5(G1.negative, to: G2.positive)
+    wire:W6(G2.negative, to: GND2.common)
+    wire:W7(LP2.label, to: U1.Vcc)
+    wire:W8(U1.GND, to: LN2.label)
+    wire:W9(U1.A.non_inverting_input, to: Jt.j)
+    wire:W10(Jt.j, to: R1.positive)
+    wire:W11(R1.negative, to: GND3.common)
+    wire:W12(Jt.j, to: R2.positive, via: [640 600, 640 1000])
+    wire:W13(R2.negative, to: Jo.j, via: 1040 1000)
+    wire:W14(U1.A.output, to: Jo.j)
+    probe:CH1(in, 2 V/div)
+    probe:CH2(out, 5 V/div)
+    probe:CH3(threshold, 2 V/div)
+    expect("the upper threshold", from: "V_T+ = V_high · R1 / (R1 + R2) = 13.5 V · 10 kΩ / 57 kΩ = 2.37 V") {
+        measure(maximum, threshold, after: 10 ms)
+        near(2.37 V, +- 3%)
+    }
+    expect("the lower threshold", from: "V_T− = V_low · R1 / (R1 + R2) = −13.5 V · 10 kΩ / 57 kΩ = −2.37 V") {
+        measure(minimum, threshold, after: 10 ms)
+        near(-2.37 V, +- 3%)
+    }
+    expect("one switch each way per period, noise or not", from: "the noise's swing is inside the 4.7 V between the thresholds: the output's frequency is the triangle's, 20 Hz") {
+        measure(frequency, out, above: 0 V, after: 10 ms)
+        near(20 Hz, +- 2%)
+    }
+    analysis(transient, for: 160 ms)
+    view:transient_response(primary)
+}

@@ -3,8 +3,8 @@ package org.jmouse.cad.plugin.suppliers;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.suppliers.SupplierParts;
 import org.jmouse.http.client.JdkHttpTransport;
-import org.jmouse.plugin.PluginSettingValues;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.ParameterValues;
+import org.jmouse.settings.Settings;
 import org.jmouse.suppliers.DigiKeyDriver;
 import org.jmouse.suppliers.MouserDriver;
 import org.jmouse.suppliers.SupplierAccess;
@@ -71,25 +71,27 @@ public class SuppliersPluginConfiguration {
 
     /** The plugin over one place per distributor; how many offers a search asks for is its setting, read at each search. */
     @Bean
-    public SuppliersPlugin cadSuppliersPlugin(SuppliersProperties properties, PluginSettings settings,
-                                              JdkHttpTransport suppliersHttpTransport) {
-        PluginSettingValues values = settings.valuesOf(SuppliersPlugin.ID);
-        IntSupplier limit = () -> Math.toIntExact(values.wholeNumber(SuppliersPlugin.LIMIT));
+    public SuppliersPlugin cadSuppliersPlugin(SuppliersProperties properties, Settings settings,
+                                              JdkHttpTransport suppliersHttpTransport, CadSettings sections) {
+        ParameterValues mouserValues = settings.parameters(SuppliersPlugin.ID, SuppliersPlugin.MOUSER_SECTION);
+        ParameterValues digiKeyValues = settings.parameters(SuppliersPlugin.ID, SuppliersPlugin.DIGI_KEY_SECTION);
+        ParameterValues searchValues = settings.parameters(SuppliersPlugin.ID, SuppliersPlugin.SEARCHES_SECTION);
+        IntSupplier limit = () -> Math.toIntExact(searchValues.wholeNumber(SuppliersPlugin.LIMIT));
         SupplierDriver mouser = new MouserDriver(suppliersHttpTransport);
         SupplierDriver digiKey = new DigiKeyDriver(suppliersHttpTransport, Clock.systemUTC(), () -> new DigiKeyDriver.Locale(
-                values.text(SuppliersPlugin.DIGI_KEY_SITE), values.text(SuppliersPlugin.DIGI_KEY_LANGUAGE), values.text(SuppliersPlugin.DIGI_KEY_CURRENCY)));
+                digiKeyValues.text(SuppliersPlugin.DIGI_KEY_SITE), digiKeyValues.text(SuppliersPlugin.DIGI_KEY_LANGUAGE), digiKeyValues.text(SuppliersPlugin.DIGI_KEY_CURRENCY)));
         List<SupplierParts> places = List.of(
                 new SupplierParts(mouser, () -> new SupplierAccess(mouser.name(), properties.mouser().address(),
-                        new SupplierCredentials.ApiKey(values.secret(SuppliersPlugin.MOUSER_KEY)), properties.timeout()), limit,
+                        new SupplierCredentials.ApiKey(mouserValues.secret(SuppliersPlugin.MOUSER_KEY)), properties.timeout()), limit,
                         "A Mouser search API key is not set: Settings, Plugins, Suppliers."),
                 new SupplierParts(digiKey, () -> new SupplierAccess(digiKey.name(), properties.digiKey().address(),
-                        new SupplierCredentials.ClientCredentials(values.text(SuppliersPlugin.DIGI_KEY_CLIENT), values.secret(SuppliersPlugin.DIGI_KEY_SECRET)),
+                        new SupplierCredentials.ClientCredentials(digiKeyValues.text(SuppliersPlugin.DIGI_KEY_CLIENT), digiKeyValues.secret(SuppliersPlugin.DIGI_KEY_SECRET)),
                         properties.timeout()), limit,
                         "A DigiKey application's client is not set: Settings, Plugins, Suppliers."));
         int most = Stream.of(mouser, digiKey).mapToInt(SupplierDriver::mostPerSearch).max().orElseThrow();
-        IntSupplier pcbs = () -> Math.toIntExact(values.wholeNumber(SuppliersPlugin.PCBS));
+        IntSupplier pcbs = () -> Math.toIntExact(searchValues.wholeNumber(SuppliersPlugin.PCBS));
         SupplierMaterialsExport materials = new SupplierMaterialsExport(places, pcbs,
-                CadSettings.read(SuppliersPlugin.MATERIALS));
+                () -> sections.read(SuppliersPlugin.MATERIALS));
         return new SuppliersPlugin(places, materials, Math.min(properties.limit(), most), most, new SuppliersPlugin.Deployed(
                 properties.mouser().apiKey(), properties.digiKey().clientId(), properties.digiKey().clientSecret(), properties.digiKeyLocale()));
     }

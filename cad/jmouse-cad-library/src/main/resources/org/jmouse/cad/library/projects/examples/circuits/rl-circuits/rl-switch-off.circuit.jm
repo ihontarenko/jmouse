@@ -1,0 +1,107 @@
+# RL-02. Two identical coils — 100 mH with 100 Ω of copper — on 12 V, each switched by an IRFZ44N from the same gate
+# drive. Both carry 120 mA when the gate falls at 5 ms. The bare coil has nowhere to send its current: it drives its
+# drain up until the transistor breaks down near 55 V and burns the coil's energy itself. The other coil has a
+# resistor path across it through SW1: its current turns into that loop, the drain rises only to 12 V + 120 mA · 100 Ω
+# = 24 V, and the current dies along τ = L / (R + R_path). Open SW1 while it runs and the second coil spikes too.
+circuit:rl-switch-off("Switching off an inductor") {
+    meta {
+        summary: "Two coils carrying 120 mA are switched off: the bare one kicks its drain to the transistor's 55 V breakdown, the one with a resistor path only to 24 V."
+        description: """
+            Idea: an inductor keeps its current flowing — the energy ½ L i² is in its magnetic field and has to go
+            somewhere. Open its path and it raises whatever voltage it takes to push the current on: across a
+            transistor that has just turned off, that is far more than the supply, until something breaks down.
+            Give the current another path and the voltage is only what that path needs.
+
+            Try: SW1 connects a 100 Ω path across the right-hand coil. Open it while the circuit runs: the right drain
+            kicks as high as the left one. Close it and raise L: the spike lasts longer, but with the path it is no
+            taller — its height is the current times the path's resistance. Lower the path's resistance and the
+            spike shrinks, but the current takes longer to die.
+
+            Watch: CH1, the gate drive, falling at 5 ms; CH2, the bare coil's drain — a spike to the breakdown,
+            near 55 V, almost five times the supply; CH3, the coil with a path — a step to 24 V that decays along
+            τ = L / (R + R_path) = 0.5 ms.
+
+            Ask: where does the energy go in each case? Why does a smaller path resistance give a lower spike but a
+            slower decay? What would a diode in place of the resistor do?
+            """
+        category: rl-circuits
+        tags: rl, example, rl-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:L(100 mH, in: 10 mH .. 1 H, step: 10 mH, "L, each coil")
+    parameter:R_path(100 Ω, in: 10 Ω .. 1 kΩ, step: 10 Ω, "The resistor path across the right-hand coil")
+    parameter:f(100 Hz, in: 10 Hz .. 1 kHz, step: 10 Hz, "Gate drive frequency")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 12 V)
+    part:G1(square-generator, [positive: drive, negative: 0], high: 10 V, low: 0 V, frequency: f, duty: 0.5)
+    part:RA(resistor, [vcc, bare_coil], resistance: 100 Ω)
+    part:LA(inductor, [bare_coil, bare], inductance: L)
+    part:QA(irfz44n, [gate: drive, drain: bare, source: 0])
+    part:RB(resistor, [vcc, tamed_coil], resistance: 100 Ω)
+    part:LB(inductor, [tamed_coil, tamed], inductance: L)
+    part:QB(irfz44n, [gate: drive, drain: tamed, source: 0])
+    part:SW1(switch, [a: vcc, b: path], closed: 1)
+    part:RP(resistor, [path, tamed], resistance: R_path)
+    place:V1(at: 240 600, rotate: 90)
+    place:G1(at: 520 920, rotate: 90)
+    place:RA(at: 880 320, rotate: 90)
+    place:LA(at: 880 520, rotate: 90)
+    place:QA(at: 840 760)
+    place:RB(at: 1320 320, rotate: 90)
+    place:LB(at: 1320 520, rotate: 90)
+    place:QB(at: 1280 760)
+    place:SW1(at: 1560 320, rotate: 90)
+    place:RP(at: 1560 520, rotate: 90)
+    mark:Ja(junction, at: 880 160)
+    mark:Jt(junction, at: 1320 160)
+    mark:Jd(junction, at: 1320 640)
+    mark:Jg(junction, at: 640 760)
+    mark:Jb1(junction, at: 240 1120)
+    mark:Jb2(junction, at: 520 1120)
+    mark:Jb3(junction, at: 880 1120)
+    mark:Jb4(junction, at: 1320 1120)
+    mark:GND1(ground, at: 520 1200)
+    wire:W1(V1.positive, to: Ja.j, via: 240 160)
+    wire:W2(Ja.j, to: RA.positive)
+    wire:W3(RA.negative, to: LA.positive)
+    wire:W4(LA.negative, to: QA.drain)
+    wire:W5(Ja.j, to: Jt.j)
+    wire:W6(Jt.j, to: RB.positive)
+    wire:W7(RB.negative, to: LB.positive)
+    wire:W8(LB.negative, to: Jd.j)
+    wire:W9(Jd.j, to: QB.drain)
+    wire:W10(Jt.j, to: SW1.a, via: 1560 160)
+    wire:W11(SW1.b, to: RP.positive)
+    wire:W12(RP.negative, to: Jd.j, via: 1560 640)
+    wire:W13(G1.positive, to: Jg.j, via: 520 760)
+    wire:W14(Jg.j, to: QA.gate)
+    wire:W15(Jg.j, to: QB.gate, via: [640 960, 1080 960, 1080 760])
+    wire:W16(V1.negative, to: Jb1.j)
+    wire:W17(Jb1.j, to: Jb2.j)
+    wire:W18(G1.negative, to: Jb2.j)
+    wire:W19(Jb2.j, to: Jb3.j)
+    wire:W20(QA.source, to: Jb3.j)
+    wire:W21(Jb3.j, to: Jb4.j)
+    wire:W22(QB.source, to: Jb4.j)
+    wire:W23(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(drive, 5 V/div)
+        probe:CH2(bare, 10 V/div)
+        probe:CH3(tamed, 10 V/div)
+        time(1 ms/div)
+    }
+    expect("both coils carry 120 mA when they are switched off", from: "after 5 τ: 12 V / 100 Ω · (1 − e⁻⁵), τ = L / R = 1 ms") {
+        measure(maximum, current: RA)
+        within(115 mA .. 121 mA)
+    }
+    expect("the bare coil kicks its drain up to the transistor's breakdown", from: "nowhere else for 120 mA to go: the IRFZ44N's V(BR)DSS, 55 V") {
+        measure(maximum, bare)
+        within(50 V .. 75 V)
+    }
+    expect("the coil with a path lifts its drain only to 24 V", from: "V = 12 V + 120 mA · 100 Ω, the current turned into the path") {
+        measure(maximum, tamed)
+        near(24 V, +- 4%)
+    }
+    analysis(transient, for: 8 ms)
+    view:transient_response(primary)
+}

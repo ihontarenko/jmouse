@@ -1,14 +1,10 @@
 package org.jmouse.cad.exchange.imported;
 
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.sheet.Sheet;
 import org.jmouse.sheet.SheetEntry;
-import org.jmouse.sheet.SheetReader;
 import org.jmouse.sheet.SheetValue;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,15 +26,9 @@ public final class FilingTable {
     }
 
     /** The table shipped beside a class. */
-    public static FilingTable shipped(Class<?> beside, String resource) {
-        try (InputStream stream = beside.getResourceAsStream(resource)) {
-            if (stream == null) {
-                throw new IllegalStateException("'" + resource + "' is not beside " + beside.getName());
-            }
-            return of(resource, SheetReader.read(resource, new String(stream.readAllBytes(), StandardCharsets.UTF_8)));
-        } catch (IOException failure) {
-            throw new UncheckedIOException(failure);
-        }
+    /** A table read through its source by its slug: the engine's catalogue table, or the one its module ships. */
+    public static FilingTable of(TableSource tables, String slug) {
+        return of(slug, tables.table(slug));
     }
 
     public static FilingTable of(String name, Sheet table) {

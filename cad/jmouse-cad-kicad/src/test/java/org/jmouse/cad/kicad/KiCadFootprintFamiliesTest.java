@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /** A KiCad footprint lands on this library's footprint of the same sizes, by the families the shipped map writes once. */
 class KiCadFootprintFamiliesTest {
 
-    private final KiCadLibraryMap map = KiCadLibraryMap.standard();
+    private final KiCadLibraryMap map = KiCadLibraryMap.shipped();
 
     @Test
     void theFootprintsOfARealBoardFindOursBySize() {

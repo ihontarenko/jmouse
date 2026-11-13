@@ -1,0 +1,116 @@
+# PW-02. The simplest linear regulator: a 5.1 V Zener held at its knee by a resistor from the input, and a TIP31C
+# emitter follower that copies the Zener's voltage, less one base-emitter drop, onto the load. The input is a 12 V
+# rail with a 2 V, 100 Hz ripple on it — what an unregulated supply gives —, and the output holds about 4.4 V with a
+# fortieth of that ripple. Everything the input has above the output is burnt in the transistor: the wattmeter reads
+# it.
+circuit:linear-regulator("Linear regulator: Zener and emitter follower") {
+    meta {
+        summary: "A BZX55C5V1 Zener and a TIP31C emitter follower hold about 4.4 V while the input ripples by 4 V; the transistor burns the difference."
+        description: """
+            Idea: a Zener diode in breakdown holds its voltage almost regardless of its current, but it can supply
+            only milliamperes. An emitter follower lends it current: the transistor's emitter sits one junction
+            below its base, whatever the load takes, and the load's current comes from the collector — from the
+            input, not from the Zener. The price: the transistor carries the whole load current across the whole
+            difference between input and output, and turns (Vin − Vout) · I into heat.
+
+            Try: raise the input's DC level from 12 V to 18 V — the output hardly moves, and the wattmeter's figure
+            climbs. Close the switch to add a second load: the output dips by a few tens of millivolts while the
+            current doubles. Lower the input to about 7 V: the ripple's troughs fall below what the regulator
+            needs, and the bottom of the output follows them down.
+
+            Watch: the input (CH1) rippling between 10 V and 14 V, the output (CH2) flat at about 4.4 V, the Zener
+            (CH3) at 5.1 V. The DC sweep draws the output against the input: flat above the dropout, a slope below.
+
+            Ask: at 12 V in and 94 mA out, how many watts does the TIP31C turn into heat, and how much does the load
+            get? What efficiency is that, and why does it fall as the input rises?
+            """
+        category: power-supplies
+        tags: power, example, pw-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:V_in(12 V, in: 4 V .. 20 V, step: 0.5 V, "Input DC level")
+    parameter:R_load(47 Ω, in: 22 Ω .. 470 Ω, step: 1 Ω, "Load resistor")
+    part:V1(voltage-source, [positive: dc, negative: 0], U_output: V_in)
+    part:AC1(sine-generator, [positive: vin, negative: dc], amplitude: 2 V, frequency: 100 Hz)
+    part:RZ(resistor, [vin, reference], resistance: 1 kΩ)
+    part:D1(bzx55c5v1, [anode: 0, cathode: reference])
+    part:WM1(wattmeter, [in: vin, out: collector, plus: collector, minus: out])
+    part:Q1(tip31c, [base: reference, collector: collector, emitter: out])
+    part:RL(resistor, [out, 0], resistance: R_load, power_rating: 2 W)
+    part:SW1(switch, [a: out, b: second], closed: 0)
+    part:RL2(resistor, [second, 0], resistance: 47 Ω, power_rating: 2 W)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:AC1(at: 200 520, rotate: 90)
+    place:V1(at: 200 760, rotate: 90)
+    place:RZ(at: 480 440, rotate: 90)
+    place:D1(at: 480 760, rotate: 270)
+    place:WM1(at: 680 240)
+    place:Q1(at: 800 600)
+    place:RL(at: 1120 920, rotate: 90)
+    place:SW1(at: 1360 880, rotate: 90)
+    place:RL2(at: 1360 1080, rotate: 90)
+    place:VM1(at: 1600 960, rotate: 90)
+    mark:Jin(junction, at: 480 240)
+    mark:Jz(junction, at: 480 600)
+    mark:Jc(junction, at: 840 400)
+    mark:Jo(junction, at: 840 760)
+    mark:Jo2(junction, at: 1120 760)
+    mark:Jo3(junction, at: 1360 760)
+    mark:Jg2(junction, at: 480 1240)
+    mark:Jg3(junction, at: 1120 1240)
+    mark:Jg4(junction, at: 1360 1240)
+    mark:GND1(ground, at: 1120 1320)
+    wire:W1(V1.positive, to: AC1.negative)
+    wire:W2(AC1.positive, to: Jin.j, via: 200 240)
+    wire:W3(Jin.j, to: RZ.positive)
+    wire:W4(Jin.j, to: WM1.in)
+    wire:W5(WM1.out, to: Jc.j, via: 840 240)
+    wire:W6(Jc.j, to: Q1.collector)
+    wire:W7(WM1.plus, to: Jc.j, via: [680 120, 920 120, 920 400])
+    wire:W8(RZ.negative, to: Jz.j)
+    wire:W9(Jz.j, to: D1.cathode)
+    wire:W10(Jz.j, to: Q1.base)
+    wire:W11(Q1.emitter, to: Jo.j)
+    wire:W12(WM1.minus, to: Jo.j)
+    wire:W13(Jo.j, to: Jo2.j)
+    wire:W14(Jo2.j, to: RL.positive)
+    wire:W15(Jo2.j, to: Jo3.j)
+    wire:W16(Jo3.j, to: SW1.a)
+    wire:W17(SW1.b, to: RL2.positive)
+    wire:W18(Jo3.j, to: VM1.plus, via: 1600 760)
+    wire:W19(V1.negative, to: Jg2.j, via: 200 1240)
+    wire:W20(D1.anode, to: Jg2.j)
+    wire:W21(Jg2.j, to: Jg3.j)
+    wire:W22(RL.negative, to: Jg3.j)
+    wire:W23(Jg3.j, to: GND1.ground)
+    wire:W24(Jg3.j, to: Jg4.j)
+    wire:W25(RL2.negative, to: Jg4.j)
+    wire:W26(VM1.minus, to: Jg4.j, via: 1600 1240)
+    probes {
+        probe:CH1(vin, 5 V/div)
+        probe:CH2(out, 1 V/div)
+        probe:CH3(reference, 1 V/div)
+        time(5 ms/div)
+    }
+    expect("the output sits one junction below the Zener", from: "Vout = VZ − VBE ≈ 5.1 V − 0.7 V") {
+        measure(average, out, after: 20 ms)
+        within(4.2 V .. 4.6 V)
+    }
+    expect("4 V of ripple in, about 0.1 V out: the top of the output", from: "the Zener's 20 Ω against 1 kΩ passes about 1/50 of the ripple") {
+        measure(maximum, out, after: 20 ms)
+        within(4.45 V .. 4.56 V)
+    }
+    expect("and its bottom, within 0.1 V of the top", from: "the same divider at the ripple's trough") {
+        measure(minimum, out, after: 20 ms)
+        within(4.36 V .. 4.47 V)
+    }
+    expect("the load takes about 94 mA", from: "I = Vout / R_load ≈ 4.4 V / 47 Ω") {
+        measure(average, current: RL, after: 20 ms)
+        within(88 mA .. 98 mA)
+    }
+    analysis(transient, for: 60 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: V_in, from: 0, to: 20, points: 41)
+}

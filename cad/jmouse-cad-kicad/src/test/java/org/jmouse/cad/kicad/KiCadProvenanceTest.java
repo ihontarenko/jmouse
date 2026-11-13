@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class KiCadProvenanceTest {
 
-    private static final KiCadLibraries LIBRARIES = KiCadLibraries.standard();
+    private static final KiCadLibraries LIBRARIES = KiCadLibraries.shipped();
 
     private static KiCadFootprint footprint(Map<String, String> properties) {
         return new KiCadFootprint("TO-220-3_Vertical", "", List.of(), properties, List.of(), List.of(), List.of(), List.of());

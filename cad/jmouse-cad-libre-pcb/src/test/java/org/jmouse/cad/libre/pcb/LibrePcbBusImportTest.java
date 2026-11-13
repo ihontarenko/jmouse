@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LibrePcbBusImportTest {
 
     /** The marks as the shipped library draws them. */
-    private static final SheetMarks MARKS = SheetMarks.of(CadLibrary.library(), LibrePcbFiling.standard().markSymbols());
+    private static final SheetMarks MARKS = SheetMarks.of(CadLibrary.library(), LibrePcbFiling.shipped().markSymbols());
 
     /** A project of one sheet holding one bus, D[0..3], drawn as a segment of two lines meeting at a corner. */
     private static final Map<String, String> PROJECT = Map.of(
@@ -48,7 +48,7 @@ class LibrePcbBusImportTest {
     @DisplayName("come across as one line, named as the circuit names the bus, with the nets that name carries")
     void aBusComesAcrossNamed() {
         LibrePcbProject project = LibrePcbProject.read(PROJECT);
-        ImportedDocuments imported = LibrePcbDesignImport.read(project, Map.of(), "buses.lpp", "Buses", LibrePcbFiling.standard(), MARKS);
+        ImportedDocuments imported = LibrePcbDesignImport.read(project, Map.of(), "buses.lpp", "Buses", LibrePcbFiling.shipped(), MARKS);
         String circuit = language.write(imported.designs().getFirst());
         assertTrue(circuit.contains("bus:B1(D"), circuit);
         assertTrue(circuit.contains("D0") && circuit.contains("D3"), circuit);

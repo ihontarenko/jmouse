@@ -1,0 +1,49 @@
+# The triangle and square generator laid out as a pcb one could order: the comparator U1 and the integrator U2, each a
+# TL072 in SOIC-8, the ring's resistors and its capacitor in 0805, and a 1×5 header where the bench's supplies and ground
+# come in and the square and the triangle go out. Two layers — the signals and the supplies on the top, the bottom a
+# ground plane; each ground pad of the top reaches it through its own via.
+pcb:triangle-square-generator-pcb("Triangle and square generator — pcb") {
+    meta {
+        summary: "The triangle and square generator as a two-layer pcb: two TL072 in SOIC-8, the ring's resistors and capacitor in 0805, a header to the bench, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(triangle-square-generator)
+    rules(standard)
+    layers(2)
+    edge("M1 0H37A1 1 0 0 1 38 1V23A1 1 0 0 1 37 24H1A1 1 0 0 1 0 23V1A1 1 0 0 1 1 0Z")
+    place(J1, at: 4 12)
+    place(U1, at: 15 9)
+    place(U2, at: 29 9)
+    place(RB, at: 15 17)
+    place(RA, at: 22 19)
+    place(RI, at: 22 13)
+    place(CI, at: 29 16)
+    track(top, width: 0.4, from: 12.55 8.365, to: 10.95 8.365)
+    track(top, width: 0.4, from: 26.55 9.635, to: 24.95 9.635)
+    track(top, width: 0.4, from: 26.55 8.365, to: 25.05 8.365, to: 23 10.415, to: 23 13)
+    track(top, width: 0.4, from: 23 13, to: 25.15 13, to: 28.15 16)
+    track(top, width: 0.4, from: 21 13, to: 20 13, to: 16 17)
+    track(top, width: 0.4, from: 14 17, to: 16 19, to: 21 19)
+    track(top, width: 0.4, from: 23 19, to: 26.85 19, to: 29.85 16)
+    track(top, width: 0.4, from: 12.55 9.635, to: 14 9.635, to: 14 17)
+    track(top, width: 0.6, from: 4 12, to: 11.455 12, to: 12.55 10.905)
+    track(top, width: 0.4, from: 29.85 16, to: 29.85 9.7, to: 27.245 7.095, to: 26.55 7.095)
+    track(top, width: 0.4, from: 12.55 7.095, to: 14.65 7.095, to: 14.65 10.095, to: 17.555 13, to: 21 13)
+    track(top, width: 0.4, from: 4 14.54, to: 2.5 13.04, to: 2.5 5.24, to: 10.695 5.24, to: 12.55 7.095)
+    track(top, width: 0.6, from: 17.45 5.895, to: 17.45 7.095)
+    track(bottom, width: 0.6, from: 4 6.92, to: 16.425 6.92, to: 17.45 5.895)
+    track(top, width: 0.6, from: 17.45 7.095, to: 18.25 6.295, to: 30.65 6.295, to: 31.45 7.095)
+    track(top, width: 0.6, from: 12.55 10.905, to: 12.55 12.105)
+    track(top, width: 0.6, from: 26.55 12.105, to: 26.55 10.905)
+    track(bottom, width: 0.6, from: 12.55 12.105, to: 26.55 12.105)
+    track(top, width: 0.4, from: 4 17.08, to: 7.3 20.38, to: 21.62 20.38, to: 23 19)
+    via(at: 10.95 8.365, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 24.95 9.635, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 17.45 5.895, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 12.55 12.105, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 26.55 12.105, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.3, "M0.5 0.5H37.5V23.5H0.5Z")
+}

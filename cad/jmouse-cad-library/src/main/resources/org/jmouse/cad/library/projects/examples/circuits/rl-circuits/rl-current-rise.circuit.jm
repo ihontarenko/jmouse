@@ -1,0 +1,81 @@
+# RL-01. A switch closes a source onto a resistor and an inductor. The inductor will not let its current jump: at the
+# first instant the whole source stands across it and no current flows; then the current climbs along an exponential
+# with τ = L / R towards Vs / R while the inductor's voltage dies away. After one τ the current is at 63 % and the
+# inductor holds 37 % of the source. The switch is live.
+circuit:rl-current-rise("Current rising in an RL circuit") {
+    meta {
+        featured: yes
+        summary: "A switch closes onto R and L: the current climbs to 63 % of Vs / R in one τ = L / R while the inductor's voltage dies away."
+        description: """
+            Idea: an inductor opposes a change of its current — it makes whatever voltage it takes to slow it. At the
+            moment the switch closes the current is zero, so nothing is dropped across R and the whole source is
+            across L. As the current grows, R takes more and L less, so the growth slows: an exponential with
+            τ = L / R, the mirror of a capacitor charging.
+
+            Try: raise L and the rise takes longer; raise R and it is quicker — and ends lower, at Vs / R. Open the
+            switch while the current flows and look at what the inductor does to the switch (the next example is about
+            that). Close it again: the rise starts over.
+
+            Watch: the ammeter, and CH2, the current — rising fast, then slowly; CH1 and the voltmeter, the
+            inductor's voltage — the whole source at once, then falling the same way. After one τ the current is at
+            63.2 % of Vs / R and the inductor's voltage at 36.8 % of Vs.
+
+            Ask: with L = 100 mH and R = 100 Ω, how long is τ? Why is the inductor's voltage largest exactly when its
+            current is smallest?
+            """
+        category: rl-circuits
+        tags: rl, example, rl-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(5 V, in: 1 V .. 12 V, step: 0.5 V, "Source voltage")
+    parameter:R(100 Ω, in: 10 Ω .. 1 kΩ, step: 10 Ω, "R, the series resistor")
+    parameter:L(100 mH, in: 10 mH .. 1 H, step: 10 mH, "L, the inductor")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:SW1(switch, [a: in, b: feed], closed: 1)
+    part:A1(ammeter, [in: feed, out: top])
+    part:R1(resistor, [top, coil], resistance: R)
+    part:L1(inductor, [coil, 0], inductance: L)
+    part:VM1(voltmeter, [plus: coil, minus: 0])
+    place:V1(at: 320 600, rotate: 90)
+    place:SW1(at: 520 360)
+    place:A1(at: 760 360)
+    place:R1(at: 1000 360)
+    place:L1(at: 1240 600, rotate: 90)
+    place:VM1(at: 1480 600, rotate: 90)
+    mark:Jc(junction, at: 1240 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 1240 840)
+    mark:GND1(ground, at: 1240 920)
+    wire:W1(V1.positive, to: SW1.a, via: 320 360)
+    wire:W2(SW1.b, to: A1.in)
+    wire:W3(A1.out, to: R1.positive)
+    wire:W4(R1.negative, to: Jc.j)
+    wire:W5(Jc.j, to: L1.positive)
+    wire:W6(Jc.j, to: VM1.plus, via: 1480 360)
+    wire:W7(V1.negative, to: Jb1.j)
+    wire:W8(Jb1.j, to: Jb2.j)
+    wire:W9(L1.negative, to: Jb2.j)
+    wire:W10(VM1.minus, to: Jb2.j, via: 1480 840)
+    wire:W11(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(coil, 1 V/div)
+        probe:CH2(current, R1, 10 mA/div)
+        time(1 ms/div)
+    }
+    expect("after one τ the current is at 63 % of Vs / R", from: "i(τ) = (Vs / R) · (1 − e⁻¹) = 50 mA · 0.632, τ = L / R = 1 ms") {
+        measure(minimum, current: R1, after: 1 ms)
+        near(31.6 mA, +- 2%)
+    }
+    expect("after one τ the inductor holds 37 % of the source", from: "vL(τ) = Vs · e⁻¹ = 5 V · 0.368") {
+        measure(maximum, coil, after: 1 ms)
+        near(1.84 V, +- 3%)
+    }
+    expect("in the end the current is Vs / R", from: "after 8 τ the inductor is a wire: 5 V / 100 Ω") {
+        measure(final, current: R1)
+        near(50 mA, +- 0.5%)
+    }
+    analysis(transient, for: 8 ms)
+    view:transient_response(primary)
+    view:operating_point
+}

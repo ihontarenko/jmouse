@@ -1,5 +1,8 @@
 package org.jmouse.cad.altium;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ShippedTables;
 import org.jmouse.cad.document.Provenance;
 import org.jmouse.cad.exchange.imported.FilingTable;
 import org.jmouse.cad.exchange.imported.ImportFiling;
@@ -24,7 +27,11 @@ import java.util.Optional;
 public record AltiumLibraries(SheetFiling sheet, String ground, Map<String, String> layers, Map<String, String> mechanicalKinds,
                               int multiLayer, int bottomLayer) implements ImportFiling {
 
-    private static final String RESOURCE = "altium-libraries.sht";
+    /** The table's address in the catalogue. */
+    public static final String TABLE = "altium-libraries";
+
+    /** Where its module ships it. */
+    public static final ShippedTables SHIPPED = ShippedTables.in(AltiumLibraries.class, "jmouse-cad-altium", "org/jmouse/cad/altium/tables");
 
     public AltiumLibraries {
         layers = Map.copyOf(layers);
@@ -32,8 +39,16 @@ public record AltiumLibraries(SheetFiling sheet, String ground, Map<String, Stri
     }
 
     /** The table this library ships. */
-    public static AltiumLibraries standard() {
-        return of(FilingTable.shipped(AltiumLibraries.class, RESOURCE));
+    public static AltiumLibraries shipped() {
+        return readFrom(SHIPPED).current();
+    }
+
+    /**
+     * As its source answers at each use — the engine's catalogue table, its curator's revision where one is kept —, read again
+     * only when another revision answers.
+     */
+    public static ReadTable<AltiumLibraries> readFrom(TableSource tables) {
+        return new ReadTable<>(tables, TABLE, sheet -> of(FilingTable.of(TABLE, sheet)));
     }
 
     public static AltiumLibraries of(FilingTable table) {

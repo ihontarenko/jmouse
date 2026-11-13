@@ -1,15 +1,20 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.library.CadStandards;
+import org.jmouse.cad.kicad.KiCadLibraryMap;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.kicad.KiCadLibraries;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.Settings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import java.nio.file.Path;
+import java.util.function.Supplier;
 import java.util.List;
 
 /** 🧩 The KiCad plugin, on the classpath: its plugin bean over the libraries its settings name. */
@@ -43,10 +48,12 @@ public class KiCadPluginConfiguration {
      * answered "indexing" meanwhile rather than kept waiting.
      */
     @Bean
-    public KiCadPlugin cadKiCadPlugin(KiCadProperties properties, PluginSettings settings) {
-        InstalledKiCad installed = new InstalledKiCad(settings.valuesOf(KiCadPlugin.ID), KiCadLibraries.standard(),
+    public KiCadPlugin cadKiCadPlugin(KiCadProperties properties, Settings settings, CadSettings sections, TableSource tables,
+                                      CadStandards standards) {
+        ReadTable<KiCadLibraries> filings = KiCadLibraries.readFrom(tables);
+        InstalledKiCad installed = new InstalledKiCad(settings.parameters(KiCadPlugin.ID, KiCadPlugin.LIBRARIES_SECTION), filings,
                 command -> Thread.ofVirtual().name("kicad-libraries").start(command));
         return new KiCadPlugin(installed, properties.symbolFolders(), properties.footprintFolders(), properties.modelFolders(),
-                CadSettings.read(PcbArtwork.SECTION));
+                () -> sections.read(PcbArtwork.SECTION), KiCadLibraryMap.readFrom(tables), filings, standards);
     }
 }

@@ -1,0 +1,34 @@
+# Current divider laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:current-divider-pcb("Current divider — pcb") {
+    meta {
+        summary: "Current divider laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: ohms-and-kirchhoffs-laws
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(current-divider)
+    layers(2)
+    edge("M1 0H26A1 1 0 0 1 27 1V19A1 1 0 0 1 26 20H1A1 1 0 0 1 0 19V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 11.5 12.5, rotate: 270)
+    place(R2, at: 15 12.5, rotate: 270)
+    place(R3, at: 19 12.5, rotate: 270)
+    place(R4, at: 23 12.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, first: 2, fourth: 3, second: 4, third: 5], at: 5.5 10)
+    track(top, width: 0.25, from: 11.5 13.5, to: 15 13.5)
+    track(top, width: 0.25, from: 15 13.5, to: 19 13.5)
+    track(top, width: 0.25, from: 19 13.5, to: 23 13.5)
+    track(top, width: 0.25, from: 11.5 11.5, to: 9.54 11.5, to: 5.5 7.46)
+    track(top, width: 0.25, from: 15 11.5, to: 13.96 12.54, to: 5.5 12.54)
+    track(top, width: 0.25, from: 11.5 13.5, to: 10.15 13.5)
+    track(bottom, width: 0.25, from: 10.15 13.5, to: 10.15 9.57, to: 5.5 4.92)
+    track(top, width: 0.25, from: 19 11.5, to: 17.2 9.7, to: 9.1 9.7)
+    track(bottom, width: 0.25, from: 9.1 9.7, to: 9.1 11.48, to: 5.5 15.08)
+    track(top, width: 0.25, from: 23 11.5, to: 20.3 8.8, to: 8.15 8.8)
+    track(bottom, width: 0.25, from: 8.15 8.8, to: 6.7 8.8, to: 5.5 10)
+    via(at: 10.15 13.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 9.1 9.7, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 8.15 8.8, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H26.5V19.5H0.5Z")
+}

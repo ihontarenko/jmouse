@@ -1,0 +1,69 @@
+# RC-06. A square wave into a high-pass whose time constant is a small share of the period. Each edge is a fast change
+# and passes whole: the output jumps by the edge's height. Then the input stands still, the capacitor charges to it
+# within a few RC, and the output dies back to zero. What is left is a spike on every edge — up on a rising one, down
+# on a falling one: the output follows the input's rate of change, not its level.
+circuit:rc-differentiator("RC differentiator") {
+    meta {
+        summary: "A square through C into R with RC much shorter than the period: a spike on every edge, positive on the rise, negative on the fall."
+        description: """
+            Idea: a capacitor passes changes, not levels. When the input jumps, the capacitor's voltage cannot jump
+            with it, so the whole jump appears across the resistor. While the input stands still the capacitor
+            catches up within a few RC and the output falls back to zero. The output is the input's rate of change:
+            a spike at each edge, nothing on the flat tops.
+
+            Try: lengthen RC (raise R or C) towards the half period: the spikes widen until the flat tops show
+            through as sloping steps — the high-pass passing the square. Shorten it: the spikes get narrower, never
+            lower. Move the duty: the spikes move with the edges.
+
+            Watch: CH1, the square, 0 to 5 V; CH2, the output — +5 V on every rising edge, −5 V on every falling
+            one, each dying away along e^(−t/RC), 47 µs here, and zero in between.
+
+            Ask: the input never goes below zero — where does the −5 V come from? Why is each spike exactly as tall as
+            the edge, whatever R and C are?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-06
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(5 V, in: 1 V .. 12 V, step: 0.5 V, "Square height")
+    parameter:F(1 kHz, in: 100 Hz .. 10 kHz, step: 100 Hz, "Square frequency")
+    parameter:R(1 kΩ, in: 100 Ω .. 100 kΩ, step: 100 Ω, "R, the resistor across the output")
+    parameter:C(47 nF, in: 1 nF .. 1 µF, step: 1 nF, "C, the series capacitor")
+    part:G1(square-generator, [positive: in, negative: 0], high: A, low: 0 V, frequency: F, duty: 0.5)
+    part:C1(capacitor, [in, out], capacitance: C)
+    part:R1(resistor, [out, 0], resistance: R)
+    place:G1(at: 320 600, rotate: 90)
+    place:C1(at: 600 360)
+    place:R1(at: 880 600, rotate: 90)
+    mark:Jo(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: C1.positive, via: 320 360)
+    wire:W2(C1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: R1.positive)
+    wire:W4(G1.negative, to: Jb1.j)
+    wire:W5(Jb1.j, to: Jb2.j)
+    wire:W6(R1.negative, to: Jb2.j)
+    wire:W7(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 2 V/div)
+        probe:CH2(out, 2 V/div)
+        time(200 µs/div)
+    }
+    expect("a rising edge gives a spike as tall as the edge", from: "the capacitor's voltage cannot jump: Vout jumps by +A = +5 V") {
+        measure(maximum, out)
+        within(4.5 V .. 5.01 V)
+    }
+    expect("a falling edge gives the same spike, negative", from: "Vout jumps by −A = −5 V") {
+        measure(minimum, out)
+        within(-5.01 V .. -4.5 V)
+    }
+    expect("on the flat top the output is back at zero", from: "a quarter period after the last edge, 250 µs ≈ 5.3 RC: e^(−5.3) · 5 V ≈ 25 mV is left") {
+        measure(minimum, out, after: 1.75 ms)
+        within(-50 mV .. 0 V)
+    }
+    analysis(transient, for: 2 ms)
+    view:transient_response(primary)
+}

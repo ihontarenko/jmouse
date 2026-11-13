@@ -2,6 +2,7 @@ package org.jmouse.sheet.parser;
 
 import org.jmouse.sheet.SheetSyntaxException;
 import org.jmouse.sheet.SheetValue;
+import org.jmouse.el.grammar.AuthoredText;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
@@ -9,6 +10,7 @@ import org.jmouse.el.lexer.support.SourceReading;
 import org.jmouse.el.node.expression.literal.QuantityLiteralNode;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.QuantityParser;
+import org.jmouse.units.Quantity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,10 +86,13 @@ final class SheetValueReading {
         if (cursor.isCurrent(BasicToken.T_STRING)) {
             return new SheetValue.Text(SheetReading.text(cursor.next()));
         }
+        Token start = cursor.lookAt(0);
         Optional<QuantityLiteralNode> quantity = ((QuantityParser) context.getParser(QuantityParser.class))
                 .read(cursor, context);
         if (quantity.isPresent()) {
-            return new SheetValue.Measure(quantity.get().getQuantity());
+            // As the author wrote it: a host language's lexer may read 27 °C as 27 degC, and a table written back says °C.
+            String written = AuthoredText.of(cursor).written(start, cursor.lookAt(-1));
+            return new SheetValue.Measure(Quantity.parse(written).orElse(quantity.get().getQuantity()));
         }
         Token first = cursor.lookAt(0);
         String word = SheetReading.word(cursor);

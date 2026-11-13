@@ -1,5 +1,6 @@
 package org.jmouse.sheet.node;
 
+import org.jmouse.el.writer.SourceWriter;
 import org.jmouse.sheet.SheetSource;
 import org.jmouse.sheet.SheetValue;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -41,6 +42,15 @@ public class FieldNode extends AbstractExpression {
     @Override
     public Object evaluate(EvaluationContext context) {
         return this;
+    }
+
+    /** {@code name value [source …]}, as the sheet language reads it — in a sheet document or a host language's. */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        writer.word(name).word(value.written());
+        if (source != null) {
+            writer.word(source.written());
+        }
     }
 
     @Override

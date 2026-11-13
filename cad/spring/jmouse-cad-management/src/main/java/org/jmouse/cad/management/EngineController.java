@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ⚙️ The engines beside the engine's own — {@code JMOUSE_CAD_API.md} §2.4. Which there are is the plugins'.
+ * ⚙️ The engines beside the engine's own — {@code JMOUSE_CAD_API.md} §2.5. Which there are is the plugins'.
  */
 @RestController
 @RequestMapping(CadManagementRoutes.PREFIX)

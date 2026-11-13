@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.gerber;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.exchange.ExportedFile;
@@ -11,6 +12,7 @@ import org.jmouse.gerber.compose.GerberComposer;
 import org.jmouse.strokefont.StrokeFont;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,7 +29,7 @@ public final class GerberSet {
      *
      * @param edgeWidth the pen the pcb's edge is drawn with
      */
-    public record Settings(double edgeWidth) {
+    public record Settings(@Label("Edge width") double edgeWidth) {
     }
 
     /**
@@ -36,7 +38,8 @@ public final class GerberSet {
      * @param ending how the file's name ends: -F_Cu.gbr
      * @param role   what the file is, as the set's README says it
      */
-    public record FileRole(String ending, String role) {
+    public record FileRole(@Label("Ending") String ending,
+                           @Label("Role") String role) {
     }
 
     /** A side of the pcb as its files name it. */
@@ -45,23 +48,17 @@ public final class GerberSet {
 
     private static final List<Side> SIDES = List.of(new Side(PcbDrawing.TOP, "F", "Top"), new Side(PcbDrawing.BOTTOM, "B", "Bot"));
 
-    private final Settings              settings;
-    private final PcbArtwork.Settings artwork;
-    private final StrokeFont            font;
-    private final List<FileRole>        roles;
+    /** Its numbers and its README's words — the plugin's sections —, and the pcb's artwork, as the installation has them now. */
+    private final CadSettings sections;
+    private final StrokeFont  font;
 
-    private GerberSet(Settings settings, PcbArtwork.Settings artwork, List<FileRole> roles) {
-        this.settings = settings;
-        this.artwork = artwork;
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
+
+    public GerberSet(CadSettings sections, CadStandards standards) {
+        this.standards = standards;
+        this.sections = sections;
         this.font = StrokeFont.newStroke();
-        this.roles = List.copyOf(roles);
-    }
-
-    /** The set as this plugin ships it: its numbers and its README's words from the jar, the artwork's the pcb's. */
-    public static GerberSet shipped() {
-        return new GerberSet(CadSettings.read(GerberPlugin.FABRICATION),
-                CadSettings.read(PcbArtwork.SECTION),
-                List.of(CadSettings.read(GerberPlugin.FILES)));
     }
 
     /**
@@ -72,7 +69,7 @@ public final class GerberSet {
      */
     public List<ExportedFile> write(PcbFabrication fabrication, AssemblyProfile profile, List<String> remarks) {
         PcbDrawing pcb = fabrication.pcb();
-        PcbArtwork drawn = PcbArtwork.of(fabrication, CadStandards.pcbRules().valuesOf(pcb.rules()), artwork, font);
+        PcbArtwork drawn = PcbArtwork.of(fabrication, standards.pcbRules().valuesOf(pcb.rules()), sections.read(PcbArtwork.SECTION), font);
         ArtworkGerber gerber = new ArtworkGerber(new PadShapes(drawn.outlines()));
         List<ExportedFile> files = new ArrayList<>();
         List<String> stack = pcb.copperLayerIds();
@@ -135,7 +132,7 @@ public final class GerberSet {
     /** The edge: every run of the outline drawn with a thin round pen. */
     private String edge(PcbArtwork drawn) {
         GerberComposer edge = PcbGerber.file("Profile,NP", true);
-        int pen = edge.aperture(new GerberShape.Circle(settings.edgeWidth()), "Profile");
+        int pen = edge.aperture(new GerberShape.Circle(sections.read(GerberPlugin.FABRICATION).edgeWidth()), "Profile");
         for (List<double[]> run : drawn.runs(drawn.fabrication().pcb().outline())) {
             edge.line(pen, run.stream().map(point -> PcbGerber.out(point[0], point[1])).toList());
         }
@@ -189,6 +186,6 @@ public final class GerberSet {
                 return table.role();
             }
         }
-        return roles.stream().filter(role -> fileName.endsWith(role.ending())).map(FileRole::role).findFirst().orElse("");
+        return Arrays.stream(sections.read(GerberPlugin.FILES)).filter(role -> fileName.endsWith(role.ending())).map(FileRole::role).findFirst().orElse("");
     }
 }

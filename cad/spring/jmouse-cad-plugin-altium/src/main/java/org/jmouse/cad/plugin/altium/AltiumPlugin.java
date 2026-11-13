@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.altium;
 
+import org.jmouse.cad.altium.AltiumLibraries;
+import org.jmouse.cad.table.ShippedTable;
 import org.jmouse.cad.exchange.DocumentImport;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
@@ -32,6 +34,8 @@ public final class AltiumPlugin implements Plugin {
 
     @Override
     public void register(PluginRegistration registration) {
+        // The tables its module reads, as pages of the library.
+        registration.contribute(ShippedTable.POINT, AltiumLibraries.SHIPPED.shipping(AltiumLibraries.TABLE));
         registration.contribute(DocumentImport.POINT, schematics);
     }
 }

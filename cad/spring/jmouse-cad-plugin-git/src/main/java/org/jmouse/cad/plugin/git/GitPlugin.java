@@ -1,11 +1,12 @@
 package org.jmouse.cad.plugin.git;
 
+import org.jmouse.settings.Parameter;
+import org.jmouse.settings.Section;
 import org.jmouse.cad.plugin.explorer.ExplorerPlugin;
 import org.jmouse.cad.plugin.explorer.ExplorerReserved;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
 import org.jmouse.plugin.PluginRegistration;
-import org.jmouse.plugin.PluginSetting;
 
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,9 @@ public final class GitPlugin implements Plugin {
     static final String GITHUB_TOKEN = "github-token";
     static final String GITLAB_TOKEN = "gitlab-token";
     static final String FIRST_BRANCH = "first-branch";
+    /** Its sections: the keys to the hosts a branch is pushed to, and how a history starts. */
+    static final String HOSTS_SECTION = "hosts";
+    static final String HISTORY_SECTION = "history";
 
     private static final String HOSTS   = "Hosts";
     private static final String HISTORY = "History";
@@ -33,13 +37,14 @@ public final class GitPlugin implements Plugin {
     }
 
     @Override
-    public List<PluginSetting> settings() {
-        return List.of(
-                PluginSetting.secret(GITHUB_TOKEN, "GitHub token",
-                        "Sent only to github.com, when a branch is pushed: a fine-grained token with Contents, read and write. A commit stays under the reader's own name.", null).inGroup(HOSTS),
-                PluginSetting.secret(GITLAB_TOKEN, "GitLab token",
-                        "Sent only to gitlab.com, when a branch is pushed: a project or personal token with write_repository.", null).inGroup(HOSTS),
-                PluginSetting.text(FIRST_BRANCH, "First branch", "What a folder's new history starts on.", "main").inGroup(HISTORY));
+    public List<Section> settings() {
+        return List.of(Section.fixed(HOSTS_SECTION, HOSTS, null, List.of(
+                Parameter.secret(GITHUB_TOKEN, "GitHub token",
+                        "Sent only to github.com, when a branch is pushed: a fine-grained token with Contents, read and write. A commit stays under the reader's own name.", null),
+                Parameter.secret(GITLAB_TOKEN, "GitLab token",
+                        "Sent only to gitlab.com, when a branch is pushed: a project or personal token with write_repository.", null))),
+                Section.fixed(HISTORY_SECTION, HISTORY, null, List.of(
+                Parameter.text(FIRST_BRANCH, "First branch", "What a folder's new history starts on.", "main"))));
     }
 
     @Override

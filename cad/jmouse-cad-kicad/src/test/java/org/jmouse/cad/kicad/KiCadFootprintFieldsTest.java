@@ -24,7 +24,7 @@ class KiCadFootprintFieldsTest {
         assertEquals(List.of(
                 new FootprintLines.Field(PcbVocabulary.FIELD_REFERENCE, 0, -1.65, 1, 0, "silkscreen"),
                 new FootprintLines.Field(PcbVocabulary.FIELD_VALUE, 0, 1.65, 0.8, 90, "fabrication")),
-                KiCadFootprintDrawing.fieldsOf(footprint, KiCadLibraries.standard()));
+                KiCadFootprintDrawing.fieldsOf(footprint, KiCadLibraries.shipped()));
     }
 
     @Test
@@ -35,6 +35,6 @@ class KiCadFootprintFieldsTest {
                 """));
         // Standing on its bottom at y = -2, Y downwards: its middle half its height above, at -2.5; its letters begin at x = -1.
         assertEquals(List.of(new FootprintLines.Field(PcbVocabulary.FIELD_REFERENCE, -1, -2.5, 1, 0, "silkscreen", PcbVocabulary.TEXT_START)),
-                KiCadFootprintDrawing.fieldsOf(footprint, KiCadLibraries.standard()));
+                KiCadFootprintDrawing.fieldsOf(footprint, KiCadLibraries.shipped()));
     }
 }

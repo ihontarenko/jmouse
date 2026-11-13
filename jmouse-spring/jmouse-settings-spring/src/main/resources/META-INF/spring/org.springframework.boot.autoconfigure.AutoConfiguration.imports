@@ -1,0 +1,2 @@
+org.jmouse.settings.spring.SettingsJpaAutoConfiguration
+org.jmouse.settings.spring.SettingsAutoConfiguration

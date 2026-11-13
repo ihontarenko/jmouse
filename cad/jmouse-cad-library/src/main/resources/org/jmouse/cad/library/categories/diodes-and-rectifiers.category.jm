@@ -1,0 +1,8 @@
+category:diodes-and-rectifiers("Diodes and rectifiers") {
+    meta {
+        category: circuits
+        order: 4
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

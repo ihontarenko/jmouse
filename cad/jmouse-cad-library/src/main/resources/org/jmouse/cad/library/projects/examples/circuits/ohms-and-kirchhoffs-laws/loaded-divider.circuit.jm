@@ -1,0 +1,99 @@
+# DC-05. Two identical dividers from one source, one of them loaded. The unloaded one keeps its 6 V; on the loaded one
+# the load stands in parallel with R2, the lower leg becomes smaller than R2 and the middle sags. The lighter the load
+# (the larger R_load), the less it matters; a load as small as the divider's own resistors drags the middle down by a
+# third. The sweep over the load draws the whole sag at once.
+circuit:loaded-divider("Loaded voltage divider") {
+    meta {
+        summary: "A divider with a load on its middle sags: R2 in parallel with the load is less than R2."
+        description: """
+            Idea: a divider gives Vin · R2 / (R1 + R2) only while nothing draws from its middle. A load stands in
+            parallel with R2, the lower leg becomes R2 ∥ R_load — always smaller than R2 — and the output drops.
+
+            Try: start with a heavy load, R_load = R2 = 1 kΩ: the loaded middle falls from 6 V to 4 V. Raise R_load
+            to 10 kΩ: it climbs back to within a few percent of the unloaded divider. Lower R1 and R2 together: the
+            same load matters less, because a stiffer divider wastes more current.
+
+            Watch: the left divider is the reference, unloaded; the right one is loaded. Compare their two
+            voltmeters. The ammeter shows what the load takes; the current through R1 is the load's share plus R2's.
+            The sweep over R_load shows the sag shrinking as the load grows lighter.
+
+            Ask: how large must R_load be for the middle to stay within 5 % of the unloaded 6 V? Why does a divider
+            make a poor power supply?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-05
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 1 V .. 24 V, step: 0.5 V, "Input voltage")
+    parameter:R_top(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R1, the upper resistor of both dividers")
+    parameter:R_bottom(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R2, the lower resistor of both dividers")
+    parameter:R_load(1 kΩ, in: 100 Ω .. 20 kΩ, step: 100 Ω, "Load on the right divider's middle")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:R3(resistor, [in, reference], resistance: R_top)
+    part:R4(resistor, [reference, 0], resistance: R_bottom)
+    part:VM2(voltmeter, [plus: reference, minus: 0])
+    part:R1(resistor, [in, middle], resistance: R_top)
+    part:R2(resistor, [middle, 0], resistance: R_bottom)
+    part:VM1(voltmeter, [plus: middle, minus: 0])
+    part:A1(ammeter, [in: middle, out: load])
+    part:RL(resistor, [load, 0], resistance: R_load)
+    place:V1(at: 240 600, rotate: 90)
+    place:R3(at: 520 440, rotate: 90)
+    place:R4(at: 520 680, rotate: 90)
+    place:VM2(at: 720 680, rotate: 90)
+    place:R1(at: 1040 440, rotate: 90)
+    place:R2(at: 1040 680, rotate: 90)
+    place:VM1(at: 1240 720, rotate: 90)
+    place:A1(at: 1440 560)
+    place:RL(at: 1640 720, rotate: 90)
+    mark:Jt(junction, at: 520 320)
+    mark:Jr(junction, at: 520 560)
+    mark:Jm(junction, at: 1040 560)
+    mark:Jl(junction, at: 1240 560)
+    mark:Jb1(junction, at: 520 880)
+    mark:Jb2(junction, at: 720 880)
+    mark:Jb3(junction, at: 1040 880)
+    mark:Jb4(junction, at: 1240 880)
+    mark:GND1(ground, at: 1040 960)
+    wire:W1(V1.positive, to: Jt.j, via: 240 320)
+    wire:W2(Jt.j, to: R3.positive)
+    wire:W3(Jt.j, to: R1.positive, via: 1040 320)
+    wire:W4(R3.negative, to: Jr.j)
+    wire:W5(Jr.j, to: R4.positive)
+    wire:W6(Jr.j, to: VM2.plus, via: 720 560)
+    wire:W7(R1.negative, to: Jm.j)
+    wire:W8(Jm.j, to: R2.positive)
+    wire:W9(Jm.j, to: Jl.j)
+    wire:W10(Jl.j, to: VM1.plus)
+    wire:W11(Jl.j, to: A1.in)
+    wire:W12(A1.out, to: RL.positive, via: 1640 560)
+    wire:W13(V1.negative, to: Jb1.j, via: 240 880)
+    wire:W14(R4.negative, to: Jb1.j)
+    wire:W15(Jb1.j, to: Jb2.j)
+    wire:W16(VM2.minus, to: Jb2.j)
+    wire:W17(Jb2.j, to: Jb3.j)
+    wire:W18(R2.negative, to: Jb3.j)
+    wire:W19(Jb3.j, to: Jb4.j)
+    wire:W20(VM1.minus, to: Jb4.j)
+    wire:W21(RL.negative, to: Jb4.j, via: 1640 880)
+    wire:W22(Jb3.j, to: GND1.ground)
+    probe:CH1(reference, 2 V/div)
+    probe:CH2(middle, 2 V/div)
+    expect("unloaded, the divider keeps half the input", from: "Vout = Vin · R2 / (R1 + R2) = 12 V · 1 kΩ / 2 kΩ") {
+        measure(final, reference)
+        near(6 V, +- 0.5%)
+    }
+    expect("a 1 kΩ load drags the middle down to 4 V", from: "R2 ∥ R_load = 500 Ω; Vout = 12 V · 500 Ω / (1 kΩ + 500 Ω)") {
+        measure(final, middle)
+        near(4 V, +- 0.5%)
+    }
+    expect("the load takes 4 mA of the 8 mA through R1", from: "I_load = 4 V / 1 kΩ; I_R1 = (12 V − 4 V) / 1 kΩ = I_R2 + I_load") {
+        measure(final, current: A1)
+        near(4 mA, +- 0.5%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: R_load, from: 100, to: 20000, points: 200)
+}

@@ -1,0 +1,112 @@
+# OA-09. An active low-pass filter: an RC low-pass in front of a TL072 non-inverting amplifier. The RC sets where the
+# response turns down, fc = 1 / (2π R C) = 1 / (2π · 10 kΩ · 15.9 nF) ≈ 1 kHz; the amplifier gives the passband a gain
+# of 1 + Rf / Rg = 4 (12 dB) and drives the load without loading the capacitor. At the cut-off the filter passes
+# 0.707 of what it passes below it and the output is 45° behind the input; an octave above, the gain falls by half
+# again, 20 dB a decade.
+circuit:active-low-pass("Active low-pass filter") {
+    meta {
+        summary: "An RC low-pass before a TL072 with a gain of 4: flat 12 dB below fc = 1 / (2πRC) ≈ 1 kHz, 3 dB down and 45° behind at it, falling above."
+        description: """
+            Idea: a passive RC filter can only lose — its output is never more than its input, and any load on the
+            capacitor changes its corner. Put an amplifier after it and the filter gains: the passband is lifted to
+            1 + Rf / Rg, and the load hangs on the op-amp, not on the capacitor.
+
+            Try: sweep the frequency. Well below 1 kHz the output is four times the input and in step with it; at
+            1 kHz it is 0.707 of that, 2.83 times the input, and lags by 45°; at 10 kHz it is ten times smaller still
+            and lags almost 90°. Change R or C: the corner moves. Change Rf: only the height of the passband moves.
+
+            Watch: CH1 the input, CH3 the capacitor, CH2 the output. The frequency response shows it all at once —
+            the flat shelf at 12 dB, the corner, the slope of 20 dB a decade, and the phase sliding from 0° to −90°.
+
+            Ask: where is the corner with R = 4.7 kΩ? Why does the load not move the corner here, when it would on a
+            bare RC filter?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-09
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 3 V, step: 0.1 V, "Input amplitude")
+    parameter:F(1 kHz, in: 10 Hz .. 20 kHz, step: 10 Hz, "Input frequency: 0.707 of the passband at the corner")
+    parameter:R(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 0.1 kΩ, "Filter resistor")
+    parameter:C(15.9 nF, in: 1 nF .. 100 nF, step: 0.1 nF, "Filter capacitor")
+    parameter:R_feedback(30 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Rf: the passband gain is 1 + Rf / 10 kΩ")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:R1(resistor, [in, filtered], resistance: R, footprint: "FP.CHIP:R0805")
+    part:C1(capacitor, [filtered, 0], capacitance: C, footprint: "FP.CHIP:C0805")
+    part:U1(tl072, [A.non_inverting_input: filtered, A.inverting_input: inverting, A.output: out, Vcc: vp, GND: vn])
+    part:RF(resistor, [inverting, out], resistance: R_feedback, footprint: "FP.CHIP:R0805")
+    part:RG(resistor, [inverting, 0], resistance: 10 kΩ, footprint: "FP.CHIP:R0805")
+    part:RL(resistor, [out, 0], resistance: 10 kΩ, footprint: "FP.CHIP:R0805")
+    # Where the pcb meets the bench: the supplies, ground, the input and the output, on one header.
+    part:J1(pin-header-1x5, [pin1: vp, pin2: 0, pin3: vn, pin4: in, pin5: out], footprint: "FP.HDR:1X5-P2.54-V")
+    place:PS1(at: 1520 320)
+    mark:LP1(label, vp, at: 1520 120)
+    mark:LN1(label, vn, at: 1520 520, rotate: 180)
+    mark:GND1(common, at: 1680 360)
+    place:RG(at: 200 760, rotate: 90)
+    place:G1(at: 400 760, rotate: 90)
+    place:R1(at: 560 600)
+    mark:Jf(junction, at: 720 600)
+    place:C1(at: 720 760, rotate: 90)
+    mark:Ji(junction, at: 720 520)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    place:RF(at: 880 200)
+    mark:Jo(junction, at: 1040 560)
+    place:RL(at: 1280 760, rotate: 90)
+    mark:Jr1(junction, at: 400 1040)
+    mark:Jr2(junction, at: 720 1040)
+    mark:GND2(common, at: 720 1120)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: R1.positive, via: 400 600)
+    wire:W5(R1.negative, to: Jf.j)
+    wire:W6(Jf.j, to: U1.A.non_inverting_input)
+    wire:W7(Jf.j, to: C1.positive)
+    wire:W8(U1.A.inverting_input, to: Ji.j)
+    wire:W9(Ji.j, to: RF.positive, via: 720 200)
+    wire:W10(RF.negative, to: Jo.j, via: 1040 200)
+    wire:W11(Ji.j, to: RG.positive, via: 200 520)
+    wire:W12(LP2.label, to: U1.Vcc)
+    wire:W13(U1.GND, to: LN2.label)
+    wire:W14(U1.A.output, to: Jo.j)
+    wire:W15(Jo.j, to: RL.positive, via: 1280 560)
+    wire:W16(G1.negative, to: Jr1.j)
+    wire:W17(RG.negative, to: Jr1.j, via: 200 1040)
+    wire:W18(Jr1.j, to: Jr2.j)
+    wire:W19(C1.negative, to: Jr2.j)
+    wire:W20(RL.negative, to: Jr2.j, via: 1280 1040)
+    wire:W21(Jr2.j, to: GND2.common)
+    place:J1(at: 1880 800)
+    mark:LJ1(label, vp, at: 2080 720, rotate: 90)
+    mark:GND3(common, at: 2240 760, rotate: 270)
+    mark:LJ3(label, vn, at: 2080 800, rotate: 90)
+    mark:LJ4(label, in, at: 2240 840, rotate: 90)
+    mark:LJ5(label, out, at: 2080 880, rotate: 90)
+    wire:W22(J1.pin1, to: LJ1.label, via: 2000 720)
+    wire:W23(J1.pin2, to: GND3.common)
+    wire:W24(J1.pin3, to: LJ3.label)
+    wire:W25(J1.pin4, to: LJ4.label)
+    wire:W26(J1.pin5, to: LJ5.label, via: 2000 880)
+    probes {
+        probe:CH1(in, 0.5 V/div)
+        probe:CH2(out, 1 V/div)
+        probe:CH3(filtered, 0.5 V/div)
+        time(500 µs/div)
+    }
+    expect("at the corner the gain is 0.707 of the passband's four", from: "|H| = (1 + Rf / Rg) / √(1 + (f / fc)²) = 4 / √2 = 2.83 at f = fc = 1 / (2π · 10 kΩ · 15.9 nF) ≈ 1 kHz") {
+        measure(maximum, out, after: 5 ms)
+        near(2.83 V, +- 3%)
+    }
+    expect("and the capacitor lags the input by 45°", from: "0.707 V at −45° against 1 V: |1 − 0.707∠−45°| = 0.707 V between them; in phase it would be 0.29 V") {
+        measure(maximum, in - filtered, after: 5 ms)
+        near(0.707 V, +- 3%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 10, to: 100000, points: 200)
+}

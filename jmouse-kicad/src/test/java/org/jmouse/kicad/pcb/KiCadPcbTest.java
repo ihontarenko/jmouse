@@ -89,4 +89,26 @@ class KiCadPcbTest {
         assertEquals(3, pour.outlines().getFirst().size());
         assertEquals(KiCadPcb.ZoneKind.KEEPOUT, board.zones().get(1).kind());
     }
+
+    @Test
+    void keepsWhatKiCadLockedAndItsGroupsInEitherSpelling() {
+        String locked = """
+                (kicad_pcb (version 20240108) (generator "pcbnew")
+                  (layers (0 "F.Cu" signal) (31 "B.Cu" signal))
+                  (footprint "Display:LCD" (locked yes) (layer "F.Cu") (uuid "display-1") (at 50 30)
+                    (property "Reference" "DS1" (at 0 0) (layer "F.SilkS")))
+                  (footprint "Button:Tact" (layer "F.Cu") (uuid "button-1") (at 10 30)
+                    (property "Reference" "SW1" (at 0 0) (layer "F.SilkS")))
+                  (segment locked (start 1 2) (end 3 4) (width 0.25) (layer "F.Cu") (net 1) (tstamp "track-1"))
+                  (via (at 7 8) (size 0.8) (drill 0.4) (layers "F.Cu" "B.Cu") (net 2) (uuid "via-1"))
+                  (group "front panel" (uuid "group-1") (locked yes) (members "display-1" "button-1")))
+                """;
+        KiCadPcb read = KiCadPcb.of(new SExpressionParser().parse("locked.kicad_pcb", locked));
+        assertEquals(new KiCadStanding("display-1", KiCadLock.LOCKED), read.footprints().get(0).standing());
+        assertEquals(new KiCadStanding("button-1", KiCadLock.FREE), read.footprints().get(1).standing());
+        assertEquals(new KiCadStanding("track-1", KiCadLock.LOCKED), read.tracks().getFirst().standing());
+        assertEquals(new KiCadStanding("via-1", KiCadLock.FREE), read.vias().getFirst().standing());
+        assertEquals(java.util.List.of(new KiCadPcb.Group("front panel", new KiCadStanding("group-1", KiCadLock.LOCKED),
+                java.util.List.of("display-1", "button-1"))), read.groups());
+    }
 }

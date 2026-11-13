@@ -1,0 +1,28 @@
+# Rectifier supply laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:rectifier-supply-pcb("Rectifier supply — pcb") {
+    meta {
+        summary: "Rectifier supply laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: power-supplies
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(rectifier-supply)
+    layers(2)
+    edge("M1 0H72A1 1 0 0 1 73 1V39A1 1 0 0 1 72 40H1A1 1 0 0 1 0 39V1A1 1 0 0 1 1 0Z")
+    place(T1, at: 23.5 20)
+    place(BR1, at: 44.5 20)
+    place(C1, at: 55.5 20, rotate: 270)
+    place(RL, at: 68.5 20, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, line: 2, load: 3, out: 4], at: 5.5 16)
+    track(top, width: 0.25, from: 47.04 22.54, to: 53.81 22.54, to: 55.5 20.85)
+    track(top, width: 0.25, from: 33.5 15, to: 41.04 22.54, to: 41.96 22.54)
+    track(top, width: 0.25, from: 55.5 20.85, to: 68.35 20.85, to: 68.5 21)
+    track(top, width: 0.25, from: 41.96 17.46, to: 43.65 19.15, to: 55.5 19.15)
+    track(bottom, width: 0.25, from: 33.5 25, to: 39.35 19.15, to: 45.35 19.15, to: 47.04 17.46)
+    track(bottom, width: 0.25, from: 13.5 30, to: 7.2 23.7, to: 7.2 16.43, to: 5.5 14.73)
+    track(top, width: 0.25, from: 41.96 17.46, to: 37.91 13.41, to: 11.9 13.41, to: 5.5 19.81)
+    track(top, width: 0.25, from: 68.5 19, to: 62.2 12.7, to: 10.07 12.7, to: 5.5 17.27)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H72.5V39.5H0.5Z")
+}

@@ -156,7 +156,7 @@ public final class Expectations {
         }
         Circuit circuit = new Circuit(new DocumentHead(component.slug() + "-bench", component.title() + " on its bench", null, Map.of()),
                 List.of(), parts, List.of(), List.of(), null, List.of(), new Analysis(SimulationVocabulary.TRANSIENT, bench.duration()), List.of(), null,
-                SheetBoundary.NONE);
+                SheetBoundary.NONE, List.of());
         return new MeasuredCircuit(circuit, catalogue, BenchConditions.of(bench), fixtures);
     }
 

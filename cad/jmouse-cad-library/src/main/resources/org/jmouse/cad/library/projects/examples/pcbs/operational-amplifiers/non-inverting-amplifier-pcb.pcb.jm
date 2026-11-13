@@ -1,0 +1,37 @@
+# Non-inverting amplifier laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:non-inverting-amplifier-pcb("Non-inverting amplifier — pcb") {
+    meta {
+        summary: "Non-inverting amplifier laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(non-inverting-amplifier)
+    layers(2)
+    edge("M1 0H28A1 1 0 0 1 29 1V17A1 1 0 0 1 28 18H1A1 1 0 0 1 0 17V1A1 1 0 0 1 1 0Z")
+    place(U1, at: 18.5 9.5)
+    place(RF, at: 18.5 4)
+    place(RG, at: 11.5 12.5, rotate: 270)
+    place(RL, at: 25 12.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 9)
+    track(top, width: 0.25, from: 16.05 7.595, to: 16.05 7.45, to: 19.5 4)
+    track(top, width: 0.25, from: 16.05 8.865, to: 15.15 8.865, to: 13.893 7.607, to: 17.5 4)
+    track(top, width: 0.25, from: 16.05 8.865, to: 14.135 8.865, to: 11.5 11.5)
+    track(top, width: 0.25, from: 19.5 4, to: 25 9.5, to: 25 11.5)
+    track(top, width: 0.25, from: 11.5 13.5, to: 7 9, to: 7 6.69, to: 5.5 5.19)
+    track(top, width: 0.25, from: 16.05 11.405, to: 12.9 14.555, to: 9.785 14.555, to: 5.5 10.27)
+    track(top, width: 0.25, from: 16.05 10.135, to: 14.25 10.135)
+    track(bottom, width: 0.25, from: 14.25 10.135, to: 7.905 10.135, to: 5.5 7.73)
+    track(top, width: 0.25, from: 11.5 13.5, to: 12.85 13.5)
+    track(bottom, width: 0.25, from: 12.85 13.5, to: 15.1 13.5)
+    track(top, width: 0.25, from: 15.1 13.5, to: 25 13.5)
+    track(top, width: 0.25, from: 20.95 7.595, to: 18.25 7.595)
+    track(bottom, width: 0.25, from: 18.25 7.595, to: 14.2 11.645, to: 6.665 11.645, to: 5.5 12.81)
+    via(at: 14.25 10.135, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 12.85 13.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 15.1 13.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 18.25 7.595, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H28.5V17.5H0.5Z")
+}

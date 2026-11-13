@@ -1,16 +1,18 @@
 package org.jmouse.cad.plugin.step;
 
+import org.jmouse.settings.Section;
+import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.settings.SettingsSection;
-import org.jmouse.cad.settings.SettingsOwner;
 import org.jmouse.cad.exchange.DocumentExport;
 import org.jmouse.cad.mesh.ModelMeshes;
 import org.jmouse.mesh.MeshReader;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
 import org.jmouse.plugin.PluginRegistration;
-import org.jmouse.plugin.PluginSetting;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import java.util.Set;
 
 /**
@@ -22,26 +24,34 @@ import java.util.Set;
  */
 public final class StepPlugin implements Plugin {
 
-    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/step/export. */
-    public static final SettingsSection<PcbStepExport.Settings> EXPORT = new SettingsSection<>("plugin/step/export", "STEP export", SettingsOwner.ENGINE_DATA, PcbStepExport.Settings.class);
-
     public static final String ID = "cad-step";
+
+    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/cad-step/export. */
+    public static final SettingsSection<PcbStepExport.Settings> EXPORT = SettingsSection.ofPlugin(ID, "export", "STEP export", PcbStepExport.Settings.class);
 
     /** The 3D models plugin's id: the point this one contributes to is its. */
     static final String MESH = "cad-mesh";
 
-    private final MeshReader           reader;
-    private final List<DocumentExport> exports;
-    private final List<PluginSetting>  settings;
+    private final MeshReader                                      reader;
+    private final Function<PcbStepExport.Variant, DocumentExport> exports;
+    private final CadSettings                                     sections;
+    private final List<Section>                             settings;
 
-    public StepPlugin(MeshReader reader, List<DocumentExport> exports, List<PluginSetting> settings) {
+    /**
+     * @param exports  the pcb's export of one variant
+     * @param sections the installation's settings: the variants offered are its export's, as they stand at the start
+     * @param settings its programs' settings; its export's section is added to them
+     */
+    public StepPlugin(MeshReader reader, Function<PcbStepExport.Variant, DocumentExport> exports, CadSettings sections,
+                      List<Section> settings) {
         this.reader = reader;
-        this.exports = List.copyOf(exports);
-        this.settings = List.copyOf(settings);
+        this.exports = exports;
+        this.sections = sections;
+        this.settings = Stream.concat(settings.stream(), Stream.of(CadSettings.declarationOf(EXPORT))).toList();
     }
 
     @Override
-    public List<PluginSetting> settings() {
+    public List<Section> settings() {
         return settings;
     }
 
@@ -53,8 +63,7 @@ public final class StepPlugin implements Plugin {
 
     @Override
     public void register(PluginRegistration registration) {
-        registration.contribute(SettingsSection.POINT, EXPORT);
         registration.contribute(ModelMeshes.READERS, reader);
-        exports.forEach(export -> registration.contribute(DocumentExport.POINT, export));
+        sections.read(EXPORT).exports().forEach(variant -> registration.contribute(DocumentExport.POINT, exports.apply(variant)));
     }
 }

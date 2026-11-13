@@ -1,5 +1,7 @@
 package org.jmouse.cad.mesh;
 
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.source.DocumentResources;
 import org.jmouse.mesh.Mesh;
@@ -31,10 +33,14 @@ public final class ModelMeshes {
     private final MeshFormats formats;
     private final MeshReaders readers;
     private final GlbWriter writer = new GlbWriter();
+    /** What a drawn model is made of, as the table says it now. */
+    private final ReadTable<ModelMaterials> materials;
 
-    public ModelMeshes(MeshFormats formats, MeshReaders readers) {
+    /** @param tables where the materials table is read: the engine's catalogue, or the tables as they ship */
+    public ModelMeshes(MeshFormats formats, MeshReaders readers, TableSource tables) {
         this.formats = formats;
         this.readers = readers;
+        this.materials = ModelMaterials.readFrom(tables);
     }
 
     /**
@@ -43,14 +49,14 @@ public final class ModelMeshes {
      * @throws IllegalArgumentException when none of its files is in a format read here, saying which formats it holds
      */
     public byte[] glb(DocumentNode model, DocumentResources files) {
-        return writer.write(MeshScene.of(mesh(model, files)).withExtras(ModelMarkings.extrasOf(ModelMarkings.of(model), ModelMaterials.standard())));
+        return writer.write(MeshScene.of(mesh(model, files)).withExtras(ModelMarkings.extrasOf(ModelMarkings.of(model), materials.current())));
     }
 
     /** The model's body, in millimetres with Z up: drawn from its shapes, or read from the first of its files read here. */
     public Mesh mesh(DocumentNode model, DocumentResources files) {
         List<ModelShapes.Shape> shapes = ModelShapes.of(model);
         if (!shapes.isEmpty()) {
-            return ModelShapes.mesh(shapes, ModelMaterials.standard());
+            return ModelShapes.mesh(shapes, materials.current());
         }
         List<ModelFile> written = ModelFile.of(model);
         ModelFile chosen = written.stream()

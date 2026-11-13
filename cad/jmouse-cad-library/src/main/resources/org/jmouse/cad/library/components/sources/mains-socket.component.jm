@@ -1,0 +1,26 @@
+# The wall socket: 230 V RMS at 50 Hz, a sine of 325 V peak, as a transformer's primary takes it. What a bench puts at a
+# design's mains connector to run it as it is used.
+
+component:mains-socket("Mains socket, 230 V 50 Hz", type: generator) {
+    meta {
+        designator: G
+        summary: "The wall socket: 230 V RMS at 50 Hz, a sine of 325 V peak"
+        source: "IEC 60038: 230 V nominal at 50 Hz"
+        category: sources
+        bench: source
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    extends:sine-generator
+
+    parameter:amplitude(325 V, "peak voltage: 230 V RMS times the square root of two")
+    parameter:frequency(50 Hz, "the grid's frequency")
+
+    pin:positive(analog, 1, "line")
+    pin:negative(analog, 2, "neutral")
+
+    symbol(uses: "SY.SOURCE:VOLTAGE-ALTERNATING") {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+}

@@ -1,0 +1,182 @@
+# DG-07. One press of a push button whose contact bounces, counted twice. U1 counts the raw line straight off the switch
+# — every bounce a rising edge, so one press counts five. U2 counts it after an RC of 1 ms and two Schmitt inverters
+# (74HC1G14): the RC smooths the chatter into one slow rise, the hysteresis turns that into one clean edge, and the
+# press counts one. The low four bits of each counter light half an LED bar each, through 330 Ω; R7 and C2 hold both
+# counters cleared for their first milliseconds.
+circuit:counting-bounces("Counting a bouncing button") {
+    meta {
+        summary: "One press of a bouncing button counts five on a bare counter and one after an RC and a Schmitt trigger."
+        description: """
+            Idea: a mechanical contact does not close once. Its springy metal hits, bounces off and hits again a few
+            times in a millisecond or two before it rests, and a logic input is fast enough to see every one of those
+            closings as a press. A counter on the bare switch counts them all.
+
+            Try: run it and read the LED bar — the left four segments are the raw counter, the right four the
+            debounced one. Change the bounces and run it again: the left half follows, the right stays at one. Set the
+            bounces to 0 and both agree.
+
+            Watch: on the logic lanes, the raw line chattering for a millisecond, and the clean line rising once, a
+            little later — the price of debouncing is a delay about as long as the RC.
+
+            Ask: why does the RC alone not do the job, without the Schmitt trigger after it? How long must the RC be
+            for a switch that bounces for 5 ms?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-07
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:bounces(4, in: 0 .. 10, step: 1, "How many times the contact springs open")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:SW1(bouncing-push-button, [a: vcc, b: raw], bounces: bounces, pressed_at: 3 ms, released_at: 13 ms)
+    part:R1(resistor, [raw, 0], resistance: 10 kΩ)
+    part:R2(resistor, [raw, slow], resistance: 10 kΩ)
+    part:C1(capacitor, [slow, 0], capacitance: 100 nF)
+    part:U3(74hc1g14, [a: slow, output: inverted, Vcc: vcc, GND: 0])
+    part:U4(74hc1g14, [a: inverted, output: clean, Vcc: vcc, GND: 0])
+    part:R7(resistor, [vcc, reset], resistance: 10 kΩ)
+    part:C2(capacitor, [reset, 0], capacitance: 100 nF)
+    part:U1(74hc161, [not_clear: reset, clock: raw, enable_p: vcc, enable_t: vcc, not_load: vcc, count_0: r0, count_1: r1, count_2: r2, count_3: r3, Vcc: vcc, GND: 0])
+    part:U2(74hc161, [not_clear: reset, clock: clean, enable_p: vcc, enable_t: vcc, not_load: vcc, count_0: c0, count_1: c1, count_2: c2, count_3: c3, Vcc: vcc, GND: 0])
+    part:R3(resistor, [r0, a0], resistance: 330 Ω)
+    part:R4(resistor, [r1, a1], resistance: 330 Ω)
+    part:R5(resistor, [r2, a2], resistance: 330 Ω)
+    part:R6(resistor, [r3, a3], resistance: 330 Ω)
+    part:R8(resistor, [c0, a4], resistance: 330 Ω)
+    part:R9(resistor, [c1, a5], resistance: 330 Ω)
+    part:R10(resistor, [c2, a6], resistance: 330 Ω)
+    part:R11(resistor, [c3, a7], resistance: 330 Ω)
+    part:DS1(led-bar, [anode_0: a0, anode_1: a1, anode_2: a2, anode_3: a3, anode_4: a4, anode_5: a5, anode_6: a6, anode_7: a7, cathode: 0])
+    place:V1(at: -360 1120, rotate: 90)
+    mark:N1(label, vcc, at: -360 960)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: -360 1320)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:SW1(at: 80 360, rotate: 90)
+    mark:N2(label, vcc, at: 80 200)
+    wire:WN2(SW1.a, to: N2.label)
+    mark:N3(label, raw, at: 80 560, rotate: 180)
+    wire:WN3(SW1.b, to: N3.label)
+    place:R1(at: 80 720, rotate: 90, name(at: 44 -16), value(at: 60 20))
+    mark:G2(ground, at: 80 960)
+    wire:WG2(R1.negative, to: G2.ground)
+    place:R2(at: 360 600, name(at: -52 -32), value(at: 52 -32))
+    mark:N4(label, raw, at: 160 600, rotate: 270)
+    wire:WN4(R2.positive, to: N4.label)
+    place:C1(at: 560 800, rotate: 90)
+    mark:G3(ground, at: 560 1040)
+    wire:WG3(C1.negative, to: G3.ground)
+    place:U3(at: 800 600)
+    mark:N5(label, vcc, at: 780 440)
+    wire:WN5(U3.Vcc, to: N5.label)
+    mark:G4(ground, at: 780 760)
+    wire:WG4(U3.GND, to: G4.ground)
+    place:U4(at: 1080 600)
+    mark:N6(label, clean, at: 1280 600, rotate: 90)
+    wire:WN6(U4.output, to: N6.label)
+    mark:N7(label, vcc, at: 1060 440)
+    wire:WN7(U4.Vcc, to: N7.label)
+    mark:G5(ground, at: 1060 760)
+    wire:WG5(U4.GND, to: G5.ground)
+    place:R7(at: 800 1160, rotate: 90, name(at: 44 -16), value(at: 60 20))
+    mark:N8(label, vcc, at: 800 960)
+    wire:WN8(R7.positive, to: N8.label)
+    place:C2(at: 800 1400, rotate: 90)
+    mark:N9(label, reset, at: 800 1200)
+    wire:WN9(C2.positive, to: N9.label)
+    mark:G6(ground, at: 800 1640)
+    wire:WG6(C2.negative, to: G6.ground)
+    place:U1(at: 1600 280)
+    mark:N10(label, raw, at: 1240 240, rotate: 270)
+    wire:WN10(U1.clock, to: N10.label)
+    mark:N11(label, vcc, at: 1240 280, rotate: 270)
+    wire:WN11(U1.enable_p, to: N11.label)
+    mark:N12(label, vcc, at: 1240 320, rotate: 270)
+    wire:WN12(U1.enable_t, to: N12.label)
+    mark:N13(label, vcc, at: 1520 0)
+    wire:WN13(U1.not_load, to: N13.label)
+    mark:N14(label, vcc, at: 1600 0)
+    wire:WN14(U1.Vcc, to: N14.label)
+    mark:G7(ground, at: 1680 0, rotate: 180)
+    wire:WG7(U1.GND, to: G7.ground)
+    mark:N15(label, reset, at: 1600 600, rotate: 180)
+    wire:WN15(U1.not_clear, to: N15.label)
+    place:U2(at: 1600 1040)
+    mark:N16(label, clean, at: 1240 1000, rotate: 270)
+    wire:WN16(U2.clock, to: N16.label)
+    mark:N17(label, vcc, at: 1240 1040, rotate: 270)
+    wire:WN17(U2.enable_p, to: N17.label)
+    mark:N18(label, vcc, at: 1240 1080, rotate: 270)
+    wire:WN18(U2.enable_t, to: N18.label)
+    mark:N19(label, vcc, at: 1520 760)
+    wire:WN19(U2.not_load, to: N19.label)
+    mark:N20(label, vcc, at: 1600 760)
+    wire:WN20(U2.Vcc, to: N20.label)
+    mark:G8(ground, at: 1680 760, rotate: 180)
+    wire:WG8(U2.GND, to: G8.ground)
+    mark:N21(label, reset, at: 1600 1360, rotate: 180)
+    wire:WN21(U2.not_clear, to: N21.label)
+    place:R3(at: 2080 120, name(at: -52 -32), value(at: 52 -32))
+    place:R4(at: 2080 200, name(at: -52 -32), value(at: 52 -32))
+    place:R5(at: 2080 280, name(at: -52 -32), value(at: 52 -32))
+    place:R6(at: 2080 360, name(at: -52 -32), value(at: 52 -32))
+    place:R8(at: 2080 880, name(at: -52 -32), value(at: 52 -32))
+    place:R9(at: 2080 960, name(at: -52 -32), value(at: 52 -32))
+    place:R10(at: 2080 1040, name(at: -52 -32), value(at: 52 -32))
+    place:R11(at: 2080 1120, name(at: -52 -32), value(at: 52 -32))
+    place:DS1(at: 2520 640, rotate: 270, mirror)
+    mark:G9(ground, at: 2760 600, rotate: 270)
+    wire:WG9(DS1.cathode, to: G9.ground)
+    wire:W1(SW1.b, to: R1.positive)
+    mark:Jd(junction, at: 560 600)
+    wire:W2(R2.negative, to: Jd.j)
+    wire:W22(Jd.j, to: U3.a)
+    wire:W3(C1.positive, to: Jd.j)
+    wire:W4(U3.output, to: U4.a)
+    wire:W5(R7.negative, to: C2.positive)
+    wire:W6(U1.count_0, to: R3.positive, via: [1800 220, 1800 120])
+    wire:W7(R3.negative, to: DS1.anode_0, via: [2360 120, 2360 480])
+    wire:W8(U1.count_1, to: R4.positive, via: [1840 260, 1840 200])
+    wire:W9(R4.negative, to: DS1.anode_1, via: [2320 200, 2320 520])
+    wire:W10(U1.count_2, to: R5.positive, via: [1880 300, 1880 280])
+    wire:W11(R5.negative, to: DS1.anode_2, via: [2280 280, 2280 560])
+    wire:W12(U1.count_3, to: R6.positive, via: [1840 340, 1840 360])
+    wire:W13(R6.negative, to: DS1.anode_3, via: [2240 360, 2240 600])
+    wire:W14(U2.count_0, to: R8.positive, via: [1920 980, 1920 880])
+    wire:W15(R8.negative, to: DS1.anode_4, via: [2240 880, 2240 640])
+    wire:W16(U2.count_1, to: R9.positive, via: [1960 1020, 1960 960])
+    wire:W17(R9.negative, to: DS1.anode_5, via: [2280 960, 2280 680])
+    wire:W18(U2.count_2, to: R10.positive, via: [2000 1060, 2000 1040])
+    wire:W19(R10.negative, to: DS1.anode_6, via: [2320 1040, 2320 720])
+    wire:W20(U2.count_3, to: R11.positive, via: [1800 1100, 1800 1120])
+    wire:W21(R11.negative, to: DS1.anode_7, via: [2360 1120, 2360 760])
+    probes {
+        time(1 ms/div)
+        probe:CH1(raw, 2 V/div)
+        probe:CH2(slow, 2 V/div)
+        probe:L1(level, raw)
+        probe:L2(level, clean)
+    }
+    expect("the bare counter counts five: 0101", from: "four bounces: the contact closes five times before it rests") {
+        measure(final, a0)
+        within(1.8 V .. 2.2 V)
+    }
+    expect("its second bit is dark", from: "five is 0101") {
+        measure(final, a1)
+        near(0 V, +- 0.1 V)
+    }
+    expect("its third bit is lit", from: "five is 0101") {
+        measure(final, a2)
+        within(1.8 V .. 2.2 V)
+    }
+    expect("the debounced counter counts one", from: "an RC of 1 ms and a Schmitt trigger: one edge for one press") {
+        measure(final, a4)
+        within(1.8 V .. 2.2 V)
+    }
+    expect("and no more", from: "one is 0001") {
+        measure(final, a5)
+        near(0 V, +- 0.1 V)
+    }
+    analysis(transient, for: 20 ms)
+    view:transient_response(primary)
+}

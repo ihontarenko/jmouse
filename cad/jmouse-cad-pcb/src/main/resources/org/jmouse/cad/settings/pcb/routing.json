@@ -1,5 +1,4 @@
 {
-  "$schema": "./routing.schema.json",
   "routing": {
     "searches": [
       { "share": 2, "margin": 6 },

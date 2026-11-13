@@ -1,0 +1,8 @@
+category:general("Other") {
+    meta {
+        summary: "Documents without a category of their own"
+        order: 200
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

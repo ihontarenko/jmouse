@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.datasheets;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.store.problem.CadProblem;
 
 import java.nio.charset.StandardCharsets;
@@ -8,14 +9,17 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * What counts as a datasheet: the plugin's data ({@code settings/plugin/datasheets/format}), and the two refusals that follow from it.
+ * What counts as a datasheet: the plugin's data ({@code settings/plugin/cad-datasheets/format}), and the two refusals that follow from it.
  *
  * @param extensions what a datasheet's file name ends in
  * @param mediaType  what it is served as
  * @param signature  what its first bytes say: a file only called a PDF is refused
  * @param linkLabel  what a document's {@code links} call its datasheet on the web
  */
-public record DatasheetFormat(List<String> extensions, String mediaType, String signature, String linkLabel) {
+public record DatasheetFormat(@Label("Extensions") List<String> extensions,
+                              @Label("Media type") String mediaType,
+                              @Label("Signature") String signature,
+                              @Label("Link label") String linkLabel) {
 
     /** What the store keeps of a name. */
     private static final int LONGEST_NAME = 255;

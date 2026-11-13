@@ -1,0 +1,8 @@
+category:rc-circuits("RC circuits") {
+    meta {
+        category: circuits
+        order: 1
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

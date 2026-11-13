@@ -1,0 +1,69 @@
+{
+  "kinds": {
+    "category": {
+      "one": "category",
+      "plural": "Categories",
+      "code": null
+    },
+    "circuit": {
+      "one": "circuit",
+      "plural": "Circuits",
+      "code": null
+    },
+    "component": {
+      "one": "component",
+      "plural": "Components",
+      "code": null
+    },
+    "family": {
+      "one": "family",
+      "plural": "Families",
+      "code": null
+    },
+    "footprint": {
+      "one": "footprint",
+      "plural": "Footprints",
+      "code": "FP"
+    },
+    "frame": {
+      "one": "frame",
+      "plural": "Frames",
+      "code": "FR"
+    },
+    "functions": {
+      "one": "function library",
+      "plural": "Function libraries",
+      "code": null
+    },
+    "model": {
+      "one": "3D model",
+      "plural": "3D models",
+      "code": "MD"
+    },
+    "panel": {
+      "one": "panel",
+      "plural": "Panels",
+      "code": null
+    },
+    "pcb": {
+      "one": "pcb",
+      "plural": "Pcbs",
+      "code": null
+    },
+    "portrait": {
+      "one": "portrait",
+      "plural": "Portraits",
+      "code": "PT"
+    },
+    "project": {
+      "one": "project",
+      "plural": "Projects",
+      "code": null
+    },
+    "symbol": {
+      "one": "symbol",
+      "plural": "Symbols",
+      "code": "SY"
+    }
+  }
+}

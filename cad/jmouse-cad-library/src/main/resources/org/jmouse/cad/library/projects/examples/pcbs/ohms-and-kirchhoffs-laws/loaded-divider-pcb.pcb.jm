@@ -1,0 +1,37 @@
+# Loaded voltage divider laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:loaded-divider-pcb("Loaded voltage divider — pcb") {
+    meta {
+        summary: "Loaded voltage divider laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: ohms-and-kirchhoffs-laws
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(loaded-divider)
+    layers(2)
+    edge("M1 0H26A1 1 0 0 1 27 1V19A1 1 0 0 1 26 20H1A1 1 0 0 1 0 19V1A1 1 0 0 1 1 0Z")
+    place(R3, at: 10.5 7, rotate: 270)
+    place(R4, at: 10.5 12.5, rotate: 270)
+    place(R1, at: 16 7, rotate: 270)
+    place(R2, at: 16 12.5, rotate: 270)
+    place(RL, at: 22.5 11.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, in: 2, load: 3, middle: 4, reference: 5], at: 5.5 10)
+    track(top, width: 0.25, from: 10.5 8, to: 10.5 11.5)
+    track(top, width: 0.25, from: 16 8, to: 16 11.5)
+    track(top, width: 0.25, from: 10.5 6, to: 9.04 7.46, to: 5.5 7.46)
+    track(top, width: 0.25, from: 10.5 6, to: 16 6)
+    track(top, width: 0.25, from: 10.5 13.5, to: 16 13.5)
+    track(top, width: 0.25, from: 10.5 11.5, to: 9.08 11.5, to: 5.5 15.08)
+    track(top, width: 0.25, from: 16 13.5, to: 21.5 13.5, to: 22.5 12.5)
+    track(top, width: 0.25, from: 10.5 13.5, to: 9.6 12.6)
+    track(bottom, width: 0.25, from: 9.6 12.6, to: 9.6 9.02, to: 5.5 4.92)
+    track(top, width: 0.25, from: 16 11.5, to: 11.95 11.5)
+    track(bottom, width: 0.25, from: 11.95 11.5, to: 8.205 15.245, to: 5.5 12.54)
+    track(top, width: 0.25, from: 22.5 10.5, to: 24.3 12.3, to: 22.05 14.55, to: 9.9 14.55, to: 8.55 13.2)
+    track(bottom, width: 0.25, from: 8.55 13.2, to: 8.55 13.05, to: 5.5 10)
+    via(at: 9.6 12.6, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 11.95 11.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 8.55 13.2, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H26.5V19.5H0.5Z")
+}

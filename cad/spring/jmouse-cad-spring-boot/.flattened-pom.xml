@@ -65,16 +65,21 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-cad-exchange</artifactId>
+      <artifactId>jmouse-settings-spring</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-storage-management</artifactId>
+      <artifactId>jmouse-settings-jpa</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
-      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-exchange</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tools.jackson.core</groupId>

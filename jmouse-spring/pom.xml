@@ -44,6 +44,7 @@
         <module>jmouse-scheduler-spring-boot</module>
         <module>jmouse-taxonomy-management</module>
         <module>jmouse-plugin-spring</module>
+        <module>jmouse-settings-spring</module>
     </modules>
 
 </project>

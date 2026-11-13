@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.DocumentImport;
 import org.jmouse.cad.exchange.ExchangeFiles;
@@ -10,6 +11,7 @@ import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 import org.jmouse.kicad.symbol.KiCadSymbolLibrary;
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.kicad.KiCadComponentStub;
 import org.jmouse.cad.kicad.KiCadSymbolDrawing;
 import org.jmouse.cad.kicad.KiCadDesign;
@@ -43,17 +45,21 @@ final class KiCadDesignImport implements DocumentImport {
 
     private static final String LIBRARY_SUFFIX = ".pretty";
 
-    private final Supplier<KiCadFootprintLibraries> installedFootprints;
+    private final Supplier<InstalledKiCadLibraries> installedLibraries;
     private final Supplier<ModelSource>             installedModels;
-    private final KiCadLibraryMap                   map    = KiCadLibraryMap.standard();
-    private final KiCadLibraries                    filing = KiCadLibraries.standard();
+    /** The map of KiCad's symbols to ours and KiCad's filings.current(), as the engine's tables say them at each use. */
+    private final ReadTable<KiCadLibraryMap>        maps;
+    private final ReadTable<KiCadLibraries>         filings;
 
     /**
-     * @param installedFootprints the footprints installed on the server, as they stand when a design is read
-     * @param installedModels     the 3D model libraries installed on the server, as they stand when a design is read
+     * @param installedLibraries the footprint and symbol libraries installed on the server, as they stand when a design is read
+     * @param installedModels    the 3D model libraries installed on the server, as they stand when a design is read
      */
-    KiCadDesignImport(Supplier<KiCadFootprintLibraries> installedFootprints, Supplier<ModelSource> installedModels) {
-        this.installedFootprints = installedFootprints;
+    KiCadDesignImport(Supplier<InstalledKiCadLibraries> installedLibraries, Supplier<ModelSource> installedModels,
+                      ReadTable<KiCadLibraryMap> maps, ReadTable<KiCadLibraries> filings) {
+        this.maps = maps;
+        this.filings = filings;
+        this.installedLibraries = installedLibraries;
         this.installedModels = installedModels;
     }
 
@@ -98,7 +104,7 @@ final class KiCadDesignImport implements DocumentImport {
             case SYMBOL_LIBRARY -> symbols(main, files.mainText()).whoseAsStated(files.stated(), main);
         };
         // Every KiCad library a drawing comes from is a category of its own, under KiCad's.
-        return read.filedBy(filing);
+        return read.filedBy(filings.current());
     }
 
     /**
@@ -144,7 +150,7 @@ final class KiCadDesignImport implements DocumentImport {
         } catch (SExpressionParseException unreadable) {
             throw new IllegalArgumentException(unreadable.getMessage(), unreadable);
         }
-        DocumentNode document = KiCadFootprintDrawing.documentOf(libraryId, footprint, KiCadFootprintLibraries.Origin.PROJECT, filing);
+        DocumentNode document = KiCadFootprintDrawing.documentOf(libraryId, footprint, KiCadFootprintLibraries.Origin.PROJECT, filings.current());
         return new ImportedDocuments(List.of(document), List.of(), List.of());
     }
 
@@ -160,8 +166,8 @@ final class KiCadDesignImport implements DocumentImport {
         // Each symbol named as KiCad names it outside the file — Device:R —, so it is the same document a design brings.
         String libraryName = KiCadFile.SYMBOL_LIBRARY.stemOf(fileNameOf(main));
         for (KiCadSymbolDefinition symbol : library.symbols().stream().map(found -> found.inLibrary(libraryName)).toList()) {
-            KiCadSymbolDrawing.units(symbol).forEach(unit -> documents.add(KiCadSymbolDrawing.documentOf(symbol, unit, Map.of(), filing, false)));
-            documents.add(KiCadComponentStub.documentOf(symbol, Optional.empty(), Optional.empty(), false, filing, false));
+            KiCadSymbolDrawing.units(symbol).forEach(unit -> documents.add(KiCadSymbolDrawing.documentOf(symbol, unit, Map.of(), filings.current(), false)));
+            documents.add(KiCadComponentStub.documentOf(symbol, Optional.empty(), Optional.empty(), false, filings.current(), false));
         }
         if (documents.isEmpty()) {
             throw new IllegalArgumentException(main + " holds no symbol.");
@@ -176,7 +182,7 @@ final class KiCadDesignImport implements DocumentImport {
     private ImportedDocuments design(String root, String stem, List<String> opened, ExchangeFiles files, CatalogueDocuments catalogue) {
         String title = files.title() == null || files.title().isBlank() ? KiCadFile.SCHEMATIC.stemOf(root) : files.title();
         return withModels(KiCadDesign.read(new KiCadDesign.Sources(files.files(), root, title, stem + KiCadFile.PCB.suffix(),
-                stem + KiCadFile.PROJECT.suffix(), opened), catalogue, installedFootprints.get(), map, filing), catalogue);
+                stem + KiCadFile.PROJECT.suffix(), opened), catalogue, installedLibraries.get(), maps.current(), filings.current()), catalogue);
     }
 
     /** A design with the models its footprints name, each before the footprints, as what is named comes first; one the place holds is left. */

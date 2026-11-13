@@ -1,0 +1,22 @@
+# AC coupling laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:ac-coupling-pcb("AC coupling — pcb") {
+    meta {
+        summary: "AC coupling laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: rc-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(ac-coupling)
+    layers(2)
+    edge("M1 0H20A1 1 0 0 1 21 1V12A1 1 0 0 1 20 13H1A1 1 0 0 1 0 12V1A1 1 0 0 1 1 0Z")
+    place(C1, at: 12 4.5)
+    place(R1, at: 17 8, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 6.5)
+    track(top, width: 0.25, from: 17 9, to: 17 10.05)
+    track(top, width: 0.25, from: 12.85 4.5, to: 14.5 4.5, to: 17 7)
+    track(top, width: 0.25, from: 11.15 4.5, to: 7.88 7.77, to: 5.5 7.77)
+    via(at: 17 10.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H20.5V12.5H0.5Z")
+}

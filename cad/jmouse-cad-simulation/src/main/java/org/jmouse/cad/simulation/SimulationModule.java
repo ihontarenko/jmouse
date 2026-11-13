@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation;
 
+import org.jmouse.cad.document.ArrangementLines;
 import java.util.function.Function;
 import java.util.Map;
 import org.jmouse.cad.document.DocumentNode;
@@ -77,7 +78,7 @@ public final class SimulationModule implements DocumentModule {
                             line(SimulationLines.WITHIN), line(SimulationLines.IS))),
             ClauseBlockParser.of(SimulationVocabulary.PARTS, PARTS),
             ClauseBlockParser.of("layout", LineSet.of(List.of(SimulationLines.FRAME, SimulationLines.WIRE, SimulationLines.BUS, SimulationLines.NOTE, SimulationLines.DRAWN, SimulationLines.MARK,
-                    SimulationLines.PLACE))),
+                    SimulationLines.PLACE, ArrangementLines.GROUP_LINE))),
             ClauseBlockParser.of("ports", LineSet.of(SimulationLines.PORTS)),
             ClauseBlockParser.of("nets", LineSet.of(List.of(SimulationLines.NET))),
             ClauseBlockParser.of("probes", LineSet.of(List.of(SimulationLines.TIME_BASE, SimulationLines.PROBE))),
@@ -93,10 +94,11 @@ public final class SimulationModule implements DocumentModule {
     public static final DocumentKind FAMILY    = DocumentKind.of("family", "parameters", "formulas");
     public static final DocumentKind FUNCTIONS = DocumentKind.of("functions", "formulas", "heat");
     public static final DocumentKind CATEGORY  = DocumentKind.of("category");
+    public static final DocumentKind PROJECT   = DocumentKind.of("project");
 
     @Override
     public List<DocumentKind> kinds() {
-        return List.of(COMPONENT, CIRCUIT, FAMILY, FUNCTIONS, CATEGORY);
+        return List.of(COMPONENT, CIRCUIT, FAMILY, FUNCTIONS, CATEGORY, PROJECT);
     }
 
     @Override

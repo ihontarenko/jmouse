@@ -1,0 +1,36 @@
+# Op-amp differentiator laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:differentiator-pcb("Op-amp differentiator — pcb") {
+    meta {
+        summary: "Op-amp differentiator laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(differentiator)
+    layers(2)
+    edge("M1 0H29A1 1 0 0 1 30 1V23A1 1 0 0 1 29 24H1A1 1 0 0 1 0 23V1A1 1 0 0 1 1 0Z")
+    place(RS, at: 11.5 13)
+    place(CI, at: 17 12)
+    place(RF, at: 20 8)
+    place(CF, at: 20 4)
+    place(U1, at: 19.5 18)
+    place(RL, at: 26 16.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 13)
+    track(top, width: 0.25, from: 17.05 18.635, to: 18.65 18.635)
+    track(top, width: 0.25, from: 26 17.5, to: 26 18.55)
+    track(top, width: 0.25, from: 12.5 13, to: 15.15 13, to: 16.15 12)
+    track(top, width: 0.25, from: 19 8, to: 19 4.15, to: 19.15 4)
+    track(top, width: 0.25, from: 21 8, to: 21 4.15, to: 20.85 4)
+    track(top, width: 0.25, from: 17.85 12, to: 17.85 9.15, to: 19 8)
+    track(top, width: 0.25, from: 10.5 13, to: 6.77 13, to: 5.5 11.73)
+    track(top, width: 0.25, from: 17.85 12, to: 15.6 14.25, to: 15.6 17.365, to: 17.05 17.365)
+    track(top, width: 0.25, from: 17.05 16.095, to: 17.95 15.195, to: 25.695 15.195, to: 26 15.5)
+    track(top, width: 0.25, from: 21 8, to: 21 12.145, to: 17.05 16.095)
+    track(top, width: 0.25, from: 17.05 19.905, to: 11.135 19.905, to: 5.5 14.27)
+    track(top, width: 0.25, from: 21.95 16.095, to: 20.6 16.095, to: 20.6 18.345, to: 18.35 20.595, to: 9.285 20.595, to: 5.5 16.81)
+    via(at: 18.65 18.635, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 26 18.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H29.5V23.5H0.5Z")
+}

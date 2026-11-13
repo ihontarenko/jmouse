@@ -1,0 +1,8 @@
+category:rl-circuits("RL circuits") {
+    meta {
+        category: circuits
+        order: 2
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

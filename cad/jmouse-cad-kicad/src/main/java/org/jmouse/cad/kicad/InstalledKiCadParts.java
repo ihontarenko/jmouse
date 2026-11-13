@@ -52,6 +52,10 @@ import java.util.stream.Stream;
  */
 public final class InstalledKiCadParts implements PartSearchProvider {
 
+    /** What the installed libraries are as a place parts are looked for. */
+    public static final String ID   = "kicad";
+    public static final String NAME = "KiCad libraries";
+
     private static final String SYMBOL_PREFIX = "symbol:";
     private static final String FOOTPRINT_PREFIX = "footprint:";
     private static final String SYMBOL_SUFFIX = ".kicad_sym";
@@ -89,12 +93,12 @@ public final class InstalledKiCadParts implements PartSearchProvider {
 
     @Override
     public String id() {
-        return "kicad";
+        return ID;
     }
 
     @Override
     public String name() {
-        return "KiCad libraries";
+        return NAME;
     }
 
     @Override

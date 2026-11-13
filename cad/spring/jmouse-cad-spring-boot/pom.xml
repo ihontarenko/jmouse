@@ -81,16 +81,19 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-plugin-spring</artifactId>
         </dependency>
+        <!-- The settings (ADR 0007): one row a value in settings_parameters, the library's own table and migrations -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-settings-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-settings-jpa</artifactId>
+        </dependency>
         <!-- Exchange: the points a format is brought to; the store reads them, converts nothing itself -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-exchange</artifactId>
-        </dependency>
-        <!-- The files a document holds besides its text, where the installation keeps managed files. -->
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-storage-management</artifactId>
-            <optional>true</optional>
         </dependency>
         <!-- JSON: the engine reads what it says of itself (about.json) -->
         <dependency>

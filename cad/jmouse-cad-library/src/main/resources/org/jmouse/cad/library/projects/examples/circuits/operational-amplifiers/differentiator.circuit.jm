@@ -1,0 +1,109 @@
+# OA-06. The differentiator: the integrator turned round — the capacitor at the input, the resistor in the feedback.
+# The inverting input is a virtual earth, so the capacitor's current is C · dVin/dt, and the output is what pushes it
+# back through Rf: out = −Rf · C · dVin/dt. A ±1 V triangle at 1 kHz changes at 4 V/ms, so with 100 kΩ and 10 nF it
+# comes out a ±4 V square, its edges on the triangle's corners. A square in is all edges: each one gives a spike that
+# reaches a rail and dies away. A pure differentiator's gain grows with frequency without end and it rings or amplifies
+# every bit of noise; the 1 kΩ in series with the capacitor holds the gain at Rf / 1 kΩ above 16 kHz, and the 100 pF
+# across Rf rolls it off above 16 kHz too.
+#
+# The generator is two generators in series, a triangle and a square: the shape slider gives one of them the whole
+# amplitude and the other none.
+circuit:differentiator("Op-amp differentiator") {
+    meta {
+        summary: "A TL072 with a capacitor at its input: out = −Rf · C · dVin/dt — a triangle in comes out a square, a square in comes out spikes."
+        description: """
+            Idea: a capacitor passes a current only while its voltage changes, C · dV/dt. At the virtual earth that
+            current has to go on through Rf, so the output measures how fast the input is changing, not how large
+            it is.
+
+            Try: switch the shape to the square — every edge is a sudden change and gives a sharp spike, while the flat
+            tops give nothing at all. Back on the triangle, raise the frequency: the slopes get steeper and the square
+            at the output grows. Lower C or Rf: it shrinks.
+
+            Watch: CH1 the input, CH2 the output. On the triangle, the output is high while the input falls and low
+            while it rises — the slope, turned over. On the square, the output is flat zero with a spike at each edge.
+
+            Ask: why is the output zero on the square's flat tops? What would noise riding on the input do to a
+            differentiator without the 1 kΩ in series?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-06
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:V(1 V, in: 0.1 V .. 3 V, step: 0.1 V, "Input height either side of the common")
+    parameter:F(1 kHz, in: 100 Hz .. 5 kHz, step: 100 Hz, "Input frequency")
+    parameter:Shape(0, in: 0 .. 1, step: 1, "Input shape: 0 a triangle, 1 a square")
+    parameter:C(10 nF, in: 1 nF .. 100 nF, step: 1 nF, "Input capacitor")
+    parameter:R_feedback(100 kΩ, in: 10 kΩ .. 470 kΩ, step: 1 kΩ, "Rf, the feedback resistor")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(triangle-generator, [positive: in, negative: middle], high: (1 - Shape) * V, low: -(1 - Shape) * V, frequency: F)
+    part:G2(square-generator, [positive: middle, negative: 0], high: Shape * V, low: -Shape * V, frequency: F, duty: 0.5)
+    part:RS(resistor, [in, series], resistance: 1 kΩ)
+    part:CI(capacitor, [series, inverting], capacitance: C)
+    part:RF(resistor, [inverting, out], resistance: R_feedback)
+    part:CF(capacitor, [inverting, out], capacitance: 100 pF)
+    part:U1(tl072, [A.non_inverting_input: 0, A.inverting_input: inverting, A.output: out, Vcc: vp, GND: vn])
+    part:RL(resistor, [out, 0], resistance: 10 kΩ)
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:GND1(common, at: 360 360)
+    place:G1(at: 400 760, rotate: 90)
+    place:G2(at: 400 1000, rotate: 90)
+    place:RS(at: 560 520)
+    place:CI(at: 760 520)
+    mark:Ji(junction, at: 920 520)
+    place:U1(at: 1080 560)
+    mark:LP2(label, vp, at: 1080 380)
+    mark:LN2(label, vn, at: 1080 740, rotate: 180)
+    mark:Jc(junction, at: 920 200)
+    place:RF(at: 1080 200)
+    place:CF(at: 1080 40)
+    mark:Jd(junction, at: 1240 200)
+    mark:Jo(junction, at: 1240 560)
+    place:RL(at: 1480 760, rotate: 90)
+    mark:Jr(junction, at: 960 1200)
+    mark:GND2(common, at: 960 1280)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: RS.positive, via: 400 520)
+    wire:W5(G1.negative, to: G2.positive)
+    wire:W6(RS.negative, to: CI.positive)
+    wire:W7(CI.negative, to: Ji.j)
+    wire:W8(Ji.j, to: U1.A.inverting_input)
+    wire:W9(Ji.j, to: Jc.j)
+    wire:W10(Jc.j, to: RF.positive)
+    wire:W11(Jc.j, to: CF.positive, via: 920 40)
+    wire:W12(RF.negative, to: Jd.j)
+    wire:W13(CF.negative, to: Jd.j, via: 1240 40)
+    wire:W14(Jd.j, to: Jo.j)
+    wire:W15(LP2.label, to: U1.Vcc)
+    wire:W16(U1.GND, to: LN2.label)
+    wire:W17(U1.A.output, to: Jo.j)
+    wire:W18(Jo.j, to: RL.positive, via: 1480 560)
+    wire:W19(U1.A.non_inverting_input, to: Jr.j, via: 960 600)
+    wire:W20(G2.negative, to: Jr.j, via: 400 1200)
+    wire:W21(RL.negative, to: Jr.j, via: 1480 1200)
+    wire:W22(Jr.j, to: GND2.common)
+    probes {
+        probe:CH1(in, 0.5 V/div)
+        probe:CH2(out, 2 V/div)
+        time(500 µs/div)
+    }
+    expect("a falling triangle gives a steady high output", from: "out = −Rf · C · dVin/dt = −100 kΩ · 10 nF · (−4 V/ms) = 4 V") {
+        measure(maximum, out, after: 3 ms)
+        near(4 V, +- 5%)
+    }
+    expect("a rising one a steady low output", from: "out = −100 kΩ · 10 nF · (+4 V/ms) = −4 V") {
+        measure(minimum, out, after: 3 ms)
+        near(-4 V, +- 5%)
+    }
+    expect("the triangle's slope is a square, half up and half down", from: "a triangle rises for half its period and falls for the other half") {
+        measure(duty, out, above: 0 V, after: 3 ms)
+        near(0.5, +- 3%)
+    }
+    analysis(transient, for: 8 ms)
+    view:transient_response(primary)
+}

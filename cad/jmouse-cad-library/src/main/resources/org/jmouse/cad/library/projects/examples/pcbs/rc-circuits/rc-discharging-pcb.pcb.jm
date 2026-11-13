@@ -1,0 +1,23 @@
+# Discharging a capacitor through a resistor laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:rc-discharging-pcb("Discharging a capacitor through a resistor — pcb") {
+    meta {
+        summary: "Discharging a capacitor through a resistor laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: rc-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(rc-discharging)
+    layers(2)
+    edge("M1 0H21A1 1 0 0 1 22 1V14A1 1 0 0 1 21 15H1A1 1 0 0 1 0 14V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 13 5.5)
+    place(C1, at: 18 9.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, in: 2, out: 3], at: 5.5 7.5)
+    track(top, width: 0.25, from: 18 10.35, to: 18 11.55)
+    track(top, width: 0.25, from: 14 5.5, to: 14.85 5.5, to: 18 8.65)
+    track(top, width: 0.25, from: 12 5.5, to: 10 7.5, to: 5.5 7.5)
+    track(top, width: 0.25, from: 14 5.5, to: 9.46 10.04, to: 5.5 10.04)
+    via(at: 18 11.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H21.5V14.5H0.5Z")
+}

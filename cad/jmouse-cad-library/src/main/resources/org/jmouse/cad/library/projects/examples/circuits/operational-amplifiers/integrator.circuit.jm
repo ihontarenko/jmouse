@@ -1,0 +1,99 @@
+# OA-05. The integrator: the inverting amplifier with a capacitor where the feedback resistor was. The inverting input
+# is a virtual earth, so a steady input V drives a steady current V / R into the capacitor, and the output ramps at
+# −V / (RC) volts a second. A ±1 V square therefore comes out a triangle: each half-period it moves V · T / (2RC), so it
+# swings ±V · T / (4RC) = ±1 V · 1 ms / (4 · 10 kΩ · 10 nF) = ±2.5 V. An ideal integrator also adds up every microvolt
+# of offset until it sits on a rail; the 470 kΩ across the capacitor gives it a DC gain of 47 instead of infinity and
+# lets the start-up step die away in 470 kΩ · 10 nF = 4.7 ms, while it takes only a fraction of a percent of the
+# triangle at 1 kHz.
+circuit:integrator("Op-amp integrator") {
+    meta {
+        summary: "A TL072 with a capacitor in its feedback: a square in comes out a triangle of ±V · T / (4RC), the running sum of the input."
+        description: """
+            Idea: the virtual earth turns the input voltage into a current V / R, and that current has nowhere to go
+            but into the capacitor. The capacitor's voltage — the output, turned over — is the running sum of the
+            input: a steady input gives a steady slope, −V / (RC) volts a second.
+
+            Try: lower the frequency or the capacitor — the triangle grows, until it meets the rails. Change the
+            square's duty away from one half: the input is no longer zero on average, the triangle tilts and drifts,
+            and only the 470 kΩ across the capacitor stops it running into a rail.
+
+            Watch: CH1 the square, CH2 the output. Where the input is high the output falls in a straight line; where
+            it is low it rises. The corners of the triangle sit exactly on the square's edges.
+
+            Ask: what does the output do with the 470 kΩ taken away? Why must a real integrator be given some DC path
+            across its capacitor?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-05
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:V(1 V, in: 0.1 V .. 3 V, step: 0.1 V, "Square height either side of the common")
+    parameter:F(1 kHz, in: 200 Hz .. 5 kHz, step: 100 Hz, "Square frequency")
+    parameter:C(10 nF, in: 5 nF .. 100 nF, step: 1 nF, "Integrating capacitor")
+    parameter:R(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Input resistor")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(square-generator, [positive: in, negative: 0], high: V, low: -V, frequency: F, duty: 0.5)
+    part:RI(resistor, [in, inverting], resistance: R)
+    part:CF(capacitor, [inverting, out], capacitance: C)
+    part:RP(resistor, [inverting, out], resistance: 470 kΩ)
+    part:U1(tl072, [A.non_inverting_input: 0, A.inverting_input: inverting, A.output: out, Vcc: vp, GND: vn])
+    part:RL(resistor, [out, 0], resistance: 10 kΩ)
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:GND1(common, at: 360 360)
+    place:G1(at: 400 840, rotate: 90)
+    place:RI(at: 600 520)
+    mark:Ji(junction, at: 720 520)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    mark:Jc(junction, at: 720 200)
+    place:CF(at: 880 200)
+    place:RP(at: 880 40)
+    mark:Jd(junction, at: 1040 200)
+    mark:Jo(junction, at: 1040 560)
+    place:RL(at: 1280 760, rotate: 90)
+    mark:Jr(junction, at: 760 1040)
+    mark:GND2(common, at: 760 1120)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: RI.positive, via: 400 520)
+    wire:W5(RI.negative, to: Ji.j)
+    wire:W6(Ji.j, to: U1.A.inverting_input)
+    wire:W7(Ji.j, to: Jc.j)
+    wire:W8(Jc.j, to: CF.positive)
+    wire:W9(Jc.j, to: RP.positive, via: 720 40)
+    wire:W10(CF.negative, to: Jd.j)
+    wire:W11(RP.negative, to: Jd.j, via: 1040 40)
+    wire:W12(Jd.j, to: Jo.j)
+    wire:W13(LP2.label, to: U1.Vcc)
+    wire:W14(U1.GND, to: LN2.label)
+    wire:W15(U1.A.output, to: Jo.j)
+    wire:W16(Jo.j, to: RL.positive, via: 1280 560)
+    wire:W17(U1.A.non_inverting_input, to: Jr.j, via: 760 600)
+    wire:W18(G1.negative, to: Jr.j, via: 400 1040)
+    wire:W19(RL.negative, to: Jr.j, via: 1280 1040)
+    wire:W20(Jr.j, to: GND2.common)
+    probes {
+        probe:CH1(in, 0.5 V/div)
+        probe:CH2(out, 1 V/div)
+        time(500 µs/div)
+    }
+    expect("the triangle's top", from: "a ±V square integrated: V_peak = V · T / (4RC) = 1 V · 1 ms / (4 · 10 kΩ · 10 nF) = 2.5 V") {
+        measure(maximum, out, after: 30 ms)
+        near(2.5 V, +- 3%)
+    }
+    expect("and its bottom", from: "the same swing below the common once the start-up step has died away, in 470 kΩ · 10 nF = 4.7 ms") {
+        measure(minimum, out, after: 30 ms)
+        near(-2.5 V, +- 3%)
+    }
+    expect("centred on the common", from: "a square of duty one half averages zero, so the triangle does too") {
+        measure(average, out, after: 30 ms)
+        within(-0.1 V .. 0.1 V)
+    }
+    analysis(transient, for: 40 ms)
+    view:transient_response(primary)
+}

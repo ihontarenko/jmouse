@@ -1,0 +1,8 @@
+category:librepcb("LibrePCB's") {
+    meta {
+        summary: "Symbols, footprints, 3D models and components brought by a LibrePCB import, each crediting the author its element names"
+        order: 101
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

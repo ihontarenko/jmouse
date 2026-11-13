@@ -1,0 +1,77 @@
+# RLC-01. A sine into a coil, a capacitor and a resistor in series. At f0 = 1/(2π√LC) the coil's and the capacitor's
+# reactances are equal and opposite, they cancel, and only R is left to limit the current: it peaks at A / R. The coil
+# and the capacitor each still carry that current through their own reactance, so each holds Q times the source —
+# in antiphase, so they cancel around the loop and the source never sees them. R sits last, at ground, so the voltage
+# across it is the current: its frequency response is the resonance curve itself.
+circuit:series-resonance("Series resonance") {
+    meta {
+        featured: yes
+        summary: "L, C and R in series: at f0 = 1/(2π√LC) the current peaks at A / R and L and C each hold Q times the source."
+        description: """
+            Idea: a coil's reactance grows with frequency and a capacitor's falls. At one frequency, f0 = 1/(2π√LC),
+            they are equal and opposite and cancel; the loop is then a bare resistor, and the current is as large as
+            it can be: the source's amplitude over R.
+
+            Try: start at f0 — 1592 Hz with 10 mH and 1 µF — then move the frequency down or up: the current falls
+            either way. Lower R: the peak grows taller and narrower. Change L or C: the peak moves.
+
+            Watch: the voltage across R on CH2 — it is the current times R — and the frequency response of that node:
+            one peak at f0, where it reaches the whole input. On CH3 and CH4 the coil's and the capacitor's voltages:
+            at resonance each is Q = √(L/C) / R times the source, here five times, and they swing opposite each other.
+
+            Ask: how can a 1 V source put 5 V across the coil? Where does the extra voltage come from, and why does
+            the source never see it?
+            """
+        category: resonance
+        tags: rlc, example, rlc-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:F(1592 Hz, in: 200 Hz .. 10 kHz, step: 1 Hz, "Generator frequency")
+    parameter:R(20 Ω, in: 5 Ω .. 500 Ω, step: 5 Ω, "Series resistance")
+    parameter:L(10 mH, in: 1 mH .. 100 mH, step: 1 mH, "Series inductance")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "Series capacitance")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:L1(inductor, [in, middle], inductance: L)
+    part:C1(capacitor, [middle, out], capacitance: C)
+    part:R1(resistor, [out, 0], resistance: R)
+    place:G1(at: 320 640, rotate: 90)
+    place:L1(at: 600 440)
+    place:C1(at: 920 440)
+    place:R1(at: 1200 640, rotate: 90)
+    mark:Jg(junction, at: 1200 840)
+    mark:GND1(ground, at: 1200 920)
+    wire:W1(G1.positive, to: L1.positive, via: 320 440)
+    wire:W2(L1.negative, to: C1.positive)
+    wire:W3(C1.negative, to: R1.positive, via: 1200 440)
+    wire:W4(G1.negative, to: Jg.j, via: 320 840)
+    wire:W5(R1.negative, to: Jg.j)
+    wire:W6(Jg.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 1 V/div)
+        probe:CH2(out, 1 V/div)
+        probe:CH3(in, against: middle, 2 V/div)
+        probe:CH4(middle, against: out, 2 V/div)
+        time(200 µs/div)
+    }
+    expect("at f0 the current is the source over R alone", from: "XL = XC at f0 = 1/(2π√LC) = 1592 Hz: I = A / R = 1 V / 20 Ω = 50 mA") {
+        measure(maximum, current: R1, after: 7 ms)
+        near(50 mA, +- 3%)
+    }
+    expect("the coil holds five times the source", from: "V_L = I · 2πf0·L = 50 mA · 100 Ω = 5 V, Q = √(L/C) / R = 5") {
+        measure(maximum, in - middle, after: 7 ms)
+        near(5 V, +- 4%)
+    }
+    expect("and so does the capacitor", from: "V_C = I / (2πf0·C) = 50 mA · 100 Ω = 5 V") {
+        measure(maximum, middle - out, after: 7 ms)
+        near(5 V, +- 4%)
+    }
+    expect("off resonance the reactances no longer cancel", from: "at 800 Hz XL = 50 Ω, XC = 199 Ω: |Z| = √(20² + 149²) = 150 Ω, I = 1 V / 150 Ω = 6.7 mA") {
+        measure(maximum, current: R1, after: 7 ms, with: [F: 800 Hz])
+        near(6.7 mA, +- 5%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 100, to: 20000, points: 300)
+}

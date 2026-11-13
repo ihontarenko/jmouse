@@ -35,6 +35,12 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-el-grammar</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
       <artifactId>jmouse-units</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>

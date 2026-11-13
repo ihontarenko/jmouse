@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 /**
  * 📄 A part's datasheets: the PDFs kept beside its document, filed against it as any file a document holds, and where its
@@ -65,7 +66,8 @@ public class Datasheets {
     private final CadLanguage     language;
     private final DocumentAccess  access;
     private final DocumentFiles   files;
-    private final DatasheetFormat format;
+    /** How a datasheet is told, as the installation has it now. */
+    private final Supplier<DatasheetFormat> format;
     private final LongSupplier    largest;
     private final CadAuthority    authority;
     private final CadPlaces       places;
@@ -75,7 +77,7 @@ public class Datasheets {
      * @param largest how large one may be, read at each upload
      */
     public Datasheets(CadCatalogue catalogue, CadLanguage language, DocumentAccess access, DocumentFiles files,
-                      DatasheetFormat format, LongSupplier largest, CadAuthority authority, CadPlaces places) {
+                      Supplier<DatasheetFormat> format, LongSupplier largest, CadAuthority authority, CadPlaces places) {
         this.authority = authority;
         this.places = places;
         this.largest = largest;
@@ -96,7 +98,7 @@ public class Datasheets {
     }
 
     public OpenedDatasheet open(String address, DocumentOwner owner, String name) {
-        format.requireName(name);
+        format.get().requireName(name);
         Optional<FolderPart> beside = folderPart(address, owner);
         if (beside.isPresent()) {
             return beside.get().open(name);
@@ -104,14 +106,14 @@ public class Datasheets {
         StoredDocument document = access.requireReadable(address);
         byte[] content = files.read(document.getId(), name, DocumentFiles.LARGEST_FILE)
                 .orElseThrow(() -> CadProblem.notFound("The datasheet"));
-        return new OpenedDatasheet(name, format.mediaType(), content);
+        return new OpenedDatasheet(name, format.get().mediaType(), content);
     }
 
     /** Keeps a datasheet beside the document; a name it already holds is refused, never written over. */
     public DatasheetShelf keep(String address, DocumentOwner owner, String name, InputStream body) {
-        format.requireName(name);
+        format.get().requireName(name);
         byte[] content = boundedContent(name, body);
-        format.requireContent(name, content);
+        format.get().requireContent(name, content);
         Optional<FolderPart> beside = folderPart(address, owner);
         if (beside.isPresent()) {
             beside.get().keep(name, content);
@@ -127,7 +129,7 @@ public class Datasheets {
     }
 
     public DatasheetShelf remove(String address, DocumentOwner owner, String name) {
-        format.requireName(name);
+        format.get().requireName(name);
         Optional<FolderPart> beside = folderPart(address, owner);
         if (beside.isPresent()) {
             beside.get().remove(name);
@@ -177,12 +179,12 @@ public class Datasheets {
         DatasheetShelf shelf() {
             List<KeptDatasheet> kept = new ArrayList<>();
             for (String name : resources.names()) {
-                if (format.names(name) && name.startsWith(stem)) {
+                if (format.get().names(name) && name.startsWith(stem)) {
                     kept.add(new KeptDatasheet(name, sizeOf(name)));
                 }
             }
             List<String> links = held.document().block(MetaNode.class).map(MetaNode::links).orElse(List.of()).stream()
-                    .filter(link -> format.linkLabel().equalsIgnoreCase(link.label()))
+                    .filter(link -> format.get().linkLabel().equalsIgnoreCase(link.label()))
                     .map(MetaNode.Link::address).filter(Datasheets::isWebAddress).toList();
             boolean changeable = mayChange && resources instanceof ChangeableResources;
             return new DatasheetShelf(changeable ? Keeping.CHANGEABLE : Keeping.READ_ONLY, List.copyOf(kept), links);
@@ -201,7 +203,7 @@ public class Datasheets {
                 throw CadProblem.notFound("The datasheet");
             }
             try (InputStream body = resources.open(name)) {
-                return new OpenedDatasheet(name, format.mediaType(), body.readAllBytes());
+                return new OpenedDatasheet(name, format.get().mediaType(), body.readAllBytes());
             } catch (FileNotFoundException missing) {
                 throw CadProblem.notFound("The datasheet");
             } catch (IOException failed) {
@@ -244,7 +246,7 @@ public class Datasheets {
     }
 
     private List<KeptDatasheet> keptOf(StoredDocument document) {
-        return files.of(document.getId()).stream().filter(file -> format.names(file.name()))
+        return files.of(document.getId()).stream().filter(file -> format.get().names(file.name()))
                 .map(file -> new KeptDatasheet(file.name(), file.size())).toList();
     }
 
@@ -253,7 +255,7 @@ public class Datasheets {
         String source = catalogue.detail(address).source();
         DocumentNode read = language.language().readOne(DocumentInput.text(document.getSlug(), source));
         return read.block(MetaNode.class).map(MetaNode::links).orElse(List.of()).stream()
-                .filter(link -> format.linkLabel().equalsIgnoreCase(link.label()))
+                .filter(link -> format.get().linkLabel().equalsIgnoreCase(link.label()))
                 .map(MetaNode.Link::address).filter(Datasheets::isWebAddress).toList();
     }
 

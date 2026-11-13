@@ -48,7 +48,7 @@ public class ModelLinesParser extends GrammarLinesParser {
      * how it is turned (degrees about X, then Y, then Z) — millimetres, Z up, as a model is set on its footprint.
      */
     public static final LineGrammar BOX = LineGrammar.line("box")
-            .slot("material", WORD, ModelMaterials.standard().names().toArray(String[]::new))
+            .slot("material", WORD, ModelMaterials.shipped().names().toArray(String[]::new))
             .required("size", QUANTITIES)
             .optional("at", QUANTITIES)
             .optional("rotate", QUANTITIES)
@@ -57,7 +57,7 @@ public class ModelLinesParser extends GrammarLinesParser {
 
     /** A cylinder of a model drawn from shapes: along Z before it is turned, centred where it stands. */
     public static final LineGrammar CYLINDER = LineGrammar.line("cylinder")
-            .slot("material", WORD, ModelMaterials.standard().names().toArray(String[]::new))
+            .slot("material", WORD, ModelMaterials.shipped().names().toArray(String[]::new))
             .required("radius", QUANTITY)
             .required("length", QUANTITY)
             .optional("at", QUANTITIES)
@@ -70,7 +70,7 @@ public class ModelLinesParser extends GrammarLinesParser {
      * from above — raised along Z by its height from its base, which {@code at} sets.
      */
     public static final LineGrammar PRISM = LineGrammar.line("prism")
-            .slot("material", WORD, ModelMaterials.standard().names().toArray(String[]::new))
+            .slot("material", WORD, ModelMaterials.shipped().names().toArray(String[]::new))
             .required("outline", QUANTITIES)
             .required("height", QUANTITY)
             .optional("at", QUANTITIES)
@@ -85,7 +85,7 @@ public class ModelLinesParser extends GrammarLinesParser {
      * is. A capacitor's rolled can, a resistor's bulging ends, a stripe on a sleeve (a part of a turn).
      */
     public static final LineGrammar REVOLVED = LineGrammar.line("revolved")
-            .slot("material", WORD, ModelMaterials.standard().names().toArray(String[]::new))
+            .slot("material", WORD, ModelMaterials.shipped().names().toArray(String[]::new))
             .required("profile", QUANTITIES)
             .optional("from", QUANTITY)
             .optional("to", QUANTITY)
@@ -120,7 +120,7 @@ public class ModelLinesParser extends GrammarLinesParser {
             .optional("at", QUANTITIES)
             .optional("rotate", QUANTITIES)
             .optional("text", TEXT)
-            .optional("ink", WORD, ModelMaterials.standard().names().toArray(String[]::new))
+            .optional("ink", WORD, ModelMaterials.shipped().names().toArray(String[]::new))
             .check((marking, grammar) -> markingFault(marking))
             .build();
 

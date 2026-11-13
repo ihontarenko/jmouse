@@ -1,5 +1,4 @@
 {
-  "$schema": "./pin-rules.schema.json",
   "noConnectReach": 1,
   "kinds": {
     "output": "an output",

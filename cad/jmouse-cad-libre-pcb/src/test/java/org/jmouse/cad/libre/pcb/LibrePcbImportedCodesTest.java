@@ -22,7 +22,7 @@ class LibrePcbImportedCodesTest {
 
     @Test
     void aFootprintIsCodedByItsOwnIdWhichItsSlugKeeps() {
-        Optional<String> recovered = LibrePcbFiling.standard().codeOfImported(PcbModule.FOOTPRINT, LibrePcbNames.footprint(PACKAGE, FOOTPRINT),
+        Optional<String> recovered = LibrePcbFiling.shipped().codeOfImported(PcbModule.FOOTPRINT, LibrePcbNames.footprint(PACKAGE, FOOTPRINT),
                 new Provenance(LibrePcbNames.source("package", PACKAGE.name(), PACKAGE.id()), null, null));
         assertEquals(Optional.of(LibrePcbNames.footprintCode(PACKAGE, FOOTPRINT)), recovered);
     }
@@ -30,7 +30,7 @@ class LibrePcbImportedCodesTest {
     @Test
     void aModelIsCodedByItsNameAndIdAsItsSourceSaysThem() {
         String modelId = "a1b2c3d4-0000-0000-0000-000000000000";
-        Optional<String> recovered = LibrePcbFiling.standard().codeOfImported(ModelModule.MODEL, LibrePcbNames.model(PACKAGE, modelId),
+        Optional<String> recovered = LibrePcbFiling.shipped().codeOfImported(ModelModule.MODEL, LibrePcbNames.model(PACKAGE, modelId),
                 new Provenance(LibrePcbNames.source("model", PACKAGE.name(), modelId), null, null));
         assertEquals(Optional.of(LibrePcbNames.modelCode(PACKAGE, modelId)), recovered);
     }

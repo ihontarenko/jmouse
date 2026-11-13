@@ -1,18 +1,16 @@
 package org.jmouse.cad.spice;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ShippedTables;
 import org.jmouse.cad.simulation.EvaluatedParameter;
 import org.jmouse.cad.simulation.SimulatedComponent;
 import org.jmouse.cad.spice.SpiceNetlist.ModelType;
 import org.jmouse.sheet.Sheet;
 import org.jmouse.sheet.SheetEntry;
 import org.jmouse.sheet.SheetField;
-import org.jmouse.sheet.SheetReader;
 import org.jmouse.sheet.SheetValue;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,7 +27,11 @@ import java.util.Optional;
  */
 public record SpiceDevices(List<ElementCard> elements, List<SpiceDevice> devices) {
 
-    private static final String RESOURCE = "spice-devices.sht";
+    /** The table's address in the catalogue. */
+    public static final String TABLE = "spice-devices";
+
+    /** Where its module ships it. */
+    public static final ShippedTables SHIPPED = ShippedTables.in(SpiceDevices.class, "jmouse-cad-spice", "org/jmouse/cad/spice/tables");
 
     /** The parameter a component of a device of two polarities says which it is by. */
     public static final String POLARITY = "polarity";
@@ -40,15 +42,16 @@ public record SpiceDevices(List<ElementCard> elements, List<SpiceDevice> devices
     }
 
     /** The table this library ships, for the components its catalogue holds. */
-    public static SpiceDevices standard() {
-        try (InputStream stream = SpiceDevices.class.getResourceAsStream(RESOURCE)) {
-            if (stream == null) {
-                throw new IllegalStateException("'" + RESOURCE + "' is not beside " + SpiceDevices.class.getName());
-            }
-            return of(SheetReader.read(RESOURCE, new String(stream.readAllBytes(), StandardCharsets.UTF_8)));
-        } catch (IOException failure) {
-            throw new UncheckedIOException(failure);
-        }
+    public static SpiceDevices shipped() {
+        return readFrom(SHIPPED).current();
+    }
+
+    /**
+     * As its source answers at each use — the engine's catalogue table, its curator's revision where one is kept —, read again
+     * only when another revision answers.
+     */
+    public static ReadTable<SpiceDevices> readFrom(TableSource tables) {
+        return new ReadTable<>(tables, TABLE, SpiceDevices::of);
     }
 
     public static SpiceDevices of(Sheet table) {

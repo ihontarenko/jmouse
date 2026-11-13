@@ -1,0 +1,68 @@
+# RC-05. A square wave into a low-pass whose time constant is ten periods long. The capacitor never gets near either
+# level: in each half period it only starts to charge, along the first, almost straight stretch of its exponential —
+# so the output climbs and falls in straight lines, a triangle. That is integration: the output grows by the area
+# under the input, ΔV ≈ A · (T / 2) / RC.
+circuit:rc-integrator("RC integrator") {
+    meta {
+        summary: "A ±5 V square into R and C with RC ten periods long: the output is a small triangle, the running sum of the input."
+        description: """
+            Idea: while the capacitor's voltage is still small next to the input's, the current through R is set by
+            the input alone, and the capacitor's voltage grows by that current over time — it adds the input up. A
+            constant input gives a straight ramp; a square wave, up and down ramps in turn: a triangle.
+
+            Try: shorten RC towards the period (lower R or C): the ramps bend into exponentials and the output grows
+            towards a square. Lengthen it: the triangle stays straight but gets smaller. Raise the frequency: the same.
+            Move the duty and the triangle tilts — and drifts until its average is the input's.
+
+            Watch: CH1, the square, ±5 V; CH2, the output on a scale a hundred times finer — straight ramps meeting in
+            sharp corners at every edge, ±0.125 V about zero once the start has died away (about 5 RC).
+
+            Ask: why does the triangle have to be small to be straight? What would make it both large and straight —
+            and why does an op-amp integrator manage that?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-05
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(5 V, in: 1 V .. 12 V, step: 0.5 V, "Square amplitude, ± about zero")
+    parameter:F(1 kHz, in: 100 Hz .. 10 kHz, step: 100 Hz, "Square frequency")
+    parameter:R(10 kΩ, in: 100 Ω .. 100 kΩ, step: 100 Ω, "R, the resistor")
+    parameter:C(1 µF, in: 10 nF .. 10 µF, step: 10 nF, "C, the capacitor")
+    part:G1(square-generator, [positive: in, negative: 0], high: A, low: -A, frequency: F, duty: 0.5)
+    part:R1(resistor, [in, out], resistance: R)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    place:G1(at: 320 600, rotate: 90)
+    place:R1(at: 600 360)
+    place:C1(at: 880 600, rotate: 90)
+    mark:Jo(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: R1.positive, via: 320 360)
+    wire:W2(R1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: C1.positive)
+    wire:W4(G1.negative, to: Jb1.j)
+    wire:W5(Jb1.j, to: Jb2.j)
+    wire:W6(C1.negative, to: Jb2.j)
+    wire:W7(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 2 V/div)
+        probe:CH2(out, 50 mV/div)
+        time(500 µs/div)
+    }
+    expect("the triangle's top", from: "settled: A · tanh(T / 4RC) = 5 V · tanh(1 ms / 40 ms) ≈ A · (T / 2) / (2RC) = 0.125 V") {
+        measure(maximum, out, after: 50 ms)
+        near(0.125 V, +- 3%)
+    }
+    expect("the triangle's bottom", from: "a symmetric square: the triangle sits about zero") {
+        measure(minimum, out, after: 50 ms)
+        near(-0.125 V, +- 3%)
+    }
+    expect("the output's average is the input's", from: "a capacitor passes no DC current: the average across R is zero") {
+        measure(average, out, after: 50 ms)
+        within(-5 mV .. 5 mV)
+    }
+    analysis(transient, for: 60 ms)
+    view:transient_response(primary)
+}

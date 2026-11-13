@@ -39,7 +39,7 @@ class KiCadPcbBuilderTest {
         KiCadPcbBuilder.Field reference = new KiCadPcbBuilder.Field(new KiCadPoint(0.5, -3), 15, "F.SilkS", 1, false);
         KiCadPcbBuilder board = KiCadPcbBuilder.of("seed", "Board", EXTENT, 2, 1.6, 0.15, 0.05)
                 .footprint(new KiCadPcbBuilder.PlacedFootprint("Lib:Odd", FOOTPRINT, Optional.of("/symbol"), "U1", "Odd", side,
-                        new KiCadPoint(10, 12), angle, reference, reference, Map.of("1", "IN", "2", "OUT"), false));
+                        new KiCadPoint(10, 12), angle, reference, reference, Map.of("1", "IN", "2", "OUT"), false, KiCadArrangement.FREE));
         return KiCadPcb.of(new SExpressionParser().parse("board.kicad_pcb", board.print("board.kicad_pcb")));
     }
 
@@ -103,5 +103,23 @@ class KiCadPcbBuilderTest {
     private static void assertSame(KiCadPoint expected, KiCadPoint actual, String said) {
         assertEquals(expected.x(), actual.x(), 1e-6, said + " x");
         assertEquals(expected.y(), actual.y(), 1e-6, said + " y");
+    }
+
+    @Test
+    void whatIsLockedAndGroupedReadsBackLockedAndGrouped() {
+        KiCadPcbBuilder.Field reference = new KiCadPcbBuilder.Field(new KiCadPoint(0.5, -3), 0, "F.SilkS", 1, false);
+        KiCadPcbBuilder board = KiCadPcbBuilder.of("seed", "Board", EXTENT, 2, 1.6, 0.15, 0.05)
+                .group("front-panel", KiCadLock.LOCKED)
+                .footprint(new KiCadPcbBuilder.PlacedFootprint("Lib:Odd", FOOTPRINT, Optional.empty(), "U1", "Odd", KiCadSide.FRONT,
+                        new KiCadPoint(10, 12), 0, reference, reference, Map.of(), false, new KiCadArrangement("front-panel", KiCadLock.FREE)))
+                .track(new KiCadPoint(1, 1), new KiCadPoint(5, 1), 0.25, "F.Cu", "IN", new KiCadArrangement("", KiCadLock.LOCKED))
+                .via(new KiCadPoint(5, 1), 0.6, 0.3, "F.Cu", "B.Cu", "IN", new KiCadArrangement("front-panel", KiCadLock.FREE));
+        KiCadPcb read = KiCadPcb.of(new SExpressionParser().parse("board.kicad_pcb", board.print("board.kicad_pcb")));
+        assertEquals(KiCadLock.LOCKED, read.tracks().getFirst().standing().lock());
+        assertEquals(KiCadLock.FREE, read.footprints().getFirst().standing().lock());
+        KiCadPcb.Group group = read.groups().getFirst();
+        assertEquals("front-panel", group.name());
+        assertEquals(KiCadLock.LOCKED, group.standing().lock());
+        assertEquals(List.of(read.footprints().getFirst().standing().identity(), read.vias().getFirst().standing().identity()), group.members());
     }
 }

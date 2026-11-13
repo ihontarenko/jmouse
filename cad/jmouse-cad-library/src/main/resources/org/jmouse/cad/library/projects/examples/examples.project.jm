@@ -1,0 +1,8 @@
+project:examples("Examples") {
+    meta {
+        category: circuits
+        summary: "Each circuit shows one idea — open it, turn its values, and watch what the instruments say. Make a copy to change it."
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

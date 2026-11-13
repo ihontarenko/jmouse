@@ -1,5 +1,4 @@
 {
-  "$schema": "./artwork.schema.json",
   "maskExpansion": 0.05,
   "silkscreenWidth": 0.12,
   "letterStroke": 0.15,

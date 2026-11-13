@@ -79,7 +79,7 @@ public record MeasuredCircuit(Circuit circuit, CatalogueDocuments catalogue, Ben
             throw new IllegalArgumentException("'with' names no part of the circuit: " + String.join(", ", named));
         }
         Circuit measured = new Circuit(circuit.head(), set, parts, circuit.layout(), circuit.probes(), circuit.timeBase(),
-                circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(), circuit.boundary());
+                circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(), circuit.boundary(), circuit.groups());
         return CircuitElaboration.of(measured, catalogue, bench, fixtures);
     }
 

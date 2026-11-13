@@ -22,7 +22,8 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration(after = PluginAutoConfiguration.class,
                    beforeName = "org.jmouse.storage.spring.autoconfigure.StorageAutoConfiguration")
-@ConditionalOnClass(name = "org.jmouse.storage.policy.UploadPolicy")
+// Only where the installation runs the storage's Spring module: it is what reads the settings and judges uploads by the policy.
+@ConditionalOnClass(name = "org.jmouse.storage.spring.autoconfigure.StorageAutoConfiguration")
 public class CadUploadAutoConfiguration {
 
     @Bean

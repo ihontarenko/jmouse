@@ -118,6 +118,10 @@ public final class Shoving {
                 tracks.add(track);
                 continue;
             }
+            // A track held where it stands gives way to nothing: the copper laid must go round it.
+            if (world.pcb().drawnGroups().holds(track.arrangement())) {
+                return Optional.empty();
+            }
             Optional<PcbDrawing.Track> bent = bentRound(world, index, laid, own, gap);
             if (bent.isEmpty()) {
                 return Optional.empty();

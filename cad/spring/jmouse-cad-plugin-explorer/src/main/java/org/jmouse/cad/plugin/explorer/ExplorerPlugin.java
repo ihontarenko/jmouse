@@ -1,10 +1,11 @@
 package org.jmouse.cad.plugin.explorer;
 
+import org.jmouse.settings.Parameter;
+import org.jmouse.settings.Section;
 import org.jmouse.cad.store.catalogue.PlaceSource;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
 import org.jmouse.plugin.PluginRegistration;
-import org.jmouse.plugin.PluginSetting;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ public final class ExplorerPlugin implements Plugin {
     static final long   MEGABYTE         = 1024L * 1024;
 
     private static final String FOLDERS_AS_PROJECTS = "Folders as projects";
+    /** Its section of how a folder is read as a project. */
+    static final String FOLDERS = "folders";
 
     private final List<ExplorerMount> mounted;
     private final PlaceSource         documents;
@@ -39,13 +42,13 @@ public final class ExplorerPlugin implements Plugin {
     }
 
     @Override
-    public List<PluginSetting> settings() {
-        return List.of(
-                PluginSetting.wholeNumber(MOST_FILES, "Entries looked at in a folder",
+    public List<Section> settings() {
+        return List.of(Section.fixed(FOLDERS, FOLDERS_AS_PROJECTS, null, List.of(
+                Parameter.wholeNumber(MOST_FILES, "Entries looked at in a folder",
                         "How far a folder that belongs to a project is walked for its documents: a mount of a whole disk is not walked to its end.",
-                        5000, 100, 200_000, "entries").inGroup(FOLDERS_AS_PROJECTS),
-                PluginSetting.wholeNumber(LARGEST_DOCUMENT, "Largest document read",
-                        "A larger .jm file is shown as a file, and listed as too large to read as a document.", 8, 1, 256, "MB").inGroup(FOLDERS_AS_PROJECTS));
+                        5000, 100, 200_000, "entries"),
+                Parameter.wholeNumber(LARGEST_DOCUMENT, "Largest document read",
+                        "A larger .jm file is shown as a file, and listed as too large to read as a document.", 8, 1, 256, "MB"))));
     }
 
     @Override

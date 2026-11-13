@@ -62,11 +62,6 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-exchange</artifactId>
         </dependency>
-        <!-- A datasheet is one of the files a document holds -->
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-storage-management</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-plugin-spring</artifactId>

@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.svg.path.node.PathPolylines;
@@ -30,13 +31,17 @@ public record PlacedDesignator(double x, double y, double height, double rotatio
      * How a designator is set where nothing says where: the gap above the part, the least and most its letters may be,
      * and the share of the part's width they take; and how far each letter advances, as a share of its height.
      *
-     * @param gap        how far above the part's box its designator stands, in millimetres
-     * @param least      the least height its letters are written at, in millimetres
-     * @param most       the most, in millimetres
+     * @param gap        how far above the part's box its designator stands
+     * @param least      the least height its letters are written at
+     * @param most       the most
      * @param widthShare the share of the part's width its letters are high, between those
      * @param advance    how far each letter advances, as a share of its height
      */
-    public record Rules(double gap, double least, double most, double widthShare, double advance) {
+    public record Rules(@Label(value = "Gap", unit = "mm") double gap,
+                        @Label(value = "Least height", unit = "mm") double least,
+                        @Label(value = "Most height", unit = "mm") double most,
+                        @Label("Width share") double widthShare,
+                        @Label("Advance") double advance) {
     }
 
     /**

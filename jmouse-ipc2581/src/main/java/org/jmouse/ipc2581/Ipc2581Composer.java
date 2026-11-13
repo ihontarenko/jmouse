@@ -1,5 +1,6 @@
 package org.jmouse.ipc2581;
 
+import org.jmouse.settings.Label;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
@@ -54,7 +55,11 @@ public final class Ipc2581Composer {
      * @param vendor     who makes that software
      * @param revision   the software's revision
      */
-    public record Sender(String enterprise, String person, String software, String vendor, String revision) {
+    public record Sender(@Label("Enterprise") String enterprise,
+                         @Label("Person") String person,
+                         @Label("Software") String software,
+                         @Label("Vendor") String vendor,
+                         @Label("Revision") String revision) {
     }
 
     /** @param function the layer's function as the standard names it: {@code CONDUCTOR}, {@code SOLDERMASK} … */

@@ -31,7 +31,7 @@ class DrawnCopperTest {
 
     private static PcbDrawing pcb(List<PcbDrawing.Shape> shapes, List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias, List<PcbDrawing.Arc> arcs) {
         return new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, null, List.of(), tracks, arcs, vias, List.of(),
-                List.of(), List.of(), List.of(), List.of(), shapes, List.of());
+                List.of(), List.of(), List.of(), List.of(), shapes, List.of(), List.of());
     }
 
     private static CopperNets netsOf(PcbDrawing pcb) {

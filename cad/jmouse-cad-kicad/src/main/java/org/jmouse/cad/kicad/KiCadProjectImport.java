@@ -2,7 +2,6 @@ package org.jmouse.cad.kicad;
 
 import org.jmouse.cad.exchange.imported.SheetMarks;
 
-import org.jmouse.core.text.Slugifier;
 import org.jmouse.cad.exchange.imported.ImportedCircuit;
 import org.jmouse.cad.exchange.imported.ImportedCircuitDocument;
 import org.jmouse.kicad.KiCadProject;
@@ -14,6 +13,7 @@ import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 
+import org.jmouse.cad.document.DocumentParser;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.pcb.FootprintLines;
 
@@ -56,12 +56,14 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
     /**
      * @param name       what the design is called: its project's name, {@code LINEAR_500W_PS-1}
      * @param footprints where the footprints its parts name are looked up: the project's own libraries, then KiCad's
+     * @param installed  KiCad's installed libraries: a symbol or a footprint the design keeps a copy of is KiCad's when the
+     *                   installed library of its name holds it, else the design's own
      * @param filing     whose KiCad's own libraries are, and where what is made of them is filed
      */
     public static KiCadProjectImport of(KiCadProject project, String name, KiCadLibraryMap library,
-                                        KiCadCatalogue catalogue, KiCadFootprintLibraries footprints,
+                                        KiCadCatalogue catalogue, KiCadFootprintLibraries footprints, InstalledKiCadLibraries installed,
                                         KiCadLibraries filing) {
-        return of(project, name, library, catalogue, footprints, Optional.empty(), filing);
+        return of(project, name, library, catalogue, footprints, installed, Optional.empty(), filing);
     }
 
     /**
@@ -69,13 +71,13 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
      *              board, as the board holds it. It is what was laid out, whatever a library has become since.
      */
     public static KiCadProjectImport of(KiCadProject project, String name, KiCadLibraryMap library,
-                                        KiCadCatalogue catalogue, KiCadFootprintLibraries footprints,
+                                        KiCadCatalogue catalogue, KiCadFootprintLibraries footprints, InstalledKiCadLibraries installed,
                                         Optional<KiCadPcb> board, KiCadLibraries filing) {
-        String root = slugOf(name);
+        String root = DocumentParser.slugOf(name);
         Map<String, String> slugs = new LinkedHashMap<>();
         for (SheetInstance sheet : project.sheets()) {
             String file = sheet.schematic().name();
-            slugs.putIfAbsent(file, sheet.root() ? root : root + "-" + slugOf(file.replaceFirst("\\.kicad_sch$", "")));
+            slugs.putIfAbsent(file, sheet.root() ? root : root + "-" + DocumentParser.slugOf(file.replaceFirst("\\.kicad_sch$", "")));
         }
         List<DocumentNode> circuits = new ArrayList<>();
         Set<ImportedSheet.SymbolUse> uses = new LinkedHashSet<>();
@@ -106,7 +108,7 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
                 continue;
             }
             ImportedSheet read = KiCadSheetImport.of(sheet.schematic(), sheet.path(), ground, library, filing.ownLibrary(),
-                    catalogue, placed -> slugs.getOrDefault(placed, slugOf(placed)), placed -> labelledPorts(project, placed, ground), marks);
+                    catalogue, placed -> slugs.getOrDefault(placed, DocumentParser.slugOf(placed)), placed -> labelledPorts(project, placed, ground), marks);
             // A sheet is called what KiCad calls it; the project it belongs to is said by where it is filed.
             String title = sheet.root() ? name : sheet.name();
             identifiers.putAll(read.identifiers());
@@ -122,7 +124,7 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
                 Optional<String> footprint = landing(definition, footprintOfSymbol.get(definition.name()), found, paired, notes);
                 components.put(component, KiCadComponentStub.documentOf(definition, footprint,
                         KiCadComponentStub.drawnWith(definition, library, catalogue),
-                        KiCadComponentStub.boxed(definition, library), filing, false));
+                        KiCadComponentStub.boxed(definition, library), filing, installed.holdsSymbol(definition.name())));
                 libraries.putIfAbsent(component, KiCadSymbolDrawing.libraryOf(definition));
             }
             read.circuit().notes().forEach(note -> notes.add(file + ": " + note));
@@ -132,7 +134,8 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
         List<DocumentNode> symbols = new ArrayList<>();
         Set<String> drawn = new LinkedHashSet<>();
         for (ImportedSheet.SymbolUse use : uses) {
-            DocumentNode symbol = KiCadSymbolDrawing.documentOf(use.symbol(), use.unit(), use.pinNames(), filing, false);
+            DocumentNode symbol = KiCadSymbolDrawing.documentOf(use.symbol(), use.unit(), use.pinNames(), filing,
+                    installed.holdsSymbol(use.symbol().name()));
             if (drawn.add(symbol.slug())) {
                 symbols.add(symbol);
                 libraries.putIfAbsent(symbol.slug(), KiCadSymbolDrawing.libraryOf(use.symbol()));
@@ -143,7 +146,8 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
             Optional<List<FootprintLines.Model>> bodies = Optional.ofNullable(pairedOnBoard.get(libraryId)).flatMap(catalogue::footprintDrawing)
                     .flatMap(ours -> OwnBodies.of(KiCadFootprintDrawing.padsOf(footprint), ours));
             footprintDocuments.add(KiCadFootprintDrawing.documentOf(libraryId, footprint,
-                    footprints.originOf(libraryId).orElse(KiCadFootprintLibraries.Origin.PROJECT), filing, bodies));
+                    installed.holdsFootprint(libraryId) ? KiCadFootprintLibraries.Origin.INSTALLED : KiCadFootprintLibraries.Origin.PROJECT,
+                    filing, bodies));
             libraries.putIfAbsent(KiCadFootprintDrawing.slugOf(libraryId), KiCadFootprintDrawing.libraryOf(libraryId));
         });
         return new KiCadProjectImport(List.copyOf(circuits), List.copyOf(symbols), List.copyOf(components.values()),
@@ -405,7 +409,4 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
                 : grounds.first();
     }
 
-    private static String slugOf(String name) {
-        return Slugifier.standard().fallingBackTo("kicad-design").slug(name);
-    }
 }

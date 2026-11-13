@@ -1,5 +1,12 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
+import org.jmouse.cad.drawing.DrawnGroups;
+import org.jmouse.kicad.pcb.KiCadArrangement;
+import org.jmouse.kicad.pcb.KiCadLock;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.MetaNode;
@@ -109,7 +116,26 @@ public final class KiCadPcbExport {
         }
         this.board = KiCadPcbBuilder.of(fabrication.name(), title, extent(), ours.size(), rules.get(PcbVocabulary.RULE_PCB_THICKNESS),
                 artwork.letterStroke(), artwork.maskExpansion());
+        declareGroups();
         notes.addAll(fabrication.notes());
+    }
+
+    /** Every group of the pcb told to the board before anything is put in it: those it declares, and those only named by members. */
+    private void declareGroups() {
+        DrawnGroups declared = pcb.drawnGroups();
+        Set<String> named = new LinkedHashSet<>();
+        pcb.groups().forEach(group -> named.add(group.name()));
+        pcb.standingItems().forEach(item -> {
+            if (item.arrangement().grouped()) {
+                named.add(item.arrangement().group());
+            }
+        });
+        named.forEach(name -> board.group(name, declared.named(name).map(DrawnGroup::locked).orElse(false) ? KiCadLock.LOCKED : KiCadLock.FREE));
+    }
+
+    /** How a thing of the pcb stands on KiCad's board: in its group, locked where it is locked itself. */
+    private static KiCadArrangement kicadArrangement(Arrangement arrangement) {
+        return new KiCadArrangement(arrangement.group(), arrangement.locked() ? KiCadLock.LOCKED : KiCadLock.FREE);
     }
 
     /**
@@ -202,7 +228,7 @@ public final class KiCadPcbExport {
             board.footprint(new KiCadPcbBuilder.PlacedFootprint(libraryId, placedFootprint, path, reference, value,
                     placement.onBottom() ? KiCadSide.BACK : KiCadSide.FRONT, point(placement.x(), placement.y()),
                     placement.onBottom() ? placement.rotation() - 180 : placement.rotation(), referenceField(part, drawing),
-                    valueField(drawing), padNets, part.nothingToMount()));
+                    valueField(drawing), padNets, part.nothingToMount(), kicadArrangement(placement.arrangement())));
         }
         if (!withoutDrawing.isEmpty()) {
             notes.add(withoutDrawing.size() + " parts have no footprint to stand on and are left off the board: "
@@ -300,7 +326,7 @@ public final class KiCadPcbExport {
                     footprints.fieldLayer(PcbVocabulary.FABRICATION), artwork.designator().least(), true);
             standing.putIfAbsent(libraries.ownLibrary() + ":" + name, footprint);
             board.footprint(new KiCadPcbBuilder.PlacedFootprint(libraries.ownLibrary() + ":" + name, footprint, Optional.empty(), reference,
-                    name, KiCadSide.FRONT, point(hole.x(), hole.y()), 0, hidden, hidden, Map.of(), true));
+                    name, KiCadSide.FRONT, point(hole.x(), hole.y()), 0, hidden, hidden, Map.of(), true, KiCadArrangement.FREE));
         }
     }
 
@@ -324,12 +350,12 @@ public final class KiCadPcbExport {
                             if (start.sameAs(end) && run.points().size() > 2) {
                                 continue;
                             }
-                            board.track(start, end, track.width(), layer, net);
+                            board.track(start, end, track.width(), layer, net, kicadArrangement(track.arrangement()));
                             bare.ifPresent(mask -> board.graphic(new KiCadFootprintGraphic.Line(start, end, mask, opened, false)));
                         }
                     }
                     case RoundedTrack.Bend bend -> {
-                        board.arc(point(bend.from()), point(bend.through()), point(bend.to()), track.width(), layer, net);
+                        board.arc(point(bend.from()), point(bend.through()), point(bend.to()), track.width(), layer, net, kicadArrangement(track.arrangement()));
                         bare.ifPresent(mask -> board.graphic(new KiCadFootprintGraphic.Arc(point(bend.from()), point(bend.through()),
                                 point(bend.to()), mask, opened, false)));
                     }
@@ -339,7 +365,7 @@ public final class KiCadPcbExport {
         for (int index = 0; index < pcb.arcs().size(); index++) {
             PcbDrawing.Arc arc = pcb.arcs().get(index);
             board.arc(point(arc.from()), point(arc.through()), point(arc.to()), arc.width(), copperOf(arc.layer()),
-                    nets.arcNets().get(index).map(this::kicadNet).orElse(""));
+                    nets.arcNets().get(index).map(this::kicadNet).orElse(""), kicadArrangement(arc.arrangement()));
             if (arc.bare()) {
                 maskOf(arc.layer()).ifPresent(mask -> board.graphic(new KiCadFootprintGraphic.Arc(point(arc.from()), point(arc.through()),
                         point(arc.to()), mask, arc.width() + 2 * artwork.maskExpansion(), false)));
@@ -351,7 +377,7 @@ public final class KiCadPcbExport {
             String from = via.from() == null || via.from().isBlank() ? layers.getFirst() : via.from();
             String to = via.to() == null || via.to().isBlank() ? layers.getLast() : via.to();
             board.via(point(via.x(), via.y()), via.diameter(), via.drill(), copperOf(from), copperOf(to),
-                    nets.viaNets().get(index).map(this::kicadNet).orElse(""));
+                    nets.viaNets().get(index).map(this::kicadNet).orElse(""), kicadArrangement(via.arrangement()));
             // KiCad tents its vias board-wide; one left open on a side is an opening drawn on that side's mask, as wide as its own would be.
             for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
                 if (via.opensMaskOn(side)) {

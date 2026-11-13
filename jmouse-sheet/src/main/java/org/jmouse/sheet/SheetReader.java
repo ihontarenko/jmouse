@@ -74,6 +74,14 @@ public final class SheetReader {
         }
     }
 
+    /**
+     * The sheet language's own parsers: what a host language reads a sheet's lines with — a CAD table's body —, on its own
+     * cursor, so that the sheet's parsers are never offered the host's other lines.
+     */
+    public static ParserContext linesContext() {
+        return CONTEXT;
+    }
+
     private static ParserContext context() {
         ExtensionContainer extensions = new StandardExtensionContainer();
         extensions.importExtension(new SheetExtension());
@@ -85,10 +93,23 @@ public final class SheetReader {
         return new Sheet(document.getSlug(), document.getTitle(), body.fields(), body.entries(), comments(document));
     }
 
+    /**
+     * A sheet whose fields and entries another language read with this one's parsers — a document of a host language that
+     * holds a sheet as its body —, held to the same rules as a sheet document's: a name once in a block, an id once in the
+     * sheet.
+     *
+     * @param statements the {@link FieldNode}s and {@link EntryNode}s read, in order
+     * @throws SheetSyntaxException for a body this language would refuse
+     */
+    public static Sheet of(String slug, String title, List<? extends Expression> statements) {
+        Body body = new SheetReader().body(List.copyOf(statements));
+        return new Sheet(slug, title, body.fields(), body.entries());
+    }
+
     private record Body(List<SheetField> fields, List<SheetEntry> entries) {
     }
 
-    private Body body(List<Expression> statements) {
+    private Body body(List<? extends Expression> statements) {
         List<SheetField> fields = new ArrayList<>();
         List<SheetEntry> entries = new ArrayList<>();
         Set<String> names = new HashSet<>();

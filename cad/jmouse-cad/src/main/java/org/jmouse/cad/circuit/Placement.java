@@ -1,6 +1,7 @@
 package org.jmouse.cad.circuit;
 
 import org.jmouse.cad.Point;
+import org.jmouse.cad.drawing.Arrangement;
 
 import java.util.List;
 
@@ -8,6 +9,12 @@ import java.util.List;
 public sealed interface Placement {
 
     String reference();
+
+    /** The group it is chosen and moved with, and whether it is locked where it stands. */
+    Arrangement arrangement();
+
+    /** The same, standing otherwise among the others. */
+    Placement arranged(Arrangement other);
 
     /**
      * A part where it stands — or one block of it, placed on its own: {@code U4.B at …}.
@@ -22,16 +29,27 @@ public sealed interface Placement {
      *                 the sheet puts it
      */
     record PlacedPart(String reference, String unit, Point at, double rotation, boolean mirrored, Point name, Point value,
-                      Point readings, Point size, List<String> shows, List<PortPlace> ports) implements Placement {
+                      Point readings, Point size, List<String> shows, List<PortPlace> ports, Arrangement arrangement) implements Placement {
 
         public PlacedPart {
             shows = List.copyOf(shows);
             ports = ports == null ? List.of() : List.copyOf(ports);
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
         }
 
         public PlacedPart(String reference, String unit, Point at, double rotation, boolean mirrored, Point name, Point value,
                           Point readings, Point size, List<String> shows) {
-            this(reference, unit, at, rotation, mirrored, name, value, readings, size, shows, List.of());
+            this(reference, unit, at, rotation, mirrored, name, value, readings, size, shows, List.of(), Arrangement.FREE);
+        }
+
+        @Override
+        public PlacedPart arranged(Arrangement other) {
+            return new PlacedPart(reference, unit, at, rotation, mirrored, name, value, readings, size, shows, ports, other);
+        }
+
+        /** How a refusal names it: the part, or one block of it. */
+        public String placedName() {
+            return unit == null ? reference : reference + "." + unit;
         }
     }
 
@@ -73,17 +91,34 @@ public sealed interface Placement {
      * @param symbol what it is — {@code junction}, {@code ground}, {@code label}… —, as written
      * @param net    the net it names — {@code label vp}, {@code ground agnd} —, or null
      */
-    record Mark(String reference, String symbol, String net, Point at, double rotation)
+    record Mark(String reference, String symbol, String net, Point at, double rotation, Arrangement arrangement)
             implements Placement {
+
+        public Mark {
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
+        }
+
+        @Override
+        public Mark arranged(Arrangement other) {
+            return new Mark(reference, symbol, net, at, rotation, other);
+        }
     }
 
-    /** A wire from one pin to another — {@code R1.negative} —, through its corners. */
     /**
      * Words written on a sheet for whoever reads it: they join nothing.
      *
      * @param words what it says
      */
-    record Note(String reference, String words, Point at) implements Placement {
+    record Note(String reference, String words, Point at, Arrangement arrangement) implements Placement {
+
+        public Note {
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
+        }
+
+        @Override
+        public Note arranged(Arrangement other) {
+            return new Note(reference, words, at, other);
+        }
     }
 
     /**
@@ -93,7 +128,17 @@ public sealed interface Placement {
      * @param via   its points: a line's corners, a rectangle's two opposite corners, a circle's centre and a point on it, an
      *              arc's two ends and a point it goes through
      */
-    record Drawn(String reference, Shape shape, List<Point> via) implements Placement {
+    record Drawn(String reference, Shape shape, List<Point> via, Arrangement arrangement) implements Placement {
+
+        public Drawn {
+            via = List.copyOf(via);
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
+        }
+
+        @Override
+        public Drawn arranged(Arrangement other) {
+            return new Drawn(reference, shape, via, other);
+        }
 
         /** What can be drawn on a sheet. */
         public enum Shape {
@@ -122,13 +167,31 @@ public sealed interface Placement {
      * @param members the nets it carries; empty while it has only a name
      * @param via     its corners, in order
      */
-    record Bus(String reference, String name, List<String> members, List<Point> via) implements Placement {
+    record Bus(String reference, String name, List<String> members, List<Point> via, Arrangement arrangement) implements Placement {
+
+        public Bus {
+            members = List.copyOf(members);
+            via = List.copyOf(via);
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
+        }
+
+        @Override
+        public Bus arranged(Arrangement other) {
+            return new Bus(reference, name, members, via, other);
+        }
     }
 
-    record Wire(String reference, String from, String to, List<Point> via) implements Placement {
+    /** A wire from one pin to another — {@code R1.negative} —, through its corners. */
+    record Wire(String reference, String from, String to, List<Point> via, Arrangement arrangement) implements Placement {
 
         public Wire {
             via = List.copyOf(via);
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
+        }
+
+        @Override
+        public Wire arranged(Arrangement other) {
+            return new Wire(reference, from, to, via, other);
         }
     }
 }

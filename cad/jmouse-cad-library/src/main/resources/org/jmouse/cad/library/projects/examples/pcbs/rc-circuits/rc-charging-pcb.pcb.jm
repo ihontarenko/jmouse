@@ -1,0 +1,26 @@
+# Charging a capacitor through a resistor laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:rc-charging-pcb("Charging a capacitor through a resistor — pcb") {
+    meta {
+        summary: "Charging a capacitor through a resistor laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: rc-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(rc-charging)
+    layers(2)
+    edge("M1 0H30A1 1 0 0 1 31 1V15A1 1 0 0 1 30 16H1A1 1 0 0 1 0 15V1A1 1 0 0 1 1 0Z")
+    place(SW1, at: 14.5 6)
+    place(R1, at: 24 6)
+    place(C1, at: 26.5 11, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, in: 2, out: 3], at: 5.5 8.5)
+    track(top, width: 0.25, from: 25 6, to: 25 8.65, to: 26.5 10.15)
+    track(top, width: 0.25, from: 18.31 6, to: 23 6)
+    track(top, width: 0.25, from: 10.69 6, to: 8.19 8.5, to: 5.5 8.5)
+    track(top, width: 0.25, from: 25 6, to: 19.96 11.04, to: 5.5 11.04)
+    track(top, width: 0.25, from: 26.5 11.85, to: 11.2 11.85)
+    track(bottom, width: 0.25, from: 11.2 11.85, to: 11.2 11.66, to: 5.5 5.96)
+    via(at: 11.2 11.85, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H30.5V15.5H0.5Z")
+}

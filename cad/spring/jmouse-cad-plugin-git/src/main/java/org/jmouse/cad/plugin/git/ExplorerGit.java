@@ -16,7 +16,7 @@ import org.jmouse.git.local.LocalGitException;
 import org.jmouse.git.local.PushOutcome;
 import org.jmouse.git.local.WorkingTreeDiff;
 import org.jmouse.git.local.WorkingTreeStatus;
-import org.jmouse.plugin.PluginSettingValues;
+import org.jmouse.settings.ParameterValues;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -31,7 +31,8 @@ import java.util.function.Supplier;
  */
 public final class ExplorerGit {
 
-    private final PluginSettingValues settings;
+    private final ParameterValues hosts;
+    private final ParameterValues history;
 
     private final Explorer                   explorer;
     private final LocalGit                   git;
@@ -54,8 +55,9 @@ public final class ExplorerGit {
     public record RemoteRequest(String address) {
     }
 
-    public ExplorerGit(Explorer explorer, LocalGit git, CadAuthority authority, Optional<CommitAuthors> authors, PluginSettingValues settings) {
-        this.settings = settings;
+    public ExplorerGit(Explorer explorer, LocalGit git, CadAuthority authority, Optional<CommitAuthors> authors, ParameterValues hosts, ParameterValues history) {
+        this.hosts = hosts;
+        this.history = history;
         this.explorer = explorer;
         this.git = git;
         this.authority = authority;
@@ -101,14 +103,14 @@ public final class ExplorerGit {
     }
 
     private Optional<String> tokenOf(String host) {
-        return Optional.ofNullable(TOKEN_OF_HOST.get(host)).map(settings::secret).filter(token -> !token.isBlank());
+        return Optional.ofNullable(TOKEN_OF_HOST.get(host)).map(hosts::secret).filter(token -> !token.isBlank());
     }
 
     /** The mount made a repository, its files untouched: all of them become changes to commit. */
     public WorkingTreeStatus initialize(String mountId) {
         Path folder = changeable(mountId);
         told(() -> {
-            git.initialize(folder, settings.text(GitPlugin.FIRST_BRANCH));
+            git.initialize(folder, history.text(GitPlugin.FIRST_BRANCH));
             return null;
         });
         return told(() -> git.status(folder, author()));

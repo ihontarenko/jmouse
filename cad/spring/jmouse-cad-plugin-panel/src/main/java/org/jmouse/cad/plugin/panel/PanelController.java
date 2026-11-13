@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.panel;
 
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.access.enforcement.PublicEndpoint;
 import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentLanguage;
@@ -38,7 +40,7 @@ public class PanelController {
     }
 
     /** A copy of a board as a form holds it. */
-    public record BoardForm(String pcb, double x, double y, double rotation, int across, int down, Double gap) {
+    public record BoardForm(String pcb, double x, double y, double rotation, int across, int down, Double gap, Arrangement arrangement) {
     }
 
     /** A panel's frame as a form holds it. */
@@ -50,7 +52,8 @@ public class PanelController {
     }
 
     /** A panel as a form holds it. */
-    public record PanelForm(List<BoardForm> boards, String separation, FrameForm frame, List<MarkForm> fiducials, List<MarkForm> tooling) {
+    public record PanelForm(List<BoardForm> boards, String separation, FrameForm frame, List<MarkForm> fiducials, List<MarkForm> tooling,
+                            List<DrawnGroup> groups) {
     }
 
     /** @param source the panel's text so far, whose head is kept; null for a new one */
@@ -79,10 +82,11 @@ public class PanelController {
     public PanelForm form(@RequestBody SourceText text) {
         PanelDrawing panel = PanelDrawing.of(read(text.source()));
         return new PanelForm(panel.boards().stream().map(board -> new BoardForm(board.pcb(), board.x(), board.y(), board.rotation(), board.across(),
-                board.down(), value(board.gap()))).toList(), panel.separation().word(), panel.frame().map(frame -> new FrameForm(value(frame.rail()),
+                board.down(), value(board.gap()), board.arrangement())).toList(), panel.separation().word(), panel.frame().map(frame -> new FrameForm(value(frame.rail()),
                 frame.sides().stream().map(PanelSide::word).toList(), value(frame.fiducials()), value(frame.tooling()))).orElse(null),
                 panel.fiducials().stream().map(fiducial -> new MarkForm(fiducial.at().x(), fiducial.at().y(), value(fiducial.diameter()), value(fiducial.opening()), null)).toList(),
-                panel.tooling().stream().map(tooling -> new MarkForm(tooling.at().x(), tooling.at().y(), null, null, value(tooling.drill()))).toList());
+                panel.tooling().stream().map(tooling -> new MarkForm(tooling.at().x(), tooling.at().y(), null, null, value(tooling.drill()))).toList(),
+                panel.groups());
     }
 
     /** What a picture of a pcb draws: its edge, its copper's runs, its holes and its drawn shapes. */
@@ -119,14 +123,14 @@ public class PanelController {
 
     private static PanelDrawing drawingOf(PanelForm form) {
         List<PanelDrawing.Board> boards = form.boards().stream().map(board -> new PanelDrawing.Board(board.pcb(), board.x(), board.y(), board.rotation(),
-                board.across(), board.down(), optional(board.gap()))).toList();
+                board.across(), board.down(), optional(board.gap()), board.arrangement())).toList();
         Optional<PanelDrawing.Frame> frame = Optional.ofNullable(form.frame()).map(given -> new PanelDrawing.Frame(optional(given.rail()),
                 PanelSide.ofWords(given.sides() == null ? List.of() : given.sides()), optional(given.fiducials()), optional(given.tooling())));
         List<PanelDrawing.Fiducial> fiducials = (form.fiducials() == null ? List.<MarkForm>of() : form.fiducials()).stream().map(mark -> new PanelDrawing.Fiducial(
                 new PcbDrawing.Point(mark.x(), mark.y()), optional(mark.diameter()), optional(mark.opening()))).toList();
         List<PanelDrawing.Tooling> tooling = (form.tooling() == null ? List.<MarkForm>of() : form.tooling()).stream().map(mark -> new PanelDrawing.Tooling(
                 new PcbDrawing.Point(mark.x(), mark.y()), optional(mark.drill()))).toList();
-        return new PanelDrawing(boards, PanelSeparation.ofWord(form.separation()), frame, fiducials, tooling);
+        return new PanelDrawing(boards, PanelSeparation.ofWord(form.separation()), frame, fiducials, tooling, form.groups());
     }
 
     private static OptionalDouble optional(Double value) {

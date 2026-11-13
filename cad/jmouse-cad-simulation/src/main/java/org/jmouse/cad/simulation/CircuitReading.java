@@ -1,5 +1,7 @@
 package org.jmouse.cad.simulation;
 
+import org.jmouse.cad.document.ArrangementLines;
+import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.circuit.Analysis;
@@ -56,9 +58,11 @@ final class CircuitReading {
         String frame = layout.stream().filter(line -> line.grammar() == SimulationLines.FRAME).findFirst()
                 .flatMap(line -> line.name("slug")).orElse(null);
         return new Circuit(ModelValues.head(document), ModelValues.parameters(document), parts(ModelValues.lines(document, SimulationVocabulary.PARTS)),
-                layout.stream().filter(line -> line.grammar() != SimulationLines.FRAME).map(CircuitReading::placement).toList(),
+                layout.stream().filter(line -> line.grammar() != SimulationLines.FRAME && line.grammar() != ArrangementLines.GROUP_LINE)
+                        .map(CircuitReading::placement).toList(),
                 probes, timeBase, expectations(document), analysis,
-                ModelValues.lines(document, "view").stream().map(CircuitReading::view).toList(), frame, boundary(document));
+                ModelValues.lines(document, "view").stream().map(CircuitReading::view).toList(), frame, boundary(document),
+                layout.stream().filter(line -> line.grammar() == ArrangementLines.GROUP_LINE).map(ArrangementLines::groupOf).toList());
     }
 
     /** {@code ports { input in }} and {@code nets { vcc global }}: what the circuit hands across its sheet's edge. */
@@ -92,24 +96,27 @@ final class CircuitReading {
     private static Placement placement(ClauseLineNode line) {
         String reference = line.name("reference").orElseThrow();
         double rotation = line.quantity("rotate").orElse(0.0);
+        Arrangement arrangement = ArrangementLines.arrangementOf(line);
         if (line.grammar() == SimulationLines.WIRE) {
             return new Placement.Wire(reference, line.name("from").orElseThrow(), line.word("to").orElseThrow(),
-                    line.value("via").map(CircuitReading::corners).orElse(List.of()));
+                    line.value("via").map(CircuitReading::corners).orElse(List.of()), arrangement);
         }
         if (line.grammar() == SimulationLines.NOTE) {
-            return new Placement.Note(reference, ((org.jmouse.el.grammar.WordNode) line.slot("words").orElseThrow()).word(), ModelValues.point(line, "at").orElseThrow());
+            return new Placement.Note(reference, ((org.jmouse.el.grammar.WordNode) line.slot("words").orElseThrow()).word(), ModelValues.point(line, "at").orElseThrow(),
+                    arrangement);
         }
         if (line.grammar() == SimulationLines.DRAWN) {
             return new Placement.Drawn(reference, Placement.Drawn.Shape.named(line.name("shape").orElseThrow()),
-                    line.value("via").map(CircuitReading::corners).orElse(List.of()));
+                    line.value("via").map(CircuitReading::corners).orElse(List.of()), arrangement);
         }
         if (line.grammar() == SimulationLines.BUS) {
             return new Placement.Bus(reference, line.name("name").orElseThrow(),
                     line.value("members").map(ModelValues::groups).orElse(List.of()).stream().flatMap(List::stream).toList(),
-                    line.value("via").map(CircuitReading::corners).orElse(List.of()));
+                    line.value("via").map(CircuitReading::corners).orElse(List.of()), arrangement);
         }
         if (line.grammar() == SimulationLines.MARK) {
-            return new Placement.Mark(reference, line.name("symbol").orElseThrow(), line.name("net").orElse(null), ModelValues.point(line, "at").orElseThrow(), rotation);
+            return new Placement.Mark(reference, line.name("symbol").orElseThrow(), line.name("net").orElse(null), ModelValues.point(line, "at").orElseThrow(), rotation,
+                    arrangement);
         }
         // 'U4.B at …' places block B of the part U4 on its own.
         int dot = reference.indexOf('.');
@@ -124,7 +131,7 @@ final class CircuitReading {
                 ModelValues.point(line, "at").orElseThrow(), rotation, line.has("mirror"),
                 line.nested("name").flatMap(name -> ModelValues.point(name, "at")).orElse(null),
                 line.nested("value").flatMap(value -> ModelValues.point(value, "at")).orElse(null),
-                line.nested("readings").flatMap(readings -> ModelValues.point(readings, "at")).orElse(null), size, shows, ports);
+                line.nested("readings").flatMap(readings -> ModelValues.point(readings, "at")).orElse(null), size, shows, ports, arrangement);
     }
 
     /** {@code in left 60}: a port, the edge of its sheet's frame it stands on, and how far along it. */

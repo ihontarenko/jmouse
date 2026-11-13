@@ -32,29 +32,24 @@ public final class DrawingsExport implements DocumentExport {
     /** The rule a pcb's thickness is in. */
     private static final String THICKNESS = "pcb-thickness";
 
-    private final SheetSettings       settings;
-    private final PcbArtwork.Settings artwork;
-    private final PcbLayers.Settings  layers;
-    private final StrokeFont          strokes;
-    private final SheetFonts          fonts;
+    /** The sheets, the artwork and the layers, as the installation has them when a drawing is made. */
+    private final CadSettings sections;
+    private final StrokeFont  strokes;
+    private final SheetFonts  fonts;
 
-    DrawingsExport(SheetSettings settings, PcbArtwork.Settings artwork, PcbLayers.Settings layers, StrokeFont strokes, SheetFonts fonts) {
-        this.settings = settings;
-        this.artwork = artwork;
-        this.layers = layers;
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
+
+    DrawingsExport(CadSettings sections, StrokeFont strokes, SheetFonts fonts, CadStandards standards) {
+        this.standards = standards;
+        this.sections = sections;
         this.strokes = strokes;
         this.fonts = fonts;
     }
 
-    /** The settings shipped in the jar, as data. */
-    static SheetSettings shippedSettings() {
-        return CadSettings.read(DrawingsPlugin.SHEETS);
-    }
-
-    /** The export with the settings shipped in its jar and the engine's. */
-    static DrawingsExport shipped(SheetSettings settings, SheetFonts fonts) {
-        return new DrawingsExport(settings, CadSettings.read(PcbArtwork.SECTION),
-                CadSettings.read(PcbLayers.SECTION), StrokeFont.newStroke(), fonts);
+    /** How a sheet is drawn and worded. */
+    private SheetSettings sheets() {
+        return sections.read(DrawingsPlugin.SHEETS);
     }
 
     @Override
@@ -87,8 +82,8 @@ public final class DrawingsExport implements DocumentExport {
         SheetFacts facts = new SheetFacts(document.title(), "", designed.revision(), today.toString(), String.valueOf(today.getYear()), designed.sheets().facts());
         files.add(ExportedFile.binary(name + "-drawing.pdf", pdfOf(document.title(), facts, designed.sheets().pages())));
         // A DXF is what a factory draws from: the drawings alone, each numbered as a document of its own.
-        List<Sheet> drawings = new SheetTitles(settings, document.title()).titled(designed.sheets().pages().stream().filter(page -> page.purpose() == SheetPurpose.DRAWING).toList());
-        DxfSheets dxf = new DxfSheets(settings);
+        List<Sheet> drawings = new SheetTitles(sheets(), document.title()).titled(designed.sheets().pages().stream().filter(page -> page.purpose() == SheetPurpose.DRAWING).toList());
+        DxfSheets dxf = new DxfSheets(sheets());
         for (Sheet sheet : drawings) {
             files.add(new ExportedFile(name + "-" + sheet.name() + ".dxf", dxf.write(sheet)));
         }
@@ -101,14 +96,14 @@ public final class DrawingsExport implements DocumentExport {
 
     private Designed designed(DocumentNode document, CatalogueDocuments catalogue) {
         PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
+        Map<String, Double> rules = standards.pcbRules().valuesOf(fabrication.pcb().rules());
         Double thickness = rules.get(THICKNESS);
         if (thickness == null) {
             throw new IllegalStateException("The pcb's rules hold no " + THICKNESS + ", which a drawing's stack needs.");
         }
-        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork, strokes);
-        String revision = catalogue.revisionOf(document).orElse(settings.words().unsaved());
-        return new Designed(new FactorySheets(settings, lettering(), drawn, layers, thickness, document.title(), revision,
+        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, sections.read(PcbArtwork.SECTION), strokes);
+        String revision = catalogue.revisionOf(document).orElse(sheets().words().unsaved());
+        return new Designed(new FactorySheets(sheets(), lettering(), drawn, sections.read(PcbLayers.SECTION), thickness, document.title(), revision,
                 slug -> catalogue.find(slug).map(DocumentNode::title).orElse(slug)), revision);
     }
 
@@ -123,22 +118,22 @@ public final class DrawingsExport implements DocumentExport {
 
     /** A schematic's drawing as a page. */
     SheetPage schematicPage(SchematicPages.Drawn drawn) {
-        return new SchematicPages(settings, lettering()).page(drawn);
+        return new SchematicPages(sheets(), lettering()).page(drawn);
     }
 
     /** Pages as one PDF, behind a cover and contents, numbered through. */
     byte[] pdfOf(String title, SheetFacts facts, List<SheetPage> body) {
-        DocumentFront front = new DocumentFront(settings, lettering());
+        DocumentFront front = new DocumentFront(sheets(), lettering());
         List<SheetPage> all = new ArrayList<>();
         all.add(front.cover(facts));
         all.addAll(front.contents(body, facts.revision()));
         all.addAll(body);
-        return new PdfSheets(settings, strokes, fonts.faces()).write(title, PRODUCER, new SheetTitles(settings, title).titled(all));
+        return new PdfSheets(sheets(), strokes, fonts.faces()).write(title, PRODUCER, new SheetTitles(sheets(), title).titled(all));
     }
 
     /** The lettering a document is set in: its layout measures words by the font they will be drawn in. */
     private SheetLettering lettering() {
         return fonts.faces().<SheetLettering>map(found -> (text, height) -> found.regular().widthOf(text, found.regular().sizeForCapHeight(height)))
-                .orElseGet(() -> SheetLettering.strokes(strokes, settings.curveSteps()));
+                .orElseGet(() -> SheetLettering.strokes(strokes, sheets().curveSteps()));
     }
 }

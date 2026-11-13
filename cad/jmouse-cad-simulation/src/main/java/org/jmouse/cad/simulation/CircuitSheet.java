@@ -6,6 +6,7 @@ import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.circuit.Placement;
 import org.jmouse.cad.circuit.Probe;
 import org.jmouse.cad.document.DocumentEditing.BlockRedrawing;
+import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.el.node.Expression;
 
 import java.util.ArrayList;
@@ -18,18 +19,21 @@ import java.util.List;
  *
  * @param frame    the frame its sheet stands in, by slug, or null
  * @param timeBase the oscilloscope's time a division, or null
+ * @param groups   the groups its layout's items are in, each with its own state
  */
-public record CircuitSheet(List<Part> parts, List<Placement> layout, String frame, List<Probe> probes, Formula timeBase) {
+public record CircuitSheet(List<Part> parts, List<Placement> layout, String frame, List<Probe> probes, Formula timeBase,
+                           List<DrawnGroup> groups) {
 
     public CircuitSheet {
         parts = parts == null ? List.of() : List.copyOf(parts);
         layout = layout == null ? List.of() : List.copyOf(layout);
         probes = probes == null ? List.of() : List.copyOf(probes);
+        groups = groups == null ? List.of() : List.copyOf(groups);
     }
 
     /** The sheet a circuit draws. */
     public static CircuitSheet of(Circuit circuit) {
-        return new CircuitSheet(circuit.parts(), circuit.layout(), circuit.frame(), circuit.probes(), circuit.timeBase());
+        return new CircuitSheet(circuit.parts(), circuit.layout(), circuit.frame(), circuit.probes(), circuit.timeBase(), circuit.groups());
     }
 
     /**
@@ -57,6 +61,7 @@ public record CircuitSheet(List<Part> parts, List<Placement> layout, String fram
         if (frame != null) {
             layoutLines.add(lines.frame(frame));
         }
+        groups.forEach(group -> layoutLines.add(lines.group(group)));
         layout.forEach(placement -> layoutLines.add(lines.placement(placement)));
         return layoutLines;
     }

@@ -107,6 +107,8 @@ public class PartLibrary {
     public record FootprintDetail(DrawnDocument footprint, List<DocumentSummary> usedBy) {
     }
 
+    /** The standards the library's footprints and pcbs are held to, read through the engine's tables. */
+    private final CadStandards standards;
     private final DocumentStore  documents;
     private final DocumentAccess access;
     private final CadCatalogue   catalogue;
@@ -116,7 +118,8 @@ public class PartLibrary {
     private final DocumentReading reading;
 
     public PartLibrary(DocumentStore documents, DocumentAccess access, CadCatalogue catalogue, CadAuthority authority,
-                       CadPlaces places, CadLanguage language, DocumentReading reading) {
+                       CadPlaces places, CadLanguage language, DocumentReading reading, CadStandards standards) {
+        this.standards = standards;
         this.documents = documents;
         this.reading = reading;
         this.language = language;
@@ -254,6 +257,15 @@ public class PartLibrary {
         return drawn(kind, owner);
     }
 
+    /**
+     * One stored document as a shelf lists it — its drawing or model read against its owner's place —: what a project's
+     * documents are listed as, so a project is browsed as the library is.
+     */
+    @CadRead
+    public DrawnDocument drawn(StoredDocument document) {
+        return drawnDocument(catalogue.scope(document.owner().orElse(null)), document);
+    }
+
     /** A footprint the reader may see, and the components that name it as theirs. */
     @CadRead
     public FootprintDetail footprint(String slug) {
@@ -267,12 +279,12 @@ public class PartLibrary {
 
     /** The land pattern rules the library's footprints are generated with. */
     public LandPatternRules footprintRules() {
-        return CadStandards.landPatternRules();
+        return standards.landPatternRules();
     }
 
     /** The ways a printed circuit board can be made. */
     public PcbRules pcbRules() {
-        return CadStandards.pcbRules();
+        return standards.pcbRules();
     }
 
     // ── What a reader may see ────────────────────────────────────────────────────────────────────────────────────

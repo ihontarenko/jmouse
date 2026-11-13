@@ -67,6 +67,12 @@
             <artifactId>jmouse-el</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- A field and an entry write themselves into a host language's document, comments kept, as its statements are -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el-grammar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-units</artifactId>

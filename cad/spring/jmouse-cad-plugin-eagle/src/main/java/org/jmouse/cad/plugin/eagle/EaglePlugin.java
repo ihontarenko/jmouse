@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.eagle;
 
+import org.jmouse.cad.eagle.EagleLibraries;
+import org.jmouse.cad.table.ShippedTable;
 import org.jmouse.cad.exchange.DocumentImport;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
@@ -32,6 +34,8 @@ public final class EaglePlugin implements Plugin {
 
     @Override
     public void register(PluginRegistration registration) {
+        // The tables its module reads, as pages of the library.
+        registration.contribute(ShippedTable.POINT, EagleLibraries.SHIPPED.shipping(EagleLibraries.TABLE));
         registration.contribute(DocumentImport.POINT, designs);
     }
 }

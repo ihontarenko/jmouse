@@ -40,8 +40,7 @@ public final class ImportedCircuitDocument {
      */
     public static DocumentNode of(String slug, String title, String summary, ImportedCircuit sheet, ImportFiling libraries) {
         DocumentNode document = new DocumentNode(SimulationModule.CIRCUIT, title, slug, null, 1);
-        MetaNode meta = MetaNode.filed(summary, null, libraries.category(),
-                libraries.circuitTags());
+        MetaNode meta = MetaNode.filed(summary, null, null, libraries.circuitTags());
         document.addExpression(meta);
         LineGrammar port = SimulationLines.PORTS.stream().filter(line -> line.word().equals(PORT_DIRECTION)).findFirst()
                 .orElseThrow();

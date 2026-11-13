@@ -1,0 +1,33 @@
+# A bench's dummy load: a 10 Ohm power resistor on a heatsink, what a supply is tried against. It takes what a quarter-watt
+# resistor would burn on.
+
+component:dummy-load("Dummy load, 10 Ohm", type: resistor) {
+    meta {
+        designator: RL
+        summary: "A 10 Ohm power resistor on a heatsink: what a supply is tried against on a bench"
+        category: resistors
+        bench: load
+        failure: open
+        value: resistance
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    extends:resistor
+
+    parameter:resistance(10 Ohm, "resistance")
+    parameter:power_rating(100 W, "what it takes on its heatsink")
+    parameter:thermal_resistance(1 K/W, "kelvin above the bench per watt, on its heatsink")
+    parameter:thermal_time_constant(60 s, "how fast the heatsink warms")
+    parameter:T_maximum(200 °C, "past this it fails on a realistic bench")
+
+    pin:terminal_one(analog, 1, "first terminal")
+    pin:terminal_two(analog, 2, "second terminal")
+
+    symbol(uses: "SY.RESISTOR:FIXED") {
+        bind:failed(failed)
+        bind:load(power / power_rating)
+        bind:flow(tanh((terminal_one - terminal_two) * 1000))
+        bind:a(pin: terminal_one)
+        bind:b(pin: terminal_two)
+    }
+}

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 
 /**
  * The grammar of one kind of line, said as data: its word, the parts that stand after it in order ({@code pad "1"
@@ -259,6 +260,14 @@ public record LineGrammar(String word, List<Slot> slots, List<Clause> clauses, S
         public Builder repeated(String word, ValueKind value) {
             clauses.add(new Clause(word, value, Set.of(), false, true, null));
             return this;
+        }
+
+        /**
+         * Clauses several lines share, written once where they are said — a drawn item's group and state on a part, a track and a
+         * board alike —: the part is handed this builder and gives it back with its clauses added.
+         */
+        public Builder including(UnaryOperator<Builder> shared) {
+            return shared.apply(this);
         }
 
         /** A clause with clauses of its own, after its word, read until a word of none of them. */

@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.drawings;
 
+import org.jmouse.settings.Label;
 import java.util.List;
 import java.util.Map;
 
@@ -28,20 +29,38 @@ import java.util.Map;
  * @param words            every word a sheet prints that does not come from the pcb
  * @param fabricationNotes the general notes; {@code {thickness}}, {@code {copperLayers}} and {@code {rules}} are filled in
  */
-public record SheetSettings(List<Paper> papers, List<Scale> scales, double margin, double columnWidth, double columnGap,
-                            double titleHeight, double viewMargin, double rowHeight, double dimensionArrow, int curveSteps,
-                            int circleSteps, String schematicPaper, List<String> fontFamilies, List<String> fontFolders, Text text, Ink ink, Cover cover,
-                            Map<SheetLayer, Pen> layers, Words words, List<String> fabricationNotes) {
+public record SheetSettings(@Label("Papers") List<Paper> papers,
+                            @Label("Scales") List<Scale> scales,
+                            @Label("Margin") double margin,
+                            @Label("Column width") double columnWidth,
+                            @Label("Column gap") double columnGap,
+                            @Label("Title height") double titleHeight,
+                            @Label("View margin") double viewMargin,
+                            @Label("Row height") double rowHeight,
+                            @Label("Dimension arrow") double dimensionArrow,
+                            @Label("Curve steps") int curveSteps,
+                            @Label("Circle steps") int circleSteps,
+                            @Label("Schematic paper") String schematicPaper,
+                            @Label("Font families") List<String> fontFamilies,
+                            @Label("Font folders") List<String> fontFolders,
+                            @Label("Text") Text text,
+                            @Label("Ink") Ink ink,
+                            @Label("Cover") Cover cover,
+                            @Label("Layers") Map<SheetLayer, Pen> layers,
+                            @Label("Words") Words words,
+                            @Label("Fabrication notes") List<String> fabricationNotes) {
 
 
     /**
      * A sheet's paper, lying on its long side.
      *
      * @param name   what the paper is called: A4
-     * @param width  its long side, in millimetres
-     * @param height its short side, in millimetres
+     * @param width  its long side
+     * @param height its short side
      */
-    public record Paper(String name, double width, double height) {
+    public record Paper(@Label("Name") String name,
+                        @Label(value = "Width", unit = "mm") double width,
+                        @Label(value = "Height", unit = "mm") double height) {
     }
 
     /**
@@ -50,31 +69,40 @@ public record SheetSettings(List<Paper> papers, List<Scale> scales, double margi
      * @param label  how the scale is printed: 10:1
      * @param factor millimetres of paper to one of pcb
      */
-    public record Scale(String label, double factor) {
+    public record Scale(@Label("Label") String label,
+                        @Label("Factor") double factor) {
     }
 
     /**
      * Heights of a capital, by what is printed.
      *
-     * @param title          a sheet's title, in millimetres on paper
-     * @param heading        a table's heading, in millimetres
-     * @param body           a table's text, in millimetres
-     * @param label          a label on a view, in millimetres
-     * @param holeMark       a hole's mark on the drill drawing, in millimetres
-     * @param schematicLeast the least a schematic's text is printed at, however small its scale, in millimetres
+     * @param title          a sheet's title on paper
+     * @param heading        a table's heading
+     * @param body           a table's text
+     * @param label          a label on a view
+     * @param holeMark       a hole's mark on the drill drawing
+     * @param schematicLeast the least a schematic's text is printed at, however small its scale
      * @param stroke         how wide a letter's stroke is, as a share of its height
      */
-    public record Text(double title, double heading, double body, double label, double holeMark, double schematicLeast, double stroke) {
+    public record Text(@Label(value = "Title", unit = "mm") double title,
+                       @Label(value = "Heading", unit = "mm") double heading,
+                       @Label(value = "Body", unit = "mm") double body,
+                       @Label(value = "Label", unit = "mm") double label,
+                       @Label(value = "Hole mark", unit = "mm") double holeMark,
+                       @Label(value = "Schematic least", unit = "mm") double schematicLeast,
+                       @Label("Stroke") double stroke) {
     }
 
     /**
      * What a layer of a sheet is drawn with.
      *
-     * @param pen    how wide its lines are, in millimetres on paper
+     * @param pen    how wide its lines are on paper
      * @param colour its colour in a DXF: AutoCAD's index
      * @param hex    its colour in a PDF
      */
-    public record Pen(double pen, int colour, String hex) {
+    public record Pen(@Label(value = "Pen", unit = "mm") double pen,
+                      @Label("Colour") int colour,
+                      @Label("Hex") String hex) {
     }
 
     /**
@@ -86,7 +114,11 @@ public record SheetSettings(List<Paper> papers, List<Scale> scales, double margi
      * @param silkscreen   the silkscreen's colour, #rrggbb
      * @param substrate    the pcb's own colour, #rrggbb
      */
-    public record Ink(String copperTop, String copperBottom, String copperInner, String silkscreen, String substrate) {
+    public record Ink(@Label("Copper top") String copperTop,
+                      @Label("Copper bottom") String copperBottom,
+                      @Label("Copper inner") String copperInner,
+                      @Label("Silkscreen") String silkscreen,
+                      @Label("Substrate") String substrate) {
     }
 
     /**
@@ -94,9 +126,9 @@ public record SheetSettings(List<Paper> papers, List<Scale> scales, double margi
      *
      * @param product       the product the documents are made by
      * @param subtitle      what the document is
-     * @param markSize      how large the mark is printed, in millimetres
-     * @param productHeight how high the product's name is printed, in millimetres
-     * @param titleHeight   how high the design's name is printed, in millimetres
+     * @param markSize      how large the mark is printed
+     * @param productHeight how high the product's name is printed
+     * @param titleHeight   how high the design's name is printed
      * @param titleAtShare  how far up the paper the design's name stands
      * @param factColumns   how many facts of the design stand in a row
      * @param markBox       the size of the box the mark's paths are drawn in
@@ -107,15 +139,29 @@ public record SheetSettings(List<Paper> papers, List<Scale> scales, double margi
      * @param accent        its second colour, #rrggbb
      * @param muted         the colour of what is said quietly, #rrggbb
      */
-    public record Cover(String product, String subtitle, double markSize, double productHeight, double titleHeight, double titleAtShare, int factColumns, double markBox, String markPrimary,
-                        String markAccent, Dot markDot, String primary, String accent, String muted) {
+    public record Cover(@Label("Product") String product,
+                        @Label("Subtitle") String subtitle,
+                        @Label(value = "Mark size", unit = "mm") double markSize,
+                        @Label(value = "Product height", unit = "mm") double productHeight,
+                        @Label(value = "Title height", unit = "mm") double titleHeight,
+                        @Label("Title at share") double titleAtShare,
+                        @Label("Fact columns") int factColumns,
+                        @Label("Mark box") double markBox,
+                        @Label("Mark primary") String markPrimary,
+                        @Label("Mark accent") String markAccent,
+                        @Label("Mark dot") Dot markDot,
+                        @Label("Primary") String primary,
+                        @Label("Accent") String accent,
+                        @Label("Muted") String muted) {
 
         /**
          * @param x      its centre across the mark's box
          * @param y      its centre down the box
          * @param radius its radius, in the box's units
          */
-        public record Dot(double x, double y, double radius) {
+        public record Dot(@Label("X") double x,
+                          @Label("Y") double y,
+                          @Label("Radius") double radius) {
         }
     }
 
@@ -173,15 +219,56 @@ public record SheetSettings(List<Paper> papers, List<Scale> scales, double margi
      * @param factHoles           its holes fact
      * @param factSheets          its schematic sheets fact
      */
-    public record Words(String fabricationSheet, String assemblyTopSheet, String assemblyBottomSheet, String holesHeading,
-                        String holeMark, String holeSize, String holeSlot, String holePlating, String holeCount, String plated,
-                        String unplated, String stackHeading, String stackLayer, String stackThickness, String stackTotal,
-                        String stackSilkscreen, String stackMask, String stackCopper, String stackCore, String partsHeading,
-                        String partsDesignators, String partsValue, String partsFootprint, String partsCount, String notesHeading,
-                        String titleDrawing, String titleSheet, String titleOf, String titleRevision, String titleScale,
-                        String titleUnits, String titlePaper, String units, String unsaved, String schematicScale, String schematicSheet, String overviewSheet, String copperSheet, String tablesSheet, String materialsSheet,
-                        String contentsSheet, String partsItem, String factAuthor, String factDate, String factSize, String factLayers, String factThickness, String factParts, String factHoles,
-                        String factSheets) {
+    public record Words(@Label("Fabrication sheet") String fabricationSheet,
+                        @Label("Assembly top sheet") String assemblyTopSheet,
+                        @Label("Assembly bottom sheet") String assemblyBottomSheet,
+                        @Label("Holes heading") String holesHeading,
+                        @Label("Hole mark") String holeMark,
+                        @Label("Hole size") String holeSize,
+                        @Label("Hole slot") String holeSlot,
+                        @Label("Hole plating") String holePlating,
+                        @Label("Hole count") String holeCount,
+                        @Label("Plated") String plated,
+                        @Label("Unplated") String unplated,
+                        @Label("Stack heading") String stackHeading,
+                        @Label("Stack layer") String stackLayer,
+                        @Label("Stack thickness") String stackThickness,
+                        @Label("Stack total") String stackTotal,
+                        @Label("Stack silkscreen") String stackSilkscreen,
+                        @Label("Stack mask") String stackMask,
+                        @Label("Stack copper") String stackCopper,
+                        @Label("Stack core") String stackCore,
+                        @Label("Parts heading") String partsHeading,
+                        @Label("Parts designators") String partsDesignators,
+                        @Label("Parts value") String partsValue,
+                        @Label("Parts footprint") String partsFootprint,
+                        @Label("Parts count") String partsCount,
+                        @Label("Notes heading") String notesHeading,
+                        @Label("Title drawing") String titleDrawing,
+                        @Label("Title sheet") String titleSheet,
+                        @Label("Title of") String titleOf,
+                        @Label("Title revision") String titleRevision,
+                        @Label("Title scale") String titleScale,
+                        @Label("Title units") String titleUnits,
+                        @Label("Title paper") String titlePaper,
+                        @Label("Units") String units,
+                        @Label("Unsaved") String unsaved,
+                        @Label("Schematic scale") String schematicScale,
+                        @Label("Schematic sheet") String schematicSheet,
+                        @Label("Overview sheet") String overviewSheet,
+                        @Label("Copper sheet") String copperSheet,
+                        @Label("Tables sheet") String tablesSheet,
+                        @Label("Materials sheet") String materialsSheet,
+                        @Label("Contents sheet") String contentsSheet,
+                        @Label("Parts item") String partsItem,
+                        @Label("Fact author") String factAuthor,
+                        @Label("Fact date") String factDate,
+                        @Label("Fact size") String factSize,
+                        @Label("Fact layers") String factLayers,
+                        @Label("Fact thickness") String factThickness,
+                        @Label("Fact parts") String factParts,
+                        @Label("Fact holes") String factHoles,
+                        @Label("Fact sheets") String factSheets) {
     }
 
     /** What a layer is drawn with. */

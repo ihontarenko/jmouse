@@ -1,0 +1,28 @@
+# OLED: a screen drawn byte by byte laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:oled-pixels-pcb("OLED: a screen drawn byte by byte — pcb") {
+    meta {
+        summary: "OLED: a screen drawn byte by byte laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: digital-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(oled-pixels)
+    layers(2)
+    edge("M1 0H30A1 1 0 0 1 31 1V20A1 1 0 0 1 30 21H1A1 1 0 0 1 0 20V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 10.5 6.5, rotate: 270)
+    place(R2, at: 14.5 6.5, rotate: 270)
+    place(U1, at: 25.5 9)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, scl: 2, sda: 3, vcc: 4], at: 5.5 12)
+    track(top, width: 0.25, from: 10.5 5.5, to: 14.5 5.5)
+    track(top, width: 0.25, from: 10.5 7.5, to: 7.27 10.73, to: 5.5 10.73)
+    track(top, width: 0.25, from: 14.5 7.5, to: 8.73 13.27, to: 5.5 13.27)
+    track(top, width: 0.25, from: 14.5 5.5, to: 23.05 5.5, to: 25.39 7.84, to: 25.5 7.73)
+    track(top, width: 0.25, from: 10.5 5.5, to: 7.35 8.65)
+    track(bottom, width: 0.25, from: 7.35 8.65, to: 7.35 13.96, to: 5.5 15.81)
+    track(top, width: 0.25, from: 14.5 7.5, to: 19.81 12.81, to: 25.5 12.81)
+    track(top, width: 0.25, from: 10.5 7.5, to: 11.4 6.6, to: 21.83 6.6, to: 25.5 10.27)
+    via(at: 7.35 8.65, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H30.5V20.5H0.5Z")
+}

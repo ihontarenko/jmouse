@@ -1,5 +1,6 @@
 package org.jmouse.odb;
 
+import org.jmouse.settings.Label;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
@@ -30,7 +31,8 @@ public final class OdbJob {
      * @param software the software that wrote the job
      * @param user     who it was written by
      */
-    public record Origin(String software, String user) {
+    public record Origin(@Label("Software") String software,
+                         @Label("User") String user) {
     }
 
     private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss");

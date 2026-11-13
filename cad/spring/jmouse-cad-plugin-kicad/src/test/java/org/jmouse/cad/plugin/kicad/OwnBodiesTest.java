@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OwnBodiesTest {
 
     private static final FootprintDrawing OURS = FootprintDrawing.of(CadLibrary.library()
-            .findCoded(KiCadLibraryMap.standard().footprintCodeOf("Capacitor_THT:CP_Radial_D10.0mm_P5.00mm").orElseThrow()).orElseThrow());
+            .findCoded(KiCadLibraryMap.shipped().footprintCodeOf("Capacitor_THT:CP_Radial_D10.0mm_P5.00mm").orElseThrow()).orElseThrow());
 
     /** Our pads as a board would carry them, moved by (dx, dy) in the pads' own frame, Y down. */
     private static List<FootprintLines.Pad> board(double dx, double dy) {

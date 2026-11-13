@@ -1,0 +1,111 @@
+# DG-03. A 4-bit R-2R ladder, its bits from four square generators at 800, 400, 200 and 100 Hz — a binary counter's
+# outputs. Each bit drives a 2R leg; the R between the taps halves every bit's share on its way to the output, so the
+# most significant bit gives half the reference, the next a quarter, then an eighth and a sixteenth. Counting from 0
+# to 15, the output climbs a staircase of sixteen equal steps of V_ref / 16 and falls back to zero.
+circuit:r2r-dac("R-2R digital-to-analog converter") {
+    meta {
+        summary: "Four bits into an R-2R ladder: the output climbs a staircase of sixteen steps, Vout = V_ref · code / 16."
+        description: """
+            Idea: an R-2R ladder turns a binary number into a voltage. Every bit switches its 2R leg between the
+            reference and ground; looking back into the ladder from any tap there is always 2R, so each R halves
+            what reaches the output. The most significant bit is worth V_ref / 2, the least V_ref / 16, and the
+            output is their sum: V_ref · code / 16.
+
+            Try: the bits count from 0 to 15 every 10 ms — watch the staircase climb. Change the reference: every
+            step scales with it. Change R: the staircase does not move — only the ratio of R to 2R matters, which
+            is why a ladder needs just two values of resistor, matched to each other rather than accurate.
+
+            Watch: the output (CH1) against the most significant bit (CH2) — the bit is high for the upper half of
+            the staircase, from 2.5 V up. The voltmeter reads the code of the moment.
+
+            Ask: what output does code 1010 give with a 5 V reference? How large is the smallest step, and how many
+            bits would a 1 mV step from 5 V need?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:V_ref(5 V, in: 1 V .. 10 V, step: 0.5 V, "Reference: the level a 1 bit drives its leg to")
+    parameter:f(800 Hz, in: 100 Hz .. 8 kHz, step: 100 Hz, "Least significant bit's frequency; each higher bit runs at half")
+    parameter:R(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "R; every leg is 2R")
+    # A generator's 'high' is its first half-period: 0 V first, then V_ref, so the bits count up from 0.
+    part:G1(square-generator, [positive: bit0, negative: 0], high: 0 V, low: V_ref, frequency: f, duty: 0.5)
+    part:G2(square-generator, [positive: bit1, negative: 0], high: 0 V, low: V_ref, frequency: f / 2, duty: 0.5)
+    part:G3(square-generator, [positive: bit2, negative: 0], high: 0 V, low: V_ref, frequency: f / 4, duty: 0.5)
+    part:G4(square-generator, [positive: bit3, negative: 0], high: 0 V, low: V_ref, frequency: f / 8, duty: 0.5)
+    part:RT(resistor, [ladder0, 0], resistance: 2 * R)
+    part:R0(resistor, [ladder0, bit0], resistance: 2 * R)
+    part:R1(resistor, [ladder1, bit1], resistance: 2 * R)
+    part:R2(resistor, [ladder2, bit2], resistance: 2 * R)
+    part:R3(resistor, [out, bit3], resistance: 2 * R)
+    part:R01(resistor, [ladder0, ladder1], resistance: R)
+    part:R12(resistor, [ladder1, ladder2], resistance: R)
+    part:R23(resistor, [ladder2, out], resistance: R)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:RT(at: 400 400, rotate: 180)
+    place:R01(at: 720 400)
+    place:R12(at: 1040 400)
+    place:R23(at: 1360 400)
+    place:R0(at: 560 560, rotate: 90)
+    place:R1(at: 880 560, rotate: 90)
+    place:R2(at: 1200 560, rotate: 90)
+    place:R3(at: 1520 560, rotate: 90)
+    place:G1(at: 560 800, rotate: 90)
+    place:G2(at: 880 800, rotate: 90)
+    place:G3(at: 1200 800, rotate: 90)
+    place:G4(at: 1520 800, rotate: 90)
+    place:VM1(at: 1760 600, rotate: 90)
+    mark:J0(junction, at: 560 400)
+    mark:J1(junction, at: 880 400)
+    mark:J2(junction, at: 1200 400)
+    mark:J3(junction, at: 1520 400)
+    mark:Jg1(junction, at: 560 1000)
+    mark:Jg2(junction, at: 880 1000)
+    mark:Jg3(junction, at: 1200 1000)
+    mark:Jg4(junction, at: 1520 1000)
+    mark:GND1(ground, at: 880 1080)
+    wire:W1(RT.positive, to: J0.j)
+    wire:W2(J0.j, to: R01.positive)
+    wire:W3(R01.negative, to: J1.j)
+    wire:W4(J1.j, to: R12.positive)
+    wire:W5(R12.negative, to: J2.j)
+    wire:W6(J2.j, to: R23.positive)
+    wire:W7(R23.negative, to: J3.j)
+    wire:W8(J0.j, to: R0.positive)
+    wire:W9(J1.j, to: R1.positive)
+    wire:W10(J2.j, to: R2.positive)
+    wire:W11(J3.j, to: R3.positive)
+    wire:W12(R0.negative, to: G1.positive)
+    wire:W13(R1.negative, to: G2.positive)
+    wire:W14(R2.negative, to: G3.positive)
+    wire:W15(R3.negative, to: G4.positive)
+    wire:W16(J3.j, to: VM1.plus, via: 1760 400)
+    wire:W17(RT.negative, to: Jg1.j, via: 340 1000)
+    wire:W18(G1.negative, to: Jg1.j)
+    wire:W19(Jg1.j, to: Jg2.j)
+    wire:W20(G2.negative, to: Jg2.j)
+    wire:W21(Jg2.j, to: GND1.ground)
+    wire:W22(Jg2.j, to: Jg3.j)
+    wire:W23(G3.negative, to: Jg3.j)
+    wire:W24(Jg3.j, to: Jg4.j)
+    wire:W25(G4.negative, to: Jg4.j)
+    wire:W26(VM1.minus, to: Jg4.j, via: 1760 1000)
+    probe:CH1(out, 1 V/div)
+    probe:CH2(bit3, 5 V/div)
+    probe:CH3(bit0, 5 V/div)
+    expect("code 1111 gives fifteen sixteenths of the reference", from: "Vout = V_ref · 15 / 16 = 5 V · 15 / 16") {
+        measure(maximum, out)
+        near(4.6875 V, +- 1%)
+    }
+    expect("code 0000 gives nothing", from: "every leg at ground") {
+        measure(minimum, out)
+        within(-0.01 V .. 0.01 V)
+    }
+    expect("the staircase averages the middle code, 7.5", from: "average of V_ref · code / 16 over codes 0 … 15 = 5 V · 7.5 / 16") {
+        measure(average, out)
+        near(2.344 V, +- 2%)
+    }
+    analysis(transient, for: 20 ms)
+    view:transient_response(primary)
+}

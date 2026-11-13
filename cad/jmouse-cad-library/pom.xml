@@ -57,6 +57,12 @@
     </properties>
 
     <dependencies>
+        <!-- Its tables are documents of the catalogue, read through the table port -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-table</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- the documents are read by the jM language with every module of jmCAD -->
         <dependency>
             <groupId>org.jmouse</groupId>

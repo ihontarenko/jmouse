@@ -51,10 +51,10 @@ public class PluginSettingsController {
         return settings.serverFolder(path);
     }
 
-    /** Changes a plugin's settings, all or none; a null value brings a setting back to its default. */
-    @PutMapping("/plugin-settings/{plugin}")
+    /** Changes one section of a plugin's parameters, all or none; a null value brings a parameter back to its default. */
+    @PutMapping("/plugin-settings/{plugin}/{*section}")
     @PublicEndpoint("the change decides inside its service: setting the engine up is a curator's, installation-wide")
-    public PluginSettingsView change(@PathVariable String plugin, @RequestBody Map<String, String> values) {
-        return settings.change(plugin, values);
+    public PluginSettingsView change(@PathVariable String plugin, @PathVariable String section, @RequestBody Map<String, String> values) {
+        return settings.change(plugin, section.startsWith("/") ? section.substring(1) : section, values);
     }
 }

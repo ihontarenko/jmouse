@@ -1,0 +1,140 @@
+# What a pcb can be made with: each entry is one way of making pcbs — etched at home, a pcb house's ordinary
+# service, its fine-line one —, with the least copper, gaps and holes that way can make, and the tracks and vias a pcb
+# made that way is laid with unless a net class says otherwise. A pcb names one (`rules standard`) and may tighten or
+# loosen any value on its own line; a change of a house's capability is an edit here, never of a pcb.
+#
+# The least values are the ones a pcb's checks hold every track, via, pad and hole to — and a poured zone keeps no
+# copper narrower than the least track —; the usual ones are what the editor lays new copper with. A zone joins a pad of
+# its own net across the thermal gap by spokes this wide, so the pad can be soldered. The thicknesses are what copper
+# analysis reads: a track's resistance and the current it carries follow its copper's thickness, a via's its plating and
+# the pcb's thickness. 0.035 mm is 1 oz copper.
+table:pcb-rules("Pcb rules") {
+    meta {
+        summary: "The clearances, widths and holes a printed circuit board is checked against, by how it is made."
+        category: tables
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+
+    source "The published capabilities of common prototype pcb houses, rounded to values every one of them makes"
+    usual "standard"
+
+    home "Etched at home — toner transfer or photoresist, drilled by hand" {
+        clearance 0.4 mm
+        least-track-width 0.4 mm
+        least-drill 0.6 mm
+        least-via-drill 0.8 mm
+        least-via-ring 0.4 mm
+        hole-clearance 0.5 mm
+        edge-clearance 1 mm
+        thermal-gap 0.6 mm
+        thermal-spoke-width 0.8 mm
+        track-width 0.8 mm
+        via-drill 0.8 mm
+        via-diameter 1.8 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.035 mm
+        plating-thickness 0.02 mm
+        pcb-thickness 1.6 mm
+    }
+
+    standard "A pcb house's ordinary one- and two-layer service" {
+        clearance 0.2 mm
+        least-track-width 0.15 mm
+        least-drill 0.3 mm
+        least-via-drill 0.3 mm
+        least-via-ring 0.15 mm
+        hole-clearance 0.25 mm
+        edge-clearance 0.3 mm
+        thermal-gap 0.5 mm
+        thermal-spoke-width 0.5 mm
+        track-width 0.25 mm
+        via-drill 0.4 mm
+        via-diameter 0.8 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.0175 mm
+        plating-thickness 0.02 mm
+        pcb-thickness 1.6 mm
+    }
+
+    fine "A pcb house's fine-line multilayer service" {
+        clearance 0.1 mm
+        least-track-width 0.1 mm
+        least-drill 0.2 mm
+        least-via-drill 0.2 mm
+        least-via-ring 0.1 mm
+        hole-clearance 0.2 mm
+        edge-clearance 0.2 mm
+        thermal-gap 0.3 mm
+        thermal-spoke-width 0.3 mm
+        track-width 0.15 mm
+        via-drill 0.3 mm
+        via-diameter 0.6 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.0175 mm
+        plating-thickness 0.025 mm
+        pcb-thickness 1.6 mm
+    }
+
+    # What each house publishes (jlcpcb.com/capabilities, pcbway.com/capabilities, read 2026-11-02) for 1 oz outer copper. The
+    # least values are theirs — a house's absolute limit, where its recommendation is often wider — and a via's ring is half
+    # of "the pad 0.10 mm over the hole". The gaps round a thermal and the usual track and via are not capabilities, so they
+    # are the ones this table lays with. A pad's through-hole ring (JLCPCB: 0.18 mm on two layers) has no rule of its own yet.
+    jlcpcb-two-layer "JLCPCB, one and two layers" {
+        clearance 0.1 mm
+        least-track-width 0.1 mm
+        least-drill 0.15 mm
+        least-via-drill 0.15 mm
+        least-via-ring 0.05 mm
+        hole-clearance 0.2 mm
+        edge-clearance 0.2 mm
+        thermal-gap 0.3 mm
+        thermal-spoke-width 0.3 mm
+        track-width 0.2 mm
+        via-drill 0.3 mm
+        via-diameter 0.6 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.0175 mm
+        plating-thickness 0.018 mm
+        pcb-thickness 1.6 mm
+    }
+
+    jlcpcb-multilayer "JLCPCB, four layers and more" {
+        clearance 0.09 mm
+        least-track-width 0.09 mm
+        least-drill 0.15 mm
+        least-via-drill 0.15 mm
+        least-via-ring 0.05 mm
+        hole-clearance 0.2 mm
+        edge-clearance 0.2 mm
+        thermal-gap 0.3 mm
+        thermal-spoke-width 0.3 mm
+        track-width 0.2 mm
+        via-drill 0.3 mm
+        via-diameter 0.6 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.0175 mm
+        plating-thickness 0.018 mm
+        pcb-thickness 1.6 mm
+    }
+
+    # The page gives no hole-to-hole gap for this service: 0.28 mm is its advanced service's between vias (11 mil).
+    pcbway-standard "PCBWay's standard service" {
+        clearance 0.1 mm
+        least-track-width 0.1 mm
+        least-drill 0.15 mm
+        least-via-drill 0.15 mm
+        least-via-ring 0.15 mm
+        hole-clearance 0.28 mm
+        edge-clearance 0.25 mm
+        thermal-gap 0.3 mm
+        thermal-spoke-width 0.3 mm
+        track-width 0.2 mm
+        via-drill 0.3 mm
+        via-diameter 0.6 mm
+        copper-thickness 0.035 mm
+        inner-copper-thickness 0.035 mm
+        plating-thickness 0.018 mm
+        pcb-thickness 1.6 mm
+    }
+}

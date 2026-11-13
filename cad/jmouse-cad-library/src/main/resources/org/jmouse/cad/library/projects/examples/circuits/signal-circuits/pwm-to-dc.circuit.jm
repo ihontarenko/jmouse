@@ -1,0 +1,70 @@
+# SG-02. A square wave switched between 0 and 5 V, its duty on a slider, into an RC low-pass. The filter is far slower
+# than the square (RC = 10 ms against a 1 ms period), so the capacitor cannot follow the edges and settles at their
+# average, duty · 5 V, with a small ripple on top. This is how a microcontroller's PWM pin becomes an analog voltage.
+circuit:pwm-to-dc("PWM to DC") {
+    meta {
+        summary: "A PWM square through an RC filter: the output settles at duty · V_high with a small ripple."
+        description: """
+            Idea: a square wave that is high for a share D of every period carries an average of D · V_high. An RC
+            filter much slower than the period passes that average and holds back the edges, so a digital pin
+            switching on and off becomes a steady analog voltage.
+
+            Try: move the duty from 0.25 to 0.75 — the output climbs from 1.25 V to 3.75 V, in proportion. Raise the
+            frequency or the capacitance: the ripple shrinks. Lower the resistance: the output answers faster, but
+            the ripple grows — a filter trades speed against smoothness.
+
+            Watch: CH1, the square before the filter, and CH2, the output after it: it climbs over about 5 RC =
+            50 ms and then wobbles a little around duty · 5 V. The voltmeter reads that level.
+
+            Ask: what output does a duty of 0.6 give? How long does the output take to reach its level, and how
+            would you make it faster without more ripple?
+            """
+        category: signal-circuits
+        tags: signals, example, sg-02, filters, pwm
+        time_constant: "τ = RC" "Time constant"
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:D(0.25, in: 0.05 .. 0.95, step: 0.05, "Duty cycle: share of each period spent high")
+    parameter:f(1 kHz, in: 100 Hz .. 10 kHz, step: 100 Hz, "PWM frequency")
+    parameter:R(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Filter resistance")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "Filter capacitance")
+    part:G1(square-generator, [positive: pwm, negative: 0], high: 5 V, low: 0 V, frequency: f, duty: D)
+    part:R1(resistor, [pwm, out], resistance: R)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:G1(at: 320 600, rotate: 90)
+    place:R1(at: 600 400)
+    place:C1(at: 880 600, rotate: 90)
+    place:VM1(at: 1120 600, rotate: 90)
+    mark:Jo(junction, at: 880 400)
+    mark:Jb(junction, at: 880 800)
+    mark:GND1(ground, at: 880 880)
+    wire:W1(G1.positive, to: R1.positive, via: 320 400)
+    wire:W2(R1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: C1.positive)
+    wire:W4(Jo.j, to: VM1.plus, via: 1120 400)
+    wire:W5(G1.negative, to: Jb.j, via: 320 800)
+    wire:W6(C1.negative, to: Jb.j)
+    wire:W7(VM1.minus, to: Jb.j, via: 1120 800)
+    wire:W8(Jb.j, to: GND1.ground)
+    probes {
+        probe:CH1(pwm, 2 V/div)
+        probe:CH2(out, 0.5 V/div)
+        time(10 ms/div)
+    }
+    expect("the square is high a quarter of the time", from: "duty D = 0.25") {
+        measure(duty, pwm, above: 2.5 V)
+        near(0.25, +- 2%)
+    }
+    expect("the output settles at the average, 1.25 V", from: "V_out = D · V_high = 0.25 · 5 V, once 5 RC = 50 ms have passed") {
+        measure(average, out, after: 60 ms)
+        near(1.25 V, +- 2%)
+    }
+    expect("only a small ripple is left on top", from: "ripple ≈ V_high · D · (1 − D) / (f · RC) = 5 V · 0.1875 / 10 ≈ 0.09 V peak to peak") {
+        measure(maximum, out, after: 60 ms)
+        within(1.27 V .. 1.32 V)
+    }
+    analysis(transient, for: 80 ms)
+    view:transient_response(primary)
+}

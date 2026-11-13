@@ -1,0 +1,82 @@
+# RC-01. A switch closes a source onto a resistor and a capacitor at rest. The capacitor's voltage climbs along an
+# exponential and the current starts at its largest, Vs / R, and dies away: after one time constant τ = RC the
+# capacitor holds 63 % of the source and the current is down to 37 % of where it began. The switch is live — open it
+# part way and the charge stays where it was.
+circuit:rc-charging("Charging a capacitor through a resistor") {
+    meta {
+        featured: yes
+        summary: "A switch closes onto R and C: Vc climbs to 63 % of the source in one τ = RC while the current falls from Vs / R."
+        description: """
+            Idea: a capacitor cannot change its voltage at once — it fills with charge, and the charge has to come
+            through the resistor. At first the capacitor is empty, the whole source is across R and the current is
+            at its largest, Vs / R. As Vc rises, less voltage is left across R, so the current — and the filling —
+            slow down. Both follow an exponential whose time constant is τ = RC.
+
+            Try: raise R or C and the charge takes longer; double either and τ doubles. Raise the source: the curve
+            keeps its shape and only scales. Open the switch half way through the charge, then close it again: the
+            capacitor keeps what it had and carries on from there.
+
+            Watch: CH1, the capacitor's voltage, rising fast then slowly; CH2, the current, jumping to Vs / R and
+            falling the same way. After one τ Vc is at 63.2 % of the source and the current at 36.8 % of its start;
+            after five τ the charge is practically done.
+
+            Ask: with R = 1 kΩ and C = 1 µF, how long is τ? What is Vc after 1 ms, 2 ms, 5 ms? Why does the current
+            fall exactly as Vc rises?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(5 V, in: 1 V .. 12 V, step: 0.5 V, "Source voltage")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R, the charging resistor")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "C, the capacitor")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:SW1(switch, [a: in, b: feed], closed: 1)
+    part:R1(resistor, [feed, out], resistance: R)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:V1(at: 320 600, rotate: 90)
+    place:SW1(at: 520 360)
+    place:R1(at: 800 360)
+    place:C1(at: 1040 600, rotate: 90)
+    place:VM1(at: 1280 600, rotate: 90)
+    mark:Jo(junction, at: 1040 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 1040 840)
+    mark:GND1(ground, at: 1040 920)
+    wire:W1(V1.positive, to: SW1.a, via: 320 360)
+    wire:W2(SW1.b, to: R1.positive)
+    wire:W3(R1.negative, to: Jo.j)
+    wire:W4(Jo.j, to: C1.positive)
+    wire:W5(Jo.j, to: VM1.plus, via: 1280 360)
+    wire:W6(V1.negative, to: Jb1.j)
+    wire:W7(Jb1.j, to: Jb2.j)
+    wire:W8(C1.negative, to: Jb2.j)
+    wire:W9(VM1.minus, to: Jb2.j, via: 1280 840)
+    wire:W10(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(out, 1 V/div)
+        probe:CH2(current, R1, 1 mA/div)
+        time(1 ms/div)
+    }
+    expect("after one τ the capacitor holds 63 % of the source", from: "Vc(τ) = Vs · (1 − e⁻¹) = 5 V · 0.632, τ = RC = 1 ms") {
+        measure(minimum, out, after: 1 ms)
+        near(3.16 V, +- 2%)
+    }
+    expect("the current starts at Vs / R", from: "I(0) = Vs / R = 5 V / 1 kΩ") {
+        measure(maximum, current: R1)
+        near(5 mA, +- 2%)
+    }
+    expect("after one τ the current is down to 37 %", from: "I(τ) = (Vs / R) · e⁻¹ = 5 mA · 0.368") {
+        measure(maximum, current: R1, after: 1 ms)
+        near(1.84 mA, +- 3%)
+    }
+    expect("after many τ the capacitor holds the whole source", from: "Vc(∞) = Vs; after 8 τ the gap is e⁻⁸, 0.03 %") {
+        measure(final, out)
+        near(5 V, +- 0.5%)
+    }
+    analysis(transient, for: 8 ms)
+    view:transient_response(primary)
+    view:operating_point
+}

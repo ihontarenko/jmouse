@@ -1,0 +1,56 @@
+# D-02. A sine through one 1N4007 into a load resistor. On the positive half the diode conducts and the load follows
+# the input, a diode drop lower; on the negative half it blocks and the load sits at zero. What is left is one half of
+# every period, and its average is no longer zero: (Vpeak − VF) / π. The first, crudest step from AC to DC.
+circuit:half-wave-rectifier("Half-wave rectifier") {
+    meta {
+        summary: "A sine through one 1N4007: only the positive halves reach the load, and the average becomes (Vpeak − VF) / π."
+        description: """
+            Idea: a diode passes current one way only, so of a sine it lets through only the halves that push forward.
+            The load sees bumps, all of one sign: the average of the input was zero, the average of the output is not.
+
+            Try: raise the amplitude: the bumps grow, always a diode drop short of the input's peak. Change the
+            frequency: nothing changes in their shape. Change the load: almost nothing — the diode's drop moves a little.
+
+            Watch: CH1, the input, and CH2, the output: the top halves pass, about 0.7 V lower; the bottom halves
+            are gone. The output's average is about a third of its peak.
+
+            Ask: why is the average (Vpeak − VF) / π and not half the peak? What would turning the diode round give?
+            """
+        category: diodes-and-rectifiers
+        tags: diodes, example, d-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(10 V, in: 2 V .. 30 V, step: 0.5 V, "Input amplitude")
+    parameter:F(50 Hz, in: 10 Hz .. 1 kHz, step: 10 Hz, "Input frequency")
+    parameter:R_load(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Load resistance")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:D1(1n4007, [anode: in, cathode: out])
+    part:R1(resistor, [out, 0], resistance: R_load)
+    place:G1(at: 320 640, rotate: 90)
+    place:D1(at: 640 440)
+    place:R1(at: 960 640, rotate: 90)
+    mark:Jg(junction, at: 960 840)
+    mark:GND1(ground, at: 960 920)
+    wire:W1(G1.positive, to: D1.anode, via: 320 440)
+    wire:W2(D1.cathode, to: R1.positive, via: 960 440)
+    wire:W3(G1.negative, to: Jg.j, via: 320 840)
+    wire:W4(R1.negative, to: Jg.j)
+    wire:W5(Jg.j, to: GND1.ground)
+    probe:CH1(in, 5 V/div)
+    probe:CH2(out, 5 V/div)
+    expect("the positive halves pass, a diode drop lower", from: "1N4007 datasheet: VF about 0.7 V at 9 mA, so the peak is 10 V − 0.7 V") {
+        measure(maximum, out)
+        within(9.1 V .. 9.4 V)
+    }
+    expect("the negative halves are blocked", from: "reversed, the diode passes only its leakage: out = 0") {
+        measure(minimum, out)
+        within(-0.01 V .. 0.01 V)
+    }
+    expect("and the average is no longer zero", from: "average of half a sine: (Vpeak − VF) / π ≈ 9.3 V / π ≈ 2.95 V (a little less: the diode starts late)") {
+        measure(average, out)
+        within(2.8 V .. 3.05 V)
+    }
+    analysis(transient, for: 40 ms)
+    view:transient_response(primary)
+}

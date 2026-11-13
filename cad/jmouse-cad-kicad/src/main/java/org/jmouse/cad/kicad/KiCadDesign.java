@@ -46,15 +46,16 @@ public final class KiCadDesign {
     }
 
     /**
-     * @param installed KiCad's own footprint libraries, looked in after the design's
+     * @param installed KiCad's own libraries: its footprints, looked in after the design's, and its symbols, which say whether a
+     *                  symbol the design keeps a copy of is KiCad's
      * @throws IllegalArgumentException when a file does not read, or a sheet the design places was not sent
      */
-    public static ImportedDocuments read(Sources sources, CatalogueDocuments catalogue, KiCadFootprintLibraries installed,
+    public static ImportedDocuments read(Sources sources, CatalogueDocuments catalogue, InstalledKiCadLibraries installed,
                                          KiCadLibraryMap map, KiCadLibraries filing) {
         Map<String, String> files = sources.files();
         Optional<KiCadPcb> board = boardOf(sources.boardFile(), files);
         KiCadProjectImport imported = KiCadProjectImport.of(project(sources.root(), files), sources.title(), map,
-                KiCadCatalogue.of(catalogue), KiCadFootprintLibraries.among(files).then(installed), board, filing);
+                KiCadCatalogue.of(catalogue), KiCadFootprintLibraries.among(files).then(installed.footprints()), installed, board, filing);
         // What a design is built from, each before what names it: a footprint before the component landing on it.
         List<DocumentNode> library = new ArrayList<>(imported.footprints());
         library.addAll(imported.symbols());

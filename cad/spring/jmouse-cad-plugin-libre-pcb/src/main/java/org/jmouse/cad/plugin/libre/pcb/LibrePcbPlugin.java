@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.libre.pcb;
 
+import org.jmouse.cad.libre.pcb.LibrePcbFiling;
+import org.jmouse.cad.table.ShippedTable;
 import org.jmouse.cad.exchange.DocumentImport;
 import org.jmouse.plugin.Plugin;
 import org.jmouse.plugin.PluginDescriptor;
@@ -28,6 +30,8 @@ public final class LibrePcbPlugin implements Plugin {
 
     @Override
     public void register(PluginRegistration registration) {
+        // The tables its module reads, as pages of the library.
+        registration.contribute(ShippedTable.POINT, LibrePcbFiling.SHIPPED.shipping(LibrePcbFiling.TABLE));
         registration.contribute(DocumentImport.POINT, designs);
     }
 }

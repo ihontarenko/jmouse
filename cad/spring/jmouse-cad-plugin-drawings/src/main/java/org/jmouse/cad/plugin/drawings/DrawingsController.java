@@ -1,6 +1,7 @@
 package org.jmouse.cad.plugin.drawings;
 
 import org.jmouse.access.enforcement.PublicEndpoint;
+import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.ExportedFiles;
 import org.jmouse.cad.management.CadManagementRoutes;
 import org.jmouse.cad.store.catalogue.WrittenOwners;
@@ -21,12 +22,12 @@ public class DrawingsController {
 
     private final DrawingsExport   drawings;
     private final DocumentExchange exchange;
-    private final SheetSettings    settings;
+    private final CadSettings      sections;
 
-    public DrawingsController(DrawingsExport drawings, DocumentExchange exchange, SheetSettings settings) {
+    public DrawingsController(DrawingsExport drawings, DocumentExchange exchange, CadSettings sections) {
         this.drawings = drawings;
         this.exchange = exchange;
-        this.settings = settings;
+        this.sections = sections;
     }
 
     /**
@@ -60,9 +61,9 @@ public class DrawingsController {
         schematic.forEach(drawn -> pages.add(drawings.schematicPage(drawn)));
         List<SheetFacts.Fact> facts = new ArrayList<>();
         if (!schematic.isEmpty()) {
-            facts.add(new SheetFacts.Fact(settings.words().factSheets(), String.valueOf(schematic.size())));
+            facts.add(new SheetFacts.Fact(sections.read(DrawingsPlugin.SHEETS).words().factSheets(), String.valueOf(schematic.size())));
         }
-        String revision = request.revision() == null ? settings.words().unsaved() : request.revision();
+        String revision = request.revision() == null ? sections.read(DrawingsPlugin.SHEETS).words().unsaved() : request.revision();
         if (request.pcb() != null && !request.pcb().isBlank()) {
             DrawingsExport.PcbPart pcb = exchange.written(request.pcb(), WrittenOwners.optional(request.owner()), drawings::pcbPart);
             pages.addAll(pcb.pages());

@@ -1,0 +1,67 @@
+# RLC-03. A slow square wave — a step up, then a step down — into a resistor, a coil and a capacitor in series, read
+# across the capacitor. Every edge sets the energy swinging between the coil and the capacitor at about f0, and the
+# resistor decides how fast it dies. The damping is ζ = (R / 2)·√(C / L): below one it rings, at one (R = 2√(L/C),
+# 200 Ω here) it settles fastest with no overshoot, above one it only creeps.
+circuit:rlc-damping("RLC damping") {
+    meta {
+        summary: "A step into series RLC: a small R rings, R = 2√(L/C) settles fastest without overshoot, a large R creeps."
+        description: """
+            Idea: a coil and a capacitor trade energy back and forth, so a step makes the capacitor's voltage swing
+            past its target and back. The resistor burns some energy on every swing. How much, against how much is
+            swinging, is the damping ζ = (R / 2)·√(C / L).
+
+            Try: start with R = 20 Ω — ζ = 0.1, the output rings for many cycles. Raise R to 200 Ω — ζ = 1, critical
+            damping: the fastest settling with no overshoot at all. Go on to 400 Ω: overdamped, the output only creeps
+            up. Change L or C and watch the ring's pitch and the critical R both move.
+
+            Watch: CH1 is the step, CH2 the capacitor. At ζ = 0.1 the first peak overshoots the 5 V step by 73 %, and
+            the falling edge undershoots below zero by as much; each next swing is smaller by the same ratio.
+
+            Ask: why does the output overshoot at all — where is the energy that carries it past 5 V? Why is the
+            critical R exactly 2√(L/C)?
+            """
+        category: resonance
+        tags: rlc, example, rlc-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(5 V, in: 1 V .. 12 V, step: 0.5 V, "Step height")
+    parameter:F(50 Hz, in: 10 Hz .. 200 Hz, step: 5 Hz, "Square frequency: how often it steps")
+    parameter:R(20 Ω, in: 1 Ω .. 400 Ω, step: 1 Ω, "Series resistance: the damping")
+    parameter:L(10 mH, in: 1 mH .. 100 mH, step: 1 mH, "Series inductance")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "Capacitance across the output")
+    part:G1(square-generator, [positive: in, negative: 0], high: A, frequency: F, duty: 0.5)
+    part:R1(resistor, [in, middle], resistance: R)
+    part:L1(inductor, [middle, out], inductance: L)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    place:G1(at: 320 640, rotate: 90)
+    place:R1(at: 600 440)
+    place:L1(at: 920 440)
+    place:C1(at: 1200 640, rotate: 90)
+    mark:Jg(junction, at: 1200 840)
+    mark:GND1(ground, at: 1200 920)
+    wire:W1(G1.positive, to: R1.positive, via: 320 440)
+    wire:W2(R1.negative, to: L1.positive)
+    wire:W3(L1.negative, to: C1.positive, via: 1200 440)
+    wire:W4(G1.negative, to: Jg.j, via: 320 840)
+    wire:W5(C1.negative, to: Jg.j)
+    wire:W6(Jg.j, to: GND1.ground)
+    probe:CH1(in, 2 V/div)
+    probe:CH2(out, 2 V/div)
+    probe:CH3(current, R1, 50 mA/div)
+    expect("underdamped: the first peak overshoots by 73 %", from: "ζ = (R/2)√(C/L) = 0.1; peak = A · (1 + e^(−πζ/√(1−ζ²))) = 5 V · 1.729") {
+        measure(maximum, out)
+        near(8.65 V, +- 3%)
+    }
+    expect("and the falling edge undershoots below zero as far", from: "the same ringing after the step down, from 5 V towards 0 V: 5 V · (−0.729)") {
+        measure(minimum, out, after: 10 ms)
+        near(-3.65 V, +- 5%)
+    }
+    expect("the ring has died long before the next edge", from: "the envelope falls as e^(−t·R/2L): τ = 1 ms, so 9 ms later it is 0.01 % of the swing") {
+        measure(final, out)
+        within(-0.05 V .. 0.05 V)
+    }
+    analysis(transient, for: 19.9 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 100, to: 20000, points: 300)
+}

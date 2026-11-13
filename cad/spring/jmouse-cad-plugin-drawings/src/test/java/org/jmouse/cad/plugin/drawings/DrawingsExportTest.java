@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DrawingsExportTest {
 
     private static final DocumentLanguage LANGUAGE = CadLanguage.of(CadLanguage.engineModules()).language();
-    private static final SheetSettings    SETTINGS = DrawingsExport.shippedSettings();
+    private static final SheetSettings    SETTINGS = CadSettings.shipped().read(DrawingsPlugin.SHEETS);
     private static final StrokeFont       FONT     = StrokeFont.newStroke();
     private static final SheetLettering   LETTERING = SheetLettering.strokes(FONT, SETTINGS.curveSteps());
 
@@ -54,9 +54,9 @@ class DrawingsExportTest {
 
     private static List<Sheet> sheetsOf(DocumentNode document) {
         PcbFabrication fabrication = PcbFabrication.of(document, CIRCUIT);
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, CadSettings.read(PcbArtwork.SECTION), FONT);
-        return new FactorySheets(SETTINGS, LETTERING, drawn, CadSettings.read(PcbLayers.SECTION),
+        Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(fabrication.pcb().rules());
+        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, CadSettings.shipped().read(PcbArtwork.SECTION), FONT);
+        return new FactorySheets(SETTINGS, LETTERING, drawn, CadSettings.shipped().read(PcbLayers.SECTION),
                 rules.get("pcb-thickness"), document.title(), "r1", slug -> slug).sheets();
     }
 
@@ -82,8 +82,8 @@ class DrawingsExportTest {
                 }
                 """, "bare");
         PcbFabrication fabrication = PcbFabrication.of(document, CIRCUIT);
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-        PcbArtwork.Settings settings = CadSettings.read(PcbArtwork.SECTION);
+        Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(fabrication.pcb().rules());
+        PcbArtwork.Settings settings = CadSettings.shipped().read(PcbArtwork.SECTION);
         List<ArtworkFeature> top = PcbArtwork.of(fabrication, rules, settings, FONT).maskOpenings(PcbDrawing.TOP);
         List<ArtworkFeature.Stroke> strokes = top.stream().filter(ArtworkFeature.Stroke.class::isInstance).map(ArtworkFeature.Stroke.class::cast).toList();
         assertEquals(1, strokes.size(), "only the track left bare on this side: " + top);
@@ -149,7 +149,7 @@ class DrawingsExportTest {
 
     @Test
     void itWritesOnePdfAndADxfForEachSheet() {
-        ExportedFiles files = DrawingsExport.shipped(SETTINGS, new SheetFonts(List::of, List::of)).write(board("M0 0H40V20H0Z"), CIRCUIT);
+        ExportedFiles files = new DrawingsExport(CadSettings.shipped(), StrokeFont.newStroke(), new SheetFonts(List::of, List::of), CadStandards.shipped()).write(board("M0 0H40V20H0Z"), CIRCUIT);
         assertEquals(List.of("drawn-drawing.pdf", "drawn-fabrication.dxf"), files.files().stream().map(ExportedFile::fileName).toList(), "a DXF of what a factory draws from alone");
         assertTrue(new String(files.files().getFirst().content(), StandardCharsets.ISO_8859_1).startsWith("%PDF-"));
         String dxf = files.files().get(1).text();
@@ -160,7 +160,7 @@ class DrawingsExportTest {
     @Test
     void aPcbWithoutAnEdgeHasNoDrawing() {
         DocumentNode none = LANGUAGE.readOne("pcb:drawn(\"X\") {\n    circuit(empty-circuit)\n    hole(at: 5 5, drill: 1)\n}\n", "drawn");
-        assertThrows(IllegalArgumentException.class, () -> DrawingsExport.shipped(SETTINGS, new SheetFonts(List::of, List::of)).write(none, CIRCUIT));
+        assertThrows(IllegalArgumentException.class, () -> new DrawingsExport(CadSettings.shipped(), StrokeFont.newStroke(), new SheetFonts(List::of, List::of), CadStandards.shipped()).write(none, CIRCUIT));
     }
 
     @Test

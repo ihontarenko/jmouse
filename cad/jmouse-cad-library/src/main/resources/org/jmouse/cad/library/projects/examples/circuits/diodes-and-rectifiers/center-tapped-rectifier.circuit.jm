@@ -1,0 +1,91 @@
+# D-06. Full-wave rectification with two diodes and a centre-tapped transformer. Each half of the secondary feeds the
+# output through its own diode on its own half of the mains period, the tap being the ground: two bumps a period, as a
+# bridge gives, but through one diode drop instead of two — paid for with a winding twice as long, each half working
+# only half the time.
+circuit:center-tapped-rectifier("Centre-tapped full-wave rectifier") {
+    meta {
+        summary: "A centre-tapped transformer and two diodes: both halves of the mains come out positive, one diode drop lower, at twice the frequency."
+        description: """
+            Idea: the secondary is tapped in its middle and the tap is the ground. Its two ends swing in opposite phase:
+            while one is above the tap the other is below it. Each end has its own diode to the output, so one diode
+            conducts on one half of the period and the other on the other — the output gets a bump on both.
+
+            Try: take the capacitor away (set it to its least) and the output is bare bumps at 100 Hz. Raise it again
+            and the output holds near the peak between bumps. Lower the load resistance: the dips between bumps deepen.
+
+            Watch: CH1 and CH2, the two ends of the secondary, mirror each other; CH3, the output, follows whichever is
+            higher, one diode drop below it. The voltmeter reads the DC the load gets.
+
+            Ask: a bridge gives the same 100 Hz from a single winding. What does this circuit save, and what does it
+            cost? Why does each diode here have to stand off twice the peak of a half?
+            """
+        category: diodes-and-rectifiers
+        tags: diodes, example, d-06, rectifiers, transformer
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:C(470 µF, in: 1 µF .. 2200 µF, step: 1 µF, "Smoothing capacitor")
+    parameter:R_load(100 Ω, in: 22 Ω .. 1 kΩ, step: 1 Ω, "Load resistance")
+    part:AC1(sine-generator, [positive: mains, negative: 0], amplitude: 325 V, frequency: 50 Hz)
+    part:T1(center-tapped-transformer, [primary_one: mains, primary_two: 0, secondary_one: top, center_tap: 0, secondary_two: bottom])
+    part:D1(1n4007, [anode: top, cathode: out])
+    part:D2(1n4007, [anode: bottom, cathode: out])
+    part:C1(capacitor, [out, 0], capacitance: C)
+    part:RL(resistor, [out, 0], resistance: R_load, power_rating: 5 W, thermal_resistance: 25 K/W)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:AC1(at: 280 600, rotate: 90)
+    place:T1(at: 600 600)
+    place:D1(at: 920 400)
+    place:D2(at: 920 800)
+    place:C1(at: 1280 600, rotate: 90)
+    place:RL(at: 1520 600, rotate: 90)
+    place:VM1(at: 1760 600, rotate: 90)
+    mark:Jout(junction, at: 1120 400)
+    mark:Jc(junction, at: 1280 400)
+    mark:Jr(junction, at: 1520 400)
+    mark:Jg1(junction, at: 720 960)
+    mark:Jg2(junction, at: 1280 960)
+    mark:Jg3(junction, at: 1520 960)
+    mark:Jg4(junction, at: 280 960)
+    mark:GND1(ground, at: 720 1040)
+    wire:W1(AC1.positive, to: T1.primary_one, via: [280 480, 440 480, 440 560])
+    wire:W2(AC1.negative, to: Jg4.j)
+    wire:W3(T1.primary_two, to: Jg4.j, via: [440 640, 440 960])
+    wire:W4(T1.secondary_one, to: D1.anode, via: [760 540, 760 400])
+    wire:W5(T1.secondary_two, to: D2.anode, via: 680 800)
+    wire:W6(T1.center_tap, to: Jg1.j, via: 720 600)
+    wire:W7(D1.cathode, to: Jout.j)
+    wire:W8(D2.cathode, to: Jout.j, via: 1120 800)
+    wire:W9(Jout.j, to: Jc.j)
+    wire:W10(Jc.j, to: C1.positive)
+    wire:W11(Jc.j, to: Jr.j)
+    wire:W12(Jr.j, to: RL.positive)
+    wire:W13(Jr.j, to: VM1.plus, via: 1760 400)
+    wire:W14(Jg4.j, to: Jg1.j)
+    wire:W15(Jg1.j, to: Jg2.j)
+    wire:W16(C1.negative, to: Jg2.j)
+    wire:W17(Jg2.j, to: Jg3.j)
+    wire:W18(RL.negative, to: Jg3.j)
+    wire:W19(VM1.minus, to: Jg3.j, via: 1760 960)
+    wire:W20(Jg1.j, to: GND1.ground)
+    probes {
+        probe:CH1(top, 10 V/div)
+        probe:CH2(bottom, 10 V/div)
+        probe:CH3(out, 10 V/div)
+        time(5 ms/div)
+    }
+    expect("the output holds near the peak: one diode drop below a half's 16 V", from: "each half 325 V / 20 ≈ 16 V peak; 1N4007 VF about 0.8 V") {
+        measure(maximum, out, after: 60 ms)
+        within(14.2 V .. 15.6 V)
+    }
+    expect("the bumps come at twice the mains frequency", from: "a full-wave rectifier: one bump per half period of 50 Hz") {
+        measure(frequency, out, above: 14 V, after: 60 ms)
+        near(100 Hz, +- 2%)
+    }
+    expect("the dip between bumps is about I / (2 f C)", from: "≈ 0.15 A / (100 Hz · 470 µF) ≈ 3 V at most") {
+        measure(minimum, out, after: 60 ms)
+        within(11.5 V .. 14.5 V)
+    }
+    analysis(transient, for: 100 ms)
+    view:transient_response(primary)
+}

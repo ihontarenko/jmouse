@@ -30,10 +30,8 @@ public class DocumentTexts {
 
     /** Where a catalogued document's copy is held, at a revision of it. */
     public static DocumentLocation locationOf(StoredDocument document, int revision) {
-        return switch (document.getHolding()) {
-            case STORED -> new DocumentLocation.Stored(document.owner().orElse(null), document.getId(), revision);
-            case SHIPPED -> new DocumentLocation.Shipped(document.getShippedLibrary(), document.getShippedPath());
-        };
+        return document.shipped().<DocumentLocation>map(shipped -> shipped)
+                .orElseGet(() -> new DocumentLocation.Stored(document.owner().orElse(null), document.getId(), revision));
     }
 
     /** Its head text. */
@@ -44,11 +42,11 @@ public class DocumentTexts {
 
     /** Its text at a revision; empty for a revision it does not have. */
     public Optional<String> at(StoredDocument document, int revision) {
-        return switch (document.getHolding()) {
-            case STORED -> documents.sourceAt(document.getId(), revision);
-            case SHIPPED -> revision == document.getRevision()
-                    ? shipped.find(document.getSlug()).map(ShippedDocuments.ShippedDocument::source) : Optional.empty();
-        };
+        if (!document.isShipped()) {
+            return documents.sourceAt(document.getId(), revision);
+        }
+        return revision == document.getRevision()
+                ? shipped.find(document.getSlug()).map(ShippedDocuments.ShippedDocument::source) : Optional.empty();
     }
 
     /**
@@ -56,20 +54,19 @@ public class DocumentTexts {
      * document answers only for its one version.
      */
     public Optional<Integer> revisionWritten(StoredDocument document, String written) {
-        return switch (document.getHolding()) {
-            case STORED -> documents.revisionWritten(document.getId(), written);
-            case SHIPPED -> names(document, written == null ? "" : written.strip())
-                    ? Optional.of(document.getRevision()) : Optional.empty();
-        };
+        if (!document.isShipped()) {
+            return documents.revisionWritten(document.getId(), written);
+        }
+        return names(document, written == null ? "" : written.strip()) ? Optional.of(document.getRevision()) : Optional.empty();
     }
 
     /** Every revision, newest first; a shipped document's one. */
     public List<DocumentRevision> revisions(StoredDocument document) {
-        return switch (document.getHolding()) {
-            case STORED -> documents.revisions(document.getId());
-            case SHIPPED -> List.of(new DocumentRevision(document.getRevision(), labelOf(document), document.getSourceChecksum(),
-                                                         document.getUpdatedAt(), null, RevisionOrigin.UNRECORDED));
-        };
+        if (!document.isShipped()) {
+            return documents.revisions(document.getId());
+        }
+        return List.of(new DocumentRevision(document.getRevision(), labelOf(document), document.getSourceChecksum(),
+                                            document.getUpdatedAt(), null, RevisionOrigin.UNRECORDED));
     }
 
     private static boolean names(StoredDocument document, String written) {

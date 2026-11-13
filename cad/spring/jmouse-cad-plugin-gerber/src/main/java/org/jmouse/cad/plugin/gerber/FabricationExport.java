@@ -10,6 +10,7 @@ import org.jmouse.cad.exchange.ExportedFiles;
 import org.jmouse.cad.simulation.CatalogueDocuments;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.Set;
 
 /**
@@ -21,13 +22,13 @@ public final class FabricationExport implements DocumentExport {
     private final String          id;
     private final String          title;
     private final GerberSet       set;
-    private final AssemblyProfile profile;
+    private final Supplier<AssemblyProfile> profile;
 
     /**
      * @param id      the format's word on the exchange routes: {@code jlcpcb}
-     * @param profile how its assembly tables are written
+     * @param profile how its assembly tables are written, as the installation has it when a pcb is written
      */
-    public FabricationExport(String id, String title, GerberSet set, AssemblyProfile profile) {
+    public FabricationExport(String id, String title, GerberSet set, Supplier<AssemblyProfile> profile) {
         this.id = id;
         this.title = title;
         this.set = set;
@@ -58,7 +59,7 @@ public final class FabricationExport implements DocumentExport {
     @Override
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
         PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
-        return new ExportedFiles(fabrication.name() + "-" + id, set.write(fabrication, profile, fabrication.notes()),
+        return new ExportedFiles(fabrication.name() + "-" + id, set.write(fabrication, profile.get(), fabrication.notes()),
                 fabrication.notes());
     }
 }

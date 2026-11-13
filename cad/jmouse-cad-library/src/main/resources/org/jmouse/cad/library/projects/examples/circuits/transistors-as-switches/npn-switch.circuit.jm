@@ -1,0 +1,93 @@
+# TR-01. A 2N2222 switching a red LED from 9 V, its base driven by a 5 V square wave through a base resistor. With
+# 4.7 kΩ the base gets about 0.9 mA, several times what the LED's 21 mA needs at a gain of 200: the transistor
+# saturates, a tenth of a volt across it. Turn the base resistor up past about 40 kΩ and it can no longer: the
+# collector stops reaching the bottom, the LED dims, and the transistor itself takes the difference as heat.
+circuit:npn-switch("NPN transistor as a switch") {
+    meta {
+        summary: "A 2N2222 switching an LED: a small base current turns on a collector current many times larger."
+        description: """
+            Idea: a bipolar transistor is a current amplifier, and a switch is that amplifier driven too hard on
+            purpose. A base current of a milliampere lets the collector carry tens of milliamperes; give the base
+            more than the load needs divided by the gain and the transistor saturates — fully on, a tenth of a volt
+            across it — and the load gets everything the supply and its own resistor allow.
+
+            Try: start at 4.7 kΩ — the collector swings cleanly between 9 V and almost zero. Raise the base resistor
+            towards 100 kΩ: past about 40 kΩ the base current times the gain falls below the LED's 21 mA, the
+            collector stops reaching the bottom and the LED dims. Lower the frequency to see each edge on its own.
+
+            Watch: the base ammeter (under a milliampere) against the LED's current (about 21 mA) — the gain at
+            work; the voltmeter on the collector, low while on and at the supply while off; the base sitting one
+            junction, about 0.75 V, above the emitter.
+
+            Ask: with a gain of 200, what is the largest base resistor that still saturates the transistor? Why
+            does a switch want much more base current than that, not just enough?
+            """
+        category: transistors-as-switches
+        tags: transistors, example, tr-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:R_base(4.7 kΩ, in: 1 kΩ .. 220 kΩ, step: 1 kΩ, "Base resistor: past about 40 kΩ the transistor leaves saturation")
+    parameter:R_load(330 Ω, in: 220 Ω .. 1 kΩ, step: 10 Ω, "LED series resistor")
+    parameter:f(1 kHz, in: 100 Hz .. 10 kHz, step: 100 Hz, "Drive frequency")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 9 V)
+    part:G1(square-generator, [positive: drive, negative: 0], high: 5 V, frequency: f, duty: 0.5)
+    part:RB(resistor, [drive, control], resistance: R_base)
+    part:A1(ammeter, [in: control, out: base])
+    part:RL(resistor, [vcc, lit], resistance: R_load)
+    part:D1(led-red, [anode: lit, cathode: collector])
+    part:Q1(2n2222, [base: base, collector: collector, emitter: 0])
+    part:VM1(voltmeter, [plus: collector, minus: 0])
+    place:V1(at: 240 600, rotate: 90)
+    place:G1(at: 560 760, rotate: 90)
+    place:RB(at: 720 600)
+    place:A1(at: 960 600)
+    place:Q1(at: 1200 600)
+    place:RL(at: 1240 160, rotate: 90)
+    place:D1(at: 1240 360, rotate: 90)
+    place:VM1(at: 1520 640, rotate: 90)
+    mark:Jc(junction, at: 1240 480)
+    mark:Jg1(junction, at: 240 920)
+    mark:Jg2(junction, at: 560 920)
+    mark:Jg3(junction, at: 1240 920)
+    mark:Jg4(junction, at: 1520 920)
+    mark:GND1(ground, at: 560 1000)
+    wire:W1(V1.positive, to: RL.positive, via: [240 80, 1240 80])
+    wire:W2(RL.negative, to: D1.anode)
+    wire:W3(D1.cathode, to: Jc.j)
+    wire:W4(Jc.j, to: Q1.collector)
+    wire:W5(Jc.j, to: VM1.plus, via: 1520 480)
+    wire:W6(G1.positive, to: RB.positive, via: 560 600)
+    wire:W7(RB.negative, to: A1.in)
+    wire:W8(A1.out, to: Q1.base)
+    wire:W9(V1.negative, to: Jg1.j)
+    wire:W10(Jg1.j, to: Jg2.j)
+    wire:W11(G1.negative, to: Jg2.j)
+    wire:W12(Jg2.j, to: GND1.ground)
+    wire:W13(Jg2.j, to: Jg3.j)
+    wire:W14(Q1.emitter, to: Jg3.j)
+    wire:W15(Jg3.j, to: Jg4.j)
+    wire:W16(VM1.minus, to: Jg4.j)
+    probe:CH1(drive, 2 V/div)
+    probe:CH2(collector, 2 V/div)
+    probe:CH3(base, 0.5 V/div)
+    expect("saturated while on: about a tenth of a volt across it", from: "datasheet VCE(sat) at most 0.3 V; IB ≈ (5 V − 0.75 V) / 4.7 kΩ ≈ 0.9 mA, far above 21 mA / hFE") {
+        measure(minimum, collector, after: 2 ms)
+        within(0.02 V .. 0.3 V)
+    }
+    expect("off: the collector rises towards the supply", from: "cut-off: no current, so the LED drops only its leakage") {
+        measure(maximum, collector, after: 2 ms)
+        within(6.5 V .. 9 V)
+    }
+    expect("the LED takes about 21 mA while on", from: "I = (9 V − VF − VCE(sat)) / 330 Ω ≈ (9 − 1.9 − 0.1) / 330") {
+        measure(maximum, current: RL, after: 2 ms)
+        within(18 mA .. 23 mA)
+    }
+    expect("the base takes under a milliampere", from: "IB = (5 V − VBE) / R_base ≈ 4.25 V / 4.7 kΩ") {
+        measure(maximum, current: RB, after: 2 ms)
+        within(0.8 mA .. 1 mA)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+    view:operating_point
+}

@@ -1,14 +1,12 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ShippedTables;
 import org.jmouse.sheet.Sheet;
-import org.jmouse.sheet.SheetReader;
 import org.jmouse.sheet.SheetEntry;
 import org.jmouse.sheet.SheetValue;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -123,18 +121,23 @@ public final class KiCadLibraryMap {
     }
 
     /** Where the map this library ships stands, beside this class. */
-    private static final String RESOURCE = "kicad-library-map.sht";
+    /** The table's address in the catalogue. */
+    public static final String TABLE = "kicad-library-map";
+
+    /** Where its module ships it. */
+    public static final ShippedTables SHIPPED = ShippedTables.in(KiCadLibraryMap.class, "jmouse-cad-kicad", "org/jmouse/cad/kicad/tables");
 
     /** The map this library ships: which of its components each symbol of KiCad's standard libraries stands for. */
-    public static KiCadLibraryMap standard() {
-        try (InputStream stream = KiCadLibraryMap.class.getResourceAsStream(RESOURCE)) {
-            if (stream == null) {
-                throw new IllegalStateException("'" + RESOURCE + "' is not beside " + KiCadLibraryMap.class.getName());
-            }
-            return of(SheetReader.read(RESOURCE, new String(stream.readAllBytes(), StandardCharsets.UTF_8)));
-        } catch (IOException failure) {
-            throw new UncheckedIOException(failure);
-        }
+    public static KiCadLibraryMap shipped() {
+        return readFrom(SHIPPED).current();
+    }
+
+    /**
+     * As its source answers at each use — the engine's catalogue table, its curator's revision where one is kept —, read again
+     * only when another revision answers.
+     */
+    public static ReadTable<KiCadLibraryMap> readFrom(TableSource tables) {
+        return new ReadTable<>(tables, TABLE, KiCadLibraryMap::of);
     }
 
     /** The map a sheet document holds, entry by entry. */

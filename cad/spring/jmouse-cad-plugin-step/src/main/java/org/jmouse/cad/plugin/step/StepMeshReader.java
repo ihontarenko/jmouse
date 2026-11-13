@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * STEP as a mesh: the file handed to OpenCascade, run as a program ({@code docker run --rm -i jmcad-step}), which cuts
+ * STEP as a mesh: the file handed to OpenCascade, run as a program ({@code docker run --rm -i jm_cad-step}), which cuts
  * every body into triangles and answers with VRML — in millimetres, Z up, as the STEP file is —, read here as any VRML
  * model is. Nothing of OpenCascade is in the server.
  */

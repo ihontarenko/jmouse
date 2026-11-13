@@ -1,0 +1,70 @@
+# RC-07. A 1 V sine riding on 2.5 V of DC, passed through a coupling capacitor into a 10 kΩ load. At switch-on the
+# capacitor is empty, so the whole input — DC included — appears at the output; then the capacitor charges to the DC
+# over a few RC and holds it, and what is left at the output is the sine alone, centred on zero. The DC is gone; the
+# AC passes, as long as its frequency is well above 1 / (2πRC).
+circuit:ac-coupling("AC coupling") {
+    meta {
+        summary: "A sine on a 2.5 V offset through a coupling capacitor: within a few RC the DC is gone and the sine is centred on zero."
+        description: """
+            Idea: a capacitor in series passes no steady current, so a steady voltage cannot reach the load — the
+            capacitor charges to it and holds it. A changing voltage does pass. This is how one stage of an amplifier
+            hands its signal to the next without handing over its bias.
+
+            Try: the offset is 2.5 V. Change it while you watch the output: it jumps with the change, then settles back
+            on zero. Lower C, or the frequency, until the sine itself is held back too — near fc = 1 / (2πRC), 16 Hz
+            here, the output is 0.707 of the sine. Raise C and the start takes longer to settle.
+
+            Watch: CH1, the input, a sine about 2.5 V; CH2, the output — it starts at 2.5 V, slides down along
+            e^(−t/RC), RC = 10 ms, and after about 5 RC swings ±1 V about zero, the full sine.
+
+            Ask: what voltage is the capacitor holding once it has settled? What would happen to the output if the
+            load resistor were left off?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-07, filters
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U_offset(2.5 V, in: 0 V .. 5 V, step: 0.1 V, "DC offset of the input")
+    parameter:A(1 V, in: 0.1 V .. 2 V, step: 0.1 V, "Sine amplitude")
+    parameter:F(200 Hz, in: 1 Hz .. 10 kHz, step: 1 Hz, "Sine frequency")
+    parameter:C(1 µF, in: 10 nF .. 10 µF, step: 10 nF, "C, the coupling capacitor")
+    parameter:R(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "R, the load")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F, offset: U_offset)
+    part:C1(capacitor, [in, out], capacitance: C)
+    part:R1(resistor, [out, 0], resistance: R)
+    place:G1(at: 320 600, rotate: 90)
+    place:C1(at: 600 360)
+    place:R1(at: 880 600, rotate: 90)
+    mark:Jo(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: C1.positive, via: 320 360)
+    wire:W2(C1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: R1.positive)
+    wire:W4(G1.negative, to: Jb1.j)
+    wire:W5(Jb1.j, to: Jb2.j)
+    wire:W6(R1.negative, to: Jb2.j)
+    wire:W7(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 1 V/div)
+        probe:CH2(out, 1 V/div)
+        time(10 ms/div)
+    }
+    expect("the input carries its offset", from: "a sine about U_offset: the average is 2.5 V") {
+        measure(average, in, after: 60 ms)
+        near(2.5 V, +- 1%)
+    }
+    expect("the output's DC is gone", from: "after 6 RC, e⁻⁶ · 2.5 V ≈ 6 mV of the offset is left") {
+        measure(average, out, after: 60 ms)
+        within(-15 mV .. 15 mV)
+    }
+    expect("the sine passes whole", from: "|H| = 1 / √(1 + (fc / f)²), fc = 1 / (2π · 10 kΩ · 1 µF) = 16 Hz, f = 200 Hz: 0.997") {
+        measure(maximum, out, after: 60 ms)
+        near(1 V, +- 3%)
+    }
+    analysis(transient, for: 80 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 1, to: 100000, points: 200)
+}

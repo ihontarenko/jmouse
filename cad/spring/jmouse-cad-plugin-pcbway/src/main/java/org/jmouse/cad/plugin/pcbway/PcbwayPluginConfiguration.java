@@ -1,6 +1,7 @@
 package org.jmouse.cad.plugin.pcbway;
 
 import org.jmouse.cad.plugin.gerber.GerberSet;
+import org.jmouse.cad.settings.CadSettings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 public class PcbwayPluginConfiguration {
 
     @Bean
-    public PcbwayPlugin cadPcbwayPlugin(GerberSet set) {
-        return new PcbwayPlugin(set);
+    public PcbwayPlugin cadPcbwayPlugin(GerberSet set, CadSettings sections) {
+        return new PcbwayPlugin(set, sections);
     }
 }

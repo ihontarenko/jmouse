@@ -2,6 +2,7 @@ package org.jmouse.cad.pcb;
 
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.GrammarLinesParser;
+import org.jmouse.cad.document.ArrangementLines;
 import org.jmouse.cad.document.DocumentValues;
 import org.jmouse.el.grammar.LineGrammar;
 
@@ -77,25 +78,26 @@ public class PcbLinesParser extends GrammarLinesParser {
                     .build(),
             LineGrammar.line(PcbWords.LAYERS).slot(PcbWords.COUNT, QUANTITY).build(),
             path("edge"),
+            ArrangementLines.GROUP_LINE,
             LineGrammar.line(PcbWords.PLACE).slot(PcbWords.REFERENCE, WORD).optional(PcbWords.SHOWN, WORD).optional(PcbWords.FOOTPRINT, WORD).optional(PcbWords.NETS, CONNECTIONS)
                     .required(PcbWords.AT, POINT).optional(PcbWords.ROTATE, QUANTITY)
                     .optional(PcbWords.SIDE, WORD, PcbVocabulary.SIDES.toArray(String[]::new))
-                    .optional(PcbWords.GROUP, WORD)
+                    .including(ArrangementLines.CLAUSES)
                     .optional(PcbWords.ROLE, WORD, PcbVocabulary.PLACEMENT_ROLES.toArray(String[]::new))
                     .nested("reference", LineGrammar.line(PcbWords.REFERENCE).required(PcbWords.AT, POINT).optional(PcbWords.ROTATE, QUANTITY)
                             .optional(PcbWords.LAYER, WORD, PcbVocabulary.FIELD_LAYERS.toArray(String[]::new))
                             .build())
                     .build(),
             LineGrammar.line(PcbWords.TRACK).slot(PcbWords.LAYER, WORD).required(PcbWords.WIDTH, QUANTITY).optional(PcbWords.ROUNDING, QUANTITY)
-                    .required(PcbWords.FROM, POINT).repeated(PcbWords.TO, POINT).optional(PcbWords.GROUP, WORD).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new))
+                    .required(PcbWords.FROM, POINT).repeated(PcbWords.TO, POINT).including(ArrangementLines.CLAUSES).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new))
                     .check((track, grammar) -> track.values("to").isEmpty() ? grammar.shape() : null)
                     .build(),
             LineGrammar.line(PcbWords.ARC).slot(PcbWords.LAYER, WORD).required(PcbWords.WIDTH, QUANTITY).required(PcbWords.FROM, POINT)
-                    .required(PcbWords.THROUGH, POINT).required(PcbWords.TO, POINT).optional(PcbWords.GROUP, WORD).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new))
+                    .required(PcbWords.THROUGH, POINT).required(PcbWords.TO, POINT).including(ArrangementLines.CLAUSES).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new))
                     .build(),
             LineGrammar.line(PcbWords.VIA).required(PcbWords.AT, POINT).required(PcbWords.DRILL, QUANTITY).required(PcbWords.DIAMETER, QUANTITY)
                     .optional(PcbWords.FROM, WORD).optional(PcbWords.TO, WORD)
-                    .optional(PcbWords.OPEN, WORD, PcbVocabulary.VIA_OPENINGS.toArray(String[]::new)).optional(PcbWords.GROUP, WORD)
+                    .optional(PcbWords.OPEN, WORD, PcbVocabulary.VIA_OPENINGS.toArray(String[]::new)).including(ArrangementLines.CLAUSES)
                     .build(),
             LineGrammar.line(PcbWords.ZONE).slot(PcbWords.LAYER, WORD).required(PcbWords.NET, WORD).optional(PcbWords.CLEARANCE, QUANTITY)
                     .optional(PcbWords.PRIORITY, QUANTITY).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new)).ending(PcbWords.PATH, DocumentValues.PATH)
@@ -121,7 +123,7 @@ public class PcbLinesParser extends GrammarLinesParser {
 
     /** The grammar of a pcb's line by its word: what a program makes the line with. */
     public static LineGrammar grammar(String word) {
-        return LINES.stream().filter(line -> line.word().equals(word)).findFirst()
+        return LINES.stream().filter(line -> word.equals(line.termWord())).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("a pcb has no '" + word + "' line"));
     }
 

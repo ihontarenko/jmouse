@@ -1,0 +1,47 @@
+# The binary counter laid out as a pcb one could order: the 74HC161 and the LED bar in DIP-16 side by side, each
+# output's series resistor in 0805 between them, the power-on reset — R5 and C1 — beside the counter's clear pin, and a
+# 1×4 header where the bench's supply, ground and clock come in and the carry goes out. Two layers — the signals on the
+# top, the supply where it must cross under; the bottom a ground plane the bar's cathodes and the counter's ground pin
+# reach through their holes.
+pcb:binary-counter-pcb("Binary counter — pcb") {
+    meta {
+        summary: "The binary counter as a two-layer pcb: a 74HC161 and the LED bar in DIP-16, the series resistors and the power-on reset in 0805, a header to the bench, a ground plane under it all."
+        category: digital-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(binary-counter)
+    rules(standard)
+    layers(2)
+    edge("M1 0H45A1 1 0 0 1 46 1V29A1 1 0 0 1 45 30H1A1 1 0 0 1 0 29V1A1 1 0 0 1 1 0Z")
+    place(J1, at: 4 15)
+    place(R5, at: 9 3.5)
+    place(C1, at: 9 8)
+    place(U1, at: 17 15)
+    place(R1, at: 27 11.19)
+    place(R2, at: 27 13.73)
+    place(R3, at: 27 16.27)
+    place(R4, at: 27 18.81)
+    place(DS1, at: 37 15)
+    track(top, width: 0.4, from: 9.85 8, to: 11.45 8)
+    track(top, width: 0.6, from: 20.81 21.35, to: 20.81 23.89)
+    track(top, width: 0.4, from: 10 3.5, to: 10.58 3.5, to: 13.19 6.11)
+    track(top, width: 0.4, from: 10 3.5, to: 10 6.15, to: 8.15 8)
+    track(top, width: 0.4, from: 20.81 18.81, to: 26 18.81)
+    track(top, width: 0.4, from: 20.81 16.27, to: 26 16.27)
+    track(top, width: 0.4, from: 20.81 13.73, to: 26 13.73)
+    track(top, width: 0.4, from: 20.81 11.19, to: 26 11.19)
+    track(top, width: 0.4, from: 28 18.81, to: 28.11 18.81, to: 33.19 13.73)
+    track(top, width: 0.4, from: 28 11.19, to: 28.11 11.19, to: 33.19 6.11)
+    track(top, width: 0.4, from: 28 13.73, to: 28.11 13.73, to: 33.19 8.65)
+    track(top, width: 0.4, from: 28 16.27, to: 28.11 16.27, to: 33.19 11.19)
+    track(top, width: 0.6, from: 13.19 21.35, to: 20.81 21.35)
+    track(top, width: 0.6, from: 4 11.19, to: 4 7.5, to: 8 3.5)
+    track(top, width: 0.4, from: 4 16.27, to: 5.57 16.27, to: 13.19 8.65)
+    track(top, width: 0.6, from: 8 3.5, to: 9.2 2.3, to: 17 2.3, to: 20.81 6.11)
+    track(top, width: 0.6, from: 4 11.19, to: 2.4 12.79, to: 2.4 21.35, to: 13.19 21.35)
+    track(bottom, width: 0.4, from: 4 18.81, to: 10.6 12.21, to: 10.6 4.71, to: 16.87 4.71, to: 20.81 8.65)
+    via(at: 11.45 8, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.3, "M0.5 0.5H45.5V29.5H0.5Z")
+}

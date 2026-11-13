@@ -1,0 +1,78 @@
+# DC-06. A resistor across a source, read three ways: a voltmeter for U, an ammeter for I and a wattmeter for the power
+# it turns into heat, P = U · I = I² · R = U² / R. At a fixed voltage a smaller resistor takes more current and more
+# power; a quarter-watt resistor passes its rating once U² / R exceeds 0.25 W.
+circuit:resistor-power("Power in a resistor") {
+    meta {
+        summary: "A resistor turns P = U · I = U² / R into heat; the wattmeter reads it directly."
+        description: """
+            Idea: the current through a resistor carries energy from the source and the resistor turns it into heat
+            at a rate P = U · I. With Ohm's law the same power is I² · R, or U² / R.
+
+            Try: at 12 V, lower R from 1 kΩ to 500 Ω: the current doubles and so does the power. Raise the voltage
+            instead: double U and the power grows four times, because both U and I double. Find the R at which the
+            wattmeter passes a quarter of a watt — the rating of an ordinary small resistor.
+
+            Watch: the voltmeter (U), the ammeter (I) and the wattmeter (P). Multiply the first two: the product is
+            what the wattmeter shows. On a realistic bench, past its rating the resistor warms and finally burns open.
+
+            Ask: 12 V across 1 kΩ — how many milliwatts? At what voltage does the same resistor reach 0.25 W? Why
+            does a fixed current give more power in a larger resistor, while a fixed voltage gives less?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-06
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 1 V .. 24 V, step: 0.5 V, "Source voltage")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Resistance")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A1(ammeter, [in: in, out: sensed])
+    part:WM1(wattmeter, [in: sensed, out: top, plus: top, minus: 0])
+    part:R1(resistor, [top, 0], resistance: R)
+    part:VM1(voltmeter, [plus: top, minus: 0])
+    place:V1(at: 240 600, rotate: 90)
+    place:A1(at: 400 320)
+    place:WM1(at: 640 320)
+    place:R1(at: 880 600, rotate: 90)
+    place:VM1(at: 1120 600, rotate: 90)
+    mark:Jt(junction, at: 880 320)
+    mark:Jr(junction, at: 880 440)
+    mark:Jb1(junction, at: 640 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(V1.positive, to: A1.in, via: 240 320)
+    wire:W2(A1.out, to: WM1.in)
+    wire:W3(WM1.out, to: Jt.j)
+    wire:W4(Jt.j, to: WM1.plus, via: [880 160, 640 160])
+    wire:W5(Jt.j, to: Jr.j)
+    wire:W6(Jr.j, to: R1.positive)
+    wire:W7(Jr.j, to: VM1.plus, via: 1120 440)
+    wire:W8(WM1.minus, to: Jb1.j)
+    wire:W9(V1.negative, to: Jb1.j, via: 240 840)
+    wire:W10(Jb1.j, to: Jb2.j)
+    wire:W11(R1.negative, to: Jb2.j)
+    wire:W12(VM1.minus, to: Jb2.j, via: 1120 840)
+    wire:W13(Jb2.j, to: GND1.ground)
+    probe:CH1(top, 5 V/div)
+    probe:CH2(current, R1, 5 mA/div)
+    expect("the whole source stands across the resistor", from: "U_R = U = 12 V") {
+        measure(final, top)
+        near(12 V, +- 0.5%)
+    }
+    expect("12 mA flows, so the power is 144 mW", from: "I = U / R = 12 V / 1 kΩ; P = U · I = 12 V · 12 mA = U² / R") {
+        measure(final, current: R1)
+        near(12 mA, +- 0.5%)
+    }
+    expect("the resistor takes 144 mW", from: "P = U² / R = (12 V)² / 1 kΩ") {
+        measure(average, power: R1)
+        near(144 mW, +- 1%)
+    }
+    expect("twice the voltage, four times the power", from: "P = U² / R = (24 V)² / 1 kΩ = 576 mW") {
+        measure(average, power: R1, with: [U: 24 V])
+        near(576 mW, +- 1%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: R, from: 100, to: 10000, points: 100)
+}

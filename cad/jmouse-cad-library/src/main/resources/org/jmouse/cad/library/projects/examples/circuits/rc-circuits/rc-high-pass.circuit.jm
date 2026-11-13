@@ -1,0 +1,78 @@
+# RC-04. The low-pass turned round: the capacitor in the path, the resistor to ground, the output across the resistor.
+# Now slow changes are blocked — the capacitor has time to charge to them and hold them back — and fast ones pass. At
+# the cut-off fc = 1 / (2πRC) the output is 0.707 of the input and 45° AHEAD of it.
+circuit:rc-high-pass("RC high-pass filter") {
+    meta {
+        featured: yes
+        summary: "A sine through C into R: above fc = 1 / (2πRC) it passes, below it shrinks and leads; at fc it is 0.707 and 45° ahead."
+        description: """
+            Idea: the same two parts as the low-pass, swapped. The capacitor in the path charges up to whatever changes
+            slowly and holds it back, so only changes come through to the resistor. A fast sine passes almost whole;
+            a slow one is mostly held back; a constant voltage does not pass at all.
+
+            Try: the generator starts at the cut-off, 1.59 kHz for 1 kΩ and 100 nF. Turn the frequency up to 16 kHz:
+            the output is almost the input. Turn it down to 160 Hz: the output is a tenth of it, and nearly a quarter
+            of a period early. Change R or C and the cut-off moves.
+
+            Watch: CH1 and CH2 together — now the output's peaks come BEFORE the input's. At the cut-off the output's
+            peak is 0.707 of the input's and 45° earlier. In the frequency response the gain rises 20 dB a decade,
+            bends at fc and goes flat; the phase goes from +90° down to 0, passing +45° at fc.
+
+            Ask: how can an output come before its input — is it predicting the future? What does this filter do to a
+            square wave's flat tops, and to its edges?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-04, filters
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:F(1.59 kHz, in: 10 Hz .. 50 kHz, step: 10 Hz, "Generator frequency")
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R, the resistor across the output")
+    parameter:C(100 nF, in: 10 nF .. 1 µF, step: 10 nF, "C, the series capacitor")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:C1(capacitor, [in, out], capacitance: C)
+    part:R1(resistor, [out, 0], resistance: R)
+    place:G1(at: 320 600, rotate: 90)
+    place:C1(at: 600 360)
+    place:R1(at: 880 600, rotate: 90)
+    mark:Jo(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: C1.positive, via: 320 360)
+    wire:W2(C1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: R1.positive)
+    wire:W4(G1.negative, to: Jb1.j)
+    wire:W5(Jb1.j, to: Jb2.j)
+    wire:W6(R1.negative, to: Jb2.j)
+    wire:W7(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 500 mV/div)
+        probe:CH2(out, 500 mV/div)
+        time(200 µs/div)
+    }
+    expect("at the cut-off the output is 0.707 of the input", from: "|H| = (f / fc) / √(1 + (f / fc)²) = 1 / √2 at f = fc = 1 / (2π · 1 kΩ · 100 nF) = 1.59 kHz") {
+        measure(maximum, out, after: 2 ms)
+        near(0.707 V, +- 2%)
+    }
+    expect("and swings as far below zero", from: "a sine through a linear filter stays a sine about zero") {
+        measure(minimum, out, after: 2 ms)
+        near(-0.707 V, +- 2%)
+    }
+    expect("at the cut-off the capacitor holds as much as the resistor", from: "|1 − H| = 1 / |1 + jf/fc| = 1 / √2 at f = fc") {
+        measure(maximum, in - out, after: 2 ms)
+        near(0.707 V, +- 2%)
+    }
+    expect("at the cut-off the output leads by 45°", from: "arg H = 90° − arctan(f / fc) = 45° at f = fc") {
+        measure(phase, out, at: 1.59 kHz)
+        within(44.5 .. 45.5)
+    }
+    expect("the cut-off is where 1 / (2πRC) puts it", from: "fc = 1 / (2π · 1 kΩ · 100 nF) = 1.59 kHz") {
+        measure(corner, out)
+        near(1.59 kHz, +- 1%)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 10, to: 1000000, points: 200)
+}

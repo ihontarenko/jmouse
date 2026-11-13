@@ -100,9 +100,9 @@ Every refusal is an RFC 9457 problem document with `Content-Type: application/pr
 | 401 | `unauthenticated` | a write, and nobody is signed in |
 | 403 | `forbidden` | the reader may not do it |
 | 404 | `not-found` | nothing answers that id, slug or revision — or the reader may not see it (the two are not told apart) |
-| 409 | `conflict` | `version` is stale; a slug is taken; a category still files documents; another document still names the one deleted; nothing newer ships for `POST /documents/{id}/shipped` |
+| 409 | `conflict` | `version` is stale; a slug is taken; a category still files documents; another document still names the one deleted; nothing newer ships for `POST /documents/{id}/shipped`; a drawing written anew moves or removes what is held where it stands — a locked item, or one of a locked group — (`detail` names it: «DS1 is held where it stands — its group 'front-panel' is locked …»); a reader's Drafts archived |
 | 422 | `simulation-failed` | the circuit reads but does not run — `detail` says why |
-| 422 | `component-refused` | a component reads but the engine cannot compile it (§2.3) |
+| 422 | `component-refused` | a component reads but the engine cannot compile it (§2.4) |
 
 ### 1.6 Authorization
 
@@ -132,7 +132,7 @@ neither a rule nor `@PublicEndpoint`: an ungated route is a failure to boot.
 | GET | `/categories` | `?kind=` count only that kind | `Category[]` | public | ✅ |
 | PUT | `/categories/{code}` | `CategoryDraft` | `Category` | CATALOGUE_WRITE | ✅ |
 | DELETE | `/categories/{code}` | — | 204 | CATALOGUE_WRITE | ✅ |
-| GET | `/documents` | `?text= &category= &kind= &tag= &featured= &drafts= &page= &size=` | `Page<DocumentSummary>` | public | ✅ |
+| GET | `/documents` | `?text= &category= &kind= &tag= &role= &featured= &drafts= &page= &size=` — `role`: what a component is to a bench (`source`, `load`, `control`, `instrument`), or `any` for every bench device | `Page<DocumentSummary>` | public | ✅ |
 | POST | `/documents/summaries` | `{ "slugs": [] }` | `DocumentSummary[]`, in the order asked; one the reader cannot see is left out | public | ✅ |
 | GET | `/documents/{address}` | `address`: the id or the slug, and may carry `@revision` | `DocumentDetail` | public | ✅ |
 | POST | `/documents` | `{ "source" }` | 201 `DocumentDetail` | CATALOGUE_WRITE | ✅ |
@@ -153,7 +153,31 @@ neither a rule nor `@PublicEndpoint`: an ungated route is a failure to boot.
 | GET | `/owners/{type}/{id}/sheets` | — | `SheetView[]` — every circuit of the owner as a sheet of one design | OWNER_READ | ✅ |
 | GET | `/documents/{id}/sheet` | `?path=S1,S2` the blocks, outermost first | `SheetInstance` — that block as it runs inside the circuit | public, per document | ✅ |
 
-### 2.3 The library — what a sheet and a pcb are built from
+### 2.3 Projects — the reader's own and those the libraries ship
+
+A project is a document of the kind `project` (`<slug>.project.jm`), kept as ONE folder among its keeper's projects —
+`libraries/<handle>/projects/<slug>/` beside its `circuits/`, `pcbs/`, `panels/` (ADR 0006) — or shipped by a library
+(`projects/<slug>/` in it). Whose it is is read off its document, never off the request: every route below is
+`@PublicEndpoint` and decides in `CadProjects` — reading at the project's place (`OWNER_READ`), changing at it
+(`OWNER_WRITE`), a new one at the reader's own. What it holds is owned by `PROJECT:<slug>` and filed in no category.
+
+| Method | Path | Takes | Answers | Decided at | State |
+|---|---|---|---|---|---|
+| GET | `/projects` | `?includeArchived=` | `ProjectView[]` — the reader's own they may read, then the shipped ones | each project's place | ✅ |
+| GET | `/drafts` | — | `ProjectView` — the reader's Drafts, made on the first question | the reader's place | ✅ |
+| POST | `/projects` | `{ "title", "summary" }` | `ProjectView` — a design of the reader's, its address the title's first free slug | the reader's place | ✅ |
+| GET | `/projects/{slug}` | — | `ProjectView` | its place | ✅ |
+| PUT | `/projects/{slug}?version=` | `{ "title", "summary" }` | `ProjectView`; 409 `stale-revision` when it changed since `version` | its place | ✅ |
+| PUT | `/projects/{slug}/archived` | `{ "archived": true }` | `ProjectView` — kept, listed no more, taking nothing new; `false` brings it back | its place | ✅ |
+| GET | `/projects/{slug}/sheets` | — | `SheetView[]` — its circuits as the sheets of one design, kept or shipped alike | its place | ✅ |
+| GET | `/projects/{slug}/documents` | `?kind=` | `DrawnDocument[]` — what it holds, each one the reader may read | its place | ✅ |
+| GET | `/documents/{slug}/project` | — | `ProjectView` of the project holding that document; 404 when none does | the document's | ✅ |
+
+`ProjectView`: `{ document: DocumentSummary, purpose: "DESIGN" | "DRAFTS", writable, version, changedAt }` — `writable` says
+whether the reader may describe, archive or put work in it; `changedAt` is when it or anything it holds last changed. A reader's
+Drafts is never archived: the server answers 409 `conflict`, so loose work always has a place.
+
+### 2.4 The library — what a sheet and a pcb are built from
 
 | Method | Path | Takes | Answers | Capability | State |
 |---|---|---|---|---|---|
@@ -167,7 +191,33 @@ neither a rule nor `@PublicEndpoint`: an ungated route is a failure to boot.
 | GET | `/footprint-rules` | — | `LandPatternRules` — the land-pattern table the footprints are generated from | public | ✅ |
 | GET | `/pcb-rules` | — | `PcbRules` — the pcb standards table | public | ✅ |
 
-### 2.4 Simulation
+#### The settings tree (ADR 0004)
+
+Every value the engine computes and makes with is a **section** of one tree by subject — `pcb/layout`, `pcb/routing`,
+`pcb/physics/copper`, `pcb/artwork`, `pcb/layer-codes`, `solid/layers`, `schematic/pin-rules`, `schematic/lettering`, `library/kinds`,
+`output/jobs`, and a plugin's under its id, `plugin/cad-gerber/assembly` (`SettingsSection.ofPlugin`) — kept as
+`org/jmouse/cad/settings/<path>.json`, in the module that computes with it. A plugin contributes its own sections
+(`SettingsSection.POINT`). Each file is read once into its record, strictly — a field the record does not have, or one missing,
+is refused —, and every section is read when the server starts.
+
+A section's JSON Schema is never a file: `SettingsSchemas.of(section)` writes it from the record — every component a property,
+nested records, lists, maps and optionals followed down, an enum by the words its file says it in — and describes each property by
+its `@param`, the record by its own Javadoc. The words travel in the jar: **jmouse-descriptions**' annotation processor keeps
+every record's and enum's Javadoc beside its class (`META-INF/jmouse/descriptions/<binary name>.properties`) as the module
+compiles, and `Descriptions.of(type)` reads them back. Each module's settings test asks `SettingsSchemas.mismatches`: the file
+read into its record, every component described.
+
+| Method | Path | Takes | Answers | Capability | State |
+|---|---|---|---|---|---|
+| GET | `/settings` | — | `[{ path, title, owner, values: null }]` — every section, by path; `owner`: `engine-data` or `engine-settings` | public | ✅ |
+| GET | `/settings/{path}` | a section's path, or a branch's: `pcb` | `[{ path, title, owner, values, schema }]` — the section, or every section under the branch, each with the JSON Schema written from its record; none, 404 | public | ✅ |
+
+The interface reads the sections its `tree.json` lists as `served` (`pcb/artwork`, `pcb/layout`, `pcb/layer-codes`, `library/kinds`,
+`schematic/lettering`, and `plugin/cad-mesh/markings` where that plugin runs), installed once a visit before anything is drawn
+(`ServedSettingsGate`). jmCAD opens `GET /settings/**` to a signed-out visitor: it is the engine's data, the same for every reader;
+a plugin's keys are `/plugin-settings`, which stays closed.
+
+### 2.5 Simulation
 
 | Method | Path | Takes | Answers | Capability | State |
 |---|---|---|---|---|---|
@@ -177,7 +227,7 @@ neither a rule nor `@PublicEndpoint`: an ungated route is a failure to boot.
 | POST | `/simulations/jobs/{jobId}/cancel` | — | `Job` | SIMULATION_RUN | ✅ |
 | POST | `/expectations` | `{ "reference" }` or `{ "source" }`, and `owner` | `Verdict[]` — every expectation the document writes, measured | SIMULATION_RUN | ✅ |
 
-### 2.5 Editing — the jM language for editors
+### 2.6 Editing — the jM language for editors
 
 An editor never writes text itself: it sends the text it holds and the change, and the server answers the next text,
 written by the language's own writer. The interface keeps no grammar of its own.
@@ -193,7 +243,7 @@ written by the language's own writer. The interface keeps no grammar of its own.
 | POST | `/language/pcb` | `{ "source", "drawing": PcbDrawing, "title", "category" }` | `EditedDocument` — a `pcb` | public | ✅ |
 | POST | `/language/drawn` | `{ "source" }` | `DrawnText` — a drawn kind's text drawn without saving it | public | ✅ |
 
-### 2.6 Exchange — formats the plugins bring
+### 2.7 Exchange — formats the plugins bring
 
 ⚠️ **A format is a plugin's, never the engine's.** It brings a `DocumentImport` (`cad.exchange.imports`) and/or a
 `DocumentExport` (`cad.exchange.exports`), and the routes below are the same for every format: an interface knows
@@ -243,7 +293,7 @@ Another engine's transient — `GET /simulations/engines` (`[{ "id", "title", "a
 Every route decides inside its service through the host's `CadAuthority`, so it needs no rule of the product's.
 `owner` (`TYPE:id`, optional) lets a conversion read that owner's components too, once the reader may read there.
 
-### 2.7 Parts from suppliers
+### 2.8 Parts from suppliers
 
 ⚠️ **The search is the engine's; the places beyond the catalogue are the plugins'.** It asks the catalogue first, then
 every provider brought to `cad.parts.providers` — Nexar (`cad-nexar`, `jmouse-cad-plugin-nexar`), Mouser and DigiKey
@@ -306,7 +356,7 @@ shown. ⚠️ **Nexar's terms allow showing, not keeping**: its candidates are n
 `link` for the interface to show, and a fetch from it is 409. A document whose slug is taken already is reused, never
 written over. Refusals: 400 for an empty query or a missing `identifier`, 404 for a provider not there.
 
-### 2.8 Plugins
+### 2.9 Plugins
 
 | Method | Route | Takes | Answers | Access | State |
 |---|---|---|---|---|---|
@@ -364,7 +414,7 @@ refused as an upload and no part has such a section.
 | POST | `/mounts/{mount}/move` | `{ "from", "to" }` | 204; 409 when something stands at `to` | ✅ |
 | DELETE | `/mounts/{mount}/entries` | `?key= &folder=true` | 204; a folder only when empty (409 otherwise) | ✅ |
 
-### 2.9 Not carried over from `/jmouse/parallax/api`
+### 2.12 Not carried over from `/jmouse/parallax/api`
 
 | Old route | Why it is gone |
 |---|---|
@@ -415,6 +465,7 @@ it last.
   "origin": "CATALOGUE",
   "owner": null,
   "tags": ["logic", "cmos"],
+  "benchRole": null,
   "revision": 4,
   "revisionLabel": "20261027_002",
   "updatedAt": "2026-10-27T14:03:11.204Z",
@@ -585,7 +636,7 @@ so a drawing of the block labels its parts with the block's figures, not the she
 ]
 ```
 
-Every list of §2.3 takes `?owner=PROJECT:42`: the catalogue's documents the reader may see, then that owner's own — when
+Every list of §2.4 takes `?owner=PROJECT:42`: the catalogue's documents the reader may see, then that owner's own — when
 the reader may read there — each by title. Without it, the catalogue's alone.
 
 `ComponentView` is the component **with its lineage applied** — its bases' and families' parameters, pins and equations

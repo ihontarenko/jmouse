@@ -73,9 +73,9 @@ final class LibrePcbBoardImport {
         reading.copper(tracks, vias);
         PcbDrawing drawing = new PcbDrawing(circuit.circuit(), reading.rules(), reading.netClasses(), PcbDrawing.Sizes.NONE, List.of(), List.of(),
                 2 + board.innerLayers(), reading.outline(), reading.placements(), tracks, List.of(), vias, reading.zones(), List.of(), List.of(),
-                reading.texts(), reading.holes(), reading.shapes(), List.of());
+                reading.texts(), reading.holes(), reading.shapes(), List.of(), List.of());
         DocumentNode document = new DocumentNode(PcbModule.PCB, title, LibrePcbNames.pcb(title), null, 1);
-        document.addExpression(MetaNode.filed(SUMMARY + file, null, filing.category(), filing.circuitTags()));
+        document.addExpression(MetaNode.filed(SUMMARY + file, null, null, filing.circuitTags()));
         drawing.lines().forEach(document::addExpression);
         return new Pcb(document, reading.notes);
     }

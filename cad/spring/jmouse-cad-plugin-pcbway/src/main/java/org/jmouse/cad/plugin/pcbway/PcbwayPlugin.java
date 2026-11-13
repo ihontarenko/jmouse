@@ -1,8 +1,8 @@
 package org.jmouse.cad.plugin.pcbway;
 
+import org.jmouse.settings.Section;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.settings.SettingsSection;
-import org.jmouse.cad.settings.SettingsOwner;
 import org.jmouse.cad.exchange.DocumentExport;
 import org.jmouse.cad.exchange.OutputJob;
 import org.jmouse.cad.plugin.gerber.AssemblyProfile;
@@ -18,22 +18,29 @@ import java.util.Set;
 
 /**
  * PCBWay as a pcb house: the Gerber set with its assembly tables in PCBWay's columns, by the profile in
- * this jar ({@code settings/plugin/pcbway/assembly}). It stands on the Gerber plugin; with that one off, this one is refused too.
+ * this jar ({@code settings/plugin/cad-pcbway/assembly}). It stands on the Gerber plugin; with that one off, this one is refused too.
  */
 public final class PcbwayPlugin implements Plugin {
 
-    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/pcbway/assembly. */
-    public static final SettingsSection<AssemblyProfile> ASSEMBLY = new SettingsSection<>("plugin/pcbway/assembly", "PCBWay assembly files", SettingsOwner.ENGINE_DATA, AssemblyProfile.class);
-
     public static final String ID = "cad-pcbway";
+
+    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/cad-pcbway/assembly. */
+    public static final SettingsSection<AssemblyProfile> ASSEMBLY = SettingsSection.ofPlugin(ID, "assembly", "PCBWay assembly files", AssemblyProfile.class);
 
     /** The format's word on the exchange routes: {@code /exchange/pcbway/export}. */
     static final String FORMAT = "pcbway";
 
-    private final GerberSet set;
+    private final GerberSet   set;
+    private final CadSettings sections;
 
-    public PcbwayPlugin(GerberSet set) {
+    public PcbwayPlugin(GerberSet set, CadSettings sections) {
         this.set = set;
+        this.sections = sections;
+    }
+
+    @Override
+    public List<Section> settings() {
+        return List.of(CadSettings.declarationOf(ASSEMBLY));
     }
 
     @Override
@@ -44,9 +51,7 @@ public final class PcbwayPlugin implements Plugin {
 
     @Override
     public void register(PluginRegistration registration) {
-        registration.contribute(SettingsSection.POINT, ASSEMBLY);
-        registration.contribute(DocumentExport.POINT, new FabricationExport(FORMAT, "PCBWay", set,
-                CadSettings.read(PcbwayPlugin.ASSEMBLY)));
+        registration.contribute(DocumentExport.POINT, new FabricationExport(FORMAT, "PCBWay", set, () -> sections.read(ASSEMBLY)));
         registration.contribute(OutputJob.POINT, new OutputJob(FORMAT, "PCBWay order", List.of(FORMAT)));
     }
 }

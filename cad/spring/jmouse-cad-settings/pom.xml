@@ -41,7 +41,12 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-document</artifactId>
         </dependency>
-        <!-- A section's file and its schema, read as JSON -->
+        <!-- What each record and its components say of themselves: a section's schema is written from them -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+        </dependency>
+        <!-- A section's file read, and its schema written, as JSON -->
         <dependency>
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>

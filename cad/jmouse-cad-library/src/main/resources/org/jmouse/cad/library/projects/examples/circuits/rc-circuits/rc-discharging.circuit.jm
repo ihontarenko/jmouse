@@ -1,0 +1,74 @@
+# RC-02. A square source is a changeover: for the first half of its period it connects the resistor to U, for the
+# second half it connects it to 0 V. So the capacitor charges, then gives its charge back through the same resistor —
+# Vc falls along e^(−t/RC) and the current flows the other way. One period of 10 τ is one charge and one discharge.
+circuit:rc-discharging("Discharging a capacitor through a resistor") {
+    meta {
+        summary: "A changeover charges C through R, then shorts R to ground: Vc falls to 37 % in one τ and the current reverses."
+        description: """
+            Idea: a charged capacitor is a small source of its own. Connect its resistor to ground and it pushes its
+            charge back through it: the current flows the other way, starts at V0 / R and fades with the voltage, both
+            along e^(−t/RC). Here a square source is the changeover switch — U for the first half of its period, 0 V
+            for the second.
+
+            Try: raise U and the capacitor starts its discharge from higher, but falls in the same time. Raise R or C:
+            τ grows and the capacitor no longer charges fully, nor empties, in a half period. Move the duty: a shorter
+            charge leaves less to give back.
+
+            Watch: CH1, the source; CH2, the capacitor, rising, then falling — fast at first, slowly at the end; CH3,
+            the current, positive while charging and negative while discharging. One τ after the changeover Vc has
+            fallen to 36.8 % of where it started.
+
+            Ask: why does the current change its sign at the changeover while the voltage across the capacitor does
+            not jump? Where did the energy the capacitor held go?
+            """
+        category: rc-circuits
+        tags: rc, example, rc-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(5 V, in: 1 V .. 12 V, step: 0.5 V, "Charging voltage, the capacitor's start of discharge")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R, the resistor")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "C, the capacitor")
+    parameter:f(100 Hz, in: 10 Hz .. 1 kHz, step: 10 Hz, "Changeover frequency")
+    part:G1(square-generator, [positive: in, negative: 0], high: U, low: 0 V, frequency: f, duty: 0.5)
+    part:R1(resistor, [in, out], resistance: R)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    part:VM1(voltmeter, [plus: out, minus: 0])
+    place:G1(at: 320 600, rotate: 90)
+    place:R1(at: 600 360)
+    place:C1(at: 880 600, rotate: 90)
+    place:VM1(at: 1120 600, rotate: 90)
+    mark:Jo(junction, at: 880 360)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 880 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: R1.positive, via: 320 360)
+    wire:W2(R1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: C1.positive)
+    wire:W4(Jo.j, to: VM1.plus, via: 1120 360)
+    wire:W5(G1.negative, to: Jb1.j)
+    wire:W6(Jb1.j, to: Jb2.j)
+    wire:W7(C1.negative, to: Jb2.j)
+    wire:W8(VM1.minus, to: Jb2.j, via: 1120 840)
+    wire:W9(Jb2.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 2 V/div)
+        probe:CH2(out, 2 V/div)
+        probe:CH3(current, R1, 2 mA/div)
+        time(1 ms/div)
+    }
+    expect("one τ into the discharge the capacitor keeps 37 %", from: "Vc = V0 · e⁻¹, V0 = 5 V · (1 − e⁻⁵) after 5 τ of charge: 0.993 · 5 V · 0.368") {
+        measure(maximum, out, after: 6 ms)
+        near(1.827 V, +- 2%)
+    }
+    expect("the charging current starts at U / R", from: "I = U / R = 5 V / 1 kΩ") {
+        measure(maximum, current: R1)
+        near(5 mA, +- 2%)
+    }
+    expect("the discharge current flows the other way", from: "I = −V0 / R = −4.97 V / 1 kΩ") {
+        measure(minimum, current: R1)
+        near(-4.97 mA, +- 2%)
+    }
+    analysis(transient, for: 9.9 ms)
+    view:transient_response(primary)
+}

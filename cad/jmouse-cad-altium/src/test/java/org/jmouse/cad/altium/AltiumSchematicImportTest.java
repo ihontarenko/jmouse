@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AltiumSchematicImportTest {
 
     /** The marks as the shipped library draws them. */
-    private static final SheetMarks MARKS = SheetMarks.of(CadLibrary.library(), AltiumLibraries.standard().markSymbols());
+    private static final SheetMarks MARKS = SheetMarks.of(CadLibrary.library(), AltiumLibraries.shipped().markSymbols());
 
     /**
      * A resistor turned upright: its pin 1 under a label IN, its pin 2 wired down to a ground port; a second resistor
@@ -63,7 +63,7 @@ class AltiumSchematicImportTest {
 
     private ImportedDocuments imported() {
         AltiumSchematic sheet = AltiumSchematicReader.read("divider.SchDoc", SHEET.getBytes(StandardCharsets.US_ASCII));
-        return AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", AltiumLibraries.standard(), MARKS, CatalogueDocuments.empty());
+        return AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", AltiumLibraries.shipped(), MARKS, CatalogueDocuments.empty());
     }
 
     /** The upright resistor's footprint, as Altium names it: its implementation list holding R0805 current, no library said. */
@@ -92,7 +92,7 @@ class AltiumSchematicImportTest {
 
     private ImportedDocuments importedWith(String footprint, CatalogueDocuments catalogue) {
         AltiumSchematic sheet = AltiumSchematicReader.read("divider.SchDoc", withFootprint(footprint).getBytes(StandardCharsets.US_ASCII));
-        return AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", AltiumLibraries.standard(), MARKS, catalogue);
+        return AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", AltiumLibraries.shipped(), MARKS, catalogue);
     }
 
     @Test
@@ -120,7 +120,7 @@ class AltiumSchematicImportTest {
     void aPartIsFiledByItsLibrary() {
         String placed = SHEET.replace("|RECORD=1|LIBREFERENCE=RES|", "|RECORD=1|LIBREFERENCE=RES|SOURCELIBRARYNAME=Miscellaneous Devices.IntLib|");
         AltiumSchematic sheet = AltiumSchematicReader.read("divider.SchDoc", placed.getBytes(StandardCharsets.US_ASCII));
-        AltiumLibraries filing = AltiumLibraries.standard();
+        AltiumLibraries filing = AltiumLibraries.shipped();
         ImportedDocuments imported = AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", filing, MARKS, CatalogueDocuments.empty());
         String category = filing.libraryCategory() + "-miscellaneous-devices-library";
         assertEquals(List.of(category, "altium-res-symbol", "altium-res"), imported.library().stream().map(DocumentNode::slug).toList());
@@ -143,7 +143,7 @@ class AltiumSchematicImportTest {
     @DisplayName("a bus line comes across whole, named by the label on it with the nets it carries; that label joins no net")
     void aBusLineComesAcrossNamed() {
         AltiumSchematic sheet = AltiumSchematicReader.read("divider.SchDoc", WITH_BUS.getBytes(StandardCharsets.US_ASCII));
-        String circuit = language.write(AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", AltiumLibraries.standard(), MARKS, CatalogueDocuments.empty()).root());
+        String circuit = language.write(AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", AltiumLibraries.shipped(), MARKS, CatalogueDocuments.empty()).root());
         assertTrue(circuit.contains("bus:B1(D"), circuit);
         assertTrue(circuit.contains("D0") && circuit.contains("D3"), circuit);
         assertEquals(1, circuit.split("bus:", -1).length - 1, circuit);

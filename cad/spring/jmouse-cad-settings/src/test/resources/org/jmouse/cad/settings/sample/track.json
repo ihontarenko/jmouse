@@ -1,0 +1,8 @@
+{
+  "width": 0.25,
+  "style": "dashed",
+  "note": null,
+  "layers": ["top", "bottom"],
+  "clearances": { "fine": { "gap": 0.1 } },
+  "silent": 1
+}

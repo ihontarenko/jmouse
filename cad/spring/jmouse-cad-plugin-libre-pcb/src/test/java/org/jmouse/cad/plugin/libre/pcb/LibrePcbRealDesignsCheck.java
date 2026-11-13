@@ -53,7 +53,7 @@ class LibrePcbRealDesignsCheck {
         }
         assertFalse(markers.isEmpty(), "no project under " + root);
         for (Path marker : markers) {
-            ImportedDocuments imported = new LibrePcbDesignReading(LibrePcbFiling.standard()).read(
+            ImportedDocuments imported = new LibrePcbDesignReading(LibrePcbFiling.readFrom(LibrePcbFiling.SHIPPED)).read(
                     new ExchangeFiles(filesBeside(marker), marker.getFileName().toString(), null), CadLibrary.library());
             Map<String, DocumentNode> made = new HashMap<>();
             imported.library().forEach(document -> made.put(document.slug(), document));
@@ -95,7 +95,7 @@ class LibrePcbRealDesignsCheck {
             markers = found.filter(path -> LibrePcbFile.isProject(path.toString())).toList();
         }
         for (Path marker : markers) {
-            LibrePcbDesignReading reading = new LibrePcbDesignReading(LibrePcbFiling.standard());
+            LibrePcbDesignReading reading = new LibrePcbDesignReading(LibrePcbFiling.readFrom(LibrePcbFiling.SHIPPED));
             ImportedDocuments folder = reading.read(new ExchangeFiles(filesBeside(marker), marker.getFileName().toString(), null), CadLibrary.library());
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (ZipOutputStream zip = new ZipOutputStream(bytes); Stream<Path> found = Files.walk(marker.getParent())) {

@@ -1,0 +1,68 @@
+# RLC-04. A resistor in series, then a coil and a capacitor in parallel to ground, read across them. Far below f0 the
+# coil shorts the output, far above it the capacitor does; only near f0 = 1/(2π√LC) do the two cancel, the pair looks
+# like an open circuit, and the whole input reaches the output. The resistor sets how narrow the band is.
+circuit:band-pass("RLC band-pass filter") {
+    meta {
+        summary: "A resistor into a parallel LC: only frequencies near f0 = 1/(2π√LC) reach the output."
+        description: """
+            Idea: a coil passes low frequencies to ground, a capacitor passes high ones. Put both from the output to
+            ground and every frequency is shorted away — except near f0 = 1/(2π√LC), where their currents cancel and
+            the pair stops conducting. Only that band of frequencies gets through the series resistor.
+
+            Try: start at f0 — 1592 Hz. Move the frequency a few hundred hertz either way: the output shrinks. Raise R:
+            the band gets narrower and the peak sharper. Change L or C: the band moves.
+
+            Watch: the frequency response — one peak at f0 reaching 0 dB, falling on both sides. On the screen, CH2
+            follows CH1 at f0, while CH3, the series resistor's current, is almost nothing.
+
+            Ask: the bandwidth is f0 / Q with Q = R·√(C/L). How wide is the band with 1 kΩ, and what R halves it?
+            """
+        category: resonance
+        tags: rlc, example, rlc-04
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:F(1592 Hz, in: 200 Hz .. 10 kHz, step: 1 Hz, "Generator frequency")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Series resistance: the narrower band the larger it is")
+    parameter:L(10 mH, in: 1 mH .. 100 mH, step: 1 mH, "Inductance")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "Capacitance")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:R1(resistor, [in, out], resistance: R)
+    part:L1(inductor, [out, 0], inductance: L)
+    part:C1(capacitor, [out, 0], capacitance: C)
+    place:G1(at: 320 640, rotate: 90)
+    place:R1(at: 600 440)
+    place:L1(at: 880 640, rotate: 90)
+    place:C1(at: 1120 640, rotate: 90)
+    mark:Jo(junction, at: 880 440)
+    mark:Jb1(junction, at: 880 840)
+    mark:Jb2(junction, at: 1120 840)
+    mark:GND1(ground, at: 880 920)
+    wire:W1(G1.positive, to: R1.positive, via: 320 440)
+    wire:W2(R1.negative, to: Jo.j)
+    wire:W3(Jo.j, to: L1.positive)
+    wire:W4(Jo.j, to: C1.positive, via: 1120 440)
+    wire:W5(G1.negative, to: Jb1.j, via: 320 840)
+    wire:W6(L1.negative, to: Jb1.j)
+    wire:W7(Jb1.j, to: Jb2.j)
+    wire:W8(C1.negative, to: Jb2.j)
+    wire:W9(Jb1.j, to: GND1.ground)
+    probes {
+        probe:CH1(in, 0.5 V/div)
+        probe:CH2(out, 0.5 V/div)
+        probe:CH3(current, R1, 0.1 mA/div)
+        time(200 µs/div)
+    }
+    expect("at f0 the whole input reaches the output", from: "the parallel LC is an open circuit at f0 = 1/(2π√LC) = 1592 Hz: out = in") {
+        measure(maximum, out, after: 12 ms)
+        near(1 V, +- 3%)
+    }
+    expect("because almost no current flows through R", from: "the source sees the open pair: I = (in − out) / R ≈ 0") {
+        measure(maximum, current: R1, after: 12 ms)
+        within(0 mA .. 0.05 mA)
+    }
+    analysis(transient, for: 15 ms)
+    view:transient_response(primary)
+    view:frequency_response(from: 100, to: 20000, points: 300)
+}

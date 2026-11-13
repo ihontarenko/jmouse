@@ -1,0 +1,25 @@
+# A mains transformer's 40 V winding: a sine of 56.6 V peak at 50 Hz, what it gives a rectifier. What a bench puts at a
+# design's AC input to run it as it is used.
+
+component:transformer-secondary("Transformer secondary, 40 V AC", type: generator) {
+    meta {
+        designator: G
+        summary: "A mains transformer's 40 V RMS winding at 50 Hz, a sine of 56.6 V peak"
+        category: sources
+        bench: source
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    extends:sine-generator
+
+    parameter:amplitude(56.6 V, "peak voltage: 40 V RMS times the square root of two")
+    parameter:frequency(50 Hz, "the grid's frequency the transformer is fed at")
+
+    pin:positive(analog, 1, "one end of the winding")
+    pin:negative(analog, 2, "the other end")
+
+    symbol(uses: "SY.SOURCE:VOLTAGE-ALTERNATING") {
+        bind:a(pin: positive)
+        bind:b(pin: negative)
+    }
+}

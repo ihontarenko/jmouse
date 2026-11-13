@@ -3,6 +3,11 @@ package org.jmouse.cad.circuit;
 import org.jmouse.cad.DocumentHead;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Parameter;
+import org.jmouse.cad.drawing.ArrangedDrawing;
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
+import org.jmouse.cad.drawing.DrawnGroups;
+import org.jmouse.cad.drawing.StandingItem;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +20,11 @@ import java.util.Optional;
  * @param analysis how it is run, or null where whoever runs it says
  * @param frame    the frame its sheet stands in, by slug — {@code frame iso-a4-landscape-frame} —, or null
  * @param boundary what it hands across its sheet's edge when it is placed as a block
+ * @param groups   the groups its layout's items are chosen and moved with, each with its own state
  */
 public record Circuit(DocumentHead head, List<Parameter> parameters, List<Part> parts, List<Placement> layout,
                       List<Probe> probes, Formula timeBase, List<Expectation> expectations, Analysis analysis,
-                      List<View> views, String frame, SheetBoundary boundary) {
+                      List<View> views, String frame, SheetBoundary boundary, List<DrawnGroup> groups) implements ArrangedDrawing {
 
     public static final String GROUND = "0";
 
@@ -30,6 +36,19 @@ public record Circuit(DocumentHead head, List<Parameter> parameters, List<Part> 
         expectations = List.copyOf(expectations);
         views = List.copyOf(views);
         boundary = boundary == null ? SheetBoundary.NONE : boundary;
+        groups = groups == null ? List.of() : List.copyOf(groups);
+    }
+
+    /** Its layout's items as a lock looks at them: each named by its reference, apart from how it stands. */
+    @Override
+    public List<StandingItem> standingItems() {
+        return layout.stream().map(placement -> new StandingItem(placement instanceof Placement.PlacedPart part ? part.placedName() : placement.reference(),
+                placement.arranged(Arrangement.FREE), placement.arrangement())).toList();
+    }
+
+    @Override
+    public DrawnGroups drawnGroups() {
+        return new DrawnGroups(groups);
     }
 
     public Optional<Part> part(String reference) {

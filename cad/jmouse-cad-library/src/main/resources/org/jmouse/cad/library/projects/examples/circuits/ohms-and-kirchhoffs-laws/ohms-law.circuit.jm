@@ -1,0 +1,61 @@
+# DC-01. One resistor across a source: the whole source voltage stands across it, and the current is that voltage
+# divided by the resistance. The voltmeter reads U, the ammeter reads I, and the sweep over the source draws I(U) as a
+# straight line through zero whose slope is 1 / R — the resistor's conductance.
+circuit:ohms-law("Ohm's law") {
+    meta {
+        summary: "One resistor across a source: I = U / R, a straight line through zero."
+        description: """
+            Idea: a resistor lets through a current in proportion to the voltage across it. Double the voltage and
+            the current doubles; double the resistance and it halves. The ratio U / I is the resistance itself.
+
+            Try: raise the source voltage and watch the ammeter climb in step. Then raise R at a fixed voltage: the
+            current falls. Halve R: the current doubles.
+
+            Watch: the voltmeter — the whole source voltage stands across the resistor, nothing is lost on the
+            wires —, the ammeter, and the sweep: the current against the voltage is a straight line through zero
+            whose slope is 1 / R. A larger resistor gives a flatter line.
+
+            Ask: with 12 V across 1 kΩ, what current flows? What resistance lets 24 mA through at the same voltage?
+            What power does the resistor take, P = U · I?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 0 V .. 24 V, step: 0.5 V, "Source voltage")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Resistance")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A1(ammeter, [in: in, out: top])
+    part:R1(resistor, [top, 0], resistance: R)
+    part:VM1(voltmeter, [plus: top, minus: 0])
+    place:V1(at: 320 560, rotate: 90)
+    place:A1(at: 520 320)
+    place:R1(at: 760 560, rotate: 90)
+    place:VM1(at: 1040 560, rotate: 90)
+    mark:Jt(junction, at: 760 320)
+    mark:Jb(junction, at: 760 800)
+    mark:GND1(ground, at: 760 880)
+    wire:W1(V1.positive, to: A1.in, via: 320 320)
+    wire:W2(A1.out, to: Jt.j)
+    wire:W3(Jt.j, to: R1.positive)
+    wire:W4(Jt.j, to: VM1.plus, via: 1040 320)
+    wire:W5(V1.negative, to: Jb.j, via: 320 800)
+    wire:W6(R1.negative, to: Jb.j)
+    wire:W7(VM1.minus, to: Jb.j, via: 1040 800)
+    wire:W8(Jb.j, to: GND1.ground)
+    probe:CH1(top, 5 V/div)
+    probe:CH2(current, R1, 5 mA/div)
+    expect("the whole source voltage stands across the resistor", from: "nothing else in the loop drops: U_R = U = 12 V") {
+        measure(final, top)
+        near(12 V, +- 0.5%)
+    }
+    expect("12 V across 1 kΩ drives 12 mA", from: "I = U / R = 12 V / 1 kΩ") {
+        measure(final, current: R1)
+        near(12 mA, +- 0.5%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: U, from: 0, to: 24, points: 49)
+}

@@ -1,0 +1,83 @@
+# A PC817 optocoupler carrying a 1 kHz square from one circuit to another that shares no wire with it: the input side
+# runs from its own 5 V generator and ground, the output side from its own 12 V supply and its own, isolated ground.
+# Only light crosses: the LED lights while the input is high, the phototransistor conducts and pulls its 10 kΩ
+# pull-up down, so the output is the input inverted — and moved from a 5 V world to a 12 V one.
+circuit:optocoupler-isolation("Optocoupler isolation") {
+    meta {
+        summary: "A PC817 carries a 5 V square into a separate 12 V circuit with its own ground: the output inverted on a pull-up, nothing but light between them."
+        description: """
+            Idea: an optocoupler joins two circuits with light instead of a wire. Its LED, on the input side,
+            shines on a phototransistor on the output side; the transistor's collector current is the LED's
+            current times the current transfer ratio (CTR — 50 % to 600 % for a PC817, by rank). The two sides can
+            sit volts or kilovolts apart: a microcontroller can switch a mains circuit, or two grounds that must
+            never meet can still talk.
+
+            Try: raise the LED resistor — the LED's current falls, and once CTR · I_F is less than the pull-up
+            needs (about 1.2 mA at 12 V through 10 kΩ) the output stops reaching the bottom. Lower the pull-up
+            resistor and the same happens sooner. Raise the frequency: this model has no slow edges, but a real
+            PC817 needs microseconds to switch.
+
+            Watch: the input (CH1, against the input's ground) and the output (CH2, against its own isolated
+            ground): high in, low out; low in, 12 V out. The voltmeter on the output side reads against the
+            isolated ground, never the input's.
+
+            Ask: with a 330 Ω resistor from 5 V and the LED dropping 1.2 V, what is I_F? With a CTR of 100 %, what
+            is the largest pull-up current the output can still sink fully?
+            """
+        category: signal-circuits
+        tags: signals, example, sg-04, optocoupler, isolation
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:R_led(330 Ω, in: 100 Ω .. 47 kΩ, step: 10 Ω, "LED series resistor")
+    parameter:R_pull_up(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Output pull-up resistor")
+    parameter:f(1 kHz, in: 100 Hz .. 20 kHz, step: 100 Hz, "Input frequency")
+    part:G1(square-generator, [positive: input, negative: 0], high: 5 V, frequency: f, duty: 0.5)
+    part:RF(resistor, [input, led], resistance: R_led)
+    part:U1(pc817, [anode: led, cathode: 0, collector: output, emitter: isolated])
+    part:V2(voltage-source, [positive: supply, negative: isolated], U_output: 12 V)
+    part:RP(resistor, [supply, output], resistance: R_pull_up)
+    part:VM1(voltmeter, [plus: output, minus: isolated])
+    place:G1(at: 240 680, rotate: 90)
+    place:RF(at: 400 400)
+    place:U1(at: 800 600)
+    place:RP(at: 1120 400, rotate: 90)
+    place:VM1(at: 1320 760, rotate: 90)
+    place:V2(at: 1520 680, rotate: 90)
+    mark:Jo(junction, at: 1120 560)
+    mark:Ja(junction, at: 600 920)
+    mark:Jb1(junction, at: 1040 920)
+    mark:Jb2(junction, at: 1320 920)
+    mark:GND1(ground, at: 600 1000)
+    mark:GND2(ground, isolated, at: 1040 1000)
+    wire:W1(G1.positive, to: RF.positive, via: 240 400)
+    wire:W2(RF.negative, to: U1.anode, via: [560 400, 560 560])
+    wire:W3(U1.cathode, to: Ja.j, via: 600 640)
+    wire:W4(G1.negative, to: Ja.j, via: 240 920)
+    wire:W5(Ja.j, to: GND1.ground)
+    wire:W6(U1.collector, to: Jo.j)
+    wire:W7(RP.negative, to: Jo.j)
+    wire:W8(Jo.j, to: VM1.plus, via: 1320 560)
+    wire:W9(RP.positive, to: V2.positive, via: [1120 240, 1520 240])
+    wire:W10(U1.emitter, to: Jb1.j, via: 1040 640)
+    wire:W11(Jb1.j, to: GND2.ground)
+    wire:W12(Jb1.j, to: Jb2.j)
+    wire:W13(VM1.minus, to: Jb2.j)
+    wire:W14(V2.negative, to: Jb2.j, via: 1520 920)
+    probe:CH1(input, 5 V/div)
+    probe:CH2(output, against: isolated, 5 V/div)
+    expect("input high: the phototransistor pulls the output to the bottom", from: "I_F = (5 V − 1.2 V) / 330 Ω ≈ 11.5 mA; CTR 1 gives far more than 12 V / 10 kΩ") {
+        measure(minimum, output - isolated, after: 0.1 ms)
+        within(0 V .. 0.3 V)
+    }
+    expect("input low: the pull-up lifts the output to its own 12 V", from: "no light, only the dark current through 10 kΩ") {
+        measure(maximum, output - isolated, after: 0.1 ms)
+        within(11.9 V .. 12.05 V)
+    }
+    expect("inverted: the output is low while the input is high, half the time", from: "duty 0.5 in, the output below its middle for the same half") {
+        measure(duty, output - isolated, below: 6 V, after: 0.1 ms)
+        near(0.5, +- 2%)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+}

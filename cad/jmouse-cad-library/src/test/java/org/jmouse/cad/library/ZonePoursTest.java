@@ -48,7 +48,7 @@ class ZonePoursTest {
         PcbDrawing pcb = PcbDrawing.of(document);
         FootprintDrawing chip = FootprintDrawing.of(CadLibrary.library().findCoded("FP.CHIP:R0805").orElseThrow());
         CopperNets nets = CopperNets.of(pcb, Map.of("R1", chip, "R2", chip), NETS, new PadOutline(CURVE_STEPS, 6), CURVE_STEPS);
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(pcb.rules());
+        Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(pcb.rules());
         return new Poured(pcb, nets, rules, new ZonePours(pcb, nets, rules, CURVE_STEPS, ARC_ERROR).pour());
     }
 

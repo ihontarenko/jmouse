@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.libre.pcb;
 
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.exchange.imported.SheetMarks;
 
 import org.jmouse.cad.exchange.DocumentImport;
@@ -21,10 +22,11 @@ final class LibrePcbDesignReading implements DocumentImport {
 
     private static final char SEPARATOR = '/';
 
-    private final LibrePcbFiling filing;
+    /** Its filing(), as the engine's table says it at each use. */
+    private final ReadTable<LibrePcbFiling> filings;
 
-    LibrePcbDesignReading(LibrePcbFiling filing) {
-        this.filing = filing;
+    LibrePcbDesignReading(ReadTable<LibrePcbFiling> filings) {
+        this.filings = filings;
     }
 
     @Override
@@ -66,15 +68,15 @@ final class LibrePcbDesignReading implements DocumentImport {
         String file = main.substring(nameStarts);
         String folder = main.substring(0, nameStarts);
         LibrePcbProject project = LibrePcbProject.read(insideFolder(files.files(), folder));
-        return LibrePcbDesignImport.read(project, modelsInside(files, folder), file, titleOf(files, project), filing,
-                SheetMarks.of(catalogue, filing.markSymbols()));
+        return LibrePcbDesignImport.read(project, modelsInside(files, folder), file, titleOf(files, project), filing(),
+                SheetMarks.of(catalogue, filing().markSymbols()));
     }
 
     private ImportedDocuments fromArchive(ExchangeFiles files, String main, CatalogueDocuments catalogue) {
         LibrePcbArchive archive = LibrePcbArchive.of(files.bytesOf(files.main()));
         LibrePcbProject project = LibrePcbProject.read(archive.texts());
-        return LibrePcbDesignImport.read(project, archive.models(), main.substring(main.lastIndexOf(SEPARATOR) + 1), titleOf(files, project), filing,
-                SheetMarks.of(catalogue, filing.markSymbols()));
+        return LibrePcbDesignImport.read(project, archive.models(), main.substring(main.lastIndexOf(SEPARATOR) + 1), titleOf(files, project), filing(),
+                SheetMarks.of(catalogue, filing().markSymbols()));
     }
 
     private static String titleOf(ExchangeFiles files, LibrePcbProject project) {
@@ -103,5 +105,9 @@ final class LibrePcbDesignReading implements DocumentImport {
             }
         });
         return inside;
+    }
+
+    private LibrePcbFiling filing() {
+        return filings.current();
     }
 }

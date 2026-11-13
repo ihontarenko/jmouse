@@ -1,0 +1,93 @@
+# DC-03. Three resistors in parallel across one source: the same voltage stands across every branch, each branch takes
+# U / R of its own, and the total the source gives is their sum. An ammeter in each branch and one in the common lead
+# let the sum be read off the meters; the voltmeter shows that every branch sees the same voltage.
+circuit:parallel-resistors("Parallel resistors") {
+    meta {
+        summary: "Three branches across one source: the same voltage on each, the currents add up to the total."
+        description: """
+            Idea: parallel branches share their two ends, so each sees the full source voltage and draws its own
+            current U / R. The source gives the sum of them, as if it fed one resistor of 1 / (1/R1 + 1/R2 + 1/R3).
+
+            Try: lower R3 — its branch takes more and the total grows with it, while the other branches do not
+            change at all. Raise one branch to 10 kΩ: it hardly adds anything. Add equal branches and the total
+            resistance halves, thirds.
+
+            Watch: the branch ammeters read 12, 6 and 4 mA — the smallest resistor takes the most —, the total
+            ammeter reads their sum, 22 mA, and the voltmeter reads the same 12 V across every branch.
+
+            Ask: what single resistor would draw the same 22 mA from 12 V? Why is it smaller than the smallest
+            branch?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 1 V .. 24 V, step: 0.5 V, "Source voltage")
+    parameter:R_first(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R1")
+    parameter:R_second(2 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R2")
+    parameter:R_third(3 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R3")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A0(ammeter, [in: in, out: bus])
+    part:A1(ammeter, [in: bus, out: first])
+    part:R1(resistor, [first, 0], resistance: R_first)
+    part:A2(ammeter, [in: bus, out: second])
+    part:R2(resistor, [second, 0], resistance: R_second)
+    part:A3(ammeter, [in: bus, out: third])
+    part:R3(resistor, [third, 0], resistance: R_third)
+    part:VM1(voltmeter, [plus: bus, minus: 0])
+    place:V1(at: 240 640, rotate: 90)
+    place:A0(at: 440 320)
+    place:A1(at: 680 480, rotate: 90)
+    place:R1(at: 680 720, rotate: 90)
+    place:A2(at: 1000 480, rotate: 90)
+    place:R2(at: 1000 720, rotate: 90)
+    place:A3(at: 1320 480, rotate: 90)
+    place:R3(at: 1320 720, rotate: 90)
+    place:VM1(at: 1600 640, rotate: 90)
+    mark:J1(junction, at: 680 320)
+    mark:J2(junction, at: 1000 320)
+    mark:J3(junction, at: 1320 320)
+    mark:Jb1(junction, at: 680 960)
+    mark:Jb2(junction, at: 1000 960)
+    mark:Jb3(junction, at: 1320 960)
+    mark:GND1(ground, at: 1000 1040)
+    wire:W1(V1.positive, to: A0.in, via: 240 320)
+    wire:W2(A0.out, to: J1.j)
+    wire:W3(J1.j, to: A1.in)
+    wire:W4(J1.j, to: J2.j)
+    wire:W5(J2.j, to: A2.in)
+    wire:W6(J2.j, to: J3.j)
+    wire:W7(J3.j, to: A3.in)
+    wire:W8(J3.j, to: VM1.plus, via: 1600 320)
+    wire:W9(A1.out, to: R1.positive)
+    wire:W10(A2.out, to: R2.positive)
+    wire:W11(A3.out, to: R3.positive)
+    wire:W12(R1.negative, to: Jb1.j)
+    wire:W13(R2.negative, to: Jb2.j)
+    wire:W14(R3.negative, to: Jb3.j)
+    wire:W15(VM1.minus, to: Jb3.j, via: 1600 960)
+    wire:W16(V1.negative, to: Jb1.j, via: 240 960)
+    wire:W17(Jb1.j, to: Jb2.j)
+    wire:W18(Jb2.j, to: Jb3.j)
+    wire:W19(Jb2.j, to: GND1.ground)
+    probe:CH1(bus, 5 V/div)
+    probe:CH2(current, R1, 5 mA/div)
+    probe:CH3(current, R3, 5 mA/div)
+    expect("the smallest resistor takes the most: 12 mA", from: "I1 = U / R1 = 12 V / 1 kΩ") {
+        measure(final, current: R1)
+        near(12 mA, +- 0.5%)
+    }
+    expect("the largest takes the least: 4 mA", from: "I3 = U / R3 = 12 V / 3 kΩ") {
+        measure(final, current: R3)
+        near(4 mA, +- 0.5%)
+    }
+    expect("the total is the sum of the branches: 22 mA", from: "I = I1 + I2 + I3 = 12 + 6 + 4 mA = U / (1 / (1/R1 + 1/R2 + 1/R3))") {
+        measure(final, current: A0)
+        near(22 mA, +- 0.5%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: R_third, from: 100, to: 10000, points: 100)
+}

@@ -1,0 +1,86 @@
+# OA-07. An LM393 comparator on a single 5 V supply: the signal on its non-inverting input, a threshold from a
+# potentiometer on its inverting one, no feedback at all. With a gain of two hundred thousand the output can only be at
+# one end or the other: while the signal is above the threshold the open-collector output lets go and the 10 kΩ
+# pull-up makes it 5 V; below, it pulls the output down to the common. A sine of 2 V around 2.5 V against a 3 V
+# threshold is above it for (π − 2 · asin(0.25)) / 2π = 42 % of each period — the output is a square of that duty.
+circuit:comparator("Comparator") {
+    meta {
+        summary: "An LM393 compares a sine with a threshold from a potentiometer: the output is 5 V while the signal is above it, 0 V below."
+        description: """
+            Idea: an op-amp with no feedback has so much gain that its output cannot rest in between — it is at one
+            end or the other, depending only on which input is higher. That turns an analogue signal into a logic
+            level: 1 while the signal is above the threshold, 0 while it is below.
+
+            Try: turn the threshold up — the high pulses get narrower; turn it down — wider. Take it above the
+            sine's top or below its bottom and the output stops switching altogether. Change the input's amplitude:
+            the pulses change width though the threshold stays put.
+
+            Watch: CH1 the sine, CH3 the threshold, CH2 the output. The output flips exactly where CH1 crosses CH3,
+            and its high level is the pull-up's 5 V, not anything the LM393 makes itself.
+
+            Ask: why does the LM393 need a pull-up resistor? What would a slow, noisy signal do at the moment it
+            crosses the threshold?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-07
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:Threshold(0.6, in: 0 .. 0.7, step: 0.01, "Threshold potentiometer: the threshold is 5 V times its position")
+    parameter:A(2 V, in: 0.1 V .. 2.5 V, step: 0.1 V, "Input amplitude around 2.5 V")
+    parameter:F(100 Hz, in: 10 Hz .. 1 kHz, step: 10 Hz, "Input frequency")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:RV1(potentiometer, [a: 0, w: threshold, b: vcc], position: Threshold)
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F, offset: 2.5 V)
+    part:U1(lm393, [A.non_inverting_input: in, A.inverting_input: threshold, A.output: out, Vcc: vcc, GND: 0])
+    part:RP(resistor, [vcc, out], resistance: 10 kΩ)
+    place:V1(at: 200 680, rotate: 90)
+    mark:J1(junction, at: 600 200)
+    mark:J2(junction, at: 880 200)
+    place:RV1(at: 600 360, rotate: 90, mirror)
+    place:G1(at: 720 760, rotate: 90)
+    place:U1(at: 880 560)
+    place:RP(at: 1120 400, rotate: 90)
+    mark:Jo(junction, at: 1120 560)
+    mark:Jr1(junction, at: 600 960)
+    mark:Jr2(junction, at: 720 960)
+    mark:Jr3(junction, at: 880 960)
+    mark:GND1(ground, at: 880 1040)
+    wire:W1(V1.positive, to: J1.j, via: 200 200)
+    wire:W2(J1.j, to: RV1.b)
+    wire:W3(J1.j, to: J2.j)
+    wire:W4(J2.j, to: U1.Vcc)
+    wire:W5(J2.j, to: RP.positive, via: 1120 200)
+    wire:W6(RV1.w, to: U1.A.inverting_input, via: [720 360, 720 520])
+    wire:W7(G1.positive, to: U1.A.non_inverting_input, via: 720 600)
+    wire:W8(U1.A.output, to: Jo.j)
+    wire:W9(RP.negative, to: Jo.j)
+    wire:W10(V1.negative, to: Jr1.j, via: 200 960)
+    wire:W11(RV1.a, to: Jr1.j)
+    wire:W12(Jr1.j, to: Jr2.j)
+    wire:W13(G1.negative, to: Jr2.j)
+    wire:W14(Jr2.j, to: Jr3.j)
+    wire:W15(U1.GND, to: Jr3.j)
+    wire:W16(Jr3.j, to: GND1.ground)
+    probe:CH1(in, 1 V/div)
+    probe:CH2(out, 1 V/div)
+    probe:CH3(threshold, 1 V/div)
+    expect("the potentiometer sets a 3 V threshold", from: "the wiper at 0.6 of 5 V") {
+        measure(final, threshold)
+        near(3 V, +- 1%)
+    }
+    expect("high is the pull-up's 5 V, for 42 % of the time", from: "open collector: off, the 10 kΩ pull-up alone sets the level, so the output averages 5 V · 0.42 = 2.1 V") {
+        measure(average, out, after: 10 ms)
+        near(2.1 V, +- 3%)
+    }
+    expect("low is the common", from: "on, the output transistor pulls to the LM393's ground") {
+        measure(minimum, out, after: 10 ms)
+        within(0 V .. 0.2 V)
+    }
+    expect("high only while the sine is above the threshold", from: "2.5 V + 2 V · sin θ > 3 V for (π − 2 · asin(0.25)) / 2π = 0.42 of a period") {
+        measure(duty, out, above: 2.5 V, after: 10 ms)
+        near(0.42, +- 3%)
+    }
+    analysis(transient, for: 40 ms)
+    view:transient_response(primary)
+}

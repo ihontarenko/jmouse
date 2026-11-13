@@ -95,7 +95,7 @@ final class SheetHierarchy {
         }
         Circuit unfolded = new Circuit(circuit.head(), circuit.parameters(), hierarchy.parts, circuit.layout(), circuit.probes(),
                 circuit.timeBase(), circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(),
-                circuit.boundary());
+                circuit.boundary(), circuit.groups());
         return new Unfolded(unfolded, hierarchy.blocks);
     }
 

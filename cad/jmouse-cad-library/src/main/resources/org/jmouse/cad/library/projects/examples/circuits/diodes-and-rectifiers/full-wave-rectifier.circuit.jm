@@ -1,0 +1,59 @@
+# D-03. A floating sine across a bridge rectifier into a load resistor. Whichever way the input pushes, two of the four
+# diodes steer the current the same way through the load: the negative halves come out turned over. Every period of
+# the input now gives two bumps, so the ripple is at twice the input frequency — and the peak is two diode drops short.
+circuit:full-wave-rectifier("Full-wave bridge rectifier") {
+    meta {
+        summary: "A sine through a bridge rectifier: both halves come out positive, two diode drops lower, at twice the input frequency."
+        description: """
+            Idea: four diodes in a bridge send the current through the load the same way on both halves of the input.
+            On one half one pair conducts, on the other the other pair; the negative halves come out turned over.
+
+            Try: raise the amplitude: the bumps grow, two diode drops short of the input. Change the input frequency:
+            the bumps come twice as often. Change the load: the shape stays, the current follows it.
+
+            Watch: CH2, the input across the bridge, and CH1, the output: two bumps for every period of the input, no
+            gaps between them but short flats at zero where the input is below two diode drops. The frequency of the
+            output is twice that of the input.
+
+            Ask: why is the peak two diode drops lower here, but only one in a half-wave rectifier? Why can the
+            generator not have its own end on ground here?
+            """
+        category: diodes-and-rectifiers
+        tags: diodes, example, d-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(12 V, in: 3 V .. 30 V, step: 0.5 V, "Input amplitude")
+    parameter:F(50 Hz, in: 10 Hz .. 400 Hz, step: 10 Hz, "Input frequency")
+    parameter:R_load(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Load resistance")
+    part:G1(sine-generator, [positive: a, negative: b], amplitude: A, frequency: F)
+    part:BR1(bridge-rectifier, [ac1: a, ac2: b, plus: out, minus: 0])
+    part:R1(resistor, [out, 0], resistance: R_load)
+    place:G1(at: 400 600, rotate: 90)
+    place:BR1(at: 800 600)
+    place:R1(at: 1200 600, rotate: 90)
+    mark:Jm(junction, at: 800 840)
+    mark:GND1(ground, at: 800 920)
+    wire:W1(G1.positive, to: BR1.ac1, via: [400 400, 640 400, 640 600])
+    wire:W2(G1.negative, to: BR1.ac2, via: [400 800, 960 800, 960 600])
+    wire:W3(BR1.plus, to: R1.positive, via: [800 360, 1200 360])
+    wire:W4(BR1.minus, to: Jm.j)
+    wire:W5(R1.negative, to: Jm.j, via: 1200 840)
+    wire:W6(Jm.j, to: GND1.ground)
+    probe:CH1(out, 5 V/div)
+    probe:CH2(a, against: b, 10 V/div)
+    expect("the peak is two diode drops short of the input", from: "two conducting diodes in series: 12 V − 2 · VF ≈ 12 V − 2 · 0.75 V") {
+        measure(maximum, out)
+        within(10.2 V .. 10.8 V)
+    }
+    expect("the ripple comes at twice the input frequency", from: "full-wave: two bumps every period, 2 · 50 Hz") {
+        measure(frequency, out, above: 5 V, after: 5 ms)
+        near(100 Hz, +- 2%)
+    }
+    expect("and between the bumps it touches zero", from: "while |input| < 2 · VF no pair conducts") {
+        measure(minimum, out)
+        within(-0.01 V .. 0.01 V)
+    }
+    analysis(transient, for: 60 ms)
+    view:transient_response(primary)
+}

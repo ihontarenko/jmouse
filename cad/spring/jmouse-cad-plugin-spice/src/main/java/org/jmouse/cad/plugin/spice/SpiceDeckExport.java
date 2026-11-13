@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.spice;
 
+import org.jmouse.cad.spice.SpiceDevices;
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.DocumentExport;
@@ -13,6 +15,13 @@ import java.util.Set;
 
 /** A circuit written as a SPICE deck, a component as its {@code .model} or {@code .subckt}. */
 final class SpiceDeckExport implements DocumentExport {
+
+    /** The devices SPICE knows, as the engine's table says it at each use. */
+    private final ReadTable<SpiceDevices> devices;
+
+    SpiceDeckExport(ReadTable<SpiceDevices> devices) {
+        this.devices = devices;
+    }
 
     /** What a deck's file ends with, and a library's of models and subcircuits. */
     private static final String DECK_SUFFIX    = ".cir";
@@ -35,7 +44,7 @@ final class SpiceDeckExport implements DocumentExport {
 
     @Override
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
-        SpiceConverter.SpiceExport exported = new SpiceConverter(catalogue, CadLanguage.standard().language())
+        SpiceConverter.SpiceExport exported = new SpiceConverter(catalogue, CadLanguage.standard().language(), devices.current())
                 .exportDocument(document);
         String suffix = document.kind().equals(SimulationModule.CIRCUIT) ? DECK_SUFFIX : LIBRARY_SUFFIX;
         return ExportedFiles.single(document.slug() + suffix, exported.text(), exported.notes());

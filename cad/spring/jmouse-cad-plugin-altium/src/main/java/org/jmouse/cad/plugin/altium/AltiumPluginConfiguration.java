@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.altium;
 
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.altium.AltiumLibraries;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 public class AltiumPluginConfiguration {
 
     @Bean
-    public AltiumPlugin cadAltiumPlugin() {
-        return new AltiumPlugin(new AltiumReading(AltiumLibraries.standard()));
+    public AltiumPlugin cadAltiumPlugin(TableSource tables) {
+        return new AltiumPlugin(new AltiumReading(AltiumLibraries.readFrom(tables)));
     }
 }

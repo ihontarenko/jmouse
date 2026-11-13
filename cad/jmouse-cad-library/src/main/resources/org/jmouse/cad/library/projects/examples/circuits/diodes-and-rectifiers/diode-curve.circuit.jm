@@ -1,0 +1,65 @@
+# D-01. A 1N4148 with a series resistor across an adjustable source. Forward, the diode conducts and holds about
+# 0.7 V while the resistor takes the rest; reversed, it blocks and the whole source stands across it with nothing
+# flowing. The sweep from −10 V to +10 V draws the diode's characteristic: flat at zero, then a knee and a steep rise.
+circuit:diode-curve("Diode and resistor") {
+    meta {
+        summary: "A 1N4148 through a resistor: forward it conducts at about 0.7 V, reversed it blocks; the sweep draws its curve."
+        description: """
+            Idea: a diode conducts one way only. Forward, its voltage barely moves once it conducts — about 0.7 V for a
+            small silicon diode — so the resistor sets the current. Reversed, it blocks: the current is nanoamperes and
+            the whole source stands across the diode.
+
+            Try: set the input to +5 V: the diode holds about 0.66 V and 4.3 mA flows. Turn the input negative: the
+            current is gone and the voltmeter reads the whole input. Change R: the current follows, the diode's
+            voltage hardly does.
+
+            Watch: the voltmeter across the diode, the ammeter in the loop, and the sweep from −10 V to +10 V — the
+            diode's voltage sits on the input line while reversed, then bends at the knee and stays near 0.7 V.
+
+            Ask: why does doubling the current add only about 30 mV across the diode? What would the curve look like
+            with the diode turned round?
+            """
+        category: diodes-and-rectifiers
+        tags: diodes, example, d-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(5 V, in: -10 V .. 10 V, step: 0.1 V, "Input voltage: negative reverses the diode")
+    parameter:R(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Series resistor")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A1(ammeter, [in: in, out: top])
+    part:R1(resistor, [top, anode], resistance: R)
+    part:D1(1n4148, [anode: anode, cathode: 0])
+    part:VM1(voltmeter, [plus: anode, minus: 0])
+    place:V1(at: 320 560, rotate: 90)
+    place:A1(at: 520 360)
+    place:R1(at: 800 360)
+    place:D1(at: 1040 560, rotate: 90)
+    place:VM1(at: 1280 560, rotate: 90)
+    mark:Ja(junction, at: 1040 360)
+    mark:Jb1(junction, at: 1040 800)
+    mark:GND1(ground, at: 1040 880)
+    wire:W1(V1.positive, to: A1.in, via: 320 360)
+    wire:W2(A1.out, to: R1.positive)
+    wire:W3(R1.negative, to: Ja.j)
+    wire:W4(Ja.j, to: D1.anode)
+    wire:W5(Ja.j, to: VM1.plus, via: 1280 360)
+    wire:W6(V1.negative, to: Jb1.j, via: 320 800)
+    wire:W7(D1.cathode, to: Jb1.j)
+    wire:W8(VM1.minus, to: Jb1.j, via: 1280 800)
+    wire:W9(Jb1.j, to: GND1.ground)
+    probe:CH1(in, 2 V/div)
+    probe:CH2(anode, 0.2 V/div)
+    expect("forward, the diode holds about 0.66 V", from: "1N4148 datasheet: VF at most 1 V at 10 mA; about 0.66 V at 4 mA") {
+        measure(final, anode)
+        within(0.62 V .. 0.78 V)
+    }
+    expect("and the resistor takes the rest", from: "I = (U − VF) / R = (5 V − 0.66 V) / 1 kΩ ≈ 4.3 mA") {
+        measure(final, current: R1)
+        within(4.2 mA .. 4.4 mA)
+    }
+    analysis(transient, for: 1 ms)
+    view:operating_point
+    view:dc_sweep(parameter: U, from: -10, to: 10, points: 201)
+    view:transient_response(primary)
+}

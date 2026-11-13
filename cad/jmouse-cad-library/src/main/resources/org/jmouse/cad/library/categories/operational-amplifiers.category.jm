@@ -1,0 +1,8 @@
+category:operational-amplifiers("Operational amplifiers") {
+    meta {
+        category: circuits
+        order: 5
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

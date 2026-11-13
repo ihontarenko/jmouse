@@ -1,0 +1,8 @@
+category:power-supplies("Power supplies") {
+    meta {
+        category: circuits
+        order: 9
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

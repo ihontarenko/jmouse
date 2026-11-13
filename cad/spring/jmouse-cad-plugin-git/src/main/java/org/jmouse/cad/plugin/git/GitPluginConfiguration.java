@@ -6,7 +6,7 @@ import org.jmouse.cad.plugin.explorer.Explorer;
 import org.jmouse.cad.plugin.explorer.ExplorerPluginConfiguration;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.git.local.JGitLocalGit;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.Settings;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +26,9 @@ public class GitPluginConfiguration {
     }
 
     @Bean
-    public ExplorerGit cadExplorerGit(Explorer explorer, CadAuthority authority, ObjectProvider<CommitAuthors> authors, PluginSettings settings) {
-        return new ExplorerGit(explorer, new JGitLocalGit(), authority, Optional.ofNullable(authors.getIfAvailable()), settings.valuesOf(GitPlugin.ID));
+    public ExplorerGit cadExplorerGit(Explorer explorer, CadAuthority authority, ObjectProvider<CommitAuthors> authors, Settings settings) {
+        return new ExplorerGit(explorer, new JGitLocalGit(), authority, Optional.ofNullable(authors.getIfAvailable()), settings.parameters(GitPlugin.ID, GitPlugin.HOSTS_SECTION),
+                settings.parameters(GitPlugin.ID, GitPlugin.HISTORY_SECTION));
     }
 
     @Bean

@@ -1,0 +1,68 @@
+# SG-03. Two sine generators a little apart in frequency, mixed through two equal resistors into one node. The node
+# sits at the average of the two (superposition), and because the two slip past each other in phase it swells where
+# they are in step and dies where they are opposed — a beat whose rate is the difference of the two frequencies.
+circuit:beats("Beats") {
+    meta {
+        summary: "Two close sines summed: the sum swells and fades |f1 − f2| times a second."
+        description: """
+            Idea: signals in a linear circuit simply add — superposition. Two sines of nearly the same frequency
+            drift in and out of step: in step their peaks add, opposed they cancel. The sum is a tone at the mean
+            frequency whose loudness rises and falls |f1 − f2| times a second: beats.
+
+            Try: bring f2 closer to f1 — the beats slow down; at f2 = f1 they stop, and the sum is one steady sine.
+            Move f2 further away: the beats speed up until they blur into a rough tone. Make the amplitudes unequal:
+            the sum no longer dies to zero, the dips become shallow.
+
+            Watch: CH1 and CH2, the two generators, and CH3, the mixed node. With 1 kHz and 1.1 kHz the envelope of
+            CH3 swells and fades every 10 ms: loud at 0 and 10 ms, silent at 5 and 15 ms. Two equal resistors make the node the average of the two, so its
+            peak is (A1 + A2) / 2 where they are in step.
+
+            Ask: what beat rate do 440 Hz and 442 Hz give — the way a musician tunes two strings? Why does the sum
+            never vanish completely when the two amplitudes differ?
+            """
+        category: signal-circuits
+        tags: signals, example, sg-03
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:f_first(1 kHz, in: 100 Hz .. 5 kHz, step: 10 Hz, "f1, the first generator")
+    parameter:f_second(1.1 kHz, in: 100 Hz .. 5 kHz, step: 10 Hz, "f2, the second generator")
+    parameter:A_first(1 V, in: 0 V .. 5 V, step: 0.1 V, "A1, the first amplitude")
+    parameter:A_second(1 V, in: 0 V .. 5 V, step: 0.1 V, "A2, the second amplitude")
+    part:G1(sine-generator, [positive: first, negative: 0], amplitude: A_first, frequency: f_first)
+    part:G2(sine-generator, [positive: second, negative: 0], amplitude: A_second, frequency: f_second)
+    part:R1(resistor, [first, sum], resistance: 10 kΩ)
+    part:R2(resistor, [second, sum], resistance: 10 kΩ)
+    place:G1(at: 320 640, rotate: 90)
+    place:G2(at: 600 640, rotate: 90)
+    place:R1(at: 880 320)
+    place:R2(at: 880 480)
+    mark:Jb(junction, at: 600 880)
+    mark:GND1(ground, at: 600 960)
+    wire:W1(G1.positive, to: R1.positive, via: 320 320)
+    wire:W2(G2.positive, to: R2.positive, via: 600 480)
+    wire:W3(R1.negative, to: R2.negative, via: [1120 320, 1120 480])
+    wire:W4(G1.negative, to: Jb.j, via: 320 880)
+    wire:W5(G2.negative, to: Jb.j)
+    wire:W6(Jb.j, to: GND1.ground)
+    probes {
+        probe:CH1(first, 1 V/div)
+        probe:CH2(second, 1 V/div)
+        probe:CH3(sum, 0.5 V/div)
+        time(2 ms/div)
+    }
+    expect("in step, the node reaches the average of the two peaks", from: "two equal resistors: sum = (v1 + v2) / 2, at most (A1 + A2) / 2 = 1 V") {
+        measure(maximum, sum)
+        within(0.97 V .. 1.0 V)
+    }
+    expect("opposed, they all but cancel", from: "f2 gains half a period on f1 every 1 / (2 · |f2 − f1|) = 5 ms: at 15 ms the two are opposed") {
+        measure(maximum, sum, after: 14.5 ms)
+        within(0 V .. 0.2 V)
+    }
+    expect("and in step again one beat later", from: "the beat period is 1 / |f2 − f1| = 1 / 100 Hz = 10 ms: the peak returns at 10 ms") {
+        measure(maximum, sum, after: 9.5 ms)
+        within(0.97 V .. 1.0 V)
+    }
+    analysis(transient, for: 15 ms)
+    view:transient_response(primary)
+}

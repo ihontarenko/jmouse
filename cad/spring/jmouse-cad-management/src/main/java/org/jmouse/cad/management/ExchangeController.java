@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 🔁 Documents to and from other formats — {@code JMOUSE_CAD_API.md} §2.6. Which formats there are is the plugins'; the
+ * 🔁 Documents to and from other formats — {@code JMOUSE_CAD_API.md} §2.7. Which formats there are is the plugins'; the
  * routes are the same for every one, so an interface needs to know none of them by name.
  */
 @RestController

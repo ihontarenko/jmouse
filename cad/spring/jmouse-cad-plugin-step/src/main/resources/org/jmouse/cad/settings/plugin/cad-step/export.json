@@ -1,0 +1,9 @@
+{
+  "ellipseSteps": 32,
+  "areaSteps": 4,
+  "areaTolerance": 0.01,
+  "exports": [
+    { "id": "step", "title": "STEP · PCB and parts", "layers": false },
+    { "id": "step-layers", "title": "STEP · PCB, parts, copper, mask and silkscreen", "layers": true }
+  ]
+}

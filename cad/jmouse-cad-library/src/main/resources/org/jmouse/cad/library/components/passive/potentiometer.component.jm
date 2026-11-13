@@ -4,6 +4,7 @@ component:potentiometer("Potentiometer", type: potentiometer) {
         designator: RV
         summary: "A resistance with a wiper, moved while the circuit runs"
         category: potentiometers
+        bench: control
         failure: open
         value: resistance
         authors: "jMouse"

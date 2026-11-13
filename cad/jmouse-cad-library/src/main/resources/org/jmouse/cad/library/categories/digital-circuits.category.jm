@@ -1,0 +1,8 @@
+category:digital-circuits("Digital circuits") {
+    meta {
+        category: circuits
+        order: 8
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

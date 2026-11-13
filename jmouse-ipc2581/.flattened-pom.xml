@@ -28,6 +28,18 @@
   </scm>
   <dependencies>
     <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-settings</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-descriptions</artifactId>
+      <version>1.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
       <version>4.0.0</version>

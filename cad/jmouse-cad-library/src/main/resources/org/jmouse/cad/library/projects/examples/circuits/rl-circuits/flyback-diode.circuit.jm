@@ -1,0 +1,89 @@
+# RL-04. An IRFZ44N switches a coil — 100 mH with 100 Ω of copper — from 12 V at 100 Hz. A 1N4007 across the coil,
+# connected through SW1, gives the coil's current a way round when the transistor turns off: the drain rises only a
+# diode drop above the supply, and the current circulates through coil and diode, dying away over about L / R. Open SW1
+# while it runs and take the diode out: every turn-off kicks the drain to the transistor's 55 V breakdown.
+circuit:flyback-diode("Coil and flyback diode") {
+    meta {
+        summary: "A transistor switching a coil: with the flyback diode the drain stops a diode drop above 12 V and the current fades slowly; open SW1 and it kicks to 55 V."
+        description: """
+            Idea: a coil that is switched off keeps its current for a while, and if nothing carries it the coil
+            raises the voltage on the switch until something breaks down. A diode across the coil, pointing against
+            the supply, carries nothing while the coil is on; at turn-off it takes the coil's current and holds the
+            switch's voltage to the supply plus one diode drop.
+
+            Try: SW1 connects the diode. Open it while the circuit runs: every turn-off now sends a spike to the
+            transistor's breakdown, near 55 V — the transistor, not the diode, takes the energy. Close it again. Raise
+            L: the current rises and falls more slowly; with the diode the voltage on the switch stays where it was.
+
+            Watch: CH1, the gate drive; CH2, the drain — near zero while on, a little above 12 V while the diode
+            carries; CH3, the coil's current — it climbs while on, and with the diode it does not stop at turn-off
+            but fades along about τ = L / R = 1 ms, far slower than the spike would have ended it.
+
+            Ask: why is the diode the right way round to carry nothing while the transistor is on? The price of the
+            diode is a slower turn-off — when would that matter, for a relay?
+            """
+        category: rl-circuits
+        tags: rl, example, rl-04
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:L(100 mH, in: 10 mH .. 1 H, step: 10 mH, "L, the coil")
+    parameter:f(100 Hz, in: 10 Hz .. 1 kHz, step: 10 Hz, "Gate drive frequency")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 12 V)
+    part:G1(square-generator, [positive: drive, negative: 0], high: 10 V, low: 0 V, frequency: f, duty: 0.5)
+    part:R1(resistor, [vcc, coil], resistance: 100 Ω)
+    part:L1(inductor, [coil, switched], inductance: L)
+    part:Q1(irfz44n, [gate: drive, drain: switched, source: 0])
+    part:SW1(switch, [a: vcc, b: clamp], closed: 1)
+    part:D1(1n4007, [anode: switched, cathode: clamp])
+    place:V1(at: 320 800, rotate: 90)
+    place:G1(at: 720 960, rotate: 90)
+    place:Q1(at: 1120 800)
+    place:R1(at: 1160 240, rotate: 90)
+    place:L1(at: 1160 480, rotate: 90)
+    place:SW1(at: 1400 240, rotate: 90)
+    place:D1(at: 1400 480, rotate: 270)
+    mark:Jt(junction, at: 1160 80)
+    mark:Jc(junction, at: 1160 640)
+    mark:Jd(junction, at: 1400 640)
+    mark:Jg1(junction, at: 320 1120)
+    mark:Jg2(junction, at: 720 1120)
+    mark:Jg3(junction, at: 1160 1120)
+    mark:GND1(ground, at: 720 1200)
+    wire:W1(V1.positive, to: Jt.j, via: 320 80)
+    wire:W2(Jt.j, to: R1.positive)
+    wire:W3(R1.negative, to: L1.positive)
+    wire:W4(L1.negative, to: Jc.j)
+    wire:W5(Jc.j, to: Q1.drain)
+    wire:W6(Jt.j, to: SW1.a, via: 1400 80)
+    wire:W7(SW1.b, to: D1.cathode)
+    wire:W8(D1.anode, to: Jd.j)
+    wire:W9(Jc.j, to: Jd.j)
+    wire:W10(G1.positive, to: Q1.gate, via: 720 800)
+    wire:W11(V1.negative, to: Jg1.j)
+    wire:W12(Jg1.j, to: Jg2.j)
+    wire:W13(G1.negative, to: Jg2.j)
+    wire:W14(Jg2.j, to: Jg3.j)
+    wire:W15(Q1.source, to: Jg3.j)
+    wire:W16(Jg2.j, to: GND1.ground)
+    probes {
+        probe:CH1(drive, 5 V/div)
+        probe:CH2(switched, 5 V/div)
+        probe:CH3(current, R1, 20 mA/div)
+        time(1 ms/div)
+    }
+    expect("the coil carries 120 mA when it is switched off", from: "after 5 τ: 12 V / 100 Ω · (1 − e⁻⁵), τ = L / R = 1 ms") {
+        measure(maximum, current: R1)
+        within(115 mA .. 121 mA)
+    }
+    expect("the diode holds the drain a diode drop above the supply", from: "V = 12 V + V_F of the 1N4007 at 120 mA, about 0.75 V") {
+        measure(maximum, switched)
+        within(12.4 V .. 13.3 V)
+    }
+    expect("the current lives on through the diode", from: "one τ after turn-off: i ≈ 119 mA · e⁻¹ − (V_F / R) · (1 − e⁻¹) ≈ 39 mA") {
+        measure(maximum, current: R1, after: 6 ms)
+        within(32 mA .. 46 mA)
+    }
+    analysis(transient, for: 9.5 ms)
+    view:transient_response(primary)
+}

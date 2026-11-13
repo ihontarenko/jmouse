@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.altium;
 
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.altium.AltiumPcbLibrary;
 import org.jmouse.altium.AltiumPcbLibraryReader;
 import org.jmouse.altium.AltiumReadException;
@@ -32,10 +33,11 @@ final class AltiumReading implements DocumentImport {
     private static final List<String> SCHEMATICS = List.of("*.SchDoc");
     private static final List<String> PCB_LIBRARIES = List.of("*.PcbLib");
 
-    private final AltiumLibraries filing;
+    /** Its filing(), as the engine's table says it at each use. */
+    private final ReadTable<AltiumLibraries> filings;
 
-    AltiumReading(AltiumLibraries filing) {
-        this.filing = filing;
+    AltiumReading(ReadTable<AltiumLibraries> filings) {
+        this.filings = filings;
     }
 
     @Override
@@ -77,7 +79,7 @@ final class AltiumReading implements DocumentImport {
         if (lower.endsWith(PCB_LIBRARY)) {
             AltiumPcbLibrary library = readable(() -> AltiumPcbLibraryReader.read(file, files.mainBytes()));
             // Whose the library is, as the reader says it, before it is filed by the library it comes from.
-            return AltiumPcbLibraryImport.read(library, file, filing).whoseAsStated(files.stated(), file).filedBy(filing);
+            return AltiumPcbLibraryImport.read(library, file, filing()).whoseAsStated(files.stated(), file).filedBy(filing());
         }
         if (!lower.endsWith(SCHEMATIC)) {
             throw new IllegalArgumentException("Altium reads a schematic (*.SchDoc) or a PCB library (*.PcbLib); '" + main + "' is neither.");
@@ -85,7 +87,7 @@ final class AltiumReading implements DocumentImport {
         AltiumSchematic sheet = readable(() -> AltiumSchematicReader.read(file, files.mainBytes()));
         String title = files.title() == null || files.title().isBlank() ? file.substring(0, file.length() - SCHEMATIC.length())
                 : files.title();
-        return AltiumSchematicImport.read(sheet, file, title, filing, SheetMarks.of(catalogue, filing.markSymbols()), catalogue);
+        return AltiumSchematicImport.read(sheet, file, title, filing(), SheetMarks.of(catalogue, filing().markSymbols()), catalogue);
     }
 
     /** What a file reads as, or why it does not, as the import says a refusal. */
@@ -95,5 +97,9 @@ final class AltiumReading implements DocumentImport {
         } catch (AltiumReadException unreadable) {
             throw new IllegalArgumentException(unreadable.getMessage(), unreadable);
         }
+    }
+
+    private AltiumLibraries filing() {
+        return filings.current();
     }
 }

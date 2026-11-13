@@ -1,0 +1,52 @@
+# NOT, AND, OR and XOR laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:logic-gates-pcb("NOT, AND, OR and XOR — pcb") {
+    meta {
+        summary: "NOT, AND, OR and XOR laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: digital-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(logic-gates)
+    layers(2)
+    edge("M1 0H26A1 1 0 0 1 27 1V22A1 1 0 0 1 26 23H1A1 1 0 0 1 0 22V1A1 1 0 0 1 1 0Z")
+    place(U1, at: 21.5 4.5)
+    place(U2, at: 21.5 9)
+    place(U3, at: 21.5 13.5)
+    place(U4, at: 21.5 18)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, a: 2, b: 3, vcc: 4], at: 5.5 11.5)
+    track(top, width: 0.25, from: 22.35 8.35, to: 24.6 10.6, to: 22.35 12.85)
+    track(top, width: 0.25, from: 20.65 4.5, to: 19.525 4.5, to: 19.525 7.225, to: 20.65 8.35)
+    track(top, width: 0.25, from: 20.65 14.15, to: 19.3 15.5, to: 19.3 18.65, to: 20.65 18.65)
+    track(top, width: 0.25, from: 20.65 5.15, to: 21.55 6.05)
+    track(bottom, width: 0.25, from: 21.55 6.05, to: 21.55 10.55)
+    track(top, width: 0.25, from: 21.55 10.55, to: 20.65 9.65)
+    track(top, width: 0.25, from: 22.35 3.85, to: 24.6 6.1, to: 22.35 8.35)
+    track(top, width: 0.25, from: 20.65 13.5, to: 23.35 13.5, to: 23.35 18, to: 20.65 18)
+    track(top, width: 0.25, from: 20.65 12.85, to: 21.55 11.95)
+    track(bottom, width: 0.25, from: 21.55 11.95, to: 21.55 16.45)
+    track(top, width: 0.25, from: 21.55 16.45, to: 20.65 17.35)
+    track(top, width: 0.25, from: 22.35 12.85, to: 23.7 12.85)
+    track(bottom, width: 0.25, from: 23.7 12.85, to: 23.7 14.2, to: 22.35 15.55)
+    track(top, width: 0.25, from: 22.35 15.55, to: 22.35 17.35)
+    track(top, width: 0.25, from: 20.65 8.35, to: 10.3 8.35, to: 8.42 10.23, to: 5.5 10.23)
+    track(top, width: 0.25, from: 22.35 17.35, to: 22.35 15.55, to: 20.55 15.55)
+    track(bottom, width: 0.25, from: 20.55 15.55, to: 5.74 15.55, to: 5.5 15.31)
+    track(top, width: 0.25, from: 20.65 9.65, to: 19.3 11, to: 19.3 14.15, to: 20.65 14.15)
+    track(top, width: 0.25, from: 20.65 8.35, to: 20.65 7)
+    track(bottom, width: 0.25, from: 20.65 7, to: 20.65 11.5)
+    track(top, width: 0.25, from: 20.65 11.5, to: 20.65 12.85)
+    track(top, width: 0.25, from: 20.65 9, to: 18.85 9, to: 18.85 19.35, to: 23.35 19.35, to: 23.35 13.5, to: 20.65 13.5)
+    track(top, width: 0.25, from: 20.65 13.5, to: 23.35 13.5, to: 23.35 19.35, to: 12.08 19.35, to: 5.5 12.77)
+    via(at: 21.55 6.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 21.55 10.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 21.55 11.95, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 21.55 16.45, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 23.7 12.85, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 22.35 15.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 20.55 15.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 20.65 7, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 20.65 11.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H26.5V22.5H0.5Z")
+}

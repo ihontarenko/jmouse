@@ -77,11 +77,12 @@ public class CatalogueController {
                                               @RequestParam(required = false) String category,
                                               @RequestParam(required = false) String kind,
                                               @RequestParam(required = false) String tag,
+                                              @RequestParam(required = false) String role,
                                               @RequestParam(required = false) Boolean featured,
                                               @RequestParam(defaultValue = "false") boolean drafts,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "50") int size) {
-        return catalogue.browse(text, category, kind, tag, featured, drafts, page, size);
+        return catalogue.browse(text, category, kind, tag, role, featured, drafts, page, size);
     }
 
     /** The documents a list names, summarised in the order asked; one the reader cannot see is left out. */

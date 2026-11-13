@@ -48,10 +48,13 @@ public final class PanelFlattening implements DocumentFlattening {
     private static final String PARTS_BLOCK = "parts";
 
     private final Supplier<PanelDefaults> defaults;
+    /** The ways a pcb is made: what thickness a board names, read through the engine's tables. */
+    private final CadStandards standards;
 
     /** @param defaults what a panel takes where its lines say nothing, as it stands when a panel is written */
-    public PanelFlattening(Supplier<PanelDefaults> defaults) {
+    public PanelFlattening(Supplier<PanelDefaults> defaults, CadStandards standards) {
         this.defaults = defaults;
+        this.standards = standards;
     }
 
     @Override
@@ -100,7 +103,7 @@ public final class PanelFlattening implements DocumentFlattening {
         merged.texts.addAll(layout.texts());
         PcbDrawing flat = new PcbDrawing(circuitSlug, first.rules(), merged.netClasses, first.sizes(), merged.teardrops(drawings), List.of(), first.copperLayers(),
                 layout.outline(), merged.placements, merged.tracks, merged.arcs, merged.vias, merged.zones, merged.keepouts, List.of(), merged.texts,
-                merged.holes, merged.shapes, List.of());
+                merged.holes, merged.shapes, List.of(), List.of());
         DocumentNode pcb = new DocumentNode(PcbModule.PCB, document.title(), document.slug(), null, 1);
         document.getExpressions().stream().filter(MetaNode.class::isInstance).forEach(pcb::addExpression);
         flat.lines().forEach(pcb::addExpression);
@@ -125,11 +128,11 @@ public final class PanelFlattening implements DocumentFlattening {
     }
 
     /** Boards of one panel are one sheet of material: one count of copper layers, one thickness. */
-    private static void requireOneMaterial(Map<String, PcbDrawing> drawings) {
+    private void requireOneMaterial(Map<String, PcbDrawing> drawings) {
         Double thickness = null;
         Integer copper = null;
         for (Map.Entry<String, PcbDrawing> entry : drawings.entrySet()) {
-            Double own = CadStandards.pcbRules().valuesOf(entry.getValue().rules()).get(THICKNESS);
+            Double own = standards.pcbRules().valuesOf(entry.getValue().rules()).get(THICKNESS);
             int layers = entry.getValue().copperLayers();
             if (copper != null && copper != layers) {
                 throw new IllegalArgumentException("'" + entry.getKey() + "' has " + layers + " copper layers and the panel's other boards " + copper
@@ -166,8 +169,8 @@ public final class PanelFlattening implements DocumentFlattening {
             }
             pcb.placements().forEach(placement -> placements.add(placed(placement, motion, prefix)));
             pcb.tracks().forEach(track -> tracks.add(new PcbDrawing.Track(track.layer(), track.width(), track.rounding(),
-                    track.points().stream().map(motion::point).toList(), track.group(), track.finish())));
-            pcb.arcs().forEach(arc -> arcs.add(new PcbDrawing.Arc(arc.layer(), arc.width(), motion.point(arc.from()), motion.point(arc.through()), motion.point(arc.to()), arc.group(), arc.finish())));
+                    track.points().stream().map(motion::point).toList(), track.arrangement(), track.finish())));
+            pcb.arcs().forEach(arc -> arcs.add(new PcbDrawing.Arc(arc.layer(), arc.width(), motion.point(arc.from()), motion.point(arc.through()), motion.point(arc.to()), arc.arrangement(), arc.finish())));
             for (PcbDrawing.Via via : pcb.vias()) {
                 PcbDrawing.Point at = motion.point(new PcbDrawing.Point(via.x(), via.y()));
                 vias.add(new PcbDrawing.Via(at.x(), at.y(), via.drill(), via.diameter(), via.from(), via.to(), via.open()));

@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /** A document KiCad's import brought before imports named by codes is given the code the import gives it now. */
 class KiCadImportedCodesTest {
 
-    private final KiCadLibraries libraries = KiCadLibraries.standard();
+    private final KiCadLibraries libraries = KiCadLibraries.shipped();
 
     private Optional<String> codeOf(org.jmouse.cad.document.DocumentKind kind, String slug, String source) {
         return libraries.codeOfImported(kind, slug, new Provenance(source, null, null));

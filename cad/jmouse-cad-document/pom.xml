@@ -81,10 +81,23 @@
             <artifactId>jmouse-script-el</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- descriptions: every record's and enum's Javadoc kept beside it as it compiles, in every module built on this one —
+             what a settings section's schema says of each value -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- units: a document's quantities -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-units</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the plain model a drawing's lines speak of: how a drawn item stands (its group, its state) -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- the grammar a document's lines are said in -->

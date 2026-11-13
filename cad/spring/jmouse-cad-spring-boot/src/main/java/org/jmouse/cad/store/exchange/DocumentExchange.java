@@ -1,6 +1,7 @@
 package org.jmouse.cad.store.exchange;
 
 import org.jmouse.cad.settings.CadSettings;
+import org.jmouse.cad.store.plugin.CadEnginePlugin;
 import org.jmouse.cad.store.CadRead;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.jmouse.cad.document.DocumentInput;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Set;
 import java.nio.charset.StandardCharsets;
 import java.io.UncheckedIOException;
@@ -131,6 +133,8 @@ public class DocumentExchange {
     /** What a release of a document never stored is called. */
     private static final String UNSTORED = "unsaved";
 
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
     private final Extensions    extensions;
     private final CadCatalogue  catalogue;
     private final DocumentStore documents;
@@ -139,13 +143,16 @@ public class DocumentExchange {
     private final CadLanguage   language;
     private final FetchedFilesKeeper keeper;
     private final DocumentLicences licences;
+    private final CadSettings      settings;
 
     /**
      * @param files    where a document's files are kept; null for an installation that keeps none
      * @param licences what the licences of the works a written document carries let it leave as
      */
     public DocumentExchange(Extensions extensions, CadCatalogue catalogue, DocumentStore documents, CadAuthority authority,
-                            CadPlaces places, CadLanguage language, DocumentFiles files, DocumentLicences licences) {
+                            CadPlaces places, CadLanguage language, DocumentFiles files, DocumentLicences licences, CadSettings settings,
+                            CadStandards standards) {
+        this.standards = standards;
         this.extensions = extensions;
         this.catalogue = catalogue;
         this.documents = documents;
@@ -154,6 +161,7 @@ public class DocumentExchange {
         this.language = language;
         this.keeper = new FetchedFilesKeeper(files);
         this.licences = licences;
+        this.settings = settings;
     }
 
     /** Every format a plugin brought, read or written; none without a plugin. */
@@ -210,11 +218,22 @@ public class DocumentExchange {
         return new Imported(made.root().slug(), created, updated, reused, notes);
     }
 
-    /** The output jobs the plugins bring, those whose formats all run here. */
+    /** The output jobs the installation offers and the plugins bring, those whose formats all run here. */
     public List<OutputJob> outputJobs() {
         Set<String> running = extensions.contributions(DocumentExport.POINT).stream().filter(DocumentExport::available).map(DocumentExport::id)
                 .collect(Collectors.toSet());
-        return extensions.contributions(OutputJob.POINT).stream().filter(job -> running.containsAll(job.formats())).toList();
+        return Stream.concat(settings.read(CadEnginePlugin.OUTPUT_JOBS).jobs().stream(), extensions.contributions(OutputJob.POINT).stream())
+                .filter(job -> running.containsAll(job.formats())).toList();
+    }
+
+    /** How a pcb's artwork is drawn, as the installation has it now. */
+    private PcbArtwork.Settings artworkSettings() {
+        return settings.read(PcbArtwork.SECTION);
+    }
+
+    /** What a pcb's stack means for signals and heat, as the installation has it now. */
+    private TrackStacks trackStacks() {
+        return new TrackStacks(settings.read(StackPhysics.SECTION));
     }
 
     /**
@@ -303,9 +322,9 @@ public class DocumentExchange {
         return converted(() -> {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
-            Map<String, Double> values = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-            PcbArtwork artwork = PcbArtwork.of(fabrication, values, ARTWORK, SILKSCREEN_FONT);
-            ArtworkAreas areas = new ArtworkAreas(artwork.outlines(), ARTWORK.areas().steps());
+            Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
+            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT);
+            ArtworkAreas areas = new ArtworkAreas(artwork.outlines(), artworkSettings().areas().steps());
             Map<String, MaskAreas> masks = new LinkedHashMap<>();
             for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
                 masks.put(side, new MaskAreas(areas.areaOf(artwork.maskOpenings(side)), areas.areaOf(artwork.maskWindows(side)),
@@ -315,12 +334,6 @@ public class DocumentExchange {
             return new PcbDerived(artwork, masks, artwork.checks(values), lengths);
         });
     }
-
-    /** What copper is, as the engine measures a pcb's copper: data beside the physics, read once. */
-    private static final CopperPhysics COPPER_PHYSICS = CadSettings.read(CopperPhysics.SECTION);
-
-    /** What a pcb's stack means for signals and heat: data beside the physics, read once. */
-    private static final TrackStacks TRACK_STACKS = new TrackStacks(CadSettings.read(StackPhysics.SECTION));
 
     /**
      * The copper between two points of a pcb, its text as it stands: its resistance, the drop and the heat at a current, and
@@ -333,9 +346,9 @@ public class DocumentExchange {
         return converted(() -> {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
-            Map<String, Double> values = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-            CopperNets nets = fabrication.copperNets(new PadOutline(ARTWORK.curveSteps(), ARTWORK.cornerSteps()), ARTWORK.curveSteps());
-            return CopperPaths.between(fabrication.pcb(), nets, values, from, to, current, temperatureRise, COPPER_PHYSICS, ARTWORK.curveSteps());
+            Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
+            CopperNets nets = fabrication.copperNets(new PadOutline(artworkSettings().curveSteps(), artworkSettings().cornerSteps()), artworkSettings().curveSteps());
+            return CopperPaths.between(fabrication.pcb(), nets, values, from, to, current, temperatureRise, settings.read(CopperPhysics.SECTION), artworkSettings().curveSteps());
         });
     }
 
@@ -367,18 +380,18 @@ public class DocumentExchange {
         DocumentNode document = requirePcb(source);
         return converted(() -> {
             PcbDrawing pcb = PcbDrawing.of(document);
-            Map<String, Double> values = CadStandards.pcbRules().valuesOf(pcb.rules());
-            TrackStacks.Standing standing = TRACK_STACKS.stackOf(pcb.copperLayerIds(), values, layer, height, permittivity);
-            Optional<Double> warmth = CopperShape.ofPath(pcb.outline(), true, 0, ARTWORK.curveSteps())
-                    .map(edge -> TRACK_STACKS.warmth(power, edge.box().right() - edge.box().left(), edge.box().bottom() - edge.box().top()));
+            Map<String, Double> values = standards.pcbRules().valuesOf(pcb.rules());
+            TrackStacks.Standing standing = trackStacks().stackOf(pcb.copperLayerIds(), values, layer, height, permittivity);
+            Optional<Double> warmth = CopperShape.ofPath(pcb.outline(), true, 0, artworkSettings().curveSteps())
+                    .map(edge -> trackStacks().warmth(power, edge.box().right() - edge.box().left(), edge.box().bottom() - edge.box().top()));
             if (!(standing instanceof TrackStacks.Stands stands)) {
                 return new StackAnswer(standing, Optional.empty(), Map.of(), Map.of(), warmth);
             }
             Map<Double, Optional<Double>> widths = new LinkedHashMap<>();
-            impedances.forEach(impedance -> widths.put(impedance, TRACK_STACKS.widthFor(impedance, stands.stack())));
+            impedances.forEach(impedance -> widths.put(impedance, trackStacks().widthFor(impedance, stands.stack())));
             Map<String, Double> pairs = new LinkedHashMap<>();
-            pcb.pairs().forEach(pair -> pairs.put(pair.name(), TRACK_STACKS.pairImpedance(pair.width(), pair.gap(), stands.stack())));
-            return new StackAnswer(standing, Optional.of(TRACK_STACKS.impedanceOf(width, stands.stack())), widths, pairs, warmth);
+            pcb.pairs().forEach(pair -> pairs.put(pair.name(), trackStacks().pairImpedance(pair.width(), pair.gap(), stands.stack())));
+            return new StackAnswer(standing, Optional.of(trackStacks().impedanceOf(width, stands.stack())), widths, pairs, warmth);
         });
     }
 
@@ -406,15 +419,12 @@ public class DocumentExchange {
         return converted(() -> {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
-            Map<String, Double> values = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-            PcbArtwork artwork = PcbArtwork.of(fabrication, values, ARTWORK, SILKSCREEN_FONT);
+            Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
+            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT);
             return new ViaRows(fabrication.pcb(), artwork.nets(), artwork.pours(), new NetRules(fabrication.pcb(), values),
-                    new AreaOffsets(ARTWORK.arcError()), ARTWORK.curveSteps());
+                    new AreaOffsets(artworkSettings().arcError()), artworkSettings().curveSteps());
         });
     }
-
-    /** How a new pcb is laid out from its circuit: data beside the layout, read once. */
-    private static final PcbLayout LAYOUT = CadSettings.read(PcbLayout.SECTION);
 
     /**
      * A new pcb for a circuit, laid out by the engine from the circuit as it is drawn: its parts where the sheet has them, apart,
@@ -427,7 +437,7 @@ public class DocumentExchange {
         StoredDocuments documents = scope(owner);
         DocumentNode document = documents.find(circuit).filter(found -> found.kind().equals(SimulationModule.CIRCUIT))
                 .orElseThrow(() -> CadProblem.notFound("circuit " + circuit));
-        return converted(() -> CircuitBoards.laidOut(document, documents, LAYOUT));
+        return converted(() -> CircuitBoards.laidOut(document, documents, settings.read(PcbLayout.SECTION)));
     }
 
     /** A text that holds a pcb, or refused where it holds another kind. */
@@ -450,17 +460,14 @@ public class DocumentExchange {
         return converted(() -> {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
-            Map<String, Double> values = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-            PcbArtwork artwork = PcbArtwork.of(fabrication, values, ARTWORK, SILKSCREEN_FONT);
-            PcbSolid solid = PcbSolid.of(artwork, new ArtworkAreas(artwork.outlines(), ARTWORK.areas().steps()),
-                    PcbDrills.of(fabrication.pcb(), fabrication.footprints()), ARTWORK.areas().steps(), new PartBodies(ARTWORK.curveSteps()));
-            return new MadePcb(values.get(PcbVocabulary.RULE_PCB_THICKNESS), values.get(PcbVocabulary.RULE_COPPER_THICKNESS), solid, ARTWORK.areas().tolerance());
+            Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
+            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT);
+            PcbSolid solid = PcbSolid.of(artwork, new ArtworkAreas(artwork.outlines(), artworkSettings().areas().steps()),
+                    PcbDrills.of(fabrication.pcb(), fabrication.footprints()), artworkSettings().areas().steps(), new PartBodies(artworkSettings().curveSteps()));
+            return new MadePcb(values.get(PcbVocabulary.RULE_PCB_THICKNESS), values.get(PcbVocabulary.RULE_COPPER_THICKNESS), solid, artworkSettings().areas().tolerance());
         });
     }
 
-
-    /** How the router lays copper: data beside it, read once. */
-    private static final RoutingSettings ROUTING = CadSettings.read(RoutingSettings.SECTION);
 
     /**
      * What the router knows of a pcb besides where its copper runs, its text as it stands: each part's footprint and the nets
@@ -479,11 +486,11 @@ public class DocumentExchange {
                 named.put(part.designator(), part.footprint());
                 partNets.put(part.designator(), part.padNets());
             }
-            String link = ROUTING.autorouting().link().footprint();
+            String link = settings.read(RoutingSettings.SECTION).autorouting().link().footprint();
             Map<String, FootprintDrawing> ownFootprints = new LinkedHashMap<>();
             flat.catalogue().find(link).map(FootprintDrawing::of).ifPresent(drawing -> ownFootprints.put(link, drawing));
-            return new RoutingBoard(fabrication.footprints(), named, partNets, CadStandards.pcbRules().valuesOf(fabrication.pcb().rules()),
-                    ownFootprints, ARTWORK.forChecks(), new PadOutline(ARTWORK.curveSteps(), ARTWORK.cornerSteps()), ROUTING);
+            return new RoutingBoard(fabrication.footprints(), named, partNets, standards.pcbRules().valuesOf(fabrication.pcb().rules()),
+                    ownFootprints, artworkSettings().forChecks(), new PadOutline(artworkSettings().curveSteps(), artworkSettings().cornerSteps()), settings.read(RoutingSettings.SECTION));
         });
     }
 
@@ -497,23 +504,20 @@ public class DocumentExchange {
         if (!document.kind().equals(SimulationModule.CIRCUIT)) {
             throw CadProblem.invalid("A sheet's checks are made of a circuit; this text holds a " + document.kind().word() + ".");
         }
-        return converted(() -> SheetChecks.of(SimulationReading.circuit(document), scope(owner), PIN_RULES));
+        return converted(() -> SheetChecks.of(SimulationReading.circuit(document), scope(owner), settings.read(SheetChecks.SECTION)));
     }
 
-    /** Which pins may not share a net: the sheet checks' rules, which ship in the exchange's jar, read once. */
-    private static final SheetChecks.PinRules PIN_RULES = CadSettings.read(SheetChecks.SECTION);
-
     /** The checks' findings of a pcb, held to the values its rules give, its copper worked out as its artwork is. */
-    private static List<PcbFinding> findingsOf(DocumentNode pcb, CatalogueDocuments catalogue) {
+    private List<PcbFinding> findingsOf(DocumentNode pcb, CatalogueDocuments catalogue) {
         PcbFabrication fabrication = PcbFabrication.of(pcb, catalogue);
-        return fabrication.checks(ARTWORK, CadStandards.pcbRules().valuesOf(fabrication.pcb().rules()));
+        return fabrication.checks(artworkSettings(), standards.pcbRules().valuesOf(fabrication.pcb().rules()));
     }
 
     /**
      * Refuses to write a factory's files of a pcb its checks find an error in: a narrow gap, a short, a track off the edge
      * would be made as drawn. What only warns is written; the editor shows it.
      */
-    private static void requirePassing(DocumentNode pcb, CatalogueDocuments catalogue, String format) {
+    private void requirePassing(DocumentNode pcb, CatalogueDocuments catalogue, String format) {
         List<PcbFinding> errors = findingsOf(pcb, catalogue).stream().filter(finding -> finding.severity() == FindingSeverity.ERROR).toList();
         if (errors.isEmpty()) {
             return;
@@ -526,9 +530,6 @@ public class DocumentExchange {
 
     /** How many of a pcb's errors a refusal names; the rest are counted. */
     private static final int NAMED_ERRORS = 5;
-
-    /** How the checks measure: the artwork's settings, which ship in the exchange's jar, read once. */
-    private static final PcbArtwork.Settings ARTWORK = CadSettings.read(PcbArtwork.SECTION);
 
     /** The letters a pcb's silkscreen is written in, as its Gerber writes them: read once. */
     private static final StrokeFont SILKSCREEN_FONT = StrokeFont.newStroke();

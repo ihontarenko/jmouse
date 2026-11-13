@@ -1,7 +1,9 @@
 package org.jmouse.cad.folder;
 
+import org.jmouse.cad.document.source.DocumentLocation;
 import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.document.DocumentStatus;
+import org.jmouse.core.io.PortablePaths;
 import org.jmouse.revisions.RevisionLabel;
 
 import java.time.Instant;
@@ -23,14 +25,6 @@ import java.util.Set;
  */
 public class StoredDocument {
 
-    /** Where a document's text is held. */
-    public enum Holding {
-        /** A file of the library folder: every revision of it a commit. */
-        STORED,
-        /** A file a library ships: read in place, one version, read only. */
-        SHIPPED
-    }
-
     private final String slug;
     private final String ownerType;
     private final String ownerId;
@@ -41,9 +35,8 @@ public class StoredDocument {
     private String code;
     private String kind;
     private String categoryCode;
-    private Holding holding;
-    private String shippedLibrary;
-    private String shippedPath;
+    /** The file a library ships it from; null for a document of the library folder. */
+    private DocumentLocation.Shipped shipped;
     private int revision;
     private String revisionLabel;
     private String sourceChecksum;
@@ -65,7 +58,6 @@ public class StoredDocument {
         this.ownerId = owner == null ? null : owner.id();
         this.createdBy = createdBy;
         this.status = DocumentStatus.DRAFT;
-        this.holding = Holding.STORED;
         this.revision = 0;
         this.createdAt = now;
         this.updatedAt = now;
@@ -94,14 +86,23 @@ public class StoredDocument {
 
     /** Indexes a document a library ships, held in its file: where the file stands, so the index says where to read it. */
     public void holdShipped(String library, String path) {
-        this.holding = Holding.SHIPPED;
-        this.shippedLibrary = library;
-        this.shippedPath = path;
+        this.shipped = new DocumentLocation.Shipped(library, path);
     }
 
     public void replaceRelations(List<Relation> relations) {
         this.relations.clear();
         this.relations.addAll(relations);
+    }
+
+    /** What the document is to a bench — {@code source}, {@code load} … —, as its head says; null for none. */
+    private String benchRole;
+
+    public void changeBenchRole(String benchRole) {
+        this.benchRole = benchRole;
+    }
+
+    public String getBenchRole() {
+        return benchRole;
     }
 
     public void replaceTags(Set<String> tags) {
@@ -162,25 +163,23 @@ public class StoredDocument {
         return categoryCode;
     }
 
-    public Holding getHolding() {
-        return holding;
+    /** Whether a library ships it, read in place, one version, read only — rather than a file of the library folder. */
+    public boolean isShipped() {
+        return shipped != null;
     }
 
-    public String getShippedLibrary() {
-        return shippedLibrary;
-    }
-
-    public String getShippedPath() {
-        return shippedPath;
+    /** The file a library ships it from; empty for a document of the library folder. */
+    public Optional<DocumentLocation.Shipped> shipped() {
+        return Optional.ofNullable(shipped);
     }
 
     /** The folder a shipped document's file stands in under what ships it; null for one of the library folder, or at its root. */
     public String getFolder() {
-        if (shippedPath == null) {
+        if (shipped == null) {
             return null;
         }
-        int last = shippedPath.lastIndexOf('/');
-        return last <= 0 ? null : shippedPath.substring(0, last);
+        int last = shipped.path().lastIndexOf(PortablePaths.SEPARATOR);
+        return last <= 0 ? null : shipped.path().substring(0, last);
     }
 
     /** The head revision of the text: what {@code slug@revision} names. */

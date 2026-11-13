@@ -1,0 +1,8 @@
+category:resonance("Resonance") {
+    meta {
+        category: circuits
+        order: 3
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

@@ -33,8 +33,28 @@ class DocumentStoreTest {
     private static final CommitAuthor FOLDER = new CommitAuthor("library", "library@example.org");
     private static final DocumentOwner WORKSPACE = DocumentOwner.of("WORKSPACE", "w1");
 
+    /** A layout in words: an owner's type its folder's word, the owner's identifier its name; a kind's folder its word with an s. */
+    private static final FolderLayout LAYOUT = new FolderLayout() {
+        private static final java.util.Map<String, String> WORDS = java.util.Map.of("WORKSPACE", "workspaces", "PROJECT", "projects");
+
+        @Override
+        public String pathOf(Place place) {
+            String owner = place.owner() == null ? CATALOGUE : WORDS.get(place.owner().type()) + SEPARATOR + place.owner().id();
+            return FolderLayout.standing(owner, place.kind() + "s", place);
+        }
+
+        @Override
+        public Optional<Placed> placedAt(java.util.List<String> words) {
+            if (words.getFirst().equals(CATALOGUE)) {
+                return FolderLayout.standingAt(null, words.subList(1, words.size()));
+            }
+            return WORDS.entrySet().stream().filter(word -> word.getValue().equals(words.getFirst()) && words.size() > 2).findFirst()
+                    .flatMap(word -> FolderLayout.standingAt(DocumentOwner.of(word.getKey(), words.get(1)), words.subList(2, words.size())));
+        }
+    };
+
     private static DocumentStore storeOf(Path folder) {
-        return new DocumentStore(folder, new JGitLocalGit(), actor -> Optional.of(new CommitAuthor(actor, actor + "@example.org")),
+        return new DocumentStore(() -> folder, LAYOUT, new JGitLocalGit(), actor -> Optional.of(new CommitAuthor(actor, actor + "@example.org")),
                 FOLDER, () -> KYIV);
     }
 
@@ -86,19 +106,19 @@ class DocumentStoreTest {
         StoredDocument resistor = store.save(new StoredDocument("resistor", WORKSPACE, "anna", first));
         index(resistor, 1, first, "passive");
         store.appendSource("resistor", 1, store.nextLabel("resistor", LocalDate.of(2026, 10, 23)), "one", null, RevisionOrigin.IMPORTED, first);
-        assertTrue(Files.exists(folder.resolve("owners/WORKSPACE/w1/passive/resistor.component.jm")));
+        assertTrue(Files.exists(folder.resolve("workspaces/w1/components/passive/resistor.component.jm")));
         store.keepFile("resistor", "body.step", new byte[] {1, 2, 3}, "anna");
 
         // Filed in another category: the file moves, its files with it.
         Instant second = Instant.parse("2026-10-23T09:00:00Z");
         index(resistor, 2, second, "resistors");
         store.appendSource("resistor", 2, store.nextLabel("resistor", LocalDate.of(2026, 10, 23)), "two", "anna", RevisionOrigin.WRITTEN, second);
-        assertTrue(Files.exists(folder.resolve("owners/WORKSPACE/w1/resistors/resistor.component.jm")));
-        assertFalse(Files.exists(folder.resolve("owners/WORKSPACE/w1/passive/resistor.component.jm")));
+        assertTrue(Files.exists(folder.resolve("workspaces/w1/components/resistors/resistor.component.jm")));
+        assertFalse(Files.exists(folder.resolve("workspaces/w1/components/passive/resistor.component.jm")));
         assertEquals(List.of("body.step"), store.fileNames("resistor"));
 
         // Opened again, the folder gives every revision back, and a change made by hand there is recorded as found.
-        Files.writeString(folder.resolve("owners/WORKSPACE/w1/resistors/resistor.component.jm"), "three", StandardCharsets.UTF_8);
+        Files.writeString(folder.resolve("workspaces/w1/components/resistors/resistor.component.jm"), "three", StandardCharsets.UTF_8);
         DocumentStore opened = storeOf(folder);
         List<StoredDocument> held = opened.open();
         assertEquals(1, held.size());
@@ -118,7 +138,7 @@ class DocumentStoreTest {
         assertEquals(Optional.of(new byte[] {1, 2, 3}).map(bytes -> bytes.length), opened.readFile("resistor", "body.step").map(bytes -> bytes.length));
 
         opened.remove(read, "anna");
-        assertFalse(Files.exists(folder.resolve("owners/WORKSPACE/w1/resistors/resistor.component.jm")));
+        assertFalse(Files.exists(folder.resolve("workspaces/w1/components/resistors/resistor.component.jm")));
         assertEquals(List.of(), storeOf(folder).open());
     }
 
@@ -126,10 +146,10 @@ class DocumentStoreTest {
     @Test
     void aFilePutInByHandIsWhatItsPlaceSays(@TempDir Path folder) throws IOException {
         storeOf(folder).open();
-        Files.createDirectories(folder.resolve("catalogue/capacitors"));
-        Files.writeString(folder.resolve("catalogue/capacitors/ceramic.component.jm"), "not a document yet", StandardCharsets.UTF_8);
-        Files.createDirectories(folder.resolve("owners/PROJECT/p1"));
-        Files.writeString(folder.resolve("owners/PROJECT/p1/filter.circuit.jm"), "neither", StandardCharsets.UTF_8);
+        Files.createDirectories(folder.resolve("catalogue/components/capacitors"));
+        Files.writeString(folder.resolve("catalogue/components/capacitors/ceramic.component.jm"), "not a document yet", StandardCharsets.UTF_8);
+        Files.createDirectories(folder.resolve("projects/p1/circuits"));
+        Files.writeString(folder.resolve("projects/p1/circuits/filter.circuit.jm"), "neither", StandardCharsets.UTF_8);
 
         List<StoredDocument> held = storeOf(folder).open();
 

@@ -1,0 +1,86 @@
+# TR-02. An IRFZ44N switching a 12 Ω load from 12 V, its gate driven by a square wave whose high level is the slider.
+# At 10 V the channel is a resistance of about 15 mΩ: an ampere through it drops 15 millivolts. Below the threshold,
+# 3 V, nothing flows; a few tenths of a volt above it the channel only half opens and the drain stays volts up.
+circuit:mosfet-switch("MOSFET as a switch") {
+    meta {
+        summary: "An IRFZ44N switching an ampere: a gate voltage, no gate current, and millivolts across the open channel."
+        description: """
+            Idea: a MOSFET is controlled by a voltage, not a current. Once the gate is charged no current flows into
+            it; above the threshold the channel opens, and driven well past it the channel is a few milliohms —
+            so an ampere through it drops only millivolts, where a bipolar switch always keeps a tenth of a volt.
+
+            Try: start with a 10 V gate drive — the drain falls to about 15 mV while on. Lower the gate drive step
+            by step: at 3.5 V the drop is already ten times larger, at 3.2 V the channel only half opens and the
+            drain stays at 7 V, and at 3 V — the threshold — nothing flows. Change the load resistor and watch the
+            on-state drop follow the current.
+
+            Watch: the gate (CH2) against the drain (CH3); the ammeter in the drain — 1 A while on, nothing while
+            off; the voltmeter across the channel. Zoom into an edge: the gate stalls on a plateau while the drain
+            falls — the Miller effect, the gate charging the drain-gate capacitance.
+
+            Ask: the datasheet gives RDS(on) at most 17.5 mΩ at 10 V. What does that make the drop at 1 A, and the
+            power lost in the transistor? The datasheet's threshold is 2 … 4 V from one part to the next — why
+            does a designer still drive the gate to 10 V rather than just past 3?
+            """
+        category: transistors-as-switches
+        tags: transistors, example, tr-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:V_gate(10 V, in: 0 V .. 12 V, step: 0.1 V, "Gate drive: the square's high level")
+    parameter:R_load(12 Ω, in: 4.7 Ω .. 100 Ω, step: 0.1 Ω, "Load resistor")
+    parameter:f(1 kHz, in: 100 Hz .. 20 kHz, step: 100 Hz, "Switching frequency")
+    part:V1(voltage-source, [positive: vdd, negative: 0], U_output: 12 V)
+    part:G1(square-generator, [positive: drive, negative: 0], high: V_gate, frequency: f, duty: 0.5)
+    part:RG(resistor, [drive, gate], resistance: 100 Ω)
+    part:A1(ammeter, [in: vdd, out: top])
+    part:RL(resistor, [top, drain], resistance: R_load, power_rating: 25 W, thermal_resistance: 5 K/W)
+    part:Q1(irfz44n, [gate: gate, drain: drain, source: 0])
+    part:VM1(voltmeter, [plus: drain, minus: 0])
+    place:V1(at: 240 600, rotate: 90)
+    place:G1(at: 560 760, rotate: 90)
+    place:RG(at: 800 600)
+    place:Q1(at: 1040 600)
+    place:A1(at: 640 160)
+    place:RL(at: 1080 320, rotate: 90)
+    place:VM1(at: 1360 640, rotate: 90)
+    mark:Jd(junction, at: 1080 480)
+    mark:Jg1(junction, at: 240 920)
+    mark:Jg2(junction, at: 560 920)
+    mark:Jg3(junction, at: 1080 920)
+    mark:Jg4(junction, at: 1360 920)
+    mark:GND1(ground, at: 560 1000)
+    wire:W1(V1.positive, to: A1.in, via: 240 160)
+    wire:W2(A1.out, to: RL.positive, via: 1080 160)
+    wire:W3(RL.negative, to: Jd.j)
+    wire:W4(Jd.j, to: Q1.drain)
+    wire:W5(Jd.j, to: VM1.plus, via: 1360 480)
+    wire:W6(G1.positive, to: RG.positive, via: 560 600)
+    wire:W7(RG.negative, to: Q1.gate)
+    wire:W8(V1.negative, to: Jg1.j)
+    wire:W9(Jg1.j, to: Jg2.j)
+    wire:W10(G1.negative, to: Jg2.j)
+    wire:W11(Jg2.j, to: GND1.ground)
+    wire:W12(Jg2.j, to: Jg3.j)
+    wire:W13(Q1.source, to: Jg3.j)
+    wire:W14(Jg3.j, to: Jg4.j)
+    wire:W15(VM1.minus, to: Jg4.j)
+    probe:CH1(drive, 5 V/div)
+    probe:CH2(gate, 5 V/div)
+    probe:CH3(drain, 5 V/div)
+    expect("fully on: millivolts across the channel", from: "datasheet RDS(on) at most 17.5 mΩ at VGS 10 V; VDS = 1 A · 15 mΩ") {
+        measure(minimum, drain, after: 1 ms)
+        within(5 mV .. 25 mV)
+    }
+    expect("the load takes an ampere while on", from: "I = (12 V − VDS) / 12 Ω") {
+        measure(maximum, current: RL, after: 1 ms)
+        within(0.98 A .. 1.0 A)
+    }
+    expect("off: the drain at the supply", from: "below the threshold no channel, no current") {
+        measure(maximum, drain, after: 1 ms)
+        within(11.9 V .. 12.1 V)
+    }
+    analysis(transient, for: 3 ms)
+    view:transient_response(primary)
+    view:operating_point
+}

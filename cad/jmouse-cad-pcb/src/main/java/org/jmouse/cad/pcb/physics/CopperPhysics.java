@@ -1,11 +1,11 @@
 package org.jmouse.cad.pcb.physics;
 
-import org.jmouse.cad.settings.SettingsOwner;
+import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 /**
  * What copper is, as the engine works out a pcb's copper as an electrical network: its resistivity and how it changes with
  * temperature, the temperature a pcb stands in, IPC-2221's current-carrying constants, and how finely the network is solved.
- * Data, beside this class ({@link #SECTION}); the copper's thickness is the pcb's way of making, not this.
+ * Data, a section of the settings tree; the copper's thickness is the pcb's way of making, not this.
  *
  * @param source                 where each value comes from: the standards and books it is read from
  * @param resistivity            Ω·m at the reference temperature
@@ -17,11 +17,18 @@ import org.jmouse.cad.settings.SettingsSection;
  * @param edgeHalvings           how many halvings find where a piece crosses an area's edge
  * @param solver                 how finely the copper's network is solved
  */
-public record CopperPhysics(String source, double resistivity, double referenceTemperature, double temperatureCoefficient, double ambient,
-                            Capacity capacity, double carrying, int edgeHalvings, Solver solver) {
+public record CopperPhysics(@Label("Source") String source,
+                            @Label("Resistivity") double resistivity,
+                            @Label("Reference temperature") double referenceTemperature,
+                            @Label("Temperature coefficient") double temperatureCoefficient,
+                            @Label("Ambient") double ambient,
+                            @Label("Capacity") Capacity capacity,
+                            @Label("Least carried share") double carrying,
+                            @Label("Edge halvings") int edgeHalvings,
+                            @Label("Solver") Solver solver) {
 
     /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/pcb/physics/copper. */
-    public static final SettingsSection<CopperPhysics> SECTION = new SettingsSection<>("pcb/physics/copper", "Copper physics", SettingsOwner.ENGINE_DATA, CopperPhysics.class);
+    public static final SettingsSection<CopperPhysics> SECTION = new SettingsSection<>("pcb/physics/copper", "Copper physics", CopperPhysics.class);
 
     /**
      * IPC-2221's I = k·ΔT^riseExponent·A^areaExponent, A in square mils.
@@ -32,7 +39,11 @@ public record CopperPhysics(String source, double resistivity, double referenceT
      * @param areaExponent                  the power the cross-section is raised to
      * @param squareMilsPerSquareMillimetre square mils in a square millimetre: the formula's unit of area
      */
-    public record Capacity(double outer, double inner, double riseExponent, double areaExponent, double squareMilsPerSquareMillimetre) {
+    public record Capacity(@Label("Outer layer constant") double outer,
+                           @Label("Inner layer constant") double inner,
+                           @Label("Rise exponent") double riseExponent,
+                           @Label("Area exponent") double areaExponent,
+                           @Label("Square mils per square millimetre") double squareMilsPerSquareMillimetre) {
     }
 
     /**
@@ -43,7 +54,9 @@ public record CopperPhysics(String source, double resistivity, double referenceT
      * @param iterationsPerNode iterations allowed for each node of the network
      * @param iterations        iterations allowed beyond those
      */
-    public record Solver(double tolerance, int iterationsPerNode, int iterations) {
+    public record Solver(@Label("Tolerance") double tolerance,
+                         @Label("Iterations per node") int iterationsPerNode,
+                         @Label("Iterations") int iterations) {
     }
 
     /** Ω·mm at the ambient temperature. */

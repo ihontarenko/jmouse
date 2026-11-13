@@ -1,5 +1,6 @@
 package org.jmouse.cad.library;
 
+import org.jmouse.cad.table.TableModule;
 import java.util.function.Function;
 import java.util.Optional;
 import java.util.Map;
@@ -61,7 +62,7 @@ public final class CadLanguage {
 
     /** The engine's own modules, each a new instance: what the engine contributes to {@link DocumentModule#POINT}. */
     public static List<DocumentModule> engineModules() {
-        return List.of(new SchematicModule(), new PcbModule(), new SimulationModule());
+        return List.of(new SchematicModule(), new PcbModule(), new SimulationModule(), new TableModule());
     }
 
     /** The modules of the {@link #shipped() shipped} language, each a new instance. */

@@ -47,7 +47,7 @@ class ViaRowsTest {
                 new PcbDrawing.Placement("TP3", 2, 10, 0, PcbDrawing.TOP, Optional.empty()),
                 new PcbDrawing.Placement("TP4", 18, 10, 0, PcbDrawing.TOP, Optional.empty()));
         PcbDrawing pcb = new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, SQUARE, points, List.of(track), List.of(),
-                List.of(), zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+                List.of(), zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         CopperNets nets = CopperNets.of(pcb, Map.of("TP1", POINT, "TP2", POINT, "TP3", POINT, "TP4", POINT), Map.of("TP1", Map.of("1", "GND"),
                 "TP2", Map.of("1", "GND"), "TP3", Map.of("1", "SIG"), "TP4", Map.of("1", "SIG")),
                 new PadOutline(CURVE_STEPS, 6), CURVE_STEPS);

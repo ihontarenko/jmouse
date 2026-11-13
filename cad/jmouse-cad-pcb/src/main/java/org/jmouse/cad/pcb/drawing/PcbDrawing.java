@@ -3,7 +3,13 @@ package org.jmouse.cad.pcb.drawing;
 import org.jmouse.cad.pcb.PcbWords;
 import org.jmouse.cad.pcb.PcbLinesParser;
 import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.document.ArrangementLines;
 import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.drawing.ArrangedDrawing;
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
+import org.jmouse.cad.drawing.DrawnGroups;
+import org.jmouse.cad.drawing.StandingItem;
 import org.jmouse.cad.document.PathTextNode;
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.LineBuilder;
@@ -15,6 +21,7 @@ import org.jmouse.svg.path.parser.PathParseException;
 import org.jmouse.svg.path.parser.PathParser;
 
 import org.jmouse.el.grammar.ConnectionsNode;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -28,11 +35,14 @@ import java.util.Set;
  * part stands and the copper between them —, in millimetres, Y downwards. It is data; how it is sent is the product's.
  *
  * @param copperLayers how many copper layers it has; 0 when it does not say
+ * @param groups       the groups its items are chosen and moved with, each with its own state; a group only named by its members
+ *                     is a free one
  */
 public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> netClasses, Sizes sizes, List<Teardrop> teardrops,
                            List<Pair> pairs, int copperLayers, String outline, List<Placement> placements, List<Track> tracks,
                            List<Arc> arcs, List<Via> vias, List<Zone> zones, List<Keepout> keepouts, List<Dimension> dimensions,
-                           List<Text> texts, List<Hole> holes, List<Shape> shapes, List<Output> outputs) {
+                           List<Text> texts, List<Hole> holes, List<Shape> shapes, List<Output> outputs, List<DrawnGroup> groups)
+        implements ArrangedDrawing {
 
     public PcbDrawing {
         netClasses = listed(netClasses);
@@ -50,6 +60,40 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         holes = listed(holes);
         shapes = listed(shapes);
         outputs = listed(outputs);
+        groups = listed(groups);
+    }
+
+    /** Its parts, tracks, arcs and vias as a lock looks at them: each named as a refusal says it, apart from how it stands. */
+    @Override
+    public List<StandingItem> standingItems() {
+        List<StandingItem> items = new ArrayList<>();
+        placements.forEach(placement -> items.add(new StandingItem(placement.printed(), placement.arranged(Arrangement.FREE), placement.arrangement())));
+        tracks.forEach(track -> items.add(new StandingItem("the track on " + track.layer() + " from " + at(track.points().getFirst()),
+                track.arranged(Arrangement.FREE), track.arrangement())));
+        arcs.forEach(arc -> items.add(new StandingItem("the arc on " + arc.layer() + " from " + at(arc.from()), arc.arranged(Arrangement.FREE), arc.arrangement())));
+        vias.forEach(via -> items.add(new StandingItem("the via at " + at(new Point(via.x(), via.y())), via.arranged(Arrangement.FREE), via.arrangement())));
+        return List.copyOf(items);
+    }
+
+    /** A point as a refusal writes it: {@code 12.5, 40}. */
+    private static String at(Point point) {
+        return millimetres(point.x()) + ", " + millimetres(point.y());
+    }
+
+    private static String millimetres(double value) {
+        return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
+    }
+
+    /** Its groups, asked whether an item is held where it stands. */
+    @Override
+    public DrawnGroups drawnGroups() {
+        return new DrawnGroups(groups);
+    }
+
+    /** The same pcb with other groups. */
+    public PcbDrawing withGroups(List<DrawnGroup> others) {
+        return new PcbDrawing(circuit, rules, netClasses, sizes, teardrops, pairs, copperLayers, outline, placements, tracks, arcs, vias,
+                zones, keepouts, dimensions, texts, holes, shapes, outputs, others);
     }
 
     /** A list a pcb does not have is left out of what is written: absent is empty. */
@@ -126,19 +170,19 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
     /** The same pcb with other tracks. */
     public PcbDrawing withTracks(List<Track> others) {
         return new PcbDrawing(circuit, rules, netClasses, sizes, teardrops, pairs, copperLayers, outline, placements, others, arcs, vias,
-                zones, keepouts, dimensions, texts, holes, shapes, outputs);
+                zones, keepouts, dimensions, texts, holes, shapes, outputs, groups);
     }
 
     /** The same pcb with other vias. */
     public PcbDrawing withVias(List<Via> others) {
         return new PcbDrawing(circuit, rules, netClasses, sizes, teardrops, pairs, copperLayers, outline, placements, tracks, arcs, others,
-                zones, keepouts, dimensions, texts, holes, shapes, outputs);
+                zones, keepouts, dimensions, texts, holes, shapes, outputs, groups);
     }
 
     /** The same pcb with other placements. */
     public PcbDrawing withPlacements(List<Placement> others) {
         return new PcbDrawing(circuit, rules, netClasses, sizes, teardrops, pairs, copperLayers, outline, others, tracks, arcs, vias,
-                zones, keepouts, dimensions, texts, holes, shapes, outputs);
+                zones, keepouts, dimensions, texts, holes, shapes, outputs, groups);
     }
 
     /** The same pcb with one track run through other points. */
@@ -206,22 +250,27 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
     /**
      * @param side      {@code top} or {@code bottom}
      * @param reference where its designator stands in the part's own frame; empty for where its footprint's field puts it
-     * @param group     the group it is chosen and moved with; empty for none
+     * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
      * @param role      what it is to the copper beyond its pads: {@code link} for a 0 Ω link, its pads one piece of copper; empty for a part
      */
     public record Placement(String designator, double x, double y, double rotation, String side, Optional<Reference> reference,
-                            Optional<String> shown, Optional<String> footprint, Map<String, String> nets, String group, String role) {
+                            Optional<String> shown, Optional<String> footprint, Map<String, String> nets, Arrangement arrangement, String role) {
 
         public Placement {
             nets = nets == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(nets));
-            group = group == null ? "" : group;
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
             role = role == null ? "" : role;
         }
 
-        /** A placement in no group. */
+        /** A placement in no group, free. */
         public Placement(String designator, double x, double y, double rotation, String side, Optional<Reference> reference,
                          Optional<String> shown, Optional<String> footprint, Map<String, String> nets) {
-            this(designator, x, y, rotation, side, reference, shown, footprint, nets, "", "");
+            this(designator, x, y, rotation, side, reference, shown, footprint, nets, Arrangement.FREE, "");
+        }
+
+        /** The same part standing otherwise among the others: in another group, or locked. */
+        public Placement arranged(Arrangement other) {
+            return new Placement(designator, x, y, rotation, side, reference, shown, footprint, nets, other, role);
         }
 
         /** A part of the circuit, printed as it is named and standing on the footprint the circuit gives it. */
@@ -266,21 +315,26 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
     }
 
     /**
-     * @param group  the group it is chosen and moved with; empty for none
-     * @param finish what its copper is left as: {@link PcbVocabulary#FINISH_BARE}, the solder mask open along it for solder to be run on;
+     * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
+     * @param finish      what its copper is left as: {@link PcbVocabulary#FINISH_BARE}, the solder mask open along it for solder to be run on;
      *               empty for under the mask
      */
-    public record Track(String layer, double width, double rounding, List<Point> points, String group, String finish) {
+    public record Track(String layer, double width, double rounding, List<Point> points, Arrangement arrangement, String finish) {
 
         public Track {
             points = List.copyOf(points);
-            group = group == null ? "" : group;
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
             finish = finish == null ? "" : finish;
         }
 
-        /** A track in no group, under the mask. */
+        /** A track in no group, free, under the mask. */
         public Track(String layer, double width, double rounding, List<Point> points) {
-            this(layer, width, rounding, points, "", "");
+            this(layer, width, rounding, points, Arrangement.FREE, "");
+        }
+
+        /** The same track standing otherwise among the others. */
+        public Track arranged(Arrangement other) {
+            return new Track(layer, width, rounding, points, other, finish);
         }
 
         public boolean bare() {
@@ -289,26 +343,31 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
 
         /** The same track run through other points. */
         public Track withPoints(List<Point> others) {
-            return new Track(layer, width, rounding, others, group, finish);
+            return new Track(layer, width, rounding, others, arrangement, finish);
         }
 
         /** The same track with its corners rounded so. */
         public Track withRounding(double other) {
-            return new Track(layer, width, other, points, group, finish);
+            return new Track(layer, width, other, points, arrangement, finish);
         }
     }
 
     /** A track bent as an arc, through three points. */
-    public record Arc(String layer, double width, Point from, Point through, Point to, String group, String finish) {
+    public record Arc(String layer, double width, Point from, Point through, Point to, Arrangement arrangement, String finish) {
 
         public Arc {
-            group = group == null ? "" : group;
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
             finish = finish == null ? "" : finish;
         }
 
-        /** An arc in no group, under the mask. */
+        /** An arc in no group, free, under the mask. */
         public Arc(String layer, double width, Point from, Point through, Point to) {
-            this(layer, width, from, through, to, "", "");
+            this(layer, width, from, through, to, Arrangement.FREE, "");
+        }
+
+        /** The same arc standing otherwise among the others. */
+        public Arc arranged(Arrangement other) {
+            return new Arc(layer, width, from, through, to, other, finish);
         }
 
         public boolean bare() {
@@ -317,15 +376,20 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
     }
 
     /** @param from the layer it starts on; empty for through the pcb */
-    public record Via(double x, double y, double drill, double diameter, String from, String to, String open, String group) {
+    public record Via(double x, double y, double drill, double diameter, String from, String to, String open, Arrangement arrangement) {
 
         public Via {
-            group = group == null ? "" : group;
+            arrangement = arrangement == null ? Arrangement.FREE : arrangement;
         }
 
-        /** A via in no group. */
+        /** A via in no group, free. */
         public Via(double x, double y, double drill, double diameter, String from, String to, String open) {
-            this(x, y, drill, diameter, from, to, open, "");
+            this(x, y, drill, diameter, from, to, open, Arrangement.FREE);
+        }
+
+        /** The same via standing otherwise among the others. */
+        public Via arranged(Arrangement other) {
+            return new Via(x, y, drill, diameter, from, to, open, other);
         }
 
         /** A via covered by the solder mask on both sides. */
@@ -490,6 +554,7 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         if (outline != null && !outline.isEmpty()) {
             lines.add(line("edge").ending(pathText("the edge", outline)).build());
         }
+        groups.forEach(group -> lines.add(ArrangementLines.groupLine(group)));
         placements.forEach(placement -> lines.add(placement(placement)));
         for (Track track : tracks) {
             LineBuilder line = line("track").slot(PcbWords.LAYER, Nodes.word(track.layer())).clause(PcbWords.WIDTH, Nodes.number(track.width()));
@@ -498,14 +563,14 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
             }
             line.clause(PcbWords.FROM, point(track.points().getFirst()));
             track.points().stream().skip(1).forEach(point -> line.clause(PcbWords.TO, point(point)));
-            inGroup(line, track.group());
+            ArrangementLines.write(line, track.arrangement());
             finished(line, track.finish());
             lines.add(line.build());
         }
         for (Arc arc : arcs) {
             LineBuilder line = line("arc").slot(PcbWords.LAYER, Nodes.word(arc.layer())).clause(PcbWords.WIDTH, Nodes.number(arc.width()))
                     .clause(PcbWords.FROM, point(arc.from())).clause(PcbWords.THROUGH, point(arc.through())).clause(PcbWords.TO, point(arc.to()));
-            inGroup(line, arc.group());
+            ArrangementLines.write(line, arc.arrangement());
             finished(line, arc.finish());
             lines.add(line.build());
         }
@@ -521,7 +586,7 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
             if (via.open() != null && !via.open().isEmpty()) {
                 line.clause(PcbWords.OPEN, Nodes.word(via.open()));
             }
-            inGroup(line, via.group());
+            ArrangementLines.write(line, via.arrangement());
             lines.add(line.build());
         }
         for (Zone zone : zones) {
@@ -592,13 +657,6 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** The group a line's thing is in, said when it is in one. */
-    private static void inGroup(LineBuilder line, String group) {
-        if (!group.isEmpty()) {
-            line.clause(PcbWords.GROUP, Nodes.word(group));
-        }
-    }
-
     private static ClauseLineNode placement(Placement placement) {
         LineBuilder line = line("place").slot(PcbWords.REFERENCE, Nodes.word(placement.designator()));
         placement.shown().ifPresent(shown -> line.clause(PcbWords.SHOWN, Nodes.word(shown)));
@@ -615,7 +673,7 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         if (placement.side() != null && !placement.side().equals(TOP)) {
             line.clause(PcbWords.SIDE, Nodes.word(placement.side()));
         }
-        inGroup(line, placement.group());
+        ArrangementLines.write(line, placement.arrangement());
         if (!placement.role().isEmpty()) {
             line.clause(PcbWords.ROLE, Nodes.word(placement.role()));
         }
@@ -661,6 +719,7 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         int layers = 0;
         String outline = "";
         List<Placement> placements = new ArrayList<>();
+        List<DrawnGroup> groups = new ArrayList<>();
         List<Track> tracks = new ArrayList<>();
         List<Arc> arcs = new ArrayList<>();
         List<Via> vias = new ArrayList<>();
@@ -673,6 +732,11 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         List<Hole> holes = new ArrayList<>();
         for (Expression statement : pcb.getExpressions()) {
             if (!(statement instanceof ClauseLineNode line)) {
+                continue;
+            }
+            // A group is named as every item is, by its term: it has no word of its own.
+            if (line.grammar() == ArrangementLines.GROUP_LINE) {
+                groups.add(ArrangementLines.groupOf(line));
                 continue;
             }
             switch (line.word()) {
@@ -711,15 +775,15 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
                     points.add(point(line.point(PcbWords.FROM).orElseThrow()));
                     line.values("to").forEach(value -> points.add(point((PointNode) value)));
                     tracks.add(new Track(line.name(PcbWords.LAYER).orElseThrow(), line.quantity(PcbWords.WIDTH).orElseThrow(),
-                            line.quantity(PcbWords.ROUNDING).orElse(0.0), points, line.word(PcbWords.GROUP).orElse(""), line.word(PcbWords.FINISH).orElse("")));
+                            line.quantity(PcbWords.ROUNDING).orElse(0.0), points, ArrangementLines.arrangementOf(line), line.word(PcbWords.FINISH).orElse("")));
                 }
                 case "arc" -> arcs.add(new Arc(line.name(PcbWords.LAYER).orElseThrow(), line.quantity(PcbWords.WIDTH).orElseThrow(),
                         point(line.point(PcbWords.FROM).orElseThrow()), point(line.point(PcbWords.THROUGH).orElseThrow()),
-                        point(line.point(PcbWords.TO).orElseThrow()), line.word(PcbWords.GROUP).orElse(""), line.word(PcbWords.FINISH).orElse("")));
+                        point(line.point(PcbWords.TO).orElseThrow()), ArrangementLines.arrangementOf(line), line.word(PcbWords.FINISH).orElse("")));
                 case "via" -> {
                     PointNode at = line.point(PcbWords.AT).orElseThrow();
                     vias.add(new Via(at.x(), at.y(), line.quantity(PcbWords.DRILL).orElseThrow(), line.quantity(PcbWords.DIAMETER).orElseThrow(),
-                            line.word(PcbWords.FROM).orElse(""), line.word(PcbWords.TO).orElse(""), line.word(PcbWords.OPEN).orElse(""), line.word(PcbWords.GROUP).orElse("")));
+                            line.word(PcbWords.FROM).orElse(""), line.word(PcbWords.TO).orElse(""), line.word(PcbWords.OPEN).orElse(""), ArrangementLines.arrangementOf(line)));
                 }
                 case "zone" -> zones.add(new Zone(line.name(PcbWords.LAYER).orElseThrow(), line.word(PcbWords.NET).orElseThrow(),
                         line.quantity(PcbWords.CLEARANCE).orElse(0.0), (int) Math.round(line.quantity(PcbWords.PRIORITY).orElse(0.0)), path(line), line.word(PcbWords.FINISH).orElse("")));
@@ -744,7 +808,7 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
         return new PcbDrawing(circuit, Optional.ofNullable(rules), netClasses, new Sizes(trackSizes, viaSizes), teardrops, pairs,
                                 layers, outline, placements,
-                tracks, arcs, vias, zones, keepouts, dimensions, texts, holes, shapes, outputs);
+                tracks, arcs, vias, zones, keepouts, dimensions, texts, holes, shapes, outputs, groups);
     }
 
     private static Placement placement(ClauseLineNode line) {
@@ -754,7 +818,7 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
             return new Reference(where.x(), where.y(), nested.quantity(PcbWords.ROTATE).orElse(0.0), nested.word(PcbWords.LAYER).orElse(""));
         });
         return new Placement(line.name(PcbWords.REFERENCE).orElseThrow(), at.x(), at.y(), line.quantity(PcbWords.ROTATE).orElse(0.0),
-                line.word(PcbWords.SIDE).orElse(TOP), reference, line.word(PcbWords.SHOWN), line.word(PcbWords.FOOTPRINT), netsOf(line), line.word(PcbWords.GROUP).orElse(""), line.word(PcbWords.ROLE).orElse(""));
+                line.word(PcbWords.SIDE).orElse(TOP), reference, line.word(PcbWords.SHOWN), line.word(PcbWords.FOOTPRINT), netsOf(line), ArrangementLines.arrangementOf(line), line.word(PcbWords.ROLE).orElse(""));
     }
 
     /** {@code nets (GND = 1, OUT = 2)}, by pad: a net takes several pads, a pad only one net. */

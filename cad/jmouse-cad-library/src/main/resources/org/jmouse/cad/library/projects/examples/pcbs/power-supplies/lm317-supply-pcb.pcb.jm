@@ -1,0 +1,48 @@
+# The LM317 supply as a board one could order, 60 × 40 mm, every part through-hole: the winding in on J1 at the left,
+# the bridge in two rows either side of it, the 1000 µF reservoir, the LM317 in TO-220 with its divider under it, the
+# output capacitor and J2 at the right. Two layers: every signal on the top, the bottom one ground plane that every
+# ground pad — through-hole, so on both sides — meets without a track. The reservoir's rail runs above the regulator to
+# its input, the winding's two lines into the middle of each row of diodes, so nothing crosses.
+# Each diode is turned half round, so each row's two ends on the winding — the left diode's first pad, the right one's second —
+# meet in the middle of the row, and the right diode's first pad stands on the reservoir's rail.
+pcb:lm317-supply-pcb("Adjustable supply on an LM317 — pcb") {
+    meta {
+        summary: "The LM317 supply as a two-layer through-hole pcb: bridge, reservoir, TO-220 regulator and trimmer, a ground plane under it all."
+        category: power-supplies
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(lm317-supply)
+    rules(standard)
+    teardrops(round, length: 0.5, width: 1, curved)
+    layers(2)
+    edge("M1 0H59A1 1 0 0 1 60 1V39A1 1 0 0 1 59 40H1A1 1 0 0 1 0 39V1A1 1 0 0 1 1 0Z")
+    place(J1, at: 4 14)
+    place(D3, at: 8 8, rotate: 180)
+    place(D1, at: 22 8, rotate: 180)
+    place(D4, at: 8 20, rotate: 180)
+    place(D2, at: 22 20, rotate: 180)
+    place(C1, at: 36 14)
+    place(U1, at: 48 8)
+    place(R1, at: 46 20, rotate: 270)
+    place(RV1, at: 46 32)
+    place(C2, at: 54 20)
+    place(J2, at: 56 32)
+    # The winding's two lines from J1 into the middle of each row: each row's two diodes meet there.
+    track(top, width: 1, rounding: 0.5, from: 4 12.73, to: 15 12.73, to: 15 8)
+    track(top, width: 1, from: 13.08 8, to: 16.92 8)
+    track(top, width: 1, rounding: 0.5, from: 4 15.27, to: 15 15.27, to: 15 20)
+    track(top, width: 1, from: 13.08 20, to: 16.92 20)
+    # The reservoir's rail: the two upper diodes' cathodes, the capacitor, and over the regulator to its input.
+    track(top, width: 1.2, from: 27.08 8, to: 27.08 20)
+    track(top, width: 1.2, from: 27.08 14, to: 33.5 14)
+    track(top, width: 1.2, rounding: 1, from: 27.08 8, to: 27.08 4, to: 50.54 4, to: 50.54 8)
+    # The output: to R1's top, the output capacitor and J2.
+    track(top, width: 0.8, rounding: 0.5, from: 48 8, to: 48 12.92, to: 46 14.92)
+    track(top, width: 0.8, rounding: 0.5, from: 48 12.92, to: 53 12.92, to: 53 28.5, to: 56 28.5, to: 56 30.73)
+    # The adjustment pin: down past the reservoir to R1's foot and the trimmer's end.
+    track(top, width: 0.5, rounding: 0.5, from: 45.46 8, to: 43.5 9.96, to: 43.5 32, to: 43.46 32)
+    track(top, width: 0.5, from: 43.5 25.08, to: 46 25.08)
+    zone(bottom, net: 0, clearance: 0.4, "M1.5 1.5H58.5V38.5H1.5Z")
+}

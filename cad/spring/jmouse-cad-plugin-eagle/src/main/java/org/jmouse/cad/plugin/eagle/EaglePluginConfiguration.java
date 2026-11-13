@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.eagle;
 
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.eagle.EagleLibraries;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 public class EaglePluginConfiguration {
 
     @Bean
-    public EaglePlugin cadEaglePlugin() {
-        return new EaglePlugin(new EagleDesignReading(EagleLibraries.standard()));
+    public EaglePlugin cadEaglePlugin(TableSource tables) {
+        return new EaglePlugin(new EagleDesignReading(EagleLibraries.readFrom(tables)));
     }
 }

@@ -1,0 +1,114 @@
+# OA-10. A function generator with no generator in it: a Schmitt trigger and an integrator in a ring, each a TL072. The
+# comparator's square drives the integrator, whose triangle ramps until it carries the comparator's input through zero;
+# the square flips, the ramp turns round, and so on for ever. The comparator flips where the triangle reaches
+# Vsat · R1 / R2 = 13.5 V · 10 kΩ / 20 kΩ = ±6.75 V, and the integrator ramps at Vsat / (Ri · C), so one period is
+# 4 · Ri · C · R1 / R2 and the frequency f = R2 / (4 · R1 · Ri · C) = 20 kΩ / (4 · 10 kΩ · 10 kΩ · 47 nF) ≈ 1.06 kHz.
+# The rail voltage cancels out of the frequency: a higher rail ramps faster, but has further to go.
+circuit:triangle-square-generator("Triangle and square generator") {
+    meta {
+        summary: "A Schmitt trigger and an integrator in a loop oscillate by themselves: a square from one, a triangle from the other, at f = R2 / (4 · R1 · Ri · C)."
+        description: """
+            Idea: an integrator turns a steady input into a ramp; a Schmitt trigger turns a ramp that has gone far
+            enough into a flip. Connect each to the other and they keep each other going: the square makes the
+            triangle ramp, the triangle flips the square, the square turns the ramp round.
+
+            Try: raise C or Ri — the ramps get slower and the frequency falls, the triangle's height stays. Raise R1:
+            the comparator waits for a taller triangle, so each ramp lasts longer — taller and slower at once.
+
+            Watch: CH1 the square, CH2 the triangle. Every corner of the triangle sits on an edge of the square, and
+            the triangle turns at ±6.75 V — where the comparator's input, between R1 and R2, crosses zero.
+
+            Ask: why does the rail voltage not appear in the frequency? What would happen to the triangle if R1 were
+            larger than R2?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-10
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:C(47 nF, in: 4.7 nF .. 470 nF, step: 0.1 nF, "Integrating capacitor")
+    parameter:R_integrator(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Ri, the integrator's input resistor")
+    parameter:R1(10 kΩ, in: 1 kΩ .. 18 kΩ, step: 1 kΩ, "R1, from the triangle to the comparator's input")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:U1(tl072, [A.non_inverting_input: feedback, A.inverting_input: 0, A.output: square, Vcc: vp, GND: vn])
+    part:RA(resistor, [feedback, triangle], resistance: R1)
+    part:RB(resistor, [feedback, square], resistance: 20 kΩ)
+    part:RI(resistor, [square, integrating], resistance: R_integrator)
+    part:CI(capacitor, [integrating, triangle], capacitance: C)
+    part:U2(tl072, [A.non_inverting_input: 0, A.inverting_input: integrating, A.output: triangle, Vcc: vp, GND: vn])
+    # Where the pcb meets the bench: the supplies, ground, the square and the triangle, on one header.
+    part:J1(pin-header-1x5, [pin1: vp, pin2: 0, pin3: vn, pin4: square, pin5: triangle])
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:Jc(junction, at: 400 320)
+    mark:GND1(common, at: 400 400)
+    place:U1(at: 600 560)
+    mark:LP2(label, vp, at: 600 380)
+    mark:LN2(label, vn, at: 600 740, rotate: 180)
+    mark:Jf(junction, at: 440 600)
+    place:RB(at: 600 920)
+    mark:Jsq(junction, at: 760 560)
+    place:RI(at: 920 520)
+    mark:Ji(junction, at: 1080 520)
+    place:CI(at: 1240 200)
+    place:U2(at: 1240 560)
+    mark:LP3(label, vp, at: 1240 380)
+    mark:LN3(label, vn, at: 1240 740, rotate: 180)
+    mark:GND2(common, at: 1120 720)
+    mark:Jt(junction, at: 1400 560)
+    place:RA(at: 920 1080)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: Jc.j)
+    wire:W4(Jc.j, to: GND1.common)
+    wire:W5(Jc.j, to: U1.A.inverting_input, via: [480 320, 480 520])
+    wire:W6(LP2.label, to: U1.Vcc)
+    wire:W7(U1.GND, to: LN2.label)
+    wire:W8(U1.A.non_inverting_input, to: Jf.j)
+    wire:W9(Jf.j, to: RB.positive, via: 440 920)
+    wire:W10(RB.negative, to: Jsq.j, via: 760 920)
+    wire:W11(U1.A.output, to: Jsq.j)
+    wire:W12(Jsq.j, to: RI.positive, via: 760 520)
+    wire:W13(RI.negative, to: Ji.j)
+    wire:W14(Ji.j, to: U2.A.inverting_input)
+    wire:W15(Ji.j, to: CI.positive, via: 1080 200)
+    wire:W16(CI.negative, to: Jt.j, via: 1400 200)
+    wire:W17(LP3.label, to: U2.Vcc)
+    wire:W18(U2.GND, to: LN3.label)
+    wire:W19(U2.A.non_inverting_input, to: GND2.common, via: 1120 600)
+    wire:W20(U2.A.output, to: Jt.j)
+    wire:W21(Jt.j, to: RA.negative, via: 1400 1080)
+    wire:W22(RA.positive, to: Jf.j, via: [360 1080, 360 600])
+    place:J1(at: 1720 600)
+    mark:LJ1(label, vp, at: 1920 520, rotate: 90)
+    mark:GNDJ(common, at: 2080 560, rotate: 270)
+    mark:LJ3(label, vn, at: 1920 600, rotate: 90)
+    mark:LJ4(label, square, at: 2080 640, rotate: 90)
+    mark:LJ5(label, triangle, at: 1920 680, rotate: 90)
+    wire:W23(J1.pin1, to: LJ1.label)
+    wire:W24(J1.pin2, to: GNDJ.common)
+    wire:W25(J1.pin3, to: LJ3.label)
+    wire:W26(J1.pin4, to: LJ4.label)
+    wire:W27(J1.pin5, to: LJ5.label)
+    probe:CH1(square, 5 V/div)
+    probe:CH2(triangle, 2 V/div)
+    expect("it oscillates by itself, at R2 / (4 · R1 · Ri · C)", from: "f = 20 kΩ / (4 · 10 kΩ · 10 kΩ · 47 nF) = 1.06 kHz") {
+        measure(frequency, triangle, above: 0 V, after: 5 ms)
+        near(1064 Hz, +- 3%)
+    }
+    expect("the triangle turns at the upper threshold", from: "Vsat · R1 / R2 = 13.5 V · 10 kΩ / 20 kΩ = 6.75 V") {
+        measure(maximum, triangle, after: 5 ms)
+        near(6.75 V, +- 3%)
+    }
+    expect("and at the lower one", from: "−13.5 V · 10 kΩ / 20 kΩ = −6.75 V") {
+        measure(minimum, triangle, after: 5 ms)
+        near(-6.75 V, +- 3%)
+    }
+    expect("the square is high half the time", from: "the rails are symmetric, ±13.5 V, so the ramps up and down take equally long") {
+        measure(duty, square, above: 0 V, after: 5 ms)
+        near(0.5, +- 3%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+}

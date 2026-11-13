@@ -21,6 +21,7 @@
         <module>jmouse-cad-document</module>
         <module>jmouse-cad-schematic</module>
         <module>jmouse-cad-pcb</module>
+        <module>jmouse-cad-table</module>
         <module>jmouse-cad-panel</module>
         <module>jmouse-cad-mesh</module>
         <module>jmouse-cad-simulation</module>

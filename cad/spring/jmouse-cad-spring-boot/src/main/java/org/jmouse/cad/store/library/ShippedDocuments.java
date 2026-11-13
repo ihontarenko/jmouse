@@ -1,8 +1,12 @@
 package org.jmouse.cad.store.library;
 
+import java.util.function.Supplier;
+import org.jmouse.cad.table.TableModule;
+import org.jmouse.cad.table.ShippedTable;
 import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.source.DocumentLocation;
+import org.jmouse.core.io.PortablePaths;
 import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.library.CadLibrary;
@@ -42,7 +46,7 @@ public class ShippedDocuments {
     public static final String ENGINE_LIBRARY = "jmouse-cad-library";
 
     private static final String FILE_PATTERN = "**/*" + DocumentInput.FILE_SUFFIX;
-    private static final String SEPARATOR    = "/";
+    private static final String SEPARATOR    = PortablePaths.SEPARATOR;
 
     /**
      * One document as it ships: its text, and where its file is.
@@ -81,7 +85,12 @@ public class ShippedDocuments {
 
     private volatile Scanned scanned;
 
-    public ShippedDocuments(ResourcePatternResolver resources, CadProperties properties, CadLanguage language) {
+    /** The tables the running plugins bring of their modules: KiCad's filing, SPICE's devices. */
+    private final Supplier<List<ShippedTable>> tables;
+
+    public ShippedDocuments(ResourcePatternResolver resources, CadProperties properties, CadLanguage language,
+                            Supplier<List<ShippedTable>> tables) {
+        this.tables = tables;
         this.resources = resources;
         this.properties = properties;
         this.language = language;
@@ -162,6 +171,13 @@ public class ShippedDocuments {
         if (unread > 0) {
             LOGGER.info("📚 {} shipped document(s) are of a kind no running module reads — a plugin's that is off — and are left out.",
                         unread);
+        }
+        // A module's tables, brought by its plugin; one file brought by two plugins — SPICE's devices by ngspice and Xyce — is one.
+        Set<String> brought = new HashSet<>();
+        for (ShippedTable table : tables.get()) {
+            if (kinds.contains(TableModule.TABLE.word()) && brought.add(placeOf(table.library(), table.path()))) {
+                documents.addAll(split(table.text(), table.library(), table.path()));
+            }
         }
         for (String location : properties.library().locations()) {
             documents.addAll(located(location));

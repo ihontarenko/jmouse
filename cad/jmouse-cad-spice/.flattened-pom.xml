@@ -29,6 +29,12 @@
   <dependencies>
     <dependency>
       <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-cad-table</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
       <artifactId>jmouse-cad-simulation</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>

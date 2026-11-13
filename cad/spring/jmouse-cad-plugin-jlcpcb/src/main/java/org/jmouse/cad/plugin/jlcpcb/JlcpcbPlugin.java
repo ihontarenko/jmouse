@@ -1,8 +1,8 @@
 package org.jmouse.cad.plugin.jlcpcb;
 
+import org.jmouse.settings.Section;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.settings.SettingsSection;
-import org.jmouse.cad.settings.SettingsOwner;
 import org.jmouse.cad.exchange.DocumentExport;
 import org.jmouse.cad.exchange.OutputJob;
 import org.jmouse.cad.plugin.gerber.AssemblyProfile;
@@ -18,22 +18,29 @@ import java.util.Set;
 
 /**
  * JLCPCB as a pcb house: the Gerber set with its assembly tables in JLCPCB's columns, by the profile in
- * this jar ({@code settings/plugin/jlcpcb/assembly}). It stands on the Gerber plugin; with that one off, this one is refused too.
+ * this jar ({@code settings/plugin/cad-jlcpcb/assembly}). It stands on the Gerber plugin; with that one off, this one is refused too.
  */
 public final class JlcpcbPlugin implements Plugin {
 
-    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/jlcpcb/assembly. */
-    public static final SettingsSection<AssemblyProfile> ASSEMBLY = new SettingsSection<>("plugin/jlcpcb/assembly", "JLCPCB assembly files", SettingsOwner.ENGINE_DATA, AssemblyProfile.class);
-
     public static final String ID = "cad-jlcpcb";
+
+    /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/plugin/cad-jlcpcb/assembly. */
+    public static final SettingsSection<AssemblyProfile> ASSEMBLY = SettingsSection.ofPlugin(ID, "assembly", "JLCPCB assembly files", AssemblyProfile.class);
 
     /** The format's word on the exchange routes: {@code /exchange/jlcpcb/export}. */
     static final String FORMAT = "jlcpcb";
 
-    private final GerberSet set;
+    private final GerberSet   set;
+    private final CadSettings sections;
 
-    public JlcpcbPlugin(GerberSet set) {
+    public JlcpcbPlugin(GerberSet set, CadSettings sections) {
         this.set = set;
+        this.sections = sections;
+    }
+
+    @Override
+    public List<Section> settings() {
+        return List.of(CadSettings.declarationOf(ASSEMBLY));
     }
 
     @Override
@@ -44,9 +51,7 @@ public final class JlcpcbPlugin implements Plugin {
 
     @Override
     public void register(PluginRegistration registration) {
-        registration.contribute(SettingsSection.POINT, ASSEMBLY);
-        registration.contribute(DocumentExport.POINT, new FabricationExport(FORMAT, "JLCPCB", set,
-                CadSettings.read(JlcpcbPlugin.ASSEMBLY)));
+        registration.contribute(DocumentExport.POINT, new FabricationExport(FORMAT, "JLCPCB", set, () -> sections.read(ASSEMBLY)));
         registration.contribute(OutputJob.POINT, new OutputJob(FORMAT, "JLCPCB order", List.of(FORMAT)));
     }
 }

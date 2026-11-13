@@ -1,0 +1,25 @@
+# Optocoupler isolation laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:optocoupler-isolation-pcb("Optocoupler isolation — pcb") {
+    meta {
+        summary: "Optocoupler isolation laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: signal-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(optocoupler-isolation)
+    layers(2)
+    edge("M1 0H32A1 1 0 0 1 33 1V19A1 1 0 0 1 32 20H1A1 1 0 0 1 0 19V1A1 1 0 0 1 1 0Z")
+    place(RF, at: 11 6.5)
+    place(U1, at: 20 10.5)
+    place(RP, at: 28.5 6.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, input: 2, isolated: 3, output: 4, supply: 5], at: 5.5 10)
+    track(top, width: 0.25, from: 10 6.5, to: 6.46 6.5, to: 5.5 7.46)
+    track(top, width: 0.25, from: 23.81 9.23, to: 26.77 9.23, to: 28.5 7.5)
+    track(top, width: 0.25, from: 12 6.5, to: 13.46 6.5, to: 16.19 9.23)
+    track(top, width: 0.25, from: 23.81 11.77, to: 22.46 13.12, to: 8.62 13.12, to: 5.5 10)
+    track(top, width: 0.25, from: 23.81 9.23, to: 26.06 11.48, to: 23.81 13.73, to: 6.69 13.73, to: 5.5 12.54)
+    track(top, width: 0.25, from: 28.5 5.5, to: 30.75 7.75, to: 23.42 15.08, to: 5.5 15.08)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H32.5V19.5H0.5Z")
+}

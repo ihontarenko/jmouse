@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.settings.CadSettings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,10 +36,10 @@ import java.util.Optional;
  */
 class KiCadProjectExportTest {
 
-    private static final PcbArtwork.Settings ARTWORK = CadSettings.read(PcbArtwork.SECTION);
+    private static final PcbArtwork.Settings ARTWORK = CadSettings.shipped().read(PcbArtwork.SECTION);
 
     private static ImportedDocuments read(Map<String, String> files, String project) {
-        return new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS)
+        return new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, project, "Design"), CadLibrary.library());
     }
 
@@ -55,16 +56,20 @@ class KiCadProjectExportTest {
     }
 
     private static ImportedDocuments original() {
+        return original(KiCadBoardImportTest.BOARD);
+    }
+
+    private static ImportedDocuments original(String board) {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("design.kicad_sch", KiCadBoardImportTest.SCHEMATIC);
-        files.put("design.kicad_pcb", KiCadBoardImportTest.BOARD);
+        files.put("design.kicad_pcb", board);
         files.put("design.kicad_pro", "{}");
         return read(files, "design.kicad_pro");
     }
 
     private static ExportedFiles written(ImportedDocuments imported) {
-        return KiCadProjectExport.of(imported.root(), documentsOf(imported), KiCadLibraryMap.standard(), KiCadLibraries.standard(),
-                CadStandards.pcbRules().valuesOf(PcbDrawing.of(imported.root()).rules()), ARTWORK);
+        return KiCadProjectExport.of(imported.root(), documentsOf(imported), KiCadLibraryMap.shipped(), KiCadLibraries.shipped(),
+                CadStandards.shipped().pcbRules().valuesOf(PcbDrawing.of(imported.root()).rules()), ARTWORK);
     }
 
     private static PcbFabrication fabricated(ImportedDocuments imported) {
@@ -85,6 +90,18 @@ class KiCadProjectExportTest {
         assertEquals(List.of("design.kicad_pro", "design.kicad_sch", "design.kicad_pcb"),
                 written.files().stream().map(ExportedFile::fileName).toList());
         assertEquals("design-kicad", written.name());
+    }
+
+    @Test
+    void whatIsLockedAndGroupedGoesToKiCadAndComesBackSo() {
+        ImportedDocuments first = original(KiCadBoardImportTest.LOCKED_BOARD);
+        PcbDrawing before = fabricated(first).pcb();
+        PcbDrawing after = fabricated(read(filesOf(written(first)), "design.kicad_pro")).pcb();
+        assertEquals(before.groups(), after.groups());
+        assertEquals(before.placements().stream().map(PcbDrawing.Placement::arrangement).toList(),
+                after.placements().stream().map(PcbDrawing.Placement::arrangement).toList());
+        assertEquals(before.tracks().stream().map(PcbDrawing.Track::arrangement).toList(),
+                after.tracks().stream().map(PcbDrawing.Track::arrangement).toList());
     }
 
     @Test
@@ -159,7 +176,7 @@ class KiCadProjectExportTest {
     @Test
     void theProjectFileSaysHowTheBoardIsMade() {
         ImportedDocuments first = original();
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(PcbDrawing.of(first.root()).rules());
+        Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(PcbDrawing.of(first.root()).rules());
         KiCadProjectSettings settings = KiCadProjectSettings.of(filesOf(written(first)).get("design.kicad_pro"));
         assertEquals(rules.get(PcbDrawing.RULE_CLEARANCE), settings.usual().orElseThrow().clearance(), 1e-9);
         assertEquals(rules.get(PcbDrawing.RULE_TRACK_WIDTH), settings.usual().orElseThrow().trackWidth(), 1e-9);

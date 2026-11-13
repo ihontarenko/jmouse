@@ -1,0 +1,99 @@
+# SG-01. The four basic waveforms side by side, each generator into its own load and onto its own channel: a sine, a
+# square, a triangle and a sawtooth, all at the same frequency, the same peak and the same offset. They reach the same
+# top and bottom, yet differ in how they get there — smoothly, in jumps, in straight ramps, or a ramp and a jump.
+circuit:four-waveforms("Four waveforms") {
+    meta {
+        summary: "Sine, square, triangle and sawtooth at one frequency and one peak, on CH1 to CH4."
+        description: """
+            Idea: a periodic signal is told by its shape as much as by its frequency and its peak. The sine changes
+            smoothly; the square jumps between two levels; the triangle climbs and falls in straight lines; the
+            sawtooth climbs in a straight line and falls at once.
+
+            Try: change the frequency — all four keep their shape and squeeze together in time. Change the peak:
+            all four grow alike. Move the offset: all four ride up or down together, centred on it.
+
+            Watch: CH1 to CH4 — the same top, the same bottom and the same period, four shapes. The square spends
+            all its time at the extremes, the triangle and the sawtooth pass every level evenly, the sine lingers
+            near its peaks. The sharp edges of the square and the sawtooth are where high harmonics live: a filter
+            rounds them first.
+
+            Ask: which of the four has the largest RMS at the same peak, and which the smallest? Which would a
+            low-pass filter change the least?
+            """
+        category: signal-circuits
+        tags: signals, example, sg-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:f(1 kHz, in: 100 Hz .. 10 kHz, step: 100 Hz, "Frequency of all four")
+    parameter:A(2 V, in: 0.5 V .. 5 V, step: 0.1 V, "Peak above the offset")
+    parameter:U_offset(0 V, in: -2 V .. 2 V, step: 0.1 V, "Offset all four swing around")
+    part:G1(sine-generator, [positive: sine, negative: 0], amplitude: A, frequency: f, offset: U_offset)
+    part:R1(resistor, [sine, 0], resistance: 1 kΩ)
+    part:G2(square-generator, [positive: square, negative: 0], high: U_offset + A, low: U_offset - A, frequency: f, duty: 0.5)
+    part:R2(resistor, [square, 0], resistance: 1 kΩ)
+    part:G3(triangle-generator, [positive: triangle, negative: 0], high: U_offset + A, low: U_offset - A, frequency: f)
+    part:R3(resistor, [triangle, 0], resistance: 1 kΩ)
+    part:G4(sawtooth-generator, [positive: sawtooth, negative: 0], high: U_offset + A, low: U_offset - A, frequency: f)
+    part:R4(resistor, [sawtooth, 0], resistance: 1 kΩ)
+    place:G1(at: 320 600, rotate: 90)
+    place:R1(at: 520 600, rotate: 90)
+    place:G2(at: 760 600, rotate: 90)
+    place:R2(at: 960 600, rotate: 90)
+    place:G3(at: 1200 600, rotate: 90)
+    place:R3(at: 1400 600, rotate: 90)
+    place:G4(at: 1640 600, rotate: 90)
+    place:R4(at: 1840 600, rotate: 90)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 520 840)
+    mark:Jb3(junction, at: 760 840)
+    mark:Jb4(junction, at: 960 840)
+    mark:Jb5(junction, at: 1200 840)
+    mark:Jb6(junction, at: 1400 840)
+    mark:Jb7(junction, at: 1640 840)
+    mark:GND1(ground, at: 960 920)
+    wire:W1(G1.positive, to: R1.positive, via: [320 440, 520 440])
+    wire:W2(G2.positive, to: R2.positive, via: [760 440, 960 440])
+    wire:W3(G3.positive, to: R3.positive, via: [1200 440, 1400 440])
+    wire:W4(G4.positive, to: R4.positive, via: [1640 440, 1840 440])
+    wire:W5(G1.negative, to: Jb1.j)
+    wire:W6(R1.negative, to: Jb2.j)
+    wire:W7(G2.negative, to: Jb3.j)
+    wire:W8(R2.negative, to: Jb4.j)
+    wire:W9(G3.negative, to: Jb5.j)
+    wire:W10(R3.negative, to: Jb6.j)
+    wire:W11(G4.negative, to: Jb7.j)
+    wire:W12(R4.negative, to: Jb7.j, via: 1840 840)
+    wire:W13(Jb1.j, to: Jb2.j)
+    wire:W14(Jb2.j, to: Jb3.j)
+    wire:W15(Jb3.j, to: Jb4.j)
+    wire:W16(Jb4.j, to: Jb5.j)
+    wire:W17(Jb5.j, to: Jb6.j)
+    wire:W18(Jb6.j, to: Jb7.j)
+    wire:W19(Jb4.j, to: GND1.ground)
+    probes {
+        probe:CH1(sine, 1 V/div)
+        probe:CH2(square, 1 V/div)
+        probe:CH3(triangle, 1 V/div)
+        probe:CH4(sawtooth, 1 V/div)
+        time(500 µs/div)
+    }
+    expect("the sine repeats a thousand times a second", from: "f = 1 kHz, one rising pass through zero a period") {
+        measure(frequency, sine, above: 0 V)
+        near(1 kHz, +- 1%)
+    }
+    expect("the square sits at its top for half of every period", from: "duty = 0.5: high for 0.5 ms of each 1 ms") {
+        measure(duty, square, above: 0 V)
+        near(0.5, +- 2%)
+    }
+    expect("the triangle reaches the same peak as the sine", from: "high = offset + A = 0 V + 2 V") {
+        measure(maximum, triangle)
+        near(2 V, +- 1%)
+    }
+    expect("the sawtooth averages its middle, the offset", from: "a straight ramp from −A to +A passes every level evenly: mean = offset = 0 V") {
+        measure(average, sawtooth, after: 1 ms)
+        within(-0.05 V .. 0.05 V)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+}

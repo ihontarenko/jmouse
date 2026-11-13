@@ -1,0 +1,121 @@
+# DG-08. A potentiometer across the 5 V supply sets a voltage on CH0 of an MCP3008; an SPI controller asks for a
+# conversion every half millisecond and reads the answer. The question is sent one clock early — 0110 0000: the start
+# bit on the second clock, then single-ended CH0 — so that the null bit closes the first byte and the second byte read
+# is the result's top eight bits, B9 to B2. They stand on the controller's data outputs and light an LED bar: the wiper
+# turned up, the bar counts up in binary.
+circuit:spi-adc("SPI: reading an ADC") {
+    meta {
+        summary: "An MCP3008 converts a potentiometer's voltage; an SPI controller reads its top eight bits onto an LED bar."
+        description: """
+            Idea: an analog-to-digital converter turns a voltage into a number: here 1024 steps between 0 V and its
+            reference, 5 V, so each step is about 4.9 mV. The MCP3008 answers over SPI — it is asked which input to
+            read, samples it, and sends the ten bits of the result back, most significant first.
+
+            Try: move the wiper and watch the LED bar count — it shows the top eight bits, so one LED step is four
+            converter steps, about 20 mV. Open the Logic view with the SPI decoder (SCK L1, MOSI L2, MISO L3, CS L4):
+            MOSI says 0x60, 0x00; MISO answers the result in its second byte.
+
+            Watch: the oscilloscope on the wiper and on DOUT — the voltage is still; the number in the bits is what
+            changes as you move it.
+
+            Ask: with the wiper at exactly half, what number does the bar show, and why not 128 every time? What would
+            you send to read CH5 instead?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-08
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:wiper(0.5, in: 0 .. 1, step: 0.01, "Wiper position")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:P1(potentiometer, [a: 0, w: input, b: vcc], position: wiper)
+    part:U1(mcp3008, [channel_0: input, reference: vcc, analog_ground: 0, clk: sck, din: mosi, dout: miso, cs: cs, Vcc: vcc, GND: 0])
+    part:B1(spi-controller, [sck: sck, mosi: mosi, miso: miso, cs: cs, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: vcc, GND: 0], bytes: "96 0", clock_frequency: 1 MHz, start_at: 20 us, repeat_every: 500 us)
+    part:R1(resistor, [d0, a0], resistance: 330 Ω)
+    part:R2(resistor, [d1, a1], resistance: 330 Ω)
+    part:R3(resistor, [d2, a2], resistance: 330 Ω)
+    part:R4(resistor, [d3, a3], resistance: 330 Ω)
+    part:R5(resistor, [d4, a4], resistance: 330 Ω)
+    part:R6(resistor, [d5, a5], resistance: 330 Ω)
+    part:R7(resistor, [d6, a6], resistance: 330 Ω)
+    part:R8(resistor, [d7, a7], resistance: 330 Ω)
+    part:DS1(led-bar, [anode_0: a0, anode_1: a1, anode_2: a2, anode_3: a3, anode_4: a4, anode_5: a5, anode_6: a6, anode_7: a7, cathode: 0])
+    place:V1(at: -360 920, rotate: 90)
+    mark:N1(label, vcc, at: -360 760)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: -360 1120)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:P1(at: 120 520, rotate: 90, mirror, name(at: -60 -16), value(at: -80 20))
+    mark:N2(label, vcc, at: 120 360)
+    wire:WN2(P1.b, to: N2.label)
+    mark:G2(ground, at: 120 720)
+    wire:WG2(P1.a, to: G2.ground)
+    place:U1(at: 600 600)
+    mark:N3(label, vcc, at: 320 600, rotate: 270)
+    wire:WN3(U1.reference, to: N3.label)
+    mark:G3(ground, at: 320 640, rotate: 90)
+    wire:WG3(U1.analog_ground, to: G3.ground)
+    mark:N4(label, vcc, at: 560 320)
+    wire:WN4(U1.Vcc, to: N4.label)
+    mark:G4(ground, at: 640 320, rotate: 180)
+    wire:WG4(U1.GND, to: G4.ground)
+    place:B1(at: 1280 600)
+    mark:N5(label, vcc, at: 1240 160)
+    wire:WN5(B1.Vcc, to: N5.label)
+    mark:G5(ground, at: 1320 160, rotate: 180)
+    wire:WG5(B1.GND, to: G5.ground)
+    place:R1(at: 1800 320, name(at: -52 -32), value(at: 52 -32))
+    place:R2(at: 1800 400, name(at: -52 -32), value(at: 52 -32))
+    place:R3(at: 1800 480, name(at: -52 -32), value(at: 52 -32))
+    place:R4(at: 1800 560, name(at: -52 -32), value(at: 52 -32))
+    place:R5(at: 1800 640, name(at: -52 -32), value(at: 52 -32))
+    place:R6(at: 1800 720, name(at: -52 -32), value(at: 52 -32))
+    place:R7(at: 1800 800, name(at: -52 -32), value(at: 52 -32))
+    place:R8(at: 1800 880, name(at: -52 -32), value(at: 52 -32))
+    place:DS1(at: 2200 600, rotate: 270, mirror)
+    mark:G6(ground, at: 2440 560, rotate: 270)
+    wire:WG6(DS1.cathode, to: G6.ground)
+    wire:W1(P1.w, to: U1.channel_0, via: [360 520, 360 560])
+    wire:W2(U1.clk, to: B1.sck)
+    wire:W3(U1.din, to: B1.mosi)
+    wire:W4(U1.dout, to: B1.miso)
+    wire:W5(U1.cs, to: B1.cs)
+    wire:W6(B1.data_0, to: R1.positive, via: [1520 460, 1520 320])
+    wire:W7(R1.negative, to: DS1.anode_0, via: [2020 320, 2020 440])
+    wire:W8(B1.data_1, to: R2.positive, via: [1560 500, 1560 400])
+    wire:W9(R2.negative, to: DS1.anode_1, via: [1980 400, 1980 480])
+    wire:W10(B1.data_2, to: R3.positive, via: [1600 540, 1600 480])
+    wire:W11(R3.negative, to: DS1.anode_2, via: [1940 480, 1940 520])
+    wire:W12(B1.data_3, to: R4.positive, via: [1640 580, 1640 560])
+    wire:W13(R4.negative, to: DS1.anode_3)
+    wire:W14(B1.data_4, to: R5.positive, via: [1640 620, 1640 640])
+    wire:W15(R5.negative, to: DS1.anode_4, via: [1940 640, 1940 600])
+    wire:W16(B1.data_5, to: R6.positive, via: [1600 660, 1600 720])
+    wire:W17(R6.negative, to: DS1.anode_5, via: [1980 720, 1980 640])
+    wire:W18(B1.data_6, to: R7.positive, via: [1560 700, 1560 800])
+    wire:W19(R7.negative, to: DS1.anode_6, via: [2020 800, 2020 680])
+    wire:W20(B1.data_7, to: R8.positive, via: [1520 740, 1520 880])
+    wire:W21(R8.negative, to: DS1.anode_7, via: [2060 880, 2060 720])
+    probes {
+        time(2 us/div)
+        probe:CH1(input, 1 V/div)
+        probe:L1(level, sck)
+        probe:L2(level, mosi)
+        probe:L3(level, miso)
+        probe:L4(level, cs)
+    }
+    expect("just over half reads 1000 0101 in its top bits", from: "code = floor(1024 · VIN / VREF) = 532 at 2.6 V: B9 … B2 = 1000 0101") {
+        measure(final, a7, with: [wiper: 0.52])
+        within(1.8 V .. 2.2 V)
+    }
+    expect("with B8 clear", from: "532 = 10 0001 0100: B8 is 0") {
+        measure(final, a6, with: [wiper: 0.52])
+        near(0 V, +- 0.1 V)
+    }
+    expect("four fifths read 1100 1100", from: "code 819 at 4 V: 11 0011 0011, B9 B8 = 11") {
+        measure(final, a6, with: [wiper: 0.8])
+        within(1.8 V .. 2.2 V)
+    }
+    analysis(transient, for: 0.2 ms)
+    view:transient_response(primary)
+}

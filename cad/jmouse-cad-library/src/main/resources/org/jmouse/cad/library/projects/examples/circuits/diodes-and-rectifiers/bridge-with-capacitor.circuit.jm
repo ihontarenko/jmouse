@@ -1,0 +1,69 @@
+# D-04. The bridge rectifier with a reservoir capacitor across its output and a load beside it. The capacitor charges
+# to the peak on every bump and feeds the load between them, sagging as it does: the ripple. Its depth is the charge
+# the load draws in one half period over the capacitance, ΔV ≈ I / (2 f C) — more capacitance, less ripple; more
+# load current, more ripple.
+circuit:bridge-with-capacitor("Bridge rectifier with a smoothing capacitor") {
+    meta {
+        summary: "A bridge and a reservoir capacitor: the output holds near the peak, sagging by ΔV ≈ I / (2 f C) between bumps."
+        description: """
+            Idea: a capacitor across the rectifier's output is a reservoir. Each bump fills it to the peak; between
+            bumps the diodes are off and the capacitor alone feeds the load, losing a little voltage — the ripple. The
+            charge drawn in one half period is I / (2f), so the sag is ΔV ≈ I / (2 f C).
+
+            Try: raise C: the ripple shrinks. Lower the load resistance — more current: the ripple grows. Take C down
+            to its least: the output almost falls back to the bare bumps of the bridge.
+
+            Watch: CH1, the output — a sawtooth between about 10.3 V and 8.7 V at 100 Hz; CH2, the input across the
+            bridge. The diodes conduct only in short pulses near each peak, when the input climbs above the capacitor.
+
+            Ask: what capacitance keeps the ripple under 0.5 V for this 100 Ω load? Why do the diodes conduct only for
+            a short moment, and what does that mean for the current they carry then?
+            """
+        category: diodes-and-rectifiers
+        tags: diodes, example, d-04
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(12 V, in: 3 V .. 30 V, step: 0.5 V, "Input amplitude")
+    parameter:F(50 Hz, in: 10 Hz .. 400 Hz, step: 10 Hz, "Input frequency")
+    parameter:C(470 µF, in: 10 µF .. 4700 µF, step: 10 µF, "Reservoir capacitance")
+    parameter:R_load(100 Ω, in: 22 Ω .. 10 kΩ, step: 1 Ω, "Load resistance: smaller draws more")
+    part:G1(sine-generator, [positive: a, negative: b], amplitude: A, frequency: F)
+    part:BR1(bridge-rectifier, [ac1: a, ac2: b, plus: out, minus: 0])
+    part:C1(capacitor, [out, 0], capacitance: C)
+    part:R1(resistor, [out, 0], resistance: R_load, power_rating: 5 W)
+    place:G1(at: 400 600, rotate: 90)
+    place:BR1(at: 800 600)
+    place:C1(at: 1200 600, rotate: 90)
+    place:R1(at: 1440 600, rotate: 90)
+    mark:Jo(junction, at: 1200 360)
+    mark:Jm1(junction, at: 800 840)
+    mark:Jm2(junction, at: 1200 840)
+    mark:GND1(ground, at: 800 920)
+    wire:W1(G1.positive, to: BR1.ac1, via: [400 400, 640 400, 640 600])
+    wire:W2(G1.negative, to: BR1.ac2, via: [400 800, 960 800, 960 600])
+    wire:W3(BR1.plus, to: Jo.j, via: 800 360)
+    wire:W4(Jo.j, to: C1.positive)
+    wire:W5(Jo.j, to: R1.positive, via: 1440 360)
+    wire:W6(BR1.minus, to: Jm1.j)
+    wire:W7(Jm1.j, to: Jm2.j)
+    wire:W8(C1.negative, to: Jm2.j)
+    wire:W9(R1.negative, to: Jm2.j, via: 1440 840)
+    wire:W10(Jm1.j, to: GND1.ground)
+    probe:CH1(out, 2 V/div)
+    probe:CH2(a, against: b, 10 V/div)
+    expect("the capacitor charges to the peak", from: "12 V less two diode drops, which grow with the charging pulse: about 10.3 V") {
+        measure(maximum, out, after: 40 ms)
+        within(10.0 V .. 10.7 V)
+    }
+    expect("and sags by about I / (2 f C) between bumps", from: "ΔV ≈ I / (2 f C) = 0.095 A / (2 · 50 Hz · 470 µF) ≈ 2 V at most: the next bump refills it before the half period is over, so about 1.6 V") {
+        measure(minimum, out, after: 40 ms)
+        within(8.3 V .. 8.95 V)
+    }
+    expect("the ripple comes at twice the input frequency", from: "full-wave: the capacitor is topped up on both halves, 2 · 50 Hz") {
+        measure(frequency, out, above: 9.5 V, after: 40 ms)
+        near(100 Hz, +- 3%)
+    }
+    analysis(transient, for: 80 ms)
+    view:transient_response(primary)
+}

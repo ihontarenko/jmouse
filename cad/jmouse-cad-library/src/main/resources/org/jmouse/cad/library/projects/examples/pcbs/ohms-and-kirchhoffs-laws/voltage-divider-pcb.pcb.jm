@@ -1,0 +1,25 @@
+# Voltage divider laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:voltage-divider-pcb("Voltage divider — pcb") {
+    meta {
+        summary: "Voltage divider laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: ohms-and-kirchhoffs-laws
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(voltage-divider)
+    layers(2)
+    edge("M1 0H21A1 1 0 0 1 22 1V16A1 1 0 0 1 21 17H1A1 1 0 0 1 0 16V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 18 5.5, rotate: 270)
+    place(R2, at: 18 11.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, middle: 2, top: 3], at: 5.5 7.5)
+    track(top, width: 0.25, from: 18 12.5, to: 18 13.55)
+    track(top, width: 0.25, from: 18 6.5, to: 18 10.5)
+    track(top, width: 0.25, from: 18 6.5, to: 6.5 6.5, to: 5.5 7.5)
+    track(top, width: 0.25, from: 18 4.5, to: 10.8 4.5)
+    track(bottom, width: 0.25, from: 10.8 4.5, to: 10.8 4.74, to: 5.5 10.04)
+    via(at: 18 13.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 10.8 4.5, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H21.5V16.5H0.5Z")
+}

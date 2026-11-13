@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.mesh;
 
+import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.mesh.ModelMeshes;
 import org.jmouse.cad.simulation.CatalogueDocuments;
@@ -26,10 +27,13 @@ public class ModelMeshService {
 
     private final ModelDocuments models;
     private final Extensions     extensions;
+    /** Where the model materials are read: the engine's tables. */
+    private final TableSource    tables;
     private final MeshFormats    formats = MeshFormats.standard();
     private final LRUCache<String, byte[]> read = new LRUCache<>(KEPT);
 
-    public ModelMeshService(ModelDocuments models, Extensions extensions) {
+    public ModelMeshService(ModelDocuments models, Extensions extensions, TableSource tables) {
+        this.tables = tables;
         this.models = models;
         this.extensions = extensions;
     }
@@ -71,7 +75,7 @@ public class ModelMeshService {
     }
 
     private ModelMeshes meshes() {
-        return new ModelMeshes(formats, MeshReaders.standard().with(extensions.contributions(ModelMeshes.READERS)));
+        return new ModelMeshes(formats, MeshReaders.standard().with(extensions.contributions(ModelMeshes.READERS)), tables);
     }
 
     /** A model read, a file that is not read refused as the model not read, with why. */

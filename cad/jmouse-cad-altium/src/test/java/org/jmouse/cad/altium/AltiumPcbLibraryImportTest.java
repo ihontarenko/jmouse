@@ -73,8 +73,8 @@ class AltiumPcbLibraryImportTest {
 
     private ImportedDocuments imported() {
         // As the plugin reads it: whose it is as the reader says, then filed by its library.
-        return AltiumPcbLibraryImport.read(library(), "rcl.PcbLib", AltiumLibraries.standard()).whoseAsStated(WHOSE, "rcl.PcbLib")
-                .filedBy(AltiumLibraries.standard());
+        return AltiumPcbLibraryImport.read(library(), "rcl.PcbLib", AltiumLibraries.shipped()).whoseAsStated(WHOSE, "rcl.PcbLib")
+                .filedBy(AltiumLibraries.shipped());
     }
 
     private DocumentNode named(ImportedDocuments imported, String code) {
@@ -154,7 +154,7 @@ class AltiumPcbLibraryImportTest {
 
     @Test
     void aLibraryNobodySaidWhoseIsItClaimsNoneAndSaysSo() {
-        ImportedDocuments imported = AltiumPcbLibraryImport.read(library(), "rcl.PcbLib", AltiumLibraries.standard())
+        ImportedDocuments imported = AltiumPcbLibraryImport.read(library(), "rcl.PcbLib", AltiumLibraries.shipped())
                 .whoseAsStated(Provenance.OURS, "rcl.PcbLib");
         assertTrue(imported.library().stream().noneMatch(document -> Provenance.of(document).borrowed()));
         assertTrue(imported.notes().stream().anyMatch(note -> note.contains("said no holder")), imported.notes().toString());
@@ -169,7 +169,7 @@ class AltiumPcbLibraryImportTest {
                 new Model("{22222222-0000}", "DSG0008A.stp", new Rotation(0, 0, 0), 0, step),
                 new Model("{33333333-0000}", "DSG0008A.stp", new Rotation(0, 0, 0), 0, other));
         ImportedDocuments imported = AltiumPcbLibraryImport.read(new AltiumPcbLibrary(List.of(), models, Map.of()), "chips.PcbLib",
-                AltiumLibraries.standard());
+                AltiumLibraries.shipped());
         assertEquals(List.of("MD.CHIPS:A06242D6-842D-40C7", "MD.CHIPS:DSG0008A", "MD.CHIPS:DSG0008A-33333333"),
                 imported.library().stream().map(DocumentNode::referenceName).toList());
     }

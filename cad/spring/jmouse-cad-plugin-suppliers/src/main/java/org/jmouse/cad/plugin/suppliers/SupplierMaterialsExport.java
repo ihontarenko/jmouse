@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 /**
  * 💶 A pcb's bill of materials with what each distributor would sell of it right now, as a CSV: one row a kind of part at
@@ -39,10 +40,10 @@ public final class SupplierMaterialsExport implements DocumentExport {
 
     private final List<SupplierParts>    places;
     private final IntSupplier            pcbs;
-    private final SupplierMaterialsTable table;
+    private final Supplier<SupplierMaterialsTable> table;
 
     /** @param pcbs how many pcbs are priced, read at each export: it may be changed while the server runs */
-    public SupplierMaterialsExport(List<SupplierParts> places, IntSupplier pcbs, SupplierMaterialsTable table) {
+    public SupplierMaterialsExport(List<SupplierParts> places, IntSupplier pcbs, Supplier<SupplierMaterialsTable> table) {
         this.places = List.copyOf(places);
         this.pcbs = pcbs;
         this.table = table;
@@ -76,13 +77,13 @@ public final class SupplierMaterialsExport implements DocumentExport {
                 component -> headField(fabrication, component, PART_NUMBER), places, pcbs.getAsInt());
         List<String> notes = new ArrayList<>(priced.notes());
         notes.addAll(fabrication.notes());
-        return ExportedFiles.single(fabrication.name() + "-" + table.file(), written(fabrication, priced), notes);
+        return ExportedFiles.single(fabrication.name() + "-" + table.get().file(), written(fabrication, priced), notes);
     }
 
     /** The table's text, its first line the headings; the same item number on every row of one kind. */
     private String written(PcbFabrication fabrication, SupplierMaterials.Priced priced) {
         List<String> lines = new ArrayList<>();
-        lines.add(CsvText.row(table.columns().stream().map(SupplierMaterialsTable.Column::heading).toList()));
+        lines.add(CsvText.row(table.get().columns().stream().map(SupplierMaterialsTable.Column::heading).toList()));
         int item = 0;
         BillOfMaterials.Line previous = null;
         for (SupplierMaterials.Row row : priced.rows()) {
@@ -91,7 +92,7 @@ public final class SupplierMaterialsExport implements DocumentExport {
                 previous = row.line();
             }
             Map<String, String> fields = fields(row, item, headField(fabrication, row.line().component(), MANUFACTURER).orElse(null));
-            lines.add(CsvText.row(table.columns().stream().map(column -> cell(column, fields)).toList()));
+            lines.add(CsvText.row(table.get().columns().stream().map(column -> cell(column, fields)).toList()));
         }
         return String.join("\n", lines) + "\n";
     }
@@ -120,7 +121,7 @@ public final class SupplierMaterialsExport implements DocumentExport {
         fields.put("part-number", outside(row.partNumber()));
         fields.put("manufacturer", outside(offer.map(SupplierOffer::manufacturer).orElse(writtenManufacturer)));
         fields.put("supplier", outside(row.supplier()));
-        fields.put("standing", table.standings().get(row.standing()));
+        fields.put("standing", table.get().standings().get(row.standing()));
         fields.put("order-number", outside(offer.map(SupplierOffer::supplierPartNumber).orElse(null)));
         fields.put("buy", order == null ? "" : String.valueOf(order.quantity()));
         fields.put("stock", number(offer.map(SupplierOffer::stock).orElse(null)));

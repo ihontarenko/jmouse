@@ -1,0 +1,33 @@
+# A character LCD laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:lcd-hello-pcb("A character LCD — pcb") {
+    meta {
+        summary: "A character LCD laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: digital-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(lcd-hello)
+    layers(2)
+    edge("M1 0H41A1 1 0 0 1 42 1V47A1 1 0 0 1 41 48H1A1 1 0 0 1 0 47V1A1 1 0 0 1 1 0Z")
+    place(LCD1, at: 37 24)
+    place(J1, footprint: "FP.HDR:1X13-P2.54-V", nets: [0: 1, d0: 2, d1: 3, d2: 4, d3: 5, d4: 6, d5: 7, d6: 8, d7: 9, e: 10, rs: 11, rw: 12, vcc: 13], at: 5.5 26.5)
+    track(top, width: 0.25, from: 37 20.19, to: 11.89 20.19, to: 5.5 13.8)
+    track(top, width: 0.25, from: 37 22.73, to: 11.89 22.73, to: 5.5 16.34)
+    track(top, width: 0.25, from: 37 25.27, to: 11.89 25.27, to: 5.5 18.88)
+    track(top, width: 0.25, from: 37 27.81, to: 11.89 27.81, to: 5.5 21.42)
+    track(top, width: 0.25, from: 37 30.35, to: 11.89 30.35, to: 5.5 23.96)
+    track(top, width: 0.25, from: 37 32.89, to: 11.89 32.89, to: 5.5 26.5)
+    track(top, width: 0.25, from: 37 35.43, to: 11.89 35.43, to: 5.5 29.04)
+    track(top, width: 0.25, from: 37 37.97, to: 11.89 37.97, to: 5.5 31.58)
+    track(top, width: 0.25, from: 37 17.65, to: 22.15 17.65)
+    track(bottom, width: 0.25, from: 22.15 17.65, to: 21.97 17.65, to: 5.5 34.12)
+    track(bottom, width: 0.25, from: 37 12.57, to: 29.59 12.57, to: 5.5 36.66)
+    track(bottom, width: 0.25, from: 37 15.11, to: 29.59 15.11, to: 5.5 39.2)
+    track(top, width: 0.25, from: 37 7.49, to: 30.7 13.79, to: 30.7 16.49)
+    track(bottom, width: 0.25, from: 30.7 16.49, to: 30.7 16.54, to: 5.5 41.74)
+    via(at: 22.15 17.65, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 30.7 16.49, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H41.5V47.5H0.5Z")
+}

@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.spice;
 
+import org.jmouse.cad.spice.SpiceDevices;
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.DocumentImport;
 import org.jmouse.cad.exchange.ExchangeFiles;
@@ -22,6 +24,13 @@ import java.util.Map;
  */
 final class SpiceNetlistImport implements DocumentImport {
 
+    /** The devices SPICE knows, as the engine's table says it at each use. */
+    private final ReadTable<SpiceDevices> devices;
+
+    SpiceNetlistImport(ReadTable<SpiceDevices> devices) {
+        this.devices = devices;
+    }
+
     @Override
     public String id() {
         return SpicePlugin.FORMAT;
@@ -43,7 +52,7 @@ final class SpiceNetlistImport implements DocumentImport {
         includes.remove(files.main());
         SpiceConverter.SpiceImport imported;
         try {
-            imported = new SpiceConverter(catalogue, CadLanguage.standard().language())
+            imported = new SpiceConverter(catalogue, CadLanguage.standard().language(), devices.current())
                     .importNetlist(files.mainText(), files.title(), SpiceIncludes.of(includes));
         } catch (SpiceParseException refused) {
             throw new ExchangeRefusal(refused.getDetail(), refused.getPosition().line(), refused.getPosition().column());

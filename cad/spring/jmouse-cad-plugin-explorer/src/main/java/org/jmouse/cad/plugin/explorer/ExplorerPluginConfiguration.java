@@ -9,8 +9,8 @@ import org.jmouse.cad.store.authority.CadPlaces;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.catalogue.DocumentReading;
 import org.jmouse.plugin.Extensions;
-import org.jmouse.plugin.PluginSettingValues;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.ParameterValues;
+import org.jmouse.settings.Settings;
 import org.jmouse.plugin.spring.PluginAutoConfiguration;
 import org.jmouse.storage.local.LocalFileStore;
 import org.springframework.beans.factory.ObjectProvider;
@@ -78,8 +78,8 @@ public class ExplorerPluginConfiguration {
     }
 
     @Bean
-    public MountDocuments cadMountDocuments(ExplorerMounts mounts, Extensions extensions, DocumentReading reading, PluginSettings settings) {
-        PluginSettingValues values = settings.valuesOf(ExplorerPlugin.ID);
+    public MountDocuments cadMountDocuments(ExplorerMounts mounts, Extensions extensions, DocumentReading reading, Settings settings) {
+        ParameterValues values = settings.parameters(ExplorerPlugin.ID, ExplorerPlugin.FOLDERS);
         return new MountDocuments(mounts, extensions, reading, () -> Math.toIntExact(values.wholeNumber(ExplorerPlugin.MOST_FILES)),
                 () -> values.wholeNumber(ExplorerPlugin.LARGEST_DOCUMENT) * ExplorerPlugin.MEGABYTE);
     }

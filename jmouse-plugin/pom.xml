@@ -57,6 +57,12 @@
     </properties>
 
     <dependencies>
+        <!-- A plugin declares its settings as sections of jmouse-settings, owned by its id. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-settings</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

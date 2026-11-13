@@ -42,6 +42,8 @@ public class MetaNode extends BlockNode {
     public static final String STATUS = "status";
     /** {@code order 1}: where a category stands among its siblings. */
     public static final String ORDER = "order";
+    /** {@code purpose drafts}: what a project is for — a design, or its owner's drafts —; a project that says nothing is a design. */
+    public static final String PURPOSE = "purpose";
     /** {@code designator U}: what a part of it is called on a sheet before its number. */
     public static final String DESIGNATOR = "designator";
 

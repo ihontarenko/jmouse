@@ -1,0 +1,88 @@
+# OA-01. A TL072 wired as a follower: its output fed straight back to its inverting input, so it drives the output
+# wherever the non-inverting input is — a gain of one. What it adds is strength: its input draws picoamperes, its output
+# gives milliamperes. One generator behind a 10 kΩ source resistance feeds two 1 kΩ loads, one through the follower and
+# one directly. The buffered load gets the whole signal; the direct one gets only 1 kΩ / 11 kΩ of it, a divider.
+circuit:voltage-follower("Voltage follower") {
+    meta {
+        summary: "A TL072 follower between a weak source and a heavy load: the output is the input, and the load no longer pulls it down."
+        description: """
+            Idea: a follower has a gain of one, so it seems to do nothing — but its input takes almost no current and
+            its output can give plenty. It copies a voltage from a source that cannot drive a load to one that can.
+
+            Try: raise the source resistance — the buffered output does not move, the direct one falls further. Lower
+            the load: the direct output collapses, the buffered one still follows the input. Raise the amplitude past
+            about 13 V and the follower meets its rails.
+
+            Watch: CH1 is the generator, CH2 the buffered load, CH3 the same load hung on the source directly. CH2
+            lies on top of CH1; CH3 is a small copy of it, R_load / (R_source + R_load) of the size.
+
+            Ask: why does the source resistance not matter to the follower? How much current does the generator give
+            in each branch, and where does the buffered load's current come from?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-01
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 15 V, step: 0.1 V, "Input amplitude")
+    parameter:F(100 Hz, in: 10 Hz .. 10 kHz, step: 10 Hz, "Input frequency")
+    parameter:R_source(10 kΩ, in: 100 Ω .. 100 kΩ, step: 100 Ω, "Source resistance, both branches")
+    parameter:R_load(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "Load resistance, both branches")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:RS1(resistor, [in, weak], resistance: R_source)
+    part:U1(tl072, [A.non_inverting_input: weak, A.inverting_input: out, A.output: out, Vcc: vp, GND: vn])
+    part:RL1(resistor, [out, 0], resistance: R_load)
+    part:RS2(resistor, [in, direct], resistance: R_source)
+    part:RL2(resistor, [direct, 0], resistance: R_load)
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:GND1(common, at: 360 360)
+    place:G1(at: 400 840, rotate: 90)
+    mark:Jin(junction, at: 480 600)
+    place:RS1(at: 640 600)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    mark:Jo(junction, at: 1040 560)
+    place:RL1(at: 1280 720, rotate: 90)
+    place:RS2(at: 640 920)
+    place:RL2(at: 960 980, rotate: 90)
+    mark:Jr(junction, at: 960 1120)
+    mark:GND2(common, at: 960 1200)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: Jin.j, via: 400 600)
+    wire:W5(Jin.j, to: RS1.positive)
+    wire:W6(RS1.negative, to: U1.A.non_inverting_input)
+    wire:W7(LP2.label, to: U1.Vcc)
+    wire:W8(U1.GND, to: LN2.label)
+    wire:W9(U1.A.output, to: Jo.j)
+    wire:W10(Jo.j, to: U1.A.inverting_input, via: [1040 280, 760 280, 760 520])
+    wire:W11(Jo.j, to: RL1.positive, via: 1280 560)
+    wire:W12(Jin.j, to: RS2.positive, via: 480 920)
+    wire:W13(RS2.negative, to: RL2.positive)
+    wire:W14(RL2.negative, to: Jr.j)
+    wire:W15(G1.negative, to: Jr.j, via: 400 1120)
+    wire:W16(RL1.negative, to: Jr.j, via: 1280 1120)
+    wire:W17(Jr.j, to: GND2.common)
+    probe:CH1(in, 0.5 V/div)
+    probe:CH2(out, 0.5 V/div)
+    probe:CH3(direct, 0.5 V/div)
+    expect("the buffered load gets the whole input", from: "follower: Vout = Vin, and its input draws picoamperes, so nothing drops across R_source: 1 V") {
+        measure(maximum, out, after: 10 ms)
+        near(1 V, +- 2%)
+    }
+    expect("the direct load gets only a divider's share", from: "Vdirect = Vin · R_load / (R_source + R_load) = 1 V · 1 kΩ / 11 kΩ = 0.091 V") {
+        measure(maximum, direct, after: 10 ms)
+        near(0.0909 V, +- 2%)
+    }
+    expect("the follower's input sits on the generator", from: "no current into the input: Vweak = Vin, 1 V") {
+        measure(maximum, weak, after: 10 ms)
+        near(1 V, +- 1%)
+    }
+    analysis(transient, for: 30 ms)
+    view:transient_response(primary)
+}

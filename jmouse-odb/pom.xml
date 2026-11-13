@@ -48,6 +48,18 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
     <dependencies>
+        <!-- What a reader is shown a value of its settings as (@Label): the settings library, which depends on nothing. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-settings</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Compiled with the descriptions processor, so a record a settings section reads carries its Javadoc; nothing at run time -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- A job is a tree of files handed over as one tar, gzip'ed: Apache Commons Compress writes the archive -->
         <dependency>
             <groupId>org.apache.commons</groupId>

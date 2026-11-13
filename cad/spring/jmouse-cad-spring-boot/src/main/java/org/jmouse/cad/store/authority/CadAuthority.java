@@ -1,5 +1,6 @@
 package org.jmouse.cad.store.authority;
 
+import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.store.problem.CadProblem;
 
 import java.util.Optional;
@@ -19,6 +20,12 @@ public interface CadAuthority {
 
     /** The current actor, or {@link CadProblem.Unauthenticated}. */
     String requireActor();
+
+    /**
+     * Where the acting reader's own work is kept — their projects, their library —: jmCAD's account, Innoventa's workspace
+     * the reader works in. Empty when nobody is signed in, or the reader has no place of their own here.
+     */
+    Optional<DocumentOwner> actorOwner();
 
     boolean permits(Capability capability, CadPlace place);
 

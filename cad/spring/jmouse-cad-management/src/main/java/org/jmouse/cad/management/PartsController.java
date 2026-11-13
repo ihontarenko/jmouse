@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 🔎 Parts from suppliers beside jmCAD's API — {@code JMOUSE_CAD_API.md} §2.7. Searching keeps nothing and reads only
+ * 🔎 Parts from suppliers beside jmCAD's API — {@code JMOUSE_CAD_API.md} §2.8. Searching keeps nothing and reads only
  * the published catalogue and what the providers answer; a fetch writes only where the reader may write.
  */
 @RestController

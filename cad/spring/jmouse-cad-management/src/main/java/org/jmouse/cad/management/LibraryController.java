@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 🧰 The library a sheet and a pcb are built from — {@code JMOUSE_CAD_API.md} §2.3: components, symbols, portraits,
+ * 🧰 The library a sheet and a pcb are built from — {@code JMOUSE_CAD_API.md} §2.4: components, symbols, portraits,
  * frames, footprints and the standards they are checked against.
  *
  * <p>Every route decides inside its service: a list holds the catalogue's documents the reader may see, and those of

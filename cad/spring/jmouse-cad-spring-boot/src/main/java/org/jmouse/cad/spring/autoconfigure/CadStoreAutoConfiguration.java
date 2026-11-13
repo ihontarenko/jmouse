@@ -1,5 +1,9 @@
 package org.jmouse.cad.spring.autoconfigure;
 
+import org.jmouse.cad.table.ShippedTable;
+import org.jmouse.cad.library.CadStandards;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.store.library.CatalogueTables;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.library.CadLanguage;
@@ -9,6 +13,8 @@ import org.jmouse.cad.store.about.EngineAbout;
 import org.jmouse.cad.store.activity.CadActivity;
 import org.jmouse.cad.store.activity.LiveActivity;
 import org.jmouse.cad.store.authority.CadAuthority;
+import org.jmouse.cad.store.authority.CadFolderLayout;
+import org.jmouse.cad.store.authority.CadHostPlaces;
 import org.jmouse.cad.store.authority.CadPlaces;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.catalogue.DocumentAccess;
@@ -18,6 +24,7 @@ import org.jmouse.cad.store.catalogue.PlaceSource;
 import org.jmouse.cad.store.editing.LanguageEditing;
 import org.jmouse.cad.store.exchange.DocumentExchange;
 import org.jmouse.cad.store.exchange.RoutingBoards;
+import org.jmouse.cad.store.project.CadProjects;
 import org.jmouse.cad.store.settings.SettingsTree;
 import org.jmouse.cad.store.licence.DocumentLicences;
 import org.jmouse.licence.Licences;
@@ -38,11 +45,14 @@ import org.jmouse.cad.store.simulation.CatalogueChecks;
 import org.jmouse.cad.store.simulation.SimulationJobs;
 import org.jmouse.cad.store.showcase.FeaturedDesigns;
 import org.jmouse.cad.store.simulation.Simulations;
-import org.jmouse.files.management.FileManagement;
-import org.jmouse.files.management.FileManagementContext;
 import org.jmouse.plugin.Extensions;
-import org.jmouse.plugin.PluginSecrets;
-import org.jmouse.plugin.PluginSettings;
+import org.jmouse.settings.SecretSealing;
+import org.jmouse.settings.SectionReader;
+import org.jmouse.settings.Settings;
+import org.jmouse.settings.spring.SettingsAutoConfiguration;
+import org.jmouse.cad.settings.CadSectionReader;
+import org.jmouse.cad.settings.CadSettings;
+import org.jmouse.cad.store.habits.CadHabits;
 import org.jmouse.plugin.spring.PluginAutoConfiguration;
 import org.jmouse.vault.seal.AesGcmSecretCipher;
 import org.jmouse.vault.seal.SecretCipher;
@@ -70,13 +80,12 @@ import java.util.Map;
  * 📚 jmCAD's application services over its stores: reading documents, deciding who may see them, the catalogue, and
  * the shipped library imported when the application is ready.
  *
- * <p>⚠️ The host provides a {@link CadAuthority} and a {@link CadPlaces} — who is acting, and what an owner is. Nothing
+ * <p>⚠️ The host provides a {@link CadAuthority} and a {@link CadHostPlaces} — who is acting, and what its own owners are;
+ * the engine answers its projects itself ({@link CadPlaces}). Nothing
  * here backs off without them: a catalogue that silently was not there would be found at the first request, far from
  * the cause, so the context refuses to start instead.</p>
  */
-// After the managed files, where an installation keeps them: a fetched model's files are filed through them.
-@AutoConfiguration(after = {CadJpaAutoConfiguration.class, PluginAutoConfiguration.class},
-                   afterName = "org.jmouse.files.management.autoconfigure.FilesManagementAutoConfiguration")
+@AutoConfiguration(after = {CadJpaAutoConfiguration.class, PluginAutoConfiguration.class, SettingsAutoConfiguration.class})
 @EnableConfigurationProperties(CadProperties.class)
 public class CadStoreAutoConfiguration {
 
@@ -91,7 +100,7 @@ public class CadStoreAutoConfiguration {
     /** What the engine itself is set to while it runs, kept with the plugins' settings. */
     @Bean
     @ConditionalOnMissingBean
-    public EngineConfiguration cadEngineRunningSettings(PluginSettings settings) {
+    public EngineConfiguration cadEngineRunningSettings(Settings settings) {
         return new EngineConfiguration(settings);
     }
 
@@ -113,17 +122,38 @@ public class CadStoreAutoConfiguration {
     @ConditionalOnMissingBean
     public DocumentExchange cadDocumentExchange(Extensions extensions, CadCatalogue catalogue, DocumentStore documents,
                                                 CadAuthority authority, CadPlaces places, CadLanguage language, DocumentFiles files,
-                                                DocumentLicences licences) {
-        return new DocumentExchange(extensions, catalogue, documents, authority, places, language, files, licences);
+                                                DocumentLicences licences, CadSettings settings, CadStandards standards) {
+        return new DocumentExchange(extensions, catalogue, documents, authority, places, language, files, licences, settings, standards);
+    }
+
+    /** How a section is written where it is kept: JSON, read strictly into its record. */
+    @Bean
+    @ConditionalOnMissingBean
+    public SectionReader cadSectionReader() {
+        return CadSectionReader.JSON;
+    }
+
+    /** The settings tree as every module reads it: the installation's values, each read when it is used. */
+    @Bean
+    @ConditionalOnMissingBean
+    public CadSettings cadSettings(Settings settings) {
+        return CadSettings.kept(settings);
+    }
+
+    /** A reader's habits, the engine's for every host. */
+    @Bean
+    @ConditionalOnMissingBean
+    public CadHabits cadHabits(Settings settings, EngineConfiguration configuration, CadAuthority authority) {
+        return new CadHabits(settings, configuration, authority);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SettingsTree cadSettingsTree(Extensions extensions) {
-        return new SettingsTree(extensions);
+    public SettingsTree cadSettingsTree(Extensions extensions, Settings settings, CadSettings values) {
+        return new SettingsTree(extensions, settings, values);
     }
 
-    /** Every section of the settings tree read once the plugins stand, before the port opens. */
+    /** Every section of the settings tree read once the plugins stand and their values are kept, before the port opens. */
     @Bean
     public SmartInitializingSingleton cadSettingsRead(SettingsTree tree) {
         return tree::readEvery;
@@ -143,7 +173,7 @@ public class CadStoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EnginePluginSettings cadEnginePluginSettings(Extensions extensions, PluginSettings settings, CadAuthority authority) {
+    public EnginePluginSettings cadEnginePluginSettings(Extensions extensions, Settings settings, CadAuthority authority) {
         return new EnginePluginSettings(extensions, settings, authority);
     }
 
@@ -185,6 +215,13 @@ public class CadStoreAutoConfiguration {
         return new DocumentReading(properties, configuration, language);
     }
 
+    /** Every owner as a place: the engine's projects from their documents, the host's owners through the host. */
+    @Bean
+    @ConditionalOnMissingBean
+    public CadPlaces cadPlaces(CadHostPlaces host, DocumentStore documents) {
+        return new CadPlaces(host, documents);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public DocumentAccess cadDocumentAccess(DocumentStore documents, CadAuthority authority, CadPlaces places) {
@@ -192,16 +229,16 @@ public class CadStoreAutoConfiguration {
     }
 
     /**
-     * What seals the plugins' keys where they are kept: the installation's own secret, {@code jmouse.cad.secret-key}, base64 of
+     * What seals the keys to services where they are kept: the installation's own secret, {@code jmouse.cad.secret-key}, base64 of
      * 32 bytes. Without it nothing is sealed, so no key is kept: a plugin then has what its deployment gave it. Losing it
      * loses what was kept: each key is then given again.
      */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnExpression("!'${jmouse.cad.secret-key:}'.isBlank()")
-    public PluginSecrets cadPluginSecrets(@Value("${jmouse.cad.secret-key}") String key) {
+    public SecretSealing cadSecretSealing(@Value("${jmouse.cad.secret-key}") String key) {
         SecretCipher cipher = new AesGcmSecretCipher(VaultKeyring.fromBase64(Map.of(SECRET_KEY_NAME, key), SECRET_KEY_NAME));
-        return new PluginSecrets() {
+        return new SecretSealing() {
             @Override
             public String seal(String secret, String context) {
                 return cipher.seal(secret, context);
@@ -224,12 +261,34 @@ public class CadStoreAutoConfiguration {
                 files, texts, () -> extensions.getObject().contributions(PlaceSource.POINT));
     }
 
+    /** The engine's tables: the catalogue's table documents by slug, a curator's revision where one is kept. */
+    @Bean
+    @ConditionalOnMissingBean
+    public TableSource cadTables(ObjectProvider<CadCatalogue> catalogue) {
+        return new CatalogueTables(catalogue::getObject);
+    }
+
+    /** The standards the library ships as tables — land patterns, the ways a pcb is made —, read through the engine's tables. */
+    @Bean
+    @ConditionalOnMissingBean
+    public CadStandards cadStandards(TableSource tables) {
+        return new CadStandards(tables);
+    }
+
+    /** The projects: readers' own, kept in the library folder, and those the libraries ship. */
+    @Bean
+    @ConditionalOnMissingBean
+    public CadProjects cadProjects(DocumentStore documents, CadCatalogue catalogue, DocumentAccess access, DocumentReading reading,
+                                   CadAuthority authority, CadPlaces places, CadProperties properties, PartLibrary library) {
+        return new CadProjects(documents, catalogue, access, reading, authority, places, properties, library);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public PartLibrary cadPartLibrary(DocumentStore documents, DocumentAccess access, CadCatalogue catalogue,
                                       CadAuthority authority, CadPlaces places, CadLanguage language,
-                                      DocumentReading reading) {
-        return new PartLibrary(documents, access, catalogue, authority, places, language, reading);
+                                      DocumentReading reading, CadStandards standards) {
+        return new PartLibrary(documents, access, catalogue, authority, places, language, reading, standards);
     }
 
     @Bean
@@ -275,8 +334,8 @@ public class CadStoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ShippedDocuments cadShippedDocuments(ResourcePatternResolver resources, CadProperties properties,
-                                               CadLanguage language) {
-        return new ShippedDocuments(resources, properties, language);
+                                               CadLanguage language, ObjectProvider<Extensions> extensions) {
+        return new ShippedDocuments(resources, properties, language, () -> extensions.getObject().contributions(ShippedTable.POINT));
     }
 
     /** The one way a catalogued document's text is read, wherever it is held. */
@@ -293,9 +352,9 @@ public class CadStoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public DocumentStore cadDocumentStore(CadProperties properties, EngineConfiguration configuration,
-                                          ObjectProvider<CommitAuthors> authors) {
+                                          ObjectProvider<CommitAuthors> authors, CadHostPlaces host, CadSettings settings) {
         CadProperties.Identity identity = properties.library().identity();
-        return new DocumentStore(properties.library().folder(), new JGitLocalGit(), authors.getIfAvailable(() -> CommitAuthors.NONE),
+        return new DocumentStore(configuration::workingFolder, new CadFolderLayout(host, settings), new JGitLocalGit(), authors.getIfAvailable(() -> CommitAuthors.NONE),
                 new CommitAuthor(identity.name(), identity.email()), configuration::revisionZone);
     }
 
@@ -313,7 +372,11 @@ public class CadStoreAutoConfiguration {
      * read answered as if the documents did not exist.
      */
     @Bean
-    public SmartInitializingSingleton cadCatalogueIndex(CatalogueIndexing indexing) {
-        return indexing::index;
+    public SmartInitializingSingleton cadCatalogueIndex(CatalogueIndexing indexing, Settings settings) {
+        return () -> {
+            indexing.index();
+            // Another working folder is another library: the store opens on it and the catalogue is made from it again.
+            settings.whenChanged(CadEnginePlugin.ID, EngineConfiguration.LIBRARY, indexing::index);
+        };
     }
 }

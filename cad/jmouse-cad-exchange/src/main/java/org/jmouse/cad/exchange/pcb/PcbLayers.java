@@ -1,6 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
-import org.jmouse.cad.settings.SettingsOwner;
+import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.PcbDrills;
@@ -23,7 +23,7 @@ import java.util.Map;
 public final class PcbLayers {
 
     /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/solid/layers. */
-    public static final SettingsSection<Settings> SECTION = new SettingsSection<>("solid/layers", "PCB layers in 3D", SettingsOwner.ENGINE_DATA, Settings.class);
+    public static final SettingsSection<Settings> SECTION = new SettingsSection<>("solid/layers", "PCB layers in 3D", Settings.class);
 
     private static final GeometryFactory AREAS = new GeometryFactory();
 
@@ -34,21 +34,25 @@ public final class PcbLayers {
      * @param metallic  0 a dielectric — epoxy, ink —, 1 a bare metal
      * @param roughness 0 a mirror, 1 matte
      */
-    public record Finish(String colour, double metallic, double roughness) {
+    public record Finish(@Label("Colour") String colour,
+                         @Label("Metallic") double metallic,
+                         @Label("Roughness") double roughness) {
     }
 
     /**
      * A thin layer over a face of the pcb.
      *
      * @param name      what its solid is called after the pcb and the side: {@code copper}
-     * @param thickness how thick it is, in millimetres
+     * @param thickness how thick it is
      * @param finish    how it looks
      */
-    public record Layer(String name, double thickness, Finish finish) {
+    public record Layer(@Label("Name") String name,
+                        @Label(value = "Thickness", unit = "mm") double thickness,
+                        @Label("Finish") Finish finish) {
     }
 
     /**
-     * The layers' data: the settings tree's {@code solid/layers} ({@link #SECTION}).
+     * The layers' data: the settings tree's {@code solid/layers}.
      *
      * @param bare       the pcb where no mask is modelled over it: the mask's look, as the pcb is seen
      * @param core       the pcb's own look, under a mask modelled as a layer of its own
@@ -57,7 +61,12 @@ public final class PcbLayers {
      * @param silkscreen the silkscreen, as a layer over the mask
      * @param body       a part shown as its footprint's body
      */
-    public record Settings(Finish bare, Finish core, Layer copper, Layer mask, Layer silkscreen, Finish body) {
+    public record Settings(@Label("Bare PCB") Finish bare,
+                           @Label("PCB core") Finish core,
+                           @Label("Copper") Layer copper,
+                           @Label("Mask") Layer mask,
+                           @Label("Silkscreen") Layer silkscreen,
+                           @Label("Part body") Finish body) {
     }
 
     /**

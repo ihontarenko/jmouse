@@ -1,0 +1,96 @@
+# DG-10. An SSD1306 OLED module on I²C, drawn byte by byte. One controller sets the panel up — the charge pump, the
+# display on, horizontal addressing over the whole screen — and repeats it every 20 ms, so the two sliders that flip and
+# invert the picture take effect while it runs. A second controller sends fifteen bytes of picture every millisecond:
+# a smiley and a heart, eight pixels down a column each. Horizontal addressing carries every burst on from where the last
+# one stopped, so the screen fills strip by strip.
+circuit:oled-pixels("OLED: a screen drawn byte by byte") {
+    meta {
+        summary: "An I²C controller draws a smiley and a heart onto an SSD1306 OLED, fifteen bytes at a time, until the screen is full."
+        description: """
+            Idea: a monochrome OLED keeps its picture in its own memory, 128 columns by eight pages, and every byte it
+            is sent is eight pixels down one column — its lowest bit on top. After the module's address a control byte
+            says whether commands or pixels follow; the pixels land where the address pointer stands, and the pointer
+            moves on by itself.
+
+            Try: watch the screen fill from the top left, one strip of fifteen columns a millisecond. Turn «flipped» on:
+            the panel draws its memory mirrored both ways, without a byte of it changing. Turn «inverted» on: every
+            pixel that was dark lights.
+
+            Watch: the logic analyser on SCL and SDA with the I²C decoder — the set-up burst begins 0x00, a control byte
+            for commands, then 0x8D 0x14 and 0xAF; each picture burst begins 0x40, a control byte for data.
+
+            Ask: why does nothing show if 0x8D 0x14 is left out? The second burst writes the same fifteen bytes as the
+            first — why does it draw beside the first rather than over it?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-10
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:inverted(0, in: 0 .. 1, step: 1, integer, "Inverted: A7h instead of A6h")
+    parameter:flipped(0, in: 0 .. 1, step: 1, integer, "Flipped: A1h and C8h — the columns and the rows drawn the other way")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 3.3 V)
+    part:R1(resistor, [vcc, scl], resistance: 4.7 kΩ)
+    part:R2(resistor, [vcc, sda], resistance: 4.7 kΩ)
+    part:B1(i2c-controller, [scl: scl, sda: sda, Vcc: vcc, GND: 0], address: 60, bytes: "0x00 0x8D 0x14 0xAF 0x20 0x00 {160 + flipped} {192 + 8 * flipped} {166 + inverted}", clock_frequency: 400 kHz, repeat_every: 20 ms)
+    part:B2(i2c-controller, [scl: scl, sda: sda, Vcc: vcc, GND: 0], address: 60, bytes: "0x40 0x3C 0x42 0xA5 0x81 0xA5 0x99 0x42 0x3C 0x00 0x0C 0x1E 0x3C 0x1E 0x0C 0x00", clock_frequency: 400 kHz, start_at: 2 ms, repeat_every: 1 ms)
+    part:U1(ssd1306, [scl: scl, sda: sda, Vcc: vcc, GND: 0])
+    place:V1(at: -400 600, rotate: 90)
+    mark:N1(label, vcc, at: -400 440)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: -400 800)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:R1(at: -120 400, rotate: 90, name(at: -44 -16), value(at: -64 20))
+    mark:N2(label, vcc, at: -120 200)
+    wire:WN2(R1.positive, to: N2.label)
+    mark:N3(label, scl, at: -120 600, rotate: 180)
+    wire:WN3(R1.negative, to: N3.label)
+    place:R2(at: 0 400, rotate: 90, name(at: 44 -16), value(at: 64 20))
+    mark:N4(label, vcc, at: 0 200)
+    wire:WN4(R2.positive, to: N4.label)
+    mark:N5(label, sda, at: 0 600, rotate: 180)
+    wire:WN5(R2.negative, to: N5.label)
+    place:B1(at: 560 600)
+    mark:N6(label, scl, at: 280 580, rotate: 270)
+    wire:WN6(B1.scl, to: N6.label)
+    mark:N7(label, sda, at: 280 620, rotate: 270)
+    wire:WN7(B1.sda, to: N7.label)
+    mark:N8(label, vcc, at: 520 160)
+    wire:WN8(B1.Vcc, to: N8.label)
+    mark:G2(ground, at: 600 160, rotate: 180)
+    wire:WG2(B1.GND, to: G2.ground)
+    place:B2(at: 560 1520)
+    mark:N9(label, scl, at: 280 1500, rotate: 270)
+    wire:WN9(B2.scl, to: N9.label)
+    mark:N10(label, sda, at: 280 1540, rotate: 270)
+    wire:WN10(B2.sda, to: N10.label)
+    mark:N11(label, vcc, at: 520 1080)
+    wire:WN11(B2.Vcc, to: N11.label)
+    mark:G3(ground, at: 600 1080, rotate: 180)
+    wire:WG3(B2.GND, to: G3.ground)
+    place:U1(at: 1400 680)
+    mark:G4(ground, at: 1200 400, rotate: 90)
+    wire:WG4(U1.GND, to: G4.ground, via: 1320 400)
+    mark:N12(label, vcc, at: 1200 320, rotate: 270)
+    wire:WN12(U1.Vcc, to: N12.label, via: 1360 320)
+    mark:N13(label, scl, at: 1600 320, rotate: 90)
+    wire:WN13(U1.scl, to: N13.label, via: 1400 320)
+    mark:N14(label, sda, at: 1600 400, rotate: 90)
+    wire:WN14(U1.sda, to: N14.label, via: 1440 400)
+    probe:L1(level, scl)
+    probe:L2(level, sda)
+    expect("the panel lights once its charge pump is on", from: "SSD1306 application note: 8Dh 14h, then AFh") {
+        measure(final, figure: U1.lit)
+        near(1, +- 0.01)
+    }
+    expect("every burst moves the pointer on fifteen columns", from: "§10.1.4, horizontal addressing: after the bursts of 2 ms … 9 ms, 8 × 15 = 120 columns on page 0") {
+        measure(final, figures: [U1.cursor_column, U1.cursor_page])
+        is([120,0])
+    }
+    expect("the sliders reach the panel: flipped both ways and inverted", from: "A1h remaps the columns, C8h scans the rows the other way, A7h inverts") {
+        measure(final, figures: [U1.mirrored_columns, U1.mirrored_rows, U1.inverted], with: [flipped: 1, inverted: 1])
+        is([1,1,1])
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+}

@@ -134,10 +134,11 @@ public final class KiCadPcbBuilder {
      */
     public record PlacedFootprint(String libraryId, KiCadFootprint footprint, Optional<String> path, String designator,
                                   String valueText, KiCadSide side, KiCadPoint at, double angle, Field reference, Field value,
-                                  Map<String, String> padNets, boolean boardOnly) {
+                                  Map<String, String> padNets, boolean boardOnly, KiCadArrangement arrangement) {
 
         public PlacedFootprint {
             padNets = Map.copyOf(padNets);
+            arrangement = arrangement == null ? KiCadArrangement.FREE : arrangement;
         }
     }
 
@@ -171,6 +172,12 @@ public final class KiCadPcbBuilder {
     private final List<SExpressionNode> footprints = new ArrayList<>();
     private final List<SExpressionNode> copperItems = new ArrayList<>();
     private final List<SExpressionNode> areas = new ArrayList<>();
+    /** The board's groups in the order they were told of: each its lock and the identities of its members so far. */
+    private final Map<String, GroupBeingWritten> groups = new LinkedHashMap<>();
+
+    /** A group as the builder gathers it: whether it is locked, and the identities of what was put in it. */
+    private record GroupBeingWritten(KiCadLock lock, List<String> members) {
+    }
     private final double thickness;
     private final double letterStroke;
     private final String title;
@@ -240,6 +247,7 @@ public final class KiCadPcbBuilder {
         items.add(SExpressionString.of(placed.libraryId()));
         items.add(SExpressionList.of(LAYER, SExpressionString.of(side.copper())));
         items.add(uuid(identity));
+        arranged(items, placed.arrangement(), identity);
         items.add(at(onPage(placed.at()), placed.angle()));
         if (!footprint.description().isBlank()) {
             items.add(SExpressionList.of(DESCRIPTION, SExpressionString.of(footprint.description())));
@@ -316,19 +324,58 @@ public final class KiCadPcbBuilder {
 
     // ─── copper ─────────────────────────────────────────────────────────────────────────────────────
 
+    /**
+     * A group of the board — {@code (group "front panel" (uuid …) (locked yes) (members …))} —, to put items in by its name; written
+     * after them, naming every item that was put in it.
+     */
+    public KiCadPcbBuilder group(String name, KiCadLock lock) {
+        groups.putIfAbsent(name, new GroupBeingWritten(lock, new ArrayList<>()));
+        return this;
+    }
+
     /** A straight run of copper; one of no length is copper all the same — a dot as wide as the track. */
     public KiCadPcbBuilder track(KiCadPoint start, KiCadPoint end, double width, String layer, String net) {
-        copperItems.add(SExpressionList.of(SEGMENT, point(START, onPage(start)), point(END, onPage(end)),
+        return track(start, end, width, layer, net, KiCadArrangement.FREE);
+    }
+
+    /** The same, in a group or locked. */
+    public KiCadPcbBuilder track(KiCadPoint start, KiCadPoint end, double width, String layer, String net, KiCadArrangement arrangement) {
+        String identity = identity("track");
+        List<SExpressionNode> items = new ArrayList<>(List.of(point(START, onPage(start)), point(END, onPage(end)),
                 SExpressionList.of(WIDTH, SExpressionAtom.of(width)), SExpressionList.of(LAYER, SExpressionString.of(layer)),
-                SExpressionList.of(NET, SExpressionAtom.of(net(net))), uuid(identity("track"))));
+                SExpressionList.of(NET, SExpressionAtom.of(net(net))), uuid(identity)));
+        arranged(items, arrangement, identity);
+        copperItems.add(SExpressionList.of(SEGMENT, items.toArray(SExpressionNode[]::new)));
         return this;
     }
 
     public KiCadPcbBuilder arc(KiCadPoint start, KiCadPoint middle, KiCadPoint end, double width, String layer, String net) {
-        copperItems.add(SExpressionList.of(TRACK_ARC, point(START, onPage(start)), point(MIDDLE, onPage(middle)), point(END, onPage(end)),
+        return arc(start, middle, end, width, layer, net, KiCadArrangement.FREE);
+    }
+
+    /** The same, in a group or locked. */
+    public KiCadPcbBuilder arc(KiCadPoint start, KiCadPoint middle, KiCadPoint end, double width, String layer, String net, KiCadArrangement arrangement) {
+        String identity = identity("arc");
+        List<SExpressionNode> items = new ArrayList<>(List.of(point(START, onPage(start)), point(MIDDLE, onPage(middle)), point(END, onPage(end)),
                 SExpressionList.of(WIDTH, SExpressionAtom.of(width)), SExpressionList.of(LAYER, SExpressionString.of(layer)),
-                SExpressionList.of(NET, SExpressionAtom.of(net(net))), uuid(identity("arc"))));
+                SExpressionList.of(NET, SExpressionAtom.of(net(net))), uuid(identity)));
+        arranged(items, arrangement, identity);
+        copperItems.add(SExpressionList.of(TRACK_ARC, items.toArray(SExpressionNode[]::new)));
         return this;
+    }
+
+    /** Says how an item stands: `(locked yes)` when it is locked, and puts it among its group's members. */
+    private void arranged(List<SExpressionNode> items, KiCadArrangement arrangement, String identity) {
+        if (arrangement.lock() == KiCadLock.LOCKED) {
+            items.add(SExpressionList.of(LOCKED, SExpressionAtom.of("yes")));
+        }
+        if (!arrangement.group().isEmpty()) {
+            GroupBeingWritten group = groups.get(arrangement.group());
+            if (group == null) {
+                throw new IllegalArgumentException("No group '" + arrangement.group() + "' was told of before what is put in it");
+            }
+            group.members().add(identity);
+        }
     }
 
     /**
@@ -336,6 +383,11 @@ public final class KiCadPcbBuilder {
      * them is, buried otherwise.
      */
     public KiCadPcbBuilder via(KiCadPoint at, double diameter, double drill, String from, String to, String net) {
+        return via(at, diameter, drill, from, to, net, KiCadArrangement.FREE);
+    }
+
+    /** The same, in a group or locked. */
+    public KiCadPcbBuilder via(KiCadPoint at, double diameter, double drill, String from, String to, String net, KiCadArrangement arrangement) {
         List<SExpressionNode> items = new ArrayList<>();
         boolean outerFrom = from.equals(copper.getFirst()) || from.equals(copper.getLast());
         boolean outerTo = to.equals(copper.getFirst()) || to.equals(copper.getLast());
@@ -350,7 +402,9 @@ public final class KiCadPcbBuilder {
         items.add(SExpressionList.of(DRILL, SExpressionAtom.of(drill)));
         items.add(SExpressionList.of(LAYERS, SExpressionString.of(from), SExpressionString.of(to)));
         items.add(SExpressionList.of(NET, SExpressionAtom.of(net(net))));
-        items.add(uuid(identity("via")));
+        String identity = identity("via");
+        items.add(uuid(identity));
+        arranged(items, arrangement, identity);
         copperItems.add(SExpressionList.of(VIA, items.toArray(SExpressionNode[]::new)));
         return this;
     }
@@ -450,6 +504,14 @@ public final class KiCadPcbBuilder {
         items.addAll(drawn);
         items.addAll(copperItems);
         items.addAll(areas);
+        groups.forEach((name, group) -> {
+            List<SExpressionNode> written = new ArrayList<>(List.of(SExpressionString.of(name), uuid(identity("group " + name))));
+            if (group.lock() == KiCadLock.LOCKED) {
+                written.add(SExpressionList.of(LOCKED, SExpressionAtom.of("yes")));
+            }
+            written.add(SExpressionList.of(MEMBERS, group.members().stream().map(SExpressionString::of).toArray(SExpressionNode[]::new)));
+            items.add(SExpressionList.of(GROUP, written.toArray(SExpressionNode[]::new)));
+        });
         return SExpressionDocument.of(fileName, SExpressionList.of(PCB_FILE, items.toArray(SExpressionNode[]::new)));
     }
 

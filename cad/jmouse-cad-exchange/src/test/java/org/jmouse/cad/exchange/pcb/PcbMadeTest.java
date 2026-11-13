@@ -67,7 +67,7 @@ class PcbMadeTest {
                 }
                 """.formatted(body), "made-probe");
         PcbFabrication fabrication = PcbFabrication.of(pcb, catalogue);
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
+        Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(fabrication.pcb().rules());
         PcbArtwork artwork = PcbArtwork.of(fabrication, rules, ARTWORK, StrokeFont.newStroke());
         ArtworkAreas areas = new ArtworkAreas(artwork.outlines(), ARTWORK.areas().steps());
         PcbSolid solid = PcbSolid.of(artwork, areas, PcbDrills.of(fabrication.pcb(), fabrication.footprints()), ARTWORK.areas().steps(),

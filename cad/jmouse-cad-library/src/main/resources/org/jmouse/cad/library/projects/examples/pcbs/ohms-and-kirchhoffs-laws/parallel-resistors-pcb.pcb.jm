@@ -1,0 +1,28 @@
+# Parallel resistors laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:parallel-resistors-pcb("Parallel resistors — pcb") {
+    meta {
+        summary: "Parallel resistors laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: ohms-and-kirchhoffs-laws
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(parallel-resistors)
+    layers(2)
+    edge("M1 0H24A1 1 0 0 1 25 1V17A1 1 0 0 1 24 18H1A1 1 0 0 1 0 17V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 12.5 11.5, rotate: 270)
+    place(R2, at: 16.5 11.5, rotate: 270)
+    place(R3, at: 20.5 11.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, first: 2, second: 3, third: 4], at: 5.5 9)
+    track(top, width: 0.25, from: 12.5 12.5, to: 12.5 13.55)
+    track(top, width: 0.25, from: 16.5 12.5, to: 16.5 13.55)
+    track(top, width: 0.25, from: 20.5 12.5, to: 20.5 13.55)
+    track(top, width: 0.25, from: 12.5 10.5, to: 8.27 10.5, to: 5.5 7.73)
+    track(top, width: 0.25, from: 16.5 10.5, to: 15.6 11.4, to: 6.63 11.4, to: 5.5 10.27)
+    track(top, width: 0.25, from: 20.5 10.5, to: 20.5 10.95, to: 16.9 14.55, to: 7.24 14.55, to: 5.5 12.81)
+    via(at: 12.5 13.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 16.5 13.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 20.5 13.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H24.5V17.5H0.5Z")
+}

@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.DocumentExport;
@@ -18,6 +19,7 @@ import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.simulation.SimulationReading;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 import java.util.List;
 import java.util.Set;
 
@@ -28,12 +30,19 @@ import java.util.Set;
  */
 final class KiCadDesignWriting implements DocumentExport {
 
-    private final KiCadLibraryMap map    = KiCadLibraryMap.standard();
-    private final KiCadLibraries  filing = KiCadLibraries.standard();
-    private final PcbArtwork.Settings artwork;
+    /** The map of KiCad's symbols to ours and KiCad's filing, as the engine's tables say them at each use. */
+    private final ReadTable<KiCadLibraryMap> maps;
+    private final ReadTable<KiCadLibraries>  filings;
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards               standards;
+    private final Supplier<PcbArtwork.Settings> artwork;
 
     /** @param artwork how every format draws what no document says: curves, a designator nothing places, the mask's opening */
-    KiCadDesignWriting(PcbArtwork.Settings artwork) {
+    KiCadDesignWriting(Supplier<PcbArtwork.Settings> artwork, ReadTable<KiCadLibraryMap> maps, ReadTable<KiCadLibraries> filings,
+                       CadStandards standards) {
+        this.maps = maps;
+        this.filings = filings;
+        this.standards = standards;
         this.artwork = artwork;
     }
 
@@ -55,11 +64,11 @@ final class KiCadDesignWriting implements DocumentExport {
     @Override
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
         if (document.kind().equals(PcbModule.PCB)) {
-            return KiCadProjectExport.of(document, catalogue, map, filing,
-                    CadStandards.pcbRules().valuesOf(PcbDrawing.of(document).rules()), artwork);
+            return KiCadProjectExport.of(document, catalogue, maps.current(), filings.current(),
+                    standards.pcbRules().valuesOf(PcbDrawing.of(document).rules()), artwork.get());
         }
         KiCadSchematicExport.Exported exported = KiCadSchematicExport.of(document.slug(), document.title(),
-                SimulationReading.circuit(document), catalogue, map, filing);
+                SimulationReading.circuit(document), catalogue, maps.current(), filings.current());
         if (exported.sheets().isEmpty()) {
             return ExportedFiles.single(exported.fileName(), exported.text(), exported.notes());
         }

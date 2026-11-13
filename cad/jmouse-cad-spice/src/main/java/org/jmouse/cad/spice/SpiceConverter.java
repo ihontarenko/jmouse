@@ -35,10 +35,6 @@ public final class SpiceConverter {
     private final SpiceDevices       devices;
     private final SpiceParser        parser = new SpiceParser();
 
-    public SpiceConverter(CatalogueDocuments catalogue, DocumentLanguage language) {
-        this(catalogue, language, SpiceDevices.standard());
-    }
-
     public SpiceConverter(CatalogueDocuments catalogue, DocumentLanguage language, SpiceDevices devices) {
         this.catalogue = catalogue;
         this.language = language;

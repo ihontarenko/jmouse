@@ -1,5 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
+import org.jmouse.cad.drawing.DrawnState;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -114,7 +117,7 @@ class RoutingEngineTest {
     private static PcbDrawing pcb(List<PcbDrawing.Placement> placements, List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias,
                                   List<PcbDrawing.Zone> zones, List<PcbDrawing.NetClass> netClasses) {
         return new PcbDrawing("circuit", Optional.empty(), netClasses, null, List.of(), List.of(), 2, OUTLINE, placements, tracks, List.of(), vias,
-                zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+                zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     private static PcbDrawing pcb(List<PcbDrawing.Placement> placements, List<PcbDrawing.Track> tracks) {
@@ -1093,5 +1096,50 @@ class RoutingEngineTest {
         // A jog one can see is the reader's, kept.
         List<Point> seen = line(0, 0, 10, 0, 10.5, 0.5, 20, 0.5);
         assertLine(seen, tightening.untangled(seen, Tightening.JogHandling.KEPT));
+    }
+
+    /** A track held where it stands — locked itself, or in a locked group —: no act of the router moves, reshapes or shoves it. */
+    @Nested
+    class HeldWhereItStands {
+
+        private static final Arrangement LOCKED = new Arrangement("", DrawnState.LOCKED);
+
+        private PcbDrawing withLockedTrack() {
+            return pcb(List.of(), List.of(track(line(0, 0, 10, 0, 20, 10)).arranged(LOCKED)));
+        }
+
+        @Test
+        void aLockedTrackIsNeitherCarriedNorReshaped() {
+            PcbDrawing pcb = withLockedTrack();
+            RoutingEngine engine = new RoutingEngine(board(pcb, Map.of()));
+            assertTrue(engine.segmentCarried(pcb, 0, 0, 0, 2, WALKING, Optional.empty()).isEmpty());
+            assertSame(pcb, engine.cornerCarried(pcb, 0, 1, point(10, 5), WALKING));
+            assertEquals(pcb.tracks(), engine.withCorners(pcb, 2, List.of()).tracks());
+            assertEquals(pcb.tracks(), engine.withoutJogs(pcb, List.of()).tracks());
+        }
+
+        @Test
+        void aTrackOfALockedGroupIsHeldAsALockedOneIs() {
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 10, 0, 20, 10)).arranged(Arrangement.in("front-panel"))))
+                    .withGroups(List.of(new DrawnGroup("front-panel", DrawnState.LOCKED)));
+            assertTrue(new RoutingEngine(board(pcb, Map.of())).segmentCarried(pcb, 0, 0, 0, 2, WALKING, Optional.empty()).isEmpty());
+        }
+
+        @Test
+        void copperLaidNearALockedTrackGoesRoundItRatherThanBendingIt() {
+            List<Point> laid = line(0, 0.3, 10, 0.3);
+            PcbDrawing free = pcb(List.of(), List.of(track(line(0, 0, 10, 0))));
+            PcbDrawing locked = pcb(List.of(), List.of(track(line(0, 0, 10, 0)).arranged(LOCKED)));
+            for (PcbDrawing pcb : List.of(free, locked)) {
+                RoutingWorld world = new RoutingEngine(board(pcb, Map.of())).worldOf(pcb);
+                Optional<List<PcbDrawing.Track>> givingWay = Shoving.tracksGivingWay(world, PcbDrawing.TOP, Optional.of("A"),
+                        CopperShapes.track(track(laid), CURVE_STEPS), OptionalInt.empty());
+                if (pcb == free) {
+                    givingWay.ifPresent(tracks -> assertFalse(tracks.getFirst().points().equals(line(0, 0, 10, 0)), "a free track bends round"));
+                } else {
+                    assertTrue(givingWay.isEmpty(), "a locked track gives way to nothing");
+                }
+            }
+        }
     }
 }

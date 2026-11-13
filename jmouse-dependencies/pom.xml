@@ -214,7 +214,27 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-descriptions</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-revisions</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-settings</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-settings-jpa</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-settings-spring</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>
@@ -350,6 +370,11 @@
             <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-cad-panel</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-cad-table</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>

@@ -1,0 +1,23 @@
+# Full-wave bridge rectifier laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:full-wave-rectifier-pcb("Full-wave bridge rectifier — pcb") {
+    meta {
+        summary: "Full-wave bridge rectifier laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: diodes-and-rectifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(full-wave-rectifier)
+    layers(2)
+    edge("M1 0H30A1 1 0 0 1 31 1V16A1 1 0 0 1 30 17H1A1 1 0 0 1 0 16V1A1 1 0 0 1 1 0Z")
+    place(BR1, at: 17.5 8.5)
+    place(R1, at: 26.5 8.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [a: 1, b: 2], at: 5.5 8.5)
+    track(top, width: 0.25, from: 26.5 9.5, to: 26.5 10.55)
+    track(top, width: 0.25, from: 14.96 11.04, to: 9.31 11.04, to: 5.5 7.23)
+    track(top, width: 0.25, from: 14.96 5.96, to: 16.76 7.76, to: 26.24 7.76, to: 26.5 7.5)
+    track(bottom, width: 0.25, from: 20.04 5.96, to: 17.79 5.96, to: 13.98 9.77, to: 5.5 9.77)
+    via(at: 26.5 10.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H30.5V16.5H0.5Z")
+}

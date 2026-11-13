@@ -1,5 +1,4 @@
 {
-  "$schema": "./layout.schema.json",
   "circuit": {
     "partsShare": 0.3,
     "gap": 1.5,

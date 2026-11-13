@@ -1,0 +1,133 @@
+# DG-05. An I²C controller writes one byte, 0x5A, into word 3 of a 24C02 EEPROM, waits out the chip's write cycle, and
+# reads word 3 back; it does it again every ten milliseconds. SCL and SDA are open drain and pulled up by 4.7 kΩ — the
+# controller and the memory only ever pull them low. The byte read back stands on the controller's data outputs, and an
+# LED bar shows it, each segment through 330 Ω. The logic analyser's two channels sit on SCL and SDA.
+circuit:i2c-eeprom("I²C: writing and reading an EEPROM") {
+    meta {
+        summary: "An I²C controller writes 0x5A into a 24C02 and reads it back; the logic analyser decodes every byte on the bus."
+        description: """
+            Idea: I²C is two wires shared by every chip on them. SCL is the clock, SDA the data, and nobody drives either
+            high — a chip only pulls a line low and lets it go, and a resistor pulls it back up. A transfer begins with a
+            START (SDA falls while SCL is high), names the chip by its 7-bit address, and every byte after it is answered
+            by the receiver pulling SDA low for one more clock: the ACK.
+
+            Try: open the Logic view under the sheet and choose the I²C decoder with L1 as SCL and L2 as SDA. Find the
+            write — S, W 0x50, 0x03, 0x5A, P — and, 5.5 ms later, the read: S, W 0x50, 0x03, Sr, R 0x50, 0x5A, N, P.
+            Then set the pattern trigger to SDA falling while SCL is high, and the screen holds every START it finds.
+
+            Watch: the LED bar lights 0101 1010 once the read is back. On the oscilloscope, SDA's rising edges are slow
+            curves — the pull-up charging the line — while its falling edges are sharp: a transistor pulls, a resistor
+            only lets go.
+
+            Ask: what happens if the read comes during the write cycle — set the controller's pause to 1 ms and look
+            for the N after the address. Why can two chips on one bus never short each other out?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-05
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:R1(resistor, [vcc, scl], resistance: 4.7 kΩ)
+    part:R2(resistor, [vcc, sda], resistance: 4.7 kΩ)
+    part:B1(i2c-controller, [scl: scl, sda: sda, data_0: d0, data_1: d1, data_2: d2, data_3: d3, data_4: d4, data_5: d5, data_6: d6, data_7: d7, Vcc: vcc, GND: 0], address: 80, bytes: "3 90", operation: "write-read", pause: 5.5 ms, repeat_every: 10 ms)
+    part:U1(24c02, [scl: scl, sda: sda, a0: 0, a1: 0, a2: 0, write_protect: 0, Vcc: vcc, GND: 0])
+    part:R3(resistor, [d0, a0], resistance: 330 Ω)
+    part:R4(resistor, [d1, a1], resistance: 330 Ω)
+    part:R5(resistor, [d2, a2], resistance: 330 Ω)
+    part:R6(resistor, [d3, a3], resistance: 330 Ω)
+    part:R7(resistor, [d4, a4], resistance: 330 Ω)
+    part:R8(resistor, [d5, a5], resistance: 330 Ω)
+    part:R9(resistor, [d6, a6], resistance: 330 Ω)
+    part:R10(resistor, [d7, a7], resistance: 330 Ω)
+    part:DS1(led-bar, [anode_0: a0, anode_1: a1, anode_2: a2, anode_3: a3, anode_4: a4, anode_5: a5, anode_6: a6, anode_7: a7, cathode: 0])
+    place:V1(at: -280 880, rotate: 90)
+    mark:N1(label, vcc, at: -280 720)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: -280 1080)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:R1(at: 480 320, rotate: 90, name(at: -44 -16), value(at: -64 20))
+    mark:N2(label, vcc, at: 480 120)
+    wire:WN2(R1.positive, to: N2.label)
+    mark:N3(label, scl, at: 480 560, rotate: 180)
+    wire:WN3(R1.negative, to: N3.label)
+    place:R2(at: 560 320, rotate: 90, name(at: 44 -16), value(at: 64 20))
+    mark:N4(label, vcc, at: 560 120)
+    wire:WN4(R2.positive, to: N4.label)
+    mark:N5(label, sda, at: 560 560, rotate: 180)
+    wire:WN5(R2.negative, to: N5.label)
+    place:B1(at: 960 600)
+    mark:N6(label, scl, at: 680 580, rotate: 270)
+    wire:WN6(B1.scl, to: N6.label)
+    mark:N7(label, sda, at: 680 620, rotate: 270)
+    wire:WN7(B1.sda, to: N7.label)
+    mark:N8(label, vcc, at: 920 160)
+    wire:WN8(B1.Vcc, to: N8.label)
+    mark:G2(ground, at: 1000 160, rotate: 180)
+    wire:WG2(B1.GND, to: G2.ground)
+    place:U1(at: 240 640)
+    mark:N9(label, scl, at: -40 540, rotate: 270)
+    wire:WN9(U1.scl, to: N9.label)
+    mark:N10(label, sda, at: -40 580, rotate: 270)
+    wire:WN10(U1.sda, to: N10.label)
+    mark:G3(ground, at: -40 620, rotate: 90)
+    wire:WG3(U1.a0, to: G3.ground)
+    mark:G4(ground, at: -40 660, rotate: 90)
+    wire:WG4(U1.a1, to: G4.ground)
+    mark:G5(ground, at: -40 700, rotate: 90)
+    wire:WG5(U1.a2, to: G5.ground)
+    mark:G6(ground, at: -40 740, rotate: 90)
+    wire:WG6(U1.write_protect, to: G6.ground)
+    mark:N11(label, vcc, at: 200 280)
+    wire:WN11(U1.Vcc, to: N11.label)
+    mark:G7(ground, at: 280 280, rotate: 180)
+    wire:WG7(U1.GND, to: G7.ground)
+    place:R3(at: 1480 320, name(at: -52 -32), value(at: 52 -32))
+    place:R4(at: 1480 400, name(at: -52 -32), value(at: 52 -32))
+    place:R5(at: 1480 480, name(at: -52 -32), value(at: 52 -32))
+    place:R6(at: 1480 560, name(at: -52 -32), value(at: 52 -32))
+    place:R7(at: 1480 640, name(at: -52 -32), value(at: 52 -32))
+    place:R8(at: 1480 720, name(at: -52 -32), value(at: 52 -32))
+    place:R9(at: 1480 800, name(at: -52 -32), value(at: 52 -32))
+    place:R10(at: 1480 880, name(at: -52 -32), value(at: 52 -32))
+    place:DS1(at: 1920 600, rotate: 270, mirror)
+    mark:G8(ground, at: 2160 560, rotate: 270)
+    wire:WG8(DS1.cathode, to: G8.ground)
+    wire:W1(B1.data_0, to: R3.positive, via: [1200 460, 1200 320])
+    wire:W2(R3.negative, to: DS1.anode_0, via: [1720 320, 1720 440])
+    wire:W3(B1.data_1, to: R4.positive, via: [1240 500, 1240 400])
+    wire:W4(R4.negative, to: DS1.anode_1, via: [1680 400, 1680 480])
+    wire:W5(B1.data_2, to: R5.positive, via: [1280 540, 1280 480])
+    wire:W6(R5.negative, to: DS1.anode_2, via: [1640 480, 1640 520])
+    wire:W7(B1.data_3, to: R6.positive, via: [1320 580, 1320 560])
+    wire:W8(R6.negative, to: DS1.anode_3)
+    wire:W9(B1.data_4, to: R7.positive, via: [1320 620, 1320 640])
+    wire:W10(R7.negative, to: DS1.anode_4, via: [1640 640, 1640 600])
+    wire:W11(B1.data_5, to: R8.positive, via: [1280 660, 1280 720])
+    wire:W12(R8.negative, to: DS1.anode_5, via: [1680 720, 1680 640])
+    wire:W13(B1.data_6, to: R9.positive, via: [1240 700, 1240 800])
+    wire:W14(R9.negative, to: DS1.anode_6, via: [1720 800, 1720 680])
+    wire:W15(B1.data_7, to: R10.positive, via: [1200 740, 1200 880])
+    wire:W16(R10.negative, to: DS1.anode_7, via: [1760 880, 1760 720])
+    probes {
+        time(50 us/div)
+        probe:CH1(scl, 2 V/div)
+        probe:CH2(sda, 2 V/div)
+        probe:L1(level, scl)
+        probe:L2(level, sda)
+    }
+    expect("the byte read back lights bit 1", from: "0x5A = 0101 1010: D1 high") {
+        measure(final, a1)
+        within(1.8 V .. 2.2 V)
+    }
+    expect("and leaves bit 0 dark", from: "0x5A = 0101 1010: D0 low") {
+        measure(final, a0)
+        near(0 V, +- 0.1 V)
+    }
+    expect("a low on SDA is a transistor's, near ground", from: "UM10204: VOL at most 0.4 V with 3 mA sunk") {
+        measure(minimum, sda)
+        within(0 V .. 0.4 V)
+    }
+    analysis(transient, for: 7 ms)
+    view:transient_response(primary)
+}

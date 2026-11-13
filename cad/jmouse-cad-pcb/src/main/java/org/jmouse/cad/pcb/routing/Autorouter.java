@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -252,7 +253,7 @@ public final class Autorouter {
         nets.put("2", net);
         return new PcbDrawing.Placement(link.designator() + number, (from.x() + to.x()) / 2, (from.y() + to.y()) / 2, from.y() == to.y() ? 0 : 90,
                 PcbDrawing.BOTTOM.equals(layer) ? PcbDrawing.BOTTOM : PcbDrawing.TOP, Optional.empty(), Optional.empty(), Optional.of(link.footprint()),
-                nets, "", PcbVocabulary.ROLE_LINK);
+                nets, Arrangement.FREE, PcbVocabulary.ROLE_LINK);
     }
 
     /** One connection laid: the way kept only where the checks find nothing new in it and it truly joins what it was to join. */

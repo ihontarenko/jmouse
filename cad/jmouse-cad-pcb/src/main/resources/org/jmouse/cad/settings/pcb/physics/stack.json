@@ -1,5 +1,4 @@
 {
-  "$schema": "./stack.schema.json",
   "source": "Microstrip: Hammerstad and Jensen (1980). Stripline: Wheeler, as Pozar's Microwave Engineering gives it. Pairs: IPC-2141 edge-coupled. Permittivity: JLCPCB's FR-4 core. Surface coefficient: a PCB in still air, convection and radiation together, a rule of thumb.",
   "permittivity": 4.5,
   "pair": {

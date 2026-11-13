@@ -1,0 +1,6 @@
+{
+  "places": { "top": "T.", "bottom": "B.", "inner": "I{number}." },
+  "kinds": { "copper": "Copper", "silkscreen": "Silkscreen", "fabrication": "Fabrication", "courtyard": "Courtyard", "mask": "Mask", "paste": "Paste", "adhesive": "Adhesive", "pads": "Pads" },
+  "sheet": { "documentation": "Documentation", "comments": "Comments" },
+  "edge": "Edge"
+}

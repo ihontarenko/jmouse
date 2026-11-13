@@ -1,0 +1,28 @@
+# RL low-pass and high-pass laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:rl-filters-pcb("RL low-pass and high-pass — pcb") {
+    meta {
+        summary: "RL low-pass and high-pass laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: rl-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(rl-filters)
+    layers(2)
+    edge("M1 0H23A1 1 0 0 1 24 1V14A1 1 0 0 1 23 15H1A1 1 0 0 1 0 14V1A1 1 0 0 1 1 0Z")
+    place(R2, at: 11.5 4)
+    place(L2, at: 19.5 10, rotate: 270)
+    place(L1, at: 11 8)
+    place(R1, at: 15.5 10, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 7.5)
+    track(top, width: 0.25, from: 19.5 10.85, to: 19.5 12.05)
+    track(top, width: 0.25, from: 15.5 11, to: 15.5 12.05)
+    track(top, width: 0.25, from: 11.85 8, to: 14.5 8, to: 15.5 9)
+    track(top, width: 0.25, from: 10.5 4, to: 10.5 7.65, to: 10.15 8)
+    track(top, width: 0.25, from: 10.15 8, to: 6.27 8, to: 5.5 8.77)
+    track(top, width: 0.25, from: 12.5 4, to: 14.35 4, to: 19.5 9.15)
+    via(at: 19.5 12.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 15.5 12.05, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H23.5V14.5H0.5Z")
+}

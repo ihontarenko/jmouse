@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.layout;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.CopperShape;
@@ -30,17 +31,24 @@ public final class CircuitLayout {
 
     /**
      * @param partsShare     the share of the pcb the parts' own area fills
-     * @param gap            how far apart two courtyards stand at least, in millimetres
-     * @param grid           the grid every part stands on, in millimetres
-     * @param margin         how far the edge stands off every courtyard, in millimetres
+     * @param gap            how far apart two courtyards stand at least
+     * @param grid           the grid every part stands on
+     * @param margin         how far the edge stands off every courtyard
      * @param passes         how many passes push the courtyards apart at most
-     * @param planeInset     how far inside the edge the ground is poured, in millimetres
-     * @param planeClearance the gap the ground keeps from other nets, in millimetres
-     * @param corner         the radius of the edge's corners, in millimetres
+     * @param planeInset     how far inside the edge the ground is poured
+     * @param planeClearance the gap the ground keeps from other nets
+     * @param corner         the radius of the edge's corners
      * @param connector      the header the bench's nets come out on
      */
-    public record Settings(double partsShare, double gap, double grid, double margin, int passes, double planeInset, double planeClearance,
-                           double corner, Connector connector) {
+    public record Settings(@Label("Share the parts fill") double partsShare,
+                           @Label(value = "Gap", unit = "mm") double gap,
+                           @Label(value = "Grid", unit = "mm") double grid,
+                           @Label(value = "Margin", unit = "mm") double margin,
+                           @Label("Passes") int passes,
+                           @Label(value = "Plane inset", unit = "mm") double planeInset,
+                           @Label(value = "Plane clearance", unit = "mm") double planeClearance,
+                           @Label(value = "Corner", unit = "mm") double corner,
+                           @Label("Connector") Connector connector) {
     }
 
     /**
@@ -48,7 +56,9 @@ public final class CircuitLayout {
      * @param designator  the letters its designator starts with
      * @param beforeSheet how far left of the sheet's leftmost part it stands, in the sheet's units
      */
-    public record Connector(String footprint, String designator, double beforeSheet) {
+    public record Connector(@Label("Footprint") String footprint,
+                            @Label("Designator") String designator,
+                            @Label("Distance before the sheet") double beforeSheet) {
 
         public String footprintFor(int pins) {
             return footprint.replace("{pins}", Integer.toString(pins));
@@ -145,13 +155,13 @@ public final class CircuitLayout {
                 "M" + number(inset) + " " + number(inset) + "H" + number(width - inset) + "V" + number(height - inset) + "H" + number(inset) + "Z")))
                 .orElse(List.of());
         return new PcbDrawing(request.circuit(), Optional.empty(), List.of(), null, List.of(), List.of(), 2, rectangularOutline(width, height, settings.corner()),
-                placed, List.of(), List.of(), List.of(), zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+                placed, List.of(), List.of(), List.of(), zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     /** A placement at another place, all else kept. */
     private static PcbDrawing.Placement moved(PcbDrawing.Placement placement, double x, double y) {
         return new PcbDrawing.Placement(placement.designator(), x, y, placement.rotation(), placement.side(), placement.reference(), placement.shown(),
-                placement.footprint(), placement.nets(), placement.group(), placement.role());
+                placement.footprint(), placement.nets(), placement.arrangement(), placement.role());
     }
 
     /** The box a footprint takes in its own frame: its pads and outlines; an unseated part's box and courtyard. */

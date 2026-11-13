@@ -1,0 +1,39 @@
+# Summing amplifier laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:summing-amplifier-pcb("Summing amplifier — pcb") {
+    meta {
+        summary: "Summing amplifier laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(summing-amplifier)
+    layers(2)
+    edge("M1 0H32A1 1 0 0 1 33 1V22A1 1 0 0 1 32 23H1A1 1 0 0 1 0 22V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 14 9.5)
+    place(R2, at: 14 13.5)
+    place(R3, at: 15.5 17.5)
+    place(RF, at: 20 5)
+    place(U1, at: 21.5 11)
+    place(RL, at: 28.5 15, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X6-P2.54-V", nets: [0: 1, in1: 2, in2: 3, in3: 4, vn: 5, vp: 6], at: 5.5 11.5)
+    track(top, width: 0.25, from: 15 9.5, to: 15 13.5)
+    track(top, width: 0.25, from: 15 9.5, to: 15.865 10.365, to: 19.05 10.365)
+    track(top, width: 0.25, from: 15 13.5, to: 15 16, to: 16.5 17.5)
+    track(top, width: 0.25, from: 21 5, to: 21 7.145, to: 19.05 9.095)
+    track(top, width: 0.25, from: 19.05 10.365, to: 17.7 10.365, to: 17.7 6.3, to: 19 5)
+    track(top, width: 0.25, from: 13 9.5, to: 7.31 9.5, to: 5.5 7.69)
+    track(top, width: 0.25, from: 13 13.5, to: 8.77 13.5, to: 5.5 10.23)
+    track(top, width: 0.25, from: 14.5 17.5, to: 10.23 17.5, to: 5.5 12.77)
+    track(top, width: 0.25, from: 19.05 11.635, to: 20.85 11.635, to: 25.215 16, to: 28.5 16)
+    track(top, width: 0.25, from: 19.05 9.095, to: 19.95 8.195, to: 24.9 8.195, to: 28.5 11.795, to: 28.5 14)
+    track(top, width: 0.25, from: 19.05 12.905, to: 19.05 16.505, to: 16.8 18.755, to: 8.945 18.755, to: 5.5 15.31)
+    track(top, width: 0.25, from: 19.05 11.635, to: 15.9 11.635)
+    track(bottom, width: 0.25, from: 15.9 11.635, to: 11.985 11.635, to: 5.5 5.15)
+    track(top, width: 0.25, from: 23.95 9.095, to: 20.8 9.095)
+    track(bottom, width: 0.25, from: 20.8 9.095, to: 12.045 17.85, to: 5.5 17.85)
+    via(at: 15.9 11.635, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 20.8 9.095, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H32.5V22.5H0.5Z")
+}

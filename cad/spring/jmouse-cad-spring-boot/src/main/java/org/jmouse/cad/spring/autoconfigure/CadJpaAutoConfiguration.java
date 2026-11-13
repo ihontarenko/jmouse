@@ -3,9 +3,6 @@ package org.jmouse.cad.spring.autoconfigure;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.cad.jpa.mount.MountedFolderRecords;
-import org.jmouse.cad.jpa.plugin.PluginSettingRecords;
-import org.jmouse.cad.store.plugin.CadPluginSettingStore;
-import org.jmouse.plugin.PluginSettingStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,18 +36,6 @@ import java.time.Clock;
 @AutoConfiguration
 @ConditionalOnClass({EntityManagerFactory.class, SharedEntityManagerCreator.class})
 public class CadJpaAutoConfiguration {
-
-    /**
-     * 🎚️ Where the values the engine's plugins' settings were changed to are kept, installation-wide.
-     *
-     * @param entityManagerFactory the application's persistence unit
-     * @return the store
-     */
-    @Bean
-    @ConditionalOnMissingBean(PluginSettingStore.class)
-    public PluginSettingStore cadPluginSettingStore(EntityManagerFactory entityManagerFactory) {
-        return new CadPluginSettingStore(new PluginSettingRecords(sharedEntityManager(entityManagerFactory), Clock.systemUTC()));
-    }
 
     /**
      * 📁 The folders of the server a curator mounted, opened by an explorer.

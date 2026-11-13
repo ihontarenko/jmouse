@@ -1,5 +1,12 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.document.DocumentParser;
+import org.jmouse.cad.drawing.Arrangement;
+import org.jmouse.cad.drawing.DrawnGroup;
+import org.jmouse.cad.drawing.DrawnState;
+import org.jmouse.kicad.pcb.KiCadLock;
+import org.jmouse.kicad.pcb.KiCadStanding;
+import java.util.HashSet;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.circuit.Part;
@@ -79,6 +86,54 @@ public final class KiCadPcbImport {
     private double left;
     private double top;
 
+    /** The board's groups as the pcb names them, and the group each member is in, by the member's identity. */
+    private record BoardGroups(List<DrawnGroup> declared, Map<String, String> groupOfMember) {
+    }
+
+    private final BoardGroups groups;
+
+    /**
+     * The board's groups as pcb groups: each named from KiCad's name as a pcb names one — `front panel` is `front-panel` —, an
+     * unnamed one `group-1`, and locked where KiCad locked it. A group inside another lends its members its own name: an item is
+     * in one group.
+     */
+    private static BoardGroups groupsOf(KiCadPcb pcb) {
+        List<DrawnGroup> declared = new ArrayList<>();
+        Map<String, String> groupOfMember = new LinkedHashMap<>();
+        Set<String> taken = new HashSet<>();
+        for (KiCadPcb.Group group : pcb.groups()) {
+            String written = group.name().isBlank() ? "" : DocumentParser.slugOf(group.name());
+            String name = freeGroupName(written.isBlank() ? UNNAMED_GROUP : written, written.isBlank(), taken);
+            declared.add(new DrawnGroup(name, group.standing().lock() == KiCadLock.LOCKED ? DrawnState.LOCKED : DrawnState.FREE));
+            // A group inside another is named among the outer one's members by its own identity, which is no item of the pcb: its
+            // items are in the inner group alone.
+            group.members().forEach(member -> groupOfMember.putIfAbsent(member, name));
+        }
+        return new BoardGroups(List.copyOf(declared), Map.copyOf(groupOfMember));
+    }
+
+    /** What an unnamed group of the board is called, numbered: `group-1`. */
+    private static final String UNNAMED_GROUP = "group";
+
+    /** A group's name no other group has: as written when it is free, else numbered — an unnamed one always is. */
+    private static String freeGroupName(String name, boolean numbered, Set<String> taken) {
+        if (!numbered && taken.add(name)) {
+            return name;
+        }
+        for (int number = 1; ; number++) {
+            String candidate = name + "-" + number;
+            if (taken.add(candidate)) {
+                return candidate;
+            }
+        }
+    }
+
+    /** How a thing of the board stands on the pcb: in the group KiCad put it in, locked where KiCad locked it. */
+    private Arrangement arrangementOf(KiCadStanding standing) {
+        return new Arrangement(groups.groupOfMember().getOrDefault(standing.identity(), ""),
+                standing.lock() == KiCadLock.LOCKED ? DrawnState.LOCKED : DrawnState.FREE);
+    }
+
     private KiCadPcbImport(KiCadPcb pcb, Map<String, String> identifiers, String ground, Circuit design, CatalogueDocuments documents,
                            KiCadLibraries filing) {
         this.pcb = pcb;
@@ -90,6 +145,7 @@ public final class KiCadPcbImport {
         this.lineSpacing = filing.textLineSpacing();
         this.identifiers = identifiers;
         this.facts = new ComponentFacts(documents);
+        this.groups = groupsOf(pcb);
         design.parts().forEach(part -> {
             parts.put(part.reference(), part);
             ownIdentifiers.of(part.reference());
@@ -128,10 +184,10 @@ public final class KiCadPcbImport {
         reading.areas(zones, keepouts);
         PcbDrawing drawing = new PcbDrawing(circuit, rulesOf(settings, filing), reading.netClasses(settings, filing), sizesOf(settings), List.of(), List.of(),
                 reading.copper.size(), reading.outline(), placements, reading.tracks(), reading.arcs(), reading.vias(), zones,
-                keepouts, reading.dimensions(), reading.texts(), List.of(), reading.shapes(), List.of());
+                keepouts, reading.dimensions(), reading.texts(), List.of(), reading.shapes(), List.of(), reading.groups.declared());
         reading.noteWhatIsLeft();
         DocumentNode document = new DocumentNode(PcbModule.PCB, title, slug, null, 1);
-        document.addExpression(MetaNode.filed(SUMMARY + file, null, filing.category(), filing.circuitTags()));
+        document.addExpression(MetaNode.filed(SUMMARY + file, null, null, filing.circuitTags()));
         drawing.lines().forEach(document::addExpression);
         return new Pcb(document, reading.notes);
     }
@@ -331,7 +387,8 @@ public final class KiCadPcbImport {
         Optional<PcbDrawing.Reference> reference = footprint.lettering().map(lettering -> new PcbDrawing.Reference(
                 round.rounded(lettering.at().x()), round.rounded(lettering.at().y()), round.rounded(normalized(lettering.angle()))));
         return new PcbDrawing.Placement(designator, round.rounded(footprint.at().x() - left), round.rounded(footprint.at().y() - top),
-                round.rounded(normalized(turned)), back ? PcbDrawing.BOTTOM : PcbDrawing.TOP, reference, shown, ownFootprint, nets);
+                round.rounded(normalized(turned)), back ? PcbDrawing.BOTTOM : PcbDrawing.TOP, reference, shown, ownFootprint, nets)
+                .arranged(arrangementOf(footprint.standing()));
     }
 
     /** Which design's net each of the board's nets is, as a part's pads say; where the two part ways, it is written down. */
@@ -374,7 +431,7 @@ public final class KiCadPcbImport {
         List<PcbDrawing.Track> tracks = new ArrayList<>();
         for (KiCadPcb.Track track : pcb.tracks()) {
             Optional.ofNullable(copper.get(track.layer())).ifPresent(layer -> tracks.add(new PcbDrawing.Track(layer,
-                    round.rounded(track.width()), 0, List.of(point(track.start()), point(track.end())))));
+                    round.rounded(track.width()), 0, List.of(point(track.start()), point(track.end()))).arranged(arrangementOf(track.standing()))));
         }
         return tracks;
     }
@@ -383,7 +440,7 @@ public final class KiCadPcbImport {
         List<PcbDrawing.Arc> arcs = new ArrayList<>();
         for (KiCadPcb.Arc arc : pcb.arcs()) {
             Optional.ofNullable(copper.get(arc.layer())).ifPresent(layer -> arcs.add(new PcbDrawing.Arc(layer,
-                    round.rounded(arc.width()), point(arc.start()), point(arc.middle()), point(arc.end()))));
+                    round.rounded(arc.width()), point(arc.start()), point(arc.middle()), point(arc.end())).arranged(arrangementOf(arc.standing()))));
         }
         return arcs;
     }
@@ -397,7 +454,7 @@ public final class KiCadPcbImport {
             String to = via.layers().isEmpty() ? null : copper.get(via.layers().getLast());
             boolean through = PcbDrawing.TOP.equals(from) && PcbDrawing.BOTTOM.equals(to);
             vias.add(new PcbDrawing.Via(at.x(), at.y(), round.rounded(via.drill()), round.rounded(via.diameter()),
-                    through ? null : from, through ? null : to, openOf(via.tenting())));
+                    through ? null : from, through ? null : to, openOf(via.tenting())).arranged(arrangementOf(via.standing())));
         }
         return vias;
     }

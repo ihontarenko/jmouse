@@ -1,5 +1,6 @@
 package org.jmouse.cad.library;
 
+import org.jmouse.cad.component.BenchRole;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -48,7 +49,7 @@ import java.util.Set;
  * @param references every other document it names, each way once, in the order the text names them
  */
 public record DocumentIndex(String slug, String title, String kind, String code, String summary, String category, List<String> tags,
-                            boolean featured, DocumentStatus status, List<Reference> references) {
+                            boolean featured, DocumentStatus status, List<Reference> references, Optional<BenchRole> benchRole) {
 
     /** What separates a slug from the revision it pins: {@code resistor@3}. */
     public static final String REVISION_MARK = "@";
@@ -106,7 +107,9 @@ public record DocumentIndex(String slug, String title, String kind, String code,
                                  meta.map(found -> found.words(MetaNode.TAGS)).orElse(List.of()),
                                  meta.flatMap(found -> found.text(MetaNode.FEATURED)).map(YES::equals).orElse(false),
                                  DocumentStatus.written(meta.flatMap(found -> found.text(MetaNode.STATUS))),
-                                 references.all());
+                                 references.all(),
+                                 // What a component is to a bench: a word no role has is refused, as every head field is.
+                                 meta.flatMap(found -> found.text(BenchRole.FIELD)).map(BenchRole::named));
     }
 
     /**

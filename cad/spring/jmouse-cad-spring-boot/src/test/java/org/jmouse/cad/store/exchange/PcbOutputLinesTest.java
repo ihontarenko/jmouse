@@ -37,7 +37,7 @@ class PcbOutputLinesTest {
     @Test
     void anAbsentListIsAnEmptyOne() {
         PcbDrawing pcb = new PcbDrawing("", Optional.empty(), null, null, null, null, 2, "", null, null, null, null, null, null,
-                null, null, null, null, null);
+                null, null, null, null, null, List.of());
         assertEquals(List.of(), pcb.placements());
         assertEquals(List.of(), pcb.shapes());
         assertEquals(List.of(), pcb.outputs());

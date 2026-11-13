@@ -1,0 +1,11 @@
+{
+  "rail": 5,
+  "boardGap": 2,
+  "fiducialDiameter": 1,
+  "fiducialOpening": 2,
+  "toolingDrill": 3.2,
+  "tabWidth": 5,
+  "tabSpacing": 40,
+  "biteDrill": 0.5,
+  "bitePitch": 0.8
+}

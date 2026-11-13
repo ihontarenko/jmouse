@@ -1,0 +1,34 @@
+# Op-amp integrator laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:integrator-pcb("Op-amp integrator — pcb") {
+    meta {
+        summary: "Op-amp integrator laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(integrator)
+    layers(2)
+    edge("M1 0H30A1 1 0 0 1 31 1V21A1 1 0 0 1 30 22H1A1 1 0 0 1 0 21V1A1 1 0 0 1 1 0Z")
+    place(RI, at: 12 12.5)
+    place(CF, at: 19 8)
+    place(RP, at: 19 4)
+    place(U1, at: 19.5 14)
+    place(RL, at: 26.5 16.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 11.5)
+    track(top, width: 0.25, from: 17.05 14.635, to: 18.65 14.635)
+    track(top, width: 0.25, from: 26.5 17.5, to: 26.5 18.55)
+    track(top, width: 0.25, from: 18.15 8, to: 18.15 4.15, to: 18 4)
+    track(top, width: 0.25, from: 19.85 8, to: 19.85 4.15, to: 20 4)
+    track(top, width: 0.25, from: 13 12.5, to: 13.865 13.365, to: 17.05 13.365)
+    track(top, width: 0.25, from: 19.85 8, to: 19.85 9.295, to: 17.05 12.095)
+    track(top, width: 0.25, from: 17.05 13.365, to: 15.7 13.365, to: 15.7 10.45, to: 18.15 8)
+    track(top, width: 0.25, from: 11 12.5, to: 7.77 12.5, to: 5.5 10.23)
+    track(top, width: 0.25, from: 19.85 8, to: 26.5 14.65, to: 26.5 15.5)
+    track(top, width: 0.25, from: 17.05 15.905, to: 8.635 15.905, to: 5.5 12.77)
+    track(top, width: 0.25, from: 21.95 12.095, to: 20.6 12.095, to: 20.6 14.345, to: 18.35 16.595, to: 6.785 16.595, to: 5.5 15.31)
+    via(at: 18.65 14.635, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 26.5 18.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H30.5V21.5H0.5Z")
+}

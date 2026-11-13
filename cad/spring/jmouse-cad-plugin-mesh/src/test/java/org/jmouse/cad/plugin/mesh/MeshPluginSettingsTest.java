@@ -12,6 +12,6 @@ class MeshPluginSettingsTest {
 
     @Test
     void everySectionIsReadAndDescribed() {
-        assertEquals(List.of(), SettingsSchemas.mismatches(List.of(MeshPlugin.GLB)));
+        assertEquals(List.of(), SettingsSchemas.mismatches(List.of(MeshPlugin.GLB, MeshPlugin.MARKINGS)));
     }
 }

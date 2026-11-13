@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DatasheetRulesTest {
 
-    private final DatasheetFormat format = CadSettings.read(DatasheetPlugin.FORMAT);
+    private final DatasheetFormat format = CadSettings.shipped().read(DatasheetPlugin.FORMAT);
 
     @Test
     void onlyADatasheetsOwnKindCounts() {

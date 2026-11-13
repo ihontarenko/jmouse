@@ -1,5 +1,8 @@
 package org.jmouse.cad.eagle;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ShippedTables;
 import org.jmouse.cad.document.Provenance;
 import org.jmouse.cad.exchange.imported.FilingTable;
 import org.jmouse.cad.exchange.imported.ImportFiling;
@@ -25,15 +28,27 @@ import java.util.Optional;
 public record EagleLibraries(SheetFiling sheet, String ground, double sheetGap, double ringShare, double ringLeast,
                              double ringMost, Map<String, String> layers) implements ImportFiling {
 
-    private static final String RESOURCE = "eagle-libraries.sht";
+    /** The table's address in the catalogue. */
+    public static final String TABLE = "eagle-libraries";
+
+    /** Where its module ships it. */
+    public static final ShippedTables SHIPPED = ShippedTables.in(EagleLibraries.class, "jmouse-cad-eagle", "org/jmouse/cad/eagle/tables");
 
     public EagleLibraries {
         layers = Map.copyOf(layers);
     }
 
     /** The table this library ships. */
-    public static EagleLibraries standard() {
-        return of(FilingTable.shipped(EagleLibraries.class, RESOURCE));
+    public static EagleLibraries shipped() {
+        return readFrom(SHIPPED).current();
+    }
+
+    /**
+     * As its source answers at each use — the engine's catalogue table, its curator's revision where one is kept —, read again
+     * only when another revision answers.
+     */
+    public static ReadTable<EagleLibraries> readFrom(TableSource tables) {
+        return new ReadTable<>(tables, TABLE, sheet -> of(FilingTable.of(TABLE, sheet)));
     }
 
     public static EagleLibraries of(FilingTable table) {

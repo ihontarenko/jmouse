@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.odb;
 
+import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.strokefont.StrokeFont;
@@ -13,9 +14,8 @@ import java.time.Clock;
 public class OdbPluginConfiguration {
 
     @Bean
-    public OdbPlugin cadOdbPlugin() {
-        PcbOdbExport.Settings settings = CadSettings.read(OdbPlugin.EXPORT);
-        PcbArtwork.Settings artwork = CadSettings.read(PcbArtwork.SECTION);
-        return new OdbPlugin(new PcbOdbExport(settings, artwork, StrokeFont.newStroke(), Clock.systemUTC()));
+    public OdbPlugin cadOdbPlugin(CadSettings sections, CadStandards standards) {
+        return new OdbPlugin(new PcbOdbExport(() -> sections.read(OdbPlugin.EXPORT), () -> sections.read(PcbArtwork.SECTION),
+                StrokeFont.newStroke(), Clock.systemUTC(), standards));
     }
 }

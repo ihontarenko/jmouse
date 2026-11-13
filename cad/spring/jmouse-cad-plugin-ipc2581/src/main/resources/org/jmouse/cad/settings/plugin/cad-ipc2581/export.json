@@ -1,0 +1,12 @@
+{
+  "id": "ipc-2581",
+  "title": "IPC-2581 · the PCB in one file",
+  "sender": { "enterprise": "jmCAD", "person": "jmCAD", "software": "jmCAD", "vendor": "jMouse", "revision": "1" },
+  "copper": { "top": "TOP", "bottom": "BOTTOM", "inner": "INNER_%d", "function": "CONDUCTOR" },
+  "mask": { "top": "TOP_SOLDERMASK", "bottom": "BOTTOM_SOLDERMASK", "function": "SOLDERMASK" },
+  "paste": { "top": "TOP_SOLDERPASTE", "bottom": "BOTTOM_SOLDERPASTE", "function": "SOLDERPASTE" },
+  "silkscreen": { "top": "TOP_SILKSCREEN", "bottom": "BOTTOM_SILKSCREEN", "function": "SILKSCREEN" },
+  "dielectric": { "between": "DIELECTRIC_%d", "function": "DIELCORE" },
+  "drill": "DRILL_TOP_BOTTOM",
+  "packageMargin": 0.25
+}

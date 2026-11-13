@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.circuit.Placement;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.ExchangeFiles;
@@ -91,7 +92,7 @@ class KiCadSheetPortsTest {
         files.put("design.kicad_sch", ROOT);
         files.put("child.kicad_sch", CHILD);
         files.put("design.kicad_pro", "{}");
-        return new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS)
+        return new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                 .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
     }
 
@@ -129,7 +130,7 @@ class KiCadSheetPortsTest {
         ImportedDocuments imported = imported();
         DocumentNode root = root(imported);
         KiCadSchematicExport.Exported exported = KiCadSchematicExport.of(root.slug(), root.title(), SimulationReading.circuit(root),
-                documentsOf(imported), KiCadLibraryMap.standard(), KiCadLibraries.standard());
+                documentsOf(imported), KiCadLibraryMap.shipped(), KiCadLibraries.shipped());
         KiCadSchematic written = KiCadSchematic.of(new SExpressionParser().parse("design.kicad_sch", exported.text()));
         KiCadSheet box = written.sheets().getFirst();
         Map<String, KiCadPoint> pins = new LinkedHashMap<>();

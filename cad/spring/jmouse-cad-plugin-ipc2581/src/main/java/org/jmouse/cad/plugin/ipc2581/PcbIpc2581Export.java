@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.ipc2581;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
@@ -27,6 +28,7 @@ import org.jmouse.ipc2581.Ipc2581Shape;
 import org.jmouse.strokefont.StrokeFont;
 
 import java.time.Clock;
+import java.util.function.Supplier;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,7 +58,9 @@ public final class PcbIpc2581Export implements DocumentExport {
      * @param bottom   how the bottom one is called
      * @param function the function IPC-2581 gives the group
      */
-    public record FaceNames(String top, String bottom, String function) {
+    public record FaceNames(@Label("Top") String top,
+                            @Label("Bottom") String bottom,
+                            @Label("Function") String function) {
 
         /** The one on a side: {@code top} or {@code bottom}. */
         String of(String side) {
@@ -72,7 +76,10 @@ public final class PcbIpc2581Export implements DocumentExport {
      * @param inner    how an inner layer is called, by its number from the top: {@code INNER_%d}
      * @param function the function IPC-2581 gives the group
      */
-    public record CopperNames(String top, String bottom, String inner, String function) {
+    public record CopperNames(@Label("Top") String top,
+                              @Label("Bottom") String bottom,
+                              @Label("Inner") String inner,
+                              @Label("Function") String function) {
 
         /** The outer one on a side: {@code top} or {@code bottom}. */
         String of(String side) {
@@ -86,11 +93,12 @@ public final class PcbIpc2581Export implements DocumentExport {
      * @param between  how it is called, by its number from the top: {@code DIELECTRIC_%d}
      * @param function the function IPC-2581 gives it
      */
-    public record DielectricNames(String between, String function) {
+    public record DielectricNames(@Label("Between") String between,
+                                  @Label("Function") String function) {
     }
 
     /**
-     * The export's data ({@code settings/plugin/ipc2581/export}).
+     * The export's data ({@code settings/plugin/cad-ipc2581/export}).
      *
      * @param id            its word on the exchange routes
      * @param title         what the export is called where formats are offered
@@ -101,15 +109,23 @@ public final class PcbIpc2581Export implements DocumentExport {
      * @param silkscreen    how the silkscreen layers are called
      * @param dielectric    what the dielectric between two copper layers is called, by its number from the top
      * @param drill         what the layer of the through holes is called
-     * @param packageMargin how far a package's outline stands off its pads, in millimetres
+     * @param packageMargin how far a package's outline stands off its pads
      */
-    public record Settings(String id, String title, Ipc2581Composer.Sender sender, CopperNames copper, FaceNames mask,
-                           FaceNames paste, FaceNames silkscreen, DielectricNames dielectric, String drill, double packageMargin) {
+    public record Settings(@Label("ID") String id,
+                           @Label("Title") String title,
+                           @Label("Sender") Ipc2581Composer.Sender sender,
+                           @Label("Copper") CopperNames copper,
+                           @Label("Mask") FaceNames mask,
+                           @Label("Paste") FaceNames paste,
+                           @Label("Silkscreen") FaceNames silkscreen,
+                           @Label("Dielectric") DielectricNames dielectric,
+                           @Label("Drill") String drill,
+                           @Label(value = "Package margin", unit = "mm") double packageMargin) {
     }
 
-    private final Settings              settings;
-    private final PcbArtwork.Settings artwork;
-    private final PcbLayers.Settings  layers;
+    private final Supplier<Settings>              settings;
+    private final Supplier<PcbArtwork.Settings> artwork;
+    private final Supplier<PcbLayers.Settings>  layers;
     private final StrokeFont            font;
     private final Clock                 clock;
 
@@ -118,8 +134,12 @@ public final class PcbIpc2581Export implements DocumentExport {
      * @param layers  how thick the copper and the mask are
      * @param clock   when the file is written, as its history says
      */
-    public PcbIpc2581Export(Settings settings, PcbArtwork.Settings artwork, PcbLayers.Settings layers, StrokeFont font,
-                              Clock clock) {
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
+
+    public PcbIpc2581Export(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, Supplier<PcbLayers.Settings> layers, StrokeFont font,
+                              Clock clock, CadStandards standards) {
+        this.standards = standards;
         this.settings = settings;
         this.artwork = artwork;
         this.layers = layers;
@@ -129,12 +149,12 @@ public final class PcbIpc2581Export implements DocumentExport {
 
     @Override
     public String id() {
-        return settings.id();
+        return settings.get().id();
     }
 
     @Override
     public String title() {
-        return settings.title();
+        return settings.get().title();
     }
 
     /** A factory makes the pcb from this file: written only from a pcb its checks pass. */
@@ -152,9 +172,9 @@ public final class PcbIpc2581Export implements DocumentExport {
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
         PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
         List<String> notes = new ArrayList<>(fabrication.notes());
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
-        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork, font);
-        Ipc2581Composer composer = new Ipc2581Composer(fabrication.name(), fabrication.name(), settings.sender(),
+        Map<String, Double> rules = standards.pcbRules().valuesOf(fabrication.pcb().rules());
+        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork.get(), font);
+        Ipc2581Composer composer = new Ipc2581Composer(fabrication.name(), fabrication.name(), settings.get().sender(),
                 OffsetDateTime.now(clock));
         List<String> copper = fabrication.pcb().copperLayerIds();
         declareLayers(composer, copper, rules.get(THICKNESS));
@@ -164,9 +184,9 @@ public final class PcbIpc2581Export implements DocumentExport {
             artworkOf(composer, copperName(layer, copper), drawn.copper(layer), drawn.outlines(), fabrication);
         }
         for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
-            artworkOf(composer, settings.mask().of(side), drawn.maskOpenings(side), drawn.outlines(), null);
-            artworkOf(composer, settings.paste().of(side), drawn.paste(side), drawn.outlines(), null);
-            artworkOf(composer, settings.silkscreen().of(side), drawn.silkscreen(side), drawn.outlines(), null);
+            artworkOf(composer, settings.get().mask().of(side), drawn.maskOpenings(side), drawn.outlines(), null);
+            artworkOf(composer, settings.get().paste().of(side), drawn.paste(side), drawn.outlines(), null);
+            artworkOf(composer, settings.get().silkscreen().of(side), drawn.silkscreen(side), drawn.outlines(), null);
         }
         holes(composer, fabrication);
         return ExportedFiles.single(fabrication.name() + ".xml", composer.write(), notes);
@@ -180,37 +200,37 @@ public final class PcbIpc2581Export implements DocumentExport {
     private void declareLayers(Ipc2581Composer composer, List<String> copper, double thickness) {
         Ipc2581Composer.Side top = Ipc2581Composer.Side.TOP;
         Ipc2581Composer.Side bottom = Ipc2581Composer.Side.BOTTOM;
-        composer.layer(new Ipc2581Composer.Layer(settings.silkscreen().top(), settings.silkscreen().function(), top))
-                .layer(new Ipc2581Composer.Layer(settings.paste().top(), settings.paste().function(), top))
-                .layer(new Ipc2581Composer.Layer(settings.mask().top(), settings.mask().function(), top));
+        composer.layer(new Ipc2581Composer.Layer(settings.get().silkscreen().top(), settings.get().silkscreen().function(), top))
+                .layer(new Ipc2581Composer.Layer(settings.get().paste().top(), settings.get().paste().function(), top))
+                .layer(new Ipc2581Composer.Layer(settings.get().mask().top(), settings.get().mask().function(), top));
         List<Ipc2581Composer.StackupLayer> stacked = new ArrayList<>();
-        stacked.add(new Ipc2581Composer.StackupLayer(settings.mask().top(), layers.mask().thickness()));
-        double copperThickness = layers.copper().thickness();
+        stacked.add(new Ipc2581Composer.StackupLayer(settings.get().mask().top(), layers.get().mask().thickness()));
+        double copperThickness = layers.get().copper().thickness();
         double dielectric = (thickness - copper.size() * copperThickness) / Math.max(1, copper.size() - 1);
         for (int index = 0; index < copper.size(); index++) {
             String name = copperName(copper.get(index), copper);
             Ipc2581Composer.Side side = index == 0 ? top : index == copper.size() - 1 ? bottom : Ipc2581Composer.Side.INTERNAL;
-            composer.layer(new Ipc2581Composer.Layer(name, settings.copper().function(), side));
+            composer.layer(new Ipc2581Composer.Layer(name, settings.get().copper().function(), side));
             stacked.add(new Ipc2581Composer.StackupLayer(name, copperThickness));
             if (index < copper.size() - 1) {
-                String between = settings.dielectric().between().formatted(index + 1);
-                composer.layer(new Ipc2581Composer.Layer(between, settings.dielectric().function(), Ipc2581Composer.Side.INTERNAL));
+                String between = settings.get().dielectric().between().formatted(index + 1);
+                composer.layer(new Ipc2581Composer.Layer(between, settings.get().dielectric().function(), Ipc2581Composer.Side.INTERNAL));
                 stacked.add(new Ipc2581Composer.StackupLayer(between, dielectric));
             }
         }
-        stacked.add(new Ipc2581Composer.StackupLayer(settings.mask().bottom(), layers.mask().thickness()));
-        composer.layer(new Ipc2581Composer.Layer(settings.mask().bottom(), settings.mask().function(), bottom))
-                .layer(new Ipc2581Composer.Layer(settings.paste().bottom(), settings.paste().function(), bottom))
-                .layer(new Ipc2581Composer.Layer(settings.silkscreen().bottom(), settings.silkscreen().function(), bottom))
-                .drillLayer(settings.drill(), copperName(copper.getFirst(), copper), copperName(copper.getLast(), copper))
-                .stackup(thickness + 2 * layers.mask().thickness(), stacked);
+        stacked.add(new Ipc2581Composer.StackupLayer(settings.get().mask().bottom(), layers.get().mask().thickness()));
+        composer.layer(new Ipc2581Composer.Layer(settings.get().mask().bottom(), settings.get().mask().function(), bottom))
+                .layer(new Ipc2581Composer.Layer(settings.get().paste().bottom(), settings.get().paste().function(), bottom))
+                .layer(new Ipc2581Composer.Layer(settings.get().silkscreen().bottom(), settings.get().silkscreen().function(), bottom))
+                .drillLayer(settings.get().drill(), copperName(copper.getFirst(), copper), copperName(copper.getLast(), copper))
+                .stackup(thickness + 2 * layers.get().mask().thickness(), stacked);
     }
 
     private String copperName(String layer, List<String> copper) {
         if (PcbDrawing.TOP.equals(layer) || PcbDrawing.BOTTOM.equals(layer)) {
-            return settings.copper().of(layer);
+            return settings.get().copper().of(layer);
         }
-        return settings.copper().inner().formatted(copper.indexOf(layer));
+        return settings.get().copper().inner().formatted(copper.indexOf(layer));
     }
 
     /** The pcb's edge: the widest of its areas, with its cut-outs; any other area is said and left out. */
@@ -237,7 +257,7 @@ public final class PcbIpc2581Export implements DocumentExport {
             for (PcbFabrication.SeatedPart part : line.parts()) {
                 PcbDrawing.Placement placement = part.placement();
                 composer.component(new Ipc2581Composer.Component(part.printed(), packageName, partNumberOf(line),
-                        settings.copper().of(placement.side()), part.throughHole(), turn(-placement.rotation()), placement.onBottom(),
+                        settings.get().copper().of(placement.side()), part.throughHole(), turn(-placement.rotation()), placement.onBottom(),
                         upward(placement.x(), placement.y())));
                 part.padNets().forEach((pad, net) -> nets.computeIfAbsent(net, ignored -> new ArrayList<>())
                         .add(new Ipc2581Composer.PinReference(part.printed(), pad)));
@@ -277,7 +297,7 @@ public final class PcbIpc2581Export implements DocumentExport {
                 bottom = Math.max(bottom, corner.y());
             }
         }
-        double margin = settings.packageMargin();
+        double margin = settings.get().packageMargin();
         if (pins.isEmpty()) {
             left = top = -margin;
             right = bottom = margin;
@@ -347,12 +367,12 @@ public final class PcbIpc2581Export implements DocumentExport {
             Ipc2581Point from = upward(drill.from().x(), drill.from().y());
             Ipc2581Point to = upward(drill.to().x(), drill.to().y());
             if (drill.round()) {
-                composer.hole(settings.drill(), null, "H" + count, drill.width(), plating, from);
+                composer.hole(settings.get().drill(), null, "H" + count, drill.width(), plating, from);
                 continue;
             }
             double length = Math.hypot(to.x() - from.x(), to.y() - from.y());
             double rotation = turn(Math.toDegrees(Math.atan2(to.y() - from.y(), to.x() - from.x())));
-            composer.slot(settings.drill(), null, "S" + count, plating, new Ipc2581Point((from.x() + to.x()) / 2, (from.y() + to.y()) / 2),
+            composer.slot(settings.get().drill(), null, "S" + count, plating, new Ipc2581Point((from.x() + to.x()) / 2, (from.y() + to.y()) / 2),
                     length + drill.width(), drill.width(), rotation);
         }
     }

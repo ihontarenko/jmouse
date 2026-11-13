@@ -1,0 +1,123 @@
+# DG-04. A 74HC161 counts the rising edges of a 1 kHz logic clock and shows the count in binary on four segments of an
+# LED bar, each through its own 330 Ω resistor. QA changes on every edge, QB on every second, QC every fourth, QD every
+# eighth: each output is the one before it divided by two, so QD runs at a sixteenth of the clock. RCO goes high for
+# the one clock period the count stands at fifteen. A counter wakes up holding nothing anyone knows, so R5 and C1 hold
+# CLR low for the first millisecond after power-up: the count starts from nought, as a power-on reset makes it on a pcb.
+circuit:binary-counter("Binary counter") {
+    meta {
+        summary: "A 74HC161 counting a 1 kHz clock in binary on an LED bar: each output half the frequency of the one before."
+        description: """
+            Idea: a binary counter is a chain of dividers by two. Its lowest bit, QA, flips on every clock edge; QB
+            flips each time QA falls back to 0; QC each time QB does; QD each time QC does. Read together, QD QC QB QA
+            is the number of clock edges seen so far, from 0000 to 1111 and round again.
+
+            Try: slow the clock to a few hertz and count along on the LED bar — the lit segments are the count in
+            binary. Raise it again and watch the outputs on the logic lanes: each is a square wave of half the
+            frequency of the one above it.
+
+            Watch: the four outputs under the clock on the logic lanes, and RCO: one short pulse every sixteen clocks,
+            when the count stands at 1111 — the carry a second counter would count.
+
+            Watch, too, the first millisecond: CLR rises slowly through R5 into C1, and until it crosses the
+            input's threshold the counter is held at 0000 — without it, the count would start from nobody knows what.
+
+            Ask: how many 74HC161s would it take to count to a thousand? Which output would you feed the next one's
+            clock from, and why is RCO a better choice than QD?
+            """
+        category: digital-circuits
+        tags: logic, example, dg-04
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:f_clock(1 kHz, in: 1 Hz .. 100 kHz, step: 1 Hz, "Clock frequency")
+    part:V1(voltage-source, [positive: vcc, negative: 0], U_output: 5 V)
+    part:CLK1(clock-generator, [output: clock, Vcc: vcc, GND: 0], frequency: f_clock)
+    part:R5(resistor, [vcc, reset], resistance: 10 kΩ)
+    part:C1(capacitor, [reset, 0], capacitance: 100 nF)
+    part:U1(74hc161, [not_clear: reset, clock: clock, enable_p: vcc, enable_t: vcc, not_load: vcc, count_0: qa, count_1: qb, count_2: qc, count_3: qd, carry: carry, Vcc: vcc, GND: 0])
+    part:R1(resistor, [qa, a0], resistance: 330 Ω)
+    part:R2(resistor, [qb, a1], resistance: 330 Ω)
+    part:R3(resistor, [qc, a2], resistance: 330 Ω)
+    part:R4(resistor, [qd, a3], resistance: 330 Ω)
+    part:DS1(led-bar, [anode_0: a0, anode_1: a1, anode_2: a2, anode_3: a3, cathode: 0])
+    # Where the pcb meets the bench: the supply, ground, the clock in and the carry out, on one header.
+    part:J1(pin-header-1x4, [pin1: vcc, pin2: 0, pin3: clock, pin4: carry])
+    place:V1(at: 120 840, rotate: 90)
+    mark:N1(label, vcc, at: 120 680)
+    wire:WN1(V1.positive, to: N1.label)
+    mark:G1(ground, at: 120 1040)
+    wire:WG1(V1.negative, to: G1.ground)
+    place:CLK1(at: 400 560)
+    mark:N2(label, vcc, at: 360 400)
+    wire:WN2(CLK1.Vcc, to: N2.label)
+    mark:G2(ground, at: 440 400, rotate: 180)
+    wire:WG2(CLK1.GND, to: G2.ground)
+    place:R5(at: 1360 1040, rotate: 90, name(at: 44 -20), value(at: 60 20))
+    mark:N3(label, vcc, at: 1360 840)
+    wire:WN3(R5.positive, to: N3.label)
+    place:C1(at: 1360 1260, rotate: 90)
+    mark:G3(ground, at: 1360 1480)
+    wire:WG3(C1.negative, to: G3.ground)
+    place:U1(at: 960 600)
+    mark:N4(label, vcc, at: 600 600, rotate: 270)
+    wire:WN4(U1.enable_p, to: N4.label)
+    mark:N5(label, carry, at: 1240 680, rotate: 90)
+    wire:WN5(U1.carry, to: N5.label)
+    mark:N6(label, vcc, at: 880 360)
+    wire:WN6(U1.not_load, to: N6.label)
+    mark:N7(label, vcc, at: 960 360)
+    wire:WN7(U1.Vcc, to: N7.label)
+    mark:G4(ground, at: 1040 360, rotate: 180)
+    wire:WG4(U1.GND, to: G4.ground)
+    place:R1(at: 1440 400, name(at: -52 -32), value(at: 52 -32))
+    place:R2(at: 1440 480, name(at: -52 -32), value(at: 52 -32))
+    place:R3(at: 1440 560, name(at: -52 -32), value(at: 52 -32))
+    place:R4(at: 1440 640, name(at: -52 -32), value(at: 52 -32))
+    place:DS1(at: 1800 640, rotate: 270, mirror)
+    mark:G5(ground, at: 2000 600, rotate: 270)
+    wire:WG5(DS1.cathode, to: G5.ground)
+    wire:W1(CLK1.output, to: U1.clock)
+    wire:W2(R5.negative, to: C1.positive)
+    wire:W3(C1.positive, to: U1.not_clear, via: 960 1200)
+    wire:W4(U1.count_0, to: R1.positive, via: [1160 520, 1160 400])
+    wire:W5(U1.count_1, to: R2.positive, via: [1200 560, 1200 480])
+    wire:W6(U1.count_2, to: R3.positive, via: [1240 600, 1240 560])
+    wire:W7(U1.count_3, to: R4.positive)
+    wire:W8(R1.negative, to: DS1.anode_0, via: [1600 400, 1600 480])
+    wire:W9(R2.negative, to: DS1.anode_1, via: [1540 480, 1540 520])
+    wire:W10(R3.negative, to: DS1.anode_2)
+    wire:W11(R4.negative, to: DS1.anode_3, via: [1600 640, 1600 600])
+    wire:W12(U1.enable_p, to: U1.enable_t)
+    place:J1(at: 2320 600)
+    mark:NJ1(label, vcc, at: 2520 540, rotate: 90)
+    mark:GJ(ground, at: 2680 580, rotate: 270)
+    mark:NJ3(label, clock, at: 2520 620, rotate: 90)
+    mark:NJ4(label, carry, at: 2680 660, rotate: 90)
+    wire:W13(J1.pin1, to: NJ1.label)
+    wire:W14(J1.pin2, to: GJ.ground)
+    wire:W15(J1.pin3, to: NJ3.label)
+    wire:W16(J1.pin4, to: NJ4.label)
+    probes {
+        time(2 ms/div)
+        probe:L1(level, clock)
+        probe:L2(level, qa)
+        probe:L3(level, qb)
+        probe:L4(level, qc)
+        probe:L5(level, qd)
+        probe:L6(level, carry)
+    }
+    expect("QA is the clock divided by two", from: "a counter's lowest bit flips on every rising edge") {
+        measure(frequency, qa, above: 2.5 V, after: 2 ms)
+        near(500 Hz, +- 1%)
+    }
+    expect("QD is the clock divided by sixteen", from: "each output divides the one before it by two") {
+        measure(frequency, qd, above: 2.5 V, after: 2 ms)
+        near(62.5 Hz, +- 2%)
+    }
+    expect("a lit segment carries its resistor's current", from: "(5 V − VF) / 330 Ω, about 9 mA") {
+        measure(maximum, current: R1)
+        within(8 mA .. 10 mA)
+    }
+    analysis(transient, for: 40 ms)
+    view:transient_response(primary)
+}

@@ -93,7 +93,7 @@ public final class RoutingEngine {
     /** The pcb with a track's segment carried by (dx, dy), its neighbours following; empty where it cannot move at all. */
     public synchronized Optional<PcbDrawing> segmentCarried(PcbDrawing pcb, int index, int own, double dx, double dy,
                                                             TrackRouter.LayingStyle style, Optional<Point> pressed) {
-        if (index < 0 || index >= pcb.tracks().size() || own < 0 || own >= pcb.tracks().get(index).points().size() - 1) {
+        if (index < 0 || index >= pcb.tracks().size() || own < 0 || own >= pcb.tracks().get(index).points().size() - 1 || held(pcb, index)) {
             return Optional.empty();
         }
         // On a track that runs against the line, its stretch ends at the point its own stretch starts from.
@@ -120,7 +120,7 @@ public final class RoutingEngine {
 
     /** The pcb with a track's corner carried to a point, the runs either side of it kept. */
     public synchronized PcbDrawing cornerCarried(PcbDrawing pcb, int index, int own, Point to, TrackRouter.LayingStyle style) {
-        if (index < 0 || index >= pcb.tracks().size()) {
+        if (index < 0 || index >= pcb.tracks().size() || held(pcb, index)) {
             return pcb;
         }
         return onJoinedLine(pcb, index, own, (working, old, corner, reversed) -> {
@@ -200,7 +200,7 @@ public final class RoutingEngine {
         RoutingWorld world = worldOf(pcb);
         List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
         for (int index = 0; index < tracks.size(); index++) {
-            if (!chosen.isEmpty() && !chosen.contains(index)) {
+            if (!chosen.isEmpty() && !chosen.contains(index) || held(pcb, index)) {
                 continue;
             }
             PcbDrawing.Track track = tracks.get(index);
@@ -220,7 +220,7 @@ public final class RoutingEngine {
         RoutingWorld world = worldOf(pcb);
         List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
         for (int index = 0; index < tracks.size(); index++) {
-            if (!chosen.isEmpty() && !chosen.contains(index)) {
+            if (!chosen.isEmpty() && !chosen.contains(index) || held(pcb, index)) {
                 continue;
             }
             PcbDrawing.Track track = tracks.get(index);
@@ -271,6 +271,12 @@ public final class RoutingEngine {
         List<Optional<Boolean>> pulled = new ArrayList<>();
         List<PcbDrawing.Track> drawn = new ArrayList<>();
         for (int index = 0; index < moved.tracks().size(); index++) {
+            // A track held where it stands follows nothing: it stays as it was, whatever moved at its end.
+            if (index < before.tracks().size() && held(before, index)) {
+                pulled.add(Optional.empty());
+                drawn.add(before.tracks().get(index));
+                continue;
+            }
             PcbDrawing.Track track = moved.tracks().get(index);
             Optional<Boolean> byStart = pulledByStart(track, index < before.tracks().size() ? before.tracks().get(index) : null);
             pulled.add(byStart);
@@ -334,6 +340,9 @@ public final class RoutingEngine {
         // Twice: a track laid round the part may stand in the way of one already looked at.
         for (int position = 0; position < count * 2; position++) {
             int index = position % count;
+            if (held(pcb, index)) {
+                continue;
+            }
             RoutingWorld world = worldOf(pcb);
             PcbDrawing.Track track = pcb.tracks().get(index);
             Optional<String> net = world.netOfTrack(index);
@@ -352,6 +361,11 @@ public final class RoutingEngine {
             }
         }
         return pcb;
+    }
+
+    /** Whether a track is held where it stands — locked itself or in a locked group —: no act of the router moves it. */
+    private static boolean held(PcbDrawing pcb, int track) {
+        return pcb.drawnGroups().holds(pcb.tracks().get(track).arrangement());
     }
 
     /** The point of a stretch nearest a point: where on it the reader took it. */

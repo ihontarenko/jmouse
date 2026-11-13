@@ -1,5 +1,8 @@
 package org.jmouse.cad.plugin.mesh;
 
+import org.jmouse.cad.table.TableSource;
+
+import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbLayers;
@@ -29,11 +32,9 @@ public class MeshPluginConfiguration {
 
     /** The places models come from are read from the plugins on each fetch, so the plugin needs none at its start. */
     @Bean
-    public MeshPlugin cadMeshPlugin(ObjectProvider<Extensions> extensions, ObjectProvider<ModelMeshService> meshes) {
-        PcbGlbExport.Settings settings = CadSettings.read(MeshPlugin.GLB);
-        PcbArtwork.Settings artwork = CadSettings.read(PcbArtwork.SECTION);
-        PcbLayers.Settings layers = CadSettings.read(PcbLayers.SECTION);
-        PcbGlbExport pcb = new PcbGlbExport(settings, artwork, layers, StrokeFont.newStroke(), meshes::getObject);
+    public MeshPlugin cadMeshPlugin(ObjectProvider<Extensions> extensions, ObjectProvider<ModelMeshService> meshes, CadSettings sections, CadStandards standards) {
+        PcbGlbExport pcb = new PcbGlbExport(() -> sections.read(MeshPlugin.GLB), () -> sections.read(PcbArtwork.SECTION),
+                () -> sections.read(PcbLayers.SECTION), StrokeFont.newStroke(), meshes::getObject, standards);
         return new MeshPlugin(() -> extensions.getObject().contributions(ModelSource.POINT), List.of(pcb));
     }
 
@@ -44,8 +45,8 @@ public class MeshPluginConfiguration {
     }
 
     @Bean
-    public ModelMeshService cadModelMeshService(ModelDocuments models, Extensions extensions) {
-        return new ModelMeshService(models, extensions);
+    public ModelMeshService cadModelMeshService(ModelDocuments models, Extensions extensions, TableSource tables) {
+        return new ModelMeshService(models, extensions, tables);
     }
 
     @Bean

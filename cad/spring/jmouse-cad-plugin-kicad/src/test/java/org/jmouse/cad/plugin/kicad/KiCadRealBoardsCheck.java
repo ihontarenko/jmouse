@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.settings.CadSettings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -67,7 +68,7 @@ class KiCadRealBoardsCheck {
                 System.out.println(root.relativize(board) + ": no footprints, skipped");
                 continue;
             }
-            ImportedDocuments imported = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS)
+            ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                     .read(new ExchangeFiles(filesBeside(board), board.getFileName().toString(), null), CadLibrary.library());
             Map<String, DocumentNode> made = new HashMap<>();
             imported.library().forEach(document -> made.put(document.slug(), document));
@@ -103,18 +104,18 @@ class KiCadRealBoardsCheck {
         try (Stream<Path> walked = Files.walk(root)) {
             boards = walked.filter(path -> path.toString().endsWith(".kicad_pcb") && !path.toString().contains("-backups")).toList();
         }
-        PcbArtwork.Settings artwork = CadSettings.read(PcbArtwork.SECTION);
+        PcbArtwork.Settings artwork = CadSettings.shipped().read(PcbArtwork.SECTION);
         List<String> moved = new ArrayList<>();
         for (Path board : boards) {
-            ImportedDocuments first = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS)
+            ImportedDocuments first = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                     .read(new ExchangeFiles(filesBeside(board), board.getFileName().toString(), null), CadLibrary.library());
             CatalogueDocuments firstDocuments = documentsOf(first);
             PcbFabrication before = PcbFabrication.of(first.root(), firstDocuments);
             if (before.parts().isEmpty()) {
                 continue;
             }
-            ExportedFiles written = KiCadProjectExport.of(first.root(), firstDocuments, KiCadLibraryMap.standard(), KiCadLibraries.standard(),
-                    CadStandards.pcbRules().valuesOf(before.pcb().rules()), artwork);
+            ExportedFiles written = KiCadProjectExport.of(first.root(), firstDocuments, KiCadLibraryMap.shipped(), KiCadLibraries.shipped(),
+                    CadStandards.shipped().pcbRules().valuesOf(before.pcb().rules()), artwork);
             Map<String, String> files = new LinkedHashMap<>();
             written.files().forEach(file -> files.put(file.fileName(), file.text()));
             if (kept.isPresent()) {
@@ -126,7 +127,7 @@ class KiCadRealBoardsCheck {
                 Files.writeString(folder.resolve("notes.txt"), String.join(System.lineSeparator(), written.notes()));
             }
             String project = files.keySet().iterator().next();
-            ImportedDocuments again = new KiCadDesignImport(() -> KiCadFootprintLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS)
+            ImportedDocuments again = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> KiCadBoardImportTest.NO_MODELS, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
                     .read(new ExchangeFiles(files, project, null), CadLibrary.library());
             PcbFabrication after = PcbFabrication.of(again.root(), documentsOf(again));
             int pads = 0;

@@ -84,8 +84,22 @@ public final class CatalogueViews {
      */
     public record DocumentSummary(String id, String slug, String title, String summary, String kind, String category,
                                   String folder, boolean featured, String status, LocationView location, DocumentOwner owner,
-                                  List<String> tags, int revision, String revisionLabel, Instant updatedAt,
+                                  List<String> tags, String benchRole, int revision, String revisionLabel, Instant updatedAt,
                                   String problem) {
+
+        /** A document of the store as a list shows it, its problem the refusal its file stands under, if any. */
+        public static DocumentSummary of(StoredDocument document) {
+            return of(document, document.refusal().orElse(null));
+        }
+
+        /** A document of the store as a list shows it, with the problem its text is refused for. */
+        public static DocumentSummary of(StoredDocument document, String problem) {
+            return new DocumentSummary(document.getId(), document.getSlug(), document.getTitle(), document.getSummary(),
+                                       document.getKind(), document.getCategoryCode(), document.getFolder(),
+                                       document.isFeatured(), document.getStatus().name(), LocationView.of(document),
+                                       document.owner().orElse(null), List.copyOf(document.getTags()), document.getBenchRole(),
+                                       document.getRevision(), document.getRevisionLabel(), document.getUpdatedAt(), problem);
+        }
     }
 
     /**

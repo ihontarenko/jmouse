@@ -38,10 +38,6 @@ public final class SpiceTransient {
     private final SpiceDialect       dialect;
     private final SpiceDevices       devices;
 
-    public SpiceTransient(CatalogueDocuments catalogue, SpiceSimulator simulator, SpiceDialect dialect) {
-        this(catalogue, simulator, dialect, SpiceDevices.standard());
-    }
-
     public SpiceTransient(CatalogueDocuments catalogue, SpiceSimulator simulator, SpiceDialect dialect, SpiceDevices devices) {
         this.catalogue = catalogue;
         this.simulator = simulator;

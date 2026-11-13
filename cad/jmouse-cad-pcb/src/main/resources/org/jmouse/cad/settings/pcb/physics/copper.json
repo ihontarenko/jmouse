@@ -1,5 +1,4 @@
 {
-  "$schema": "./copper.schema.json",
   "source": "Resistivity and its temperature coefficient: annealed copper (IEC 60028). Current: IPC-2221 §6.2, I = k · ΔT^0.44 · A^0.725, A in square mils.",
   "resistivity": 1.724e-8,
   "referenceTemperature": 20,

@@ -1,0 +1,20 @@
+# Power in a resistor laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:resistor-power-pcb("Power in a resistor — pcb") {
+    meta {
+        summary: "Power in a resistor laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: ohms-and-kirchhoffs-laws
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(resistor-power)
+    layers(2)
+    edge("M1 0H19A1 1 0 0 1 20 1V13A1 1 0 0 1 19 14H1A1 1 0 0 1 0 13V1A1 1 0 0 1 1 0Z")
+    place(R1, at: 15.5 8.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, top: 2], at: 5.5 6.5)
+    track(top, width: 0.25, from: 15.5 9.5, to: 15.5 10.55)
+    track(top, width: 0.25, from: 15.5 7.5, to: 5.77 7.5, to: 5.5 7.77)
+    via(at: 15.5 10.55, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H19.5V13.5H0.5Z")
+}

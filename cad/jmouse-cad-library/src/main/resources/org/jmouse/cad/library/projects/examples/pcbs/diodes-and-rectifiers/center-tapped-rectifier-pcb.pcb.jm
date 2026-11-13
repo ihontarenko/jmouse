@@ -1,0 +1,32 @@
+# Centre-tapped full-wave rectifier laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:center-tapped-rectifier-pcb("Centre-tapped full-wave rectifier — pcb") {
+    meta {
+        summary: "Centre-tapped full-wave rectifier laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: diodes-and-rectifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(center-tapped-rectifier)
+    layers(2)
+    edge("M1 0H69A1 1 0 0 1 70 1V51A1 1 0 0 1 69 52H1A1 1 0 0 1 0 51V1A1 1 0 0 1 1 0Z")
+    place(T1, at: 26.5 25.5)
+    place(D1, at: 40 5)
+    place(D2, at: 40 46.5)
+    place(C1, at: 56 25.5, rotate: 270)
+    place(RL, at: 66 25.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, mains: 2, out: 3], at: 5.5 25.5)
+    track(top, width: 0.25, from: 56 26.35, to: 65.85 26.35, to: 66 26.5)
+    track(top, width: 0.25, from: 56 24.65, to: 65.85 24.65, to: 66 24.5)
+    track(bottom, width: 0.25, from: 36.5 15.5, to: 45.08 6.92, to: 45.08 5)
+    track(bottom, width: 0.25, from: 36.5 35.5, to: 45.08 44.08, to: 45.08 46.5)
+    track(top, width: 0.25, from: 16.5 35.5, to: 6.5 25.5, to: 5.5 25.5)
+    track(top, width: 0.25, from: 36.5 30.5, to: 40.65 26.35, to: 56 26.35)
+    track(top, width: 0.25, from: 34.92 5, to: 36.35 5, to: 56 24.65)
+    track(top, width: 0.25, from: 56 24.65, to: 45.2 24.65)
+    track(bottom, width: 0.25, from: 45.2 24.65, to: 34.92 34.93, to: 34.92 46.5)
+    track(top, width: 0.25, from: 34.92 46.5, to: 23.96 46.5, to: 5.5 28.04)
+    via(at: 45.2 24.65, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H69.5V51.5H0.5Z")
+}

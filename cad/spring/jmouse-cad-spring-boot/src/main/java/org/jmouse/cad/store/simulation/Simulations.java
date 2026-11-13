@@ -247,7 +247,7 @@ public class Simulations {
         }
         return new Circuit(circuit.head(), circuit.parameters(), circuit.parts(), circuit.layout(), circuit.probes(),
                            circuit.timeBase(), circuit.expectations(), new Analysis(analysis, seconds), circuit.views(),
-                           circuit.frame(), circuit.boundary());
+                           circuit.frame(), circuit.boundary(), circuit.groups());
     }
 
     private int samplesOf(Integer asked) {

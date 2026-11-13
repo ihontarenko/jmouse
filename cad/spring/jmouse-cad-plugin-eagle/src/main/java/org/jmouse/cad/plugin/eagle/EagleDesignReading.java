@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.eagle;
 
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.eagle.EagleDesignImport;
 import org.jmouse.cad.exchange.imported.SheetMarks;
 import org.jmouse.cad.eagle.EagleLibraries;
@@ -26,10 +27,11 @@ final class EagleDesignReading implements DocumentImport {
     private static final String SCHEMATIC = ".sch";
     private static final String PCB = ".brd";
 
-    private final EagleLibraries filing;
+    /** Its filing(), as the engine's table says it at each use. */
+    private final ReadTable<EagleLibraries> filings;
 
-    EagleDesignReading(EagleLibraries filing) {
-        this.filing = filing;
+    EagleDesignReading(ReadTable<EagleLibraries> filings) {
+        this.filings = filings;
     }
 
     @Override
@@ -63,8 +65,8 @@ final class EagleDesignReading implements DocumentImport {
         String stem = file.substring(0, file.length() - SCHEMATIC.length());
         String title = files.title() == null || files.title().isBlank() ? stem : files.title();
         if (lowered.endsWith(SCHEMATIC)) {
-            return EagleDesignImport.read(schematicOf(main, files.mainText()), file, Optional.empty(), title, filing,
-                    SheetMarks.of(catalogue, filing.markSymbols()));
+            return EagleDesignImport.read(schematicOf(main, files.mainText()), file, Optional.empty(), title, filing(),
+                    SheetMarks.of(catalogue, filing().markSymbols()));
         }
         String schematicFile = files.files().keySet().stream().filter(name -> nameOf(name).equalsIgnoreCase(stem + SCHEMATIC))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("The PCB " + file + " is read with its schematic "
@@ -72,7 +74,7 @@ final class EagleDesignReading implements DocumentImport {
         EagleBoard pcb = read(main, files.mainText()).board().orElseThrow(() -> new IllegalArgumentException(
                 "'" + main + "' is an Eagle file with no PCB in it."));
         return EagleDesignImport.read(schematicOf(schematicFile, files.files().get(schematicFile)), nameOf(schematicFile),
-                Optional.of(new EagleDesignImport.Read(pcb, file)), title, filing, SheetMarks.of(catalogue, filing.markSymbols()));
+                Optional.of(new EagleDesignImport.Read(pcb, file)), title, filing(), SheetMarks.of(catalogue, filing().markSymbols()));
     }
 
     private static EagleSchematic schematicOf(String name, String text) {
@@ -91,5 +93,9 @@ final class EagleDesignReading implements DocumentImport {
     private static String nameOf(String path) {
         String normalized = path.replace('\\', '/');
         return normalized.substring(normalized.lastIndexOf('/') + 1);
+    }
+
+    private EagleLibraries filing() {
+        return filings.current();
     }
 }

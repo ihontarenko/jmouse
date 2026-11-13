@@ -55,7 +55,7 @@ class KiCadLibraryRefiling {
     void fileEachKiCadDocumentWhereAnImportFilesItNow() {
         Path folder = Path.of(System.getProperty("cad.refile.folder"));
         ZoneId zone = ZoneId.of(System.getProperty("cad.refile.zone", ZoneId.systemDefault().getId()));
-        KiCadLibraries libraries = KiCadLibraries.standard();
+        KiCadLibraries libraries = KiCadLibraries.shipped();
         String kicad = libraries.libraryCategory();
         CadLanguage cad = CadLanguage.shipped();
         DocumentLanguage language = cad.language();
@@ -133,7 +133,23 @@ class KiCadLibraryRefiling {
     }
 
     private static DocumentStore storeOf(Path folder, ZoneId zone, String name, String email) {
-        return new DocumentStore(folder, new JGitLocalGit(), CommitAuthors.NONE, new CommitAuthor(name, email), () -> zone);
+        // The shared catalogue alone, each kind in the folder its word with an s names: a library refiled holds no owner.
+        org.jmouse.cad.folder.FolderLayout catalogue = new org.jmouse.cad.folder.FolderLayout() {
+            @Override
+            public String pathOf(Place place) {
+                if (place.owner() != null) {
+                    throw new IllegalArgumentException("A library refiled holds no owner: " + place.owner());
+                }
+                return org.jmouse.cad.folder.FolderLayout.standing(CATALOGUE, place.kind() + "s", place);
+            }
+
+            @Override
+            public java.util.Optional<Placed> placedAt(java.util.List<String> words) {
+                return words.getFirst().equals(CATALOGUE)
+                        ? org.jmouse.cad.folder.FolderLayout.standingAt(null, words.subList(1, words.size())) : java.util.Optional.empty();
+            }
+        };
+        return new DocumentStore(() -> folder, catalogue, new JGitLocalGit(), CommitAuthors.NONE, new CommitAuthor(name, email), () -> zone);
     }
 
     private static String filedIn(DocumentNode read) {

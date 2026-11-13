@@ -1,0 +1,103 @@
+# Two MOSFETs, one drive. The same 10 V square, through the same gate resistor, drives a small 2N7000 and a power
+# IRFZ44N side by side, each switching the same 100 Ω load from 12 V — the same current, so the only difference on the
+# screen is the transistor. What differs is the charge their gates take: the 2N7000's input capacitance is about 20 pF,
+# while the IRFZ44N's gate takes 63 nC to reach 10 V, 23 nC of it on the Miller plateau while its drain falls
+# (its datasheet's Qg and Qgd). So the 2N7000 switches in nanoseconds and the IRFZ44N in about a microsecond — and with
+# a 1 kΩ gate resistor, not within half a period at all — but once on, it drops a millivolt where the 2N7000 drops a
+# tenth of a volt.
+circuit:two-mosfets("Two MOSFETs, one gate drive") {
+    meta {
+        summary: "A 2N7000 and an IRFZ44N driven by the same square through the same gate resistor: different thresholds, gate charges and switching times side by side."
+        description: """
+            Idea: a MOSFET's gate is a capacitor, and the gate resistor fills it. A small transistor has a small gate —
+            the 2N7000's input capacitance is about 20 pF — and switches in nanoseconds. A power transistor has a large
+            one: the IRFZ44N's datasheet gives 63 nC to bring its gate to 10 V, 23 nC of it on the Miller plateau, where
+            the drain is falling and the drive's current goes into the gate–drain capacitance instead of raising the
+            gate. That capacitance grows as the drain falls towards the gate, which is why the plateau is long.
+
+            Try: at 100 Ω the IRFZ44N turns on a tenth of a microsecond late and off a whole microsecond late — it must
+            give its charge back first. Raise the gate resistor to 1 kΩ: 63 nC through 1 kΩ takes about 12 µs, longer
+            than half a period at 50 kHz, and the IRFZ44N never switches fully. Lower the frequency and it recovers.
+
+            Watch: both gates (CH1, CH3) and both drains (CH2, CH4) on one screen. Both loads are 100 Ω, so both
+            branches carry the same 120 mA and glow alike on the sheet: what differs is only the transistor. The flat
+            step in the IRFZ44N's gate is the plateau; its drain falls during it. Off, the order reverses: the gate
+            falls back to the plateau first, sits there while the drain rises, and only then drops away.
+
+            Ask: the drive gives at most (10 V − 5 V plateau) / 100 Ω = 50 mA into the gate. How long does 23 nC take
+            at that current? Why does the larger transistor still win once it is fully on?
+            """
+        category: transistors-as-switches
+        tags: transistors, example, tr-04, mosfet, comparison
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:R_gate(100 Ω, in: 10 Ω .. 4.7 kΩ, step: 10 Ω, "Gate resistor, the same for both")
+    parameter:f(50 kHz, in: 1 kHz .. 200 kHz, step: 1 kHz, "Drive frequency")
+    part:V1(voltage-source, [positive: vdd, negative: 0], U_output: 12 V)
+    part:G1(square-generator, [positive: drive, negative: 0], high: 10 V, frequency: f, duty: 0.5)
+    part:RG1(resistor, [drive, gate_small], resistance: R_gate)
+    part:RG2(resistor, [drive, gate_large], resistance: R_gate)
+    part:RL1(resistor, [vdd, drain_small], resistance: 100 Ω, power_rating: 2 W)
+    part:RL2(resistor, [vdd, drain_large], resistance: 100 Ω, power_rating: 2 W)
+    part:Q1(2n7000, [gate: gate_small, drain: drain_small, source: 0])
+    part:Q2(irfz44n, [gate: gate_large, drain: drain_large, source: 0])
+    place:V1(at: 240 600, rotate: 90)
+    place:G1(at: 480 760, rotate: 90)
+    place:RG1(at: 720 600)
+    place:RG2(at: 1200 600)
+    place:Q1(at: 960 600)
+    place:Q2(at: 1440 600)
+    place:RL1(at: 1000 320, rotate: 90)
+    place:RL2(at: 1480 320, rotate: 90)
+    mark:Jd(junction, at: 560 600)
+    mark:Jv1(junction, at: 1000 160)
+    mark:Jg1(junction, at: 240 920)
+    mark:Jg2(junction, at: 480 920)
+    mark:Jg3(junction, at: 1000 920)
+    mark:Jg4(junction, at: 1480 920)
+    mark:GND1(ground, at: 480 1000)
+    wire:W1(V1.positive, to: Jv1.j, via: 240 160)
+    wire:W2(Jv1.j, to: RL1.positive)
+    wire:W3(Jv1.j, to: RL2.positive, via: 1480 160)
+    wire:W4(RL1.negative, to: Q1.drain)
+    wire:W5(RL2.negative, to: Q2.drain)
+    wire:W6(G1.positive, to: Jd.j, via: 480 600)
+    wire:W7(Jd.j, to: RG1.positive)
+    wire:W8(RG1.negative, to: Q1.gate)
+    wire:W9(Jd.j, to: RG2.positive, via: [560 840, 1140 840])
+    wire:W10(RG2.negative, to: Q2.gate)
+    wire:W11(V1.negative, to: Jg1.j)
+    wire:W12(Jg1.j, to: Jg2.j)
+    wire:W13(G1.negative, to: Jg2.j)
+    wire:W14(Jg2.j, to: GND1.ground)
+    wire:W15(Jg2.j, to: Jg3.j)
+    wire:W16(Q1.source, to: Jg3.j)
+    wire:W17(Jg3.j, to: Jg4.j)
+    wire:W18(Q2.source, to: Jg4.j)
+    probes {
+        probe:CH1(gate_small, 5 V/div)
+        probe:CH2(drain_small, 5 V/div)
+        probe:CH3(gate_large, 5 V/div)
+        probe:CH4(drain_large, 5 V/div)
+        time(1 µs/div)
+    }
+    expect("the 2N7000 follows the drive: its drain is low for half the period", from: "Ciss about 20 pF: through 100 Ω its gate settles in nanoseconds") {
+        measure(duty, drain_small, below: 6 V, after: 10 us)
+        near(0.5, +- 2%)
+    }
+    expect("the IRFZ44N lets go a microsecond late: its drain is low for 55 % of the period, not half", from: "Qg 63 nC, Qgd 23 nC: through 100 Ω its gate takes about a microsecond to give back the charge above the plateau and on it") {
+        measure(duty, drain_large, below: 6 V, after: 10 us)
+        within(0.53 .. 0.57)
+    }
+    expect("once on, the 2N7000 drops about 0.14 V", from: "RDS(on) 1.2 Ω at VGS 10 V; I = 12 V / 101.2 Ω") {
+        measure(minimum, drain_small, after: 10 us)
+        within(0.1 V .. 0.2 V)
+    }
+    expect("once on, the IRFZ44N drops only a couple of millivolts at the same current", from: "RDS(on) at most 17.5 mΩ at VGS 10 V; I = 12 V / 100 Ω") {
+        measure(minimum, drain_large, after: 10 us)
+        within(1 mV .. 3 mV)
+    }
+    analysis(transient, for: 60 us)
+    view:transient_response(primary)
+}

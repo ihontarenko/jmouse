@@ -1,0 +1,84 @@
+# OA-02. A TL072 as a non-inverting amplifier: the signal goes straight into the non-inverting input, and the output
+# comes back to the inverting one through a divider, Rf over Rg. Feedback drives the output until the divider's middle
+# equals the input, so out = in · (1 + Rf / Rg) — 40 kΩ over 10 kΩ make five, and the output stays in phase. On ±15 V
+# the TL072 swings to about ±13.5 V, so past 2.7 V of input the tops of the sine are cut off flat at the rails.
+circuit:non-inverting-amplifier("Non-inverting amplifier") {
+    meta {
+        summary: "A TL072 with the signal on its non-inverting input and a divider in its feedback: Av = 1 + Rf / Rg, in phase."
+        description: """
+            Idea: the op-amp drives its output until the voltage fed back through the divider Rf over Rg equals the
+            input. The divider takes a share Rg / (Rf + Rg) of the output, so the output must be the input times
+            1 + Rf / Rg — larger, and in step with it.
+
+            Try: raise Rf, or lower Rg — the gain grows. Turn the amplitude up past about 2.7 V: the output reaches
+            the TL072's limits, near ±13.5 V on ±15 V rails, and the sine's tops are cut off flat — clipping.
+
+            Watch: CH1 the input, CH2 the output. Both cross zero together and peak together: no inversion. The output
+            is five times taller at the start; with the amplitude raised it turns into a flattened trapezoid.
+
+            Ask: what is the smallest gain this circuit can have, and what would it become with Rf shorted? At what input
+            amplitude does the output first touch a rail for a gain of ten?
+            """
+        category: operational-amplifiers
+        tags: operational-amplifiers, example, oa-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Input amplitude: past 2.7 V the output clips")
+    parameter:F(1 kHz, in: 100 Hz .. 20 kHz, step: 100 Hz, "Input frequency")
+    parameter:R_feedback(40 kΩ, in: 1 kΩ .. 200 kΩ, step: 1 kΩ, "Rf, from the output to the inverting input")
+    parameter:R_ground(10 kΩ, in: 1 kΩ .. 100 kΩ, step: 1 kΩ, "Rg, from the inverting input to the common")
+    part:PS1(dual-supply, [positive: vp, common: 0, negative: vn], V_positive: 15 V, V_negative: 15 V)
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:U1(tl072, [A.non_inverting_input: in, A.inverting_input: inverting, A.output: out, Vcc: vp, GND: vn])
+    part:RF(resistor, [inverting, out], resistance: R_feedback)
+    part:RG(resistor, [inverting, 0], resistance: R_ground)
+    part:RL(resistor, [out, 0], resistance: 10 kΩ)
+    place:PS1(at: 200 320)
+    mark:LP1(label, vp, at: 200 120)
+    mark:LN1(label, vn, at: 200 520, rotate: 180)
+    mark:GND1(common, at: 360 360)
+    place:G1(at: 600 840, rotate: 90)
+    place:RG(at: 480 760, rotate: 90)
+    mark:Ji(junction, at: 720 520)
+    place:U1(at: 880 560)
+    mark:LP2(label, vp, at: 880 380)
+    mark:LN2(label, vn, at: 880 740, rotate: 180)
+    place:RF(at: 880 200)
+    mark:Jo(junction, at: 1040 560)
+    place:RL(at: 1280 760, rotate: 90)
+    mark:Jr(junction, at: 600 1040)
+    mark:GND2(common, at: 600 1120)
+    wire:W1(PS1.positive, to: LP1.label)
+    wire:W2(PS1.negative, to: LN1.label)
+    wire:W3(PS1.common, to: GND1.common)
+    wire:W4(G1.positive, to: U1.A.non_inverting_input, via: 600 600)
+    wire:W5(U1.A.inverting_input, to: Ji.j)
+    wire:W6(Ji.j, to: RF.positive, via: 720 200)
+    wire:W7(RF.negative, to: Jo.j, via: 1040 200)
+    wire:W8(Ji.j, to: RG.positive, via: 480 520)
+    wire:W9(LP2.label, to: U1.Vcc)
+    wire:W10(U1.GND, to: LN2.label)
+    wire:W11(U1.A.output, to: Jo.j)
+    wire:W12(Jo.j, to: RL.positive, via: 1280 560)
+    wire:W13(G1.negative, to: Jr.j)
+    wire:W14(RG.negative, to: Jr.j, via: 480 1040)
+    wire:W15(RL.negative, to: Jr.j, via: 1280 1040)
+    wire:W16(Jr.j, to: GND2.common)
+    probe:CH1(in, 1 V/div)
+    probe:CH2(out, 2 V/div)
+    expect("the output is five times the input", from: "Av = 1 + Rf / Rg = 1 + 40 kΩ / 10 kΩ = 5, so 1 V in gives 5 V out") {
+        measure(maximum, out, after: 1 ms)
+        near(5 V, +- 2%)
+    }
+    expect("and in phase with it", from: "in phase, out − in peaks at (5 − 1) · 1 V = 4 V; inverted it would be 6 V") {
+        measure(maximum, out - in, after: 1 ms)
+        near(4 V, +- 2%)
+    }
+    expect("the same swing below the common", from: "a symmetric sine: −5 V at the bottom") {
+        measure(minimum, out, after: 1 ms)
+        near(-5 V, +- 2%)
+    }
+    analysis(transient, for: 5 ms)
+    view:transient_response(primary)
+}

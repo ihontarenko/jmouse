@@ -1,0 +1,32 @@
+# Schmitt trigger laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:schmitt-trigger-pcb("Schmitt trigger — pcb") {
+    meta {
+        summary: "Schmitt trigger laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: operational-amplifiers
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(schmitt-trigger)
+    layers(2)
+    edge("M1 0H30A1 1 0 0 1 31 1V21A1 1 0 0 1 30 22H1A1 1 0 0 1 0 21V1A1 1 0 0 1 1 0Z")
+    place(U1, at: 24 6)
+    place(R1, at: 20.5 13, rotate: 270)
+    place(R2, at: 24 17.5)
+    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 9.5)
+    track(top, width: 0.25, from: 21.55 6.635, to: 20.2 6.635, to: 20.2 11.7, to: 20.5 12)
+    track(top, width: 0.25, from: 20.5 12, to: 23 14.5, to: 23 17.5)
+    track(top, width: 0.25, from: 21.55 4.095, to: 22 4.095, to: 25 7.095, to: 25 17.5)
+    track(top, width: 0.25, from: 21.55 5.365, to: 13 5.365, to: 10.135 8.23, to: 5.5 8.23)
+    track(top, width: 0.25, from: 21.55 7.905, to: 21.55 9.255)
+    track(bottom, width: 0.25, from: 21.55 9.255, to: 20.2 10.605, to: 19.3 10.605)
+    track(top, width: 0.25, from: 19.3 10.605, to: 5.665 10.605, to: 5.5 10.77)
+    track(top, width: 0.25, from: 20.5 14, to: 13.75 14)
+    track(bottom, width: 0.25, from: 13.75 14, to: 13.75 13.94, to: 5.5 5.69)
+    track(top, width: 0.25, from: 26.45 4.095, to: 25.55 3.195, to: 3.95 3.195, to: 3.95 11.76, to: 5.5 13.31)
+    via(at: 21.55 9.255, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 19.3 10.605, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    via(at: 13.75 14, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H30.5V21.5H0.5Z")
+}

@@ -1,5 +1,8 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.table.ReadTable;
+import org.jmouse.cad.table.TableSource;
+import org.jmouse.cad.table.ShippedTables;
 import org.jmouse.cad.exchange.imported.FilingTable;
 import org.jmouse.cad.exchange.imported.ImportFiling;
 import org.jmouse.cad.exchange.imported.SheetFiling;
@@ -49,7 +52,11 @@ public record KiCadLibraries(String holder, String license, String home, SheetFi
                              double edgeWidth, String holeFootprint, Map<String, String> provenanceFields)
         implements ImportFiling {
 
-    private static final String RESOURCE = "kicad-libraries.sht";
+    /** The table's address in the catalogue. */
+    public static final String TABLE = "kicad-libraries";
+
+    /** Where its module ships it. */
+    public static final ShippedTables SHIPPED = ShippedTables.in(KiCadLibraries.class, "jmouse-cad-kicad", "org/jmouse/cad/kicad/tables");
 
     /** The parts of a provenance, as {@code provenance-fields} names them: the words of the document's {@code meta}. */
     private static final String SOURCE = MetaNode.SOURCE;
@@ -65,8 +72,16 @@ public record KiCadLibraries(String holder, String license, String home, SheetFi
     }
 
     /** The table this library ships. */
-    public static KiCadLibraries standard() {
-        return of(FilingTable.shipped(KiCadLibraries.class, RESOURCE));
+    public static KiCadLibraries shipped() {
+        return readFrom(SHIPPED).current();
+    }
+
+    /**
+     * As its source answers at each use — the engine's catalogue table, its curator's revision where one is kept —, read again
+     * only when another revision answers.
+     */
+    public static ReadTable<KiCadLibraries> readFrom(TableSource tables) {
+        return new ReadTable<>(tables, TABLE, sheet -> of(FilingTable.of(TABLE, sheet)));
     }
 
     public static KiCadLibraries of(FilingTable table) {

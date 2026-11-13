@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange;
 
+import org.jmouse.settings.Label;
 import org.jmouse.plugin.Contributions;
 import org.jmouse.plugin.Identified;
 
@@ -13,7 +14,9 @@ import java.util.List;
  * @param title   how a reader is shown it
  * @param formats the formats, by the word each is written under
  */
-public record OutputJob(String id, String title, List<String> formats) implements Identified {
+public record OutputJob(@Label("ID") String id,
+                        @Label("Title") String title,
+                        @Label("Formats") List<String> formats) implements Identified {
 
     public static final Contributions<OutputJob> POINT = new Contributions<>("cad.exchange.output-jobs", OutputJob.class);
 

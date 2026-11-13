@@ -1,0 +1,70 @@
+# DC-04. Two resistors in series across a source: the middle sits at the share of the input the lower resistor holds.
+# Equal resistors give half; a larger lower resistor gives more. The voltmeter reads the middle, the ammeter the one
+# current both resistors carry, and the sweep shows the output as a straight line through zero — a divider scales.
+circuit:voltage-divider("Voltage divider") {
+    meta {
+        featured: yes
+        summary: "Two resistors in series: the middle sits at Vin · R2 / (R1 + R2)."
+        description: """
+            Idea: a divider makes a fixed share of its input. The same current flows through both resistors, so each
+            drops a voltage in proportion to its resistance, and the middle sits at the lower one's share.
+
+            Try: set R1 and R2 equal — the output is half the input. Raise R2: the output climbs towards the input.
+            Raise R1: it falls towards zero. Change the input: the output follows it in the same proportion.
+
+            Watch: the voltmeter on the middle, the ammeter on the current, and the sweep — the output against the
+            input is a straight line through zero whose slope is R2 / (R1 + R2).
+
+            Ask: with R1 = 3 kΩ and R2 = 1 kΩ, what share of 12 V is left at the middle? What current flows?
+            """
+        category: ohms-and-kirchhoffs-laws
+        tags: ohm, example, dc-04
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:U(12 V, in: 1 V .. 24 V, step: 0.5 V, "Input voltage")
+    parameter:R_top(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R1, the upper resistor")
+    parameter:R_bottom(1 kΩ, in: 100 Ω .. 10 kΩ, step: 100 Ω, "R2, the lower resistor")
+    part:V1(voltage-source, [in, 0], U_output: U)
+    part:A1(ammeter, [in: in, out: top])
+    part:R1(resistor, [top, middle], resistance: R_top)
+    part:R2(resistor, [middle, 0], resistance: R_bottom)
+    part:VM1(voltmeter, [plus: middle, minus: 0])
+    place:V1(at: 320 560, rotate: 90)
+    place:A1(at: 520 320)
+    place:R1(at: 760 440, rotate: 90)
+    place:R2(at: 760 680, rotate: 90)
+    place:VM1(at: 1040 640, rotate: 90)
+    mark:Jm(junction, at: 760 560)
+    mark:Jb1(junction, at: 320 840)
+    mark:Jb2(junction, at: 760 840)
+    mark:GND1(ground, at: 760 920)
+    wire:W1(V1.positive, to: A1.in, via: 320 320)
+    wire:W2(A1.out, to: R1.positive, via: 760 320)
+    wire:W3(R1.negative, to: Jm.j)
+    wire:W4(Jm.j, to: R2.positive)
+    wire:W5(Jm.j, to: VM1.plus, via: 1040 560)
+    wire:W6(V1.negative, to: Jb1.j)
+    wire:W7(Jb1.j, to: Jb2.j)
+    wire:W8(R2.negative, to: Jb2.j)
+    wire:W9(VM1.minus, to: Jb2.j, via: 1040 840)
+    wire:W10(Jb2.j, to: GND1.ground)
+    probe:CH1(in, 5 V/div)
+    probe:CH2(middle, 5 V/div)
+    expect("equal resistors: half the input", from: "Vout = Vin · R2 / (R1 + R2) = 12 V · 1 kΩ / 2 kΩ") {
+        measure(final, middle)
+        near(6 V, +- 0.5%)
+    }
+    expect("one current through both: 6 mA", from: "I = Vin / (R1 + R2) = 12 V / 2 kΩ") {
+        measure(final, current: R1)
+        near(6 mA, +- 0.5%)
+    }
+    expect("a three times larger R2 takes three quarters", from: "Vout = 12 V · 3 kΩ / (1 kΩ + 3 kΩ) = 9 V") {
+        measure(final, middle, with: [R_bottom: 3 kΩ])
+        near(9 V, +- 0.5%)
+    }
+    analysis(transient, for: 10 ms)
+    view:transient_response(primary)
+    view:operating_point
+    view:dc_sweep(parameter: U, from: 0, to: 24, points: 49)
+}

@@ -1,0 +1,8 @@
+category:circuits("Circuits") {
+    meta {
+        summary: "Circuits and the boards laid out from them"
+        order: 0
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

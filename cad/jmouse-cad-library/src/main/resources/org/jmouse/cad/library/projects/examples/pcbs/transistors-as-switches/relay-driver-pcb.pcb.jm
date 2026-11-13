@@ -1,0 +1,34 @@
+# Relay driver and flyback diode laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:relay-driver-pcb("Relay driver and flyback diode — pcb") {
+    meta {
+        summary: "Relay driver and flyback diode laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: transistors-as-switches
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(relay-driver)
+    layers(2)
+    edge("M1 0H55A1 1 0 0 1 56 1V32A1 1 0 0 1 55 33H1A1 1 0 0 1 0 32V1A1 1 0 0 1 1 0Z")
+    place(RB, at: 20 23)
+    place(Q1, at: 30.5 27)
+    place(K1, at: 42 11.5)
+    place(D1, at: 19.5 13, rotate: 90)
+    place(SW1, at: 26.5 16.5, rotate: 270)
+    place(RL, at: 49 23.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, coil: 2, drive: 3, load_supply: 4, vcc: 5], at: 5.5 19)
+    track(top, width: 0.25, from: 47.7 17.6, to: 47.7 21.2, to: 49 22.5)
+    track(top, width: 0.25, from: 19.5 7.92, to: 21.73 7.92, to: 26.5 12.69)
+    track(bottom, width: 0.25, from: 33.04 27, to: 33.04 26.85, to: 26.5 20.31)
+    track(top, width: 0.25, from: 21 23, to: 26.5 23, to: 30.5 27)
+    track(top, width: 0.25, from: 19 23, to: 15 19, to: 5.5 19)
+    track(bottom, width: 0.25, from: 19.5 18.08, to: 13.5 24.08, to: 5.5 24.08)
+    track(bottom, width: 0.25, from: 26.5 20.31, to: 31.9 14.91, to: 31.9 9.2, to: 35.5 5.6)
+    track(top, width: 0.25, from: 27.96 27, to: 29.31 28.35, to: 45.15 28.35, to: 49 24.5)
+    track(top, width: 0.25, from: 33.55 11.55, to: 30.4 14.7, to: 12.4 14.7)
+    track(bottom, width: 0.25, from: 12.4 14.7, to: 12.34 14.7, to: 5.5 21.54)
+    track(top, width: 0.25, from: 35.5 17.6, to: 34.36 16.46, to: 5.5 16.46)
+    via(at: 12.4 14.7, drill: 0.4, diameter: 0.8, from: top, to: bottom)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H55.5V32.5H0.5Z")
+}

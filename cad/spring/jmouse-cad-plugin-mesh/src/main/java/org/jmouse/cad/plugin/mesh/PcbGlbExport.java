@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.mesh;
 
+import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.geometry.PcbDrills;
@@ -55,19 +56,22 @@ public final class PcbGlbExport implements DocumentExport {
     private static final String FORMAT = "gltf-binary";
 
     /**
-     * The export's data ({@code settings/plugin/mesh/glb}).
+     * The export's data ({@code settings/plugin/cad-mesh/glb}).
      *
      * @param id            its word on the exchange routes: {@code glb}
      * @param title         what the export is called where formats are offered
      * @param areaSteps     how many straight steps a quarter of a round end, a disc, an arc or a drill is drawn with
-     * @param areaTolerance how far a layer's outline may move when it is simplified, in millimetres
+     * @param areaTolerance how far a layer's outline may move when it is simplified
      */
-    public record Settings(String id, String title, int areaSteps, double areaTolerance) {
+    public record Settings(@Label("ID") String id,
+                           @Label("Title") String title,
+                           @Label("Area steps") int areaSteps,
+                           @Label(value = "Area tolerance", unit = "mm") double areaTolerance) {
     }
 
-    private final Settings                  settings;
-    private final PcbArtwork.Settings     artwork;
-    private final PcbLayers               layers;
+    private final Supplier<Settings>                  settings;
+    private final Supplier<PcbArtwork.Settings>     artwork;
+    private final Supplier<PcbLayers.Settings>               layers;
     private final StrokeFont                font;
     private final Supplier<ModelMeshService> meshes;
     private final Placement                 frame = MeshFormats.standard().byId(FORMAT).orElseThrow().frame();
@@ -78,23 +82,27 @@ public final class PcbGlbExport implements DocumentExport {
      * @param layers  how thick the layers over the pcb's faces are and how each looks, as every 3D format models them
      * @param meshes  the models as meshes, asked for on each export: they stand on the catalogue, which stands on the plugins
      */
-    public PcbGlbExport(Settings settings, PcbArtwork.Settings artwork, PcbLayers.Settings layers, StrokeFont font,
-                          Supplier<ModelMeshService> meshes) {
+    /** The ways a pcb is made, read through the engine's tables. */
+    private final CadStandards standards;
+
+    public PcbGlbExport(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, Supplier<PcbLayers.Settings> layers, StrokeFont font,
+                          Supplier<ModelMeshService> meshes, CadStandards standards) {
+        this.standards = standards;
         this.settings = settings;
         this.artwork = artwork;
-        this.layers = new PcbLayers(layers);
+        this.layers = layers;
         this.font = font;
         this.meshes = meshes;
     }
 
     @Override
     public String id() {
-        return settings.id();
+        return settings.get().id();
     }
 
     @Override
     public String title() {
-        return settings.title();
+        return settings.get().title();
     }
 
     @Override
@@ -106,28 +114,28 @@ public final class PcbGlbExport implements DocumentExport {
     public ExportedFiles write(DocumentNode document, CatalogueDocuments catalogue) {
         PcbFabrication fabrication = PcbFabrication.of(document, catalogue);
         List<String> notes = new ArrayList<>(fabrication.notes());
-        Map<String, Double> rules = CadStandards.pcbRules().valuesOf(fabrication.pcb().rules());
+        Map<String, Double> rules = standards.pcbRules().valuesOf(fabrication.pcb().rules());
         double thickness = rules.get(THICKNESS);
-        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork, font);
+        PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork.get(), font);
         List<PcbDrills.Drill> drilled = PcbDrills.of(fabrication.pcb(), fabrication.footprints());
-        PartBodies partBodies = new PartBodies(artwork.curveSteps());
-        PcbSolid made = PcbSolid.of(drawn, new ArtworkAreas(drawn.outlines(), settings.areaSteps()), drilled, settings.areaSteps(), partBodies);
+        PartBodies partBodies = new PartBodies(artwork.get().curveSteps());
+        PcbSolid made = PcbSolid.of(drawn, new ArtworkAreas(drawn.outlines(), settings.get().areaSteps()), drilled, settings.get().areaSteps(), partBodies);
         Geometry pcb = made.substrate();
         if (pcb.isEmpty()) {
             throw new IllegalArgumentException("The PCB has no closed edge, so there is no PCB to make a solid of.");
         }
         List<Mesh> bodies = new ArrayList<>();
         List<MeshScene.Node> nodes = new ArrayList<>();
-        raised(new PcbLayers.RaisedArea(fabrication.name() + " " + PCB, layers.settings().core(), 0, thickness, pcb), bodies,
+        raised(new PcbLayers.RaisedArea(fabrication.name() + " " + PCB, new PcbLayers(layers.get()).settings().core(), 0, thickness, pcb), bodies,
                 nodes);
-        layers.layersOf(made, drawn, thickness).forEach(layer ->
+        new PcbLayers(layers.get()).layersOf(made, drawn, thickness).forEach(layer ->
                 raised(new PcbLayers.RaisedArea(layer.name(), layer.finish(), layer.bottom(), layer.thickness(),
-                        TopologyPreservingSimplifier.simplify(layer.area(), settings.areaTolerance())), bodies, nodes));
+                        TopologyPreservingSimplifier.simplify(layer.area(), settings.get().areaTolerance())), bodies, nodes));
         Map<String, Optional<Integer>> models = new LinkedHashMap<>();
         for (PcbFabrication.SeatedPart part : fabrication.parts()) {
             List<FootprintDrawing.Model> shown = part.drawing().map(ModelPlacement::shownOf).orElse(List.of());
             if (shown.isEmpty()) {
-                partBodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> raised(layers.bodyOf(body, thickness), bodies, nodes),
+                partBodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> raised(new PcbLayers(layers.get()).bodyOf(body, thickness), bodies, nodes),
                         () -> notes.add(part.designator() + " has neither a 3D model nor a body; left out."));
                 continue;
             }

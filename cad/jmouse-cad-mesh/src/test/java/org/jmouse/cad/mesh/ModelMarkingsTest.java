@@ -34,7 +34,7 @@ class ModelMarkingsTest {
         List<ModelShapes.Shape> shapes = ModelShapes.of(model(RESISTOR));
         assertEquals(1, shapes.size());
         assertInstanceOf(ModelShapes.Revolved.class, shapes.getFirst());
-        assertTrue(ModelShapes.mesh(shapes, ModelMaterials.standard()).triangles() > 0);
+        assertTrue(ModelShapes.mesh(shapes, ModelMaterials.shipped()).triangles() > 0);
     }
 
     @Test
@@ -44,7 +44,7 @@ class ModelMarkingsTest {
         assertEquals(ModelMarkings.Shows.BANDS, markings.get(0).shows());
         assertEquals(new ModelMarkings.Round(1.12, 2.8, 0, 360), markings.get(0).surface());
         assertEquals("+", markings.get(1).text().orElseThrow());
-        JsonNode extras = ModelMarkings.extrasOf(markings, ModelMaterials.standard());
+        JsonNode extras = ModelMarkings.extrasOf(markings, ModelMaterials.shipped());
         assertEquals("bands", extras.path("markings").path(0).path("shows").asString());
         assertEquals("round", extras.path("markings").path(0).path("surface").path("kind").asString());
         assertEquals(90, extras.path("markings").path(0).path("rotate").path(1).asDouble());
@@ -57,7 +57,7 @@ class ModelMarkingsTest {
 
     @Test
     void aModelWithNoMarkingsSaysNothing() {
-        assertNull(ModelMarkings.extrasOf(ModelMarkings.of(model("box(plastic, size: [1, 1, 1])")), ModelMaterials.standard()));
+        assertNull(ModelMarkings.extrasOf(ModelMarkings.of(model("box(plastic, size: [1, 1, 1])")), ModelMaterials.shipped()));
     }
 
     @Test

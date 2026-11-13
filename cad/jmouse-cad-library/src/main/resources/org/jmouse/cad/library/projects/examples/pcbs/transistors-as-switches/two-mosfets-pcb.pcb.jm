@@ -1,0 +1,30 @@
+# Two MOSFETs, one gate drive laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:two-mosfets-pcb("Two MOSFETs, one gate drive — pcb") {
+    meta {
+        summary: "Two MOSFETs, one gate drive laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: transistors-as-switches
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(two-mosfets)
+    layers(2)
+    edge("M1 0H36A1 1 0 0 1 37 1V22A1 1 0 0 1 36 23H1A1 1 0 0 1 0 22V1A1 1 0 0 1 1 0Z")
+    place(RG1, at: 14 11.5)
+    place(RG2, at: 24 18.5)
+    place(RL1, at: 17 7, rotate: 270)
+    place(RL2, at: 31 5, rotate: 270)
+    place(Q1, at: 24 6)
+    place(Q2, at: 28 12.5)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, drive: 2, vdd: 3], at: 5.5 10.5)
+    track(top, width: 0.25, from: 31 6, to: 31 12.04, to: 30.54 12.5)
+    track(top, width: 0.25, from: 25 18.5, to: 25 15.8, to: 28.15 12.65, to: 28 12.5)
+    track(top, width: 0.25, from: 13 11.5, to: 6.5 11.5, to: 5.5 10.5)
+    track(top, width: 0.25, from: 17 8, to: 24.54 8, to: 26.54 6)
+    track(top, width: 0.25, from: 15 11.5, to: 15 7, to: 19.95 7, to: 20.4 7.45, to: 22.55 7.45, to: 24 6)
+    track(top, width: 0.25, from: 13 11.5, to: 20 18.5, to: 23 18.5)
+    track(top, width: 0.25, from: 17 6, to: 3.95 6, to: 3.95 11.49, to: 5.5 13.04)
+    track(top, width: 0.25, from: 17 6, to: 19 4, to: 31 4)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H36.5V22.5H0.5Z")
+}

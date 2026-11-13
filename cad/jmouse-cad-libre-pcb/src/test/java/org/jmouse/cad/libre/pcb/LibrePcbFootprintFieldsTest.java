@@ -29,7 +29,7 @@ class LibrePcbFootprintFieldsTest {
                 List.of(), List.of(), new LibrePcbLibrary.Axes(0, 0, 0), new LibrePcbLibrary.Axes(0, 0, 0));
         LibrePcbLibrary.Package found = new LibrePcbLibrary.Package("p", "R0805", "", "", Map.of(), Map.of(), List.of(footprint));
         String written = CadLanguage.standard().language().write(
-                LibrePcbFootprintDrawing.documentOf(found, footprint, Optional.empty(), LibrePcbFiling.standard()));
+                LibrePcbFootprintDrawing.documentOf(found, footprint, Optional.empty(), LibrePcbFiling.shipped()));
         assertTrue(written.contains("field(reference, at: 0 -2, size: 1)"), written);
         assertTrue(written.contains("field(value, at: 0 1.9, size: 0.8)"), written);
         assertTrue(written.split("field\\(").length == 3, written);

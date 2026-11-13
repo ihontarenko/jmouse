@@ -1,5 +1,6 @@
 package org.jmouse.cad.panel;
 
+import org.jmouse.settings.Label;
 /**
  * What a panel takes where its lines say nothing, in millimetres.
  *
@@ -13,6 +14,13 @@ package org.jmouse.cad.panel;
  * @param biteDrill        a hole of a tab's row
  * @param bitePitch        between the holes of a row
  */
-public record PanelDefaults(double rail, double boardGap, double fiducialDiameter, double fiducialOpening, double toolingDrill,
-                            double tabWidth, double tabSpacing, double biteDrill, double bitePitch) {
+public record PanelDefaults(@Label(value = "Rail", unit = "mm") double rail,
+                            @Label(value = "Board gap", unit = "mm") double boardGap,
+                            @Label(value = "Fiducial diameter", unit = "mm") double fiducialDiameter,
+                            @Label(value = "Fiducial opening", unit = "mm") double fiducialOpening,
+                            @Label(value = "Tooling drill", unit = "mm") double toolingDrill,
+                            @Label(value = "Tab width", unit = "mm") double tabWidth,
+                            @Label(value = "Tab spacing", unit = "mm") double tabSpacing,
+                            @Label(value = "Bite drill", unit = "mm") double biteDrill,
+                            @Label(value = "Bite pitch", unit = "mm") double bitePitch) {
 }

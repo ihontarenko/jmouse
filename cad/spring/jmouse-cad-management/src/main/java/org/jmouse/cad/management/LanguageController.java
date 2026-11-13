@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * ✏️ The jM language for editors — {@code JMOUSE_CAD_API.md} §2.5: what a form is built from. Nothing stored is read.
+ * ✏️ The jM language for editors — {@code JMOUSE_CAD_API.md} §2.6: what a form is built from. Nothing stored is read.
  */
 @RestController
 @RequestMapping(CadManagementRoutes.PREFIX)

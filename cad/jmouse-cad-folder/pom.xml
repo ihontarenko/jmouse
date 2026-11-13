@@ -62,6 +62,12 @@
             <artifactId>jmouse-revisions</artifactId>
         </dependency>
         <!-- Every revision is a commit of the library folder's repository. -->
+        <!-- A document's own files, kept through jMouse storage: one local store rooted at the library folder -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-storage</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-git</artifactId>

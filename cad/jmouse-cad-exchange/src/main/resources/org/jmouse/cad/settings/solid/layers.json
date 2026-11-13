@@ -1,5 +1,4 @@
 {
-  "$schema": "./layers.schema.json",
   "bare": { "colour": "#1f5a36", "metallic": 0, "roughness": 0.55 },
   "core": { "colour": "#c2b280", "metallic": 0, "roughness": 0.8 },
   "copper": { "name": "copper", "thickness": 0.035, "finish": { "colour": "#c8913f", "metallic": 1, "roughness": 0.35 } },

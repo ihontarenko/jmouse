@@ -1,0 +1,85 @@
+# RLC-02. A sine straight across a capacitor, a coil and a resistor in parallel, through an ammeter. At f0 = 1/(2π√LC)
+# the capacitor's current leads the voltage by a quarter turn and the coil's lags it by as much; they are equal and
+# cancel, so the source supplies only what is lost — the resistor's share and the coil's own winding resistance.
+# Inside the loop of L and C a current ten times larger keeps circulating, handed back and forth every half period.
+circuit:parallel-resonance("Parallel resonance") {
+    meta {
+        summary: "L, C and R in parallel across a sine: at f0 the source current falls to a minimum while L and C each carry far more."
+        description: """
+            Idea: in parallel, the capacitor and the coil see the same voltage. The capacitor's current leads it by a
+            quarter turn, the coil's lags it by a quarter turn; at f0 = 1/(2π√LC) they are equal and opposite, so
+            what one takes the other gives. The source supplies only the losses.
+
+            Try: start at f0 — 1592 Hz with 10 mH and 1 µF. Move the frequency away: the source current grows, because
+            one branch now outweighs the other. Raise R_parallel: the minimum gets deeper. Raise the coil's own
+            resistance: the minimum gets shallower.
+
+            Watch: CH2, the ammeter — the source current, about 0.6 mA at f0. CH3 and CH4, the capacitor's and the
+            coil's currents — 10 mA each, in antiphase. Most of the current never leaves the loop of L and C.
+
+            Ask: how can two branches carry 10 mA each while the wire feeding both carries 0.6 mA? What does the coil's
+            winding resistance do to the minimum, and why?
+            """
+        category: resonance
+        tags: rlc, example, rlc-02
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    parameter:A(1 V, in: 0.1 V .. 5 V, step: 0.1 V, "Generator amplitude")
+    parameter:F(1592 Hz, in: 200 Hz .. 10 kHz, step: 1 Hz, "Generator frequency")
+    parameter:R_parallel(10 kΩ, in: 100 Ω .. 100 kΩ, step: 100 Ω, "R, the resistor in parallel")
+    parameter:R_coil(5 Ω, in: 1 Ω .. 50 Ω, step: 1 Ω, "The coil's winding resistance")
+    parameter:L(10 mH, in: 1 mH .. 100 mH, step: 1 mH, "Inductance")
+    parameter:C(1 µF, in: 100 nF .. 10 µF, step: 100 nF, "Capacitance")
+    part:G1(sine-generator, [positive: in, negative: 0], amplitude: A, frequency: F)
+    part:A1(ammeter, [in: in, out: top])
+    part:R1(resistor, [top, 0], resistance: R_parallel)
+    part:C1(capacitor, [top, 0], capacitance: C)
+    part:L1(inductor, [top, coil], inductance: L)
+    part:R2(resistor, [coil, 0], resistance: R_coil)
+    place:G1(at: 320 680, rotate: 90)
+    place:A1(at: 560 440)
+    place:R1(at: 800 680, rotate: 90)
+    place:C1(at: 1040 680, rotate: 90)
+    place:L1(at: 1280 600, rotate: 90)
+    place:R2(at: 1280 800, rotate: 90)
+    mark:Jt1(junction, at: 800 440)
+    mark:Jt2(junction, at: 1040 440)
+    mark:Jb1(junction, at: 800 960)
+    mark:Jb2(junction, at: 1040 960)
+    mark:GND1(ground, at: 800 1040)
+    wire:W1(G1.positive, to: A1.in, via: 320 440)
+    wire:W2(A1.out, to: Jt1.j)
+    wire:W3(Jt1.j, to: R1.positive)
+    wire:W4(Jt1.j, to: Jt2.j)
+    wire:W5(Jt2.j, to: C1.positive)
+    wire:W6(Jt2.j, to: L1.positive, via: 1280 440)
+    wire:W7(L1.negative, to: R2.positive)
+    wire:W8(G1.negative, to: Jb1.j, via: 320 960)
+    wire:W9(R1.negative, to: Jb1.j)
+    wire:W10(Jb1.j, to: Jb2.j)
+    wire:W11(C1.negative, to: Jb2.j)
+    wire:W12(R2.negative, to: Jb2.j, via: 1280 960)
+    wire:W13(Jb1.j, to: GND1.ground)
+    probes {
+        probe:CH1(top, 1 V/div)
+        probe:CH2(current, A1, 1 mA/div)
+        probe:CH3(current, C1, 5 mA/div)
+        probe:CH4(current, L1, 5 mA/div)
+        time(200 µs/div)
+    }
+    expect("the source supplies only the losses", from: "at f0 the branches cancel: I = V / (R_parallel ∥ (X_L² / R_coil)) = 1 V / (10 kΩ ∥ 2 kΩ) ≈ 0.6 mA") {
+        measure(maximum, current: A1, after: 16 ms)
+        within(0.5 mA .. 0.7 mA)
+    }
+    expect("while the capacitor carries 10 mA", from: "I_C = V · 2πf0·C = 1 V / 100 Ω") {
+        measure(maximum, current: C1, after: 16 ms)
+        near(10 mA, +- 3%)
+    }
+    expect("and the coil as much", from: "I_L = V / |R_coil + j·2πf0·L| = 1 V / 100.1 Ω") {
+        measure(maximum, current: L1, after: 16 ms)
+        near(10 mA, +- 3%)
+    }
+    analysis(transient, for: 20 ms)
+    view:transient_response(primary)
+}

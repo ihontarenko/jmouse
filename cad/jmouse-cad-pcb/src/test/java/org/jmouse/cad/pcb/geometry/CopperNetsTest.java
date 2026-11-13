@@ -23,7 +23,7 @@ class CopperNetsTest {
         List<PcbDrawing.Zone> pours = List.of(new PcbDrawing.Zone(PcbDrawing.TOP, "GROUND", 0, 0, SQUARE),
                 new PcbDrawing.Zone(PcbDrawing.BOTTOM, "GROUND", 0, 0, SQUARE));
         PcbDrawing pcb = new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, SQUARE, List.of(part),
-                tracks, List.of(), vias, pours, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+                tracks, List.of(), vias, pours, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         return CopperNets.of(pcb, Map.of("TP1", footprint), Map.of("TP1", Map.of("1", "SIGNAL")), new PadOutline(16, 6), 16);
     }
 

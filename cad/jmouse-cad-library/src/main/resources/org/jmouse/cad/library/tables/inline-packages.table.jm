@@ -1,0 +1,79 @@
+# Transistor outlines whose leads stand in one row, the body upright behind them: `body-width` across the row,
+# `body-depth` front to back, `back` from the leads' line to the body's back face, `tab` the metal tab's thickness at the
+# back (0 for none). Leads `lead` × `thickness` at their largest.
+# `body-height` is the body's own height upright, tab included, as its outline draws it; the leads that stand it off the
+# pcb are left as the assembly bends them.
+table:inline-packages("Inline packages") {
+    meta {
+        summary: "Upright transistor outlines, the leads in one row."
+        category: tables
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+
+    form inline
+
+    to-126 "TO-126 (SOT-32)" source standard "JEDEC TO-126" {
+        body-height 11 mm
+        name to-126-3-vertical
+        leads 3
+        pitch 2.28 mm
+        lead 0.88 mm
+        thickness 0.6 mm
+        body-width 8 mm
+        body-depth 3 mm
+        back 1.5 mm
+        tab 0.5 mm
+        folder "packages/through-hole/transistor-outline"
+        category through-hole-transistor-outline
+        designation "TO126:3-V"
+    }
+
+    to-247 "TO-247-3" source standard "JEDEC TO-247 AD" {
+        body-height 21 mm
+        name to-247-3-vertical
+        leads 3
+        pitch 5.45 mm
+        lead 1.4 mm
+        thickness 0.8 mm
+        body-width 16.25 mm
+        body-depth 5.21 mm
+        back 2.6 mm
+        tab 2 mm
+        folder "packages/through-hole/transistor-outline"
+        category through-hole-transistor-outline
+        designation "TO247:3-V"
+    }
+
+    to-3p "TO-3P-3" source standard "JEITA SC-65" {
+        body-height 20 mm
+        name to-3p-3-vertical
+        leads 3
+        pitch 5.45 mm
+        lead 1.2 mm
+        thickness 0.7 mm
+        body-width 15.6 mm
+        body-depth 4.8 mm
+        back 2.5 mm
+        tab 1.5 mm
+        folder "packages/through-hole/transistor-outline"
+        category through-hole-transistor-outline
+        designation "TO3P:3-V"
+    }
+
+trimmer-3296w "Bourns 3296W trimming potentiometer" source standard "Bourns 3296 data sheet: the W, top adjust, pins in line" {
+        body-height 10.03 mm
+        name trimmer-bourns-3296w
+        leads 3
+        pitch 2.54 mm
+        lead 0.51 mm
+        thickness 0.51 mm
+        body-width 9.53 mm
+        body-depth 4.83 mm
+        back 2.415 mm
+        tab 0 mm
+        folder "passive/potentiometers/through-hole"
+        category potentiometers-through-hole
+        designation "POT:3296W"
+    }
+}

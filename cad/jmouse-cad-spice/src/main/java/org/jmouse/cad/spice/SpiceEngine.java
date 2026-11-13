@@ -1,5 +1,6 @@
 package org.jmouse.cad.spice;
 
+import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.simulation.AnalysisEngine;
 import org.jmouse.cad.simulation.CatalogueDocuments;
@@ -17,12 +18,15 @@ public final class SpiceEngine implements AnalysisEngine {
     private final String         id;
     private final SpiceDialect   dialect;
     private final SpiceSimulator simulator;
+    /** The devices SPICE knows and how ours are written as them, as the engine's table says it at each use. */
+    private final ReadTable<SpiceDevices> devices;
 
     /**
      * @param id        the engine's word on the routes: {@code ngspice}
      * @param simulator the program as a process, off while it says it is not set
      */
-    public SpiceEngine(String id, SpiceDialect dialect, SpiceSimulator simulator) {
+    public SpiceEngine(String id, SpiceDialect dialect, SpiceSimulator simulator, ReadTable<SpiceDevices> devices) {
+        this.devices = devices;
         this.id = id;
         this.dialect = dialect;
         this.simulator = simulator;
@@ -50,7 +54,7 @@ public final class SpiceEngine implements AnalysisEngine {
             throw new IllegalStateException("No program is set to run " + dialect.program() + ": set it in the plugin's settings.");
         }
         try {
-            SpiceTransient.Run run = new SpiceTransient(catalogue, simulator, dialect).run(circuit, parameters, samples);
+            SpiceTransient.Run run = new SpiceTransient(catalogue, simulator, dialect, devices.current()).run(circuit, parameters, samples);
             return new EngineTransient(run.time(), run.voltages(), run.currents(), run.deck(), run.notes());
         } catch (SpiceRunException failed) {
             throw new IllegalStateException(failed.getMessage(), failed);

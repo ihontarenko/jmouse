@@ -1,0 +1,35 @@
+# Switching off an inductor laid out by the engine (circuitBoard + autoroute, 2026-11-06): every part where the sheet
+# puts it, the bench's nets on J1, the bottom poured with the ground; every connection laid, the checks clean.
+pcb:rl-switch-off-pcb("Switching off an inductor — pcb") {
+    meta {
+        summary: "Switching off an inductor laid out on a two-layer pcb by the engine: parts where the sheet puts them, the bench's nets on a header, a ground plane under it all."
+        category: rl-circuits
+        tags: pcb, example
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    circuit(rl-switch-off)
+    layers(2)
+    edge("M1 0H44A1 1 0 0 1 45 1V24A1 1 0 0 1 44 25H1A1 1 0 0 1 0 24V1A1 1 0 0 1 1 0Z")
+    place(RA, at: 21 7, rotate: 270)
+    place(LA, at: 21 12.5, rotate: 270)
+    place(QA, at: 18.5 18.5)
+    place(RB, at: 29 7, rotate: 270)
+    place(LB, at: 28.5 12.5, rotate: 270)
+    place(QB, at: 31.5 19)
+    place(SW1, at: 38.5 8.5, rotate: 270)
+    place(RP, at: 32.5 12.5, rotate: 270)
+    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, drive: 2, vcc: 3], at: 5.5 14.5)
+    track(top, width: 0.25, from: 21 8, to: 21 11.65)
+    track(top, width: 0.25, from: 29 8, to: 29 11.15, to: 28.5 11.65)
+    track(top, width: 0.25, from: 28.5 13.35, to: 32.35 13.35, to: 32.5 13.5)
+    track(top, width: 0.25, from: 21 13.35, to: 21 18.46, to: 21.04 18.5)
+    track(top, width: 0.25, from: 32.5 13.5, to: 32.5 17.46, to: 34.04 19)
+    track(top, width: 0.25, from: 38.5 12.31, to: 33.31 12.31, to: 32.5 11.5)
+    track(top, width: 0.25, from: 21 6, to: 29 6)
+    track(top, width: 0.25, from: 29 6, to: 37.19 6, to: 38.5 4.69)
+    track(top, width: 0.25, from: 18.5 18.5, to: 20.75 20.75, to: 31.5 20.75, to: 31.5 19)
+    track(top, width: 0.25, from: 18.5 18.5, to: 18.5 18.05, to: 14.95 14.5, to: 5.5 14.5)
+    track(top, width: 0.25, from: 21 6, to: 8.85 6, to: 1.655 13.195, to: 5.5 17.04)
+    zone(bottom, net: 0, clearance: 0.4, "M0.5 0.5H44.5V24.5H0.5Z")
+}
