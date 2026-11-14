@@ -72,9 +72,8 @@ class AltiumPcbLibraryImportTest {
     }
 
     private ImportedDocuments imported() {
-        // As the plugin reads it: whose it is as the reader says, then filed by its library.
-        return AltiumPcbLibraryImport.read(library(), "rcl.PcbLib", AltiumLibraries.shipped()).whoseAsStated(WHOSE, "rcl.PcbLib")
-                .filedBy(AltiumLibraries.shipped());
+        // As the plugin reads it: whose it is as the reader says.
+        return AltiumPcbLibraryImport.read(library(), "rcl.PcbLib", AltiumLibraries.shipped()).whoseAsStated(WHOSE, "rcl.PcbLib");
     }
 
     private DocumentNode named(ImportedDocuments imported, String code) {

@@ -27,8 +27,8 @@ final class LibrePcbModelDrawing {
         String fileName = modelId + LibrePcbFile.MODEL_SUFFIX;
         String format = MeshFormats.standard().ofFile(fileName).orElseThrow().id();
         DocumentNode document = new DocumentNode(ModelModule.MODEL, name, slug, null, 1);
-        Provenance provenance = filing.provenance(LibrePcbNames.source("model", name, modelId), found.author());
-        MetaNode meta = MetaNode.filed(name + " — a 3D model imported from LibrePCB", LibrePcbNames.modelCode(found, modelId), filing.libraryCategory(provenance),
+        Provenance provenance = filing.provenance(LibrePcbNames.source(LibrePcbNames.SourceKind.MODEL, name, modelId), found.author());
+        MetaNode meta = MetaNode.filed(name + " — a 3D model imported from LibrePCB", LibrePcbNames.modelCode(found, modelId), filing.categoryOf(provenance),
                 filing.footprintTags());
         provenance.writeInto(meta);
         document.addExpression(meta);

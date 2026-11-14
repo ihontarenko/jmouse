@@ -14,14 +14,16 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SupplierPartsTest {
+
+    private static final Set<PartCandidate.Kind> PARTS = Set.of(PartCandidate.Kind.PART);
 
     private static final SupplierOffer OFFER = new SupplierOffer("mouser", "595-LM358DR", "LM358DR", "Texas Instruments", "Op amp",
             null, "Amplifiers", "Active", null, 12400L, 5L, "42 Days", "EUR", List.of(new PriceBreak(1, new BigDecimal("0.176"))),
@@ -74,13 +76,13 @@ class SupplierPartsTest {
         SupplierParts parts = parts("", 10);
         assertEquals(ProviderState.Status.NOT_CONFIGURED, parts.state().status());
         assertEquals("MOUSER_API_KEY is not set.", parts.state().detail());
-        assertEquals(List.of(), parts.search("LM358", 10));
+        assertEquals(List.of(), parts.search("LM358", PARTS, 10));
         assertTrue(asked.isEmpty());
     }
 
     @Test
     void anOfferBecomesACandidateShownNotKept() {
-        List<PartCandidate> found = parts("key", 10).search(" LM358 ", 20);
+        List<PartCandidate> found = parts("key", 10).search(" LM358 ", PARTS, 20);
         assertEquals(1, found.size(), "an offer naming no part has nothing to look up");
         PartCandidate candidate = found.getFirst();
         assertEquals("mouser", candidate.provider());
@@ -88,7 +90,6 @@ class SupplierPartsTest {
         assertEquals("LM358DR", candidate.title());
         assertEquals(PartCandidate.Kind.PART, candidate.kind());
         assertFalse(candidate.fetchable());
-        assertNull(candidate.slug());
         assertEquals(new PartCandidate.Link("Mouser", "https://mouser.example/lm358"), candidate.link());
         assertEquals(12400L, candidate.supply().stock());
         assertEquals(List.of(new PartCandidate.Price(1, new BigDecimal("0.176"))), candidate.supply().prices());
@@ -96,9 +97,9 @@ class SupplierPartsTest {
 
     @Test
     void asksTheFewestOfWhatTheReaderTheSettingAndTheDistributorAllow() {
-        parts("key", 10).search("a", 20);
-        parts("key", 80).search("a", 200);
-        parts("key", 80).search("a", 3);
+        parts("key", 10).search("a", PARTS, 20);
+        parts("key", 80).search("a", PARTS, 200);
+        parts("key", 80).search("a", PARTS, 3);
         assertEquals(List.of(10, 50, 3), asked);
     }
 
@@ -106,9 +107,9 @@ class SupplierPartsTest {
     void aFailureStaysAFailureAndTheNextSearchStillAsks() {
         SupplierParts parts = parts("key", 10);
         failure = new SupplierFailure(SupplierFailure.Reason.RATE_LIMITED, "Mouser answered HTTP 429.");
-        assertEquals("Mouser answered HTTP 429.", assertThrows(IllegalStateException.class, () -> parts.search("a", 10)).getMessage());
+        assertEquals("Mouser answered HTTP 429.", assertThrows(IllegalStateException.class, () -> parts.search("a", PARTS, 10)).getMessage());
         assertTrue(parts.state().ready(), "one failure must not switch the place off: search skips a place that is not ready");
         failure = null;
-        assertEquals(1, parts.search("a", 10).size());
+        assertEquals(1, parts.search("a", PARTS, 10).size());
     }
 }

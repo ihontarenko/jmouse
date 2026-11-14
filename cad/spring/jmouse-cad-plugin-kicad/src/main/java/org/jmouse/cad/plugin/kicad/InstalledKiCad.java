@@ -5,10 +5,8 @@ import org.jmouse.kicad.symbol.KiCadSymbolLibraries;
 import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.document.DocumentNode;
 
-import org.jmouse.cad.document.part.FetchedPart;
-import org.jmouse.cad.document.part.PartCandidate;
 import org.jmouse.cad.document.part.PartSearchProvider;
-import org.jmouse.cad.document.part.ProviderState;
+import org.jmouse.cad.document.part.InstalledLibraryParts;
 import org.jmouse.cad.kicad.InstalledKiCadParts;
 import org.jmouse.cad.kicad.KiCadLibraries;
 import org.jmouse.cad.kicad.KiCadModels;
@@ -35,7 +33,7 @@ final class InstalledKiCad {
     private record Folders(List<Path> symbols, List<Path> footprints, List<Path> models) {
     }
 
-    private record Libraries(Folders folders, KiCadLibraries filing, InstalledKiCadLibraries installed, InstalledKiCadParts parts, KiCadModels models) {
+    private record Libraries(Folders folders, KiCadLibraries filing, InstalledKiCadLibraries installed, PartSearchProvider parts, KiCadModels models) {
     }
 
     private final ParameterValues settings;
@@ -44,7 +42,7 @@ final class InstalledKiCad {
     private final Executor            indexing;
     private Libraries                 current;
 
-    /** @param indexing where the libraries are read the first time they are asked about */
+    /** @param indexing where the libraries are read, as the engine comes up or the first time they are asked about */
     InstalledKiCad(ParameterValues settings, ReadTable<KiCadLibraries> filings, Executor indexing) {
         this.settings = settings;
         this.filings = filings;
@@ -56,34 +54,9 @@ final class InstalledKiCad {
         return current().installed();
     }
 
-    /** The installed libraries as a place parts are looked for. */
+    /** The installed libraries as a place parts are looked for: the one the settings name now. */
     PartSearchProvider parts() {
-        return new PartSearchProvider() {
-            @Override
-            public String id() {
-                return InstalledKiCadParts.ID;
-            }
-
-            @Override
-            public String name() {
-                return InstalledKiCadParts.NAME;
-            }
-
-            @Override
-            public ProviderState state() {
-                return current().parts().state();
-            }
-
-            @Override
-            public List<PartCandidate> search(String query, int limit) {
-                return current().parts().search(query, limit);
-            }
-
-            @Override
-            public FetchedPart fetch(String identifier) {
-                return current().parts().fetch(identifier);
-            }
-        };
+        return PartSearchProvider.following(InstalledKiCadParts.ID, InstalledKiCadParts.NAME, () -> current().parts());
     }
 
     /** The installed 3D model libraries, a source of the 3D models plugin's where it runs. */
@@ -115,7 +88,7 @@ final class InstalledKiCad {
                 : KiCadFootprintLibraries.in(folders.footprints());
         KiCadSymbolLibraries symbols = folders.symbols().isEmpty() ? KiCadSymbolLibraries.NONE : KiCadSymbolLibraries.in(folders.symbols());
         return new Libraries(folders, libraries, new InstalledKiCadLibraries(footprints, symbols),
-                new InstalledKiCadParts(folders.symbols(), folders.footprints(), footprints, indexing, libraries),
+                new InstalledLibraryParts(new InstalledKiCadParts(folders.symbols(), folders.footprints(), footprints, libraries), indexing),
                 new KiCadModels(folders.models(), footprints, MeshFormats.standard(), libraries));
     }
 }

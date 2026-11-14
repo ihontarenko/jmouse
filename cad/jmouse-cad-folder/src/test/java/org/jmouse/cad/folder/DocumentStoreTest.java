@@ -1,6 +1,7 @@
 package org.jmouse.cad.folder;
 
 import org.jmouse.cad.document.DocumentOwner;
+import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.git.local.CommitAuthor;
 import org.jmouse.git.local.JGitLocalGit;
 import org.jmouse.revisions.RevisionLabel;
@@ -15,8 +16,11 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,6 +75,22 @@ class DocumentStoreTest {
         document.indexRevision(1, new RevisionLabel(LocalDate.ofInstant(at, KYIV), 1), "checksum", "footprint", slug, code, null,
                 "footprints", false, at);
         return document;
+    }
+
+    @Test
+    void theListingIsNarrowedByTheWordsAsWrittenNeverByAPatternLanguage(@TempDir Path folder) {
+        DocumentStore store = storeOf(folder);
+        store.open();
+        coded(store, "sot-23-5-footprint", null, "FP.SOT:SOT-23-5");
+        coded(store, "chip-resistor-0805-footprint", null, "FP.CHIP:R0805");
+        Set<DocumentStatus> every = EnumSet.allOf(DocumentStatus.class);
+        Function<String, List<String>> found = (text) -> store.browse(every, null, null, null, text, null, null, 0, 10)
+                .rows().stream().map(StoredDocument::getSlug).toList();
+
+        // Any case, anywhere in the slug; a `%` is a character like any other, so a LIKE pattern finds nothing.
+        assertEquals(List.of("sot-23-5-footprint"), found.apply("SOT-23"));
+        assertEquals(List.of("chip-resistor-0805-footprint"), found.apply("resistor"));
+        assertEquals(List.of(), found.apply("%resistor%"));
     }
 
     @Test

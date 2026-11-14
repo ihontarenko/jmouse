@@ -2,6 +2,13 @@ package org.jmouse.cad.store.parts;
 
 import org.jmouse.cad.folder.RevisionOrigin;
 import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.MetaNode;
+import org.jmouse.cad.document.Provenance;
+import org.jmouse.cad.document.source.DocumentLocation;
+import org.jmouse.cad.store.catalogue.CatalogueViews.LocationView;
+import org.jmouse.cad.store.catalogue.DocumentReading;
+import org.jmouse.cad.store.catalogue.ReadDocument;
+import org.jmouse.cad.store.library.PartLibrary.DrawnDocument;
 import org.jmouse.cad.document.part.FetchCompletion;
 import org.jmouse.cad.document.part.FetchedFile;
 import org.jmouse.cad.document.part.FetchedPart;
@@ -29,14 +36,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.EnumSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
- * 🔎 Parts looked for in every provider at once, and a found one made an owner's documents — {@code JMOUSE_CAD_API.md}
- * §2.7.
+ * 🔎 Parts looked for beyond the library, in every provider at once, and a found one made an owner's documents —
+ * {@code JMOUSE_CAD_API.md} §2.8.
  *
- * <p>The catalogue is asked first, then every provider the plugins brought ({@link PartSearchProvider#POINT}) — KiCad's
- * installed libraries, a supplier's search —, read anew on each call.</p>
+ * <p>Every provider the plugins brought ({@link PartSearchProvider#POINT}) — KiCad's and LibrePCB's installed libraries, a
+ * supplier's search — is asked, read anew on each call. The library itself is no provider: what it holds is its own listing,
+ * which the same search narrows beside these.</p>
  *
  * <p>A provider that cannot answer is answered for by its state — not configured, still indexing, failed — and never
  * left out, so a reader sees which places were asked. A provider that fails while searching does not fail the others.</p>
@@ -69,7 +79,21 @@ public class PartSearch {
     public record Fetched(String open, List<String> created, List<String> reused, List<String> notes) {
     }
 
-    private final CataloguePartSearch      catalogueSearch;
+    /**
+     * A part seen before it is kept: what a fetch would store, read as the library reads its documents, nothing written.
+     *
+     * @param open      the slug a fetch would open
+     * @param documents each document it would store, by its kind, drawn as a shelf draws it — held nowhere: read in place from
+     *                  its provider
+     * @param notes     what the source said that the documents could not carry
+     */
+    public record Previewed(String open, List<PreviewedDocument> documents, List<String> notes) {
+    }
+
+    /** One document of a part seen before it is kept: its kind — the shelf that would hold it — and the document as drawn. */
+    public record PreviewedDocument(String kind, DrawnDocument drawn) {
+    }
+
     private final Extensions               extensions;
     private final CadCatalogue             catalogue;
     private final DocumentStore            documents;
@@ -80,14 +104,16 @@ public class PartSearch {
     private final CadLanguage              language;
     private final DocumentFiles            files;
     private final DocumentAccess           access;
+    private final DocumentReading          reading;
 
-    public PartSearch(CataloguePartSearch catalogueSearch, Extensions extensions, CadCatalogue catalogue,
+    public PartSearch(Extensions extensions, CadCatalogue catalogue,
                       DocumentStore documents, CadAuthority authority, CadPlaces places, TransactionTemplate transactions,
-                      EngineConfiguration configuration, CadLanguage language, DocumentFiles files, DocumentAccess access) {
+                      EngineConfiguration configuration, CadLanguage language, DocumentFiles files, DocumentAccess access,
+                      DocumentReading reading) {
+        this.reading = reading;
         this.language = language;
         this.files = files;
         this.access = access;
-        this.catalogueSearch = catalogueSearch;
         this.extensions = extensions;
         this.catalogue = catalogue;
         this.documents = documents;
@@ -103,23 +129,33 @@ public class PartSearch {
                 List.of())).toList();
     }
 
+    /** Every provider made ready in the background ({@link PartSearchProvider#prepare()}): what the engine asks as it comes up. */
+    public void prepareProviders() {
+        chosen(null).forEach(PartSearchProvider::prepare);
+    }
+
     /**
      * @param query    what the reader typed
      * @param provider one provider's code, or null for every one
+     * @param kinds    the kinds of part looked for — a shelf's —; empty for every kind. A provider offering none of them is not asked.
      */
-    public List<ProviderResults> search(String query, String provider) {
+    public List<ProviderResults> search(String query, String provider, Set<PartCandidate.Kind> kinds) {
         if (query == null || query.isBlank()) {
             throw CadProblem.invalid("Say what to look for: a part number, a name or a few words.");
         }
         List<ProviderResults> answered = new ArrayList<>();
         for (PartSearchProvider candidate : chosen(provider)) {
+            Set<PartCandidate.Kind> asked = kinds.isEmpty() ? candidate.offers() : intersection(kinds, candidate.offers());
+            if (asked.isEmpty()) {
+                continue;
+            }
             ProviderState state = candidate.state();
             if (!state.ready()) {
                 answered.add(new ProviderResults(candidate.id(), candidate.name(), state, List.of()));
                 continue;
             }
             try {
-                answered.add(new ProviderResults(candidate.id(), candidate.name(), state, candidate.search(query, configuration.partLimit())));
+                answered.add(new ProviderResults(candidate.id(), candidate.name(), state, candidate.search(query, asked, configuration.partLimit())));
             } catch (RuntimeException failed) {
                 answered.add(new ProviderResults(candidate.id(), candidate.name(), ProviderState.failed(failed.getMessage()),
                         List.of()));
@@ -141,6 +177,40 @@ public class PartSearch {
         if (identifier == null || identifier.isBlank()) {
             throw CadProblem.invalid("Name the part to fetch as 'identifier': what the search answered it by.");
         }
+        FetchedPart completed = converted(provider, identifier);
+        return transactions.execute(status -> store(owner, completed));
+    }
+
+    /**
+     * A candidate as a fetch would make it, read and drawn, nothing stored: what a reader looks at before keeping it. Each document
+     * is read as the library reads one; a document that does not read is shown without its drawing, never dropped.
+     */
+    public Previewed preview(String provider, String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            throw CadProblem.invalid("Name the part to preview as 'identifier': what the search answered it by.");
+        }
+        FetchedPart made = converted(provider, identifier);
+        LocationView place = LocationView.of(new DocumentLocation.Foreign(provider, identifier.strip(), null));
+        List<PreviewedDocument> seen = made.documents().stream().map(document -> previewed(document, place)).toList();
+        return new Previewed(made.open(), seen, made.notes());
+    }
+
+    private PreviewedDocument previewed(DocumentNode document, LocationView place) {
+        String source = language.language().write(document);
+        try {
+            ReadDocument read = reading.read(source, document.slug());
+            Optional<MetaNode> meta = read.document().block(MetaNode.class);
+            return new PreviewedDocument(read.index().kind(), new DrawnDocument(read.index().slug(), read.index().title(),
+                    read.index().summary(), place, null, null, read.index().code(), meta.map(Provenance::of).orElse(Provenance.OURS),
+                    read.model().orElse(null)));
+        } catch (CadProblem unreadable) {
+            return new PreviewedDocument(document.kind().word(), new DrawnDocument(document.slug(), document.title(), null, place, null,
+                    null, null, new Provenance(null, null, null), null));
+        }
+    }
+
+    /** A candidate converted by its provider, then completed by every plugin that completes one: what a fetch stores. */
+    private FetchedPart converted(String provider, String identifier) {
         PartSearchProvider source = chosen(provider).getFirst();
         FetchedPart made;
         try {
@@ -155,8 +225,7 @@ public class PartSearch {
         for (FetchCompletion completion : extensions.contributions(FetchCompletion.POINT)) {
             made = completion.completed(made);
         }
-        FetchedPart completed = made;
-        return transactions.execute(status -> store(owner, completed));
+        return made;
     }
 
     /**
@@ -209,11 +278,15 @@ public class PartSearch {
         return named;
     }
 
-    /** The catalogue first, then every provider a plugin brought. */
+    private static Set<PartCandidate.Kind> intersection(Set<PartCandidate.Kind> asked, Set<PartCandidate.Kind> offered) {
+        Set<PartCandidate.Kind> both = EnumSet.noneOf(PartCandidate.Kind.class);
+        both.addAll(asked);
+        both.retainAll(offered);
+        return both;
+    }
+
+    /** Every provider a plugin brought. */
     private List<PartSearchProvider> everyProvider() {
-        List<PartSearchProvider> every = new ArrayList<>();
-        every.add(catalogueSearch);
-        every.addAll(extensions.contributions(PartSearchProvider.POINT));
-        return every;
+        return extensions.contributions(PartSearchProvider.POINT);
     }
 }

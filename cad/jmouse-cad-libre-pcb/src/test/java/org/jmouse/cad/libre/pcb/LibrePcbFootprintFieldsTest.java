@@ -27,7 +27,7 @@ class LibrePcbFootprintFieldsTest {
                 new LibrePcbGraphic.Text("top_documentation", 0.5, new LibrePcbPoint(0, 0), 0, LibrePcbGraphic.Alignment.CENTRE,
                         LibrePcbGraphic.Across.MIDDLE, false, "{{NAME}} here")),
                 List.of(), List.of(), new LibrePcbLibrary.Axes(0, 0, 0), new LibrePcbLibrary.Axes(0, 0, 0));
-        LibrePcbLibrary.Package found = new LibrePcbLibrary.Package("p", "R0805", "", "", Map.of(), Map.of(), List.of(footprint));
+        LibrePcbLibrary.Package found = new LibrePcbLibrary.Package("p", "R0805", "", "", "", Map.of(), Map.of(), List.of(footprint));
         String written = CadLanguage.standard().language().write(
                 LibrePcbFootprintDrawing.documentOf(found, footprint, Optional.empty(), LibrePcbFiling.shipped()));
         assertTrue(written.contains("field(reference, at: 0 -2, size: 1)"), written);

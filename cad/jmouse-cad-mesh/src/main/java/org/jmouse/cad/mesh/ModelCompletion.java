@@ -40,10 +40,6 @@ public final class ModelCompletion implements FetchCompletion {
                 for (ModelSource place : places) {
                     for (ModelSource.FetchedModel model : place.modelsOf(document)) {
                         if (brought.add(model.document().slug())) {
-                            // Its categories before it, each once, unless the part brings it already.
-                            model.categories().stream().filter(category -> brought.add(category.slug()))
-                                    .filter(category -> part.documents().stream().noneMatch(held -> held.slug().equals(category.slug())))
-                                    .forEach(documents::add);
                             documents.add(model.document());
                             files.addAll(model.files());
                         }

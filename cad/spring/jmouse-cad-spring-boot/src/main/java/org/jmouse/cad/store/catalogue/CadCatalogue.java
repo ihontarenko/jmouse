@@ -267,10 +267,11 @@ public class CadCatalogue {
         Set<DocumentStatus> statuses = includeDrafts && authority.permitsGlobally(CadCapability.CATALOGUE_WRITE)
                 ? EnumSet.of(DocumentStatus.PUBLISHED, DocumentStatus.DRAFT)
                 : EnumSet.of(DocumentStatus.PUBLISHED);
-        String pattern = text == null || text.isBlank() ? null : "%" + text.strip().toLowerCase(Locale.ROOT) + "%";
+        // The store matches the words as written, anywhere in a title, a summary or a slug: no pattern language between them.
+        String wanted = text == null || text.isBlank() ? null : text.strip();
         // A category means what is filed in it and in every category under it.
         Set<String> categories = blankToNull(category) == null ? null : CategoryDocument.within(category.strip(), catalogueCategories());
-        return documents.browse(statuses, categories, blankToNull(kind), featured, pattern,
+        return documents.browse(statuses, categories, blankToNull(kind), featured, wanted,
                                 blankToNull(tag), blankToNull(benchRole), page, size).map(DocumentSummary::of);
     }
 

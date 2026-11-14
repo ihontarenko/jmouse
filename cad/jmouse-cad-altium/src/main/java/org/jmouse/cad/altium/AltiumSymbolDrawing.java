@@ -34,7 +34,7 @@ final class AltiumSymbolDrawing {
         String said = component.description().isBlank() ? reference : component.description();
         Provenance provenance = filing.provenance(AltiumNames.symbolSource(component.sourceLibrary(), reference), false);
         MetaNode meta = MetaNode.filed(said + ", drawn as Altium draws it", AltiumNames.symbolCode(component.sourceLibrary(), reference),
-                filing.libraryCategory(provenance), filing.symbolTags());
+                filing.categoryOf(provenance), filing.symbolTags());
         provenance.writeInto(meta);
         document.addExpression(meta);
         double[] centre = centreOf(component);

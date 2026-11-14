@@ -32,8 +32,8 @@ final class LibrePcbSymbolDrawing {
     /** @param namedPins the pins whose names a sheet shows, by id: what the components using it say */
     static DocumentNode documentOf(LibrePcbLibrary.Symbol symbol, Set<String> namedPins, LibrePcbFiling filing) {
         DocumentNode document = new DocumentNode(SchematicModule.SYMBOL, symbol.name(), LibrePcbNames.symbol(symbol), null, 1);
-        Provenance provenance = filing.provenance(LibrePcbNames.source("symbol", symbol.name(), symbol.id()), symbol.author());
-        MetaNode meta = MetaNode.filed(symbol.name() + ", drawn as LibrePCB draws it", LibrePcbNames.symbolCode(symbol), filing.libraryCategory(provenance),
+        Provenance provenance = filing.provenance(LibrePcbNames.source(LibrePcbNames.SourceKind.SYMBOL, symbol.name(), symbol.id()), symbol.author());
+        MetaNode meta = MetaNode.filed(symbol.name() + ", drawn as LibrePCB draws it", LibrePcbNames.symbolCode(symbol), filing.categoryOf(provenance),
                 filing.symbolTags());
         provenance.writeInto(meta);
         document.addExpression(meta);

@@ -63,15 +63,14 @@ public final class KiCadModels implements ModelSource {
     public Optional<FetchedModel> find(KiCadModel model) {
         String libraryPath = model.libraryPath();
         String name = Path.of(libraryPath).getFileName().toString();
-        return folders.find(libraryPath, KiCadFootprintDrawing.modelSlugOf(libraryPath), name, metaOf(libraryPath, name))
-                .map(found -> found.filedIn(libraries.libraryCategoryDocument(Provenance.of(found.document())).stream().toList()));
+        return folders.find(libraryPath, KiCadFootprintDrawing.modelSlugOf(libraryPath), name, metaOf(libraryPath, name));
     }
 
     /** What a model of KiCad's libraries says of itself: where it was imported from, where it is filed, whose it is. */
     private MetaNode metaOf(String libraryPath, String name) {
         Provenance provenance = libraries.provenance(KiCadSources.model(libraryPath), true);
         MetaNode meta = MetaNode.filed(name + " — a 3D model imported from KiCad", KiCadFootprintDrawing.modelCodeOf(libraryPath),
-                libraries.libraryCategory(provenance),
+                libraries.categoryOf(provenance),
                 libraries.modelTags());
         provenance.writeInto(meta);
         return meta;

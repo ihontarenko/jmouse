@@ -1,8 +1,0 @@
-category:altium("Altium's") {
-    meta {
-        summary: "Symbols, footprints and components brought by an Altium import"
-        order: 103
-        authors: "jMouse"
-        license: "CERN-OHL-W-2.0"
-    }
-}

@@ -136,7 +136,7 @@ public final class KiCadSymbolDrawing {
                 + ", drawn as KiCad draws it";
         DocumentNode document = new DocumentNode(SchematicModule.SYMBOL, title, slugOf(symbol, unit), null, 1);
         Provenance provenance = libraries.provenance(KiCadSources.symbol(symbol.name()), installed);
-        MetaNode meta = MetaNode.filed(summary, codeOf(symbol, unit), libraries.libraryCategory(provenance), libraries.symbolTags());
+        MetaNode meta = MetaNode.filed(summary, codeOf(symbol, unit), libraries.categoryOf(provenance), libraries.symbolTags());
         provenance.writeInto(meta);
         document.addExpression(meta);
         drawing(symbol, unit, pinNames).forEach(document::addExpression);

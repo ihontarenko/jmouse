@@ -1,0 +1,9 @@
+category:microcontrollers("Microcontrollers") {
+    meta {
+        summary: "Microcontrollers and processors, systems on a chip, signal processors"
+        category: integrated
+        order: 13
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+}

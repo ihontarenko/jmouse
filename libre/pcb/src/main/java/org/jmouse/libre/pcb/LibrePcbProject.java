@@ -1,6 +1,5 @@
 package org.jmouse.libre.pcb;
 
-import org.jmouse.sexpression.SExpressionParser;
 import org.jmouse.sexpression.node.SExpressionList;
 
 import java.util.LinkedHashMap;
@@ -13,8 +12,6 @@ import java.util.Map;
  */
 public record LibrePcbProject(String name, String author, String version, LibrePcbCircuit circuit, List<LibrePcbSchematic> schematics,
                               List<LibrePcbBoard> boards, LibrePcbLibrary library) {
-
-    private static final SExpressionParser PARSER = new SExpressionParser();
 
     public LibrePcbProject {
         schematics = List.copyOf(schematics);
@@ -38,21 +35,15 @@ public record LibrePcbProject(String name, String author, String version, LibreP
         return required(files, index.path()).lists(item).stream().map(entry -> required(files, entry.word(1))).toList();
     }
 
+    /** The library the project carries: its files under {@link LibrePcbFile#PROJECT_LIBRARY}, read as any library is. */
     private static LibrePcbLibrary library(Map<String, String> files) {
-        Map<String, LibrePcbLibrary.Symbol> symbols = new LinkedHashMap<>();
-        Map<String, LibrePcbLibrary.Component> components = new LinkedHashMap<>();
-        Map<String, LibrePcbLibrary.Device> devices = new LinkedHashMap<>();
-        Map<String, LibrePcbLibrary.Package> packages = new LinkedHashMap<>();
-        files.forEach((path, text) -> LibrePcbFile.Element.of(path).ifPresent(element -> {
-            SExpressionList read = parsed(path, text);
-            switch (element) {
-                case SYMBOL -> symbols.put(read.word(1), LibrePcbLibrary.Symbol.of(read));
-                case COMPONENT -> components.put(read.word(1), LibrePcbLibrary.Component.of(read));
-                case DEVICE -> devices.put(read.word(1), LibrePcbLibrary.Device.of(read));
-                case PACKAGE -> packages.put(read.word(1), LibrePcbLibrary.Package.of(read));
+        Map<String, String> carried = new LinkedHashMap<>();
+        files.forEach((path, text) -> {
+            if (path.startsWith(LibrePcbFile.PROJECT_LIBRARY)) {
+                carried.put(path.substring(LibrePcbFile.PROJECT_LIBRARY.length()), text);
             }
-        }));
-        return new LibrePcbLibrary(symbols, components, devices, packages);
+        });
+        return LibrePcbLibrary.read(carried);
     }
 
     private static SExpressionList required(Map<String, String> files, String path) {
@@ -60,14 +51,6 @@ public record LibrePcbProject(String name, String author, String version, LibreP
         if (text == null) {
             throw new LibrePcbReadException("The project's " + path + " is not among its files: choose the project's whole folder.");
         }
-        return parsed(path, text);
-    }
-
-    private static SExpressionList parsed(String path, String text) {
-        try {
-            return PARSER.parse(path, text).root();
-        } catch (IllegalArgumentException unread) {
-            throw new LibrePcbReadException(path + " does not read: " + unread.getMessage(), unread);
-        }
+        return LibrePcbParsing.parsed(path, text);
     }
 }

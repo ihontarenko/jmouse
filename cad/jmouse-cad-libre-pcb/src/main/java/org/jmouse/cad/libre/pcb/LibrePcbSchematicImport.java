@@ -2,7 +2,6 @@ package org.jmouse.cad.libre.pcb;
 
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.document.part.FetchedFile;
 import org.jmouse.cad.exchange.ImportedDocuments;
 import org.jmouse.cad.exchange.imported.ImportedBuses;
 import org.jmouse.cad.exchange.imported.ImportedCircuit;
@@ -71,23 +70,19 @@ final class LibrePcbSchematicImport {
     private final LibrePcbFiling filing;
     /** How the sheet's marks are drawn: where each one's pin stands. */
     private final SheetMarks marks;
-    private final Map<String, byte[]> modelBytes;
     private final Optional<LibrePcbBoard> board;
     private final ImportedNetNames nets;
     private final UniqueIdentifiers ids = new UniqueIdentifiers(ImportedCircuit.ID_OPENING, ImportedCircuit.ID_LONGEST);
-    private final Map<String, DocumentNode> models = new LinkedHashMap<>();
-    private final List<FetchedFile> modelFiles = new ArrayList<>();
-    private final Map<String, DocumentNode> footprints = new LinkedHashMap<>();
-    private final Map<String, DocumentNode> symbols = new LinkedHashMap<>();
-    private final Map<String, DocumentNode> components = new LinkedHashMap<>();
+    /** What its library's elements become: made once each, as a fetch from an installed library makes them. */
+    private final LibrePcbLibraryDocuments made;
     private final Map<String, Placed> placed = new LinkedHashMap<>();
     private final Map<String, Kind> kinds = new HashMap<>();
-    private final Map<String, Set<String>> namedPins = new HashMap<>();
+    private final Map<String, Set<String>> namedPins;
     private final List<ImportedCircuit.Item> items = new ArrayList<>();
     private final List<ImportedCircuit.Wire> wires = new ArrayList<>();
     private final List<ImportedCircuit.Bus> buses = new ArrayList<>();
     /** How many stretches of wire each net of the file is drawn in. */
-    private final Map<String, Long> segmentsOfNet = new java.util.HashMap<>();
+    private final Map<String, Long> segmentsOfNet = new HashMap<>();
     private final Set<String> globals = new LinkedHashSet<>();
     private final List<String> notes = new ArrayList<>();
     private final Set<String> drawnParts = new LinkedHashSet<>();
@@ -99,10 +94,12 @@ final class LibrePcbSchematicImport {
     private LibrePcbSchematicImport(LibrePcbProject project, Map<String, byte[]> modelBytes, LibrePcbFiling filing, SheetMarks marks) {
         this.marks = marks;
         this.project = project;
-        this.modelBytes = modelBytes;
         this.library = project.library();
         this.filing = filing;
         this.board = project.boards().stream().findFirst();
+        this.made = new LibrePcbLibraryDocuments(library, projectModels(modelBytes), board.map(LibrePcbBoard::rules), filing);
+        this.namedPins = LibrePcbLibraryDocuments.namedPinsOf(project.circuit().parts().values().stream()
+                .map(part -> variantOf(part, componentOf(part))).toList());
         this.nets = new ImportedNetNames(filing.ground(), UnaryOperator.identity());
     }
 
@@ -122,7 +119,6 @@ final class LibrePcbSchematicImport {
         for (LibrePcbCircuit.Part part : project.circuit().parts().values()) {
             LibrePcbLibrary.Component component = componentOf(part);
             LibrePcbLibrary.Variant variant = variantOf(part, component);
-            variant.gates().forEach(gate -> namedPins.computeIfAbsent(gate.symbol(), ignored -> new LinkedHashSet<>()).addAll(gate.namedPins()));
             Kind kind = kindOf(component, variant);
             kinds.put(part.id(), kind);
             switch (kind) {
@@ -143,20 +139,14 @@ final class LibrePcbSchematicImport {
     }
 
     private void part(LibrePcbCircuit.Part part, LibrePcbLibrary.Component component, LibrePcbLibrary.Variant variant) {
-        LibrePcbComponents.Drawn drawn = LibrePcbComponents.drawnOf(library, variant);
-        if (drawn instanceof LibrePcbComponents.Drawn.ByGate byGate) {
-            symbols.computeIfAbsent(LibrePcbNames.symbol(byGate.symbol()), ignored -> LibrePcbSymbolDrawing.documentOf(byGate.symbol(),
-                    namedPins.getOrDefault(byGate.symbol().id(), Set.of()), filing));
-        }
         Optional<LibrePcbLibrary.Device> device = part.device().map(library.devices()::get);
-        Optional<LibrePcbLibrary.Package> found = device.map(LibrePcbLibrary.Device::packageId).map(library.packages()::get);
         // The component lands on what its package offers first; a part the board stands on another says so itself.
-        String usual = found.flatMap(given -> given.footprints().stream().findFirst().map(footprint -> footprint(given, footprint))).orElse(null);
-        String own = found.flatMap(given -> boardFootprint(part, given).map(footprint -> footprint(given, footprint)))
-                .filter(code -> !code.equals(usual)).orElse(null);
-        String slug = device.map(given -> LibrePcbNames.component(given.name(), given.id()))
-                .orElseGet(() -> LibrePcbNames.component(component.name(), variant.id()));
-        components.computeIfAbsent(slug, ignored -> LibrePcbComponents.documentOf(library, component, drawn, device, usual, slug, filing));
+        LibrePcbLibraryDocuments.Part madePart = made.part(component, variant, device, namedPins);
+        LibrePcbComponents.Drawn drawn = madePart.drawn();
+        String slug = madePart.slug();
+        Optional<LibrePcbLibrary.Package> found = device.map(LibrePcbLibrary.Device::packageId).map(library.packages()::get);
+        String own = found.flatMap(given -> boardFootprint(part, given).map(footprint -> made.footprint(given, footprint)))
+                .filter(code -> !code.equals(madePart.footprint())).orElse(null);
         Map<String, String> pinOfSignal = LibrePcbComponents.pinOfSignal(component, drawn);
         Map<String, String> partNets = new LinkedHashMap<>();
         part.nets().forEach((signal, net) -> Optional.ofNullable(pinOfSignal.get(signal)).ifPresent(pin -> partNets.put(pin, netName(net))));
@@ -175,28 +165,19 @@ final class LibrePcbSchematicImport {
                 .flatMap(device -> found.footprint(device.footprint()));
     }
 
-    /** A footprint the import brings, made once; the code every reference to it writes. */
-    private String footprint(LibrePcbLibrary.Package found, LibrePcbLibrary.Footprint footprint) {
-        String slug = LibrePcbNames.footprint(found, footprint);
-        footprints.computeIfAbsent(slug, ignored -> {
-            footprint.models().forEach(model -> model(found, model));
-            return LibrePcbFootprintDrawing.documentOf(found, footprint, board.map(LibrePcbBoard::rules), filing);
-        });
-        return LibrePcbNames.footprintCode(found, footprint);
-    }
+    /** The project's 3D models, by where a package it carries keeps one: what its footprints are made with. */
+    private static LibrePcbLibraryDocuments.PackageModels projectModels(Map<String, byte[]> modelBytes) {
+        return new LibrePcbLibraryDocuments.PackageModels() {
+            @Override
+            public Optional<byte[]> read(LibrePcbLibrary.Package found, String modelId) {
+                return Optional.ofNullable(modelBytes.get(LibrePcbFile.modelPath(found.id(), modelId)));
+            }
 
-    private void model(LibrePcbLibrary.Package found, String modelId) {
-        byte[] bytes = modelBytes.get(LibrePcbFile.modelPath(found.id(), modelId));
-        if (bytes == null) {
-            throw new IllegalArgumentException("The package " + found.name() + " names the model " + modelId
-                    + ", which is not among the project's files: choose the project's whole folder, or its archive.");
-        }
-        String slug = LibrePcbNames.model(found, modelId);
-        if (!models.containsKey(slug)) {
-            LibrePcbModelDrawing.Made made = LibrePcbModelDrawing.of(found, modelId, bytes, filing);
-            models.put(slug, made.document());
-            modelFiles.add(made.file());
-        }
+            @Override
+            public String absence() {
+                return "is not among the project's files: choose the project's whole folder, or its archive.";
+            }
+        };
     }
 
     // ─── sheets ──────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -467,12 +448,9 @@ final class LibrePcbSchematicImport {
                 .withValue(part.value())));
         ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), List.of(), globals, notes, buses);
         // What a design is built from, each before what names it: a footprint before the component landing on it.
-        List<DocumentNode> built = new ArrayList<>(models.values());
-        built.addAll(footprints.values());
-        built.addAll(symbols.values());
-        built.addAll(components.values());
+        List<DocumentNode> built = made.documents();
         DocumentNode design = ImportedCircuitDocument.of(LibrePcbNames.design(title), title, "Imported from LibrePCB: " + file, circuit, filing);
-        return new ImportedDocuments(built, List.of(design), notes, modelFiles);
+        return new ImportedDocuments(built, List.of(design), notes, made.files());
     }
 
     // ─── geometry ────────────────────────────────────────────────────────────────────────────────────────────────────

@@ -53,7 +53,7 @@ public record EagleLibraries(SheetFiling sheet, String ground, double sheetGap, 
 
     public static EagleLibraries of(FilingTable table) {
         return new EagleLibraries(SheetFiling.of(table), table.text("ground"), table.measure("sheet-gap") * 1000, Double.parseDouble(table.text("ring-share")),
-                table.measure("ring-least") * 1000, table.measure("ring-most") * 1000, table.layers("eagle"));
+                table.measure("ring-least") * 1000, table.measure("ring-most") * 1000, table.ours("eagle"));
     }
 
     @Override

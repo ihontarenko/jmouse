@@ -43,7 +43,7 @@ final class LibrePcbFootprintDrawing {
         footprint.holes().forEach(hole -> pads.add(hole(hole)));
         return new ImportedFootprint(found.name(), LibrePcbNames.footprint(found, footprint), LibrePcbNames.footprintCode(found, footprint),
                 said + " — imported from LibrePCB",
-                filing.provenance(LibrePcbNames.source("package", found.name(), found.id()), found.author()), pads,
+                filing.provenance(LibrePcbNames.source(LibrePcbNames.SourceKind.PACKAGE, found.name(), found.id()), found.author()), pads,
                 outlinesOf(footprint.graphics(), filing), fieldsOf(footprint.graphics()), modelsOf(found, footprint)).document(filing);
     }
 

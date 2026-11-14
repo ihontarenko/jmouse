@@ -44,8 +44,8 @@ public class KiCadPluginConfiguration {
     }
 
     /**
-     * The installed libraries are read the first time a search asks — on a virtual thread of their own, so a search is
-     * answered "indexing" meanwhile rather than kept waiting.
+     * The installed libraries are read on a virtual thread of their own — as the engine comes up, when the part search prepares
+     * its providers, else the first time a search asks —, so a search is answered "indexing" meanwhile rather than kept waiting.
      */
     @Bean
     public KiCadPlugin cadKiCadPlugin(KiCadProperties properties, Settings settings, CadSettings sections, TableSource tables,

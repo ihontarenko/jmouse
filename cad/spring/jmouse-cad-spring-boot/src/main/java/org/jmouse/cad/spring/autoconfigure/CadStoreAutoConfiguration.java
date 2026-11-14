@@ -35,7 +35,6 @@ import org.jmouse.cad.store.library.CatalogueIndexing;
 import org.jmouse.git.local.CommitAuthor;
 import org.jmouse.git.local.CommitAuthors;
 import org.jmouse.git.local.JGitLocalGit;
-import org.jmouse.cad.store.parts.CataloguePartSearch;
 import org.jmouse.cad.store.parts.PartSearch;
 import org.jmouse.cad.store.plugin.CadEnginePlugin;
 import org.jmouse.cad.store.plugin.EngineConfiguration;
@@ -66,7 +65,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -177,22 +178,22 @@ public class CadStoreAutoConfiguration {
         return new EnginePluginSettings(extensions, settings, authority);
     }
 
+    /** Parts looked for beyond the library, in every place a plugin brought. */
     @Bean
     @ConditionalOnMissingBean
-    public CataloguePartSearch cadCataloguePartSearch(CadCatalogue catalogue) {
-        return new CataloguePartSearch(catalogue);
-    }
-
-    /** Parts looked for in the catalogue, then in every place a plugin brought. */
-    @Bean
-    @ConditionalOnMissingBean
-    public PartSearch cadPartSearch(CataloguePartSearch catalogueSearch, Extensions extensions, CadCatalogue catalogue,
+    public PartSearch cadPartSearch(Extensions extensions, CadCatalogue catalogue,
                                     DocumentStore documents, CadAuthority authority, CadPlaces places,
                                     PlatformTransactionManager transactions, EngineConfiguration configuration, CadLanguage language,
-                                    DocumentFiles files, DocumentAccess access) {
-        return new PartSearch(catalogueSearch, extensions, catalogue, documents, authority, places,
+                                    DocumentFiles files, DocumentAccess access, DocumentReading reading) {
+        return new PartSearch(extensions, catalogue, documents, authority, places,
                               new TransactionTemplate(transactions), configuration, language, files,
-                              access);
+                              access, reading);
+    }
+
+    /** Once the engine is up — its plugins registered, their settings readable —, every place parts are looked for is made ready. */
+    @Bean
+    public ApplicationListener<ApplicationReadyEvent> cadPartProvidersPrepared(PartSearch search) {
+        return ready -> search.prepareProviders();
     }
 
     /** The files documents hold besides their text: files of the library folder beside each document's own. */

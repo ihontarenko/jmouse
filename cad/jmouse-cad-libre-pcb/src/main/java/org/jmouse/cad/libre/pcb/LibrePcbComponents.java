@@ -92,7 +92,7 @@ final class LibrePcbComponents {
         String packageName = device.map(LibrePcbLibrary.Device::packageId).map(library.packages()::get).map(LibrePcbLibrary.Package::name).orElse(null);
         return new ImportedComponent(device.map(LibrePcbLibrary.Device::name).orElse(component.name()), slug,
                 said + " — imported from LibrePCB: its pins and its drawing, with no model yet",
-                filing.provenance(LibrePcbNames.source("component", component.name(), component.id()), component.author()),
+                filing.provenance(LibrePcbNames.source(LibrePcbNames.SourceKind.COMPONENT, component.name(), component.id()), component.author()),
                 ImportedNames.designatorOf(component.prefix()).orElse(null), packageName, pins, bubbled, drawing, footprint).document(filing);
     }
 

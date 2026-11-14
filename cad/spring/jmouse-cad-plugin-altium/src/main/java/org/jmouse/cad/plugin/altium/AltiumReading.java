@@ -79,7 +79,7 @@ final class AltiumReading implements DocumentImport {
         if (lower.endsWith(PCB_LIBRARY)) {
             AltiumPcbLibrary library = readable(() -> AltiumPcbLibraryReader.read(file, files.mainBytes()));
             // Whose the library is, as the reader says it, before it is filed by the library it comes from.
-            return AltiumPcbLibraryImport.read(library, file, filing()).whoseAsStated(files.stated(), file).filedBy(filing());
+            return AltiumPcbLibraryImport.read(library, file, filing()).whoseAsStated(files.stated(), file);
         }
         if (!lower.endsWith(SCHEMATIC)) {
             throw new IllegalArgumentException("Altium reads a schematic (*.SchDoc) or a PCB library (*.PcbLib); '" + main + "' is neither.");

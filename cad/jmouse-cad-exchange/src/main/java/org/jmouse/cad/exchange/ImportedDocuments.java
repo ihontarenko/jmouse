@@ -37,14 +37,6 @@ public record ImportedDocuments(List<DocumentNode> library, List<DocumentNode> d
     }
 
     /**
-     * The same, the category of each library its library documents come from before them, as the filing writes it
-     * ({@link ImportFiling#withLibraryCategories}): stored in order, every document finds its category standing.
-     */
-    public ImportedDocuments filedBy(ImportFiling filing) {
-        return new ImportedDocuments(filing.withLibraryCategories(library), designs, notes, files);
-    }
-
-    /**
      * The same, each library document whose own text names no holder and no terms given those the reader stated for its
      * file ({@link ExchangeFiles#stated()}): a library somebody made is theirs, said once by whoever brought it in. One
      * whose text names its own keeps them. Stated nothing, the documents claim none and a note says so.

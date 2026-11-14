@@ -18,9 +18,10 @@ table:kicad-libraries("KiCad libraries") {
     # names a holder or a licence so is read back as theirs.
     provenance-fields source = Source, authors = Author, license = License
 
-    # The tags a converted drawing carries; it is filed in no category, for the project it is imported into is its place.
-    # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
-    library-category kicad
+    # The tags a converted drawing carries; a circuit or a pcb is filed in no category, for the project it is imported into is its
+    # place. A symbol, a footprint, a 3D model or a component is filed by what it is — the entries at the end of this table, by the
+    # KiCad library it comes from —; whose it is stays in its provenance. What no entry names is filed here:
+    unfiled-category general
     symbol-tags electronics, schematic, kicad
     footprint-tags electronics, kicad, footprint
     model-tags electronics, kicad, model
@@ -95,5 +96,165 @@ table:kicad-libraries("KiCad libraries") {
     }
     copper "Copper drawn besides the pads" {
         kicad "F.Cu", "B.Cu"
+    }
+
+    # Where each of KiCad's parts is filed, by what it is: the KiCad words filed in each of our categories, a symbol's LIBRARY:NAME
+    # or a library's name, '*' any run of characters. A part is filed by the first entry naming its symbol or footprint, else its
+    # library; nothing named, it is unfiled.
+    resistors-surface "Resistors, surface mount" {
+        sources "Resistor_SMD"
+    }
+    resistors-through-hole "Resistors, through-hole" {
+        sources "Resistor_THT"
+    }
+    resistors "Resistors" {
+        sources "Device:R", "Device:R_*", "Device:RN*", "Device:R_Pack*", "Resistor_*"
+    }
+    potentiometers-through-hole "Potentiometers, through-hole" {
+        sources "Potentiometer_THT"
+    }
+    potentiometers "Potentiometers" {
+        sources "Device:R_Pot*", "Device:R_Trim*", "Potentiometer_*"
+    }
+    thermistors "Thermistors" {
+        sources "Device:Thermistor*"
+    }
+    capacitors-surface "Capacitors, surface mount" {
+        sources "Capacitor_SMD", "Capacitor_Tantalum_SMD"
+    }
+    capacitors-through-hole "Capacitors, through-hole" {
+        sources "Capacitor_THT"
+    }
+    capacitors "Capacitors" {
+        sources "Device:C", "Device:C_*", "Device:CP*", "Capacitor_*"
+    }
+    inductors-surface "Inductors, surface mount" {
+        sources "Inductor_SMD"
+    }
+    inductors "Inductors" {
+        sources "Device:L", "Device:L_*", "Device:Ferrite*", "Inductor_*"
+    }
+    crystals "Crystals and oscillators" {
+        sources "Device:Crystal*", "Device:Resonator*", "Crystal", "Oscillator", "Oscillator_*"
+    }
+    fuses "Fuses" {
+        sources "Device:Fuse*", "Device:Polyfuse*", "Fuse"
+    }
+    protection-through-hole "Protection, through-hole" {
+        sources "Varistor"
+    }
+    protection "Protection" {
+        sources "Device:Varistor*", "Device:Thermistor_PTC*", "Power_Protection"
+    }
+    transformers "Transformers" {
+        sources "Device:Transformer*", "Transformer", "Transformer_*"
+    }
+    diodes-surface "Diodes, surface mount" {
+        sources "Diode_SMD"
+    }
+    diodes-through-hole "Diodes, through-hole" {
+        sources "Diode_THT"
+    }
+    optoelectronics-surface "Optoelectronics, surface mount" {
+        sources "LED_SMD"
+    }
+    optoelectronics-through-hole "Optoelectronics, through-hole" {
+        sources "LED_THT"
+    }
+    optoelectronics "Optoelectronics" {
+        sources "Device:LED*", "LED", "LED_*", "Isolator", "Isolator_*", "OptoDevice", "Optocoupler*"
+    }
+    diodes "Diodes" {
+        sources "Device:D", "Device:D_*", "Diode", "Diode_*"
+    }
+    transistors "Transistors" {
+        sources "Device:Q_*", "Transistor_*"
+    }
+    thyristors "Thyristors" {
+        sources "Device:Thyristor*", "Device:Triac*", "Triac_Thyristor"
+    }
+    surface-transistor-outline "Transistor outlines, surface mount" {
+        sources "Package_TO_SOT_SMD"
+    }
+    through-hole-transistor-outline "Transistor outlines, through-hole" {
+        sources "Package_TO_SOT_THT"
+    }
+    small-outline "Small outline packages" {
+        sources "Package_SO", "Package_SO_*", "Package_SON"
+    }
+    no-lead "No-lead packages" {
+        sources "Package_DFN_QFN"
+    }
+    quad-flat "Quad flat packages" {
+        sources "Package_QFP", "Package_LCC"
+    }
+    dual-inline "Dual in-line packages" {
+        sources "Package_DIP"
+    }
+    packages-through-hole "Packages, through-hole" {
+        sources "Package_SIP", "Package_DIP_*"
+    }
+    packages-surface "Packages, surface mount" {
+        sources "Package_BGA", "Package_CSP", "Package_LGA", "Package_DirectFET", "Package_*"
+    }
+    microcontrollers "Microcontrollers" {
+        sources "MCU_*"
+    }
+    memory "Memory" {
+        sources "Memory_*"
+    }
+    logic "Logic" {
+        sources "74xx", "74xGxx", "4xxx", "4xxx_IEEE", "Logic_*"
+    }
+    amplifiers "Amplifiers" {
+        sources "Amplifier_*"
+    }
+    comparators "Comparators" {
+        sources "Comparator"
+    }
+    converters "Converters" {
+        sources "Analog_ADC", "Analog_DAC", "Converter_*"
+    }
+    references "References" {
+        sources "Reference_*"
+    }
+    power "Power" {
+        sources "Regulator_*", "Battery_Management", "Driver_*", "Power_Management"
+    }
+    timers "Timers" {
+        sources "Timer", "Timer_*"
+    }
+    interface "Interface" {
+        sources "Interface_*"
+    }
+    sensors "Sensors" {
+        sources "Sensor", "Sensor_*"
+    }
+    displays "Displays" {
+        sources "Display", "Display_*"
+    }
+    relays "Relays" {
+        sources "Relay", "Relay_*"
+    }
+    switches "Switches" {
+        sources "Switch", "Button_Switch_*", "Rotary_Encoder"
+    }
+    connectors "Connectors" {
+        sources "Connector", "Connector_*", "TerminalBlock*"
+    }
+    mounting-holes "Mounting holes" {
+        sources "MountingHole", "Mechanical"
+    }
+    test-points "Test points" {
+        sources "TestPoint"
+    }
+    electromechanical "Electromechanical" {
+        sources "Buzzer_Beeper", "Motor", "Device:Buzzer*", "Device:Speaker*", "Device:Motor*"
+    }
+    marks "Marks and labels" {
+        sources "power", "Graphic"
+    }
+    passive "Passive" {
+        sources "Device"
     }
 }

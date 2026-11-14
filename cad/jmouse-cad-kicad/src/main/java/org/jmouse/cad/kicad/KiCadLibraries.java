@@ -15,6 +15,7 @@ import org.jmouse.cad.document.Provenance;
 
 import org.jmouse.kicad.KiCadLayer;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,7 +89,7 @@ public record KiCadLibraries(String holder, String license, String home, SheetFi
         return new KiCadLibraries(table.text("holder"), table.text("license"), table.text("home"), SheetFiling.of(table),
                 table.words("model-tags"), table.assignments("model-scales").entrySet().stream()
                         .collect(Collectors.toMap(Map.Entry::getKey, scale -> Double.parseDouble(scale.getValue()))),
-                table.assignments("model-ups"), table.text("own-library"), table.text("own-library-description"), table.layers("kicad"),
+                table.assignments("model-ups"), table.text("own-library"), table.text("own-library-description"), table.ours("kicad"),
                 table.text("pcb-rules"), table.assignments("pcb-rule-names"), Double.parseDouble(table.text("text-line-spacing")),
                 table.text("pcb-own-part"), table.text("pcb-class-opening"), table.millimetres("area-step"), table.text("model-file"),
                 table.millimetres("edge-width"), table.text("hole-footprint"), table.assignments("provenance-fields"));
@@ -152,6 +153,18 @@ public record KiCadLibraries(String holder, String license, String home, SheetFi
     @Override
     public Optional<String> libraryOf(Provenance provenance) {
         return KiCadSources.libraryOf(provenance.source());
+    }
+
+    /**
+     * What KiCad calls a drawing, the most specific first: its {@code LIBRARY:NAME} — {@code Device:R}, where one library holds
+     * many kinds —, then its library — {@code Package_SO}.
+     */
+    @Override
+    public List<String> kindsOf(Provenance provenance) {
+        List<String> kinds = new ArrayList<>();
+        KiCadSources.symbolIdOf(provenance.source()).or(() -> KiCadSources.footprintIdOf(provenance.source())).ifPresent(kinds::add);
+        libraryOf(provenance).filter(library -> !library.isBlank()).ifPresent(kinds::add);
+        return kinds;
     }
 
     /** The code KiCad's import names a document by, from the KiCad id or the model's path its source keeps. */

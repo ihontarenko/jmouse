@@ -95,7 +95,7 @@ final class KiCadDesignImport implements DocumentImport {
         KiCadFile kind = KiCadFile.of(main).orElseThrow(() -> new IllegalArgumentException(
                 "KiCad reads a schematic, a project, a board, a footprint or a symbol library (" + String.join(", ", KiCadFile.fileNames()) + "); '"
                 + main + "' is none of them."));
-        ImportedDocuments read = switch (kind) {
+        return switch (kind) {
             case SCHEMATIC -> design(main, KiCadFile.SCHEMATIC.stemOf(main), List.of(), files, catalogue);
             case PROJECT -> designOpenedBy(main, KiCadFile.PROJECT, files, catalogue);
             case PCB -> designOpenedBy(main, KiCadFile.PCB, files, catalogue);
@@ -103,8 +103,6 @@ final class KiCadDesignImport implements DocumentImport {
             case FOOTPRINT -> footprint(main, files.mainText()).whoseAsStated(files.stated(), main);
             case SYMBOL_LIBRARY -> symbols(main, files.mainText()).whoseAsStated(files.stated(), main);
         };
-        // Every KiCad library a drawing comes from is a category of its own, under KiCad's.
-        return read.filedBy(filings.current());
     }
 
     /**

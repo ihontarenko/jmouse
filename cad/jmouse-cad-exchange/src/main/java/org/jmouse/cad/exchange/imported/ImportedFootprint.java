@@ -27,7 +27,7 @@ public record ImportedFootprint(String title, String slug, String code, String s
     /** The footprint's document, filed as the product it came from files its footprints. */
     public DocumentNode document(ImportFiling filing) {
         DocumentNode document = new DocumentNode(PcbModule.FOOTPRINT, title, slug, null, 1);
-        MetaNode meta = MetaNode.filed(ImportedSummary.shortened(summary), code, filing.libraryCategory(provenance), filing.footprintTags());
+        MetaNode meta = MetaNode.filed(ImportedSummary.shortened(summary), code, filing.categoryOf(provenance), filing.footprintTags());
         provenance.writeInto(meta);
         document.addExpression(meta);
         pads.forEach(pad -> document.addExpression(FootprintLines.pad(pad, List.of())));

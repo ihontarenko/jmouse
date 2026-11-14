@@ -10,9 +10,10 @@ table:eagle-libraries("Eagle libraries") {
         license: "CERN-OHL-W-2.0"
     }
 
-    # The tags a converted drawing carries; it is filed in no category, for the project it is imported into is its place.
-    # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
-    library-category eagle
+    # The tags a converted drawing carries; a circuit or a pcb is filed in no category, for the project it is imported into is its
+    # place. A symbol, a footprint, a 3D model or a component is filed by what it is — by the library it comes from, the entries at
+    # the end of this table —; whose it is stays in its provenance. What no entry names is filed here:
+    unfiled-category general
     symbol-tags electronics, schematic, eagle
     footprint-tags electronics, eagle, footprint
     component-tags electronics, eagle
@@ -52,5 +53,82 @@ table:eagle-libraries("Eagle libraries") {
     }
     copper "Copper drawn besides the pads" {
         eagle "1", "16"
+    }
+
+    # Where each part is filed, by the library it comes from — '*' any run of characters. Nothing named, it is unfiled.
+    resistors "Resistors" {
+        sources "resistor*", "res*"
+    }
+    capacitors "Capacitors" {
+        sources "capacitor*", "cap*"
+    }
+    inductors "Inductors" {
+        sources "inductor*", "ferrite*"
+    }
+    passive "Passive" {
+        sources "rcl", "discrete"
+    }
+    crystals "Crystals and oscillators" {
+        sources "crystal*", "oscillator*"
+    }
+    fuses "Fuses" {
+        sources "fuse*"
+    }
+    transformers "Transformers" {
+        sources "trafo*", "transformer*"
+    }
+    optoelectronics "Optoelectronics" {
+        sources "led*", "optocoupler*", "opto*"
+    }
+    diodes "Diodes" {
+        sources "diode*", "rectifier*"
+    }
+    transistors "Transistors" {
+        sources "transistor*", "fet*", "mosfet*"
+    }
+    logic "Logic" {
+        sources "74xx*", "40xx*", "logic*"
+    }
+    amplifiers "Amplifiers" {
+        sources "linear", "op-amp*", "opamp*"
+    }
+    power "Power" {
+        sources "v-reg*", "regulator*", "power_ic*"
+    }
+    memory "Memory" {
+        sources "memory*", "eeprom*"
+    }
+    microcontrollers "Microcontrollers" {
+        sources "microchip*", "atmel*", "avr*", "st-microelectronics*", "stm32*", "pic*"
+    }
+    interface "Interface" {
+        sources "interface*", "maxim*", "ftdi*"
+    }
+    displays "Displays" {
+        sources "display*", "lcd*"
+    }
+    relays "Relays" {
+        sources "relay*"
+    }
+    switches "Switches" {
+        sources "switch*", "button*"
+    }
+    connectors "Connectors" {
+        sources "con-*", "pinhead*", "jumper*", "connector*"
+    }
+    test-points "Test points" {
+        sources "testpad*", "solpad*", "wirepad*"
+    }
+    mounting-holes "Mounting holes" {
+        sources "holes*", "mounting*"
+    }
+    packages "Packages" {
+        sources "ic-package*", "ref-packages*", "package*"
+    }
+    marks "Marks and labels" {
+        sources "supply*"
+    }
+    frames "Sheet frames" {
+        sources "frames*"
     }
 }

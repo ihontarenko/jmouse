@@ -104,7 +104,7 @@ public final class AltiumSchematicImport {
         reading.wire();
         reading.buses();
         // Every Altium library a part was placed from is a category of its own, under Altium's.
-        return reading.documents(file, title).filedBy(filing);
+        return reading.documents(file, title);
     }
 
     // ─── parts ──────────────────────────────────────────────────────────────────────────────────────

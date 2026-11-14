@@ -34,7 +34,7 @@ final class EagleSymbolDrawing {
                 null, 1);
         Provenance provenance = filing.provenance(EagleNames.symbolSource(library, symbol.name()), false);
         MetaNode meta = MetaNode.filed(library + ":" + symbol.name() + ", drawn as Eagle draws it", EagleNames.symbolCode(library, symbol.name()),
-                filing.libraryCategory(provenance),
+                filing.categoryOf(provenance),
                 filing.symbolTags());
         provenance.writeInto(meta);
         document.addExpression(meta);

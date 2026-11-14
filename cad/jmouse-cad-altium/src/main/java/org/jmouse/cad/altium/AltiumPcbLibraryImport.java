@@ -61,7 +61,7 @@ public final class AltiumPcbLibraryImport {
             DocumentNode document = new DocumentNode(ModelModule.MODEL, AltiumNames.withoutFileKind(name), slug, null, 1);
             Provenance whose = filing.provenance(AltiumNames.modelSource(file, name), false);
             MetaNode meta = MetaNode.filed(AltiumNames.withoutFileKind(name) + " — a 3D model embedded in " + file, code,
-                    filing.libraryCategory(whose), filing.footprintTags());
+                    filing.categoryOf(whose), filing.footprintTags());
             whose.writeInto(meta);
             document.addExpression(meta);
             String embedded = name;

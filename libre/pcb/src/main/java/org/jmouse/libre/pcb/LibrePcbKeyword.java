@@ -8,6 +8,10 @@ public enum LibrePcbKeyword implements SExpressionName {
     // ─── what everything says ────────────────────────────────────────────────────────────────────────────────────────
     NAME("name"),
     DESCRIPTION("description"),
+    KEYWORDS("keywords"),
+    DEPENDENCY("dependency"),
+    CATEGORY("category"),
+    PARENT("parent"),
     AUTHOR("author"),
     VERSION("version"),
     POSITION("position"),

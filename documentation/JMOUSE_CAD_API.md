@@ -293,12 +293,15 @@ Another engine's transient — `GET /simulations/engines` (`[{ "id", "title", "a
 Every route decides inside its service through the host's `CadAuthority`, so it needs no rule of the product's.
 `owner` (`TYPE:id`, optional) lets a conversion read that owner's components too, once the reader may read there.
 
-### 2.8 Parts from suppliers
+### 2.8 Parts beyond the library
 
-⚠️ **The search is the engine's; the places beyond the catalogue are the plugins'.** It asks the catalogue first, then
-every provider brought to `cad.parts.providers` — Nexar (`cad-nexar`, `jmouse-cad-plugin-nexar`), Mouser and DigiKey
-(`cad-suppliers`, `jmouse-cad-plugin-suppliers`, over the library `jmouse-suppliers`) and KiCad's installed libraries
-(`cad-kicad`). A distributor's candidate carries `supply` — its order number, status, stock, minimum order, lead time,
+⚠️ **The search is the engine's; the places beyond the library are the plugins'.** It asks every provider brought to
+`cad.parts.providers` — Nexar (`cad-nexar`, `jmouse-cad-plugin-nexar`), Mouser and DigiKey (`cad-suppliers`,
+`jmouse-cad-plugin-suppliers`, over the library `jmouse-suppliers`), KiCad's installed libraries (`cad-kicad`) and LibrePCB's
+(`cad-libre-pcb`). The library itself is no provider: what it holds is its own listing (`GET /documents?text=`), which a
+reader's one search narrows beside these. An installed library — KiCad's, LibrePCB's — is one `InstalledLibrary` made a provider
+by `InstalledLibraryParts` (`jmouse-cad-document`): read once in the background as the engine comes up (`PartSearchProvider.prepare`),
+`INDEXING` meanwhile, its parts scored by every word asked. A distributor's candidate carries `supply` — its order number, status, stock, minimum order, lead time,
 currency and `prices` by quantity; whatever it did not say is null, never zero — and is shown, never kept. A provider that cannot answer is listed all the same, saying why; one that fails while
 searching does not fail the others.
 
@@ -311,7 +314,8 @@ searching does not fail the others.
 | `jmouse.cad.parts.suppliers.digi-key.client-id`, `.client-secret` | a DigiKey application's client; without it DigiKey is `NOT_CONFIGURED` |
 | `jmouse.cad.parts.suppliers.digi-key.site`, `.language`, `.currency` (`US`, `en`, `USD`) | which of DigiKey's sites answers, and in what |
 | `jmouse.cad.parts.suppliers.limit` (10), `.timeout` (8 s), `.mouser.address`, `.digi-key.address` | how many offers a search asks each for; where each is called, blank for its own |
-| `jmouse.cad.kicad.symbol-folders`, `.footprint-folders` | KiCad's installed libraries, read on a virtual thread the first time they are asked about |
+| `jmouse.cad.kicad.symbol-folders`, `.footprint-folders` | KiCad's installed libraries — the plugin's setting Installed libraries starts from them |
+| `jmouse.cad.libre-pcb.library-folders` | the folders LibrePCB's library manager installs `*.lplib` libraries in; what is fetched carries each library's terms, named by its UUID in the `libre-pcb-libraries` table |
 
 ⚠️ **A pcb's bill of materials is priced by the export `supplier-materials`** (`POST /exchange/supplier-materials/export`,
 the same plugin): a CSV with one row a kind of part at one distributor, the buying quantity, its price break and the total;
@@ -337,9 +341,7 @@ its full id. A repository whose own configuration declares a `filter` is refused
 
 ```json
 // GET /parts/search?q=NE555
-[ { "provider": "catalogue", "name": "Catalogue", "state": { "status": "READY", "detail": "The published catalogue." },
-    "candidates": [ { "kind": "COMPONENT", "identifier": "ne555", "title": "NE555", "slug": "ne555", "fetchable": false, … } ] },
-  { "provider": "kicad", "name": "KiCad libraries",
+[ { "provider": "kicad", "name": "KiCad libraries",
     "state": { "status": "READY", "detail": "21093 symbols, 13820 footprints. Fetched parts stay under CC-BY-SA-4.0 WITH KiCad-libraries-exception." },
     "candidates": [ { "kind": "COMPONENT", "identifier": "symbol:Timer:NE555D", "title": "Timer:NE555D", "fetchable": true, … }, … ] },
   { "provider": "nexar", "name": "Nexar · Octopart",

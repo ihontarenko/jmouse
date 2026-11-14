@@ -1,8 +1,10 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.access.enforcement.PublicEndpoint;
+import org.jmouse.cad.document.part.PartCandidate;
 import org.jmouse.cad.store.parts.PartSearch;
 import org.jmouse.cad.store.parts.PartSearch.Fetched;
+import org.jmouse.cad.store.parts.PartSearch.Previewed;
 import org.jmouse.cad.store.parts.PartSearch.ProviderResults;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * 🔎 Parts from suppliers beside jmCAD's API — {@code JMOUSE_CAD_API.md} §2.8. Searching keeps nothing and reads only
+ * 🔎 Parts beyond the library — {@code JMOUSE_CAD_API.md} §2.8. Searching keeps nothing and reads only
  * the published catalogue and what the providers answer; a fetch writes only where the reader may write.
  */
 @RestController
@@ -40,9 +44,16 @@ public class PartsController {
     }
 
     @GetMapping("/parts/search")
-    @PublicEndpoint("the published catalogue and what the providers answer; nothing is kept")
-    public List<ProviderResults> search(@RequestParam("q") String query, @RequestParam(required = false) String provider) {
-        return search.search(query, provider);
+    @PublicEndpoint("what the providers beyond the library answer; nothing is kept")
+    public List<ProviderResults> search(@RequestParam("q") String query, @RequestParam(required = false) String provider,
+                                        @RequestParam(name = "kind", required = false) List<PartCandidate.Kind> kinds) {
+        return search.search(query, provider, kinds == null || kinds.isEmpty() ? Set.of() : EnumSet.copyOf(kinds));
+    }
+
+    @PostMapping("/parts/preview")
+    @PublicEndpoint("converts a part the providers answer, as a fetch would, and keeps nothing")
+    public Previewed preview(@RequestBody FetchRequest request) {
+        return search.preview(request.provider(), request.identifier());
     }
 
     @PostMapping(CadManagementRoutes.OWNER + "/parts/fetch")

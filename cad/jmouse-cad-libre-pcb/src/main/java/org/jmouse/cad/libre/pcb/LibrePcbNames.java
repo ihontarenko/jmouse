@@ -8,6 +8,7 @@ import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.schematic.SchematicModule;
 import org.jmouse.libre.pcb.LibrePcbLibrary;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,9 +66,47 @@ final class LibrePcbNames {
         return ImportedNames.slug(FORMAT, title, "pcb");
     }
 
+    /** What kind of element a converted element's source names, by the word the source writes. */
+    enum SourceKind {
+        SYMBOL("symbol"), COMPONENT("component"), PACKAGE("package"), MODEL("model");
+
+        private final String word;
+
+        SourceKind(String word) {
+            this.word = word;
+        }
+
+        static Optional<SourceKind> of(String word) {
+            return Arrays.stream(values()).filter(kind -> kind.word.equals(word)).findFirst();
+        }
+    }
+
     /** What a converted element writes as its source: {@code LibrePCB package R0805 06786894}. */
-    static String source(String kind, String name, String id) {
-        return SOURCE + kind + " " + name + " " + kept(id);
+    static String source(SourceKind kind, String name, String id) {
+        return SOURCE + kind.word + " " + name + " " + kept(id);
+    }
+
+    /**
+     * The element a converted element's source names: what kind it is — {@code package}, {@code symbol}, {@code component},
+     * {@code model} — and the start of its UUID; empty for a source that is no LibrePCB element's.
+     */
+    static Optional<SourcedElement> elementOf(String source) {
+        if (source == null || !source.startsWith(SOURCE)) {
+            return Optional.empty();
+        }
+        String written = source.substring(SOURCE.length()).strip();
+        int kindEnd = written.indexOf(' ');
+        int idAt = written.lastIndexOf(' ');
+        if (kindEnd < 0 || idAt <= kindEnd) {
+            return Optional.empty();
+        }
+        String name = written.substring(kindEnd + 1, idAt);
+        String idStart = written.substring(idAt + 1);
+        return SourceKind.of(written.substring(0, kindEnd)).map(kind -> new SourcedElement(kind, name, idStart));
+    }
+
+    /** An element a source names: its kind, its name, and the start of its UUID. */
+    record SourcedElement(SourceKind kind, String name, String idStart) {
     }
 
     private static final String SOURCE = "LibrePCB ";
@@ -81,24 +120,20 @@ final class LibrePcbNames {
      * which only its slug keeps — the source keeps the package's.
      */
     static Optional<String> codeOfImported(DocumentKind kind, String slug, String source) {
-        if (source == null || !source.startsWith(SOURCE)) {
+        Optional<SourcedElement> said = elementOf(source);
+        if (said.isEmpty()) {
             return Optional.empty();
         }
-        String[] said = source.substring(SOURCE.length()).split(" ", 2);
-        if (said.length < 2 || said[1].lastIndexOf(' ') < 0) {
-            return Optional.empty();
+        SourcedElement element = said.get();
+        if (kind.equals(SchematicModule.SYMBOL) && element.kind() == SourceKind.SYMBOL) {
+            return Optional.of(ImportedNames.code(TechnicalClass.SYMBOL, FORMAT, element.name() + " " + element.idStart()));
         }
-        String name = said[1].substring(0, said[1].lastIndexOf(' '));
-        String id = said[1].substring(said[1].lastIndexOf(' ') + 1);
-        if (kind.equals(SchematicModule.SYMBOL) && said[0].equals("symbol")) {
-            return Optional.of(ImportedNames.code(TechnicalClass.SYMBOL, FORMAT, name + " " + id));
-        }
-        if (kind.equals(ModelModule.MODEL) && said[0].equals("model")) {
-            return Optional.of(ImportedNames.code(TechnicalClass.MODEL, FORMAT, name + " " + id));
+        if (kind.equals(ModelModule.MODEL) && element.kind() == SourceKind.MODEL) {
+            return Optional.of(ImportedNames.code(TechnicalClass.MODEL, FORMAT, element.name() + " " + element.idStart()));
         }
         Matcher footprintId = FOOTPRINT_ID_IN_SLUG.matcher(slug);
-        if (kind.equals(PcbModule.FOOTPRINT) && said[0].equals("package") && footprintId.find()) {
-            return Optional.of(ImportedNames.code(TechnicalClass.FOOTPRINT, FORMAT, name + " " + footprintId.group(1)));
+        if (kind.equals(PcbModule.FOOTPRINT) && element.kind() == SourceKind.PACKAGE && footprintId.find()) {
+            return Optional.of(ImportedNames.code(TechnicalClass.FOOTPRINT, FORMAT, element.name() + " " + footprintId.group(1)));
         }
         return Optional.empty();
     }

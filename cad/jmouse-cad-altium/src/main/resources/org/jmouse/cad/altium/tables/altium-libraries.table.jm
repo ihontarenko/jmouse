@@ -9,9 +9,10 @@ table:altium-libraries("Altium libraries") {
         license: "CERN-OHL-W-2.0"
     }
 
-    # The tags a converted drawing carries; it is filed in no category, for the project it is imported into is its place.
-    # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
-    library-category altium
+    # The tags a converted drawing carries; a circuit or a pcb is filed in no category, for the project it is imported into is its
+    # place. A symbol, a footprint, a 3D model or a component is filed by what it is — by the library it comes from, the entries at
+    # the end of this table —; whose it is stays in its provenance. What no entry names is filed here:
+    unfiled-category general
     symbol-tags electronics, schematic, altium
     footprint-tags electronics, altium, footprint
     component-tags electronics, altium
@@ -55,4 +56,27 @@ table:altium-libraries("Altium libraries") {
     # The layers whose numbers say a pad's side: one stands through the board, one on the far side.
     multi-layer 74
     bottom-layer 32
+
+    # Where each part is filed, by the library it comes from — '*' any run of characters. Nothing named, it is unfiled.
+    connectors "Connectors" {
+        sources "Miscellaneous Connectors*", "*Connector*"
+    }
+    passive "Passive" {
+        sources "Miscellaneous Devices*", "rcl*"
+    }
+    resistors "Resistors" {
+        sources "*Resistor*"
+    }
+    capacitors "Capacitors" {
+        sources "*Capacitor*"
+    }
+    diodes "Diodes" {
+        sources "*Diode*"
+    }
+    transistors "Transistors" {
+        sources "*Transistor*"
+    }
+    microcontrollers "Microcontrollers" {
+        sources "*Microcontroller*", "*MCU*"
+    }
 }

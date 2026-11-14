@@ -16,19 +16,23 @@ symbol:polarized-capacitor-symbol("Polarized capacitor") {
         live stroke = if(failed > 0.5, burned, signal)
     }
 
-    # How full it is: between its plates, a level as high as the voltage across against its rating — which, at its
-    # capacitance, is its charge against the charge it is made to hold. It warms close to the rating, and at once if charged the wrong way round.
-    box:charge_level(live, at: 1 0, size: 16 x 52) {
-        live level = absolute(charge)
-        live fill = if(charge < -0.02, hot, if(absolute(charge) > 0.8, warm, signal))
+    # How charged it is, as a capacitor holds a charge: on its plates — each in its sign's colour, thicker as it fills, the charge
+    # being the voltage across against its rating —, and in the field between them, its lines coming in with the charge, warming
+    # close to the rating. Charged the wrong way round, an electrolytic is hurt: its plates and its field light hot at once.
+    path:field(live, "M-6-18H6M-6 0H3M-6 18H6") {
+        live opacity = absolute(charge)
+        live stroke = if(charge < -0.02, hot, if(absolute(charge) > 0.8, warm, signal))
+        thickness = 0.5
     }
 
     path:plate_a(live, "M-10-28V28") {
-        live stroke = if(failed > 0.5, burned, signal)
+        live stroke = if(failed > 0.5, burned, if(charge < -0.02, hot, if(charge > 0.02, positive, signal)))
+        live thickness = 1 + 0.9 * absolute(charge)
     }
 
     path:plate_b(live, "M14-28Q0 0 14 28") {
-        live stroke = if(failed > 0.5, burned, signal)
+        live stroke = if(failed > 0.5, burned, if(charge < -0.02, hot, if(charge > 0.02, negative, signal)))
+        live thickness = 1 + 0.9 * absolute(charge)
     }
 
     layer(live, failed > 0.5) {

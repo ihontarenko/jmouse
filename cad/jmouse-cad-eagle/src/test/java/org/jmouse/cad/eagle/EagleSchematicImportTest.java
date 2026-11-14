@@ -163,16 +163,16 @@ class EagleSchematicImportTest {
     }
 
     @Test
-    @DisplayName("files each Eagle library as a category of its own, under Eagle's, standing before what it holds")
-    void eachLibraryIsACategory() {
+    @DisplayName("files an Eagle part by what it is, never in a category of its library's: one its table does not name is unfiled")
+    void aPartIsFiledByWhatItIs() {
         EagleSchematic schematic = EagleReader.read("divider.sch", SCHEMATIC).schematic().orElseThrow();
         EagleLibraries filing = EagleLibraries.shipped();
         ImportedDocuments read = EagleDesignImport.read(schematic, "divider.sch", Optional.empty(), "Divider", filing, MARKS);
-        String category = filing.libraryCategory() + "-test-library";
         List<DocumentNode> library = read.library();
-        assertEquals(category, library.getFirst().slug(), library.stream().map(DocumentNode::slug).toList().toString());
-        assertTrue(library.stream().filter(document -> !document.slug().equals(category))
-                .allMatch(document -> text(document).contains("category: " + category)), library.stream().map(this::text).toList().toString());
+        // The library «test» is none the table names: what it brings is unfiled, and no category is made for it.
+        assertTrue(library.stream().noneMatch(document -> document.kind().word().equals("category")), library.stream().map(DocumentNode::slug).toList().toString());
+        assertTrue(library.stream().allMatch(document -> text(document).contains("category: " + filing.sheet().categories().unfiled())),
+                library.stream().map(this::text).toList().toString());
         assertEquals(Optional.of("SparkFun-Resistors"), EagleNames.libraryOf("Eagle package SparkFun-Resistors:AXIAL-0.3"));
         assertEquals(Optional.empty(), EagleNames.libraryOf("KiCad footprint Package_SO:SOIC-8"));
     }

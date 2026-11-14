@@ -1,8 +1,0 @@
-category:eagle("Eagle's") {
-    meta {
-        summary: "Symbols, footprints and components brought by an Eagle import"
-        order: 102
-        authors: "jMouse"
-        license: "CERN-OHL-W-2.0"
-    }
-}

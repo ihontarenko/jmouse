@@ -1,5 +1,7 @@
 # How a drawing converted from a LibrePCB project is filed, and where each of its layers goes.
 # A LibrePCB project carries its library inside it: a converted drawing is the project's, it names no holder and no terms.
+# A symbol, a footprint, a 3D model or a component is filed by what LibrePCB says it is — the categories at the end of this table.
+# A part fetched from a library installed beside the server stands under that library's terms, where they are named below.
 # A layer not named here — a part's names and values, grab areas — says nothing of what is made, and is left out.
 table:libre-pcb-libraries("LibrePCB libraries") {
     meta {
@@ -11,7 +13,7 @@ table:libre-pcb-libraries("LibrePCB libraries") {
 
     # The tags a converted drawing carries; it is filed in no category, for the project it is imported into is its place.
     # The symbols, footprints, 3D models and components an import brings of this program's library: filed apart, as its own.
-    library-category librepcb
+    unfiled-category general
     symbol-tags electronics, schematic, librepcb
     footprint-tags electronics, librepcb, footprint
     component-tags electronics, librepcb
@@ -40,6 +42,10 @@ table:libre-pcb-libraries("LibrePCB libraries") {
     pcb-rule-names clearance = min_copper_copper_clearance, edge-clearance = min_copper_board_clearance, least-track-width = min_copper_width, least-drill = min_pth_drill_diameter, least-via-ring = min_annular_ring, hole-clearance = min_drill_drill_clearance
     pcb-class-opening class_
 
+    # The terms each library LibrePCB itself publishes stands under, by the library's UUID — Base, Connectors, Integrated Circuits —:
+    # CC0, as each one's LICENSE.txt says. A library not named here — a community one — claims none until it is named.
+    installed-licences a9ddf0c6-9b1c-4730-b300-01b4f192ad40 = CC0-1.0, 6ccc516c-21b7-4cd5-9cf2-7a04cfa361c6 = CC0-1.0, 326f091b-b715-44bf-b385-b613cd60d9f3 = CC0-1.0
+
     silkscreen "What is printed on the pcb, front and back" {
         libre-pcb "top_legend", "bot_legend"
     }
@@ -66,5 +72,201 @@ table:libre-pcb-libraries("LibrePCB libraries") {
     }
     copper "Copper drawn besides the pads" {
         libre-pcb "top_cu", "bot_cu"
+    }
+
+    # Where each of LibrePCB's parts is filed, by the categories its element names — LibrePCB's own component and package trees, by
+    # UUID, their names beside them. An element is filed by its first category named here, else by that category's parent; LibrePCB's
+    # «Miscellaneous» is unfiled.
+    # Resistors (component) · Resistor (package)
+    resistors "LibrePCB's categories filed here" {
+        sources "1039f038-20a6-4bfe-89c1-99f34fbb45bd", "398630c9-bbfa-4b3a-90cd-3fc3a1e9ce53"
+    }
+    # Relays (component)
+    relays "LibrePCB's category filed here" {
+        sources "1f60e4f0-f86b-4f90-9081-187099ca03a7"
+    }
+    # Counters, Dividers (component) · Programmable Logic Devices (PLD) (component) · Complex Programmable Logic Devices (CPLD) (component) · Buffers, Drivers (component) · Signal Switches, Multiplexers, Decoders (component) · Shift Registers (component) · Gates, Inverters (component) · Logic (component) · Translators, Level Shifters (component) · Field Programmable Gate Arrays (FPGA) (component) · Flip Flops, Latches (component)
+    logic "LibrePCB's categories filed here" {
+        sources "20580770-121f-422e-be2b-420c000487ed", "2b70644c-2269-41f9-9381-6c9677330e01", "4a2a74fb-e458-4903-9251-f0287a2fd04f", "56f01b1d-0723-4c33-88f7-9968cf96b50f", "651dca6f-67a5-4ee3-a07f-ed028243a6e2", "71b1d6fa-cc7c-44ea-82c3-4396dfd3d7cc", "8e4af7b5-cbff-4409-9698-f2b545218075", "9212a13b-d12d-4d13-b2c3-07a6c86e5e5c", "a4c3b94b-5321-4adb-8a77-d3b53f178cee", "c3dfb625-e6e4-46c1-a1df-d14eeecfc965", "f4abe9d8-20b1-4818-a007-0f1b527e621d"
+    }
+    # Microcontrollers, Microprocessors (component) · Digital Signal Processors (DSP) (component) · Systems On Chip (SoC) (component) · Data Processing (component)
+    microcontrollers "LibrePCB's categories filed here" {
+        sources "22151601-c2d9-419a-87bc-266f9c7c3459", "6dd43c27-b5f0-49fa-a8c0-926912d1dc35", "7c698c64-e0f4-4885-bc29-566c4828071e", "b1a06201-8efe-418d-ad1b-1e000cc12e63"
+    }
+    # Voltage References (component)
+    references "LibrePCB's category filed here" {
+        sources "267ee59f-c903-4391-bb98-6d7527dc7dd1"
+    }
+    # Optocouplers (component) · Isolators (component) · LEDs (component) · Optoelectronics (component)
+    optoelectronics "LibrePCB's categories filed here" {
+        sources "2bb3fe20-2ae6-4dfa-92f8-20004eaafe90", "3be18dae-a305-41ea-9e16-036b57cc21f8", "70421345-ae1d-4fed-aa60-e7619524b97f", "798db79a-f83e-49c5-bc4c-33e77c8501d6"
+    }
+    # Magnetic Sensors (component) · Humidity Sensors (component) · Sensors, Transducers (component) · Joysticks (component) · Gas Sensors (component) · Motion Sensors (component) · Optical Sensors (component) · Encoders (component) · Particle and Dust Sensors (component) · Current Transducers (component) · Temperature Sensors (component)
+    sensors "LibrePCB's categories filed here" {
+        sources "2d036c7b-992d-44e5-8f69-f2d263163fea", "3e181c86-f883-4d48-aa60-22db32b1b495", "5347fa0a-108b-4fa0-b97d-947d35c218be", "588232c9-c053-4f7f-8ea2-ff4303adb7cb", "8c508cce-7904-44b9-a300-d9cc6eb44a6d", "92fd938b-2eef-45be-b4e8-65b03a5dbfe3", "982705c8-9e88-4dab-89eb-fcea58afbeae", "a159772a-3fc2-4037-ab59-f9d59b3ee6fc", "c227644e-1d75-442d-8cd8-185b1e4e64dd", "c4ddfbc6-6543-499d-9e95-3091e049b07f", "d1b6d2ca-061d-4c5c-81b2-cc7ee26942cb"
+    }
+    # Voltage Regulators (component) · Supervisors (component) · Gate Drivers (component) · Motor Drivers/Controllers (component) · Full/Half Bridge Drivers (component) · Battery Management (component) · Power Management (PMIC) (component) · LED Drivers (component) · AC/DC Converters (component) · Battery Chargers (component)
+    power "LibrePCB's categories filed here" {
+        sources "30643e64-b131-4eb5-b956-ceb3cb02413a", "38b3555a-bfea-4422-8d01-d4f2f94b1192", "5a6e8219-34b8-44f2-a7c2-3a97ddf7456a", "688c7dcd-2fcf-4655-90b6-777a42963cbe", "8625295c-d121-45c3-8bf9-32f5fce71722", "9109b7fd-e834-437f-b98d-114febc103e9", "c6be465e-4086-4785-9437-8ec0a76689b3", "cda9162b-fa94-4b99-abe0-00fc02c6f5c1", "e1f123ad-a959-474c-8b61-b5cdc92e817f", "ffe32a67-4ee5-4494-9936-c9e4c0b147bc"
+    }
+    # Interface (component) · USB Interfaces (component) · Analog Switches, Multiplexers, Demultiplexers (component) · Signal Buffers, Repeaters, Splitters (component) · I/O Expanders (component) · Drivers, Receivers, Transmitters (component)
+    interface "LibrePCB's categories filed here" {
+        sources "38665d59-1fed-4cd0-8bcd-57af52fefb29", "58601391-795b-4ebf-ae55-984352167ce4", "66367c6f-741a-4b3e-a7c6-af32a04b5b9b", "a9aeef4d-41c2-440f-add5-cd1999e31e8f", "f69720b5-bf32-4afb-8a59-4ba554008b11", "f7f9bc34-7966-4af4-8cd4-4b8101e0823a"
+    }
+    # Crystals, Oscillators, Resonators (component) · Crystal (package)
+    crystals "LibrePCB's categories filed here" {
+        sources "39d4b3d6-4168-4fe2-9420-fbf7eb3ac248", "9d2d1d3f-9fe2-4497-ac40-b35a141e472b"
+    }
+    # Digital Potentiometers (component) · Analog Front End (AFE) (component) · Analog to Digital Converters (ADC) (component) · Data Acquisition (component) · Digital to Analog Converters (DAC) (component)
+    converters "LibrePCB's categories filed here" {
+        sources "3ae7605e-f9e6-499f-bfa4-f72f62abd6f8", "9066f53a-1270-466a-9b68-5501ffe41c08", "a621d579-8715-4edf-816e-5715f97cd2d7", "b9fc7966-d5d2-4379-a029-5b65b69a4fbb", "f87a2a14-4dd2-49f0-b93d-0c78ac50cf53"
+    }
+    # D-Sub Connectors (component) · Pin Headers (Male) (component) · IC Sockets (component) · Barrel Connectors (Audio, Power Jacks, ...) (component) · Coaxial Connectors (component) · Card Edge Connectors (component) · Pin Sockets (Female) (component) · Card Slots (component) · Computer Connectors (USB, HDMI, Ethernet, ...) (component) · Flex Connectors (component) · Connectors (component) · Direct Wire to Board Connectors (component) · Terminal Blocks (component) · Direct Wire to Board Connector (package) · Connector (package) · Pin Socket (Female) (package) · Card Edge Connector (package) · Coaxial Connector (package) · Computer Connector (USB, HDMI, Ethernet, ...) (package) · Flex Connector (package) · Terminal Block (package) · D-Sub Connector (package) · Pin Header (Male) (package)
+    connectors "LibrePCB's categories filed here" {
+        sources "3dcfe933-b2ee-49fb-a66f-275bf51849bb", "4a4e3c72-94fb-45f9-a6d8-122d2af16fb1", "4b931698-8e30-4d59-98c8-6fcf452f4be2", "6eb1e60c-9c2b-439c-a2c5-8df7edbeeb98", "7587f34f-a63d-45f1-8613-ef1e2375e240", "7891f51d-8e92-4686-ab46-718ffb7f82db", "ade6d8ff-3c4f-4dac-a939-cc540c87c280", "bfe2b7c8-1aa0-49f1-9f27-e015d65af08e", "c4c12c6e-abcd-4856-8445-e96c2737423e", "cd70ec84-a440-496f-b5c9-ece75e81de64", "d0618c29-0436-42da-a388-fdadf7b23892", "e4c9b084-7ee2-4310-9b5c-dc66c736a6e0", "f9db4ef5-2220-462a-adff-deac8402ecf0", "2f9c28ee-8507-45be-8c06-591549d8bee3", "56a5773f-eeb4-4b39-8cb9-274f3da26f4f", "6183d171-e810-475a-a568-2a270aff8f5e", "66add33e-fb54-4864-bae3-a899b380cb90", "6ee4b500-90c3-4387-be67-628c273ec3b0", "92943488-b68c-400e-8338-589fe4081b8a", "b2fef347-8caf-4a6f-a889-ed91a3b357ab", "b724b55e-0f80-4cf3-aa9f-e2a87e02bd19", "c89b8a73-8449-408e-8730-763a6f6822ea", "e4d3a6bf-af32-48a2-b427-5e794bed949a"
+    }
+    # Diodes, Rectifiers (component) · Diode (package)
+    diodes "LibrePCB's categories filed here" {
+        sources "4d1c95f4-2e60-4f50-a15b-ba9186a01b1a", "0a8e9c33-0a23-47e0-a4a5-b1a6c1c7fa2e"
+    }
+    # Discrete Semiconductors (component)
+    semiconductors "LibrePCB's category filed here" {
+        sources "59112789-151e-4f46-b71b-ff33d023927a"
+    }
+    # Comparators (component)
+    comparators "LibrePCB's category filed here" {
+        sources "6b8cb737-30d9-49e2-831c-34aa909ef85e"
+    }
+    # Motors, Actuators (component) · Electromechanical (component) · Battery Holders (component)
+    electromechanical "LibrePCB's categories filed here" {
+        sources "75a26b1f-c84e-4a3d-a20d-021d37e6697d", "8ca4f9fb-3dd3-4c1e-a097-6601b437bbc6", "b76b4ce6-4d44-4510-8e9d-688d44c697e5"
+    }
+    # Board Spacers (component)
+    mechanical "LibrePCB's category filed here" {
+        sources "7da60b1f-96a7-4026-bd84-ab4a51883101"
+    }
+    # Integrated Circuits (component) · Single Board Computers, Dev/Eval Boards (component)
+    integrated "LibrePCB's categories filed here" {
+        sources "8226f987-124b-4776-9084-3821dd51c272", "e96d0dda-3100-4e68-8c33-e2a5bc80428b"
+    }
+    # Clock, Timing (component) · Timers, Oscillators (component) · Real Time Clocks (RTC) (component) · Clock Generators, PLLs, Frequency Synthesizers (component)
+    timers "LibrePCB's categories filed here" {
+        sources "8f9cbf8f-eada-4981-86a3-b789955a789a", "907a87d1-1050-46b0-95bd-f7c9e9068b77", "db02d12f-b838-404a-9c04-2873c8c5a439", "e6aea6d6-ac09-4e2d-862d-49a70e62613e"
+    }
+    # Passive (component)
+    passive "LibrePCB's category filed here" {
+        sources "9a25af45-d6a3-4c5a-af08-d68a148e9ca0"
+    }
+    # Linear (component) · Amplifiers (component)
+    amplifiers "LibrePCB's categories filed here" {
+        sources "9ce1e2fa-696e-405e-8c6a-c8fb0269fb5a", "e05f53ad-1c05-42c1-9124-d0ed3e445a2d"
+    }
+    # Displays (component)
+    displays "LibrePCB's category filed here" {
+        sources "a6565eed-ad95-4be7-a29c-39259b1bea5f"
+    }
+    # Supply Symbols (component) · Schematic Symbols (component)
+    marks "LibrePCB's categories filed here" {
+        sources "adf8d941-787c-4b02-8772-fbc0a587463d", "bd6346a1-5cbf-4b28-a62b-637d8e1a225d"
+    }
+    # Inductors, Coils, Chokes, Filters (component) · Inductor (package) · Through-Hole Inductor (package)
+    inductors "LibrePCB's categories filed here" {
+        sources "b3adfa1e-b878-44f6-902a-14ef3dad7a14", "63d56ec5-daf9-40b9-b8df-3831a9239df0", "c56106fb-9ba4-4730-b4be-3f27880b8b04"
+    }
+    # Capacitors (component) · Capacitor (package)
+    capacitors "LibrePCB's categories filed here" {
+        sources "c011cc6b-b762-498e-8494-d1994f3043cf", "5797019a-87f3-4b9b-8973-21834c40fb20"
+    }
+    # Fuse Holders (component)
+    fuses "LibrePCB's category filed here" {
+        sources "c3a8348e-f7a9-4607-8fe7-253076498ae2"
+    }
+    # Schematic Frames (component)
+    frames "LibrePCB's category filed here" {
+        sources "e0702c57-f31f-497d-ae1e-e31c4017f3c0"
+    }
+    # Switches (component) · Switch (package)
+    switches "LibrePCB's categories filed here" {
+        sources "e29f0cb3-ef6d-4203-b854-d75150cbae0b", "c0f16db0-f0db-4121-ab12-b4570ff79738"
+    }
+    # Transistors, Thyristors (component)
+    transistors "LibrePCB's category filed here" {
+        sources "e9663545-80dd-4658-9357-d4ef62e55168"
+    }
+    # Memory (component)
+    memory "LibrePCB's category filed here" {
+        sources "f81c3abf-dfbe-4464-b4d9-cc9824959f56"
+    }
+    # Chip LED (package)
+    optoelectronics-surface "LibrePCB's category filed here" {
+        sources "0764a19f-0b33-4927-906a-f4d6c522841d"
+    }
+    # Transistor Outline (TO) (package)
+    through-hole-transistor-outline "LibrePCB's category filed here" {
+        sources "13444388-0f37-4369-99ad-cf470bcb85b5"
+    }
+    # Flip-Chip (package) · Wafer (package) · Grid Array (package) · Embedded Wafer-Level Ball Grid Array (eWLB) (package) · Chip-Scale (CSP) (package) · Ball Grid Array (BGA) (package) · Land Grid Array (LGA) (package) · Wafer-Level (WL-CSP / WLP) (package)
+    packages-surface "LibrePCB's categories filed here" {
+        sources "13aaf987-ce55-4c5b-899c-9c93f90dc652", "5eea18fe-0322-4b6e-a1f8-2bd6d5b7c4bc", "6a35dc4f-550d-4807-80d8-edb68ed36d9f", "700f8ed8-fbb6-4832-b045-aff1ba3fdfe8", "9069e789-352d-452a-8a49-67548d263c56", "a1216e37-110e-4abc-b896-4b74fe38684c", "c0214496-debb-425b-96ca-08473dbc1740", "e29f81f9-e1ce-4301-8875-f95f9972f739"
+    }
+    # Manufacturer-Specific (package) · Dual Row (package) · Transistor (package)
+    packages "LibrePCB's categories filed here" {
+        sources "194951ec-03dd-412a-9828-70c40bbdd22d", "51a8dc64-d5b5-4bc4-b920-c914707c8341", "e8388369-7f8d-45e8-98e6-a655bc498559"
+    }
+    # Thin-Shrink Small-Outline Package (TSSOP) (package) · Shrink Small-Outline Package (SSOP) (package) · Small-Outline Package (SOP) (package) · Thin Small-Outline Package (TSOP) (package) · Small-Outline IC (SO / SOIC) (package)
+    small-outline "LibrePCB's categories filed here" {
+        sources "241d9d5d-8f74-4740-8901-3cf51cf50091", "3627bf02-2e6e-4d68-9ada-743fa69a4f8c", "76ca5dfa-6d3d-409a-ac36-484a24ba8711", "7993abb0-fb0a-4157-8f83-1db890755836", "a074fabf-4912-4c29-bc6b-451bf43c2193"
+    }
+    # Thin Small-Outline Transistor (TSOT) (package) · Decawatt Package (DPAK) (package) · Small-Outline Transistor (SOT) (package)
+    surface-transistor-outline "LibrePCB's categories filed here" {
+        sources "2b8ac154-bab7-407f-a208-50cfb8d5be46", "a1c24335-5cdc-4eea-9319-2b01132e3af8", "b77c2754-fc91-4e9e-949e-5568a4bee0fe"
+    }
+    # Quad Row (package) · Quad Flat Package (QFP) (package) · Leaded Chip Carrier (LCC) (package) · Plastic Leaded Chip Carrier (PLCC) (package)
+    quad-flat "LibrePCB's categories filed here" {
+        sources "2e16635c-5069-4105-b875-852547a6d027", "3363b8b1-6fa8-4041-962e-5f839cfd86b7", "3609a237-2ac3-40c8-8078-3c5cebf992ea", "adefed1c-bf86-432c-98ca-6e4d969b58b2"
+    }
+    # Chip Capacitor (package)
+    capacitors-surface "LibrePCB's category filed here" {
+        sources "414f873f-4099-47fd-8526-bdd8419de581"
+    }
+    # Pin Grid Array (PGA) (package) · Single In-Line (SIP / SIL) (package) · Single Row (package)
+    packages-through-hole "LibrePCB's categories filed here" {
+        sources "5bc3a6c4-2f77-4a9e-85ca-e261f4757312", "91c062f0-ae3f-43db-a925-93d7ea6b6a80", "e7892b0e-a037-4090-bc75-e350e9f0ab2e"
+    }
+    # Through-Hole Resistor (package)
+    resistors-through-hole "LibrePCB's category filed here" {
+        sources "72ceb547-9e68-4d6b-8c96-283d325e1abf"
+    }
+    # Chip Inductor (package)
+    inductors-surface "LibrePCB's category filed here" {
+        sources "812c8e64-3a47-49d8-987f-2cfba377c8ae"
+    }
+    # Dual-Flat No-Leads (DFN) (package) · Quad-Flat No-Leads (QFN) (package)
+    no-lead "LibrePCB's categories filed here" {
+        sources "88cbb15c-2b69-4612-8764-c5d323f88f13", "e077449f-2272-41ce-92ce-0cb99dfa0697"
+    }
+    # Small-Outline Diode (SOD) (package)
+    diodes-surface "LibrePCB's category filed here" {
+        sources "9b31c9b4-04b6-4f97-ad12-f095d196bd38"
+    }
+    # Through-Hole LED (package)
+    optoelectronics-through-hole "LibrePCB's category filed here" {
+        sources "9c36c4be-3582-4f27-ae00-4c1229f1e870"
+    }
+    # Chip Resistor (package)
+    resistors-surface "LibrePCB's category filed here" {
+        sources "a20f0330-06d3-4bc2-a1fa-f8577deb6770"
+    }
+    # Diode Outline (DO) (package)
+    diodes-through-hole "LibrePCB's category filed here" {
+        sources "dcaa6b6c-0c55-43fd-a320-5dd74a2cdc85"
+    }
+    # Dual In-Line (DIP / DIL) (package)
+    dual-inline "LibrePCB's category filed here" {
+        sources "edc63ee6-ea87-495d-a6b9-54536fe8b1f9"
+    }
+    # Through-Hole Capacitor (package)
+    capacitors-through-hole "LibrePCB's category filed here" {
+        sources "ee75e31d-f231-41d9-8a3b-bea5114f41e3"
     }
 }

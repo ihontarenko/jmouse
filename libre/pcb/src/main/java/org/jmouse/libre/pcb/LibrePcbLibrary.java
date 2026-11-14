@@ -12,17 +12,76 @@ import java.util.Optional;
  * The library a LibrePCB project carries inside it: every symbol, component, device and package it uses, each by its UUID.
  * A component says what a part is and how it is drawn, a device which package it comes in.
  */
+/**
+ * @param categories     the categories each element is filed in, by the element's UUID, as it says them
+ * @param categoryParent each category's parent, by the category's UUID — where the library holds the category's file; a root has none
+ */
 public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component> components, Map<String, Device> devices,
-                              Map<String, Package> packages) {
+                              Map<String, Package> packages, Map<String, List<String>> categories, Map<String, String> categoryParent) {
+
+    /** What a root category writes for its parent. */
+    private static final String NO_PARENT = "none";
 
     private static final String NO_PIN_NAME = "none";
     private static final String BOTTOM_SIDE = "bottom";
+
+    /**
+     * A library as its files say it, by their path inside its folder — {@code sym/<uuid>/symbol.lp} —: an installed {@code *.lplib}
+     * or the one a project carries. A file that keeps no element is passed over.
+     *
+     * @throws LibrePcbReadException naming the file that does not read
+     */
+    public static LibrePcbLibrary read(Map<String, String> files) {
+        Map<String, Symbol> symbols = new LinkedHashMap<>();
+        Map<String, Component> components = new LinkedHashMap<>();
+        Map<String, Device> devices = new LinkedHashMap<>();
+        Map<String, Package> packages = new LinkedHashMap<>();
+        Map<String, List<String>> categories = new LinkedHashMap<>();
+        Map<String, String> categoryParent = new LinkedHashMap<>();
+        files.forEach((path, text) -> LibrePcbFile.Element.inLibrary(path).ifPresent(element -> {
+            SExpressionList read = LibrePcbParsing.parsed(path, text);
+            String id = read.word(1);
+            switch (element) {
+                case SYMBOL -> symbols.put(id, Symbol.of(read));
+                case COMPONENT -> components.put(id, Component.of(read));
+                case DEVICE -> devices.put(id, Device.of(read));
+                case PACKAGE -> packages.put(id, Package.of(read));
+                case COMPONENT_CATEGORY, PACKAGE_CATEGORY -> {
+                    String parent = LibrePcbValues.text(read, LibrePcbKeyword.PARENT);
+                    if (!parent.isBlank() && !parent.equals(NO_PARENT)) {
+                        categoryParent.put(id, parent);
+                    }
+                }
+            }
+            List<String> filed = read.lists(LibrePcbKeyword.CATEGORY).stream().map(category -> category.word(1)).toList();
+            if (!filed.isEmpty()) {
+                categories.put(id, filed);
+            }
+        }));
+        return new LibrePcbLibrary(symbols, components, devices, packages, categories, categoryParent);
+    }
 
     public LibrePcbLibrary {
         symbols = Map.copyOf(symbols);
         components = Map.copyOf(components);
         devices = Map.copyOf(devices);
         packages = Map.copyOf(packages);
+        categories = Map.copyOf(categories);
+        categoryParent = Map.copyOf(categoryParent);
+    }
+
+    /**
+     * What an element says it is, the most specific first: each category it is filed in, then that category's parent and its
+     * parent's, as far as the library holds them — each once.
+     */
+    public List<String> categoriesOf(String elementId) {
+        List<String> chain = new ArrayList<>();
+        for (String category : categories.getOrDefault(elementId, List.of())) {
+            for (String step = category; step != null && !chain.contains(step); step = categoryParent.get(step)) {
+                chain.add(step);
+            }
+        }
+        return chain;
     }
 
     /** A pin of a symbol: {@code at} is where a wire meets it, and it runs {@code length} along {@code rotation}. */
@@ -116,10 +175,13 @@ public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component
         }
     }
 
-    /** @param schematicOnly whether it stands on the sheet alone: a supply, a frame */
-    /** @param author who made it, as the element says; empty where it says nobody */
-    public record Component(String id, String name, String author, String description, String prefix, boolean schematicOnly, List<Signal> signals,
-                            List<Variant> variants) {
+    /**
+     * @param author        who made it, as the element says; empty where it says nobody
+     * @param keywords      what it is looked for by, comma-separated as LibrePCB writes them; empty where it says none
+     * @param schematicOnly whether it stands on the sheet alone: a supply, a frame
+     */
+    public record Component(String id, String name, String author, String description, String keywords, String prefix, boolean schematicOnly,
+                            List<Signal> signals, List<Variant> variants) {
 
         public Component {
             signals = List.copyOf(signals);
@@ -128,7 +190,8 @@ public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component
 
         static Component of(SExpressionList component) {
             return new Component(component.word(1), LibrePcbValues.text(component, LibrePcbKeyword.NAME), LibrePcbValues.text(component, LibrePcbKeyword.AUTHOR),
-                    LibrePcbValues.text(component, LibrePcbKeyword.DESCRIPTION), LibrePcbValues.text(component, LibrePcbKeyword.PREFIX),
+                    LibrePcbValues.text(component, LibrePcbKeyword.DESCRIPTION), LibrePcbValues.text(component, LibrePcbKeyword.KEYWORDS),
+                    LibrePcbValues.text(component, LibrePcbKeyword.PREFIX),
                     LibrePcbValues.flag(component, LibrePcbKeyword.SCHEMATIC_ONLY),
                     component.lists(LibrePcbKeyword.SIGNAL).stream().map(Signal::of).toList(),
                     component.lists(LibrePcbKeyword.VARIANT).stream().map(Variant::of).toList());
@@ -143,8 +206,12 @@ public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component
         }
     }
 
-    /** @param padSignals the signal each of its package's pads carries, by pad; a pad with none is left out */
-    public record Device(String id, String name, String component, String packageId, Map<String, String> padSignals) {
+    /**
+     * @param keywords   what it is looked for by, comma-separated as LibrePCB writes them; empty where it says none
+     * @param padSignals the signal each of its package's pads carries, by pad; a pad with none is left out
+     */
+    public record Device(String id, String name, String description, String keywords, String component, String packageId,
+                         Map<String, String> padSignals) {
 
         public Device {
             padSignals = Map.copyOf(padSignals);
@@ -156,6 +223,7 @@ public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component
                 LibrePcbValues.reference(pad, LibrePcbKeyword.SIGNAL).ifPresent(signal -> signals.put(pad.word(1), signal));
             }
             return new Device(device.word(1), LibrePcbValues.text(device, LibrePcbKeyword.NAME),
+                    LibrePcbValues.text(device, LibrePcbKeyword.DESCRIPTION), LibrePcbValues.text(device, LibrePcbKeyword.KEYWORDS),
                     LibrePcbValues.text(device, LibrePcbKeyword.COMPONENT), LibrePcbValues.text(device, LibrePcbKeyword.PACKAGE), signals);
         }
     }
@@ -265,9 +333,11 @@ public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component
     /**
      * @param padNames   each pad's name, by its id: what a footprint's pad is numbered with
      * @param author     who drew it, its footprints and its 3D models, as the element says; empty where it says nobody
+     * @param keywords   what it is looked for by, comma-separated as LibrePCB writes them; empty where it says none
      * @param modelNames each 3D model's name, by its id
      */
-    public record Package(String id, String name, String author, String description, Map<String, String> padNames, Map<String, String> modelNames, List<Footprint> footprints) {
+    public record Package(String id, String name, String author, String description, String keywords, Map<String, String> padNames,
+                          Map<String, String> modelNames, List<Footprint> footprints) {
 
         public Package {
             padNames = Map.copyOf(padNames);
@@ -281,7 +351,7 @@ public record LibrePcbLibrary(Map<String, Symbol> symbols, Map<String, Component
             Map<String, String> models = new LinkedHashMap<>();
             found.lists(LibrePcbKeyword.MODEL).forEach(model -> models.put(model.word(1), LibrePcbValues.text(model, LibrePcbKeyword.NAME)));
             return new Package(found.word(1), LibrePcbValues.text(found, LibrePcbKeyword.NAME), LibrePcbValues.text(found, LibrePcbKeyword.AUTHOR),
-                    LibrePcbValues.text(found, LibrePcbKeyword.DESCRIPTION),
+                    LibrePcbValues.text(found, LibrePcbKeyword.DESCRIPTION), LibrePcbValues.text(found, LibrePcbKeyword.KEYWORDS),
                     names, models, found.lists(LibrePcbKeyword.FOOTPRINT).stream().map(Footprint::of).toList());
         }
 

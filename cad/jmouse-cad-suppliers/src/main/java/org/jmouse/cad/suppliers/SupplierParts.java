@@ -9,6 +9,7 @@ import org.jmouse.suppliers.SupplierFailure;
 import org.jmouse.suppliers.SupplierOffer;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Objects;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -61,6 +62,12 @@ public final class SupplierParts implements PartSearchProvider {
         return access.get().credentials().complete();
     }
 
+    /** A distributor's parts: part numbers with their offers, not yet any drawing. */
+    @Override
+    public Set<PartCandidate.Kind> offers() {
+        return Set.of(PartCandidate.Kind.PART);
+    }
+
     @Override
     public ProviderState state() {
         if (!configured()) {
@@ -70,7 +77,7 @@ public final class SupplierParts implements PartSearchProvider {
     }
 
     @Override
-    public List<PartCandidate> search(String query, int limit) {
+    public List<PartCandidate> search(String query, Set<PartCandidate.Kind> kinds, int limit) {
         if (!configured() || query == null || query.isBlank()) {
             return List.of();
         }
@@ -103,7 +110,7 @@ public final class SupplierParts implements PartSearchProvider {
         String identifier = offer.supplierPartNumber() != null ? offer.supplierPartNumber() : offer.partNumber();
         PartCandidate.Link page = offer.page() == null ? null : new PartCandidate.Link(driver.name(), offer.page());
         return new PartCandidate(id(), identifier, PartCandidate.Kind.PART, title, offer.partNumber(), offer.manufacturer(),
-                offer.description(), offer.datasheet(), page, null, null, false, supplyOf(offer));
+                offer.description(), offer.datasheet(), page, null, false, supplyOf(offer));
     }
 
     private static PartCandidate.Supply supplyOf(SupplierOffer offer) {

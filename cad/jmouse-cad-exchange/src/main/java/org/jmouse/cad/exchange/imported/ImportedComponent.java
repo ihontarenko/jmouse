@@ -61,7 +61,7 @@ public record ImportedComponent(String title, String slug, String summary, Prove
     /** The component's document, filed as the product it came from files its components. */
     public DocumentNode document(ImportFiling filing) {
         DocumentNode document = new DocumentNode(SimulationModule.COMPONENT, title, slug, null, 1);
-        MetaNode meta = MetaNode.filed(summary, null, filing.libraryCategory(provenance), filing.componentTags());
+        MetaNode meta = MetaNode.filed(summary, null, filing.categoryOf(provenance), filing.componentTags());
         provenance.writeInto(meta);
         if (designator != null) {
             meta.addExpression(MetaLineNode.of(MetaNode.DESIGNATOR, Nodes.word(designator)));

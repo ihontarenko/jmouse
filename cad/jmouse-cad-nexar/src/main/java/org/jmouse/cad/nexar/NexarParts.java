@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntSupplier;
@@ -89,6 +90,12 @@ public final class NexarParts implements PartSearchProvider {
         return "Nexar · Octopart";
     }
 
+    /** A distributor's parts: part numbers with their offers, not yet any drawing. */
+    @Override
+    public Set<PartCandidate.Kind> offers() {
+        return Set.of(PartCandidate.Kind.PART);
+    }
+
     @Override
     public ProviderState state() {
         if (!settings.get().configured()) {
@@ -99,7 +106,7 @@ public final class NexarParts implements PartSearchProvider {
     }
 
     @Override
-    public List<PartCandidate> search(String query, int limit) {
+    public List<PartCandidate> search(String query, Set<PartCandidate.Kind> kinds, int limit) {
         if (!settings.get().configured() || query == null || query.isBlank()) {
             return List.of();
         }
@@ -131,7 +138,7 @@ public final class NexarParts implements PartSearchProvider {
         String partNumber = textOrNull(part.path("mpn"));
         return new PartCandidate(id(), textOrNull(part.path("id")), PartCandidate.Kind.PART, partNumber, partNumber,
                 textOrNull(part.path("manufacturer").path("name")), textOrNull(part.path("shortDescription")),
-                textOrNull(part.path("bestDatasheet").path("url")), octopartLink(textOrNull(part.path("octopartUrl"))), null, null, false, null);
+                textOrNull(part.path("bestDatasheet").path("url")), octopartLink(textOrNull(part.path("octopartUrl"))), null, false, null);
     }
 
     /** Octopart's page for the part: Nexar's terms ask that what it answers be shown with it. */

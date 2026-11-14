@@ -19,25 +19,13 @@ public interface ModelSource extends Identified {
     /**
      * A model, as a document that names its files, and those files, each kept as it came.
      *
-     * @param document   the model document: whose it is in its {@code meta}, its files by name
-     * @param categories the category documents it is filed in that the place brings with it — its library's —, each
-     *                   stored before it unless it is there already; none for a model filed in one that stands
+     * @param document the model document: whose it is in its {@code meta}, its files by name, filed by what it is in a category that
+     *                 stands
      */
-    record FetchedModel(DocumentNode document, List<FetchedFile> files, List<DocumentNode> categories) {
+    record FetchedModel(DocumentNode document, List<FetchedFile> files) {
 
         public FetchedModel {
             files = List.copyOf(files);
-            categories = List.copyOf(categories);
-        }
-
-        /** A model filed in a category that stands. */
-        public FetchedModel(DocumentNode document, List<FetchedFile> files) {
-            this(document, files, List.of());
-        }
-
-        /** The same, brought with the categories it is filed in. */
-        public FetchedModel filedIn(List<DocumentNode> brought) {
-            return new FetchedModel(document, files, brought);
         }
     }
 

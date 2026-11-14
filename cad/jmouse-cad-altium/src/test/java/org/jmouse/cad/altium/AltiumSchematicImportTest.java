@@ -116,16 +116,16 @@ class AltiumSchematicImportTest {
     }
 
     @Test
-    @DisplayName("files a part by the library it was placed from, a category of its own under Altium's, standing before it")
-    void aPartIsFiledByItsLibrary() {
+    @DisplayName("files a part by what the library it was placed from holds — Altium's Miscellaneous Devices are passive parts —")
+    void aPartIsFiledByWhatItIs() {
         String placed = SHEET.replace("|RECORD=1|LIBREFERENCE=RES|", "|RECORD=1|LIBREFERENCE=RES|SOURCELIBRARYNAME=Miscellaneous Devices.IntLib|");
         AltiumSchematic sheet = AltiumSchematicReader.read("divider.SchDoc", placed.getBytes(StandardCharsets.US_ASCII));
         AltiumLibraries filing = AltiumLibraries.shipped();
         ImportedDocuments imported = AltiumSchematicImport.read(sheet, "divider.SchDoc", "Divider", filing, MARKS, CatalogueDocuments.empty());
-        String category = filing.libraryCategory() + "-miscellaneous-devices-library";
-        assertEquals(List.of(category, "altium-res-symbol", "altium-res"), imported.library().stream().map(DocumentNode::slug).toList());
-        assertTrue(imported.library().stream().skip(1).allMatch(document -> language.write(document).contains("category: " + category)));
-        assertTrue(language.write(imported.library().get(2)).contains("Altium part Miscellaneous Devices.IntLib:RES"));
+        assertEquals(List.of("altium-res-symbol", "altium-res"), imported.library().stream().map(DocumentNode::slug).toList());
+        assertTrue(imported.library().stream().allMatch(document -> language.write(document).contains("category: passive")),
+                imported.library().stream().map(language::write).toList().toString());
+        assertTrue(language.write(imported.library().get(1)).contains("Altium part Miscellaneous Devices.IntLib:RES"));
     }
 
     @Test

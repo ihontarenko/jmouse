@@ -78,10 +78,11 @@ public final class FilingTable {
     }
 
     /**
-     * Our layer each of the product's layers is: every entry of the table names our layer by its id and the product's
-     * by its {@code key} ({@code kicad "F.SilkS", "B.SilkS"}).
+     * Ours for each of the product's words, in the table's order: every entry names ours by its id and the product's by its
+     * {@code key} — a layer ({@code silkscreen "…" { kicad "F.SilkS", "B.SilkS" }}), a category
+     * ({@code resistors-surface "…" { sources "Resistor_SMD" }}).
      */
-    public Map<String, String> layers(String key) {
+    public Map<String, String> ours(String key) {
         Map<String, String> layers = new LinkedHashMap<>();
         for (SheetEntry entry : table.entries()) {
             entry.value(key).ifPresent(value -> items(value).forEach(product -> layers.put(text(product), entry.id())));

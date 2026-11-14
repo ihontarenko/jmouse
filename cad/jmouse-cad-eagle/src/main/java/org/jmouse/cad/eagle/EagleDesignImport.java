@@ -32,7 +32,7 @@ public final class EagleDesignImport {
         EagleSchematicImport.Converted circuit = EagleSchematicImport.read(schematic, schematicFile, title, filing, marks);
         if (pcb.isEmpty()) {
             // Every Eagle library a drawing comes from is a category of its own, under Eagle's.
-            return circuit.documents().filedBy(filing);
+            return circuit.documents();
         }
         EaglePcbImport.Pcb laid = EaglePcbImport.read(pcb.get().pcb(), circuit, pcb.get().file(), title, filing);
         List<DocumentNode> designs = new ArrayList<>(circuit.documents().designs());
@@ -40,7 +40,7 @@ public final class EagleDesignImport {
         designs.add(laid.document());
         List<String> notes = new ArrayList<>(circuit.documents().notes());
         notes.addAll(laid.notes());
-        return new ImportedDocuments(circuit.documents().library(), designs, notes).filedBy(filing);
+        return new ImportedDocuments(circuit.documents().library(), designs, notes);
     }
 
     /** A pcb, and the file it was read from. */

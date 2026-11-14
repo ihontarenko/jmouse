@@ -18,13 +18,12 @@ import java.util.List;
  * @param link         the source's own page for it, named as the source names it — a supplier's terms may require it
  *                     shown —; null when none
  * @param license      the license its documents come under once fetched; null when they are ours
- * @param slug         the catalogue object it already is; null when it is not ours yet
  * @param fetchable    whether {@link PartSearchProvider#fetch} makes it the reader's own
  * @param supply       what a distributor has of it right now; null where the source sells nothing
  */
 public record PartCandidate(String provider, String identifier, Kind kind, String title, String partNumber,
                             String manufacturer, String description, String datasheet, Link link, String license,
-                            String slug, boolean fetchable, Supply supply) {
+                            boolean fetchable, Supply supply) {
 
     /** A page of the source's own: what it is called — {@code Octopart} — and where it is. */
     public record Link(String title, String address) {
@@ -61,11 +60,7 @@ public record PartCandidate(String provider, String identifier, Kind kind, Strin
         SYMBOL,
         /** How a part sits on a pcb. */
         FOOTPRINT,
-        /** A circuit. */
-        CIRCUIT,
         /** A manufacturer's part as a supplier lists it: a part number, not yet any drawing. */
-        PART,
-        /** Any other object of the catalogue. */
-        OTHER
+        PART
     }
 }

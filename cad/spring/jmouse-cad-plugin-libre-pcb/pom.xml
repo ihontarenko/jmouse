@@ -52,6 +52,11 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-libre-pcb</artifactId>
         </dependency>
+        <!-- Its settings, read from the engine's one settings tree: the folders its installed libraries stand in -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-settings</artifactId>
+        </dependency>
         <!-- The point it brings its format to -->
         <dependency>
             <groupId>org.jmouse</groupId>

@@ -52,7 +52,7 @@ public record AltiumLibraries(SheetFiling sheet, String ground, Map<String, Stri
     }
 
     public static AltiumLibraries of(FilingTable table) {
-        return new AltiumLibraries(SheetFiling.of(table), table.text("ground"), table.layers("altium"), table.layers("mechanical-kind"),
+        return new AltiumLibraries(SheetFiling.of(table), table.text("ground"), table.ours("altium"), table.ours("mechanical-kind"),
                 Integer.parseInt(table.text("multi-layer")), Integer.parseInt(table.text("bottom-layer")));
     }
 
