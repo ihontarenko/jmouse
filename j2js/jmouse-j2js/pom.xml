@@ -6,28 +6,16 @@
 
     <parent>
         <groupId>org.jmouse</groupId>
-        <artifactId>jmouse-parent</artifactId>
+        <artifactId>jmouse-j2js-modules</artifactId>
         <version>1.0.1</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-dependencies</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <packaging>jar</packaging>
-    <artifactId>jmouse-libre-pcb</artifactId>
-    <name>jMouse - LibrePCB</name>
-    <description>jMouse Framework - LibrePCB: the files of a LibrePCB project as a typed model</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/libre/pcb</url>
+    <artifactId>jmouse-j2js</artifactId>
+    <name>jMouse - J2JS</name>
+    <description>jMouse Framework - J2JS: the seam a module crosses to be called from a page — what it exports and the values that may cross — naming no compiler.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js</url>
 
     <licenses>
         <license>
@@ -47,39 +35,21 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/libre/pcb</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js</url>
     </scm>
 
-    <properties>
-        <java.version>21</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-    </properties>
-
-    <!--
-        The KiCad syntax and nothing of Parallax: a consumer — the Parallax bridge, a converter, a report — reads a
-        schematic through this model and never parses a parenthesis itself.
-    -->
+    <!-- Nothing: a module that exports to a page depends on this, and on no compiler. -->
     <dependencies>
-        <!-- A project file is JSON -->
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-sexpression</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
@@ -102,5 +72,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -4,9 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,49 +26,73 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
     private final static Logger LOGGER = LoggerFactory.getLogger(ExpressionSplitter.class);
 
     /**
-     * What a language's numbers and operators look like, where languages built on the engine differ.
+     * What a language's numbers, operators and texts look like, where languages built on the engine differ: the
+     * {@link Feature}s it has.
      *
      * <p>⚠️ A number never carries a sign. Whether {@code -} negates or subtracts is decided by what stands
      * before it — {@code b-2.5} subtracts, {@code -2.5} negates — and only the parser knows that; a lexer that
      * glued the sign on read {@code b-2.5} as {@code b} followed by the number {@code -2.5}.</p>
      *
-     * @param typedNumbers  whether a letter ending a number is a Java type suffix — {@code 3d} a double,
-     *                      {@code 2L} a long. Only a letter that ends the word is one: {@code 24c02} is a number and
-     *                      a name. Mathematics has none: there {@code 2d} is two times {@code d}.
-     * @param stepOperators whether {@code ++} and {@code --} are operators of their own. Mathematics has no
-     *                      steps: there {@code 2--1} is two minus minus one.
-     * @param longTexts     whether {@code """ … """} is one string, line breaks and quotes inside it included — a
-     *                      document's long text. A long text left open runs to the end of the source. Without it,
-     *                      {@code """} is an empty string followed by a quote.
-     * @param lineComments  whether {@code #} opens a comment that runs to the end of its line and is passed over as
-     *                      space is — no token stands for it. Without it, {@code #} is a character like any other.
+     * @param features what this dialect has; one it lacks reads as that feature says it reads without it
      */
-    public record Dialect(boolean typedNumbers, boolean stepOperators, boolean longTexts, boolean lineComments) {
+    public record Dialect(Set<Feature> features) {
 
         /** jME's own: typed numbers and step operators, as Java writes them. */
-        public static final Dialect PROGRAMMING = new Dialect(true, true);
+        public static final Dialect PROGRAMMING = of(Feature.TYPED_NUMBERS, Feature.STEP_OPERATORS);
 
         /** A formula's: no type suffixes and no steps. */
-        public static final Dialect MATHEMATICS = new Dialect(false, false);
+        public static final Dialect MATHEMATICS = of();
 
-        /** A language without long texts or line comments: how every dialect read before they existed. */
-        public Dialect(boolean typedNumbers, boolean stepOperators) {
-            this(typedNumbers, stepOperators, false, false);
+        public Dialect {
+            EnumSet<Feature> copied = EnumSet.noneOf(Feature.class);
+            copied.addAll(features);
+            features = Collections.unmodifiableSet(copied);
         }
 
-        /** This dialect, reading {@code """ … """} as one string. */
-        public Dialect withLongTexts() {
-            return new Dialect(typedNumbers, stepOperators, true, lineComments);
+        /** The dialect of these features. */
+        public static Dialect of(Feature... features) {
+            return new Dialect(Set.of(features));
         }
 
-        /** This dialect, passing over {@code #} comments to the end of their line. */
-        public Dialect withLineComments() {
-            return new Dialect(typedNumbers, stepOperators, longTexts, true);
+        /** This dialect, with {@code feature} too. */
+        public Dialect with(Feature feature) {
+            EnumSet<Feature> more = EnumSet.of(feature);
+            more.addAll(features);
+            return new Dialect(more);
+        }
+
+        public boolean has(Feature feature) {
+            return features.contains(feature);
         }
     }
 
+    /** What a {@link Dialect} may have. */
+    public enum Feature {
+
+        /**
+         * A letter ending a number is a Java type suffix — {@code 3d} a double, {@code 2L} a long. Only a letter that ends the
+         * word is one: {@code 24c02} is a number and a name. Without it — mathematics — {@code 2d} is two times {@code d}.
+         */
+        TYPED_NUMBERS,
+
+        /** {@code ++} and {@code --} are operators of their own. Without it — mathematics — {@code 2--1} is two minus minus one. */
+        STEP_OPERATORS,
+
+        /**
+         * {@code """ … """} is one string, line breaks and quotes inside it included — a document's long text. A long text left
+         * open runs to the end of the source. Without it, {@code """} is an empty string followed by a quote.
+         */
+        LONG_TEXTS,
+
+        /**
+         * {@code #} opens a comment that runs to the end of its line and is passed over as space is — no token stands for it.
+         * Without it, {@code #} is a character like any other.
+         */
+        LINE_COMMENTS
+    }
+
     private final Pattern expressionPattern;
-    private final boolean lineComments;
+    private final Dialect dialect;
 
     public ExpressionSplitter() {
         this(Dialect.PROGRAMMING);
@@ -73,15 +100,15 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
 
     public ExpressionSplitter(Dialect dialect) {
         this.expressionPattern = expressionPattern(dialect);
-        this.lineComments = dialect.lineComments();
+        this.dialect = dialect;
     }
 
     private static Pattern expressionPattern(Dialect dialect) {
-        String typeSuffix = dialect.typedNumbers() ? "(?:[FLIDSBClfidsbc](?!" + Identifiers.CHARACTER + "))?" : "";
-        String steps = dialect.stepOperators() ? "\\+\\+|--|" : "";
+        String typeSuffix = dialect.has(Feature.TYPED_NUMBERS) ? "(?:[FLIDSBClfidsbc](?!" + Identifiers.CHARACTER + "))?" : "";
+        String steps = dialect.has(Feature.STEP_OPERATORS) ? "\\+\\+|--|" : "";
         // Tried before a quoted string, which would otherwise read its first two quotes as an empty string.
-        String longText = dialect.longTexts() ? "\"\"\"[\\s\\S]*?(?:\"\"\"|\\z)|" : "";
-        String comment = dialect.lineComments() ? "|(?<COMMENT>#[^\\n\\r]*)" : "";
+        String longText = dialect.has(Feature.LONG_TEXTS) ? "\"\"\"[\\s\\S]*?(?:\"\"\"|\\z)|" : "";
+        String comment = dialect.has(Feature.LINE_COMMENTS) ? "|(?<COMMENT>#[^\\n\\r]*)" : "";
         return Pattern.compile(
                 "[^\\S\\r\\n]*(?:(?<IDENTIFIER>" + Identifiers.PATTERN + ")" +
                 "|(?<NUMBER>(?<!\\d)(\\d+(\\.\\d+)?([Ee][+-]?\\d+)?" + typeSuffix + "))" +
@@ -138,7 +165,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
 
         while (matcher.find(index)) {
             // A comment is passed over as space is: it ends where its line does, and nothing stands for it.
-            if (lineComments && matcher.group(COMMENT) != null) {
+            if (dialect.has(Feature.LINE_COMMENTS) && matcher.group(COMMENT) != null) {
                 index = matcher.end() > index ? matcher.end() : index + 1;
                 continue;
             }

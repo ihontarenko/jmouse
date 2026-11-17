@@ -50,6 +50,12 @@
     <dependencies>
         <!-- The services these routes call, with their transactions; it brings the engine, the stores and the
              seams (CadProblem, DocumentOwner, CadCapability) with it. -->
+        <!-- What an editor asks the router and is answered: the same records for the routes, the live session and a page. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-routing-protocol</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-cad-spring-boot</artifactId>

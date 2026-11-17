@@ -14,9 +14,12 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * An open pcb's conversation with the engine, over one socket ({@code cad.pcb}): the editor sends a layout once, then only what
@@ -43,7 +46,9 @@ import java.util.Optional;
  * editor keeps the last of each kind as the engine does, so both apply the same patch to the same document.</p>
  *
  * <h3>The newest wins, but not over what was done</h3>
- * <p>One ask is worked on at a time, a session's asks in turn ({@link WaitingAsks}); while one is, the newest ask of a kind waits
+ * <p>A session's asks are worked on lane by lane ({@link PcbAskKind.Lane}), a thread each: the router's in turn on one, what is derived
+ * of the pcb — its pours, its checks — beside them on another, so a release's pours never hold the next grab up. Within a lane one
+ * ask is worked on at a time ({@link WaitingAsks}); while one is, the newest ask of a kind waits
  * and an older one of that kind is dropped — what a pointer asked a moment ago no longer matters once it has moved on —, except a
  * kind that is something the reader did, a corner clicked: every one of those is answered, in the order asked.</p>
  */
@@ -58,12 +63,15 @@ final class PcbSession implements SocketConversation {
 
     /** The layouts the editor sent, by slot: read and written on the socket's own thread alone. */
     private final Map<String, JsonNode> layouts = new HashMap<>();
+    /** The layouts read, by slot: what an ask takes them as, read once — a pcb a step changed only in its tracks, only those read. */
+    private final LayoutReading         reading;
 
-    /** The asks waiting their turn. */
-    private final WaitingAsks waiting = new WaitingAsks();
+    /** The asks waiting their turn, lane by lane. */
+    private final Map<PcbAskKind.Lane, WaitingAsks> waiting = new EnumMap<>(PcbAskKind.Lane.class);
+    /** The lanes being worked on now: each its own thread while it has asks. */
+    private final Set<PcbAskKind.Lane>              working = EnumSet.noneOf(PcbAskKind.Lane.class);
     /** The last answer of each kind sent over this socket: what the next one is sent as a change of. */
     private final Map<PcbAskKind, JsonNode> answered = new EnumMap<>(PcbAskKind.class);
-    private boolean                        working;
     private boolean                        closed;
 
     PcbSession(PcbAsks asks, SocketPrincipal principal, ObjectMapper mapper, SocketOutput output) {
@@ -71,6 +79,7 @@ final class PcbSession implements SocketConversation {
         this.principal = principal;
         this.mapper = mapper;
         this.output = output;
+        this.reading = new LayoutReading(mapper);
     }
 
     @Override
@@ -97,10 +106,12 @@ final class PcbSession implements SocketConversation {
             return;
         }
         ObjectNode request = message.path("request").isObject() ? (ObjectNode) message.get("request").deepCopy() : mapper.createObjectNode();
+        Map<String, Object> read = new HashMap<>();
         for (Map.Entry<String, JsonNode> field : message.path("layouts").properties()) {
             JsonNode sent = field.getValue();
             String slot = sent.path("slot").asString(field.getKey());
             JsonNode layout;
+            Optional<JsonPatch> patch = Optional.empty();
             if (sent.has("whole")) {
                 layout = sent.get("whole");
             } else {
@@ -110,25 +121,35 @@ final class PcbSession implements SocketConversation {
                     return;
                 }
                 try {
-                    layout = JsonPatch.of(sent.path("patch")).appliedTo(kept);
+                    patch = Optional.of(JsonPatch.of(sent.path("patch")));
+                    layout = patch.get().appliedTo(kept);
                 } catch (JsonPatchRefusal refused) {
                     layouts.remove(slot);
+                    reading.forget(slot);
                     reply(refusal(id, 409, "layout-unknown", "The layout " + slot + " is not the one the change was made to (" + refused.getMessage()
                                                              + "): send it whole.").put("slot", slot));
                     return;
                 }
             }
             layouts.put(slot, layout);
-            request.set(field.getKey(), layout);
+            Optional<Class<?>> type = asks.layoutType(kind, field.getKey());
+            if (type.isPresent()) {
+                read.put(field.getKey(), reading.read(slot, layout, patch, type.get()));
+            } else {
+                request.set(field.getKey(), layout);
+            }
         }
         String board = message.path("board").isString() ? message.get("board").asString() : null;
-        enqueue(new WaitingAsks.Waiting(id, kind, board, request));
+        enqueue(new WaitingAsks.Waiting(id, kind, board, request, Map.copyOf(read)));
     }
 
     private void abandoned(long id) {
         boolean dropped;
         synchronized (this) {
-            dropped = waiting.abandon(id);
+            dropped = false;
+            for (WaitingAsks lane : waiting.values()) {
+                dropped |= lane.abandon(id);
+            }
         }
         if (dropped) {
             reply(dropped(id));
@@ -136,30 +157,31 @@ final class PcbSession implements SocketConversation {
     }
 
     private void enqueue(WaitingAsks.Waiting ask) {
+        PcbAskKind.Lane lane = ask.kind().lane();
         Optional<WaitingAsks.Waiting> older;
         boolean start;
         synchronized (this) {
             if (closed) {
                 return;
             }
-            older = waiting.add(ask);
-            start = !working;
-            working = true;
+            older = waiting.computeIfAbsent(lane, ignored -> new WaitingAsks()).add(ask);
+            start = working.add(lane);
         }
         older.ifPresent(dropped -> reply(dropped(dropped.id())));
         if (start) {
-            Thread.ofVirtual().name("pcb-session").start(this::work);
+            Thread.ofVirtual().name("pcb-session-" + lane.name().toLowerCase(Locale.ROOT)).start(() -> work(lane));
         }
     }
 
-    /** Works on the waiting asks in turn until none is left. */
-    private void work() {
+    /** Works on a lane's waiting asks in turn until none is left. */
+    private void work(PcbAskKind.Lane lane) {
         for (;;) {
             Optional<WaitingAsks.Waiting> next;
             synchronized (this) {
-                next = closed ? Optional.empty() : waiting.next();
+                WaitingAsks ofLane = waiting.get(lane);
+                next = closed || ofLane == null ? Optional.empty() : ofLane.next();
                 if (next.isEmpty()) {
-                    working = false;
+                    working.remove(lane);
                     return;
                 }
             }
@@ -169,7 +191,7 @@ final class PcbSession implements SocketConversation {
 
     private ObjectNode answerTo(WaitingAsks.Waiting ask) {
         try {
-            JsonNode answer = mapper.valueToTree(principal.runAs(() -> asks.answer(ask.kind(), ask.board(), ask.request())));
+            JsonNode answer = mapper.valueToTree(principal.runAs(() -> asks.answer(ask.kind(), ask.board(), ask.request(), ask.layouts())));
             ObjectNode reply = mapper.createObjectNode().put("type", "answer").put("id", ask.id()).put("kind", ask.kind().word());
             JsonNode last;
             synchronized (this) {
@@ -210,9 +232,10 @@ final class PcbSession implements SocketConversation {
     public void close() {
         synchronized (this) {
             closed = true;
-            waiting.clear();
+            waiting.values().forEach(WaitingAsks::clear);
             answered.clear();
         }
         layouts.clear();
+        reading.clear();
     }
 }

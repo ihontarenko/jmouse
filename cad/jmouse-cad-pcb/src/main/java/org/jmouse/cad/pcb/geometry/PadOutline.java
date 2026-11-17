@@ -28,6 +28,16 @@ public final class PadOutline {
         this.cornerSteps = cornerSteps;
     }
 
+    /** How many steps a curve of a custom pad's path is drawn in. */
+    public int curveSteps() {
+        return curveSteps;
+    }
+
+    /** How many steps a rounded corner is drawn in. */
+    public int cornerSteps() {
+        return cornerSteps;
+    }
+
     /** The outline in the footprint's frame about the pad's centre. */
     public List<PcbDrawing.Point> of(FootprintDrawing.Pad pad, double growth) {
         double turn = Math.toRadians(pad.rotation());

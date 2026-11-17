@@ -18,7 +18,6 @@ import java.util.function.Supplier;
  */
 public class Binder implements ObjectBinder, BindContext {
 
-    private static final AccessorWrapper                      DEFAULT_WRAPPER    = new ObjectAccessorWrapper();
     private static final Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = () -> new BindException(
             "Recursive binding detected");
 
@@ -66,7 +65,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return a new {@code Binder} instance
      */
     public static Binder with(Object source, BindCallback callback) {
-        Binder binder = new Binder(DEFAULT_WRAPPER.wrap(source));
+        Binder binder = new Binder(ObjectAccessorWrapper.defaults().wrap(source));
         binder.setCallback(callback);
         return binder;
     }
@@ -78,7 +77,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return a new {@code Binder} instance
      */
     public static Binder forObject(Object source) {
-        return new Binder(DEFAULT_WRAPPER.wrap(source));
+        return new Binder(ObjectAccessorWrapper.defaults().wrap(source));
     }
 
     /**
@@ -285,7 +284,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the configured wrapper, or the default wrapper
      */
     public AccessorWrapper getWrapper() {
-        return wrapper == null ? DEFAULT_WRAPPER : wrapper;
+        return wrapper == null ? ObjectAccessorWrapper.defaults() : wrapper;
     }
 
     /**

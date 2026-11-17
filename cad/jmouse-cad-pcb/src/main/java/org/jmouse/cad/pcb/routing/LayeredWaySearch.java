@@ -82,8 +82,10 @@ final class LayeredWaySearch {
         Map<HopAt, List<CorridorSearch.Hop<HopKind>>> known = new HashMap<>();
         CorridorSearch.Hops<HopKind> hops = (layer, at) -> known.computeIfAbsent(new HopAt(layer, at.x, at.y), ignored -> hopsFrom(request, layer, at));
         for (double margin : settings.corridorMargins()) {
-            Envelope window = new Envelope(request.from().x(), request.to().x(), request.from().y(), request.to().y());
-            window.expandBy(margin);
+            Envelope asked = new Envelope(request.from().x(), request.to().x(), request.from().y(), request.to().y());
+            asked.expandBy(margin);
+            // Laid on the grid, as a leg's window is: its copper united once for the windows near it.
+            Envelope window = StillCopper.onGrid(asked, settings.corridorGrid());
             List<CorridorSearch.Layer> layers = request.lanes().stream()
                     .map(lane -> new CorridorSearch.Layer(CorridorWaySearch.fieldOf(lane.fence(), window, request.from(), request.to()), costOf(lane)))
                     .toList();

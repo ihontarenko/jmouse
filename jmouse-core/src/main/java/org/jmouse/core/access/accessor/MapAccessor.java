@@ -3,9 +3,6 @@ package org.jmouse.core.access.accessor;
 import org.jmouse.core.access.AbstractAccessor;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.UnsupportedOperationException;
-import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.access.descriptor.structured.map.MapDescriptor;
-import org.jmouse.core.access.descriptor.structured.map.MapIntrospector;
 
 import java.util.*;
 
@@ -18,10 +15,12 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * This class allows retrieving values from lists and maps using either an index (for lists)
  * or a key (for maps).
  * </p>
+ *
+ * <p>A property's name is its key's text: a key that is that text itself, else the key whose {@code toString()} it is. The map
+ * is asked as it stands at each read — nothing of it is introspected up front, so wrapping a map costs nothing, however many
+ * entries it holds, and a key put after wrapping is read like any other.</p>
  */
 public class MapAccessor extends AbstractAccessor {
-
-    private final MapDescriptor<Object, Object> descriptor;
 
     /**
      * Creates a new {@link MapAccessor} with the given source object.
@@ -30,7 +29,24 @@ public class MapAccessor extends AbstractAccessor {
      */
     public MapAccessor(Object source) {
         super(source);
-        this.descriptor = new MapIntrospector<>(asMap(Object.class, Object.class)).introspect().toDescriptor();
+    }
+
+    /**
+     * The key a property's name stands for: the name itself where the map holds it, else the key written as the name; none
+     * where the map holds neither.
+     */
+    private Optional<Object> keyNamed(Map<Object, Object> map, String name) {
+        if (map.containsKey(name)) {
+            return Optional.of(name);
+        }
+
+        for (Object key : map.keySet()) {
+            if (key != null && !(key instanceof String) && key.toString().equals(name)) {
+                return Optional.of(key);
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -55,13 +71,12 @@ public class MapAccessor extends AbstractAccessor {
      */
     @Override
     public Object read(String name) {
-        Object value = null;
-
-        if (isMap() && descriptor.getProperty(name) instanceof PropertyDescriptor<Map<Object, Object>> property) {
-            value = property.getAccessor().readValue(asMap(Object.class, Object.class));
+        if (!isMap()) {
+            return null;
         }
 
-        return value;
+        Map<Object, Object> map = asMap(Object.class, Object.class);
+        return keyNamed(map, name).map(map::get).orElse(null);
     }
 
     /**
@@ -112,8 +127,10 @@ public class MapAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        if (isMap() && descriptor.getProperty(name) instanceof PropertyDescriptor<Map<Object, Object>> property) {
-            property.getAccessor().writeValue(asMap(Object.class, Object.class), value);
+        // Only a key the map holds is set: a property is one of its entries, never a new one.
+        if (isMap()) {
+            Map<Object, Object> map = asMap(Object.class, Object.class);
+            keyNamed(map, name).ifPresent(key -> map.put(key, value));
         }
     }
 

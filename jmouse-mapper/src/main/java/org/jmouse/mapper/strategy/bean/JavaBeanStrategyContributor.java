@@ -7,7 +7,12 @@ import org.jmouse.mapper.strategy.MappingStrategyContributor;
 import org.jmouse.mapper.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-@Priority(Integer.MIN_VALUE + 1)
+/*
+ * ⚠️ A bean is the shape of last resort among objects — whatever is not a scalar, a collection, a map or an array is one —, so a
+ * contributor of a shape more particular than "a bean" stands before it: room is left between it and the rules converted whole
+ * (Integer.MIN_VALUE) for those — an Optional, a type a caller reads its own way. It stood at MIN_VALUE + 1, with no room.
+ */
+@Priority(Integer.MIN_VALUE + 50)
 public final class JavaBeanStrategyContributor implements MappingStrategyContributor {
 
     @Override

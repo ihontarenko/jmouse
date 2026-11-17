@@ -51,7 +51,6 @@ import static org.jmouse.core.reflection.Reflections.getMethodName;
  */
 public final class MethodAccessorFactory {
 
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     private static final ClassValue<Map<Method, Getter<?, ?>>> GETTERS = new ClassValue<>() {
         @Override
@@ -145,21 +144,24 @@ public final class MethodAccessorFactory {
      * @return the generated supplier, or {@code null} when the runtime refused
      */
     private static Supplier<?> compileConstructor(Constructor<?> constructor) {
-        MethodHandles.Lookup lookup = lookupFor(constructor);
-
-        if (lookup == null) {
-            return null;
-        }
-
         try {
+            MethodHandles.Lookup lookup = lookupFor(constructor);
+
+            if (lookup == null) {
+                return null;
+            }
+
             MethodHandle handle   = lookup.unreflectConstructor(constructor);
             CallSite     callSite = LambdaMetafactory.metafactory(
-                    lookup, "get", MethodType.methodType(Supplier.class),
-                    MethodType.methodType(Object.class), handle,
-                    MethodType.methodType(constructor.getDeclaringClass())
+                    lookup, "get", new Signature(Supplier.class).methodType(),
+                    new Signature(Object.class).methodType(), handle,
+                    new Signature(constructor.getDeclaringClass()).methodType()
             );
 
-            return (Supplier<?>) callSite.getTarget().invoke();
+            // Invoked for an Object and cast after, as compile() invokes: one shape of call for every compiled accessor — invoke
+            // is signature polymorphic, and each return type written at a call is a method of its own to a compiler ahead of time.
+            Object supplier = callSite.getTarget().invoke();
+            return (Supplier<?>) supplier;
         } catch (Throwable refused) {
             return null;
         }
@@ -359,8 +361,8 @@ public final class MethodAccessorFactory {
                 method,
                 Function.class,
                 "apply",
-                MethodType.methodType(Object.class, Object.class),
-                MethodType.methodType(Reflections.boxType(method.getReturnType()), method.getDeclaringClass())
+                new Signature(Object.class, Object.class),
+                new Signature(Reflections.boxType(method.getReturnType()), method.getDeclaringClass())
         );
     }
 
@@ -383,10 +385,8 @@ public final class MethodAccessorFactory {
                 method,
                 BiConsumer.class,
                 "accept",
-                MethodType.methodType(void.class, Object.class, Object.class),
-                MethodType.methodType(
-                        void.class, method.getDeclaringClass(),
-                        Reflections.boxType(method.getParameterTypes()[0]))
+                new Signature(void.class, Object.class, Object.class),
+                new Signature(void.class, method.getDeclaringClass(), Reflections.boxType(method.getParameterTypes()[0]))
         );
     }
 
@@ -397,6 +397,10 @@ public final class MethodAccessorFactory {
      * @param method method the generated body calls
      * @param functionalInterface interface to implement
      * @param name its single abstract method
+     * <p>Everything asked of the run time for a compiled call — the lookup, the method types, the call
+     * site — is asked inside the one {@code try} that means the run time refused: a run time without
+     * method handles (a browser) refuses there, and the accessor is a reflective one.</p>
+     *
      * @param erasedType that method's erased signature
      * @param instantiatedType the signature this particular accessor really has, boxing included
      * @return the generated instance, or {@code null} when the runtime refused
@@ -405,20 +409,20 @@ public final class MethodAccessorFactory {
             Method method,
             Class<?> functionalInterface,
             String name,
-            MethodType erasedType,
-            MethodType instantiatedType
+            Signature erasedType,
+            Signature instantiatedType
     ) {
-        MethodHandles.Lookup lookup = lookupFor(method);
-
-        if (lookup == null) {
-            return null;
-        }
-
         try {
+            MethodHandles.Lookup lookup = lookupFor(method);
+
+            if (lookup == null) {
+                return null;
+            }
+
             MethodHandle handle   = lookup.unreflect(method);
             CallSite     callSite = LambdaMetafactory.metafactory(
-                    lookup, name, MethodType.methodType(functionalInterface),
-                    erasedType, handle, instantiatedType
+                    lookup, name, new Signature(functionalInterface).methodType(),
+                    erasedType.methodType(), handle, instantiatedType.methodType()
             );
 
             return callSite.getTarget().invoke();
@@ -437,7 +441,7 @@ public final class MethodAccessorFactory {
         Class<?> owner = member.getDeclaringClass();
 
         try {
-            return MethodHandles.privateLookupIn(owner, LOOKUP);
+            return MethodHandles.privateLookupIn(owner, OwnLookup.LOOKUP);
         } catch (IllegalAccessException | SecurityException refused) {
             // ⚠️ Without private access into the owner's package the generated class is defined in
             // THIS one, so it can only name what this package can reach. Anything less than public on
@@ -447,8 +451,37 @@ public final class MethodAccessorFactory {
             boolean reachable = Modifier.isPublic(member.getModifiers())
                     && Modifier.isPublic(owner.getModifiers());
 
-            return reachable ? LOOKUP : null;
+            return reachable ? OwnLookup.LOOKUP : null;
         }
+    }
+
+    /**
+     * A signature to compile a call to: its result and its parameters. It becomes a {@link MethodType}
+     * only where the call is compiled, so that asking the run time for one is part of the attempt it
+     * may refuse.
+     *
+     * @param returnType     what the call answers
+     * @param parameterTypes what it is passed, in order
+     */
+    private record Signature(Class<?> returnType, Class<?>... parameterTypes) {
+
+        MethodType methodType() {
+            return MethodType.methodType(returnType, parameterTypes);
+        }
+    }
+
+    /**
+     * This class's own lookup, made when the first accessor is compiled rather than when the class is first touched: the JVM
+     * loads a holder on its first use. It is made by {@link #ownLookup()}, so its lookup class is this one — a lookup is its
+     * caller's — and every access it grants is the one this class had before.
+     */
+    private static final class OwnLookup {
+
+        private static final MethodHandles.Lookup LOOKUP = ownLookup();
+    }
+
+    private static MethodHandles.Lookup ownLookup() {
+        return MethodHandles.lookup();
     }
 
     /**

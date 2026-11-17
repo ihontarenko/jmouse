@@ -1,0 +1,17 @@
+org.jmouse.j2js.teavm.supplement.jdk.ClassSupplements
+org.jmouse.j2js.teavm.supplement.jdk.CharacterSupplements
+org.jmouse.j2js.teavm.supplement.jdk.DoubleSupplements
+org.jmouse.j2js.teavm.supplement.jdk.DateSupplements
+org.jmouse.j2js.teavm.supplement.jdk.CalendarSupplements
+org.jmouse.j2js.teavm.supplement.jdk.GregorianCalendarSupplements
+org.jmouse.j2js.teavm.supplement.jdk.CharsetSupplements
+org.jmouse.j2js.teavm.supplement.jdk.MethodTypeSupplements
+org.jmouse.j2js.teavm.supplement.jdk.MethodHandlesSupplements
+org.jmouse.j2js.teavm.supplement.jdk.LookupSupplements
+org.jmouse.j2js.teavm.supplement.jdk.CallSiteSupplements
+org.jmouse.j2js.teavm.supplement.jdk.MethodHandleSupplements
+org.jmouse.j2js.teavm.supplement.jdk.LambdaMetafactorySupplements
+# Substitutes that supply: read by their JDK name, so what they answer with is named so.
+org.jmouse.j2js.teavm.classlib.java.lang.reflect.TParameter
+org.jmouse.j2js.teavm.classlib.java.lang.reflect.TRecordComponent
+org.jmouse.j2js.teavm.classlib.java.util.concurrent.TConcurrentHashMap$KeySetView

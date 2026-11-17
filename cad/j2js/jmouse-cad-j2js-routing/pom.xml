@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-j2js-modules</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <packaging>jar</packaging>
+    <artifactId>jmouse-cad-j2js-routing</artifactId>
+    <name>jMouse - CAD J2JS Routing</name>
+    <description>jMouse Framework - the CAD router in the browser: the routing engine on a board the server worked out, answering the same gestures as the server's routes — compiled to an ES module and to WebAssembly, run in a worker, so an editor routes with no request.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-routing</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>ihontarenko</id>
+            <name>Ivan Hontarenko</name>
+            <email>ihontarenko@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-routing</url>
+    </scm>
+
+    <properties>
+        <!-- The module's name: routing.js, routing.wasm and routing.d.ts. -->
+        <j2js.module>routing</j2js.module>
+    </properties>
+
+    <dependencies>
+        <!-- The gestures, their answers and the board as JSON: the protocol the server answers too. Logging in the browser is
+             TeaVM's slf4j; logback is the server's. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-cad-routing-protocol</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- What a page may call: the seam, no compiler. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-j2js</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- The compiler this module is built with. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-j2js-teavm</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Aj2js.module=${j2js.module}</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>module-declarations</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/javascript</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.outputDirectory}/j2js</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>readable-module-declarations</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/javascript-readable</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.outputDirectory}/j2js</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>module</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.jmouse.cad.j2js.routing.RoutingInBrowserExports</mainClass>
+                            <targetType>JAVASCRIPT</targetType>
+                            <targetDirectory>${project.build.directory}/javascript</targetDirectory>
+                            <targetFileName>${j2js.module}.js</targetFileName>
+                            <jsModuleType>ES2015</jsModuleType>
+                            <minifying>true</minifying>
+                            <optimizationLevel>FULL</optimizationLevel>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>readable-module</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.jmouse.cad.j2js.routing.RoutingInBrowserExports</mainClass>
+                            <targetType>JAVASCRIPT</targetType>
+                            <targetDirectory>${project.build.directory}/javascript-readable</targetDirectory>
+                            <targetFileName>${j2js.module}.js</targetFileName>
+                            <jsModuleType>ES2015</jsModuleType>
+                            <minifying>false</minifying>
+                            <sourceMapsGenerated>true</sourceMapsGenerated>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

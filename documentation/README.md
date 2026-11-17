@@ -17,6 +17,7 @@ Coverage: **94 public reactor modules**, **76 new module manuals** in this docum
 | `jmouse-action` | [JMOUSE_ACTION.md](JMOUSE_ACTION.md) | jmouse-action |
 | `jmouse-materializer` | [JMOUSE_MATERIALIZER.md](JMOUSE_MATERIALIZER.md) | Materializer |
 | `jmouse-el` | [JMOUSE_EL.md](JMOUSE_EL.md) | Expression Language &amp; Renderable Engine |
+| `jmouse-json` | [JMOUSE_JSON.md](JMOUSE_JSON.md) | JSON on the jME engine: strict reading into the engine's tree, writing through its source writer, serializers by type that replace the standard ones, deserializers bound into the core's Binder |
 | `jmouse-formula` | [JMOUSE_FORMULA.md](JMOUSE_FORMULA.md) | jMF: the formula tree, real and complex compilation, exact differentiation, printing, and the jMF language that parses it (the mathematical dialect of jmouse-el) |
 | `jmouse-script-el` | [JMOUSE_SCRIPT_EL.md](JMOUSE_SCRIPT_EL.md) | jMS scripting dialect (parser, binder, closed host catalogue) |
 | `jmouse-script` | [JMOUSE_SCRIPT.md](JMOUSE_SCRIPT.md) | where a jMS script may be hung: named stages, the three verbs, the dispatcher and the run log |

@@ -10,6 +10,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -95,6 +96,14 @@ public final class CopperNets {
     private final int[]                      roots;
     private final Bases                      bases;
     private final Map<Integer, Set<String>>  netsOfGroup;
+    /**
+     * Each kind's nets, by its order, worked out once: a piece's net is asked for piece by piece wherever the pcb is walked, and a
+     * list made again at every asking made every walk the square of the pcb.
+     */
+    private final List<Optional<String>>     trackNets;
+    private final List<Optional<String>>     arcNets;
+    private final List<Optional<String>>     drawnNets;
+    private final List<Optional<String>>     viaNets;
     private final Joining                    joining;
     /** The net each zone names, by its place. */
     private final List<String>               zoneNets;
@@ -116,6 +125,10 @@ public final class CopperNets {
         this.roots = roots;
         this.bases = bases;
         this.netsOfGroup = netsOfGroup;
+        this.trackNets = netsOf(bases.track(), bases.arc() - bases.track());
+        this.arcNets = netsOf(bases.arc(), bases.drawn() - bases.arc());
+        this.drawnNets = netsOf(bases.drawn(), bases.via() - bases.drawn());
+        this.viaNets = netsOf(bases.via(), bases.zone() - bases.via());
     }
 
     /**
@@ -171,21 +184,30 @@ public final class CopperNets {
             }
         }
         List<CopperShape> vias = pcb.vias().stream().map(CopperShapes::via).toList();
+        // What a piece may touch is found among the pieces whose boxes come near its own — never every piece of the pcb asked of every
+        // other —, in the order the whole list would give it, so the pieces join as they always did.
+        BoxIndex padsNear = BoxIndex.of(pads.stream().map(pad -> pad.copper().box()).toList());
+        BoxIndex runsNear = BoxIndex.of(runs.stream().map(run -> run.shape().box()).toList());
+        BoxIndex viasNear = BoxIndex.of(vias.stream().map(CopperShape::box).toList());
         for (int runIndex = 0; runIndex < runs.size(); runIndex++) {
             Run run = runs.get(runIndex);
-            for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
+            CopperShape.Box box = run.shape().box();
+            for (int padIndex : padsNear.near(box, JOIN_TOLERANCE)) {
                 PlacedPad pad = pads.get(padIndex);
                 if (pad.on(run.layer()) && touching(run.shape(), pad.copper())) {
                     joining.join(trackBase + runIndex, padIndex);
                 }
             }
-            for (int otherIndex = runIndex + 1; otherIndex < runs.size(); otherIndex++) {
+            for (int otherIndex : runsNear.near(box, JOIN_TOLERANCE)) {
+                if (otherIndex <= runIndex) {
+                    continue;
+                }
                 Run other = runs.get(otherIndex);
                 if (other.layer().equals(run.layer()) && touching(run.shape(), other.shape())) {
                     joining.join(trackBase + runIndex, trackBase + otherIndex);
                 }
             }
-            for (int viaIndex = 0; viaIndex < vias.size(); viaIndex++) {
+            for (int viaIndex : viasNear.near(box, JOIN_TOLERANCE)) {
                 if (pcb.reaches(pcb.vias().get(viaIndex), run.layer()) && touching(run.shape(), vias.get(viaIndex))) {
                     joining.join(trackBase + runIndex, viaBase + viaIndex);
                 }
@@ -194,7 +216,7 @@ public final class CopperNets {
         // A via in a pad needs no track to it: their copper is one.
         for (int viaIndex = 0; viaIndex < vias.size(); viaIndex++) {
             PcbDrawing.Via via = pcb.vias().get(viaIndex);
-            for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
+            for (int padIndex : padsNear.near(vias.get(viaIndex).box(), JOIN_TOLERANCE)) {
                 PlacedPad pad = pads.get(padIndex);
                 boolean sharesLayer = pcb.copperLayerIds().stream().anyMatch(layer -> pad.on(layer) && pcb.reaches(via, layer));
                 if (sharesLayer && touching(vias.get(viaIndex), pad.copper())) {
@@ -255,6 +277,10 @@ public final class CopperNets {
         }
         List<Integer> order = IntStream.range(0, pcb.zones().size()).boxed()
                 .sorted(Comparator.<Integer>comparingInt(index -> -pcb.zones().get(index).priority()).thenComparingInt(index -> index)).toList();
+        // What a zone holds stands within its box: the pads, runs and vias there are all it asks, in their own order.
+        BoxIndex padsNear = BoxIndex.of(pads.stream().map(pad -> pad.copper().box()).toList());
+        BoxIndex runsNear = BoxIndex.of(runs.stream().map(run -> run.shape().box()).toList());
+        BoxIndex viasNear = BoxIndex.of(pcb.vias().stream().map(via -> CopperShapes.via(via).box()).toList());
         for (int zoneIndex : order) {
             PcbDrawing.Zone zone = pcb.zones().get(zoneIndex);
             Optional<CopperShape> area = CopperShape.ofPath(zone.path(), true, 0, curveSteps);
@@ -262,14 +288,15 @@ public final class CopperNets {
                 continue;
             }
             int zoneAt = bases.zone() + zoneIndex;
-            for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
+            CopperShape.Box held = area.get().box();
+            for (int padIndex : padsNear.near(held, 0)) {
                 PlacedPad pad = pads.get(padIndex);
                 if (padNets.get(padIndex).filter(zone.net()::equals).isPresent() && pad.on(zone.layer())
                     && area.get().encloses(pad.centre().x(), pad.centre().y())) {
                     pourInto(joining, netsOfRoot, padIndex, zoneAt, zone.net());
                 }
             }
-            for (int runIndex = 0; runIndex < runs.size(); runIndex++) {
+            for (int runIndex : runsNear.near(held, 0)) {
                 Run run = runs.get(runIndex);
                 int at = bases.track() + runIndex;
                 if (run.layer().equals(zone.layer()) && takes(joining, netsOfRoot, at, zone.net())
@@ -277,7 +304,7 @@ public final class CopperNets {
                     pourInto(joining, netsOfRoot, at, zoneAt, zone.net());
                 }
             }
-            for (int viaIndex = 0; viaIndex < pcb.vias().size(); viaIndex++) {
+            for (int viaIndex : viasNear.near(held, 0)) {
                 PcbDrawing.Via via = pcb.vias().get(viaIndex);
                 int at = bases.via() + viaIndex;
                 if (pcb.reaches(via, zone.layer()) && takes(joining, netsOfRoot, at, zone.net()) && area.get().encloses(via.x(), via.y())) {
@@ -313,20 +340,20 @@ public final class CopperNets {
 
     /** Each track's net, by the pcb's order; empty for a track joined to no net, or to two. */
     public List<Optional<String>> trackNets() {
-        return netsOf(bases.track(), bases.arc() - bases.track());
+        return trackNets;
     }
 
     public List<Optional<String>> arcNets() {
-        return netsOf(bases.arc(), bases.drawn() - bases.arc());
+        return arcNets;
     }
 
     /** Each piece of copper drawn as a shape, in the order of {@link #drawn()}. */
     public List<Optional<String>> drawnNets() {
-        return netsOf(bases.drawn(), bases.via() - bases.drawn());
+        return drawnNets;
     }
 
     public List<Optional<String>> viaNets() {
-        return netsOf(bases.via(), bases.zone() - bases.via());
+        return viaNets;
     }
 
     /** The copper the pcb draws as shapes, as its nets are counted. */
@@ -391,27 +418,42 @@ public final class CopperNets {
             if (remaining.size() < 2) {
                 return;
             }
-            List<PcbDrawing.Point> reached = new ArrayList<>(remaining.removeFirst());
-            while (!remaining.isEmpty()) {
-                double best = Double.POSITIVE_INFINITY;
-                int bestPiece = 0;
-                PcbDrawing.Point from = null;
-                PcbDrawing.Point to = null;
-                for (PcbDrawing.Point inside : reached) {
-                    for (int pieceIndex = 0; pieceIndex < remaining.size(); pieceIndex++) {
+            // Grown one piece at a time from the first, by the nearest piece not yet reached (Prim's way): each piece keeps the
+            // nearest point it has to what is reached, and only the points a step adds are measured against it — never every
+            // point reached against every point left again at every step.
+            List<PcbDrawing.Point> first = remaining.removeFirst();
+            int count = remaining.size();
+            double[] best = new double[count];
+            PcbDrawing.Point[] from = new PcbDrawing.Point[count];
+            PcbDrawing.Point[] to = new PcbDrawing.Point[count];
+            boolean[] joined = new boolean[count];
+            Arrays.fill(best, Double.POSITIVE_INFINITY);
+            List<PcbDrawing.Point> added = first;
+            for (int step = 0; step < count; step++) {
+                for (int pieceIndex = 0; pieceIndex < count; pieceIndex++) {
+                    if (joined[pieceIndex]) {
+                        continue;
+                    }
+                    for (PcbDrawing.Point inside : added) {
                         for (PcbDrawing.Point outside : remaining.get(pieceIndex)) {
                             double distance = distance(inside, outside);
-                            if (distance < best) {
-                                best = distance;
-                                bestPiece = pieceIndex;
-                                from = inside;
-                                to = outside;
+                            if (distance < best[pieceIndex]) {
+                                best[pieceIndex] = distance;
+                                from[pieceIndex] = inside;
+                                to[pieceIndex] = outside;
                             }
                         }
                     }
                 }
-                lines.add(new Unlaid(net, from, to));
-                reached.addAll(remaining.remove(bestPiece));
+                int nearest = -1;
+                for (int pieceIndex = 0; pieceIndex < count; pieceIndex++) {
+                    if (!joined[pieceIndex] && (nearest < 0 || best[pieceIndex] < best[nearest])) {
+                        nearest = pieceIndex;
+                    }
+                }
+                joined[nearest] = true;
+                lines.add(new Unlaid(net, from[nearest], to[nearest]));
+                added = remaining.get(nearest);
             }
         });
         return lines;
@@ -427,7 +469,7 @@ public final class CopperNets {
             Set<String> group = netsOfGroup.getOrDefault(roots[base + index], Set.of());
             nets.add(group.size() == 1 ? Optional.of(group.iterator().next()) : Optional.empty());
         }
-        return nets;
+        return List.copyOf(nets);
     }
 
     private static double distance(PcbDrawing.Point one, PcbDrawing.Point other) {

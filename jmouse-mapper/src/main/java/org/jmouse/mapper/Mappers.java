@@ -17,6 +17,7 @@ import org.jmouse.mapper.strategy.converted.ConvertedPairStrategyContributor;
 import org.jmouse.mapper.strategy.collection.ListStrategyContributor;
 import org.jmouse.mapper.strategy.collection.SetStrategyContributor;
 import org.jmouse.mapper.strategy.map.MapToMapStrategyContributor;
+import org.jmouse.mapper.strategy.optional.OptionalStrategyContributor;
 import org.jmouse.mapper.strategy.map.ObjectToMapStrategyContributor;
 import org.jmouse.mapper.strategy.record.RecordStrategyContributor;
 import org.jmouse.mapper.strategy.scalar.ScalarStrategyContributor;
@@ -73,6 +74,8 @@ public class Mappers {
             // below would claim it and map it property by property. It matches only where a rule
             // actually declares a whole-target expression, which is a very small set of pairs.
             new ConvertedPairStrategyContributor(),
+            // An Optional before the object strategies, which would take it for a bean of no properties.
+            new OptionalStrategyContributor(),
             new JavaBeanStrategyContributor(),
             new RecordStrategyContributor(),
             new ScalarStrategyContributor(),

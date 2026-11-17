@@ -4,14 +4,17 @@ import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.geometry.taut.CorridorSearch;
 import org.jmouse.geometry.taut.Obstacle;
 import org.jmouse.geometry.taut.ObstacleField;
+import org.jmouse.geometry.taut.UnitedObstacles;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.jmouse.geometry.Areas;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 /**
  * 🧭 A way searched for through the free room between what a track keeps clear of ({@link CorridorSearch}): the copper its fence
@@ -28,9 +31,21 @@ final class CorridorWaySearch {
 
     /** The way from a point to another — its corners, the start among them — at an angle step, keeping the fence's gaps; empty where none is found. */
     static Optional<List<Point>> way(TrackFence fence, Point from, Point to, double angleStep, RoutingSettings.Routing settings) {
-        for (double margin : settings.corridorMargins()) {
-            Envelope window = new Envelope(from.x(), to.x(), from.y(), to.y());
-            window.expandBy(margin);
+        return way(fence, from, to, angleStep, settings, OptionalDouble.empty());
+    }
+
+    /**
+     * The way, no longer than {@code longest} where it is said: the windows it is searched in reach no further round than such a way
+     * can go, every one past that left — a way longer than wanted is no answer, so searching for it was only time.
+     */
+    static Optional<List<Point>> way(TrackFence fence, Point from, Point to, double angleStep, RoutingSettings.Routing settings,
+                                     OptionalDouble longest) {
+        List<Double> margins = marginsWithin(settings.corridorMargins(), longest, from, to);
+        for (double margin : margins) {
+            Envelope asked = new Envelope(from.x(), to.x(), from.y(), to.y());
+            asked.expandBy(margin);
+            // Laid on the grid: the window the next step near this one asks for is this very window, its copper united already.
+            Envelope window = StillCopper.onGrid(asked, settings.corridorGrid());
             CorridorSearch.Outcome<Void> searched = CorridorSearch.searched(CorridorSearch.alone(fieldOf(fence, window, from, to), window,
                     Plane.coordinateOf(from), Plane.coordinateOf(to)));
             if (searched instanceof CorridorSearch.ClosedIn<Void>) {
@@ -51,17 +66,54 @@ final class CorridorWaySearch {
     }
 
     /**
+     * The margins a way no longer than {@code longest} can need: every point of such a way, its two ends a and b apart, lies in the
+     * ellipse round them whose axis is that length — within its half minor axis, √((longest/2)² − (ab/2)²), of the box
+     * of its ends. The ladder's margins below that, then that one; the whole ladder where no length is said.
+     */
+    static List<Double> marginsWithin(List<Double> ladder, OptionalDouble longest, Point from, Point to) {
+        if (longest.isEmpty()) {
+            return ladder;
+        }
+        double apart = Math.hypot(to.x() - from.x(), to.y() - from.y());
+        double half = Math.max(longest.getAsDouble(), apart) / 2;
+        double reach = Math.sqrt(half * half - apart * apart / 4);
+        List<Double> margins = new ArrayList<>();
+        for (double margin : ladder) {
+            if (margin < reach) {
+                margins.add(margin);
+            }
+        }
+        if (margins.size() < ladder.size()) {
+            margins.add(reach);
+        }
+        return margins;
+    }
+
+    /**
      * What the fence keeps the track from within a window, as room its centre line keeps out of; its two ends' own ground — a pad
-     * left on a fine pitch stands nearer its neighbour than the rule — cut out of it, as the fence lets them leave.
+     * left on a fine pitch stands nearer its neighbour than the rule — cut out of it, as the fence lets them leave. The copper that
+     * stands still is the one united for the window before ({@link StillCopper}), kept for every search of fences alike — a window on
+     * the grid, so the windows of a hand's steps are one —; only what moves with the ask — what the fence's ends ease, what it keeps
+     * clear of besides — is united each time.
      */
     static ObstacleField fieldOf(TrackFence fence, Envelope window, Point from, Point to) {
-        List<Obstacle> obstacles = new ArrayList<>();
-        for (TrackFence.Obstacle obstacle : fence.obstaclesNear(window.getMinX(), window.getMinY(), window.getMaxX(), window.getMaxY())) {
-            double grow = obstacle.shape().radius() + obstacle.gap() + fence.width() / 2 - KeptOut.EASED;
-            KeptOut.of(obstacle.shape(), grow, window).ifPresent(obstacles::add);
-        }
+        BitSet eased = fence.easedFromBase();
+        UnitedObstacles still = fence.stillCopper().unitedOver(eased, window, region -> keptOut(
+                fence.stillNear(region.getMinX(), region.getMinY(), region.getMaxX(), region.getMaxY(), eased), fence, region));
+        List<Obstacle> moving = keptOut(fence.movingNear(window.getMinX(), window.getMinY(), window.getMaxX(), window.getMaxY(), eased),
+                fence, window);
         Geometry ground = Areas.unionOf(List.of(endGround(from, fence), endGround(to, fence)));
-        return ObstacleField.of(obstacles, ground, KeptOut.SLACK, Plane.FACTORY);
+        return ObstacleField.of(still, moving, ground, KeptOut.SLACK, Plane.FACTORY);
+    }
+
+    /** Copper a track keeps clear of, as the room its centre line keeps out of within a region: each grown by its gap and half the track. */
+    private static List<Obstacle> keptOut(List<TrackFence.Obstacle> copper, TrackFence fence, Envelope region) {
+        List<Obstacle> obstacles = new ArrayList<>();
+        for (TrackFence.Obstacle obstacle : copper) {
+            double grow = obstacle.shape().radius() + obstacle.gap() + fence.width() / 2 - KeptOut.EASED;
+            KeptOut.of(obstacle.shape(), grow, region).ifPresent(obstacles::add);
+        }
+        return obstacles;
     }
 
     /** The ground round one end of the way: as far round as half the track is wide. */

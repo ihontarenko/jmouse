@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- The j2js modules' parent: one TeaVM, its plugin, the dependency management of the seam and its binding. -->
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-j2js-modules</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../../j2js/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-cad-j2js-modules</artifactId>
+    <packaging>pom</packaging>
+    <name>jMouse - CAD J2JS modules</name>
+    <description>jMouse Framework - CAD in the browser: CAD modules compiled to JavaScript and WebAssembly through jmouse-j2js, beside the CAD modules they are made of.</description>
+
+    <modules>
+        <module>jmouse-cad-j2js-routing</module>
+    </modules>
+</project>

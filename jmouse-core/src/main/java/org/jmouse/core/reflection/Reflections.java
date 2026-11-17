@@ -9,7 +9,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleReference;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
@@ -32,15 +31,6 @@ abstract public class Reflections {
 
     public static final  String                PROXY_CLASS_NAME_SEPARATOR     = "$$";
     public static final  char                  PACKAGE_SEPARATOR              = '.';
-    /**
-     * A set of all Java module references
-     */
-    public static final Set<ModuleReference> JAVA_MODULES = ModuleFinder.ofSystem().findAll();
-    /**
-     * A set of all Java module names.
-     */
-    public static final Set<String> JAVA_MODULE_NAMES = JAVA_MODULES.stream().map(r -> r.descriptor().name())
-            .collect(Collectors.toSet());
     public static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(
                     boolean.class, false,
                     byte.class, (byte) 0,
@@ -1079,10 +1069,23 @@ abstract public class Reflections {
      * @return {@code true} if the class is part of a JRT module, {@code false} otherwise
      * <p>
      * This method evaluates the module of the given class and checks if it matches any of the known
-     * Java modules in {@code JAVA_MODULE_NAMES}.
+     * Java modules — {@link JavaModules#NAMES}.
      */
     public static boolean isJrtResource(Class<?> clazz) {
-        return JAVA_MODULE_NAMES.contains(clazz.getModule().getName());
+        return JavaModules.NAMES.contains(clazz.getModule().getName());
+    }
+
+    /**
+     * The names of the JDK's own modules, scanned once — when a class is first asked about, not when {@link Reflections} is
+     * first touched: the JVM loads a holder on its first use, so whoever only sorts by priority or reads a field never pays
+     * for a scan of the run time, and a platform without modules never reaches one. A set that answers a class of the unnamed
+     * module — whose module name is null — with no.
+     */
+    private static final class JavaModules {
+
+        private static final Set<String> NAMES = ModuleFinder.ofSystem().findAll().stream()
+                .map(reference -> reference.descriptor().name())
+                .collect(Collectors.toSet());
     }
 
     /**

@@ -17,7 +17,7 @@ import java.util.Optional;
 final class WaitingAsks {
 
     /** An ask whose request is whole, waiting to be worked on. */
-    record Waiting(long id, PcbAskKind kind, String board, JsonNode request) {
+    record Waiting(long id, PcbAskKind kind, String board, JsonNode request, Map<String, Object> layouts) {
     }
 
     private final Map<PcbAskKind, Deque<Waiting>> byKind = new LinkedHashMap<>();

@@ -46,6 +46,9 @@ public record RoutingSettings(@Label("Routing") Routing routing,
      * @param bucket          how wide a cell of a fence's index is: a few tracks' worth
      * @param corridorMargins how far past a way's two ends the room a corridor is searched through reaches, in millimetres, tried
      *                        nearest first: a way round little is found in a small room, one far round a part in a large one
+     * @param relaidAtMost    how many tracks a layout may have laid again since the board was worked out whole and still be worked
+     *                        out from it — the rest of its copper, nets and index kept, those tracks kept clear of on their own —:
+     *                        past that, the board is worked out whole again, which then costs less
      */
     public record Routing(@Label("Shortest run") double shortestRun,
                           @Label("Least step") double leastStep,
@@ -55,11 +58,24 @@ public record RoutingSettings(@Label("Routing") Routing routing,
                           @Label("Neck shares") List<Double> neckShares,
                           @Label("Stop halvings") int stopHalvings,
                           @Label(value = "Fence index cell", unit = "mm") double bucket,
-                          @Label(value = "Corridor margins", unit = "mm") List<Double> corridorMargins) {
+                          @Label(value = "Corridor margins", unit = "mm") List<Double> corridorMargins,
+                          @Label("Relaid at most") int relaidAtMost) {
 
         public Routing {
             neckShares = List.copyOf(neckShares);
             corridorMargins = List.copyOf(corridorMargins);
+        }
+
+        /**
+         * How wide a cell of the grid a corridor's window is laid on: the nearest margin it is searched within. Windows a hand's steps
+         * ask for near one another come out the very same window, and the copper united for one is the copper of the next.
+         */
+        public double corridorGrid() {
+            double nearest = Double.POSITIVE_INFINITY;
+            for (double margin : corridorMargins) {
+                nearest = Math.min(nearest, margin);
+            }
+            return Double.isInfinite(nearest) ? 0 : nearest;
         }
     }
 

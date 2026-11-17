@@ -26,6 +26,20 @@ public class ValueObjectIntrospector<T>
         ClassTypeDescriptor         descriptor   = container.getType();
         List<ConstructorDescriptor> constructors = new ArrayList<>(descriptor.getConstructors());
 
+        // ⚠️ A record is made by its canonical constructor: a component for each parameter. It took the constructor with the
+        // fewest parameters, and a record with a constructor of convenience — fewer arguments, the rest defaulted — was then
+        // handed every component of it and refused ("wrong number of arguments"). Any other value object keeps that choice.
+        RecordComponent[] components = descriptor.getClassType().isRecord() ? descriptor.getClassType().getRecordComponents() : null;
+
+        if (components != null) {
+            for (ConstructorDescriptor constructor : constructors) {
+                if (isCanonical(new ArrayList<>(constructor.getParameters()), components)) {
+                    container.setConstructor(constructor);
+                    return self();
+                }
+            }
+        }
+
         constructors.sort(Comparator.comparingInt(ctor -> ctor.getParameters().size()));
         container.setConstructor(constructors.getFirst());
 
@@ -40,16 +54,27 @@ public class ValueObjectIntrospector<T>
         ValueObjectDescriptor<T>     parent      = toDescriptor();
         Class<?>                     classType   = parent.getClassType();
 
+        RecordComponent[]         ordered    = parent.isValueObject() ? classType.getRecordComponents() : new RecordComponent[0];
+        List<ParameterDescriptor> parameters = new ArrayList<>(constructor.getParameters());
+        boolean                   canonical  = isCanonical(parameters, ordered);
+
         if (parent.isValueObject()) {
-            components = Streamable.of(classType.getRecordComponents()).toMap(RecordComponent::getName);
+            components = Streamable.of(ordered).toMap(RecordComponent::getName);
         }
 
-        for (ParameterDescriptor parameter : constructor.getParameters()) {
+        for (int index = 0; index < parameters.size(); index++) {
+            ParameterDescriptor parameter = parameters.get(index);
+
+            // ⚠️ The canonical constructor's parameters ARE the components, in their order — the language makes it so — while
+            // their names are kept only in a MethodParameters attribute: javac writes one for every canonical constructor, but a
+            // compiler that keeps none — TeaVM, compiling a record for the browser — or a tool that strips it leaves arg0, arg1,
+            // and read by name every property was missing. So a component is found by its position, and by name only for a
+            // constructor that is not the canonical one.
+            RecordComponent component = canonical ? ordered[index] : components.get(parameter.getName());
+
             ValueObjectPropertyIntrospector<T> introspector = new ValueObjectPropertyIntrospector<>(
                     container.getTarget());
-            introspector.owner(parent).name(parameter.getName());
-
-            RecordComponent component = components.get(parameter.getName());
+            introspector.owner(parent).name(component != null ? component.getName() : parameter.getName());
 
             // ⚠️ The component, not the parameter, when there is one. A record whose canonical
             // constructor is compact reflects its parameters WITHOUT generics —
@@ -100,6 +125,27 @@ public class ValueObjectIntrospector<T>
         }
 
         return self();
+    }
+
+    /**
+     * Whether the constructor is the record's canonical one: a parameter for each component, of its type, in its order.
+     *
+     * @param parameters the constructor's parameters, in order
+     * @param components the record's components, in order; none for a value object that is no record
+     * @return {@code true} when each parameter stands for the component at its position
+     */
+    private static boolean isCanonical(List<ParameterDescriptor> parameters, RecordComponent[] components) {
+        if (components.length == 0 || parameters.size() != components.length) {
+            return false;
+        }
+
+        for (int index = 0; index < components.length; index++) {
+            if (parameters.get(index).unwrap().getType() != components[index].getType()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public ValueObjectIntrospector<T> property(ValueObjectPropertyDescriptor<T> property) {

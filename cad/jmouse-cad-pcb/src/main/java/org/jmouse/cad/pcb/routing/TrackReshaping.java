@@ -308,8 +308,12 @@ final class TrackReshaping {
                 line.add(shape.get(at));
                 continue;
             }
+            // A walk longer than the line asked for by its share is not the line being pulled: this leg may come out no longer than
+            // what that leaves it, the rest of the shape standing at its straight length at least.
+            double stretch = Lines.lengthOf(List.of(shape.get(at - 1), shape.get(at)));
+            double budget = Lines.lengthOf(shape) * settings.carrying().longestWalk() - (Lines.lengthOf(shape) - stretch);
             TrackRouter.RoutedLeg leg = TrackRouter.routedLeg(TrackRouter.LegRequest.walked(world, track, net, shape.get(at - 1), shape.get(at), request.style().angleStep(), index,
-                    held, ends).keepingClearOf(request.sweptPast()));
+                    held, ends).keepingClearOf(request.sweptPast()).noLongerThan(budget));
             if (!leg.reached()) {
                 return Optional.empty();
             }

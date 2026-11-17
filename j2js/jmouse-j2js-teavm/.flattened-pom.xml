@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jmouse</groupId>
+  <artifactId>jmouse-j2js-teavm</artifactId>
+  <version>1.0.1</version>
+  <name>jMouse - J2JS TeaVM</name>
+  <description>jMouse Framework - J2JS on TeaVM: the binding that turns jmouse-j2js exports into TeaVM's, and the JDK that TeaVM's class library lacks — classes substituted, methods supplied — found by TeaVM on the class path it compiles.</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js-teavm</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>ihontarenko</id>
+      <name>Ivan Hontarenko</name>
+      <email>ihontarenko@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js-teavm</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-j2js</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.teavm</groupId>
+      <artifactId>teavm-classlib</artifactId>
+      <version>0.16.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.teavm</groupId>
+      <artifactId>teavm-core</artifactId>
+      <version>0.16.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.teavm</groupId>
+      <artifactId>teavm-extension-spi</artifactId>
+      <version>0.16.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.teavm</groupId>
+      <artifactId>teavm-jso</artifactId>
+      <version>0.16.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.teavm</groupId>
+      <artifactId>teavm-extras-slf4j</artifactId>
+      <version>0.16.0</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

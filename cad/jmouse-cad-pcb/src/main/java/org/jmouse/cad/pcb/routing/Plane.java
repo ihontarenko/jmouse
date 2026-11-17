@@ -6,6 +6,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateFilter;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -13,7 +14,14 @@ import java.util.function.UnaryOperator;
 /** The pcb's points as the plane geometry has them, and back; shapes carried as a part is. */
 final class Plane {
 
-    static final GeometryFactory FACTORY = new GeometryFactory();
+    /**
+     * The grid the plane's areas are combined on: a nanometre, the unit KiCad keeps a pcb's every coordinate in, far below any gap a
+     * router keeps. Areas of a fixed grid are united and cut by snap rounding ({@code Areas}), which no near-miss of two edges can make
+     * fail — in any runtime, whatever order the obstacles come in.
+     */
+    private static final double NANOMETRES_A_MILLIMETRE = 1_000_000;
+
+    static final GeometryFactory FACTORY = new GeometryFactory(new PrecisionModel(NANOMETRES_A_MILLIMETRE));
 
     private Plane() {
     }

@@ -10,15 +10,20 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.jmouse.geometry.Areas;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The pcb's zones poured as a pcb house pours them: the area drawn, inside the pcb's edge less its clearance and
@@ -266,18 +271,38 @@ public final class ZonePours {
      * The pour less every island that joins nothing: an island is kept when it reaches two things of its net — two pads, a
      * pad and a track, a via and a pad —, for copper is there to join. One that reaches a single pad carries no current
      * anywhere: it is metal left on the board for nothing, and a pad's thermal into it is spokes to nowhere.
+     *
+     * <p>The anchors are indexed once; an island asks only those within its box, through its outline prepared, and stops at the
+     * second thing it reaches. Asking every anchor of a dense board of every island, through an outline walked whole each time,
+     * was what a pour cost — seconds after every change.</p>
      */
     private static Geometry withoutIslands(Geometry filled, List<Anchor> anchors) {
+        STRtree anchorsIndexed = new STRtree();
+        anchors.forEach(anchor -> anchorsIndexed.insert(new Envelope(anchor.at()), anchor));
         List<Geometry> kept = new ArrayList<>();
         for (int index = 0; index < filled.getNumGeometries(); index++) {
             Geometry island = filled.getGeometryN(index);
-            long joined = anchors.stream().filter(anchor -> island.intersects(GEOMETRY.createPoint(anchor.at())))
-                    .map(Anchor::item).distinct().count();
-            if (joined >= JOINED) {
+            if (joinsEnough(island, anchorsIndexed)) {
                 kept.add(island);
             }
         }
         return kept.isEmpty() ? GEOMETRY.createPolygon() : Areas.unionOf(kept, GEOMETRY);
+    }
+
+    /** Whether an island reaches as many things as joining takes: the anchors within its box asked through its outline prepared. */
+    private static boolean joinsEnough(Geometry island, STRtree anchors) {
+        PreparedGeometry outline = PreparedGeometryFactory.prepare(island);
+        Set<String> joined = new HashSet<>();
+        for (Object near : anchors.query(island.getEnvelopeInternal())) {
+            Anchor anchor = (Anchor) near;
+            if (!joined.contains(anchor.item()) && outline.intersects(GEOMETRY.createPoint(anchor.at()))) {
+                joined.add(anchor.item());
+                if (joined.size() >= JOINED) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** A point of its net's copper the pour must reach, and what it is of: {@code pad 3}, {@code track 7}. */

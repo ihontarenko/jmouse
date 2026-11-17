@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-j2js-modules</artifactId>
+    <packaging>pom</packaging>
+    <name>jMouse - J2JS modules</name>
+    <description>jMouse Framework - J2JS: the engine's Java run in the browser. A module says what a page may call through jmouse-j2js alone; the compiler that turns it into JavaScript is a binding behind that seam — jmouse-j2js-teavm.</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <!-- One TeaVM for the binding, its class library and the plugin that compiles a browser module. -->
+        <teavm.version>0.16.0</teavm.version>
+    </properties>
+
+    <modules>
+        <module>jmouse-j2js</module>
+        <module>jmouse-j2js-teavm</module>
+        <module>jmouse-j2js-el</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-classlib</artifactId>
+                <version>${teavm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-core</artifactId>
+                <version>${teavm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-extension-spi</artifactId>
+                <version>${teavm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-jso</artifactId>
+                <version>${teavm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-extras-slf4j</artifactId>
+                <version>${teavm.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.teavm</groupId>
+                    <artifactId>teavm-maven-plugin</artifactId>
+                    <version>${teavm.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

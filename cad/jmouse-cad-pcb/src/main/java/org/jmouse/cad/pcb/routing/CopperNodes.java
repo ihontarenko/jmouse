@@ -178,16 +178,36 @@ public final class CopperNodes {
         /** Every via a node, with the ends within it on any layer it joins; the ends left. */
         private List<Loose> viasTaking(List<Loose> loose) {
             List<String> copperLayers = pcb.copperLayerIds();
-            List<Loose> left = new ArrayList<>(loose);
+            // The ends indexed by where they stand: a via asks those within its own box, never every end of the pcb; an end one via
+            // took is taken from the next.
+            STRtree endIndex = new STRtree();
+            for (int position = 0; position < loose.size(); position++) {
+                Point at = loose.get(position).at();
+                endIndex.insert(new Envelope(at.x(), at.x(), at.y(), at.y()), position);
+            }
+            boolean[] taken = new boolean[loose.size()];
             for (int index = 0; index < pcb.vias().size(); index++) {
                 PcbDrawing.Via via = pcb.vias().get(index);
                 Point middle = new Point(via.x(), via.y());
+                double radius = via.diameter() / 2;
                 Set<String> layers = Set.copyOf(via.layersOf(copperLayers));
-                List<Loose> within = left.stream()
-                        .filter(end -> layers.contains(end.layer()) && Lines.lengthBetween(end.at(), middle) <= via.diameter() / 2)
-                        .toList();
-                left.removeAll(within);
-                node(CopperNodeKind.VIA, middle, via.diameter() / 2, layers, OptionalInt.of(index), within, List.of());
+                List<?> near = endIndex.query(new Envelope(via.x() - radius, via.x() + radius, via.y() - radius, via.y() + radius));
+                int[] positions = near.stream().mapToInt(position -> (Integer) position).sorted().toArray();
+                List<Loose> within = new ArrayList<>();
+                for (int position : positions) {
+                    Loose end = loose.get(position);
+                    if (!taken[position] && layers.contains(end.layer()) && Lines.lengthBetween(end.at(), middle) <= radius) {
+                        taken[position] = true;
+                        within.add(end);
+                    }
+                }
+                node(CopperNodeKind.VIA, middle, radius, layers, OptionalInt.of(index), within, List.of());
+            }
+            List<Loose> left = new ArrayList<>();
+            for (int position = 0; position < loose.size(); position++) {
+                if (!taken[position]) {
+                    left.add(loose.get(position));
+                }
             }
             return left;
         }

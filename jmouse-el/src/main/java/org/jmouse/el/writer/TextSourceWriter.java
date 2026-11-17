@@ -72,13 +72,22 @@ public final class TextSourceWriter implements SourceWriter {
         return word(stripped.signum() == 0 ? "0" : stripped.toPlainString());
     }
 
+    /** The largest whole double every one below which is exact: 2^53. */
+    private static final double WHOLE_EXACT = 9_007_199_254_740_992d;
+
     @Override
     public SourceWriter number(double number) {
         if (Double.isNaN(number) || Double.isInfinite(number)) {
             throw new IllegalArgumentException("A number written as source is finite: " + number);
         }
-        // BigDecimal.valueOf goes through Double.toString: the shortest digits that read back as the same double.
-        return number(BigDecimal.valueOf(number));
+        // A whole number within a long's exact reach is its digits; a negative zero is a zero.
+        if (number == Math.rint(number) && Math.abs(number) < WHOLE_EXACT) {
+            return number((long) number);
+        }
+        // Double.toString writes the shortest digits that read back as the same double, plainly between a thousandth and ten
+        // million — a fraction, never a trailing zero —; only past those does it take an exponent, written plain through BigDecimal.
+        String shortest = Double.toString(number);
+        return shortest.indexOf('E') < 0 ? word(shortest) : number(new BigDecimal(shortest));
     }
 
     @Override
@@ -129,12 +138,17 @@ public final class TextSourceWriter implements SourceWriter {
 
     @Override
     public SourceWriter block(Consumer<SourceWriter> body) {
-        word(layout.blockOpening()).endLine();
+        return block(layout.blockOpening(), layout.blockClosing(), body).endLine();
+    }
+
+    @Override
+    public SourceWriter block(String opening, String closing, Consumer<SourceWriter> body) {
+        word(opening).endLine();
         depth++;
         body.accept(this);
         endLine();
         depth--;
-        return word(layout.blockClosing()).endLine();
+        return word(closing);
     }
 
     @Override

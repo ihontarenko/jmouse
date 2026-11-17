@@ -108,6 +108,7 @@
         <module>jmouse-documentation</module>
         <module>jmouse-documentation-md</module>
         <module>jmouse-revisions</module>
+        <module>jmouse-json</module>
         <module>jmouse-json-patch</module>
         <module>jmouse-settings</module>
         <module>jmouse-plugin</module>
@@ -128,10 +129,11 @@
         <module>jmouse-sexpression</module>
         <module>jmouse-mesh</module>
         <module>jmouse-kicad</module>
-        <module>libre/pcb</module>
+        <module>jmouse-libre-pcb</module>
         <module>jmouse-numerics</module>
         <module>jmouse-el-grammar</module>
         <module>cad</module>
+        <module>j2js</module>
         <module>jmouse-transaction</module>
         <module>jmouse-jdbc</module>
         <module>jmouse-security</module>

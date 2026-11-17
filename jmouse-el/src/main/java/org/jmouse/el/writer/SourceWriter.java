@@ -60,6 +60,13 @@ public interface SourceWriter {
      */
     SourceWriter block(Consumer<SourceWriter> body);
 
+    /**
+     * A block between marks of its own — JSON's {@code [} and {@code ]} where the layout's are braces: the opening ends the
+     * line in hand, the body is written a level further in, and the closing starts a line it leaves open, so what follows
+     * the block — a comma — stands beside it.
+     */
+    SourceWriter block(String opening, String closing, Consumer<SourceWriter> body);
+
     /** Text written as it is — a script, a body a node keeps verbatim —, each of its lines at the indentation in hand. */
     SourceWriter verbatim(String text);
 

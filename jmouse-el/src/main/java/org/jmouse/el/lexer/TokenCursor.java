@@ -2,8 +2,6 @@ package org.jmouse.el.lexer;
 
 import org.jmouse.core.Streamable;
 
-import java.util.List;
-
 /**
  * TokenCursor provides an advanced API for navigating a stream of tokens.
  * It offers methods for lookahead, shifting, retracting, expectation checking,
@@ -158,6 +156,17 @@ public interface TokenCursor extends Streamable<Token> {
     }
 
     /**
+     * Whether the current token is of this one type — the check every parser makes at almost every token, so with no array
+     * of types built to make it.
+     *
+     * @param expected the type it may have
+     * @return {@code true} when it has that type
+     */
+    default boolean isCurrent(Token.Type expected) {
+        return checkAt(0, expected);
+    }
+
+    /**
      * Checks whether the previous token matches the specified expected type.
      *
      * @param expected the expected Token.Type for the previous token
@@ -184,13 +193,13 @@ public interface TokenCursor extends Streamable<Token> {
      * @return {@code true} if the tokens from the current position match the expected sequence, {@code false} otherwise
      */
     default boolean matchesSequence(Token.Type... expected) {
-        boolean matches = true;
-
-        for (int i = 0; i < expected.length; i++) {
-            matches &= checkAt(i, expected[i]);
+        for (int offset = 0; offset < expected.length; offset++) {
+            if (!checkAt(offset, expected[offset])) {
+                return false;
+            }
         }
 
-        return matches;
+        return true;
     }
 
     /**
@@ -201,7 +210,26 @@ public interface TokenCursor extends Streamable<Token> {
      * @return true if the token at the offset matches, false otherwise
      */
     default boolean checkAt(int offset, Token.Type... expected) {
-        return List.of(expected).contains(lookAt(offset).type());
+        Token.Type type = lookAt(offset).type();
+
+        for (Token.Type candidate : expected) {
+            if (candidate.equals(type)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the token at a lookahead offset is of this one type, with no array of types built to ask.
+     *
+     * @param offset   the offset from the current position (0 means current token)
+     * @param expected the type it may have
+     * @return {@code true} when it has that type
+     */
+    default boolean checkAt(int offset, Token.Type expected) {
+        return expected.equals(lookAt(offset).type());
     }
 
     /**
@@ -250,7 +278,17 @@ public interface TokenCursor extends Streamable<Token> {
      */
     default boolean checkValueAt(int offset, String... values) {
         Token token = lookAt(offset);
-        return token != null && token.type() != BasicToken.T_STRING && List.of(values).contains(token.value());
+        if (token == null || token.type() == BasicToken.T_STRING) {
+            return false;
+        }
+
+        for (String value : values) {
+            if (value.equals(token.value())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

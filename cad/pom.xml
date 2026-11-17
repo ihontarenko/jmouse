@@ -21,6 +21,7 @@
         <module>jmouse-cad-document</module>
         <module>jmouse-cad-schematic</module>
         <module>jmouse-cad-pcb</module>
+        <module>jmouse-cad-routing-protocol</module>
         <module>jmouse-cad-table</module>
         <module>jmouse-cad-panel</module>
         <module>jmouse-cad-mesh</module>
@@ -38,5 +39,6 @@
         <module>jmouse-cad-folder</module>
         <module>jmouse-cad-jpa</module>
         <module>spring</module>
+        <module>j2js</module>
     </modules>
 </project>

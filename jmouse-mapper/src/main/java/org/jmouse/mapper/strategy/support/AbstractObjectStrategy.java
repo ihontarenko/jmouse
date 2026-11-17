@@ -10,6 +10,7 @@ import org.jmouse.core.reflection.InferredType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 
 /**
  * Base strategy for source-to-object mapping scenarios. 🧩
@@ -71,6 +72,10 @@ abstract public class AbstractObjectStrategy<T> extends AbstractStrategy<T> {
      *       {@link IgnoredValue#INSTANCE} when the type has no meaningful empty</li>
      * </ul>
      *
+     * <p>⚠️ An {@link Optional} property holds {@link Optional#empty()} whatever the policy says: an
+     * optional that is itself {@code null} breaks the one promise the type makes, and every reader of it would have to
+     * check twice.</p>
+     *
      * <p>⚠️ A primitive property is left alone whatever the policy says. It cannot hold {@code null},
      * and the target already carries the type's own default; propagating into one unboxes to a
      * {@link NullPointerException} raised deep inside the setter, where nothing names the property.</p>
@@ -80,6 +85,10 @@ abstract public class AbstractObjectStrategy<T> extends AbstractStrategy<T> {
      * @return value to write, or {@link IgnoredValue#INSTANCE} to write nothing
      */
     protected Object resolveNullValue(InferredType propertyType, MappingContext context) {
+        if (propertyType != null && propertyType.getClassType() == Optional.class) {
+            return Optional.empty();
+        }
+
         if (propertyType != null && propertyType.isPrimitive()) {
             return IgnoredValue.INSTANCE;
         }

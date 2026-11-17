@@ -4,6 +4,7 @@ import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.LiteralNode;
 import org.jmouse.el.node.expression.literal.*;
 
 import java.math.BigDecimal;
@@ -41,6 +42,81 @@ import static org.jmouse.el.lexer.BasicToken.*;
  */
 public class LiteralParser implements Parser {
 
+    /**
+     * The literal of a number written with no type suffix — an optional sign, digits, a fraction, an exponent: the narrowest
+     * of {@code int}, {@code long} and a big integer for a whole one; a {@code double} for a decimal, or a big decimal where a
+     * double would not hold it exactly. Every language on the engine reads an unsuffixed number by this one rule.
+     *
+     * @param written the number as written
+     * @return its literal node
+     */
+    /** How many significant decimal digits a double always reads back unchanged. */
+    private static final int DOUBLE_KEPT_DIGITS = 15;
+
+    /** The significant digits of a decimal's mantissa: its digits less the zeros leading and trailing them. */
+    private static int significantDigits(String written) {
+        int first = -1;
+        int last  = -1;
+        int count = 0;
+        for (int index = 0; index < written.length(); index++) {
+            char character = written.charAt(index);
+            if (character == 'e' || character == 'E') {
+                break;
+            }
+            if (character >= '0' && character <= '9') {
+                if (character != '0') {
+                    if (first < 0) {
+                        first = count;
+                    }
+                    last = count;
+                }
+                count++;
+            }
+        }
+        return first < 0 ? 0 : last - first + 1;
+    }
+
+    public static LiteralNode<?> numericLiteral(String written) {
+        if (written.contains(".") || written.toLowerCase().contains("e")) {
+            // ⚠️ A decimal with no suffix is a DOUBLE, and choosing the narrowest type that
+            // happens to round-trip its text was quietly wrong. `0.8` prints back exactly as a
+            // float, so it became one — and `500 * 0.8` then answered 400.0000059604645 while
+            // `500 * 0.8d` answered 400.0. Nothing raised; a total was simply a little wrong.
+            //
+            // Java, and every language somebody arrives here from, reads an unsuffixed decimal as
+            // a double. Somebody who wants a float writes `0.8f`, which the suffix path handles.
+            //
+            // A decimal of at most fifteen significant digits whose double is finite and normal reads back as exactly that
+            // double — fifteen is the most digits a double always keeps —, so it is one with no BigDecimal built to ask.
+            if (significantDigits(written) <= DOUBLE_KEPT_DIGITS) {
+                double number = Double.parseDouble(written);
+                if (number == 0 || Double.isFinite(number) && Math.abs(number) >= Double.MIN_NORMAL) {
+                    return new DoubleLiteralNode(number);
+                }
+            }
+
+            BigDecimal big    = new BigDecimal(written);
+            double     number = big.doubleValue();
+
+            // A decimal past a double's reach is no double at all: it stays as written.
+            if (!Double.isFinite(number)) {
+                return new BigDecimalLiteralNode(big);
+            }
+
+            return big.compareTo(BigDecimal.valueOf(number)) == 0 ? new DoubleLiteralNode(number) : new BigDecimalLiteralNode(big);
+        }
+
+        try {
+            return new IntegerLiteralNode(Integer.parseInt(written));
+        } catch (NumberFormatException notAnInteger) {
+            try {
+                return new LongLiteralNode(Long.parseLong(written));
+            } catch (NumberFormatException notALong) {
+                return new BigIntegerLiteralNode(new BigInteger(written));
+            }
+        }
+    }
+
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         // Peek at the next token without advancing the cursor.
@@ -64,38 +140,7 @@ public class LiteralParser implements Parser {
                 parent.add(new BooleanLiteralNode(type == T_TRUE));
                 break;
             case T_NUMERIC:
-                // numeric literal without explicit suffix
-                String raw = token.value();
-
-                if (raw.contains(".") || raw.toLowerCase().contains("e")) {
-                    // ⚠️ A decimal with no suffix is a DOUBLE, and choosing the narrowest type that
-                    // happens to round-trip its text was quietly wrong. `0.8` prints back exactly as a
-                    // float, so it became one — and `500 * 0.8` then answered 400.0000059604645 while
-                    // `500 * 0.8d` answered 400.0. Nothing raised; a total was simply a little wrong.
-                    //
-                    // Java, and every language somebody arrives here from, reads an unsuffixed decimal as
-                    // a double. Somebody who wants a float writes `0.8f`, which the suffix path handles.
-                    BigDecimal big = new BigDecimal(raw);
-                    double     d   = big.doubleValue();
-
-                    if (big.compareTo(BigDecimal.valueOf(d)) == 0) {
-                        parent.add(new DoubleLiteralNode(d));
-                    } else {
-                        parent.add(new BigDecimalLiteralNode(big));
-                    }
-
-                } else {
-                    try {
-                        parent.add(new IntegerLiteralNode(Integer.parseInt(token.value())));
-                    } catch (NumberFormatException e) {
-                        try {
-                            parent.add(new LongLiteralNode(Long.parseLong(token.value())));
-                        } catch (NumberFormatException ignored) {
-                            parent.add(new BigIntegerLiteralNode(new BigInteger(token.value())));
-                        }
-                    }
-                }
-
+                parent.add(numericLiteral(token.value()));
                 break;
 
             case T_BYTE:

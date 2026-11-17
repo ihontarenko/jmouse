@@ -104,6 +104,29 @@ public final class RoutingWorld {
         return new RoutingWorld(laid, root, Map.copyOf(now));
     }
 
+    /**
+     * Another layout of this board worked out from this one, where it differs only in some of its tracks laid again — as a gesture
+     * leaves it —, and in no more than the settings let: the copper, nets and index of this board kept, those tracks kept clear of on
+     * their own. Empty where it differs in more — a part moved, a track added or taken away —, and has to be worked out whole.
+     */
+    public Optional<RoutingWorld> relaidAs(PcbDrawing other) {
+        if (root != this || other.tracks().size() != pcb.tracks().size() || !other.withTracks(pcb.tracks()).equals(pcb)) {
+            return Optional.empty();
+        }
+        Map<Integer, PcbDrawing.Track> changed = new HashMap<>();
+        int most = settings().routing().relaidAtMost();
+        for (int index = 0; index < pcb.tracks().size(); index++) {
+            PcbDrawing.Track track = other.tracks().get(index);
+            if (!track.equals(pcb.tracks().get(index))) {
+                changed.put(index, track);
+                if (changed.size() > most) {
+                    return Optional.empty();
+                }
+            }
+        }
+        return Optional.of(new RoutingWorld(other, this, Map.copyOf(changed)));
+    }
+
     /** The same board with another layout on it. */
     public RoutingWorld of(PcbDrawing other) {
         return other.equals(pcb) ? this : new RoutingWorld(other, board);
@@ -137,8 +160,11 @@ public final class RoutingWorld {
         return nodes;
     }
 
-    /** Which copper is on which net. */
+    /** Which copper is on which net: a board's tracks laid again over it keep their nets, so theirs are the board's. */
     public CopperNets nets() {
+        if (root != this) {
+            return root.nets();
+        }
         if (nets == null) {
             nets = CopperNets.of(pcb, board.footprintsOn(pcb), board.partNetsOn(pcb), board.outlines(), curveSteps());
         }

@@ -5,6 +5,7 @@ import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
@@ -35,7 +36,8 @@ public final class TrackRouter {
      *                    does not cross back over
      */
     public record LegRequest(RoutingWorld world, String layer, Optional<String> net, double width, Point from, Point to, double angleStep,
-                             OptionalInt own, List<Point> held, Optional<List<Point>> joins, List<TrackFence.Obstacle> also) {
+                             OptionalInt own, List<Point> held, Optional<List<Point>> joins, List<TrackFence.Obstacle> also,
+                             OptionalDouble longest) {
 
         public LegRequest {
             also = List.copyOf(also);
@@ -43,12 +45,21 @@ public final class TrackRouter {
 
         /** The same leg, of a net. */
         public LegRequest onNet(Optional<String> other) {
-            return new LegRequest(world, layer, other, width, from, to, angleStep, own, held, joins, also);
+            return new LegRequest(world, layer, other, width, from, to, angleStep, own, held, joins, also, longest);
+        }
+
+        /**
+         * The same leg, a way of it no longer than this: one longer is not wanted, so its search looks no further round than such a
+         * way can go — never a window a way it could take does not need.
+         */
+        public LegRequest noLongerThan(double length) {
+            return new LegRequest(world, layer, net, width, from, to, angleStep, own, held, joins, also, OptionalDouble.of(length));
         }
 
         /** The same leg keeping clear of more besides the board's copper. */
         public LegRequest keepingClearOf(List<TrackFence.Obstacle> more) {
-            return new LegRequest(world, layer, net, width, from, to, angleStep, own, held, joins, Stream.concat(also.stream(), more.stream()).toList());
+            return new LegRequest(world, layer, net, width, from, to, angleStep, own, held, joins, Stream.concat(also.stream(), more.stream()).toList(),
+                    longest);
         }
 
         /**
@@ -57,14 +68,14 @@ public final class TrackRouter {
          */
         public static LegRequest of(RoutingWorld world, OptionalInt own, String layer, Optional<String> net, double width, Point from, Point to,
                                     double angleStep) {
-            return new LegRequest(world, layer, net, width, from, to, angleStep, own, List.of(), Optional.empty(), List.of());
+            return new LegRequest(world, layer, net, width, from, to, angleStep, own, List.of(), Optional.empty(), List.of(), OptionalDouble.empty());
         }
 
         /** A leg of a track already on the pcb, walked round what it meets, joined at the given points. */
         public static LegRequest walked(RoutingWorld world, PcbDrawing.Track track, Optional<String> net, Point from, Point to, double angleStep,
                                         int own, List<Point> held, List<Point> joins) {
             return new LegRequest(world, track.layer(), net, track.width(), from, to, angleStep, OptionalInt.of(own), held, Optional.of(joins),
-                    List.of());
+                    List.of(), OptionalDouble.empty());
         }
     }
 
@@ -122,7 +133,7 @@ public final class TrackRouter {
             return new RoutedLeg(straight, true);
         }
         // Searched through the free room's corridor: as far round as it has to go, tight on what it goes round.
-        Optional<List<Point>> way = CorridorWaySearch.way(fence, request.from(), request.to(), request.angleStep(), settings);
+        Optional<List<Point>> way = CorridorWaySearch.way(fence, request.from(), request.to(), request.angleStep(), settings, request.longest());
         if (way.isPresent()) {
             List<Point> tight = new Tightening(fence, request.angleStep(), request.held(), settings).tightened(way.get());
             return new RoutedLeg(List.copyOf(tight.subList(1, tight.size())), true);

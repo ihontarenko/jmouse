@@ -43,6 +43,13 @@ public final class TrackFence {
     private final double            reachOut;
     /** A few obstacles more, kept clear of as well — the tracks laid over a world since its copper was indexed —; null where none. */
     private final TrackFence        also;
+    /**
+     * The fence this one was made from — by leaving its ends, by keeping clear of more —: the same copper and index, its own gaps;
+     * null for a fence made of its own. What stands still among them is united once, for it and every fence made from it.
+     */
+    private final TrackFence        base;
+    /** The still copper a corridor goes round, united once for this fence and every one made from it: used on a base alone. */
+    private final StillCopper       still = new StillCopper();
 
     /**
      * A fence over obstacles of its own, indexed for it alone.
@@ -57,12 +64,13 @@ public final class TrackFence {
 
     /** A fence over pieces already indexed — a layer's —, keeping these gaps from them ({@code NaN}: not an obstacle). */
     TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, ObstacleCells cells, int curveSteps) {
-        this(width, clearance, shapes, gaps, cells, curveSteps, null);
+        this(width, clearance, shapes, gaps, cells, curveSteps, null, null);
     }
 
     private TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, ObstacleCells cells, int curveSteps,
-                       TrackFence also) {
+                       TrackFence also, TrackFence base) {
         this.also = also;
+        this.base = base;
         this.width = width;
         this.clearance = clearance;
         this.shapes = shapes;
@@ -89,12 +97,62 @@ public final class TrackFence {
             return this;
         }
         TrackFence extra = new TrackFence(width, clearance, more, bucket, curveSteps);
-        return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? extra : also.joined(extra));
+        return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? extra : also.joined(extra), base());
     }
 
     /** The obstacles of two fences of one track kept clear of together. */
     private TrackFence joined(TrackFence other) {
-        return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? other : also.joined(other));
+        return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? other : also.joined(other), base());
+    }
+
+    /** The fence this one was made from, or this one where it was made of its own. */
+    TrackFence base() {
+        return base == null ? this : base;
+    }
+
+    /** The still copper a corridor goes round, kept by this fence's base for every fence made from it. */
+    StillCopper stillCopper() {
+        return base().still;
+    }
+
+    /** The numbers of the base's obstacles this fence keeps another gap from: eased where its ends stand. */
+    BitSet easedFromBase() {
+        BitSet eased = new BitSet();
+        double[] own = base().gaps;
+        if (own != gaps) {
+            for (int number = 0; number < gaps.length; number++) {
+                if (Double.compare(own[number], gaps[number]) != 0) {
+                    eased.set(number);
+                }
+            }
+        }
+        return eased;
+    }
+
+    /** The base's obstacles whose cells a box reaches, with the gaps the base keeps, but those numbered in {@code leftOut}. */
+    List<Obstacle> stillNear(double left, double top, double right, double bottom, BitSet leftOut) {
+        TrackFence own = base();
+        List<Obstacle> found = new ArrayList<>();
+        BitSet near = own.near(left, top, right, bottom);
+        near.andNot(leftOut);
+        for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
+            found.add(new Obstacle(shapes.get(number), own.gaps[number]));
+        }
+        return found;
+    }
+
+    /** What this fence keeps clear of besides its base's still copper near a box: the obstacles it eases, and the ones more it keeps clear of. */
+    List<Obstacle> movingNear(double left, double top, double right, double bottom, BitSet eased) {
+        List<Obstacle> found = new ArrayList<>();
+        BitSet near = near(left, top, right, bottom);
+        near.and(eased);
+        for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
+            found.add(new Obstacle(shapes.get(number), gaps[number]));
+        }
+        if (also != null) {
+            found.addAll(also.obstaclesNear(left, top, right, bottom));
+        }
+        return found;
     }
 
     public double width() {
@@ -202,7 +260,7 @@ public final class TrackFence {
         }
         TrackFence alsoLeaving = also == null ? null : also.leaving(points);
         if (tightest == null) {
-            return alsoLeaving == also ? this : new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, alsoLeaving);
+            return alsoLeaving == also ? this : new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, alsoLeaving, base());
         }
         double[] eased = Arrays.copyOf(gaps, gaps.length);
         for (int number = 0; number < eased.length; number++) {
@@ -210,6 +268,6 @@ public final class TrackFence {
                 eased[number] = Math.max(0, tightest[number]) - GAP_TOLERANCE;
             }
         }
-        return new TrackFence(width, clearance, shapes, eased, cells, curveSteps, alsoLeaving);
+        return new TrackFence(width, clearance, shapes, eased, cells, curveSteps, alsoLeaving, base());
     }
 }

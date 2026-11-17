@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Arrays.copyOf;
 import static java.util.Arrays.sort;
 
 /**
@@ -184,21 +185,27 @@ public final class Arrays {
      */
     @SuppressWarnings({"unchecked"})
     public static <T> T expand(T oldArray, int newSize) {
-        Class<?> arrayType = oldArray.getClass();
-        T        newArray  = oldArray;
-
-        if (arrayType.isArray()) {
-            int oldSize = Array.getLength(oldArray);
-
-            if (newSize > oldSize) {
-                // Create a new array with the specified size
-                newArray = (T) Array.newInstance(arrayType.getComponentType(), newSize);
-                // Copy elements from the old array to the new array
-                System.arraycopy(oldArray, 0, newArray, 0, oldSize);
-            }
+        if (!oldArray.getClass().isArray() || newSize <= Array.getLength(oldArray)) {
+            return oldArray;
         }
 
-        return newArray;
+        // ⚠️ Each array copied by its own type, never made by reflection: a primitive array made by Array.newInstance is
+        // only as good as the platform's reflection, and TeaVM 0.16 makes one that is no primitive array at all — copying
+        // into it fails. The typed copies are also the faster ones on the JVM.
+        Object expanded = switch (oldArray) {
+            case Object[] objects -> copyOf(objects, newSize);
+            case char[] characters -> copyOf(characters, newSize);
+            case int[] integers -> copyOf(integers, newSize);
+            case long[] longs -> copyOf(longs, newSize);
+            case double[] doubles -> copyOf(doubles, newSize);
+            case float[] floats -> copyOf(floats, newSize);
+            case byte[] bytes -> copyOf(bytes, newSize);
+            case short[] shorts -> copyOf(shorts, newSize);
+            case boolean[] truths -> copyOf(truths, newSize);
+            default -> throw new IllegalArgumentException("Not an array: " + oldArray.getClass());
+        };
+
+        return (T) expanded;
     }
 
     @SuppressWarnings("unchecked")

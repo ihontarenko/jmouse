@@ -22,11 +22,6 @@ import static org.jmouse.core.reflection.InferredType.forInstance;
 public interface ObjectAccessor extends TypeClassifier {
 
     /**
-     * A standard wrapper for object accessor operations.
-     */
-    AccessorWrapper STANDARD_WRAPPER = new ObjectAccessorWrapper();
-
-    /**
      * Ensures that the expected and actual types are compatible.
      *
      * @param message  the error message context
@@ -42,13 +37,17 @@ public interface ObjectAccessor extends TypeClassifier {
     }
 
     /**
-     * Creates an ObjectAccessor instance from the given source object.
+     * Creates an ObjectAccessor instance from the given source object, through the default wrapper.
+     *
+     * <p>⚠️ This interface held its own wrapper as a constant, built — bean and record accessors with it — whenever any
+     * accessor was first made, for an interface with default methods is initialized with its first implementation. It is
+     * {@link ObjectAccessorWrapper#defaults()}, built on its first use.</p>
      *
      * @param source the source object
      * @return an ObjectAccessor instance wrapping the source
      */
     static ObjectAccessor wrapObject(Object source) {
-        return STANDARD_WRAPPER.wrap(source);
+        return ObjectAccessorWrapper.defaults().wrap(source);
     }
 
     /**

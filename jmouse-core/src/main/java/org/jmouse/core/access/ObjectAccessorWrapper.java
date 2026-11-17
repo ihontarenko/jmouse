@@ -22,7 +22,6 @@ import java.util.List;
  */
 public class ObjectAccessorWrapper extends AbstractAccessorWrapper {
 
-    private static final AccessorWrapper WRAPPER = new ObjectAccessorWrapper();
 
     /**
      * Constructs a {@code ObjectAccessorWrapper} with a default set of {@link ObjectAccessorProvider} instances.
@@ -53,7 +52,17 @@ public class ObjectAccessorWrapper extends AbstractAccessorWrapper {
         super(providers);
     }
 
+    /** The wrapper of every default provider, built once — when first asked for, not when this class is first touched. */
     public static AccessorWrapper defaults() {
-        return WRAPPER;
+        return Defaults.WRAPPER;
+    }
+
+    /**
+     * The default wrapper, built on its first use: the JVM loads a holder then. A wrapper of chosen providers — one with no bean
+     * or record access — never builds the reflective ones.
+     */
+    private static final class Defaults {
+
+        private static final AccessorWrapper WRAPPER = new ObjectAccessorWrapper();
     }
 }

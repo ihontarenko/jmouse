@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-j2js-modules</artifactId>
+        <version>1.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <packaging>jar</packaging>
+    <artifactId>jmouse-j2js-el</artifactId>
+    <name>jMouse - J2JS jME</name>
+    <description>jMouse Framework - jME in the browser: an expression evaluated by a page over the values it gives as JSON, with no request — the language itself, compiled to an ES module. Its values are reached as maps, lists and scalars, never through reflection.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js-el</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>ihontarenko</id>
+            <name>Ivan Hontarenko</name>
+            <email>ihontarenko@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js-el</url>
+    </scm>
+
+    <properties>
+        <!-- The module's name: its script is <name>.js and its declarations <name>.d.ts, in target/javascript and
+             target/javascript-readable. -->
+        <j2js.module>jme</j2js.module>
+    </properties>
+
+    <dependencies>
+        <!-- The language. Logging in the browser is TeaVM's slf4j, which the binding brings; logback is the server's. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- How structured values cross: JSON on the engine, read and written alike on either side. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- What a page may call: the seam, no compiler. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-j2js</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- The compiler this module is built with: its module class written while it compiles, and the JDK TeaVM lacks. Not run
+             with it — provided. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-j2js-teavm</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <!-- The module's name, for the declarations the TeaVM binding writes beside its module class. -->
+                        <arg>-Aj2js.module=${j2js.module}</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <!-- The declarations beside each script: a page's TypeScript is typed by the Java it calls. -->
+                    <execution>
+                        <id>module-declarations</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/javascript</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.outputDirectory}/j2js</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>readable-module-declarations</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/javascript-readable</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.outputDirectory}/j2js</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.teavm</groupId>
+                <artifactId>teavm-maven-plugin</artifactId>
+                <executions>
+                    <!-- The module a page imports: target/javascript/jme.js. -->
+                    <execution>
+                        <id>module</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.jmouse.j2js.el.JmeInBrowserExports</mainClass>
+                            <targetType>JAVASCRIPT</targetType>
+                            <jsModuleType>ES2015</jsModuleType>
+                            <targetDirectory>${project.build.directory}/javascript</targetDirectory>
+                            <targetFileName>${j2js.module}.js</targetFileName>
+                            <minifying>true</minifying>
+                            <optimizationLevel>FULL</optimizationLevel>
+                        </configuration>
+                    </execution>
+                    <!-- The same module written to be read, with its source map: target/javascript-readable/jme.js. -->
+                    <execution>
+                        <id>readable-module</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.jmouse.j2js.el.JmeInBrowserExports</mainClass>
+                            <targetType>JAVASCRIPT</targetType>
+                            <jsModuleType>ES2015</jsModuleType>
+                            <targetDirectory>${project.build.directory}/javascript-readable</targetDirectory>
+                            <targetFileName>${j2js.module}.js</targetFileName>
+                            <minifying>false</minifying>
+                            <sourceMapsGenerated>true</sourceMapsGenerated>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

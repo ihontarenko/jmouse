@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Base implementation for {@link MappingStrategy} that provides common utilities for
@@ -180,7 +181,7 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
      *
      * <p>Strategy:</p>
      * <ul>
-     *   <li>{@code null} input returns {@code null}</li>
+     *   <li>{@code null} input returns {@code null} — {@code Optional.empty()} for an {@code Optional} target</li>
      *   <li>Scalar/enum/plain-class targets are converted via {@link Conversion}</li>
      *   <li>If a dedicated converter exists for {@code value -> targetType}, conversion is preferred</li>
      *   <li>Otherwise mapping is delegated to {@link Mapper} for deep object mapping</li>
@@ -217,8 +218,9 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
             MappingDestination destination,
             TargetShape shape
     ) {
+        // An Optional is never null: a map's value, an element, a component that held nothing is an empty one.
         if (value == null) {
-            return null;
+            return typedValue.getType() != null && typedValue.getType().getClassType() == Optional.class ? Optional.empty() : null;
         }
 
         InferredType targetType = typedValue.getType();

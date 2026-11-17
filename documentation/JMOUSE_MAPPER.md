@@ -47,6 +47,13 @@ TypeMapper is the explicit typed implementation seam when a pair needs custom co
 ## Wiring and extension points
 
 - Register MappingStrategyContributor implementations for a new target shape.
+- Where a contributor stands is its `@Priority`, lowest first: rules converted whole (`MIN_VALUE`), then shapes more particular
+  than a bean — `Optional` (`MIN_VALUE + 20`), a caller's own (`jmouse-json`'s deserializers, `MIN_VALUE + 10`) —, then
+  the bean (`MIN_VALUE + 50`), which takes whatever is not a scalar, a collection, a map or an array, so anything more particular
+  must stand before it. Records, scalars, maps, collections and arrays follow, as before.
+- An `Optional` target (`OptionalStrategy`) is the source mapped into its type argument and wrapped; no source is
+  `Optional.empty()`. An `Optional` property or record component whose source is absent or null holds `Optional.empty()`
+  whatever the null policy says, never `null`.
 - Supply collection/map factories and MappingPolicy deliberately when concrete destination types or reference behavior matter.
 - Add MappingPlugin implementations for cross-cutting observations; use error policy separately from the plugin notification mechanism.
 
@@ -217,6 +224,13 @@ Top-level public types in production source, excluding smoke/example drivers. Li
 | [MapToMapStrategyContributor](../jmouse-mapper/src/main/java/org/jmouse/mapper/strategy/map/MapToMapStrategyContributor.java) | Implements/extends `MappingStrategyContributor`. Operations: `supports`, `build`. |
 | [ObjectToMapStrategy](../jmouse-mapper/src/main/java/org/jmouse/mapper/strategy/map/ObjectToMapStrategy.java) | Mapping plan that converts an arbitrary object into a "tree" Map structure. 🗺️ |
 | [ObjectToMapStrategyContributor](../jmouse-mapper/src/main/java/org/jmouse/mapper/strategy/map/ObjectToMapStrategyContributor.java) | MappingStrategyContributor that builds an ObjectToMapStrategy for mapping arbitrary objects into Map targets. 🗺️ |
+
+#### `org.jmouse.mapper.strategy.optional`
+
+| Type | Role |
+| --- | --- |
+| [OptionalStrategy](../jmouse-mapper/src/main/java/org/jmouse/mapper/strategy/optional/OptionalStrategy.java) | An `Optional` target: the source mapped into its type argument and wrapped; none, `Optional.empty()`. |
+| [OptionalStrategyContributor](../jmouse-mapper/src/main/java/org/jmouse/mapper/strategy/optional/OptionalStrategyContributor.java) | Contributes it for an `Optional` target, before the bean strategy. |
 
 #### `org.jmouse.mapper.strategy.record`
 

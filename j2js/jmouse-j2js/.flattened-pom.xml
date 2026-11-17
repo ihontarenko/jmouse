@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-libre-pcb</artifactId>
+  <artifactId>jmouse-j2js</artifactId>
   <version>1.0.1</version>
-  <name>jMouse - LibrePCB</name>
-  <description>jMouse Framework - LibrePCB: the files of a LibrePCB project as a typed model</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/libre/pcb</url>
+  <name>jMouse - J2JS</name>
+  <description>jMouse Framework - J2JS: the seam a module crosses to be called from a page — what it exports and the values that may cross — naming no compiler.</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,16 +24,8 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/libre/pcb</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/j2js/jmouse-j2js</url>
   </scm>
-  <dependencies>
-    <dependency>
-      <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-sexpression</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
   <build>
     <plugins>
       <plugin>

@@ -13,15 +13,10 @@ import java.util.List;
  * <p>
  * Provides the necessary services for expression evaluation such as variable scopes,
  * extensions, conversion, and property resolution via a standard {@link ObjectAccessor}
- * wrapped by a default {@link AccessorWrapper}.
+ * wrapped by the context's {@link AccessorWrapper}.
  * </p>
  */
 public interface EvaluationContext extends VirtualPropertyResolver.Aware {
-
-    /**
-     * The default AccessorWrapper used to wrap object access operations.
-     */
-    AccessorWrapper WRAPPER = ObjectAccessorWrapper.defaults();
 
     /**
      * Returns the current inheritance chain that manages variable scope hierarchy.
@@ -64,7 +59,7 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
      * Retrieves an ObjectAccessor configured with the current scope chain.
      * <p>
      * Creates a new {@link ScopedChainValuesAccessor} based on the current scope chain,
-     * sets the default wrapper, and returns it.
+     * sets the context's wrapper, and returns it.
      * </p>
      *
      * @return an ObjectAccessor for accessing scoped values

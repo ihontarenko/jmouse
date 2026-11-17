@@ -30,6 +30,8 @@ public final class RoutingEngine {
             return size() > KEPT_WORLDS;
         }
     };
+    /** The last board worked out whole: what a layout differing from it only in tracks laid again is worked out from. */
+    private Optional<RoutingWorld>                lastWhole = Optional.empty();
 
     /** A world asked for: its layout, and the board a drag made it of, whose names its copper keeps; none, a layout of its own. */
     private record WorldKey(PcbDrawing layout, Optional<PcbDrawing> draggedFrom) {
@@ -55,9 +57,20 @@ public final class RoutingEngine {
         return board.settings();
     }
 
-    /** The board with this layout on it, worked out once. */
+    /**
+     * The board with this layout on it, worked out once — and where it is a layout the last board worked out whole differs from only in
+     * some tracks laid again, worked out from that one: a track carried leaves the rest of the pcb as it was, and so does its world.
+     */
     public synchronized RoutingWorld worldOf(PcbDrawing pcb) {
-        return worlds.computeIfAbsent(new WorldKey(pcb, Optional.empty()), key -> new RoutingWorld(pcb, board));
+        return worlds.computeIfAbsent(new WorldKey(pcb, Optional.empty()), key -> {
+            Optional<RoutingWorld> relaid = lastWhole.flatMap(whole -> whole.relaidAs(pcb));
+            if (relaid.isPresent()) {
+                return relaid.get();
+            }
+            RoutingWorld whole = new RoutingWorld(pcb, board);
+            lastWhole = Optional.of(whole);
+            return whole;
+        });
     }
 
     /** The board with a layout a drag made on it, worked out once: its copper keeps the nets the board it began on named it by. */

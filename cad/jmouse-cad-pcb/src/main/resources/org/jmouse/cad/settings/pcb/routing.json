@@ -8,7 +8,8 @@
     "neckShares": [0.75, 0.5, 0],
     "stopHalvings": 14,
     "bucket": 2,
-    "corridorMargins": [4, 15, 60]
+    "corridorMargins": [4, 15, 60],
+    "relaidAtMost": 64
   },
   "carrying": {
     "holdSteps": 7,

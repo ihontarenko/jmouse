@@ -2,6 +2,7 @@ package org.jmouse.el.evaluation;
 
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.core.access.VirtualPropertyResolver;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.core.context.beans.BeanLookup;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class DefaultEvaluationContext implements EvaluationContext, BeanLookupContext {
 
     private final Conversion              conversion;
+    private final AccessorWrapper         wrapper;
     private final Map<Object, Object>     objects;
     private final Inheritance             stack;
     private       ExtensionContainer      extensions;
@@ -26,13 +28,22 @@ public class DefaultEvaluationContext implements EvaluationContext, BeanLookupCo
     private       BeanLookup              lookup;
     private       ObjectAccessor          accessor;
 
-    public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion) {
+    /**
+     * A context whose values are reached through {@code wrapper}: what kinds of object an expression may read — the default
+     * wrapper reads beans and records too; one of chosen providers reads only what they read.
+     */
+    public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion, AccessorWrapper wrapper) {
         this.chain = chain;
         this.extensions = extensions;
         this.conversion = conversion;
+        this.wrapper = wrapper;
         this.resolver = new VirtualPropertyResolver.Default();
         this.objects = new HashMap<>();
         this.stack = Inheritance.empty();
+    }
+
+    public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion) {
+        this(chain, extensions, conversion, ObjectAccessorWrapper.defaults());
     }
 
     public DefaultEvaluationContext(ExtensionContainer extensions) {
@@ -73,7 +84,7 @@ public class DefaultEvaluationContext implements EvaluationContext, BeanLookupCo
     public ObjectAccessor getValueAccessor() {
         if (accessor == null) {
             accessor = new ScopedChainValuesAccessor(getScopedChain());
-            ((AccessorWrapper.Aware) accessor).setWrapper(WRAPPER);
+            ((AccessorWrapper.Aware) accessor).setWrapper(wrapper);
         }
         return accessor;
     }

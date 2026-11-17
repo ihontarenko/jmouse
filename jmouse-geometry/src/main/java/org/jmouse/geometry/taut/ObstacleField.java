@@ -62,7 +62,8 @@ public final class ObstacleField {
         Geometry grown = united(factory, still.slack(), UnitedObstacles.grown(movingArea, slack));
         boolean grounded = !ground.isEmpty();
         Geometry kept = grounded && !area.isEmpty() ? Areas.difference(area, ground) : area;
-        Geometry slackArea = grounded && !grown.isEmpty() ? grown.difference(ground) : grown;
+        // Cut as robustly as the area is: an overlay that is not snapped again where its edges cross too nearly fails on a dense board.
+        Geometry slackArea = grounded && !grown.isEmpty() ? Areas.difference(grown, ground) : grown;
         List<Coordinate> insides = new ArrayList<>();
         PreparedGeometry groundPrepared = PreparedGeometryFactory.prepare(ground);
         List<Obstacle> every = new ArrayList<>(still.obstacles());

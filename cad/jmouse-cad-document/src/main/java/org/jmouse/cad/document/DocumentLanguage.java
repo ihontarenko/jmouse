@@ -43,7 +43,8 @@ public final class DocumentLanguage {
      * A document's numbers are a formula's — {@code 2d} is two times {@code d}, a part number such as {@code 24c02} is
      * no typed literal —, its behaviour is jMS, which counts with {@code ++}, and its texts may span lines.
      */
-    private static final ExpressionSplitter.Dialect DIALECT = new ExpressionSplitter.Dialect(false, true).withLongTexts();
+    private static final ExpressionSplitter.Dialect DIALECT = ExpressionSplitter.Dialect.of(
+            ExpressionSplitter.Feature.STEP_OPERATORS, ExpressionSplitter.Feature.LONG_TEXTS);
 
     private final DocumentGrammar       grammar;
     private final List<DocumentModule> modules;

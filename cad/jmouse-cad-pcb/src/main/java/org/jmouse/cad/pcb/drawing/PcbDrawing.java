@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A pcb as data an editor works on — the circuit it lays out, how it is made, its copper layers and edge, where each
@@ -168,11 +169,21 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
     private static final int USUAL_COPPER_LAYERS = 2;
 
     /**
+     * Each count's copper layers, listed once: a pcb's stack is asked for every pad and via on every layer as its nets and nodes are
+     * found, and listing it afresh each time — a list, a name made for each inner layer — was most of what finding them cost.
+     */
+    private static final Map<Integer, List<String>> COPPER_STACKS = new ConcurrentHashMap<>();
+
+    /**
      * Its copper layers from the top down, by id — {@code top}, {@code inner-1} …, {@code bottom} —; a pcb of one layer
      * is copper on the bottom alone.
      */
     public List<String> copperLayerIds() {
-        int count = copperLayers > 0 ? copperLayers : USUAL_COPPER_LAYERS;
+        return COPPER_STACKS.computeIfAbsent(copperLayers > 0 ? copperLayers : USUAL_COPPER_LAYERS, PcbDrawing::copperStackOf);
+    }
+
+    /** The copper layers of a stack of this many, from the top down. */
+    private static List<String> copperStackOf(int count) {
         if (count == 1) {
             return List.of(BOTTOM);
         }

@@ -11,22 +11,22 @@ import java.util.Optional;
  */
 enum PcbAskKind {
 
-    OPEN(Waiting.NEWEST),
+    OPEN(Waiting.NEWEST, Lane.ROUTING),
     /** The rest of a track toward the pointer, as it moves: only where the pointer is now matters. */
-    LEG(Waiting.NEWEST),
+    LEG(Waiting.NEWEST, Lane.ROUTING),
     /** A leg to a corner the reader clicked: every one is laid, in the order clicked — the next goes on from it. */
-    CLICKED_LEG(Waiting.EVERY),
-    SEGMENT(Waiting.NEWEST),
-    CORNER(Waiting.NEWEST),
-    FOLLOWING(Waiting.NEWEST),
-    LAID(Waiting.NEWEST),
-    JOGS(Waiting.NEWEST),
-    CORNERS(Waiting.NEWEST),
+    CLICKED_LEG(Waiting.EVERY, Lane.ROUTING),
+    SEGMENT(Waiting.NEWEST, Lane.ROUTING),
+    CORNER(Waiting.NEWEST, Lane.ROUTING),
+    FOLLOWING(Waiting.NEWEST, Lane.ROUTING),
+    LAID(Waiting.NEWEST, Lane.ROUTING),
+    JOGS(Waiting.NEWEST, Lane.ROUTING),
+    CORNERS(Waiting.NEWEST, Lane.ROUTING),
     /** Where the copper's lines end and meet, for the pcb as it stands now. */
-    NODES(Waiting.NEWEST),
-    TUNE(Waiting.NEWEST),
-    TUNE_TRACK(Waiting.NEWEST),
-    DERIVED(Waiting.NEWEST);
+    NODES(Waiting.NEWEST, Lane.ROUTING),
+    TUNE(Waiting.NEWEST, Lane.ROUTING),
+    TUNE_TRACK(Waiting.NEWEST, Lane.ROUTING),
+    DERIVED(Waiting.NEWEST, Lane.DERIVED);
 
     /** How asks of a kind wait their turn. */
     enum Waiting {
@@ -36,14 +36,32 @@ enum PcbAskKind {
         EVERY
     }
 
-    private final Waiting waiting;
+    /**
+     * Where asks of a kind are worked on: each lane its own thread, its asks in turn, so what one lane takes long over never holds
+     * another up. The router's asks share one, for they share the board's engine; what is derived of a pcb — its pours, its checks —
+     * goes on beside them, never between a hand and its track.
+     */
+    enum Lane {
+        /** What the board's routing engine answers: a track laid or carried, a part followed, the nodes, the jogs. */
+        ROUTING,
+        /** What is derived of the pcb as it stands — the copper poured, the checks —: worked out beside the routing, never before it. */
+        DERIVED
+    }
 
-    PcbAskKind(Waiting waiting) {
+    private final Waiting waiting;
+    private final Lane    lane;
+
+    PcbAskKind(Waiting waiting, Lane lane) {
         this.waiting = waiting;
+        this.lane = lane;
     }
 
     Waiting waiting() {
         return waiting;
+    }
+
+    Lane lane() {
+        return lane;
     }
 
     /** How it is written in a message: {@code tune-track}. */
