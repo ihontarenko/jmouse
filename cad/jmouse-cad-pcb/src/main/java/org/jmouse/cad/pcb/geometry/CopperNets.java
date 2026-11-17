@@ -58,8 +58,27 @@ public final class CopperNets {
         }
     }
 
-    /** Copper that joins pads of different nets: the nets it joins, and the tracks, arcs and vias that do it. */
-    public record Short(List<String> nets, List<Integer> tracks, List<Integer> arcs, List<Integer> vias) {
+    /**
+     * Copper that joins pads of different nets: the nets it joins, the tracks, arcs and vias of the copper joined, and where the
+     * nets meet — for each two of them the chain of copper joining them, not all the copper the short spreads to.
+     */
+    public record Short(List<String> nets, List<Integer> tracks, List<Integer> arcs, List<Integer> vias, List<Joined> joins) {
+    }
+
+    /** What a piece of copper is to the joining: a pad, a track, an arc, a piece drawn, a via, a zone's pour. */
+    public enum MemberKind {
+        PAD, TRACK, ARC, DRAWN, VIA, ZONE
+    }
+
+    /** A piece of copper: its kind, and its place among its kind. */
+    public record Member(MemberKind kind, int index) {
+    }
+
+    /**
+     * Where two nets meet: the copper joining them, from a piece that names the first — a pad, a zone — through each piece that
+     * touches the next to one that names the second.
+     */
+    public record Joined(String firstNet, String secondNet, List<Member> chain) {
     }
 
     /** A connection not laid yet: two pads of one net that no copper joins, the nearest of their pieces. */
@@ -76,13 +95,21 @@ public final class CopperNets {
     private final int[]                      roots;
     private final Bases                      bases;
     private final Map<Integer, Set<String>>  netsOfGroup;
+    private final Joining                    joining;
+    /** The net each zone names, by its place. */
+    private final List<String>               zoneNets;
+    /** Where each piece of copper may be reached, by its place among all of them: a pad's middle, a track's or an arc's ends, a via's middle. */
+    private final List<List<PcbDrawing.Point>> reachedAt;
 
     /** Where each kind starts in the one index space the joining runs over. */
     private record Bases(int track, int arc, int drawn, int via, int zone, int length) {
     }
 
     private CopperNets(List<PlacedPad> pads, List<Optional<String>> padNets, List<CopperShapes.Drawn> drawn, int[] roots, Bases bases,
-                       Map<Integer, Set<String>> netsOfGroup) {
+                       Map<Integer, Set<String>> netsOfGroup, Joining joining, List<String> zoneNets, List<List<PcbDrawing.Point>> reachedAt) {
+        this.reachedAt = List.copyOf(reachedAt);
+        this.joining = joining;
+        this.zoneNets = List.copyOf(zoneNets);
         this.pads = List.copyOf(pads);
         this.padNets = List.copyOf(padNets);
         this.drawn = List.copyOf(drawn);
@@ -128,7 +155,7 @@ public final class CopperNets {
         int viaBase = drawnBase + drawn.size();
         int zoneBase = viaBase + pcb.vias().size();
         Bases bases = new Bases(trackBase, arcBase, drawnBase, viaBase, zoneBase, zoneBase + pcb.zones().size());
-        int[] parents = IntStream.range(0, bases.length()).toArray();
+        Joining joining = new Joining(bases.length());
 
         // The pads of a 0 Ω link are one piece of copper, through the part.
         Map<String, Integer> firstOfLink = new HashMap<>();
@@ -139,7 +166,7 @@ public final class CopperNets {
             if (links.contains(designator)) {
                 Integer first = firstOfLink.putIfAbsent(designator, padIndex);
                 if (first != null) {
-                    join(parents, padIndex, first);
+                    joining.join(padIndex, first);
                 }
             }
         }
@@ -149,18 +176,18 @@ public final class CopperNets {
             for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
                 PlacedPad pad = pads.get(padIndex);
                 if (pad.on(run.layer()) && touching(run.shape(), pad.copper())) {
-                    join(parents, trackBase + runIndex, padIndex);
+                    joining.join(trackBase + runIndex, padIndex);
                 }
             }
             for (int otherIndex = runIndex + 1; otherIndex < runs.size(); otherIndex++) {
                 Run other = runs.get(otherIndex);
                 if (other.layer().equals(run.layer()) && touching(run.shape(), other.shape())) {
-                    join(parents, trackBase + runIndex, trackBase + otherIndex);
+                    joining.join(trackBase + runIndex, trackBase + otherIndex);
                 }
             }
             for (int viaIndex = 0; viaIndex < vias.size(); viaIndex++) {
                 if (pcb.reaches(pcb.vias().get(viaIndex), run.layer()) && touching(run.shape(), vias.get(viaIndex))) {
-                    join(parents, trackBase + runIndex, viaBase + viaIndex);
+                    joining.join(trackBase + runIndex, viaBase + viaIndex);
                 }
             }
         }
@@ -171,16 +198,13 @@ public final class CopperNets {
                 PlacedPad pad = pads.get(padIndex);
                 boolean sharesLayer = pcb.copperLayerIds().stream().anyMatch(layer -> pad.on(layer) && pcb.reaches(via, layer));
                 if (sharesLayer && touching(vias.get(viaIndex), pad.copper())) {
-                    join(parents, viaBase + viaIndex, padIndex);
+                    joining.join(viaBase + viaIndex, padIndex);
                 }
             }
         }
-        pour(pcb, pads, padNets, runs, drawn, bases, parents, curveSteps);
+        pour(pcb, pads, padNets, runs, drawn, bases, joining, curveSteps);
 
-        int[] roots = new int[bases.length()];
-        for (int index = 0; index < roots.length; index++) {
-            roots[index] = find(parents, index);
-        }
+        int[] roots = joining.groups();
         Map<Integer, Set<String>> netsOfGroup = new LinkedHashMap<>();
         for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
             int root = roots[padIndex];
@@ -197,7 +221,15 @@ public final class CopperNets {
                 netsOfGroup.computeIfAbsent(roots[drawnBase + drawnIndex], ignored -> new LinkedHashSet<>()).add(net);
             }
         }
-        return new CopperNets(pads, padNets, drawn, roots, bases, netsOfGroup);
+        List<List<PcbDrawing.Point>> reachedAt = new ArrayList<>();
+        pads.forEach(pad -> reachedAt.add(List.of(pad.centre())));
+        pcb.tracks().forEach(track -> reachedAt.add(List.of(track.points().getFirst(), track.points().getLast())));
+        pcb.arcs().forEach(arc -> reachedAt.add(List.of(arc.from(), arc.to())));
+        drawn.forEach(piece -> reachedAt.add(List.of()));
+        pcb.vias().forEach(via -> reachedAt.add(List.of(new PcbDrawing.Point(via.x(), via.y()))));
+        pcb.zones().forEach(zone -> reachedAt.add(List.of()));
+        return new CopperNets(pads, padNets, drawn, roots, bases, netsOfGroup, joining, pcb.zones().stream().map(PcbDrawing.Zone::net).toList(),
+                reachedAt);
     }
 
     /**
@@ -205,7 +237,7 @@ public final class CopperNets {
      * drawn first. A piece a zone takes is on the zone's net from then on, so a later zone of another net leaves it alone.
      */
     private static void pour(PcbDrawing pcb, List<PlacedPad> pads, List<Optional<String>> padNets, List<Run> runs,
-                             List<CopperShapes.Drawn> drawn, Bases bases, int[] parents, int curveSteps) {
+                             List<CopperShapes.Drawn> drawn, Bases bases, Joining joining, int curveSteps) {
         if (pcb.zones().isEmpty()) {
             return;
         }
@@ -213,12 +245,12 @@ public final class CopperNets {
         Map<Integer, Set<String>> netsOfRoot = new HashMap<>();
         for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
             int at = padIndex;
-            padNets.get(padIndex).ifPresent(net -> netsOfRoot.computeIfAbsent(find(parents, at), ignored -> new LinkedHashSet<>()).add(net));
+            padNets.get(padIndex).ifPresent(net -> netsOfRoot.computeIfAbsent(joining.groupOf(at), ignored -> new LinkedHashSet<>()).add(net));
         }
         for (int drawnIndex = 0; drawnIndex < drawn.size(); drawnIndex++) {
             String net = drawn.get(drawnIndex).net();
             if (net != null) {
-                netsOfRoot.computeIfAbsent(find(parents, bases.drawn() + drawnIndex), ignored -> new LinkedHashSet<>()).add(net);
+                netsOfRoot.computeIfAbsent(joining.groupOf(bases.drawn() + drawnIndex), ignored -> new LinkedHashSet<>()).add(net);
             }
         }
         List<Integer> order = IntStream.range(0, pcb.zones().size()).boxed()
@@ -234,39 +266,39 @@ public final class CopperNets {
                 PlacedPad pad = pads.get(padIndex);
                 if (padNets.get(padIndex).filter(zone.net()::equals).isPresent() && pad.on(zone.layer())
                     && area.get().encloses(pad.centre().x(), pad.centre().y())) {
-                    pourInto(parents, netsOfRoot, padIndex, zoneAt, zone.net());
+                    pourInto(joining, netsOfRoot, padIndex, zoneAt, zone.net());
                 }
             }
             for (int runIndex = 0; runIndex < runs.size(); runIndex++) {
                 Run run = runs.get(runIndex);
                 int at = bases.track() + runIndex;
-                if (run.layer().equals(zone.layer()) && takes(parents, netsOfRoot, at, zone.net())
+                if (run.layer().equals(zone.layer()) && takes(joining, netsOfRoot, at, zone.net())
                     && run.points().stream().anyMatch(point -> area.get().encloses(point.x(), point.y()))) {
-                    pourInto(parents, netsOfRoot, at, zoneAt, zone.net());
+                    pourInto(joining, netsOfRoot, at, zoneAt, zone.net());
                 }
             }
             for (int viaIndex = 0; viaIndex < pcb.vias().size(); viaIndex++) {
                 PcbDrawing.Via via = pcb.vias().get(viaIndex);
                 int at = bases.via() + viaIndex;
-                if (pcb.reaches(via, zone.layer()) && takes(parents, netsOfRoot, at, zone.net()) && area.get().encloses(via.x(), via.y())) {
-                    pourInto(parents, netsOfRoot, at, zoneAt, zone.net());
+                if (pcb.reaches(via, zone.layer()) && takes(joining, netsOfRoot, at, zone.net()) && area.get().encloses(via.x(), via.y())) {
+                    pourInto(joining, netsOfRoot, at, zoneAt, zone.net());
                 }
             }
         }
     }
 
     /** Whether a zone of a net may take a piece: one on no net yet, or on that net alone. */
-    private static boolean takes(int[] parents, Map<Integer, Set<String>> netsOfRoot, int index, String net) {
-        Set<String> nets = netsOfRoot.get(find(parents, index));
+    private static boolean takes(Joining joining, Map<Integer, Set<String>> netsOfRoot, int index, String net) {
+        Set<String> nets = netsOfRoot.get(joining.groupOf(index));
         return nets == null || (nets.size() == 1 && nets.contains(net));
     }
 
-    private static void pourInto(int[] parents, Map<Integer, Set<String>> netsOfRoot, int index, int zoneAt, String net) {
-        Set<String> nets = new LinkedHashSet<>(netsOfRoot.getOrDefault(find(parents, index), Set.of()));
-        nets.addAll(netsOfRoot.getOrDefault(find(parents, zoneAt), Set.of()));
+    private static void pourInto(Joining joining, Map<Integer, Set<String>> netsOfRoot, int index, int zoneAt, String net) {
+        Set<String> nets = new LinkedHashSet<>(netsOfRoot.getOrDefault(joining.groupOf(index), Set.of()));
+        nets.addAll(netsOfRoot.getOrDefault(joining.groupOf(zoneAt), Set.of()));
         nets.add(net);
-        join(parents, index, zoneAt);
-        netsOfRoot.put(find(parents, index), nets);
+        joining.join(index, zoneAt);
+        netsOfRoot.put(joining.groupOf(index), nets);
     }
 
     /** Every pad with copper, where its part stands it. */
@@ -329,7 +361,10 @@ public final class CopperNets {
         netsOfGroup.forEach((root, nets) -> {
             if (nets.size() > 1) {
                 shorts.add(new Short(List.copyOf(nets), inGroup(bases.track(), bases.arc() - bases.track(), root),
-                        inGroup(bases.arc(), bases.drawn() - bases.arc(), root), inGroup(bases.via(), bases.zone() - bases.via(), root)));
+                        inGroup(bases.arc(), bases.drawn() - bases.arc(), root), inGroup(bases.via(), bases.zone() - bases.via(), root),
+                        joining.chainsIn(root, roots, this::netNamedBy).stream()
+                                .map(chain -> new Joined(chain.firstNet(), chain.secondNet(), chain.pieces().stream().map(this::memberOf).toList()))
+                                .toList()));
             }
         });
         return shorts;
@@ -337,32 +372,35 @@ public final class CopperNets {
 
     /**
      * The connections not laid yet: for each net, the shortest lines joining the pieces copper has not joined — a minimum
-     * spanning tree over the pieces, each reached through its nearest pad.
+     * spanning tree over the pieces, each reached where it is nearest: a pad's middle, or the end of a track or an arc, or a via of
+     * it. A line cut back from a pad is reached at its tip, where that is nearer than the pad it ran from.
      */
     public List<Unlaid> unlaid() {
-        Map<String, List<Integer>> byNet = new LinkedHashMap<>();
+        Map<String, Set<Integer>> rootsByNet = new LinkedHashMap<>();
         for (int padIndex = 0; padIndex < pads.size(); padIndex++) {
-            int at = padIndex;
-            padNets.get(padIndex).ifPresent(net -> byNet.computeIfAbsent(net, ignored -> new ArrayList<>()).add(at));
+            int root = roots[padIndex];
+            padNets.get(padIndex).ifPresent(net -> rootsByNet.computeIfAbsent(net, ignored -> new LinkedHashSet<>()).add(root));
+        }
+        Map<Integer, List<PcbDrawing.Point>> reachedByRoot = new HashMap<>();
+        for (int member = 0; member < reachedAt.size(); member++) {
+            reachedByRoot.computeIfAbsent(roots[member], ignored -> new ArrayList<>()).addAll(reachedAt.get(member));
         }
         List<Unlaid> lines = new ArrayList<>();
-        byNet.forEach((net, members) -> {
-            Map<Integer, List<Integer>> pieces = new LinkedHashMap<>();
-            members.forEach(member -> pieces.computeIfAbsent(roots[member], ignored -> new ArrayList<>()).add(member));
-            List<List<Integer>> remaining = new ArrayList<>(pieces.values());
+        rootsByNet.forEach((net, pieceRoots) -> {
+            List<List<PcbDrawing.Point>> remaining = new ArrayList<>(pieceRoots.stream().map(reachedByRoot::get).toList());
             if (remaining.size() < 2) {
                 return;
             }
-            List<Integer> reached = new ArrayList<>(remaining.removeFirst());
+            List<PcbDrawing.Point> reached = new ArrayList<>(remaining.removeFirst());
             while (!remaining.isEmpty()) {
                 double best = Double.POSITIVE_INFINITY;
                 int bestPiece = 0;
-                int from = 0;
-                int to = 0;
-                for (int inside : reached) {
+                PcbDrawing.Point from = null;
+                PcbDrawing.Point to = null;
+                for (PcbDrawing.Point inside : reached) {
                     for (int pieceIndex = 0; pieceIndex < remaining.size(); pieceIndex++) {
-                        for (int outside : remaining.get(pieceIndex)) {
-                            double distance = distance(pads.get(inside).centre(), pads.get(outside).centre());
+                        for (PcbDrawing.Point outside : remaining.get(pieceIndex)) {
+                            double distance = distance(inside, outside);
                             if (distance < best) {
                                 best = distance;
                                 bestPiece = pieceIndex;
@@ -372,7 +410,7 @@ public final class CopperNets {
                         }
                     }
                 }
-                lines.add(new Unlaid(net, pads.get(from).centre(), pads.get(to).centre()));
+                lines.add(new Unlaid(net, from, to));
                 reached.addAll(remaining.remove(bestPiece));
             }
         });
@@ -397,21 +435,42 @@ public final class CopperNets {
     }
 
     /** Whether two pieces of copper touch or overlap: one conductor, wherever along them they meet. */
-    static boolean touching(CopperShape first, CopperShape second) {
-        return first.within(second, JOIN_TOLERANCE) && first.gapTo(second).gap() <= JOIN_TOLERANCE;
+    public static boolean touching(CopperShape first, CopperShape second) {
+        return first.within(second, JOIN_TOLERANCE) && first.comesWithin(second, JOIN_TOLERANCE);
     }
 
-    private static int find(int[] parents, int index) {
-        int root = index;
-        while (parents[root] != root) {
-            parents[root] = parents[parents[root]];
-            root = parents[root];
+    /** The net a piece names itself, by its place in the joining: a pad's of the circuit, a zone's, a drawn piece's. */
+    private Optional<String> netNamedBy(int piece) {
+        if (piece < bases.track()) {
+            return padNets.get(piece);
         }
-        return root;
+        if (piece >= bases.drawn() && piece < bases.via()) {
+            return Optional.ofNullable(drawn.get(piece - bases.drawn()).net());
+        }
+        if (piece >= bases.zone()) {
+            return Optional.of(zoneNets.get(piece - bases.zone()));
+        }
+        return Optional.empty();
     }
 
-    private static void join(int[] parents, int one, int other) {
-        parents[find(parents, one)] = find(parents, other);
+    /** A piece by its place in the joining. */
+    private Member memberOf(int piece) {
+        if (piece < bases.track()) {
+            return new Member(MemberKind.PAD, piece);
+        }
+        if (piece < bases.arc()) {
+            return new Member(MemberKind.TRACK, piece - bases.track());
+        }
+        if (piece < bases.drawn()) {
+            return new Member(MemberKind.ARC, piece - bases.arc());
+        }
+        if (piece < bases.via()) {
+            return new Member(MemberKind.DRAWN, piece - bases.drawn());
+        }
+        if (piece < bases.zone()) {
+            return new Member(MemberKind.VIA, piece - bases.via());
+        }
+        return new Member(MemberKind.ZONE, piece - bases.zone());
     }
 
     /** A closed outline as a polygon. */

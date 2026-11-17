@@ -13,7 +13,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -129,6 +131,35 @@ public final class PathOutlines {
                     rings.add(pointsOf(polygon.getInteriorRingN(hole).getCoordinates()));
                 }
             }
+        }
+        return rings;
+    }
+
+    /**
+     * An area's rings — each outline and each hole —, each as its own closed path, keyed by the box it spans as written: what an
+     * answer changed by a move changes only the rings the move reached in, every other ring written as before, for its ring is
+     * normalized ({@link #ringsOf}). Drawn by the even-odd rule, the rings in any order make the area. Two rings of one box are
+     * told apart by their order: {@code 1 2 3 4}, {@code 1 2 3 4 #2}.
+     */
+    public static Map<String, String> ringPathsOf(Geometry area) {
+        Map<String, String> rings = new LinkedHashMap<>();
+        for (List<PcbDrawing.Point> ring : ringsOf(area)) {
+            double left = Double.POSITIVE_INFINITY;
+            double top = Double.POSITIVE_INFINITY;
+            double right = Double.NEGATIVE_INFINITY;
+            double bottom = Double.NEGATIVE_INFINITY;
+            for (PcbDrawing.Point point : ring) {
+                left = Math.min(left, point.x());
+                top = Math.min(top, point.y());
+                right = Math.max(right, point.x());
+                bottom = Math.max(bottom, point.y());
+            }
+            String box = written(left) + " " + written(top) + " " + written(right) + " " + written(bottom);
+            String key = box;
+            for (int count = 2; rings.containsKey(key); count++) {
+                key = box + " #" + count;
+            }
+            rings.put(key, pathOf(ring));
         }
         return rings;
     }

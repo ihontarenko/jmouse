@@ -14,7 +14,7 @@ pcb:mosfet-switch-pcb("MOSFET as a switch — pcb") {
     place(RG, at: 20 9)
     place(RL, at: 25.5 6, rotate: 270)
     place(Q1, at: 24.5 14.5)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, drain: 2, drive: 3, top: 4], at: 5.5 9)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, drain: 2, drive: 3, top: 4], at: 5.5 9)
     track(top, width: 0.25, from: 21 9, to: 24.5 12.5, to: 24.5 14.5)
     track(top, width: 0.25, from: 25.5 7, to: 27.04 8.54, to: 27.04 14.5)
     track(top, width: 0.25, from: 19 9, to: 6.77 9, to: 5.5 10.27)

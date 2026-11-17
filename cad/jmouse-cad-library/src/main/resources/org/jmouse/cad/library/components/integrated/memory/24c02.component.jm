@@ -31,8 +31,8 @@ component:24c02("24C02", type: memory) {
     pin:write_protect(digital, input, 7, "WP: high protects the whole memory")
     pin:Vcc(power, 8)
 
-    footprint("FP.DIP:8-W7.62")
-    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("DIP:8-W7.62:F")
+    footprint("SOIC:8-P1.27-W3.9:F")
 
     symbol(box) {
         left([scl, sda, a0, a1, a2, write_protect])

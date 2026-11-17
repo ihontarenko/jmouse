@@ -25,6 +25,7 @@ import org.jmouse.cad.simulation.ComponentFacts;
 import org.jmouse.cad.simulation.SimulationReading;
 import org.jmouse.cad.simulation.elaboration.SheetUnfolding;
 import org.jmouse.kicad.KiCadLayer;
+import org.jmouse.kicad.KiCadOutline;
 import org.jmouse.kicad.KiCadPoint;
 import org.jmouse.kicad.KiCadProjectSettings;
 import org.jmouse.kicad.footprint.KiCadFootprintGraphic;
@@ -467,13 +468,20 @@ public final class KiCadPcbImport {
             List<String> layers = copperLayersOf(zone.layers());
             // Off copper: a window in the mask or the paste, which is simply an area on that layer. One zone may be both, the copper and its window.
             List<String> offCopper = zone.layers().stream().filter(layer -> copperLayersOf(List.of(layer)).isEmpty()).toList();
-            offCopper.stream().map(this::pcbLayerOf).flatMap(Optional::stream).forEach(layer -> zone.outlines().forEach(outline ->
+            List<KiCadOutline> outlines = zone.outlines().stream().filter(outline -> {
+                if (outline.isEmpty()) {
+                    notes.add("A zone of " + (zone.net().isBlank() ? "no net" : zone.net()) + " on " + String.join(", ", zone.layers())
+                              + " has an outline of nothing: it is left out.");
+                }
+                return !outline.isEmpty();
+            }).toList();
+            offCopper.stream().map(this::pcbLayerOf).flatMap(Optional::stream).forEach(layer -> outlines.forEach(outline ->
                     areasOffCopper.add(new PcbDrawing.Shape(layer, 0, true, "", pathOf(outline)))));
             if (layers.isEmpty()) {
                 beside += offCopper.stream().map(this::pcbLayerOf).allMatch(Optional::isEmpty) ? 1 : 0;
                 continue;
             }
-            for (List<KiCadPoint> outline : zone.outlines()) {
+            for (KiCadOutline outline : outlines) {
                 String path = pathOf(outline);
                 if (zone.kind() == KiCadPcb.ZoneKind.KEEPOUT) {
                     keepouts.add(new PcbDrawing.Keepout(layers, path));
@@ -516,9 +524,33 @@ public final class KiCadPcbImport {
         return List.copyOf(named);
     }
 
-    private String pathOf(List<KiCadPoint> outline) {
+    /** A zone's outline as path data: its corners joined straight, its arcs drawn through their middles, closed. */
+    private String pathOf(KiCadOutline outline) {
         RoundedPath path = new RoundedPath(PLACES);
-        closedShape(outline, path);
+        SheetTracing.Point pen = traced(outline.start());
+        path.moveTo(pen.x(), pen.y());
+        for (KiCadOutline.Step step : outline.steps()) {
+            switch (step) {
+                case KiCadOutline.Corner corner -> {
+                    SheetTracing.Point at = traced(corner.end());
+                    if (!at.equals(pen)) {
+                        path.lineTo(at.x(), at.y());
+                    }
+                    pen = at;
+                }
+                case KiCadOutline.Bend bend -> {
+                    SheetTracing.Point from = traced(bend.start());
+                    if (!from.equals(pen)) {
+                        path.lineTo(from.x(), from.y());
+                    }
+                    SheetTracing.Point middle = traced(bend.middle());
+                    SheetTracing.Point to = traced(bend.end());
+                    path.arcThrough(from.x(), from.y(), middle.x(), middle.y(), to.x(), to.y());
+                    pen = to;
+                }
+            }
+        }
+        path.close();
         return path.build().toSource();
     }
 

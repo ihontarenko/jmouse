@@ -1,7 +1,7 @@
 footprint:axial-diode-do-201ad-pitch-2032-horizontal-footprint("Axial diode DO-201AD, horizontal, 20.32 mm") {
     meta {
         summary: "Axial diode DO-201AD, body 9.5 × ⌀5.3 mm, laid flat, 20.32 mm between its holes; pin 1 is the cathode"
-        code: "FP.AXIAL:DO-201AD-P20.32-H"
+        code: "AXIAL:DO-201AD-P20.32-H:F"
         category: diodes-through-hole
         tags: electronics, footprint, through-hole
         source: "JEDEC DO-204 outlines"
@@ -17,5 +17,5 @@ footprint:axial-diode-do-201ad-pitch-2032-horizontal-footprint("Axial diode DO-2
     outline(silkscreen, width: 0.12, "M-4.86 -2.76H4.86V2.76H-4.86ZM-8.65 0H-4.86M4.86 0H8.65M-3.167 -2.76V2.76")
     outline(courtyard, width: 0.05, "M-11.9 -3.15H11.9V3.15H-11.9Z")
     body(height: 5.3)
-    model("MD.AXIAL:DO-201AD-P20.32-H")
+    model("AXIAL:DO-201AD-P20.32-H:M3D")
 }

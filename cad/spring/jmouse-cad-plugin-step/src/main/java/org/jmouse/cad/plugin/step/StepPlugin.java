@@ -57,7 +57,7 @@ public final class StepPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "STEP", StepPlugin.class).drawnBy(StepPlugin.class, "step.svg")
+        return PluginDescriptor.ofArtifact(ID, "STEP", StepPlugin.class).withIcon(StepPlugin.class, "step.svg")
                 .requiring(Set.of(MESH));
     }
 

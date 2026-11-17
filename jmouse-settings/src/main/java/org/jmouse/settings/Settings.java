@@ -1,5 +1,8 @@
 package org.jmouse.settings;
 
+import org.jmouse.core.parameters.RequestParametersPathToken;
+import org.jmouse.core.parameters.RequestParametersPathToken.ArrayIndexToken;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +22,8 @@ import java.util.function.Supplier;
  *
  * <p>The installation holds a value of every parameter: {@link #seed()} keeps each section's seed at the first start, and what a
  * later release declares once it is not kept yet — a list the installation already holds is not seeded again, so an item taken
- * away stays away. Bringing a value back keeps its seed again. A reader holds rows only of what they changed and reads the
+ * away stays away —; and it forgets what a later release no longer declares ({@link DeclaredKeys}). A reader's row of a key no
+ * longer declared is passed over when read. Bringing a value back keeps its seed again. A reader holds rows only of what they changed and reads the
  * installation's for every other key. A secret is never seeded: its deployment stands until somebody keeps another, sealed.</p>
  *
  * <p>The declarations are read when a value is first asked for, not when this is made: an owner's own parts read their settings
@@ -88,7 +92,25 @@ public final class Settings {
 
     /** An owner's section at a path; empty for none. */
     public Optional<Section> section(String owner, String path) {
-        return Optional.ofNullable(declared().getOrDefault(owner, Map.of()).get(path));
+        Map<String, Section> declared = declared().getOrDefault(owner, Map.of());
+        Section exact = declared.get(path);
+        if (exact != null) {
+            return Optional.of(exact);
+        }
+        // A path below an open section is that section, at the path asked.
+        return declared.values().stream().filter(candidate -> candidate.covers(path)).findFirst().map(open -> open.at(path));
+    }
+
+    /**
+     * Every section of an open one a holder keeps rows of — its own path and every path below it —, by path, the holder's rows of
+     * each: what an interface reads of its reader whole, once.
+     */
+    public Map<String, Map<String, String>> ownUnder(String owner, String path, SettingHolder holder) {
+        Section open = requireSection(owner, path);
+        if (!(open.shape() instanceof Section.Open)) {
+            throw new IllegalArgumentException("Section '" + path + "' of '" + owner + "' is not open: its rows are read one section at a time.");
+        }
+        return Collections.unmodifiableMap(new java.util.TreeMap<>(requireStore().keptUnder(holder, owner, path)));
     }
 
     /** Whether a change can be kept: the application keeps its settings somewhere. */
@@ -103,7 +125,8 @@ public final class Settings {
 
     /**
      * Keeps every value the installation holds none of yet — its seed —, a secret's never: at the first start, every value; after a
-     * release that declares more, the new ones; an item of a list the installation already holds, never.
+     * release that declares more, the new ones; an item of a list the installation already holds, never. Forgets every value the
+     * installation holds of a key its section no longer declares: a later release took it away.
      *
      * @return how many values were kept
      */
@@ -113,7 +136,14 @@ public final class Settings {
         }
         int seeded = 0;
         for (Owned owned : sections()) {
-            Map<String, String> already = keptBy(SettingHolder.INSTALLATION, owned.owner(), owned.section().path());
+            Map<String, String> held = keptBy(SettingHolder.INSTALLATION, owned.owner(), owned.section().path());
+            Set<String> retired = new HashSet<>();
+            held.keySet().stream().filter(key -> !DeclaredKeys.declares(owned.section(), key)).forEach(retired::add);
+            if (!retired.isEmpty()) {
+                store.get().forget(SettingHolder.INSTALLATION, owned.owner(), owned.section().path(), retired);
+                forgetRead(SettingHolder.INSTALLATION, owned.owner(), owned.section().path());
+            }
+            Map<String, String> already = retired.isEmpty() ? held : keptBy(SettingHolder.INSTALLATION, owned.owner(), owned.section().path());
             Map<String, String> missing = new LinkedHashMap<>();
             owned.section().seed().forEach((key, value) -> {
                 if (!already.containsKey(key) && !underHeldList(key, already.keySet())) {
@@ -131,19 +161,18 @@ public final class Settings {
 
     /** Whether a key stands in a list the installation already holds: the list is what the installation made it. */
     private static boolean underHeldList(String key, Set<String> held) {
-        List<ParameterTree.Segment> segments = ParameterTree.segmentsOf(key);
-        for (int position = 0; position < segments.size(); position++) {
-            if (segments.get(position).index()) {
-                List<ParameterTree.Segment> list = segments.subList(0, position);
-                return held.stream().anyMatch(other -> startsWith(ParameterTree.segmentsOf(other), list));
+        List<RequestParametersPathToken> path = ParameterTree.pathOf(key);
+        for (int position = 0; position < path.size(); position++) {
+            if (path.get(position) instanceof ArrayIndexToken) {
+                List<RequestParametersPathToken> list = path.subList(0, position);
+                return held.stream().anyMatch(other -> startsWith(ParameterTree.pathOf(other), list));
             }
         }
         return false;
     }
 
-    private static boolean startsWith(List<ParameterTree.Segment> segments, List<ParameterTree.Segment> prefix) {
-        return segments.size() > prefix.size() && segments.subList(0, prefix.size()).equals(prefix)
-               || segments.equals(prefix);
+    private static boolean startsWith(List<RequestParametersPathToken> path, List<RequestParametersPathToken> prefix) {
+        return path.size() >= prefix.size() && path.subList(0, prefix.size()).equals(prefix);
     }
 
     /** A section's values as the installation has them, by key; a secret's never. */
@@ -156,7 +185,12 @@ public final class Settings {
         Section section = requireSection(owner, path);
         Map<String, String> values = new LinkedHashMap<>(installationOf(owner, section));
         if (holder.isReader() && section.scope() == SettingScope.READER) {
-            values.putAll(keptBy(holder, owner, path));
+            // A reader's row of a key a later release took away names nothing: passed over, never read.
+            keptBy(holder, owner, path).forEach((key, value) -> {
+                if (DeclaredKeys.declares(section, key)) {
+                    values.put(key, value);
+                }
+            });
         }
         secretKeys(section).forEach(values::remove);
         return Collections.unmodifiableMap(values);
@@ -215,6 +249,12 @@ public final class Settings {
             Optional<Parameter> parameter = parameterOf(section, key);
             if (section.shape() instanceof Section.Fixed && parameter.isEmpty()) {
                 throw new SettingRefused(section.label() + " has no parameter '" + key + "'.");
+            }
+            if (section.shape() instanceof Section.Open open) {
+                Optional<String> refusal = open.refusalOf(key, value);
+                if (refusal.isPresent()) {
+                    throw new SettingRefused(section.label() + " was not changed: " + refusal.get() + ".");
+                }
             }
             if (parameter.isPresent() && value != null) {
                 Optional<String> refusal = parameter.get().refusalOf(value);
@@ -340,7 +380,8 @@ public final class Settings {
 
     /**
      * The installation's values of a section: a fixed one's defaults with what it keeps over them; a structured one's kept values,
-     * its seed while it keeps none.
+     * its seed while it keeps none — in the order the section declares them, whatever order the store keeps rows in, and what it
+     * added after them.
      */
     private Map<String, String> installationOf(String owner, Section section) {
         Map<String, String> held = keptBy(SettingHolder.INSTALLATION, owner, section.path());
@@ -349,21 +390,38 @@ public final class Settings {
             values.putAll(held);
             return values;
         }
-        return held.isEmpty() ? section.seed() : held;
+        return held.isEmpty() ? section.seed() : inDeclaredOrder(section.seed(), held);
+    }
+
+    /** Values in the order a seed declares its keys, the keys it does not declare after them as they came. */
+    private static Map<String, String> inDeclaredOrder(Map<String, String> seed, Map<String, String> values) {
+        Map<String, String> ordered = new LinkedHashMap<>();
+        seed.keySet().stream().filter(values::containsKey).forEach(key -> ordered.put(key, values.get(key)));
+        values.forEach(ordered::putIfAbsent);
+        return ordered;
     }
 
     private void requireReadable(Section section, Section.Structured structured, Map<String, String> values) {
+        Object read;
         try {
-            requireReader(section.path()).read(ParameterTree.fold(values), structured.type());
+            read = requireReader(section.path()).read(ParameterTree.fold(values), structured.type());
         } catch (IllegalArgumentException refused) {
             throw new SettingRefused(section.label() + " was not changed: " + refused.getMessage());
         }
+        // What the record says of its values beside their types — their bounds, a colour —, held before anything is kept.
+        RecordChecks.refusalOf(read).ifPresent(refusal -> {
+            throw new SettingRefused(section.label() + " was not changed: " + refusal);
+        });
     }
 
     private Section requireChangeable(String owner, String path, SettingHolder holder) {
         Section section = requireSection(owner, path);
         if (holder.isReader() && section.scope() != SettingScope.READER) {
             throw new SettingRefused(section.label() + " is the installation's, not a reader's own.");
+        }
+        // An open section's rows are each reader's own: what it starts from is the interface's, never the installation's.
+        if (!holder.isReader() && section.shape() instanceof Section.Open) {
+            throw new SettingRefused(section.label() + " is each reader's own: the installation keeps none of it.");
         }
         return section;
     }
@@ -434,5 +492,99 @@ public final class Settings {
             declared = known;
         }
         return known;
+    }
+
+    /** What a file of settings was made of when it was taken in: how many rows were kept, and each block refused, with why. */
+    public record Taken(int kept, List<String> refused) {
+
+        public Taken {
+            refused = List.copyOf(refused);
+        }
+    }
+
+    /**
+     * Settings as a file is made of them (the {@link SettingsFile}'s blocks): a reader's own rows of every section of theirs, and —
+     * when {@code withInstallation} — every section the installation changed from what ships: a section of fixed parameters by the
+     * rows it changed, a structured one whole, since a list it shrank is said by the rows it keeps. A key to a service is never in it.
+     */
+    public List<SettingsFile.Block> fileOf(SettingHolder reader, boolean withInstallation) {
+        List<SettingsFile.Block> blocks = new ArrayList<>();
+        for (Owned owned : sections()) {
+            Section section = owned.section();
+            if (section.scope() == SettingScope.READER && reader.isReader() && section.shape() instanceof Section.Open) {
+                // An open section is every section below it the reader keeps rows of, each its own block.
+                ownUnder(owned.owner(), section.path(), reader).forEach((path, own) -> {
+                    if (!own.isEmpty()) {
+                        blocks.add(new SettingsFile.Block(SettingsFile.Holding.READER, owned.owner(), path, own));
+                    }
+                });
+            } else if (section.scope() == SettingScope.READER && reader.isReader()) {
+                // Every section the reader may set, the whole of it as it stands for them: their own rows, the rest as notes.
+                blocks.add(new SettingsFile.Block(SettingsFile.Holding.READER, owned.owner(), section.path(),
+                        ownOf(owned.owner(), section.path(), reader), valuesOf(owned.owner(), section.path(), reader)));
+            }
+        }
+        if (withInstallation) {
+            for (Owned owned : sections()) {
+                Section section = owned.section();
+                // Every section the installation sets, the whole of it as it stands: its changes as rows, the rest as notes.
+                Map<String, String> standing = section.shape() instanceof Section.Open ? Map.of() : valuesOf(owned.owner(), section.path());
+                blocks.add(new SettingsFile.Block(SettingsFile.Holding.INSTALLATION, owned.owner(), section.path(),
+                        installationChangedOf(owned.owner(), section), standing));
+            }
+        }
+        return List.copyOf(blocks);
+    }
+
+    /**
+     * Takes in a file's blocks, each on its own: a reader's rows kept as the reader's (key by key, over what they keep), an
+     * installation's section as the installation's — only {@code mayInstallation} —, each checked as a change is. A block refused
+     * keeps nothing of itself and is named with why; the others are kept.
+     */
+    public Taken take(List<SettingsFile.Block> blocks, SettingHolder reader, boolean mayInstallation) {
+        int kept = 0;
+        List<String> refused = new ArrayList<>();
+        for (SettingsFile.Block block : blocks) {
+            // A block with no rows only shows a section as it stood — its values as notes —: it asks nothing, so nothing is taken.
+            if (block.rows().isEmpty()) {
+                continue;
+            }
+            String named = "[" + block.holding().word() + " " + block.owner() + " " + block.path() + "]";
+            try {
+                Section section = section(block.owner(), block.path())
+                        .orElseThrow(() -> new SettingRefused("there is no such section here."));
+                if (block.holding() == SettingsFile.Holding.READER) {
+                    change(block.owner(), block.path(), reader, block.rows());
+                } else if (!mayInstallation) {
+                    throw new SettingRefused("the installation's settings are changed only by whoever sets the engine up.");
+                } else if (section.shape() instanceof Section.Structured) {
+                    replace(block.owner(), block.path(), SettingHolder.INSTALLATION, block.rows());
+                } else {
+                    change(block.owner(), block.path(), SettingHolder.INSTALLATION, block.rows());
+                }
+                kept += block.rows().size();
+            } catch (SettingRefused refusal) {
+                refused.add(named + " " + refusal.getMessage());
+            }
+        }
+        return new Taken(kept, refused);
+    }
+
+    /** What the installation changed of a section from what ships, as a file writes it; empty where it changed nothing. */
+    private Map<String, String> installationChangedOf(String owner, Section section) {
+        Map<String, String> held = new LinkedHashMap<>(installationOf(owner, section));
+        secretKeys(section).forEach(held::remove);
+        Map<String, String> seed = new LinkedHashMap<>(section.seed());
+        secretKeys(section).forEach(seed::remove);
+        if (section.shape() instanceof Section.Structured) {
+            return held.equals(seed) ? Map.of() : held;
+        }
+        Map<String, String> changed = new LinkedHashMap<>();
+        held.forEach((key, value) -> {
+            if (!value.equals(seed.get(key))) {
+                changed.put(key, value);
+            }
+        });
+        return changed;
     }
 }

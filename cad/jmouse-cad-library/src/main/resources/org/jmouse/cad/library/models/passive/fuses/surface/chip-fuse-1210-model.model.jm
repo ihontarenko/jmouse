@@ -1,7 +1,7 @@
 model:chip-fuse-1210-model("Chip fuse 1210 (3225 metric)") {
     meta {
         summary: "Chip fuse 1210 (3225 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:F1210"
+        code: "CHIP:F1210:M3D"
         category: fuses-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"

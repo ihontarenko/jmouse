@@ -16,8 +16,8 @@ component:switch("Switch", type: switch) {
     pin:b(analog, 2, "second contact")
 
 
-    footprint("FP.SW:SLIDE-1")
-    symbol(uses: "SY.SWITCH:SPST") {
+    footprint("SW:SLIDE-1:F")
+    symbol(uses: "SWITCH:SPST:S") {
         bind:closed(closed)
     }
 
@@ -26,7 +26,7 @@ component:switch("Switch", type: switch) {
     }
 
     # How it looks in the hand: a miniature toggle whose lever is thrown by its state.
-    portrait(uses: "PT.SWITCH:TOGGLE") {
+    portrait(uses: "SWITCH:TOGGLE:P") {
         bind:closed(closed)
     }
 }

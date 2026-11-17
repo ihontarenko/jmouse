@@ -1,7 +1,7 @@
 model:tssop-20-exposed-pad-model("TSSOP-20, 4.4 mm body") {
     meta {
         summary: "TSSOP-20, 4.4 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.TSSOP:20-P0.65-EP"
+        code: "TSSOP:20-P0.65-EP:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-153 AC-ET"

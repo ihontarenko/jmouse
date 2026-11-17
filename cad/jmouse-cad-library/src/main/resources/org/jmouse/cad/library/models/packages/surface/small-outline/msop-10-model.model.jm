@@ -1,7 +1,7 @@
 model:msop-10-model("MSOP-10, 3 mm body") {
     meta {
         summary: "MSOP-10, 3 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.MSOP:10-P0.5"
+        code: "MSOP:10-P0.5:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-187 BA"

@@ -2,7 +2,7 @@
 portrait:dip-24-portrait("DIP-24") {
     meta {
         summary: "24-lead DIP, 7.62 mm rows from above: pin 1 at the bottom left, beside the notch and dot"
-        code: "PT.DIP:24-W7.62"
+        code: "DIP:24-W7.62:P"
         category: dual-inline
         tags: electronics, portrait, package, through-hole
         source: "JEDEC MS-001"

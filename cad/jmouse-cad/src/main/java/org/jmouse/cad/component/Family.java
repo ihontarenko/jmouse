@@ -9,7 +9,11 @@ import java.util.List;
  * A family its members share — 74HC CMOS logic —, or a library of functions — {@code junctions}, {@code heat} —: its
  * parameters, its definitions for jMF, and a heat law, each empty when it writes none.
  *
- * @param uses the libraries it uses itself, by slug
+ * @param head       what the document says of itself: its slug, its title, its role and its meta fields
+ * @param uses       the libraries it uses itself, by slug
+ * @param parameters the parameters its members share
+ * @param formulas   its definitions for jMF
+ * @param heat       its heat law's lines: how warm a member grows; empty for none
  */
 public record Family(DocumentHead head, List<String> uses, List<Parameter> parameters, List<Equation> formulas,
                      List<Equation> heat) {

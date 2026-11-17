@@ -1,7 +1,7 @@
 model:sod-323-model("Diode SOD-323") {
     meta {
         summary: "Diode SOD-323 — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOD:323"
+        code: "SOD:323:M3D"
         category: diodes-surface
         tags: electronics, model, chip
         source: "JEDEC SOD outlines, the makers' drawings (Nexperia), SOD-323"

@@ -1,7 +1,7 @@
 symbol:igbt-symbol("IGBT") {
     meta {
         summary: "N-channel insulated-gate bipolar transistor, as drawn on a schematic: a MOSFET's insulated gate driving a bipolar collector and emitter"
-        code: "SY.TRANSISTOR:IGBT-N"
+        code: "TRANSISTOR:IGBT-N:S"
         category: transistors
         tags: electronics, schematic
         authors: "jMouse"

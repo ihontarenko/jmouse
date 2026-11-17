@@ -1,7 +1,7 @@
 footprint:terminal-block-1x6-pitch-350-horizontal-footprint("Screw terminal block, 3.50 mm pitch, 1 × 6, horizontal") {
     meta {
         summary: "Screw terminal block, 3.50 mm pitch, 1 row of 6, upright, through-hole"
-        code: "FP.TB:6-P3.5"
+        code: "TB:6-P3.5:F"
         category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"
@@ -21,5 +21,5 @@ footprint:terminal-block-1x6-pitch-350-horizontal-footprint("Screw terminal bloc
     outline(silkscreen, filled, "M-4.41 -8.75A0.3 0.3 0 1 0 -3.81 -8.75A0.3 0.3 0 1 0 -4.41 -8.75Z")
     outline(courtyard, width: 0.05, "M-4 -11H4V11H-4Z")
     body(height: 8.5)
-    model("MD.TB:6-P3.5")
+    model("TB:6-P3.5:M3D")
 }

@@ -43,9 +43,9 @@ component:pc817("PC817", type: optocoupler) {
 
     node:j("the LED junction, behind its series resistance")
 
-    footprint("FP.DIP:4-W7.62")
+    footprint("DIP:4-W7.62:F")
 
-    symbol(uses: "SY.OPTOCOUPLER:TRANSISTOR") {
+    symbol(uses: "OPTOCOUPLER:TRANSISTOR:S") {
         bind:failed(failed)
         bind:light(max(0, anode.current) / I_forward_maximum)
         bind:conduction(min(1, max(0, collector.current) / I_collector_maximum))

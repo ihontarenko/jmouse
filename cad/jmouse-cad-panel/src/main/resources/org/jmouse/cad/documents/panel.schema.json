@@ -1,0 +1,214 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:panel",
+  "title" : "A panel document, as the engine answers it (PanelDrawing)",
+  "$defs" : {
+    "Arrangement" : {
+      "type" : "object",
+      "properties" : {
+        "group" : {
+          "type" : "string",
+          "description" : "the group's name; empty when it is in none"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "FREE", "LOCKED" ],
+          "description" : "its own state"
+        },
+        "default" : {
+          "type" : "boolean",
+          "description" : "Whether there is nothing to write: in no group, free.",
+          "readOnly" : true
+        }
+      },
+      "required" : [ "group", "state", "default" ],
+      "description" : "How a drawn item stands among the others: the group it is chosen and moved with — empty for none —, and its own state. An item is held where it stands when it is locked itself or its group is (holds).",
+      "additionalProperties" : false
+    },
+    "DrawnGroup" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the name its members carry"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "FREE", "LOCKED" ],
+          "description" : "the group's own state"
+        }
+      },
+      "required" : [ "name", "state" ],
+      "description" : "A group of a drawing as an item of its own: its name, by which its members say they are in it, and its state — a locked group holds every member where it stands, whatever each says of itself.",
+      "additionalProperties" : false
+    },
+    "PanelDrawing.Board" : {
+      "type" : "object",
+      "properties" : {
+        "pcb" : {
+          "type" : "string",
+          "description" : "the pcb it stands, by slug"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "where the left of its outline stands, as it stands turned"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where the top of its outline stands"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "degrees, a quarter turn at a time"
+        },
+        "across" : {
+          "type" : "integer",
+          "description" : "how many copies stand side by side"
+        },
+        "down" : {
+          "type" : "integer",
+          "description" : "how many copies stand one under another"
+        },
+        "gap" : {
+          "type" : [ "number", "null" ],
+          "description" : "between the copies of a grid; empty for the panel's usual"
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "pcb", "x", "y", "rotation", "across", "down", "gap", "arrangement" ],
+      "description" : "A pcb standing on the panel, once or in a grid.",
+      "additionalProperties" : false
+    },
+    "PanelDrawing.Fiducial" : {
+      "type" : "object",
+      "properties" : {
+        "at" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "where it stands, millimetres"
+        },
+        "diameter" : {
+          "type" : [ "number", "null" ],
+          "description" : "its copper's diameter, millimetres; empty for the usual"
+        },
+        "opening" : {
+          "type" : [ "number", "null" ],
+          "description" : "the solder mask's opening round it, millimetres; empty for the usual"
+        }
+      },
+      "required" : [ "at", "diameter", "opening" ],
+      "description" : "A fiducial set by hand: a mark a machine finds the panel by.",
+      "additionalProperties" : false
+    },
+    "PanelDrawing.Frame" : {
+      "type" : "object",
+      "properties" : {
+        "rail" : {
+          "type" : [ "number", "null" ],
+          "description" : "how wide; empty for the usual"
+        },
+        "sides" : {
+          "description" : "which have one",
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "enum" : [ "TOP", "BOTTOM", "LEFT", "RIGHT" ],
+            "description" : "A side of a panel, as its drawing has it: Y grows downwards, so the top is the smallest Y."
+          }
+        },
+        "fiducials" : {
+          "type" : [ "integer", "null" ],
+          "description" : "how many fiducials the frame sets by itself"
+        },
+        "tooling" : {
+          "type" : [ "integer", "null" ],
+          "description" : "how many tooling holes the frame sets by itself"
+        }
+      },
+      "required" : [ "rail", "sides", "fiducials", "tooling" ],
+      "description" : "Rails round the boards.",
+      "additionalProperties" : false
+    },
+    "PanelDrawing.Tooling" : {
+      "type" : "object",
+      "properties" : {
+        "at" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "where it stands, millimetres"
+        },
+        "drill" : {
+          "type" : [ "number", "null" ],
+          "description" : "its diameter, millimetres; empty for the usual"
+        }
+      },
+      "required" : [ "at", "drill" ],
+      "description" : "A tooling hole set by hand: a hole a machine holds the panel by.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Point" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "millimetres from the left"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "millimetres down"
+        }
+      },
+      "required" : [ "x", "y" ],
+      "description" : "A point of the pcb.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "boards" : {
+      "description" : "boards, of one pcb or several",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PanelDrawing.Board"
+      }
+    },
+    "separation" : {
+      "type" : "string",
+      "enum" : [ "NONE", "V_SCORE", "MOUSE_BITES" ],
+      "description" : "how they come apart"
+    },
+    "frame" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/PanelDrawing.Frame"
+      } ],
+      "description" : "the rails round them; empty for none"
+    },
+    "fiducials" : {
+      "description" : "fiducials set by hand, besides the frame's",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PanelDrawing.Fiducial"
+      }
+    },
+    "tooling" : {
+      "description" : "tooling holes set by hand, besides the frame's",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PanelDrawing.Tooling"
+      }
+    },
+    "groups" : {
+      "description" : "the groups its boards are chosen and moved with, each with its own state",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/DrawnGroup"
+      }
+    }
+  },
+  "required" : [ "boards", "separation", "frame", "fiducials", "tooling", "groups" ],
+  "description" : "A panel as its lines say it: which boards stand where, how they come apart, its frame and what stands on the frame.",
+  "additionalProperties" : false
+}

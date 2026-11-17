@@ -1,7 +1,7 @@
 model:qfn-16-exposed-pad-model("QFN-16, 3 mm body") {
     meta {
         summary: "QFN-16, 3 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.QFN:16-P0.5-3-EP1.7"
+        code: "QFN:16-P0.5-3-EP1.7:M3D"
         category: no-lead
         tags: electronics, model, quad
         source: "JEDEC MO-220"

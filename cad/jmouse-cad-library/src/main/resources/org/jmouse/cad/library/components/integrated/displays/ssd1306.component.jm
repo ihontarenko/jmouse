@@ -23,9 +23,9 @@ component:ssd1306("SSD1306 OLED module", type: display) {
     pin:scl(digital, input, 3, "serial clock")
     pin:sda(digital, bidirectional, open-drain, 4, "serial data")
 
-    footprint("FP.HDR:1X4-P2.54-V")
+    footprint("HDR:1X4-P2.54-V:F")
 
-    symbol(uses: "SY.DISPLAY:OLED-128X64")
+    symbol(uses: "DISPLAY:OLED-128X64:S")
 
     state:mode(2, discrete, "the addressing mode: horizontal, vertical or page — page after reset")
     state:column_start(0, discrete, "21h: the column window")

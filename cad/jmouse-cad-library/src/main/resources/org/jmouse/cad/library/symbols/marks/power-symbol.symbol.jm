@@ -1,0 +1,14 @@
+symbol:power-symbol("Supply rail") {
+    meta {
+        summary: "A supply rail — +3V3, +5V, VBAT —, as a power symbol draws one: a stem up to a bar, the rail's name over it. Every rail of one name, on any sheet of the design, is that net, as KiCad's power symbols are."
+        code: "MARK:POWER:S"
+        category: marks
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(120 x 80)
+    path("M0 40V0M-32 0H32")
+    pin:power(at: 0 40)
+    label(name, at: 0 -16)
+}

@@ -1,7 +1,7 @@
 model:axial-diode-do-15-pitch-2032-horizontal-model("Axial diode DO-15 (DO-204AC), horizontal, 20.32 mm") {
     meta {
         summary: "Axial diode DO-15 (DO-204AC), horizontal, 20.32 mm — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.AXIAL:DO-15-P20.32-H"
+        code: "AXIAL:DO-15-P20.32-H:M3D"
         category: diodes-through-hole
         tags: electronics, model, axial
         source: "JEDEC DO-204 outlines"

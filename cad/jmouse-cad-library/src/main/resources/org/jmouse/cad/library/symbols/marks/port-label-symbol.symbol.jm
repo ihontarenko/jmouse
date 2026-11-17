@@ -1,7 +1,7 @@
 symbol:port-label-symbol("Sheet port") {
     meta {
         summary: "A net the sheet hands to its parent, as KiCad's hierarchical label: the pin of this sheet's block on the sheet that places it. The arrow points both ways — the signal may go either way."
-        code: "SY.MARK:PORT-LABEL"
+        code: "MARK:PORT-LABEL:S"
         category: marks
         tags: electronics, schematic
         authors: "jMouse"

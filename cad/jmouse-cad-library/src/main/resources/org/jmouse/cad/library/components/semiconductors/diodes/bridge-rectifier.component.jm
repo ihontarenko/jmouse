@@ -42,13 +42,13 @@ component:bridge-rectifier("Bridge rectifier, 1 A 400 V", type: rectifier-bridge
 
 
     # Its round WOM case: + and − across one diagonal of its square of leads, the inputs across the other.
-    footprint("FP.BRIDGE:WOM") {
+    footprint("BRIDGE:WOM:F") {
         pad:1(plus)
         pad:2(ac1)
         pad:3(minus)
         pad:4(ac2)
     }
-    symbol(uses: "SY.DIODE:BRIDGE") {
+    symbol(uses: "DIODE:BRIDGE:S") {
         bind:failed(failed)
         # Current into ac1 is carried by one diagonal, current into ac2 by the other: each against the rating.
         bind:pair_a(max(0, ac1.current) / I_forward_maximum)

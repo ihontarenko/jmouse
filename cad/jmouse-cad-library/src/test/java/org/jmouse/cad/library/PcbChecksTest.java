@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PcbChecksTest {
 
     private static final int CURVE_STEPS = 16;
-    private static final PcbChecks.Settings SETTINGS = new PcbChecks.Settings(0.005, 40, CURVE_STEPS,
+    private static final PcbChecks.Settings SETTINGS = new PcbChecks.Settings(0.005, 40, 3, CURVE_STEPS,
             new PlacedDesignator.Rules(0.6, 0.9, 1.6, 0.25, 0.6), new Teardrops.Shape(8, 0.9, 0.8, 14, 24));
 
     /** R1's pads stand at 4 5 and 6 5, R2's at 14 5 and 16 5; each pad on a net of its own. */
@@ -43,9 +43,9 @@ class PcbChecksTest {
                 }
                 """.formatted(body), "checks-probe");
         PcbDrawing pcb = PcbDrawing.of(document);
-        FootprintDrawing chip = FootprintDrawing.of(CadLibrary.library().findCoded("FP.CHIP:R0805").orElseThrow());
+        FootprintDrawing chip = FootprintDrawing.of(CadLibrary.library().findCoded("CHIP:R0805:F").orElseThrow());
         Map<String, FootprintDrawing> footprints = Map.of("R1", chip, "R2", chip);
-        PcbChecks.Subject subject = new PcbChecks.Subject(pcb, footprints, Map.of("R1", Optional.of("FP.CHIP:R0805"), "R2", Optional.of("FP.CHIP:R0805")),
+        PcbChecks.Subject subject = new PcbChecks.Subject(pcb, footprints, Map.of("R1", Optional.of("CHIP:R0805:F"), "R2", Optional.of("CHIP:R0805:F")),
                 NETS, Optional.of(CadStandards.shipped().pcbRules().valuesOf(pcb.rules())));
         CopperNets nets = CopperNets.of(pcb, footprints, NETS, new PadOutline(CURVE_STEPS, 6), CURVE_STEPS);
         return PcbChecks.of(subject, nets, SETTINGS);
@@ -63,7 +63,13 @@ class PcbChecksTest {
                     track(top, width: 0.1, from: 5 8, to: 7 8)
                 """);
         List<String> errors = said(findings, FindingSeverity.ERROR);
-        assertTrue(errors.contains("Copper joins a and b, which the circuit keeps apart"), errors.toString());
+        // Said where the nets meet: the chain of copper from R2's pad of b through the track to R1's pad of a — those are the
+        // finding's keys, and where two of them touch its point.
+        assertTrue(errors.contains("Copper joins a and b, which the circuit keeps apart: R2 pad 1 of b reaches R1 pad 2 of a through Track 1"),
+                errors.toString());
+        PcbFinding joined = findings.stream().filter(finding -> finding.message().startsWith("Copper joins")).findFirst().orElseThrow();
+        assertEquals(List.of("placement:1", "track:0", "placement:0"), joined.keys());
+        assertTrue(joined.at().isPresent(), "the short is placed");
         assertTrue(errors.contains("Track 2 is thinner than the 0.15 mm the PCB is made with"), errors.toString());
         assertEquals(List.of("Track 2 ends at 5, 8 joined to nothing", "Track 2 ends at 7, 8 joined to nothing"), said(findings, FindingSeverity.WARNING));
     }

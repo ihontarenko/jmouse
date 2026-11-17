@@ -13,7 +13,7 @@ pcb:beats-pcb("Beats — pcb") {
     edge("M1 0H21A1 1 0 0 1 22 1V13A1 1 0 0 1 21 14H1A1 1 0 0 1 0 13V1A1 1 0 0 1 1 0Z")
     place(R1, at: 16.5 4)
     place(R2, at: 16.5 7.5)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [first: 1, second: 2], at: 5.5 7)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [first: 1, second: 2], at: 5.5 7)
     track(top, width: 0.25, from: 17.5 4, to: 17.5 7.5)
     track(top, width: 0.25, from: 15.5 7.5, to: 6.27 7.5, to: 5.5 8.27)
     track(top, width: 0.25, from: 15.5 4, to: 7.23 4, to: 5.5 5.73)

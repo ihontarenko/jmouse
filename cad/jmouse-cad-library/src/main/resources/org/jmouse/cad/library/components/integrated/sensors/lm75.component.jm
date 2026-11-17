@@ -30,8 +30,8 @@ component:lm75("LM75", type: sensor) {
     pin:a0(digital, input, 7, "address bit A0")
     pin:Vcc(power, 8)
 
-    footprint("FP.SOIC:8-P1.27-W3.9")
-    footprint("FP.MSOP:8-P0.65")
+    footprint("SOIC:8-P1.27-W3.9:F")
+    footprint("MSOP:8-P0.65:F")
 
     symbol(box) {
         left([scl, sda, a0, a1, a2])

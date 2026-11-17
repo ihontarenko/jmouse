@@ -2,7 +2,7 @@
 portrait:msop-12-exposed-pad-portrait("MSOP-12, exposed-pad") {
     meta {
         summary: "12-lead MSOP, 3 × 4 mm body, 0.65 mm pitch, exposed pad from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.MSOP:12-P0.65-EP"
+        code: "MSOP:12-P0.65-EP:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "the makers' MSE12 outline (Analog Devices)"

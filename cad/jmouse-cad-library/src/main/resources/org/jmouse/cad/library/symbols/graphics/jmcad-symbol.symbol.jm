@@ -1,7 +1,7 @@
 symbol:jmcad-symbol("jmCAD") {
     meta {
         summary: "The jmCAD mark: this board was laid out in jmCAD, as drawn on a schematic"
-        code: "SY.GRAPHIC:JMCAD"
+        code: "GRAPHIC:JMCAD:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

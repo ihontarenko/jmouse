@@ -76,7 +76,7 @@ component:mos-transistor("MOS transistor", type: mosfet) {
     node:gi("the intrinsic gate, behind the gate resistance")
     node:si("the intrinsic source, behind the source resistance")
 
-    symbol(uses: "SY.TRANSISTOR:MOSFET-N") {
+    symbol(uses: "TRANSISTOR:MOSFET-N:S") {
         bind:failed(failed)
     }
 

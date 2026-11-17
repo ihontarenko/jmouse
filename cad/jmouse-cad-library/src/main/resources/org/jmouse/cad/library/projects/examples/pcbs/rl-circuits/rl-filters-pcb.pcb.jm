@@ -15,7 +15,7 @@ pcb:rl-filters-pcb("RL low-pass and high-pass — pcb") {
     place(L2, at: 19.5 10, rotate: 270)
     place(L1, at: 11 8)
     place(R1, at: 15.5 10, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 7.5)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [0: 1, in: 2], at: 5.5 7.5)
     track(top, width: 0.25, from: 19.5 10.85, to: 19.5 12.05)
     track(top, width: 0.25, from: 15.5 11, to: 15.5 12.05)
     track(top, width: 0.25, from: 11.85 8, to: 14.5 8, to: 15.5 9)

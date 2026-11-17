@@ -6,10 +6,10 @@ component:waste-bin-mark("Separate collection mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:WASTE-BIN-10")
-    footprint("FP.GRAPHIC:WASTE-BIN-5")
-    footprint("FP.GRAPHIC:WASTE-BIN-20")
+    footprint("GRAPHIC:WASTE-BIN-10:F")
+    footprint("GRAPHIC:WASTE-BIN-5:F")
+    footprint("GRAPHIC:WASTE-BIN-20:F")
 
-    symbol(uses: "SY.GRAPHIC:WASTE-BIN") {
+    symbol(uses: "GRAPHIC:WASTE-BIN:S") {
     }
 }

@@ -63,6 +63,18 @@
             <artifactId>jmouse-cad-document</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- the unboxed maps a route search remembers its grid in -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- the lines a moved part pulls or pushes, pulled tight as rubber bands -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-geometry</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- the plane geometry copper is worked out in: which copper touches which, what a zone pours -->
         <dependency>
             <groupId>org.locationtech.jts</groupId>

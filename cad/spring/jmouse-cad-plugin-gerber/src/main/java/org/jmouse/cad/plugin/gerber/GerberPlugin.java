@@ -47,7 +47,7 @@ public final class GerberPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Gerber", GerberPlugin.class).drawnBy(GerberPlugin.class, "gerber.svg");
+        return PluginDescriptor.ofArtifact(ID, "Gerber", GerberPlugin.class).withIcon(GerberPlugin.class, "gerber.svg");
     }
 
     @Override

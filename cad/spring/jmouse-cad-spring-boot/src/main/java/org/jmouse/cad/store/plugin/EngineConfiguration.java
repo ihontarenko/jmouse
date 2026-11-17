@@ -8,11 +8,8 @@ import org.jmouse.settings.Settings;
 
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
 
 /**
  * 🎚️ What the engine itself may be set to while it runs, as sections of the engine plugin's settings (ADR 0007): read each time it
@@ -31,13 +28,12 @@ public final class EngineConfiguration {
 
     private static final String PART_LIMIT       = "part-limit";
     private static final String DOCUMENT_LENGTH  = "document-length";
-    private static final String REVISION_ZONE    = "revision-zone";
     private static final String DEFAULT_CATEGORY = "default-category";
     private static final String INLINE_SAMPLES   = "inline-samples";
     private static final String MOST_SAMPLES     = "most-samples";
     private static final String ENGINE_SAMPLES   = "engine-samples";
     private static final String JOB_RETENTION    = "job-retention";
-    private static final String MOST_HABITS      = "most-habits";
+    private static final String MOST_VALUES      = "most-values";
     private static final String WORKING_FOLDER   = "working-folder";
 
     private final Settings settings;
@@ -58,9 +54,7 @@ public final class EngineConfiguration {
                         Parameter.wholeNumber(DOCUMENT_LENGTH, "Longest document", "The most text one document may be.",
                                 properties.documents().maximumLength(), 1_000, 100_000_000, "characters"),
                         Parameter.text(DEFAULT_CATEGORY, "Category of the unfiled", "The category a new document that names none is filed in; none when empty.",
-                                properties.documents().defaultCategory()),
-                        Parameter.choice(REVISION_ZONE, "Revision day", "The zone a revision's day is written in, as lm358@20261023_001 is.",
-                                properties.revisions().zone().getId(), zonesWith(properties.revisions().zone())))),
+                                properties.documents().defaultCategory()))),
                 Section.fixed(PART_SEARCH, "Part search", null, List.of(
                         Parameter.wholeNumber(PART_LIMIT, "Results from each place", "How many parts each place parts are looked for in answers with at most.",
                                 properties.parts().limit(), 1, 500, "parts"))),
@@ -74,17 +68,8 @@ public final class EngineConfiguration {
                         Parameter.duration(JOB_RETENTION, "Finished jobs kept", "How long a finished job and its result wait for whoever started it.",
                                 simulation.jobRetention(), Duration.ofMinutes(1), Duration.ofDays(7)))),
                 Section.fixed(READERS, "Readers", null, List.of(
-                        Parameter.wholeNumber(MOST_HABITS, "Habits a reader keeps", "The most habits — a column's width, a look — one reader keeps; an interface naming more names something it should not.",
-                                512, 16, 100_000, "habits"))));
-    }
-
-    /** Every zone the platform knows by name, and the one configured even when it is none of them: {@code +02:00}. */
-    private static List<Parameter.Choice> zonesWith(ZoneId configured) {
-        TreeSet<String> zones = new TreeSet<>(ZoneId.getAvailableZoneIds());
-        zones.add(configured.getId());
-        List<Parameter.Choice> choices = new ArrayList<>(zones.size());
-        zones.forEach(zone -> choices.add(new Parameter.Choice(zone, zone)));
-        return choices;
+                        Parameter.wholeNumber(MOST_VALUES, "Values a reader keeps", "The most values of the interface's — a column's width, a look — one reader keeps; an interface naming more names something it should not.",
+                                512, 16, 100_000, "values"))));
     }
 
     private ParameterValues section(String path) {
@@ -109,10 +94,6 @@ public final class EngineConfiguration {
         return Optional.ofNullable(section(DOCUMENTS).text(DEFAULT_CATEGORY)).map(String::strip).filter(code -> !code.isEmpty());
     }
 
-    public ZoneId revisionZone() {
-        return ZoneId.of(section(DOCUMENTS).text(REVISION_ZONE));
-    }
-
     public int inlineSamples() {
         return (int) section(SIMULATION).wholeNumber(INLINE_SAMPLES);
     }
@@ -129,8 +110,8 @@ public final class EngineConfiguration {
         return section(SIMULATION).duration(JOB_RETENTION);
     }
 
-    /** The most habits one reader keeps. */
-    public int mostHabits() {
-        return (int) section(READERS).wholeNumber(MOST_HABITS);
+    /** The most values of the interface's one reader keeps. */
+    public int mostValues() {
+        return (int) section(READERS).wholeNumber(MOST_VALUES);
     }
 }

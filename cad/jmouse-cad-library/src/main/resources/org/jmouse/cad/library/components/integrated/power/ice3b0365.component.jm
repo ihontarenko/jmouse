@@ -78,7 +78,7 @@ component:ice3b0365("ICE3B0365", type: pwm-controller) {
     pin:Vcc(power, 7, "controller supply, 8.5 .. 21 V in operation")
     pin:GND(ground, 8, "controller ground")
 
-    footprint("FP.DIP:8-W7.62")
+    footprint("DIP:8-W7.62:F")
 
     symbol(box) {
         left([feedback, soft_start])

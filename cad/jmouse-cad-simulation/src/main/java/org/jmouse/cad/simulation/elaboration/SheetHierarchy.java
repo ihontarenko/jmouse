@@ -2,6 +2,7 @@ package org.jmouse.cad.simulation.elaboration;
 
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Setting;
+import org.jmouse.cad.circuit.Bus;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Connection;
 import org.jmouse.cad.circuit.Part;
@@ -10,6 +11,7 @@ import org.jmouse.cad.simulation.CatalogueDocuments;
 import org.jmouse.cad.simulation.EvaluatedParameter;
 import org.jmouse.cad.simulation.ParameterEvaluation;
 import org.jmouse.cad.simulation.SimulationModule;
+import org.jmouse.cad.simulation.SimulationVocabulary;
 import org.jmouse.cad.simulation.SimulationReading;
 
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ import java.util.Set;
  *   <li>node {@value Circuit#GROUND} stays node 0 — every sheet's;</li>
  *   <li>a port (its {@code ports} block) is the net the block's pin is wired to on the parent sheet; a port left unwired
  *       is the instance's own;</li>
+ *   <li>a bus port ({@code ports { bus(D) }}) is the parent's bus the block's pin is bound to, member by member: the sheet's
+ *       {@code D_3} is the parent's fourth net of that bus — both declared, of one size;</li>
  *   <li>a global net ({@code nets { vcc global }}) keeps its name — one net across the project, whichever sheet names it,
  *       the top one included;</li>
  *   <li>every other net is the instance's own: {@code S1.mid} — two blocks of one sheet never share it.</li>
@@ -91,11 +95,11 @@ final class SheetHierarchy {
         }
         SheetHierarchy hierarchy = new SheetHierarchy(catalogue, circuit.parts());
         for (Part part : circuit.parts()) {
-            hierarchy.add(part, values, new LinkedHashSet<>());
+            hierarchy.add(busesUnfolded(part, circuit, catalogue), values, new LinkedHashSet<>());
         }
         Circuit unfolded = new Circuit(circuit.head(), circuit.parameters(), hierarchy.parts, circuit.layout(), circuit.probes(),
                 circuit.timeBase(), circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(),
-                circuit.boundary(), circuit.groups());
+                circuit.boundary(), circuit.buses(), circuit.groups());
         return new Unfolded(unfolded, hierarchy.blocks);
     }
 
@@ -122,7 +126,7 @@ final class SheetHierarchy {
             sheet = sheetOf(block, catalogue).orElseThrow(() -> new IllegalArgumentException("'" + step + "' places no sheet: "
                     + block.component() + " is a component."));
             // The block's pins are its parent's nets as the run names them: the parent is a placed sheet itself below the top.
-            Map<String, String> ownPins = pinsOf(block, sheet);
+            Map<String, String> ownPins = pinsOf(busesUnfolded(block, parent, catalogue), sheet);
             Map<String, String> runPins = new LinkedHashMap<>();
             String parentPrefix = prefix;
             Map<String, String> parentPins = pins;
@@ -168,23 +172,89 @@ final class SheetHierarchy {
         Map<String, Double> sheetValues = sheetValues(part, sheet, values);
         int first = parts.size();
         for (Part inner : sheet.parts()) {
-            add(placedPart(part.reference(), pins, boundary, inner, sheetValues), sheetValues, path);
+            add(placedPart(part.reference(), pins, boundary, busesUnfolded(inner, sheet, catalogue), sheetValues), sheetValues, path);
         }
         // Its pins are the nets its ports are wired to; what it became is everything added since, however deep.
         blocks.add(new Block(part.reference(), pins, parts.subList(first, parts.size()).stream().map(Part::reference).toList()));
         path.remove(part.component());
     }
 
+    /**
+     * A block as its nets are bound: each pin carrying a bus — a bus port of its sheet — made one named connection a member, the
+     * sheet's member {@code i} on the parent's bus member {@code i}; every other connection named by the port it wires. A part that
+     * places no sheet, or a sheet handing no bus across, is the part as written.
+     *
+     * @param parent the circuit the block stands in, whose buses its bus pins name
+     * @throws IllegalArgumentException when a bus pin names no bus of the parent, or one of another size
+     */
+    static Part busesUnfolded(Part block, Circuit parent, CatalogueDocuments catalogue) {
+        Optional<Circuit> placed = sheetOf(block, catalogue);
+        if (placed.isEmpty() || placed.get().boundary().ports().stream().noneMatch(SheetHierarchy::carriesBus)) {
+            return block;
+        }
+        Circuit sheet = placed.get();
+        List<SheetBoundary.Port> ports = sheet.boundary().ports();
+        List<Connection> bound = new ArrayList<>();
+        for (int index = 0; index < block.connections().size(); index++) {
+            Connection connection = block.connections().get(index);
+            int position = index;
+            String port = connection.named().orElseGet(() -> position < ports.size() ? ports.get(position).net() : null);
+            Optional<SheetBoundary.Port> handed = ports.stream().filter(written -> written.net().equals(port)).findFirst();
+            if (handed.isEmpty() || !carriesBus(handed.get())) {
+                bound.add(new Connection(port, connection.net()));
+                continue;
+            }
+            Bus inside = sheet.bus(port).orElseThrow(() -> new IllegalArgumentException("Block '" + block.reference() + "': sheet '"
+                    + block.component() + "' hands the bus " + port + " across and declares no bus of that name in its buses block."));
+            Bus outside = parent.bus(connection.net()).orElseThrow(() -> new IllegalArgumentException("Block '" + block.reference()
+                    + "': its pin " + port + " carries a bus and is bound to " + connection.net() + ", which is no bus of "
+                    + parent.head().title() + busesNamed(parent) + "."));
+            if (inside.size() != outside.size()) {
+                throw new IllegalArgumentException("Block '" + block.reference() + "': its bus " + port + " carries " + inside.size()
+                        + " nets and is bound to " + outside.name() + ", which carries " + outside.size() + ": a bus is bound member by member.");
+            }
+            for (int member = 0; member < inside.size(); member++) {
+                bound.add(new Connection(inside.members().get(member), outside.members().get(member)));
+            }
+        }
+        return new Part(block.reference(), block.component(), bound, block.settings(), block.symbol(), block.footprint(), block.pads());
+    }
+
+    private static boolean carriesBus(SheetBoundary.Port port) {
+        return port.direction().equals(SimulationVocabulary.BUS);
+    }
+
+    private static String busesNamed(Circuit circuit) {
+        return circuit.buses().isEmpty() ? ", which declares none" : ", whose buses are "
+                + String.join(", ", circuit.buses().stream().map(Bus::name).toList());
+    }
+
+    /**
+     * What a sheet hands across its edge, by the names a block's pins may give: each port — a bus port by its bus's name, as a block
+     * is drawn and written —, and each net of a bus port, as a block is run, bound member by member ({@link #busesUnfolded}).
+     */
+    private static Set<String> handedAcross(Circuit sheet) {
+        Set<String> handed = new LinkedHashSet<>();
+        for (SheetBoundary.Port port : sheet.boundary().ports()) {
+            handed.add(port.net());
+            if (carriesBus(port)) {
+                sheet.bus(port.net()).ifPresent(bus -> handed.addAll(bus.members()));
+            }
+        }
+        return handed;
+    }
+
     /** Each port of the sheet a block wires — by name, or in the order the sheet writes its ports — → the parent's net. */
     static Map<String, String> pinsOf(Part block, Circuit sheet) {
         List<SheetBoundary.Port> ports = sheet.boundary().ports();
+        Set<String> handed = handedAcross(sheet);
         Map<String, String> pins = new LinkedHashMap<>();
         List<Connection> connections = block.connections();
         for (int index = 0; index < connections.size(); index++) {
             Connection connection = connections.get(index);
             int position = index;
             String port = connection.named().orElseGet(() -> position < ports.size() ? ports.get(position).net() : null);
-            if (port == null || ports.stream().noneMatch(written -> written.net().equals(port))) {
+            if (port == null || !handed.contains(port)) {
                 throw new IllegalArgumentException("Block '" + block.reference() + "': sheet '" + block.component()
                         + "' has no port '" + (port == null ? "#" + (index + 1) : port) + "'" + portsNamed(sheet.boundary()) + ".");
             }

@@ -1,7 +1,7 @@
 symbol:dual-supply-symbol("Dual power supply") {
     meta {
         summary: "Two DC outputs in series with their middle brought out as the common: +, 0 V and −"
-        code: "SY.SOURCE:SUPPLY-DUAL"
+        code: "SOURCE:SUPPLY-DUAL:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

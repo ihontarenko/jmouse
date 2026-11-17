@@ -35,12 +35,6 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-revisions</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jmouse</groupId>
       <artifactId>jmouse-storage</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>

@@ -1,7 +1,7 @@
 model:chip-capacitor-2220-hand-soldering-model("Chip capacitor 2220 (5750 metric), hand soldering") {
     meta {
         summary: "Chip capacitor 2220 (5750 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:C2220-HAND"
+        code: "CHIP:C2220-HAND:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "IEC 60384-22 dimensions, 2220 (5750 metric)"

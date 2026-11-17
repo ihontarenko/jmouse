@@ -69,7 +69,7 @@ public final class SuppliersPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Suppliers", SuppliersPlugin.class).drawnBy(SuppliersPlugin.class, "suppliers.svg");
+        return PluginDescriptor.ofArtifact(ID, "Suppliers", SuppliersPlugin.class).withIcon(SuppliersPlugin.class, "suppliers.svg");
     }
 
     @Override

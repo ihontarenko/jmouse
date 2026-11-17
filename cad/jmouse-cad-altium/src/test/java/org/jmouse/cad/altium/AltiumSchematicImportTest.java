@@ -98,9 +98,9 @@ class AltiumSchematicImportTest {
     @Test
     @DisplayName("names a part's footprint by the code of the one footprint of that name a PCB library imported before brought")
     void aFootprintNamedBareIsTheOneOfThatName() {
-        ImportedDocuments imported = importedWith("R0805", holding("FP.RCL:R0805", "FP.RCL:R0603", "FP.CHIPS:SOT-23"));
+        ImportedDocuments imported = importedWith("R0805", holding("RCL:R0805:F", "RCL:R0603:F", "CHIPS:SOT-23:F"));
         String component = language.write(imported.library().get(1));
-        assertTrue(component.contains("footprint(\"FP.RCL:R0805\")"), component);
+        assertTrue(component.contains("footprint(\"RCL:R0805:F\")"), component);
         assertTrue(component.contains("package: \"R0805\""), component);
         assertTrue(imported.notes().stream().noneMatch(note -> note.contains("R0805")), imported.notes().toString());
     }
@@ -108,11 +108,11 @@ class AltiumSchematicImportTest {
     @Test
     @DisplayName("keeps a footprint's name as written, and says so, where none or several of that name are held")
     void aFootprintNoneOrSeveralHoldIsSaid() {
-        ImportedDocuments none = importedWith("R0805", holding("FP.RCL:R0603"));
+        ImportedDocuments none = importedWith("R0805", holding("RCL:R0603:F"));
         assertTrue(!language.write(none.library().get(1)).contains("footprint("), language.write(none.library().get(1)));
         assertTrue(none.notes().stream().anyMatch(note -> note.startsWith("Footprint R0805: none")), none.notes().toString());
-        ImportedDocuments several = importedWith("R0805", holding("FP.RCL:R0805", "FP.CHIP:R0805"));
-        assertTrue(several.notes().stream().anyMatch(note -> note.contains("FP.RCL:R0805, FP.CHIP:R0805")), several.notes().toString());
+        ImportedDocuments several = importedWith("R0805", holding("RCL:R0805:F", "CHIP:R0805:F"));
+        assertTrue(several.notes().stream().anyMatch(note -> note.contains("RCL:R0805:F, CHIP:R0805:F")), several.notes().toString());
     }
 
     @Test

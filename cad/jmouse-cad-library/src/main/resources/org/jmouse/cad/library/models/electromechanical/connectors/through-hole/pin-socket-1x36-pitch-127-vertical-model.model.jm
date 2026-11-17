@@ -1,7 +1,7 @@
 model:pin-socket-1x36-pitch-127-vertical-model("Pin socket, 1.27 mm pitch, 1 × 36, vertical") {
     meta {
         summary: "Pin socket, 1.27 mm pitch, 1 × 36, vertical — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SKT:1X36-P1.27-V"
+        code: "SKT:1X36-P1.27-V:M3D"
         category: connectors-through-hole
         tags: electronics, model, header
         source: "IEC 60603-13 grid"

@@ -1,7 +1,7 @@
 footprint:chip-inductor-0201-footprint("Chip inductor 0201 (0603 metric)") {
     meta {
         summary: "Chip inductor, 0201 (0603 metric) body, reflow pads"
-        code: "FP.CHIP:L0201"
+        code: "CHIP:L0201:F"
         category: inductors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 0201 (0603 metric)"
@@ -16,5 +16,5 @@ footprint:chip-inductor-0201-footprint("Chip inductor 0201 (0603 metric)") {
     outline(fabrication, width: 0.1, "M-0.3 -0.15H0.3V0.15H-0.3Z")
     outline(courtyard, width: 0.05, "M-0.7 -0.35H0.7V0.35H-0.7Z")
     body(height: 0.33)
-    model("MD.CHIP:L0201")
+    model("CHIP:L0201:M3D")
 }

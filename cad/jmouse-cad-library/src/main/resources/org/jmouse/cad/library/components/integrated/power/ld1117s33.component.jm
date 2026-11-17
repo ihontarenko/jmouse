@@ -28,9 +28,9 @@ component:ld1117s33("LD1117S33", type: regulator) {
     pin:output(analog, output, 2, "regulated output; the tab is output too")
     pin:input(power, 3, "unregulated input")
 
-    footprint("FP.SOT223:4")
+    footprint("SOT223:4:F")
 
-    symbol(uses: "SY.REGULATOR:LINEAR-FIXED") {
+    symbol(uses: "REGULATOR:LINEAR-FIXED:S") {
         bind:failed(failed)
         bind:ground(pin: GND)
     }

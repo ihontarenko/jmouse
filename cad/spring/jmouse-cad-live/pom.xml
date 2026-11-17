@@ -98,6 +98,20 @@
             <artifactId>jakarta.annotation-api</artifactId>
         </dependency>
 
+        <!-- The socket itself: one endpoint, a conversation per subprotocol, its opener known by the handshake's token. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-websocket</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- What a pcb's session is sent instead of its layout again: the change to it, as a JSON Patch. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-json-patch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Servlet API, for the listener that registers the endpoint. Provided by the container. -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
@@ -124,6 +138,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

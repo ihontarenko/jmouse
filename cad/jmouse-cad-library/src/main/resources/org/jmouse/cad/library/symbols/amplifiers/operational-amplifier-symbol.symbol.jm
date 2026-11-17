@@ -1,7 +1,7 @@
 symbol:operational-amplifier-symbol("Operational amplifier") {
     meta {
         summary: "Operational amplifier, as drawn on a schematic: its body tints with where its output stands between its supplies, the higher input lit"
-        code: "SY.AMPLIFIER:OPERATIONAL"
+        code: "AMPLIFIER:OPERATIONAL:S"
         category: amplifiers
         tags: electronics, schematic
         authors: "jMouse"

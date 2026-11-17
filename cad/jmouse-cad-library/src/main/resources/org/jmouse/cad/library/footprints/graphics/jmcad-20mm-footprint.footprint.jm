@@ -1,7 +1,7 @@
 footprint:jmcad-20mm-footprint("jmCAD, 20 mm") {
     meta {
         summary: "The jmCAD mark: this board was laid out in jmCAD, printed 20 mm wide"
-        code: "FP.GRAPHIC:JMCAD-20"
+        code: "GRAPHIC:JMCAD-20:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

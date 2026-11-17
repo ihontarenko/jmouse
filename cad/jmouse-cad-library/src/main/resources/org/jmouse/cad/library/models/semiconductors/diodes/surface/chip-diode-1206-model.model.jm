@@ -1,7 +1,7 @@
 model:chip-diode-1206-model("Chip diode 1206 (3216 metric)") {
     meta {
         summary: "Chip diode 1206 (3216 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:D1206"
+        code: "CHIP:D1206:M3D"
         category: diodes-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 1206 (3216 metric)"

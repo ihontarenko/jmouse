@@ -1,7 +1,7 @@
 model:chip-resistor-1210-model("Chip resistor 1210 (3225 metric)") {
     meta {
         summary: "Chip resistor 1210 (3225 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:R1210"
+        code: "CHIP:R1210:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"

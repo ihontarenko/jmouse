@@ -6,10 +6,10 @@ component:high-voltage-mark("High voltage mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:HIGH-VOLTAGE-10")
-    footprint("FP.GRAPHIC:HIGH-VOLTAGE-5")
-    footprint("FP.GRAPHIC:HIGH-VOLTAGE-20")
+    footprint("GRAPHIC:HIGH-VOLTAGE-10:F")
+    footprint("GRAPHIC:HIGH-VOLTAGE-5:F")
+    footprint("GRAPHIC:HIGH-VOLTAGE-20:F")
 
-    symbol(uses: "SY.GRAPHIC:HIGH-VOLTAGE") {
+    symbol(uses: "GRAPHIC:HIGH-VOLTAGE:S") {
     }
 }

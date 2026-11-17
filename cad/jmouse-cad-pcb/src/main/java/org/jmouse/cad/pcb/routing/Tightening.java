@@ -162,9 +162,4 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
     public Tightening holding(List<Point> others) {
         return new Tightening(fence, angleStep, others, settings);
     }
-
-    /** The same tightening against another fence. */
-    public Tightening against(TrackFence other) {
-        return new Tightening(other, angleStep, held, settings);
-    }
 }

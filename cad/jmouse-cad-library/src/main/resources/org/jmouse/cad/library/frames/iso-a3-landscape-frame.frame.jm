@@ -2,7 +2,7 @@
 frame:iso-a3-landscape-frame("ISO A3, landscape") {
     meta {
         summary: "An ISO 216 A3 sheet, landscape (420 × 297 mm): a 10 mm margin, 8 × 6 zones and a title block filled from the drawing"
-        code: "FR.ISO:A3-L"
+        code: "ISO:A3-L:FRM"
         category: frames
         tags: electronics, frame
         authors: "jMouse"

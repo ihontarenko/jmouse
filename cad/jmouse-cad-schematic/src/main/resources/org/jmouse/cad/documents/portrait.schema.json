@@ -1,0 +1,489 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:portrait",
+  "title" : "A portrait document, as the engine answers it (SymbolDrawing)",
+  "$defs" : {
+    "DrawingExpression.Call" : {
+      "type" : "object",
+      "properties" : {
+        "function" : {
+          "type" : "string",
+          "description" : "the function, by name"
+        },
+        "arguments" : {
+          "description" : "what it is called on, in order",
+          "type" : "array",
+          "items" : {
+            "anyOf" : [ {
+              "$ref" : "#/$defs/DrawingExpression.Number"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Name"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Operation"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Call"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Choice"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Words"
+            } ]
+          }
+        }
+      },
+      "required" : [ "function", "arguments" ],
+      "description" : "A function of the drawing's vocabulary, or of mathematics, called on its arguments.",
+      "additionalProperties" : false
+    },
+    "DrawingExpression.Choice" : {
+      "type" : "object",
+      "properties" : {
+        "branches" : {
+          "description" : "each condition with its value, in order",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/DrawingExpression.Choice.Branch"
+          }
+        },
+        "otherwise" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/DrawingExpression.Number",
+            "description" : "what holds when no condition does"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Name",
+            "description" : "what holds when no condition does"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Operation",
+            "description" : "what holds when no condition does"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Call",
+            "description" : "what holds when no condition does"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Choice",
+            "description" : "what holds when no condition does"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Words",
+            "description" : "what holds when no condition does"
+          } ]
+        }
+      },
+      "required" : [ "branches", "otherwise" ],
+      "description" : "if: each condition with its value, in order, then what holds otherwise.",
+      "additionalProperties" : false
+    },
+    "DrawingExpression.Choice.Branch" : {
+      "type" : "object",
+      "properties" : {
+        "condition" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/DrawingExpression.Number",
+            "description" : "when it holds"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Name",
+            "description" : "when it holds"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Operation",
+            "description" : "when it holds"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Call",
+            "description" : "when it holds"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Choice",
+            "description" : "when it holds"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Words",
+            "description" : "when it holds"
+          } ]
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/DrawingExpression.Number",
+            "description" : "what holds then"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Name",
+            "description" : "what holds then"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Operation",
+            "description" : "what holds then"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Call",
+            "description" : "what holds then"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Choice",
+            "description" : "what holds then"
+          }, {
+            "$ref" : "#/$defs/DrawingExpression.Words",
+            "description" : "what holds then"
+          } ]
+        }
+      },
+      "required" : [ "condition", "value" ],
+      "description" : "A condition, and the value that holds when it does.",
+      "additionalProperties" : false
+    },
+    "DrawingExpression.Name" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the input's name, or the word"
+        }
+      },
+      "required" : [ "name" ],
+      "description" : "An input of the drawing, or a word of the drawing's vocabulary, which the sheet colours by its tokens.",
+      "additionalProperties" : false
+    },
+    "DrawingExpression.Number" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "type" : "number",
+          "description" : "the number"
+        }
+      },
+      "required" : [ "value" ],
+      "description" : "A number.",
+      "additionalProperties" : false
+    },
+    "DrawingExpression.Operation" : {
+      "type" : "object",
+      "properties" : {
+        "operator" : {
+          "type" : "string",
+          "description" : "the operator, as jMF writes it"
+        },
+        "operands" : {
+          "description" : "what it works on, in order",
+          "type" : "array",
+          "items" : {
+            "anyOf" : [ {
+              "$ref" : "#/$defs/DrawingExpression.Number"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Name"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Operation"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Call"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Choice"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Words"
+            } ]
+          }
+        }
+      },
+      "required" : [ "operator", "operands" ],
+      "description" : "operator over its operands: +, - (one operand for a negation), <, and, not …, as jMF writes them.",
+      "additionalProperties" : false
+    },
+    "DrawingExpression.Words" : {
+      "type" : "object",
+      "properties" : {
+        "words" : {
+          "type" : "string",
+          "description" : "the words"
+        }
+      },
+      "required" : [ "words" ],
+      "description" : "Words a glyph prints as they are: a caption the drawing always carries.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Element" : {
+      "type" : "object",
+      "properties" : {
+        "shape" : {
+          "type" : "string",
+          "description" : "what it is, by its word: path, box, circle, line, glyph, bitmap, group, or when for a layer"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, for a layer to hide it by; empty for an element of no name"
+        },
+        "live" : {
+          "type" : "boolean",
+          "description" : "whether it is marked live: drawn again as its inputs move"
+        },
+        "path" : {
+          "type" : "string",
+          "description" : "a path's data; empty for any other shape"
+        },
+        "geometry" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "number"
+            }
+          },
+          "description" : "its geometry by word — at, size, radius, from, to, pivot —, each a list of numbers"
+        },
+        "condition" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/SymbolDrawing.Value"
+          } ],
+          "description" : "when a layer is shown; null for any other element"
+        },
+        "properties" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "$ref" : "#/$defs/SymbolDrawing.Value"
+          },
+          "description" : "its properties by name — fill, opacity, rotate … —, each a value"
+        },
+        "hidden" : {
+          "description" : "the elements a layer hides while it is shown, by name",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "children" : {
+          "description" : "what a group or a layer holds",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/SymbolDrawing.Element"
+          }
+        }
+      },
+      "required" : [ "shape", "name", "live", "path", "geometry", "condition", "properties", "hidden", "children" ],
+      "description" : "An element of the living part: its shape, its name, whether it is marked live, a path's data, its geometry by word — at, size, radius, from, to, pivot —, a layer's condition (null for any other element), its properties, what a layer hides, and what a group or a layer holds.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Indicator" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the figure it shows, by name"
+        },
+        "left" : {
+          "type" : "number",
+          "description" : "the box's left edge"
+        },
+        "top" : {
+          "type" : "number",
+          "description" : "the box's top edge"
+        },
+        "right" : {
+          "type" : "number",
+          "description" : "the box's right edge"
+        },
+        "bottom" : {
+          "type" : "number",
+          "description" : "the box's bottom edge"
+        }
+      },
+      "required" : [ "name", "left", "top", "right", "bottom" ],
+      "description" : "Where a part's live figure of this name is drawn: a box in the drawing's coordinates.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Input" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as the drawing's values read it"
+        },
+        "low" : {
+          "type" : "number",
+          "description" : "the low end of its range"
+        },
+        "high" : {
+          "type" : "number",
+          "description" : "the high end of its range"
+        },
+        "typical" : {
+          "type" : "number",
+          "description" : "the value drawn when nothing binds it; the low end unless written"
+        },
+        "range" : {
+          "type" : "string",
+          "description" : "the range as written, empty for the default 0 … 1 and for a picture or a text"
+        },
+        "picture" : {
+          "type" : "boolean",
+          "description" : "whether it is a picture: a row of bytes, in hexadecimal"
+        },
+        "text" : {
+          "type" : [ "string", "null" ],
+          "description" : "the words a text input is drawn with while no part gives its own; null for any other input"
+        },
+        "hold" : {
+          "type" : "number",
+          "description" : "how long the value takes to settle, in seconds: what a symbol shows of a figure that moves many times a second — a resistor's power on an alternating current — is read as it settles, not as it flickers. 0 follows it at once."
+        }
+      },
+      "required" : [ "name", "low", "high", "typical", "range", "picture", "text", "hold" ],
+      "description" : "What a living drawing is drawn from: input current 0 .. 20 mA, input screen picture, input marking text.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Label" : {
+      "type" : "object",
+      "properties" : {
+        "subject" : {
+          "type" : "string",
+          "description" : "name or value"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "across from the origin"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "down from the origin"
+        }
+      },
+      "required" : [ "subject", "x", "y" ],
+      "description" : "Where a part's name or value is printed, the text centred on the point.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Pin" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the pin's name, as the part names its pins"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "where it meets the drawing, across from the origin"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where it meets the drawing, down from the origin"
+        },
+        "label" : {
+          "type" : "string",
+          "description" : "the text printed beside it"
+        },
+        "body" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/SymbolDrawing.Pin.Body"
+          } ],
+          "description" : "where its lead reaches the body, which its label stands inside; null for a pin whose lead is not its own"
+        }
+      },
+      "required" : [ "name", "x", "y", "label", "body" ],
+      "description" : "Where a pin meets the drawing, and the text printed beside it; an empty label prints nothing.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Pin.Body" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "across from the origin"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "down from the origin"
+        }
+      },
+      "required" : [ "x", "y" ],
+      "description" : "A point on the body.",
+      "additionalProperties" : false
+    },
+    "SymbolDrawing.Value" : {
+      "type" : "object",
+      "properties" : {
+        "written" : {
+          "type" : "string",
+          "description" : "the value as its line writes it"
+        },
+        "expressions" : {
+          "description" : "its trees, which the browser evaluates; none in a value an editor sends",
+          "type" : "array",
+          "items" : {
+            "anyOf" : [ {
+              "$ref" : "#/$defs/DrawingExpression.Number"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Name"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Operation"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Call"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Choice"
+            }, {
+              "$ref" : "#/$defs/DrawingExpression.Words"
+            } ]
+          }
+        },
+        "motion" : {
+          "type" : "string",
+          "enum" : [ "STILL", "LIVE", "ANIMATED" ],
+          "description" : "how it moves"
+        }
+      },
+      "required" : [ "written", "expressions", "motion" ],
+      "description" : "A property's value: as written, its trees — one per value, move has two —, and how it moves. The trees are read from the words: a value an editor sends holds its words alone, and none until the text is read again.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "width" : {
+      "type" : "number",
+      "description" : "the drawing's extent across, centred on the origin; 0 when not written"
+    },
+    "height" : {
+      "type" : "number",
+      "description" : "the drawing's extent down, centred on the origin; 0 when not written"
+    },
+    "paths" : {
+      "description" : "its still path data, drawn as they stand",
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "upright" : {
+      "description" : "still paths that stay upright however the part is turned — a meter's letter",
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "pins" : {
+      "description" : "where each pin meets it, and what is printed beside it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/SymbolDrawing.Pin"
+      }
+    },
+    "labels" : {
+      "description" : "where the part's name and value are printed",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/SymbolDrawing.Label"
+      }
+    },
+    "indicators" : {
+      "description" : "where the part's live figures are drawn",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/SymbolDrawing.Indicator"
+      }
+    },
+    "inputs" : {
+      "description" : "what its living part is drawn from",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/SymbolDrawing.Input"
+      }
+    },
+    "elements" : {
+      "description" : "its living part's elements",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/SymbolDrawing.Element"
+      }
+    }
+  },
+  "required" : [ "width", "height", "paths", "upright", "pins", "labels", "indicators", "inputs", "elements" ],
+  "description" : "A drawing — a symbol's, a portrait's, a frame's — as the interface draws it: its extent, its still paths, its pins and labels, the figures it shows, and its living part — the inputs it is drawn from and its elements, every value an expression tree (DrawingExpression) checked to be marked as it moves (LivingDrawing). It is data; how it is sent — JSON, for a browser — is the product's.",
+  "additionalProperties" : false
+}

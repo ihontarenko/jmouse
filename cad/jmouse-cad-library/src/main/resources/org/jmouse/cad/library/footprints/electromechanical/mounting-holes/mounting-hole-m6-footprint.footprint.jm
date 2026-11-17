@@ -1,7 +1,7 @@
 footprint:mounting-hole-m6-footprint("Mounting hole M6") {
     meta {
         summary: "M6 screw, 6.4 mm hole, a bare hole"
-        code: "FP.MH:M6"
+        code: "MH:M6:F"
         category: mounting-holes
         tags: electronics, footprint, through-hole
         source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"

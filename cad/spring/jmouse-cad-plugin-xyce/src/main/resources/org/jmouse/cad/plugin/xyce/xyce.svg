@@ -1,4 +1,377 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Sandia National Laboratories, the maker of Xyce's mark, as its own site serves it (https://xyce.sandia.gov/app/themes/thunderberg/favicon.png); the mark is Sandia National Laboratories, the maker of Xyce's trademark, shown to name what the plugin speaks for. -->
-  <image width="32" height="32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAD20lEQVRYheWXPYgkRRTHf28YhmE5lmFYlvU4P0DYbZRFFCPBj0QTEQymhQNFEQ0MNBCNzUQUwUS4xMRP3FnRQAwu00QRRIQNxuNOTjkRlmNdhqEZhmH+BlXVXdNTfXfqgoEPmireq3rvX++rquH/TrbC2R+B2AYeAm4FNoENoAecArp+rNMMmAJjYAIcAVeBP4ALwHnybHJtAMPRKeBdzJ4EWv/sTA0kHQIvYuwxyEp2OzLeBj7D7JETNRzIbBPpIwTAXsmOADwLvIcZIBAHwBfAJZwrj4ACKDBbIBUYC69wDawF6uJCtA70ceG7G3gCs3UApKvA7eTZGIIHhiOA551xQOwDZ8mzeQQQ4AHgNqQO0PXGAaag78mzg+Tph6O3kL7FrI/ZBtLjwPsVADfe4RECvLZkvKIPMLslaUR6CriclOXZBYajD4GXPGc3iEKirWOs+fkEuJhQ0waOkQ6Qpgl5qjJi+jGab9UB9JAFbxxizFb32xy4C7Nd4LeEgbUEL6bDaN4Pk2C0F6XjMYMsVMVmtccH3IUoZewmhqPTCf6UPAs9oRFArHDsxy3g1zIxl0irPcJ4Bezl1aX6Cngs0gtRuIKibiSclDyzll9T+1KgjPTa8nBFtLjrq8oDMGtHwlm56GSo48cqcSN7KVeG8jsZAJWxRUrc3O+d+yuSvgFuRroTaVWZ9KWX3+8T9Ybo71w4YwY7V4AjrGGfk1++riZVSdwMQFqwfJCQRF3SBwwhm9Lg7pKMbrC9CiDu7yHZpV+AH2qG6hSSrQDOI8383tWmpgpkyy+KxcFAEYH5mDx708+bOp7bl2cFZo9iFso5AOhE+koPBQ/Evb1ypanOc/Nkc4qASXGci1JebSvt1ReBu8sD8oB0GUCaYs90qLps0B1fVhNy9yoKi+I22fNdqkDsgXrA7zcAIOa3gO+QCuBrz+tH8tJeAHCMtPC1vwG0ybMCOJsw1JQDHYajFnm28Hsfrsmji626mEIIjqji0vcgmqgJQJtr95XtaF5ezcEDM+AKsI1ZC+kZ4I0GRQdIr4N1ozJdAH82mh6O1lj25qUwiR+lb2P+OpXmwDvAp7jHx5iQlGUFyG0f7MD+z5VqAaYWYg3nzXuAVzG7z8vnoF3ybFQHsAn8hNkWMYkFaIbL5okbbQGa46pkDnT9q7iDC5H7gTE6K1e3dA7jhfBvUP8xuRf4HLMzKU/+OxKuqniaPCv7wGpHGY56wHPAg8AZXEKu407Udi5ONCLJ8V0+zHDeGuMS7iLwCe73bOmeSLa0GiCoGkvXzzsrO8UcF47Cj3PM5gx2rmviP6W/ABx8O7r5R33PAAAAAElFTkSuQmCC"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Sandia National Laboratories' thunderbird, the maker of Xyce, cut out of its logo (public domain, https://commons.wikimedia.org/wiki/File:Sandia_National_Laboratories_logo.svg) onto a tile of its blue; the mark is Sandia's trademark, shown to name what the plugin speaks for -->
+  <style>.mark *{stroke:none!important}.mark [fill^="#"],.mark [style*="fill:#"]{fill:#fff!important}</style>
+  <rect width="24" height="24" rx="5" fill="#00adef"/>
+  <svg class="mark" x="3" y="3" width="18" height="18" viewBox="15.79 15.83 55.96 55.96">
+  
+  
+  
+  <g id="layer1" transform="translate(-215.65296,-544.25292)">
+    <g id="g3440" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g3442" clip-path="url(#clipPath3444)">
+        
+      </g>
+    </g>
+    <g id="g3518" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g3520" clip-path="url(#clipPath3522)">
+        
+      </g>
+    </g>
+    <g id="g3534" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g3536" clip-path="url(#clipPath3538)">
+        
+      </g>
+    </g>
+    <g id="g3686" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g3688" clip-path="url(#clipPath3690)">
+        
+      </g>
+    </g>
+    <g id="g3730" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g3732" clip-path="url(#clipPath3734)">
+        
+      </g>
+    </g>
+    <g id="g3886" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g3888" clip-path="url(#clipPath3890)">
+        
+      </g>
+    </g>
+    <g id="g4002" transform="matrix(1.25,0,0,-1.25,520.85177,817.34355)">
+      <g id="g4004" clip-path="url(#clipPath4006)">
+        
+      </g>
+    </g>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <g id="g4498">
+      <g transform="matrix(1.0789088,0,0,1.0789088,-31.804978,168.56112)" id="g13410">
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </g>
+      <g id="g4492">
+        <g style="fill:none;stroke:#00adef;stroke-width:191.99992371;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" id="g7876" transform="matrix(0.04529875,0,0,-0.04527072,192.70903,656.33787)">
+          <path d="m 957.154,2328.18 c 0,0 343.7487,24.0054 515.623,24.0054 171.8743,0 515.623,-24.0054 515.623,-24.0054 170.43,0 308.61,-138.17 308.61,-308.61 0,0 23.9957,-343.7473 23.9957,-515.621 0,-171.8737 -23.9957,-515.621 -23.9957,-515.621 0,-170.435 -138.18,-308.607 -308.61,-308.607 0,0 -343.7487,-24.0039 -515.623,-24.0039 -171.8743,0 -515.623,24.0039 -515.623,24.0039 -170.44,0 -308.612,138.172 -308.612,308.607 0,0 -23.99441,343.7473 -23.99441,515.621 0,171.8737 23.99441,515.621 23.99441,515.621 0,170.44 138.172,308.61 308.612,308.61 z" style="fill:none;stroke:#00adef;stroke-width:191.99992371;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" id="path7878"></path>
+        </g>
+        <g transform="matrix(0.04529875,0,0,-0.04527072,192.70906,656.33784)" id="g6515" style="fill:#00adef;fill-opacity:1;stroke:none;stroke-opacity:1">
+          <path id="path6517" style="fill:#00adef;fill-opacity:1;stroke:none;stroke-opacity:1" d="m 1166.46,1983.68 133.42,0 -4.12,-132.58 -400.118,0 0,-772.24 166.268,-8.72 0,266.77 80.56,-4.23 0,240.76 144.64,0 -21.25,-683.298 413.84,0 -21.26,683.298 144.65,0 0,-240.76 80.56,4.23 0,-266.77 166.26,8.72 0,772.24 -400.12,0 -8.56,275.1 -474.77,0 0,-142.52 z"></path>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
 </svg>

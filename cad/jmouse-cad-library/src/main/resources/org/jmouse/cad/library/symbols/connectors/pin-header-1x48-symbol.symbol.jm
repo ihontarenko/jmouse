@@ -1,7 +1,7 @@
 symbol:pin-header-1x48-symbol("Pin header, 48 contacts") {
     meta {
         summary: "A single-row pin header of 48, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the pcb"
-        code: "SY.HDR:1X48"
+        code: "HDR:1X48:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

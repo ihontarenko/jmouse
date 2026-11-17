@@ -1,7 +1,7 @@
 footprint:chip-capacitor-1210-hand-soldering-footprint("Chip capacitor 1210 (3225 metric), hand soldering") {
     meta {
         summary: "Chip capacitor, 1210 (3225 metric) body, pads lengthened for a soldering iron"
-        code: "FP.CHIP:C1210-HAND"
+        code: "CHIP:C1210-HAND:F"
         category: capacitors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 1210 (3225 metric)"
@@ -17,5 +17,5 @@ footprint:chip-capacitor-1210-hand-soldering-footprint("Chip capacitor 1210 (322
     outline(silkscreen, width: 0.12, "M-0.59 -1.685H0.59M-0.59 1.685H0.59")
     outline(courtyard, width: 0.05, "M-2.75 -1.95H2.75V1.95H-2.75Z")
     body(height: 2.7)
-    model("MD.CHIP:C1210-HAND")
+    model("CHIP:C1210-HAND:M3D")
 }

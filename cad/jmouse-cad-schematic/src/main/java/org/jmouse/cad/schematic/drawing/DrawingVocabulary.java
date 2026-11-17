@@ -27,7 +27,7 @@ public final class DrawingVocabulary {
      */
     public static final Set<String> WORDS = Set.of("clear", "signal", "body", "positive", "negative", "warm", "hot", "burned",
             "glow", "red", "orange", "yellow", "green", "blue", "violet", "white", "yes", "no",
-            "black", "brown", "grey", "gold", "silver", "beige", "tan", "copper", "amber");
+            "black", "brown", "grey", "gold", "silver", "beige", "tan", "copper", "amber", "mark", "accent");
 
     /** Each property, and how many values it is written with. */
     public static final Map<String, Set<Integer>> PROPERTIES = Map.ofEntries(

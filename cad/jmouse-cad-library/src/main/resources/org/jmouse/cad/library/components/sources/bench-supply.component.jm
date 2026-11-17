@@ -24,7 +24,7 @@ component:bench-supply("Bench power supply", type: power-supply) {
     pin:positive(analog, 1, "positive output")
     pin:negative(analog, 2, "negative output")
 
-    symbol(uses: "SY.SOURCE:SUPPLY-LIMITED") {
+    symbol(uses: "SOURCE:SUPPLY-LIMITED:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

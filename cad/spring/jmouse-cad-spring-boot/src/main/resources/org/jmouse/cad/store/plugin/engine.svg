@@ -1,3 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- the engine: a chip, what every circuit it reads is built of -->
+  <rect width="24" height="24" rx="5" fill="#2563eb"/>
+  <g fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="7.5" y="7.5" width="9" height="9" rx="1.6" fill="#fff" fill-opacity=".22"/>
+    <rect x="10.4" y="10.4" width="3.2" height="3.2" rx=".6" fill="#fff" stroke="none"/>
+    <path d="M10 4.5v3M14 4.5v3M10 16.5v3M14 16.5v3M4.5 10h3M4.5 14h3M16.5 10h3M16.5 14h3"/></g>
 </svg>

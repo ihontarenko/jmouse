@@ -56,6 +56,9 @@
         <hibernate-validation.version>8.0.1.Final</hibernate-validation.version>
         <jakarta-el.version>4.0.2</jakarta-el.version>
         <jackson.version>3.1.4</jackson.version>
+        <victools.version>5.0.0</victools.version>
+        <networknt.version>3.0.0</networknt.version>
+        <jspecify.version>1.0.0</jspecify.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <jakarta-inject.version>2.0.1</jakarta-inject.version>
         <slf4j.version>2.0.13</slf4j.version>
@@ -214,12 +217,42 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-geometry</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-descriptions</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-schemas</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-documentation</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-documentation-md</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-revisions</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-json-patch</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-websocket</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>
@@ -923,6 +956,30 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- JSON Schema: written from a type (victools, Jackson 3), and a value checked against one (networknt) -->
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-generator</artifactId>
+                <version>${victools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-module-jackson</artifactId>
+                <version>${victools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.networknt</groupId>
+                <artifactId>json-schema-validator</artifactId>
+                <version>${networknt.version}</version>
+            </dependency>
+
+            <!-- JSpecify: a type that may be null, said on the type itself — a model's schema reads it -->
+            <dependency>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+                <version>${jspecify.version}</version>
+            </dependency>
+
             <!-- Jakarta Annotation -->
             <dependency>
                 <groupId>jakarta.annotation</groupId>
@@ -1037,6 +1094,11 @@
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
                 <version>${tomcat-embed.version}</version>
             </dependency>
 

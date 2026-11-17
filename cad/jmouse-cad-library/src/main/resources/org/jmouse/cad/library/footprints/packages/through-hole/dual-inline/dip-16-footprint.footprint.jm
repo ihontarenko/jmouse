@@ -1,7 +1,7 @@
 footprint:dip-16-footprint("DIP-16, 7.62 mm rows") {
     meta {
         summary: "16-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
-        code: "FP.DIP:16-W7.62"
+        code: "DIP:16-W7.62:F"
         category: dual-inline
         tags: electronics, footprint, through-hole
         source: "JEDEC MS-001"
@@ -31,5 +31,5 @@ footprint:dip-16-footprint("DIP-16, 7.62 mm rows") {
     outline(silkscreen, filled, "M-2.2 -8.89A0.3 0.3 0 1 0 -1.6 -8.89A0.3 0.3 0 1 0 -2.2 -8.89Z")
     outline(courtyard, width: 0.05, "M-5.25 -10.35H5.25V10.35H-5.25Z")
     body(height: 5.33)
-    model("MD.DIP:16-W7.62")
+    model("DIP:16-W7.62:M3D")
 }

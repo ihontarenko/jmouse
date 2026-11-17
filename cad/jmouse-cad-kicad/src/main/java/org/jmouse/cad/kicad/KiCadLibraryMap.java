@@ -22,23 +22,23 @@ import java.util.regex.Pattern;
  * Which jMX component a KiCad symbol stands for, read from a sheet library map: {@code symbol "Device:R"}, its
  * {@code component}, which of its pins is which ({@code pins 1 = a, 2 = b}) and the parameter its value sets
  * ({@code value resistance}). An entry with no component but a symbol {@code code} names only how the part is drawn:
- * it stays a part without a model, drawn with the catalogue symbol of that code ({@code code "SY.DIODE:RECTIFIER"}) — the
+ * it stays a part without a model, drawn with the catalogue symbol of that code ({@code code "DIODE:RECTIFIER:S"}) — the
  * identity a symbol keeps when its slug is renamed —, its pins named as the map names them. A symbol the map does not
  * name is imported as a part without a model — never guessed.
  *
  * <p>A <em>family</em> entry covers every count of a symbol written once: {@code symbol "Connector_Generic:Conn_01x{count}"},
- * {@code code "SY.HDR:1X{count}"}, {@code pin-names "pin{number}"} — the count read from the library id
+ * {@code code "HDR:1X{count}:S"}, {@code pin-names "pin{number}"} — the count read from the library id
  * ({@code 01x04} is 4), a numbered pin named by the template, a pin written in {@code pins} as written. An entry naming
  * the id exactly is asked first.</p>
  *
  * <p>A <em>footprint</em> entry pairs a KiCad footprint with one of this library's by its code — the identity a footprint
  * keeps when its slug is renamed —, both ways: {@code footprint "Resistor_SMD:R_0603_1608Metric"},
- * {@code code "FP.CHIP:R0603"}. An import lands a part naming the
+ * {@code code "CHIP:R0603:F"}. An import lands a part naming the
  * KiCad id on ours — nothing converted, no copy of a package the library already draws —, and an export writes ours as
  * the KiCad id, so the design opens in KiCad on its own libraries. Pads are numbered alike on both sides.</p>
  *
  * <p>A <em>footprint family</em> covers every size of a package written once ({@link FootprintFamily}):
- * {@code footprint "Capacitor_THT:CP_Radial_D{diameter}mm_P{pitch}mm"}, {@code code "FP.RADIAL:CP-D{diameter}-P{pitch}"}. It is
+ * {@code footprint "Capacitor_THT:CP_Radial_D{diameter}mm_P{pitch}mm"}, {@code code "RADIAL:CP-D{diameter}-P{pitch}:F"}. It is
  * a way in only; a size the library does not draw finds no footprint and is converted as KiCad draws it.</p>
  */
 public final class KiCadLibraryMap {

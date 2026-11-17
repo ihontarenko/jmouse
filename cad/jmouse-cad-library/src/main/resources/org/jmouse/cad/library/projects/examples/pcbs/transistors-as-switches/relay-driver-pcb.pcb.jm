@@ -17,7 +17,7 @@ pcb:relay-driver-pcb("Relay driver and flyback diode — pcb") {
     place(D1, at: 19.5 13, rotate: 90)
     place(SW1, at: 26.5 16.5, rotate: 270)
     place(RL, at: 49 23.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, coil: 2, drive: 3, load_supply: 4, vcc: 5], at: 5.5 19)
+    place(J1, footprint: "HDR:1X5-P2.54-V:F", nets: [0: 1, coil: 2, drive: 3, load_supply: 4, vcc: 5], at: 5.5 19)
     track(top, width: 0.25, from: 47.7 17.6, to: 47.7 21.2, to: 49 22.5)
     track(top, width: 0.25, from: 19.5 7.92, to: 21.73 7.92, to: 26.5 12.69)
     track(bottom, width: 0.25, from: 33.04 27, to: 33.04 26.85, to: 26.5 20.31)

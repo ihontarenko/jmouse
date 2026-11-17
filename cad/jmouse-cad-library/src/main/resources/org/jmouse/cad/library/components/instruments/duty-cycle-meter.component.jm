@@ -34,7 +34,7 @@ component:duty-cycle-meter("Duty cycle meter", type: meter) {
     lead:input(yellow, stripes: blue)
     lead:reference(grey)
     reading:reading(100 * duty, unit: %)
-    symbol(uses: "SY.METER:DUTY-CYCLE") {
+    symbol(uses: "METER:DUTY-CYCLE:S") {
         bind:a(pin: input)
         bind:b(pin: reference)
     }

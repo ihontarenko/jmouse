@@ -1,7 +1,7 @@
 model:ssop-24-model("SSOP-24, 5.3 mm body") {
     meta {
         summary: "SSOP-24, 5.3 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SSOP:24-P0.65-W5.3"
+        code: "SSOP:24-P0.65-W5.3:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-150"

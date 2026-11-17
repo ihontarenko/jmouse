@@ -1,7 +1,7 @@
 model:chip-capacitor-1206-hand-soldering-model("Chip capacitor 1206 (3216 metric), hand soldering") {
     meta {
         summary: "Chip capacitor 1206 (3216 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:C1206-HAND"
+        code: "CHIP:C1206-HAND:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "IEC 60384-22 dimensions, 1206 (3216 metric)"

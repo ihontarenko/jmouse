@@ -35,12 +35,12 @@ component:tantalum-capacitor("Tantalum capacitor", type: capacitor) {
 
     node:plate("the capacitance, behind the ESR")
 
-    footprint("FP.CHIP:CT3528")
-    footprint("FP.CHIP:CT3216")
-    footprint("FP.CHIP:CT6032")
-    footprint("FP.CHIP:CT7343")
+    footprint("CHIP:CT3528:F")
+    footprint("CHIP:CT3216:F")
+    footprint("CHIP:CT6032:F")
+    footprint("CHIP:CT7343:F")
 
-    symbol(uses: "SY.CAPACITOR:POLARIZED") {
+    symbol(uses: "CAPACITOR:POLARIZED:S") {
         bind:failed(failed)
         bind:charge((positive - negative) / voltage_rating)
         bind:a(pin: positive)
@@ -67,7 +67,7 @@ component:tantalum-capacitor("Tantalum capacitor", type: capacitor) {
     }
 
     # How it looks in the hand: a moulded amber chip from above, its plus band, its code and its voltage letter.
-    portrait(uses: "PT.CAPACITOR:TANTALUM-MOULDED") {
+    portrait(uses: "CAPACITOR:TANTALUM-MOULDED:P") {
         bind:capacitance(capacitance)
         bind:voltage_rating(voltage_rating)
     }

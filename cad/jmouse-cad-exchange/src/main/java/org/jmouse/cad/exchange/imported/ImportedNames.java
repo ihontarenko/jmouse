@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange.imported;
 
+import org.jmouse.cad.document.DocumentParser;
 import org.jmouse.cad.document.TechnicalClass;
 import org.jmouse.core.text.Slugifier;
 import org.jmouse.el.lexer.Identifiers;
@@ -7,7 +8,11 @@ import org.jmouse.el.lexer.Identifiers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -49,7 +54,11 @@ public final class ImportedNames {
         return Identifiers.of(worded(written), opening);
     }
 
-    /** The slug of a document named by these words: {@code kicad}, {@code power}, {@code +12V} is {@code kicad-power-plus-12v}. */
+    /**
+     * The slug of a document named by these words: {@code kicad}, {@code power}, {@code +12V} is {@code kicad-power-plus-12v}. One
+     * longer than a document's address may be keeps its start and its last word — the kind it ends with, {@code -footprint} —, and
+     * between them the first eight letters of its whole spelling's hash: as unique as the whole, and the same every time it is made.
+     */
     public static String slug(String... words) {
         List<String> worded = new ArrayList<>();
         for (String word : words) {
@@ -57,13 +66,31 @@ public final class ImportedNames {
                 worded.add(worded(word));
             }
         }
-        return Slugifier.standard().slug(String.join(" ", worded));
+        String whole = Slugifier.standard().slug(String.join(" ", worded));
+        if (whole.length() <= DocumentParser.LONGEST_SLUG) {
+            return whole;
+        }
+        String ending = whole.substring(whole.lastIndexOf('-'));
+        String hash = HexFormat.of().formatHex(sha256(whole)).substring(0, HASHED);
+        String start = whole.substring(0, DocumentParser.LONGEST_SLUG - ending.length() - hash.length() - 1).replaceAll("-+$", "");
+        return start + "-" + hash + ending;
+    }
+
+    /** How many letters of a hash tell apart two long slugs cut to one start. */
+    private static final int HASHED = 8;
+
+    private static byte[] sha256(String words) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(words.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException absent) {
+            throw new IllegalStateException("Every Java has SHA-256", absent);
+        }
     }
 
     /**
      * The technical code a document another product brings is named by, in the namespace of the library it came from:
-     * Altium's {@code rcl.PcbLib} footprint {@code R0402} is {@code FP.RCL:R0402}, Eagle's {@code con-jst} package
-     * {@code B2B-XH-A} is {@code FP.CON-JST:B2B-XH-A}. Each part in capitals; a character a code does not write — a space, a
+     * Altium's {@code rcl.PcbLib} footprint {@code R0402} is {@code RCL:R0402:F}, Eagle's {@code con-jst} package
+     * {@code B2B-XH-A} is {@code CON-JST:B2B-XH-A:F}. Each part in capitals; a character a code does not write — a space, a
      * bracket — is a dash, two of them one, none at either end. A namespace writes no dot: the dot ends the class.
      *
      * @throws IllegalArgumentException when either part has nothing a code can write
@@ -85,7 +112,7 @@ public final class ImportedNames {
         return codePart(written, DESIGNATION_OUTSIDE);
     }
 
-    /** What separates a code's namespace from its designation: {@code CHIP} and {@code R0805} of {@code FP.CHIP:R0805}. */
+    /** What separates a code's namespace from its designation: {@code CHIP} and {@code R0805} of {@code CHIP:R0805:F}. */
     private static final String NAMESPACE_SEPARATOR = ":";
     private static final Pattern NAMESPACE_OUTSIDE = Pattern.compile("[^A-Z0-9]+");
     private static final Pattern DESIGNATION_OUTSIDE = Pattern.compile("[^A-Z0-9.]+");

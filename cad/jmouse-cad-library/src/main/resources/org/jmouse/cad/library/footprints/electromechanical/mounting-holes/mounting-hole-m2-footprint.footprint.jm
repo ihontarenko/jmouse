@@ -1,7 +1,7 @@
 footprint:mounting-hole-m2-footprint("Mounting hole M2") {
     meta {
         summary: "M2 screw, 2.2 mm hole, a bare hole"
-        code: "FP.MH:M2"
+        code: "MH:M2:F"
         category: mounting-holes
         tags: electronics, footprint, through-hole
         source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"

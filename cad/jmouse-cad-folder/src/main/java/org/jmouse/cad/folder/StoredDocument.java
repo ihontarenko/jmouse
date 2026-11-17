@@ -4,7 +4,6 @@ import org.jmouse.cad.document.source.DocumentLocation;
 import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.core.io.PortablePaths;
-import org.jmouse.revisions.RevisionLabel;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ public class StoredDocument {
     /** The file a library ships it from; null for a document of the library folder. */
     private DocumentLocation.Shipped shipped;
     private int revision;
-    private String revisionLabel;
     private String sourceChecksum;
     private DocumentStatus status;
     private boolean featured;
@@ -66,15 +64,13 @@ public class StoredDocument {
     /**
      * Moves the document to a new head revision and takes the index from what that revision says.
      *
-     * @param label    the name the new head is said by
      * @param checksum the new head text's checksum
      * @param kind     the word its head opens with
      */
-    public void indexRevision(int revision, RevisionLabel label, String checksum, String kind, String title, String code,
+    public void indexRevision(int revision, String checksum, String kind, String title, String code,
                               String summary, String categoryCode, boolean featured, Instant now) {
         this.code = code;
         this.revision = revision;
-        this.revisionLabel = label.token();
         this.sourceChecksum = checksum;
         this.kind = kind;
         this.title = title;
@@ -188,9 +184,6 @@ public class StoredDocument {
     }
 
     /** The head revision as a person says it: {@code 20261023_001}. */
-    public String getRevisionLabel() {
-        return revisionLabel;
-    }
 
     public String getSourceChecksum() {
         return sourceChecksum;

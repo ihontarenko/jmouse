@@ -2,7 +2,7 @@
 portrait:qsop-16-portrait("QSOP-16") {
     meta {
         summary: "16-lead QSOP, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.QSOP:16-P0.64"
+        code: "QSOP:16-P0.64:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-137"

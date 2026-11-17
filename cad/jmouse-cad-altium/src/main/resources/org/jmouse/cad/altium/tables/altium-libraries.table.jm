@@ -19,7 +19,7 @@ table:altium-libraries("Altium libraries") {
     circuit-tags electronics, altium
 
     # The symbol each mark of a sheet is drawn with — where its terminal stands.
-    mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+    mark-symbols ground = ground-symbol, common = common-symbol, power = power-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol, entry = bus-entry-symbol
 
     # The net that is a design's reference ground, node 0: what Altium's ground ports name it.
     ground GND

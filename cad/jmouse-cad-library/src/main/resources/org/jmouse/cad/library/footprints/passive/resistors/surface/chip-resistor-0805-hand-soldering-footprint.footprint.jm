@@ -1,7 +1,7 @@
 footprint:chip-resistor-0805-hand-soldering-footprint("Chip resistor 0805 (2012 metric), hand soldering") {
     meta {
         summary: "Chip resistor, 0805 (2012 metric) body, pads lengthened for a soldering iron"
-        code: "FP.CHIP:R0805-HAND"
+        code: "CHIP:R0805-HAND:F"
         category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 0805 (2012 metric)"
@@ -17,5 +17,5 @@ footprint:chip-resistor-0805-hand-soldering-footprint("Chip resistor 0805 (2012 
     outline(silkscreen, width: 0.12, "M-0.315 -1.01H0.315M-0.315 1.01H0.315")
     outline(courtyard, width: 0.05, "M-2.15 -1.25H2.15V1.25H-2.15Z")
     body(height: 0.6)
-    model("MD.CHIP:R0805-HAND")
+    model("CHIP:R0805-HAND:M3D")
 }

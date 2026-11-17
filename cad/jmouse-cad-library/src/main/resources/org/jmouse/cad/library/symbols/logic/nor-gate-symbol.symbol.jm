@@ -1,7 +1,7 @@
 symbol:nor-gate-symbol("NOR gate") {
     meta {
         summary: "A two-input NOR gate, as drawn on a schematic (ANSI): the OR body and the bubble that inverts"
-        code: "SY.GATE:NOR"
+        code: "GATE:NOR:S"
         category: logic
         tags: electronics, schematic, logic
         authors: "jMouse"

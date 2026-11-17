@@ -1,7 +1,7 @@
 model:chip-fuse-0201-hand-soldering-model("Chip fuse 0201 (0603 metric), hand soldering") {
     meta {
         summary: "Chip fuse 0201 (0603 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:F0201-HAND"
+        code: "CHIP:F0201-HAND:M3D"
         category: fuses-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0201 (0603 metric)"

@@ -14,7 +14,7 @@ pcb:parallel-resistors-pcb("Parallel resistors — pcb") {
     place(R1, at: 12.5 11.5, rotate: 270)
     place(R2, at: 16.5 11.5, rotate: 270)
     place(R3, at: 20.5 11.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, first: 2, second: 3, third: 4], at: 5.5 9)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, first: 2, second: 3, third: 4], at: 5.5 9)
     track(top, width: 0.25, from: 12.5 12.5, to: 12.5 13.55)
     track(top, width: 0.25, from: 16.5 12.5, to: 16.5 13.55)
     track(top, width: 0.25, from: 20.5 12.5, to: 20.5 13.55)

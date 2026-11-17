@@ -49,11 +49,11 @@ component:power-inductor("Power inductor", type: inductor) {
 
     state:I_winding(0, continuous, "the current in the inductance")
 
-    footprint("FP.CHIP:L1812")
-    footprint("FP.CHIP:L2220")
-    footprint("FP.CHIP:L1210")
+    footprint("CHIP:L1812:F")
+    footprint("CHIP:L2220:F")
+    footprint("CHIP:L1210:F")
 
-    symbol(uses: "SY.INDUCTOR:FIXED") {
+    symbol(uses: "INDUCTOR:FIXED:S") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -93,7 +93,7 @@ component:power-inductor("Power inductor", type: inductor) {
     }
 
     # How it looks in the hand: a shielded SMD square printed with its microhenry code.
-    portrait(uses: "PT.INDUCTOR:POWER-SHIELDED") {
+    portrait(uses: "INDUCTOR:POWER-SHIELDED:P") {
         bind:inductance(inductance)
     }
 }

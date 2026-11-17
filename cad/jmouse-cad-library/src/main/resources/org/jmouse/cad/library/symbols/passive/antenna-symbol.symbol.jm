@@ -1,7 +1,7 @@
 symbol:antenna-symbol("Antenna") {
     meta {
         summary: "Antenna, as drawn on a schematic"
-        code: "SY.ANTENNA:GENERIC"
+        code: "ANTENNA:GENERIC:S"
         category: passive
         tags: electronics, schematic
         authors: "jMouse"

@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Part;
@@ -35,7 +36,7 @@ import java.util.Optional;
 public record SimulatedComponent(String slug, String title, String type, List<EvaluatedParameter> parameters, List<Pin> pins,
                                  Map<String, List<String>> buses, List<String> units, List<InternalNode> nodes, List<State> states,
                                  List<Equation.Local> locals, List<Equation> equations, List<Equation> formulas,
-                                 List<String> behaviours, HeatLaw heat, String family, List<Component> lineage,
+                                 List<String> behaviours, @Nullable HeatLaw heat, @Nullable String family, List<Component> lineage,
                                  List<Part> parts) {
 
     public SimulatedComponent {

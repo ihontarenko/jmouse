@@ -1,7 +1,8 @@
 -- ---------------------------------------------------------------------------------------------
 -- An application's settings, one row a value (jmouse-settings): who holds it — the installation, or a reader over it —, the
 -- owner that declares its section, the section's path, the parameter's key in it, its value. A structured section is
--- unfolded into its keys: pcb/layout · circuit.gap = 1.5, sheets · papers.0.width = 297. What a value means — its label, its
+-- unfolded into its keys, in jmouse-core's one path grammar: pcb/layout · circuit.gap = 1.5, sheets · papers[0].width = 297,
+-- markings · colourCode.multipliers.0 = black (an index in brackets, a name after a dot). What a value means — its label, its
 -- kind, its bounds — is its section's declaration, never a row.
 --
 -- holder_type / holder_id: INSTALLATION and '' for the installation's, or a reader as the application names one.

@@ -13,7 +13,7 @@ pcb:half-wave-rectifier-pcb("Half-wave rectifier — pcb") {
     edge("M1 0H26A1 1 0 0 1 27 1V15A1 1 0 0 1 26 16H1A1 1 0 0 1 0 15V1A1 1 0 0 1 1 0Z")
     place(D1, at: 16 5)
     place(R1, at: 22.5 11, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 8)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [0: 1, in: 2], at: 5.5 8)
     track(top, width: 0.25, from: 22.5 12, to: 22.5 13.05)
     track(top, width: 0.25, from: 10.92 5, to: 15.92 10, to: 22.5 10)
     track(bottom, width: 0.25, from: 21.08 5, to: 16.81 9.27, to: 5.5 9.27)

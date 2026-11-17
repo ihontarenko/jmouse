@@ -1,0 +1,216 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:model",
+  "title" : "A model document, as the engine answers it (ModelContents)",
+  "$defs" : {
+    "ModelFile" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the file's name, among the document's files"
+        },
+        "format" : {
+          "type" : "string",
+          "description" : "the format's id in MeshFormats"
+        },
+        "scale" : {
+          "type" : [ "number", "null" ],
+          "description" : "the millimetres one unit of the file is; null for its format's standard"
+        },
+        "up" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "type" : "string",
+            "enum" : [ "Y", "Z" ]
+          } ],
+          "description" : "the axis the file stands up along; null for its format's standard",
+          "additionalProperties" : false
+        }
+      },
+      "required" : [ "name", "format", "scale", "up" ],
+      "description" : "One of a model document's files (FILE).",
+      "additionalProperties" : false
+    },
+    "ModelShapes.Box" : {
+      "type" : "object",
+      "properties" : {
+        "material" : {
+          "type" : "string",
+          "description" : "the material it is made of, by name"
+        },
+        "size" : {
+          "description" : "how long it is along each axis, millimetres: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "at" : {
+          "description" : "where its centre stands, millimetres: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "rotate" : {
+          "description" : "how far it is turned, degrees about X, then Y, then Z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        }
+      },
+      "required" : [ "material", "size", "at", "rotate" ],
+      "description" : "A box, its sides along the axes before it is turned.",
+      "additionalProperties" : false
+    },
+    "ModelShapes.Cylinder" : {
+      "type" : "object",
+      "properties" : {
+        "material" : {
+          "type" : "string",
+          "description" : "the material it is made of, by name"
+        },
+        "radius" : {
+          "type" : "number",
+          "description" : "its radius, millimetres"
+        },
+        "length" : {
+          "type" : "number",
+          "description" : "how long it is along Z, millimetres"
+        },
+        "at" : {
+          "description" : "where its centre stands, millimetres: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "rotate" : {
+          "description" : "how far it is turned, degrees about X, then Y, then Z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        }
+      },
+      "required" : [ "material", "radius", "length", "at", "rotate" ],
+      "description" : "Along Z before it is turned.",
+      "additionalProperties" : false
+    },
+    "ModelShapes.Prism" : {
+      "type" : "object",
+      "properties" : {
+        "material" : {
+          "type" : "string",
+          "description" : "the material it is made of, by name"
+        },
+        "outline" : {
+          "description" : "its base's corners, each an x and a y, millimetres",
+          "type" : "array",
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "number"
+            }
+          }
+        },
+        "height" : {
+          "type" : "number",
+          "description" : "how far its base is raised along Z, millimetres"
+        },
+        "at" : {
+          "description" : "where its centre stands, millimetres: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "rotate" : {
+          "description" : "how far it is turned, degrees about X, then Y, then Z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        }
+      },
+      "required" : [ "material", "outline", "height", "at", "rotate" ],
+      "description" : "A convex outline of [x, y] corners raised along Z by height from its base, where at sets it.",
+      "additionalProperties" : false
+    },
+    "ModelShapes.Revolved" : {
+      "type" : "object",
+      "properties" : {
+        "material" : {
+          "type" : "string",
+          "description" : "the material it is made of, by name"
+        },
+        "profile" : {
+          "description" : "its profile from the bottom up, each point a radius and a z, millimetres",
+          "type" : "array",
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "number"
+            }
+          }
+        },
+        "from" : {
+          "type" : "number",
+          "description" : "the angle it is swept from, degrees"
+        },
+        "to" : {
+          "type" : "number",
+          "description" : "the angle it is swept to, degrees"
+        },
+        "at" : {
+          "description" : "where its centre stands, millimetres: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "rotate" : {
+          "description" : "how far it is turned, degrees about X, then Y, then Z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        }
+      },
+      "required" : [ "material", "profile", "from", "to", "at", "rotate" ],
+      "description" : "A body turned about Z: its profile, radius and z from the bottom up, swept from and to its angles, degrees.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "files" : {
+      "description" : "the files its body is in, each in its format and convention; none for a model drawn from shapes",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/ModelFile"
+      }
+    },
+    "shapes" : {
+      "description" : "the shapes it is drawn from here; none for a model of files",
+      "type" : "array",
+      "items" : {
+        "anyOf" : [ {
+          "$ref" : "#/$defs/ModelShapes.Box"
+        }, {
+          "$ref" : "#/$defs/ModelShapes.Cylinder"
+        }, {
+          "$ref" : "#/$defs/ModelShapes.Revolved"
+        }, {
+          "$ref" : "#/$defs/ModelShapes.Prism"
+        } ]
+      }
+    }
+  },
+  "required" : [ "files", "shapes" ],
+  "description" : "What a model document is to the engine: the files its body is in, each in its format and convention, or the shapes it is drawn from here.",
+  "additionalProperties" : false
+}

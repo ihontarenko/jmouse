@@ -2,7 +2,7 @@
 portrait:soic-14-portrait("SOIC-14") {
     meta {
         summary: "14-lead SOIC, 3.9 mm body from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.SOIC:14-P1.27-W3.9"
+        code: "SOIC:14-P1.27-W3.9:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MS-012"

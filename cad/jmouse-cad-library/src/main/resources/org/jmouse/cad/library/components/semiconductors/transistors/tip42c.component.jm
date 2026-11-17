@@ -40,9 +40,9 @@ component:tip42c("TIP42C", type: bjt) {
     pin:collector(analog, output, open-collector, 2, "collector; the tab is collector too")
     pin:emitter(analog, 3, "emitter")
 
-    footprint("FP.TO220:3-V")
+    footprint("TO220:3-V:F")
 
-    symbol(uses: "SY.TRANSISTOR:BIPOLAR-PNP") {
+    symbol(uses: "TRANSISTOR:BIPOLAR-PNP:S") {
         bind:failed(failed)
     }
 
@@ -66,7 +66,7 @@ component:tip42c("TIP42C", type: bjt) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO220:3") {
+    portrait(uses: "TO220:3:P") {
         bind:marking("TIP42C")
     }
 }

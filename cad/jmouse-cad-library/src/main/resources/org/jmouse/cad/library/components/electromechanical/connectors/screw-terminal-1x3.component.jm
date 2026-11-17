@@ -11,7 +11,7 @@ component:screw-terminal-1x3("Screw terminal, 1x3", type: connector) {
     pin:pin1(analog, 1, "clamp 1")
     pin:pin2(analog, 2, "clamp 2")
     pin:pin3(analog, 3, "clamp 3")
-    footprint("FP.TB:3-P5.08")
+    footprint("TB:3-P5.08:F")
 
-    symbol(uses: "SY.TB:3")
+    symbol(uses: "TB:3:S")
 }

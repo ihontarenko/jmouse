@@ -4,7 +4,6 @@ import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.AreaOffsets;
-import org.jmouse.cad.pcb.geometry.Areas;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperPieces;
 import org.jmouse.cad.pcb.geometry.CopperShape;
@@ -15,7 +14,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
-import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.jmouse.geometry.Areas;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -152,7 +151,7 @@ public final class ViaRows {
             }
         }
         Geometry shrunk = offsets.grown(room, -radius);
-        return obstacles.isEmpty() ? shrunk : shrunk.difference(UnaryUnionOp.union(obstacles, GEOMETRY));
+        return obstacles.isEmpty() ? shrunk : Areas.difference(shrunk, Areas.unionOf(obstacles, GEOMETRY));
     }
 
     private static PcbDrawing.Via throughVia(double x, double y, PcbDrawing.ViaSize via) {
@@ -186,7 +185,7 @@ public final class ViaRows {
         if (partners.isEmpty()) {
             return new Placed.Refused("No other layer pours " + zone.net() + ": a via here would join nothing");
         }
-        Geometry room = Areas.common(pours.get(zoneIndex).get(), UnaryUnionOp.union(partners, GEOMETRY));
+        Geometry room = Areas.common(pours.get(zoneIndex).get(), Areas.unionOf(partners, GEOMETRY));
         Geometry area = viaRoom(zone.net(), room, via);
         if (area.isEmpty()) {
             return new Placed.Vias(List.of());
@@ -234,7 +233,7 @@ public final class ViaRows {
                 byLayer.computeIfAbsent(zone.layer(), ignored -> new ArrayList<>()).add(pours.get(index).get());
             }
         }
-        List<Geometry> poured = byLayer.values().stream().map(areas -> UnaryUnionOp.union(areas, GEOMETRY)).toList();
+        List<Geometry> poured = byLayer.values().stream().map(areas -> Areas.unionOf(areas, GEOMETRY)).toList();
         if (poured.size() < 2) {
             return new Placed.Refused("No two layers pour " + net + ": a fence via would join nothing");
         }
@@ -245,7 +244,7 @@ public final class ViaRows {
                 overlaps.add(Areas.common(poured.get(first), poured.get(second)));
             }
         }
-        PreparedGeometry inside = PreparedGeometryFactory.prepare(viaRoom(net, UnaryUnionOp.union(overlaps, GEOMETRY), via));
+        PreparedGeometry inside = PreparedGeometryFactory.prepare(viaRoom(net, Areas.unionOf(overlaps, GEOMETRY), via));
         // The pours keep their zone's gap from the track — the wider of it and the track's own — and the fence stands past it.
         double gap = rules.clearanceOf(trackNet);
         for (PcbDrawing.Zone zone : pcb.zones()) {

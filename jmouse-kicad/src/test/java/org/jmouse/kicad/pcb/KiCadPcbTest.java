@@ -86,7 +86,7 @@ class KiCadPcbTest {
         assertEquals(java.util.List.of("F.Cu", "B.Cu"), pour.layers());
         assertEquals(0.5, pour.clearance());
         assertEquals(3, pour.priority());
-        assertEquals(3, pour.outlines().getFirst().size());
+        assertEquals(3, pour.outlines().getFirst().steps().size());
         assertEquals(KiCadPcb.ZoneKind.KEEPOUT, board.zones().get(1).kind());
     }
 

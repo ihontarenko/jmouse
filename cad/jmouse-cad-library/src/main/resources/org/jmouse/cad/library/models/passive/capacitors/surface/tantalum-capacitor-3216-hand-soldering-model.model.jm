@@ -1,7 +1,7 @@
 model:tantalum-capacitor-3216-hand-soldering-model("Tantalum capacitor Case A (3216-18 metric), hand soldering") {
     meta {
         summary: "Tantalum capacitor Case A (3216-18 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:CT3216-HAND"
+        code: "CHIP:CT3216-HAND:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "EIA-535-BAAC case sizes (KEMET T491), Case A (3216-18 metric)"

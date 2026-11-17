@@ -1,7 +1,7 @@
 model:tantalum-capacitor-6032-model("Tantalum capacitor Case C (6032-28 metric)") {
     meta {
         summary: "Tantalum capacitor Case C (6032-28 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:CT6032"
+        code: "CHIP:CT6032:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "EIA-535-BAAC case sizes (KEMET T491), Case C (6032-28 metric)"

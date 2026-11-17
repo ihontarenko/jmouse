@@ -3,6 +3,7 @@ package org.jmouse.cad.store.catalogue;
 import org.jmouse.cad.component.BenchRole;
 import org.jmouse.cad.drawing.ArrangedDrawing;
 import org.jmouse.cad.drawing.Holding;
+import org.jmouse.cad.document.DocumentParser;
 import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.cad.store.CadRead;
 import org.jmouse.cad.circuit.Circuit;
@@ -44,14 +45,12 @@ import org.jmouse.cad.store.catalogue.CatalogueViews.SheetView;
 import org.jmouse.cad.store.library.ShippedDocuments;
 import org.jmouse.cad.store.plugin.EngineConfiguration;
 import org.jmouse.cad.store.problem.CadProblem;
-import org.jmouse.revisions.RevisionLabel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -86,7 +85,7 @@ public class CadCatalogue {
     /** The longest title: what a list, a tab and a sheet's frame show whole. */
     private static final int TITLE_LENGTH   = 160;
     /** The longest address: a document's file is named by it, and a file's name is bounded. */
-    private static final int SLUG_LENGTH    = 120;
+    private static final int SLUG_LENGTH    = DocumentParser.LONGEST_SLUG;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CadCatalogue.class);
 
@@ -342,7 +341,7 @@ public class CadCatalogue {
             throw CadProblem.invalid("Only a circuit places sheets.");
         }
         Circuit placing = new Circuit(circuit.head(), circuit.parameters(), blocks, circuit.layout(), circuit.probes(),
-                circuit.timeBase(), circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(), circuit.boundary(), circuit.groups());
+                circuit.timeBase(), circuit.expectations(), circuit.analysis(), circuit.views(), circuit.frame(), circuit.boundary(), circuit.buses(), circuit.groups());
         try {
             return SheetUnfolding.of(placing, scope).parts();
         } catch (IllegalArgumentException refused) {
@@ -357,17 +356,13 @@ public class CadCatalogue {
         return texts.revisions(document).stream().map(CadCatalogue::revisionView).toList();
     }
 
-    /** One revision's text, named as after an {@code @}: its number, its label, a day — its last — or {@code latest}. */
+    /** One revision's text, named as after an {@code @}: its number or {@code latest}. */
     @CadRead
     public RevisionSource revision(String address, String written) {
         StoredDocument document = access.requireReadable(address);
         int revision = texts.revisionWritten(document, written).orElseThrow(() -> CadProblem.notFound("The revision"));
-        String label = texts.revisions(document).stream()
-                .filter(candidate -> candidate.revision() == revision).findFirst()
-                .map(candidate -> candidate.label().token())
-                .orElseThrow(() -> CadProblem.notFound("The revision"));
         String source = texts.at(document, revision).orElseThrow(() -> CadProblem.notFound("The revision"));
-        return new RevisionSource(revision, label, source);
+        return new RevisionSource(revision, source);
     }
 
     /** The readable documents whose text names this one — by one relation when {@code relation} names it. */
@@ -596,11 +591,10 @@ public class CadCatalogue {
         Instant now = clock.instant();
         StoredDocument document = new StoredDocument(shipped.slug(), null, null, now);
         document.holdShipped(shipped.library(), shipped.path());
-        RevisionLabel label = RevisionLabel.next(LocalDate.ofInstant(now, configuration.revisionZone()), 0);
         // What its file's name says, until its text is read.
-        document.indexRevision(1, label, DocumentStore.checksumOf(shipped.source()), shipped.kind(), shipped.slug(), null, null,
+        document.indexRevision(1, DocumentStore.checksumOf(shipped.source()), shipped.kind(), shipped.slug(), null, null,
                                null, false, now);
-        indexFile(document, shipped.source(), shipped.origin(), 1, label, now);
+        indexFile(document, shipped.source(), shipped.origin(), 1, now);
         return ShippedOutcome.CREATED;
     }
 
@@ -610,7 +604,7 @@ public class CadCatalogue {
      */
     public void indexHeld(StoredDocument held) {
         DocumentRevision head = documents.headOf(held);
-        indexFile(held, documents.heldText(held), held.getSlug(), head.revision(), head.label(), head.writtenAt());
+        indexFile(held, documents.heldText(held), held.getSlug(), head.revision(), head.writtenAt());
     }
 
     /**
@@ -618,7 +612,7 @@ public class CadCatalogue {
      * — one put in the folder by hand, one a library ships wrong — is indexed all the same, as far as it reads, and says
      * why it is refused ({@link StoredDocument#refusal()}); it never stops the catalogue being made.
      */
-    private void indexFile(StoredDocument document, String source, String origin, int revision, RevisionLabel label, Instant at) {
+    private void indexFile(StoredDocument document, String source, String origin, int revision, Instant at) {
         ReadDocument read;
         try {
             read = reading.read(source, origin);
@@ -636,7 +630,7 @@ public class CadCatalogue {
         } catch (CadProblem refused) {
             refuse(document, refused);
         }
-        index(document, read, revision, label, at, Strictness.LATER);
+        index(document, read, revision, at, Strictness.LATER);
     }
 
     private static void refuse(StoredDocument document, CadProblem refusal) {
@@ -698,9 +692,8 @@ public class CadCatalogue {
         document.judge(Optional.empty());
         Instant now = clock.instant();
         int revision = document.getRevision() + 1;
-        RevisionLabel label = documents.nextLabel(document.getId(), LocalDate.ofInstant(now, configuration.revisionZone()));
-        StoredDocument stored = index(document, read, revision, label, now, strictness);
-        documents.appendSource(stored.getId(), revision, label, read.source(), writtenBy, origin, now);
+        StoredDocument stored = index(document, read, revision, now, strictness);
+        documents.appendSource(stored.getId(), revision, read.source(), writtenBy, origin, now);
         return stored;
     }
 
@@ -710,12 +703,12 @@ public class CadCatalogue {
      *
      * @return the document, indexed
      */
-    private StoredDocument index(StoredDocument document, ReadDocument read, int revision, RevisionLabel label, Instant now,
+    private StoredDocument index(StoredDocument document, ReadDocument read, int revision, Instant now,
                                  Strictness strictness) {
         DocumentIndex index = read.index();
         // Where a catalogue document stands is what its text says; an owner's is published, having no curator to wait for.
         document.changeStatus(document.isCatalogue() ? index.status() : DocumentStatus.PUBLISHED, now);
-        document.indexRevision(revision, label, read.checksum(), index.kind(), index.title().strip(), index.code(), index.summary(),
+        document.indexRevision(revision, read.checksum(), index.kind(), index.title().strip(), index.code(), index.summary(),
                                index.category(), index.featured(), now);
         document.replaceTags(tagsOf(index));
         document.changeBenchRole(index.benchRole().map(BenchRole::word).orElse(null));
@@ -834,7 +827,7 @@ public class CadCatalogue {
         Object model = read.model().orElse(null);
         DocumentSummary summary = new DocumentSummary(identity, index.slug(), index.title(), index.summary(), index.kind(),
                 index.category(), null, index.featured(), DocumentStatus.PUBLISHED.name(), LocationView.of(location), owner,
-                index.tags(), index.benchRole().map(BenchRole::word).orElse(null), 0, null, changed, null);
+                index.tags(), index.benchRole().map(BenchRole::word).orElse(null), 0, changed, null);
         return new DocumentDetail(summary, read.source(), 0, version, metaOf(read), List.of(), model, ModelFacts.slidersOf(model),
                                   ModelFacts.presentationOf(model), writable);
     }
@@ -853,8 +846,7 @@ public class CadCatalogue {
 
     /** A document as a list shows it, its problem what the catalogue finds wrong with its head text. */
     private static RevisionView revisionView(DocumentRevision revision) {
-        return new RevisionView(revision.revision(), revision.label().token(), revision.checksum(), revision.writtenAt(),
-                                revision.writtenBy());
+        return new RevisionView(revision.revision(), revision.checksum(), revision.writtenAt(), revision.writtenBy());
     }
 
     /** Whether a document is still as an import left it: its head revision the engine's, not a person's. */

@@ -1,7 +1,7 @@
 symbol:voltage-regulator-symbol("Three-terminal voltage regulator") {
     meta {
         summary: "A three-terminal linear regulator, as drawn on a schematic: input on the left, output on the right, its reference below"
-        code: "SY.REGULATOR:LINEAR-FIXED"
+        code: "REGULATOR:LINEAR-FIXED:S"
         category: power
         tags: electronics, schematic
         authors: "jMouse"

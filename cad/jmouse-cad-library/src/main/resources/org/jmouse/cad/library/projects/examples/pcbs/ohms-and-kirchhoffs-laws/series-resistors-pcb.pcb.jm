@@ -14,7 +14,7 @@ pcb:series-resistors-pcb("Series resistors — pcb") {
     place(R1, at: 12 8)
     place(R2, at: 17.5 7.5)
     place(R3, at: 20 12, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, first: 2, second: 3, third: 4], at: 5.5 9)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, first: 2, second: 3, third: 4], at: 5.5 9)
     track(top, width: 0.25, from: 20 13, to: 20 14.05)
     track(top, width: 0.25, from: 13 8, to: 16 8, to: 16.5 7.5)
     track(top, width: 0.25, from: 18.5 7.5, to: 18.5 9.5, to: 20 11)

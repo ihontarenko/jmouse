@@ -38,7 +38,7 @@ table:kicad-libraries("KiCad libraries") {
     own-library jmCAD
     # What a project's tables say of that library, written beside the project: the footprints and symbols it draws.
     own-library-description "The footprints and symbols of this design that no KiCad library holds, as jmCAD draws them"
-    mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+    mark-symbols ground = ground-symbol, common = common-symbol, power = power-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol, entry = bus-entry-symbol
 
     # The way of making a pcb a board is set against, and which of its rules each of KiCad's design rules is. KiCad's
     # usual clearance and sizes come from its Default net class.

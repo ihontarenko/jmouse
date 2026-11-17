@@ -23,10 +23,10 @@ component:ferrite-bead("Ferrite bead, 220 Ω", type: ferrite) {
 
     state:I_inductance(0, continuous, "the current in the inductance")
 
-    footprint("FP.CHIP:L0603")
-    footprint("FP.CHIP:L0805")
+    footprint("CHIP:L0603:F")
+    footprint("CHIP:L0805:F")
 
-    symbol(uses: "SY.INDUCTOR:FERRITE-BEAD") {
+    symbol(uses: "INDUCTOR:FERRITE-BEAD:S") {
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
     }

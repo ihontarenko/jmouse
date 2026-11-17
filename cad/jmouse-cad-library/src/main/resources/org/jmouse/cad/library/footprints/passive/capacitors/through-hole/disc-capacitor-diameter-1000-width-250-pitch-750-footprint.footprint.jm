@@ -1,7 +1,7 @@
 footprint:disc-capacitor-diameter-1000-width-250-pitch-750-footprint("Ceramic disc capacitor, 10 mm disc, 7.5 mm pitch") {
     meta {
         summary: "Ceramic disc capacitor, 10 mm disc, 7.5 mm pitch, leads 7.5 mm apart"
-        code: "FP.RADIAL:CD-10X2.5-P7.5"
+        code: "RADIAL:CD-10X2.5-P7.5:F"
         category: capacitors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-2 lead spacing, makers' disc sizes"
@@ -16,5 +16,5 @@ footprint:disc-capacitor-diameter-1000-width-250-pitch-750-footprint("Ceramic di
     outline(silkscreen, width: 0.12, "M-5.11 -1.36H5.11V1.36H-5.11Z")
     outline(courtyard, width: 0.05, "M-5.5 -1.75H5.5V1.75H-5.5Z")
     body(height: 12.5)
-    model("MD.RADIAL:CD-10X2.5-P7.5")
+    model("RADIAL:CD-10X2.5-P7.5:M3D")
 }

@@ -1,7 +1,7 @@
 footprint:recycle-10mm-footprint("Recycling, 10 mm") {
     meta {
         summary: "Three chasing arrows: the board and its materials can be recycled, printed 10 mm wide"
-        code: "FP.GRAPHIC:RECYCLE-10"
+        code: "GRAPHIC:RECYCLE-10:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

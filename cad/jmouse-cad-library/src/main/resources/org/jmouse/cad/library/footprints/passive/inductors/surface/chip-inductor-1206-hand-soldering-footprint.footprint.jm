@@ -1,7 +1,7 @@
 footprint:chip-inductor-1206-hand-soldering-footprint("Chip inductor 1206 (3216 metric), hand soldering") {
     meta {
         summary: "Chip inductor, 1206 (3216 metric) body, pads lengthened for a soldering iron"
-        code: "FP.CHIP:L1206-HAND"
+        code: "CHIP:L1206-HAND:F"
         category: inductors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 1206 (3216 metric)"
@@ -17,5 +17,5 @@ footprint:chip-inductor-1206-hand-soldering-footprint("Chip inductor 1206 (3216 
     outline(silkscreen, width: 0.12, "M-0.59 -1.235H0.59M-0.59 1.235H0.59")
     outline(courtyard, width: 0.05, "M-2.75 -1.5H2.75V1.5H-2.75Z")
     body(height: 1.8)
-    model("MD.CHIP:L1206-HAND")
+    model("CHIP:L1206-HAND:M3D")
 }

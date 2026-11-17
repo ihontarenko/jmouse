@@ -1,7 +1,6 @@
 package org.jmouse.cad.library;
 
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.table.Table;
 import org.jmouse.cad.table.TableModule;
 import org.jmouse.sheet.Sheet;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ class LibraryTablesTest {
             String path = library.path(slug).orElseThrow();
             try {
                 DocumentNode table = CadLanguage.standard().language().readOne(library.text(path), path);
-                Sheet sheet = ((Table) CadLanguage.standard().modelOf(table).orElseThrow()).sheet();
+                Sheet sheet = TableModule.sheetOf(table);
                 assertEquals(slug, sheet.slug());
             } catch (RuntimeException refusal) {
                 refused.add(path + ": " + refusal.getMessage());

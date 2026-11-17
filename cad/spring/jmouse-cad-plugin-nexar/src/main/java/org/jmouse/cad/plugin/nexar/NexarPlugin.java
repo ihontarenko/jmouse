@@ -42,7 +42,7 @@ public final class NexarPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Nexar", NexarPlugin.class).markedBy(NexarPlugin.class, "nexar.svg");
+        return PluginDescriptor.ofArtifact(ID, "Nexar", NexarPlugin.class).withIcon(NexarPlugin.class, "nexar.svg");
     }
 
     @Override

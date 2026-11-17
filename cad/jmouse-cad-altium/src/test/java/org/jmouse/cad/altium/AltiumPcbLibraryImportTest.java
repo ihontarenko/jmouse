@@ -83,8 +83,8 @@ class AltiumPcbLibraryImportTest {
     @Test
     void eachDocumentIsNamedByItsCodeInTheLibrarysNamespaceAndReadsBack() {
         ImportedDocuments imported = imported();
-        DocumentNode footprint = named(imported, "FP.RCL:R0402");
-        DocumentNode model = named(imported, "MD.RCL:0402-RES");
+        DocumentNode footprint = named(imported, "RCL:R0402:F");
+        DocumentNode model = named(imported, "RCL:0402-RES:M3D");
         for (DocumentNode document : List.of(footprint, model)) {
             assertDoesNotThrow(() -> language.readOne(language.write(document), document.slug()), document.slug());
         }
@@ -94,11 +94,11 @@ class AltiumPcbLibraryImportTest {
 
     @Test
     void theFootprintNamesItsModelByCodeAndStandsItWhereAltiumDoes() {
-        DocumentNode read = readBack(named(imported(), "FP.RCL:R0402"));
+        DocumentNode read = readBack(named(imported(), "RCL:R0402:F"));
         FootprintDrawing drawing = FootprintDrawing.of(read);
         assertEquals(1, drawing.models().size());
         FootprintDrawing.Model model = drawing.models().getFirst();
-        assertEquals("MD.RCL:0402-RES", model.reference());
+        assertEquals("RCL:0402-RES:M3D", model.reference());
         // A mil and two, to the footprint's three places.
         assertEquals(0.025, model.offset().get(0), 1e-9);
         assertEquals(0.051, model.offset().get(1), 1e-9);
@@ -108,7 +108,7 @@ class AltiumPcbLibraryImportTest {
 
     @Test
     void padsAreAltiumsAsOursWritesThem() {
-        String written = language.write(named(imported(), "FP.RCL:R0402"));
+        String written = language.write(named(imported(), "RCL:R0402:F"));
         assertTrue(written.contains("pad:1(surface, rectangle, at: -0.508 0, size: 0.508 x 0.635, mask-margin: 0.051)"), written);
         // A paste drawn smaller than nothing is drawn apart, as a fill: the pad opens its mask alone.
         assertTrue(written.contains("pad:2(surface, rounded-rectangle, at: 0.508 0, size: 0.508 x 0.635, roundness: 0.25, opens: mask"), written);
@@ -121,7 +121,7 @@ class AltiumPcbLibraryImportTest {
     @Test
     void linesStandOnTheLayersTheLibraryNamesAndTheRestIsSaid() {
         ImportedDocuments imported = imported();
-        String written = language.write(named(imported, "FP.RCL:R0402"));
+        String written = language.write(named(imported, "RCL:R0402:F"));
         assertTrue(written.contains("outline(silkscreen,"), written);
         assertTrue(written.contains("outline(fabrication,"), written);
         assertTrue(written.contains("outline(paste, filled,"), written);
@@ -132,7 +132,7 @@ class AltiumPcbLibraryImportTest {
     @Test
     void theDesignatorStandsWhereAltiumPrintsItAndAnyOtherWordIsSaid() {
         ImportedDocuments imported = imported();
-        String footprint = language.write(named(imported, "FP.RCL:R0402"));
+        String footprint = language.write(named(imported, "RCL:R0402:F"));
         // 37.5 mil left, raised by 25 mil and half its 25 mil letters: y = -(25 + 12.5) mil, upright, on the top overlay.
         assertTrue(footprint.contains("field(reference, at: -0.952 -0.952, size: 0.635, layer: silkscreen, anchor: start)"), footprint);
         assertTrue(imported.notes().contains("R0402: 1 × text not carried"), imported.notes().toString());
@@ -169,13 +169,13 @@ class AltiumPcbLibraryImportTest {
                 new Model("{33333333-0000}", "DSG0008A.stp", new Rotation(0, 0, 0), 0, other));
         ImportedDocuments imported = AltiumPcbLibraryImport.read(new AltiumPcbLibrary(List.of(), models, Map.of()), "chips.PcbLib",
                 AltiumLibraries.shipped());
-        assertEquals(List.of("MD.CHIPS:A06242D6-842D-40C7", "MD.CHIPS:DSG0008A", "MD.CHIPS:DSG0008A-33333333"),
+        assertEquals(List.of("CHIPS:A06242D6-842D-40C7:M3D", "CHIPS:DSG0008A:M3D", "CHIPS:DSG0008A-33333333:M3D"),
                 imported.library().stream().map(DocumentNode::referenceName).toList());
     }
 
     private DocumentNode readBack(DocumentNode document) {
         DocumentNode read = language.readOne(language.write(document), document.slug());
-        assertEquals("FP.RCL:R0402", DocumentIndex.of(read).code());
+        assertEquals("RCL:R0402:F", DocumentIndex.of(read).code());
         return read;
     }
 }

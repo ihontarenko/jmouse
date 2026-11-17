@@ -1,16 +1,11 @@
 package org.jmouse.cad.live;
 
-import java.util.function.Supplier;
+import org.jmouse.websocket.SocketPrincipal;
 
 /**
- * Who a live socket runs for. A socket's messages arrive on threads no request filter ran on, so each one is run as
- * this actor — and decided by the host's {@code CadAuthority} exactly as a request of theirs would be.
+ * Who a live socket runs for — a running circuit, an open pcb's session —: every message is run as this actor and decided by
+ * the host's {@code CadAuthority} exactly as a request of theirs would be. jmCAD's name for the socket's principal, so a
+ * product implements jmCAD's types and none of the socket library's.
  */
-public interface LivePrincipal {
-
-    /** The account (or other actor) the socket was opened by. */
-    String actorId();
-
-    /** Runs work as this actor, restoring whoever ran on the thread before. */
-    <T> T runAs(Supplier<T> work);
+public interface LivePrincipal extends SocketPrincipal {
 }

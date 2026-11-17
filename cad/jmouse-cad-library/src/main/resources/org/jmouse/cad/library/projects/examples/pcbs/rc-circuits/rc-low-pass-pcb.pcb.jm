@@ -13,7 +13,7 @@ pcb:rc-low-pass-pcb("RC low-pass filter — pcb") {
     edge("M1 0H20A1 1 0 0 1 21 1V12A1 1 0 0 1 20 13H1A1 1 0 0 1 0 12V1A1 1 0 0 1 1 0Z")
     place(R1, at: 12 4.5)
     place(C1, at: 17 8, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 6.5)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [0: 1, in: 2], at: 5.5 6.5)
     track(top, width: 0.25, from: 17 8.85, to: 17 10.05)
     track(top, width: 0.25, from: 13 4.5, to: 14.35 4.5, to: 17 7.15)
     track(top, width: 0.25, from: 11 4.5, to: 7.73 7.77, to: 5.5 7.77)

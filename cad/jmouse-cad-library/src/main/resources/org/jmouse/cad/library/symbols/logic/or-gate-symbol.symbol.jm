@@ -1,7 +1,7 @@
 symbol:or-gate-symbol("OR gate") {
     meta {
         summary: "A two-input OR gate, as drawn on a schematic (ANSI)"
-        code: "SY.GATE:OR"
+        code: "GATE:OR:S"
         category: logic
         tags: electronics, schematic, logic
         authors: "jMouse"

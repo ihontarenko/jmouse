@@ -1,7 +1,7 @@
 symbol:gas-discharge-tube-symbol("Gas discharge tube") {
     meta {
         summary: "Gas discharge tube, as drawn on a schematic: two electrodes in a gas-filled envelope, the dot its gas"
-        code: "SY.PROTECTION:GAS-DISCHARGE-TUBE"
+        code: "PROTECTION:GAS-DISCHARGE-TUBE:S"
         category: protection
         tags: electronics, schematic
         authors: "jMouse"

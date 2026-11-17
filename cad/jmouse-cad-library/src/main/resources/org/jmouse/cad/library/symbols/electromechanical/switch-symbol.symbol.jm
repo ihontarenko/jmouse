@@ -1,7 +1,7 @@
 symbol:switch-symbol("Switch") {
     meta {
         summary: "Switch, as drawn on a schematic: its lever lies on the far contact while it is closed"
-        code: "SY.SWITCH:SPST"
+        code: "SWITCH:SPST:S"
         category: switches
         tags: electronics, schematic
         authors: "jMouse"

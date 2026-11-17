@@ -1,7 +1,7 @@
 footprint:chip-led-1210-footprint("Chip LED 1210 (3225 metric)") {
     meta {
         summary: "Chip LED, 1210 (3225 metric) body, reflow pads; pad 1 is the cathode"
-        code: "FP.CHIP:LED1210"
+        code: "CHIP:LED1210:F"
         category: optoelectronics-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"
@@ -18,5 +18,5 @@ footprint:chip-led-1210-footprint("Chip LED 1210 (3225 metric)") {
     outline(silkscreen, width: 0.12, "M-2.21 -1.51V1.51")
     outline(courtyard, width: 0.05, "M-2.2 -1.65H2.2V1.65H-2.2Z")
     body(height: 0.7)
-    model("MD.CHIP:LED1210")
+    model("CHIP:LED1210:M3D")
 }

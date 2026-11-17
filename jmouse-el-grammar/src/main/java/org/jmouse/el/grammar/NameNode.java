@@ -1,5 +1,7 @@
 package org.jmouse.el.grammar;
 
+import org.jmouse.el.writer.SourceWriter;
+
 import java.util.Optional;
 
 /**
@@ -36,6 +38,16 @@ public class NameNode extends WordNode {
     /** {@code [0..7]}: the first and last of a range. */
     public Optional<int[]> range() {
         return last == null ? Optional.empty() : Optional.of(new int[]{first, last});
+    }
+
+    /** An indexed name is written as read — {@code q[0..7]} —: its brackets are its index, not words to quote. */
+    @Override
+    public void writeSource(SourceWriter writer) {
+        if (indexed()) {
+            writer.word(word());
+        } else {
+            super.writeSource(writer);
+        }
     }
 
     /** {@code [256]}: how many. */

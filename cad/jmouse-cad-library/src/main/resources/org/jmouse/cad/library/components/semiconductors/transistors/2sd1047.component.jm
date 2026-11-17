@@ -44,9 +44,9 @@ component:2sd1047("2SD1047", type: bjt) {
     pin:collector(analog, output, open-collector, 2, "collector; the tab is collector too")
     pin:emitter(analog, 3, "emitter")
 
-    footprint("FP.TO3P:3-V")
+    footprint("TO3P:3-V:F")
 
-    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
+    symbol(uses: "TRANSISTOR:BIPOLAR-NPN:S") {
         bind:failed(failed)
     }
 

@@ -1,7 +1,7 @@
 footprint:pin-header-2x15-pitch-127-vertical-footprint("Pin header, 1.27 mm pitch, 2 × 15, vertical") {
     meta {
         summary: "Pin header, 1.27 mm pitch, 2 rows of 15, upright, through-hole"
-        code: "FP.HDR:2X15-P1.27-V"
+        code: "HDR:2X15-P1.27-V:F"
         category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60603-13 grid"
@@ -45,5 +45,5 @@ footprint:pin-header-2x15-pitch-127-vertical-footprint("Pin header, 1.27 mm pitc
     outline(silkscreen, filled, "M-2.18 -8.89A0.3 0.3 0 1 0 -1.58 -8.89A0.3 0.3 0 1 0 -2.18 -8.89Z")
     outline(courtyard, width: 0.05, "M-1.75 -10.05H1.75V10.05H-1.75Z")
     body(height: 4.4)
-    model("MD.HDR:2X15-P1.27-V")
+    model("HDR:2X15-P1.27-V:M3D")
 }

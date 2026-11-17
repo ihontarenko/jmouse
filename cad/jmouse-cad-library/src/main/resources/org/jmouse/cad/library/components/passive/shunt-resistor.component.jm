@@ -31,9 +31,9 @@ component:shunt-resistor("Shunt resistor, 10 mΩ, four terminals", type: resisto
     pin:force_two(analog, 4, "force: the current goes out")
 
     # Its own four-terminal case: the force lands carry the current, the sense lands read the drop across the strip.
-    footprint("FP.R:WSK2512-4T")
+    footprint("R:WSK2512-4T:F")
 
-    symbol(uses: "SY.RESISTOR:SHUNT-KELVIN") {
+    symbol(uses: "RESISTOR:SHUNT-KELVIN:S") {
         bind:failed(failed)
         bind:load(power / power_rating)
         bind:flow(tanh((terminal_one - terminal_two) * 1000))

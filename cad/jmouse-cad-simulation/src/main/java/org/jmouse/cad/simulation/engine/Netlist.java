@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation.engine;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.component.Equation;
 import org.jmouse.cad.simulation.SimulatedFamily;
@@ -56,7 +57,7 @@ public record Netlist(List<String> nodes, List<Element> elements, List<Branch> b
      * @param part the part of the circuit it is — a generator's reference —, or null for what the solver and the bench
      *             put in: a node's leak to ground, a failed part's stand-in, a logic pin's capacitance
      */
-    public record Element(String id, Kind kind, String part, int positive, int negative, double value, int branch,
+    public record Element(String id, Kind kind, @Nullable String part, int positive, int negative, double value, int branch,
                           SourceSignal signal, String[] terminalNames) {
 
         /** What a bare element's terminals are called in what it reports: its "+" and its "−". */
@@ -124,7 +125,7 @@ public record Netlist(List<String> nodes, List<Element> elements, List<Branch> b
      * @param texts      its text parameters, read by its behaviour and never by its equations
      * @param reportedAs what each pin's current is reported under, where that is not the pin's own name
      */
-    public record ModelUnit(String label, String part, SimulatedComponent component, SimulatedFamily family,
+    public record ModelUnit(String label, String part, SimulatedComponent component, @Nullable SimulatedFamily family,
                             Map<String, Double> parameters, Map<String, String> texts, Map<String, PinBinding> pins,
                             Map<String, Integer> internalNodes, Map<String, String> internalDigitalNodes,
                             List<Integer> voltageBranches, Map<String, Integer> stateRows, Map<String, String> reportedAs) {

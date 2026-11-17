@@ -24,7 +24,7 @@ component:dual-supply("Dual power supply", type: dual-power-supply) {
     pin:common(analog, 2, "common, the circuit's 0 V")
     pin:negative(analog, 3, "negative rail")
 
-    symbol(uses: "SY.SOURCE:SUPPLY-DUAL") {
+    symbol(uses: "SOURCE:SUPPLY-DUAL:S") {
         bind:a(pin: positive)
         bind:c(pin: common)
         bind:b(pin: negative)

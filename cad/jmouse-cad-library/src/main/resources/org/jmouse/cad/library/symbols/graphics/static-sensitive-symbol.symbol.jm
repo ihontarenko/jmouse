@@ -1,7 +1,7 @@
 symbol:static-sensitive-symbol("Static sensitive") {
     meta {
         summary: "A warning triangle with a struck-out hand: handle against electrostatic discharge, as drawn on a schematic"
-        code: "SY.GRAPHIC:STATIC-SENSITIVE"
+        code: "GRAPHIC:STATIC-SENSITIVE:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

@@ -14,7 +14,7 @@ pcb:rc-charging-pcb("Charging a capacitor through a resistor — pcb") {
     place(SW1, at: 14.5 6)
     place(R1, at: 24 6)
     place(C1, at: 26.5 11, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, in: 2, out: 3], at: 5.5 8.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, in: 2, out: 3], at: 5.5 8.5)
     track(top, width: 0.25, from: 25 6, to: 25 8.65, to: 26.5 10.15)
     track(top, width: 0.25, from: 18.31 6, to: 23 6)
     track(top, width: 0.25, from: 10.69 6, to: 8.19 8.5, to: 5.5 8.5)

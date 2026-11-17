@@ -6,6 +6,8 @@ import org.jmouse.cad.Formula;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.circuit.Analysis;
 import org.jmouse.cad.circuit.Bench;
+import org.jmouse.cad.Index;
+import org.jmouse.cad.circuit.Bus;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Criterion;
 import org.jmouse.cad.circuit.Expectation;
@@ -61,7 +63,7 @@ final class CircuitReading {
                 layout.stream().filter(line -> line.grammar() != SimulationLines.FRAME && line.grammar() != ArrangementLines.GROUP_LINE)
                         .map(CircuitReading::placement).toList(),
                 probes, timeBase, expectations(document), analysis,
-                ModelValues.lines(document, "view").stream().map(CircuitReading::view).toList(), frame, boundary(document),
+                ModelValues.lines(document, "view").stream().map(CircuitReading::view).toList(), frame, boundary(document), buses(document),
                 layout.stream().filter(line -> line.grammar() == ArrangementLines.GROUP_LINE).map(ArrangementLines::groupOf).toList());
     }
 
@@ -72,6 +74,22 @@ final class CircuitReading {
         List<SheetBoundary.Net> nets = ModelValues.lines(document, "nets").stream()
                 .map(line -> new SheetBoundary.Net(line.name("name").orElseThrow(), line.has("ground"), line.has("global"))).toList();
         return new SheetBoundary(ports, nets);
+    }
+
+    /** {@code buses { bus(D[0..7]) bus(I2C, members: [SDA, SCL]) }}: the named sets of nets the circuit carries together. */
+    private static List<Bus> buses(DocumentNode document) {
+        return ModelValues.lines(document, SimulationVocabulary.BUSES).stream().map(CircuitReading::bus).toList();
+    }
+
+    private static Bus bus(ClauseLineNode line) {
+        String name = ModelValues.base(line, "name");
+        Index index = ModelValues.index(line, "name");
+        List<String> members = line.value("members").map(ModelValues::groups).orElse(List.of()).stream().flatMap(List::stream).toList();
+        if (index != null && !members.isEmpty()) {
+            throw new IllegalArgumentException("The bus " + name + " is a vector — its nets are " + String.join(", ", index.names(name))
+                    + " — and names members too: write one or the other");
+        }
+        return index != null ? Bus.vector(name, index) : Bus.group(name, members);
     }
 
     static List<Part> parts(List<ClauseLineNode> lines) {
@@ -110,8 +128,7 @@ final class CircuitReading {
                     line.value("via").map(CircuitReading::corners).orElse(List.of()), arrangement);
         }
         if (line.grammar() == SimulationLines.BUS) {
-            return new Placement.Bus(reference, line.name("name").orElseThrow(),
-                    line.value("members").map(ModelValues::groups).orElse(List.of()).stream().flatMap(List::stream).toList(),
+            return new Placement.BusLine(reference, line.name("name").orElseThrow(),
                     line.value("via").map(CircuitReading::corners).orElse(List.of()), arrangement);
         }
         if (line.grammar() == SimulationLines.MARK) {

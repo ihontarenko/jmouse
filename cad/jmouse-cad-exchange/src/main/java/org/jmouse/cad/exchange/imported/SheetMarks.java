@@ -20,19 +20,24 @@ public final class SheetMarks {
     /**
      * A mark: what it is on the sheet, where its symbol connects in its own drawing, and which way its body goes from there.
      *
-     * @param mark     what the sheet calls it: {@code ground}, {@code label}, {@code port}, {@code global}
+     * @param mark     what the sheet calls it: {@code ground}, {@code power}, {@code label}, {@code port}, {@code global}, {@code entry}
      * @param terminal the pin a wire reaches it by
-     * @param bodyY    which way along Y its body goes: 1 down, -1 up
+     * @param bodyX    which way along X its body goes from its pin, in its own drawing: 1 right, -1 left, 0 neither
+     * @param bodyY    which way along Y its body goes from its pin: 1 down, -1 up, 0 neither
      */
-    public record Shape(String mark, String terminal, double bodyY) {
+    public record Shape(String mark, String terminal, double bodyX, double bodyY) {
     }
 
-    public static final Shape GROUND = new Shape("ground", "ground", 1);
-    public static final Shape LABEL = new Shape("label", "label", -1);
-    public static final Shape PORT = new Shape("port", "label", -1);
-    public static final Shape GLOBAL = new Shape("global", "label", -1);
+    public static final Shape GROUND = new Shape("ground", "ground", 0, 1);
+    /** A supply rail: its stem goes up from its pin to the bar its name stands over. */
+    public static final Shape POWER = new Shape("power", "power", 0, -1);
+    public static final Shape LABEL = new Shape("label", "label", 0, -1);
+    public static final Shape PORT = new Shape("port", "label", 0, -1);
+    public static final Shape GLOBAL = new Shape("global", "label", 0, -1);
+    /** A bus entry: its body slants from the wire's end, its pin, back to the bus. */
+    public static final Shape ENTRY = new Shape("entry", "entry", -1, -1);
 
-    private static final List<Shape> SHAPES = List.of(GROUND, LABEL, PORT, GLOBAL);
+    private static final List<Shape> SHAPES = List.of(GROUND, POWER, LABEL, PORT, GLOBAL, ENTRY);
 
     /** Where each mark's pin stands in its own drawing, by the mark: the symbol drawing's own, never a number kept here. */
     private final Map<String, double[]> pins;
@@ -74,12 +79,12 @@ public final class SheetMarks {
                 localX * Math.sin(radians) + point[1] * Math.cos(radians)};
     }
 
-    /** The quarter turn that points a body drawn along Y ({@code bodyY} is its sign) along a direction on the sheet. */
-    public static double rotationTowards(double[] direction, double bodyY) {
+    /** The quarter turn that points a mark's body, as its own drawing goes from its pin, along a direction on the sheet. */
+    public static double rotationTowards(double[] direction, Shape shape) {
         double best = 0;
         double bestDot = -Double.MAX_VALUE;
         for (int quarter = 0; quarter < 4; quarter++) {
-            double[] turned = turned(new double[] {0, bodyY}, quarter * 90, false);
+            double[] turned = turned(new double[] {shape.bodyX(), shape.bodyY()}, quarter * 90, false);
             double dot = turned[0] * direction[0] + turned[1] * direction[1];
             if (dot > bestDot) {
                 bestDot = dot;
@@ -98,7 +103,7 @@ public final class SheetMarks {
      * @param body which way its body goes from there
      */
     public ImportedCircuit.Item mark(String id, String net, Shape shape, double[] at, double[] body) {
-        double rotation = rotationTowards(body, shape.bodyY());
+        double rotation = rotationTowards(body, shape);
         double[] pin = turned(pins.get(shape.mark()), rotation, false);
         String named = shape == GROUND && Circuit.GROUND.equals(net) ? null : net;
         return new ImportedCircuit.Item(id, shape.mark(), named, ImportedCircuit.rounded(at[0] - pin[0]),

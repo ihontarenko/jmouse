@@ -1,7 +1,7 @@
 symbol:capacitor-symbol("Capacitor") {
     meta {
         summary: "Capacitor, as drawn on a schematic: its plates take their charge's sign and grow with it, the field between them comes in as it fills, warming close to its rating"
-        code: "SY.CAPACITOR:FIXED"
+        code: "CAPACITOR:FIXED:S"
         category: capacitors
         tags: electronics, schematic
         authors: "jMouse"

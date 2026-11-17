@@ -1,7 +1,7 @@
 footprint:open-hardware-5mm-footprint("Open hardware, 5 mm") {
     meta {
         summary: "The open hardware gear, for a design that is shared as open hardware, printed 5 mm wide"
-        code: "FP.GRAPHIC:OPEN-HARDWARE-5"
+        code: "GRAPHIC:OPEN-HARDWARE-5:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

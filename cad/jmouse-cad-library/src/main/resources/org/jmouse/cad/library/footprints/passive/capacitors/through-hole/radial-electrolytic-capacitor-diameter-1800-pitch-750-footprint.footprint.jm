@@ -1,7 +1,7 @@
 footprint:radial-electrolytic-capacitor-diameter-1800-pitch-750-footprint("Radial electrolytic capacitor, 18 mm can") {
     meta {
         summary: "Radial electrolytic capacitor, 18 mm can, leads 7.5 mm apart; pin 1 is the positive lead"
-        code: "FP.RADIAL:CP-D18-P7.5"
+        code: "RADIAL:CP-D18-P7.5:F"
         category: capacitors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"
@@ -17,5 +17,5 @@ footprint:radial-electrolytic-capacitor-diameter-1800-pitch-750-footprint("Radia
     outline(silkscreen, width: 0.12, "M-5.97 -1.74H-5.01M-5.49 -2.22V-1.26")
     outline(courtyard, width: 0.05, "M-9.5 -9.5H9.5V9.5H-9.5Z")
     body(height: 35)
-    model("MD.RADIAL:CP-D18-P7.5")
+    model("RADIAL:CP-D18-P7.5:M3D")
 }

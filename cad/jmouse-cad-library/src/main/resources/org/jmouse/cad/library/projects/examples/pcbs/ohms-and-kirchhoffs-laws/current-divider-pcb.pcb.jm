@@ -15,7 +15,7 @@ pcb:current-divider-pcb("Current divider — pcb") {
     place(R2, at: 15 12.5, rotate: 270)
     place(R3, at: 19 12.5, rotate: 270)
     place(R4, at: 23 12.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, first: 2, fourth: 3, second: 4, third: 5], at: 5.5 10)
+    place(J1, footprint: "HDR:1X5-P2.54-V:F", nets: [0: 1, first: 2, fourth: 3, second: 4, third: 5], at: 5.5 10)
     track(top, width: 0.25, from: 11.5 13.5, to: 15 13.5)
     track(top, width: 0.25, from: 15 13.5, to: 19 13.5)
     track(top, width: 0.25, from: 19 13.5, to: 23 13.5)

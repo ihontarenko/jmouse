@@ -30,11 +30,11 @@ final class CadJson {
 
     /**
      * Where something of a sheet stands is known by what it says, as a reader of the answer knows it: a wire by its
-     * {@code from} and {@code to}, a mark by its {@code symbol}, a placed part by the rest. Nothing names the type.
+     * {@code from} and {@code to}, a mark by its {@code symbol}, a bus line by its {@code bus}, a placed part by the rest. Nothing names the type.
      */
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
     @JsonSubTypes({@JsonSubTypes.Type(Placement.PlacedPart.class), @JsonSubTypes.Type(Placement.Mark.class),
-                   @JsonSubTypes.Type(Placement.Wire.class), @JsonSubTypes.Type(Placement.Bus.class), @JsonSubTypes.Type(Placement.Note.class), @JsonSubTypes.Type(Placement.Drawn.class)})
+                   @JsonSubTypes.Type(Placement.Wire.class), @JsonSubTypes.Type(Placement.BusLine.class), @JsonSubTypes.Type(Placement.Note.class), @JsonSubTypes.Type(Placement.Drawn.class)})
     private interface PlacementByFields {
     }
 

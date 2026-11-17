@@ -32,9 +32,9 @@ component:bt136("BT136", type: thyristor) {
     pin:main_terminal_two(analog, 2, "MT2, the tab")
     pin:gate(analog, input, 3, "gate")
 
-    footprint("FP.TO220:3-V")
+    footprint("TO220:3-V:F")
 
-    symbol(uses: "SY.THYRISTOR:TRIAC") {
+    symbol(uses: "THYRISTOR:TRIAC:S") {
         bind:failed(failed)
         bind:conduction(conducting)
         bind:a(pin: main_terminal_two)
@@ -101,7 +101,7 @@ component:bt136("BT136", type: thyristor) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO220:3") {
+    portrait(uses: "TO220:3:P") {
         bind:marking("BT136")
     }
 }

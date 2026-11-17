@@ -1,8 +1,7 @@
 package org.jmouse.cad.mesh;
 
-import java.util.function.Function;
 import java.util.Map;
-import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.DocumentModel;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.el.parser.Parser;
@@ -24,8 +23,8 @@ public final class ModelModule implements DocumentModule {
 
     /** A model is the files it is made of, each in its format and convention, or the shapes it is drawn from. */
     @Override
-    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
-        return Map.of(MODEL, document -> new ModelContents(ModelFile.of(document), ModelShapes.of(document)));
+    public Map<DocumentKind, DocumentModel<?>> models() {
+        return Map.of(MODEL, DocumentModel.of(ModelContents.class, document -> new ModelContents(ModelFile.of(document), ModelShapes.of(document))));
     }
 
     @Override

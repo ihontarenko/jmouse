@@ -69,7 +69,7 @@ public class DocumentNode extends ExpressionsNode {
     }
 
     /**
-     * The word a reference names this document by: its technical code ({@code meta { code "FP.CHIP:R0805" }}), or its
+     * The word a reference names this document by: its technical code ({@code meta { code "CHIP:R0805:F" }}), or its
      * slug where it writes none — what every writer of a reference writes, and what a reader matches a reference against.
      */
     public String referenceName() {

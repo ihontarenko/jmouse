@@ -1,7 +1,7 @@
 model:qsop-16-model("QSOP-16, 3.9 mm body") {
     meta {
         summary: "QSOP-16, 3.9 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.QSOP:16-P0.64"
+        code: "QSOP:16-P0.64:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-137"

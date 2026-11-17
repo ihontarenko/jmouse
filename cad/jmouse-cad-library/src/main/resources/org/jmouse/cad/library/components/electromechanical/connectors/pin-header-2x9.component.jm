@@ -26,7 +26,7 @@ component:pin-header-2x9("Pin header, 2x9", type: connector) {
     pin:pin16(analog, 16, "contact 16")
     pin:pin17(analog, 17, "contact 17")
     pin:pin18(analog, 18, "contact 18")
-    footprint("FP.HDR:2X9-P2.54-V")
+    footprint("HDR:2X9-P2.54-V:F")
 
-    symbol(uses: "SY.HDR:2X9")
+    symbol(uses: "HDR:2X9:S")
 }

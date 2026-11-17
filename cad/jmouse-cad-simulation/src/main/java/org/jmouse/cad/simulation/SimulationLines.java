@@ -219,12 +219,21 @@ public final class SimulationLines {
             .including(ArrangementLines.CLAUSES)
             .build();
 
-    /** {@code B1 bus D members D0, D1, D2 via 240 120, 400 120}: a bus by its name, the nets it carries and its corners. */
+    /** {@code bus:B1(D, via: [240 120, 400 120])}: a line of the bus {@code D}, by its corners — what it carries is the bus's. */
     public static final LineGrammar BUS = LineGrammar.named("bus", "reference")
             .requiredMarkedSlot("name", "bus", WORD)
-            .optional("members", ITEMS)
             .required("via", NUMBERS)
             .including(ArrangementLines.CLAUSES)
+            .build();
+
+    /**
+     * {@code bus(D[0..7])} — a vector, its nets {@code D_0} … {@code D_7} —, {@code bus(I2C, members: [SDA, SCL])} — a group, the nets
+     * it names: a bus of the circuit, declared once in its {@code buses} block. A line, not a term: a term {@code bus:} is a bus line
+     * of the layout, and a flat document gathers a term by its word.
+     */
+    public static final LineGrammar BUS_DECLARATION = LineGrammar.line("bus")
+            .slot("name", NAME)
+            .optional("members", ITEMS)
             .build();
 
     /** {@code CH1 out 2 V/div}, {@code CH3 current R1 1 mA/div}, {@code L1 level clock}, {@code CH2 a against b 1 V/div}. */

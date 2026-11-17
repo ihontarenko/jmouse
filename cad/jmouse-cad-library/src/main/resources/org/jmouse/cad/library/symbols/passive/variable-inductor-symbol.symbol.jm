@@ -1,7 +1,7 @@
 symbol:variable-inductor-symbol("Variable inductor") {
     meta {
         summary: "Variable inductor, as drawn on a schematic: a coil with an arrow through it"
-        code: "SY.INDUCTOR:VARIABLE"
+        code: "INDUCTOR:VARIABLE:S"
         category: inductors
         tags: electronics, schematic
         authors: "jMouse"

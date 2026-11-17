@@ -6,10 +6,11 @@ component:jmcad-mark("jmCAD mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:JMCAD-10")
-    footprint("FP.GRAPHIC:JMCAD-5")
-    footprint("FP.GRAPHIC:JMCAD-20")
+    footprint("GRAPHIC:JMCAD-10:F")
+    footprint("GRAPHIC:JMCAD-5:F")
+    footprint("GRAPHIC:JMCAD-20:F")
 
-    symbol(uses: "SY.GRAPHIC:JMCAD") {
+    symbol(uses: "GRAPHIC:JMCAD:S") {
     }
+    portrait(uses: "GRAPHIC:JMCAD:P")
 }

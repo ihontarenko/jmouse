@@ -1,7 +1,7 @@
 symbol:hot-surface-symbol("Hot surface") {
     meta {
         summary: "A warning triangle with rising heat: this part of the board runs hot, as drawn on a schematic"
-        code: "SY.GRAPHIC:HOT-SURFACE"
+        code: "GRAPHIC:HOT-SURFACE:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

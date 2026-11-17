@@ -33,6 +33,9 @@ public class DocumentParser extends AbstractBodyParser<DocumentNode, BasicToken>
     private static final String    SLUG  = "[a-z0-9]+(-[a-z0-9]+)*";
     private static final Slugifier SLUGS = Slugifier.standard().fallingBackTo("untitled");
 
+    /** The longest address a document may have: its file is named by it, and a file's name is bounded. */
+    public static final int LONGEST_SLUG = 120;
+
     private final DocumentGrammar grammar;
 
     /** The slug a title gives a document that writes none: {@code "NPN transistor"} is {@code npn-transistor}. */

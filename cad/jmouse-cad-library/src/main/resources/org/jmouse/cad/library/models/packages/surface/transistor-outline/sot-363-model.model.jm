@@ -1,7 +1,7 @@
 model:sot-363-model("SOT-363, 1.25 mm body") {
     meta {
         summary: "SOT-363, 1.25 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOT363:6"
+        code: "SOT363:6:M3D"
         category: surface-transistor-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-203 AB, the makers' tighter outline (Nexperia SOT323)"

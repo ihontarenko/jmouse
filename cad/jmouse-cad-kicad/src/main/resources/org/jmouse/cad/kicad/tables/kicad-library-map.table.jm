@@ -479,151 +479,151 @@ table:kicad-library-map("KiCad symbols as jM components") {
     # as our library draws its kind, never with KiCad's drawing. Pins KiCad marks as not connected need no name.
     diode-generic "Diode, no part named" {
         symbol "Device:D"
-        code "SY.DIODE:RECTIFIER"
+        code "DIODE:RECTIFIER:S"
         pins 1 = b, 2 = a
     }
 
     diode-generic-small "Diode, small, no part named" {
         symbol "Device:D_Small"
-        code "SY.DIODE:RECTIFIER"
+        code "DIODE:RECTIFIER:S"
         pins 1 = b, 2 = a
     }
 
     schottky-generic "Schottky diode, no part named" {
         symbol "Device:D_Schottky"
-        code "SY.DIODE:SCHOTTKY"
+        code "DIODE:SCHOTTKY:S"
         pins 1 = b, 2 = a
     }
 
     zener-generic "Zener diode, no part named" {
         symbol "Device:D_Zener"
-        code "SY.DIODE:ZENER"
+        code "DIODE:ZENER:S"
         pins 1 = b, 2 = a
     }
 
     n-channel-small-signal "2N7002" {
         symbol "Transistor_FET:2N7002"
-        code "SY.TRANSISTOR:MOSFET-N"
+        code "TRANSISTOR:MOSFET-N:S"
         pins 1 = gate, 2 = source, 3 = drain
     }
 
     npn-base-emitter-collector "NPN, pins B E C" {
         symbol "Device:Q_NPN_BEC"
-        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        code "TRANSISTOR:BIPOLAR-NPN:S"
         pins 1 = base, 2 = emitter, 3 = collector
     }
 
     npn-base-collector-emitter "NPN, pins B C E" {
         symbol "Device:Q_NPN_BCE"
-        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        code "TRANSISTOR:BIPOLAR-NPN:S"
         pins 1 = base, 2 = collector, 3 = emitter
     }
 
     npn-emitter-base-collector "NPN, pins E B C" {
         symbol "Device:Q_NPN_EBC"
-        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        code "TRANSISTOR:BIPOLAR-NPN:S"
         pins 1 = emitter, 2 = base, 3 = collector
     }
 
     npn-collector-base-emitter "NPN, pins C B E" {
         symbol "Device:Q_NPN_CBE"
-        code "SY.TRANSISTOR:BIPOLAR-NPN"
+        code "TRANSISTOR:BIPOLAR-NPN:S"
         pins 1 = collector, 2 = base, 3 = emitter
     }
 
     pnp-base-emitter-collector "PNP, pins B E C" {
         symbol "Device:Q_PNP_BEC"
-        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        code "TRANSISTOR:BIPOLAR-PNP:S"
         pins 1 = base, 2 = emitter, 3 = collector
     }
 
     pnp-base-collector-emitter "PNP, pins B C E" {
         symbol "Device:Q_PNP_BCE"
-        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        code "TRANSISTOR:BIPOLAR-PNP:S"
         pins 1 = base, 2 = collector, 3 = emitter
     }
 
     pnp-emitter-base-collector "PNP, pins E B C" {
         symbol "Device:Q_PNP_EBC"
-        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        code "TRANSISTOR:BIPOLAR-PNP:S"
         pins 1 = emitter, 2 = base, 3 = collector
     }
 
     pnp-collector-base-emitter "PNP, pins C B E" {
         symbol "Device:Q_PNP_CBE"
-        code "SY.TRANSISTOR:BIPOLAR-PNP"
+        code "TRANSISTOR:BIPOLAR-PNP:S"
         pins 1 = collector, 2 = base, 3 = emitter
     }
 
     n-channel-gate-source-drain "N-channel MOSFET, pins G S D" {
         symbol "Device:Q_NMOS_GSD"
-        code "SY.TRANSISTOR:MOSFET-N"
+        code "TRANSISTOR:MOSFET-N:S"
         pins 1 = gate, 2 = source, 3 = drain
     }
 
     n-channel-gate-drain-source "N-channel MOSFET, pins G D S" {
         symbol "Device:Q_NMOS_GDS"
-        code "SY.TRANSISTOR:MOSFET-N"
+        code "TRANSISTOR:MOSFET-N:S"
         pins 1 = gate, 2 = drain, 3 = source
     }
 
     p-channel-gate-source-drain "P-channel MOSFET, pins G S D" {
         symbol "Device:Q_PMOS_GSD"
-        code "SY.TRANSISTOR:MOSFET-P"
+        code "TRANSISTOR:MOSFET-P:S"
         pins 1 = gate, 2 = source, 3 = drain
     }
 
     p-channel-gate-drain-source "P-channel MOSFET, pins G D S" {
         symbol "Device:Q_PMOS_GDS"
-        code "SY.TRANSISTOR:MOSFET-P"
+        code "TRANSISTOR:MOSFET-P:S"
         pins 1 = gate, 2 = drain, 3 = source
     }
 
     current-feedback-op-amp "AD8001AN" {
         symbol "Amplifier_Operational:AD8001AN"
-        code "SY.AMPLIFIER:OPERATIONAL-WIDE"
+        code "AMPLIFIER:OPERATIONAL-WIDE:S"
         pins 2 = inverting_input, 3 = non_inverting_input, 6 = output, 7 = positive_supply, 4 = negative_supply
     }
 
     precision-op-amp "OPA188, SOIC-8" {
         symbol "Amplifier_Operational:OPA188xxD"
-        code "SY.AMPLIFIER:OPERATIONAL-WIDE"
+        code "AMPLIFIER:OPERATIONAL-WIDE:S"
         pins 2 = inverting_input, 3 = non_inverting_input, 6 = output, 7 = positive_supply, 4 = negative_supply
     }
 
     optocoupler-transistor "PC817" {
         symbol "Isolator:PC817"
-        code "SY.OPTOCOUPLER:TRANSISTOR"
+        code "OPTOCOUPLER:TRANSISTOR:S"
         pins 1 = anode, 2 = cathode, 3 = emitter, 4 = collector
     }
 
     adjustable-regulator-3-amperes "LM350, TO-220" {
         symbol "Regulator_Linear:LM350_TO220"
-        code "SY.REGULATOR:LINEAR-ADJUSTABLE"
+        code "REGULATOR:LINEAR-ADJUSTABLE:S"
         pins 1 = adjust, 2 = output, 3 = input
     }
 
     buzzer "Buzzer" {
         symbol "Device:Buzzer"
-        code "SY.TRANSDUCER:BUZZER"
+        code "TRANSDUCER:BUZZER:S"
         pins 1 = negative, 2 = positive
     }
 
     jumper-bridged "Jumper, two pads, bridged" {
         symbol "Jumper:Jumper_2_Bridged"
-        code "SY.JUMPER:BRIDGED"
+        code "JUMPER:BRIDGED:S"
         pins 1 = a, 2 = b
     }
 
     relay-two-make-contacts "Relay RTE4, two make contacts" {
         symbol "Relay:RTE4xxxx"
-        code "SY.RELAY:DPST"
+        code "RELAY:DPST:S"
         pins A1 = coil_one, A2 = coil_two, 11 = first_common, 14 = first_normally_open, 21 = second_common, 24 = second_normally_open
     }
 
     temperature-sensor-analog "LM35, SOIC-8" {
         symbol "Sensor_Temperature:LM35-D"
-        code "SY.SENSOR:TEMPERATURE-VOLTAGE"
+        code "SENSOR:TEMPERATURE-VOLTAGE:S"
         pins 8 = supply, 4 = ground, 1 = output
     }
 
@@ -631,193 +631,193 @@ table:kicad-library-map("KiCad symbols as jM components") {
 
     tvs "TVS diode, no part named" {
         symbol "Device:D_TVS"
-        code "SY.DIODE:TVS"
+        code "DIODE:TVS:S"
         pins 1 = a, 2 = b
     }
 
     tvs-filled "TVS diode, no part named" {
         symbol "Device:D_TVS_Filled"
-        code "SY.DIODE:TVS"
+        code "DIODE:TVS:S"
         pins 1 = a, 2 = b
     }
 
     tvs-small "TVS diode, no part named" {
         symbol "Device:D_TVS_Small"
-        code "SY.DIODE:TVS"
+        code "DIODE:TVS:S"
         pins 1 = a, 2 = b
     }
 
     varicap "Varicap diode, no part named" {
         symbol "Device:D_Capacitance"
-        code "SY.DIODE:VARICAP"
+        code "DIODE:VARICAP:S"
         pins 1 = b, 2 = a
     }
 
     varicap-filled "Varicap diode, no part named" {
         symbol "Device:D_Capacitance_Filled"
-        code "SY.DIODE:VARICAP"
+        code "DIODE:VARICAP:S"
         pins 1 = b, 2 = a
     }
 
     photodiode "Photodiode, no part named" {
         symbol "Device:D_Photo"
-        code "SY.PHOTODETECTOR:DIODE"
+        code "PHOTODETECTOR:DIODE:S"
         pins 1 = b, 2 = a
     }
 
     photodiode-filled "Photodiode, no part named" {
         symbol "Device:D_Photo_Filled"
-        code "SY.PHOTODETECTOR:DIODE"
+        code "PHOTODETECTOR:DIODE:S"
         pins 1 = b, 2 = a
     }
 
     phototransistor "Phototransistor, pins C E" {
         symbol "Device:Q_Photo_NPN"
-        code "SY.PHOTODETECTOR:NPN"
+        code "PHOTODETECTOR:NPN:S"
         pins 1 = collector, 2 = emitter
     }
 
     phototransistor-emitter-collector "Phototransistor, pins E C" {
         symbol "Device:Q_Photo_NPN_EC"
-        code "SY.PHOTODETECTOR:NPN"
+        code "PHOTODETECTOR:NPN:S"
         pins 1 = emitter, 2 = collector
     }
 
     changeover-switch "Changeover switch" {
         symbol "Switch:SW_SPDT"
-        code "SY.SWITCH:SPDT"
+        code "SWITCH:SPDT:S"
         pins 1 = upper, 2 = common, 3 = lower
     }
 
     reed-switch "Reed switch" {
         symbol "Switch:SW_Reed"
-        code "SY.SWITCH:REED"
+        code "SWITCH:REED:S"
         pins 1 = a, 2 = b
     }
 
     jumper-open "Jumper, open" {
         symbol "Jumper:Jumper_2_Open"
-        code "SY.JUMPER:OPEN"
+        code "JUMPER:OPEN:S"
         pins 1 = a, 2 = b
     }
 
     solder-jumper-open "Solder jumper, open" {
         symbol "Jumper:SolderJumper_2_Open"
-        code "SY.JUMPER:SOLDER"
+        code "JUMPER:SOLDER:S"
         pins 1 = a, 2 = b
     }
 
     loudspeaker "Loudspeaker" {
         symbol "Device:Speaker"
-        code "SY.TRANSDUCER:LOUDSPEAKER"
+        code "TRANSDUCER:LOUDSPEAKER:S"
         pins 1 = a, 2 = b
     }
 
     microphone "Microphone" {
         symbol "Device:Microphone"
-        code "SY.TRANSDUCER:MICROPHONE"
+        code "TRANSDUCER:MICROPHONE:S"
         pins 1 = a, 2 = b
     }
 
     microphone-condenser "Condenser microphone" {
         symbol "Device:Microphone_Condenser"
-        code "SY.TRANSDUCER:MICROPHONE"
+        code "TRANSDUCER:MICROPHONE:S"
         pins 1 = a, 2 = b
     }
 
     battery-cell "Battery cell" {
         symbol "Device:Battery_Cell"
-        code "SY.SOURCE:CELL"
+        code "SOURCE:CELL:S"
         pins 1 = a, 2 = b
     }
 
     solar-cell "Solar cell" {
         symbol "Device:Solar_Cell"
-        code "SY.SOURCE:SOLAR-CELL"
+        code "SOURCE:SOLAR-CELL:S"
         pins 1 = a, 2 = b
     }
 
     ptc-thermistor "PTC thermistor" {
         symbol "Device:Thermistor_PTC"
-        code "SY.RESISTOR:THERMISTOR-PTC"
+        code "RESISTOR:THERMISTOR-PTC:S"
         pins 1 = a, 2 = b
     }
 
     variable-resistor "Variable resistor" {
         symbol "Device:R_Variable"
-        code "SY.RESISTOR:VARIABLE"
+        code "RESISTOR:VARIABLE:S"
         pins 1 = a, 2 = b
     }
 
     variable-capacitor "Variable capacitor" {
         symbol "Device:C_Variable"
-        code "SY.CAPACITOR:VARIABLE"
+        code "CAPACITOR:VARIABLE:S"
         pins 1 = a, 2 = b
     }
 
     variable-inductor "Variable inductor" {
         symbol "Device:L_Trim"
-        code "SY.INDUCTOR:VARIABLE"
+        code "INDUCTOR:VARIABLE:S"
         pins 1 = a, 2 = b
     }
 
     ferrite-core-inductor "Inductor on a ferrite core" {
         symbol "Device:L_Ferrite"
-        code "SY.INDUCTOR:MAGNETIC-CORE"
+        code "INDUCTOR:MAGNETIC-CORE:S"
         pins 1 = a, 2 = b
     }
 
     iron-core-inductor "Inductor on an iron core" {
         symbol "Device:L_Iron"
-        code "SY.INDUCTOR:MAGNETIC-CORE"
+        code "INDUCTOR:MAGNETIC-CORE:S"
         pins 1 = a, 2 = b
     }
 
     resettable-fuse "Resettable fuse" {
         symbol "Device:Polyfuse"
-        code "SY.FUSE:RESETTABLE"
+        code "FUSE:RESETTABLE:S"
         pins 1 = a, 2 = b
     }
 
     gas-discharge-tube "Gas discharge tube" {
         symbol "Device:GDT_2Pin"
-        code "SY.PROTECTION:GAS-DISCHARGE-TUBE"
+        code "PROTECTION:GAS-DISCHARGE-TUBE:S"
         pins 1 = a, 2 = b
     }
 
     igbt-gate-collector-emitter "IGBT, pins G C E" {
         symbol "Device:Q_NIGBT_GCE"
-        code "SY.TRANSISTOR:IGBT-N"
+        code "TRANSISTOR:IGBT-N:S"
         pins 1 = gate, 2 = collector, 3 = emitter
     }
 
     igbt-gate-emitter-collector "IGBT, pins G E C" {
         symbol "Device:Q_NIGBT_GEC"
-        code "SY.TRANSISTOR:IGBT-N"
+        code "TRANSISTOR:IGBT-N:S"
         pins 1 = gate, 2 = emitter, 3 = collector
     }
 
     igbt-collector-gate-emitter "IGBT, pins C G E" {
         symbol "Device:Q_NIGBT_CGE"
-        code "SY.TRANSISTOR:IGBT-N"
+        code "TRANSISTOR:IGBT-N:S"
         pins 1 = collector, 2 = gate, 3 = emitter
     }
 
     igbt-collector-emitter-gate "IGBT, pins C E G" {
         symbol "Device:Q_NIGBT_CEG"
-        code "SY.TRANSISTOR:IGBT-N"
+        code "TRANSISTOR:IGBT-N:S"
         pins 1 = collector, 2 = emitter, 3 = gate
     }
 
     igbt-emitter-gate-collector "IGBT, pins E G C" {
         symbol "Device:Q_NIGBT_EGC"
-        code "SY.TRANSISTOR:IGBT-N"
+        code "TRANSISTOR:IGBT-N:S"
         pins 1 = emitter, 2 = gate, 3 = collector
     }
 
     igbt-emitter-collector-gate "IGBT, pins E C G" {
         symbol "Device:Q_NIGBT_ECG"
-        code "SY.TRANSISTOR:IGBT-N"
+        code "TRANSISTOR:IGBT-N:S"
         pins 1 = emitter, 2 = collector, 3 = gate
     }
 
@@ -825,45 +825,45 @@ table:kicad-library-map("KiCad symbols as jM components") {
 
     generic-rows "Generic connector, one row of any count" {
         symbol "Connector_Generic:Conn_01x{count}"
-        code "SY.HDR:1X{count}"
+        code "HDR:1X{count}:S"
         pin-names "pin{number}"
     }
 
     pin-rows "Pin header, one row of any count" {
         symbol "Connector:Conn_01x{count}_Pin"
-        code "SY.HDR:1X{count}"
+        code "HDR:1X{count}:S"
         pin-names "pin{number}"
     }
 
     socket-rows "Socket strip, one row of any count" {
         symbol "Connector:Conn_01x{count}_Socket"
-        code "SY.HDR:1X{count}"
+        code "HDR:1X{count}:S"
         pin-names "pin{number}"
     }
 
     generic-double-rows "Generic connector, two rows of any count, odd and even" {
         symbol "Connector_Generic:Conn_02x{count}_Odd_Even"
-        code "SY.HDR:2X{count}"
+        code "HDR:2X{count}:S"
         pin-names "pin{number}"
     }
 
     shielded-rows "Shielded connector, one row of any count" {
         symbol "Connector_Generic_Shielded:Conn_01x{count}_Shielded"
-        code "SY.HDR:1X{count}-SHIELDED"
+        code "HDR:1X{count}-SHIELDED:S"
         pin-names "pin{number}"
         pins SH = shield
     }
 
     shielded-double-rows "Shielded connector, two rows of any count, odd and even" {
         symbol "Connector_Generic_Shielded:Conn_02x{count}_Odd_Even_Shielded"
-        code "SY.HDR:2X{count}-SHIELDED"
+        code "HDR:2X{count}-SHIELDED:S"
         pin-names "pin{number}"
         pins SH = shield
     }
 
     screw-terminals "Screw terminal block of any count" {
         symbol "Connector:Screw_Terminal_01x{count}"
-        code "SY.TB:{count}"
+        code "TB:{count}:S"
         pin-names "pin{number}"
     }
 
@@ -874,122 +874,122 @@ table:kicad-library-map("KiCad symbols as jM components") {
 
     chip-resistor-0402 "Chip resistor 0402" {
         footprint "Resistor_SMD:R_0402_1005Metric"
-        code "FP.CHIP:R0402"
+        code "CHIP:R0402:F"
     }
 
     chip-capacitor-0402 "Chip capacitor 0402" {
         footprint "Capacitor_SMD:C_0402_1005Metric"
-        code "FP.CHIP:C0402"
+        code "CHIP:C0402:F"
     }
 
     chip-resistor-0603 "Chip resistor 0603" {
         footprint "Resistor_SMD:R_0603_1608Metric"
-        code "FP.CHIP:R0603"
+        code "CHIP:R0603:F"
     }
 
     chip-capacitor-0603 "Chip capacitor 0603" {
         footprint "Capacitor_SMD:C_0603_1608Metric"
-        code "FP.CHIP:C0603"
+        code "CHIP:C0603:F"
     }
 
     chip-resistor-0805 "Chip resistor 0805" {
         footprint "Resistor_SMD:R_0805_2012Metric"
-        code "FP.CHIP:R0805"
+        code "CHIP:R0805:F"
     }
 
     chip-capacitor-0805 "Chip capacitor 0805" {
         footprint "Capacitor_SMD:C_0805_2012Metric"
-        code "FP.CHIP:C0805"
+        code "CHIP:C0805:F"
     }
 
     chip-resistor-1206 "Chip resistor 1206" {
         footprint "Resistor_SMD:R_1206_3216Metric"
-        code "FP.CHIP:R1206"
+        code "CHIP:R1206:F"
     }
 
     chip-capacitor-1206 "Chip capacitor 1206" {
         footprint "Capacitor_SMD:C_1206_3216Metric"
-        code "FP.CHIP:C1206"
+        code "CHIP:C1206:F"
     }
 
     soic-8 "SOIC-8" {
         footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
-        code "FP.SOIC:8-P1.27-W3.9"
+        code "SOIC:8-P1.27-W3.9:F"
     }
 
     dip-8 "DIP-8" {
         footprint "Package_DIP:DIP-8_W7.62mm"
-        code "FP.DIP:8-W7.62"
+        code "DIP:8-W7.62:F"
     }
 
     tssop-14 "TSSOP-14" {
         footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
-        code "FP.TSSOP:14-P0.65-W4.4"
+        code "TSSOP:14-P0.65-W4.4:F"
     }
 
     sot-23 "SOT-23" {
         footprint "Package_TO_SOT_SMD:SOT-23"
-        code "FP.SOT23:3"
+        code "SOT23:3:F"
     }
 
     to-92 "TO-92, inline" {
         footprint "Package_TO_SOT_THT:TO-92_Inline"
-        code "FP.TO92:3-L"
+        code "TO92:3-L:F"
     }
 
     sod-123 "SOD-123" {
         footprint "Diode_SMD:D_SOD-123"
-        code "FP.SOD:123"
+        code "SOD:123:F"
     }
 
     pin-header-1x1 "Pin header 1 × 1, 2.54 mm" {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical"
-        code "FP.HDR:1X1-P2.54-V"
+        code "HDR:1X1-P2.54-V:F"
     }
 
     pin-header-1x2 "Pin header 1 × 2, 2.54 mm" {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-        code "FP.HDR:1X2-P2.54-V"
+        code "HDR:1X2-P2.54-V:F"
     }
 
     pin-header-1x3 "Pin header 1 × 3, 2.54 mm" {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
-        code "FP.HDR:1X3-P2.54-V"
+        code "HDR:1X3-P2.54-V:F"
     }
 
     pin-header-1x4 "Pin header 1 × 4, 2.54 mm" {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
-        code "FP.HDR:1X4-P2.54-V"
+        code "HDR:1X4-P2.54-V:F"
     }
 
     pin-header-1x5 "Pin header 1 × 5, 2.54 mm" {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
-        code "FP.HDR:1X5-P2.54-V"
+        code "HDR:1X5-P2.54-V:F"
     }
 
     pin-header-1x6 "Pin header 1 × 6, 2.54 mm" {
         footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
-        code "FP.HDR:1X6-P2.54-V"
+        code "HDR:1X6-P2.54-V:F"
     }
 
     to-220 "TO-220, three leads, standing" {
         footprint "Package_TO_SOT_THT:TO-220-3_Vertical"
-        code "FP.TO220:3-V"
+        code "TO220:3-V:F"
     }
 
     to-3p "TO-3P, three leads, standing" {
         footprint "Package_TO_SOT_THT:TO-3P-3_Vertical"
-        code "FP.TO3P:3-V"
+        code "TO3P:3-V:F"
     }
 
     to-247 "TO-247, three leads, standing" {
         footprint "Package_TO_SOT_THT:TO-247-3_Vertical"
-        code "FP.TO247:3-V"
+        code "TO247:3-V:F"
     }
 
     to-126 "TO-126, three leads, standing" {
         footprint "Package_TO_SOT_THT:TO-126-3_Vertical"
-        code "FP.TO126:3-V"
+        code "TO126:3-V:F"
     }
 
     # Footprint families: every size of a package KiCad names by its sizes, written once — {name} a part of the id read, {*} a
@@ -999,101 +999,101 @@ table:kicad-library-map("KiCad symbols as jM components") {
 
     chip-resistors "Chip resistors, every size" {
         footprint "Resistor_SMD:R_{size}_{metric}Metric"
-        code "FP.CHIP:R{size}"
+        code "CHIP:R{size}:F"
     }
 
     chip-capacitors "Chip capacitors, every size" {
         footprint "Capacitor_SMD:C_{size}_{metric}Metric"
-        code "FP.CHIP:C{size}"
+        code "CHIP:C{size}:F"
     }
 
     chip-inductors "Chip inductors, every size" {
         footprint "Inductor_SMD:L_{size}_{metric}Metric"
-        code "FP.CHIP:L{size}"
+        code "CHIP:L{size}:F"
     }
 
     axial-resistors "Axial resistors, every DIN body, pitch and standing" {
         footprint "Resistor_THT:R_Axial_DIN{code}_L{*}mm_D{*}mm_P{pitch}mm_{standing}"
-        code "FP.AXIAL:R{code}-P{pitch|number}-{standing|initial}"
+        code "AXIAL:R{code}-P{pitch|number}-{standing|initial}:F"
     }
 
     axial-diodes "Axial diodes, every body, pitch and standing" {
         footprint "Diode_THT:D_{code}_P{pitch}mm_{standing}"
-        code "FP.AXIAL:{code|upper}-P{pitch|number}-{standing|initial}"
+        code "AXIAL:{code|upper}-P{pitch|number}-{standing|initial}:F"
     }
 
     axial-diodes-named-twice "Axial diodes whose body KiCad names twice" {
         footprint "Diode_THT:D_{code}_{*}_P{pitch}mm_{standing}"
-        code "FP.AXIAL:{code|upper}-P{pitch|number}-{standing|initial}"
+        code "AXIAL:{code|upper}-P{pitch|number}-{standing|initial}:F"
     }
 
     radial-electrolytic-capacitors "Radial electrolytic capacitors, every can and pitch" {
         footprint "Capacitor_THT:CP_Radial_D{diameter}mm_P{pitch}mm"
-        code "FP.RADIAL:CP-D{diameter|number}-P{pitch|number}"
+        code "RADIAL:CP-D{diameter|number}-P{pitch|number}:F"
     }
 
     disc-capacitors "Ceramic disc capacitors, every disc and pitch" {
         footprint "Capacitor_THT:C_Disc_D{diameter}mm_W{width}mm_P{pitch}mm"
-        code "FP.RADIAL:CD-{diameter|number}X{width|number}-P{pitch|number}"
+        code "RADIAL:CD-{diameter|number}X{width|number}-P{pitch|number}:F"
     }
 
     box-capacitors "Film box capacitors, every box and pitch" {
         footprint "Capacitor_THT:C_Rect_L{length}mm_W{width}mm_P{pitch}mm"
-        code "FP.RADIAL:CB-{length|number}X{width|number}-P{pitch|number}"
+        code "RADIAL:CB-{length|number}X{width|number}-P{pitch|number}:F"
     }
 
     box-capacitors-of-a-series "Film box capacitors, every box and pitch, a maker's series named after them" {
         footprint "Capacitor_THT:C_Rect_L{length}mm_W{width}mm_P{pitch}mm_{*}"
-        code "FP.RADIAL:CB-{length|number}X{width|number}-P{pitch|number}"
+        code "RADIAL:CB-{length|number}X{width|number}-P{pitch|number}:F"
     }
 
     dual-inline-packages "Dual inline packages, every count and row" {
         footprint "Package_DIP:DIP-{leads}_W{row}mm"
-        code "FP.DIP:{leads|number}-W{row|number}"
+        code "DIP:{leads|number}-W{row|number}:F"
     }
 
     small-outline-packages "Small outline packages, every count, body and pitch" {
         footprint "Package_SO:SOIC-{leads}_{width}x{*}mm_P{pitch}mm"
-        code "FP.SOIC:{leads|number}-P{pitch|number}-W{width|number}"
+        code "SOIC:{leads|number}-P{pitch|number}-W{width|number}:F"
     }
 
     wide-small-outline-packages "Wide small outline packages, every count, body and pitch: KiCad marks the wide body after the count" {
         footprint "Package_SO:SOIC-{leads}W_{width}x{*}mm_P{pitch}mm"
-        code "FP.SOIC:{leads|number}-P{pitch|number}-W{width|number}"
+        code "SOIC:{leads|number}-P{pitch|number}-W{width|number}:F"
     }
 
     thin-shrink-small-outline-packages "Thin shrink small outline packages, every count, body and pitch" {
         footprint "Package_SO:TSSOP-{leads}_{width}x{*}mm_P{pitch}mm"
-        code "FP.TSSOP:{leads|number}-P{pitch|number}-W{width|number}"
+        code "TSSOP:{leads|number}-P{pitch|number}-W{width|number}:F"
     }
 
     pin-headers "Pin headers, every row, count, pitch and standing" {
         footprint "Connector_PinHeader_{pitch}mm:PinHeader_{rows}x{pins}_P{*}mm_{standing}"
-        code "FP.HDR:{rows|number}X{pins|number}-P{pitch|number}-{standing|initial}"
+        code "HDR:{rows|number}X{pins|number}-P{pitch|number}-{standing|initial}:F"
     }
 
     pin-sockets "Pin sockets, every row, count, pitch and standing" {
         footprint "Connector_PinSocket_{pitch}mm:PinSocket_{rows}x{pins}_P{*}mm_{standing}"
-        code "FP.SKT:{rows|number}X{pins|number}-P{pitch|number}-{standing|initial}"
+        code "SKT:{rows|number}X{pins|number}-P{pitch|number}-{standing|initial}:F"
     }
 
     mounting-holes "Mounting holes, bare" {
         footprint "MountingHole:MountingHole_{*}_M{metric}"
-        code "FP.MH:M{metric|number}"
+        code "MH:M{metric|number}:F"
     }
 
     mounting-holes-with-a-pad "Mounting holes with a pad" {
         footprint "MountingHole:MountingHole_{*}_M{metric}_Pad"
-        code "FP.MH:M{metric|number}-PAD"
+        code "MH:M{metric|number}-PAD:F"
     }
 
     mounting-holes-with-a-pad-and-vias "Mounting holes with a pad and vias round it" {
         footprint "MountingHole:MountingHole_{*}_M{metric}_Pad_Via"
-        code "FP.MH:M{metric|number}-PAD-VIA"
+        code "MH:M{metric|number}-PAD-VIA:F"
     }
 
     mounting-holes-din-965 "Mounting holes for DIN 965 heads, with a pad" {
         footprint "MountingHole:MountingHole_{*}_M{metric}_DIN965_Pad"
-        code "FP.MH:M{metric|number}-DIN-965-PAD"
+        code "MH:M{metric|number}-DIN-965-PAD:F"
     }
 }

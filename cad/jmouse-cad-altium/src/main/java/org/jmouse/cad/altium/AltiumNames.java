@@ -35,14 +35,14 @@ final class AltiumNames {
 
     /**
      * The code a converted symbol is named by, and the component drawn with it names it by: in the namespace of the
-     * library it was placed from — {@code Miscellaneous Devices.IntLib}'s {@code Res2} is {@code SY.MISCELLANEOUS-DEVICES:RES2} —,
+     * library it was placed from — {@code Miscellaneous Devices.IntLib}'s {@code Res2} is {@code MISCELLANEOUS-DEVICES:RES2:S} —,
      * in Altium's own where the sheet names none.
      */
     static String symbolCode(Optional<String> library, String libraryReference) {
         return ImportedNames.code(TechnicalClass.SYMBOL, library.map(AltiumNames::withoutFileKind).orElse(ALTIUM), libraryReference);
     }
 
-    /** The code a footprint of a PCB library is named by: {@code rcl.PcbLib}'s {@code R0402} is {@code FP.RCL:R0402}. */
+    /** The code a footprint of a PCB library is named by: {@code rcl.PcbLib}'s {@code R0402} is {@code RCL:R0402:F}. */
     static String footprintCode(String library, String footprint) {
         return ImportedNames.code(TechnicalClass.FOOTPRINT, withoutFileKind(library), footprint);
     }

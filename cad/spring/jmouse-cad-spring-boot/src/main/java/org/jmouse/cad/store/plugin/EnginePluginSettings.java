@@ -1,5 +1,6 @@
 package org.jmouse.cad.store.plugin;
 
+import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.cad.store.authority.CadCapability;
 import org.jmouse.cad.store.problem.CadProblem;
@@ -19,19 +20,39 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
- * 🎚️ The parameters of the plugins the engine runs, as a reader is shown them and as a curator changes them: every running plugin's
- * sections of fixed parameters (ADR 0007), each parameter with the value it stands at. Reading them is open, but for a secret, told
- * to nobody, and what names the server's folders and programs, told only to whoever may change it; changing them is
- * {@link CadCapability#ENGINE_CONFIGURE}, installation-wide, and each change is logged with who made it: a program named here is one
- * the server will run. A structured section is the settings tree's ({@code /settings}).
+ * 🎚️ The installation's settings of the engine and every plugin it runs, as a reader is shown them and as a curator changes them.
+ * Every section of fixed parameters (ADR 0007) stands in the one settings tree by its path — the core's at its own
+ * ({@code part-search}), a plugin's under its id ({@code plugin/cad-suppliers/mouser}) —, each parameter with the value it stands at.
+ * Reading them is open, but for a secret, told to nobody, and what names the server's folders and programs, told only to whoever
+ * may change it; changing any section is {@link CadCapability#ENGINE_CONFIGURE}, installation-wide, and each change is logged with
+ * who made it: a program named here is one the server will run.
  */
 public class EnginePluginSettings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnginePluginSettings.class);
+
+    /**
+     * A section of fixed parameters: whose it is, where it stands among its plugin's and in the tree, and what it is called.
+     *
+     * @param path where it stands in the settings tree ({@link SettingsSection#pathOf})
+     */
+    public record FixedSection(String plugin, String pathInOwner, String path, String label, String description) {
+    }
+
+    /**
+     * Where a secret's value comes from, and whether another can be kept here.
+     *
+     * @param keepable the installation has what to seal one with
+     */
+    public record SecretView(Settings.SecretState state, boolean keepable) {
+    }
 
     /**
      * One parameter as a reader is shown it.
@@ -42,24 +63,7 @@ public class EnginePluginSettings {
      */
     public record ParameterView(String key, String label, String description, ParameterKind kind, String defaultValue, String value,
                                 List<Parameter.Choice> choices, String unit, BigDecimal least, BigDecimal most,
-                                Settings.SecretState secret, List<String> absent) {
-    }
-
-    /** A section of a plugin's parameters, in the order it declares them. */
-    public record SectionView(String path, String label, String description, List<ParameterView> parameters) {
-    }
-
-    /** A plugin's sections of parameters, in the order it declares them. */
-    public record PluginSettingsView(String plugin, String title, List<SectionView> sections) {
-    }
-
-    /**
-     * Every running plugin's parameters.
-     *
-     * @param changeable   whether the reader may change them: the installation keeps them, and the reader may set the engine up
-     * @param keepsSecrets whether a key to a service can be kept here: the installation has what to seal it with
-     */
-    public record EngineSettingsView(boolean changeable, boolean keepsSecrets, List<PluginSettingsView> plugins) {
+                                SecretView secret, List<String> absent) {
     }
 
     private final Extensions   extensions;
@@ -72,15 +76,55 @@ public class EnginePluginSettings {
         this.authority = authority;
     }
 
-    public EngineSettingsView settings() {
-        List<PluginSettingsView> plugins = extensions.plugins().stream()
+    /**
+     * Every running plugin's sections of fixed parameters, by path — to a signed-in reader only: they are how this installation is
+     * set up, never what a page is drawn with, so a host that opens the settings' records to a visitor opens none of these.
+     */
+    public List<FixedSection> fixedSections() {
+        if (authority.actor().isEmpty()) {
+            return List.of();
+        }
+        return extensions.plugins().stream()
                 .filter(state -> state.status() == PluginState.Status.STARTED)
-                .map(state -> viewOf(state.plugin().id(), state.plugin().title()))
+                .flatMap(state -> settings.sectionsOf(state.plugin().id()).stream()
+                        .filter(section -> section.shape() instanceof Section.Fixed)
+                        .map(section -> new FixedSection(state.plugin().id(), section.path(),
+                                                         SettingsSection.pathOf(state.plugin().id(), section.path()),
+                                                         section.label(), section.description())))
+                .sorted(Comparator.comparing(FixedSection::path))
                 .toList();
-        return new EngineSettingsView(changeable(), settings.keepsSecrets(), plugins);
     }
 
-    /** Changes the installation's values of one section of a plugin's settings, all or none; one that is structured included. */
+    /** The section of fixed parameters at a path of the tree; empty for none. */
+    public Optional<FixedSection> fixedSection(String path) {
+        return fixedSections().stream().filter(section -> section.path().equals(path)).findFirst();
+    }
+
+    /** A section's parameters as the reader is shown them, in the order it declares them. */
+    public List<ParameterView> parametersOf(FixedSection fixed) {
+        boolean curator = authority.permitsGlobally(CadCapability.ENGINE_CONFIGURE);
+        Map<String, String> current = settings.valuesOf(fixed.plugin(), fixed.pathInOwner());
+        return declared(fixed).stream().map(parameter -> {
+            boolean secret = parameter.kind() == ParameterKind.SECRET;
+            boolean told = !secret && (curator || !parameter.kind().namesTheServer());
+            String value = told ? current.getOrDefault(parameter.key(), parameter.defaultValue()) : "";
+            return new ParameterView(parameter.key(), parameter.label(), parameter.description(), parameter.kind(),
+                                     told ? parameter.defaultValue() : "", value, parameter.choices(), parameter.unit(),
+                                     parameter.least(), parameter.most(),
+                                     secret ? new SecretView(settings.secretStateOf(fixed.plugin(), fixed.pathInOwner(), parameter), settings.keepsSecrets()) : null,
+                                     parameter.kind() == ParameterKind.FOLDERS ? absentFolders(value) : List.of());
+        }).toList();
+    }
+
+    /** Whether a section stands other than its plugin declares it: a value changed, or a key to a service kept here. */
+    public boolean changed(FixedSection fixed) {
+        Map<String, String> current = settings.valuesOf(fixed.plugin(), fixed.pathInOwner());
+        return declared(fixed).stream().anyMatch(parameter -> parameter.kind() == ParameterKind.SECRET
+                ? settings.secretStateOf(fixed.plugin(), fixed.pathInOwner(), parameter) == Settings.SecretState.KEPT
+                : !Objects.equals(current.getOrDefault(parameter.key(), parameter.defaultValue()), parameter.defaultValue()));
+    }
+
+    /** Changes the installation's values of one section of a plugin's settings, all or none, whatever its shape. */
     public void changeSection(String plugin, String section, Map<String, String> values) {
         authority.requireGlobally(CadCapability.ENGINE_CONFIGURE);
         try {
@@ -113,23 +157,6 @@ public class EnginePluginSettings {
         }
     }
 
-    /**
-     * Changes a running plugin's parameters of one section, all of them or none; a null value brings one back to its default.
-     *
-     * @return the plugin's parameters as they now stand
-     */
-    public PluginSettingsView change(String plugin, String section, Map<String, String> values) {
-        PluginState state = extensions.plugins().stream()
-                .filter(candidate -> candidate.plugin().id().equals(plugin) && candidate.status() == PluginState.Status.STARTED)
-                .findFirst()
-                .orElseThrow(() -> CadProblem.notFound("Plugin '" + plugin + "' does not run here."));
-        if (settings.section(plugin, section).filter(found -> found.shape() instanceof Section.Fixed).isEmpty()) {
-            throw CadProblem.notFound("Plugin '" + plugin + "' has no parameters '" + section + "'.");
-        }
-        changeSection(plugin, section, values);
-        return viewOf(plugin, state.plugin().title());
-    }
-
     /** The drives of the server, to choose a folder from: only for whoever may set the engine up. */
     public List<ServerFolders.Folder> serverRoots() {
         authority.requireGlobally(CadCapability.ENGINE_CONFIGURE);
@@ -151,25 +178,10 @@ public class EnginePluginSettings {
         return settings.changeable() && authority.permitsGlobally(CadCapability.ENGINE_CONFIGURE);
     }
 
-    private PluginSettingsView viewOf(String plugin, String title) {
-        boolean curator = authority.permitsGlobally(CadCapability.ENGINE_CONFIGURE);
-        List<SectionView> sections = settings.sectionsOf(plugin).stream()
-                .filter(section -> section.shape() instanceof Section.Fixed)
-                .map(section -> {
-                    Map<String, String> current = settings.valuesOf(plugin, section.path());
-                    List<ParameterView> parameters = ((Section.Fixed) section.shape()).parameters().stream().map(parameter -> {
-                        boolean secret = parameter.kind() == ParameterKind.SECRET;
-                        boolean told = !secret && (curator || !parameter.kind().namesTheServer());
-                        String value = told ? current.getOrDefault(parameter.key(), parameter.defaultValue()) : "";
-                        return new ParameterView(parameter.key(), parameter.label(), parameter.description(), parameter.kind(),
-                                                 told ? parameter.defaultValue() : "", value, parameter.choices(), parameter.unit(),
-                                                 parameter.least(), parameter.most(),
-                                                 secret ? settings.secretStateOf(plugin, section.path(), parameter) : null,
-                                                 parameter.kind() == ParameterKind.FOLDERS ? absentFolders(value) : List.of());
-                    }).toList();
-                    return new SectionView(section.path(), section.label(), section.description(), parameters);
-                }).toList();
-        return new PluginSettingsView(plugin, title, sections);
+    private List<Parameter> declared(FixedSection fixed) {
+        return settings.section(fixed.plugin(), fixed.pathInOwner())
+                .map(section -> ((Section.Fixed) section.shape()).parameters())
+                .orElseThrow(() -> CadProblem.notFound("settings " + fixed.path()));
     }
 
     /** The folders named that are not on the server now: a drive taken away keeps its place in the list. */

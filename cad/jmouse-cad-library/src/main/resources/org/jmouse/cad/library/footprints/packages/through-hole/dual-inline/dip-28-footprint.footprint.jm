@@ -1,7 +1,7 @@
 footprint:dip-28-footprint("DIP-28, 7.62 mm rows") {
     meta {
         summary: "28-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
-        code: "FP.DIP:28-W7.62"
+        code: "DIP:28-W7.62:F"
         category: dual-inline
         tags: electronics, footprint, through-hole
         source: "JEDEC MS-001"
@@ -43,5 +43,5 @@ footprint:dip-28-footprint("DIP-28, 7.62 mm rows") {
     outline(silkscreen, filled, "M-2.2 -16.51A0.3 0.3 0 1 0 -1.6 -16.51A0.3 0.3 0 1 0 -2.2 -16.51Z")
     outline(courtyard, width: 0.05, "M-5.25 -18.3H5.25V18.3H-5.25Z")
     body(height: 5.33)
-    model("MD.DIP:28-W7.62")
+    model("DIP:28-W7.62:M3D")
 }

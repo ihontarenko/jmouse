@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation.elaboration;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.Setting;
 import org.jmouse.cad.simulation.SimulatedFamily;
 import org.jmouse.cad.simulation.SimulatedComponent;
@@ -23,7 +24,7 @@ import java.util.Map;
  *                    reported under, so a sheet finds the current of a terminal by the name its wire ends on
  */
 public record ElaboratedPart(String reference, SimulatedComponent component, Map<String, String> connections,
-                             SimulatedFamily family, List<Setting> settings, Map<String, Double> conditioned,
+                             @Nullable SimulatedFamily family, List<Setting> settings, Map<String, Double> conditioned,
                              Map<String, String> reportedAs) {
 
     public ElaboratedPart {

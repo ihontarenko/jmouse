@@ -1,7 +1,7 @@
 symbol:current-source-symbol("Current source") {
     meta {
         summary: "Current source, as drawn on a schematic"
-        code: "SY.SOURCE:CURRENT"
+        code: "SOURCE:CURRENT:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

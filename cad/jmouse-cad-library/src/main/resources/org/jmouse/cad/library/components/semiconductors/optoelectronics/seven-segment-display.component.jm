@@ -45,7 +45,7 @@ component:seven-segment-display("Seven-segment display", type: display) {
     figure:light_point(100 * max(0, segment_point.current) / I_rated, unit: %, "of the decimal point's rated brightness")
     figure:overcurrent(100 * max(abs(segment_a.current), max(abs(segment_b.current), max(abs(segment_c.current), max(abs(segment_d.current), max(abs(segment_e.current), max(abs(segment_f.current), max(abs(segment_g.current), abs(segment_point.current)))))))) / I_forward_maximum, unit: %, "of a segment's rated current")
 
-    footprint("FP.DISP:7SEG-10-W15.24") {
+    footprint("DISP:7SEG-10-W15.24:F") {
         pad:1(segment_e)
         pad:2(segment_d)
         pad:3(cathode)
@@ -58,10 +58,10 @@ component:seven-segment-display("Seven-segment display", type: display) {
         pad:10(segment_g)
     }
 
-    symbol(uses: "SY.DISPLAY:SEVEN-SEGMENT")
+    symbol(uses: "DISPLAY:SEVEN-SEGMENT:S")
 
     # How it looks in the hand: the digit itself, its segments lit by the same figures as the symbol.
-    portrait(uses: "PT.DISPLAY:SEVEN-SEGMENT-0.56")
+    portrait(uses: "DISPLAY:SEVEN-SEGMENT-0.56:P")
 
     node:junction_segment_a
     node:junction_segment_b

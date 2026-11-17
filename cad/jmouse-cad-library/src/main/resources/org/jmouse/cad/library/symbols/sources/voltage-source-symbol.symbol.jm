@@ -1,7 +1,7 @@
 symbol:voltage-source-symbol("Voltage source") {
     meta {
         summary: "Voltage source, as drawn on a schematic"
-        code: "SY.SOURCE:VOLTAGE-DC"
+        code: "SOURCE:VOLTAGE-DC:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

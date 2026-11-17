@@ -45,10 +45,14 @@ class EnginePluginSettingsTest {
     }
 
     private static CadAuthority authority(boolean curator) {
+        return authority(curator, true);
+    }
+
+    private static CadAuthority authority(boolean curator, boolean signedIn) {
         return new CadAuthority() {
             @Override
             public Optional<String> actor() {
-                return Optional.of("reader");
+                return signedIn ? Optional.of("reader") : Optional.empty();
             }
 
             @Override
@@ -76,6 +80,10 @@ class EnginePluginSettingsTest {
     }
 
     private static EnginePluginSettings settings(boolean curator, Path folder) {
+        return settings(authority(curator), folder);
+    }
+
+    private static EnginePluginSettings settings(CadAuthority authority, Path folder) {
         Plugin plugin = new Plugin() {
             @Override
             public PluginDescriptor descriptor() {
@@ -142,13 +150,18 @@ class EnginePluginSettingsTest {
                 kept.clear();
                 kept.putAll(values);
             }
+
+            @Override
+            public Map<String, Map<String, String>> keptUnder(SettingHolder holder, String owner, String section) {
+                return kept.isEmpty() ? Map.of() : Map.of(section, Map.copyOf(kept));
+            }
         };
         return new EnginePluginSettings(extensions, new Settings(() -> Map.of(PLUGIN, plugin.settings()), Optional.of(store),
-                                                                 Optional.empty(), Optional.empty()), authority(curator));
+                                                                 Optional.empty(), Optional.empty()), authority);
     }
 
     private static ParameterView settingOf(EnginePluginSettings settings, String key) {
-        return settings.settings().plugins().getFirst().sections().getFirst().parameters().stream()
+        return settings.parametersOf(settings.fixedSections().getFirst()).stream()
                 .filter(setting -> setting.key().equals(key)).findFirst().orElseThrow();
     }
 
@@ -162,7 +175,7 @@ class EnginePluginSettingsTest {
             assertEquals(List.of(), setting.absent(), key);
         }
         assertEquals("plain", settingOf(settings, "label").value());
-        assertFalse(settings.settings().changeable());
+        assertFalse(settings.changeable());
     }
 
     @Test
@@ -170,7 +183,19 @@ class EnginePluginSettingsTest {
         EnginePluginSettings settings = settings(false, folder);
         assertThrows(Stopped.class, settings::serverRoots);
         assertThrows(Stopped.class, () -> settings.serverFolder(folder.toString()));
-        assertThrows(Stopped.class, () -> settings.change(PLUGIN, SECTION, Map.of("program", "/usr/bin/other")));
+        assertThrows(Stopped.class, () -> settings.changeSection(PLUGIN, SECTION, Map.of("program", "/usr/bin/other")));
+    }
+
+    @Test
+    void aVisitorWhoIsNotSignedInIsShownNoSectionOfParameters(@TempDir Path folder) {
+        assertEquals(List.of(), settings(authority(false, false), folder).fixedSections());
+    }
+
+    @Test
+    void aSectionOfParametersStandsUnderItsPluginInTheTree(@TempDir Path folder) {
+        EnginePluginSettings settings = settings(true, folder);
+        assertEquals("plugin/" + PLUGIN + "/" + SECTION, settings.fixedSections().getFirst().path());
+        assertFalse(settings.changed(settings.fixedSections().getFirst()));
     }
 
     @Test

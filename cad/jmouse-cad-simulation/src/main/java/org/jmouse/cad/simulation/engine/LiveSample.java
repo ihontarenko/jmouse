@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation.engine;
 
+import org.jspecify.annotations.Nullable;
 import java.util.Map;
 
 /**
@@ -15,8 +16,8 @@ import java.util.Map;
  *                 the readings are not kept or the circuit has no digital node
  */
 public record LiveSample(double time, double[] voltages, Map<String, Map<String, Double>> terminals,
-                         Map<String, MeteredPart> metered, SampleWindow window, SampleEnvelope envelope,
-                         Map<String, Double> powers, Map<String, LogicLevel> levels) {
+                         @Nullable Map<String, MeteredPart> metered, @Nullable SampleWindow window, @Nullable SampleEnvelope envelope,
+                         Map<String, Double> powers, @Nullable Map<String, LogicLevel> levels) {
 
     public LiveSample(double time, double[] voltages, Map<String, Map<String, Double>> terminals,
                       Map<String, MeteredPart> metered, SampleWindow window, SampleEnvelope envelope,

@@ -1,7 +1,7 @@
 footprint:fiducial-1mm-footprint("Fiducial, 1 mm") {
     meta {
         summary: "A placement machine's reference mark: a bare copper dot 1 mm wide in a 2 mm opening of the solder mask, no paste"
-        code: "FP.GRAPHIC:FIDUCIAL-1"
+        code: "GRAPHIC:FIDUCIAL-1:F"
         category: graphics
         tags: electronics, footprint, graphic, fiducial
         authors: "jMouse"

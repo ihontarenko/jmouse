@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation.engine;
 
+import org.jspecify.annotations.Nullable;
 /**
  * One thing that happened to a unit's discrete side, which its behaviour may handle:
  * {@code on <kind> '<subject>' [when …] do … end}.
@@ -7,7 +8,7 @@ package org.jmouse.cad.simulation.engine;
  * @param subject what it happened to — the input that changed, the expression that crossed, the timer or period
  *                that came due; null for {@code start}
  */
-record DigitalEvent(DigitalUnit unit, Kind kind, String subject) {
+record DigitalEvent(DigitalUnit unit, Kind kind, @Nullable String subject) {
 
     /** The events a behaviour may handle. */
     enum Kind {

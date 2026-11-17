@@ -1,7 +1,7 @@
 model:chip-led-2010-model("Chip LED 2010 (5025 metric)") {
     meta {
         summary: "Chip LED 2010 (5025 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:LED2010"
+        code: "CHIP:LED2010:M3D"
         category: optoelectronics-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 2010 (5025 metric)"

@@ -23,14 +23,14 @@ component:bouncing-push-button("Bouncing push button", type: button) {
     pin:a(analog, 1, "first contact")
     pin:b(analog, 2, "second contact")
 
-    footprint("FP.SW:TACT-6X6") {
+    footprint("SW:TACT-6X6:F") {
         pad:1(a)
         pad:2(a)
         pad:3(b)
         pad:4(b)
     }
 
-    symbol(uses: "SY.SWITCH:SPST") {
+    symbol(uses: "SWITCH:SPST:S") {
         bind:closed(contact)
     }
 

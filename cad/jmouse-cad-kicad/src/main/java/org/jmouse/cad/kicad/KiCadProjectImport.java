@@ -5,6 +5,7 @@ import org.jmouse.cad.exchange.imported.SheetMarks;
 import org.jmouse.cad.exchange.imported.ImportedCircuit;
 import org.jmouse.cad.exchange.imported.ImportedCircuitDocument;
 import org.jmouse.kicad.KiCadProject;
+import org.jmouse.kicad.connectivity.KiCadConnectivity;
 import org.jmouse.kicad.pcb.KiCadPcb;
 import org.jmouse.kicad.pcb.KiCadPcbFootprint;
 import org.jmouse.kicad.KiCadProject.SheetInstance;
@@ -102,13 +103,15 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
         Set<String> imported = new LinkedHashSet<>();
         Map<String, String> identifiers = new LinkedHashMap<>();
         SheetMarks marks = SheetMarks.of(catalogue::document, filing.markSymbols());
+        // Each sheet is read alone, told what the whole design makes of the names that join across it.
+        KiCadDesignNets designNets = new KiCadDesignNets(ground, KiCadConnectivity.of(project).globals(), project.busAliases());
         for (SheetInstance sheet : project.sheets()) {
             String file = sheet.schematic().name();
             if (!imported.add(file)) {
                 continue;
             }
-            ImportedSheet read = KiCadSheetImport.of(sheet.schematic(), sheet.path(), ground, library, filing.ownLibrary(),
-                    catalogue, placed -> slugs.getOrDefault(placed, DocumentParser.slugOf(placed)), placed -> labelledPorts(project, placed, ground), marks);
+            ImportedSheet read = KiCadSheetImport.of(sheet.schematic(), sheet.path(), designNets, library, filing.ownLibrary(),
+                    catalogue, placed -> slugs.getOrDefault(placed, DocumentParser.slugOf(placed)), placed -> labelledPorts(project, placed, designNets), marks);
             // A sheet is called what KiCad calls it; the project it belongs to is said by where it is filed.
             String title = sheet.root() ? name : sheet.name();
             identifiers.putAll(read.identifiers());
@@ -176,9 +179,9 @@ public record KiCadProjectImport(List<DocumentNode> circuits, List<DocumentNode>
         return paired;
     }
     /** What a box placing a sheet file can wire a pin to: the port each of its hierarchical labels is. */
-    private static Map<String, String> labelledPorts(KiCadProject project, String file, String ground) {
+    private static Map<String, String> labelledPorts(KiCadProject project, String file, KiCadDesignNets designNets) {
         return project.sheets().stream().filter(sheet -> sheet.schematic().name().equals(file)).findFirst()
-                .map(sheet -> KiCadSheetImport.portsOf(sheet.schematic(), sheet.path(), ground)).orElse(Map.of());
+                .map(sheet -> KiCadSheetImport.portsOf(sheet.schematic(), sheet.path(), designNets)).orElse(Map.of());
     }
 
     /**

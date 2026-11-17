@@ -7,55 +7,66 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 🪜 A tree laid flat again: each value under the name its path is written by ({@link RequestParametersPathWriter}), so parsing
+ * the names gives the tree back. A list keeps its items' indices, a sparse one too ({@code ids[1]}). An empty record or list is
+ * named with the value that says it ({@link RequestParametersTreeOptions.Emptiness}); with none, it is left out, as is a place a
+ * sparse list leaves empty.
+ */
 public final class RequestParametersTreeFlattener {
 
+    private final RequestParametersPathWriter            pathWriter = new RequestParametersPathWriter();
+    private final RequestParametersTreeOptions.Emptiness emptiness;
+
+    /** A flattener that leaves an empty record or list out. */
+    public RequestParametersTreeFlattener() {
+        this(RequestParametersTreeOptions.Emptiness.NONE);
+    }
+
+    public RequestParametersTreeFlattener(RequestParametersTreeOptions.Emptiness emptiness) {
+        this.emptiness = emptiness;
+    }
+
+    /**
+     * The names and values the tree is made of, in its order.
+     *
+     * @throws IllegalArgumentException where a record's field has a name no path can hold — a bracket in it, or nothing
+     */
     public Map<String, List<String>> flatten(RequestParametersTree tree) {
-        Map<String, List<String>> out = new LinkedHashMap<>();
-        flattenObject(out, "", tree.root());
-        return out;
+        Map<String, List<String>> flattened = new LinkedHashMap<>();
+        flattenNode(flattened, new ArrayList<>(), tree.root());
+        return flattened;
     }
 
-    private void flattenObject(Map<String, List<String>> out, String prefix, RequestParametersObjectNode objectNode) {
-        for (Map.Entry<String, RequestParametersNode> entry : objectNode.fields().entrySet()) {
-            String                key   = entry.getKey();
-            RequestParametersNode value = entry.getValue();
-
-            String nextPrefix = prefix.isEmpty() ? key : prefix + "[" + key + "]";
-            flattenNode(out, nextPrefix, value);
+    private void flattenNode(Map<String, List<String>> flattened, List<RequestParametersPathToken> path, RequestParametersNode node) {
+        switch (node) {
+            case null -> {
+                // A place a sparse list leaves empty: nothing stands there to be named.
+            }
+            case RequestParametersScalarNode scalarNode ->
+                    flattened.computeIfAbsent(pathWriter.write(path), name -> new ArrayList<>()).addAll(scalarNode.values());
+            case RequestParametersObjectNode objectNode when objectNode.fields().isEmpty() -> nameEmpty(flattened, path, emptiness.record());
+            case RequestParametersObjectNode objectNode -> objectNode.fields().forEach((name, value) -> {
+                path.add(new RequestParametersPathToken.PropertyNameToken(name));
+                flattenNode(flattened, path, value);
+                path.removeLast();
+            });
+            case RequestParametersArrayNode arrayNode when arrayNode.items().isEmpty() -> nameEmpty(flattened, path, emptiness.list());
+            case RequestParametersArrayNode arrayNode -> {
+                List<RequestParametersNode> items = arrayNode.items();
+                for (int index = 0; index < items.size(); index++) {
+                    path.add(new RequestParametersPathToken.ArrayIndexToken(index));
+                    flattenNode(flattened, path, items.get(index));
+                    path.removeLast();
+                }
+            }
         }
     }
 
-    private void flattenNode(Map<String, List<String>> out, String path, RequestParametersNode node) {
-        if (node == null) {
-            // keep "path=" empty value? choose policy; MVP: emit nothing
-            return;
+    /** An empty record or list, named with the value that says it — where one does. */
+    private void nameEmpty(Map<String, List<String>> flattened, List<RequestParametersPathToken> path, String value) {
+        if (value != null) {
+            flattened.put(pathWriter.write(path), new ArrayList<>(List.of(value)));
         }
-
-        switch (node.nodeType()) {
-            case SCALAR -> putAll(out, path, ((RequestParametersScalarNode) node).values());
-            case OBJECT -> flattenObject(out, path, (RequestParametersObjectNode) node);
-            case ARRAY -> flattenArray(out, path, (RequestParametersArrayNode) node);
-        }
-    }
-
-    private void flattenArray(Map<String, List<String>> out, String prefix, RequestParametersArrayNode arrayNode) {
-        List<RequestParametersNode> items = arrayNode.items();
-
-        // Policy: keep indices to preserve sparse arrays (ids[1]=444)
-        for (int i = 0; i < items.size(); i++) {
-            RequestParametersNode item = items.get(i);
-            if (item == null) continue;
-
-            String indexedPath = prefix + "[" + i + "]";
-            flattenNode(out, indexedPath, item);
-        }
-
-        // Alternative policy (optional): emit append form "groups[]" for dense arrays
-        // If you want it, add a strategy flag.
-    }
-
-    private static void putAll(Map<String, List<String>> out, String key, List<String> values) {
-        List<String> list = out.computeIfAbsent(key, k -> new ArrayList<>());
-        list.addAll(values);
     }
 }

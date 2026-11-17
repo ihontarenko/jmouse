@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jmouse</groupId>
+  <artifactId>jmouse-websocket</artifactId>
+  <version>1.0.1</version>
+  <name>jMouse - WebSocket</name>
+  <description>jMouse Framework - WebSocket: one endpoint serving several conversations, each by the subprotocol it is opened with; the opener known at the handshake by a bearer token carried as a subprotocol (a browser sets no header on a handshake), and every message run as them</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-websocket</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>ihontarenko</id>
+      <name>Ivan Hontarenko</name>
+      <email>ihontarenko@gmail.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-websocket</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-websocket</artifactId>
+      <version>10.1.31</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

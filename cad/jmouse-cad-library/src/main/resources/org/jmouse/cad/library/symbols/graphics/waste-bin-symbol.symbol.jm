@@ -1,7 +1,7 @@
 symbol:waste-bin-symbol("Separate collection") {
     meta {
         summary: "A crossed-out bin: not to be thrown away with household waste, as drawn on a schematic"
-        code: "SY.GRAPHIC:WASTE-BIN"
+        code: "GRAPHIC:WASTE-BIN:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

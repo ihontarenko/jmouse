@@ -25,7 +25,6 @@ import org.jmouse.cad.library.CadLibrary;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.simulation.CatalogueDocuments;
-import org.jmouse.cad.simulation.CategoryDocument;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.kicad.footprint.KiCadFootprintLibraries;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -117,7 +115,7 @@ class KiCadBoardImportTest {
     /** The model the board's test point names. */
     private static final String TEST_POINT_MODEL = "kicad-testpoint-tp-model";
     /** The code the board's test point names its model by. */
-    private static final String TEST_POINT_MODEL_CODE = "MD.TESTPOINT:TP";
+    private static final String TEST_POINT_MODEL_CODE = "TESTPOINT:TP:M3D";
 
     /** A library that holds every model a footprint names, and one it names nowhere, which is never brought. */
     private static final ModelSource ONE_MODEL = new ModelSource() {
@@ -130,9 +128,9 @@ class KiCadBoardImportTest {
         public List<FetchedModel> modelsOf(DocumentNode footprint) {
             // As KiCad's model folders give them: a model stored under its slug, named by the code its footprint writes.
             List<String> codes = new java.util.ArrayList<>(FootprintDrawing.of(footprint).models().stream().map(FootprintDrawing.Model::reference).toList());
-            codes.add("MD.KICAD:UNNAMED");
+            codes.add("KICAD:UNNAMED:M3D");
             return codes.stream().map(code -> {
-                String slug = "kicad-" + code.substring(code.indexOf('.') + 1).toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]+", "-") + "-model";
+                String slug = "kicad-" + code.substring(0, code.lastIndexOf(':')).toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]+", "-") + "-model";
                 DocumentNode model = new DocumentNode(ModelModule.MODEL, "Body", slug, null, 1);
                 model.addExpression(org.jmouse.cad.document.MetaNode.filed("Body", code, null, List.of()));
                 return new FetchedModel(model, List.of(new FetchedFile(slug, "body.wrl", new ByteArrayResource(new byte[] {1}))));
@@ -157,28 +155,31 @@ class KiCadBoardImportTest {
     }
 
     /** Every KiCad library a drawing comes from is a category of its own under KiCad's, standing before what is filed in it. */
+    /**
+     * A drawing brought from KiCad is filed by what it is — the catalogue category its KiCad library maps to in the KiCad libraries
+     * table —, never in a category of its own: every one lands in a category the library holds, a DO-35 diode of `Diode_THT` among
+     * the through-hole diodes.
+     */
     @Test
-    void eachKiCadLibraryIsACategoryStandingBeforeItsDrawings() {
+    void eachDrawingIsFiledInACategoryTheLibraryHolds() {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("design.kicad_sch", SCHEMATIC);
         files.put("design.kicad_pcb", BOARD);
         files.put("design.kicad_pro", "{}");
+        CadLibrary library = CadLibrary.library();
         ImportedDocuments imported = new KiCadDesignImport(() -> InstalledKiCadLibraries.NONE, () -> ONE_MODEL, KiCadLibraryMap.readFrom(KiCadLibraryMap.SHIPPED), KiCadLibraries.readFrom(KiCadLibraries.SHIPPED))
-                .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), CadLibrary.library());
-        List<String> standing = new ArrayList<>();
+                .read(new ExchangeFiles(files, "design.kicad_pro", "Design"), library);
+        Map<String, String> filing = new LinkedHashMap<>();
         for (DocumentNode document : imported.library()) {
-            // The model this test's place brings writes no meta, so it names no category.
-            String filedIn = document.block(MetaNode.class).flatMap(meta -> meta.text(MetaNode.CATEGORY)).orElse("kicad");
-            if (document.kind().equals(SimulationModule.CATEGORY)) {
-                CategoryDocument category = CategoryDocument.of(document);
-                assertEquals("kicad", category.parent(), category.slug());
-                assertEquals("kicad-" + category.title().toLowerCase(Locale.ROOT).replace('_', '-') + "-library", category.slug());
-            } else if (!filedIn.equals("kicad")) {
-                assertTrue(standing.contains(filedIn), document.slug() + " is filed in " + filedIn + ", which does not stand before it");
-            }
-            standing.add(document.slug());
+            assertFalse(document.kind().equals(SimulationModule.CATEGORY), document.slug() + " is a category the import made of its own");
+            document.block(MetaNode.class).flatMap(meta -> meta.text(MetaNode.CATEGORY)).ifPresent(category -> {
+                filing.put(document.slug(), category);
+                Optional<DocumentNode> held = library.find(category);
+                assertTrue(held.isPresent() && held.get().kind().equals(SimulationModule.CATEGORY),
+                        document.slug() + " is filed in " + category + ", which is no category of the library");
+            });
         }
-        assertTrue(standing.contains("kicad-diode-tht-library"), standing.toString());
+        assertEquals("diodes-through-hole", filing.get("kicad-diode-tht-d-do-35-footprint"), filing.toString());
     }
 
     @Test
@@ -200,7 +201,7 @@ class KiCadBoardImportTest {
         String code = KiCadLibraryMap.shipped().footprintCodeOf("Capacitor_THT:CP_Radial_D10.0mm_P5.00mm").orElseThrow();
         DocumentNode ours = CadLibrary.library().findCoded(code).orElseThrow();
         assertEquals("footprint", ours.kind().word());
-        assertTrue(CadLibrary.library().findCoded("FP.NOTHING:AT-ALL").isEmpty());
+        assertTrue(CadLibrary.library().findCoded("NOTHING:AT-ALL:F").isEmpty());
     }
 
     @Test
@@ -213,7 +214,7 @@ class KiCadBoardImportTest {
         // The part names ours, by its code, wherever the design keeps what it sits on: its component, or the circuit itself.
         DocumentLanguage language = CadLanguage.standard().language();
         String written = String.join(System.lineSeparator(), Stream.concat(imported.library().stream(), imported.designs().stream()).map(language::write).toList());
-        String ours = "FP.AXIAL:DO-35-P7.62-H";
+        String ours = "AXIAL:DO-35-P7.62-H:F";
         assertTrue(CadLibrary.library().findCoded(ours).isPresent());
         assertTrue(written.contains(ours), ours + " in: " + written.lines().filter(line -> line.contains("footprint")).toList());
         assertTrue(imported.library().stream().noneMatch(document -> document.slug().contains("do-35") && document.slug().startsWith("kicad-")),
@@ -248,8 +249,10 @@ class KiCadBoardImportTest {
     void aBusLineComesAcrossWholeAndNamed() {
         DocumentNode design = imported().designs().stream().filter(document -> document.slug().equals("design")).findFirst().orElseThrow();
         String written = org.jmouse.cad.library.CadLanguage.standard().language().write(design);
-        assertTrue(written.contains("bus:B1(D"), written);
-        assertTrue(written.contains("members: D0 D1 D2"), written);
+        // The bus declared once; no entry takes its nets off it — KiCad joins them to nothing —, so each is a net of the bus's own.
+        // The line names it.
+        assertTrue(written.contains("bus(D, members: [D_D0_open, D_D1_open, D_D2_open])"), written);
+        assertTrue(written.contains("bus:B1(D,"), written);
         // Two stretches meeting end to end, one line of three corners; its label is the bus's and no net of the sheet.
         assertEquals(1, written.lines().filter(line -> line.contains("bus:B")).count(), written);
         assertTrue(!written.contains("D[0..2]"), written);

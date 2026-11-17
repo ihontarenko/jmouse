@@ -1,0 +1,275 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:family",
+  "title" : "A family document, as the engine answers it (Family)",
+  "$defs" : {
+    "DocumentHead" : {
+      "type" : "object",
+      "properties" : {
+        "slug" : {
+          "type" : "string",
+          "description" : "what the document is known by: its address among the library's"
+        },
+        "title" : {
+          "type" : "string",
+          "description" : "what it is called, for a reader"
+        },
+        "type" : {
+          "type" : [ "string", "null" ],
+          "description" : "the role its kind gives it — type gate —, or null where it says none"
+        },
+        "meta" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "its meta fields — summary, source, category … —, as written"
+        }
+      },
+      "required" : [ "slug", "title", "type", "meta" ],
+      "description" : "What every document of the model says of itself: its slug, its title, the role its kind gives it (type gate), and its meta fields — summary, source, category… — as written.",
+      "additionalProperties" : false
+    },
+    "Equation.Branch" : {
+      "type" : "object",
+      "properties" : {
+        "kind" : {
+          "type" : "string",
+          "description" : "current or voltage"
+        },
+        "from" : {
+          "type" : "string",
+          "description" : "the pin or node it runs from"
+        },
+        "to" : {
+          "type" : "string",
+          "description" : "the pin or node it runs to"
+        },
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "what the current or voltage is, for jMF"
+        }
+      },
+      "required" : [ "kind", "from", "to", "value" ],
+      "description" : "current base -> bi = …, voltage out -> 0 = …: a branch through the part, from one pin or node to another.",
+      "additionalProperties" : false
+    },
+    "Equation.Defined" : {
+      "type" : "object",
+      "properties" : {
+        "left" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its left side, as written"
+        },
+        "right" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its right side, as written"
+        },
+        "statement" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the whole line as written: one statement of jMF"
+        }
+      },
+      "required" : [ "left", "right", "statement" ],
+      "description" : "left = right, both sides as written for jMF: a definition (delay_scale(supply) = …), a value (temperature = ambient + heating), a next or a start value (x_next = …). statement is the whole line as written: one statement of jMF, as jMF reads a definition.",
+      "additionalProperties" : false
+    },
+    "Equation.Derivative" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "type" : "string",
+          "description" : "the state that changes"
+        },
+        "rate" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "how fast it changes, for jMF"
+        }
+      },
+      "required" : [ "state", "rate" ],
+      "description" : "d(flux)/dt = primary - secondary: how fast a state changes. A document writes it as any other Defined line; it is a derivative because jMF reads its left side as one, where it is compiled.",
+      "additionalProperties" : false
+    },
+    "Equation.Local" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the name it gives the value"
+        },
+        "type" : {
+          "type" : [ "string", "null" ],
+          "description" : "the quantity it is — voltage, ratio —, or null"
+        },
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the value, for jMF"
+        }
+      },
+      "required" : [ "name", "type", "value" ],
+      "description" : "let V_be : voltage = …: a name for a value the other equations use.",
+      "additionalProperties" : false
+    },
+    "Formula" : {
+      "type" : "object",
+      "properties" : {
+        "written" : {
+          "type" : "string",
+          "description" : "the expression as its author wrote it"
+        }
+      },
+      "required" : [ "written" ],
+      "description" : "An expression as its author wrote it — 4.7 kΩ, 100 * abs(anode.current) / I_maximum —, for jMF to compile where it is computed. The model says what it is for; what it means is the formula language's.",
+      "additionalProperties" : false
+    },
+    "Parameter" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as formulas name it"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "its value: a formula, or a text"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "its value: a formula, or a text"
+          } ]
+        },
+        "range" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Range.Between",
+            "description" : "the values it may take, or null for any"
+          }, {
+            "$ref" : "#/$defs/Range.Listed",
+            "description" : "the values it may take, or null for any"
+          } ]
+        },
+        "step" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "how far one step of a control moves it, or null"
+        },
+        "per" : {
+          "type" : [ "string", "null" ],
+          "description" : "the unit it is counted per — V per unit —, or null"
+        },
+        "flags" : {
+          "description" : "how it is offered, as written: log, integer, exact, animate, live",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "what it is, for a reader; empty when not written"
+        }
+      },
+      "required" : [ "name", "value", "range", "step", "per", "flags", "description" ],
+      "description" : "A parameter of a component or a circuit: its name, its value, and what a reader may set it to — a range, a step, a unit it is counted per, and how it is offered (log, integer, live…).",
+      "additionalProperties" : false
+    },
+    "Range.Between" : {
+      "type" : "object",
+      "properties" : {
+        "low" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its low end"
+        },
+        "high" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its high end"
+        }
+      },
+      "required" : [ "low", "high" ],
+      "description" : "low .. high: every value from one end to the other.",
+      "additionalProperties" : false
+    },
+    "Range.Listed" : {
+      "type" : "object",
+      "properties" : {
+        "values" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the values, as written"
+        }
+      },
+      "required" : [ "values" ],
+      "description" : "The list as written, brackets and all, for jMF to read.",
+      "additionalProperties" : false
+    },
+    "Text" : {
+      "type" : "object",
+      "properties" : {
+        "text" : {
+          "type" : "string",
+          "description" : "what it says, without its quotes"
+        }
+      },
+      "required" : [ "text" ],
+      "description" : "A text a name is given — operation = \"write\" —: what it says, without its quotes.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "head" : {
+      "$ref" : "#/$defs/DocumentHead",
+      "description" : "what the document says of itself: its slug, its title, its role and its meta fields"
+    },
+    "uses" : {
+      "description" : "the libraries it uses itself, by slug",
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "parameters" : {
+      "description" : "the parameters its members share",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Parameter"
+      }
+    },
+    "formulas" : {
+      "description" : "its definitions for jMF",
+      "type" : "array",
+      "items" : {
+        "anyOf" : [ {
+          "$ref" : "#/$defs/Equation.Local"
+        }, {
+          "$ref" : "#/$defs/Equation.Branch"
+        }, {
+          "$ref" : "#/$defs/Equation.Derivative"
+        }, {
+          "$ref" : "#/$defs/Equation.Defined"
+        } ]
+      }
+    },
+    "heat" : {
+      "description" : "its heat law's lines: how warm a member grows; empty for none",
+      "type" : "array",
+      "items" : {
+        "anyOf" : [ {
+          "$ref" : "#/$defs/Equation.Local"
+        }, {
+          "$ref" : "#/$defs/Equation.Branch"
+        }, {
+          "$ref" : "#/$defs/Equation.Derivative"
+        }, {
+          "$ref" : "#/$defs/Equation.Defined"
+        } ]
+      }
+    }
+  },
+  "required" : [ "head", "uses", "parameters", "formulas", "heat" ],
+  "description" : "A family its members share — 74HC CMOS logic —, or a library of functions — junctions, heat —: its parameters, its definitions for jMF, and a heat law, each empty when it writes none.",
+  "additionalProperties" : false
+}

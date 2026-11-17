@@ -22,7 +22,7 @@ component:and-gate("AND gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: "SY.GATE:AND")
+    symbol(uses: "GATE:AND:S")
 
     behaviour {
         function level()

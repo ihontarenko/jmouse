@@ -1,7 +1,7 @@
 model:pin-socket-2x6-pitch-254-vertical-model("Pin socket, 2.54 mm pitch, 2 × 6, vertical") {
     meta {
         summary: "Pin socket, 2.54 mm pitch, 2 × 6, vertical — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SKT:2X6-P2.54-V"
+        code: "SKT:2X6-P2.54-V:M3D"
         category: connectors-through-hole
         tags: electronics, model, header
         source: "IEC 60603-13 grid"

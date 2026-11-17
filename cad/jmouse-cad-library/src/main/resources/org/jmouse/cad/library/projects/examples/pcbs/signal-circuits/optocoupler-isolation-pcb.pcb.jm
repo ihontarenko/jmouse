@@ -14,7 +14,7 @@ pcb:optocoupler-isolation-pcb("Optocoupler isolation — pcb") {
     place(RF, at: 11 6.5)
     place(U1, at: 20 10.5)
     place(RP, at: 28.5 6.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, input: 2, isolated: 3, output: 4, supply: 5], at: 5.5 10)
+    place(J1, footprint: "HDR:1X5-P2.54-V:F", nets: [0: 1, input: 2, isolated: 3, output: 4, supply: 5], at: 5.5 10)
     track(top, width: 0.25, from: 10 6.5, to: 6.46 6.5, to: 5.5 7.46)
     track(top, width: 0.25, from: 23.81 9.23, to: 26.77 9.23, to: 28.5 7.5)
     track(top, width: 0.25, from: 12 6.5, to: 13.46 6.5, to: 16.19 9.23)

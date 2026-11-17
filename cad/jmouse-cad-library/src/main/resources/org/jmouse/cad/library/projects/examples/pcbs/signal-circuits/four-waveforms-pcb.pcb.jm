@@ -15,7 +15,7 @@ pcb:four-waveforms-pcb("Four waveforms — pcb") {
     place(R2, at: 14 10, rotate: 270)
     place(R3, at: 18 10, rotate: 270)
     place(R4, at: 22.5 10, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, sawtooth: 2, sine: 3, square: 4, triangle: 5], at: 5.5 10)
+    place(J1, footprint: "HDR:1X5-P2.54-V:F", nets: [0: 1, sawtooth: 2, sine: 3, square: 4, triangle: 5], at: 5.5 10)
     track(top, width: 0.25, from: 10 11, to: 10 12.05)
     track(top, width: 0.25, from: 14 11, to: 14 12.05)
     track(top, width: 0.25, from: 18 11, to: 18 12.05)

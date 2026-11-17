@@ -1,7 +1,7 @@
 symbol:seven-segment-symbol("Seven-segment display") {
     meta {
         summary: "A seven-segment digit and its point, cathodes common: each segment lights red as its own current flows"
-        code: "SY.DISPLAY:SEVEN-SEGMENT"
+        code: "DISPLAY:SEVEN-SEGMENT:S"
         category: displays
         tags: electronics, schematic, display
         authors: "jMouse"

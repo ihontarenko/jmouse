@@ -1,7 +1,7 @@
 footprint:tantalum-capacitor-3528-footprint("Tantalum capacitor Case B (3528-21 metric)") {
     meta {
         summary: "Tantalum capacitor, Case B (3528-21 metric) body, reflow pads; pad 1 is the positive terminal"
-        code: "FP.CHIP:CT3528"
+        code: "CHIP:CT3528:F"
         category: capacitors-surface
         tags: electronics, footprint, surface
         source: "EIA-535-BAAC case sizes (KEMET T491), Case B (3528-21 metric)"
@@ -18,5 +18,5 @@ footprint:tantalum-capacitor-3528-footprint("Tantalum capacitor Case B (3528-21 
     outline(silkscreen, width: 0.12, "M-2.46 -1.635V1.635")
     outline(courtyard, width: 0.05, "M-2.45 -1.8H2.45V1.8H-2.45Z")
     body(height: 2.1)
-    model("MD.CHIP:CT3528")
+    model("CHIP:CT3528:M3D")
 }

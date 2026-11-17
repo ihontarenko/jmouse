@@ -1,7 +1,7 @@
 model:chip-led-0402-model("Chip LED 0402 (1005 metric)") {
     meta {
         summary: "Chip LED 0402 (1005 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:LED0402"
+        code: "CHIP:LED0402:M3D"
         category: optoelectronics-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0402 (1005 metric)"

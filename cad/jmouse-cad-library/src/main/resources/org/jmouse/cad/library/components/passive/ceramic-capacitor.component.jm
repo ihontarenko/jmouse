@@ -34,12 +34,12 @@ component:ceramic-capacitor("Ceramic capacitor", type: capacitor) {
     node:plate("the capacitance, behind ESR and ESL")
     node:series_current("a node whose voltage above terminal_two is the series current, one volt per ampere")
 
-    footprint("FP.CHIP:C0805")
-    footprint("FP.CHIP:C0603")
-    footprint("FP.CHIP:C1206")
-    footprint("FP.RADIAL:CD-5X2.5-P5")
+    footprint("CHIP:C0805:F")
+    footprint("CHIP:C0603:F")
+    footprint("CHIP:C1206:F")
+    footprint("RADIAL:CD-5X2.5-P5:F")
 
-    symbol(uses: "SY.CAPACITOR:FIXED") {
+    symbol(uses: "CAPACITOR:FIXED:S") {
         bind:failed(failed)
         bind:charge((terminal_one - terminal_two) / voltage_rating)
         bind:a(pin: terminal_one)

@@ -1,7 +1,7 @@
 package org.jmouse.cad.library;
 
 import org.jmouse.cad.table.TableModule;
-import java.util.function.Function;
+import org.jmouse.cad.document.DocumentModel;
 import java.util.Optional;
 import java.util.Map;
 import org.jmouse.cad.document.DocumentNode;
@@ -82,9 +82,9 @@ public final class CadLanguage {
      */
     public Optional<Object> modelOf(DocumentNode document) {
         for (DocumentModule module : modules) {
-            for (Map.Entry<DocumentKind, Function<DocumentNode, Object>> reader : module.models().entrySet()) {
-                if (reader.getKey().word().equals(document.kind().word())) {
-                    return Optional.of(reader.getValue().apply(document));
+            for (Map.Entry<DocumentKind, DocumentModel<?>> model : module.models().entrySet()) {
+                if (model.getKey().word().equals(document.kind().word())) {
+                    return Optional.of(model.getValue().read(document));
                 }
             }
         }

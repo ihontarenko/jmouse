@@ -2,7 +2,7 @@
 portrait:ssop-16-portrait("SSOP-16") {
     meta {
         summary: "16-lead SSOP, 5.3 mm body from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.SSOP:16-P0.65-W5.3"
+        code: "SSOP:16-P0.65-W5.3:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-150"

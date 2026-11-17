@@ -5,6 +5,7 @@ import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.AreaOffsets;
 import org.jmouse.cad.pcb.geometry.CopperNets;
+import org.jmouse.cad.pcb.geometry.CopperPieces;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
 import org.jmouse.cad.pcb.geometry.PadOutline;
 import org.jmouse.cad.pcb.geometry.ZonePours;
@@ -51,7 +52,7 @@ class ViaRowsTest {
         CopperNets nets = CopperNets.of(pcb, Map.of("TP1", POINT, "TP2", POINT, "TP3", POINT, "TP4", POINT), Map.of("TP1", Map.of("1", "GND"),
                 "TP2", Map.of("1", "GND"), "TP3", Map.of("1", "SIG"), "TP4", Map.of("1", "SIG")),
                 new PadOutline(CURVE_STEPS, 6), CURVE_STEPS);
-        List<Optional<org.locationtech.jts.geom.Geometry>> pours = new ZonePours(pcb, nets, VALUES, CURVE_STEPS, ARC_ERROR).pour();
+        List<Optional<org.locationtech.jts.geom.Geometry>> pours = new ZonePours(pcb, nets, CopperPieces.of(pcb, nets, List.of(), CURVE_STEPS), VALUES, CURVE_STEPS, ARC_ERROR).pour();
         return new ViaRows(pcb, nets, pours, new NetRules(pcb, VALUES), new AreaOffsets(ARC_ERROR), CURVE_STEPS);
     }
 

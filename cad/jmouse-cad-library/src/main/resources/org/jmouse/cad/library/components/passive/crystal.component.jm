@@ -25,9 +25,9 @@ component:crystal("Crystal, 8 MHz", type: crystal) {
     state:I_motional(0, continuous, "the current in the motional branch")
     state:q_motional(0, continuous, "the charge on the motional capacitance")
 
-    footprint("FP.XTAL:HC49US-P4.88")
+    footprint("XTAL:HC49US-P4.88:F")
 
-    symbol(uses: "SY.CRYSTAL:TWO-TERMINAL") {
+    symbol(uses: "CRYSTAL:TWO-TERMINAL:S") {
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
     }
@@ -52,7 +52,7 @@ component:crystal("Crystal, 8 MHz", type: crystal) {
     }
 
     # How it looks in the hand: its HC-49/US can stamped with its frequency.
-    portrait(uses: "PT.CRYSTAL:HC49-US") {
+    portrait(uses: "CRYSTAL:HC49-US:P") {
         bind:frequency(frequency)
     }
 }

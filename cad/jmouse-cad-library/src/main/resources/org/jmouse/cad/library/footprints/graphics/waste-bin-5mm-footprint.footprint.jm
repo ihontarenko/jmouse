@@ -1,7 +1,7 @@
 footprint:waste-bin-5mm-footprint("Separate collection, 5 mm") {
     meta {
         summary: "A crossed-out bin: not to be thrown away with household waste, printed 5 mm wide"
-        code: "FP.GRAPHIC:WASTE-BIN-5"
+        code: "GRAPHIC:WASTE-BIN-5:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

@@ -1,7 +1,7 @@
 model:disc-varistor-diameter-900-pitch-500-model("Metal-oxide disc varistor, 7 mm disc") {
     meta {
         summary: "Metal-oxide disc varistor, 7 mm disc — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RV:D9-P5"
+        code: "RV:D9-P5:M3D"
         category: protection-through-hole
         tags: electronics, model, radial
         source: "IEC 61051-2 varistors, the makers' disc sizes (TDK SIOV-S)"

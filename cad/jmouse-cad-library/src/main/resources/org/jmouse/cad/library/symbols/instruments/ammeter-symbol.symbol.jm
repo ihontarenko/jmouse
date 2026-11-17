@@ -1,7 +1,7 @@
 symbol:ammeter-symbol("Ammeter") {
     meta {
         summary: "Ammeter, as drawn on a schematic: a dial marked A"
-        code: "SY.METER:AMMETER"
+        code: "METER:AMMETER:S"
         category: instruments
         tags: electronics, schematic, instrument
         authors: "jMouse"

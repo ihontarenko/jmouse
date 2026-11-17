@@ -1,7 +1,7 @@
 model:melf-resistor-model("MELF resistor MELF (DO-213AB)") {
     meta {
         summary: "MELF resistor MELF (DO-213AB) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.MELF:R-"
+        code: "MELF:R-:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "JEDEC DO-213 and the makers' MELF outlines, MELF (DO-213AB)"

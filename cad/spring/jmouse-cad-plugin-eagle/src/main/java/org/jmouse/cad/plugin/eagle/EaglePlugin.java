@@ -29,7 +29,7 @@ public final class EaglePlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, TITLE, EaglePlugin.class).drawnBy(EaglePlugin.class, "eagle.svg");
+        return PluginDescriptor.ofArtifact(ID, TITLE, EaglePlugin.class).withIcon(EaglePlugin.class, "eagle.svg");
     }
 
     @Override

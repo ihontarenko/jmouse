@@ -1,7 +1,7 @@
 model:chip-resistor-1206-hand-soldering-model("Chip resistor 1206 (3216 metric), hand soldering") {
     meta {
         summary: "Chip resistor 1206 (3216 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:R1206-HAND"
+        code: "CHIP:R1206-HAND:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 1206 (3216 metric)"

@@ -15,7 +15,7 @@ import java.util.List;
  * spelling; nothing here writes the language's text.
  *
  * @param designation its package's designation from its kind's {@code designation} template — {@code AXIAL:R0204-P7.62-H}
- *                    —: its technical code once {@code FP} says it is a footprint
+ *                    —: its technical code once {@code :F} says it is a footprint
  * @param folder      where under the library's footprints its file stands
  * @param category    the category it files itself in, as its table names it: {@code resistors-surface}
  * @param mounting    {@code surface} or {@code through-hole}
@@ -29,7 +29,7 @@ public record StandardFootprint(String slug, String designation, String title, S
         notes = List.copyOf(notes);
     }
 
-    /** Its technical code — {@code FP.AXIAL:R0204-P7.62-H} —: what a dense list leads with. */
+    /** Its technical code — {@code AXIAL:R0204-P7.62-H:F} —: what a dense list leads with. */
     public String code() {
         return TechnicalClass.FOOTPRINT.code(designation);
     }

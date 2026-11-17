@@ -16,7 +16,7 @@ component:n-mosfet("N-channel MOSFET", type: mosfet) {
     parameter:V_threshold(1 V, "VTO: an enhancement part opens above it")
     parameter:transconductance(0.1 A/V^2, "KP: the whole channel")
 
-    symbol(uses: "SY.TRANSISTOR:MOSFET-N") {
+    symbol(uses: "TRANSISTOR:MOSFET-N:S") {
         bind:failed(failed)
     }
 

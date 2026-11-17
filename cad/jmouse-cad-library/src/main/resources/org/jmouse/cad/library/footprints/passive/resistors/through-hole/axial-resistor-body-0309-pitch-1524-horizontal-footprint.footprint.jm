@@ -1,7 +1,7 @@
 footprint:axial-resistor-body-0309-pitch-1524-horizontal-footprint("Axial resistor DIN 0309, horizontal, 15.24 mm") {
     meta {
         summary: "Axial resistor DIN 0309, body 9 × ⌀3.2 mm, laid flat, 15.24 mm between its holes"
-        code: "FP.AXIAL:R0309-P15.24-H"
+        code: "AXIAL:R0309-P15.24-H:F"
         category: resistors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-1 bodies, DIN 44051 size codes"
@@ -16,5 +16,5 @@ footprint:axial-resistor-body-0309-pitch-1524-horizontal-footprint("Axial resist
     outline(silkscreen, width: 0.12, "M-4.61 -1.71H4.61V1.71H-4.61ZM-6.41 0H-4.61M4.61 0H6.41")
     outline(courtyard, width: 0.05, "M-9.05 -2.1H9.05V2.1H-9.05Z")
     body(height: 3.2)
-    model("MD.AXIAL:R0309-P15.24-H")
+    model("AXIAL:R0309-P15.24-H:M3D")
 }

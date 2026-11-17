@@ -1,0 +1,934 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:component",
+  "title" : "A component document, as the engine answers it (Component)",
+  "$defs" : {
+    "Bench" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : [ "string", "null" ],
+          "description" : "a bench shared by name — i2c-bus —, or null"
+        },
+        "duration" : {
+          "type" : [ "number", "null" ],
+          "description" : "seconds it runs, or null where its expectation's measure says"
+        },
+        "temperature" : {
+          "type" : [ "number", "null" ],
+          "description" : "the temperature it runs at, kelvin, or null for the nominal bench"
+        },
+        "realistic" : {
+          "type" : "boolean",
+          "description" : "whether its instruments load what they read and a part fails as its component says"
+        },
+        "parts" : {
+          "description" : "the parts it adds round the part tried: sources, loads, instruments",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Part"
+          }
+        }
+      },
+      "required" : [ "name", "duration", "temperature", "realistic", "parts" ],
+      "description" : "What a part is tried among: a bench's parts, how long it runs, at what temperature, and whether it is realistic — its instruments load what they read, a part fails as its component says.",
+      "additionalProperties" : false
+    },
+    "Connection" : {
+      "type" : "object",
+      "properties" : {
+        "pin" : {
+          "type" : [ "string", "null" ],
+          "description" : "the pin it names; null when the part is connected in pin order"
+        },
+        "net" : {
+          "type" : "string",
+          "description" : "the net the pin is on"
+        }
+      },
+      "required" : [ "pin", "net" ],
+      "description" : "One connection of a part: the pin it names — none when the part is connected in pin order — and the net.",
+      "additionalProperties" : false
+    },
+    "Criterion.Is" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the value — or the row of values — the measure must be"
+        }
+      },
+      "required" : [ "value" ],
+      "description" : "is 1, is [1, 0, 1].",
+      "additionalProperties" : false
+    },
+    "Criterion.Near" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the value the measure is held near"
+        },
+        "tolerance" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "how far from it the measure may be: 5%, 2 mV"
+        }
+      },
+      "required" : [ "value", "tolerance" ],
+      "description" : "near 6.86 kHz ± 5%.",
+      "additionalProperties" : false
+    },
+    "Criterion.Within" : {
+      "type" : "object",
+      "properties" : {
+        "range" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Range.Between",
+            "description" : "the values the measure may take"
+          }, {
+            "$ref" : "#/$defs/Range.Listed",
+            "description" : "the values the measure may take"
+          } ]
+        }
+      },
+      "required" : [ "range" ],
+      "description" : "within 26 V .. 30 V.",
+      "additionalProperties" : false
+    },
+    "DocumentHead" : {
+      "type" : "object",
+      "properties" : {
+        "slug" : {
+          "type" : "string",
+          "description" : "what the document is known by: its address among the library's"
+        },
+        "title" : {
+          "type" : "string",
+          "description" : "what it is called, for a reader"
+        },
+        "type" : {
+          "type" : [ "string", "null" ],
+          "description" : "the role its kind gives it — type gate —, or null where it says none"
+        },
+        "meta" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "its meta fields — summary, source, category … —, as written"
+        }
+      },
+      "required" : [ "slug", "title", "type", "meta" ],
+      "description" : "What every document of the model says of itself: its slug, its title, the role its kind gives it (type gate), and its meta fields — summary, source, category… — as written.",
+      "additionalProperties" : false
+    },
+    "Drawing" : {
+      "type" : "object",
+      "properties" : {
+        "uses" : {
+          "description" : "the drawings it may be drawn with, the first its default; empty for a box",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "box" : {
+          "description" : "the sides of the box it is drawn as, or empty for a drawing it uses",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Drawing.BoxSide"
+          }
+        },
+        "bindings" : {
+          "description" : "what the drawing's inputs are, from the part's values and pins",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Drawing.Binding"
+          }
+        }
+      },
+      "required" : [ "uses", "box", "bindings" ],
+      "description" : "How a component is drawn — its symbol — or how it looks — its portrait —: the drawings it uses, by slug, or a box of its own, and what the drawing's inputs are bound to.",
+      "additionalProperties" : false
+    },
+    "Drawing.Binding" : {
+      "type" : "object",
+      "properties" : {
+        "input" : {
+          "type" : "string",
+          "description" : "the drawing's input it binds"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula",
+            "description" : "the value it is given, or null for a pin"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "the value it is given, or null for a pin"
+          } ]
+        },
+        "pin" : {
+          "type" : [ "string", "null" ],
+          "description" : "the part's pin it follows, or null for a value"
+        }
+      },
+      "required" : [ "input", "value", "pin" ],
+      "description" : "failed = failed, a anode: an input of the drawing, given a value or one of the part's pins.",
+      "additionalProperties" : false
+    },
+    "Drawing.BoxPin" : {
+      "type" : "object",
+      "properties" : {
+        "pin" : {
+          "type" : "string",
+          "description" : "the pin, by name"
+        },
+        "marks" : {
+          "description" : "how it is marked: edge, bubble",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "required" : [ "pin", "marks" ],
+      "description" : "A pin on a box's side, and its marks — edge, bubble.",
+      "additionalProperties" : false
+    },
+    "Drawing.BoxSide" : {
+      "type" : "object",
+      "properties" : {
+        "side" : {
+          "type" : "string",
+          "description" : "the box's side: left, right, top or bottom"
+        },
+        "pins" : {
+          "description" : "the pins drawn there, in order",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Drawing.BoxPin"
+          }
+        }
+      },
+      "required" : [ "side", "pins" ],
+      "description" : "A side of a box and the pins it draws there, each with its marks: left clock edge, cs bubble.",
+      "additionalProperties" : false
+    },
+    "Equation.Branch" : {
+      "type" : "object",
+      "properties" : {
+        "kind" : {
+          "type" : "string",
+          "description" : "current or voltage"
+        },
+        "from" : {
+          "type" : "string",
+          "description" : "the pin or node it runs from"
+        },
+        "to" : {
+          "type" : "string",
+          "description" : "the pin or node it runs to"
+        },
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "what the current or voltage is, for jMF"
+        }
+      },
+      "required" : [ "kind", "from", "to", "value" ],
+      "description" : "current base -> bi = …, voltage out -> 0 = …: a branch through the part, from one pin or node to another.",
+      "additionalProperties" : false
+    },
+    "Equation.Defined" : {
+      "type" : "object",
+      "properties" : {
+        "left" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its left side, as written"
+        },
+        "right" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its right side, as written"
+        },
+        "statement" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the whole line as written: one statement of jMF"
+        }
+      },
+      "required" : [ "left", "right", "statement" ],
+      "description" : "left = right, both sides as written for jMF: a definition (delay_scale(supply) = …), a value (temperature = ambient + heating), a next or a start value (x_next = …). statement is the whole line as written: one statement of jMF, as jMF reads a definition.",
+      "additionalProperties" : false
+    },
+    "Equation.Derivative" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "type" : "string",
+          "description" : "the state that changes"
+        },
+        "rate" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "how fast it changes, for jMF"
+        }
+      },
+      "required" : [ "state", "rate" ],
+      "description" : "d(flux)/dt = primary - secondary: how fast a state changes. A document writes it as any other Defined line; it is a derivative because jMF reads its left side as one, where it is compiled.",
+      "additionalProperties" : false
+    },
+    "Equation.Local" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the name it gives the value"
+        },
+        "type" : {
+          "type" : [ "string", "null" ],
+          "description" : "the quantity it is — voltage, ratio —, or null"
+        },
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the value, for jMF"
+        }
+      },
+      "required" : [ "name", "type", "value" ],
+      "description" : "let V_be : voltage = …: a name for a value the other equations use.",
+      "additionalProperties" : false
+    },
+    "Expectation" : {
+      "type" : "object",
+      "properties" : {
+        "title" : {
+          "type" : "string",
+          "description" : "what it says holds, for a reader"
+        },
+        "source" : {
+          "type" : "string",
+          "description" : "why it holds — a datasheet's line, a calculation —, or empty"
+        },
+        "bench" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Bench"
+          } ],
+          "description" : "the bench it runs on when it is not the document's own, or null"
+        },
+        "measure" : {
+          "$ref" : "#/$defs/Measure",
+          "description" : "what is measured"
+        },
+        "criterion" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Criterion.Near",
+            "description" : "what the measure is held to"
+          }, {
+            "$ref" : "#/$defs/Criterion.Within",
+            "description" : "what the measure is held to"
+          }, {
+            "$ref" : "#/$defs/Criterion.Is",
+            "description" : "what the measure is held to"
+          } ]
+        }
+      },
+      "required" : [ "title", "source", "bench", "measure", "criterion" ],
+      "description" : "What a document says it does, to be checked by running it: what holds, why — its source —, on which bench, measured how, held to what.",
+      "additionalProperties" : false
+    },
+    "Figure" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called"
+        },
+        "index" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Index"
+          } ],
+          "description" : "a figure for each slot of a row — cell[32] —, or null for one"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "how it is computed from the part's nets and states"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "how it is computed from the part's nets and states"
+          } ]
+        },
+        "unit" : {
+          "type" : [ "string", "null" ],
+          "description" : "what it is shown in — %, °C —, or null for a bare number"
+        },
+        "signal" : {
+          "type" : "boolean",
+          "description" : "whether an instrument's reading is a signal to plot, rather than a number to show"
+        },
+        "caption" : {
+          "type" : "string",
+          "description" : "what it says of itself; empty when not written"
+        }
+      },
+      "required" : [ "name", "index", "value", "unit", "signal", "caption" ],
+      "description" : "A figure a component shows — display — or an instrument reads — measure —: a value computed from the part's nets and states, the unit it is shown in, and a caption.",
+      "additionalProperties" : false
+    },
+    "Formula" : {
+      "type" : "object",
+      "properties" : {
+        "written" : {
+          "type" : "string",
+          "description" : "the expression as its author wrote it"
+        }
+      },
+      "required" : [ "written" ],
+      "description" : "An expression as its author wrote it — 4.7 kΩ, 100 * abs(anode.current) / I_maximum —, for jMF to compile where it is computed. The model says what it is for; what it means is the formula language's.",
+      "additionalProperties" : false
+    },
+    "Index" : {
+      "type" : "object",
+      "properties" : {
+        "first" : {
+          "type" : "integer",
+          "description" : "the first member's number"
+        },
+        "last" : {
+          "type" : "integer",
+          "description" : "the last member's number"
+        }
+      },
+      "required" : [ "first", "last" ],
+      "description" : "The index a name is written with: a bus's bits — q[0..7] —, or a row's slots — memory[256], slots 0 to 255. Each of them is a name of its own, the name and its number joined: q_0, memory_255.",
+      "additionalProperties" : false
+    },
+    "InternalNode" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as the equations name it"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "what it is, for a reader"
+        }
+      },
+      "required" : [ "name", "description" ],
+      "description" : "A node of a component's own, behind its pins — the intrinsic base of a transistor —, and what it is.",
+      "additionalProperties" : false
+    },
+    "Lead" : {
+      "type" : "object",
+      "properties" : {
+        "pin" : {
+          "type" : "string",
+          "description" : "the instrument's pin it is wired to"
+        },
+        "colour" : {
+          "type" : "string",
+          "description" : "the lead's colour"
+        },
+        "stripes" : {
+          "type" : [ "string", "null" ],
+          "description" : "its stripes' colour, or null for a plain lead"
+        }
+      },
+      "required" : [ "pin", "colour", "stripes" ],
+      "description" : "The lead an instrument's pin is wired with: its colour, and its stripes' colour, or null.",
+      "additionalProperties" : false
+    },
+    "Measure" : {
+      "type" : "object",
+      "properties" : {
+        "statistic" : {
+          "type" : "string",
+          "description" : "what is taken of the reading: final, maximum, average, frequency …"
+        },
+        "subject" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "the net or expression it reads, or null where it reads something else"
+        },
+        "reading" : {
+          "type" : [ "string", "null" ],
+          "description" : "what else it reads — current, level, levels, figure, figures —, or null for a subject"
+        },
+        "targets" : {
+          "description" : "what that reading names: a part, a net, a part's figures",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "conditions" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "number"
+          },
+          "description" : "each condition's word and its value in SI: after, above, below, at"
+        },
+        "settings" : {
+          "description" : "the settings changed for this measure alone",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Setting"
+          }
+        }
+      },
+      "required" : [ "statistic", "subject", "reading", "targets", "conditions", "settings" ],
+      "description" : "What an expectation measures: a statistic — final, maximum, average, frequency… — of a subject — a net, current R1, out - in —, and when: after 60 ms, above 2.5 V, at 1 kHz, with settings changed for it.",
+      "additionalProperties" : false
+    },
+    "Parameter" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as formulas name it"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "its value: a formula, or a text"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "its value: a formula, or a text"
+          } ]
+        },
+        "range" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Range.Between",
+            "description" : "the values it may take, or null for any"
+          }, {
+            "$ref" : "#/$defs/Range.Listed",
+            "description" : "the values it may take, or null for any"
+          } ]
+        },
+        "step" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "how far one step of a control moves it, or null"
+        },
+        "per" : {
+          "type" : [ "string", "null" ],
+          "description" : "the unit it is counted per — V per unit —, or null"
+        },
+        "flags" : {
+          "description" : "how it is offered, as written: log, integer, exact, animate, live",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "what it is, for a reader; empty when not written"
+        }
+      },
+      "required" : [ "name", "value", "range", "step", "per", "flags", "description" ],
+      "description" : "A parameter of a component or a circuit: its name, its value, and what a reader may set it to — a range, a step, a unit it is counted per, and how it is offered (log, integer, live…).",
+      "additionalProperties" : false
+    },
+    "Part" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "what the circuit calls it — R1 —, unique in the circuit"
+        },
+        "component" : {
+          "type" : "string",
+          "description" : "the component it is, by slug — resistor, lm358@3 for a unit of one"
+        },
+        "connections" : {
+          "description" : "what each of its pins is connected to, in pin order or by pin",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Connection"
+          }
+        },
+        "settings" : {
+          "description" : "what its parameters are set to",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Setting"
+          }
+        },
+        "symbol" : {
+          "type" : [ "string", "null" ],
+          "description" : "the symbol it is drawn with when not its component's own, or null"
+        },
+        "footprint" : {
+          "type" : [ "string", "null" ],
+          "description" : "the footprint it sits on when not its component's own, or null"
+        },
+        "pads" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "which pin each pad of that footprint takes, by pad, where this part's differ from what its component says: a footprint another product numbers its own way — a KiCad diode's pad 1 is its cathode. Empty otherwise."
+        }
+      },
+      "required" : [ "reference", "component", "connections", "settings", "symbol", "footprint", "pads" ],
+      "description" : "A part of a circuit: its reference, the component it is — resistor, lm358@3 for a unit of one —, what it is connected to, what it is set to, and how it is drawn or seated when not as its component says. ⚠️ Every part is a component. A resistor and a microcontroller are the same kind of thing here; which of them the engine solves natively is the engine's to say, from the component, never a second sort of part.",
+      "additionalProperties" : false
+    },
+    "Pin" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as the part's wires name it"
+        },
+        "index" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Index"
+          } ],
+          "description" : "a bus's bits — q[0..7] —, each a pin of its own; null for one pin"
+        },
+        "nature" : {
+          "type" : "string",
+          "description" : "analog, digital, power or ground"
+        },
+        "direction" : {
+          "type" : [ "string", "null" ],
+          "description" : "input, output, bidirectional, or null for an analog pin that is neither"
+        },
+        "drive" : {
+          "type" : [ "string", "null" ],
+          "description" : "how it drives — open-drain, open-collector (Drive) —, or null for a push-pull output and any other pin"
+        },
+        "numbers" : {
+          "description" : "its numbers on the package, in groups as written: 1 7 one group, 15, 1, 2 three — a bus's pins are its groups, one a bit",
+          "type" : "array",
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "edge" : {
+          "type" : "boolean",
+          "description" : "whether it acts on an edge rather than a level: a clock"
+        },
+        "label" : {
+          "type" : "string",
+          "description" : "what it is, for a reader; empty when not written"
+        }
+      },
+      "required" : [ "name", "index", "nature", "direction", "drive", "numbers", "edge", "label" ],
+      "description" : "A pin of a component: its name, what it carries, which way its signal goes, how it drives, the numbers it has on the package, and a label for a reader.",
+      "additionalProperties" : false
+    },
+    "Range.Between" : {
+      "type" : "object",
+      "properties" : {
+        "low" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its low end"
+        },
+        "high" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its high end"
+        }
+      },
+      "required" : [ "low", "high" ],
+      "description" : "low .. high: every value from one end to the other.",
+      "additionalProperties" : false
+    },
+    "Range.Listed" : {
+      "type" : "object",
+      "properties" : {
+        "values" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the values, as written"
+        }
+      },
+      "required" : [ "values" ],
+      "description" : "The list as written, brackets and all, for jMF to read.",
+      "additionalProperties" : false
+    },
+    "Seat" : {
+      "type" : "object",
+      "properties" : {
+        "footprint" : {
+          "type" : "string",
+          "description" : "the footprint, by slug"
+        },
+        "pads" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "which pin each pad is, by pad, in the order written; empty for the pins' own numbers"
+        }
+      },
+      "required" : [ "footprint", "pads" ],
+      "description" : "A footprint a component sits on, by slug, and which of its pins each pad is when the package numbers them its own way — 1 base —; empty when the pads are the pins' own numbers. The pads keep the order they are written in, so whatever is made of them — a netlist, a pcb file — reads the same every time.",
+      "additionalProperties" : false
+    },
+    "Setting" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the parameter it sets, or the word that stands alone"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "what it is set to: a formula, or a text"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "what it is set to: a formula, or a text"
+          } ]
+        }
+      },
+      "required" : [ "name", "value" ],
+      "description" : "A name a part is set by — resistance = R, bytes = \"8 0\" —, or one standing alone, closed.",
+      "additionalProperties" : false
+    },
+    "State" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as the equations name it"
+        },
+        "index" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Index"
+          } ],
+          "description" : "a row's slots — memory[256] —, or null for one state"
+        },
+        "start" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "what it holds at the start"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "what it holds at the start"
+          } ]
+        },
+        "kind" : {
+          "type" : "string",
+          "description" : "discrete: it changes in steps; continuous: the solver integrates it"
+        },
+        "range" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Range.Between",
+            "description" : "the values it may hold, or null for any"
+          }, {
+            "$ref" : "#/$defs/Range.Listed",
+            "description" : "the values it may hold, or null for any"
+          } ]
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "what it is, for a reader; empty when not written"
+        }
+      },
+      "required" : [ "name", "index", "start", "kind", "range", "description" ],
+      "description" : "A state a component keeps between steps: its start, whether it changes in steps (discrete) or as a quantity the solver integrates (continuous), what it may hold. A name with an index — memory[256] — is a row of them.",
+      "additionalProperties" : false
+    },
+    "Text" : {
+      "type" : "object",
+      "properties" : {
+        "text" : {
+          "type" : "string",
+          "description" : "what it says, without its quotes"
+        }
+      },
+      "required" : [ "text" ],
+      "description" : "A text a name is given — operation = \"write\" —: what it says, without its quotes.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "head" : {
+      "$ref" : "#/$defs/DocumentHead",
+      "description" : "what the document says of itself: its slug, its title, its role and its meta fields"
+    },
+    "bases" : {
+      "description" : "the components it extends, by slug — a datasheet part extends the model it is a member of",
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "uses" : {
+      "description" : "the families and libraries of functions it uses, by slug",
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "units" : {
+      "description" : "the blocks of its package — units A, B —, each with its own pin numbers and states; empty for a package of one",
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "parameters" : {
+      "description" : "its parameters, which its equations and behaviour read",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Parameter"
+      }
+    },
+    "pins" : {
+      "description" : "its pins, in their order",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Pin"
+      }
+    },
+    "nodes" : {
+      "description" : "the nodes of its own behind its pins",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/InternalNode"
+      }
+    },
+    "states" : {
+      "description" : "what it keeps between steps",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/State"
+      }
+    },
+    "display" : {
+      "description" : "the figures it shows on a sheet",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Figure"
+      }
+    },
+    "readings" : {
+      "description" : "the figures an instrument reads of it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Figure"
+      }
+    },
+    "equations" : {
+      "description" : "its equations for jMF, by their forms",
+      "type" : "array",
+      "items" : {
+        "anyOf" : [ {
+          "$ref" : "#/$defs/Equation.Local"
+        }, {
+          "$ref" : "#/$defs/Equation.Branch"
+        }, {
+          "$ref" : "#/$defs/Equation.Derivative"
+        }, {
+          "$ref" : "#/$defs/Equation.Defined"
+        } ]
+      }
+    },
+    "formulas" : {
+      "description" : "its own definitions for jMF — formulas { … } —, before the libraries it uses add theirs",
+      "type" : "array",
+      "items" : {
+        "anyOf" : [ {
+          "$ref" : "#/$defs/Equation.Local"
+        }, {
+          "$ref" : "#/$defs/Equation.Branch"
+        }, {
+          "$ref" : "#/$defs/Equation.Derivative"
+        }, {
+          "$ref" : "#/$defs/Equation.Defined"
+        } ]
+      }
+    },
+    "behaviour" : {
+      "type" : [ "string", "null" ],
+      "description" : "its jMS, as written, or null for a component its equations say all of"
+    },
+    "symbol" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/Drawing"
+      } ],
+      "description" : "how it is drawn, or null for a component drawn as its base is"
+    },
+    "portrait" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/Drawing"
+      } ],
+      "description" : "how it looks in the hand, or null"
+    },
+    "seats" : {
+      "description" : "the footprints it sits on, the first its own",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Seat"
+      }
+    },
+    "types" : {
+      "type" : "object",
+      "additionalProperties" : {
+        "$ref" : "#/$defs/Formula"
+      },
+      "description" : "the quantity types it names itself — type transconductance = current / voltage ^ 2 —, as written"
+    },
+    "bench" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/Bench"
+      } ],
+      "description" : "the bench its expectations run on when they name none, or null"
+    },
+    "expectations" : {
+      "description" : "what it is expected to do on a bench, each to be checked by running it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Expectation"
+      }
+    },
+    "leads" : {
+      "description" : "the leads an instrument's pins are wired with",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Lead"
+      }
+    },
+    "parts" : {
+      "description" : "what it is made of, when it is a subcircuit — its own parts, wired to its pins and nets of its own —; empty for a component its equations or behaviour say all of",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Part"
+      }
+    }
+  },
+  "required" : [ "head", "bases", "uses", "units", "parameters", "pins", "nodes", "states", "display", "readings", "equations", "formulas", "behaviour", "symbol", "portrait", "seats", "types", "bench", "expectations", "leads", "parts" ],
+  "description" : "A component: what a part is. Its parameters and pins, the nodes and states of its own, its equations for jMF and its behaviour for jMS, the figures it shows and an instrument reads, how it is drawn, how it looks, what it sits on, and what it is expected to do on a bench.",
+  "additionalProperties" : false
+}

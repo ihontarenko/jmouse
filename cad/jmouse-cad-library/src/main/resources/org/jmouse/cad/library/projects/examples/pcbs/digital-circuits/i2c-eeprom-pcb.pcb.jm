@@ -23,7 +23,7 @@ pcb:i2c-eeprom-pcb("I²C: writing and reading an EEPROM — pcb") {
     place(R9, at: 39.5 11.5)
     place(R10, at: 39.5 23.5)
     place(DS1, at: 47 31.5, rotate: 90)
-    place(J1, footprint: "FP.HDR:1X12-P2.54-V", nets: [0: 1, d0: 2, d1: 3, d2: 4, d3: 5, d4: 6, d5: 7, d6: 8, d7: 9, scl: 10, sda: 11, vcc: 12], at: 5.5 22)
+    place(J1, footprint: "HDR:1X12-P2.54-V:F", nets: [0: 1, d0: 2, d1: 3, d2: 4, d3: 5, d4: 6, d5: 7, d6: 8, d7: 9, scl: 10, sda: 11, vcc: 12], at: 5.5 22)
     track(top, width: 0.25, from: 20.5 14.5, to: 23.5 14.5, to: 25 16)
     track(top, width: 0.25, from: 20.5 14.5, to: 21.85 15.85, to: 21.85 19.65, to: 20.81 20.69)
     track(top, width: 0.25, from: 40.5 44, to: 43.19 41.31, to: 43.19 35.31)

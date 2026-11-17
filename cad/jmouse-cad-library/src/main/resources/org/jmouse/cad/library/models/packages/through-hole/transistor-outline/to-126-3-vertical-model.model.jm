@@ -1,7 +1,7 @@
 model:to-126-3-vertical-model("TO-126 (SOT-32), standing") {
     meta {
         summary: "TO-126 (SOT-32), standing — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.TO126:3-V"
+        code: "TO126:3-V:M3D"
         category: through-hole-transistor-outline
         tags: electronics, model, inline
         source: "JEDEC TO-126"

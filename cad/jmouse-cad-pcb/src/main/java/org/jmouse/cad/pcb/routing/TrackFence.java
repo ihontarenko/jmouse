@@ -6,64 +6,95 @@ import org.jmouse.cad.pcb.geometry.CopperShape;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Collections;
 
 /**
- * What one track, this wide, must keep clear of: its obstacles, each with the gap it keeps from this one, indexed so a point
+ * What one track, this wide, must keep clear of: pieces of copper, each with the gap it keeps from this one, indexed so a point
  * or a stretch is measured only against the copper near it. A fence is made once for a board and a track, and asked many times.
+ *
+ * <p>The pieces and their index may be a whole layer's, shared by every fence over it ({@link ObstacleCells}): a fence is then
+ * only the gaps it keeps — none ({@code NaN}) from a piece that is not its obstacle —, so a board's many fences cost a gap
+ * apiece, not an index apiece.</p>
  */
 public final class TrackFence {
 
     /** How much nearer than its gap copper may come and still keep it: what a millimetre written to the pcb's places loses, as the checks forgive. */
     public static final double GAP_TOLERANCE = Lines.SAME_POINT;
 
+    /**
+     * What arithmetic in binary loses of millimetres written to the pcb's places, far below them: a gap measured exactly at the
+     * tolerance between two points so written comes out a hair under it, and is still kept.
+     */
+    private static final double ARITHMETIC = 1e-9;
+
     /** A piece of copper a track keeps clear of, and how far. */
     public record Obstacle(CopperShape shape, double gap) {
     }
 
-    /** The scale a cell of the index is keyed by, so a column and a row make one key. */
-    private static final long CELLS = 65536;
-
-    private final double                     width;
-    private final double                     clearance;
-    private final List<Obstacle>             obstacles;
-    private final double                     bucket;
-    private final double                     roomLooked;
-    private final int                        curveSteps;
-    private final double                     reachOut;
-    private final Map<Long, List<Obstacle>>  buckets = new HashMap<>();
-    /** Which grid points a search found free, for the grid it last asked of: a leg asked again as the pointer moves keeps them. */
-    private String                           gridKey;
-    private Map<Long, Double>                gridRooms;
+    private final double            width;
+    private final double            clearance;
+    private final List<CopperShape> shapes;
+    /** The gap kept from each piece, by its number; {@code NaN} where the piece is not this fence's obstacle. */
+    private final double[]          gaps;
+    private final ObstacleCells     cells;
+    private final int               curveSteps;
+    private final double            reachOut;
+    /** A few obstacles more, kept clear of as well — the tracks laid over a world since its copper was indexed —; null where none. */
+    private final TrackFence        also;
 
     /**
+     * A fence over obstacles of its own, indexed for it alone.
+     *
      * @param bucket     how wide a cell of the index is, in millimetres
-     * @param roomLooked how far round a point its room is looked for, in millimetres
      * @param curveSteps how many straight pieces a rounded corner is followed in
      */
-    public TrackFence(double width, double clearance, List<Obstacle> obstacles, double bucket, double roomLooked, int curveSteps) {
+    public TrackFence(double width, double clearance, List<Obstacle> obstacles, double bucket, int curveSteps) {
+        this(width, clearance, obstacles.stream().map(Obstacle::shape).toList(), obstacles.stream().mapToDouble(Obstacle::gap).toArray(),
+             new ObstacleCells(obstacles.stream().map(Obstacle::shape).toList(), bucket), curveSteps);
+    }
+
+    /** A fence over pieces already indexed — a layer's —, keeping these gaps from them ({@code NaN}: not an obstacle). */
+    TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, ObstacleCells cells, int curveSteps) {
+        this(width, clearance, shapes, gaps, cells, curveSteps, null);
+    }
+
+    private TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, ObstacleCells cells, int curveSteps,
+                       TrackFence also) {
+        this.also = also;
         this.width = width;
         this.clearance = clearance;
-        this.obstacles = List.copyOf(obstacles);
-        this.bucket = bucket;
-        this.roomLooked = roomLooked;
+        this.shapes = shapes;
+        this.gaps = gaps;
+        this.cells = cells;
         this.curveSteps = curveSteps;
         double widest = clearance;
-        for (Obstacle obstacle : this.obstacles) {
-            widest = Math.max(widest, obstacle.gap());
-            CopperShape.Box box = obstacle.shape().box();
-            for (long column = cell(box.left()); column <= cell(box.right()); column++) {
-                for (long row = cell(box.top()); row <= cell(box.bottom()); row++) {
-                    buckets.computeIfAbsent(key(column, row), ignored -> new ArrayList<>()).add(obstacle);
-                }
+        for (double gap : gaps) {
+            if (!Double.isNaN(gap)) {
+                widest = Math.max(widest, gap);
             }
         }
         this.reachOut = widest;
+    }
+
+    /**
+     * This fence keeping clear of a few obstacles more as well, indexed apart: what a world asks once tracks were laid over it,
+     * so its own copper is not indexed again for each one laid.
+     *
+     * @param bucket how wide a cell of their index is, in millimetres
+     */
+    TrackFence alsoKeepingClearOf(List<Obstacle> more, double bucket) {
+        if (more.isEmpty()) {
+            return this;
+        }
+        TrackFence extra = new TrackFence(width, clearance, more, bucket, curveSteps);
+        return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? extra : also.joined(extra));
+    }
+
+    /** The obstacles of two fences of one track kept clear of together. */
+    private TrackFence joined(TrackFence other) {
+        return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? other : also.joined(other));
     }
 
     public double width() {
@@ -74,77 +105,55 @@ public final class TrackFence {
         return clearance;
     }
 
-    public List<Obstacle> obstacles() {
-        return obstacles;
+    /** Whether copper keeps a gap from other copper, within the tolerance a router allows: the one test every fence asks. */
+    public static boolean keepsClear(CopperShape copper, CopperShape other, double gap) {
+        return !copper.within(other, gap) || copper.keepsGap(other, gap - GAP_TOLERANCE - ARITHMETIC);
     }
 
-    private long cell(double coordinate) {
-        return (long) Math.floor(coordinate / bucket);
-    }
-
-    private static long key(long column, long row) {
-        return (column + CELLS / 2) * CELLS + (row + CELLS / 2);
-    }
-
-    /** Whether a piece of copper keeps its gap from an obstacle. */
-    private static boolean keepsFrom(CopperShape copper, Obstacle obstacle) {
-        return !copper.within(obstacle.shape(), obstacle.gap()) || copper.gapTo(obstacle.shape()).gap() >= obstacle.gap() - GAP_TOLERANCE;
-    }
-
-    /** The obstacles whose cells reach within {@code reach} of a box, each once; all of them where the box covers more cells than there are obstacles. */
-    private Iterable<Obstacle> near(double left, double top, double right, double bottom) {
-        long fromColumn = cell(left);
-        long toColumn = cell(right);
-        long fromRow = cell(top);
-        long toRow = cell(bottom);
-        if ((toColumn - fromColumn + 1) * (toRow - fromRow + 1) > obstacles.size()) {
-            return obstacles;
-        }
-        Set<Obstacle> found = Collections.newSetFromMap(new IdentityHashMap<>());
-        List<Obstacle> ordered = new ArrayList<>();
-        for (long column = fromColumn; column <= toColumn; column++) {
-            for (long row = fromRow; row <= toRow; row++) {
-                for (Obstacle obstacle : buckets.getOrDefault(key(column, row), List.of())) {
-                    if (found.add(obstacle)) {
-                        ordered.add(obstacle);
-                    }
-                }
+    /** The numbers of this fence's obstacles whose cells a box reaches, in order. */
+    private BitSet near(double left, double top, double right, double bottom) {
+        BitSet near = cells.near(left, top, right, bottom);
+        for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
+            if (Double.isNaN(gaps[number])) {
+                near.clear(number);
             }
         }
-        return ordered;
+        return near;
+    }
+
+    /** How far from a track's centre line copper may stand and still be in its way: half its width and the widest gap it keeps. */
+    double reach() {
+        return width / 2 + Math.max(reachOut, also == null ? 0 : also.reachOut);
+    }
+
+    /** The obstacles whose cells a box reaches, each with the gap this track keeps from it — those of the fence joined to it too. */
+    List<Obstacle> obstaclesNear(double left, double top, double right, double bottom) {
+        List<Obstacle> found = new ArrayList<>();
+        BitSet near = near(left, top, right, bottom);
+        for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
+            found.add(new Obstacle(shapes.get(number), gaps[number]));
+        }
+        if (also != null) {
+            found.addAll(also.obstaclesNear(left, top, right, bottom));
+        }
+        return found;
     }
 
     /** Whether a piece of copper keeps its gap from everything near it. */
     public boolean copperClear(CopperShape copper) {
         CopperShape.Box box = copper.box();
-        for (Obstacle obstacle : near(box.left() - reachOut, box.top() - reachOut, box.right() + reachOut, box.bottom() + reachOut)) {
-            if (!keepsFrom(copper, obstacle)) {
+        BitSet near = near(box.left() - reachOut, box.top() - reachOut, box.right() + reachOut, box.bottom() + reachOut);
+        for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
+            if (!keepsClear(copper, shapes.get(number), gaps[number])) {
                 return false;
             }
         }
-        return true;
+        return also == null || also.copperClear(copper);
     }
 
     /** Whether the track's end standing at a point keeps its gaps. */
     public boolean pointClear(Point point) {
         return copperClear(CopperShape.circle(point.x(), point.y(), width / 2));
-    }
-
-    /**
-     * How much further than its gaps the track's end standing at a point is from everything: negative where it is too near, the
-     * room looked for where nothing stands within that. Anything that moves less than this from the point keeps its gaps, so a
-     * short step from it needs no measure.
-     */
-    public double roomAt(Point point) {
-        CopperShape end = CopperShape.circle(point.x(), point.y(), width / 2);
-        double reach = reachOut + roomLooked;
-        double room = roomLooked;
-        for (Obstacle obstacle : near(point.x() - reach, point.y() - reach, point.x() + reach, point.y() + reach)) {
-            if (end.within(obstacle.shape(), obstacle.gap() + room)) {
-                room = Math.min(room, end.gapTo(obstacle.shape()).gap() - obstacle.gap());
-            }
-        }
-        return room;
     }
 
     /** Whether a line through points keeps its gaps, stretch by stretch. */
@@ -170,35 +179,37 @@ public final class TrackFence {
     /**
      * The fence as a track standing at these points sees it: copper a point already stands too near — the neighbour of the pad
      * it leaves, on a fine pitch — may not be come nearer than it is, but need not be left at once. A track may leave it, never
-     * cross it.
+     * cross it. Only the obstacles near an end are asked; the fence it answers keeps the same pieces and index, its gaps eased.
      */
     public TrackFence leaving(List<Point> points) {
-        List<CopperShape> ends = points.stream().map(point -> CopperShape.circle(point.x(), point.y(), width / 2)).toList();
-        boolean relaxed = false;
-        List<Obstacle> eased = new ArrayList<>(obstacles.size());
-        for (Obstacle obstacle : obstacles) {
-            double tightest = Double.POSITIVE_INFINITY;
-            for (CopperShape end : ends) {
-                if (!keepsFrom(end, obstacle)) {
-                    tightest = Math.min(tightest, end.gapTo(obstacle.shape()).gap());
+        // How near the nearest end stands to each piece it does not keep its gap from; infinite where every end keeps it.
+        double[] tightest = null;
+        for (Point point : points) {
+            CopperShape end = CopperShape.circle(point.x(), point.y(), width / 2);
+            CopperShape.Box box = end.box();
+            BitSet near = near(box.left() - reachOut, box.top() - reachOut, box.right() + reachOut, box.bottom() + reachOut);
+            for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
+                CopperShape shape = shapes.get(number);
+                // Copper that does not keep its gap stands nearer than it, so the gap measured within it is the whole answer.
+                if (!keepsClear(end, shape, gaps[number])) {
+                    if (tightest == null) {
+                        tightest = new double[gaps.length];
+                        Arrays.fill(tightest, Double.POSITIVE_INFINITY);
+                    }
+                    tightest[number] = Math.min(tightest[number], end.gapWithin(shape, gaps[number]));
                 }
             }
-            if (tightest == Double.POSITIVE_INFINITY) {
-                eased.add(obstacle);
-                continue;
+        }
+        TrackFence alsoLeaving = also == null ? null : also.leaving(points);
+        if (tightest == null) {
+            return alsoLeaving == also ? this : new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, alsoLeaving);
+        }
+        double[] eased = Arrays.copyOf(gaps, gaps.length);
+        for (int number = 0; number < eased.length; number++) {
+            if (tightest[number] != Double.POSITIVE_INFINITY) {
+                eased[number] = Math.max(0, tightest[number]) - GAP_TOLERANCE;
             }
-            relaxed = true;
-            eased.add(new Obstacle(obstacle.shape(), Math.max(0, tightest) - GAP_TOLERANCE));
         }
-        return relaxed ? new TrackFence(width, clearance, eased, bucket, roomLooked, curveSteps) : this;
-    }
-
-    /** The room a search has found at the points of the grid it asks by this key ({@link #roomAt}): kept while the same grid is asked again. */
-    public Map<Long, Double> gridMemory(String key) {
-        if (!key.equals(gridKey)) {
-            gridKey = key;
-            gridRooms = new HashMap<>();
-        }
-        return gridRooms;
+        return new TrackFence(width, clearance, shapes, eased, cells, curveSteps, alsoLeaving);
     }
 }

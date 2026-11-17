@@ -1,7 +1,7 @@
 symbol:tvs-diode-symbol("TVS diode") {
     meta {
         summary: "Transient voltage suppressor, as drawn on a schematic: a diode whose bar bends both ways, glowing while it clamps a surge"
-        code: "SY.DIODE:TVS"
+        code: "DIODE:TVS:S"
         category: diodes
         tags: electronics, schematic
         authors: "jMouse"

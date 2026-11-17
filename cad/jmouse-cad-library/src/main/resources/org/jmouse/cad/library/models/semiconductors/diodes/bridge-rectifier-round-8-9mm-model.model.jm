@@ -1,7 +1,7 @@
 model:bridge-rectifier-round-8-9mm-model("Round bridge rectifier, WOM, 8.9 mm") {
     meta {
         summary: "Round bridge rectifier, WOM, 8.9 mm — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.BRIDGE:WOM"
+        code: "BRIDGE:WOM:M3D"
         category: diodes-through-hole
         tags: electronics, model, pinned
         source: "W005M … W10M data sheet (WOM case): 1 +, 2 ~, 3 −, 4 ~ on a 5.08 mm square, 8.9 mm round body"

@@ -5,6 +5,9 @@ import java.util.List;
 /**
  * What a circuit hands across its sheet's edge when it is placed as a block in another: its ports — each a net and which
  * way it goes, {@code input in} —, and the nets it shares with every sheet of its project by name, {@code vcc global}.
+ *
+ * @param ports the nets it hands to the block that places it, each a pin of that block
+ * @param nets  the nets named for what they are beyond the sheet
  */
 public record SheetBoundary(List<Port> ports, List<Net> nets) {
 
@@ -19,6 +22,7 @@ public record SheetBoundary(List<Port> ports, List<Net> nets) {
     /**
      * A net the sheet hands to its parent, a pin of the block that places it.
      *
+     * @param net       the net it hands across
      * @param direction {@code input}, {@code output}, {@code power}, {@code ground} or {@code analog}
      */
     public record Port(String net, String direction) {
@@ -27,12 +31,14 @@ public record SheetBoundary(List<Port> ports, List<Net> nets) {
     /**
      * A net named for what it is beyond the sheet.
      *
+     * @param name   the net's name
      * @param ground whether it is the ground everything is measured from
      * @param global whether every sheet of the project shares it by its name
      */
     public record Net(String name, boolean ground, boolean global) {
     }
 
+    /** Whether it hands nothing across: a circuit that is no sheet of another. */
     public boolean isEmpty() {
         return ports.isEmpty() && nets.isEmpty();
     }

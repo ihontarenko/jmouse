@@ -1,7 +1,7 @@
 symbol:rotary-encoder-symbol("Rotary encoder with switch") {
     meta {
         summary: "An incremental rotary encoder with a push switch, as drawn on a schematic: its two phases and common on the left, the switch on the right"
-        code: "SY.SWITCH:ROTARY-ENCODER"
+        code: "SWITCH:ROTARY-ENCODER:S"
         category: switches
         tags: electronics, schematic
         authors: "jMouse"

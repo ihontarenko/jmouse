@@ -25,6 +25,8 @@ public final class ImportedNetNames {
     private final String ground;
     /** What the product's own spelling of a name becomes before it is made a jMX one. */
     private final UnaryOperator<String> local;
+    /** The design's own name for a net the product names more than one way: KiCad's VCC wired to its +3.3V is +3.3V. */
+    private final UnaryOperator<String> designName;
 
     private final Map<String, String> named = new HashMap<>();
 
@@ -33,13 +35,23 @@ public final class ImportedNetNames {
      * @param local  the product's own spelling taken off a name: {@code /control/IN} is {@code IN} for KiCad
      */
     public ImportedNetNames(String ground, UnaryOperator<String> local) {
+        this(ground, local, UnaryOperator.identity());
+    }
+
+    /**
+     * @param ground     the product's net that is node 0
+     * @param local      the product's own spelling taken off a name
+     * @param designName the name the whole design gives a net the product names: two names of one net are one jMX net
+     */
+    public ImportedNetNames(String ground, UnaryOperator<String> local, UnaryOperator<String> designName) {
         this.ground = ground;
         this.local = local;
+        this.designName = designName;
     }
 
     /** The jMX net a product's net is, the same every time it is asked. */
     public String of(String written) {
-        return named.computeIfAbsent(written, this::fresh);
+        return named.computeIfAbsent(designName.apply(written), this::fresh);
     }
 
     private String fresh(String written) {

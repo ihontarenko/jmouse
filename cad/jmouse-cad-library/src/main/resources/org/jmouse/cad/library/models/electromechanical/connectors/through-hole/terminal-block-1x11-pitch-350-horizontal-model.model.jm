@@ -1,7 +1,7 @@
 model:terminal-block-1x11-pitch-350-horizontal-model("Screw terminal block, 3.50 mm pitch, 1 × 11, horizontal") {
     meta {
         summary: "Screw terminal block, 3.50 mm pitch, 1 × 11, horizontal — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.TB:11-P3.5"
+        code: "TB:11-P3.5:M3D"
         category: connectors-through-hole
         tags: electronics, model, header
         source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"

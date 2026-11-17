@@ -209,13 +209,26 @@ read into its record, every component described.
 
 | Method | Path | Takes | Answers | Capability | State |
 |---|---|---|---|---|---|
-| GET | `/settings` | — | `[{ path, title, owner, values: null }]` — every section, by path; `owner`: `engine-data` or `engine-settings` | public | ✅ |
-| GET | `/settings/{path}` | a section's path, or a branch's: `pcb` | `[{ path, title, owner, values, schema }]` — the section, or every section under the branch, each with the JSON Schema written from its record; none, 404 | public | ✅ |
+One resource holds every section, whatever it is made of — `shape`: `RECORD` (a record its module ships: `values`, `shipped`,
+`parameters` its rows, `schema`), `PARAMETERS` (fixed parameters a plugin declares: `declared`, each with its label, kind, bounds,
+value and a key's `secret` state `{ state: NONE|DEPLOYED|KEPT, keepable }`), `OWN` (a reader's rows of `interface/…`). The engine's
+sections stand at their own paths (`pcb/layout`, `part-search`), a plugin's under its id (`plugin/cad-suppliers/mouser`).
+
+| Method | Path | Takes | Answers | Capability | State |
+|---|---|---|---|---|---|
+| GET | `/settings` | — | every section by path, its `shape` and `changed`; a record without its values, a section of parameters with them | public | ✅ |
+| GET | `/settings/{path}` | a section's path, or a branch's: `pcb`, `plugin/cad-gerber` | the section, or every section under the branch, with its values; none, 404 | public | ✅ |
+| PATCH | `/settings/{path}` | `{ key: value }`, a null bringing a key back; `?holder=reader\|installation` | the section as it now stands; a value refused, 400 naming it | ENGINE_CONFIGURE for the installation's | ✅ |
+| PUT | `/settings/{path}` | a record whole, its lists grown or shrunk | the section; 400 for a section of parameters, changed value by value | ENGINE_CONFIGURE | ✅ |
+| DELETE | `/settings/{path}` | `?holder=` | the section back to what ships, a plugin's keys kept | ENGINE_CONFIGURE for the installation's | ✅ |
+| GET / POST | `/settings-file` | `{ text }` | the reader's rows, and the installation's to whoever may set the engine up, as a file; taken in block by block | signed in | ✅ |
+| GET | `/server-folders/roots`, `/server-folders?path=` | — | the server's drives and folders, to choose a folder a parameter names | ENGINE_CONFIGURE | ✅ |
 
 The interface reads the sections its `tree.json` lists as `served` (`pcb/artwork`, `pcb/layout`, `pcb/layer-codes`, `library/kinds`,
 `schematic/lettering`, and `plugin/cad-mesh/markings` where that plugin runs), installed once a visit before anything is drawn
-(`ServedSettingsGate`). jmCAD opens `GET /settings/**` to a signed-out visitor: it is the engine's data, the same for every reader;
-a plugin's keys are `/plugin-settings`, which stays closed.
+(`ServedSettingsGate`). jmCAD opens `GET /settings/**` to a signed-out visitor: the records are the engine's data, the same for every
+reader. The engine shows a visitor no section of parameters — they are how an installation is set up —: none is listed, and one asked
+for is not found.
 
 ### 2.5 Simulation
 
@@ -393,8 +406,8 @@ already says, is told apart and left out. `GET /mounts/{mount}/document?key=` an
 that is no longer the file's is refused (409), and none says the file is new. Git adds `GET`, `POST /remote` `{ "address" }` (only `https://`, no credentials) `POST /pull` (only forward; refused where the histories went two ways or a change in hand stands in the way) and `POST /push`:
 the current branch, never forced, its token sent only to the host the address really goes to; a repository with its own `pre-push`, `hooksPath` or `http` section is refused.
 
-**A plugin's keys** are settings of kind `SECRET`: `GET /plugin-settings` tells a key's `secret` state (`NONE`, `DEPLOYED`, `KEPT`), never its value, and `keepsSecrets` whether one can be kept:
-the host's `jmouse.cad.secret-key`, base64 of 32 bytes. `PUT /plugin-settings/{plugin}` seals one; `null` takes it away. Each setting may name a `group`, each plugin its deployment's `facts`, told only to a reader who may set the engine up.
+**A plugin's keys** are parameters of kind `SECRET` in its sections of parameters: `GET /settings/plugin/{id}` tells a key's `secret` — its `state` (`NONE`, `DEPLOYED`, `KEPT`), never its value, and `keepable`, whether one can be kept:
+the host's `jmouse.cad.secret-key`, base64 of 32 bytes. `PATCH /settings/plugin/{id}/{section}` seals one; `null` takes it away. Each setting may name a `group`, each plugin its deployment's `facts`, told only to a reader who may set the engine up.
 
 ### 2.11 Datasheets — the plugin `cad-datasheets`
 

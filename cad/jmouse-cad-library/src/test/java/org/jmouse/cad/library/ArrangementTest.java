@@ -152,7 +152,7 @@ class ArrangementTest {
         DocumentNode document = CadLanguage.shipped().language().readOne(SHEET, "locked-sheet");
         List<Placement> layout = new ArrayList<>(before.layout());
         layout.set(1, layout.get(1).arranged(new Arrangement("", DrawnState.LOCKED)));
-        CircuitSheet drawn = new CircuitSheet(before.parts(), layout, null, List.of(), null, List.of(new DrawnGroup("front-panel", DrawnState.FREE)));
+        CircuitSheet drawn = new CircuitSheet(before.parts(), layout, null, List.of(), null, List.of(new DrawnGroup("front-panel", DrawnState.FREE)), List.of());
         String written = new DocumentEditing(CadLanguage.shipped().language(), CadLanguage.shipped().modules())
                 .redraw(document, drawn.redrawing(CircuitSheet.of(before), new CircuitLines(CadLanguage.shipped().language(), "locked-sheet")),
                         new DocumentEditing.Head("Locked sheet", null, null));

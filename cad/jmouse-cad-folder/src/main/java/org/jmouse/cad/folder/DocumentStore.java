@@ -15,7 +15,6 @@ import org.jmouse.git.local.LocalGit;
 import org.jmouse.git.local.PathRevision;
 import org.jmouse.git.local.PathsCommit;
 import org.jmouse.git.local.WorkingTreeChange;
-import org.jmouse.revisions.RevisionLabel;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -25,8 +24,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -87,7 +84,6 @@ public class DocumentStore {
     private final class Kept {
 
         private final int number;
-        private final RevisionLabel label;
         private final Instant writtenAt;
         private final String writtenBy;
         private final RevisionOrigin origin;
@@ -97,10 +93,9 @@ public class DocumentStore {
         private final String content;
         private String checksum;
 
-        private Kept(int number, RevisionLabel label, Instant writtenAt, String writtenBy, RevisionOrigin origin, String commit, String path,
-                     String content, String checksum) {
+        private Kept(int number, Instant writtenAt, String writtenBy, RevisionOrigin origin, String commit, String path, String content,
+                     String checksum) {
             this.number = number;
-            this.label = label;
             this.writtenAt = writtenAt;
             this.writtenBy = writtenBy;
             this.origin = origin;
@@ -118,7 +113,7 @@ public class DocumentStore {
         }
 
         private DocumentRevision revision() {
-            return new DocumentRevision(number, label, checksum(), writtenAt, writtenBy, origin);
+            return new DocumentRevision(number, checksum(), writtenAt, writtenBy, origin);
         }
     }
 
@@ -141,7 +136,6 @@ public class DocumentStore {
     private final FolderLayout layout;
     private final CommitAuthors authors;
     private final CommitAuthor identity;
-    private final Supplier<ZoneId> revisionZone;
     private final Map<String, StoredDocument> documents = new LinkedHashMap<>();
     /** Every held document's revisions, the oldest first, by its address. */
     private final Map<String, List<Kept>> histories = new HashMap<>();
@@ -151,16 +145,13 @@ public class DocumentStore {
      * @param layout       how a place is written in words: an owner's folder, a kind's
      * @param authors      who a person's commit is by
      * @param identity     who a commit nobody named is by: the engine's, the folder's
-     * @param revisionZone where the day a revision is said by begins, as the installation says it now
      */
-    public DocumentStore(Supplier<Path> folders, FolderLayout layout, LocalGit git, CommitAuthors authors, CommitAuthor identity,
-                         Supplier<ZoneId> revisionZone) {
+    public DocumentStore(Supplier<Path> folders, FolderLayout layout, LocalGit git, CommitAuthors authors, CommitAuthor identity) {
         this.folders = folders;
         this.layout = layout;
         this.git = git;
         this.authors = authors;
         this.identity = identity;
-        this.revisionZone = revisionZone;
     }
 
     /**
@@ -225,7 +216,7 @@ public class DocumentStore {
             FolderLayout.Placed placed = placedAt(path).orElseThrow();
             StoredDocument document = new StoredDocument(slug, placed.owner(), first.writtenBy, first.writtenAt);
             // What its place says, until its text is read: its kind from its name, its category from its folder.
-            document.indexRevision(head.number, head.label, null, file.substring(slug.length() + 1,
+            document.indexRevision(head.number, null, file.substring(slug.length() + 1,
                     file.length() - SUFFIX.length()), slug, null, null, placed.category(), false, head.writtenAt);
             histories.put(slug, history);
             documents.put(slug, document);
@@ -239,7 +230,7 @@ public class DocumentStore {
         return read(pathOf(document.getId()));
     }
 
-    /** A held document's head revision: its number, its label and when it was written. */
+    /** A held document's head revision: its number and when it was written. */
     public synchronized DocumentRevision headOf(StoredDocument document) {
         return histories.get(document.getId()).getLast().revision();
     }
@@ -302,11 +293,8 @@ public class DocumentStore {
     /** A file's revisions as its commits say them, the oldest first; their texts are not read. */
     private List<Kept> keptOf(List<PathRevision> commits) {
         List<Kept> kept = new ArrayList<>();
-        Map<LocalDate, Integer> perDay = new HashMap<>();
         for (PathRevision commit : commits) {
-            LocalDate day = LocalDate.ofInstant(commit.time(), revisionZone.get());
-            int ordinal = perDay.merge(day, 1, Integer::sum);
-            kept.add(new Kept(kept.size() + 1, new RevisionLabel(day, ordinal), commit.time(), trailer(WRITTEN_BY_LINE, commit.message()).orElse(null),
+            kept.add(new Kept(kept.size() + 1, commit.time(), trailer(WRITTEN_BY_LINE, commit.message()).orElse(null),
                     trailer(ORIGIN_LINE, commit.message()).map(RevisionOrigin::valueOf).orElse(RevisionOrigin.UNRECORDED),
                     commit.commit(), commit.path(), commit.content(), null));
         }
@@ -360,7 +348,7 @@ public class DocumentStore {
 
     /**
      * One document by its address, asked from no place: its slug, which is its identifier, or its technical code
-     * ({@code FP.CHIP:R0805}). A code asked so names the catalogue's document of that code; failing one, the only document
+     * ({@code CHIP:R0805:F}). A code asked so names the catalogue's document of that code; failing one, the only document
      * that has it. Several owners' copies and no catalogue one is no answer: which is meant only a place can say, and
      * {@code StoredDocuments.addressed} is where a place says it.
      */
@@ -385,7 +373,7 @@ public class DocumentStore {
         return select(document -> code.equals(document.getCode()));
     }
 
-    /** Every document whose code of this class ends in this name, in whatever library — {@code R0805} finds {@code FP.CHIP:R0805}. */
+    /** Every document whose code of this class ends in this name, in whatever library — {@code R0805} finds {@code CHIP:R0805:F}. */
     public synchronized List<StoredDocument> findByCodeName(TechnicalClass kind, String name) {
         return select(document -> document.getCode() != null && kind.nameIn(document.getCode()).filter(name::equals).isPresent());
     }
@@ -554,37 +542,21 @@ public class DocumentStore {
         return List.copyOf(revisions);
     }
 
-    /** 🏷️ The label the next revision of a document written on {@code day} takes: that day, after every revision of it that day. */
-    public synchronized RevisionLabel nextLabel(String documentId, LocalDate day) {
-        int written = (int) histories.getOrDefault(documentId, List.of()).stream().filter(kept -> kept.label.day().equals(day)).count();
-        return RevisionLabel.next(day, written);
-    }
+    /** The word that names a document's newest revision after an {@code @}: {@code lm358@latest}. */
+    public static final String LATEST = "latest";
 
-    /**
-     * 🔎 The revision what follows an {@code @} names: a revision number ({@code lm358@3}), a label
-     * ({@code lm358@20261023_001}), a day — its last revision — ({@code lm358@20261023}) or {@code latest}.
-     */
+    /** 🔎 The revision what follows an {@code @} names: its number ({@code lm358@3}) or {@code latest}; nothing else names one. */
     public synchronized Optional<Integer> revisionWritten(String documentId, String written) {
         String value = written == null ? "" : written.strip();
-        if (RevisionLabel.Reference.written(value)) {
-            return revisionOf(documentId, RevisionLabel.Reference.parse(value));
+        List<Kept> history = histories.getOrDefault(documentId, List.of());
+        if (value.equalsIgnoreCase(LATEST)) {
+            return history.isEmpty() ? Optional.empty() : Optional.of(history.getLast().number);
         }
         if (!value.matches("\\d{1,7}")) {
             return Optional.empty();
         }
         int revision = Integer.parseInt(value);
-        return revision >= 1 ? Optional.of(revision) : Optional.empty();
-    }
-
-    /** 🔎 The revision number a reference names: one revision by its label, the last of a day, or the latest. */
-    public synchronized Optional<Integer> revisionOf(String documentId, RevisionLabel.Reference reference) {
-        return histories.getOrDefault(documentId, List.of()).stream()
-                .filter(kept -> switch (reference) {
-                    case RevisionLabel.Exact exact -> kept.label.equals(exact.label());
-                    case RevisionLabel.LastOfDay lastOfDay -> kept.label.day().equals(lastOfDay.day());
-                    case RevisionLabel.Latest ignored -> true;
-                })
-                .map(kept -> kept.number).max(Integer::compare);
+        return revision >= 1 && revision <= history.size() ? Optional.of(revision) : Optional.empty();
     }
 
     /**
@@ -595,7 +567,7 @@ public class DocumentStore {
      * @param origin    where it came from: a person, or an import
      * @param writtenAt when; a history written again keeps its own times
      */
-    public synchronized void appendSource(String documentId, int revision, RevisionLabel label, String source, String writtenBy,
+    public synchronized void appendSource(String documentId, int revision, String source, String writtenBy,
                                           RevisionOrigin origin, Instant writtenAt) {
         StoredDocument document = documents.get(documentId);
         if (document == null) {
@@ -623,7 +595,7 @@ public class DocumentStore {
         write(target, source);
         String commit = git.commitPaths(folder, new PathsCommit(messageOf(history.isEmpty() ? "Created" : "Written", document.getSlug(),
                 writtenBy, origin), authorOf(writtenBy), writtenAt, paths, moves)).id();
-        history.add(new Kept(revision, label, writtenAt, writtenBy, origin, commit, target, null, checksumOf(source)));
+        history.add(new Kept(revision, writtenAt, writtenBy, origin, commit, target, null, checksumOf(source)));
     }
 
     private void write(String path, String text) {

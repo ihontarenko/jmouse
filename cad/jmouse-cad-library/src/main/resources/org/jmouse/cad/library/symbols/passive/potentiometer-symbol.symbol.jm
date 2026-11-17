@@ -1,7 +1,7 @@
 symbol:potentiometer-symbol("Potentiometer") {
     meta {
         summary: "Potentiometer, as drawn on a schematic: its wiper stands where it is turned to"
-        code: "SY.RESISTOR:POTENTIOMETER"
+        code: "RESISTOR:POTENTIOMETER:S"
         category: potentiometers
         tags: electronics, schematic
         authors: "jMouse"

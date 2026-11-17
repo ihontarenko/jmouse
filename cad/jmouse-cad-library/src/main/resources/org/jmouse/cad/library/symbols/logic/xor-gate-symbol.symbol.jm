@@ -1,7 +1,7 @@
 symbol:xor-gate-symbol("XOR gate") {
     meta {
         summary: "A two-input exclusive-OR gate, as drawn on a schematic (ANSI)"
-        code: "SY.GATE:XOR"
+        code: "GATE:XOR:S"
         category: logic
         tags: electronics, schematic, logic
         authors: "jMouse"

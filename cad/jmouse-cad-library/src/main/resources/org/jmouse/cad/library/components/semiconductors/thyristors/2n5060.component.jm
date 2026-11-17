@@ -31,9 +31,9 @@ component:2n5060("2N5060", type: thyristor) {
     pin:gate(analog, input, 2, "gate")
     pin:anode(analog, 3, "anode")
 
-    footprint("FP.TO92:3-L")
+    footprint("TO92:3-L:F")
 
-    symbol(uses: "SY.THYRISTOR:SCR") {
+    symbol(uses: "THYRISTOR:SCR:S") {
         bind:failed(failed)
         bind:conduction(conducting)
         bind:a(pin: anode)
@@ -99,7 +99,7 @@ component:2n5060("2N5060", type: thyristor) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO92:3") {
+    portrait(uses: "TO92:3:P") {
         bind:marking("2N5060")
     }
 }

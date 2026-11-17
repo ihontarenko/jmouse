@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
@@ -44,8 +45,8 @@ public final class Teardrops {
      * @param looks       how many steps a line beside the track is looked along for any of the copper
      */
     public record Shape(@Label("Curve steps") int curveSteps,
-                        @Label("Widest share") double widestShare,
-                        @Label("Inside edge") double insideEdge,
+                        @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Widest share") double widestShare,
+                        @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Inside edge") double insideEdge,
                         @Label("Halvings") int halvings,
                         @Label("Looks") int looks) {
     }

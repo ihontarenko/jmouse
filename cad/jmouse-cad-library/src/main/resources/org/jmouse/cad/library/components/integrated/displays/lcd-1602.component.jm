@@ -30,9 +30,9 @@ component:lcd-1602("16×2 LCD (HD44780)", type: display) {
     pin:backlight_anode(analog, 15, "A, the backlight: not modelled")
     pin:backlight_cathode(analog, 16, "K")
 
-    footprint("FP.HDR:1X16-P2.54-V")
+    footprint("HDR:1X16-P2.54-V:F")
 
-    symbol(uses: "SY.DISPLAY:LCD-16X2")
+    symbol(uses: "DISPLAY:LCD-16X2:S")
 
     state:ddram[80](32, discrete, "the display memory: 40 bytes a row, spaces at power-up")
     state:shown[32](32, discrete, "the 32 characters in the window now")

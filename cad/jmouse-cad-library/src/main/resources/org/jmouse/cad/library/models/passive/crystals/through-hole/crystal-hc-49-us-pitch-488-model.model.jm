@@ -1,7 +1,7 @@
 model:crystal-hc-49-us-pitch-488-model("Quartz crystal, HC-49/US, HC-49/US") {
     meta {
         summary: "Quartz crystal, HC-49/US, HC-49/US — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.XTAL:HC49US-P4.88"
+        code: "XTAL:HC49US-P4.88:M3D"
         category: crystals-through-hole
         tags: electronics, model, radial
         source: "the HC-49/US holder: 4.88 mm lead spacing, the makers' low-profile can (Abracon AB)"

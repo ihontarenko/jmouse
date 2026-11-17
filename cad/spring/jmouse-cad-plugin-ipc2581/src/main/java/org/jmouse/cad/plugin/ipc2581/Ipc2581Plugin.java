@@ -35,7 +35,7 @@ public final class Ipc2581Plugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "IPC-2581", Ipc2581Plugin.class).drawnBy(Ipc2581Plugin.class, "ipc2581.svg");
+        return PluginDescriptor.ofArtifact(ID, "IPC-2581", Ipc2581Plugin.class).withIcon(Ipc2581Plugin.class, "ipc2581.svg");
     }
 
     @Override

@@ -15,7 +15,7 @@ component:pin-header-1x3("Pin header, 1x3", type: connector) {
     pin:pin2(analog, 2, "contact 2")
     pin:pin3(analog, 3, "contact 3")
 
-    footprint("FP.HDR:1X3-P2.54-V")
+    footprint("HDR:1X3-P2.54-V:F")
 
-    symbol(uses: "SY.HDR:1X3")
+    symbol(uses: "HDR:1X3:S")
 }

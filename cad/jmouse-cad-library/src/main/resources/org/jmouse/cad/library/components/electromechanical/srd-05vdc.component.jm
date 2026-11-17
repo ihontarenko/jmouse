@@ -33,14 +33,14 @@ component:srd-05vdc("SRD-05VDC-SL-C", type: relay) {
 
 
     # The SRD's own numbering: 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed.
-    footprint("FP.RELAY:SRD-C") {
+    footprint("RELAY:SRD-C:F") {
         pad:1(common)
         pad:2(coil_one)
         pad:3(normally_open)
         pad:4(normally_closed)
         pad:5(coil_two)
     }
-    symbol(uses: "SY.RELAY:SPDT") {
+    symbol(uses: "RELAY:SPDT:S") {
         bind:energized(energized)
     }
 
@@ -78,5 +78,5 @@ component:srd-05vdc("SRD-05VDC-SL-C", type: relay) {
     }
 
     # How it looks in the hand: an open-frame relay whose armature pulls in while the coil is energized.
-    portrait(uses: "PT.RELAY:OPEN-FRAME")
+    portrait(uses: "RELAY:OPEN-FRAME:P")
 }

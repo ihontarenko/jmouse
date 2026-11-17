@@ -1,7 +1,7 @@
 footprint:chip-diode-1206-footprint("Chip diode 1206 (3216 metric)") {
     meta {
         summary: "Chip diode, 1206 (3216 metric) body, reflow pads; pad 1 is the cathode"
-        code: "FP.CHIP:D1206"
+        code: "CHIP:D1206:F"
         category: diodes-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 1206 (3216 metric)"
@@ -18,5 +18,5 @@ footprint:chip-diode-1206-footprint("Chip diode 1206 (3216 metric)") {
     outline(silkscreen, width: 0.12, "M-2.21 -0.985V0.985")
     outline(courtyard, width: 0.05, "M-2.2 -1.15H2.2V1.15H-2.2Z")
     body(height: 0.7)
-    model("MD.CHIP:D1206")
+    model("CHIP:D1206:M3D")
 }

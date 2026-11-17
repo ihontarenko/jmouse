@@ -18,7 +18,7 @@ component:transformer-secondary("Transformer secondary, 40 V AC", type: generato
     pin:positive(analog, 1, "one end of the winding")
     pin:negative(analog, 2, "the other end")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-ALTERNATING") {
+    symbol(uses: "SOURCE:VOLTAGE-ALTERNATING:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

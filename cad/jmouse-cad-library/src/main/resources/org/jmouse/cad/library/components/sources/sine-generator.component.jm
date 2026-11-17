@@ -18,7 +18,7 @@ component:sine-generator("Sine generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-ALTERNATING") {
+    symbol(uses: "SOURCE:VOLTAGE-ALTERNATING:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

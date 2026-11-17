@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-  <!-- PCBWay's mark, as its own site serves it (https://www.pcbway.com/favicon.ico); the mark is PCBWay's trademark, shown to name what the plugin speaks for. -->
-  <image width="16" height="16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtklEQVR4nI1T2w2AIAy8QRzEEToAg7AJgzgGHx2EQTQamlxqK340EY+7vg5IR5OOM4ghHbt0bNKhyZ0TGXCTAeCL7AXqJBjRZ66E1UjgLveg0gthbf4b884eCTBB3bkE5+YFtgkofTPBWjL8VYFSJiZzS4WSLLfAs6kZ/iVgmTOfhAKNSvSZlYcX+oB69UPkwZoXQh+MH2scmQ9YINr7UsC3oIsWXkbyQ4ym3izsTfzxQRbP47sA0Pu+UTJchbkAAAAASUVORK5CYII="/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- PCBWay: its initials on a tile of its green, with the orange of its mark — PCBWay publishes no mark that reads at this size (its own is a 16 px favicon); the name is PCBWay's trademark, shown to name what the plugin speaks for -->
+  <rect width="24" height="24" rx="5" fill="#2e9b3e"/>
+  <g fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.6 15V7.4h2.8a2.2 2.2 0 0 1 0 4.4H4.6"/>
+    <path d="M10.6 7.4l1.6 7.6 1.9-5.6 1.9 5.6 1.6-7.6"/>
+  </g>
+  <path d="M4.5 18.6c4.8-1.6 10-1.9 15-1" fill="none" stroke="#f08a24" stroke-width="1.6" stroke-linecap="round"/>
 </svg>

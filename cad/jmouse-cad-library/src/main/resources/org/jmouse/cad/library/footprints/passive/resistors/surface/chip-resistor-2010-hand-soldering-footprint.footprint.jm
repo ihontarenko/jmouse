@@ -1,7 +1,7 @@
 footprint:chip-resistor-2010-hand-soldering-footprint("Chip resistor 2010 (5025 metric), hand soldering") {
     meta {
         summary: "Chip resistor, 2010 (5025 metric) body, pads lengthened for a soldering iron"
-        code: "FP.CHIP:R2010-HAND"
+        code: "CHIP:R2010-HAND:F"
         category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 2010 (5025 metric)"
@@ -17,5 +17,5 @@ footprint:chip-resistor-2010-hand-soldering-footprint("Chip resistor 2010 (5025 
     outline(silkscreen, width: 0.12, "M-1.44 -1.66H1.44M-1.44 1.66H1.44")
     outline(courtyard, width: 0.05, "M-3.6 -1.9H3.6V1.9H-3.6Z")
     body(height: 0.7)
-    model("MD.CHIP:R2010-HAND")
+    model("CHIP:R2010-HAND:M3D")
 }

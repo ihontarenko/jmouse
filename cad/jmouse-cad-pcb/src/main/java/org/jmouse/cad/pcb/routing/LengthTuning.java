@@ -17,8 +17,8 @@ import java.util.OptionalInt;
 
 /**
  * A pair's shorter net lengthened to its partner's — or a track to a length asked for —, as KiCad's length tuner does it: a
- * segment bent into a meander, square bumps to one side, as tall as the length wants and no taller than the settings allow, a
- * spacing of track widths apart, on the side where it keeps its gap from every other net's copper. Its length is the track's
+ * segment bent into a meander of the pattern asked for ({@link TuningPattern}), as tall as the length wants and no taller than the
+ * settings allow, a spacing of track widths apart, on the side where it keeps its gap from every other net's copper. Its length is the track's
  * own, corners rounded as the track rounds them, so what is added is what the pair's lengths then say.
  */
 public final class LengthTuning {
@@ -28,10 +28,10 @@ public final class LengthTuning {
     }
 
     /**
-     * A track bent to length: which, its corners now, how much longer it is, and the lengths it was tuned between — its net's
-     * before, and the one reached.
+     * A track bent to length: which, its corners now and the rounding they bear — no more than the meander's bumps keep their shape
+     * under —, how much longer it is, and the lengths it was tuned between: its net's before, and the one reached.
      */
-    public record Tuned(int track, List<Point> points, double added, Optional<String> net, double from, double to) implements Tuning {
+    public record Tuned(int track, List<Point> points, double rounding, double added, Optional<String> net, double from, double to) implements Tuning {
     }
 
     /** Why a track cannot be tuned, in words. */
@@ -75,7 +75,7 @@ public final class LengthTuning {
      *
      * @param reach how far off a track's edge a point may be and still mean it
      */
-    public Tuning tunedAt(String layer, Point point, double reach, OptionalDouble length) {
+    public Tuning tunedAt(String layer, Point point, double reach, OptionalDouble length, TuningPattern pattern) {
         Place best = null;
         double bestGap = Double.POSITIVE_INFINITY;
         List<PcbDrawing.Track> tracks = world.pcb().tracks();
@@ -101,14 +101,14 @@ public final class LengthTuning {
         if (best == null) {
             return new Refused("Point at a track: the meander goes on the segment under the pointer");
         }
-        return meanderOn(best, length);
+        return meanderOn(best, length, pattern);
     }
 
     /**
      * A chosen track lengthened wherever on it a meander fits best: its segments tried longest first, each with the bumps in its
      * middle. The words are the longest segment's, when none of them can.
      */
-    public Tuning tunedAnywhere(int index, OptionalDouble length) {
+    public Tuning tunedAnywhere(int index, OptionalDouble length, TuningPattern pattern) {
         if (index < 0 || index >= world.pcb().tracks().size() || world.pcb().tracks().get(index).points().size() < 2) {
             return new Refused("Choose a track to lengthen");
         }
@@ -120,7 +120,7 @@ public final class LengthTuning {
         segments.sort(Comparator.comparingDouble((Integer segment) -> -Lines.lengthBetween(points.get(segment), points.get(segment + 1))));
         Tuning first = null;
         for (int segment : segments) {
-            Tuning answer = meanderOn(new Place(index, segment, 0.5), length);
+            Tuning answer = meanderOn(new Place(index, segment, 0.5), length, pattern);
             if (answer instanceof Tuned) {
                 return answer;
             }
@@ -130,10 +130,12 @@ public final class LengthTuning {
     }
 
     /**
-     * The bumps laid along a segment: so many, so tall to one side (+1 the segment's left, -1 its right), a spacing apart, centred
-     * as near a share of the segment as its ends allow; empty where the segment cannot hold them with a spacing clear at each end.
+     * The bumps laid along a segment: so many of the pattern, so tall to one side (+1 the segment's left, -1 its right — each bump's
+     * own as the pattern turns it), a spacing apart, centred as near a share of the segment as its ends allow; empty where the segment
+     * cannot hold them with a spacing clear at each end.
      */
-    private static Optional<List<Point>> bumpsOf(Point from, Point to, double along, int count, double height, double spacing, int side) {
+    private static Optional<List<Point>> bumpsOf(TuningPattern pattern, Point from, Point to, double along, int count, double height, double spacing,
+                                                 int side) {
         double length = Lines.lengthBetween(from, to);
         double span = (2 * count - 1) * spacing;
         if (span + 2 * spacing > length) {
@@ -142,13 +144,17 @@ public final class LengthTuning {
         double start = Math.max(spacing, Math.min(length - spacing - span, along * length - span / 2));
         double unitX = (to.x() - from.x()) / length;
         double unitY = (to.y() - from.y()) / length;
-        double normalX = unitY * side;
-        double normalY = -unitX * side;
         List<Point> points = new ArrayList<>();
         for (int bump = 0; bump < count; bump++) {
-            double left = start + bump * 2 * spacing;
-            for (double[] corner : new double[][] {{left, 0}, {left, height}, {left + spacing, height}, {left + spacing, 0}}) {
-                points.add(new Point(from.x() + unitX * corner[0] + normalX * corner[1], from.y() + unitY * corner[0] + normalY * corner[1]));
+            int bumpSide = pattern.sideOf(bump, side);
+            double normalX = unitY * bumpSide;
+            double normalY = -unitX * bumpSide;
+            for (double[] corner : pattern.bump(start + bump * 2 * spacing, spacing, height)) {
+                Point point = new Point(from.x() + unitX * corner[0] + normalX * corner[1], from.y() + unitY * corner[0] + normalY * corner[1]);
+                // A pattern whose bump starts where its last point stood — a rounded top on no shoulder — gives that corner once.
+                if (points.isEmpty() || !Lines.samePoint(points.getLast(), point)) {
+                    points.add(point);
+                }
             }
         }
         return Optional.of(points);
@@ -163,7 +169,7 @@ public final class LengthTuning {
     }
 
     /** A meander laid at a place on a track, as tall as the length wants; or why it cannot be. */
-    private Tuning meanderOn(Place place, OptionalDouble length) {
+    private Tuning meanderOn(Place place, OptionalDouble length, TuningPattern pattern) {
         Lengths tuned = lengthsOf(place.track(), length);
         if (tuned.target().isEmpty()) {
             return new Refused("Track " + (place.track() + 1) + " is in no differential pair: write the length to reach in Tune to");
@@ -177,15 +183,17 @@ public final class LengthTuning {
             String partner = tuned.partner().get();
             return new Refused(tuned.net().orElse("") + " is already as long as " + partner + (missing < 0 ? ": lengthen " + partner + "'s track instead" : ""));
         }
-        PcbDrawing.Track track = world.pcb().tracks().get(place.track());
+        PcbDrawing.Track standing = world.pcb().tracks().get(place.track());
+        double gap = world.clearanceOf(tuned.net());
+        double spacing = Math.max(standing.width() * settings.spacing(), standing.width() + gap);
+        // The track as the meander is laid on it: its corners rounded no more than the bumps bear, or a zigzag's teeth are rounded away.
+        PcbDrawing.Track track = standing.withRounding(pattern.roundingFor(standing.rounding(), spacing));
         Point from = track.points().get(place.segment());
         Point to = track.points().get(place.segment() + 1);
-        double gap = world.clearanceOf(tuned.net());
-        double spacing = Math.max(track.width() * settings.spacing(), track.width() + gap);
         double tallest = settings.amplitude();
         TrackFence fence = world.fenceOver(track.width(), gap,
-                world.obstacles(track.layer(), tuned.net(), true, OptionalInt.of(place.track()), OptionalDouble.of(gap)));
-        double before = NetLengths.trackLength(track);
+                world.obstacles(track.layer(), tuned.net(), OptionalInt.of(place.track()), OptionalDouble.of(gap)));
+        double before = NetLengths.trackLength(standing);
         java.util.function.ToDoubleFunction<List<Point>> added = bumps ->
                 NetLengths.trackLength(track.withPoints(withBumps(track, place.segment(), bumps))) - before;
         int curveSteps = world.board().checks().curveSteps();
@@ -197,7 +205,7 @@ public final class LengthTuning {
         for (int count = fewest; count < (int) Math.ceil(missing / (2 * tallest)) + settings.bumpsTried(); count++) {
             for (int side : new int[] {1, -1}) {
                 int bumps = count;
-                java.util.function.DoubleFunction<Optional<List<Point>>> at = height -> bumpsOf(from, to, place.along(), bumps, height, spacing, side);
+                java.util.function.DoubleFunction<Optional<List<Point>>> at = height -> bumpsOf(pattern, from, to, place.along(), bumps, height, spacing, side);
                 Optional<List<Point>> tallestBumps = at.apply(tallest);
                 if (tallestBumps.isEmpty()) {
                     return new Refused(blocked ? "No side of this segment has room for the meander: try a longer, freer segment"
@@ -220,7 +228,8 @@ public final class LengthTuning {
                 }
                 List<Point> laid = at.apply(Lines.settled(high)).orElseThrow().stream().map(Lines::settled).toList();
                 if (clear.test(laid)) {
-                    return new Tuned(place.track(), withBumps(track, place.segment(), laid), added.applyAsDouble(laid), tuned.net(), tuned.own(), target);
+                    return new Tuned(place.track(), withBumps(track, place.segment(), laid), track.rounding(), added.applyAsDouble(laid), tuned.net(),
+                            tuned.own(), target);
                 }
                 blocked = true;
             }

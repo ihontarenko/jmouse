@@ -16,7 +16,7 @@ pcb:voltage-follower-pcb("Voltage follower — pcb") {
     place(RL1, at: 26.5 10, rotate: 270)
     place(RS2, at: 15 13.5)
     place(RL2, at: 20 14, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 9)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 9)
     track(top, width: 0.25, from: 17.55 5.595, to: 17.55 6.865)
     track(top, width: 0.25, from: 16 13.5, to: 19.5 13.5, to: 20 13)
     track(top, width: 0.25, from: 13.5 8, to: 17.415 8, to: 17.55 8.135)

@@ -16,7 +16,7 @@ pcb:center-tapped-rectifier-pcb("Centre-tapped full-wave rectifier — pcb") {
     place(D2, at: 40 46.5)
     place(C1, at: 56 25.5, rotate: 270)
     place(RL, at: 66 25.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, mains: 2, out: 3], at: 5.5 25.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, mains: 2, out: 3], at: 5.5 25.5)
     track(top, width: 0.25, from: 56 26.35, to: 65.85 26.35, to: 66 26.5)
     track(top, width: 0.25, from: 56 24.65, to: 65.85 24.65, to: 66 24.5)
     track(bottom, width: 0.25, from: 36.5 15.5, to: 45.08 6.92, to: 45.08 5)

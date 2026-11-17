@@ -1,7 +1,7 @@
 model:soic-16-model("SOIC-16, 3.9 mm body") {
     meta {
         summary: "SOIC-16, 3.9 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOIC:16-P1.27-W3.9"
+        code: "SOIC:16-P1.27-W3.9:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MS-012"

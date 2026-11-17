@@ -1,7 +1,7 @@
 symbol:shielded-header-2x57-symbol("Shielded pin header, 2 x 57") {
     meta {
         summary: "A two-row pin header of 114, inside its shield, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the pcb"
-        code: "SY.HDR:2X57-SHIELDED"
+        code: "HDR:2X57-SHIELDED:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

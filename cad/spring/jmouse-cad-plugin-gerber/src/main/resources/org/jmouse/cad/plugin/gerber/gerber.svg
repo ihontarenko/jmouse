@@ -1,8 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-  <!-- a board as it is made: its outline, a trace between two pads, a drill -->
-  <path d="M3 4h18v16H3z"/>
-  <path d="M7 9.5v4h8.5v1.5"/>
-  <circle cx="7" cy="8" r="1.5"/>
-  <circle cx="15.5" cy="16.5" r="1.5"/>
-  <circle cx="17" cy="8" r="1" fill="currentColor"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Gerber: copper on a board, two pads and the trace between them -->
+  <rect width="24" height="24" rx="5" fill="#16a34a"/>
+  <g fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="7" cy="7.5" r="2" fill="#fff" stroke="none"/>
+    <circle cx="17" cy="16.5" r="2" fill="#fff" stroke="none"/>
+    <circle cx="16.5" cy="7" r="1.3" stroke-width="1.3"/>
+    <path d="M8.6 8.9 12 12.3v2.1c0 1.2.9 2.1 2.1 2.1H15" stroke-width="1.9"/>
+    <path d="M6 13v4.5c0 .8.6 1.5 1.5 1.5H11" stroke-opacity=".6"/></g>
 </svg>

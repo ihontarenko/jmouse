@@ -5,6 +5,8 @@ import java.util.Objects;
 /**
  * An expression as its author wrote it — {@code 4.7 kΩ}, {@code 100 * abs(anode.current) / I_maximum} —, for jMF to
  * compile where it is computed. The model says what it is for; what it means is the formula language's.
+ *
+ * @param written the expression as its author wrote it
  */
 public record Formula(String written) implements Given {
 

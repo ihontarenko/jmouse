@@ -1,15 +1,18 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.geometry.CopperNets;
+import org.jmouse.cad.pcb.geometry.CopperPieces;
 import org.jmouse.cad.pcb.geometry.PadOutline;
 import org.jmouse.cad.pcb.geometry.RoundedTrack;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.checks.PcbFinding;
 import org.jmouse.cad.pcb.geometry.PlacedDesignator;
+import org.jmouse.cad.pcb.geometry.PourMemory;
 import org.jmouse.cad.pcb.geometry.Teardrops;
 import org.jmouse.cad.pcb.geometry.ZonePours;
 import org.jmouse.cad.exchange.pcb.ArtworkFeature.Role;
@@ -65,7 +68,7 @@ public final class PcbArtwork {
      */
     public record Settings(@Label("Mask expansion") double maskExpansion,
                            @Label("Silkscreen width") double silkscreenWidth,
-                           @Label("Letter stroke") double letterStroke,
+                           @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Letter stroke") double letterStroke,
                            @Label("Curve steps") int curveSteps,
                            @Label("Corner steps") int cornerSteps,
                            @Label("Arc error") double arcError,
@@ -76,19 +79,25 @@ public final class PcbArtwork {
 
         /** The checks' own settings, the rest theirs as the artwork's. */
         public PcbChecks.Settings forChecks() {
-            return new PcbChecks.Settings(checks.tolerance(), checks.namedGaps(), curveSteps, designator, teardrops);
+            return new PcbChecks.Settings(checks.tolerance(), checks.namedGaps(), checks.namedMeetings(), curveSteps, designator, teardrops);
         }
     }
 
     /**
-     * @param tolerance how much nearer than a rule a value may be and still pass
-     * @param namedGaps how many narrow gaps are named one by one
+     * How the checks of a pcb's artwork measure and name what they find.
+     *
+     * @param tolerance     how much nearer than a rule a value may be and still pass
+     * @param namedGaps     how many narrow gaps are named one by one
+     * @param namedMeetings how many places a short's nets meet at are named in its finding; every one is among its keys
      */
     public record Checks(@Label(value = "Tolerance", unit = "mm") double tolerance,
-                         @Label("Named gaps") int namedGaps) {
+                         @Label("Named gaps") int namedGaps,
+                         @Label("Named meetings of a short") int namedMeetings) {
     }
 
     /**
+     * How finely round copper is drawn as straight steps, and how far an area may be simplified.
+     *
      * @param steps     how many straight steps a quarter of a round end, a disc, an arc or a drill is drawn with
      * @param tolerance how far an area's outline may move when it is simplified for a view
      */
@@ -122,12 +131,22 @@ public final class PcbArtwork {
      * @param font  the silkscreen's letters
      */
     public static PcbArtwork of(PcbFabrication fabrication, Map<String, Double> rules, Settings settings, StrokeFont font) {
+        return of(fabrication, rules, settings, font, PourMemory.none());
+    }
+
+    /**
+     * The same, its zones poured again only where they changed since the memory last saw them: for what draws a pcb's artwork
+     * after each change to it.
+     */
+    public static PcbArtwork of(PcbFabrication fabrication, Map<String, Double> rules, Settings settings, StrokeFont font, PourMemory pours) {
         PcbDrawing pcb = fabrication.pcb();
         PadOutline outlines = new PadOutline(settings.curveSteps(), settings.cornerSteps());
         CopperNets nets = fabrication.copperNets(outlines, settings.curveSteps());
-        List<Optional<Geometry>> pours = new ZonePours(pcb, nets, rules, settings.curveSteps(), settings.arcError()).pour();
         List<Teardrops.Drop> drops = Teardrops.of(pcb, nets.pads(), settings.teardrops());
-        return new PcbArtwork(fabrication, settings, font, outlines, nets, pours, drops);
+        // Every piece of copper but the pours, teardrops too: what each zone is poured round.
+        List<CopperPieces.Piece> copper = CopperPieces.of(pcb, nets, drops, settings.curveSteps());
+        List<Optional<Geometry>> poured = new ZonePours(pcb, nets, copper, rules, settings.curveSteps(), settings.arcError(), pours).pour();
+        return new PcbArtwork(fabrication, settings, font, outlines, nets, poured, drops);
     }
 
     public PcbFabrication fabrication() {

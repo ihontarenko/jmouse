@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M3 4h18v16H3z"/><path d="M6 7h5v4H6z"/><path d="M13 7h5v4h-5z"/><path d="M6 13h5v4H6z"/><path d="M13 13h5v4h-5z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- panels: boards set out side by side, cut apart after -->
+  <rect width="24" height="24" rx="5" fill="#64748b"/>
+  <rect x="5" y="5" width="6.2" height="6.2" rx="1" fill="#fff"/>
+  <rect x="12.8" y="5" width="6.2" height="6.2" rx="1" fill="#fff"/>
+  <rect x="5" y="12.8" width="6.2" height="6.2" rx="1" fill="#fff"/>
+  <rect x="12.8" y="12.8" width="6.2" height="6.2" rx="1" fill="#fff" fill-opacity=".6"/>
+</svg>

@@ -3,7 +3,7 @@ model:to-92-inline-model("TO-92, leads in line") {
     meta {
         summary: "TO-92, leads in line — its body drawn by jmCAD from JEDEC TO-226AA"
         category: through-hole-transistor-outline
-        code: "MD.TO:92-INLINE"
+        code: "TO:92-INLINE:M3D"
         tags: model, hand-drawn
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

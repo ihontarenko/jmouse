@@ -1,7 +1,7 @@
 model:chip-fuse-2010-model("Chip fuse 2010 (5025 metric)") {
     meta {
         summary: "Chip fuse 2010 (5025 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:F2010"
+        code: "CHIP:F2010:M3D"
         category: fuses-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 2010 (5025 metric)"

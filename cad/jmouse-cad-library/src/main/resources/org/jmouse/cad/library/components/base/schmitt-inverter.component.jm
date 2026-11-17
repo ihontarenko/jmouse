@@ -25,7 +25,7 @@ component:schmitt-inverter("Schmitt-trigger inverter", type: gate) {
     pin:output(analog, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: "SY.GATE:NOT-SCHMITT")
+    symbol(uses: "GATE:NOT-SCHMITT:S")
 
     state:high(1, discrete, "the output's level: written by the behaviour, read by the equations")
     state:shown(1, continuous, "the output stage following it with a finite edge")

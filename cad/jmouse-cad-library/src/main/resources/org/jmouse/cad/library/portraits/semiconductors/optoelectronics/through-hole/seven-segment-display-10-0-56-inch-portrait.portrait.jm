@@ -2,7 +2,7 @@
 portrait:seven-segment-display-10-0-56-inch-portrait("SEVEN-SEGMENT-DISPLAY-10, 0-56-inch") {
     meta {
         summary: "10-lead Seven-segment display, 0.56 in digit from above: pin 1 at the bottom left, beside the notch and dot"
-        code: "PT.DISP:7SEG-10-W15.24"
+        code: "DISP:7SEG-10-W15.24:P"
         category: optoelectronics-through-hole
         tags: electronics, portrait, package, through-hole
         source: "the makers' 0.56-inch single digit (Kingbright SA56-11)"

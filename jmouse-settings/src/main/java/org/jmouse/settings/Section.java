@@ -3,6 +3,7 @@ package org.jmouse.settings;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -21,7 +22,39 @@ public record Section(String path, String label, String description, SettingScop
     private static final Pattern PATH = Pattern.compile("[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*");
 
     /** What a section's parameters are. */
-    public sealed interface Shape permits Fixed, Structured {
+    public sealed interface Shape permits Fixed, Structured, Open {
+    }
+
+    /**
+     * Rows of keys the section does not declare — an interface's, whose own sections the library does not know: their schema and
+     * their defaults are the interface's —, each key and value held to a form and nothing read into a record. A section of this
+     * shape covers its own path and every path below it: `interface` holds `interface/editor/grid` as much as itself.
+     *
+     * @param keys          the form every key is held to: `dotPixels`, `vendors.nvidia.title`
+     * @param longestValue  the most characters a value holds: a value is one line, never a document
+     */
+    public record Open(Pattern keys, int longestValue) implements Shape {
+
+        /** Dotted words of letters, digits, dashes and underscores. */
+        public static final Pattern WORDS = Pattern.compile("[A-Za-z0-9][A-Za-z0-9_-]*(\\.[A-Za-z0-9][A-Za-z0-9_-]*)*");
+
+        public Open {
+            Objects.requireNonNull(keys, "an open section holds its keys to a form");
+            if (longestValue < 1) {
+                throw new IllegalArgumentException("An open section's value holds at least one character.");
+            }
+        }
+
+        /** Why a row cannot be kept — its key not of the form, its value more than one line or too long —; empty where it can. */
+        public Optional<String> refusalOf(String key, String value) {
+            if (key == null || !keys.matcher(key).matches()) {
+                return Optional.of("'" + key + "' is not a key here: dotted words, as dotPixels or vendors.nvidia.title");
+            }
+            if (value != null && (value.length() > longestValue || value.chars().anyMatch(Character::isISOControl))) {
+                return Optional.of(key + " holds one line of at most " + longestValue + " characters");
+            }
+            return Optional.empty();
+        }
     }
 
     /**
@@ -79,6 +112,21 @@ public record Section(String path, String label, String description, SettingScop
         return new Section(path, label, description, SettingScope.INSTALLATION, new Structured(type, seed));
     }
 
+    /** An open section — every path below its own as well —, each reader's: what an interface keeps of a reader. */
+    public static Section open(String path, String label, String description, Pattern keys, int longestValue) {
+        return new Section(path, label, description, SettingScope.READER, new Open(keys, longestValue));
+    }
+
+    /** Whether this section is open and covers a path — its own, or one below it. */
+    public boolean covers(String asked) {
+        return shape instanceof Open && (asked.equals(path) || asked.startsWith(path + "/"));
+    }
+
+    /** The section at a path this one covers: the same shape, scope and words, at that path. */
+    public Section at(String asked) {
+        return asked.equals(path) ? this : new Section(asked, label, description, scope, shape);
+    }
+
     /** The same section, a value for each reader over the installation's. */
     public Section forEachReader() {
         return new Section(path, label, description, SettingScope.READER, shape);
@@ -88,6 +136,7 @@ public record Section(String path, String label, String description, SettingScop
     public Map<String, String> seed() {
         return switch (shape) {
             case Structured structured -> structured.seed();
+            case Open ignored -> Map.of();
             case Fixed fixed -> {
                 Map<String, String> defaults = new java.util.LinkedHashMap<>();
                 fixed.parameters().stream().filter(parameter -> parameter.kind() != ParameterKind.SECRET)

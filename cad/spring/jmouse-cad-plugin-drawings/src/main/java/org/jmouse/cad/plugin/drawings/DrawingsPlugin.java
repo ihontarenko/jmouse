@@ -37,7 +37,7 @@ public final class DrawingsPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Factory drawings", DrawingsPlugin.class).markedBy(DrawingsPlugin.class, "drawings.svg");
+        return PluginDescriptor.ofArtifact(ID, "Factory drawings", DrawingsPlugin.class).withIcon(DrawingsPlugin.class, "drawings.svg");
     }
 
     @Override

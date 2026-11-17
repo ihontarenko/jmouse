@@ -1,7 +1,7 @@
 footprint:dip-20-footprint("DIP-20, 7.62 mm rows") {
     meta {
         summary: "20-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
-        code: "FP.DIP:20-W7.62"
+        code: "DIP:20-W7.62:F"
         category: dual-inline
         tags: electronics, footprint, through-hole
         source: "JEDEC MS-001"
@@ -35,5 +35,5 @@ footprint:dip-20-footprint("DIP-20, 7.62 mm rows") {
     outline(silkscreen, filled, "M-2.2 -11.43A0.3 0.3 0 1 0 -1.6 -11.43A0.3 0.3 0 1 0 -2.2 -11.43Z")
     outline(courtyard, width: 0.05, "M-5.25 -13.6H5.25V13.6H-5.25Z")
     body(height: 5.33)
-    model("MD.DIP:20-W7.62")
+    model("DIP:20-W7.62:M3D")
 }

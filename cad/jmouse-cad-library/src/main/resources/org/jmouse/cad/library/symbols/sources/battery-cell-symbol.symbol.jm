@@ -1,7 +1,7 @@
 symbol:battery-cell-symbol("Battery cell") {
     meta {
         summary: "One battery cell, as drawn on a schematic: the long plate is its +, the bar under it as full as its charge"
-        code: "SY.SOURCE:CELL"
+        code: "SOURCE:CELL:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

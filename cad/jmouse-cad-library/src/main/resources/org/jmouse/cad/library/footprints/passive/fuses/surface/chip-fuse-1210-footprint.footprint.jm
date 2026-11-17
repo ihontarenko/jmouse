@@ -1,7 +1,7 @@
 footprint:chip-fuse-1210-footprint("Chip fuse 1210 (3225 metric)") {
     meta {
         summary: "Chip fuse, 1210 (3225 metric) body, reflow pads"
-        code: "FP.CHIP:F1210"
+        code: "CHIP:F1210:F"
         category: fuses-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"
@@ -17,5 +17,5 @@ footprint:chip-fuse-1210-footprint("Chip fuse 1210 (3225 metric)") {
     outline(silkscreen, width: 0.12, "M-0.59 -1.66H0.59M-0.59 1.66H0.59")
     outline(courtyard, width: 0.05, "M-2.2 -1.65H2.2V1.65H-2.2Z")
     body(height: 0.7)
-    model("MD.CHIP:F1210")
+    model("CHIP:F1210:M3D")
 }

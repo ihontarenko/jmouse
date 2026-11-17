@@ -1,7 +1,7 @@
 symbol:ptc-thermistor-symbol("PTC thermistor") {
     meta {
         summary: "Thermistor whose resistance rises with its temperature, as drawn on a schematic"
-        code: "SY.RESISTOR:THERMISTOR-PTC"
+        code: "RESISTOR:THERMISTOR-PTC:S"
         category: thermistors
         tags: electronics, schematic
         authors: "jMouse"

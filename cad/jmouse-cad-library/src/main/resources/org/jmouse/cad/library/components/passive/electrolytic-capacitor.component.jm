@@ -39,12 +39,12 @@ component:electrolytic-capacitor("Electrolytic capacitor", type: capacitor) {
 
     node:plate("the capacitance, behind the ESR")
 
-    footprint("FP.RADIAL:CP-D6.3-P2.5")
-    footprint("FP.RADIAL:CP-D5-P2")
-    footprint("FP.RADIAL:CP-D8-P3.5")
-    footprint("FP.RADIAL:CP-D10-P5")
+    footprint("RADIAL:CP-D6.3-P2.5:F")
+    footprint("RADIAL:CP-D5-P2:F")
+    footprint("RADIAL:CP-D8-P3.5:F")
+    footprint("RADIAL:CP-D10-P5:F")
 
-    symbol(uses: "SY.CAPACITOR:POLARIZED") {
+    symbol(uses: "CAPACITOR:POLARIZED:S") {
         bind:failed(failed)
         bind:charge((positive - negative) / voltage_rating)
         bind:a(pin: positive)
@@ -89,7 +89,7 @@ component:electrolytic-capacitor("Electrolytic capacitor", type: capacitor) {
     }
 
     # How it looks in the hand: a can with its minus stripe, its capacitance and its rating printed; burst when it fails.
-    portrait(uses: "PT.CAPACITOR:ELECTROLYTIC-RADIAL") {
+    portrait(uses: "CAPACITOR:ELECTROLYTIC-RADIAL:P") {
         bind:capacitance(capacitance)
         bind:voltage_rating(voltage_rating)
     }

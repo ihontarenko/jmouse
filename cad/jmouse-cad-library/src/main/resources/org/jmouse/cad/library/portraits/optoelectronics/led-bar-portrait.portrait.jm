@@ -4,7 +4,7 @@
 portrait:led-bar-portrait("LED bar") {
     meta {
         summary: "An eight-segment LED bar graph whose bars light by their current"
-        code: "PT.DISPLAY:BAR-8"
+        code: "DISPLAY:BAR-8:P"
         category: optoelectronics
         tags: electronics, portrait, display, through-hole
         authors: "jMouse"

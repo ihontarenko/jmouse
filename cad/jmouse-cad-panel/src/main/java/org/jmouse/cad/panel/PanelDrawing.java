@@ -60,10 +60,13 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
     /**
      * A pcb standing on the panel, once or in a grid.
      *
-     * @param x        where the left of its outline stands, as it stands turned
-     * @param y        where the top of its outline stands
-     * @param rotation degrees, a quarter turn at a time
-     * @param gap      between the copies of a grid; empty for the panel's usual
+     * @param pcb         the pcb it stands, by slug
+     * @param x           where the left of its outline stands, as it stands turned
+     * @param y           where the top of its outline stands
+     * @param rotation    degrees, a quarter turn at a time
+     * @param across      how many copies stand side by side
+     * @param down        how many copies stand one under another
+     * @param gap         between the copies of a grid; empty for the panel's usual
      * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
      */
     public record Board(String pcb, double x, double y, double rotation, int across, int down, OptionalDouble gap, Arrangement arrangement) {
@@ -93,11 +96,22 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
         }
     }
 
-    /** @param diameter and {@code opening} empty for the usual */
+    /**
+     * A fiducial set by hand: a mark a machine finds the panel by.
+     *
+     * @param at       where it stands, millimetres
+     * @param diameter its copper's diameter, millimetres; empty for the usual
+     * @param opening  the solder mask's opening round it, millimetres; empty for the usual
+     */
     public record Fiducial(PcbDrawing.Point at, OptionalDouble diameter, OptionalDouble opening) {
     }
 
-    /** @param drill empty for the usual */
+    /**
+     * A tooling hole set by hand: a hole a machine holds the panel by.
+     *
+     * @param at    where it stands, millimetres
+     * @param drill its diameter, millimetres; empty for the usual
+     */
     public record Tooling(PcbDrawing.Point at, OptionalDouble drill) {
     }
 

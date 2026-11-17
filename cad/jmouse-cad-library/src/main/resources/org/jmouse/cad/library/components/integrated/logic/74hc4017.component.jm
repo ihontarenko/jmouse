@@ -29,8 +29,8 @@ component:74hc4017("74HC4017", type: counter) {
     pin:master_reset(digital, input, 15, "MR, back to nought at once, active high")
     pin:Vcc(power, 16)
 
-    footprint("FP.DIP:16-W7.62")
-    footprint("FP.SOIC:16-P1.27-W3.9")
+    footprint("DIP:16-W7.62:F")
+    footprint("SOIC:16-P1.27-W3.9:F")
 
     symbol(box) {
         left([clock edge, not_clock_enable bubble, master_reset])

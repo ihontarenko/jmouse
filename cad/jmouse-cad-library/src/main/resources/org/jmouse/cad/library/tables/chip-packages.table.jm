@@ -40,7 +40,7 @@ table:chip-packages("Chip packages") {
             sizes resistor-sizes
             folder "passive/fuses/surface"
             category fuses-surface
-            designation "CHIP:F{code}{hand}"
+            designation "CHIP{code}{hand}:F"
         }
         diode "Chip diode" {
             sizes resistor-sizes

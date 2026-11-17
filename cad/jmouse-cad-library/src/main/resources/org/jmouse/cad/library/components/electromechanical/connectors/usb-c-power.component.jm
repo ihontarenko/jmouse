@@ -18,5 +18,5 @@ component:usb-c-power("USB-C receptacle, power only", type: connector) {
     pin:ground(ground, "GND, A12 and B12")
     pin:shield(analog, "the shell")
 
-    symbol(uses: "SY.CONNECTOR:USB-C-POWER")
+    symbol(uses: "CONNECTOR:USB-C-POWER:S")
 }

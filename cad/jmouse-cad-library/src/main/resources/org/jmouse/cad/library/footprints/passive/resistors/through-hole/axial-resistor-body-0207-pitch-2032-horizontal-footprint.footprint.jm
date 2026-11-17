@@ -1,7 +1,7 @@
 footprint:axial-resistor-body-0207-pitch-2032-horizontal-footprint("Axial resistor DIN 0207, horizontal, 20.32 mm") {
     meta {
         summary: "Axial resistor DIN 0207, body 6.3 × ⌀2.5 mm, laid flat, 20.32 mm between its holes"
-        code: "FP.AXIAL:R0207-P20.32-H"
+        code: "AXIAL:R0207-P20.32-H:F"
         category: resistors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-1 bodies, DIN 44051 size codes"
@@ -16,5 +16,5 @@ footprint:axial-resistor-body-0207-pitch-2032-horizontal-footprint("Axial resist
     outline(silkscreen, width: 0.12, "M-3.26 -1.36H3.26V1.36H-3.26ZM-9 0H-3.26M3.26 0H9")
     outline(courtyard, width: 0.05, "M-11.55 -1.75H11.55V1.75H-11.55Z")
     body(height: 2.5)
-    model("MD.AXIAL:R0207-P20.32-H")
+    model("AXIAL:R0207-P20.32-H:M3D")
 }

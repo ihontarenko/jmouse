@@ -1,7 +1,7 @@
 model:tantalum-capacitor-7343-model("Tantalum capacitor Case D (7343-31 metric)") {
     meta {
         summary: "Tantalum capacitor Case D (7343-31 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:CT7343"
+        code: "CHIP:CT7343:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "EIA-535-BAAC case sizes (KEMET T491), Case D (7343-31 metric)"

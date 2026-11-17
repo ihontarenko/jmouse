@@ -1,7 +1,7 @@
 footprint:round-led-diameter-500-footprint("Round LED, 5 mm (T-1¾)") {
     meta {
         summary: "Round LED, 5 mm (T-1¾), leads 2.54 mm apart; pin 1 is the cathode"
-        code: "FP.LED:D5"
+        code: "LED:D5:F"
         category: optoelectronics-through-hole
         tags: electronics, footprint, through-hole
         source: "T-1 and T-1¾ lamp bodies, 2.54 mm lead spacing"
@@ -18,5 +18,5 @@ footprint:round-led-diameter-500-footprint("Round LED, 5 mm (T-1¾)") {
     outline(fabrication, width: 0.1, "M-1.74 -1.74V1.74")
     outline(courtyard, width: 0.05, "M-3.4 -3.4H3.4V3.4H-3.4Z")
     body(height: 8.6)
-    model("MD.LED:D5")
+    model("LED:D5:M3D")
 }

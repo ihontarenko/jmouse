@@ -60,6 +60,16 @@ public final class SheetUnfolding {
         return SheetHierarchy.pinsOf(block, sheet);
     }
 
+    /**
+     * A block as it is run: each pin carrying a bus bound member by member to the bus of the parent it names.
+     *
+     * @param parent the circuit the block stands in
+     * @throws IllegalArgumentException when a bus pin is bound to no bus of the parent, or to one of another size
+     */
+    public static Part busesBound(Part block, Circuit parent, CatalogueDocuments catalogue) {
+        return SheetHierarchy.busesUnfolded(block, parent, catalogue);
+    }
+
     /** A circuit's parameters, each worked out from what it is written as. */
     public static Map<String, Double> valuesOf(Circuit circuit) {
         Map<String, Double> values = new LinkedHashMap<>();

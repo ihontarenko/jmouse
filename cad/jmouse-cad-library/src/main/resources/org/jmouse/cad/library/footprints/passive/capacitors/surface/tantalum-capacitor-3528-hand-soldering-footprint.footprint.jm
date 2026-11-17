@@ -1,7 +1,7 @@
 footprint:tantalum-capacitor-3528-hand-soldering-footprint("Tantalum capacitor Case B (3528-21 metric), hand soldering") {
     meta {
         summary: "Tantalum capacitor, Case B (3528-21 metric) body, pads lengthened for a soldering iron; pad 1 is the positive terminal"
-        code: "FP.CHIP:CT3528-HAND"
+        code: "CHIP:CT3528-HAND:F"
         category: capacitors-surface
         tags: electronics, footprint, surface
         source: "EIA-535-BAAC case sizes (KEMET T491), Case B (3528-21 metric)"
@@ -18,5 +18,5 @@ footprint:tantalum-capacitor-3528-hand-soldering-footprint("Tantalum capacitor C
     outline(silkscreen, width: 0.12, "M-2.66 -1.685V1.685")
     outline(courtyard, width: 0.05, "M-2.9 -2.1H2.9V2.1H-2.9Z")
     body(height: 2.1)
-    model("MD.CHIP:CT3528-HAND")
+    model("CHIP:CT3528-HAND:M3D")
 }

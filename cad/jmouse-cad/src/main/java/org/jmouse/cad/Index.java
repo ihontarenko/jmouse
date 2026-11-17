@@ -6,6 +6,9 @@ import java.util.stream.IntStream;
 /**
  * The index a name is written with: a bus's bits — {@code q[0..7]} —, or a row's slots — {@code memory[256]}, slots 0
  * to 255. Each of them is a name of its own, the name and its number joined: {@code q_0}, {@code memory_255}.
+ *
+ * @param first the first member's number
+ * @param last  the last member's number
  */
 public record Index(int first, int last) {
 

@@ -1,7 +1,7 @@
 model:axial-diode-do-41-pitch-508-vertical-model("Axial diode DO-41 (DO-204AL), vertical, 5.08 mm") {
     meta {
         summary: "Axial diode DO-41 (DO-204AL), vertical, 5.08 mm — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.AXIAL:DO-41-P5.08-V"
+        code: "AXIAL:DO-41-P5.08-V:M3D"
         category: diodes-through-hole
         tags: electronics, model, axial
         source: "JEDEC DO-204 outlines"

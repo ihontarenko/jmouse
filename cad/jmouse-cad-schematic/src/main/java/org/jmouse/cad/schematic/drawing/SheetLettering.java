@@ -1,5 +1,6 @@
 package org.jmouse.cad.schematic.drawing;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 
@@ -15,7 +16,7 @@ import org.jmouse.cad.settings.SettingsSection;
  * @param characterWidth a letter's width, as a share of the text's size
  * @param lineSpacing    a line's height, as a share of the text's size
  */
-public record SheetLettering(@Label("Field") double field, @Label("Pin name") double pinName, @Label("Part name") double partName, @Label("Reading") double reading, @Label("Character width") double characterWidth, @Label("Line spacing") double lineSpacing) {
+public record SheetLettering(@Label("Field") double field, @Label("Pin name") double pinName, @Label("Part name") double partName, @Label("Reading") double reading, @Bounds(minimum = 0, maximum = 2, step = 0.01) @Label("Character width") double characterWidth, @Label("Line spacing") double lineSpacing) {
 
     /** Its section of the settings tree (ADR 0004): {@code org/jmouse/cad/settings/schematic/lettering}. */
     public static final SettingsSection<SheetLettering> SECTION = new SettingsSection<>("schematic/lettering", "Sheet lettering", SheetLettering.class);

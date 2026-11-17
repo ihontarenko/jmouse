@@ -1,0 +1,721 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:pcb",
+  "title" : "A pcb document, as the engine answers it (PcbDrawing)",
+  "$defs" : {
+    "Arrangement" : {
+      "type" : "object",
+      "properties" : {
+        "group" : {
+          "type" : "string",
+          "description" : "the group's name; empty when it is in none"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "FREE", "LOCKED" ],
+          "description" : "its own state"
+        },
+        "default" : {
+          "type" : "boolean",
+          "description" : "Whether there is nothing to write: in no group, free.",
+          "readOnly" : true
+        }
+      },
+      "required" : [ "group", "state", "default" ],
+      "description" : "How a drawn item stands among the others: the group it is chosen and moved with — empty for none —, and its own state. An item is held where it stands when it is locked itself or its group is (holds).",
+      "additionalProperties" : false
+    },
+    "DrawnGroup" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the name its members carry"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "FREE", "LOCKED" ],
+          "description" : "the group's own state"
+        }
+      },
+      "required" : [ "name", "state" ],
+      "description" : "A group of a drawing as an item of its own: its name, by which its members say they are in it, and its state — a locked group holds every member where it stands, whatever each says of itself.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Arc" : {
+      "type" : "object",
+      "properties" : {
+        "layer" : {
+          "type" : "string",
+          "description" : "the copper layer it is on"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "how wide it is, millimetres"
+        },
+        "from" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "where it starts"
+        },
+        "through" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "a point it bends through, between its ends"
+        },
+        "to" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "where it ends"
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        },
+        "finish" : {
+          "type" : "string",
+          "description" : "what its copper is left as: bare, the solder mask open along it; empty for under the mask"
+        }
+      },
+      "required" : [ "layer", "width", "from", "through", "to", "arrangement", "finish" ],
+      "description" : "A track bent as an arc, through three points.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Dimension" : {
+      "type" : "object",
+      "properties" : {
+        "from" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "where it is measured from"
+        },
+        "to" : {
+          "$ref" : "#/$defs/PcbDrawing.Point",
+          "description" : "where it is measured to"
+        },
+        "offset" : {
+          "type" : "number",
+          "description" : "how far its line is drawn aside of the two points, millimetres"
+        }
+      },
+      "required" : [ "from", "to", "offset" ],
+      "description" : "A measure drawn on the pcb: the distance between two points.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Hole" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "where it stands, millimetres from the left"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where it stands, millimetres down"
+        },
+        "drill" : {
+          "type" : "number",
+          "description" : "its diameter, millimetres"
+        },
+        "ring" : {
+          "type" : "number",
+          "description" : "the copper ring's diameter round it, millimetres; 0: a bare hole"
+        }
+      },
+      "required" : [ "x", "y", "drill", "ring" ],
+      "description" : "A hole drilled through the pcb that is no part's.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Keepout" : {
+      "type" : "object",
+      "properties" : {
+        "layers" : {
+          "description" : "the layers it keeps copper off",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "path" : {
+          "type" : "string",
+          "description" : "the area, as path data"
+        }
+      },
+      "required" : [ "layers", "path" ],
+      "description" : "An area where no copper is laid.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.NetClass" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "the width its tracks are laid at, millimetres"
+        },
+        "clearance" : {
+          "type" : "number",
+          "description" : "how far its copper stands from other nets', millimetres"
+        },
+        "drill" : {
+          "type" : "number",
+          "description" : "its vias' drill, millimetres; 0 with diameter: the pcb's usual via"
+        },
+        "diameter" : {
+          "type" : "number",
+          "description" : "its vias' copper ring across, millimetres; 0 for the pcb's usual via"
+        },
+        "nets" : {
+          "description" : "the nets it holds",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "required" : [ "name", "width", "clearance", "drill", "diameter", "nets" ],
+      "description" : "A class of nets, routed alike.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Output" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "one word it is known by"
+        },
+        "formats" : {
+          "description" : "the formats, by the word each is written under: gerber, step",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "title" : {
+          "type" : "string",
+          "description" : "how a reader is shown it"
+        }
+      },
+      "required" : [ "name", "formats", "title" ],
+      "description" : "What this pcb is released as: a set of formats written together.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Pair" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "the width each of its tracks is laid at, millimetres"
+        },
+        "gap" : {
+          "type" : "number",
+          "description" : "how far apart its two tracks run, millimetres"
+        },
+        "skew" : {
+          "type" : "number",
+          "description" : "how far the two lengths may differ, millimetres; 0: the two lengths are not matched"
+        },
+        "positive" : {
+          "type" : "string",
+          "description" : "its positive net"
+        },
+        "negative" : {
+          "type" : "string",
+          "description" : "its negative net"
+        }
+      },
+      "required" : [ "name", "width", "gap", "skew", "positive", "negative" ],
+      "description" : "A differential pair: two nets routed side by side.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Placement" : {
+      "type" : "object",
+      "properties" : {
+        "designator" : {
+          "type" : "string",
+          "description" : "the part it places, as the circuit names it"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "where its origin stands, millimetres from the left"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where its origin stands, millimetres down"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far it is turned, degrees counter-clockwise as the pcb is seen"
+        },
+        "side" : {
+          "type" : "string",
+          "description" : "top or bottom"
+        },
+        "reference" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/PcbDrawing.Reference"
+          } ],
+          "description" : "where its designator stands in the part's own frame; empty for where its footprint's field puts it"
+        },
+        "shown" : {
+          "type" : [ "string", "null" ],
+          "description" : "what is printed for it where that is not its designator — R1 for S1_R1 —; empty for its designator"
+        },
+        "footprint" : {
+          "type" : [ "string", "null" ],
+          "description" : "the footprint a part that is only the pcb's stands on — a mounting hole, a logo —; empty for a part of the circuit"
+        },
+        "nets" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "the pad a net stands on, by net — nets (GND = 1) —, for a part that is only the pcb's"
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        },
+        "role" : {
+          "type" : "string",
+          "description" : "what it is to the copper beyond its pads: link for a 0 Ω link, its pads one piece of copper; empty for a part"
+        }
+      },
+      "required" : [ "designator", "x", "y", "rotation", "side", "reference", "shown", "footprint", "nets", "arrangement", "role" ],
+      "description" : "Where a part stands on the pcb.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Point" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "millimetres from the left"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "millimetres down"
+        }
+      },
+      "required" : [ "x", "y" ],
+      "description" : "A point of the pcb.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Reference" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "millimetres right of the part's origin"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "millimetres below the part's origin"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far it is turned, degrees"
+        },
+        "layer" : {
+          "type" : "string",
+          "description" : "the layer it is printed on; empty for its footprint's field's"
+        }
+      },
+      "required" : [ "x", "y", "rotation", "layer" ],
+      "description" : "Where a part's designator stands in its own frame, and how it is turned.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Rules" : {
+      "type" : "object",
+      "properties" : {
+        "profile" : {
+          "type" : "string",
+          "description" : "the maker's profile it starts from, by its word"
+        },
+        "changes" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "number"
+          },
+          "description" : "the values the pcb changes of its way of making, by rule word, in millimetres"
+        }
+      },
+      "required" : [ "profile", "changes" ],
+      "description" : "How a pcb is made: its maker's profile, and what the pcb changes of it.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Shape" : {
+      "type" : "object",
+      "properties" : {
+        "layer" : {
+          "type" : "string",
+          "description" : "the layer's id: top, inner-1, top-silkscreen, bottom-mask, comments"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "what it is stroked with; 0 when it is filled"
+        },
+        "filled" : {
+          "type" : "boolean",
+          "description" : "whether it is an area rather than lines"
+        },
+        "net" : {
+          "type" : "string",
+          "description" : "the net copper carries; empty for none"
+        },
+        "path" : {
+          "type" : "string",
+          "description" : "what it draws, as path data"
+        }
+      },
+      "required" : [ "layer", "width", "filled", "net", "path" ],
+      "description" : "Something drawn on a layer of the pcb itself, which no part brought: a logo on the silkscreen, a window in the mask, a note on the documentation, copper that is no track.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Sizes" : {
+      "type" : "object",
+      "properties" : {
+        "tracks" : {
+          "description" : "the track widths offered, millimetres",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "vias" : {
+          "description" : "the vias offered, each a drill with its copper ring",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/PcbDrawing.ViaSize"
+          }
+        }
+      },
+      "required" : [ "tracks", "vias" ],
+      "description" : "The sizes a pcb offers new copper in, beside what its classes say: track widths, and via drills each with its diameter. Empty lists: the editor's own.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Teardrop" : {
+      "type" : "object",
+      "properties" : {
+        "target" : {
+          "type" : "string",
+          "description" : "what the tracks enter: round pads and vias, surface pads, or other tracks"
+        },
+        "length" : {
+          "type" : "number",
+          "description" : "how far along the track a drop reaches, as a share of the copper it enters"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "how wide a drop's base is, as a share of the copper it enters"
+        },
+        "curved" : {
+          "type" : "boolean",
+          "description" : "whether a drop's sides are curved rather than straight"
+        }
+      },
+      "required" : [ "target", "length", "width", "curved" ],
+      "description" : "Where a pcb widens its tracks as they enter copper, and how far: a drop's measures are shares of the copper it enters.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Text" : {
+      "type" : "object",
+      "properties" : {
+        "layer" : {
+          "type" : "string",
+          "description" : "top-silkscreen or bottom-silkscreen"
+        },
+        "text" : {
+          "type" : "string",
+          "description" : "the words"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "where they stand, millimetres from the left"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where they stand, millimetres down"
+        },
+        "size" : {
+          "type" : "number",
+          "description" : "how tall their letters are, millimetres"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far they are turned, degrees"
+        },
+        "anchor" : {
+          "type" : "string",
+          "description" : "which part of the words stands on their point: start, middle — the usual — or end"
+        }
+      },
+      "required" : [ "layer", "text", "x", "y", "size", "rotation", "anchor" ],
+      "description" : "Words printed on the pcb.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Track" : {
+      "type" : "object",
+      "properties" : {
+        "layer" : {
+          "type" : "string",
+          "description" : "the copper layer it is on: top, inner-1 …, bottom"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "how wide it is, millimetres"
+        },
+        "rounding" : {
+          "type" : "number",
+          "description" : "how far its corners are rounded, millimetres; 0 for sharp corners"
+        },
+        "points" : {
+          "description" : "the points it runs through, in order, at least two",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/PcbDrawing.Point"
+          }
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        },
+        "finish" : {
+          "type" : "string",
+          "description" : "what its copper is left as: bare, the solder mask open along it for solder to be run on; empty for under the mask"
+        }
+      },
+      "required" : [ "layer", "width", "rounding", "points", "arrangement", "finish" ],
+      "description" : "A track: straight copper run through points on one layer.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Via" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "where it stands, millimetres from the left"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where it stands, millimetres down"
+        },
+        "drill" : {
+          "type" : "number",
+          "description" : "its hole's diameter, millimetres"
+        },
+        "diameter" : {
+          "type" : "number",
+          "description" : "its copper ring's diameter, millimetres"
+        },
+        "from" : {
+          "type" : "string",
+          "description" : "the layer it starts on; empty for through the pcb"
+        },
+        "to" : {
+          "type" : "string",
+          "description" : "the layer it ends on; empty for through the pcb"
+        },
+        "open" : {
+          "type" : "string",
+          "description" : "where the solder mask is left open over it: top, bottom or both; empty for covered"
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "x", "y", "drill", "diameter", "from", "to", "open", "arrangement" ],
+      "description" : "A via: a plated hole joining copper layers.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.ViaSize" : {
+      "type" : "object",
+      "properties" : {
+        "drill" : {
+          "type" : "number",
+          "description" : "the hole's diameter"
+        },
+        "diameter" : {
+          "type" : "number",
+          "description" : "the copper ring's diameter around it"
+        }
+      },
+      "required" : [ "drill", "diameter" ],
+      "description" : "A via's drill and the copper ring's diameter around it, millimetres.",
+      "additionalProperties" : false
+    },
+    "PcbDrawing.Zone" : {
+      "type" : "object",
+      "properties" : {
+        "layer" : {
+          "type" : "string",
+          "description" : "the copper layer it is poured on"
+        },
+        "net" : {
+          "type" : "string",
+          "description" : "the net its copper carries"
+        },
+        "clearance" : {
+          "type" : "number",
+          "description" : "how far it stands from other nets' copper, millimetres; 0 for the pcb's own"
+        },
+        "priority" : {
+          "type" : "integer",
+          "description" : "which pour is filled first where two claim an area: the higher; 0 for the lowest"
+        },
+        "path" : {
+          "type" : "string",
+          "description" : "the area it fills, as path data"
+        },
+        "finish" : {
+          "type" : "string",
+          "description" : "what its copper is left as: bare, the solder mask open over all of it; empty for under the mask"
+        }
+      },
+      "required" : [ "layer", "net", "clearance", "priority", "path", "finish" ],
+      "description" : "A copper pour: an area of a layer filled with one net's copper, round whatever else stands in it.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "circuit" : {
+      "type" : "string",
+      "description" : "the slug of the circuit it lays out; empty for a pcb of no circuit"
+    },
+    "rules" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/PcbDrawing.Rules"
+      } ],
+      "description" : "how it is made — its maker's profile and what it changes of it —, where it says"
+    },
+    "netClasses" : {
+      "description" : "the classes its nets are routed by: each one's track width, clearance and via",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.NetClass"
+      }
+    },
+    "sizes" : {
+      "$ref" : "#/$defs/PcbDrawing.Sizes",
+      "description" : "the sizes it offers new copper in beside its classes'"
+    },
+    "teardrops" : {
+      "description" : "where its tracks are widened as they enter copper, and how far",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Teardrop"
+      }
+    },
+    "pairs" : {
+      "description" : "its differential pairs: two nets routed side by side at one gap",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Pair"
+      }
+    },
+    "copperLayers" : {
+      "type" : "integer",
+      "description" : "how many copper layers it has; 0 when it does not say"
+    },
+    "outline" : {
+      "type" : "string",
+      "description" : "its edge, as path data; empty for a pcb with none drawn yet"
+    },
+    "placements" : {
+      "description" : "where each part stands on it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Placement"
+      }
+    },
+    "tracks" : {
+      "description" : "its straight tracks",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Track"
+      }
+    },
+    "arcs" : {
+      "description" : "its tracks bent as arcs",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Arc"
+      }
+    },
+    "vias" : {
+      "description" : "its vias",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Via"
+      }
+    },
+    "zones" : {
+      "description" : "its copper pours",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Zone"
+      }
+    },
+    "keepouts" : {
+      "description" : "the areas where copper is not laid",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Keepout"
+      }
+    },
+    "dimensions" : {
+      "description" : "the measures drawn on it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Dimension"
+      }
+    },
+    "texts" : {
+      "description" : "the words printed on it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Text"
+      }
+    },
+    "holes" : {
+      "description" : "the holes drilled through it that are no part's",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Hole"
+      }
+    },
+    "shapes" : {
+      "description" : "what is drawn on its layers that no part brought",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Shape"
+      }
+    },
+    "outputs" : {
+      "description" : "what it is released as, each a set of formats written together",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/PcbDrawing.Output"
+      }
+    },
+    "groups" : {
+      "description" : "the groups its items are chosen and moved with, each with its own state; a group only named by its members is a free one",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/DrawnGroup"
+      }
+    }
+  },
+  "required" : [ "circuit", "rules", "netClasses", "sizes", "teardrops", "pairs", "copperLayers", "outline", "placements", "tracks", "arcs", "vias", "zones", "keepouts", "dimensions", "texts", "holes", "shapes", "outputs", "groups" ],
+  "description" : "A pcb as data an editor works on — the circuit it lays out, how it is made, its copper layers and edge, where each part stands and the copper between them —, in millimetres, Y downwards. It is data; how it is sent is the product's.",
+  "additionalProperties" : false
+}

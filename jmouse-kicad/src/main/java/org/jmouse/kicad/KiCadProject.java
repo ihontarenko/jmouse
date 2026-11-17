@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,16 @@ public final class KiCadProject {
     /** Every sheet instance, the root first and each sheet before the sheets it places. */
     public List<SheetInstance> sheets() {
         return sheets;
+    }
+
+    /**
+     * Every bus alias the project's sheets declare, by its name: KiCad keeps an alias good across the whole project, whichever sheet
+     * declares it — {@code CM5.kicad_sch} names {@code ETH_PI{ETH}} with the {@code ETH} {@code Ethernet.kicad_sch} declares.
+     */
+    public Map<String, List<String>> busAliases() {
+        Map<String, List<String>> aliases = new LinkedHashMap<>();
+        sheets.forEach(sheet -> sheet.schematic().busAliases().forEach(aliases::putIfAbsent));
+        return Map.copyOf(aliases);
     }
 
     public SheetInstance root() {

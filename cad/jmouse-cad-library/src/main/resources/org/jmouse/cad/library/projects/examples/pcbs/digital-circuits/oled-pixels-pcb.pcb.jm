@@ -14,7 +14,7 @@ pcb:oled-pixels-pcb("OLED: a screen drawn byte by byte — pcb") {
     place(R1, at: 10.5 6.5, rotate: 270)
     place(R2, at: 14.5 6.5, rotate: 270)
     place(U1, at: 25.5 9)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, scl: 2, sda: 3, vcc: 4], at: 5.5 12)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, scl: 2, sda: 3, vcc: 4], at: 5.5 12)
     track(top, width: 0.25, from: 10.5 5.5, to: 14.5 5.5)
     track(top, width: 0.25, from: 10.5 7.5, to: 7.27 10.73, to: 5.5 10.73)
     track(top, width: 0.25, from: 14.5 7.5, to: 8.73 13.27, to: 5.5 13.27)

@@ -26,9 +26,9 @@ component:sh1106("SH1106 OLED module", type: display) {
     pin:scl(digital, input, 3, "serial clock")
     pin:sda(digital, bidirectional, open-drain, 4, "serial data")
 
-    footprint("FP.HDR:1X4-P2.54-V")
+    footprint("HDR:1X4-P2.54-V:F")
 
-    symbol(uses: "SY.DISPLAY:OLED-128X64")
+    symbol(uses: "DISPLAY:OLED-128X64:S")
 
     state:pump(1, discrete, "the DC-DC converter: on from reset")
 

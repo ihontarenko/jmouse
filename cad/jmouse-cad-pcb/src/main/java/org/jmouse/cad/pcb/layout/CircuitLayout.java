@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.layout;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -30,6 +31,8 @@ public final class CircuitLayout {
     private static final double WRITTEN = 1000;
 
     /**
+     * How a circuit's parts are first laid out on its pcb.
+     *
      * @param partsShare     the share of the pcb the parts' own area fills
      * @param gap            how far apart two courtyards stand at least
      * @param grid           the grid every part stands on
@@ -40,7 +43,7 @@ public final class CircuitLayout {
      * @param corner         the radius of the edge's corners
      * @param connector      the header the bench's nets come out on
      */
-    public record Settings(@Label("Share the parts fill") double partsShare,
+    public record Settings(@Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Share the parts fill") double partsShare,
                            @Label(value = "Gap", unit = "mm") double gap,
                            @Label(value = "Grid", unit = "mm") double grid,
                            @Label(value = "Margin", unit = "mm") double margin,
@@ -52,6 +55,8 @@ public final class CircuitLayout {
     }
 
     /**
+     * The pin header the nets the bench drives come out on, beside the sheet's left edge.
+     *
      * @param footprint   the header's footprint, its number of pins written as {@code {pins}}
      * @param designator  the letters its designator starts with
      * @param beforeSheet how far left of the sheet's leftmost part it stands, in the sheet's units

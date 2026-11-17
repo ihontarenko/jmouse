@@ -33,7 +33,7 @@ component:harmonic-generator("Harmonic generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-COMPOSITE") {
+    symbol(uses: "SOURCE:VOLTAGE-COMPOSITE:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

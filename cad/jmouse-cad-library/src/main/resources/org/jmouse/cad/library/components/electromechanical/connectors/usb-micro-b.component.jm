@@ -18,5 +18,5 @@ component:usb-micro-b("USB micro-B receptacle", type: connector) {
     pin:ground(ground, 5, "GND")
     pin:shield(analog, 6, "the shell")
 
-    symbol(uses: "SY.CONNECTOR:USB-MICRO-B")
+    symbol(uses: "CONNECTOR:USB-MICRO-B:S")
 }

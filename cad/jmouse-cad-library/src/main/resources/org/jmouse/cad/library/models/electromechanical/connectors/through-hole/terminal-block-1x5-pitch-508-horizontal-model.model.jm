@@ -1,7 +1,7 @@
 model:terminal-block-1x5-pitch-508-horizontal-model("Screw terminal block, 5.08 mm pitch, 1 × 5, horizontal") {
     meta {
         summary: "Screw terminal block, 5.08 mm pitch, 1 × 5, horizontal — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.TB:5-P5.08"
+        code: "TB:5-P5.08:M3D"
         category: connectors-through-hole
         tags: electronics, model, header
         source: "IEC 60947-7-1 terminal blocks, the makers' pin sizes"

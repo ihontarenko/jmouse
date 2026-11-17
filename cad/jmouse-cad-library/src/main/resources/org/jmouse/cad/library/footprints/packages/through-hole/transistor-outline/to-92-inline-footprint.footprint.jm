@@ -1,7 +1,7 @@
 footprint:to-92-inline-footprint("TO-92, leads in line") {
     meta {
         summary: "3-lead TO-92, through-hole, the leads formed to 2.54 mm in one line, the flat face towards +Y"
-        code: "FP.TO92:3-L"
+        code: "TO92:3-L:F"
         category: through-hole-transistor-outline
         tags: electronics, footprint, through-hole
         source: "JEDEC TO-226AA"
@@ -20,5 +20,5 @@ footprint:to-92-inline-footprint("TO-92, leads in line") {
     outline(silkscreen, filled, "M-2.74 1.6A0.2 0.2 0 1 0 -2.34 1.6A0.2 0.2 0 1 0 -2.74 1.6Z")
     outline(courtyard, width: 0.05, "M-4.05 -2.9H4.05V2.05H-4.05Z")
     body(height: 5.2)
-    model("MD.TO:92-INLINE")
+    model("TO:92-INLINE:M3D")
 }

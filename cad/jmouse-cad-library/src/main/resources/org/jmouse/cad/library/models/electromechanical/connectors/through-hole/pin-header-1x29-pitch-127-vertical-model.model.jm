@@ -1,7 +1,7 @@
 model:pin-header-1x29-pitch-127-vertical-model("Pin header, 1.27 mm pitch, 1 × 29, vertical") {
     meta {
         summary: "Pin header, 1.27 mm pitch, 1 × 29, vertical — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.HDR:1X29-P1.27-V"
+        code: "HDR:1X29-P1.27-V:M3D"
         category: connectors-through-hole
         tags: electronics, model, header
         source: "IEC 60603-13 grid"

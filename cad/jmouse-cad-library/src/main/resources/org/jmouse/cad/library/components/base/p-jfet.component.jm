@@ -14,7 +14,7 @@ component:p-jfet("P-channel JFET", type: jfet) {
 
     parameter:polarity(-1, "p-channel")
 
-    symbol(uses: "SY.TRANSISTOR:JFET-P") {
+    symbol(uses: "TRANSISTOR:JFET-P:S") {
         bind:failed(failed)
     }
 }

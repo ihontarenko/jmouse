@@ -30,7 +30,7 @@ pcb:counting-bounces-pcb("Counting a bouncing button — pcb") {
     place(R10, at: 51.5 44.5)
     place(R11, at: 51.5 40.5)
     place(DS1, at: 60 24.5, rotate: 90)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, vcc: 2], at: 5.5 26.5)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [0: 1, vcc: 2], at: 5.5 26.5)
     track(bottom, width: 0.25, from: 46.31 19.85, to: 46.31 22.39)
     track(bottom, width: 0.25, from: 46.31 42.85, to: 46.31 45.39)
     track(top, width: 0.25, from: 29.35 24.65, to: 30 24, to: 32.65 24)

@@ -1,7 +1,7 @@
 symbol:buzzer-symbol("Buzzer") {
     meta {
         summary: "A buzzer, as drawn on a schematic: a sounder's dome on its body, its leads in from one side — waves leave the dome while it sounds"
-        code: "SY.TRANSDUCER:BUZZER"
+        code: "TRANSDUCER:BUZZER:S"
         category: electromechanical
         tags: electronics, schematic
         authors: "jMouse"

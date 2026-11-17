@@ -1,7 +1,7 @@
 model:trimmer-bourns-3296w-model("Bourns 3296W trimming potentiometer, standing") {
     meta {
         summary: "Bourns 3296W trimming potentiometer, standing — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.POT:3296W"
+        code: "POT:3296W:M3D"
         category: potentiometers-through-hole
         tags: electronics, model, inline
         source: "Bourns 3296 data sheet: the W, top adjust, pins in line"

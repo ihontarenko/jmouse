@@ -1,7 +1,7 @@
 symbol:crystal-symbol("Crystal") {
     meta {
         summary: "Crystal, as drawn on a schematic"
-        code: "SY.CRYSTAL:TWO-TERMINAL"
+        code: "CRYSTAL:TWO-TERMINAL:S"
         category: crystals
         tags: electronics, schematic
         authors: "jMouse"

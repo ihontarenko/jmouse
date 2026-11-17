@@ -37,7 +37,7 @@ component:lt3042("LT3042", type: regulator) {
     pin:output_sense(analog, input, 9, "OUTS: where the output is regulated")
     pin:output(analog, output, 10, "OUT")
 
-    footprint("FP.MSOP:10-P0.5-EP") {
+    footprint("MSOP:10-P0.5-EP:F") {
         pad:1(input)
         pad:2(input)
         pad:3(enable)
@@ -51,7 +51,7 @@ component:lt3042("LT3042", type: regulator) {
         pad:11(GND)
     }
 
-    symbol(uses: "SY.REGULATOR:LDO") {
+    symbol(uses: "REGULATOR:LDO:S") {
         bind:failed(failed)
     }
 

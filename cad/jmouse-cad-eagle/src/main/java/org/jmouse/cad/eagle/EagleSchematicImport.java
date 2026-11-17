@@ -80,7 +80,9 @@ final class EagleSchematicImport {
 
     private final List<ImportedCircuit.Item> items = new ArrayList<>();
     private final List<ImportedCircuit.Wire> wires = new ArrayList<>();
-    private final List<ImportedCircuit.Bus> buses = new ArrayList<>();
+    private final List<ImportedCircuit.BusLine> busLines = new ArrayList<>();
+    /** The buses its bus lines declare, each once by its name. */
+    private final ImportedBuses declaredBuses = new ImportedBuses();
     private final Set<String> globals = new LinkedHashSet<>();
     private final List<String> notes = new ArrayList<>();
     private final Set<String> drawnParts = new LinkedHashSet<>();
@@ -289,7 +291,7 @@ final class EagleSchematicImport {
         if (!ground) {
             globals.add(net);
         }
-        mark(ground ? "ground" : "power", net, ground ? SheetMarks.GROUND : SheetMarks.GLOBAL, pinPoint(instance, pin), body);
+        mark(ground ? "ground" : "power", net, ground ? SheetMarks.GROUND : SheetMarks.POWER, pinPoint(instance, pin), body);
     }
 
     /** Each label of a net: a label mark where the nearest wire of its segment ends loose, its body pointing out of it. */
@@ -364,7 +366,7 @@ final class EagleSchematicImport {
     private void bus(EagleSchematic.Bus bus) {
         List<List<double[]>> stretches = bus.wires().stream().map(wire -> List.of(new double[] {wire.x1(), wire.y1()}, new double[] {wire.x2(), wire.y2()})).toList();
         for (List<double[]> line : ImportedBuses.joined(stretches)) {
-            buses.add(ImportedBuses.bus("B" + (buses.size() + 1), bus.name(), line.stream().map(point -> drawn(point[0], point[1])).toList(), nets::of));
+            busLines.add(declaredBuses.line("B" + (busLines.size() + 1), bus.name(), line.stream().map(point -> drawn(point[0], point[1])).toList(), nets::of));
         }
     }
 
@@ -407,7 +409,7 @@ final class EagleSchematicImport {
         List<ImportedCircuit.Part> parts = new ArrayList<>();
         placed.values().forEach(part -> parts.add(new ImportedCircuit.Part(part.id(), part.component(), part.nets(), Map.of(),
                 null, null).withValue(part.value())));
-        ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), List.of(), globals, notes, buses);
+        ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), List.of(), globals, notes, declaredBuses.buses(), busLines);
         // What a design is built from, each before what names it: a footprint before the component landing on it.
         List<DocumentNode> library = new ArrayList<>(footprints.values());
         library.addAll(symbols.values());

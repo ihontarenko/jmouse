@@ -22,7 +22,7 @@ component:or-gate("OR gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: "SY.GATE:OR")
+    symbol(uses: "GATE:OR:S")
 
     behaviour {
         function level()

@@ -1,7 +1,7 @@
 footprint:tactile-switch-4-6mm-footprint("Tactile switch, 6 × 6 mm, 4.5 mm rows") {
     meta {
         summary: "4-lead tactile switch, 6 × 6 mm, through-hole, 6.5 mm pitch, rows 4.5 mm apart"
-        code: "FP.SW:TACT-6X6"
+        code: "SW:TACT-6X6:F"
         category: switches-through-hole
         tags: electronics, footprint, through-hole
         source: "the makers' 6 mm through-hole tact switch (Omron B3F-1000): leads 6.5 mm apart along a side joined inside"
@@ -19,5 +19,5 @@ footprint:tactile-switch-4-6mm-footprint("Tactile switch, 6 × 6 mm, 4.5 mm rows
     outline(silkscreen, filled, "M-0.59 -3.25A0.3 0.3 0 1 0 0.01 -3.25A0.3 0.3 0 1 0 -0.59 -3.25Z")
     outline(courtyard, width: 0.05, "M-3.75 -4.75H3.75V4.75H-3.75Z")
     body(height: 4.3)
-    model("MD.SW:TACT-6X6")
+    model("SW:TACT-6X6:M3D")
 }

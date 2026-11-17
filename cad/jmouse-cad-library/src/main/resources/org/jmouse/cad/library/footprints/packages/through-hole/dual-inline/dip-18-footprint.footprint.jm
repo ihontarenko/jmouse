@@ -1,7 +1,7 @@
 footprint:dip-18-footprint("DIP-18, 7.62 mm rows") {
     meta {
         summary: "18-lead dual in-line package, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
-        code: "FP.DIP:18-W7.62"
+        code: "DIP:18-W7.62:F"
         category: dual-inline
         tags: electronics, footprint, through-hole
         source: "JEDEC MS-001"
@@ -33,5 +33,5 @@ footprint:dip-18-footprint("DIP-18, 7.62 mm rows") {
     outline(silkscreen, filled, "M-2.2 -10.16A0.3 0.3 0 1 0 -1.6 -10.16A0.3 0.3 0 1 0 -2.2 -10.16Z")
     outline(courtyard, width: 0.05, "M-5.25 -11.95H5.25V11.95H-5.25Z")
     body(height: 5.33)
-    model("MD.DIP:18-W7.62")
+    model("DIP:18-W7.62:M3D")
 }

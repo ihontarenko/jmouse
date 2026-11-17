@@ -38,57 +38,60 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <jakarta-el.version>4.0.2</jakarta-el.version>
+    <victools.version>5.0.0</victools.version>
     <jackson.version>3.1.4</jackson.version>
     <jaxb.version>4.0.0</jaxb.version>
     <flatten-maven-plugin.version>1.2.7</flatten-maven-plugin.version>
-    <maven-surefire.version>3.5.6</maven-surefire.version>
     <jgit.version>6.10.0.202406032230-r</jgit.version>
     <slf4j.version>2.0.13</slf4j.version>
-    <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
     <jakarta-inject.version>2.0.1</jakarta-inject.version>
     <log4j.version>1.2.17</log4j.version>
-    <maven-gpg.version>3.0.1</maven-gpg.version>
-    <junit.version>5.11.4</junit.version>
-    <context-propagation.version>1.2.1</context-propagation.version>
-    <logback.version>1.5.6</logback.version>
-    <bytebuddy.version>1.17.6</bytebuddy.version>
-    <maven.compiler.source>21</maven.compiler.source>
     <hibernate-validation.version>8.0.1.Final</hibernate-validation.version>
     <plugin.summary></plugin.summary>
     <commons-compress.version>1.28.0</commons-compress.version>
-    <jaxb-runtime.version>4.0.2</jaxb-runtime.version>
-    <maven-javadoc.version>3.11.2</maven-javadoc.version>
     <jdbc-mariadb>3.3.3</jdbc-mariadb>
     <jdbc-mysql>8.3.0</jdbc-mysql>
     <awssdk.version>2.28.29</awssdk.version>
     <archunit.version>1.3.0</archunit.version>
     <jmh.version>1.37</jmh.version>
     <mcp-sdk.version>2.0.0</mcp-sdk.version>
-    <maven-source.version>3.2.1</maven-source.version>
     <jdbc-oracle11>23.3.0.23.09</jdbc-oracle11>
     <tomcat-embed.version>10.1.31</tomcat-embed.version>
-    <org.jsoup>1.22.1</org.jsoup>
-    <plugin.category></plugin.category>
     <maven-compiler.version>3.15.0</maven-compiler.version>
     <jdbc-db2>11.5.9.0</jdbc-db2>
     <asm.version>9.7.1</asm.version>
-    <jdbc-sqlite>3.45.1.0</jdbc-sqlite>
     <jdbc-h2>2.2.224</jdbc-h2>
     <assertj.version>3.26.3</assertj.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jakarta-annotation.version>2.1.1</jakarta-annotation.version>
-    <jakarta-validation.version>3.1.1</jakarta-validation.version>
     <json-path>2.9.0</json-path>
     <objenesis.version>3.3</objenesis.version>
     <java.version>21</java.version>
-    <jakarta-tx.version>2.0.1</jakarta-tx.version>
     <jdbc-postgresql>42.7.3</jdbc-postgresql>
-    <jmouse.version>1.0.1</jmouse.version>
     <maven.compiler.target>21</maven.compiler.target>
     <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
     <jdbc-mssql>12.6.1.jre11</jdbc-mssql>
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
+    <maven-surefire.version>3.5.6</maven-surefire.version>
+    <jspecify.version>1.0.0</jspecify.version>
+    <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
+    <maven-gpg.version>3.0.1</maven-gpg.version>
+    <junit.version>5.11.4</junit.version>
+    <context-propagation.version>1.2.1</context-propagation.version>
+    <logback.version>1.5.6</logback.version>
+    <bytebuddy.version>1.17.6</bytebuddy.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <jaxb-runtime.version>4.0.2</jaxb-runtime.version>
+    <maven-javadoc.version>3.11.2</maven-javadoc.version>
+    <maven-source.version>3.2.1</maven-source.version>
+    <org.jsoup>1.22.1</org.jsoup>
+    <plugin.category></plugin.category>
+    <networknt.version>3.0.0</networknt.version>
+    <jdbc-sqlite>3.45.1.0</jdbc-sqlite>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jakarta-validation.version>3.1.1</jakarta-validation.version>
+    <jakarta-tx.version>2.0.1</jakarta-tx.version>
+    <jmouse.version>1.0.1</jmouse.version>
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
   <dependencyManagement>
@@ -227,12 +230,42 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-geometry</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-descriptions</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-schemas</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-documentation</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-documentation-md</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-revisions</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-json-patch</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-websocket</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -383,6 +416,11 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-cad-panel</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-cad-table</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -908,6 +946,26 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-generator</artifactId>
+        <version>${victools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-module-jackson</artifactId>
+        <version>${victools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.networknt</groupId>
+        <artifactId>json-schema-validator</artifactId>
+        <version>${networknt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
+      </dependency>
+      <dependency>
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
         <version>${jakarta-annotation.version}</version>
@@ -1011,6 +1069,11 @@
       <dependency>
         <groupId>org.apache.tomcat.embed</groupId>
         <artifactId>tomcat-embed-el</artifactId>
+        <version>${tomcat-embed.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
         <version>${tomcat-embed.version}</version>
       </dependency>
       <dependency>

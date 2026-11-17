@@ -20,7 +20,7 @@ component:wattmeter("Wattmeter", type: meter) {
     lead:plus(red, stripes: black)
     lead:minus(black, stripes: white)
     reading:reading((plus - minus) * in.current, unit: W, signal)
-    symbol(uses: "SY.METER:WATTMETER") {
+    symbol(uses: "METER:WATTMETER:S") {
         bind:a(pin: in)
         bind:b(pin: out)
         bind:c(pin: plus)

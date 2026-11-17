@@ -14,7 +14,7 @@ import org.jmouse.cad.pcb.physics.CopperPhysics;
 import org.jmouse.cad.pcb.physics.StackPhysics;
 import org.jmouse.cad.pcb.routing.RoutingSettings;
 import org.jmouse.cad.settings.SettingsSection;
-import org.jmouse.cad.store.habits.CadHabits;
+import org.jmouse.cad.store.settings.ReaderSettings;
 import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.cad.document.part.FetchCompletion;
@@ -71,7 +71,7 @@ public final class CadEnginePlugin implements Plugin {
     public CadEnginePlugin(CadProperties properties) {
         this.settings = Stream.concat(EngineConfiguration.sectionsFrom(properties).stream(),
                 Stream.concat(CORE_SECTIONS.stream().map(CadSettings::declarationOf),
-                        Stream.of(CadSettings.declarationOf(CadHabits.SECTION).forEachReader()))).toList();
+                        Stream.of(ReaderSettings.SECTION))).toList();
     }
 
     @Override
@@ -81,7 +81,7 @@ public final class CadEnginePlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "jMouse CAD engine", CadEnginePlugin.class).drawnBy(CadEnginePlugin.class, "engine.svg");
+        return PluginDescriptor.ofArtifact(ID, "jMouse CAD engine", CadEnginePlugin.class).withIcon(CadEnginePlugin.class, "engine.svg");
     }
 
     @Override

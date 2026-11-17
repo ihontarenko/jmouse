@@ -2,6 +2,7 @@ package org.jmouse.cad.table;
 
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentModule;
+import org.jmouse.cad.document.DocumentModel;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.el.node.Expression;
@@ -11,7 +12,6 @@ import org.jmouse.sheet.SheetReader;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * 📋 The language of tables: a document of the catalogue whose body is the sheet language's fields and entries — the
@@ -44,8 +44,8 @@ public final class TableModule implements DocumentModule {
     }
 
     @Override
-    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
-        return Map.of(TABLE, document -> Table.of(sheetOf(document)));
+    public Map<DocumentKind, DocumentModel<?>> models() {
+        return Map.of(TABLE, DocumentModel.of(Table.class, document -> Table.of(sheetOf(document))));
     }
 
     @Override

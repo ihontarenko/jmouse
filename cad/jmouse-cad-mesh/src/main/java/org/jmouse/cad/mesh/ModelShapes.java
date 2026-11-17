@@ -30,18 +30,51 @@ public final class ModelShapes {
         List<Double> rotate();
     }
 
+    /**
+     * A box, its sides along the axes before it is turned.
+     *
+     * @param material the material it is made of, by name
+     * @param size     how long it is along each axis, millimetres: x, y, z
+     * @param at       where its centre stands, millimetres: x, y, z
+     * @param rotate   how far it is turned, degrees about X, then Y, then Z
+     */
     public record Box(String material, List<Double> size, List<Double> at, List<Double> rotate) implements Shape {
     }
 
-    /** Along Z before it is turned. */
+    /**
+     * Along Z before it is turned.
+     *
+     * @param material the material it is made of, by name
+     * @param radius   its radius, millimetres
+     * @param length   how long it is along Z, millimetres
+     * @param at       where its centre stands, millimetres: x, y, z
+     * @param rotate   how far it is turned, degrees about X, then Y, then Z
+     */
     public record Cylinder(String material, double radius, double length, List<Double> at, List<Double> rotate) implements Shape {
     }
 
-    /** A body turned about Z: its profile, radius and z from the bottom up, swept from and to its angles, degrees. */
+    /**
+     * A body turned about Z: its profile, radius and z from the bottom up, swept from and to its angles, degrees.
+     *
+     * @param material the material it is made of, by name
+     * @param profile  its profile from the bottom up, each point a radius and a z, millimetres
+     * @param from     the angle it is swept from, degrees
+     * @param to       the angle it is swept to, degrees
+     * @param at       where its centre stands, millimetres: x, y, z
+     * @param rotate   how far it is turned, degrees about X, then Y, then Z
+     */
     public record Revolved(String material, List<double[]> profile, double from, double to, List<Double> at, List<Double> rotate) implements Shape {
     }
 
-    /** A convex outline of {@code [x, y]} corners raised along Z by {@code height} from its base, where {@code at} sets it. */
+    /**
+     * A convex outline of {@code [x, y]} corners raised along Z by {@code height} from its base, where {@code at} sets it.
+     *
+     * @param material the material it is made of, by name
+     * @param outline  its base's corners, each an x and a y, millimetres
+     * @param height   how far its base is raised along Z, millimetres
+     * @param at       where its centre stands, millimetres: x, y, z
+     * @param rotate   how far it is turned, degrees about X, then Y, then Z
+     */
     public record Prism(String material, List<double[]> outline, double height, List<Double> at, List<Double> rotate) implements Shape {
     }
 

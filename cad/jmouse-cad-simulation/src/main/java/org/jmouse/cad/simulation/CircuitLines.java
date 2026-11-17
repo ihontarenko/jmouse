@@ -6,6 +6,7 @@ import org.jmouse.cad.Formula;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.Setting;
 import org.jmouse.cad.Text;
+import org.jmouse.cad.circuit.Bus;
 import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.circuit.Placement;
 import org.jmouse.cad.circuit.Probe;
@@ -65,6 +66,9 @@ public final class CircuitLines {
         if (grammar == SimulationLines.FRAME || grammar == SimulationLines.TIME_BASE) {
             return Optional.of(grammar.word());
         }
+        if (grammar == SimulationLines.BUS_DECLARATION) {
+            return line.name("name").map(name -> SimulationVocabulary.BUS + " " + name);
+        }
         if (grammar == ArrangementLines.GROUP_LINE) {
             return line.name("name").map(name -> ArrangementLines.GROUP + " " + name);
         }
@@ -107,7 +111,7 @@ public final class CircuitLines {
             case Placement.PlacedPart part -> placed(part);
             case Placement.Mark mark -> mark(mark);
             case Placement.Wire wire -> wire(wire);
-            case Placement.Bus bus -> bus(bus);
+            case Placement.BusLine bus -> busLine(bus);
             case Placement.Drawn drawn -> LineBuilder.line(SimulationLines.DRAWN).slot("reference", Nodes.name(drawn.reference()))
                     .slot("shape", Nodes.word(drawn.shape().word())).clause("via", cornersOf(drawn.via()));
             case Placement.Note note -> LineBuilder.line(SimulationLines.NOTE).slot("reference", Nodes.name(note.reference()))
@@ -192,14 +196,19 @@ public final class CircuitLines {
         return line;
     }
 
-    /** {@code B1 bus D [members D0, D1] via x y, x y …}. */
-    private static LineBuilder bus(Placement.Bus bus) {
-        LineBuilder line = LineBuilder.line(SimulationLines.BUS).slot("reference", Nodes.name(bus.reference())).slot("name", Nodes.word(bus.name()));
-        if (!bus.members().isEmpty()) {
-            line.clause("members", Nodes.groups(List.of(bus.members())));
-        }
-        line.clause("via", cornersOf(bus.via()));
-        return line;
+    /** {@code bus:B1(D, via: [x y, x y …])}: a line of the bus D. */
+    private static LineBuilder busLine(Placement.BusLine bus) {
+        return LineBuilder.line(SimulationLines.BUS).slot("reference", Nodes.name(bus.reference())).slot("name", Nodes.word(bus.bus()))
+                .clause("via", cornersOf(bus.via()));
+    }
+
+    /** {@code bus(D[0..7])} — a vector, its nets the language's indexed names —, {@code bus(I2C, members: [SDA, SCL])} — a group. */
+    public static ClauseLineNode bus(Bus bus) {
+        LineBuilder line = LineBuilder.line(SimulationLines.BUS_DECLARATION);
+        bus.numbers().ifPresentOrElse(
+                index -> line.slot("name", Nodes.name(bus.name(), index.first(), index.last())),
+                () -> line.slot("name", Nodes.name(bus.name())).clause("members", Nodes.groups(bus.members().stream().map(List::of).toList())));
+        return line.build();
     }
 
     /** Points as the language writes a line of them: {@code 240 120, 400 120}. */

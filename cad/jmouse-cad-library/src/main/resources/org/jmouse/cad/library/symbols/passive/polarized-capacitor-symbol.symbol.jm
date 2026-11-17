@@ -1,7 +1,7 @@
 symbol:polarized-capacitor-symbol("Polarized capacitor") {
     meta {
         summary: "Electrolytic capacitor, as drawn on a schematic: a level between its plates says how charged it is against its rating, burning hot if charged the wrong way round"
-        code: "SY.CAPACITOR:POLARIZED"
+        code: "CAPACITOR:POLARIZED:S"
         category: capacitors
         tags: electronics, schematic
         authors: "jMouse"

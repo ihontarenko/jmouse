@@ -1,7 +1,7 @@
 model:chip-inductor-0402-hand-soldering-model("Chip inductor 0402 (1005 metric), hand soldering") {
     meta {
         summary: "Chip inductor 0402 (1005 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:L0402-HAND"
+        code: "CHIP:L0402-HAND:M3D"
         category: inductors-surface
         tags: electronics, model, chip
         source: "IEC 60384-22 dimensions, 0402 (1005 metric)"

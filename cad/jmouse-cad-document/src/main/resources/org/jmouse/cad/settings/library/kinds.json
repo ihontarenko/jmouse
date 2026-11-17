@@ -18,17 +18,17 @@
     "family": {
       "one": "family",
       "plural": "Families",
-      "code": null
+      "code": "FML"
     },
     "footprint": {
       "one": "footprint",
       "plural": "Footprints",
-      "code": "FP"
+      "code": "F"
     },
     "frame": {
       "one": "frame",
       "plural": "Frames",
-      "code": "FR"
+      "code": "FRM"
     },
     "functions": {
       "one": "function library",
@@ -38,7 +38,7 @@
     "model": {
       "one": "3D model",
       "plural": "3D models",
-      "code": "MD"
+      "code": "M3D"
     },
     "panel": {
       "one": "panel",
@@ -48,12 +48,12 @@
     "pcb": {
       "one": "pcb",
       "plural": "Pcbs",
-      "code": null
+      "code": "PCB"
     },
     "portrait": {
       "one": "portrait",
       "plural": "Portraits",
-      "code": "PT"
+      "code": "P"
     },
     "project": {
       "one": "project",
@@ -63,7 +63,7 @@
     "symbol": {
       "one": "symbol",
       "plural": "Symbols",
-      "code": "SY"
+      "code": "S"
     }
   }
 }

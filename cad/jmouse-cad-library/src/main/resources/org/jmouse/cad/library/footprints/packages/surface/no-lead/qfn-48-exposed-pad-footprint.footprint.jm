@@ -1,7 +1,7 @@
 footprint:qfn-48-exposed-pad-footprint("QFN-48, 7 mm body") {
     meta {
         summary: "48-lead QFN-48, 7 mm body, 0.5 mm pitch, body 7 × 7 mm, exposed pad 5.15 mm"
-        code: "FP.QFN:48-P0.5-7-EP5.15"
+        code: "QFN:48-P0.5-7-EP5.15:F"
         category: no-lead
         tags: electronics, footprint, surface
         source: "JEDEC MO-220"
@@ -64,5 +64,5 @@ footprint:qfn-48-exposed-pad-footprint("QFN-48, 7 mm body") {
     outline(silkscreen, filled, "M-4.735 -2.75A0.3 0.3 0 1 0 -4.135 -2.75A0.3 0.3 0 1 0 -4.735 -2.75Z")
     outline(courtyard, width: 0.05, "M-4.15 -4.15H4.15V4.15H-4.15Z")
     body(height: 1)
-    model("MD.QFN:48-P0.5-7-EP5.15")
+    model("QFN:48-P0.5-7-EP5.15:M3D")
 }

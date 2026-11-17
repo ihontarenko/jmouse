@@ -6,10 +6,10 @@ component:recycle-mark("Recycling mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:RECYCLE-10")
-    footprint("FP.GRAPHIC:RECYCLE-5")
-    footprint("FP.GRAPHIC:RECYCLE-20")
+    footprint("GRAPHIC:RECYCLE-10:F")
+    footprint("GRAPHIC:RECYCLE-5:F")
+    footprint("GRAPHIC:RECYCLE-20:F")
 
-    symbol(uses: "SY.GRAPHIC:RECYCLE") {
+    symbol(uses: "GRAPHIC:RECYCLE:S") {
     }
 }

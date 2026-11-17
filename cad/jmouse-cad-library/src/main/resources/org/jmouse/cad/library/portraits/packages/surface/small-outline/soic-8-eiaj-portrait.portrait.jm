@@ -2,7 +2,7 @@
 portrait:soic-8-eiaj-portrait("SOIC-8, eiaj") {
     meta {
         summary: "8-lead SOIC, 5.3 mm body (208 mil) from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.SOIC:8-P1.27-W5.3"
+        code: "SOIC:8-P1.27-W5.3:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEITA EDR-7320, 208-mil SOP"

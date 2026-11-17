@@ -59,7 +59,7 @@ public class StoredDocuments implements PartDocuments, DocumentSource {
         this.holdings = holdings;
     }
 
-    /** What a revision's label is marked with when the document at hand is not what is stored. */
+    /** What a revision's number is marked with when the document at hand is not what is stored. */
     private static final String DRAFT_MARK = "-draft";
 
     @Override
@@ -67,7 +67,8 @@ public class StoredDocuments implements PartDocuments, DocumentSource {
         return documents.findBySlug(document.slug()).map(stored -> {
             DocumentLanguage language = reading.language().language();
             boolean same = language.write(language.readOne(DocumentInput.text(stored.getSlug(), headSource(stored)))).equals(language.write(document));
-            return same ? stored.getRevisionLabel() : stored.getRevisionLabel() + DRAFT_MARK;
+            String revision = String.valueOf(stored.getRevision());
+            return same ? revision : revision + DRAFT_MARK;
         });
     }
 
@@ -150,7 +151,7 @@ public class StoredDocuments implements PartDocuments, DocumentSource {
     }
 
     /**
-     * The document a word names from here: by its slug, or by its technical code ({@code FP.CHIP:R0805}) — then the copy
+     * The document a word names from here: by its slug, or by its technical code ({@code CHIP:R0805:F}) — then the copy
      * nearest this place, an owner's own before the catalogue's, as a copy keeps the code of what it was copied from.
      */
     public Optional<StoredDocument> addressed(String word) {

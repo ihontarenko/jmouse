@@ -40,9 +40,9 @@ component:lm393("LM393", type: opamp) {
     pin:Vcc(power, 8)
     pin:GND(ground, 4)
 
-    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("SOIC:8-P1.27-W3.9:F")
 
-    symbol(uses: ["SY.AMPLIFIER:OPERATIONAL", "SY.AMPLIFIER:OPERATIONAL-WIDE"]) {
+    symbol(uses: ["AMPLIFIER:OPERATIONAL:S", "AMPLIFIER:OPERATIONAL-WIDE:S"]) {
         bind:failed(failed)
         bind:positive_supply(pin: Vcc)
         bind:negative_supply(pin: GND)

@@ -3,7 +3,7 @@
 portrait:tantalum-capacitor-portrait("Tantalum capacitor") {
     meta {
         summary: "A moulded tantalum chip from above, its plus band, picofarad code and voltage letter read from its values"
-        code: "PT.CAPACITOR:TANTALUM-MOULDED"
+        code: "CAPACITOR:TANTALUM-MOULDED:P"
         category: capacitors
         tags: electronics, portrait, capacitor, surface-mount
         authors: "jMouse"

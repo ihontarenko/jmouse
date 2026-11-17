@@ -14,7 +14,7 @@ pcb:comparator-pcb("Comparator — pcb") {
     place(RV1, at: 14.5 8.5, rotate: 270)
     place(U1, at: 23 12.5)
     place(RP, at: 29.5 9.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, in: 2, vcc: 3], at: 5.5 12.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, in: 2, vcc: 3], at: 5.5 12.5)
     track(top, width: 0.25, from: 25.45 10.595, to: 27.405 10.595, to: 29.5 8.5)
     track(top, width: 0.25, from: 14.5 8.5, to: 17.865 11.865, to: 20.55 11.865)
     track(top, width: 0.25, from: 20.55 10.595, to: 23.7 7.445, to: 30 7.445, to: 31.277 8.723, to: 29.5 10.5)

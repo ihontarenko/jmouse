@@ -5,6 +5,9 @@ import org.jmouse.cad.simulation.engine.LiveCircuitSession;
 import org.jmouse.cad.simulation.engine.LiveControls;
 import org.jmouse.cad.simulation.engine.PartLoad;
 import org.jmouse.cad.store.problem.CadProblem;
+import org.jmouse.websocket.SocketConversation;
+import org.jmouse.websocket.SocketOutput;
+import org.jmouse.websocket.SocketPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
@@ -46,7 +49,7 @@ import java.util.function.Function;
  * value as {@code S1.closed}. Each change builds the circuit again with them, as a measurement {@code with} them builds
  * it, and the run goes on from where it stood when it can.</p>
  */
-final class LiveRun {
+final class LiveRun implements SocketConversation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiveRun.class);
 
@@ -91,9 +94,9 @@ final class LiveRun {
     }
 
     private final LiveCircuits     circuits;
-    private final LivePrincipal    principal;
+    private final SocketPrincipal  principal;
     private final ObjectMapper     mapper;
-    private final LiveOutput       output;
+    private final SocketOutput     output;
 
     private LiveCircuits.Scope          scope;
     private Circuit                     circuit;
@@ -126,14 +129,15 @@ final class LiveRun {
     /** Every how many samples the session traces the whole circuit now. */
     private int                         tracedEvery = 1;
 
-    LiveRun(LiveCircuits circuits, LivePrincipal principal, ObjectMapper mapper, LiveOutput output) {
+    LiveRun(LiveCircuits circuits, SocketPrincipal principal, ObjectMapper mapper, SocketOutput output) {
         this.circuits = circuits;
         this.principal = principal;
         this.mapper = mapper;
         this.output = output;
     }
 
-    void receive(String text) {
+    @Override
+    public void receive(String text) {
         try {
             Message message = mapper.readValue(text, Message.class);
             principal.runAs(() -> {
@@ -629,7 +633,8 @@ final class LiveRun {
         return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
     }
 
-    void close() {
+    @Override
+    public void close() {
         pause();
     }
 

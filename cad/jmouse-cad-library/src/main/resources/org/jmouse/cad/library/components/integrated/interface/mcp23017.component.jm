@@ -35,8 +35,8 @@ component:mcp23017("MCP23017", type: interface) {
     pin:interrupt_a(digital, output, 20, "INTA")
     pin:port_a[0..7](digital, bidirectional, [21, 22, 23, 24, 25, 26, 27, 28], "GPA0 to GPA7")
 
-    footprint("FP.DIP:28-W7.62")
-    footprint("FP.SOIC:28-P1.27-W7.5")
+    footprint("DIP:28-W7.62:F")
+    footprint("SOIC:28-P1.27-W7.5:F")
 
     symbol(box) {
         left([scl, sda, a0, a1, a2, reset bubble, interrupt_a, interrupt_b])

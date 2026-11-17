@@ -1,6 +1,5 @@
 package org.jmouse.cad.document;
 
-import java.util.function.Function;
 import java.util.Map;
 import org.jmouse.el.grammar.BlockParser;
 
@@ -27,10 +26,11 @@ public interface DocumentModule extends Extension {
     }
 
     /**
-     * What a document of each kind it brings is to the engine, read from its tree — a component, a symbol's drawing, a
-     * model's files —; a kind left out has no model. Reading one is where a text that reads is refused for what it says.
+     * What a document of each kind it brings is to the engine — a component, a symbol's drawing, a model's files —: the type it
+     * is, which its schema is written from, and how it is read from its tree; a kind left out has no model. Reading one is where a
+     * text that reads is refused for what it says.
      */
-    default Map<DocumentKind, Function<DocumentNode, Object>> models() {
+    default Map<DocumentKind, DocumentModel<?>> models() {
         return Map.of();
     }
 }

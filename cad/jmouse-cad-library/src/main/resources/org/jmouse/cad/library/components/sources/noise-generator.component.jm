@@ -23,7 +23,7 @@ component:noise-generator("Noise generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-NOISE") {
+    symbol(uses: "SOURCE:VOLTAGE-NOISE:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

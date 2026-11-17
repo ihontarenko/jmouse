@@ -1,7 +1,7 @@
 model:melf-diode-micro-model("MELF diode MicroMELF") {
     meta {
         summary: "MELF diode MicroMELF — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.MELF:D-MICRO"
+        code: "MELF:D-MICRO:M3D"
         category: diodes-surface
         tags: electronics, model, chip
         source: "JEDEC DO-213 and the makers' MELF outlines, MicroMELF"

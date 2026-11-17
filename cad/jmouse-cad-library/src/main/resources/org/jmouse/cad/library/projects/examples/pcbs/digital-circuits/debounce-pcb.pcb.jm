@@ -14,7 +14,7 @@ pcb:debounce-pcb("RC and Schmitt trigger: debouncing — pcb") {
     place(R1, at: 13 4)
     place(C1, at: 15 8.5, rotate: 270)
     place(U1, at: 19.5 5)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, raw: 2, vcc: 3], at: 5.5 7.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, raw: 2, vcc: 3], at: 5.5 7.5)
     track(top, width: 0.25, from: 14 4, to: 14 6.65, to: 15 7.65)
     track(top, width: 0.25, from: 15 7.65, to: 17.65 5, to: 18.65 5)
     track(top, width: 0.25, from: 15 9.35, to: 15 9.3, to: 18.65 5.65)

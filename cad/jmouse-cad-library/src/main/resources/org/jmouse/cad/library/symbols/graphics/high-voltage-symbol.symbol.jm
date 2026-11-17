@@ -1,7 +1,7 @@
 symbol:high-voltage-symbol("High voltage") {
     meta {
         summary: "A warning triangle with a bolt: dangerous voltage on this part of the board, as drawn on a schematic"
-        code: "SY.GRAPHIC:HIGH-VOLTAGE"
+        code: "GRAPHIC:HIGH-VOLTAGE:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

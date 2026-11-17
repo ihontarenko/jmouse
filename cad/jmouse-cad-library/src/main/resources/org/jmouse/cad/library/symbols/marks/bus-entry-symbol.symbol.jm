@@ -1,0 +1,13 @@
+symbol:bus-entry-symbol("Bus entry") {
+    meta {
+        summary: "Where a wire leaves a bus: a short slanted stroke from the bus line to the wire's end, 2.54 mm each way as KiCad draws a bus entry — no words: the net it takes off is the entry's own, said by a label on the wire where the sheet wants it read. It stands on the bus; its pin is the wire's end."
+        code: "MARK:BUS-ENTRY:S"
+        category: marks
+        tags: electronics, schematic
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(80 x 80)
+    path("M0 0L40 40")
+    pin:entry(at: 40 40)
+}

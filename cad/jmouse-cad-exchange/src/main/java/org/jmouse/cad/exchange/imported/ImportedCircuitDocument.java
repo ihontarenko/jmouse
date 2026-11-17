@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange.imported;
 
+import org.jmouse.cad.circuit.SheetBoundary;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.simulation.CircuitLines;
@@ -26,9 +27,6 @@ import java.util.List;
  */
 public final class ImportedCircuitDocument {
 
-    /** How a sheet's port goes: an imported one says nothing of its direction. */
-    private static final String PORT_DIRECTION = SimulationVocabulary.ANALOG;
-
     /** The unit an oscilloscope's channel is scaled in. */
     private static final String VOLTS_A_DIVISION = "V/div";
 
@@ -42,17 +40,15 @@ public final class ImportedCircuitDocument {
         DocumentNode document = new DocumentNode(SimulationModule.CIRCUIT, title, slug, null, 1);
         MetaNode meta = MetaNode.filed(summary, null, null, libraries.circuitTags());
         document.addExpression(meta);
-        LineGrammar port = SimulationLines.PORTS.stream().filter(line -> line.word().equals(PORT_DIRECTION)).findFirst()
-                .orElseThrow();
-        addBlock(document, "ports", sheet.ports().stream()
-                .map(net -> LineBuilder.line(port).slot("net", Nodes.word(net)).build()).toList());
+        addBlock(document, "ports", sheet.ports().stream().map(ImportedCircuitDocument::port).toList());
         addBlock(document, "nets", sheet.globals().stream()
                 .map(net -> LineBuilder.line(SimulationLines.NET).slot("name", Nodes.name(net)).flag("global").build()).toList());
+        addBlock(document, SimulationVocabulary.BUSES, sheet.buses().stream().map(CircuitLines::bus).toList());
         addBlock(document, "parts", sheet.parts().stream().map(ImportedCircuitDocument::part).toList());
         List<ClauseLineNode> layout = new ArrayList<>();
         sheet.items().forEach(item -> layout.add(item(item)));
         sheet.wires().forEach(wire -> layout.add(wire(wire)));
-        sheet.buses().forEach(bus -> layout.add(bus(bus)));
+        sheet.busLines().forEach(bus -> layout.add(busLine(bus)));
         addBlock(document, "layout", layout);
         addBlock(document, "probes", sheet.probes().stream().map(ImportedCircuitDocument::probe).toList());
         document.addExpression(new ClauseBlockNode("analysis", LineBuilder.line(SimulationLines.ANALYSIS)
@@ -132,12 +128,17 @@ public final class ImportedCircuitDocument {
         }
     }
 
-    /** {@code B1 bus D members D0, D1 via x y, x y}. */
-    private static ClauseLineNode bus(ImportedCircuit.Bus bus) {
-        LineBuilder line = LineBuilder.line(SimulationLines.BUS).slot("reference", Nodes.name(bus.id())).slot("name", Nodes.word(bus.name()));
-        if (!bus.members().isEmpty()) {
-            line.clause("members", Nodes.groups(List.of(bus.members())));
-        }
+    /** {@code analog(in)}, {@code bus(D)}: what the sheet hands across its edge. */
+    private static ClauseLineNode port(SheetBoundary.Port port) {
+        LineGrammar grammar = SimulationLines.PORTS.stream().filter(line -> line.word().equals(port.direction())).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("A port goes " + String.join(", ", SimulationVocabulary.PORT_DIRECTIONS)
+                        + ", not " + port.direction()));
+        return LineBuilder.line(grammar).slot("net", Nodes.word(port.net())).build();
+    }
+
+    /** {@code bus:B1(D, via: [x y, x y])}: a line of the bus D. */
+    private static ClauseLineNode busLine(ImportedCircuit.BusLine bus) {
+        LineBuilder line = LineBuilder.line(SimulationLines.BUS).slot("reference", Nodes.name(bus.id())).slot("name", Nodes.word(bus.bus()));
         return line.clause("via", Nodes.groups(bus.via().stream()
                 .map(corner -> List.of(Quantity.plain(corner[0]).written(), Quantity.plain(corner[1]).written())).toList())).build();
     }

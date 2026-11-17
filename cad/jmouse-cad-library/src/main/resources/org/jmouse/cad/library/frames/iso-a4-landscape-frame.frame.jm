@@ -2,7 +2,7 @@
 frame:iso-a4-landscape-frame("ISO A4, landscape") {
     meta {
         summary: "An ISO 216 A4 sheet, landscape (297 × 210 mm): a 10 mm margin, 6 × 4 zones and a title block filled from the drawing"
-        code: "FR.ISO:A4-L"
+        code: "ISO:A4-L:FRM"
         category: frames
         tags: electronics, frame
         authors: "jMouse"

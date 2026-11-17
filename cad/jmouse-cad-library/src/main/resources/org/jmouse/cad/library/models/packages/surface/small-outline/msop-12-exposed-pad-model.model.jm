@@ -1,7 +1,7 @@
 model:msop-12-exposed-pad-model("MSOP-12, 3 mm body") {
     meta {
         summary: "MSOP-12, 3 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.MSOP:12-P0.65-EP"
+        code: "MSOP:12-P0.65-EP:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "the makers' MSE12 outline (Analog Devices)"

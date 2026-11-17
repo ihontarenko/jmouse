@@ -118,7 +118,7 @@ public final class PlaneDrops {
                 if (!track.lineClear(List.of(from, at))) {
                     break;
                 }
-                boolean clearOfPad = pad.copper().gapTo(CopperShape.circle(at.x(), at.y(), via.diameter() / 2)).gap() >= clearance;
+                boolean clearOfPad = pad.copper().keepsGap(CopperShape.circle(at.x(), at.y(), via.diameter() / 2), clearance);
                 if (clearOfPad && droppable.plane().encloses(at.x(), at.y()) && viaFences.stream().allMatch(fence -> fence.pointClear(at))) {
                     best = at;
                     shortest = out;

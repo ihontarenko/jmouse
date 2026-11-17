@@ -32,7 +32,7 @@ public final class GitPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Git", GitPlugin.class).markedBy(GitPlugin.class, "git.svg")
+        return PluginDescriptor.ofArtifact(ID, "Git", GitPlugin.class).withIcon(GitPlugin.class, "git.svg")
                 .requiring(Set.of(ExplorerPlugin.ID));
     }
 

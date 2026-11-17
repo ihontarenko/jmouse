@@ -1,7 +1,7 @@
 footprint:sot-223-footprint("SOT-223, tab on pin 2") {
     meta {
         summary: "4-lead SOT-223, gull-wing: three leads 2.3 mm apart on one side, the wide tab opposite them and joined to pin 2"
-        code: "FP.SOT223:4"
+        code: "SOT223:4:F"
         category: surface-transistor-outline
         tags: electronics, footprint, surface
         source: "JEDEC TO-261AA"
@@ -22,5 +22,5 @@ footprint:sot-223-footprint("SOT-223, tab on pin 2") {
     outline(silkscreen, filled, "M-3.56 3.5A0.2 0.2 0 1 0 -3.16 3.5A0.2 0.2 0 1 0 -3.56 3.5Z")
     outline(courtyard, width: 0.05, "M-3.75 -4.25H3.75V4.25H-3.75Z")
     body(height: 1.8)
-    model("MD.SOT:223")
+    model("SOT:223:M3D")
 }

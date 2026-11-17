@@ -1,0 +1,32 @@
+# The jmCAD mark: its contour mark and its wordmark, as the interface draws them — drawn in the brand's two words, the mark's ink and
+# the accent, so it reads on every theme, light or dark. The jmCAD mark's portrait, stamped on a picture of a drawing; written from the
+# mark's own geometry.
+portrait:jmcad-mark-portrait("jmCAD mark") {
+    meta {
+        summary: "The jmCAD mark — its contour mark and its wordmark —, in the mark's ink and the accent of the theme it is shown in"
+        code: "GRAPHIC:JMCAD:P"
+        category: graphics
+        tags: brand, mark, portrait
+        authors: "jMouse"
+        license: "CERN-OHL-W-2.0"
+    }
+    size(320 x 96)
+
+    path:primary("M-98.5 -36H-127C-141.25 -36 -148 -28.5 -148 -15V13.5H-130V-12.75C-130 -16.5 -128.5 -18 -124.75 -18H-98.5Z") {
+        fill = mark
+    }
+    path:accent("M-125.5 36H-97C-82.75 36 -76 28.5 -76 15V-13.5H-94V12.75C-94 16.5 -95.5 18 -99.25 18H-125.5Z") {
+        fill = accent
+    }
+    path:node("M-118.75 0A6.75 6.75 0 1 0 -105.25 0A6.75 6.75 0 1 0 -118.75 0Z") {
+        fill = accent
+    }
+    glyph:word_jm(at: -14.669 0, size: 66.662 x 53.76) {
+        fill = mark
+        text = "jm"
+    }
+    glyph:word_cad(at: 68.659 0, size: 99.994 x 53.76) {
+        fill = accent
+        text = "CAD"
+    }
+}

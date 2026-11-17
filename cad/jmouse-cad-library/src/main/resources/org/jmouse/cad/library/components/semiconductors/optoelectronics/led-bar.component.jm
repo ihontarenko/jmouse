@@ -45,7 +45,7 @@ component:led-bar("LED bar", type: display) {
     figure:light_7(100 * max(0, anode_7.current) / I_rated, unit: %, "of segment 7's rated brightness")
     figure:overcurrent(100 * max(abs(anode_0.current), max(abs(anode_1.current), max(abs(anode_2.current), max(abs(anode_3.current), max(abs(anode_4.current), max(abs(anode_5.current), max(abs(anode_6.current), abs(anode_7.current)))))))) / I_forward_maximum, unit: %, "of a segment's rated current")
 
-    footprint("FP.DIP:16-W7.62") {
+    footprint("DIP:16-W7.62:F") {
         pad:1(anode_0)
         pad:2(anode_1)
         pad:3(anode_2)
@@ -64,7 +64,7 @@ component:led-bar("LED bar", type: display) {
         pad:16(cathode)
     }
 
-    symbol(uses: "SY.LED:BAR-8")
+    symbol(uses: "LED:BAR-8:S")
 
     node:junction_anode_0
     node:junction_anode_1
@@ -116,5 +116,5 @@ component:led-bar("LED bar", type: display) {
     }
 
     # How it looks in the hand: the bar graph itself, its bars lit by the same figures as the symbol.
-    portrait(uses: "PT.DISPLAY:BAR-8")
+    portrait(uses: "DISPLAY:BAR-8:P")
 }

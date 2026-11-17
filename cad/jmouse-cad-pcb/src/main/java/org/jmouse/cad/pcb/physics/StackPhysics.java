@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.physics;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import java.util.Locale;
@@ -46,7 +47,7 @@ public record StackPhysics(@Label("Source") String source,
      * @param share how much of a track's impedance a neighbour takes at no gap
      * @param decay how fast that falls as the gap grows, against the track's reach
      */
-    public record Coupling(@Label("Share") double share,
+    public record Coupling(@Bounds(minimum = 0, maximum = 1, step = 0.001) @Label("Share") double share,
                            @Label("Decay") double decay) {
     }
 

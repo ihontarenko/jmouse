@@ -1,7 +1,7 @@
 symbol:lead-free-symbol("Lead free") {
     meta {
         summary: "Pb struck out: made without lead, as drawn on a schematic"
-        code: "SY.GRAPHIC:LEAD-FREE"
+        code: "GRAPHIC:LEAD-FREE:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

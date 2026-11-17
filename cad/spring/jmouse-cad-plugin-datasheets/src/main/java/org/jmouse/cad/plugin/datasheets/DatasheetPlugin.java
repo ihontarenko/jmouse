@@ -37,7 +37,7 @@ public final class DatasheetPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Datasheets", DatasheetPlugin.class).drawnBy(DatasheetPlugin.class, "datasheets.svg");
+        return PluginDescriptor.ofArtifact(ID, "Datasheets", DatasheetPlugin.class).withIcon(DatasheetPlugin.class, "datasheets.svg");
     }
 
     @Override

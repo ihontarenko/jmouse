@@ -16,7 +16,7 @@ pcb:loaded-divider-pcb("Loaded voltage divider — pcb") {
     place(R1, at: 16 7, rotate: 270)
     place(R2, at: 16 12.5, rotate: 270)
     place(RL, at: 22.5 11.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, in: 2, load: 3, middle: 4, reference: 5], at: 5.5 10)
+    place(J1, footprint: "HDR:1X5-P2.54-V:F", nets: [0: 1, in: 2, load: 3, middle: 4, reference: 5], at: 5.5 10)
     track(top, width: 0.25, from: 10.5 8, to: 10.5 11.5)
     track(top, width: 0.25, from: 16 8, to: 16 11.5)
     track(top, width: 0.25, from: 10.5 6, to: 9.04 7.46, to: 5.5 7.46)

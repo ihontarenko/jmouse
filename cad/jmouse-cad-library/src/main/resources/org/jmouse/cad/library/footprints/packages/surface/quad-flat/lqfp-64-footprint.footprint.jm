@@ -1,7 +1,7 @@
 footprint:lqfp-64-footprint("LQFP-64, 10 mm body") {
     meta {
         summary: "64-lead LQFP-64, 10 mm body, 0.5 mm pitch, body 10 × 10 mm"
-        code: "FP.LQFP:64-P0.5-10"
+        code: "LQFP:64-P0.5-10:F"
         category: quad-flat
         tags: electronics, footprint, surface
         source: "JEDEC MS-026 BCD"
@@ -79,5 +79,5 @@ footprint:lqfp-64-footprint("LQFP-64, 10 mm body") {
     outline(silkscreen, filled, "M-7.335 -3.75A0.3 0.3 0 1 0 -6.735 -3.75A0.3 0.3 0 1 0 -7.335 -3.75Z")
     outline(courtyard, width: 0.05, "M-6.75 -6.75H6.75V6.75H-6.75Z")
     body(height: 1.6)
-    model("MD.LQFP:64-P0.5-10")
+    model("LQFP:64-P0.5-10:M3D")
 }

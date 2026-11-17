@@ -1,7 +1,7 @@
 model:chip-fuse-0402-model("Chip fuse 0402 (1005 metric)") {
     meta {
         summary: "Chip fuse 0402 (1005 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:F0402"
+        code: "CHIP:F0402:M3D"
         category: fuses-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0402 (1005 metric)"

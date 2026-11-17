@@ -22,7 +22,7 @@ component:nand-gate("NAND gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: "SY.GATE:NAND")
+    symbol(uses: "GATE:NAND:S")
 
     behaviour {
         function level()

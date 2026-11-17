@@ -1,5 +1,6 @@
 package org.jmouse.cad.circuit;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.Formula;
 import org.jmouse.cad.Setting;
 
@@ -12,13 +13,15 @@ import java.util.Optional;
  * subject — a net, {@code current R1}, {@code out - in} —, and when: {@code after 60 ms}, {@code above 2.5 V},
  * {@code at 1 kHz}, with settings changed for it.
  *
+ * @param statistic  what is taken of the reading: {@code final}, {@code maximum}, {@code average}, {@code frequency} …
  * @param subject    the net or expression it reads, or null where it reads something else
- * @param reading    what else it reads — {@code current}, {@code level}, {@code levels}, {@code figure}, {@code figures} —,
- *                   or null for a subject
+ * @param reading    what else it reads — {@code current}, {@code level}, {@code levels}, {@code figure}, {@code figures} —, or null
+ *                   for a subject
  * @param targets    what that reading names: a part, a net, a part's figures
  * @param conditions each condition's word and its value in SI: {@code after}, {@code above}, {@code below}, {@code at}
+ * @param settings   the settings changed for this measure alone
  */
-public record Measure(String statistic, Formula subject, String reading, List<String> targets, Map<String, Double> conditions,
+public record Measure(String statistic, @Nullable Formula subject, @Nullable String reading, List<String> targets, Map<String, Double> conditions,
                       List<Setting> settings) {
 
     public Measure {

@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.drawing;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.pcb.PcbWords;
 import org.jmouse.cad.pcb.FootprintLines;
 import org.jmouse.cad.pcb.PcbVocabulary;
@@ -30,10 +31,13 @@ import java.util.Set;
  * <p>The body is not a drawn line: a footprint editor neither draws nor rewrites it ({@link #classOf}), so its line is kept as
  * written while the rest is redrawn. Its models it does set, so they are written with the pads and outlines.</p>
  *
- * @param body   the package's body; null when the footprint does not say
- * @param models the 3D models that show the body, in their order; none when the footprint names none
+ * @param pads     its pads, in their order
+ * @param outlines the lines and areas drawn on its layers
+ * @param fields   where its reference and value are printed
+ * @param body     the package's body; null when the footprint does not say
+ * @param models   the 3D models that show the body, in their order; none when the footprint names none
  */
-public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Field> fields, Body body, List<Model> models) {
+public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Field> fields, @Nullable Body body, List<Model> models) {
 
     /** A hole that carries no copper, and so no net. */
     private static final String UNPLATED_HOLE = "unplated-hole";
@@ -62,13 +66,29 @@ public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Fiel
     }
 
     /**
-     * @param type  {@code through-hole}, {@code surface}, {@code connector}, {@code unplated-hole}
-     * @param shape {@code circle}, {@code rectangle}, {@code oval}, {@code trapezoid}, {@code rounded-rectangle}, {@code custom}
-     * @param path  a custom pad's outline; empty for any other
+     * A pad: where a part's pin meets the copper, or a hole drilled for it.
+     *
+     * @param number      the pin it is, as the part numbers its pins
+     * @param type        {@code through-hole}, {@code surface}, {@code connector}, {@code unplated-hole}
+     * @param shape       {@code circle}, {@code rectangle}, {@code oval}, {@code trapezoid}, {@code rounded-rectangle}, {@code custom}
+     * @param x           where its middle stands, millimetres right of the footprint's origin
+     * @param y           where its middle stands, millimetres below the footprint's origin
+     * @param rotation    how far it is turned, degrees
+     * @param width       how wide it is, millimetres
+     * @param height      how tall it is, millimetres
+     * @param drillWidth  its hole's width, millimetres; 0 for a pad with no hole
+     * @param drillHeight its hole's height, millimetres — taller than wide for a slot —; 0 for a pad with no hole
+     * @param roundness   a rounded rectangle's corner radius, as a share of its shorter side; 0 for any other shape
+     * @param path        a custom pad's outline; empty for any other
+     * @param face        the side of the pcb a surface pad is on, from its part's: {@code near} — the usual — or {@code far}; empty for near
+     * @param opens       what it leaves open over its copper: {@code both}, {@code mask}, {@code paste} or {@code none}; empty for
+     *                    what its type usually does
+     * @param maskMargin  how far the solder mask stands back from its copper, millimetres; null for the pcb's own
+     * @param pasteMargin how far the solder paste stands back from its copper, millimetres; null for the pcb's own
      */
     public record Pad(String number, String type, String shape, double x, double y, double rotation, double width,
                       double height, double drillWidth, double drillHeight, double roundness, String path,
-                      String face, String opens, Double maskMargin, Double pasteMargin) {
+                      String face, String opens, @Nullable Double maskMargin, @Nullable Double pasteMargin) {
 
         /** Whether it leaves the solder mask open: every pad of copper, unless it says otherwise. */
         public boolean opensMask() {
@@ -84,10 +104,12 @@ public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Fiel
         public static final String THROUGH_HOLE = "through-hole";
         public static final String CONNECTOR    = "connector";
 
+        /** Whether it is a surface pad: copper on its part's side alone, no hole. */
         public boolean isSurface() {
             return SURFACE.equals(type);
         }
 
+        /** Whether it is a plated hole: copper on every layer, through the pcb. */
         public boolean isPlatedThrough() {
             return THROUGH_HOLE.equals(type);
         }
@@ -107,19 +129,36 @@ public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Fiel
         }
     }
 
-    /** @param layer {@code silkscreen}, {@code fabrication}, {@code courtyard}, {@code copper} */
+    /**
+     * A line or an area drawn on one of the footprint's layers.
+     *
+     * @param layer  {@code silkscreen}, {@code fabrication}, {@code courtyard}, {@code copper}
+     * @param width  what its lines are stroked with, millimetres; 0 for an area filled alone
+     * @param filled whether it is an area rather than lines
+     * @param path   what it draws, as path data in the footprint's millimetres
+     */
     public record Outline(String layer, double width, boolean filled, String path) {
     }
 
     /**
-     * @param subject {@code reference} or {@code value}
-     * @param layer   {@code silkscreen} or {@code fabrication}
-     * @param anchor  which part of the letters stands on the point: {@code start}, {@code middle} — the usual — or {@code end}
+     * Where a placed part's reference or value is printed, in the footprint's own frame.
+     *
+     * @param subject  {@code reference} or {@code value}
+     * @param x        where it stands, millimetres right of the footprint's origin
+     * @param y        where it stands, millimetres below the footprint's origin
+     * @param height   how tall its letters are, millimetres
+     * @param rotation how far it is turned, degrees
+     * @param layer    {@code silkscreen} or {@code fabrication}
+     * @param anchor   which part of the letters stands on the point: {@code start}, {@code middle} — the usual — or {@code end}
      */
     public record Field(String subject, double x, double y, double height, double rotation, String layer, String anchor) {
     }
 
-    /** A package's body over its footprint, its outline the fabrication layer's. @param height millimetres above the pcb */
+    /**
+     * A package's body over its footprint, its outline the fabrication layer's.
+     *
+     * @param height millimetres above the pcb
+     */
     public record Body(double height) {
     }
 
@@ -130,6 +169,7 @@ public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Fiel
      * @param offset    millimetres: x, y, z
      * @param rotation  degrees about each axis: x, y, z
      * @param scale     each axis' factor: x, y, z
+     * @param hidden    whether it is kept but not shown
      */
     public record Model(String reference, List<Double> offset, List<Double> rotation, List<Double> scale, boolean hidden) {
 

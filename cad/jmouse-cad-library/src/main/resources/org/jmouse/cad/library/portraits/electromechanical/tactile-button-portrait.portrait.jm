@@ -3,7 +3,7 @@
 portrait:tactile-button-portrait("Tactile button") {
     meta {
         summary: "A 6 × 6 tactile switch from above; the plunger sinks while it is held"
-        code: "PT.SWITCH:TACTILE-6X6"
+        code: "SWITCH:TACTILE-6X6:P"
         category: electromechanical
         tags: electronics, portrait, switch, through-hole
         authors: "jMouse"

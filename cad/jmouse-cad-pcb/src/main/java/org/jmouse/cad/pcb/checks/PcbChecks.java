@@ -66,11 +66,13 @@ public final class PcbChecks {
      * @param tolerance  how much nearer than a rule a value may be and still pass: what a millimetre written to a few places
      *                   loses
      * @param namedGaps  how many narrow gaps are named one by one; beyond them, the rest are counted
+     * @param namedMeetings how many places a short's nets meet at are named in its finding
      * @param curveSteps how many straight pieces a curve is followed in
      * @param designator how a part's designator is set and how wide its letters run
      * @param teardrops  how the drops its tracks are widened with are shaped: the copper the checks measure is the copper made
      */
-    public record Settings(double tolerance, int namedGaps, int curveSteps, PlacedDesignator.Rules designator, Teardrops.Shape teardrops) {
+    public record Settings(double tolerance, int namedGaps, int namedMeetings, int curveSteps, PlacedDesignator.Rules designator,
+                           Teardrops.Shape teardrops) {
     }
 
     private final Subject                   subject;
@@ -93,14 +95,64 @@ public final class PcbChecks {
         return new PcbChecks(subject, settings, nets, CopperPieces.of(subject.pcb(), nets, drops, settings.curveSteps())).findings();
     }
 
+    /**
+     * A short as the reader is told it: the nets it joins and where — for each two, the chain of copper joining them, its pieces
+     * the finding's keys, the first few chains named, the middle of the first chain its point —, never every piece the joined
+     * copper spreads to.
+     */
+    private PcbFinding shortFinding(CopperNets.Short joined) {
+        String joins = "Copper joins " + String.join(" and ", joined.nets()) + ", which the circuit keeps apart";
+        Set<String> keys = new LinkedHashSet<>();
+        List<String> named = new ArrayList<>();
+        Optional<PcbDrawing.Point> at = Optional.empty();
+        for (CopperNets.Joined join : joined.joins()) {
+            join.chain().forEach(member -> keys.add(keyOf(member)));
+            List<CopperNets.Member> chain = join.chain();
+            if (named.size() < settings.namedMeetings()) {
+                List<String> through = chain.subList(1, chain.size() - 1).stream().map(member -> labelOf(member, pieceOf(member))).toList();
+                named.add(labelOf(chain.getFirst(), pieceOf(chain.getFirst())) + " of " + join.firstNet() + " reaches "
+                          + labelOf(chain.getLast(), pieceOf(chain.getLast())) + " of " + join.secondNet()
+                          + (through.isEmpty() ? " directly" : " through " + String.join(", ", through)));
+            }
+            if (at.isEmpty()) {
+                at = touchIn(chain);
+            }
+        }
+        int unnamed = joined.joins().size() - named.size();
+        String where = named.isEmpty() ? "" : ": " + String.join("; ", named) + (unnamed > 0 ? "; and " + unnamed + " more" : "");
+        return new PcbFinding(ERROR, joins + where, List.copyOf(keys), at);
+    }
+
+    /** Where two pieces in the middle of a chain touch: the place a short is shown at. */
+    private Optional<PcbDrawing.Point> touchIn(List<CopperNets.Member> chain) {
+        int middle = Math.max(0, chain.size() / 2 - 1);
+        Optional<CopperPieces.Piece> first = pieceOf(chain.get(middle));
+        Optional<CopperPieces.Piece> second = pieceOf(chain.get(Math.min(chain.size() - 1, middle + 1)));
+        return first.isPresent() && second.isPresent() ? Optional.of(first.get().shape().gapTo(second.get().shape()).at()) : Optional.empty();
+    }
+
+    /** The piece of copper a member of the joining is, where the checks measure one — a zone's pour is not among them. */
+    private Optional<CopperPieces.Piece> pieceOf(CopperNets.Member member) {
+        if (member.kind() == CopperNets.MemberKind.ZONE) {
+            return Optional.empty();
+        }
+        CopperPieces.Kind kind = CopperPieces.Kind.valueOf(member.kind().name());
+        return pieces.stream().filter(piece -> piece.kind() == kind && piece.index() == member.index()).findFirst();
+    }
+
+    private String keyOf(CopperNets.Member member) {
+        return member.kind() == CopperNets.MemberKind.ZONE ? key("zone", member.index())
+                : pieceOf(member).map(CopperPieces.Piece::key).orElse(key(member.kind().name().toLowerCase(Locale.ROOT), member.index()));
+    }
+
+    private static String labelOf(CopperNets.Member member, Optional<CopperPieces.Piece> piece) {
+        return piece.map(CopperPieces.Piece::label).orElse("Zone " + (member.index() + 1));
+    }
+
     private List<PcbFinding> findings() {
         List<PcbFinding> findings = new ArrayList<>(footprintFindings());
         for (CopperNets.Short joined : nets.shorts()) {
-            List<String> keys = new ArrayList<>();
-            joined.tracks().forEach(track -> keys.add(key("track", track)));
-            joined.arcs().forEach(arc -> keys.add(key("arc", arc)));
-            joined.vias().forEach(via -> keys.add(key("via", via)));
-            findings.add(new PcbFinding(ERROR, "Copper joins " + String.join(" and ", joined.nets()) + ", which the circuit keeps apart", keys));
+            findings.add(shortFinding(joined));
         }
         findings.addAll(pairFindings());
         subject.values().ifPresent(values -> {
@@ -347,7 +399,7 @@ public final class PcbChecks {
                 continue;
             }
             List<CopperPieces.Piece> inside = pieces.stream().filter(piece -> keepout.layers().stream().anyMatch(piece.onLayer())
-                    && piece.shape().within(area.get(), 0) && piece.shape().gapTo(area.get()).gap() <= 0).toList();
+                    && piece.shape().within(area.get(), 0) && piece.shape().comesWithin(area.get(), 0)).toList();
             if (!inside.isEmpty()) {
                 List<String> keys = new ArrayList<>(List.of(key("keepout", index)));
                 inside.forEach(piece -> keys.add(piece.key()));
@@ -487,7 +539,7 @@ public final class PcbChecks {
             for (PcbDrawing.Point end : List.of(track.points().getFirst(), track.points().getLast())) {
                 CopperShape point = CopperShape.circle(end.x(), end.y(), 0);
                 boolean reached = pieces.stream().anyMatch(piece -> !piece.key().equals(own) && piece.onLayer().test(track.layer())
-                        && piece.shape().within(point, 0) && piece.shape().gapTo(point).gap() <= settings.tolerance());
+                        && piece.shape().within(point, 0) && piece.shape().comesWithin(point, settings.tolerance()));
                 if (!reached) {
                     findings.add(new PcbFinding(WARNING, "Track " + (index + 1) + " ends at " + written(rounded(end.x(), 2)) + ", " + written(rounded(end.y(), 2))
                             + " joined to nothing", List.of(own), end));

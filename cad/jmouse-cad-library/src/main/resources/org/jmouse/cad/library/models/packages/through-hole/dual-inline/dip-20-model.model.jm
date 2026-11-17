@@ -1,7 +1,7 @@
 model:dip-20-model("DIP-20, 7.62 mm rows") {
     meta {
         summary: "DIP-20, 7.62 mm rows — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.DIP:20-W7.62"
+        code: "DIP:20-W7.62:M3D"
         category: dual-inline
         tags: electronics, model, dual-inline
         source: "JEDEC MS-001"

@@ -1,7 +1,7 @@
 footprint:melf-diode-footprint("MELF diode MELF (DO-213AB)") {
     meta {
         summary: "MELF diode, MELF (DO-213AB) body, reflow pads; pad 1 is the cathode"
-        code: "FP.MELF:D-"
+        code: "MELF:D-:F"
         category: diodes-surface
         tags: electronics, footprint, surface
         source: "JEDEC DO-213 and the makers' MELF outlines, MELF (DO-213AB)"
@@ -18,5 +18,5 @@ footprint:melf-diode-footprint("MELF diode MELF (DO-213AB)") {
     outline(silkscreen, width: 0.12, "M-3.285 -1.535V1.535")
     outline(courtyard, width: 0.05, "M-3.3 -1.7H3.3V1.7H-3.3Z")
     body(height: 2.6)
-    model("MD.MELF:D-")
+    model("MELF:D-:M3D")
 }

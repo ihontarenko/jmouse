@@ -1,7 +1,7 @@
 model:radial-electrolytic-capacitor-diameter-1800-pitch-750-model("Radial electrolytic capacitor, 18 mm can") {
     meta {
         summary: "Radial electrolytic capacitor, 18 mm can — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RADIAL:CP-D18-P7.5"
+        code: "RADIAL:CP-D18-P7.5:M3D"
         category: capacitors-through-hole
         tags: electronics, model, radial
         source: "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"

@@ -20,7 +20,7 @@ import java.util.Locale;
 
 /**
  * 3D models brought in as they are: each file a model of its own, in any format a model may be in, named after the file and
- * coded in the namespace of the folder it stands in — {@code Resistor_SMD.3dshapes/R_0805.step} is {@code MD.RESISTOR-SMD:R-0805},
+ * coded in the namespace of the folder it stands in — {@code Resistor_SMD.3dshapes/R_0805.step} is {@code RESISTOR-SMD:R-0805:M3D},
  * as KiCad's import codes the same model —, or in the format's own when it stands in none. A footprint then shows one by naming it.
  */
 public final class ModelFilesImport implements DocumentImport {

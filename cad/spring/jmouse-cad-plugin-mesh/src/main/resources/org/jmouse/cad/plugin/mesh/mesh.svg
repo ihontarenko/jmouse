@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- 3D models: a cube in three lights -->
+  <rect width="24" height="24" rx="5" fill="#7c3aed"/>
+  <path d="M12 4.5 18.5 8 12 11.5 5.5 8z" fill="#fff"/>
+  <path d="M5.5 8 12 11.5v7.8l-6.5-3.6z" fill="#fff" fill-opacity=".72"/>
+  <path d="M18.5 8 12 11.5v7.8l6.5-3.6z" fill="#fff" fill-opacity=".45"/>
+</svg>

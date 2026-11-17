@@ -46,9 +46,9 @@ component:ne5532("NE5532", type: opamp) {
     pin:Vcc(power, 8, "V+")
     pin:GND(power, 4, "V-")
 
-    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("SOIC:8-P1.27-W3.9:F")
 
-    symbol(uses: ["SY.AMPLIFIER:OPERATIONAL", "SY.AMPLIFIER:OPERATIONAL-WIDE"]) {
+    symbol(uses: ["AMPLIFIER:OPERATIONAL:S", "AMPLIFIER:OPERATIONAL-WIDE:S"]) {
         bind:failed(failed)
         bind:positive_supply(pin: Vcc)
         bind:negative_supply(pin: GND)

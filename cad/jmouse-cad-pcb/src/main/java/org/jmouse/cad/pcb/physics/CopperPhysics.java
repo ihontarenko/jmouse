@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.physics;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 /**
@@ -23,7 +24,7 @@ public record CopperPhysics(@Label("Source") String source,
                             @Label("Temperature coefficient") double temperatureCoefficient,
                             @Label("Ambient") double ambient,
                             @Label("Capacity") Capacity capacity,
-                            @Label("Least carried share") double carrying,
+                            @Bounds(minimum = 0, maximum = 1, step = 0.001) @Label("Least carried share") double carrying,
                             @Label("Edge halvings") int edgeHalvings,
                             @Label("Solver") Solver solver) {
 

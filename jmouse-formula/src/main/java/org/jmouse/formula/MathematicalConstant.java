@@ -5,9 +5,13 @@ import java.util.Optional;
 
 public enum MathematicalConstant {
 
+    /** π: a circle's circumference over its diameter. */
     PI("pi", "\\pi", Math.PI),
+    /** τ = 2π: a whole turn, in radians. */
     TAU("tau", "\\tau", 2 * Math.PI),
+    /** e: the base of the natural logarithm. */
     E("e", "e", Math.E),
+    /** φ: the golden ratio, (1 + √5) / 2. */
     PHI("phi", "\\varphi", (1 + Math.sqrt(5)) / 2),
     /** Infinity, for the bound of a series or of an improper integral. */
     INFINITY("inf", "\\infty", Double.POSITIVE_INFINITY);

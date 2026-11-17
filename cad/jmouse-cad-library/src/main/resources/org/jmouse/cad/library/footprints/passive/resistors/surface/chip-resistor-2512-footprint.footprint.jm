@@ -1,7 +1,7 @@
 footprint:chip-resistor-2512-footprint("Chip resistor 2512 (6332 metric)") {
     meta {
         summary: "Chip resistor, 2512 (6332 metric) body, reflow pads"
-        code: "FP.CHIP:R2512"
+        code: "CHIP:R2512:F"
         category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 2512 (6332 metric)"
@@ -17,5 +17,5 @@ footprint:chip-resistor-2512-footprint("Chip resistor 2512 (6332 metric)") {
     outline(silkscreen, width: 0.12, "M-2.14 -1.96H2.14M-2.14 1.96H2.14")
     outline(courtyard, width: 0.05, "M-3.85 -1.95H3.85V1.95H-3.85Z")
     body(height: 0.7)
-    model("MD.CHIP:R2512")
+    model("CHIP:R2512:M3D")
 }

@@ -25,7 +25,7 @@ public class MetaNode extends BlockNode {
     public static final String SEE_ALSO = "see_also";
     /** {@code featured yes}: shown first in its section. */
     public static final String FEATURED = "featured";
-    /** {@code code "FP.AXIAL:R0207-P10.16-H"}: its technical code. */
+    /** {@code code "AXIAL:R0207-P10.16-H:F"}: its technical code. */
     public static final String CODE = "code";
     /** {@code links: { "Datasheet" "https://…" }}: where it is spoken of elsewhere, a label and an address on each line. */
     public static final String LINKS = "links";
@@ -63,7 +63,7 @@ public class MetaNode extends BlockNode {
      * The meta a document made by a program starts with — a converted, a generated, an imported one —: what it is, its
      * technical code, where it is filed and its tags, each left out where none is given.
      *
-     * @param code     its technical code ({@code FP.CHIP:R0805}), or null
+     * @param code     its technical code ({@code CHIP:R0805:F}), or null
      * @param category the category it is filed in, or null
      */
     public static MetaNode filed(String summary, String code, String category, List<String> tags) {

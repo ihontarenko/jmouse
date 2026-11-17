@@ -6,10 +6,10 @@ component:lead-free-mark("Lead free mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:LEAD-FREE-10")
-    footprint("FP.GRAPHIC:LEAD-FREE-5")
-    footprint("FP.GRAPHIC:LEAD-FREE-20")
+    footprint("GRAPHIC:LEAD-FREE-10:F")
+    footprint("GRAPHIC:LEAD-FREE-5:F")
+    footprint("GRAPHIC:LEAD-FREE-20:F")
 
-    symbol(uses: "SY.GRAPHIC:LEAD-FREE") {
+    symbol(uses: "GRAPHIC:LEAD-FREE:S") {
     }
 }

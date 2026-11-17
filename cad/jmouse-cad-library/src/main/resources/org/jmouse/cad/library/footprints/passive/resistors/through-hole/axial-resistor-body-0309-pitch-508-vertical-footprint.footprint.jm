@@ -1,7 +1,7 @@
 footprint:axial-resistor-body-0309-pitch-508-vertical-footprint("Axial resistor DIN 0309, vertical, 5.08 mm") {
     meta {
         summary: "Axial resistor DIN 0309, body 9 × ⌀3.2 mm, stood on end over pin 1, 5.08 mm between its holes"
-        code: "FP.AXIAL:R0309-P5.08-V"
+        code: "AXIAL:R0309-P5.08-V:F"
         category: resistors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-1 bodies, DIN 44051 size codes"
@@ -16,5 +16,5 @@ footprint:axial-resistor-body-0309-pitch-508-vertical-footprint("Axial resistor 
     outline(silkscreen, width: 0.12, "M-4.25 0A1.71 1.71 0 1 0 -0.83 0A1.71 1.71 0 1 0 -4.25 0Z")
     outline(courtyard, width: 0.05, "M-4.75 -2.2H4V2.2H-4.75Z")
     body(height: 9)
-    model("MD.AXIAL:R0309-P5.08-V")
+    model("AXIAL:R0309-P5.08-V:M3D")
 }

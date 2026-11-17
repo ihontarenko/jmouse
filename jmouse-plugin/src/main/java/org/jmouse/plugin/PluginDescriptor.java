@@ -40,19 +40,11 @@ public record PluginDescriptor(String id, String title, String version, String s
     }
 
     /**
-     * This descriptor with a glyph of what it does — drawn in the page's colour —, read from a resource beside the
-     * plugin's class: {@code spice.svg}.
+     * This descriptor with its icon — the mark of whoever it speaks for, or a tile of what it does —, in its own colours, read from
+     * a resource beside the plugin's class: {@code spice.svg}.
      */
-    public PluginDescriptor drawnBy(Class<?> plugin, String resource) {
-        return iconed(PluginIcon.read(plugin, resource, PluginIcon.Painting.GLYPH, id));
-    }
-
-    /**
-     * This descriptor with the mark of whoever it speaks for — KiCad's, a board house's —, kept in its own colours, read
-     * from a resource beside the plugin's class.
-     */
-    public PluginDescriptor markedBy(Class<?> plugin, String resource) {
-        return iconed(PluginIcon.read(plugin, resource, PluginIcon.Painting.MARK, id));
+    public PluginDescriptor withIcon(Class<?> plugin, String resource) {
+        return iconed(PluginIcon.read(plugin, resource, id));
     }
 
     private PluginDescriptor iconed(PluginIcon given) {

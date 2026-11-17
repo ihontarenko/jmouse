@@ -67,7 +67,7 @@ public final class KiCadFootprintDrawing {
 
     /**
      * The code a footprint converted from KiCad is named by, and every reference to it names it by: its library id in
-     * capitals — {@code Package_SO:SOIC-8_3.9x4.9mm_P1.27mm} is {@code FP.PACKAGE-SO:SOIC-8-3.9X4.9MM-P1.27MM}.
+     * capitals — {@code Package_SO:SOIC-8_3.9x4.9mm_P1.27mm} is {@code PACKAGE-SO:SOIC-8-3.9X4.9MM-P1.27MM:F}.
      */
     public static String codeOf(String libraryId) {
         int colon = libraryId.indexOf(':');
@@ -75,7 +75,7 @@ public final class KiCadFootprintDrawing {
                 libraryId.substring(colon + 1));
     }
 
-    /** The code of a 3D model by its library path: {@code Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm} is {@code MD.PACKAGE-SO:SOIC-8-3.9X4.9MM-P1.27MM}. */
+    /** The code of a 3D model by its library path: {@code Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm} is {@code PACKAGE-SO:SOIC-8-3.9X4.9MM-P1.27MM:M3D}. */
     public static String modelCodeOf(String libraryPath) {
         int separator = libraryPath.indexOf(KiCadSources.MODEL_LIBRARY);
         return separator < 0 ? ImportedNames.code(TechnicalClass.MODEL, KiCadSymbolDrawing.KICAD, libraryPath)

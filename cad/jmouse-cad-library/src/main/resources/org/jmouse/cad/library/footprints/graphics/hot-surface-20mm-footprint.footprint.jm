@@ -1,7 +1,7 @@
 footprint:hot-surface-20mm-footprint("Hot surface, 20 mm") {
     meta {
         summary: "A warning triangle with rising heat: this part of the board runs hot, printed 20 mm wide"
-        code: "FP.GRAPHIC:HOT-SURFACE-20"
+        code: "GRAPHIC:HOT-SURFACE-20:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

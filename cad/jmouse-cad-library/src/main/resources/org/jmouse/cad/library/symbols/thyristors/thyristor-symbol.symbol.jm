@@ -1,7 +1,7 @@
 symbol:thyristor-symbol("Thyristor") {
     meta {
         summary: "Thyristor (SCR), as drawn on a schematic: a diode with a gate at its cathode"
-        code: "SY.THYRISTOR:SCR"
+        code: "THYRISTOR:SCR:S"
         category: thyristors
         tags: electronics, schematic
         authors: "jMouse"

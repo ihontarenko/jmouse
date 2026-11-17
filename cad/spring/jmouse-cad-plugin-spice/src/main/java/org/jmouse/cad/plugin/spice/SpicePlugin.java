@@ -57,7 +57,7 @@ public final class SpicePlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "SPICE", SpicePlugin.class).drawnBy(SpicePlugin.class, "spice.svg");
+        return PluginDescriptor.ofArtifact(ID, "SPICE", SpicePlugin.class).withIcon(SpicePlugin.class, "spice.svg");
     }
 
     @Override

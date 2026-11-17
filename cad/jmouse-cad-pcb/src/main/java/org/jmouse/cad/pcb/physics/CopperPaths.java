@@ -334,20 +334,20 @@ public final class CopperPaths {
             Piece piece = pieces.get(pieceIndex);
             for (int pad = 0; pad < nets.pads().size(); pad++) {
                 CopperNets.PlacedPad placed = nets.pads().get(pad);
-                if (placed.on(piece.layer) && touching(piece.shape, placed.copper())) {
+                if (placed.on(piece.layer) && CopperNets.touching(piece.shape, placed.copper())) {
                     nodes.join(nodeAlong(piece, alongNearest(piece.from, piece.to, placed.centre())), padNodes.get(pad));
                 }
             }
             for (int via = 0; via < pcb.vias().size(); via++) {
                 Integer node = viaNodes.get(via).get(piece.layer);
-                if (node != null && touching(piece.shape, viaShapes.get(via))) {
+                if (node != null && CopperNets.touching(piece.shape, viaShapes.get(via))) {
                     PcbDrawing.Via placed = pcb.vias().get(via);
                     nodes.join(nodeAlong(piece, alongNearest(piece.from, piece.to, new PcbDrawing.Point(placed.x(), placed.y()))), node);
                 }
             }
             for (int otherIndex = pieceIndex + 1; otherIndex < pieces.size(); otherIndex++) {
                 Piece other = pieces.get(otherIndex);
-                if (other.layer.equals(piece.layer) && !(other.thing == piece.thing && other.index == piece.index) && touching(piece.shape, other.shape)) {
+                if (other.layer.equals(piece.layer) && !(other.thing == piece.thing && other.index == piece.index) && CopperNets.touching(piece.shape, other.shape)) {
                     double[] along = nearestAlongBoth(piece, other);
                     nodes.join(nodeAlong(piece, along[0]), nodeAlong(other, along[1]));
                 }
@@ -389,14 +389,14 @@ public final class CopperPaths {
         for (Area area : areas) {
             for (int pad = 0; pad < nets.pads().size(); pad++) {
                 CopperNets.PlacedPad placed = nets.pads().get(pad);
-                if (placed.on(area.layer()) && (touching(area.shape(), placed.copper()) || area.shape().encloses(placed.centre().x(), placed.centre().y()))) {
+                if (placed.on(area.layer()) && (CopperNets.touching(area.shape(), placed.copper()) || area.shape().encloses(placed.centre().x(), placed.centre().y()))) {
                     nodes.join(padNodes.get(pad), area.node());
                 }
             }
             for (int via = 0; via < pcb.vias().size(); via++) {
                 Integer node = viaNodes.get(via).get(area.layer());
                 PcbDrawing.Via placed = pcb.vias().get(via);
-                if (node != null && (touching(area.shape(), viaShapes.get(via)) || area.shape().encloses(placed.x(), placed.y()))) {
+                if (node != null && (CopperNets.touching(area.shape(), viaShapes.get(via)) || area.shape().encloses(placed.x(), placed.y()))) {
                     nodes.join(node, area.node());
                 }
             }
@@ -411,7 +411,7 @@ public final class CopperPaths {
                     nodes.join(nodeAlong(piece, edgeAlong(piece, area.shape(), fromInside)), area.node());
                 } else if (fromInside) {
                     nodes.join(piece.ends[0], area.node());
-                } else if (touching(area.shape(), piece.shape)) {
+                } else if (CopperNets.touching(area.shape(), piece.shape)) {
                     nodes.join(nodeAlong(piece, alongNearest(piece.from, piece.to, piece.shape.gapTo(area.shape()).at())), area.node());
                 }
             }
@@ -682,10 +682,6 @@ public final class CopperPaths {
             }
         }
         return reached;
-    }
-
-    private static boolean touching(CopperShape first, CopperShape second) {
-        return first.within(second, CopperNets.JOIN_TOLERANCE) && first.gapTo(second).gap() <= CopperNets.JOIN_TOLERANCE;
     }
 
     private static double distance(PcbDrawing.Point from, PcbDrawing.Point to) {

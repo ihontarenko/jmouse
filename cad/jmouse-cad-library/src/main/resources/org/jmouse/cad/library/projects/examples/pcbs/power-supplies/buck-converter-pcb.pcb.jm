@@ -16,7 +16,7 @@ pcb:buck-converter-pcb("Buck converter — pcb") {
     place(L1, at: 26 8.5)
     place(C1, at: 26.5 14.5, rotate: 270)
     place(RL, at: 30.5 14.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X5-P2.54-V", nets: [0: 1, gate: 2, out: 3, switch: 4, vin: 5], at: 5.5 11.5)
+    place(J1, footprint: "HDR:1X5-P2.54-V:F", nets: [0: 1, gate: 2, out: 3, switch: 4, vin: 5], at: 5.5 11.5)
     track(top, width: 0.25, from: 26.5 15.35, to: 30.35 15.35, to: 30.5 15.5)
     track(top, width: 0.25, from: 26.5 13.65, to: 30.35 13.65, to: 30.5 13.5)
     track(top, width: 0.25, from: 26.85 8.5, to: 26.85 13.3, to: 26.5 13.65)

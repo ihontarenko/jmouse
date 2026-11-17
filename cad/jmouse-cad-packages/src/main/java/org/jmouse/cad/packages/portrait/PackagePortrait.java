@@ -16,7 +16,7 @@ import java.util.List;
  * A package's portrait worked out from its table: its name, the folder it is filed in, and its drawing's statements —
  * its pins and its elements. It becomes its document as a tree — {@link #document()} —, which writes itself.
  *
- * @param code     its technical code, {@code PT.DIP:8-W7.62}
+ * @param code     its technical code, {@code DIP:8-W7.62:P}
  * @param category the category it files itself in, as its table names it
  * @param mounting {@code through-hole} or {@code surface-mount}, its tag
  * @param source   the standard its outline was read from; empty when the table names none

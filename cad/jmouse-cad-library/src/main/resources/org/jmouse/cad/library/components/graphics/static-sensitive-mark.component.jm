@@ -6,10 +6,10 @@ component:static-sensitive-mark("Static sensitive mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:STATIC-SENSITIVE-10")
-    footprint("FP.GRAPHIC:STATIC-SENSITIVE-5")
-    footprint("FP.GRAPHIC:STATIC-SENSITIVE-20")
+    footprint("GRAPHIC:STATIC-SENSITIVE-10:F")
+    footprint("GRAPHIC:STATIC-SENSITIVE-5:F")
+    footprint("GRAPHIC:STATIC-SENSITIVE-20:F")
 
-    symbol(uses: "SY.GRAPHIC:STATIC-SENSITIVE") {
+    symbol(uses: "GRAPHIC:STATIC-SENSITIVE:S") {
     }
 }

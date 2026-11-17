@@ -102,8 +102,13 @@
         <module>jmouse-formula</module>
         <module>jmouse-spice</module>
         <module>jmouse-units</module>
+        <module>jmouse-geometry</module>
         <module>jmouse-descriptions</module>
+        <module>jmouse-schemas</module>
+        <module>jmouse-documentation</module>
+        <module>jmouse-documentation-md</module>
         <module>jmouse-revisions</module>
+        <module>jmouse-json-patch</module>
         <module>jmouse-settings</module>
         <module>jmouse-plugin</module>
         <module>jmouse-sheet</module>
@@ -136,6 +141,7 @@
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-http</module>
+        <module>jmouse-websocket</module>
         <module>jmouse-access</module>
         <module>jmouse-access-enforcement</module>
         <module>jmouse-access-jpa</module>

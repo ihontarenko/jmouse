@@ -1,8 +1,7 @@
 package org.jmouse.cad.pcb;
 
-import java.util.function.Function;
 import java.util.Map;
-import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.DocumentModel;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.document.DocumentKind;
@@ -27,8 +26,8 @@ public final class PcbModule implements DocumentModule {
     }
 
     @Override
-    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
-        return Map.of(FOOTPRINT, FootprintDrawing::of, PCB, PcbDrawing::of);
+    public Map<DocumentKind, DocumentModel<?>> models() {
+        return Map.of(FOOTPRINT, DocumentModel.of(FootprintDrawing.class, FootprintDrawing::of), PCB, DocumentModel.of(PcbDrawing.class, PcbDrawing::of));
     }
 
     @Override

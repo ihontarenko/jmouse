@@ -53,12 +53,12 @@ final class EagleNames {
         return ImportedNames.slug(EAGLE, library, packageName, "footprint");
     }
 
-    /** The code a converted symbol is named by, and every component drawn with it names it by: {@code SY.SPARKFUN-RESISTORS:RESISTOR}. */
+    /** The code a converted symbol is named by, and every component drawn with it names it by: {@code SPARKFUN-RESISTORS:RESISTOR:S}. */
     static String symbolCode(String library, String symbol) {
         return ImportedNames.code(TechnicalClass.SYMBOL, library, symbol);
     }
 
-    /** The code a converted package is named by: {@code FP.SPARKFUN-RESISTORS:0603}. */
+    /** The code a converted package is named by: {@code SPARKFUN-RESISTORS:0603:F}. */
     static String footprintCode(String library, String packageName) {
         return ImportedNames.code(TechnicalClass.FOOTPRINT, library, packageName);
     }

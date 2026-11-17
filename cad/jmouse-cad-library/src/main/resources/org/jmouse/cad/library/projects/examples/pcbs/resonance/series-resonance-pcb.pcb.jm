@@ -14,7 +14,7 @@ pcb:series-resonance-pcb("Series resonance — pcb") {
     place(L1, at: 11 5.5)
     place(C1, at: 16.5 5.5)
     place(R1, at: 21 8, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, in: 2], at: 5.5 6.5)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [0: 1, in: 2], at: 5.5 6.5)
     track(top, width: 0.25, from: 21 9, to: 21 10.05)
     track(top, width: 0.25, from: 11.85 5.5, to: 15.65 5.5)
     track(top, width: 0.25, from: 17.35 5.5, to: 19.5 5.5, to: 21 7)

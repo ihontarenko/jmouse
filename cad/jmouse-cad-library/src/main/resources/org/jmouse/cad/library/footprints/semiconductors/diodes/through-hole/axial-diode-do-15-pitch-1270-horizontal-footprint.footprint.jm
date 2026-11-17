@@ -1,7 +1,7 @@
 footprint:axial-diode-do-15-pitch-1270-horizontal-footprint("Axial diode DO-15 (DO-204AC), horizontal, 12.7 mm") {
     meta {
         summary: "Axial diode DO-15 (DO-204AC), body 7.6 × ⌀3.6 mm, laid flat, 12.7 mm between its holes; pin 1 is the cathode"
-        code: "FP.AXIAL:DO-15-P12.7-H"
+        code: "AXIAL:DO-15-P12.7-H:F"
         category: diodes-through-hole
         tags: electronics, footprint, through-hole
         source: "JEDEC DO-204 outlines"
@@ -17,5 +17,5 @@ footprint:axial-diode-do-15-pitch-1270-horizontal-footprint("Axial diode DO-15 (
     outline(silkscreen, width: 0.12, "M-3.91 -1.91H3.91V1.91H-3.91ZM-5.04 0H-3.91M3.91 0H5.04M-2.533 -1.91V1.91")
     outline(courtyard, width: 0.05, "M-7.9 -2.3H7.9V2.3H-7.9Z")
     body(height: 3.6)
-    model("MD.AXIAL:DO-15-P12.7-H")
+    model("AXIAL:DO-15-P12.7-H:M3D")
 }

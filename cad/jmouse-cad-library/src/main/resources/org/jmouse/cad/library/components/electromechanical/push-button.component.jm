@@ -15,14 +15,14 @@ component:push-button("Push button", type: button) {
     pin:a(analog, 1, "first contact")
     pin:b(analog, 2, "second contact")
 
-    footprint("FP.SW:TACT-6X6") {
+    footprint("SW:TACT-6X6:F") {
         pad:1(a)
         pad:2(a)
         pad:3(b)
         pad:4(b)
     }
 
-    symbol(uses: ["SY.SWITCH:PUSH-BUTTON", "SY.SWITCH:SPST"]) {
+    symbol(uses: ["SWITCH:PUSH-BUTTON:S", "SWITCH:SPST:S"]) {
         bind:closed(closed)
     }
 
@@ -31,7 +31,7 @@ component:push-button("Push button", type: button) {
     }
 
     # How it looks in the hand: a tactile switch whose plunger sinks while it is held.
-    portrait(uses: "PT.SWITCH:TACTILE-6X6") {
+    portrait(uses: "SWITCH:TACTILE-6X6:P") {
         bind:closed(closed)
     }
 }

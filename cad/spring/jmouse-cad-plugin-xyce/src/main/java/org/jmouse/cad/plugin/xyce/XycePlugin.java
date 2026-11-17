@@ -50,7 +50,7 @@ public final class XycePlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Xyce", XycePlugin.class).markedBy(XycePlugin.class, "xyce.svg");
+        return PluginDescriptor.ofArtifact(ID, "Xyce", XycePlugin.class).withIcon(XycePlugin.class, "xyce.svg");
     }
 
     @Override

@@ -31,7 +31,7 @@ circuit:rectifier-supply("Rectifier supply") {
     part:AC1(sine-generator, [positive: line, negative: 0], amplitude: 325 V, frequency: 50 Hz)
     part:T1(transformer, [primary_one: line, primary_two: 0, secondary_one: secondary_a, secondary_two: secondary_b], L_primary: 10 H, L_secondary: 25 mH)
     part:BR1(bridge-rectifier, [ac1: secondary_a, ac2: secondary_b, plus: out, minus: 0])
-    part:C1(capacitor, [out, 0], capacitance: C, symbol: "SY.CAPACITOR:POLARIZED")
+    part:C1(capacitor, [out, 0], capacitance: C, symbol: "CAPACITOR:POLARIZED:S")
     part:A1(ammeter, [in: out, out: load])
     part:RL(resistor, [load, 0], resistance: R_load, power_rating: 5 W, thermal_resistance: 25 K/W)
     part:VM1(voltmeter, [plus: load, minus: 0])

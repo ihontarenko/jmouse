@@ -1,7 +1,7 @@
 model:chip-resistor-0805-hand-soldering-model("Chip resistor 0805 (2012 metric), hand soldering") {
     meta {
         summary: "Chip resistor 0805 (2012 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:R0805-HAND"
+        code: "CHIP:R0805-HAND:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0805 (2012 metric)"

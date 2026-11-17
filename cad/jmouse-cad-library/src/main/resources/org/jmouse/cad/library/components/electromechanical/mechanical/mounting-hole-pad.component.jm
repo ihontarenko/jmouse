@@ -13,7 +13,7 @@ component:mounting-hole-pad("Mounting hole with pad", type: mechanical) {
 
     pin:pad(analog, 1, "the pad around the hole")
 
-    footprint("FP.MH:M3-PAD")
+    footprint("MH:M3-PAD:F")
 
-    symbol(uses: "SY.MECHANICAL:MOUNTING-HOLE")
+    symbol(uses: "MECHANICAL:MOUNTING-HOLE:S")
 }

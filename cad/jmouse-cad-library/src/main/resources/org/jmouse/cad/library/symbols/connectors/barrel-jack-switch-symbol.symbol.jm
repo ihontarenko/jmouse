@@ -1,7 +1,7 @@
 symbol:barrel-jack-switch-symbol("Barrel jack with switch") {
     meta {
         summary: "A DC barrel jack with the switch a plug opens, as drawn on a schematic: the centre pin above, the switch in the middle, the sleeve below"
-        code: "SY.CONNECTOR:BARREL-JACK-SWITCH"
+        code: "CONNECTOR:BARREL-JACK-SWITCH:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

@@ -32,11 +32,11 @@ component:inductor("Inductor", type: inductor) {
     pin:terminal_one(analog, 1, "first terminal")
     pin:terminal_two(analog, 2, "second terminal")
     state:I_inductance(0, continuous, "the current in the inductance")
-    footprint("FP.CHIP:L0805")
-    footprint("FP.CHIP:L0603")
-    footprint("FP.CHIP:L1206")
+    footprint("CHIP:L0805:F")
+    footprint("CHIP:L0603:F")
+    footprint("CHIP:L1206:F")
 
-    symbol(uses: "SY.INDUCTOR:FIXED") {
+    symbol(uses: "INDUCTOR:FIXED:S") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -53,7 +53,7 @@ component:inductor("Inductor", type: inductor) {
     }
 
     # How it looks in the hand: a moulded choke whose colour bands read its microhenries.
-    portrait(uses: "PT.INDUCTOR:MOULDED-AXIAL") {
+    portrait(uses: "INDUCTOR:MOULDED-AXIAL:P") {
         bind:inductance(inductance)
     }
 }

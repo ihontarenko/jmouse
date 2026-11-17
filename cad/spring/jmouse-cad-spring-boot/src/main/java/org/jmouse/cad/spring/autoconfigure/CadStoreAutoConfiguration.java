@@ -1,5 +1,7 @@
 package org.jmouse.cad.spring.autoconfigure;
 
+import java.util.List;
+
 import org.jmouse.cad.table.ShippedTable;
 import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.table.TableSource;
@@ -8,6 +10,7 @@ import org.jmouse.cad.document.DocumentModule;
 import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.library.CadLibrary;
+import org.jmouse.cad.pcb.geometry.PourMemory;
 import org.jmouse.cad.store.CadProperties;
 import org.jmouse.cad.store.about.EngineAbout;
 import org.jmouse.cad.store.activity.CadActivity;
@@ -29,6 +32,12 @@ import org.jmouse.cad.store.settings.SettingsTree;
 import org.jmouse.cad.store.licence.DocumentLicences;
 import org.jmouse.licence.Licences;
 import org.jmouse.cad.store.files.DocumentFiles;
+import org.jmouse.cad.store.files.DocumentUnderlays;
+import org.jmouse.core.io.CompositeResourceLoader;
+import org.jmouse.documentation.Documentation;
+import org.jmouse.documentation.DocumentationSource;
+import org.jmouse.documentation.markdown.MarkdownDocumentation;
+import org.jmouse.formula.FormulaDocumentation;
 import org.jmouse.cad.store.library.PartLibrary;
 import org.jmouse.cad.store.library.ShippedDocuments;
 import org.jmouse.cad.store.library.CatalogueIndexing;
@@ -51,7 +60,7 @@ import org.jmouse.settings.Settings;
 import org.jmouse.settings.spring.SettingsAutoConfiguration;
 import org.jmouse.cad.settings.CadSectionReader;
 import org.jmouse.cad.settings.CadSettings;
-import org.jmouse.cad.store.habits.CadHabits;
+import org.jmouse.cad.store.settings.ReaderSettings;
 import org.jmouse.plugin.spring.PluginAutoConfiguration;
 import org.jmouse.vault.seal.AesGcmSecretCipher;
 import org.jmouse.vault.seal.SecretCipher;
@@ -123,8 +132,10 @@ public class CadStoreAutoConfiguration {
     @ConditionalOnMissingBean
     public DocumentExchange cadDocumentExchange(Extensions extensions, CadCatalogue catalogue, DocumentStore documents,
                                                 CadAuthority authority, CadPlaces places, CadLanguage language, DocumentFiles files,
-                                                DocumentLicences licences, CadSettings settings, CadStandards standards) {
-        return new DocumentExchange(extensions, catalogue, documents, authority, places, language, files, licences, settings, standards);
+                                                DocumentLicences licences, CadSettings settings, CadStandards standards,
+                                                CadProperties properties) {
+        return new DocumentExchange(extensions, catalogue, documents, authority, places, language, files, licences, settings, standards,
+                PourMemory.keeping(properties.documents().keptPours()));
     }
 
     /** How a section is written where it is kept: JSON, read strictly into its record. */
@@ -141,11 +152,11 @@ public class CadStoreAutoConfiguration {
         return CadSettings.kept(settings);
     }
 
-    /** A reader's habits, the engine's for every host. */
+    /** What the interface keeps of how its reader works, the engine's for every host. */
     @Bean
     @ConditionalOnMissingBean
-    public CadHabits cadHabits(Settings settings, EngineConfiguration configuration, CadAuthority authority) {
-        return new CadHabits(settings, configuration, authority);
+    public ReaderSettings cadReaderSettings(Settings settings, EngineConfiguration configuration, CadAuthority authority) {
+        return new ReaderSettings(settings, configuration, authority);
     }
 
     @Bean
@@ -201,6 +212,35 @@ public class CadStoreAutoConfiguration {
     @ConditionalOnMissingBean
     public DocumentFiles cadDocumentFiles(DocumentStore documents, CadAuthority authority) {
         return new DocumentFiles(documents, authority);
+    }
+
+    /** Where the engine's own pages of documentation are kept: one Markdown file for each window of the interface. */
+    public static final String DOCUMENTATION_PAGES = "classpath:org/jmouse/cad/documentation/*.md";
+
+    /** The engine's own pages of documentation, read from its resources as it starts. */
+    @Bean
+    public DocumentationSource cadDocumentationPages() {
+        return MarkdownDocumentation.of(new CompositeResourceLoader().findResources(DOCUMENTATION_PAGES));
+    }
+
+    /** The formula language's reference, as jMF says it of itself: its notation, then every function and constant it knows. */
+    @Bean
+    public DocumentationSource cadFormulaLanguage() {
+        return new FormulaDocumentation();
+    }
+
+    /** Every page of documentation the engine and its plugins bring, found by subject. */
+    @Bean
+    @ConditionalOnMissingBean
+    public Documentation cadDocumentation(List<DocumentationSource> sources) {
+        return new Documentation(sources);
+    }
+
+    /** The picture each drawing may be drawn over, kept with its document as two of its files. */
+    @Bean
+    @ConditionalOnMissingBean
+    public DocumentUnderlays cadDocumentUnderlays(DocumentFiles files, DocumentAccess access) {
+        return new DocumentUnderlays(files, access);
     }
 
     @Bean
@@ -356,7 +396,7 @@ public class CadStoreAutoConfiguration {
                                           ObjectProvider<CommitAuthors> authors, CadHostPlaces host, CadSettings settings) {
         CadProperties.Identity identity = properties.library().identity();
         return new DocumentStore(configuration::workingFolder, new CadFolderLayout(host, settings), new JGitLocalGit(), authors.getIfAvailable(() -> CommitAuthors.NONE),
-                new CommitAuthor(identity.name(), identity.email()), configuration::revisionZone);
+                new CommitAuthor(identity.name(), identity.email()));
     }
 
     @Bean

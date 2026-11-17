@@ -1,7 +1,7 @@
 footprint:chip-resistor-2010-footprint("Chip resistor 2010 (5025 metric)") {
     meta {
         summary: "Chip resistor, 2010 (5025 metric) body, reflow pads"
-        code: "FP.CHIP:R2010"
+        code: "CHIP:R2010:F"
         category: resistors-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 2010 (5025 metric)"
@@ -17,5 +17,5 @@ footprint:chip-resistor-2010-footprint("Chip resistor 2010 (5025 metric)") {
     outline(silkscreen, width: 0.12, "M-1.44 -1.61H1.44M-1.44 1.61H1.44")
     outline(courtyard, width: 0.05, "M-3.15 -1.6H3.15V1.6H-3.15Z")
     body(height: 0.7)
-    model("MD.CHIP:R2010")
+    model("CHIP:R2010:M3D")
 }

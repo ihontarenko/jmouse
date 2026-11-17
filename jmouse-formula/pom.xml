@@ -63,6 +63,23 @@
             <artifactId>jmouse-el</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- The language's page of documentation, for whoever hosts it: its words in Markdown, its functions from their Javadoc -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-documentation-md</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Each function's and constant's Javadoc kept beside its class: what the language reference says of it -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -56,9 +56,9 @@ component:bc557("BC557B", type: bjt) {
     pin:base(analog, input, 2, "base")
     pin:collector(analog, output, open-collector, 3, "collector")
 
-    footprint("FP.TO92:3-L")
+    footprint("TO92:3-L:F")
 
-    symbol(uses: "SY.TRANSISTOR:BIPOLAR-PNP") {
+    symbol(uses: "TRANSISTOR:BIPOLAR-PNP:S") {
         bind:failed(failed)
     }
 
@@ -73,7 +73,7 @@ component:bc557("BC557B", type: bjt) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO92:3") {
+    portrait(uses: "TO92:3:P") {
         bind:marking("BC557B")
     }
 }

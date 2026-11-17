@@ -1,7 +1,7 @@
 footprint:tssop-16-footprint("TSSOP-16, 4.4 mm body") {
     meta {
         summary: "16-lead TSSOP, 4.4 mm body, gull-wing, 0.65 mm pitch, body 4.4 × 5 mm"
-        code: "FP.TSSOP:16-P0.65-W4.4"
+        code: "TSSOP:16-P0.65-W4.4:F"
         category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-153"
@@ -31,5 +31,5 @@ footprint:tssop-16-footprint("TSSOP-16, 4.4 mm body") {
     outline(silkscreen, width: 0.12, "M-3.675 -2.76H2.2M-2.2 2.76H2.2")
     outline(courtyard, width: 0.05, "M-3.95 -2.75H3.95V2.75H-3.95Z")
     body(height: 1.2)
-    model("MD.TSSOP:16-P0.65-W4.4")
+    model("TSSOP:16-P0.65-W4.4:M3D")
 }

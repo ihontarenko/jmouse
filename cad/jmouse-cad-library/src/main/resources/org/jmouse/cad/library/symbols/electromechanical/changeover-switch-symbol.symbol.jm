@@ -1,7 +1,7 @@
 symbol:changeover-switch-symbol("Changeover switch") {
     meta {
         summary: "Changeover switch, as drawn on a schematic: its lever lies on the upper contact while it is thrown, on the lower one otherwise"
-        code: "SY.SWITCH:SPDT"
+        code: "SWITCH:SPDT:S"
         category: switches
         tags: electronics, schematic
         authors: "jMouse"

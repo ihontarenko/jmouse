@@ -84,7 +84,7 @@ public final class CatalogueViews {
      */
     public record DocumentSummary(String id, String slug, String title, String summary, String kind, String category,
                                   String folder, boolean featured, String status, LocationView location, DocumentOwner owner,
-                                  List<String> tags, String benchRole, int revision, String revisionLabel, Instant updatedAt,
+                                  List<String> tags, String benchRole, int revision, Instant updatedAt,
                                   String problem) {
 
         /** A document of the store as a list shows it, its problem the refusal its file stands under, if any. */
@@ -98,7 +98,7 @@ public final class CatalogueViews {
                                        document.getKind(), document.getCategoryCode(), document.getFolder(),
                                        document.isFeatured(), document.getStatus().name(), LocationView.of(document),
                                        document.owner().orElse(null), List.copyOf(document.getTags()), document.getBenchRole(),
-                                       document.getRevision(), document.getRevisionLabel(), document.getUpdatedAt(), problem);
+                                       document.getRevision(), document.getUpdatedAt(), problem);
         }
     }
 
@@ -123,11 +123,11 @@ public final class CatalogueViews {
     }
 
     /** One saved revision of a document's text, without the text. */
-    public record RevisionView(int revision, String label, String checksum, Instant writtenAt, String writtenBy) {
+    public record RevisionView(int revision, String checksum, Instant writtenAt, String writtenBy) {
     }
 
     /** One revision's text. */
-    public record RevisionSource(int revision, String label, String source) {
+    public record RevisionSource(int revision, String source) {
     }
 
     /** A circuit of an owner as a sheet of one design: what it hands its parent, and the sheets it places. */

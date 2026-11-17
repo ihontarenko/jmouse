@@ -57,6 +57,17 @@
     </properties>
 
     <dependencies>
+        <!-- descriptions: every record's, enum's and sealed type's Javadoc kept beside it as it compiles — what a document's schema
+             says of each type and field of its model -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+        </dependency>
+        <!-- JSpecify: a component that may be null says so on its type, and its document's schema lets it be null -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

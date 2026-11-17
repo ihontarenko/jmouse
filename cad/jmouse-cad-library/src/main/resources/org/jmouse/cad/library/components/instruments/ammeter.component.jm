@@ -17,7 +17,7 @@ component:ammeter("Ammeter", type: meter) {
     lead:in(green, stripes: white)
     lead:out(blue, stripes: white)
     reading:reading(in.current, unit: A, signal)
-    symbol(uses: "SY.METER:AMMETER") {
+    symbol(uses: "METER:AMMETER:S") {
         bind:a(pin: in)
         bind:b(pin: out)
     }

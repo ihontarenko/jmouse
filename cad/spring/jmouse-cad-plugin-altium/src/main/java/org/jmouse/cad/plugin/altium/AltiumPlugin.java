@@ -29,7 +29,7 @@ public final class AltiumPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, TITLE, AltiumPlugin.class).markedBy(AltiumPlugin.class, "altium.svg");
+        return PluginDescriptor.ofArtifact(ID, TITLE, AltiumPlugin.class).withIcon(AltiumPlugin.class, "altium.svg");
     }
 
     @Override

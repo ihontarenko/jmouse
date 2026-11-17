@@ -55,7 +55,7 @@ public final class LibrePcbPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, TITLE, LibrePcbPlugin.class).drawnBy(LibrePcbPlugin.class, "libre-pcb.svg");
+        return PluginDescriptor.ofArtifact(ID, TITLE, LibrePcbPlugin.class).withIcon(LibrePcbPlugin.class, "libre-pcb.svg");
     }
 
     @Override

@@ -41,9 +41,9 @@ component:irf9540("IRF9540N", type: mosfet) {
     pin:gate(analog, input, 2, "gate")
     pin:drain(analog, output, open-drain, 3, "drain; the tab is drain too")
 
-    footprint("FP.TO220:3-V")
+    footprint("TO220:3-V:F")
 
-    symbol(uses: "SY.TRANSISTOR:MOSFET-P") {
+    symbol(uses: "TRANSISTOR:MOSFET-P:S") {
         bind:failed(failed)
     }
 
@@ -80,7 +80,7 @@ component:irf9540("IRF9540N", type: mosfet) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO220:3") {
+    portrait(uses: "TO220:3:P") {
         bind:marking("IRF9540N")
     }
 }

@@ -15,5 +15,5 @@ component:barrel-jack-switch("DC barrel jack with switch", type: connector) {
     pin:sleeve(analog, 2, "sleeve, usually −")
     pin:switch(analog, 3, "switch contact, on the sleeve while no plug is in")
 
-    symbol(uses: "SY.CONNECTOR:BARREL-JACK-SWITCH")
+    symbol(uses: "CONNECTOR:BARREL-JACK-SWITCH:S")
 }

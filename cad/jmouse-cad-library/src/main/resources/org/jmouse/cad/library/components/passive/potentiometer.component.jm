@@ -24,9 +24,9 @@ component:potentiometer("Potentiometer", type: potentiometer) {
     pin:w(analog, 2, "wiper")
     pin:b(analog, 3, "second end")
 
-    footprint("FP.POT:3296W")
+    footprint("POT:3296W:F")
 
-    symbol(uses: ["SY.RESISTOR:POTENTIOMETER", "SY.RESISTOR:TRIMMER"]) {
+    symbol(uses: ["RESISTOR:POTENTIOMETER:S", "RESISTOR:TRIMMER:S"]) {
         bind:failed(failed)
         bind:position(position)
     }
@@ -37,7 +37,7 @@ component:potentiometer("Potentiometer", type: potentiometer) {
     }
 
     # How it looks in the hand: a square trimmer whose slot turns with the wiper.
-    portrait(uses: "PT.POTENTIOMETER:TRIMMER-SQUARE") {
+    portrait(uses: "POTENTIOMETER:TRIMMER-SQUARE:P") {
         bind:position(position)
     }
 }

@@ -31,8 +31,8 @@ component:74hc595("74HC595", type: shift-register) {
     pin:serial_data(digital, input, 14, "serial data")
     pin:Vcc(power, 16)
 
-    footprint("FP.SOIC:16-P1.27-W3.9")
-    footprint("FP.DIP:16-W7.62")
+    footprint("SOIC:16-P1.27-W3.9:F")
+    footprint("DIP:16-W7.62:F")
 
     symbol(box) {
         left([serial_data, shift_clock edge, storage_clock edge])

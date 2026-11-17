@@ -1,7 +1,7 @@
 model:chip-fuse-1210-hand-soldering-model("Chip fuse 1210 (3225 metric), hand soldering") {
     meta {
         summary: "Chip fuse 1210 (3225 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:F1210-HAND"
+        code: "CHIP:F1210-HAND:M3D"
         category: fuses-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"

@@ -25,6 +25,7 @@
   },
   "checks": {
     "tolerance": 0.005,
-    "namedGaps": 40
+    "namedGaps": 40,
+    "namedMeetings": 3
   }
 }

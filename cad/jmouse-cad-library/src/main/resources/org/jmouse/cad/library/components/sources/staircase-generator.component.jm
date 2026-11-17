@@ -19,7 +19,7 @@ component:staircase-generator("Staircase generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-SQUARE") {
+    symbol(uses: "SOURCE:VOLTAGE-SQUARE:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

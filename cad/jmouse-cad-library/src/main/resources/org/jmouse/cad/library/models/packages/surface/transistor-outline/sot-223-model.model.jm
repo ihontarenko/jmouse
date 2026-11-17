@@ -3,7 +3,7 @@ model:sot-223-model("SOT-223") {
     meta {
         summary: "SOT-223 — its body drawn by jmCAD from JEDEC TO-261AA"
         category: surface-transistor-outline
-        code: "MD.SOT:223"
+        code: "SOT:223:M3D"
         tags: model, hand-drawn
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

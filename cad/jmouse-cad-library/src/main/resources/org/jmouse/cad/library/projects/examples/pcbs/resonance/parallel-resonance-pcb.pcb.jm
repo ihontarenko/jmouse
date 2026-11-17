@@ -15,7 +15,7 @@ pcb:parallel-resonance-pcb("Parallel resonance — pcb") {
     place(C1, at: 15.5 7.5, rotate: 270)
     place(L1, at: 19.5 5, rotate: 270)
     place(R2, at: 19.5 10.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X2-P2.54-V", nets: [0: 1, top: 2], at: 5.5 6.5)
+    place(J1, footprint: "HDR:1X2-P2.54-V:F", nets: [0: 1, top: 2], at: 5.5 6.5)
     track(top, width: 0.25, from: 19.5 5.85, to: 19.5 9.5)
     track(top, width: 0.25, from: 11.5 6.5, to: 15.35 6.5, to: 15.5 6.65)
     track(top, width: 0.25, from: 11.5 8.5, to: 15.35 8.5, to: 15.5 8.35)

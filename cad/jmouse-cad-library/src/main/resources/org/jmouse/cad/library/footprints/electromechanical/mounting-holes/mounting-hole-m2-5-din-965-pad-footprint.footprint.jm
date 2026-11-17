@@ -1,7 +1,7 @@
 footprint:mounting-hole-m2-5-din-965-pad-footprint("Mounting hole M2.5, a plated ring under a countersunk head") {
     meta {
         summary: "M2.5 screw, 2.7 mm hole, a plated ring under a countersunk head"
-        code: "FP.MH:M2-5-DIN-965-PAD"
+        code: "MH:M2-5-DIN-965-PAD:F"
         category: mounting-holes
         tags: electronics, footprint, through-hole
         source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"

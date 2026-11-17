@@ -1,7 +1,7 @@
 footprint:to-126-3-vertical-footprint("TO-126 (SOT-32), standing") {
     meta {
         summary: "3-lead TO-126 (SOT-32) standing upright, through-hole, 2.28 mm pitch, the tab at the back"
-        code: "FP.TO126:3-V"
+        code: "TO126:3-V:F"
         category: through-hole-transistor-outline
         tags: electronics, footprint, through-hole
         source: "JEDEC TO-126"
@@ -18,5 +18,5 @@ footprint:to-126-3-vertical-footprint("TO-126 (SOT-32), standing") {
     outline(silkscreen, filled, "M-2.58 -1.71A0.3 0.3 0 1 0 -1.98 -1.71A0.3 0.3 0 1 0 -2.58 -1.71Z")
     outline(courtyard, width: 0.05, "M-4.5 -2H4.5V2H-4.5Z")
     body(height: 11)
-    model("MD.TO126:3-V")
+    model("TO126:3-V:M3D")
 }

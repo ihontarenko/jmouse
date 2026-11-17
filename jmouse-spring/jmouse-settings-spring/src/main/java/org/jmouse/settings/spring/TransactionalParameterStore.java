@@ -35,6 +35,12 @@ public class TransactionalParameterStore implements ParameterStore {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Map<String, Map<String, String>> keptUnder(SettingHolder holder, String owner, String section) {
+        return rows.keptUnder(holder, owner, section);
+    }
+
+    @Override
     @Transactional
     public void replace(SettingHolder holder, String owner, String section, Map<String, String> values) {
         rows.replace(holder, owner, section, values);

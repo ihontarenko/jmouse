@@ -1,7 +1,7 @@
 footprint:pin-header-1x38-pitch-254-vertical-footprint("Pin header, 2.54 mm pitch, 1 × 38, vertical") {
     meta {
         summary: "Pin header, 2.54 mm pitch, 1 row of 38, upright, through-hole"
-        code: "FP.HDR:1X38-P2.54-V"
+        code: "HDR:1X38-P2.54-V:F"
         category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60603-13 grid"
@@ -53,5 +53,5 @@ footprint:pin-header-1x38-pitch-254-vertical-footprint("Pin header, 2.54 mm pitc
     outline(silkscreen, filled, "M-2.18 -46.99A0.3 0.3 0 1 0 -1.58 -46.99A0.3 0.3 0 1 0 -2.18 -46.99Z")
     outline(courtyard, width: 0.05, "M-1.75 -48.75H1.75V48.75H-1.75Z")
     body(height: 8.5)
-    model("MD.HDR:1X38-P2.54-V")
+    model("HDR:1X38-P2.54-V:M3D")
 }

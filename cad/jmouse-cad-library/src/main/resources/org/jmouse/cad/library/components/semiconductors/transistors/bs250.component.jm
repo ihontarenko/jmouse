@@ -39,9 +39,9 @@ component:bs250("BS250", type: mosfet) {
     pin:gate(analog, input, 2, "gate")
     pin:drain(analog, output, open-drain, 3, "drain")
 
-    footprint("FP.TO92:3-L")
+    footprint("TO92:3-L:F")
 
-    symbol(uses: "SY.TRANSISTOR:MOSFET-P") {
+    symbol(uses: "TRANSISTOR:MOSFET-P:S") {
         bind:failed(failed)
     }
 
@@ -75,7 +75,7 @@ component:bs250("BS250", type: mosfet) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO92:3") {
+    portrait(uses: "TO92:3:P") {
         bind:marking("BS250")
     }
 }

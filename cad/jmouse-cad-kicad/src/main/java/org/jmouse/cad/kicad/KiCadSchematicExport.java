@@ -11,6 +11,7 @@ import org.jmouse.cad.Formula;
 import org.jmouse.cad.Point;
 import org.jmouse.cad.Setting;
 import org.jmouse.cad.Text;
+import org.jmouse.cad.circuit.Bus;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.circuit.Placement;
@@ -33,6 +34,7 @@ import org.jmouse.kicad.KiCadPlacement;
 import org.jmouse.kicad.KiCadPoint;
 import org.jmouse.kicad.KiCadValue;
 import org.jmouse.sexpression.node.SExpressionList;
+import org.jmouse.kicad.schematic.KiCadBus;
 import org.jmouse.kicad.schematic.KiCadLabel;
 import org.jmouse.kicad.schematic.KiCadSchematicBuilder;
 import org.jmouse.kicad.symbol.KiCadPinType;
@@ -75,7 +77,20 @@ public final class KiCadSchematicExport {
     private static final String NET = "net:";
 
     /** KiCad's power symbol every ground mark is, its value the net, and the name it gives node 0. */
-    private static final String GROUND_SYMBOL = "power:GND";
+    /**
+     * A power symbol as KiCad's power library draws one: its name, its strokes, and which way its body goes from its pin in its own
+     * drawing (KiCad's Y up) — a ground hangs below its pin, a rail stands over it.
+     */
+    private record PowerShape(String name, List<KiCadPoint> strokes, KiCadPoint body, KiCadPoint valueAt) {
+    }
+
+    /** KiCad's {@code power:GND}: a stem down to a triangle. */
+    private static final PowerShape GROUND_SHAPE = new PowerShape("power:GND", List.of(new KiCadPoint(0, 0), new KiCadPoint(0, -1.27),
+            new KiCadPoint(1.27, -1.27), new KiCadPoint(0, -2.54), new KiCadPoint(-1.27, -1.27), new KiCadPoint(0, -1.27)),
+            new KiCadPoint(0, -1), new KiCadPoint(0, -3.81));
+    /** A supply rail, as KiCad's {@code power:VCC} draws one: a stem up to a bar, the rail's name over it. */
+    private static final PowerShape RAIL_SHAPE = new PowerShape("power:RAIL", List.of(new KiCadPoint(0, 0), new KiCadPoint(0, 1.27),
+            new KiCadPoint(-1.27, 1.27), new KiCadPoint(1.27, 1.27)), new KiCadPoint(0, 1), new KiCadPoint(0, 3.81));
     private static final String NODE_ZERO = KiCadNetNames.KICAD_GROUND;
 
     /** The field a symbol names its footprint in. */
@@ -308,6 +323,21 @@ public final class KiCadSchematicExport {
     private final Map<String, String> joined = new HashMap<>();
     /** The circuit's parameters, computed: what a part's setting written over them is, where KiCad holds no parameter. */
     private final Map<String, Double> parameterValues = new LinkedHashMap<>();
+    /** Where a bus leaves this sheet — its hierarchical label, a box's bus pin —, and which way its line goes from there. */
+    private final List<BusAnchor> busAnchors = new ArrayList<>();
+
+    /**
+     * Where a bus crosses this sheet's edge: the point KiCad's label or pin stands on, and the way into the sheet.
+     *
+     * @param bus     the bus of this sheet, by name
+     * @param at      the label's or the pin's point, in millimetres
+     * @param inwards which way its line goes from there
+     */
+    private record BusAnchor(String bus, KiCadPoint at, double[] inwards) {
+    }
+
+    /** KiCad's grid: a bus entry's run along and across its bus. */
+    private static final double KICAD_STEP = 2.54;
     private int powerSymbols;
     private int powerFlags;
     /** Each net of this sheet that takes power, by its name here: what {@link #flagUndrivenPower} flags. */
@@ -399,8 +429,7 @@ public final class KiCadSchematicExport {
                 case Placement.PlacedPart placed -> placements.computeIfAbsent(placed.reference(), ignored -> new ArrayList<>())
                         .add(placed);
                 case Placement.Mark mark -> mark(mark);
-                case Placement.Bus ignored -> {
-                }
+                case Placement.BusLine line -> busLine(line);
                 case Placement.Note ignored -> {
                 }
                 case Placement.Drawn ignored -> {
@@ -411,6 +440,7 @@ public final class KiCadSchematicExport {
         }
         placements.forEach(this::part);
         circuit.layout().stream().filter(Placement.Wire.class::isInstance).map(Placement.Wire.class::cast).forEach(this::wire);
+        busMembersReachKiCad();
         joinUndrawnNets();
         flagUndrivenPower();
         if (misplacedPins > 0) {
@@ -516,8 +546,17 @@ public final class KiCadSchematicExport {
         for (BlockFrame.PortAt placed : frame.ports()) {
             SheetBoundary.Port port = placed.port();
             KiCadPoint at = millimetres(item.at().x() + placed.edge().x(), item.at().y() + placed.edge().y());
-            terminals.put(part.reference() + ":" + port.net(), at);
-            pins.add(new KiCadSchematicBuilder.SheetPin(port.net(), shapeOf(port.direction()), at, SHEET_PIN_ANGLES.get(placed.place().edge())));
+            if (port.direction().equals(SimulationVocabulary.BUS)) {
+                // A bus pin is reached by a bus line of the parent's bus it is bound to, not by a wire.
+                Optional.ofNullable(frame.wired().get(port.net())).filter(bound -> circuit.bus(bound).isPresent())
+                        .ifPresent(bound -> busAnchors.add(new BusAnchor(bound, at, outwardsOf(placed.place().edge()))));
+            } else {
+                terminals.put(part.reference() + ":" + port.net(), at);
+            }
+            // A bus pin is named by the child's bus as KiCad writes it, the text its hierarchical label inside says too.
+            String pinName = port.direction().equals(SimulationVocabulary.BUS)
+                    ? child.bus(port.net()).map(KiCadSchematicExport::busText).orElse(port.net()) : port.net();
+            pins.add(new KiCadSchematicBuilder.SheetPin(pinName, shapeOf(port.direction()), at, SHEET_PIN_ANGLES.get(placed.place().edge())));
         }
         String step = KiCadSchematicBuilder.placedSheetIdentity(slug, part.reference());
         Map<String, String> pages = new LinkedHashMap<>();
@@ -751,7 +790,13 @@ public final class KiCadSchematicExport {
         String ours = item.net() == null ? Circuit.GROUND : item.net();
         switch (item.symbol()) {
             case "ground", "common" -> {
-                groundSymbol(at, body, net(item));
+                powerSymbol(GROUND_SHAPE, at, body, net(item));
+                powered(ours, KiCadPinType.POWER_INPUT, at);
+                named(ours, net(item), NameStrength.POWER);
+            }
+            // A supply rail is KiCad's power symbol of the rail's name: the net by its value, everywhere — as a ground is.
+            case "power" -> {
+                powerSymbol(RAIL_SHAPE, at, body, net(item));
                 powered(ours, KiCadPinType.POWER_INPUT, at);
                 named(ours, net(item), NameStrength.POWER);
             }
@@ -764,7 +809,20 @@ public final class KiCadSchematicExport {
                 named(ours, net(item), NameStrength.GLOBAL);
             }
             case "port" -> {
-                schematic.label(KiCadLabel.Kind.HIERARCHICAL, net(item), at, labelAngle(body), portShape(net(item)));
+                // A port naming a bus hands the whole bus across: KiCad's hierarchical label of the bus's text.
+                Optional<Bus> bus = circuit.bus(net(item));
+                if (bus.isPresent()) {
+                    schematic.label(KiCadLabel.Kind.HIERARCHICAL, busText(bus.get()), at, labelAngle(body), "bidirectional");
+                    busAnchors.add(new BusAnchor(bus.get().name(), at, new double[] {-body[0], -body[1]}));
+                } else {
+                    schematic.label(KiCadLabel.Kind.HIERARCHICAL, net(item), at, labelAngle(body), portShape(net(item)));
+                    named(ours, ROOT_SHEET_PATH + net(item), NameStrength.SHEET);
+                }
+            }
+            case "entry" -> {
+                // The stroke from the bus — where the mark stands — to the wire's end, and the member's label there, which joins it.
+                schematic.busEntry(millimetres(item.at().x(), item.at().y()), at);
+                schematic.label(KiCadLabel.Kind.LOCAL, net(item), at, labelAngle(body), null);
                 named(ours, ROOT_SHEET_PATH + net(item), NameStrength.SHEET);
             }
             default -> notes.add(item.reference() + " is a '" + item.symbol() + "' mark, which has no KiCad counterpart.");
@@ -809,22 +867,22 @@ public final class KiCadSchematicExport {
         });
     }
     /** A ground: KiCad's power symbol, its value the net — GND for node 0. */
-    private void groundSymbol(KiCadPoint at, double[] body, String value) {
-        if (!schematic.hasLibrarySymbol(GROUND_SYMBOL)) {
-            schematic.librarySymbol(GROUND_SYMBOL, KiCadSymbolBuilder.named(GROUND_SYMBOL).power()
-                    .property("Reference", "#PWR").property("Value", NODE_ZERO).property("Footprint", "")
+    /** A power symbol of a shape placed where a mark stands, its body turned the way the mark's goes, its value the net it names. */
+    private void powerSymbol(PowerShape shape, KiCadPoint at, double[] body, String value) {
+        if (!schematic.hasLibrarySymbol(shape.name())) {
+            schematic.librarySymbol(shape.name(), KiCadSymbolBuilder.named(shape.name()).power()
+                    .property("Reference", "#PWR").property("Value", value).property("Footprint", "")
                     .property("Datasheet", "").hidePinNumbers()
-                    .polyline(0, List.of(new KiCadPoint(0, 0), new KiCadPoint(0, -1.27), new KiCadPoint(1.27, -1.27),
-                            new KiCadPoint(0, -2.54), new KiCadPoint(-1.27, -1.27), new KiCadPoint(0, -1.27)))
-                    .pin(1, KiCadPinType.POWER_INPUT, new KiCadPoint(0, 0), 270, 0, NODE_ZERO, "1").build());
+                    .polyline(0, shape.strokes())
+                    .pin(1, KiCadPinType.POWER_INPUT, new KiCadPoint(0, 0), shape.body().y() < 0 ? 270 : 90, 0, value, "1").build());
         }
-        // The body hangs below its pin unturned; of the four turns, the one that hangs it the way the sheet does.
+        // The body goes from its pin unturned as the shape says; of the four turns, the one that sends it the way the sheet's does.
         int best = 0;
         double bestDot = -Double.MAX_VALUE;
         for (int angle = 0; angle < 360; angle += 90) {
             KiCadPlacement turn = new KiCadPlacement(new KiCadPoint(0, 0), angle, KiCadPlacement.Mirror.NONE);
-            KiCadPoint hangs = turn.place(new KiCadPoint(0, -1));
-            double dot = hangs.x() * body[0] + hangs.y() * body[1];
+            KiCadPoint goes = turn.place(shape.body());
+            double dot = goes.x() * body[0] + goes.y() * body[1];
             if (dot > bestDot) {
                 bestDot = dot;
                 best = angle;
@@ -832,9 +890,9 @@ public final class KiCadSchematicExport {
         }
         KiCadPlacement placement = new KiCadPlacement(at, best, KiCadPlacement.Mirror.NONE);
         powerSymbols++;
-        schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(GROUND_SYMBOL, placement, 1,
+        schematic.symbol(new KiCadSchematicBuilder.PlacedSymbol(shape.name(), placement, 1,
                 String.format(Locale.ROOT, "#PWR%02d", powerSymbols), value, Map.of(), List.of("1"),
-                placement.place(new KiCadPoint(0, -6.35)), placement.place(new KiCadPoint(0, -3.81)), null, List.of(),
+                placement.place(new KiCadPoint(0, -6.35)), placement.place(shape.valueAt()), null, List.of(),
                 KiCadSchematicBuilder.Presence.SCHEMATIC));
     }
 
@@ -879,6 +937,153 @@ public final class KiCadSchematicExport {
         return (int) Math.floorMod(Math.round(degrees / 90) * 90, 360);
     }
 
+    // ─── buses ──────────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * A bus line as KiCad draws one: its stretches, and a label of its bus's text on its first corner — KiCad names a bus by a label
+     * on it, and joins a bus pin to it by that name, member by member.
+     */
+    private void busLine(Placement.BusLine line) {
+        List<KiCadPoint> points = line.via().stream().map(corner -> millimetres(corner.x(), corner.y())).toList();
+        if (points.size() < 2) {
+            return;
+        }
+        schematic.bus(points);
+        circuit.bus(line.bus()).ifPresentOrElse(
+                bus -> schematic.label(KiCadLabel.Kind.LOCAL, busText(bus), points.getFirst(), 0, null),
+                () -> notes.add(line.reference() + " draws the bus " + line.bus() + ", which the sheet does not declare: it is drawn unnamed."));
+    }
+
+    /** A bus as KiCad writes it: a vector {@code D_[0..7]} — its nets our indexed names {@code D_0} … —, a group {@code {SDA SCL}}. */
+    private static String busText(Bus bus) {
+        return bus.numbers().map(index -> KiCadBus.vectorText(bus.name() + "_", index.first(), index.last()))
+                .orElseGet(() -> KiCadBus.groupText(bus.members()));
+    }
+
+    /**
+     * Each bus crossing this sheet's edge reaching KiCad member by member: KiCad joins a member across the edge only where a bus
+     * entry takes its net off a line of the bus, which our language does by the member's name alone. So every member no entry of
+     * the sheet takes off gets one on the bus's line at its crossing — the line drawn from there, or made — and a label of its
+     * name, joined to the member's net so the net is labelled the same where it is drawn.
+     */
+    private void busMembersReachKiCad() {
+        Set<String> takenOff = circuit.layout().stream().filter(Placement.Mark.class::isInstance).map(Placement.Mark.class::cast)
+                .filter(mark -> mark.symbol().equals(SimulationVocabulary.ENTRY) && mark.net() != null).map(Placement.Mark::net)
+                .collect(java.util.stream.Collectors.toSet());
+        Set<String> reached = new java.util.HashSet<>();
+        for (BusAnchor anchor : busAnchors) {
+            Optional<Bus> bus = circuit.bus(anchor.bus());
+            if (bus.isEmpty() || !reached.add(anchor.bus())) {
+                continue;
+            }
+            List<String> members = bus.get().members().stream().filter(member -> !takenOff.contains(member)).toList();
+            if (members.isEmpty()) {
+                continue;
+            }
+            List<KiCadPoint> path = new ArrayList<>(lineFrom(anchor));
+            double needed = (members.size() + 1) * KICAD_STEP;
+            double length = lengthOf(path);
+            if (length < needed) {
+                // A line too short, or none, goes on the way it went — into the sheet from the crossing — as far as the entries need.
+                double[] way = path.size() < 2 ? anchor.inwards() : directionOf(path.get(path.size() - 2), path.getLast());
+                KiCadPoint from = path.getLast();
+                KiCadPoint to = new KiCadPoint(rounded(from.x() + way[0] * (needed - length)), rounded(from.y() + way[1] * (needed - length)));
+                schematic.bus(List.of(from, to));
+                path.add(to);
+            }
+            for (int index = 0; index < members.size(); index++) {
+                double along = (index + 1) * KICAD_STEP;
+                KiCadPoint onBus = pointAlong(path, along);
+                double[] way = directionAlong(path, along);
+                double[] across = {-way[1], way[0]};
+                KiCadPoint end = new KiCadPoint(rounded(onBus.x() + (across[0] + way[0]) * KICAD_STEP), rounded(onBus.y() + (across[1] + way[1]) * KICAD_STEP));
+                String member = members.get(index);
+                // As KiCad draws one: the entry, a short wire on from its end, and the member's label on the wire.
+                KiCadPoint labelled = new KiCadPoint(rounded(end.x() + across[0] * KICAD_STEP), rounded(end.y() + across[1] * KICAD_STEP));
+                schematic.busEntry(onBus, end);
+                schematic.wire(List.of(end, labelled));
+                schematic.label(KiCadLabel.Kind.LOCAL, member, labelled, labelAngle(across), null);
+                String key = "bus-entry:" + anchor.bus() + ":" + member;
+                terminals.put(key, labelled);
+                join(key, NET + member);
+                named(member, ROOT_SHEET_PATH + member, NameStrength.SHEET);
+            }
+        }
+    }
+
+    /** The line of an anchor's bus that starts or ends where the bus crosses the edge, from there; just the crossing when none does. */
+    private List<KiCadPoint> lineFrom(BusAnchor anchor) {
+        for (Placement placement : circuit.layout()) {
+            if (placement instanceof Placement.BusLine line && line.bus().equals(anchor.bus()) && line.via().size() > 1) {
+                List<KiCadPoint> points = line.via().stream().map(KiCadSchematicExport::millimetres).toList();
+                if (points.getFirst().sameAs(anchor.at())) {
+                    return points;
+                }
+                if (points.getLast().sameAs(anchor.at())) {
+                    return points.reversed();
+                }
+            }
+        }
+        return List.of(anchor.at());
+    }
+
+    private static double lengthOf(List<KiCadPoint> path) {
+        double length = 0;
+        for (int index = 1; index < path.size(); index++) {
+            length += Math.hypot(path.get(index).x() - path.get(index - 1).x(), path.get(index).y() - path.get(index - 1).y());
+        }
+        return length;
+    }
+
+    private static double[] directionOf(KiCadPoint from, KiCadPoint to) {
+        double length = Math.hypot(to.x() - from.x(), to.y() - from.y());
+        return length == 0 ? new double[] {1, 0} : new double[] {(to.x() - from.x()) / length, (to.y() - from.y()) / length};
+    }
+
+    /** The point a distance along a path; its stretch in which it stands, for its direction. */
+    private static int stretchAt(List<KiCadPoint> path, double along) {
+        double gone = 0;
+        for (int index = 1; index < path.size(); index++) {
+            double stretch = Math.hypot(path.get(index).x() - path.get(index - 1).x(), path.get(index).y() - path.get(index - 1).y());
+            if (gone + stretch >= along - 1e-9) {
+                return index;
+            }
+            gone += stretch;
+        }
+        return path.size() - 1;
+    }
+
+    private static KiCadPoint pointAlong(List<KiCadPoint> path, double along) {
+        int index = stretchAt(path, along);
+        double gone = lengthOf(path.subList(0, index));
+        double[] way = directionOf(path.get(index - 1), path.get(index));
+        double left = along - gone;
+        return new KiCadPoint(rounded(path.get(index - 1).x() + way[0] * left), rounded(path.get(index - 1).y() + way[1] * left));
+    }
+
+    private static double[] directionAlong(List<KiCadPoint> path, double along) {
+        int index = stretchAt(path, along);
+        return directionOf(path.get(index - 1), path.get(index));
+    }
+
+    /** Which way into the parent's sheet a pin on a box's edge leads: out of the box. */
+    private static double[] outwardsOf(Placement.PortPlace.Edge edge) {
+        return switch (edge) {
+            case LEFT -> new double[] {-1, 0};
+            case RIGHT -> new double[] {1, 0};
+            case TOP -> new double[] {0, -1};
+            case BOTTOM -> new double[] {0, 1};
+        };
+    }
+
+    /** A block's pins without those carrying a bus: a bus pin wires no net. */
+    private Map<String, String> withoutBusPins(Map<String, String> wired, DocumentNode sheet) {
+        Circuit child = design.circuits.getOrDefault(sheet.slug(), SimulationReading.circuit(sheet));
+        Map<String, String> nets = new LinkedHashMap<>(wired);
+        child.boundary().ports().stream().filter(port -> port.direction().equals(SimulationVocabulary.BUS)).forEach(port -> nets.remove(port.net()));
+        return nets;
+    }
+
     // ─── wires ──────────────────────────────────────────────────────────────────────────────────────
 
     private void wire(Placement.Wire wire) {
@@ -908,7 +1113,8 @@ public final class KiCadSchematicExport {
         Map<String, List<String>> nets = new LinkedHashMap<>();
         for (Part part : circuit.parts()) {
             Optional<Look> look = look(part.component(), part.symbol());
-            Optional<Map<String, String>> ports = sheetOf(catalogue, part).flatMap(sheet -> blockPorts(part, sheet));
+            // A block's bus pin is bound to a bus, no net: what it carries joins by the bus's entries.
+            Optional<Map<String, String>> ports = sheetOf(catalogue, part).flatMap(sheet -> blockPorts(part, sheet).map(wired -> withoutBusPins(wired, sheet)));
             Map<String, String> wired = ports.isPresent() ? ports.get() : look.map(found -> found.face().wiring(part)).orElseGet(() -> {
                 Map<String, String> named = new LinkedHashMap<>();
                 part.connections().forEach(connection -> connection.named().ifPresent(pin -> named.put(pin, connection.net())));
@@ -950,7 +1156,7 @@ public final class KiCadSchematicExport {
     /** What names a net at a point: a ground symbol for node 0, the label its kind of net takes elsewhere. */
     private void connector(String net, KiCadPoint at) {
         if (net.equals(Circuit.GROUND)) {
-            groundSymbol(at, new double[] {0, 1}, NODE_ZERO);
+            powerSymbol(GROUND_SHAPE, at, new double[] {0, 1}, NODE_ZERO);
             named(net, NODE_ZERO, NameStrength.POWER);
             return;
         }

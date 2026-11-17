@@ -1,7 +1,7 @@
 footprint:msop-12-exposed-pad-footprint("MSOP-12, 3 mm body") {
     meta {
         summary: "12-lead MSOP, 3 × 4 mm body, 0.65 mm pitch, exposed pad, gull-wing, 0.65 mm pitch, body 3 × 4.04 mm"
-        code: "FP.MSOP:12-P0.65-EP"
+        code: "MSOP:12-P0.65-EP:F"
         category: small-outline
         tags: electronics, footprint, surface
         source: "the makers' MSE12 outline (Analog Devices)"
@@ -28,5 +28,5 @@ footprint:msop-12-exposed-pad-footprint("MSOP-12, 3 mm body") {
     outline(silkscreen, width: 0.12, "M-2.875 -2.13H1.5M-1.5 2.13H1.5")
     outline(courtyard, width: 0.05, "M-3.15 -2.25H3.15V2.25H-3.15Z")
     body(height: 1.1)
-    model("MD.MSOP:12-P0.65-EP")
+    model("MSOP:12-P0.65-EP:M3D")
 }

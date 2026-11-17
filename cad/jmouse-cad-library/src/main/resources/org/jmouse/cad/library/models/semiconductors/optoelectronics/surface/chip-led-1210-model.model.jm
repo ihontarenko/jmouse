@@ -1,7 +1,7 @@
 model:chip-led-1210-model("Chip LED 1210 (3225 metric)") {
     meta {
         summary: "Chip LED 1210 (3225 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:LED1210"
+        code: "CHIP:LED1210:M3D"
         category: optoelectronics-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 1210 (3225 metric)"

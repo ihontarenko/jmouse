@@ -16,7 +16,7 @@ component:p-mosfet("P-channel MOSFET", type: mosfet) {
     parameter:V_threshold(-1 V, "VTO: an enhancement part opens when the gate is this far below the source")
     parameter:transconductance(0.1 A/V^2, "KP: the whole channel")
 
-    symbol(uses: "SY.TRANSISTOR:MOSFET-P") {
+    symbol(uses: "TRANSISTOR:MOSFET-P:S") {
         bind:failed(failed)
     }
 

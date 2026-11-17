@@ -26,6 +26,20 @@
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
     <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad</url>
   </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-descriptions</artifactId>
+      <version>1.0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>

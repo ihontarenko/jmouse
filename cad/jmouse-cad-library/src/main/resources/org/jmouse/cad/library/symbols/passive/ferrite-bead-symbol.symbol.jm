@@ -1,7 +1,7 @@
 symbol:ferrite-bead-symbol("Ferrite bead") {
     meta {
         summary: "A ferrite bead, as drawn on a schematic: a slanted block threaded on the wire"
-        code: "SY.INDUCTOR:FERRITE-BEAD"
+        code: "INDUCTOR:FERRITE-BEAD:S"
         category: inductors
         tags: electronics, schematic
         authors: "jMouse"

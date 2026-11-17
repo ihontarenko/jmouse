@@ -8,6 +8,8 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -49,7 +51,7 @@ public final class DescriptionsProcessor extends AbstractProcessor {
         if (!element.getKind().isClass() && !element.getKind().isInterface()) {
             return;
         }
-        if (element.getKind() == ElementKind.RECORD || element.getKind() == ElementKind.ENUM) {
+        if (element.getKind() == ElementKind.RECORD || element.getKind() == ElementKind.ENUM || element.getModifiers().contains(Modifier.SEALED)) {
             keep((TypeElement) element);
         }
         for (Element inside : element.getEnclosedElements()) {
@@ -70,7 +72,16 @@ public final class DescriptionsProcessor extends AbstractProcessor {
                     kept.put(Descriptions.MEMBER + component.getSimpleName(), said);
                 }
             }
-        } else {
+            // A getter beside the components is a property of the record's JSON too: isUnplated() → unplated.
+            for (Element member : type.getEnclosedElements()) {
+                if (member instanceof ExecutableElement method && isGetter(method)) {
+                    String said = JavadocWords.of(processingEnv.getElementUtils().getDocComment(method)).summary();
+                    if (!said.isBlank()) {
+                        kept.put(Descriptions.MEMBER + Descriptions.propertyOf(method.getSimpleName().toString()), said);
+                    }
+                }
+            }
+        } else if (type.getKind() == ElementKind.ENUM) {
             for (Element constant : type.getEnclosedElements()) {
                 if (constant.getKind() == ElementKind.ENUM_CONSTANT) {
                     String said = JavadocWords.of(processingEnv.getElementUtils().getDocComment(constant)).summary();
@@ -94,6 +105,13 @@ public final class DescriptionsProcessor extends AbstractProcessor {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "The description of " + binaryName + " cannot be kept: "
                                                                             + unwritable.getMessage(), type);
         }
+    }
+
+    /** A public instance method taking nothing and named as a getter — {@code getSurface()}, {@code isUnplated()}. */
+    private static boolean isGetter(ExecutableElement method) {
+        String name = method.getSimpleName().toString();
+        return method.getKind() == ElementKind.METHOD && method.getParameters().isEmpty() && method.getModifiers().contains(Modifier.PUBLIC)
+               && !method.getModifiers().contains(Modifier.STATIC) && (name.matches("get[A-Z].*") || name.matches("is[A-Z].*"));
     }
 
     /** The words as a properties file, without the date {@link Properties#store} heads it with: a build writes the same bytes twice. */

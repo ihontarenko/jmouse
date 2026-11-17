@@ -46,6 +46,7 @@ import org.jmouse.cad.pcb.geometry.PcbDrills;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 import org.jmouse.cad.pcb.geometry.PadOutline;
+import org.jmouse.cad.pcb.geometry.PourMemory;
 import org.jmouse.cad.pcb.physics.CopperPaths;
 import org.jmouse.cad.pcb.physics.CopperPhysics;
 import org.jmouse.cad.pcb.physics.StackPhysics;
@@ -135,6 +136,8 @@ public class DocumentExchange {
 
     /** The ways a pcb is made, read through the engine's tables. */
     private final CadStandards standards;
+    /** What each zone of the pcbs this exchange pours for editors was last poured from: a change pours again only where it reached. */
+    private final PourMemory   pours;
     private final Extensions    extensions;
     private final CadCatalogue  catalogue;
     private final DocumentStore documents;
@@ -151,7 +154,8 @@ public class DocumentExchange {
      */
     public DocumentExchange(Extensions extensions, CadCatalogue catalogue, DocumentStore documents, CadAuthority authority,
                             CadPlaces places, CadLanguage language, DocumentFiles files, DocumentLicences licences, CadSettings settings,
-                            CadStandards standards) {
+                            CadStandards standards, PourMemory pours) {
+        this.pours = pours;
         this.standards = standards;
         this.extensions = extensions;
         this.catalogue = catalogue;
@@ -323,7 +327,7 @@ public class DocumentExchange {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
             Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
-            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT);
+            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT, pours);
             ArtworkAreas areas = new ArtworkAreas(artwork.outlines(), artworkSettings().areas().steps());
             Map<String, MaskAreas> masks = new LinkedHashMap<>();
             for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
@@ -420,7 +424,7 @@ public class DocumentExchange {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
             Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
-            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT);
+            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT, pours);
             return new ViaRows(fabrication.pcb(), artwork.nets(), artwork.pours(), new NetRules(fabrication.pcb(), values),
                     new AreaOffsets(artworkSettings().arcError()), artworkSettings().curveSteps());
         });
@@ -461,7 +465,7 @@ public class DocumentExchange {
             DocumentFlattening.Flattened flat = flattened(document, scope(owner));
             PcbFabrication fabrication = PcbFabrication.of(flat.document(), flat.catalogue());
             Map<String, Double> values = standards.pcbRules().valuesOf(fabrication.pcb().rules());
-            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT);
+            PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT, pours);
             PcbSolid solid = PcbSolid.of(artwork, new ArtworkAreas(artwork.outlines(), artworkSettings().areas().steps()),
                     PcbDrills.of(fabrication.pcb(), fabrication.footprints()), artworkSettings().areas().steps(), new PartBodies(artworkSettings().curveSteps()));
             return new MadePcb(values.get(PcbVocabulary.RULE_PCB_THICKNESS), values.get(PcbVocabulary.RULE_COPPER_THICKNESS), solid, artworkSettings().areas().tolerance());

@@ -41,12 +41,20 @@ public final class SimulationVocabulary {
     public static final String COMMON     = "common";
     public static final String PORT       = "port";
     public static final String GLOBAL     = "global";
+    /** Where a wire leaves a bus line: a mark of the member net it carries off. */
+    public static final String ENTRY      = "entry";
 
     /** The marks a layout draws that are no part. */
-    public static final String[] LAYOUT_MARKS = {JUNCTION, NO_CONNECT, GROUND, LABEL, COMMON, POWER, PORT, GLOBAL};
+    public static final String[] LAYOUT_MARKS = {JUNCTION, NO_CONNECT, GROUND, LABEL, COMMON, POWER, PORT, GLOBAL, ENTRY};
 
-    /** Which way a sheet's port goes, as its {@code ports} block writes it. */
-    public static final String[] PORT_DIRECTIONS = {INPUT, OUTPUT, POWER, GROUND, ANALOG};
+    /** A port that hands a whole bus across the sheet's edge, its nets member by member: {@code bus(D)}. */
+    public static final String BUS = "bus";
+
+    /** Which way a sheet's port goes, as its {@code ports} block writes it — or that it is a bus. */
+    public static final String[] PORT_DIRECTIONS = {INPUT, OUTPUT, POWER, GROUND, ANALOG, BUS};
+
+    /** {@code buses { bus(D[0..7]) }}: the block a circuit declares its buses in. */
+    public static final String BUSES = "buses";
 
     /** What a measure reads other than a net or an expression: a part's current or power, a level, a part's figures. */
     public static final List<String> MEASURED = List.of("current", "power", "level", "levels", "figure", "figures");

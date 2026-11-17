@@ -58,7 +58,7 @@ public final class MeshPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "3D models", MeshPlugin.class).drawnBy(MeshPlugin.class, "mesh.svg");
+        return PluginDescriptor.ofArtifact(ID, "3D models", MeshPlugin.class).withIcon(MeshPlugin.class, "mesh.svg");
     }
 
     @Override

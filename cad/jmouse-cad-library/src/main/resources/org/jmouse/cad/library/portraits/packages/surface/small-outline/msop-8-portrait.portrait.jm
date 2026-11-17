@@ -2,7 +2,7 @@
 portrait:msop-8-portrait("MSOP-8") {
     meta {
         summary: "8-lead MSOP, 3 mm body, 0.65 mm pitch from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.MSOP:8-P0.65"
+        code: "MSOP:8-P0.65:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-187 AA"

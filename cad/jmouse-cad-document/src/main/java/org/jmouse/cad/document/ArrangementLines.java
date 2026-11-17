@@ -7,6 +7,7 @@ import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.LineBuilder;
 import org.jmouse.el.grammar.LineGrammar;
 import org.jmouse.el.grammar.Nodes;
+import org.jmouse.el.node.Expression;
 
 import java.util.function.UnaryOperator;
 
@@ -54,6 +55,11 @@ public final class ArrangementLines {
     /** A group as its line declares it. */
     public static DrawnGroup groupOf(ClauseLineNode line) {
         return new DrawnGroup(line.name("name").orElseThrow(), stateOf(line));
+    }
+
+    /** Whether a statement is a group's own line: what every drawing that keeps groups draws, whatever its own lines are. */
+    public static boolean isGroupLine(Expression statement) {
+        return statement instanceof ClauseLineNode line && line.grammar() == GROUP_LINE;
     }
 
     /** A group's own line. */

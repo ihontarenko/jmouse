@@ -1,7 +1,7 @@
 model:soic-24-wide-model("SOIC-24, 7.5 mm body") {
     meta {
         summary: "SOIC-24, 7.5 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOIC:24-P1.27-W7.5"
+        code: "SOIC:24-P1.27-W7.5:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MS-013"

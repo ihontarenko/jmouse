@@ -1,7 +1,7 @@
 symbol:two-contact-relay-symbol("Relay with two normally-open contacts") {
     meta {
         summary: "A relay with two make contacts, as drawn on a schematic: its coil, and two contacts on one armature that close together while the coil holds them"
-        code: "SY.RELAY:DPST"
+        code: "RELAY:DPST:S"
         category: relays
         tags: electronics, schematic
         authors: "jMouse"

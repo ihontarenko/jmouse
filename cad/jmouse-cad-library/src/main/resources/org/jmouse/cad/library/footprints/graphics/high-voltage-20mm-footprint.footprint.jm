@@ -1,7 +1,7 @@
 footprint:high-voltage-20mm-footprint("High voltage, 20 mm") {
     meta {
         summary: "A warning triangle with a bolt: dangerous voltage on this part of the board, printed 20 mm wide"
-        code: "FP.GRAPHIC:HIGH-VOLTAGE-20"
+        code: "GRAPHIC:HIGH-VOLTAGE-20:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

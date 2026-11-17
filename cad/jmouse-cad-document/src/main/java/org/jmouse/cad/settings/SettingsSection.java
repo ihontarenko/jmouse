@@ -58,7 +58,15 @@ public record SettingsSection<T>(String path, String title, Class<T> type) {
 
     /** The section of a plugin's settings at a path among its own: where it stands in the tree. */
     public static SettingsSection<?> of(String plugin, String pathInOwner, String title, Class<?> type) {
-        return new SettingsSection<>(plugin.equals(ENGINE) ? pathInOwner : PLUGIN_BRANCH + "/" + plugin + "/" + pathInOwner, title, type);
+        return new SettingsSection<>(pathOf(plugin, pathInOwner), title, type);
+    }
+
+    /**
+     * Where a section of a plugin's settings stands in the tree, whatever its shape: the core's at its own path, a plugin's under its
+     * id — {@code plugin/cad-gerber/files}.
+     */
+    public static String pathOf(String plugin, String pathInOwner) {
+        return plugin.equals(ENGINE) ? pathInOwner : PLUGIN_BRANCH + "/" + plugin + "/" + pathInOwner;
     }
 
     /** The plugin whose section it is: the one its branch names, the engine's for the core's. */

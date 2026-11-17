@@ -17,7 +17,7 @@ component:sawtooth-generator("Sawtooth generator", type: generator) {
     pin:positive(analog, 1, "positive terminal")
     pin:negative(analog, 2, "negative terminal")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-SAWTOOTH") {
+    symbol(uses: "SOURCE:VOLTAGE-SAWTOOTH:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

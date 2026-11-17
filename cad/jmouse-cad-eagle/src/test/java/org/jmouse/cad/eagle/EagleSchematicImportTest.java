@@ -206,9 +206,9 @@ class EagleSchematicImportTest {
         List<DocumentIndex> indexes = imported.library().stream()
                 .map(document -> DocumentIndex.of(language.readOne(text(document), document.slug()))).toList();
         List<String> codes = indexes.stream().map(DocumentIndex::code).filter(java.util.Objects::nonNull).toList();
-        assertEquals(List.of("FP.TEST:0805", "FP.TEST:SO8", "SY.TEST:R"), codes);
+        assertEquals(List.of("TEST:0805:F", "TEST:SO8:F", "TEST:R:S"), codes);
         DocumentIndex resistor = indexes.stream().filter(index -> index.slug().equals("eagle-test-resistor-0805")).findFirst().orElseThrow();
-        assertEquals(List.of("SY.TEST:R", "FP.TEST:0805"), resistor.references().stream()
+        assertEquals(List.of("TEST:R:S", "TEST:0805:F"), resistor.references().stream()
                 .filter(reference -> !reference.relation().equals("extends") && !reference.relation().equals("use"))
                 .map(DocumentIndex.Reference::slug).toList());
         for (DocumentIndex index : indexes) {

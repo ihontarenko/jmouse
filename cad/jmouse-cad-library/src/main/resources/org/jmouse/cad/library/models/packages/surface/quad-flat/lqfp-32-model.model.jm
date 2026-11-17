@@ -1,7 +1,7 @@
 model:lqfp-32-model("LQFP-32, 7 mm body") {
     meta {
         summary: "LQFP-32, 7 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.LQFP:32-P0.8-7"
+        code: "LQFP:32-P0.8-7:M3D"
         category: quad-flat
         tags: electronics, model, quad
         source: "JEDEC MS-026 BBA"

@@ -28,9 +28,9 @@ component:74hc1g14("74HC1G14", type: gate) {
     pin:output(analog, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    footprint("FP.SOT353:5")
+    footprint("SOT353:5:F")
 
-    symbol(uses: "SY.GATE:NOT-SCHMITT")
+    symbol(uses: "GATE:NOT-SCHMITT:S")
 
     # A 0 … 4.5 V triangle crosses VT+ on the way up at 2.65 ms and VT− on the way down at 8.45 ms: low for 58 % of
     # every period, high for 42 %. One threshold at the middle would give half and half.

@@ -1,7 +1,7 @@
 model:chip-led-0805-hand-soldering-model("Chip LED 0805 (2012 metric), hand soldering") {
     meta {
         summary: "Chip LED 0805 (2012 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:LED0805-HAND"
+        code: "CHIP:LED0805-HAND:M3D"
         category: optoelectronics-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0805 (2012 metric)"

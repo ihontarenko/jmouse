@@ -16,7 +16,7 @@ component:current-source("Current source", type: current-source) {
         current positive -> negative = 0 - I_output
     }
 
-    symbol(uses: "SY.SOURCE:CURRENT") {
+    symbol(uses: "SOURCE:CURRENT:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

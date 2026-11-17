@@ -13,7 +13,7 @@ pcb:voltage-divider-pcb("Voltage divider — pcb") {
     edge("M1 0H21A1 1 0 0 1 22 1V16A1 1 0 0 1 21 17H1A1 1 0 0 1 0 16V1A1 1 0 0 1 1 0Z")
     place(R1, at: 18 5.5, rotate: 270)
     place(R2, at: 18 11.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, middle: 2, top: 3], at: 5.5 7.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, middle: 2, top: 3], at: 5.5 7.5)
     track(top, width: 0.25, from: 18 12.5, to: 18 13.55)
     track(top, width: 0.25, from: 18 6.5, to: 18 10.5)
     track(top, width: 0.25, from: 18 6.5, to: 6.5 6.5, to: 5.5 7.5)

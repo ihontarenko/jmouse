@@ -2,9 +2,6 @@ package org.jmouse.cad.pcb.routing;
 
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
-import org.jmouse.cad.pcb.geometry.CopperNets;
-import org.jmouse.cad.pcb.geometry.CopperShape;
-import org.jmouse.cad.pcb.geometry.CopperShapes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,56 +50,22 @@ public final class JoinedTracks {
     }
 
     /**
-     * The one other track a point where a track ends joins at a plain joint — an end of it within both tracks' copper —, and
-     * whether that track starts there; empty where anything else meets it: a third track, a branch off the middle of one, an
-     * arc, a via, a pad.
+     * The one other track a track's end joins at a plain joint ({@link CopperNodeKind#JOINT}), and whether that track starts there;
+     * empty where the node there is anything else — a pad, a via, an arc's end, a junction, the track's own free tip.
      */
-    private static Optional<Partner> partnerAt(RoutingWorld world, int index, Point point, Set<Integer> taken) {
-        PcbDrawing pcb = world.pcb();
-        PcbDrawing.Track own = pcb.tracks().get(index);
-        int curveSteps = world.board().checks().curveSteps();
-        Partner partner = null;
-        for (int other = 0; other < pcb.tracks().size(); other++) {
-            PcbDrawing.Track track = pcb.tracks().get(other);
-            if (other == index || !track.layer().equals(own.layer())) {
-                continue;
-            }
-            List<Point> points = track.points();
-            double reach = Math.min(own.width(), track.width()) / 2;
-            boolean nearerFirst = Lines.lengthBetween(points.getFirst(), point) <= Lines.lengthBetween(points.getLast(), point);
-            Point nearer = nearerFirst ? points.getFirst() : points.getLast();
-            if (Lines.lengthBetween(nearer, point) <= reach) {
-                if (partner != null || taken.contains(other)) {
-                    return Optional.empty();
-                }
-                partner = new Partner(other, nearerFirst);
-            } else if (CopperShapes.track(track, curveSteps).covers(point.x(), point.y())) {
-                // The point stands on another track's copper away from its ends: a branch.
-                return Optional.empty();
-            }
-        }
-        if (partner == null) {
+    private static Optional<Partner> partnerAt(RoutingWorld world, int index, CopperNode.End end, Set<Integer> taken) {
+        CopperNode node = world.nodes().atEnd(index, end);
+        if (node.kind() != CopperNodeKind.JOINT) {
             return Optional.empty();
         }
-        double reach = own.width() / 2;
-        for (PcbDrawing.Arc arc : pcb.arcs()) {
-            if (arc.layer().equals(own.layer()) && (Lines.lengthBetween(arc.from(), point) <= reach + arc.width() / 2
-                                                    || Lines.lengthBetween(arc.to(), point) <= reach + arc.width() / 2)) {
-                return Optional.empty();
-            }
-        }
-        for (PcbDrawing.Via via : pcb.vias()) {
-            if (Math.hypot(via.x() - point.x(), via.y() - point.y()) <= via.diameter() / 2) {
-                return Optional.empty();
-            }
-        }
-        for (CopperNets.PlacedPad pad : world.nets().pads()) {
-            CopperShape copper = pad.copper();
-            if (pad.on(own.layer()) && copper.covers(point.x(), point.y())) {
-                return Optional.empty();
-            }
-        }
-        return Optional.of(partner);
+        CopperNode.TrackEnd partner = node.partnerOf(index);
+        return taken.contains(partner.track()) ? Optional.empty()
+                : Optional.of(new Partner(partner.track(), partner.end() == CopperNode.End.FIRST));
+    }
+
+    /** Which end of its track a member's first point is — or, {@code last}, its last. */
+    private static CopperNode.End endOf(Member member, boolean last) {
+        return member.reversed() == last ? CopperNode.End.FIRST : CopperNode.End.LAST;
     }
 
     /**
@@ -126,7 +89,7 @@ public final class JoinedTracks {
         // Back from its first point, then on from its last.
         while (true) {
             Member first = members.getFirst();
-            Optional<Partner> partner = partnerAt(world, first.index(), pointsOf(pcb, first).getFirst(), taken);
+            Optional<Partner> partner = partnerAt(world, first.index(), endOf(first, false), taken);
             if (partner.isEmpty()) {
                 break;
             }
@@ -136,7 +99,7 @@ public final class JoinedTracks {
         }
         while (true) {
             Member last = members.getLast();
-            Optional<Partner> partner = partnerAt(world, last.index(), pointsOf(pcb, last).getLast(), taken);
+            Optional<Partner> partner = partnerAt(world, last.index(), endOf(last, true), taken);
             if (partner.isEmpty()) {
                 break;
             }

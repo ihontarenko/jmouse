@@ -1,6 +1,9 @@
 package org.jmouse.cad.exchange.imported;
 
+import org.jmouse.cad.circuit.Bus;
 import org.jmouse.cad.circuit.Placement;
+import org.jmouse.cad.circuit.SheetBoundary;
+import org.jmouse.cad.simulation.SimulationVocabulary;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -14,18 +17,29 @@ import java.util.Set;
  * each is drawn, its wires, the probes it opens on, and what it hands across its edge — what
  * {@link ImportedCircuitDocument} writes. Every format's import reads its sheets into this.
  *
- * @param ports   the nets the sheet hands to the block that places it: its hierarchical labels
+ * @param ports   what the sheet hands to the block that places it: its hierarchical labels — a net, or a whole bus
  * @param globals the nets every sheet of the design shares by name: its global labels and power rails
  * @param notes   what it could not carry, by part
- * @param buses   the bus lines drawn on it; they join nothing, its labels do
+ * @param buses    the buses the sheet declares: the named sets of its nets its lines draw and its ports hand across
+ * @param busLines the bus lines drawn on it, each naming its bus; they join nothing, its labels do
  */
-public record ImportedCircuit(List<Part> parts, List<Item> items, List<Wire> wires, List<Probe> probes, List<String> ports,
-                              Set<String> globals, List<String> notes, List<Bus> buses) {
+public record ImportedCircuit(List<Part> parts, List<Item> items, List<Wire> wires, List<Probe> probes, List<SheetBoundary.Port> ports,
+                              Set<String> globals, List<String> notes, List<Bus> buses, List<BusLine> busLines) {
 
-    /** A sheet with no bus line. */
-    public ImportedCircuit(List<Part> parts, List<Item> items, List<Wire> wires, List<Probe> probes, List<String> ports,
+    /** A sheet with no bus. */
+    public ImportedCircuit(List<Part> parts, List<Item> items, List<Wire> wires, List<Probe> probes, List<SheetBoundary.Port> ports,
                            Set<String> globals, List<String> notes) {
-        this(parts, items, wires, probes, ports, globals, notes, List.of());
+        this(parts, items, wires, probes, ports, globals, notes, List.of(), List.of());
+    }
+
+    /** The port that hands one net across: a hierarchical label of it. */
+    public static SheetBoundary.Port netPort(String net) {
+        return new SheetBoundary.Port(net, SimulationVocabulary.ANALOG);
+    }
+
+    /** The port that hands a whole bus across, its nets member by member. */
+    public static SheetBoundary.Port busPort(String bus) {
+        return new SheetBoundary.Port(bus, SimulationVocabulary.BUS);
     }
 
     /** What a part's or a mark's id opens with where the product's reference opens with no letter: {@code 3V3} is {@code P3V3}. */
@@ -53,11 +67,12 @@ public record ImportedCircuit(List<Part> parts, List<Item> items, List<Wire> wir
         globals = Collections.unmodifiableSet(new LinkedHashSet<>(globals));
         notes = List.copyOf(notes);
         buses = List.copyOf(buses);
+        busLines = List.copyOf(busLines);
     }
 
     /** The same sheet with its parts as given: each on the footprint the import settled. */
     public ImportedCircuit withParts(List<Part> settled) {
-        return new ImportedCircuit(settled, items, wires, probes, ports, globals, notes, buses);
+        return new ImportedCircuit(settled, items, wires, probes, ports, globals, notes, buses, busLines);
     }
 
     /**
@@ -146,11 +161,10 @@ public record ImportedCircuit(List<Part> parts, List<Item> items, List<Wire> wir
     }
 
     /** A wire from one terminal to another — {@code R1.positive} —, through its corners. */
-    /** A bus line: what it is called, the nets it carries, and its corners. */
-    public record Bus(String id, String name, List<String> members, List<double[]> via) {
+    /** A bus line: the bus it draws, by name, and its corners. */
+    public record BusLine(String id, String bus, List<double[]> via) {
 
-        public Bus {
-            members = List.copyOf(members);
+        public BusLine {
             via = List.copyOf(via);
         }
     }

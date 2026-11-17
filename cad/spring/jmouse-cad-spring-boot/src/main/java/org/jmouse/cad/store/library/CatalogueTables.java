@@ -3,14 +3,13 @@ package org.jmouse.cad.store.library;
 import java.util.function.Supplier;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.catalogue.StoredDocuments;
-import org.jmouse.cad.table.Table;
 import org.jmouse.cad.table.TableModule;
 import org.jmouse.cad.table.TableSource;
 import org.jmouse.sheet.Sheet;
 
 /**
  * 📋 The engine's tables: the catalogue's table documents by slug — the one a library ships, or its curator's revision kept in
- * the library folder —, each read once per revision. A table saved is a new revision, so the next value asked of it is the
+ * the library folder —, each one's text read once per revision and its sheet made from that tree. A table saved is a new revision, so the next value asked of it is the
  * new one; a program never reads a jar's file of a table while the engine runs.
  */
 public class CatalogueTables implements TableSource {
@@ -31,7 +30,6 @@ public class CatalogueTables implements TableSource {
         var document = shared.addressed(slug).filter(found -> found.getKind().equals(TableModule.TABLE.word()))
                 .orElseThrow(() -> new IllegalStateException("The catalogue holds no table '" + slug + "': it ships with the module that "
                         + "reads it, so the module or its plugin is not running"));
-        return shared.head(document).model().map(Table.class::cast).map(Table::sheet)
-                .orElseThrow(() -> new IllegalStateException("The table '" + slug + "' reads to no table: the table language is not running"));
+        return TableModule.sheetOf(shared.head(document).document());
     }
 }

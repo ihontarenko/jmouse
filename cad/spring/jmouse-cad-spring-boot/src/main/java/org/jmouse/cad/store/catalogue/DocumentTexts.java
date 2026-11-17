@@ -6,7 +6,6 @@ import org.jmouse.cad.folder.RevisionOrigin;
 import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.folder.StoredDocument;
 import org.jmouse.cad.store.library.ShippedDocuments;
-import org.jmouse.revisions.RevisionLabel;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,8 +16,6 @@ import java.util.Optional;
  * database keeps no copy of it. Nothing else reads a document's text, so no reader needs to know where it is held.
  */
 public class DocumentTexts {
-
-    private static final String LATEST = "latest";
 
     private final DocumentStore    documents;
     private final ShippedDocuments shipped;
@@ -65,21 +62,11 @@ public class DocumentTexts {
         if (!document.isShipped()) {
             return documents.revisions(document.getId());
         }
-        return List.of(new DocumentRevision(document.getRevision(), labelOf(document), document.getSourceChecksum(),
+        return List.of(new DocumentRevision(document.getRevision(), document.getSourceChecksum(),
                                             document.getUpdatedAt(), null, RevisionOrigin.UNRECORDED));
     }
 
     private static boolean names(StoredDocument document, String written) {
-        if (written.equalsIgnoreCase(LATEST) || written.equals(String.valueOf(document.getRevision()))) {
-            return true;
-        }
-        return written.equals(document.getRevisionLabel());
-    }
-
-    private static RevisionLabel labelOf(StoredDocument document) {
-        return switch (RevisionLabel.Reference.parse(document.getRevisionLabel())) {
-            case RevisionLabel.Exact exact -> exact.label();
-            default -> throw new IllegalStateException("A head label is one revision's: " + document.getRevisionLabel());
-        };
+        return written.equalsIgnoreCase(DocumentStore.LATEST) || written.equals(String.valueOf(document.getRevision()));
     }
 }

@@ -16,7 +16,7 @@ pcb:flyback-diode-pcb("Coil and flyback diode — pcb") {
     place(Q1, at: 25 20.5)
     place(SW1, at: 31.5 8.5, rotate: 270)
     place(D1, at: 38.5 13.5, rotate: 90)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, drive: 2, vcc: 3], at: 5.5 16.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, drive: 2, vcc: 3], at: 5.5 16.5)
     track(top, width: 0.25, from: 25.5 9.5, to: 25.5 12.65, to: 26 13.15)
     track(top, width: 0.25, from: 26 14.85, to: 26 18.96, to: 27.54 20.5)
     track(top, width: 0.25, from: 25.5 7.5, to: 28.69 7.5, to: 31.5 4.69)

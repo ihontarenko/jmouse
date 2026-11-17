@@ -1,7 +1,7 @@
 footprint:tssop-28-footprint("TSSOP-28, 4.4 mm body") {
     meta {
         summary: "28-lead TSSOP, 4.4 mm body, gull-wing, 0.65 mm pitch, body 4.4 × 9.7 mm"
-        code: "FP.TSSOP:28-P0.65-W4.4"
+        code: "TSSOP:28-P0.65-W4.4:F"
         category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-153"
@@ -43,5 +43,5 @@ footprint:tssop-28-footprint("TSSOP-28, 4.4 mm body") {
     outline(silkscreen, width: 0.12, "M-3.675 -4.96H2.2M-2.2 4.96H2.2")
     outline(courtyard, width: 0.05, "M-3.95 -5.1H3.95V5.1H-3.95Z")
     body(height: 1.2)
-    model("MD.TSSOP:28-P0.65-W4.4")
+    model("TSSOP:28-P0.65-W4.4:M3D")
 }

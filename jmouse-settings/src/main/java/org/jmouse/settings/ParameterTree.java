@@ -1,17 +1,31 @@
 package org.jmouse.settings;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
+import org.jmouse.core.parameters.RequestParametersJavaStructureConverter;
+import org.jmouse.core.parameters.RequestParametersJavaStructureOptions;
+import org.jmouse.core.parameters.RequestParametersPathParser;
+import org.jmouse.core.parameters.RequestParametersPathToken;
+import org.jmouse.core.parameters.RequestParametersPathWriter;
+import org.jmouse.core.parameters.RequestParametersSpelling;
+import org.jmouse.core.parameters.RequestParametersTreeOptions;
+import org.jmouse.core.parameters.RequestParametersTreeOptions.Conflict;
+import org.jmouse.core.parameters.RequestParametersTreeOptions.Emptiness;
+import org.jmouse.core.parameters.RequestParametersTreeOptions.Root;
+import org.jmouse.core.parameters.RequestParametersTreeParser;
+import org.jmouse.core.parameters.support.RequestParametersTreeFlattener;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
- * 🌳 A structured value unfolded into its parameters, one key a value, and folded back: a record's field is a word
- * ({@code circuit.gap}), a list's item its index ({@code papers.0.width}), a map's key that is not one plain word — it holds a
- * dot, or is all digits — in brackets ({@code habits[pcb.look]}), so it is never taken for depth or for an index. An empty record
- * is one parameter of {@value #EMPTY_RECORD}, an empty list one of {@value #EMPTY_LIST}, a null one with no value.
+ * 🌳 A structured value unfolded into its parameters, one key a value, and folded back — jmouse-core's parameters tree held to
+ * what a store keeps. A key is a path of its one grammar ({@link RequestParametersPathParser}, {@link RequestParametersPathWriter}):
+ * a record's field after a dot ({@code circuit.gap}), a list's item by its index in brackets ({@code papers[0].width}), a map's
+ * key that holds a dot in brackets ({@code looks[pcb.look]}) and one of digits alone after a dot ({@code multipliers.0}).
+ *
+ * <p>Held to a store ({@link #STORE}): a key has one spelling, two keys that disagree on a place are refused, a section may be a
+ * list at its root ({@code [0].ending}), an empty record is one parameter of {@value #EMPTY_RECORD} and an empty list one of
+ * {@value #EMPTY_LIST} — each giving way to what another key puts there —, and a null one with no value.</p>
  *
  * <p>The tree is plain Java — maps, lists, text, numbers, switches, nulls —, so the library reads no format: whoever declares a
  * section turns its source into such a tree, and reads a folded tree back into its record ({@link SectionReader}). Folded, every
@@ -25,193 +39,61 @@ public final class ParameterTree {
     /** An empty list's value. */
     public static final String EMPTY_LIST = "[]";
 
+    /** How a store's keys are read: one spelling, a disagreement refused, a list at the root, {@value #EMPTY_RECORD} and {@value #EMPTY_LIST}. */
+    private static final RequestParametersTreeOptions STORE = new RequestParametersTreeOptions(
+            RequestParametersSpelling.ONE, Conflict.REFUSE, Root.RECORD_OR_LIST, new Emptiness(EMPTY_RECORD, EMPTY_LIST));
+
+    private static final RequestParametersPathParser             PATH_PARSER = new RequestParametersPathParser();
+    private static final RequestParametersPathWriter             PATH_WRITER = new RequestParametersPathWriter();
+    private static final RequestParametersTreeParser             TREE_PARSER = new RequestParametersTreeParser(STORE);
+    private static final RequestParametersTreeFlattener          FLATTENER   = new RequestParametersTreeFlattener(STORE.emptiness());
+    private static final RequestParametersJavaStructureConverter CONVERTER   =
+            new RequestParametersJavaStructureConverter(RequestParametersJavaStructureOptions.defaults());
+
     private ParameterTree() {
     }
 
-    /** One word of a key: a map's key, or a list's index. */
-    public record Segment(String word, boolean index) {
-
-        /** How it is written in a key, after a dot unless it is the first; in brackets where a plain word would mislead. */
-        String written(boolean first) {
-            if (index) {
-                return (first ? "" : ".") + word;
-            }
-            if (word.isEmpty() || word.chars().allMatch(Character::isDigit) || word.contains(".")) {
-                return "[" + word + "]";
-            }
-            return (first ? "" : ".") + word;
-        }
-    }
-
-    /** The parameters of a tree: each value under its key, in the tree's order. */
+    /**
+     * The parameters of a tree: each value under its key, in the tree's order.
+     *
+     * @throws IllegalArgumentException where the tree is not a record or a list, or a map's key holds a bracket or nothing
+     */
     public static Map<String, String> unfold(Object tree) {
         Map<String, String> parameters = new LinkedHashMap<>();
-        unfold(tree, new ArrayList<>(), parameters);
+        FLATTENER.flatten(CONVERTER.toTree(tree)).forEach((key, values) -> parameters.put(key, values.getFirst()));
         return parameters;
-    }
-
-    private static void unfold(Object node, List<Segment> path, Map<String, String> parameters) {
-        switch (node) {
-            case Map<?, ?> record when record.isEmpty() -> parameters.put(keyOf(path), EMPTY_RECORD);
-            case Map<?, ?> record -> record.forEach((name, value) -> {
-                String word = String.valueOf(name);
-                if (word.contains("[") || word.contains("]")) {
-                    throw new IllegalArgumentException("A key's word holds no bracket: '" + word + "'");
-                }
-                path.add(new Segment(word, false));
-                unfold(value, path, parameters);
-                path.removeLast();
-            });
-            case List<?> list when list.isEmpty() -> parameters.put(keyOf(path), EMPTY_LIST);
-            case List<?> list -> {
-                for (int index = 0; index < list.size(); index++) {
-                    path.add(new Segment(String.valueOf(index), true));
-                    unfold(list.get(index), path, parameters);
-                    path.removeLast();
-                }
-            }
-            case null -> parameters.put(keyOf(path), null);
-            case Double number -> parameters.put(keyOf(path), BigDecimal.valueOf(number).stripTrailingZeros().toPlainString());
-            case Float number -> parameters.put(keyOf(path), new BigDecimal(number.toString()).stripTrailingZeros().toPlainString());
-            case BigDecimal number -> parameters.put(keyOf(path), number.stripTrailingZeros().toPlainString());
-            default -> parameters.put(keyOf(path), String.valueOf(node));
-        }
-    }
-
-    /** A key written from its words. */
-    public static String keyOf(List<Segment> path) {
-        if (path.isEmpty()) {
-            throw new IllegalArgumentException("A value is a parameter only under a key: a section's root is a record or a list.");
-        }
-        StringBuilder key = new StringBuilder();
-        for (int position = 0; position < path.size(); position++) {
-            key.append(path.get(position).written(position == 0));
-        }
-        return key.toString();
-    }
-
-    /** A key's words: {@code papers.0.width} → papers, index 0, width; {@code habits[pcb.look]} → habits, pcb.look. */
-    public static List<Segment> segmentsOf(String key) {
-        List<Segment> segments = new ArrayList<>();
-        int position = 0;
-        while (position < key.length()) {
-            char at = key.charAt(position);
-            if (at == '.') {
-                position++;
-                continue;
-            }
-            if (at == '[') {
-                int close = key.indexOf(']', position);
-                if (close < 0) {
-                    throw new IllegalArgumentException("'" + key + "' opens a bracket it does not close.");
-                }
-                segments.add(new Segment(key.substring(position + 1, close), false));
-                position = close + 1;
-                continue;
-            }
-            int end = position;
-            while (end < key.length() && key.charAt(end) != '.' && key.charAt(end) != '[') {
-                end++;
-            }
-            String word = key.substring(position, end);
-            segments.add(new Segment(word, word.chars().allMatch(Character::isDigit)));
-            position = end;
-        }
-        if (segments.isEmpty()) {
-            throw new IllegalArgumentException("A parameter's key holds a word: '" + key + "'");
-        }
-        return segments;
     }
 
     /**
      * The tree the parameters make: maps, lists in their indices' order, and every value as text — {@value #EMPTY_RECORD} and
      * {@value #EMPTY_LIST} an empty record and list, no value a null.
      *
-     * @throws IllegalArgumentException where two keys say one place is both a record and a list, or both a value and more
+     * @throws IllegalArgumentException where a key is not written as its path is, or two keys say one place is both a record and
+     *                                  a list, or both a value and more
      */
     public static Object fold(Map<String, String> parameters) {
-        Node root = null;
-        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-            List<Segment> segments = segmentsOf(parameter.getKey());
-            root = Node.place(root, segments, 0, parameter.getValue(), parameter.getKey());
-        }
-        return root == null ? new LinkedHashMap<>() : root.tree();
+        Map<String, String[]> named = new LinkedHashMap<>();
+        parameters.forEach((key, value) -> named.put(key, new String[]{value}));
+        return CONVERTER.toJavaObject(TREE_PARSER.parse(named));
     }
 
-    /** A place of the tree as it is being folded. */
-    private sealed interface Node {
-
-        Object tree();
-
-        static Node place(Node node, List<Segment> segments, int depth, String value, String key) {
-            if (depth == segments.size()) {
-                // An empty record or list only says nothing is there: what another key holds there stands.
-                if (node instanceof Branches branches && (EMPTY_RECORD.equals(value) && !branches.list || EMPTY_LIST.equals(value) && branches.list)) {
-                    return branches;
-                }
-                if (node != null) {
-                    throw new IllegalArgumentException("'" + key + "' is a value where another key holds more.");
-                }
-                return new Leaf(value);
-            }
-            if (node instanceof Leaf leaf && (EMPTY_RECORD.equals(leaf.value()) || EMPTY_LIST.equals(leaf.value()))) {
-                node = null;
-            }
-            Segment segment = segments.get(depth);
-            if (segment.index()) {
-                Branches list = node == null ? new Branches(true) : requireBranches(node, true, key);
-                list.children.put(segment.word(), place(list.children.get(segment.word()), segments, depth + 1, value, key));
-                return list;
-            }
-            Branches record = node == null ? new Branches(false) : requireBranches(node, false, key);
-            record.children.put(segment.word(), place(record.children.get(segment.word()), segments, depth + 1, value, key));
-            return record;
-        }
-
-        private static Branches requireBranches(Node node, boolean list, String key) {
-            if (node instanceof Branches branches && branches.list == list) {
-                return branches;
-            }
-            throw new IllegalArgumentException("'" + key + "' says a place is " + (list ? "a list" : "a record") + " that another key says is not.");
-        }
+    /**
+     * A key written from its path.
+     *
+     * @throws IllegalArgumentException where the path is empty — a section's root is a record or a list —, or a name of it holds a
+     *                                  bracket or nothing
+     */
+    public static String keyOf(List<RequestParametersPathToken> path) {
+        return PATH_WRITER.write(path);
     }
 
-    private record Leaf(String value) implements Node {
-
-        @Override
-        public Object tree() {
-            if (EMPTY_RECORD.equals(value)) {
-                return new LinkedHashMap<>();
-            }
-            if (EMPTY_LIST.equals(value)) {
-                return new ArrayList<>();
-            }
-            return value;
-        }
-    }
-
-    private static final class Branches implements Node {
-
-        private final boolean           list;
-        /** A list's children by index, in its order; a record's by name, in theirs. */
-        private final Map<String, Node> children;
-
-        private Branches(boolean list) {
-            this.list = list;
-            this.children = list ? new TreeMap<>((one, other) -> Integer.compare(Integer.parseInt(one), Integer.parseInt(other)))
-                                 : new LinkedHashMap<>();
-        }
-
-        @Override
-        public Object tree() {
-            if (list) {
-                List<Object> items = new ArrayList<>();
-                children.values().forEach(child -> items.add(child.tree()));
-                return items;
-            }
-            Map<String, Object> record = new LinkedHashMap<>();
-            children.forEach((name, child) -> record.put(name, child.tree()));
-            return record;
-        }
+    /**
+     * A key's path: {@code papers[0].width} → papers, index 0, width; {@code looks[pcb.look]} → looks, pcb.look.
+     *
+     * @throws IllegalArgumentException where the key is not written as its path is — {@code a[b]} for {@code a.b}, an index after a
+     *                                  dot, an append {@code []}, a bracket never closed, nothing at all
+     */
+    public static List<RequestParametersPathToken> pathOf(String key) {
+        return PATH_PARSER.parse(key, RequestParametersSpelling.ONE);
     }
 }

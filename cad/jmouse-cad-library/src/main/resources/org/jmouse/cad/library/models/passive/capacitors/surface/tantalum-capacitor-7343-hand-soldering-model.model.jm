@@ -1,7 +1,7 @@
 model:tantalum-capacitor-7343-hand-soldering-model("Tantalum capacitor Case D (7343-31 metric), hand soldering") {
     meta {
         summary: "Tantalum capacitor Case D (7343-31 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:CT7343-HAND"
+        code: "CHIP:CT7343-HAND:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "EIA-535-BAAC case sizes (KEMET T491), Case D (7343-31 metric)"

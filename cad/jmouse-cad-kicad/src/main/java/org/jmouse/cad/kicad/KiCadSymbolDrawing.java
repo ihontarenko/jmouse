@@ -91,7 +91,7 @@ public final class KiCadSymbolDrawing {
 
     /**
      * The code a unit's symbol is named by, and every component drawn with it names it by: its library and name in
-     * capitals — {@code Device:R} is {@code SY.DEVICE:R}, a dual's second unit {@code …-UNIT-B}.
+     * capitals — {@code Device:R} is {@code DEVICE:R:S}, a dual's second unit {@code …-UNIT-B}.
      */
     public static String codeOf(KiCadSymbolDefinition symbol, int unit) {
         return codeOf(symbol.name(), units(symbol).size() > 1 ? Optional.of(unitLetter(unit)) : Optional.empty());

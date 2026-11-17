@@ -27,8 +27,8 @@ component:74hc86("74HC86", type: gate) {
     pin:GND(ground, 7)
     pin:Vcc(power, 14)
 
-    footprint("FP.DIP:14-W7.62")
-    footprint("FP.SOIC:14-P1.27-W3.9")
+    footprint("DIP:14-W7.62:F")
+    footprint("SOIC:14-P1.27-W3.9:F")
 
     symbol(box) {
         left([a, b])

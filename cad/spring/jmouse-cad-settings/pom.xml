@@ -46,6 +46,11 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-descriptions</artifactId>
         </dependency>
+        <!-- A section's schema written from its record -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-schemas</artifactId>
+        </dependency>
         <!-- A section's file read, and its schema written, as JSON -->
         <dependency>
             <groupId>tools.jackson.core</groupId>

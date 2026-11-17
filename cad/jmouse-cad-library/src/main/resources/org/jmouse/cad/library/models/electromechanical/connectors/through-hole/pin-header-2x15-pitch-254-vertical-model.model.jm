@@ -1,7 +1,7 @@
 model:pin-header-2x15-pitch-254-vertical-model("Pin header, 2.54 mm pitch, 2 × 15, vertical") {
     meta {
         summary: "Pin header, 2.54 mm pitch, 2 × 15, vertical — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.HDR:2X15-P2.54-V"
+        code: "HDR:2X15-P2.54-V:M3D"
         category: connectors-through-hole
         tags: electronics, model, header
         source: "IEC 60603-13 grid"

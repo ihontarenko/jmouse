@@ -1,3 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 7l8-4 8 4-8 4zM4 12l8 4 8-4M4 17l8 4 8-4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- ODB++: a board as its layers, one over another -->
+  <rect width="24" height="24" rx="5" fill="#0d9488"/>
+  <path d="M12 13.4 19 16.8 12 20.2 5 16.8z" fill="#fff" fill-opacity=".45"/>
+  <path d="M12 9.4 19 12.8 12 16.2 5 12.8z" fill="#fff" fill-opacity=".72"/>
+  <path d="M12 5.4 19 8.8 12 12.2 5 8.8z" fill="#fff"/>
 </svg>

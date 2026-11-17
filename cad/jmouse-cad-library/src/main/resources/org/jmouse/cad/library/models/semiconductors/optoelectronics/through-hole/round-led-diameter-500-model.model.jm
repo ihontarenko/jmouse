@@ -1,7 +1,7 @@
 model:round-led-diameter-500-model("Round LED, 5 mm (T-1¾)") {
     meta {
         summary: "Round LED, 5 mm (T-1¾) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.LED:D5"
+        code: "LED:D5:M3D"
         category: optoelectronics-through-hole
         tags: electronics, model, radial
         source: "T-1 and T-1¾ lamp bodies, 2.54 mm lead spacing"

@@ -1,5 +1,6 @@
 package org.jmouse.cad.mesh;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.LineBuilder;
@@ -13,11 +14,12 @@ import java.util.Locale;
 /**
  * One of a model document's files ({@link ModelLinesParser#FILE}).
  *
+ * @param name   the file's name, among the document's files
  * @param format the format's id in {@link MeshFormats}
  * @param scale  the millimetres one unit of the file is; null for its format's standard
  * @param up     the axis the file stands up along; null for its format's standard
  */
-public record ModelFile(String name, String format, Double scale, MeshFormats.Axis up) {
+public record ModelFile(String name, String format, @Nullable Double scale, MeshFormats.@Nullable Axis up) {
 
     /** A file in its format's own convention. */
     public static ModelFile of(String name, String format) {

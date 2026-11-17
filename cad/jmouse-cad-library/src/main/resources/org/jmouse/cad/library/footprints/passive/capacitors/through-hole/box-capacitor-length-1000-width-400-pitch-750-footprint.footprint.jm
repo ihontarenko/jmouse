@@ -1,7 +1,7 @@
 footprint:box-capacitor-length-1000-width-400-pitch-750-footprint("Film box capacitor, 7.5 mm pitch, 4 mm wide") {
     meta {
         summary: "Film box capacitor, 7.5 mm pitch, 4 mm wide, leads 7.5 mm apart"
-        code: "FP.RADIAL:CB-10X4-P7.5"
+        code: "RADIAL:CB-10X4-P7.5:F"
         category: capacitors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60286-2 lead spacing, makers' box sizes"
@@ -16,5 +16,5 @@ footprint:box-capacitor-length-1000-width-400-pitch-750-footprint("Film box capa
     outline(silkscreen, width: 0.12, "M-5.11 -2.11H5.11V2.11H-5.11Z")
     outline(courtyard, width: 0.05, "M-5.5 -2.5H5.5V2.5H-5.5Z")
     body(height: 9)
-    model("MD.RADIAL:CB-10X4-P7.5")
+    model("RADIAL:CB-10X4-P7.5:M3D")
 }

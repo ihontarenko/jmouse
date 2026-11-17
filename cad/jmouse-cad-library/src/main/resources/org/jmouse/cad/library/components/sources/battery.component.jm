@@ -32,7 +32,7 @@ component:battery("Battery", type: source) {
     node:emf("the EMF, behind the internal resistance")
     node:polarised("behind the polarisation RC")
 
-    symbol(uses: "SY.SOURCE:BATTERY") {
+    symbol(uses: "SOURCE:BATTERY:S") {
         bind:failed(failed)
         bind:state_of_charge(state_of_charge)
         bind:a(pin: positive)
@@ -57,5 +57,5 @@ component:battery("Battery", type: source) {
     }
 
     # How it looks in the hand: an 18650 cell on its side.
-    portrait(uses: "PT.CELL:18650")
+    portrait(uses: "CELL:18650:P")
 }

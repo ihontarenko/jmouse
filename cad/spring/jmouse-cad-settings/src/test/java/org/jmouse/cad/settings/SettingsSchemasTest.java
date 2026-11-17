@@ -67,7 +67,7 @@ class SettingsSchemasTest {
 
     @Test
     void saysWhatItCannotDescribe() {
-        assertEquals(List.of("sample/track.silent: org.jmouse.cad.settings.SettingsSchemasTest$Track's component silent has no @Label: a reader is never shown a key",
-                             "sample/track.silent: Track's Javadoc has no @param silent"), SettingsSchemas.mismatches(SECTION));
+        assertEquals(List.of("sample/track: SettingsSchemasTest.Track.silent: has no @Label: a reader is never shown a key",
+                             "sample/track: SettingsSchemasTest.Track.silent: its record's Javadoc has no @param silent"), SettingsSchemas.mismatches(SECTION));
     }
 }

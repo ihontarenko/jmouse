@@ -1,7 +1,7 @@
 model:chip-led-0805-model("Chip LED 0805 (2012 metric)") {
     meta {
         summary: "Chip LED 0805 (2012 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:LED0805"
+        code: "CHIP:LED0805:M3D"
         category: optoelectronics-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0805 (2012 metric)"

@@ -1,7 +1,7 @@
 symbol:jumper-symbol("Jumper") {
     meta {
         summary: "Open jumper, as drawn on a schematic: two contacts and the cap that would bridge them, lifted off"
-        code: "SY.JUMPER:OPEN"
+        code: "JUMPER:OPEN:S"
         category: electromechanical
         tags: electronics, schematic
         authors: "jMouse"

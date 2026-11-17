@@ -38,7 +38,7 @@ public final class ExplorerPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Explorer", ExplorerPlugin.class).drawnBy(ExplorerPlugin.class, "explorer.svg");
+        return PluginDescriptor.ofArtifact(ID, "Explorer", ExplorerPlugin.class).withIcon(ExplorerPlugin.class, "explorer.svg");
     }
 
     @Override

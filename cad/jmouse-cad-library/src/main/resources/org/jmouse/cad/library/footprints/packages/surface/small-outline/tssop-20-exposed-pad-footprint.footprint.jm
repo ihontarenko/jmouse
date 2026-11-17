@@ -1,7 +1,7 @@
 footprint:tssop-20-exposed-pad-footprint("TSSOP-20, 4.4 mm body") {
     meta {
         summary: "20-lead TSSOP, 4.4 mm body, exposed pad, gull-wing, 0.65 mm pitch, body 4.4 × 6.5 mm"
-        code: "FP.TSSOP:20-P0.65-EP"
+        code: "TSSOP:20-P0.65-EP:F"
         category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-153 AC-ET"
@@ -36,5 +36,5 @@ footprint:tssop-20-exposed-pad-footprint("TSSOP-20, 4.4 mm body") {
     outline(silkscreen, width: 0.12, "M-3.675 -3.41H2.2M-2.2 3.41H2.2")
     outline(courtyard, width: 0.05, "M-3.95 -3.5H3.95V3.5H-3.95Z")
     body(height: 1.2)
-    model("MD.TSSOP:20-P0.65-EP")
+    model("TSSOP:20-P0.65-EP:M3D")
 }

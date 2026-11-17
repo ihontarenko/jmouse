@@ -3,7 +3,7 @@
 portrait:trimmer-portrait("Trimmer") {
     meta {
         summary: "A square single-turn trimmer: the rotor's slot turns with the wiper's position"
-        code: "PT.POTENTIOMETER:TRIMMER-SQUARE"
+        code: "POTENTIOMETER:TRIMMER-SQUARE:P"
         category: electromechanical
         tags: electronics, portrait, potentiometer, through-hole
         authors: "jMouse"

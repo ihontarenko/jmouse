@@ -40,7 +40,7 @@ final class LibrePcbNames {
     /**
      * The codes converted elements are named by, and named by in every reference: a project's library does not say which
      * library an element came from, and may hold two of one name, so a code is LibrePCB's and carries the start of the
-     * element's UUID — {@code FP.LIBREPCB:R0805-06786894} —, the same from one import to the next.
+     * element's UUID — {@code LIBREPCB:R0805-06786894:F} —, the same from one import to the next.
      */
     static String symbolCode(LibrePcbLibrary.Symbol symbol) {
         return ImportedNames.code(TechnicalClass.SYMBOL, FORMAT, symbol.name() + " " + kept(symbol.id()));

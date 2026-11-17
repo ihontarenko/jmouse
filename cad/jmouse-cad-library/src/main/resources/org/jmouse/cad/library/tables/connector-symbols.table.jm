@@ -2,7 +2,7 @@
 # the contacts stand — `single-row` (each a pin leaving to the right), `double-row` (odd on the left, even on the
 # right, as a ribbon cable counts them), `screw` (each wire coming in from the left under its screw). Contacts stand
 # on the 40 pitch; the name template takes the count, and so does the designation — the symbol's code after SY, as a
-# header's footprint is FP.HDR:1X10-P2.54-V and its symbol SY.HDR:1X10.
+# header's footprint is HDR:1X10-P2.54-V:F and its symbol HDR:1X10:S.
 table:connector-symbols("Connector symbols") {
     meta {
         summary: "Pin headers and screw terminals, one symbol per contact count."

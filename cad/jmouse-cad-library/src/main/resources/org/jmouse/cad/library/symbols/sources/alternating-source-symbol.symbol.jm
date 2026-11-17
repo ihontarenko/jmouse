@@ -1,7 +1,7 @@
 symbol:alternating-source-symbol("Alternating voltage source") {
     meta {
         summary: "A voltage source whose voltage alternates — a sine or a square — as drawn on a schematic"
-        code: "SY.SOURCE:VOLTAGE-ALTERNATING"
+        code: "SOURCE:VOLTAGE-ALTERNATING:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

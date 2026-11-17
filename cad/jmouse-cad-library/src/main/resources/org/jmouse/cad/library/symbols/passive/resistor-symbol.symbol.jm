@@ -1,7 +1,7 @@
 symbol:resistor-symbol("Resistor") {
     meta {
         summary: "Resistor, as drawn on a schematic: its body fills against the current with the share of its rated power it takes, warming in colour as it nears the rating"
-        code: "SY.RESISTOR:FIXED"
+        code: "RESISTOR:FIXED:S"
         category: resistors
         tags: electronics, schematic
         authors: "jMouse"

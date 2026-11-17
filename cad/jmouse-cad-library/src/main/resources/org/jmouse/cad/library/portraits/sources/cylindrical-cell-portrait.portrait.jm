@@ -3,7 +3,7 @@
 portrait:cylindrical-cell-portrait("Cylindrical cell") {
     meta {
         summary: "An 18650 lithium cell on its side, tabbed at both ends"
-        code: "PT.CELL:18650"
+        code: "CELL:18650:P"
         category: sources
         tags: electronics, portrait, battery, cell
         authors: "jMouse"

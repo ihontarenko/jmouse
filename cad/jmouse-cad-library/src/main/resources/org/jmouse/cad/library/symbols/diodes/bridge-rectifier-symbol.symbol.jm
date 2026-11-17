@@ -1,7 +1,7 @@
 symbol:bridge-rectifier-symbol("Bridge rectifier") {
     meta {
         summary: "Bridge rectifier, as drawn on a schematic: the pair of diodes that carries the current lights — one diagonal on each half of the mains"
-        code: "SY.DIODE:BRIDGE"
+        code: "DIODE:BRIDGE:S"
         category: diodes
         tags: electronics, schematic
         authors: "jMouse"

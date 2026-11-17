@@ -24,9 +24,9 @@ component:varistor-470v("Varistor, 470 V", type: varistor) {
     pin:terminal_one(analog, 1, "first lead")
     pin:terminal_two(analog, 2, "second lead")
 
-    footprint("FP.RV:D15.5-P7.5")
+    footprint("RV:D15.5-P7.5:F")
 
-    symbol(uses: "SY.PROTECTION:VARISTOR") {
+    symbol(uses: "PROTECTION:VARISTOR:S") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -57,7 +57,7 @@ component:varistor-470v("Varistor, 470 V", type: varistor) {
     }
 
     # How it looks in the hand: a blue disc printed with its voltage code.
-    portrait(uses: "PT.VARISTOR:DISC") {
+    portrait(uses: "VARISTOR:DISC:P") {
         bind:V_reference(V_reference)
     }
 }

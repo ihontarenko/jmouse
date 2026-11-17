@@ -16,7 +16,7 @@ public interface CatalogueDocuments {
     Optional<DocumentNode> find(String slug);
 
     /**
-     * The document whose {@code meta} writes this technical code — {@code FP.CHIP:R0805}, the identity a document keeps when its slug is
+     * The document whose {@code meta} writes this technical code — {@code CHIP:R0805:F}, the identity a document keeps when its slug is
      * renamed —, the nearest copy where several do; empty where nothing here indexes codes.
      */
     default Optional<DocumentNode> findCoded(String code) {
@@ -25,7 +25,7 @@ public interface CatalogueDocuments {
 
     /**
      * The codes of the documents of one class whose code ends in this name, in whatever library — what another product names
-     * {@code R0805} without its library may be {@code FP.CHIP:R0805} —, the nearest first; empty where nothing here indexes
+     * {@code R0805} without its library may be {@code CHIP:R0805:F} —, the nearest first; empty where nothing here indexes
      * codes.
      */
     default List<String> codesNamed(TechnicalClass kind, String name) {

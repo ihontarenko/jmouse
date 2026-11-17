@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * An Altium PCB library as jM documents: a footprint for each of its footprints ({@link AltiumFootprintDrawing}) and a 3D
  * model for each STEP file it embeds, each named by its code in the library's namespace — {@code rcl.PcbLib}'s
- * {@code R0402} is {@code FP.RCL:R0402} — and each model before the footprints that name it.
+ * {@code R0402} is {@code RCL:R0402:F} — and each model before the footprints that name it.
  *
  * <p>A library is somebody's work, and the file does not say whose: each document says only where it came from, and whose
  * it is is what the reader says of the file ({@link ImportedDocuments#whoseAsStated}), given where the import is read.</p>

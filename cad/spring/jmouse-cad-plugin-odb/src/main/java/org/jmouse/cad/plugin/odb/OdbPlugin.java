@@ -35,7 +35,7 @@ public final class OdbPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "ODB++", OdbPlugin.class).drawnBy(OdbPlugin.class, "odb.svg");
+        return PluginDescriptor.ofArtifact(ID, "ODB++", OdbPlugin.class).withIcon(OdbPlugin.class, "odb.svg");
     }
 
     @Override

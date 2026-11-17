@@ -1,7 +1,7 @@
 footprint:chip-diode-2512-hand-soldering-footprint("Chip diode 2512 (6332 metric), hand soldering") {
     meta {
         summary: "Chip diode, 2512 (6332 metric) body, pads lengthened for a soldering iron; pad 1 is the cathode"
-        code: "FP.CHIP:D2512-HAND"
+        code: "CHIP:D2512-HAND:F"
         category: diodes-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 2512 (6332 metric)"
@@ -18,5 +18,5 @@ footprint:chip-diode-2512-hand-soldering-footprint("Chip diode 2512 (6332 metric
     outline(silkscreen, width: 0.12, "M-4.06 -1.86V1.86")
     outline(courtyard, width: 0.05, "M-4.3 -2.25H4.3V2.25H-4.3Z")
     body(height: 0.7)
-    model("MD.CHIP:D2512-HAND")
+    model("CHIP:D2512-HAND:M3D")
 }

@@ -23,7 +23,7 @@ component:dummy-load("Dummy load, 10 Ohm", type: resistor) {
     pin:terminal_one(analog, 1, "first terminal")
     pin:terminal_two(analog, 2, "second terminal")
 
-    symbol(uses: "SY.RESISTOR:FIXED") {
+    symbol(uses: "RESISTOR:FIXED:S") {
         bind:failed(failed)
         bind:load(power / power_rating)
         bind:flow(tanh((terminal_one - terminal_two) * 1000))

@@ -4,7 +4,7 @@
 portrait:to-92-portrait("TO-92") {
     meta {
         summary: "A TO-92 package from the front: flat face, three legs, pin 1 on the left"
-        code: "PT.TO92:3"
+        code: "TO92:3:P"
         category: through-hole-transistor-outline
         tags: electronics, portrait, package, through-hole
         source: "JEDEC TO-226"

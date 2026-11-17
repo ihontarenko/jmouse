@@ -1,7 +1,7 @@
 symbol:triac-symbol("Triac") {
     meta {
         summary: "Triac, as drawn on a schematic: two thyristors back to back with one gate"
-        code: "SY.THYRISTOR:TRIAC"
+        code: "THYRISTOR:TRIAC:S"
         category: thyristors
         tags: electronics, schematic
         authors: "jMouse"

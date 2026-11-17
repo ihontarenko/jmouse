@@ -98,6 +98,11 @@
             <artifactId>jmouse-cad-pcb</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-geometry</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- the pcb's artwork: a silkscreen's letters as strokes, a footprint's drawing as a path -->
         <dependency>
             <groupId>org.jmouse</groupId>

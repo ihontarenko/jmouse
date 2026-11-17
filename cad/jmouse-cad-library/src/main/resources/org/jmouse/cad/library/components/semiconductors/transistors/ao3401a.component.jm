@@ -42,9 +42,9 @@ component:ao3401a("AO3401A", type: mosfet) {
     pin:source(analog, 2, "source")
     pin:drain(analog, output, open-drain, 3, "drain")
 
-    footprint("FP.SOT23:3")
+    footprint("SOT23:3:F")
 
-    symbol(uses: "SY.TRANSISTOR:MOSFET-P") {
+    symbol(uses: "TRANSISTOR:MOSFET-P:S") {
         bind:failed(failed)
     }
 

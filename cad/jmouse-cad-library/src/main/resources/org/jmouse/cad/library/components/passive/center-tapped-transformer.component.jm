@@ -53,7 +53,7 @@ component:center-tapped-transformer("Transformer with a centre tap", type: trans
 
 
     # An EI30 with two secondaries, schematic 2, in series on the board: 6 (•) to 7, then 9 (•) to 10 — 7 and 9 the tap.
-    footprint("FP.TRAFO:EI30-2VA-2S") {
+    footprint("TRAFO:EI30-2VA-2S:F") {
         pad:1(primary_one)
         pad:5(primary_two)
         pad:6(secondary_one)
@@ -61,7 +61,7 @@ component:center-tapped-transformer("Transformer with a centre tap", type: trans
         pad:9(center_tap)
         pad:10(secondary_two)
     }
-    symbol(uses: "SY.TRANSFORMER:CENTER-TAPPED") {
+    symbol(uses: "TRANSFORMER:CENTER-TAPPED:S") {
         bind:failed(failed)
     }
 

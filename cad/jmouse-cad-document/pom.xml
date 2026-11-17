@@ -88,6 +88,11 @@
             <artifactId>jmouse-descriptions</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Each kind's model said as a JSON Schema, and a model held to it -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-schemas</artifactId>
+        </dependency>
         <!-- units: a document's quantities -->
         <dependency>
             <groupId>org.jmouse</groupId>

@@ -1,7 +1,7 @@
 model:box-capacitor-length-1300-width-400-pitch-1000-model("Film box capacitor, 10 mm pitch, 4 mm wide") {
     meta {
         summary: "Film box capacitor, 10 mm pitch, 4 mm wide — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RADIAL:CB-13X4-P10"
+        code: "RADIAL:CB-13X4-P10:M3D"
         category: capacitors-through-hole
         tags: electronics, model, radial
         source: "IEC 60286-2 lead spacing, makers' box sizes"

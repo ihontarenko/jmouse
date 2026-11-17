@@ -15,5 +15,5 @@ component:mains-plug("Mains plug with earth", type: connector) {
     pin:neutral(power, 2, "N, neutral")
     pin:earth(ground, 3, "PE, protective earth")
 
-    symbol(uses: "SY.CONNECTOR:MAINS-PLUG")
+    symbol(uses: "CONNECTOR:MAINS-PLUG:S")
 }

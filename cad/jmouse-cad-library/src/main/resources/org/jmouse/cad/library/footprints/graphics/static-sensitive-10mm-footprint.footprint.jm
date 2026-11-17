@@ -1,7 +1,7 @@
 footprint:static-sensitive-10mm-footprint("Static sensitive, 10 mm") {
     meta {
         summary: "A warning triangle with a struck-out hand: handle against electrostatic discharge, printed 10 mm wide"
-        code: "FP.GRAPHIC:STATIC-SENSITIVE-10"
+        code: "GRAPHIC:STATIC-SENSITIVE-10:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

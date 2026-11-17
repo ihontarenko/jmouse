@@ -1,7 +1,7 @@
 symbol:barrel-jack-symbol("Barrel jack") {
     meta {
         summary: "A DC barrel jack, as drawn on a schematic: the centre pin above, the sleeve below"
-        code: "SY.CONNECTOR:BARREL-JACK"
+        code: "CONNECTOR:BARREL-JACK:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

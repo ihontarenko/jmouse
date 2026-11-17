@@ -27,13 +27,13 @@ component:capacitor("Capacitor", type: capacitor) {
         current terminal_one -> terminal_two = d(C_now * (terminal_one - terminal_two))/dt
     }
 
-    footprint("FP.CHIP:C0805")
-    footprint("FP.CHIP:C0603")
-    footprint("FP.CHIP:C1206")
-    footprint("FP.RADIAL:CD-5X2.5-P5")
+    footprint("CHIP:C0805:F")
+    footprint("CHIP:C0603:F")
+    footprint("CHIP:C1206:F")
+    footprint("RADIAL:CD-5X2.5-P5:F")
 
     # Drawn plain, or as an electrolytic — the polarized drawing, its "+" on terminal_one — by a part's `symbol` choice.
-    symbol(uses: ["SY.CAPACITOR:FIXED", "SY.CAPACITOR:POLARIZED"]) {
+    symbol(uses: ["CAPACITOR:FIXED:S", "CAPACITOR:POLARIZED:S"]) {
         bind:failed(failed)
         bind:charge((terminal_one - terminal_two) / voltage_rating)
         bind:a(pin: terminal_one)
@@ -41,7 +41,7 @@ component:capacitor("Capacitor", type: capacitor) {
     }
 
     # How it looks in the hand: a ceramic disc printed with its picofarad code.
-    portrait(uses: "PT.CAPACITOR:CERAMIC-DISC") {
+    portrait(uses: "CAPACITOR:CERAMIC-DISC:P") {
         bind:capacitance(capacitance)
     }
 }

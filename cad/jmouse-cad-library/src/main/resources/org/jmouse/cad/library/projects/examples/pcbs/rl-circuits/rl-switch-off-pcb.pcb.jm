@@ -19,7 +19,7 @@ pcb:rl-switch-off-pcb("Switching off an inductor — pcb") {
     place(QB, at: 31.5 19)
     place(SW1, at: 38.5 8.5, rotate: 270)
     place(RP, at: 32.5 12.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, drive: 2, vcc: 3], at: 5.5 14.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, drive: 2, vcc: 3], at: 5.5 14.5)
     track(top, width: 0.25, from: 21 8, to: 21 11.65)
     track(top, width: 0.25, from: 29 8, to: 29 11.15, to: 28.5 11.65)
     track(top, width: 0.25, from: 28.5 13.35, to: 32.35 13.35, to: 32.5 13.5)

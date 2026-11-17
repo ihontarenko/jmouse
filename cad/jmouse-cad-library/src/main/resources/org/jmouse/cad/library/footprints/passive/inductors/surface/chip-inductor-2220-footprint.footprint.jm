@@ -1,7 +1,7 @@
 footprint:chip-inductor-2220-footprint("Chip inductor 2220 (5750 metric)") {
     meta {
         summary: "Chip inductor, 2220 (5750 metric) body, reflow pads"
-        code: "FP.CHIP:L2220"
+        code: "CHIP:L2220:F"
         category: inductors-surface
         tags: electronics, footprint, surface
         source: "IEC 60384-22 dimensions, 2220 (5750 metric)"
@@ -17,5 +17,5 @@ footprint:chip-inductor-2220-footprint("Chip inductor 2220 (5750 metric)") {
     outline(silkscreen, width: 0.12, "M-1.64 -2.985H1.64M-1.64 2.985H1.64")
     outline(courtyard, width: 0.05, "M-3.65 -3H3.65V3H-3.65Z")
     body(height: 2.8)
-    model("MD.CHIP:L2220")
+    model("CHIP:L2220:M3D")
 }

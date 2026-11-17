@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * The pcb's unrouted connections laid by the router every track is laid by, one by one, shortest first: each along a layer both
@@ -194,25 +195,27 @@ public final class Autorouter {
         PcbDrawing pcb = world.pcb();
         Optional<String> net = Optional.of(line.net());
         PcbDrawing.ViaSize viaSize = world.rules().viaOf(net);
-        List<Pathfinder.Lane> lanes = layers.stream().map(layer -> new Pathfinder.Lane(world.fence(layer, net, width),
-                settings.directionOf(layer).map(direction -> new Pathfinder.Preferred(direction, settings.againstDirection())))).toList();
+        List<LayeredWaySearch.Lane> lanes = layers.stream().map(layer -> new LayeredWaySearch.Lane(world.fence(layer, net, width),
+                settings.directionOf(layer).map(direction -> new LayeredWaySearch.Preferred(direction, settings.againstDirection())))).toList();
         Optional<Fanned> start = fan(world, layers, net, width, line.from());
         Optional<Fanned> goal = fan(world, layers, net, width, line.to());
         if (start.isEmpty() || goal.isEmpty()) {
             return Optional.empty();
         }
-        List<TrackFence> viaFences = layers.stream().map(layer -> world.fence(layer, net, viaSize.diameter())).toList();
+        // A via's copper keeps its gaps on every layer, and its hole a hole's gap from every hole, its own net's among them.
+        List<TrackFence> viaFences = Stream.concat(layers.stream().map(layer -> world.fence(layer, net, viaSize.diameter())),
+                Stream.of(world.holeFence(viaSize.drill()))).toList();
         Optional<FootprintDrawing> body = linking ? board.linkFootprint() : Optional.empty();
         List<FootprintDrawing.Pad> pads = body.map(FootprintDrawing::pads).orElse(List.of());
         double padSize = pads.size() == 2 ? Math.max(pads.getFirst().width(), pads.getFirst().height()) : 0;
         double reach = pads.size() == 2 ? Math.hypot(pads.get(1).x() - pads.getFirst().x(), pads.get(1).y() - pads.getFirst().y()) : 0;
-        Optional<Pathfinder.ViaMove> via = layers.size() > 1
-                ? Optional.of(new Pathfinder.ViaMove(viaFences, settings.viaCost(), settings.viaOffEnds())) : Optional.empty();
-        Optional<Pathfinder.LinkMove> link = reach > 0 ? Optional.of(new Pathfinder.LinkMove(reach,
+        Optional<LayeredWaySearch.ViaMove> via = layers.size() > 1
+                ? Optional.of(new LayeredWaySearch.ViaMove(viaFences, settings.viaCost(), settings.viaOffEnds())) : Optional.empty();
+        Optional<LayeredWaySearch.LinkMove> link = reach > 0 ? Optional.of(new LayeredWaySearch.LinkMove(reach,
                 lane -> surface(layers.get(lane)) ? Optional.of(world.fence(layers.get(lane), net, padSize)) : Optional.empty(),
                 settings.link().cost())) : Optional.empty();
-        Optional<List<Pathfinder.WayPart>> parts = Pathfinder.layeredWay(new Pathfinder.Request(lanes, start.get().at(), goal.get().at(),
-                start.get().lanes(), goal.get().lanes(), angleStep(), board.settings().routing().searchLimit(), via, link), board.settings().routing());
+        Optional<List<LayeredWaySearch.WayPart>> parts = LayeredWaySearch.way(new LayeredWaySearch.Request(lanes, start.get().at(), goal.get().at(),
+                start.get().lanes(), goal.get().lanes(), angleStep(), via, link), board.settings().routing());
         if (parts.isEmpty()) {
             return Optional.empty();
         }
@@ -222,18 +225,18 @@ public final class Autorouter {
         List<PcbDrawing.Via> vias = new ArrayList<>(pcb.vias());
         List<PcbDrawing.Placement> placements = new ArrayList<>(pcb.placements());
         int links = 0;
-        for (Pathfinder.WayPart part : parts.get()) {
+        for (LayeredWaySearch.WayPart part : parts.get()) {
             switch (part) {
-                case Pathfinder.Stretch stretch -> {
+                case LayeredWaySearch.Stretch stretch -> {
                     TrackFence fence = lanes.get(stretch.lane()).fence();
                     List<Point> points = new Tightening(fence, angleStep(), List.of(), board.settings().routing()).tightened(stretch.points())
                             .stream().map(this::written).toList();
                     String layer = layers.get(stretch.lane());
                     tracks.add(new PcbDrawing.Track(layer, width, fence.roundingThatFits(points, request.rounding(), layer), points));
                 }
-                case Pathfinder.ViaHop hop -> vias.add(new PcbDrawing.Via(hop.at().x(), hop.at().y(), viaSize.drill(), viaSize.diameter(),
+                case LayeredWaySearch.ViaHop hop -> vias.add(new PcbDrawing.Via(hop.at().x(), hop.at().y(), viaSize.drill(), viaSize.diameter(),
                         PcbDrawing.TOP, PcbDrawing.BOTTOM));
-                case Pathfinder.LinkHop hop -> placements.add(linkPlacement(placements, links++, layers.get(hop.lane()), hop.from(), hop.to(), line.net()));
+                case LayeredWaySearch.LinkHop hop -> placements.add(linkPlacement(placements, links++, layers.get(hop.lane()), hop.from(), hop.to(), line.net()));
             }
         }
         return Optional.of(pcb.withTracks(tracks).withVias(vias).withPlacements(placements));
@@ -273,14 +276,17 @@ public final class Autorouter {
                     tell(Step.ATTEMPT_REFUSED, pcb, Optional.of(line), List.of(), Optional.of("No way found"));
                     continue;
                 }
-                List<String> faults = worldOf(laid.get()).faults();
-                boolean joins = worldOf(laid.get()).unjoined() < unjoined;
-                if (joins && faults.size() <= before.size()) {
+                RoutingWorld laidOn = worldOf(laid.get());
+                List<String> faults = laidOn.faults();
+                boolean joins = laidOn.unjoined() < unjoined;
+                // Copper of two nets never meets because of a way laid — however many other faults the way may clear.
+                List<String> meetings = laidOn.meetingsNotIn(world);
+                if (joins && meetings.isEmpty() && faults.size() <= before.size()) {
                     return laid;
                 }
                 Set<String> seen = new HashSet<>(before);
-                Optional<String> reason = joins ? faults.stream().filter(fault -> !seen.contains(fault)).findFirst()
-                        : Optional.of("It does not join what it was to join");
+                Optional<String> reason = !joins ? Optional.of("It does not join what it was to join")
+                        : !meetings.isEmpty() ? Optional.of(meetings.getFirst()) : faults.stream().filter(fault -> !seen.contains(fault)).findFirst();
                 tell(Step.ATTEMPT_REFUSED, pcb, Optional.of(line), laid.get().tracks().subList(pcb.tracks().size(), laid.get().tracks().size()), reason);
             }
         }
@@ -404,7 +410,7 @@ public final class Autorouter {
             double gap = Math.max(world.clearanceOf(Optional.of(line.net())), world.clearanceOf(Optional.of(route.line().net())));
             boolean meets = copperOf(route).stream().anyMatch(copper -> way.stream().anyMatch(step ->
                     (step.layer().isEmpty() || copper.layer().isEmpty() || step.layer().equals(copper.layer()))
-                    && step.shape().gapTo(copper.shape()).gap() < gap));
+                    && !step.shape().keepsGap(copper.shape(), gap)));
             if (meets) {
                 inTheWay.add(route);
             }

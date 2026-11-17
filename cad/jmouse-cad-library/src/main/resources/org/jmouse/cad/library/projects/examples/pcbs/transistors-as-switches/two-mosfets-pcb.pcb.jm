@@ -17,7 +17,7 @@ pcb:two-mosfets-pcb("Two MOSFETs, one gate drive — pcb") {
     place(RL2, at: 31 5, rotate: 270)
     place(Q1, at: 24 6)
     place(Q2, at: 28 12.5)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, drive: 2, vdd: 3], at: 5.5 10.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, drive: 2, vdd: 3], at: 5.5 10.5)
     track(top, width: 0.25, from: 31 6, to: 31 12.04, to: 30.54 12.5)
     track(top, width: 0.25, from: 25 18.5, to: 25 15.8, to: 28.15 12.65, to: 28 12.5)
     track(top, width: 0.25, from: 13 11.5, to: 6.5 11.5, to: 5.5 10.5)

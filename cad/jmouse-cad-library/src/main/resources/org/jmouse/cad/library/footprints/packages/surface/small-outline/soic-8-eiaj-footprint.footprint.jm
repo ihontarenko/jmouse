@@ -1,7 +1,7 @@
 footprint:soic-8-eiaj-footprint("SOIC-8, 5.3 mm body") {
     meta {
         summary: "8-lead SOIC, 5.3 mm body (208 mil), gull-wing, 1.27 mm pitch, body 5.3 × 5.3 mm"
-        code: "FP.SOIC:8-P1.27-W5.3"
+        code: "SOIC:8-P1.27-W5.3:F"
         category: small-outline
         tags: electronics, footprint, surface
         source: "JEITA EDR-7320, 208-mil SOP"
@@ -23,5 +23,5 @@ footprint:soic-8-eiaj-footprint("SOIC-8, 5.3 mm body") {
     outline(silkscreen, width: 0.12, "M-4.4 -2.76H2.65M-2.65 2.76H2.65")
     outline(courtyard, width: 0.05, "M-4.65 -2.9H4.65V2.9H-4.65Z")
     body(height: 2.1)
-    model("MD.SOIC:8-P1.27-W5.3")
+    model("SOIC:8-P1.27-W5.3:M3D")
 }

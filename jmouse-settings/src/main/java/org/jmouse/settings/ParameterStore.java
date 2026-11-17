@@ -21,4 +21,7 @@ public interface ParameterStore {
 
     /** A holder's section as these values alone, every other row of it gone — all of it or none. */
     void replace(SettingHolder holder, String owner, String section, Map<String, String> values);
+
+    /** The values a holder keeps of a section and of every section below it — `interface` and `interface/editor/grid` —, by section, then key. */
+    Map<String, Map<String, String>> keptUnder(SettingHolder holder, String owner, String section);
 }

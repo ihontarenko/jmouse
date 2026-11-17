@@ -10,7 +10,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.jmouse.geometry.Areas;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -166,7 +166,7 @@ final class PanelLayout {
         runs.sort(Comparator.comparingDouble(Polygon::getArea).reversed());
         Geometry area = runs.getFirst().buffer(0);
         for (Polygon cutout : runs.subList(1, runs.size())) {
-            area = area.difference(cutout.buffer(0));
+            area = Areas.difference(area, cutout.buffer(0));
         }
         return area;
     }
@@ -193,7 +193,7 @@ final class PanelLayout {
             for (int second = first + 1; second < copies.size(); second++) {
                 Copy one = copies.get(first);
                 Copy other = copies.get(second);
-                if (one.area().intersection(other.area()).getArea() > SAME_LINE) {
+                if (Areas.common(one.area(), other.area()).getArea() > SAME_LINE) {
                     throw new IllegalArgumentException("'" + one.pcb() + "' and '" + other.pcb() + "' stand on one another on the panel.");
                 }
             }
@@ -422,7 +422,7 @@ final class PanelLayout {
         LineString across = horizontalEdge
                 ? GEOMETRY.createLineString(new Coordinate[]{new Coordinate(centre, facing), new Coordinate(centre, far)})
                 : GEOMETRY.createLineString(new Coordinate[]{new Coordinate(facing, centre), new Coordinate(far, centre)});
-        Geometry met = across.intersection(copy.area());
+        Geometry met = Areas.crossing(across, copy.area());
         if (met.isEmpty()) {
             throw new IllegalArgumentException("A tab of '" + copy.pcb() + "' meets no edge of it: move the board or set its tabs by hand.");
         }
@@ -439,7 +439,7 @@ final class PanelLayout {
 
     /** All of it as one piece of material, its boundary the panel's edge; several pieces would fall apart, and are refused. */
     private void closeOutline() {
-        Geometry whole = UnaryUnionOp.union(material);
+        Geometry whole = Areas.unionOf(material);
         if (whole.getNumGeometries() > 1) {
             throw new IllegalArgumentException("The panel comes to " + whole.getNumGeometries() + " separate pieces: join its boards with a frame or a separation.");
         }

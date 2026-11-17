@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.cad.document.MetaLineNode;
@@ -20,7 +21,7 @@ import java.util.Optional;
  * @param purpose a design, or its owner's drafts
  * @param status  published, or archived — kept, listed no more, taking nothing new
  */
-public record ProjectDocument(String slug, String title, String summary, ProjectPurpose purpose, DocumentStatus status) {
+public record ProjectDocument(String slug, String title, @Nullable String summary, ProjectPurpose purpose, DocumentStatus status) {
 
     /** The project a document says it is; refuses a document of another kind. */
     public static ProjectDocument of(DocumentNode document) {

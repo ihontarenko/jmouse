@@ -32,14 +32,16 @@ public final class KiCadSchematic {
     private final List<KiCadSymbolInstance> symbols;
     private final List<KiCadWire> wires;
     private final List<KiCadWire> buses;
+    private final List<KiCadBusEntry> busEntries;
+    private final Map<String, List<String>> busAliases;
     private final List<KiCadPoint> junctions;
     private final List<KiCadPoint> noConnects;
     private final List<KiCadLabel> labels;
     private final List<KiCadSheet> sheets;
 
     private KiCadSchematic(SExpressionDocument document, long version, String uuid, Map<String, KiCadSymbolDefinition> librarySymbols,
-                           List<KiCadSymbolInstance> symbols, List<KiCadWire> wires, List<KiCadWire> buses, List<KiCadPoint> junctions,
-                           List<KiCadPoint> noConnects, List<KiCadLabel> labels, List<KiCadSheet> sheets) {
+                           List<KiCadSymbolInstance> symbols, List<KiCadWire> wires, List<KiCadWire> buses, List<KiCadBusEntry> busEntries,
+                           Map<String, List<String>> busAliases, List<KiCadPoint> junctions, List<KiCadPoint> noConnects, List<KiCadLabel> labels, List<KiCadSheet> sheets) {
         this.document = document;
         this.version = version;
         this.uuid = uuid;
@@ -47,6 +49,8 @@ public final class KiCadSchematic {
         this.symbols = symbols;
         this.wires = wires;
         this.buses = buses;
+        this.busEntries = busEntries;
+        this.busAliases = busAliases;
         this.junctions = junctions;
         this.noConnects = noConnects;
         this.labels = labels;
@@ -81,6 +85,7 @@ public final class KiCadSchematic {
                 root.lists(SYMBOL).stream().map(KiCadSymbolInstance::of).toList(),
                 root.lists(WIRE).stream().map(KiCadWire::of).toList(),
                 root.lists(BUS).stream().map(KiCadWire::of).toList(),
+                root.lists(BUS_ENTRY).stream().map(KiCadBusEntry::of).toList(), busAliasesOf(root),
                 root.lists(JUNCTION).stream().map(junction -> KiCadPoint.of(junction.requireList(AT))).toList(),
                 root.lists(NO_CONNECT).stream().map(mark -> KiCadPoint.of(mark.requireList(AT))).toList(),
                 List.copyOf(labels), root.lists(SHEET).stream().map(KiCadSheet::of).toList());
@@ -113,6 +118,33 @@ public final class KiCadSchematic {
     /** Its bus lines: each drawn as a wire is, a straight stretch between its points. */
     public List<KiCadWire> buses() {
         return buses;
+    }
+
+    /**
+     * The bus aliases it declares — {@code (bus_alias "ETH" (members "TRD0_P" …))} —, each a name for a set of nets: good across the
+     * whole project, whichever sheet declares it ({@link KiCadProject#busAliases}).
+     */
+    public Map<String, List<String>> busAliases() {
+        return busAliases;
+    }
+
+    private static Map<String, List<String>> busAliasesOf(SExpressionList root) {
+        Map<String, List<String>> aliases = new LinkedHashMap<>();
+        for (SExpressionList alias : root.lists(BUS_ALIAS)) {
+            List<String> members = new ArrayList<>();
+            alias.list(MEMBERS).ifPresent(written -> {
+                for (int index = 1; index < written.size(); index++) {
+                    members.add(written.word(index));
+                }
+            });
+            aliases.put(alias.word(1), List.copyOf(members));
+        }
+        return Map.copyOf(aliases);
+    }
+
+    /** Its bus entries: where wires take nets off its buses. */
+    public List<KiCadBusEntry> busEntries() {
+        return busEntries;
     }
 
     public List<KiCadPoint> junctions() {

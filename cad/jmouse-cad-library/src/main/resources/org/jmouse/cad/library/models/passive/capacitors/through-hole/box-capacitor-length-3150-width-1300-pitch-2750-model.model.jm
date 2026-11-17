@@ -1,7 +1,7 @@
 model:box-capacitor-length-3150-width-1300-pitch-2750-model("Film box capacitor, 27.5 mm pitch, 13 mm wide") {
     meta {
         summary: "Film box capacitor, 27.5 mm pitch, 13 mm wide — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RADIAL:CB-31.5X13-P27.5"
+        code: "RADIAL:CB-31.5X13-P27.5:M3D"
         category: capacitors-through-hole
         tags: electronics, model, radial
         source: "IEC 60286-2 lead spacing, makers' box sizes"

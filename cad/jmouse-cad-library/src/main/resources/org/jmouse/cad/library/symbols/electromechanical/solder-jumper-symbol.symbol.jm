@@ -1,7 +1,7 @@
 symbol:solder-jumper-symbol("Solder jumper") {
     meta {
         summary: "Solder jumper, as drawn on a schematic: two half pads facing across a gap, bridged by solder once it is closed"
-        code: "SY.JUMPER:SOLDER"
+        code: "JUMPER:SOLDER:S"
         category: electromechanical
         tags: electronics, schematic
         authors: "jMouse"

@@ -4,7 +4,7 @@
 portrait:electrolytic-capacitor-portrait("Electrolytic capacitor") {
     meta {
         summary: "A radial electrolytic capacitor with its minus stripe, µF and voltage; burst when it fails"
-        code: "PT.CAPACITOR:ELECTROLYTIC-RADIAL"
+        code: "CAPACITOR:ELECTROLYTIC-RADIAL:P"
         category: capacitors
         tags: electronics, portrait, capacitor
         authors: "jMouse"

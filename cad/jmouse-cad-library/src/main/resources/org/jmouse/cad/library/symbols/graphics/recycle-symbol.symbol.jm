@@ -1,7 +1,7 @@
 symbol:recycle-symbol("Recycling") {
     meta {
         summary: "Three chasing arrows: the board and its materials can be recycled, as drawn on a schematic"
-        code: "SY.GRAPHIC:RECYCLE"
+        code: "GRAPHIC:RECYCLE:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

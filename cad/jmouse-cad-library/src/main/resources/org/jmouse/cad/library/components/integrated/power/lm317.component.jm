@@ -29,9 +29,9 @@ component:lm317("LM317", type: regulator) {
     pin:output(analog, output, 2, "regulated output; tab is also output")
     pin:input(power, 3, "unregulated input")
 
-    footprint("FP.TO220:3-V")
+    footprint("TO220:3-V:F")
 
-    symbol(uses: "SY.REGULATOR:LINEAR-ADJUSTABLE") {
+    symbol(uses: "REGULATOR:LINEAR-ADJUSTABLE:S") {
         bind:failed(failed)
     }
 
@@ -82,7 +82,7 @@ component:lm317("LM317", type: regulator) {
     }
 
     # How it looks in the hand: its TO-220 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO220:3") {
+    portrait(uses: "TO220:3:P") {
         bind:marking("LM317")
     }
 }

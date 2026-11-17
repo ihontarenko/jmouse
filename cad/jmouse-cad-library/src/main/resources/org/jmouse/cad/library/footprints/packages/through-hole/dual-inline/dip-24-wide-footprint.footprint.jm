@@ -1,7 +1,7 @@
 footprint:dip-24-wide-footprint("DIP-24, 15.24 mm rows") {
     meta {
         summary: "24-lead dual in-line package, through-hole, 2.54 mm pitch, rows 15.24 mm apart"
-        code: "FP.DIP:24-W15.24"
+        code: "DIP:24-W15.24:F"
         category: dual-inline
         tags: electronics, footprint, through-hole
         source: "JEDEC MS-011"
@@ -39,5 +39,5 @@ footprint:dip-24-wide-footprint("DIP-24, 15.24 mm rows") {
     outline(silkscreen, filled, "M-6.01 -13.97A0.3 0.3 0 1 0 -5.41 -13.97A0.3 0.3 0 1 0 -6.01 -13.97Z")
     outline(courtyard, width: 0.05, "M-9.05 -16.4H9.05V16.4H-9.05Z")
     body(height: 6.35)
-    model("MD.DIP:24-W15.24")
+    model("DIP:24-W15.24:M3D")
 }

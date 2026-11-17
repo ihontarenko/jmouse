@@ -25,9 +25,9 @@ component:74hc1g04("74HC1G04", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    footprint("FP.SOT353:5")
+    footprint("SOT353:5:F")
 
-    symbol(uses: "SY.GATE:NOT")
+    symbol(uses: "GATE:NOT:S")
 
     expect("A 0 gives 1", from: "function table: Y = ¬A") {
         bench(for: 1 us) {

@@ -1,7 +1,7 @@
 footprint:slide-switch-2-9-78mm-footprint("Slide switch, 1 position, 7.62 mm rows") {
     meta {
         summary: "2-lead slide switch, 1 position, through-hole, 2.54 mm pitch, rows 7.62 mm apart"
-        code: "FP.SW:SLIDE-1"
+        code: "SW:SLIDE-1:F"
         category: switches-through-hole
         tags: electronics, footprint, through-hole
         source: "a one-position DIP slide switch (CTS 206/208 series): body 9.78 × 4.72 mm, rows 7.62 mm apart"
@@ -17,5 +17,5 @@ footprint:slide-switch-2-9-78mm-footprint("Slide switch, 1 position, 7.62 mm row
     outline(silkscreen, filled, "M-2.25 0A0.3 0.3 0 1 0 -1.65 0A0.3 0.3 0 1 0 -2.25 0Z")
     outline(courtyard, width: 0.05, "M-5.4 -2.85H5.4V2.85H-5.4Z")
     body(height: 6.75)
-    model("MD.SW:SLIDE-1")
+    model("SW:SLIDE-1:M3D")
 }

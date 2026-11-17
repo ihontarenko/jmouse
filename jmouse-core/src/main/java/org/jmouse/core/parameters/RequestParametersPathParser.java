@@ -3,8 +3,41 @@ package org.jmouse.core.parameters;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 🧭 A parameter's name read into the path it stands at: a property after a dot ({@code papers.width}), an index in brackets
+ * ({@code papers[0]}), an append as empty brackets ({@code groups[]}), and any other word in brackets a property
+ * ({@code filter[admin]}, {@code looks[pcb.look]}). A bracket that is never closed is read as a letter of the name.
+ * {@link RequestParametersPathWriter} writes a path back in this grammar.
+ */
 public final class RequestParametersPathParser {
 
+    /** The most digits an index is written with: nine always fit an {@code int}. */
+    private static final int MOST_INDEX_DIGITS = 9;
+
+    private static final RequestParametersPathWriter PATH_WRITER = new RequestParametersPathWriter();
+
+    /**
+     * A name's path, held to a spelling: {@link RequestParametersSpelling#ONE} takes only the way {@link RequestParametersPathWriter}
+     * writes it, and only a place.
+     *
+     * @throws IllegalArgumentException where the spelling is {@code ONE} and the name is written another way, or names no place
+     */
+    public List<RequestParametersPathToken> parse(String rawParameterName, RequestParametersSpelling spelling) {
+        List<RequestParametersPathToken> tokens = parse(rawParameterName);
+        if (spelling == RequestParametersSpelling.ANY) {
+            return tokens;
+        }
+        if (tokens.stream().anyMatch(RequestParametersPathToken.ArrayAppendToken.class::isInstance)) {
+            throw new IllegalArgumentException("'" + rawParameterName + "' names no place: a list's item is named by its index.");
+        }
+        String written = PATH_WRITER.write(tokens);
+        if (!written.equals(rawParameterName)) {
+            throw new IllegalArgumentException("'" + rawParameterName + "' is written '" + written + "'.");
+        }
+        return tokens;
+    }
+
+    /** A name's path, in any spelling the grammar reads; none for a blank name. */
     public List<RequestParametersPathToken> parse(String rawParameterName) {
         if (rawParameterName == null || rawParameterName.isBlank()) {
             return List.of();
@@ -28,7 +61,7 @@ public final class RequestParametersPathParser {
 
                 int closingBracketIndex = rawParameterName.indexOf(']', index);
                 if (closingBracketIndex < 0) {
-                    // Malformed, treat '[' as literal
+                    // A bracket never closed is a letter of the name.
                     buffer.append(character);
                     index++;
                     continue;
@@ -38,8 +71,8 @@ public final class RequestParametersPathParser {
 
                 if (inside.isEmpty()) {
                     tokens.add(RequestParametersPathToken.ArrayAppendToken.instance());
-                } else if (isAllDigits(inside)) {
-                    tokens.add(new RequestParametersPathToken.ArrayIndexToken(parseInt(inside)));
+                } else if (isIndex(inside)) {
+                    tokens.add(new RequestParametersPathToken.ArrayIndexToken(Integer.parseInt(inside)));
                 } else {
                     tokens.add(new RequestParametersPathToken.PropertyNameToken(inside));
                 }
@@ -69,23 +102,12 @@ public final class RequestParametersPathParser {
         }
     }
 
-    private static boolean isAllDigits(String text) {
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c < '0' || c > '9') {
-                return false;
-            }
-        }
-        return !text.isEmpty();
+    /** Digits that make an index: no more of them than an index can hold, so a long run of digits is a name, never a wrong place. */
+    private static boolean isIndex(String text) {
+        return text.length() <= MOST_INDEX_DIGITS && isAllDigits(text);
     }
 
-    private static int parseInt(String digits) {
-        int value = 0;
-
-        for (int i = 0; i < digits.length(); i++) {
-            value = value * 10 + (digits.charAt(i) - '0');
-        }
-
-        return value;
+    private static boolean isAllDigits(String text) {
+        return !text.isEmpty() && text.chars().allMatch(character -> character >= '0' && character <= '9');
     }
 }

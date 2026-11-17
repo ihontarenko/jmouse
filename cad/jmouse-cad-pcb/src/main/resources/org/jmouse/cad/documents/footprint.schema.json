@@ -1,0 +1,245 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:footprint",
+  "title" : "A footprint document, as the engine answers it (FootprintDrawing)",
+  "$defs" : {
+    "FootprintDrawing.Body" : {
+      "type" : "object",
+      "properties" : {
+        "height" : {
+          "type" : "number",
+          "description" : "millimetres above the pcb"
+        }
+      },
+      "required" : [ "height" ],
+      "description" : "A package's body over its footprint, its outline the fabrication layer's.",
+      "additionalProperties" : false
+    },
+    "FootprintDrawing.Field" : {
+      "type" : "object",
+      "properties" : {
+        "subject" : {
+          "type" : "string",
+          "description" : "reference or value"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "where it stands, millimetres right of the footprint's origin"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where it stands, millimetres below the footprint's origin"
+        },
+        "height" : {
+          "type" : "number",
+          "description" : "how tall its letters are, millimetres"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far it is turned, degrees"
+        },
+        "layer" : {
+          "type" : "string",
+          "description" : "silkscreen or fabrication"
+        },
+        "anchor" : {
+          "type" : "string",
+          "description" : "which part of the letters stands on the point: start, middle — the usual — or end"
+        }
+      },
+      "required" : [ "subject", "x", "y", "height", "rotation", "layer", "anchor" ],
+      "description" : "Where a placed part's reference or value is printed, in the footprint's own frame.",
+      "additionalProperties" : false
+    },
+    "FootprintDrawing.Model" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the model document's slug"
+        },
+        "offset" : {
+          "description" : "millimetres: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "rotation" : {
+          "description" : "degrees about each axis: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "scale" : {
+          "description" : "each axis' factor: x, y, z",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
+        },
+        "hidden" : {
+          "type" : "boolean",
+          "description" : "whether it is kept but not shown"
+        }
+      },
+      "required" : [ "reference", "offset", "rotation", "scale", "hidden" ],
+      "description" : "A 3D model set onto the footprint, as MODEL places it.",
+      "additionalProperties" : false
+    },
+    "FootprintDrawing.Outline" : {
+      "type" : "object",
+      "properties" : {
+        "layer" : {
+          "type" : "string",
+          "description" : "silkscreen, fabrication, courtyard, copper"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "what its lines are stroked with, millimetres; 0 for an area filled alone"
+        },
+        "filled" : {
+          "type" : "boolean",
+          "description" : "whether it is an area rather than lines"
+        },
+        "path" : {
+          "type" : "string",
+          "description" : "what it draws, as path data in the footprint's millimetres"
+        }
+      },
+      "required" : [ "layer", "width", "filled", "path" ],
+      "description" : "A line or an area drawn on one of the footprint's layers.",
+      "additionalProperties" : false
+    },
+    "FootprintDrawing.Pad" : {
+      "type" : "object",
+      "properties" : {
+        "number" : {
+          "type" : "string",
+          "description" : "the pin it is, as the part numbers its pins"
+        },
+        "type" : {
+          "type" : "string",
+          "description" : "through-hole, surface, connector, unplated-hole"
+        },
+        "shape" : {
+          "type" : "string",
+          "description" : "circle, rectangle, oval, trapezoid, rounded-rectangle, custom"
+        },
+        "x" : {
+          "type" : "number",
+          "description" : "where its middle stands, millimetres right of the footprint's origin"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "where its middle stands, millimetres below the footprint's origin"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far it is turned, degrees"
+        },
+        "width" : {
+          "type" : "number",
+          "description" : "how wide it is, millimetres"
+        },
+        "height" : {
+          "type" : "number",
+          "description" : "how tall it is, millimetres"
+        },
+        "drillWidth" : {
+          "type" : "number",
+          "description" : "its hole's width, millimetres; 0 for a pad with no hole"
+        },
+        "drillHeight" : {
+          "type" : "number",
+          "description" : "its hole's height, millimetres — taller than wide for a slot —; 0 for a pad with no hole"
+        },
+        "roundness" : {
+          "type" : "number",
+          "description" : "a rounded rectangle's corner radius, as a share of its shorter side; 0 for any other shape"
+        },
+        "path" : {
+          "type" : "string",
+          "description" : "a custom pad's outline; empty for any other"
+        },
+        "face" : {
+          "type" : "string",
+          "description" : "the side of the pcb a surface pad is on, from its part's: near — the usual — or far; empty for near"
+        },
+        "opens" : {
+          "type" : "string",
+          "description" : "what it leaves open over its copper: both, mask, paste or none; empty for what its type usually does"
+        },
+        "maskMargin" : {
+          "type" : [ "number", "null" ],
+          "description" : "how far the solder mask stands back from its copper, millimetres; null for the pcb's own"
+        },
+        "pasteMargin" : {
+          "type" : [ "number", "null" ],
+          "description" : "how far the solder paste stands back from its copper, millimetres; null for the pcb's own"
+        },
+        "platedThrough" : {
+          "type" : "boolean",
+          "description" : "Whether it is a plated hole: copper on every layer, through the pcb.",
+          "readOnly" : true
+        },
+        "surface" : {
+          "type" : "boolean",
+          "description" : "Whether it is a surface pad: copper on its part's side alone, no hole.",
+          "readOnly" : true
+        },
+        "unplated" : {
+          "type" : "boolean",
+          "description" : "A hole of no copper: drilled, never etched, joined to no net.",
+          "readOnly" : true
+        }
+      },
+      "required" : [ "number", "type", "shape", "x", "y", "rotation", "width", "height", "drillWidth", "drillHeight", "roundness", "path", "face", "opens", "maskMargin", "pasteMargin", "platedThrough", "surface", "unplated" ],
+      "description" : "A pad: where a part's pin meets the copper, or a hole drilled for it.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "pads" : {
+      "description" : "its pads, in their order",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/FootprintDrawing.Pad"
+      }
+    },
+    "outlines" : {
+      "description" : "the lines and areas drawn on its layers",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/FootprintDrawing.Outline"
+      }
+    },
+    "fields" : {
+      "description" : "where its reference and value are printed",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/FootprintDrawing.Field"
+      }
+    },
+    "body" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/FootprintDrawing.Body"
+      } ],
+      "description" : "the package's body; null when the footprint does not say"
+    },
+    "models" : {
+      "description" : "the 3D models that show the body, in their order; none when the footprint names none",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/FootprintDrawing.Model"
+      }
+    }
+  },
+  "required" : [ "pads", "outlines", "fields", "body", "models" ],
+  "description" : "A footprint as data a picture is painted from — its pads, its outlines and where its reference and value are printed, in millimetres from its origin, Y downwards —, and its package's body when the footprint says how high it stands: what a library browser, a pcb preview or a 3D view reads. It is data; how it is sent is the product's. The body is not a drawn line: a footprint editor neither draws nor rewrites it (classOf), so its line is kept as written while the rest is redrawn. Its models it does set, so they are written with the pads and outlines.",
+  "additionalProperties" : false
+}

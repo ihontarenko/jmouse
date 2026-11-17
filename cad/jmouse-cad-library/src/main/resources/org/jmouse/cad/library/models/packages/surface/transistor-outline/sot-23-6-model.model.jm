@@ -1,7 +1,7 @@
 model:sot-23-6-model("SOT-23-6, 1.6 mm body") {
     meta {
         summary: "SOT-23-6, 1.6 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOT23:6"
+        code: "SOT23:6:M3D"
         category: surface-transistor-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-178 AB"

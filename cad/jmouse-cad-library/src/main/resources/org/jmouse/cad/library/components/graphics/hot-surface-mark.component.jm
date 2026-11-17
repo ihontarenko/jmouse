@@ -6,10 +6,10 @@ component:hot-surface-mark("Hot surface mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:HOT-SURFACE-10")
-    footprint("FP.GRAPHIC:HOT-SURFACE-5")
-    footprint("FP.GRAPHIC:HOT-SURFACE-20")
+    footprint("GRAPHIC:HOT-SURFACE-10:F")
+    footprint("GRAPHIC:HOT-SURFACE-5:F")
+    footprint("GRAPHIC:HOT-SURFACE-20:F")
 
-    symbol(uses: "SY.GRAPHIC:HOT-SURFACE") {
+    symbol(uses: "GRAPHIC:HOT-SURFACE:S") {
     }
 }

@@ -20,7 +20,7 @@ table:eagle-libraries("Eagle libraries") {
     circuit-tags electronics, eagle
 
     # The symbol each mark of a sheet is drawn with — where its terminal stands.
-    mark-symbols ground = ground-symbol, common = common-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol
+    mark-symbols ground = ground-symbol, common = common-symbol, power = power-symbol, label = net-label-symbol, port = port-label-symbol, global = global-label-symbol, entry = bus-entry-symbol
 
     # The net that is a design's reference ground, node 0: what Eagle's supply libraries name it.
     ground GND

@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.drawings;
 
+import org.jmouse.settings.Bounds;
+import org.jmouse.settings.Colour;
 import org.jmouse.settings.Label;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +92,7 @@ public record SheetSettings(@Label("Papers") List<Paper> papers,
                        @Label(value = "Label", unit = "mm") double label,
                        @Label(value = "Hole mark", unit = "mm") double holeMark,
                        @Label(value = "Schematic least", unit = "mm") double schematicLeast,
-                       @Label("Stroke") double stroke) {
+                       @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Stroke") double stroke) {
     }
 
     /**
@@ -102,7 +104,7 @@ public record SheetSettings(@Label("Papers") List<Paper> papers,
      */
     public record Pen(@Label(value = "Pen", unit = "mm") double pen,
                       @Label("Colour") int colour,
-                      @Label("Hex") String hex) {
+                      @Colour @Label("Hex") String hex) {
     }
 
     /**
@@ -114,11 +116,11 @@ public record SheetSettings(@Label("Papers") List<Paper> papers,
      * @param silkscreen   the silkscreen's colour, #rrggbb
      * @param substrate    the pcb's own colour, #rrggbb
      */
-    public record Ink(@Label("Copper top") String copperTop,
-                      @Label("Copper bottom") String copperBottom,
-                      @Label("Copper inner") String copperInner,
-                      @Label("Silkscreen") String silkscreen,
-                      @Label("Substrate") String substrate) {
+    public record Ink(@Colour @Label("Copper top") String copperTop,
+                      @Colour @Label("Copper bottom") String copperBottom,
+                      @Colour @Label("Copper inner") String copperInner,
+                      @Colour @Label("Silkscreen") String silkscreen,
+                      @Colour @Label("Substrate") String substrate) {
     }
 
     /**
@@ -144,17 +146,19 @@ public record SheetSettings(@Label("Papers") List<Paper> papers,
                         @Label(value = "Mark size", unit = "mm") double markSize,
                         @Label(value = "Product height", unit = "mm") double productHeight,
                         @Label(value = "Title height", unit = "mm") double titleHeight,
-                        @Label("Title at share") double titleAtShare,
+                        @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Title at share") double titleAtShare,
                         @Label("Fact columns") int factColumns,
                         @Label("Mark box") double markBox,
                         @Label("Mark primary") String markPrimary,
                         @Label("Mark accent") String markAccent,
                         @Label("Mark dot") Dot markDot,
-                        @Label("Primary") String primary,
-                        @Label("Accent") String accent,
-                        @Label("Muted") String muted) {
+                        @Colour @Label("Primary") String primary,
+                        @Colour @Label("Accent") String accent,
+                        @Colour @Label("Muted") String muted) {
 
         /**
+         * The dot of the cover's mark: where it stands in the mark's box, and how big it is.
+         *
          * @param x      its centre across the mark's box
          * @param y      its centre down the box
          * @param radius its radius, in the box's units

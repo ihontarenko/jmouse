@@ -1,7 +1,7 @@
 model:chip-fuse-0805-model("Chip fuse 0805 (2012 metric)") {
     meta {
         summary: "Chip fuse 0805 (2012 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:F0805"
+        code: "CHIP:F0805:M3D"
         category: fuses-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0805 (2012 metric)"

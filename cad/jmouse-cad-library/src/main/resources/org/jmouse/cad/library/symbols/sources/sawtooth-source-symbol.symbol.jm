@@ -1,7 +1,7 @@
 symbol:sawtooth-source-symbol("Sawtooth voltage source") {
     meta {
         summary: "A voltage source that ramps up and falls back at once, as drawn on a schematic"
-        code: "SY.SOURCE:VOLTAGE-SAWTOOTH"
+        code: "SOURCE:VOLTAGE-SAWTOOTH:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

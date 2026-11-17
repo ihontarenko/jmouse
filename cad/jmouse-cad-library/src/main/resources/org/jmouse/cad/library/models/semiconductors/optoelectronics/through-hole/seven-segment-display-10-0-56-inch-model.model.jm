@@ -1,7 +1,7 @@
 model:seven-segment-display-10-0-56-inch-model("Seven-segment display, 0.56 in, 15.24 mm rows") {
     meta {
         summary: "Seven-segment display, 0.56 in, 15.24 mm rows — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.DISP:7SEG-10-W15.24"
+        code: "DISP:7SEG-10-W15.24:M3D"
         category: optoelectronics-through-hole
         tags: electronics, model, dual-inline
         source: "the makers' 0.56-inch single digit (Kingbright SA56-11)"

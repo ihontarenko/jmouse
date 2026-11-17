@@ -54,7 +54,7 @@ component:relay("Relay", type: relay) {
     node:winding("between the coil's copper and its inductance")
     node:coil_current("a node whose voltage above coil_two is the inductance's current, one volt per ampere: what the armature's events read")
 
-    symbol(uses: "SY.RELAY:SPDT") {
+    symbol(uses: "RELAY:SPDT:S") {
         bind:energized(energized)
     }
 
@@ -89,5 +89,5 @@ component:relay("Relay", type: relay) {
     }
 
     # How it looks in the hand: an open-frame relay whose armature pulls in while the coil is energized.
-    portrait(uses: "PT.RELAY:OPEN-FRAME")
+    portrait(uses: "RELAY:OPEN-FRAME:P")
 }

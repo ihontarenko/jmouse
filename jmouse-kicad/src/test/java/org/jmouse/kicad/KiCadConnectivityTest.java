@@ -3,6 +3,7 @@ package org.jmouse.kicad;
 import org.jmouse.kicad.connectivity.KiCadConnectivity;
 import org.jmouse.kicad.connectivity.KiCadNet;
 import org.jmouse.sexpression.SExpressionParser;
+import org.jmouse.kicad.schematic.KiCadBus;
 import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -144,6 +145,96 @@ class KiCadConnectivityTest {
         KiCadConnectivity alone = KiCadConnectivity.of(KiCadProject.single(root, "/root.kicad_sch-uuid"));
         assertEquals(List.of("R1-1"), byName(alone).get("/child/IN"));
         assertEquals(List.of("R1-2"), alone.unconnected().stream().map(Object::toString).toList());
+    }
+
+    @Test
+    @DisplayName("a bus carried across a box's edge joins each of its nets to the child's of that name, named as the sheet above names it")
+    void joinsABusAcrossSheetsMemberByMember() {
+        // Inside: R2's ends on the bus's two nets, by local labels, entries taking them off a bus line; it leaves by a hierarchical label.
+        KiCadSchematic child = schematic("child.kicad_sch", placed("R2", 10, 10, 0, "r2") + ENTRIES
+                + "(hierarchical_label \"IRQ-[1..2]\" (shape bidirectional) (at 12.54 3.65 0))");
+        // Above: R1's ends on nets of the same names, by labels alone — above, KiCad joins by name —, and the box's pin carrying the bus.
+        KiCadSchematic root = schematic("root.kicad_sch", placed("R1", 10, 10, 0, "r1")
+                + "(label \"IRQ-1\" (at 10 6.19 0))" + "(label \"IRQ-2\" (at 10 13.81 0))"
+                + "(sheet (at 50 50) (size 20 10) (uuid \"box\") (property \"Sheetname\" \"child\") (property \"Sheetfile\" \"child.kicad_sch\")"
+                + " (pin \"IRQ-[1..2]\" bidirectional (at 50 55 180)))");
+        Map<String, List<String>> nets = byName(KiCadConnectivity.of(KiCadProject.of("root.kicad_sch",
+                file -> file.equals("root.kicad_sch") ? root : child)));
+        assertEquals(List.of("R1-1", "R2-1"), nets.get("/IRQ-1"));
+        assertEquals(List.of("R1-2", "R2-2"), nets.get("/IRQ-2"));
+        assertTrue(nets.keySet().stream().noneMatch(name -> name.contains("[")), nets.keySet().toString());
+    }
+
+    /** A bus line down x 12.54, an entry from it to each of R*'s ends, each end labelled with a member's name. */
+    private static final String ENTRIES = "(bus (pts (xy 12.54 3.65) (xy 12.54 11.27)))"
+            + "(bus_entry (at 12.54 3.65) (size -2.54 2.54))" + "(bus_entry (at 12.54 11.27) (size -2.54 2.54))"
+            + "(label \"IRQ-1\" (at 10 6.19 0))" + "(label \"IRQ-2\" (at 10 13.81 0))";
+
+    @Test
+    @DisplayName("a named group's nets are its name, a dot and the member: labels of the bare names stay on their own sheets, as kicad-cli joins them")
+    void aNamedGroupsMembersAreNotItsBareNames() {
+        String labels = "(label \"IRQ-1\" (at 10 6.19 0))" + "(label \"IRQ-2\" (at 10 13.81 0))";
+        KiCadSchematic child = schematic("child.kicad_sch", placed("R2", 10, 10, 0, "r2") + labels
+                + "(hierarchical_label \"IRQ{IRQ-1 IRQ-2}\" (shape bidirectional) (at 30 5 0))");
+        KiCadSchematic root = schematic("root.kicad_sch", placed("R1", 10, 10, 0, "r1") + labels
+                + "(sheet (at 50 50) (size 20 10) (uuid \"box\") (property \"Sheetname\" \"child\") (property \"Sheetfile\" \"child.kicad_sch\")"
+                + " (pin \"IRQ{IRQ-1 IRQ-2}\" bidirectional (at 50 55 180)))");
+        Map<String, List<String>> nets = byName(KiCadConnectivity.of(KiCadProject.of("root.kicad_sch",
+                file -> file.equals("root.kicad_sch") ? root : child)));
+        assertEquals(List.of("R1-1"), nets.get("/IRQ-1"));
+        assertEquals(List.of("R2-1"), nets.get("/child/IRQ-1"));
+    }
+
+    @Test
+    @DisplayName("a group's member that is a bus alias is each of the alias's nets, the alias good on a sheet that does not declare it")
+    void aBusAliasDeclaredOnOneSheetNamesNetsOnAnother() {
+        assertEquals(List.of("ETH_PI.TRD0_P", "ETH_PI.TRD0_N"), KiCadBus.of("ETH_PI{ETH}", Map.of("ETH", List.of("TRD0_P", "TRD0_N")))
+                .orElseThrow().members());
+        // The child declares ETH and names its nets ETH.TRD0_P …; the root names the same bus ETH_PI{ETH} on the box's pin and
+        // a line, and its nets ETH_PI.TRD0_P …: the line binds the two in order.
+        KiCadSchematic child = schematic("child.kicad_sch", placed("R2", 10, 10, 0, "r2")
+                + "(bus_alias \"ETH\" (members \"TRD0_P\" \"TRD0_N\"))"
+                + "(label \"ETH.TRD0_P\" (at 10 6.19 0))" + "(label \"ETH.TRD0_N\" (at 10 13.81 0))"
+                + "(hierarchical_label \"ETH{ETH}\" (shape bidirectional) (at 30 5 0))");
+        KiCadSchematic root = schematic("root.kicad_sch", placed("R1", 10, 10, 0, "r1")
+                + "(label \"ETH_PI.TRD0_P\" (at 10 6.19 0))" + "(label \"ETH_PI.TRD0_N\" (at 10 13.81 0))"
+                + "(bus (pts (xy 40 55) (xy 50 55)))" + "(label \"ETH_PI{ETH}\" (at 40 55 0))"
+                + "(sheet (at 50 50) (size 20 10) (uuid \"box\") (property \"Sheetname\" \"child\") (property \"Sheetfile\" \"child.kicad_sch\")"
+                + " (pin \"ETH{ETH}\" bidirectional (at 50 55 180)))");
+        Map<String, List<String>> nets = byName(KiCadConnectivity.of(KiCadProject.of("root.kicad_sch",
+                file -> file.equals("root.kicad_sch") ? root : child)));
+        assertEquals(List.of("R1-1", "R2-1"), nets.get("/ETH_PI.TRD0_P"));
+    }
+
+    @Test
+    @DisplayName("a vector joins by its nets' names on both sides, an entry or none, as kicad-cli joins it")
+    void aVectorJoinsByNameWithNoEntry() {
+        String labels = "(label \"IRQ-1\" (at 10 6.19 0))" + "(label \"IRQ-2\" (at 10 13.81 0))";
+        KiCadSchematic child = schematic("child.kicad_sch", placed("R2", 10, 10, 0, "r2") + labels
+                + "(hierarchical_label \"IRQ-[1..2]\" (shape bidirectional) (at 30 5 0))");
+        KiCadSchematic root = schematic("root.kicad_sch", placed("R1", 10, 10, 0, "r1") + labels
+                + "(sheet (at 50 50) (size 20 10) (uuid \"box\") (property \"Sheetname\" \"child\") (property \"Sheetfile\" \"child.kicad_sch\")"
+                + " (pin \"IRQ-[1..2]\" bidirectional (at 50 55 180)))");
+        Map<String, List<String>> nets = byName(KiCadConnectivity.of(KiCadProject.of("root.kicad_sch",
+                file -> file.equals("root.kicad_sch") ? root : child)));
+        assertEquals(List.of("R1-1", "R2-1"), nets.get("/IRQ-1"));
+    }
+
+    @Test
+    @DisplayName("a bus is named as KiCad writes one — a vector, a group, a named group —, and an escaped character is no group")
+    void readsABusName() {
+        assertEquals(List.of("IRQ-1", "IRQ-2", "IRQ-3"), KiCadBus.of("IRQ-[1..3]").orElseThrow().members());
+        assertEquals(List.of("D3_n", "D2_n"), KiCadBus.of("D[3..2]_n").orElseThrow().members());
+        assertEquals(List.of("SDA", "SCL"), KiCadBus.of("{SDA SCL}").orElseThrow().members());
+        assertEquals(List.of("MEM.A0", "MEM.A1", "MEM.WE"), KiCadBus.of("MEM{A[0..1], WE}").orElseThrow().members());
+        assertTrue(KiCadBus.of("A{slash}B").isEmpty());
+        // KiCad's overbar is a name's markup, not a group of its own (RoyalBlue54L-Feather).
+        assertEquals(List.of("SWD_TRG.~{RESET}", "SWD_TRG.SWDIO", "SWD_TRG.SWDCLK"), KiCadBus.of("SWD_TRG{~{RESET}, SWDIO, SWDCLK}").orElseThrow().members());
+        assertTrue(KiCadBus.of("~{RESET}").isEmpty());
+        // KiCad's overbar is a name's markup, not a group of its own (RoyalBlue54L-Feather).
+        assertEquals(List.of("SWD_TRG.~{RESET}", "SWD_TRG.SWDIO", "SWD_TRG.SWDCLK"), KiCadBus.of("SWD_TRG{~{RESET}, SWDIO, SWDCLK}").orElseThrow().members());
+        assertTrue(KiCadBus.of("~{RESET}").isEmpty());
+        assertTrue(KiCadBus.of("IRQ-7").isEmpty());
     }
 
     @Test

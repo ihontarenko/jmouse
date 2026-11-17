@@ -1,7 +1,7 @@
 footprint:tantalum-capacitor-7343-hand-soldering-footprint("Tantalum capacitor Case D (7343-31 metric), hand soldering") {
     meta {
         summary: "Tantalum capacitor, Case D (7343-31 metric) body, pads lengthened for a soldering iron; pad 1 is the positive terminal"
-        code: "FP.CHIP:CT7343-HAND"
+        code: "CHIP:CT7343-HAND:F"
         category: capacitors-surface
         tags: electronics, footprint, surface
         source: "EIA-535-BAAC case sizes (KEMET T491), Case D (7343-31 metric)"
@@ -18,5 +18,5 @@ footprint:tantalum-capacitor-7343-hand-soldering-footprint("Tantalum capacitor C
     outline(silkscreen, width: 0.12, "M-4.585 -2.485V2.485")
     outline(courtyard, width: 0.05, "M-4.85 -2.9H4.85V2.9H-4.85Z")
     body(height: 3.1)
-    model("MD.CHIP:CT7343-HAND")
+    model("CHIP:CT7343-HAND:M3D")
 }

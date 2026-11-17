@@ -28,8 +28,8 @@ component:74hc138("74HC138", type: decoder) {
     pin:GND(ground, 8)
     pin:Vcc(power, 16)
 
-    footprint("FP.DIP:16-W7.62")
-    footprint("FP.SOIC:16-P1.27-W3.9")
+    footprint("DIP:16-W7.62:F")
+    footprint("SOIC:16-P1.27-W3.9:F")
 
     symbol(box) {
         left([select, enable, not_enable_a bubble, not_enable_b bubble])

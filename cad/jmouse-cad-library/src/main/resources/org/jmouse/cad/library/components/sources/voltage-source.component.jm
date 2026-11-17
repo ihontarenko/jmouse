@@ -16,7 +16,7 @@ component:voltage-source("Voltage source", type: voltage-source) {
         voltage positive -> negative = U_output
     }
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-DC") {
+    symbol(uses: "SOURCE:VOLTAGE-DC:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }

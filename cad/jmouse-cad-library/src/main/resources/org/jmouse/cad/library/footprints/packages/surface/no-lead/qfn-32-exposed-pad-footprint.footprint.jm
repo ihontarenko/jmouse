@@ -1,7 +1,7 @@
 footprint:qfn-32-exposed-pad-footprint("QFN-32, 5 mm body") {
     meta {
         summary: "32-lead QFN-32, 5 mm body, 0.5 mm pitch, body 5 × 5 mm, exposed pad 3.45 mm"
-        code: "FP.QFN:32-P0.5-5-EP3.45"
+        code: "QFN:32-P0.5-5-EP3.45:F"
         category: no-lead
         tags: electronics, footprint, surface
         source: "JEDEC MO-220"
@@ -48,5 +48,5 @@ footprint:qfn-32-exposed-pad-footprint("QFN-32, 5 mm body") {
     outline(silkscreen, filled, "M-3.735 -1.75A0.3 0.3 0 1 0 -3.135 -1.75A0.3 0.3 0 1 0 -3.735 -1.75Z")
     outline(courtyard, width: 0.05, "M-3.15 -3.15H3.15V3.15H-3.15Z")
     body(height: 1)
-    model("MD.QFN:32-P0.5-5-EP3.45")
+    model("QFN:32-P0.5-5-EP3.45:M3D")
 }

@@ -32,9 +32,9 @@ component:j201("J201", type: jfet) {
     pin:gate(analog, input, 2, "gate")
     pin:drain(analog, output, open-drain, 3, "drain")
 
-    footprint("FP.TO92:3-L")
+    footprint("TO92:3-L:F")
 
-    symbol(uses: "SY.TRANSISTOR:JFET-N") {
+    symbol(uses: "TRANSISTOR:JFET-N:S") {
         bind:failed(failed)
     }
 
@@ -58,7 +58,7 @@ component:j201("J201", type: jfet) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO92:3") {
+    portrait(uses: "TO92:3:P") {
         bind:marking("J201")
     }
 }

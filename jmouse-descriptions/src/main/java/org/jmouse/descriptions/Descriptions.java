@@ -12,7 +12,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 📝 The Javadoc of a record or an enum, read back at run time: the {@link org.jmouse.descriptions.processing.DescriptionsProcessor}
+ * 📝 The Javadoc of a record, an enum or a sealed type, read back at run time: the {@link org.jmouse.descriptions.processing.DescriptionsProcessor}
  * keeps it beside the class as {@code META-INF/jmouse/descriptions/<binary name>.properties} while the source compiles, so it
  * travels in the same jar. A type compiled without the processor has none.
  */
@@ -38,6 +38,12 @@ public final class Descriptions {
     }
 
     /** What a type's Javadoc says; empty where it was compiled without the processor. Read once a process. */
+    /** The property a getter is known by, as Jackson writes it: {@code isUnplated} → {@code unplated}, {@code getSurface} → {@code surface}. */
+    public static String propertyOf(String getter) {
+        String bare = getter.startsWith("is") ? getter.substring(2) : getter.startsWith("get") ? getter.substring(3) : getter;
+        return bare.isEmpty() ? getter : Character.toLowerCase(bare.charAt(0)) + bare.substring(1);
+    }
+
     public static Optional<Description> of(Class<?> type) {
         return READ.computeIfAbsent(type, Descriptions::read);
     }

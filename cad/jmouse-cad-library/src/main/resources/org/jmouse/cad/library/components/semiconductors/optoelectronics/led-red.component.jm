@@ -40,16 +40,16 @@ component:led-red("Red LED", type: diode) {
     pin:cathode(analog, 2, "cathode, the flat side")
 
     # Pad 1 of a diode's footprint is its cathode.
-    footprint("FP.LED:D5") {
+    footprint("LED:D5:F") {
         pad:1(cathode)
         pad:2(anode)
     }
-    footprint("FP.CHIP:LED0805") {
+    footprint("CHIP:LED0805:F") {
         pad:1(cathode)
         pad:2(anode)
     }
 
-    symbol(uses: "SY.LED:SINGLE") {
+    symbol(uses: "LED:SINGLE:S") {
         bind:failed(failed)
         # the colour it gives off, from its band gap: λ = h·c / (e·E_gap)
         bind:wavelength(0.00000123984 / E_gap)
@@ -82,7 +82,7 @@ component:led-red("Red LED", type: diode) {
     }
 
     # How it looks in the hand: a dome in the colour of its light, from its band gap; it glows by its current.
-    portrait(uses: "PT.LED:D5") {
+    portrait(uses: "LED:D5:P") {
         bind:wavelength(0.00000123984 / E_gap)
     }
 }

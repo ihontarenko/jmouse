@@ -6,20 +6,35 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/** A code says its class, and ends in the name another product calls the object by without its library. */
+/** A code says its class at its end, and its name between its family and its kind. */
 class TechnicalClassTest {
 
     @Test
-    void aCodeEndsInItsNameAfterTheNamespace() {
-        assertEquals(Optional.of("R0805"), TechnicalClass.FOOTPRINT.nameIn("FP.CHIP:R0805"));
-        assertEquals(Optional.of("8-P1.27-W3.9"), TechnicalClass.FOOTPRINT.nameIn("FP.SOIC:8-P1.27-W3.9"));
+    void aCodeIsItsDesignationThenItsKind() {
+        assertEquals("CHIP:R0805:F", TechnicalClass.FOOTPRINT.code("CHIP:R0805"));
+        assertEquals("SOIC:8-P1.27-W3.9:M3D", TechnicalClass.MODEL.code("SOIC:8-P1.27-W3.9"));
     }
 
     @Test
-    void anotherClassOrNoNamespaceHasNoName() {
-        assertEquals(Optional.empty(), TechnicalClass.MODEL.nameIn("FP.CHIP:R0805"));
-        assertEquals(Optional.empty(), TechnicalClass.FOOTPRINT.nameIn("FP.R0805"));
+    void aCodeEndsInItsNameAfterTheFamily() {
+        assertEquals(Optional.of("R0805"), TechnicalClass.FOOTPRINT.nameIn("CHIP:R0805:F"));
+        assertEquals(Optional.of("8-P1.27-W3.9"), TechnicalClass.FOOTPRINT.nameIn("SOIC:8-P1.27-W3.9:F"));
+    }
+
+    @Test
+    void anotherClassOrNoFamilyHasNoName() {
+        assertEquals(Optional.empty(), TechnicalClass.MODEL.nameIn("CHIP:R0805:F"));
+        assertEquals(Optional.empty(), TechnicalClass.FOOTPRINT.nameIn("R0805:F"));
         assertEquals(Optional.empty(), TechnicalClass.FOOTPRINT.nameIn("fp-chip-r0805"));
+    }
+
+    @Test
+    void aCodeSaysItsClassAndASlugNone() {
+        assertEquals(Optional.of(TechnicalClass.SYMBOL), TechnicalClass.ofCode("MARK:GROUND:S"));
+        assertEquals(Optional.of(TechnicalClass.MODEL), TechnicalClass.ofCode("SOIC:8:M3D"));
+        assertEquals(Optional.of(TechnicalClass.FRAME), TechnicalClass.ofCode("ISO:A4:FRM"));
+        assertEquals(Optional.empty(), TechnicalClass.ofCode("chip-resistor-0805-footprint"));
+        assertEquals(Optional.empty(), TechnicalClass.ofCode(":F"));
     }
 
     @Test

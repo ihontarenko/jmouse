@@ -13,7 +13,7 @@ pcb:pwm-to-dc-pcb("PWM to DC — pcb") {
     edge("M1 0H21A1 1 0 0 1 22 1V14A1 1 0 0 1 21 15H1A1 1 0 0 1 0 14V1A1 1 0 0 1 1 0Z")
     place(R1, at: 13 6)
     place(C1, at: 18 9.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X3-P2.54-V", nets: [0: 1, out: 2, pwm: 3], at: 5.5 7.5)
+    place(J1, footprint: "HDR:1X3-P2.54-V:F", nets: [0: 1, out: 2, pwm: 3], at: 5.5 7.5)
     track(top, width: 0.25, from: 18 10.35, to: 18 11.55)
     track(top, width: 0.25, from: 14 6, to: 15.35 6, to: 18 8.65)
     track(top, width: 0.25, from: 12 6, to: 9.54 6, to: 5.5 10.04)

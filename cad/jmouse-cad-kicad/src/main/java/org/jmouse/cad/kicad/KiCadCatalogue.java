@@ -95,7 +95,7 @@ public interface KiCadCatalogue {
     }
 
     /**
-     * The footprint whose text writes this code — {@code meta { code "FP.CHIP:R0603" }} —: what the library map pairs a
+     * The footprint whose text writes this code — {@code meta { code "CHIP:R0603:F" }} —: what the library map pairs a
      * KiCad footprint with. Empty where the catalogue keeps no index of codes, and the import then converts KiCad's.
      */
     default Optional<String> footprintCoded(String code) {
@@ -108,7 +108,7 @@ public interface KiCadCatalogue {
     }
 
     /**
-     * The symbol whose text writes this code — {@code meta { code "SY.DIODE:RECTIFIER" }} —: what the library map draws a
+     * The symbol whose text writes this code — {@code meta { code "DIODE:RECTIFIER:S" }} —: what the library map draws a
      * KiCad symbol with no model as. Empty where the catalogue keeps no index of codes, and the part keeps KiCad's drawing.
      */
     default Optional<String> symbolCoded(String code) {

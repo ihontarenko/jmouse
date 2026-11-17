@@ -1,7 +1,7 @@
 symbol:square-source-symbol("Square voltage source") {
     meta {
         summary: "A voltage source that switches between two levels, as drawn on a schematic"
-        code: "SY.SOURCE:VOLTAGE-SQUARE"
+        code: "SOURCE:VOLTAGE-SQUARE:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

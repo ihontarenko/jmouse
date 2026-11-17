@@ -1,7 +1,7 @@
 footprint:lqfp-100-footprint("LQFP-100, 14 mm body") {
     meta {
         summary: "100-lead LQFP-100, 14 mm body, 0.5 mm pitch, body 14 × 14 mm"
-        code: "FP.LQFP:100-P0.5-14"
+        code: "LQFP:100-P0.5-14:F"
         category: quad-flat
         tags: electronics, footprint, surface
         source: "JEDEC MS-026 BED"
@@ -115,5 +115,5 @@ footprint:lqfp-100-footprint("LQFP-100, 14 mm body") {
     outline(silkscreen, filled, "M-9.335 -6A0.3 0.3 0 1 0 -8.735 -6A0.3 0.3 0 1 0 -9.335 -6Z")
     outline(courtyard, width: 0.05, "M-8.75 -8.75H8.75V8.75H-8.75Z")
     body(height: 1.6)
-    model("MD.LQFP:100-P0.5-14")
+    model("LQFP:100-P0.5-14:M3D")
 }

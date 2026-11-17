@@ -1,0 +1,51 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:table",
+  "title" : "A table document, as the engine answers it (Table)",
+  "$defs" : {
+    "Table.Line" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "a field's name, or an entry's id"
+        },
+        "title" : {
+          "type" : [ "string", "null" ],
+          "description" : "an entry's title; null for a field and for an entry with none"
+        },
+        "value" : {
+          "type" : [ "string", "null" ],
+          "description" : "a field's value as written; null for an entry"
+        },
+        "source" : {
+          "type" : [ "string", "null" ],
+          "description" : "where in the original it was read, as written; null when it says none"
+        },
+        "lines" : {
+          "description" : "an entry's own lines; none for a field",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Table.Line"
+          }
+        }
+      },
+      "required" : [ "name", "title", "value", "source", "lines" ],
+      "description" : "One line of a table as a reader sees it.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "lines" : {
+      "description" : "its lines, in order: the fields, then the entries",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Table.Line"
+      }
+    }
+  },
+  "required" : [ "lines" ],
+  "description" : "What a table document is to a reader: its lines as a reader sees them — each field's name and value as written, each entry's id and title with its own lines —, which is what a shelf of the library lists and an inspector shows. A program reads the sheet they make from the document's tree (sheetOf).",
+  "additionalProperties" : false
+}

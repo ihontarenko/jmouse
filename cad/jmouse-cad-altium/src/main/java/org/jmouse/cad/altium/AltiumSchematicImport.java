@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -56,9 +57,13 @@ public final class AltiumSchematicImport {
     private final Map<String, DocumentNode> components = new LinkedHashMap<>();
     private final List<ImportedCircuit.Item> items = new ArrayList<>();
     private final List<ImportedCircuit.Wire> wires = new ArrayList<>();
-    private final List<ImportedCircuit.Bus> buses = new ArrayList<>();
+    private final List<ImportedCircuit.BusLine> busLines = new ArrayList<>();
+    /** The buses its bus lines declare, each once by its name. */
+    private final ImportedBuses declaredBuses = new ImportedBuses();
     private final Set<String> globals = new LinkedHashSet<>();
     private final List<String> ports = new ArrayList<>();
+    /** The buses the sheet hands across whole: its ports written as a bus. */
+    private final List<String> busPorts = new ArrayList<>();
     private final List<String> notes = new ArrayList<>();
     /** Where the import is read: what a footprint the sheet names by its bare name is matched against. */
     private final CatalogueDocuments catalogue;
@@ -183,7 +188,7 @@ public final class AltiumSchematicImport {
             }
             double radians = Math.toRadians(port.orientation().degrees());
             double[] body = {Math.cos(radians), -Math.sin(radians)};
-            mark(ground ? "ground" : "power", net, ground ? SheetMarks.GROUND : SheetMarks.GLOBAL, port.location(), body);
+            mark(ground ? "ground" : "power", net, ground ? SheetMarks.GROUND : SheetMarks.POWER, port.location(), body);
         }
         for (AltiumSchematic.NetLabel label : sheet.netLabels()) {
             // A label on a bus line names the line, and joins nothing: the bus takes its words.
@@ -193,6 +198,15 @@ public final class AltiumSchematicImport {
             mark("label", nets.of(label.text()), SheetMarks.LABEL, label.location(), new double[] {0, -1});
         }
         for (AltiumSchematic.Port port : sheet.ports()) {
+            // A port written as a bus — `D[0..7]` — hands the whole bus across, declared on the sheet; any other a net.
+            if (ImportedBuses.namesBus(port.name())) {
+                String bus = declaredBuses.declareWritten(port.name(), nets::of);
+                if (!busPorts.contains(bus)) {
+                    busPorts.add(bus);
+                }
+                mark("port", bus, SheetMarks.PORT, port.location(), new double[] {0, -1});
+                continue;
+            }
             String net = nets.of(port.name());
             if (!ports.contains(net)) {
                 ports.add(net);
@@ -219,7 +233,7 @@ public final class AltiumSchematicImport {
     private void buses() {
         for (List<double[]> line : ImportedBuses.joined(busLines())) {
             String written = ImportedBuses.writtenOn(line, sheet.netLabels(), label -> at(label.location()), AltiumSchematic.NetLabel::text);
-            buses.add(ImportedBuses.bus("B" + (buses.size() + 1), written,
+            busLines.add(declaredBuses.line("B" + (busLines.size() + 1), written,
                     line.stream().map(point -> drawn(new SheetTracing.Point(point[0], point[1]))).toList(), nets::of));
         }
     }
@@ -304,7 +318,8 @@ public final class AltiumSchematicImport {
             });
             parts.add(new ImportedCircuit.Part(id, component, connections, Map.of(), null, null));
         });
-        ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), ports, globals, notes, buses);
+        ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), Stream.concat(ports.stream().map(ImportedCircuit::netPort),
+                busPorts.stream().map(ImportedCircuit::busPort)).toList(), globals, notes, declaredBuses.buses(), busLines);
         List<DocumentNode> library = new ArrayList<>(symbols.values());
         library.addAll(components.values());
         DocumentNode design = ImportedCircuitDocument.of(AltiumNames.design(title), title, "Imported from Altium: " + file, circuit,

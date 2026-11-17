@@ -1,7 +1,7 @@
 model:sot-353-model("SOT-353, 1.25 mm body") {
     meta {
         summary: "SOT-353, 1.25 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOT353:5"
+        code: "SOT353:5:M3D"
         category: surface-transistor-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-203 AA, the makers' tighter outline (Nexperia SOT353)"

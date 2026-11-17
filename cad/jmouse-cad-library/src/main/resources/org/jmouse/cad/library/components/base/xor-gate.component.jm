@@ -22,7 +22,7 @@ component:xor-gate("XOR gate", type: gate) {
     pin:output(digital, output, 4, "output Y")
     pin:Vcc(power, 5)
 
-    symbol(uses: "SY.GATE:XOR")
+    symbol(uses: "GATE:XOR:S")
 
     behaviour {
         function level()

@@ -15,7 +15,7 @@ pcb:rectifier-supply-pcb("Rectifier supply — pcb") {
     place(BR1, at: 44.5 20)
     place(C1, at: 55.5 20, rotate: 270)
     place(RL, at: 68.5 20, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, line: 2, load: 3, out: 4], at: 5.5 16)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, line: 2, load: 3, out: 4], at: 5.5 16)
     track(top, width: 0.25, from: 47.04 22.54, to: 53.81 22.54, to: 55.5 20.85)
     track(top, width: 0.25, from: 33.5 15, to: 41.04 22.54, to: 41.96 22.54)
     track(top, width: 0.25, from: 55.5 20.85, to: 68.35 20.85, to: 68.5 21)

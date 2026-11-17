@@ -3,7 +3,7 @@ model:to-220-3-vertical-model("TO-220-3, standing") {
     meta {
         summary: "TO-220-3, standing — its body drawn by jmCAD from JEDEC TO-220AB"
         category: through-hole-transistor-outline
-        code: "MD.TO:220-3-V"
+        code: "TO:220-3-V:M3D"
         tags: model, hand-drawn
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"

@@ -1,7 +1,7 @@
 symbol:core-inductor-symbol("Inductor with a core") {
     meta {
         summary: "Inductor wound on a ferromagnetic core, as drawn on a schematic: a coil and the core's lines along it"
-        code: "SY.INDUCTOR:MAGNETIC-CORE"
+        code: "INDUCTOR:MAGNETIC-CORE:S"
         category: inductors
         tags: electronics, schematic
         authors: "jMouse"

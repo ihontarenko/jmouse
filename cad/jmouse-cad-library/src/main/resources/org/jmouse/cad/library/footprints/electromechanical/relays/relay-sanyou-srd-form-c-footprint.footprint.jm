@@ -1,7 +1,7 @@
 footprint:relay-sanyou-srd-form-c-footprint("SANYOU SRD relay, form C") {
     meta {
         summary: "5-lead SPDT relay, through-hole, 19.7 × 15.5 mm body"
-        code: "FP.RELAY:SRD-C"
+        code: "RELAY:SRD-C:F"
         category: relays
         tags: electronics, footprint, through-hole
         source: "SANYOU SRD series data sheet, form C (one changeover): 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed"
@@ -20,5 +20,5 @@ footprint:relay-sanyou-srd-form-c-footprint("SANYOU SRD relay, form C") {
     outline(silkscreen, filled, "M-10.485 0.05A0.3 0.3 0 1 0 -9.885 0.05A0.3 0.3 0 1 0 -10.485 0.05Z")
     outline(courtyard, width: 0.05, "M-10.35 -8.35H10.35V8.35H-10.35Z")
     body(height: 15.6)
-    model("MD.RELAY:SRD-C")
+    model("RELAY:SRD-C:M3D")
 }

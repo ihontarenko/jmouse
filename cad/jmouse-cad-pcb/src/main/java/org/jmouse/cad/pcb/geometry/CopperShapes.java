@@ -94,8 +94,8 @@ public final class CopperShapes {
         return CopperShape.line(List.of(from, to), radius);
     }
 
-    /** A piece of copper the pcb draws as a shape on a copper layer, with the net it says, if it says one. */
-    public record Drawn(int index, String layer, String net, CopperShape shape) {
+    /** A piece of copper the pcb draws as a shape on a copper layer — one of its outlines —, with the net it says, if it says one. */
+    public record Drawn(int index, int outline, String layer, String net, CopperShape shape) {
     }
 
     /** Every piece of copper the pcb draws as a shape — one of several outlines is several pieces —, in one order. */
@@ -107,10 +107,12 @@ public final class CopperShapes {
             if (!layers.contains(shape.layer())) {
                 continue;
             }
-            for (String outline : PathOutlines.subpaths(shape.path())) {
+            List<String> outlines = PathOutlines.subpaths(shape.path());
+            for (int outline = 0; outline < outlines.size(); outline++) {
                 int at = index;
-                CopperShape.ofPath(outline, shape.filled(), shape.filled() ? 0 : shape.width() / 2, curveSteps)
-                        .ifPresent(copper -> drawn.add(new Drawn(at, shape.layer(), shape.net() == null || shape.net().isBlank() ? null : shape.net(), copper)));
+                int which = outline;
+                CopperShape.ofPath(outlines.get(outline), shape.filled(), shape.filled() ? 0 : shape.width() / 2, curveSteps)
+                        .ifPresent(copper -> drawn.add(new Drawn(at, which, shape.layer(), shape.net() == null || shape.net().isBlank() ? null : shape.net(), copper)));
             }
         }
         return drawn;

@@ -1,7 +1,7 @@
 symbol:reed-switch-symbol("Reed switch") {
     meta {
         summary: "Reed switch, as drawn on a schematic: a switch sealed in glass, closed while a magnet is near"
-        code: "SY.SWITCH:REED"
+        code: "SWITCH:REED:S"
         category: switches
         tags: electronics, schematic
         authors: "jMouse"

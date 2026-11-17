@@ -1,5 +1,6 @@
 package org.jmouse.cad.component;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.Index;
 
 import java.util.Arrays;
@@ -10,17 +11,18 @@ import java.util.Optional;
  * A pin of a component: its name, what it carries, which way its signal goes, how it drives, the numbers it has on the
  * package, and a label for a reader.
  *
+ * @param name      what it is called, as the part's wires name it
  * @param index     a bus's bits — {@code q[0..7]} —, each a pin of its own; null for one pin
  * @param nature    {@code analog}, {@code digital}, {@code power} or {@code ground}
  * @param direction {@code input}, {@code output}, {@code bidirectional}, or null for an analog pin that is neither
- * @param drive     how it drives — {@code open-drain}, {@code open-collector} ({@link Drive}) —, or null for a push-pull
- *                  output and any other pin
- * @param numbers   its numbers on the package, in groups as written: {@code 1 7} one group, {@code 15, 1, 2} three —
- *                  a bus's pins are its groups, one a bit
+ * @param drive     how it drives — {@code open-drain}, {@code open-collector} ({@link Drive}) —, or null for a push-pull output and
+ *                  any other pin
+ * @param numbers   its numbers on the package, in groups as written: {@code 1 7} one group, {@code 15, 1, 2} three — a bus's pins
+ *                  are its groups, one a bit
  * @param edge      whether it acts on an edge rather than a level: a clock
  * @param label     what it is, for a reader; empty when not written
  */
-public record Pin(String name, Index index, String nature, String direction, String drive, List<List<String>> numbers, boolean edge,
+public record Pin(String name, @Nullable Index index, String nature, @Nullable String direction, @Nullable String drive, List<List<String>> numbers, boolean edge,
                   String label) {
 
     /** The words its nature, direction and drive are written with, as the documents write them. */

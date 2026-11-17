@@ -1,7 +1,7 @@
 footprint:sod-123-footprint("Diode SOD-123") {
     meta {
         summary: "Diode, SOD-123 body, reflow pads; pad 1 is the cathode"
-        code: "FP.SOD:123"
+        code: "SOD:123:F"
         category: diodes-surface
         tags: electronics, footprint, surface
         source: "JEDEC SOD outlines, the makers' drawings (Nexperia), SOD-123"
@@ -18,5 +18,5 @@ footprint:sod-123-footprint("Diode SOD-123") {
     outline(silkscreen, width: 0.12, "M-2.56 -0.51V0.51")
     outline(courtyard, width: 0.05, "M-2.55 -0.65H2.55V0.65H-2.55Z")
     body(height: 1.35)
-    model("MD.SOD:123")
+    model("SOD:123:M3D")
 }

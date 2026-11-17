@@ -5,13 +5,14 @@ import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.svg.path.node.PathPolylines;
 import org.jmouse.svg.path.parser.PathParser;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
-import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.jmouse.geometry.Areas;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,8 +22,8 @@ import java.util.Optional;
 
 /**
  * The pcb's zones poured as a pcb house pours them: the area drawn, inside the pcb's edge less its clearance and
- * less every cut-out, less every keepout on its layer; copper of every other net cut back by the gap the two keep, a zone
- * of higher priority poured first and kept clear of too; a pad of its own net joined across a thermal gap by four spokes,
+ * less every cut-out, less every keepout on its layer; every piece of copper of another net — whatever it is: a pad, a track, a via,
+ * copper drawn as a shape, a teardrop — cut back by the gap the two keep, a zone of higher priority poured first and kept clear of too; a pad of its own net joined across a thermal gap by four spokes,
  * so it can be soldered; nothing left narrower than copper can be made; every island that joins fewer than two things of its
  * net taken away.
  */
@@ -40,21 +41,34 @@ public final class ZonePours {
 
     private final PcbDrawing        pcb;
     private final CopperNets          nets;
+    /** Every piece of the pcb's copper but its pours: what a zone is poured round. */
+    private final List<CopperPieces.Piece> copper;
     private final Map<String, Double> rules;
     private final int                 curveSteps;
     private final AreaOffsets         offsets;
+    private final double              arcError;
     private final NetRules            netRules;
+    private final PourMemory          memory;
 
     /**
      * @param rules    the values the pcb is held to, by rule word — {@code clearance}, {@code thermal-gap} …
      * @param arcError how far a round offset followed in chords may stand off the true curve; every gap is grown by it
      */
-    public ZonePours(PcbDrawing pcb, CopperNets nets, Map<String, Double> rules, int curveSteps, double arcError) {
+    public ZonePours(PcbDrawing pcb, CopperNets nets, List<CopperPieces.Piece> copper, Map<String, Double> rules, int curveSteps, double arcError) {
+        this(pcb, nets, copper, rules, curveSteps, arcError, PourMemory.none());
+    }
+
+    /** @param memory what each zone was last poured from: a zone is poured again only where a change reached it */
+    public ZonePours(PcbDrawing pcb, CopperNets nets, List<CopperPieces.Piece> copper, Map<String, Double> rules, int curveSteps, double arcError,
+                     PourMemory memory) {
+        this.memory = memory;
         this.pcb = pcb;
         this.nets = nets;
+        this.copper = List.copyOf(copper);
         this.rules = Map.copyOf(rules);
         this.curveSteps = curveSteps;
         this.offsets = new AreaOffsets(arcError);
+        this.arcError = arcError;
         this.netRules = new NetRules(pcb, rules);
     }
 
@@ -66,8 +80,11 @@ public final class ZonePours {
         for (int index = 0; index < pcb.zones().size(); index++) {
             order.add(index);
         }
-        // The higher priority first; of two alike, the one drawn first.
-        order.sort(Comparator.comparingInt((Integer index) -> -pcb.zones().get(index).priority()).thenComparingInt(index -> index));
+        // The higher priority first; of two alike, the smaller — a zone drawn inside another is what is asked for there —; of two
+        // of one size, the one drawn first.
+        List<Double> sizes = pcb.zones().stream().map(zone -> area(zone.path()).getArea()).toList();
+        order.sort(Comparator.comparingInt((Integer index) -> -pcb.zones().get(index).priority())
+                .thenComparingDouble(sizes::get).thenComparingInt(index -> index));
         for (int index : order) {
             PcbDrawing.Zone zone = pcb.zones().get(index);
             Geometry poured = poured(zone, pcbArea, pours);
@@ -76,90 +93,152 @@ public final class ZonePours {
         return pours;
     }
 
+    /** What a zone's area is made of beyond the zone: where any of it differs, the zone is poured all over again. */
+    private record AreaInputs(String outline, double edgeClearance, List<PcbDrawing.Keepout> keepouts, int curveSteps, double arcError) {
+    }
+
+    /** A zone poured before this one, of another net on its layer, kept clear of by its gap. */
+    private record EarlierPour(Geometry pour, double gap) {
+    }
+
     private Geometry poured(PcbDrawing.Zone zone, Optional<Geometry> pcbArea, List<Optional<Geometry>> pours) {
         Geometry area = area(zone.path());
         if (pcbArea.isPresent()) {
             area = Areas.common(area, pcbArea.get());
         }
+        List<PcbDrawing.Keepout> keepouts = new ArrayList<>();
         for (PcbDrawing.Keepout keepout : pcb.keepouts()) {
             if (keepout.layers().contains(zone.layer())) {
-                area = area.difference(area(keepout.path()));
+                keepouts.add(keepout);
+                area = Areas.difference(area, area(keepout.path()));
             }
         }
         double zoneGap = netRules.zoneGapOf(zone);
-        List<Geometry> others = new ArrayList<>();
-        List<Geometry> thermals = new ArrayList<>();
-        List<Geometry> spokes = new ArrayList<>();
+        List<PourMemory.Piece> pieces = new ArrayList<>();
         List<Anchor> anchors = new ArrayList<>();
-        for (int index = 0; index < nets.pads().size(); index++) {
-            CopperNets.PlacedPad pad = nets.pads().get(index);
-            if (!pad.pad().hasCopperOn(zone.layer(), pad.placement())) {
-                continue;
+        for (CopperPieces.Piece piece : copper) {
+            if (piece.onLayer().test(zone.layer())) {
+                meet(piece, zone, zoneGap, pieces, anchors);
             }
-            Optional<String> net = nets.padNets().get(index);
-            if (!net.equals(Optional.of(zone.net()))) {
-                others.add(grown(pad.shape(), Math.max(zoneGap, clearanceOf(net))));
-                continue;
-            }
-            thermals.add(grown(pad.shape(), rule(THERMAL_GAP)));
-            spokes(pad, PAD + index, spokes, anchors);
-        }
-        for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
-            if (track.layer().equals(zone.layer())) {
-                ownOrOther(nets.trackNets().get(index), zone, zoneGap, CopperNets.line(track.points(), track.width()),
-                        track.points(), TRACK + index, others, anchors);
-            }
-        }
-        for (int index = 0; index < pcb.arcs().size(); index++) {
-            PcbDrawing.Arc arc = pcb.arcs().get(index);
-            if (arc.layer().equals(zone.layer())) {
-                ownOrOther(nets.arcNets().get(index), zone, zoneGap,
-                        CopperNets.line(CopperNets.arcPoints(arc, curveSteps), arc.width()), List.of(arc.from(), arc.to()), ARC + index,
-                        others, anchors);
-            }
-        }
-        for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
-            if (!pcb.reaches(via, zone.layer())) {
-                continue;
-            }
-            Optional<String> net = nets.viaNets().get(index);
-            // A via of no net yet stitches the zone: it is poured over, as a via of its own net is.
-            if (net.isEmpty() || net.get().equals(zone.net())) {
-                anchors.add(new Anchor(VIA + index, new Coordinate(via.x(), via.y())));
-            } else {
-                others.add(circle(via.x(), via.y(), via.diameter() / 2 + Math.max(zoneGap, clearanceOf(net))));
-            }
-        }
-        // A mounting hole is poured round, its ring or its bare edge kept a gap off.
-        for (PcbDrawing.Hole hole : pcb.holes()) {
-            others.add(circle(hole.x(), hole.y(), Math.max(hole.ring(), hole.drill()) / 2 + Math.max(zoneGap, clearanceOf(Optional.empty()))));
         }
         for (int index = 0; index < pours.size(); index++) {
             PcbDrawing.Zone earlier = pcb.zones().get(index);
             if (pours.get(index).isPresent() && earlier.layer().equals(zone.layer()) && !earlier.net().equals(zone.net())) {
-                others.add(grown(pours.get(index).get(), Math.max(zoneGap, clearanceOf(Optional.of(earlier.net())))));
+                Geometry pour = pours.get(index).get();
+                double gap = Math.max(zoneGap, clearanceOf(Optional.of(earlier.net())));
+                pieces.add(new PourMemory.Piece(PourMemory.Role.OTHER, new EarlierPour(pour, gap), reachOf(pour.getEnvelopeInternal(), gap),
+                        () -> grown(pour, gap)));
             }
         }
-        Geometry open = area.difference(UnaryUnionOp.union(others, GEOMETRY));
-        Geometry filled = open.difference(UnaryUnionOp.union(thermals, GEOMETRY))
-                .union(Areas.common(UnaryUnionOp.union(spokes, GEOMETRY), open));
-        // Nothing narrower than copper can be made: shrunk by at least half the least width, then grown back by exactly it,
-        // so what is left never reaches past what was open — a gap kept above stays kept.
         double narrowest = rule(LEAST_WIDTH) / 2;
-        filled = grownBack(grown(filled, -narrowest), narrowest);
-        return withoutIslands(filled, anchors);
+        // A change reaches as far as the pour is shrunk and grown back again, each offset as far off as its chords may stand.
+        double changeReaches = 2 * (narrowest + arcError) + 1e-6;
+        PourMemory.Frame frame = new PourMemory.Frame(zone, new AreaInputs(pcb.outline(), rule(EDGE_CLEARANCE), keepouts, curveSteps, arcError),
+                changeReaches);
+        Geometry opened = memory.opened(frame, area, pieces, (within, near) -> {
+            // Only what reaches the area's box is united: copper whose box misses it cannot change what the area keeps.
+            Envelope reach = within.getEnvelopeInternal();
+            Geometry open = Areas.difference(within, Areas.unionOf(PourMemory.copperOf(near, PourMemory.Role.OTHER, reach), GEOMETRY));
+            Geometry filled = Areas.union(Areas.difference(open, Areas.unionOf(PourMemory.copperOf(near, PourMemory.Role.THERMAL, reach), GEOMETRY)),
+                    Areas.common(Areas.unionOf(PourMemory.copperOf(near, PourMemory.Role.SPOKES, reach), GEOMETRY), open));
+            // Nothing narrower than copper can be made: shrunk by at least half the least width, then grown back by exactly it,
+            // so what is left never reaches past what was open — a gap kept above stays kept.
+            return grownBack(grown(filled, -narrowest), narrowest);
+        });
+        return withoutIslands(opened, anchors);
     }
 
-    /** A track or an arc: a point the pour must reach when it is of the zone's net, copper to keep clear of otherwise. */
-    private void ownOrOther(Optional<String> net, PcbDrawing.Zone zone, double zoneGap, Geometry copper,
-                            List<PcbDrawing.Point> points, String item, List<Geometry> others, List<Anchor> anchors) {
-        if (net.equals(Optional.of(zone.net()))) {
-            points.forEach(point -> anchors.add(new Anchor(item, new Coordinate(point.x(), point.y()))));
-        } else {
-            others.add(grown(copper, Math.max(zoneGap, clearanceOf(net))));
+    /** A box grown by a gap and by how far a round offset followed in chords may stand off: as far as a piece's copper reaches. */
+    private Envelope reachOf(Envelope box, double gap) {
+        Envelope reach = new Envelope(box);
+        reach.expandBy(gap + arcError);
+        return reach;
+    }
+
+    /**
+     * How a zone meets a piece of copper on its layer, whatever the piece is: of the zone's net, joined as its kind joins — across a
+     * thermal gap by spokes, or solid, its points what the pour must reach —; of no net, stitching the zone or kept clear of, as its kind
+     * says; of another net, kept clear of by the gap the two keep.
+     */
+    private void meet(CopperPieces.Piece piece, PcbDrawing.Zone zone, double zoneGap, List<PourMemory.Piece> pieces, List<Anchor> anchors) {
+        String item = piece.kind() + ":" + piece.index();
+        boolean ownNet = piece.net().equals(Optional.of(zone.net()));
+        boolean stitches = piece.net().isEmpty() && piece.kind().netless() == CopperPieces.NetlessCopper.STITCHES;
+        if (!ownNet && !stitches) {
+            double gap = Math.max(zoneGap, clearanceOf(piece.net()));
+            pieces.add(new PourMemory.Piece(PourMemory.Role.OTHER, new Grown(piece.origin(), gap), reachOf(envelopeOf(piece.shape()), gap),
+                    () -> grown(areaOf(piece.shape()), gap)));
+            return;
         }
+        if (piece.kind().joining() == CopperPieces.PourJoining.THERMAL) {
+            CopperNets.PlacedPad pad = nets.pads().get(piece.index());
+            double thermalGap = rule(THERMAL_GAP);
+            pieces.add(new PourMemory.Piece(PourMemory.Role.THERMAL, new Grown(piece.origin(), thermalGap), reachOf(envelopeOf(piece.shape()), thermalGap),
+                    () -> grown(areaOf(piece.shape()), thermalGap)));
+            List<Geometry> spokes = new ArrayList<>();
+            spokes(pad, item, spokes, anchors);
+            Envelope spokesReach = new Envelope();
+            spokes.forEach(spoke -> spokesReach.expandToInclude(spoke.getEnvelopeInternal()));
+            pieces.add(new PourMemory.Piece(PourMemory.Role.SPOKES, new Spokes(piece.origin(), thermalGap, rule(THERMAL_SPOKE_WIDTH)), reachOf(spokesReach, 0),
+                    () -> Areas.unionOf(spokes, GEOMETRY)));
+            return;
+        }
+        for (double[] line : piece.shape().pieces()) {
+            anchors.add(new Anchor(item, new Coordinate(line[0], line[1])));
+            anchors.add(new Anchor(item, new Coordinate(line[2], line[3])));
+        }
+    }
+
+    /** A piece of copper, as what it is the copper of, grown by a gap: what a pour keeps clear of, or relieves round. */
+    private record Grown(Object origin, double gap) {
+    }
+
+    /** A pad's four thermal spokes, as the pad they join. */
+    private record Spokes(Object origin, double gap, double width) {
+    }
+
+    /** The box a piece of copper covers, its line's width included. */
+    private static Envelope envelopeOf(CopperShape shape) {
+        return new Envelope(shape.box().left(), shape.box().right(), shape.box().top(), shape.box().bottom());
+    }
+
+    /**
+     * A piece of copper's area, whatever it is: its straight pieces followed on into runs; where they close round an area, the area by the
+     * even-odd rule; grown by its line's radius — a track's half width, a round pad's radius —, as round as every pour's offsets are.
+     */
+    private Geometry areaOf(CopperShape shape) {
+        List<List<Coordinate>> runs = new ArrayList<>();
+        List<Coordinate> run = new ArrayList<>();
+        for (double[] line : shape.pieces()) {
+            Coordinate from = new Coordinate(line[0], line[1]);
+            if (run.isEmpty() || !run.getLast().equals2D(from)) {
+                if (!run.isEmpty()) {
+                    runs.add(run);
+                }
+                run = new ArrayList<>(List.of(from));
+            }
+            run.add(new Coordinate(line[2], line[3]));
+        }
+        if (!run.isEmpty()) {
+            runs.add(run);
+        }
+        Geometry area = GEOMETRY.createPolygon();
+        List<Geometry> lines = new ArrayList<>();
+        for (List<Coordinate> points : runs) {
+            boolean closes = points.size() > 3 && points.getFirst().equals2D(points.getLast());
+            if (shape.area() && closes) {
+                area = Areas.exclusive(area, GEOMETRY.createPolygon(points.toArray(Coordinate[]::new)));
+            } else if (points.size() == 2 && points.getFirst().equals2D(points.getLast())) {
+                lines.add(GEOMETRY.createPoint(points.getFirst()));
+            } else {
+                lines.add(GEOMETRY.createLineString(points.toArray(Coordinate[]::new)));
+            }
+        }
+        if (shape.radius() <= 0) {
+            return area;
+        }
+        lines.add(area);
+        return grown(Areas.unionOf(lines, GEOMETRY), shape.radius());
     }
 
     /**
@@ -198,7 +277,7 @@ public final class ZonePours {
                 kept.add(island);
             }
         }
-        return kept.isEmpty() ? GEOMETRY.createPolygon() : UnaryUnionOp.union(kept, GEOMETRY);
+        return kept.isEmpty() ? GEOMETRY.createPolygon() : Areas.unionOf(kept, GEOMETRY);
     }
 
     /** A point of its net's copper the pour must reach, and what it is of: {@code pad 3}, {@code track 7}. */
@@ -207,12 +286,6 @@ public final class ZonePours {
 
     /** What an island must reach to join anything: two things, by what joining is. */
     private static final int JOINED = 2;
-
-    /** What each kind of copper an anchor is of is called, before its place among its kind. */
-    private static final String PAD = "pad ";
-    private static final String TRACK = "track ";
-    private static final String ARC = "arc ";
-    private static final String VIA = "via ";
 
     private double rule(String word) {
         return rules.getOrDefault(word, 0.0);
@@ -233,7 +306,7 @@ public final class ZonePours {
 
     /** An area a path closes: its rings joined, a ring inside another adding to it. */
     private Geometry area(String path) {
-        return UnaryUnionOp.union(rings(path, curveSteps).stream().map(ring -> (Geometry) GEOMETRY.createPolygon(ring)).toList(), GEOMETRY);
+        return Areas.unionOf(rings(path, curveSteps).stream().map(ring -> (Geometry) GEOMETRY.createPolygon(ring)).toList(), GEOMETRY);
     }
 
     /** An area a path closes by the even-odd rule: a ring inside another cuts it out — the pcb's cut-outs. */
@@ -245,7 +318,7 @@ public final class ZonePours {
     public static Geometry areaOf(String path, int curveSteps) {
         Geometry area = GEOMETRY.createPolygon();
         for (LinearRing ring : rings(path, curveSteps)) {
-            area = area.symDifference(GEOMETRY.createPolygon(ring));
+            area = Areas.exclusive(area, GEOMETRY.createPolygon(ring));
         }
         return area;
     }
@@ -271,10 +344,6 @@ public final class ZonePours {
 
     private Geometry grownBack(Geometry area, double distance) {
         return offsets.grownBack(area, distance);
-    }
-
-    private Geometry circle(double x, double y, double radius) {
-        return grown(GEOMETRY.createPoint(new Coordinate(x, y)), radius);
     }
 
     /** The polygons of a pour, the largest first: one that holds another is drawn before what stands in its hole. */

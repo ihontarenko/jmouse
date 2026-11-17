@@ -1,7 +1,7 @@
 symbol:mains-plug-symbol("Mains plug with earth") {
     meta {
         summary: "A mains plug with an earth contact, as drawn on a schematic: line, neutral and earth leaving to the right"
-        code: "SY.CONNECTOR:MAINS-PLUG"
+        code: "CONNECTOR:MAINS-PLUG:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

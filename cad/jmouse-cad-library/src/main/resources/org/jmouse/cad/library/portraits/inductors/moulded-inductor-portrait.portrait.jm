@@ -3,7 +3,7 @@
 portrait:moulded-inductor-portrait("Moulded inductor") {
     meta {
         summary: "A moulded axial inductor: its microhenries read from its colour bands"
-        code: "PT.INDUCTOR:MOULDED-AXIAL"
+        code: "INDUCTOR:MOULDED-AXIAL:P"
         category: inductors
         tags: electronics, portrait, inductor, through-hole
         authors: "jMouse"

@@ -1,7 +1,7 @@
 symbol:open-hardware-symbol("Open hardware") {
     meta {
         summary: "The open hardware gear, for a design that is shared as open hardware, as drawn on a schematic"
-        code: "SY.GRAPHIC:OPEN-HARDWARE"
+        code: "GRAPHIC:OPEN-HARDWARE:S"
         category: graphics
         tags: electronics, schematic, graphic
         authors: "jMouse"

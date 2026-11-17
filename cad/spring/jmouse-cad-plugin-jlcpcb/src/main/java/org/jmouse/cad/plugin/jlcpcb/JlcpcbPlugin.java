@@ -46,7 +46,7 @@ public final class JlcpcbPlugin implements Plugin {
     @Override
     public PluginDescriptor descriptor() {
         return PluginDescriptor.ofArtifact(ID, "JLCPCB", JlcpcbPlugin.class)
-                .markedBy(JlcpcbPlugin.class, "jlcpcb.svg").requiring(Set.of(GerberPlugin.ID));
+                .withIcon(JlcpcbPlugin.class, "jlcpcb.svg").requiring(Set.of(GerberPlugin.ID));
     }
 
     @Override

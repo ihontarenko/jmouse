@@ -1,7 +1,7 @@
 model:box-capacitor-length-1800-width-600-pitch-1500-model("Film box capacitor, 15 mm pitch, 6 mm wide") {
     meta {
         summary: "Film box capacitor, 15 mm pitch, 6 mm wide — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RADIAL:CB-18X6-P15"
+        code: "RADIAL:CB-18X6-P15:M3D"
         category: capacitors-through-hole
         tags: electronics, model, radial
         source: "IEC 60286-2 lead spacing, makers' box sizes"

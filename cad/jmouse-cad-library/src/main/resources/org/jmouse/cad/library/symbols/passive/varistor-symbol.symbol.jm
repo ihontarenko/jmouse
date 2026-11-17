@@ -1,7 +1,7 @@
 symbol:varistor-symbol("Varistor") {
     meta {
         summary: "A varistor, as drawn on a schematic: a resistor's body crossed by the bent line of a resistance that falls with the voltage"
-        code: "SY.PROTECTION:VARISTOR"
+        code: "PROTECTION:VARISTOR:S"
         category: protection
         tags: electronics, schematic
         authors: "jMouse"

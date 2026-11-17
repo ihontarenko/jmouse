@@ -1,7 +1,7 @@
 symbol:composite-source-symbol("Composite signal source") {
     meta {
         summary: "A voltage source that sums several signals — a slow wave and a fast one over it, in the circle"
-        code: "SY.SOURCE:VOLTAGE-COMPOSITE"
+        code: "SOURCE:VOLTAGE-COMPOSITE:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

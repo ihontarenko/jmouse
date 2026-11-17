@@ -47,6 +47,21 @@ class SettingsTest {
         }
 
         @Override
+        public Map<String, Map<String, String>> keptUnder(SettingHolder holder, String owner, String section) {
+            String prefix = holder.type() + ":" + holder.id() + "/" + owner + "/";
+            Map<String, Map<String, String>> under = new java.util.TreeMap<>();
+            sections.forEach((key, rows) -> {
+                if (key.startsWith(prefix) && !rows.isEmpty()) {
+                    String path = key.substring(prefix.length());
+                    if (path.equals(section) || path.startsWith(section + "/")) {
+                        under.put(path, new LinkedHashMap<>(rows));
+                    }
+                }
+            });
+            return under;
+        }
+
+        @Override
         public void replace(SettingHolder holder, String owner, String section, Map<String, String> values) {
             Map<String, String> rows = of(holder, owner, section);
             rows.clear();
@@ -105,8 +120,45 @@ class SettingsTest {
         Settings settings = settingsOf(rows, SEARCH, LAYOUT);
         assertEquals(6, settings.seed());
         assertEquals(Map.of("limit", "10", "timeout", "PT1M"), rows.installation("engine", "search"));
-        assertEquals(Map.of("gap", "1.5", "stacks.0", "1", "stacks.1", "2", "stacks.2", "4"), rows.installation("engine", "pcb/layout"));
+        assertEquals(Map.of("gap", "1.5", "stacks[0]", "1", "stacks[1]", "2", "stacks[2]", "4"), rows.installation("engine", "pcb/layout"));
         assertEquals(0, settingsOf(rows, SEARCH, LAYOUT).seed(), "a value kept is never seeded again");
+    }
+
+    /** A release took a parameter away: what the installation kept of it names nothing, and is forgotten at the next start. */
+    @Test
+    void aValueALaterReleaseTookAwayIsForgottenAtTheStart() {
+        Rows rows = new Rows();
+        rows.installation("engine", "pcb/layout").putAll(Map.of("gap", "2", "stacks[0]", "1", "stacks[1]", "2", "stacks[2]", "4", "spacing", "3"));
+        rows.installation("engine", "search").put("retries", "5");
+        Settings settings = settingsOf(rows, SEARCH, LAYOUT);
+        settings.seed();
+        assertFalse(rows.installation("engine", "pcb/layout").containsKey("spacing"));
+        assertFalse(rows.installation("engine", "search").containsKey("retries"));
+        assertEquals("2", rows.installation("engine", "pcb/layout").get("gap"), "what is still declared stays as it was kept");
+        assertEquals(new Layout(2, List.of(1, 2, 4)), settings.read("engine", "pcb/layout", Layout.class));
+    }
+
+    /** An item the installation added to a list its seed has fewer of is the installation's own, still declared. */
+    @Test
+    void anItemTheInstallationAddedToAListIsKept() {
+        Rows rows = new Rows();
+        rows.installation("engine", "pcb/layout").putAll(Map.of("gap", "2", "stacks[0]", "1", "stacks[1]", "2", "stacks[2]", "4", "stacks[3]", "8"));
+        settingsOf(rows, SEARCH, LAYOUT).seed();
+        assertEquals("8", rows.installation("engine", "pcb/layout").get("stacks[3]"));
+    }
+
+    @Test
+    void aStructuredSectionsValuesStandInTheOrderItDeclaresWhateverOrderTheStoreKeeps() {
+        Map<String, Object> sides = new LinkedHashMap<>();
+        sides.put("top", "Top");
+        sides.put("bottom", "Bottom");
+        Section placement = Section.structured("assembly", "Assembly", null, Layout.class, ParameterTree.unfold(Map.of("sides", sides)));
+        Rows rows = new Rows();
+        rows.installation("engine", "assembly").put("sides.extra", "Both");
+        rows.installation("engine", "assembly").put("sides.bottom", "Bottom");
+        rows.installation("engine", "assembly").put("sides.top", "Top");
+        Settings settings = settingsOf(rows, placement);
+        assertEquals(List.of("sides.top", "sides.bottom", "sides.extra"), List.copyOf(settings.valuesOf("engine", "assembly").keySet()));
     }
 
     @Test
@@ -137,12 +189,12 @@ class SettingsTest {
         Settings settings = settingsOf(rows, LAYOUT);
         settings.seed();
         Map<String, String> shorter = new LinkedHashMap<>(rows.installation("engine", "pcb/layout"));
-        shorter.remove("stacks.2");
+        shorter.remove("stacks[2]");
         settings.replace("engine", "pcb/layout", SettingHolder.INSTALLATION, shorter);
         Section released = Section.structured("pcb/layout", "PCB layout", null, Layout.class,
                 ParameterTree.unfold(Map.of("gap", 1.5, "stacks", List.of(1, 2, 4), "margin", 3)));
         assertEquals(1, new Settings(() -> Map.of("engine", List.of(released)), Optional.of(rows), Optional.empty(), Optional.of(READER)).seed());
-        assertFalse(rows.installation("engine", "pcb/layout").containsKey("stacks.2"));
+        assertFalse(rows.installation("engine", "pcb/layout").containsKey("stacks[2]"));
         assertEquals("3", rows.installation("engine", "pcb/layout").get("margin"));
     }
 
@@ -185,6 +237,78 @@ class SettingsTest {
         assertFalse(settings.valuesOf("engine", "search").containsKey("token"));
         settings.change("engine", "search", SettingHolder.INSTALLATION, Map.of("token", ""));
         assertEquals("deployed-token", settings.parameters("engine", "search").secret("token"));
+    }
+
+    @Test
+    void anOpenSectionHoldsEveryPathBelowItEachRowToItsForm() {
+        Section open = Section.open("interface", "Interface", null, Section.Open.WORDS, 512);
+        Rows rows = new Rows();
+        Settings settings = settingsOf(rows, open, SEARCH);
+        settings.seed();
+        SettingHolder reader = SettingHolder.reader("READER", "1");
+        settings.change("engine", "interface/editor/grid", reader, Map.of("dotPixels", "3"));
+        settings.change("engine", "interface/editor/themes", reader, Map.of("records", "interface studio studio-copy:studio",
+                                                                             "studio-copy.title", "My studio"));
+        assertEquals(Map.of("interface/editor/grid", Map.of("dotPixels", "3"),
+                            "interface/editor/themes", Map.of("records", "interface studio studio-copy:studio", "studio-copy.title", "My studio")),
+                     settings.ownUnder("engine", "interface", reader));
+        assertEquals(Map.of(), settings.ownUnder("engine", "interface", SettingHolder.reader("READER", "2")), "another reader keeps none");
+
+        SettingRefused key = assertThrows(SettingRefused.class, () -> settings.change("engine", "interface/editor/grid", reader, Map.of("dot pixels", "3")));
+        assertTrue(key.getMessage().contains("'dot pixels' is not a key here"), key.getMessage());
+        assertThrows(SettingRefused.class, () -> settings.change("engine", "interface/editor/grid", reader, Map.of("note", "two\nlines")));
+        assertThrows(SettingRefused.class, () -> settings.change("engine", "interface/editor/grid", SettingHolder.INSTALLATION, Map.of("dotPixels", "4")),
+                     "an open section is each reader's");
+
+        assertEquals(List.of(new SettingsFile.Block(SettingsFile.Holding.READER, "engine", "interface/editor/grid", Map.of("dotPixels", "3")),
+                             new SettingsFile.Block(SettingsFile.Holding.READER, "engine", "interface/editor/themes",
+                                                    Map.of("records", "interface studio studio-copy:studio", "studio-copy.title", "My studio"))),
+                     settings.fileOf(reader, false));
+        Map<String, String> back = new HashMap<>();
+        back.put("dotPixels", null);
+        settings.change("engine", "interface/editor/grid", reader, back);
+        assertFalse(settings.ownUnder("engine", "interface", reader).containsKey("interface/editor/grid"));
+    }
+
+    @Test
+    void aFileCarriesAReadersRowsAndTheInstallationsChangesToAnotherReader() {
+        Section look = Section.fixed("look", "Look", null, List.of(
+                Parameter.choice("theme", "Theme", null, "dark", List.of(new Parameter.Choice("dark", "Dark"), new Parameter.Choice("light", "Light"))),
+                Parameter.wholeNumber("scale", "Scale", null, 100, 50, 200, "%"))).forEachReader();
+        Rows rows = new Rows();
+        Settings settings = settingsOf(rows, look, SEARCH, LAYOUT);
+        settings.seed();
+        SettingHolder one = SettingHolder.reader("READER", "1");
+        settings.change("engine", "look", one, Map.of("theme", "light"));
+        settings.change("engine", "search", SettingHolder.INSTALLATION, Map.of("limit", "25", "token", "kept-secret"));
+        settings.change("engine", "pcb/layout", SettingHolder.INSTALLATION, Map.of("gap", "2"));
+
+        List<SettingsFile.Block> file = settings.fileOf(one, true);
+        assertEquals(List.of(
+                new SettingsFile.Block(SettingsFile.Holding.READER, "engine", "look", Map.of("theme", "light"), Map.of("theme", "light", "scale", "100")),
+                new SettingsFile.Block(SettingsFile.Holding.INSTALLATION, "engine", "look", Map.of(), Map.of("theme", "dark", "scale", "100")),
+                new SettingsFile.Block(SettingsFile.Holding.INSTALLATION, "engine", "search", Map.of("limit", "25"), Map.of("limit", "25", "timeout", "PT1M")),
+                new SettingsFile.Block(SettingsFile.Holding.INSTALLATION, "engine", "pcb/layout", Map.of("gap", "2", "stacks[0]", "1", "stacks[1]", "2",
+                        "stacks[2]", "4"), Map.of("gap", "2", "stacks[0]", "1", "stacks[1]", "2", "stacks[2]", "4"))), file,
+                "every section whole, what was changed as rows; the secret never leaves; the layout whole");
+        assertEquals(List.of(file.getFirst()), settings.fileOf(one, false));
+        // Written, the whole section is seen — what the reader left alone as a note —, and read back only their own rows are taken.
+        String written = SettingsFile.write("settings", List.of(file.getFirst()));
+        assertTrue(written.contains(String.join("\n", "theme = light", "# scale = 100", "")), written);
+        assertEquals(List.of(new SettingsFile.Block(SettingsFile.Holding.READER, "engine", "look", Map.of("theme", "light"))), SettingsFile.read(written));
+
+        // Another reader takes it in: their rows are theirs; the installation's blocks only for whoever sets the engine up.
+        SettingHolder two = SettingHolder.reader("READER", "2");
+        settings.restore("engine", "search", SettingHolder.INSTALLATION);
+        Settings.Taken reader = settings.take(file, two, false);
+        assertEquals("light", settings.parameters("engine", "look", two).text("theme"));
+        assertEquals(1, reader.kept());
+        assertEquals(2, reader.refused().size(), String.join("\n", reader.refused()));
+        assertTrue(reader.refused().getFirst().startsWith("[installation engine search] "), reader.refused().getFirst());
+        assertEquals("10", rows.installation("engine", "search").get("limit"));
+        Settings.Taken curator = settings.take(file, two, true);
+        assertEquals(List.of(), curator.refused());
+        assertEquals("25", rows.installation("engine", "search").get("limit"));
     }
 
     @Test

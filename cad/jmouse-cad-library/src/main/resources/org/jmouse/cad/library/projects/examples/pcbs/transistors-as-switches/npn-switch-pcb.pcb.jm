@@ -15,7 +15,7 @@ pcb:npn-switch-pcb("NPN transistor as a switch — pcb") {
     place(RL, at: 29 5, rotate: 270)
     place(D1, at: 29 12.5, rotate: 270)
     place(Q1, at: 28 20.5)
-    place(J1, footprint: "FP.HDR:1X6-P2.54-V", nets: [0: 1, base: 2, collector: 3, control: 4, drive: 5, vcc: 6], at: 5.5 14.5)
+    place(J1, footprint: "HDR:1X6-P2.54-V:F", nets: [0: 1, base: 2, collector: 3, control: 4, drive: 5, vcc: 6], at: 5.5 14.5)
     track(top, width: 0.25, from: 29 6, to: 30.35 7.35, to: 30.35 12.42, to: 29 13.77)
     track(bottom, width: 0.25, from: 29 11.23, to: 30.54 12.77, to: 30.54 20.5)
     track(top, width: 0.25, from: 17.5 17.5, to: 6.31 17.5, to: 5.5 18.31)

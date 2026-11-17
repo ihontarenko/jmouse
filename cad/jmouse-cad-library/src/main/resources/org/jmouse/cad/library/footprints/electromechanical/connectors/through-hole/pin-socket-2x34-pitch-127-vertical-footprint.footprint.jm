@@ -1,7 +1,7 @@
 footprint:pin-socket-2x34-pitch-127-vertical-footprint("Pin socket, 1.27 mm pitch, 2 × 34, vertical") {
     meta {
         summary: "Pin socket, 1.27 mm pitch, 2 rows of 34, upright, through-hole"
-        code: "FP.SKT:2X34-P1.27-V"
+        code: "SKT:2X34-P1.27-V:F"
         category: connectors-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 60603-13 grid"
@@ -83,5 +83,5 @@ footprint:pin-socket-2x34-pitch-127-vertical-footprint("Pin socket, 1.27 mm pitc
     outline(silkscreen, filled, "M-2.18 -20.955A0.3 0.3 0 1 0 -1.58 -20.955A0.3 0.3 0 1 0 -2.18 -20.955Z")
     outline(courtyard, width: 0.05, "M-1.75 -22.1H1.75V22.1H-1.75Z")
     body(height: 4.4)
-    model("MD.SKT:2X34-P1.27-V")
+    model("SKT:2X34-P1.27-V:M3D")
 }

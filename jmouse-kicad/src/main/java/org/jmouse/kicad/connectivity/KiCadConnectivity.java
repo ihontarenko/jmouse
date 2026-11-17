@@ -3,12 +3,16 @@ package org.jmouse.kicad.connectivity;
 import org.jmouse.kicad.KiCadPoint;
 import org.jmouse.kicad.KiCadProject;
 import org.jmouse.kicad.KiCadProject.SheetInstance;
+import org.jmouse.kicad.schematic.KiCadBus;
+import org.jmouse.kicad.schematic.KiCadBusEntry;
+import org.jmouse.kicad.schematic.KiCadBusLines;
 import org.jmouse.kicad.schematic.KiCadLabel;
 import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.jmouse.kicad.schematic.KiCadSheet;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.schematic.KiCadWire;
 import org.jmouse.kicad.symbol.KiCadPin;
+import org.jmouse.kicad.symbol.KiCadPinType;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 
 import java.util.ArrayList;
@@ -37,7 +41,8 @@ import java.util.TreeMap;
  *     {@code Net-(R5-Pad1)}.</li>
  * </ul>
  *
- * <p>Buses and bus entries are not read: a design that joins by them reads as if they were not drawn.</p>
+ * <p>A bus joins nothing on its sheet — a net joins it by a label of the member's name —, but a bus carried across a box's edge
+ * joins each of its nets to the child's of that name ({@link KiCadBus}); bus lines and bus entries are not read beyond that.</p>
  */
 public final class KiCadConnectivity {
 
@@ -45,16 +50,20 @@ public final class KiCadConnectivity {
     private final List<KiCadConnection> unconnected;
     /** The net every connection point stands on, by its key: a label, a junction, a wire's corner. */
     private final Map<String, String> pointNets;
+    /** Each name that joins across the whole design → the net it is: two such names on one wire are one net, named once. */
+    private final Map<String, String> globals;
 
-    private KiCadConnectivity(List<KiCadNet> nets, List<KiCadConnection> unconnected, Map<String, String> pointNets) {
+    private KiCadConnectivity(List<KiCadNet> nets, List<KiCadConnection> unconnected, Map<String, String> pointNets,
+                              Map<String, String> globals) {
         this.pointNets = Map.copyOf(pointNets);
+        this.globals = Map.copyOf(globals);
         this.nets = List.copyOf(nets);
         this.unconnected = List.copyOf(unconnected);
     }
 
     /** The nets of a whole design. */
     public static KiCadConnectivity of(KiCadProject project) {
-        Joining joining = new Joining();
+        Joining joining = new Joining(project.busAliases());
         for (SheetInstance sheet : project.sheets()) {
             joining.sheet(sheet);
         }
@@ -77,6 +86,15 @@ public final class KiCadConnectivity {
         return Optional.ofNullable(pointNets.get(Joining.point(sheetPath, at)));
     }
 
+    /**
+     * Each name that joins its net across the whole design — a power symbol's value, a global label's text, a hidden power
+     * input's name — and the net it is, as {@link #nets} names it: {@code VCC} is {@code +3.3V} where a sheet wires a VCC symbol
+     * to a +3.3V one, on every sheet, as KiCad's netlist has it.
+     */
+    public Map<String, String> globals() {
+        return globals;
+    }
+
     /** The pins nothing joins and no no-connect mark excuses: what KiCad's rules check reports as unconnected. */
     public List<KiCadConnection> unconnected() {
         return unconnected;
@@ -93,9 +111,37 @@ public final class KiCadConnectivity {
         private final List<String> excused = new ArrayList<>();
         /** Every connection point of every sheet, by its key. */
         private final Set<String> points = new LinkedHashSet<>();
+        /** A box's pin carrying a bus: the sheet it stands on and its members there, the sheet it opens and its members inside, in order. */
+        private record BusCrossing(String sheet, String child, List<String> above, List<String> inside) {
+        }
+
+        /** Every bus a box's pin hands across, joined member by member once every sheet is read. */
+        private final List<BusCrossing> crossings = new ArrayList<>();
+
+        /** The project's bus aliases, by which a label or a pin may name a bus. */
+        private final Map<String, List<String>> aliases;
+
+        private Joining(Map<String, List<String>> aliases) {
+            this.aliases = aliases;
+        }
+
+        /** Every name joining across the whole design. */
+        private final Set<String> globalNames = new LinkedHashSet<>();
 
         private record Naming(int strength, String name) {
+
+            /** How deep in the design the sheet naming it stands: a name's path is its sheets, each closed by a slash. */
+            int depth() {
+                return (int) name.chars().filter(character -> character == '/').count();
+            }
         }
+
+        /**
+         * Which of two names a net takes: the stronger, then — two labels of one strength, a bus joining two sheets' nets — the one
+         * on the sheet higher in the design, as KiCad names it; then the first in order, so the name never depends on reading order.
+         */
+        private static final Comparator<Naming> NAMING_ORDER = Comparator.comparingInt(Naming::strength).thenComparingInt(Naming::depth)
+                .thenComparing(Naming::name);
 
         // KiCad's own order: a global label, then a power symbol, then a hidden power pin, whatever its name.
         private static final int GLOBAL = -2;
@@ -123,15 +169,18 @@ public final class KiCadConnectivity {
                 for (KiCadPin pin : definition.pinsOf(symbol.unit())) {
                     KiCadPoint at = symbol.placement().place(pin.at());
                     String pinKey = "pin:" + sheet + ":" + symbol.uuid() + ":" + pin.number();
-                    if (definition.power()) {
+                    if (definition.power() && pin.type() == KiCadPinType.POWER_INPUT) {
                         // A power symbol's pin is its net's name across the design, never a pin of the net.
                         name(pinKey, POWER_SYMBOL, symbol.value());
-                        union(pinKey, "global:" + symbol.value());
+                        joinGlobally(pinKey, symbol.value());
+                    } else if (definition.power()) {
+                        // A power symbol whose pin gives power — KiCad's power flag — names no net: it tells ERC the net it stands on
+                        // is fed. It is no pin of the net either.
                     } else {
                         pins.put(pinKey, new KiCadConnection(sheet, reference, unitLetter(definition, symbol), symbol, pin, at));
                         if (pin.joinsByName()) {
                             name(pinKey, POWER_PIN, pin.name());
-                            union(pinKey, "global:" + pin.name());
+                            joinGlobally(pinKey, pin.name());
                         }
                     }
                     String point = point(sheet, at);
@@ -142,6 +191,18 @@ public final class KiCadConnectivity {
                 }
             }
             for (KiCadLabel label : schematic.labels()) {
+                Optional<KiCadBus> bus = KiCadBus.of(label.text(), aliases);
+                // A label naming a bus stands on a bus line and joins no wire. A global one makes each of its nets global; a
+                // hierarchical one is met by its box's pin on the sheet above, which joins the two sheets' nets member by member.
+                if (bus.isPresent()) {
+                    if (label.kind() == KiCadLabel.Kind.GLOBAL) {
+                        for (String member : bus.get().members()) {
+                            name("global:" + member, GLOBAL, member);
+                            joinGlobally("local:" + sheet + ":" + member, member);
+                        }
+                    }
+                    continue;
+                }
                 String point = point(sheet, label.at());
                 pointKeys.add(point);
                 points.add(label.at());
@@ -149,7 +210,7 @@ public final class KiCadConnectivity {
                 switch (label.kind()) {
                     case GLOBAL -> {
                         name(point, GLOBAL, label.text());
-                        union(point, "global:" + label.text());
+                        joinGlobally(point, label.text());
                     }
                     case HIERARCHICAL -> {
                         name(point, HIERARCHICAL, displayPath(instance) + label.text());
@@ -165,12 +226,29 @@ public final class KiCadConnectivity {
             // reaching one is never a lone pin's — it goes on into the child, even where the child is not read with it.
             for (KiCadSheet box : schematic.sheets()) {
                 for (KiCadSheet.Pin pin : box.pins()) {
+                    Optional<KiCadBus> bus = KiCadBus.of(pin.name(), aliases);
+                    // A pin carrying a bus joins no wire: its members cross to the child by their names, once every sheet is read.
+                    if (bus.isPresent()) {
+                        // Above, the bus the line reaching the pin is named by — another name's, bound in order — or the pin's own.
+                        List<String> above = new KiCadBusLines(schematic, aliases).busReaching(pin.at()).map(KiCadBus::members)
+                                .filter(members -> members.size() == bus.get().members().size()).orElse(bus.get().members());
+                        crossings.add(new BusCrossing(sheet, sheet + "/" + box.uuid(), above, bus.get().members()));
+                        continue;
+                    }
                     String point = point(sheet, pin.at());
                     pointKeys.add(point);
                     points.add(pin.at());
                     kinds.add(PointKind.PIN);
                     name(point, SHEET_PIN, displayPath(instance) + box.name() + "/" + pin.name());
                     union(point, "hierarchical:" + sheet + "/" + box.uuid() + ":" + pin.name());
+                }
+            }
+            // Where a bus entry ends: a wire's end may meet it there, and the net it is on is the member it takes off by its name.
+            for (KiCadBusEntry entry : schematic.busEntries()) {
+                for (KiCadPoint end : List.of(entry.at(), entry.end())) {
+                    pointKeys.add(point(sheet, end));
+                    points.add(end);
+                    kinds.add(PointKind.WIRE_END);
                 }
             }
             for (KiCadPoint junction : schematic.junctions()) {
@@ -260,6 +338,12 @@ public final class KiCadConnectivity {
             return root;
         }
 
+        /** Joins a key to every key of a name across the whole design, as a global label, a power symbol and a hidden power pin join. */
+        private void joinGlobally(String key, String name) {
+            globalNames.add(name);
+            union(key, "global:" + name);
+        }
+
         private void union(String one, String other) {
             String first = find(one);
             String second = find(other);
@@ -268,13 +352,26 @@ public final class KiCadConnectivity {
             }
         }
 
+        /**
+         * Each bus crossing a sheet's edge joined member by member, as KiCad joins it: the net of the member's name on the box's sheet
+         * to the net of that name on the sheet it opens — by name on both sides, an entry or none (kicad-cli 10: a vector and an unnamed
+         * group join so; a named group's members are its name, a dot and the member, so labels of the bare names do not).
+         */
+        private void joinCrossings() {
+            for (BusCrossing crossing : crossings) {
+                for (int member = 0; member < crossing.inside().size(); member++) {
+                    union("local:" + crossing.sheet() + ":" + crossing.above().get(member), "local:" + crossing.child() + ":" + crossing.inside().get(member));
+                }
+            }
+        }
+
         KiCadConnectivity result() {
+            joinCrossings();
             Map<String, List<KiCadConnection>> groups = new LinkedHashMap<>();
             Map<String, Naming> groupNames = new HashMap<>();
             pins.forEach((key, pin) -> groups.computeIfAbsent(find(key), ignored -> new ArrayList<>()).add(pin));
             names.forEach((key, namings) -> namings.forEach(naming -> groupNames.merge(find(key), naming,
-                    (kept, offered) -> offered.strength() < kept.strength()
-                            || (offered.strength() == kept.strength() && offered.name().compareTo(kept.name()) < 0) ? offered : kept)));
+                    (kept, offered) -> NAMING_ORDER.compare(offered, kept) < 0 ? offered : kept)));
             Map<String, KiCadNet> byName = new TreeMap<>();
             Map<String, String> groupNets = new HashMap<>();
             List<KiCadConnection> unconnected = new ArrayList<>();
@@ -303,7 +400,13 @@ public final class KiCadConnectivity {
                     pointNets.put(point, name);
                 }
             }
-            return new KiCadConnectivity(List.copyOf(byName.values()), unconnected, pointNets);
+            Map<String, String> globals = new LinkedHashMap<>();
+            for (String name : globalNames) {
+                String group = find("global:" + name);
+                Naming naming = groupNames.get(group);
+                globals.put(name, groupNets.getOrDefault(group, naming == null ? name : naming.name()));
+            }
+            return new KiCadConnectivity(List.copyOf(byName.values()), unconnected, pointNets, globals);
         }
     }
 }

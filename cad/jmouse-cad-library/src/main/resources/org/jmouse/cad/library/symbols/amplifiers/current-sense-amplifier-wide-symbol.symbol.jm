@@ -1,7 +1,7 @@
 symbol:current-sense-amplifier-wide-symbol("Current-sense amplifier, KiCad's proportions") {
     meta {
         summary: "A current-sense amplifier as KiCad draws the INA240: a triangle, the inputs on the left, the supply above, ground and the two references below — so a KiCad design's wires land on its pins"
-        code: "SY.AMPLIFIER:CURRENT-SENSE-WIDE"
+        code: "AMPLIFIER:CURRENT-SENSE-WIDE:S"
         category: amplifiers
         tags: electronics, schematic
         authors: "jMouse"

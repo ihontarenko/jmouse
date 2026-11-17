@@ -21,6 +21,7 @@ import org.jmouse.cad.simulation.PinQuantities;
 import org.jmouse.cad.simulation.SimulatedComponent;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.simulation.SimulationReading;
+import org.jmouse.cad.simulation.elaboration.SheetUnfolding;
 import org.jmouse.cad.simulation.elaboration.BenchConditions;
 import org.jmouse.cad.simulation.engine.CircuitTopology;
 import org.jmouse.el.node.Trivia;
@@ -175,7 +176,8 @@ final class SpiceExporter {
     Written write(DocumentNode document) {
         SpiceDeck deck;
         if (document.kind().equals(SimulationModule.CIRCUIT)) {
-            deck = circuit(SimulationReading.circuit(document), document);
+            // SPICE has no sheets: a block is the sheet's own parts, a bus pin bound member by member, as the bench runs it.
+            deck = circuit(SheetUnfolding.of(SimulationReading.circuit(document), catalogue), document);
         } else if (document.kind().equals(SimulationModule.COMPONENT)) {
             deck = component(document);
         } else {

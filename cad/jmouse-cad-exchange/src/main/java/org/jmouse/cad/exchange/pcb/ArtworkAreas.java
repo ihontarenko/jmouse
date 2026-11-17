@@ -8,7 +8,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.jmouse.geometry.Areas;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public final class ArtworkAreas {
         for (ArtworkFeature feature : features) {
             areaOf(feature).filter(area -> !area.isEmpty()).ifPresent(areas::add);
         }
-        return areas.isEmpty() ? GEOMETRY.createPolygon() : UnaryUnionOp.union(areas);
+        return Areas.unionOf(areas, GEOMETRY);
     }
 
     private Optional<Geometry> areaOf(ArtworkFeature feature) {

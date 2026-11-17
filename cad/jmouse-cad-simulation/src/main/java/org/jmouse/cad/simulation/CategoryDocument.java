@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.MetaLineNode;
 import org.jmouse.cad.document.MetaNode;
@@ -31,7 +32,7 @@ import java.util.function.Function;
  * @param parent  the category it stands under, or null at the top
  * @param order   where it stands among its siblings; null where it says nothing, after those that do
  */
-public record CategoryDocument(String slug, String title, String summary, String parent, Integer order) {
+public record CategoryDocument(String slug, String title, @Nullable String summary, @Nullable String parent, @Nullable Integer order) {
 
     /** Siblings by their order, those that give none after, then by title. */
     public static final Comparator<CategoryDocument> SIBLING_ORDER = Comparator

@@ -22,7 +22,7 @@ pcb:spi-adc-pcb("SPI: reading an ADC — pcb") {
     place(R7, at: 46.5 11.5)
     place(R8, at: 46.5 23.5)
     place(DS1, at: 53.5 31.5, rotate: 90)
-    place(J1, footprint: "FP.HDR:1X14-P2.54-V", nets: [0: 1, cs: 2, d0: 3, d1: 4, d2: 5, d3: 6, d4: 7, d5: 8, d6: 9, d7: 10, miso: 11, mosi: 12, sck: 13, vcc: 14], at: 5.5 22.5)
+    place(J1, footprint: "HDR:1X14-P2.54-V:F", nets: [0: 1, cs: 2, d0: 3, d1: 4, d2: 5, d3: 6, d4: 7, d5: 8, d6: 9, d7: 10, miso: 11, mosi: 12, sck: 13, vcc: 14], at: 5.5 22.5)
     track(bottom, width: 0.25, from: 29.81 15.65, to: 29.81 13.11)
     track(top, width: 0.25, from: 47.5 44, to: 49.69 41.81, to: 49.69 35.31)
     track(bottom, width: 0.25, from: 16 20.5, to: 19.6 16.9, to: 19.6 15.7, to: 22.19 13.11)

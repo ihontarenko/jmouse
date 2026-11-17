@@ -5,6 +5,9 @@ import java.util.List;
 /**
  * What a model document is to the engine: the files its body is in, each in its format and convention, or the shapes it
  * is drawn from here.
+ *
+ * @param files  the files its body is in, each in its format and convention; none for a model drawn from shapes
+ * @param shapes the shapes it is drawn from here; none for a model of files
  */
 public record ModelContents(List<ModelFile> files, List<ModelShapes.Shape> shapes) {
 

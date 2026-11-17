@@ -30,8 +30,8 @@ import static org.jmouse.cad.packages.Measures.exact;
  * Packages as they are held, generated: every member of a package table whose form the portrait rules draw — two even
  * rows of leads —, drawn from above, pin 1 at the bottom left beside the notch and the dot, counted along the bottom
  * and back along the top. A pin is named by its number, as a footprint's pad is, so a part is wired to it by its pins'
- * package numbers; its code is its package's designation as a portrait's, {@code PT.SOIC:8-P1.27-W3.9} beside
- * {@code FP.SOIC:8-P1.27-W3.9}.
+ * package numbers; its code is its package's designation as a portrait's, {@code SOIC:8-P1.27-W3.9:P} beside
+ * {@code SOIC:8-P1.27-W3.9:F}.
  */
 public final class PackagePortraits {
 

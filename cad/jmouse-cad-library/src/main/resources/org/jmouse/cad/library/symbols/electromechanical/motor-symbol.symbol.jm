@@ -1,7 +1,7 @@
 symbol:motor-symbol("Motor") {
     meta {
         summary: "Motor, as drawn on a schematic"
-        code: "SY.MOTOR:DC"
+        code: "MOTOR:DC:S"
         category: electromechanical
         tags: electronics, schematic
         authors: "jMouse"

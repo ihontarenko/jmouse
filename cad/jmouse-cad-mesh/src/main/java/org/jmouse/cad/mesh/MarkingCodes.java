@@ -1,5 +1,6 @@
 package org.jmouse.cad.mesh;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public record MarkingCodes(@Label("Colour code") ColourCode colourCode, @Label("
      * @param digitsByTolerance how many digits a value is banded with: the first entry whose limit its tolerance is within
      */
     public record ColourCode(@Label("Source") String source, @Label("Digits") List<String> digits, @Label("Multipliers") Map<String, String> multipliers, @Label("Tolerances") List<Tolerance> tolerances,
-                             @Label("Usual tolerance") double usualTolerance, @Label("Digits by tolerance") List<DigitsByTolerance> digitsByTolerance) {
+                             @Bounds(minimum = 0, maximum = 1, step = 0.001) @Label("Usual tolerance") double usualTolerance, @Label("Digits by tolerance") List<DigitsByTolerance> digitsByTolerance) {
 
         public ColourCode {
             digits = List.copyOf(digits);

@@ -30,7 +30,7 @@ public final class PanelPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "Panels", PanelPlugin.class).markedBy(PanelPlugin.class, "panel.svg");
+        return PluginDescriptor.ofArtifact(ID, "Panels", PanelPlugin.class).withIcon(PanelPlugin.class, "panel.svg");
     }
 
     @Override

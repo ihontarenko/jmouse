@@ -2,7 +2,7 @@
 portrait:tactile-switch-4-6mm-portrait("TACTILE-SWITCH-4, 6mm") {
     meta {
         summary: "4-lead Tactile switch, 6 × 6 mm from above: pin 1 at the bottom left, beside the notch and dot"
-        code: "PT.SW:TACT-6X6"
+        code: "SW:TACT-6X6:P"
         category: switches-through-hole
         tags: electronics, portrait, package, through-hole
         source: "the makers' 6 mm through-hole tact switch (Omron B3F-1000): leads 6.5 mm apart along a side joined inside"

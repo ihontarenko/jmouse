@@ -56,11 +56,6 @@
         </dependency>
         <!-- ⚠️ No dependency on the language: a document's kind and its category are kept as the words its text writes them
              with, handed in by whoever reads the text. -->
-        <!-- The name a revision is said by — 20261023_001 —: read from each commit's time. -->
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-revisions</artifactId>
-        </dependency>
         <!-- Every revision is a commit of the library folder's repository. -->
         <!-- A document's own files, kept through jMouse storage: one local store rooted at the library folder -->
         <dependency>

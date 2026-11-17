@@ -31,8 +31,8 @@ component:ds1307("DS1307", type: clock) {
     pin:square_wave(digital, output, open-drain, 7, "SQW/OUT")
     pin:Vcc(power, 8)
 
-    footprint("FP.DIP:8-W7.62")
-    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("DIP:8-W7.62:F")
+    footprint("SOIC:8-P1.27-W3.9:F")
 
     symbol(box) {
         left([scl, sda, crystal_1, crystal_2, battery])

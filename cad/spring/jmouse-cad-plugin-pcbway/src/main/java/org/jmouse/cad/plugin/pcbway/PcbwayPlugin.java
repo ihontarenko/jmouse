@@ -46,7 +46,7 @@ public final class PcbwayPlugin implements Plugin {
     @Override
     public PluginDescriptor descriptor() {
         return PluginDescriptor.ofArtifact(ID, "PCBWay", PcbwayPlugin.class)
-                .markedBy(PcbwayPlugin.class, "pcbway.svg").requiring(Set.of(GerberPlugin.ID));
+                .withIcon(PcbwayPlugin.class, "pcbway.svg").requiring(Set.of(GerberPlugin.ID));
     }
 
     @Override

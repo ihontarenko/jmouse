@@ -5,7 +5,6 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.Duration;
 import java.nio.file.Path;
-import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -16,14 +15,13 @@ import java.util.List;
  *
  * @param documents what a document may be, and how many read documents are kept
  * @param library   the shipped library and the product's own shipped documents
- * @param revisions  the zone a revision's day is written in
  * @param simulation how much a simulation may ask, and how the longer ones are run
  * @param parts      how parts are looked for beyond the catalogue
  * @param projects   what a reader's projects start as
  */
 @ConfigurationProperties("jmouse.cad")
 public record CadProperties(@DefaultValue Documents documents, @DefaultValue Library library,
-                            @DefaultValue Revisions revisions, @DefaultValue Simulation simulation,
+                            @DefaultValue Simulation simulation,
                             @DefaultValue Parts parts, @DefaultValue Projects projects) {
 
     /** @param draftsTitle what the place a reader's loose work is kept in is called when the engine makes it */
@@ -41,9 +39,12 @@ public record CadProperties(@DefaultValue Documents documents, @DefaultValue Lib
      *                        library's own «Other» unless the installation names another; none when blank, the document left
      *                        unfiled. A category itself is never filed by it: one naming no parent stands at the top.
      * @param routingBoards how many pcbs an editor lays copper on are kept read at once, for the router to answer every move
+     * @param keptPours how many zones' last pours are kept, so a zone an editor's change did not reach all over is poured again
+     *                  only where it did
      */
     public record Documents(@DefaultValue("1000000") int maximumLength, @DefaultValue("2000") int cachedReadings,
-                            @DefaultValue("general") String defaultCategory, @DefaultValue("16") int routingBoards) {
+                            @DefaultValue("general") String defaultCategory, @DefaultValue("16") int routingBoards,
+                            @DefaultValue("64") int keptPours) {
     }
 
     /**
@@ -69,16 +70,6 @@ public record CadProperties(@DefaultValue Documents documents, @DefaultValue Lib
      * @param email its address
      */
     public record Identity(@DefaultValue("jMouse CAD") String name, @DefaultValue("library@jmouse.invalid") String email) {
-    }
-
-    /**
-     * @param zone the zone a revision's day — {@code 20261027_001} — is written in; the system's when unset
-     */
-    public record Revisions(ZoneId zone) {
-
-        public Revisions {
-            zone = zone == null ? ZoneId.systemDefault() : zone;
-        }
     }
 
     /**

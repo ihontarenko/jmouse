@@ -1,7 +1,7 @@
 symbol:screw-terminal-1x1-symbol("Screw terminal, 1 contact") {
     meta {
         summary: "A terminal block of 1 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
-        code: "SY.TB:1"
+        code: "TB:1:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

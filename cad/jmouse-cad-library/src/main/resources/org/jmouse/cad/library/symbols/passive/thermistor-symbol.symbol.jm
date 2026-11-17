@@ -1,7 +1,7 @@
 symbol:thermistor-symbol("Thermistor") {
     meta {
         summary: "A thermistor, as drawn on a schematic: a resistor's body crossed by the hooked line of a resistance that follows the temperature"
-        code: "SY.RESISTOR:THERMISTOR-NTC"
+        code: "RESISTOR:THERMISTOR-NTC:S"
         category: thermistors
         tags: electronics, schematic
         authors: "jMouse"

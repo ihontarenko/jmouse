@@ -4,7 +4,6 @@ import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.document.DocumentStatus;
 import org.jmouse.git.local.CommitAuthor;
 import org.jmouse.git.local.JGitLocalGit;
-import org.jmouse.revisions.RevisionLabel;
 import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -14,8 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class DocumentStoreTest {
 
-    private static final ZoneId KYIV = ZoneId.of("Europe/Kyiv");
     private static final CommitAuthor FOLDER = new CommitAuthor("library", "library@example.org");
     private static final DocumentOwner WORKSPACE = DocumentOwner.of("WORKSPACE", "w1");
 
@@ -59,12 +55,12 @@ class DocumentStoreTest {
 
     private static DocumentStore storeOf(Path folder) {
         return new DocumentStore(() -> folder, LAYOUT, new JGitLocalGit(), actor -> Optional.of(new CommitAuthor(actor, actor + "@example.org")),
-                FOLDER, () -> KYIV);
+                FOLDER);
     }
 
     /** What a reader of the text hands the store: the index of a revision. */
     private static void index(StoredDocument document, int revision, Instant at, String category) {
-        document.indexRevision(revision, new RevisionLabel(LocalDate.ofInstant(at, KYIV), revision), "checksum", "component",
+        document.indexRevision(revision, "checksum", "component",
                 "Resistor", null, null, category, false, at);
     }
 
@@ -72,7 +68,7 @@ class DocumentStoreTest {
     private static StoredDocument coded(DocumentStore store, String slug, DocumentOwner owner, String code) {
         Instant at = Instant.parse("2026-11-07T08:00:00Z");
         StoredDocument document = store.save(new StoredDocument(slug, owner, "anna", at));
-        document.indexRevision(1, new RevisionLabel(LocalDate.ofInstant(at, KYIV), 1), "checksum", "footprint", slug, code, null,
+        document.indexRevision(1, "checksum", "footprint", slug, code, null,
                 "footprints", false, at);
         return document;
     }
@@ -81,8 +77,8 @@ class DocumentStoreTest {
     void theListingIsNarrowedByTheWordsAsWrittenNeverByAPatternLanguage(@TempDir Path folder) {
         DocumentStore store = storeOf(folder);
         store.open();
-        coded(store, "sot-23-5-footprint", null, "FP.SOT:SOT-23-5");
-        coded(store, "chip-resistor-0805-footprint", null, "FP.CHIP:R0805");
+        coded(store, "sot-23-5-footprint", null, "SOT:SOT-23-5:F");
+        coded(store, "chip-resistor-0805-footprint", null, "CHIP:R0805:F");
         Set<DocumentStatus> every = EnumSet.allOf(DocumentStatus.class);
         Function<String, List<String>> found = (text) -> store.browse(every, null, null, null, text, null, null, 0, 10)
                 .rows().stream().map(StoredDocument::getSlug).toList();
@@ -97,16 +93,16 @@ class DocumentStoreTest {
     void aCodeAskedFromNoPlaceNamesTheCataloguesDocumentAndOnlyThenTheOnlyCopy(@TempDir Path folder) {
         DocumentStore store = storeOf(folder);
         store.open();
-        coded(store, "chip-resistor-0805-footprint", null, "FP.CHIP:R0805");
-        coded(store, "my-0805", WORKSPACE, "FP.CHIP:R0805");
-        coded(store, "rcl-r0402", WORKSPACE, "FP.RCL:R0402");
-        coded(store, "rcl-r0402-again", DocumentOwner.of("WORKSPACE", "w2"), "FP.RCL:R0603");
-        coded(store, "rcl-r0603", WORKSPACE, "FP.RCL:R0603");
+        coded(store, "chip-resistor-0805-footprint", null, "CHIP:R0805:F");
+        coded(store, "my-0805", WORKSPACE, "CHIP:R0805:F");
+        coded(store, "rcl-r0402", WORKSPACE, "RCL:R0402:F");
+        coded(store, "rcl-r0402-again", DocumentOwner.of("WORKSPACE", "w2"), "RCL:R0603:F");
+        coded(store, "rcl-r0603", WORKSPACE, "RCL:R0603:F");
 
-        assertEquals("chip-resistor-0805-footprint", store.findByAddress("FP.CHIP:R0805").orElseThrow().getSlug());
-        assertEquals("rcl-r0402", store.findByAddress("FP.RCL:R0402").orElseThrow().getSlug());
+        assertEquals("chip-resistor-0805-footprint", store.findByAddress("CHIP:R0805:F").orElseThrow().getSlug());
+        assertEquals("rcl-r0402", store.findByAddress("RCL:R0402:F").orElseThrow().getSlug());
         // Two owners' copies and no catalogue one: only a place can say which is meant.
-        assertEquals(Optional.empty(), store.findByAddress("FP.RCL:R0603"));
+        assertEquals(Optional.empty(), store.findByAddress("RCL:R0603:F"));
         assertEquals("my-0805", store.findByAddress("my-0805").orElseThrow().getSlug());
     }
 
@@ -125,14 +121,14 @@ class DocumentStoreTest {
         Instant first = Instant.parse("2026-10-23T08:00:00Z");
         StoredDocument resistor = store.save(new StoredDocument("resistor", WORKSPACE, "anna", first));
         index(resistor, 1, first, "passive");
-        store.appendSource("resistor", 1, store.nextLabel("resistor", LocalDate.of(2026, 10, 23)), "one", null, RevisionOrigin.IMPORTED, first);
+        store.appendSource("resistor", 1, "one", null, RevisionOrigin.IMPORTED, first);
         assertTrue(Files.exists(folder.resolve("workspaces/w1/components/passive/resistor.component.jm")));
         store.keepFile("resistor", "body.step", new byte[] {1, 2, 3}, "anna");
 
         // Filed in another category: the file moves, its files with it.
         Instant second = Instant.parse("2026-10-23T09:00:00Z");
         index(resistor, 2, second, "resistors");
-        store.appendSource("resistor", 2, store.nextLabel("resistor", LocalDate.of(2026, 10, 23)), "two", "anna", RevisionOrigin.WRITTEN, second);
+        store.appendSource("resistor", 2, "two", "anna", RevisionOrigin.WRITTEN, second);
         assertTrue(Files.exists(folder.resolve("workspaces/w1/components/resistors/resistor.component.jm")));
         assertFalse(Files.exists(folder.resolve("workspaces/w1/components/passive/resistor.component.jm")));
         assertEquals(List.of("body.step"), store.fileNames("resistor"));
@@ -152,7 +148,11 @@ class DocumentStoreTest {
                 revisions.stream().map(DocumentRevision::origin).toList());
         assertEquals("anna", revisions.get(1).writtenBy());
         assertEquals(first, revisions.get(2).writtenAt());
-        assertEquals("20261023_001", revisions.get(2).label().token());
+        // A revision is named by its number, or as the newest: nothing else — no day, no label — names one.
+        assertEquals(Optional.of(3), opened.revisionWritten("resistor", "latest"));
+        assertEquals(Optional.of(2), opened.revisionWritten("resistor", "2"));
+        assertEquals(Optional.empty(), opened.revisionWritten("resistor", "4"));
+        assertEquals(Optional.empty(), opened.revisionWritten("resistor", "20261023_001"));
         assertEquals(Optional.of("one"), opened.sourceAt("resistor", 1));
         assertEquals(Optional.of("two"), opened.sourceAt("resistor", 2));
         assertEquals(Optional.of(new byte[] {1, 2, 3}).map(bytes -> bytes.length), opened.readFile("resistor", "body.step").map(bytes -> bytes.length));

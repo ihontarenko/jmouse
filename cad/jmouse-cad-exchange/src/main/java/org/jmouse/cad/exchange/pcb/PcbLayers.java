@@ -1,5 +1,7 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.settings.Bounds;
+import org.jmouse.settings.Colour;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -34,9 +36,9 @@ public final class PcbLayers {
      * @param metallic  0 a dielectric — epoxy, ink —, 1 a bare metal
      * @param roughness 0 a mirror, 1 matte
      */
-    public record Finish(@Label("Colour") String colour,
-                         @Label("Metallic") double metallic,
-                         @Label("Roughness") double roughness) {
+    public record Finish(@Colour @Label("Colour") String colour,
+                         @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Metallic") double metallic,
+                         @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Roughness") double roughness) {
     }
 
     /**

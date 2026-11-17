@@ -7,6 +7,6 @@ package org.jmouse.settings;
 public enum SettingScope {
     /** One value for everybody: how the engine runs, what a plugin reaches. */
     INSTALLATION,
-    /** A value for each reader — a habit, a look —, the installation's standing for a reader who keeps none. */
+    /** A value for each reader — a column's width, a look —, the installation's standing for a reader who keeps none. */
     READER
 }

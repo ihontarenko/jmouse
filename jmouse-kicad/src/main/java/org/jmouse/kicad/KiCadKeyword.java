@@ -53,6 +53,8 @@ public enum KiCadKeyword implements SExpressionName {
     // ─── connections ──────────────────────────────────────────────────────────────────────────────
     WIRE("wire"),
     BUS("bus"),
+    BUS_ENTRY("bus_entry"),
+    BUS_ALIAS("bus_alias"),
     JUNCTION("junction"),
     NO_CONNECT("no_connect"),
     LABEL("label"),

@@ -1,7 +1,7 @@
 symbol:battery-symbol("Battery") {
     meta {
         summary: "Battery, as drawn on a schematic: a gauge under it shows how full it is"
-        code: "SY.SOURCE:BATTERY"
+        code: "SOURCE:BATTERY:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

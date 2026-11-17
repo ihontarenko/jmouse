@@ -1,7 +1,7 @@
 footprint:bridge-rectifier-round-8-9mm-footprint("Round bridge rectifier, WOM, 8.9 mm") {
     meta {
         summary: "4-lead bridge rectifier, through-hole, 8.9 mm round body"
-        code: "FP.BRIDGE:WOM"
+        code: "BRIDGE:WOM:F"
         category: diodes-through-hole
         tags: electronics, footprint, through-hole
         source: "W005M … W10M data sheet (WOM case): 1 +, 2 ~, 3 −, 4 ~ on a 5.08 mm square, 8.9 mm round body"
@@ -19,5 +19,5 @@ footprint:bridge-rectifier-round-8-9mm-footprint("Round bridge rectifier, WOM, 8
     outline(silkscreen, filled, "M-4.575 -2.54A0.3 0.3 0 1 0 -3.975 -2.54A0.3 0.3 0 1 0 -4.575 -2.54Z")
     outline(courtyard, width: 0.05, "M-4.95 -5.05H4.95V5.05H-4.95Z")
     body(height: 5.3)
-    model("MD.BRIDGE:WOM")
+    model("BRIDGE:WOM:M3D")
 }

@@ -1,7 +1,7 @@
 footprint:transformer-ei30-2va-two-secondaries-footprint("EI30 printed-circuit transformer, 2 VA, two secondaries") {
     meta {
         summary: "10-lead printed-circuit transformer, through-hole, 27.5 × 32.5 mm body"
-        code: "FP.TRAFO:EI30-2VA-2S"
+        code: "TRAFO:EI30-2VA-2S:F"
         category: transformers
         tags: electronics, footprint, through-hole
         source: "ERA EI30/15.5 2 VA, schematic 2: the primary 1 (•) to 5, the secondaries 6 (•) to 7 and 9 (•) to 10; body 32.5 × 27.5 × 27 mm, pins Ø 0.8 mm"
@@ -25,5 +25,5 @@ footprint:transformer-ei30-2va-two-secondaries-footprint("EI30 printed-circuit t
     outline(silkscreen, filled, "M-12.035 10A0.3 0.3 0 1 0 -11.435 10A0.3 0.3 0 1 0 -12.035 10Z")
     outline(courtyard, width: 0.05, "M-14.25 -16.85H14.25V16.85H-14.25Z")
     body(height: 27)
-    model("MD.TRAFO:EI30-2VA-2S")
+    model("TRAFO:EI30-2VA-2S:M3D")
 }

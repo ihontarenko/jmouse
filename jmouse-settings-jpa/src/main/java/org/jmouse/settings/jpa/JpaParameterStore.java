@@ -67,9 +67,27 @@ public class JpaParameterStore implements ParameterStore {
         keep(holder, owner, section, values);
     }
 
+    @Override
+    public Map<String, Map<String, String>> keptUnder(SettingHolder holder, String owner, String section) {
+        Map<String, Map<String, String>> sections = new LinkedHashMap<>();
+        entityManager.createQuery("select row from KeptParameter row where row.key.holderType = :holderType and row.key.holderId = :holderId "
+                                  + "and row.key.owner = :owner and (row.key.section = :section or row.key.section like :below) "
+                                  + "order by row.key.section, row.key.parameter", KeptParameter.class)
+                .setParameter("holderType", holder.type())
+                .setParameter("holderId", holder.id())
+                .setParameter("owner", owner)
+                .setParameter("section", section)
+                .setParameter("below", section + "/%")
+                .getResultList()
+                .forEach(row -> sections.computeIfAbsent(row.getKey().getSection(), unknown -> new LinkedHashMap<>())
+                        .put(row.getKey().getParameter(), row.getValue()));
+        return sections;
+    }
+
     private List<KeptParameter> rows(SettingHolder holder, String owner, String section) {
         return entityManager.createQuery("select row from KeptParameter row where row.key.holderType = :holderType "
-                                         + "and row.key.holderId = :holderId and row.key.owner = :owner and row.key.section = :section",
+                                         + "and row.key.holderId = :holderId and row.key.owner = :owner and row.key.section = :section "
+                                         + "order by row.key.parameter",
                                          KeptParameter.class)
                 .setParameter("holderType", holder.type())
                 .setParameter("holderId", holder.id())

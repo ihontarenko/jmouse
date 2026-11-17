@@ -12,7 +12,7 @@ component:test-point("Test point", type: connector) {
 
     pin:probe(analog, 1, "the point a probe touches")
 
-    footprint("FP.TP:D1.5")
+    footprint("TP:D1.5:F")
 
-    symbol(uses: "SY.CONNECTOR:TEST-POINT")
+    symbol(uses: "CONNECTOR:TEST-POINT:S")
 }

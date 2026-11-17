@@ -3,7 +3,7 @@
 portrait:axial-resistor-portrait("Axial resistor") {
     meta {
         summary: "A through-hole resistor with its colour bands, read from its resistance and tolerance (IEC 60062)"
-        code: "PT.RESISTOR:AXIAL"
+        code: "RESISTOR:AXIAL:P"
         category: resistors
         tags: electronics, portrait, resistor
         authors: "jMouse"

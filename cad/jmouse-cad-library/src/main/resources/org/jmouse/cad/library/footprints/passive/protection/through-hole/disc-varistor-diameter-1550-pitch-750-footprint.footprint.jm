@@ -1,7 +1,7 @@
 footprint:disc-varistor-diameter-1550-pitch-750-footprint("Metal-oxide disc varistor, 14 mm disc") {
     meta {
         summary: "Metal-oxide disc varistor, 14 mm disc, leads 7.5 mm apart"
-        code: "FP.RV:D15.5-P7.5"
+        code: "RV:D15.5-P7.5:F"
         category: protection-through-hole
         tags: electronics, footprint, through-hole
         source: "IEC 61051-2 varistors, the makers' disc sizes (TDK SIOV-S)"
@@ -16,5 +16,5 @@ footprint:disc-varistor-diameter-1550-pitch-750-footprint("Metal-oxide disc vari
     outline(silkscreen, width: 0.12, "M-7.86 -2.86H7.86V2.86H-7.86Z")
     outline(courtyard, width: 0.05, "M-8.25 -3.25H8.25V3.25H-8.25Z")
     body(height: 19)
-    model("MD.RV:D15.5-P7.5")
+    model("RV:D15.5-P7.5:M3D")
 }

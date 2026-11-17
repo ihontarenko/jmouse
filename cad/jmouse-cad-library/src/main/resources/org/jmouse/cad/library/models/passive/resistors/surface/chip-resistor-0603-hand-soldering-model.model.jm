@@ -1,7 +1,7 @@
 model:chip-resistor-0603-hand-soldering-model("Chip resistor 0603 (1608 metric), hand soldering") {
     meta {
         summary: "Chip resistor 0603 (1608 metric), hand soldering — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:R0603-HAND"
+        code: "CHIP:R0603-HAND:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0603 (1608 metric)"

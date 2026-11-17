@@ -45,10 +45,10 @@ component:ne555("NE555", type: timer) {
 
     node:lower("the 1/3 Vcc tap of the internal divider")
 
-    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("SOIC:8-P1.27-W3.9:F")
 
     # How it looks in the hand: its package from above, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.SOIC:8-P1.27-W3.9") {
+    portrait(uses: "SOIC:8-P1.27-W3.9:P") {
         bind:marking("NE555")
     }
 

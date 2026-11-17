@@ -6,10 +6,10 @@ component:open-hardware-mark("Open hardware mark") {
         authors: "jMouse"
         license: "CERN-OHL-W-2.0"
     }
-    footprint("FP.GRAPHIC:OPEN-HARDWARE-10")
-    footprint("FP.GRAPHIC:OPEN-HARDWARE-5")
-    footprint("FP.GRAPHIC:OPEN-HARDWARE-20")
+    footprint("GRAPHIC:OPEN-HARDWARE-10:F")
+    footprint("GRAPHIC:OPEN-HARDWARE-5:F")
+    footprint("GRAPHIC:OPEN-HARDWARE-20:F")
 
-    symbol(uses: "SY.GRAPHIC:OPEN-HARDWARE") {
+    symbol(uses: "GRAPHIC:OPEN-HARDWARE:S") {
     }
 }

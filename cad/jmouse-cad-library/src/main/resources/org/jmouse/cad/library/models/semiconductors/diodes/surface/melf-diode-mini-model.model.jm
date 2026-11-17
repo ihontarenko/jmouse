@@ -1,7 +1,7 @@
 model:melf-diode-mini-model("MELF diode MiniMELF (SOD-80, DO-213AA)") {
     meta {
         summary: "MELF diode MiniMELF (SOD-80, DO-213AA) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.MELF:D-MINI"
+        code: "MELF:D-MINI:M3D"
         category: diodes-surface
         tags: electronics, model, chip
         source: "JEDEC DO-213 and the makers' MELF outlines, MiniMELF (SOD-80, DO-213AA)"

@@ -33,6 +33,11 @@ public final class Nodes {
         return new NameNode(name, name, null, null);
     }
 
+    /** A name written with a range of numbers, as a bus's bits are: {@code q[0..7]}. */
+    public static NameNode name(String base, int first, int last) {
+        return new NameNode(base + "[" + first + ".." + last + "]", base, first, last);
+    }
+
     /** An expression made of a node — a word, a number —, as the formula language reads it: {@code silver}, {@code 0.6}. */
     public static FormulaNode formula(SourceWritable value) {
         return new FormulaNode(TextSourceWriter.render(value, SourceLayout.WORDS));

@@ -9,8 +9,9 @@ import javax.sql.DataSource;
  * negotiation with a product's numbering. The folder is the dialect's name ({@code db/settings/mysql}), asked of the connection
  * through {@link Dialects}, never guessed.
  *
- * <p><strong>Append-only from first release.</strong> Editing a migration in place is a rule for a product whose database can be
- * dropped, not for a library other people's data has run.</p>
+ * <p><strong>Rewritten, not altered, while every database it runs on may be dropped</strong> (Ivan, 2026-11-14: «базу можна
+ * обнуляти, щоб не робити альтери»): a change of shape or of what a key looks like is the migration rewritten to its final state
+ * and the settings tables built anew. Append-only from the first release whose data somebody else keeps.</p>
  */
 public final class SettingsMigrations {
 

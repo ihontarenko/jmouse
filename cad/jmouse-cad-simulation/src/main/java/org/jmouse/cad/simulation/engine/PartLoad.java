@@ -1,5 +1,6 @@
 package org.jmouse.cad.simulation.engine;
 
+import org.jspecify.annotations.Nullable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,8 +26,8 @@ import java.util.Set;
  *                    {@code overcurrent}, as a percentage of its limit — the one that reached 100 %; null while it works
  */
 public record PartLoad(double power, Map<String, Double> terminals, double temperature, double maximum, double rating,
-                       String failure, Map<String, Double> displays, Set<String> moments, Map<String, String> pictures,
-                       String cause) {
+                       @Nullable String failure, Map<String, Double> displays, Set<String> moments, Map<String, String> pictures,
+                       @Nullable String cause) {
 
     /** The display figures a component writes its limits as, a percentage of each; at 100 % a realistic bench fails it. */
     public static final List<String> STRESSES = List.of("overvoltage", "overcurrent");

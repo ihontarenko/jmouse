@@ -1,7 +1,7 @@
 model:tantalum-capacitor-3216-model("Tantalum capacitor Case A (3216-18 metric)") {
     meta {
         summary: "Tantalum capacitor Case A (3216-18 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:CT3216"
+        code: "CHIP:CT3216:M3D"
         category: capacitors-surface
         tags: electronics, model, chip
         source: "EIA-535-BAAC case sizes (KEMET T491), Case A (3216-18 metric)"

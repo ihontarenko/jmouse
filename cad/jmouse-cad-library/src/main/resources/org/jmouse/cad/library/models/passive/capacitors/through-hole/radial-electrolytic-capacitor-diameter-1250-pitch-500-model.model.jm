@@ -1,7 +1,7 @@
 model:radial-electrolytic-capacitor-diameter-1250-pitch-500-model("Radial electrolytic capacitor, 12.5 mm can") {
     meta {
         summary: "Radial electrolytic capacitor, 12.5 mm can — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RADIAL:CP-D12.5-P5"
+        code: "RADIAL:CP-D12.5-P5:M3D"
         category: capacitors-through-hole
         tags: electronics, model, radial
         source: "IEC 60384-4 can sizes, IEC 60286-2 lead spacing"

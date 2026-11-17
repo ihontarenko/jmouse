@@ -80,7 +80,7 @@ component:bipolar-transistor("Bipolar transistor", type: bjt) {
     node:ci("the intrinsic collector, behind the collector resistance")
     node:ei("the intrinsic emitter, behind the emitter resistance")
 
-    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
+    symbol(uses: "TRANSISTOR:BIPOLAR-NPN:S") {
         bind:failed(failed)
     }
 

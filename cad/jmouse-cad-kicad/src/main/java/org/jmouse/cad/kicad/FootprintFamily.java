@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 /**
  * Every size of a KiCad footprint family written once, and the code of this library's footprint each size is: KiCad names a
  * package by its sizes — {@code Capacitor_THT:CP_Radial_D10.0mm_P5.00mm} —, this library codes it by the same sizes —
- * {@code FP.RADIAL:CP-D10-P5} —, so one entry carries a family both ways in.
+ * {@code RADIAL:CP-D10-P5:F} —, so one entry carries a family both ways in.
  *
  * <p>In the KiCad id, {@code {name}} is a part read — no underscore in it — and {@code {*}} a part passed over. In the code,
  * {@code {name}} writes the part read as it is written, {@code {name|number}} a size as its plain value ({@code 10.00} is {@code 10},

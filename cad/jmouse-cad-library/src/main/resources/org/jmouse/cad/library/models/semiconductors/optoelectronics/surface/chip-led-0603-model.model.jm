@@ -1,7 +1,7 @@
 model:chip-led-0603-model("Chip LED 0603 (1608 metric)") {
     meta {
         summary: "Chip LED 0603 (1608 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:LED0603"
+        code: "CHIP:LED0603:M3D"
         category: optoelectronics-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 0603 (1608 metric)"

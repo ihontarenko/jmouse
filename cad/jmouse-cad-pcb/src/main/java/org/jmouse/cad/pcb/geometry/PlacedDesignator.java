@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.PcbVocabulary;
@@ -40,7 +41,7 @@ public record PlacedDesignator(double x, double y, double height, double rotatio
     public record Rules(@Label(value = "Gap", unit = "mm") double gap,
                         @Label(value = "Least height", unit = "mm") double least,
                         @Label(value = "Most height", unit = "mm") double most,
-                        @Label("Width share") double widthShare,
+                        @Bounds(minimum = 0, maximum = 1, step = 0.01) @Label("Width share") double widthShare,
                         @Label("Advance") double advance) {
     }
 

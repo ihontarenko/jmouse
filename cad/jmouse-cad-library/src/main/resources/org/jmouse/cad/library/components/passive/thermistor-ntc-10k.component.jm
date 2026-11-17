@@ -24,10 +24,10 @@ component:thermistor-ntc-10k("NTC thermistor, 10 kΩ", type: thermistor) {
     pin:terminal_one(analog, 1, "first lead")
     pin:terminal_two(analog, 2, "second lead")
 
-    footprint("FP.AXIAL:R0207-P10.16-H")
-    footprint("FP.AXIAL:R0207-P2.54-V")
+    footprint("AXIAL:R0207-P10.16-H:F")
+    footprint("AXIAL:R0207-P2.54-V:F")
 
-    symbol(uses: "SY.RESISTOR:THERMISTOR-NTC") {
+    symbol(uses: "RESISTOR:THERMISTOR-NTC:S") {
         bind:failed(failed)
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
@@ -57,5 +57,5 @@ component:thermistor-ntc-10k("NTC thermistor, 10 kΩ", type: thermistor) {
     }
 
     # How it looks in the hand: a black epoxy bead on two leads.
-    portrait(uses: "PT.THERMISTOR:NTC-BEAD")
+    portrait(uses: "THERMISTOR:NTC-BEAD:P")
 }

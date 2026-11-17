@@ -1,7 +1,7 @@
 model:tqfp-100-model("TQFP-100, 14 mm body") {
     meta {
         summary: "TQFP-100, 14 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.TQFP:100-P0.5-14"
+        code: "TQFP:100-P0.5-14:M3D"
         category: quad-flat
         tags: electronics, model, quad
         source: "JEDEC MS-026 AED"

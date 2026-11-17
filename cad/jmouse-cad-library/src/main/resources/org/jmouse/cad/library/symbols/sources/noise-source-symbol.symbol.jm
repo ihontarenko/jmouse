@@ -1,7 +1,7 @@
 symbol:noise-source-symbol("Noise source") {
     meta {
         summary: "A voltage source whose voltage is noise — a ragged line in the circle, as a schematic draws it"
-        code: "SY.SOURCE:VOLTAGE-NOISE"
+        code: "SOURCE:VOLTAGE-NOISE:S"
         category: sources
         tags: electronics, schematic
         authors: "jMouse"

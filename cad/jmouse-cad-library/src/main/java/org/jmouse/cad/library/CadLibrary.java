@@ -70,7 +70,7 @@ public final class CadLibrary implements CatalogueDocuments {
     }
 
     /**
-     * The document a word names: by its slug, or by its technical code ({@code FP.CHIP:R0805}) — the name every reference
+     * The document a word names: by its slug, or by its technical code ({@code CHIP:R0805:F}) — the name every reference
      * writes ({@link #findCoded}).
      */
     @Override

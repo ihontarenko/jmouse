@@ -1,7 +1,7 @@
 model:melf-resistor-micro-model("MELF resistor MicroMELF") {
     meta {
         summary: "MELF resistor MicroMELF — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.MELF:R-MICRO"
+        code: "MELF:R-MICRO:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "JEDEC DO-213 and the makers' MELF outlines, MicroMELF"

@@ -22,7 +22,7 @@ component:fuse("Fuse, 1 A fast", type: fuse) {
     pin:terminal_one(analog, 1, "first cap")
     pin:terminal_two(analog, 2, "second cap")
 
-    symbol(uses: "SY.FUSE:FIXED") {
+    symbol(uses: "FUSE:FIXED:S") {
         bind:a(pin: terminal_one)
         bind:b(pin: terminal_two)
     }
@@ -42,5 +42,5 @@ component:fuse("Fuse, 1 A fast", type: fuse) {
     }
 
     # How it looks in the hand: a glass tube whose element parts when it blows.
-    portrait(uses: "PT.FUSE:GLASS-5X20")
+    portrait(uses: "FUSE:GLASS-5X20:P")
 }

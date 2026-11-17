@@ -14,7 +14,7 @@ component:pnp-transistor("PNP transistor", type: bjt) {
 
     parameter:polarity(-1, "PNP")
 
-    symbol(uses: "SY.TRANSISTOR:BIPOLAR-PNP") {
+    symbol(uses: "TRANSISTOR:BIPOLAR-PNP:S") {
         bind:failed(failed)
     }
 

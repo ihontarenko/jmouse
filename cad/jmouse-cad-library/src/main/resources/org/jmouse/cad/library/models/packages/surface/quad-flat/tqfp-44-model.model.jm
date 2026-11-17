@@ -1,7 +1,7 @@
 model:tqfp-44-model("TQFP-44, 10 mm body") {
     meta {
         summary: "TQFP-44, 10 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.TQFP:44-P0.8-10"
+        code: "TQFP:44-P0.8-10:M3D"
         category: quad-flat
         tags: electronics, model, quad
         source: "JEDEC MS-026 ACB"

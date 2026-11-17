@@ -17,7 +17,7 @@ component:voltmeter("Voltmeter", type: meter) {
     lead:plus(red, stripes: black)
     lead:minus(black, stripes: white)
     reading:reading(plus - minus, unit: V, signal)
-    symbol(uses: "SY.METER:VOLTMETER") {
+    symbol(uses: "METER:VOLTMETER:S") {
         bind:a(pin: plus)
         bind:b(pin: minus)
     }

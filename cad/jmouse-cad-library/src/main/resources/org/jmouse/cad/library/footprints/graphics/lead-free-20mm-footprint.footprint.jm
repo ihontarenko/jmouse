@@ -1,7 +1,7 @@
 footprint:lead-free-20mm-footprint("Lead free, 20 mm") {
     meta {
         summary: "Pb struck out: made without lead, printed 20 mm wide"
-        code: "FP.GRAPHIC:LEAD-FREE-20"
+        code: "GRAPHIC:LEAD-FREE-20:F"
         category: graphics
         tags: electronics, footprint, graphic
         authors: "jMouse"

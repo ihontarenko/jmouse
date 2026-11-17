@@ -1,7 +1,7 @@
 symbol:screw-terminal-1x20-symbol("Screw terminal, 20 contacts") {
     meta {
         summary: "A terminal block of 20 screw clamps, as drawn on a schematic: each wire comes in from the left under its screw"
-        code: "SY.TB:20"
+        code: "TB:20:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

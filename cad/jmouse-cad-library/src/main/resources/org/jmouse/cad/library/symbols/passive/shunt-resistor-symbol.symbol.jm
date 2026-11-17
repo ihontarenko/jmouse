@@ -1,7 +1,7 @@
 symbol:shunt-resistor-symbol("Shunt resistor, four terminals") {
     meta {
         summary: "A current-sense shunt with Kelvin terminals, as drawn on a schematic: the current runs top to bottom, the voltage is taken from the right"
-        code: "SY.RESISTOR:SHUNT-KELVIN"
+        code: "RESISTOR:SHUNT-KELVIN:S"
         category: resistors
         tags: electronics, schematic
         authors: "jMouse"

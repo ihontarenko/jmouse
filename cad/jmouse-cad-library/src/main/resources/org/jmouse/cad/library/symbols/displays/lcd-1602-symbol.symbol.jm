@@ -1,7 +1,7 @@
 symbol:lcd-1602-symbol("16×2 character LCD") {
     meta {
         summary: "A 16×2 character LCD module: its window shows the 32 characters its controller holds on screen"
-        code: "SY.DISPLAY:LCD-16X2"
+        code: "DISPLAY:LCD-16X2:S"
         category: displays
         tags: electronics, schematic, display
         authors: "jMouse"

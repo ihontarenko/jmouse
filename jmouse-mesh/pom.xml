@@ -61,6 +61,11 @@
         body, whoever drew it.
     -->
     <dependencies>
+        <!-- descriptions: every record's and enum's Javadoc kept beside it, what a model document's schema says of its axis -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-descriptions</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-el</artifactId>

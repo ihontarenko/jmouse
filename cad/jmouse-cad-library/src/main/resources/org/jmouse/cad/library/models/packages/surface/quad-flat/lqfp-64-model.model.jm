@@ -1,7 +1,7 @@
 model:lqfp-64-model("LQFP-64, 10 mm body") {
     meta {
         summary: "LQFP-64, 10 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.LQFP:64-P0.5-10"
+        code: "LQFP:64-P0.5-10:M3D"
         category: quad-flat
         tags: electronics, model, quad
         source: "JEDEC MS-026 BCD"

@@ -3,6 +3,7 @@ package org.jmouse.cad.exchange.sheet;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import org.jmouse.cad.Point;
+import org.jmouse.cad.circuit.Bus;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.circuit.Placement;
@@ -15,6 +16,8 @@ import org.jmouse.cad.simulation.SimulatedComponent;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.simulation.SimulationReading;
 import org.jmouse.cad.simulation.SimulationVocabulary;
+import org.jmouse.cad.simulation.elaboration.SheetUnfolding;
+import org.jmouse.cad.exchange.imported.SheetTracing;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -168,7 +171,9 @@ public final class SheetChecks {
             }
         }
         byNet.forEach((net, onNet) -> findings.addAll(netFindings(net, onNet, fromElsewhere.contains(net))));
-        findings.addAll(labelFindings(marks, byNet.keySet()));
+        // A port naming a bus hands the bus across: it is no lone label of a net.
+        findings.addAll(labelFindings(marks.stream().filter(mark -> mark.net() == null || sheet.bus(mark.net()).isEmpty()).toList(), byNet.keySet()));
+        findings.addAll(busFindings(marks, byNet.keySet()));
         return findings;
     }
 
@@ -212,7 +217,8 @@ public final class SheetChecks {
             return List.of();
         }
         SimulatedComponent component = SimulatedComponent.sheet(placed);
-        return frame.ports().stream().map(port -> new PinOnSheet(block.reference(), port.port().net(),
+        // A bus pin is no pin of a net: its binding is what the buses' checks look at.
+        return frame.ports().stream().filter(port -> !port.port().direction().equals(SimulationVocabulary.BUS)).map(port -> new PinOnSheet(block.reference(), port.port().net(),
                 frame.wired().getOrDefault(port.port().net(), ""), component.pin(port.port().net()),
                 SheetGeometry.onSheet(item, port.lead()))).toList();
     }
@@ -292,10 +298,79 @@ public final class SheetChecks {
         return findings;
     }
 
-    /** The nets that may be driven and powered on another sheet: a port's or a global label's, and the sheet's own ports and global nets. */
+    // ─── the buses ─────────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * What is wrong with the sheet's buses: a line drawing a bus the sheet does not declare; an entry standing on no line, or
+     * taking off a net its bus does not carry; a net a bus carries that nothing on the sheet is on; a bus handed across the edge
+     * that the sheet does not declare; a block's bus pin bound to no bus, or to one of another size.
+     */
+    private List<SheetFinding> busFindings(List<Placement.Mark> marks, Set<String> pinNets) {
+        List<SheetFinding> findings = new ArrayList<>();
+        List<Placement.BusLine> lines = sheet.layout().stream().filter(Placement.BusLine.class::isInstance).map(Placement.BusLine.class::cast).toList();
+        for (Placement.BusLine line : lines) {
+            if (sheet.bus(line.bus()).isEmpty()) {
+                findings.add(new SheetFinding(FindingSeverity.ERROR, "Bus line " + line.reference() + " draws the bus " + line.bus()
+                        + ", which the sheet does not declare: declare it in its buses block", List.of(itemKey(line.reference())),
+                        line.via().stream().findFirst()));
+            }
+        }
+        for (Placement.Mark entry : marks.stream().filter(mark -> mark.symbol().equals(SimulationVocabulary.ENTRY)).toList()) {
+            Optional<Placement.BusLine> on = lines.stream().filter(line -> standsOn(entry.at(), line)).findFirst();
+            if (on.isEmpty()) {
+                findings.add(new SheetFinding(WARNING, "Entry " + entry.reference() + " stands on no bus line: it takes nothing off a bus",
+                        List.of(itemKey(entry.reference())), Optional.of(entry.at())));
+                continue;
+            }
+            Optional<Bus> bus = sheet.bus(on.get().bus());
+            if (bus.isPresent() && (entry.net() == null || !bus.get().carries(entry.net()))) {
+                findings.add(new SheetFinding(WARNING, "Entry " + entry.reference() + " takes " + (entry.net() == null ? "no net" : entry.net())
+                        + " off the bus " + bus.get().name() + ", which carries " + String.join(", ", bus.get().members()),
+                        List.of(itemKey(entry.reference())), Optional.of(entry.at())));
+            }
+        }
+        Set<String> named = marks.stream().filter(SheetChecks::namesNet).map(SheetChecks::netOf).collect(Collectors.toSet());
+        for (Bus bus : sheet.buses()) {
+            List<String> idle = bus.members().stream().filter(member -> !pinNets.contains(member) && !named.contains(member)).toList();
+            if (!idle.isEmpty() && idle.size() < bus.size()) {
+                findings.add(new SheetFinding(NOTICE, "Bus " + bus.name() + " carries " + String.join(", ", idle)
+                        + ", which nothing on the sheet is on", List.of(), Optional.empty()));
+            }
+        }
+        for (SheetBoundary.Port port : sheet.boundary().ports()) {
+            if (port.direction().equals(SimulationVocabulary.BUS) && sheet.bus(port.net()).isEmpty()) {
+                findings.add(new SheetFinding(FindingSeverity.ERROR, "The sheet hands the bus " + port.net()
+                        + " across its edge and declares no bus of that name", List.of(), Optional.empty()));
+            }
+        }
+        for (Part part : sheet.parts()) {
+            try {
+                SheetUnfolding.busesBound(part, sheet, catalogue);
+            } catch (IllegalArgumentException refused) {
+                findings.add(new SheetFinding(FindingSeverity.ERROR, refused.getMessage(), List.of(itemKey(part.reference())), Optional.empty()));
+            }
+        }
+        return findings;
+    }
+
+    /** Whether a point stands on a bus line: on one of its stretches, an end included. */
+    private static boolean standsOn(Point at, Placement.BusLine line) {
+        SheetTracing.Point point = new SheetTracing.Point(at.x(), at.y());
+        for (int index = 1; index < line.via().size(); index++) {
+            Point start = line.via().get(index - 1);
+            Point end = line.via().get(index);
+            if (point.liesOn(new SheetTracing.Point(start.x(), start.y()), new SheetTracing.Point(end.x(), end.y()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The nets that may be driven and powered on another sheet: a port's, a global label's or a supply rail's, and the sheet's own ports and global nets. */
     private Set<String> fromElsewhere(List<Placement.Mark> marks) {
         Set<String> nets = new HashSet<>();
-        marks.stream().filter(mark -> mark.symbol().equals(SimulationVocabulary.PORT) || mark.symbol().equals(SimulationVocabulary.GLOBAL))
+        marks.stream().filter(mark -> mark.symbol().equals(SimulationVocabulary.PORT) || mark.symbol().equals(SimulationVocabulary.GLOBAL)
+                        || mark.symbol().equals(SimulationVocabulary.POWER))
                 .filter(mark -> mark.net() != null).forEach(mark -> nets.add(mark.net()));
         SheetBoundary boundary = sheet.boundary();
         boundary.ports().forEach(port -> nets.add(port.net()));
@@ -309,10 +384,10 @@ public final class SheetChecks {
                 || mark.symbol().equals(SimulationVocabulary.POWER);
     }
 
-    /** Whether a mark is a label: of this sheet, a port of it, or global. */
+    /** Whether a mark is a label: of this sheet, a port of it, global, or an entry taking a bus's net off it. */
     private static boolean labels(Placement.Mark mark) {
         return mark.symbol().equals(SimulationVocabulary.LABEL) || mark.symbol().equals(SimulationVocabulary.PORT)
-                || mark.symbol().equals(SimulationVocabulary.GLOBAL);
+                || mark.symbol().equals(SimulationVocabulary.GLOBAL) || mark.symbol().equals(SimulationVocabulary.ENTRY);
     }
 
     /** The net a mark names; a ground or a common with none names the ground. */

@@ -1,7 +1,7 @@
 footprint:chip-led-0201-footprint("Chip LED 0201 (0603 metric)") {
     meta {
         summary: "Chip LED, 0201 (0603 metric) body, reflow pads; pad 1 is the cathode"
-        code: "FP.CHIP:LED0201"
+        code: "CHIP:LED0201:F"
         category: optoelectronics-surface
         tags: electronics, footprint, surface
         source: "IEC 60115-8 dimensions, 0201 (0603 metric)"
@@ -17,5 +17,5 @@ footprint:chip-led-0201-footprint("Chip LED 0201 (0603 metric)") {
     outline(silkscreen, width: 0.12, "M-0.785 -0.31V0.31")
     outline(courtyard, width: 0.05, "M-0.7 -0.35H0.7V0.35H-0.7Z")
     body(height: 0.28)
-    model("MD.CHIP:LED0201")
+    model("CHIP:LED0201:M3D")
 }

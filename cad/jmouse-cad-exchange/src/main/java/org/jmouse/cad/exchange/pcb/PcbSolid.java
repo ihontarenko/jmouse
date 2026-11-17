@@ -1,7 +1,7 @@
 package org.jmouse.cad.exchange.pcb;
 
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.geometry.Areas;
+import org.jmouse.geometry.Areas;
 import org.jmouse.cad.pcb.geometry.PcbDrills;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -60,20 +60,20 @@ public record PcbSolid(Geometry substrate, Map<String, Side> sides, List<PartBod
         Map<String, Side> sides = new LinkedHashMap<>();
         for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
             if (!stack.contains(side)) {
-                Geometry mask = pcb.difference(holes);
+                Geometry mask = Areas.difference(pcb, holes);
                 Geometry nothing = AREAS.createPolygon();
                 sides.put(side, new Side(nothing, nothing, nothing, nothing, mask, nothing, Areas.common(areas.areaOf(artwork.silkscreen(side)), mask)));
                 continue;
             }
-            Geometry copper = Areas.common(areas.areaOf(artwork.copper(side)), pcb).difference(holes);
+            Geometry copper = Areas.difference(Areas.common(areas.areaOf(artwork.copper(side)), pcb), holes);
             Geometry openings = Areas.common(areas.areaOf(artwork.maskOpenings(side)), pcb);
-            Geometry mask = pcb.difference(openings).difference(holes);
-            sides.put(side, new Side(copper, openings, Areas.common(copper, openings), openings.difference(copper).difference(holes), mask,
+            Geometry mask = Areas.difference(Areas.difference(pcb, openings), holes);
+            sides.put(side, new Side(copper, openings, Areas.common(copper, openings), Areas.difference(Areas.difference(openings, copper), holes), mask,
                     Areas.common(areas.areaOf(artwork.paste(side)), pcb), Areas.common(areas.areaOf(artwork.silkscreen(side)), mask)));
         }
         List<PartBodies.PartBody> standing = new ArrayList<>();
         artwork.fabrication().parts().forEach(part -> bodies.of(part).ifPresent(standing::add));
-        return new PcbSolid(pcb.difference(holes), sides, standing);
+        return new PcbSolid(Areas.difference(pcb, holes), sides, standing);
     }
 
     /** The pcb's area: its edge's closed runs, an inner run a cut-out of the run around it. */
@@ -87,7 +87,7 @@ public record PcbSolid(Geometry substrate, Map<String, Side> sides, List<PartBod
             if (!ring.getFirst().equals2D(ring.getLast())) {
                 ring.add(ring.getFirst());
             }
-            area = area.symDifference(AREAS.createPolygon(ring.toArray(Coordinate[]::new)).buffer(0));
+            area = Areas.exclusive(area, AREAS.createPolygon(ring.toArray(Coordinate[]::new)).buffer(0));
         }
         return area;
     }
@@ -99,7 +99,7 @@ public record PcbSolid(Geometry substrate, Map<String, Side> sides, List<PartBod
             Coordinate from = new Coordinate(drill.from().x(), drill.from().y());
             Coordinate to = new Coordinate(drill.to().x(), drill.to().y());
             Geometry line = from.equals2D(to) ? AREAS.createPoint(from) : AREAS.createLineString(new Coordinate[] {from, to});
-            area = area.union(line.buffer(drill.width() / 2, drillSteps));
+            area = Areas.union(area, line.buffer(drill.width() / 2, drillSteps));
         }
         return area;
     }

@@ -1,7 +1,7 @@
 symbol:transformer-air-core-symbol("Transformer, air core") {
     meta {
         summary: "A transformer with no core, as drawn on a schematic: two windings facing each other, nothing between them"
-        code: "SY.TRANSFORMER:AIR-CORE"
+        code: "TRANSFORMER:AIR-CORE:S"
         category: transformers
         tags: electronics, schematic
         authors: "jMouse"

@@ -1,7 +1,7 @@
 model:chip-resistor-2010-model("Chip resistor 2010 (5025 metric)") {
     meta {
         summary: "Chip resistor 2010 (5025 metric) — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.CHIP:R2010"
+        code: "CHIP:R2010:M3D"
         category: resistors-surface
         tags: electronics, model, chip
         source: "IEC 60115-8 dimensions, 2010 (5025 metric)"

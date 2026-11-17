@@ -1,7 +1,7 @@
 symbol:shielded-header-1x37-symbol("Shielded pin header, 37 contacts") {
     meta {
         summary: "A single-row pin header of 37, inside its shield, as drawn on a schematic: each contact a pin leaving to the right, numbered as on the pcb"
-        code: "SY.HDR:1X37-SHIELDED"
+        code: "HDR:1X37-SHIELDED:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

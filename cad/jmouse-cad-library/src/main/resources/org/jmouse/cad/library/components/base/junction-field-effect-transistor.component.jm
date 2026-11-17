@@ -56,7 +56,7 @@ component:junction-field-effect-transistor("Junction FET", type: jfet) {
     node:di("the intrinsic drain, behind the drain resistance")
     node:si("the intrinsic source, behind the source resistance")
 
-    symbol(uses: "SY.TRANSISTOR:JFET-N") {
+    symbol(uses: "TRANSISTOR:JFET-N:S") {
         bind:failed(failed)
     }
 

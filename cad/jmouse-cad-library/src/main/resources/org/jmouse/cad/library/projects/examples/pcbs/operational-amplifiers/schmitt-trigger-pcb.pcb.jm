@@ -14,7 +14,7 @@ pcb:schmitt-trigger-pcb("Schmitt trigger — pcb") {
     place(U1, at: 24 6)
     place(R1, at: 20.5 13, rotate: 270)
     place(R2, at: 24 17.5)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 9.5)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 9.5)
     track(top, width: 0.25, from: 21.55 6.635, to: 20.2 6.635, to: 20.2 11.7, to: 20.5 12)
     track(top, width: 0.25, from: 20.5 12, to: 23 14.5, to: 23 17.5)
     track(top, width: 0.25, from: 21.55 4.095, to: 22 4.095, to: 25 7.095, to: 25 17.5)

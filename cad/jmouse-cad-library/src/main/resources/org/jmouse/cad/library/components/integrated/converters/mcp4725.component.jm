@@ -29,7 +29,7 @@ component:mcp4725("MCP4725", type: converter) {
     pin:scl(digital, input, 5, "serial clock")
     pin:a0(digital, input, 6, "address bit A0")
 
-    footprint("FP.SOT23:6")
+    footprint("SOT23:6:F")
 
     symbol(box) {
         left([scl, sda, a0])

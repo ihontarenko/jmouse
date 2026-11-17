@@ -33,9 +33,9 @@ component:tl431("TL431", type: reference) {
     pin:anode(analog, 2, "anode")
     pin:cathode(analog, 3, "cathode")
 
-    footprint("FP.TO92:3-L")
+    footprint("TO92:3-L:F")
 
-    symbol(uses: "SY.REFERENCE:SHUNT-ADJUSTABLE") {
+    symbol(uses: "REFERENCE:SHUNT-ADJUSTABLE:S") {
         bind:failed(failed)
         bind:reference(pin: ref)
     }
@@ -77,7 +77,7 @@ component:tl431("TL431", type: reference) {
     }
 
     # How it looks in the hand: its TO-92 package from the front, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.TO92:3") {
+    portrait(uses: "TO92:3:P") {
         bind:marking("TL431")
     }
 }

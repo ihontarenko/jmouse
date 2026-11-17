@@ -46,6 +46,10 @@ public class KeptParameter {
             this.parameter = parameter;
         }
 
+        public String getSection() {
+            return section;
+        }
+
         public String getParameter() {
             return parameter;
         }

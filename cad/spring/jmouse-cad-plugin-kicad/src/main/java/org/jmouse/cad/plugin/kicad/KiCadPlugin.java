@@ -82,7 +82,7 @@ public final class KiCadPlugin implements Plugin {
 
     @Override
     public PluginDescriptor descriptor() {
-        return PluginDescriptor.ofArtifact(ID, "KiCad", KiCadPlugin.class).markedBy(KiCadPlugin.class, "kicad.svg");
+        return PluginDescriptor.ofArtifact(ID, "KiCad", KiCadPlugin.class).withIcon(KiCadPlugin.class, "kicad.svg");
     }
 
     @Override

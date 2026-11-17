@@ -1,7 +1,7 @@
 symbol:inductor-symbol("Inductor") {
     meta {
         summary: "Inductor, as drawn on a schematic"
-        code: "SY.INDUCTOR:FIXED"
+        code: "INDUCTOR:FIXED:S"
         category: inductors
         tags: electronics, schematic
         authors: "jMouse"

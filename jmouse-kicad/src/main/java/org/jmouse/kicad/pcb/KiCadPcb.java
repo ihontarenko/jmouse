@@ -3,6 +3,7 @@ package org.jmouse.kicad.pcb;
 import static org.jmouse.kicad.KiCadKeyword.*;
 
 import org.jmouse.kicad.KiCadLayer;
+import org.jmouse.kicad.KiCadOutline;
 import org.jmouse.kicad.KiCadPoint;
 import org.jmouse.kicad.footprint.KiCadFootprintGraphic;
 import org.jmouse.sexpression.SExpressionDocument;
@@ -93,11 +94,11 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
      * @param outlines  each closed outline it draws
      */
     public record Zone(ZoneKind kind, String net, List<String> layers, double clearance, int priority,
-                       List<List<KiCadPoint>> outlines) {
+                       List<KiCadOutline> outlines) {
 
         public Zone {
             layers = List.copyOf(layers);
-            outlines = outlines.stream().map(List::copyOf).toList();
+            outlines = List.copyOf(outlines);
         }
     }
 
@@ -204,9 +205,8 @@ public record KiCadPcb(String name, List<String> copper, List<KiCadPcbFootprint>
                 .orElseGet(() -> zone.wordOf(LAYER).map(List::of).orElse(List.of()));
         double clearance = zone.list(CONNECT_PADS).flatMap(pads -> pads.list(CLEARANCE)).map(written -> written.number(1)).orElse(0.0);
         int priority = zone.list(PRIORITY).map(written -> (int) written.number(1)).orElse(0);
-        List<List<KiCadPoint>> outlines = new ArrayList<>();
-        zone.lists(ZONE_OUTLINE).forEach(polygon -> polygon.list(POINTS).ifPresent(points -> outlines.add(
-                points.lists(POINT).stream().map(KiCadPoint::of).toList())));
+        List<KiCadOutline> outlines = new ArrayList<>();
+        zone.lists(ZONE_OUTLINE).forEach(polygon -> polygon.list(POINTS).map(KiCadOutline::of).ifPresent(outlines::add));
         return new Zone(zone.list(KEEPOUT).isPresent() ? ZoneKind.KEEPOUT : ZoneKind.COPPER, zone.wordOf(NET_NAME).orElse(""),
                 layers, clearance, priority, outlines);
     }

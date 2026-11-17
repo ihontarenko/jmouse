@@ -1,7 +1,10 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.cad.store.about.EngineAbout;
-import org.jmouse.cad.store.habits.CadHabits;
+import org.jmouse.cad.store.files.DocumentUnderlays;
+import org.jmouse.documentation.Documentation;
+import org.jmouse.cad.store.settings.ReaderSettings;
+import org.jmouse.settings.Settings;
 import org.jmouse.cad.store.plugin.EnginePluginSettings;
 import org.jmouse.cad.store.exchange.DocumentExchange;
 import org.jmouse.cad.store.exchange.RoutingBoards;
@@ -99,20 +102,25 @@ public class CadManagementConfiguration {
     }
 
     @Bean
+    public DocumentationController cadDocumentationController(Documentation documentation) {
+        return new DocumentationController(documentation);
+    }
+
+    @Bean
+    public UnderlaysController cadUnderlaysController(DocumentUnderlays underlays) {
+        CadAccessRules.requireDecidedInside(UnderlaysController.class);
+        return new UnderlaysController(underlays);
+    }
+
+    @Bean
     public PluginController cadPluginController(Extensions extensions) {
         return new PluginController(extensions);
     }
 
     @Bean
-    public HabitsController cadHabitsController(CadHabits habits) {
-        CadAccessRules.requireDecidedInside(HabitsController.class);
-        return new HabitsController(habits);
-    }
-
-    @Bean
-    public SettingsController cadSettingsController(SettingsTree tree, EnginePluginSettings settings) {
+    public SettingsController cadSettingsController(SettingsTree tree, EnginePluginSettings settings, Settings store, ReaderSettings reader) {
         CadAccessRules.requireDecidedInside(SettingsController.class);
-        return new SettingsController(tree, settings);
+        return new SettingsController(tree, settings, store, reader);
     }
 
     @Bean
@@ -126,9 +134,9 @@ public class CadManagementConfiguration {
     }
 
     @Bean
-    public PluginSettingsController cadPluginSettingsController(EnginePluginSettings settings) {
-        CadAccessRules.requireDecidedInside(PluginSettingsController.class);
-        return new PluginSettingsController(settings);
+    public ServerFoldersController cadServerFoldersController(EnginePluginSettings settings) {
+        CadAccessRules.requireDecidedInside(ServerFoldersController.class);
+        return new ServerFoldersController(settings);
     }
 
     @Bean

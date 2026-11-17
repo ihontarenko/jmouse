@@ -1,7 +1,7 @@
 symbol:pin-header-2x49-symbol("Pin header, 2 x 49") {
     meta {
         summary: "A two-row pin header of 98, as drawn on a schematic: odd contacts on the left, even on the right, numbered as on the pcb"
-        code: "SY.HDR:2X49"
+        code: "HDR:2X49:S"
         category: connectors
         tags: electronics, schematic, connector
         authors: "jMouse"

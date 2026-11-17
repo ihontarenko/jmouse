@@ -1,6 +1,8 @@
 package org.jmouse.cad.management;
 
 import org.jmouse.cad.pcb.checks.PcbFinding;
+import org.jmouse.cad.exchange.pcb.CopperRefresh;
+import org.jmouse.cad.exchange.pcb.LayoutMoment;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.CopperNets;
@@ -172,7 +174,16 @@ public class ExchangeController {
      * @param drawing the layout as the editor holds it, or null to work out the text as it stands
      * @param owner   whose components and footprints the parts may also name, as {@code TYPE:id}; null for the catalogue's
      */
-    public record PcbDerivedRequest(String source, PcbDrawing drawing, String owner) {
+    /**
+     * A pcb an editor holds, asked about: its text and layout, its owner, and — from an editor — the moment the layout is of
+     * ({@code shown}, {@code kept}, {@code asked}) and when the reader has the copper poured ({@code on-change}, {@code on-release},
+     * {@code on-demand}); none, the copper is poured.
+     */
+    public record PcbDerivedRequest(String source, PcbDrawing drawing, String owner, String moment, String copper) {
+
+        boolean pours() {
+            return moment == null && copper == null || CopperRefresh.of(copper).pours(LayoutMoment.of(moment));
+        }
     }
 
     /** A piece of copper's net — none when it is on none yet — and the piece of joined copper it is in. */
@@ -205,7 +216,7 @@ public class ExchangeController {
      * and the drops.
      */
     public record CopperView(List<PadNetView> pads, List<CopperNetView> tracks, List<CopperNetView> arcs, List<DrawnNetView> drawn,
-                             List<CopperNetView> vias, List<ShortView> shorts, List<UnlaidView> unlaid, List<String> pours,
+                             List<CopperNetView> vias, List<ShortView> shorts, List<UnlaidView> unlaid, List<Map<String, String>> pours,
                              List<TeardropView> teardrops) {
 
         static CopperView of(PcbArtwork artwork) {
@@ -235,7 +246,8 @@ public class ExchangeController {
                     .map(joined -> new ShortView(joined.nets(), joined.tracks(), joined.arcs(), joined.vias())).toList();
             List<UnlaidView> unlaid = nets.unlaid().stream().map(connection -> new UnlaidView(connection.net(),
                     new double[] {connection.from().x(), connection.from().y()}, new double[] {connection.to().x(), connection.to().y()})).toList();
-            List<String> pours = artwork.pours().stream().map(pour -> pour.map(PathOutlines::pathOf).orElse("")).toList();
+            // Each zone's pour as its rings by key: a change answered as what changed sends only the rings it reached.
+            List<Map<String, String>> pours = artwork.pours().stream().map(pour -> pour.map(PathOutlines::ringPathsOf).orElse(Map.of())).toList();
             List<TeardropView> teardrops = artwork.drops().stream()
                     .map(drop -> new TeardropView(drop.layer(), drop.track(), PathOutlines.pathOf(drop.outline()))).toList();
             return new CopperView(pads, tracks, arcs, drawn, vias, shorts, unlaid, pours, teardrops);
@@ -243,10 +255,12 @@ public class ExchangeController {
     }
 
     /** A side's mask and paste as made, each as path data drawn by the even-odd rule: everything that opens the mask, the windows that are no pad's, and the paste. */
-    public record MaskView(String openings, String windows, String paste) {
+    /** A side's mask and paste, each as its rings by key (see the pours). */
+    public record MaskView(Map<String, String> openings, Map<String, String> windows, Map<String, String> paste) {
 
         static MaskView of(DocumentExchange.MaskAreas areas) {
-            return new MaskView(PathOutlines.pathOf(areas.openings()), PathOutlines.pathOf(areas.windows()), PathOutlines.pathOf(areas.paste()));
+            return new MaskView(PathOutlines.ringPathsOf(areas.openings()), PathOutlines.ringPathsOf(areas.windows()),
+                    PathOutlines.ringPathsOf(areas.paste()));
         }
     }
 
@@ -259,14 +273,30 @@ public class ExchangeController {
     }
 
     /** What the engine makes of a pcb: its copper, each outer side's mask and paste by side, what its checks find, and each net's length. */
-    public record PcbDerivedView(CopperView copper, Map<String, MaskView> masks, List<FindingView> findings, Map<String, LengthView> lengths) {
+    /** Whether an answer about a pcb's copper poured it, or the copper stands as it was — the reader pours on demand. */
+    public enum CopperState {
+        POURED, STANDING
+    }
+
+    /**
+     * What the engine makes of a pcb: its copper, each outer side's mask and paste by side, what its checks find, and each net's
+     * length — or, where the moment asked about is not poured, only that the copper stands as it was.
+     */
+    public record PcbDerivedView(CopperState state, CopperView copper, Map<String, MaskView> masks, List<FindingView> findings,
+                                 Map<String, LengthView> lengths) {
+
+        /** The copper not poured: the editor keeps what it has, out of date. */
+        static PcbDerivedView standing() {
+            return new PcbDerivedView(CopperState.STANDING, null, null, null, null);
+        }
 
         static PcbDerivedView of(DocumentExchange.PcbDerived derived) {
             Map<String, MaskView> masks = new LinkedHashMap<>();
             derived.masks().forEach((side, areas) -> masks.put(side, MaskView.of(areas)));
             Map<String, LengthView> lengths = new java.util.TreeMap<>();
             derived.lengths().forEach((net, length) -> lengths.put(net, LengthView.of(length)));
-            return new PcbDerivedView(CopperView.of(derived.artwork()), masks, derived.findings().stream().map(FindingView::of).toList(), lengths);
+            return new PcbDerivedView(CopperState.POURED, CopperView.of(derived.artwork()), masks, derived.findings().stream().map(FindingView::of).toList(),
+                    lengths);
         }
     }
 
@@ -274,6 +304,10 @@ public class ExchangeController {
     @PostMapping("/pcb/derived")
     @PublicEndpoint("a text the caller sent; the components and footprints it names are read as the reader may see them")
     public PcbDerivedView derived(@RequestBody PcbDerivedRequest request) {
+        // Whether the moment asked about is poured is the reader's rule, kept here: the editor only tells the moment.
+        if (!request.pours()) {
+            return PcbDerivedView.standing();
+        }
         String source = request.drawing() == null ? request.source()
                 : editing.pcb(request.source(), request.drawing(), null, null).source();
         return PcbDerivedView.of(exchange.derived(source, WrittenOwners.optional(request.owner())));

@@ -1,7 +1,7 @@
 model:soic-8-eiaj-model("SOIC-8, 5.3 mm body") {
     meta {
         summary: "SOIC-8, 5.3 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOIC:8-P1.27-W5.3"
+        code: "SOIC:8-P1.27-W5.3:M3D"
         category: small-outline
         tags: electronics, model, gull-wing
         source: "JEITA EDR-7320, 208-mil SOP"

@@ -1,0 +1,988 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "urn:jmouse:cad:document:circuit",
+  "title" : "A circuit document, as the engine answers it (Circuit)",
+  "$defs" : {
+    "Analysis" : {
+      "type" : "object",
+      "properties" : {
+        "kind" : {
+          "type" : "string",
+          "description" : "how it is run: transient"
+        },
+        "duration" : {
+          "type" : "number",
+          "description" : "how long it runs, seconds"
+        }
+      },
+      "required" : [ "kind", "duration" ],
+      "description" : "How a circuit is run: transient, and for how long, in seconds.",
+      "additionalProperties" : false
+    },
+    "Arrangement" : {
+      "type" : "object",
+      "properties" : {
+        "group" : {
+          "type" : "string",
+          "description" : "the group's name; empty when it is in none"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "FREE", "LOCKED" ],
+          "description" : "its own state"
+        },
+        "default" : {
+          "type" : "boolean",
+          "description" : "Whether there is nothing to write: in no group, free.",
+          "readOnly" : true
+        }
+      },
+      "required" : [ "group", "state", "default" ],
+      "description" : "How a drawn item stands among the others: the group it is chosen and moved with — empty for none —, and its own state. An item is held where it stands when it is locked itself or its group is (holds).",
+      "additionalProperties" : false
+    },
+    "Bench" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : [ "string", "null" ],
+          "description" : "a bench shared by name — i2c-bus —, or null"
+        },
+        "duration" : {
+          "type" : [ "number", "null" ],
+          "description" : "seconds it runs, or null where its expectation's measure says"
+        },
+        "temperature" : {
+          "type" : [ "number", "null" ],
+          "description" : "the temperature it runs at, kelvin, or null for the nominal bench"
+        },
+        "realistic" : {
+          "type" : "boolean",
+          "description" : "whether its instruments load what they read and a part fails as its component says"
+        },
+        "parts" : {
+          "description" : "the parts it adds round the part tried: sources, loads, instruments",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Part"
+          }
+        }
+      },
+      "required" : [ "name", "duration", "temperature", "realistic", "parts" ],
+      "description" : "What a part is tried among: a bench's parts, how long it runs, at what temperature, and whether it is realistic — its instruments load what they read, a part fails as its component says.",
+      "additionalProperties" : false
+    },
+    "Bus" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called — D, I2C —, unique among the circuit's buses"
+        },
+        "index" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Index"
+          } ],
+          "description" : "a vector's numbers, [0..7]; null for a group"
+        },
+        "members" : {
+          "description" : "its nets, in order: a vector's from its index, a group's as written",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "required" : [ "name", "index", "members" ],
+      "description" : "A bus of a circuit: a named set of its nets, drawn as one thick line and handed across a sheet's edge as one port. It joins nothing by itself — a part's pin is on a member by naming the member's net —; it says which nets travel together. a vector, bus(D[0..7]): its nets are the language's indexed names of it, D_0 … D_7; a group, bus(I2C, members: [SDA, SCL]): the nets it names, in their order.",
+      "additionalProperties" : false
+    },
+    "Connection" : {
+      "type" : "object",
+      "properties" : {
+        "pin" : {
+          "type" : [ "string", "null" ],
+          "description" : "the pin it names; null when the part is connected in pin order"
+        },
+        "net" : {
+          "type" : "string",
+          "description" : "the net the pin is on"
+        }
+      },
+      "required" : [ "pin", "net" ],
+      "description" : "One connection of a part: the pin it names — none when the part is connected in pin order — and the net.",
+      "additionalProperties" : false
+    },
+    "Criterion.Is" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the value — or the row of values — the measure must be"
+        }
+      },
+      "required" : [ "value" ],
+      "description" : "is 1, is [1, 0, 1].",
+      "additionalProperties" : false
+    },
+    "Criterion.Near" : {
+      "type" : "object",
+      "properties" : {
+        "value" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the value the measure is held near"
+        },
+        "tolerance" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "how far from it the measure may be: 5%, 2 mV"
+        }
+      },
+      "required" : [ "value", "tolerance" ],
+      "description" : "near 6.86 kHz ± 5%.",
+      "additionalProperties" : false
+    },
+    "Criterion.Within" : {
+      "type" : "object",
+      "properties" : {
+        "range" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Range.Between",
+            "description" : "the values the measure may take"
+          }, {
+            "$ref" : "#/$defs/Range.Listed",
+            "description" : "the values the measure may take"
+          } ]
+        }
+      },
+      "required" : [ "range" ],
+      "description" : "within 26 V .. 30 V.",
+      "additionalProperties" : false
+    },
+    "DocumentHead" : {
+      "type" : "object",
+      "properties" : {
+        "slug" : {
+          "type" : "string",
+          "description" : "what the document is known by: its address among the library's"
+        },
+        "title" : {
+          "type" : "string",
+          "description" : "what it is called, for a reader"
+        },
+        "type" : {
+          "type" : [ "string", "null" ],
+          "description" : "the role its kind gives it — type gate —, or null where it says none"
+        },
+        "meta" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "its meta fields — summary, source, category … —, as written"
+        }
+      },
+      "required" : [ "slug", "title", "type", "meta" ],
+      "description" : "What every document of the model says of itself: its slug, its title, the role its kind gives it (type gate), and its meta fields — summary, source, category… — as written.",
+      "additionalProperties" : false
+    },
+    "DrawnGroup" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the name its members carry"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "FREE", "LOCKED" ],
+          "description" : "the group's own state"
+        }
+      },
+      "required" : [ "name", "state" ],
+      "description" : "A group of a drawing as an item of its own: its name, by which its members say they are in it, and its state — a locked group holds every member where it stands, whatever each says of itself.",
+      "additionalProperties" : false
+    },
+    "Expectation" : {
+      "type" : "object",
+      "properties" : {
+        "title" : {
+          "type" : "string",
+          "description" : "what it says holds, for a reader"
+        },
+        "source" : {
+          "type" : "string",
+          "description" : "why it holds — a datasheet's line, a calculation —, or empty"
+        },
+        "bench" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Bench"
+          } ],
+          "description" : "the bench it runs on when it is not the document's own, or null"
+        },
+        "measure" : {
+          "$ref" : "#/$defs/Measure",
+          "description" : "what is measured"
+        },
+        "criterion" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Criterion.Near",
+            "description" : "what the measure is held to"
+          }, {
+            "$ref" : "#/$defs/Criterion.Within",
+            "description" : "what the measure is held to"
+          }, {
+            "$ref" : "#/$defs/Criterion.Is",
+            "description" : "what the measure is held to"
+          } ]
+        }
+      },
+      "required" : [ "title", "source", "bench", "measure", "criterion" ],
+      "description" : "What a document says it does, to be checked by running it: what holds, why — its source —, on which bench, measured how, held to what.",
+      "additionalProperties" : false
+    },
+    "Formula" : {
+      "type" : "object",
+      "properties" : {
+        "written" : {
+          "type" : "string",
+          "description" : "the expression as its author wrote it"
+        }
+      },
+      "required" : [ "written" ],
+      "description" : "An expression as its author wrote it — 4.7 kΩ, 100 * abs(anode.current) / I_maximum —, for jMF to compile where it is computed. The model says what it is for; what it means is the formula language's.",
+      "additionalProperties" : false
+    },
+    "Index" : {
+      "type" : "object",
+      "properties" : {
+        "first" : {
+          "type" : "integer",
+          "description" : "the first member's number"
+        },
+        "last" : {
+          "type" : "integer",
+          "description" : "the last member's number"
+        }
+      },
+      "required" : [ "first", "last" ],
+      "description" : "The index a name is written with: a bus's bits — q[0..7] —, or a row's slots — memory[256], slots 0 to 255. Each of them is a name of its own, the name and its number joined: q_0, memory_255.",
+      "additionalProperties" : false
+    },
+    "Measure" : {
+      "type" : "object",
+      "properties" : {
+        "statistic" : {
+          "type" : "string",
+          "description" : "what is taken of the reading: final, maximum, average, frequency …"
+        },
+        "subject" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "the net or expression it reads, or null where it reads something else"
+        },
+        "reading" : {
+          "type" : [ "string", "null" ],
+          "description" : "what else it reads — current, level, levels, figure, figures —, or null for a subject"
+        },
+        "targets" : {
+          "description" : "what that reading names: a part, a net, a part's figures",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "conditions" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "number"
+          },
+          "description" : "each condition's word and its value in SI: after, above, below, at"
+        },
+        "settings" : {
+          "description" : "the settings changed for this measure alone",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Setting"
+          }
+        }
+      },
+      "required" : [ "statistic", "subject", "reading", "targets", "conditions", "settings" ],
+      "description" : "What an expectation measures: a statistic — final, maximum, average, frequency… — of a subject — a net, current R1, out - in —, and when: after 60 ms, above 2.5 V, at 1 kHz, with settings changed for it.",
+      "additionalProperties" : false
+    },
+    "Parameter" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is called, as formulas name it"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "its value: a formula, or a text"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "its value: a formula, or a text"
+          } ]
+        },
+        "range" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Range.Between",
+            "description" : "the values it may take, or null for any"
+          }, {
+            "$ref" : "#/$defs/Range.Listed",
+            "description" : "the values it may take, or null for any"
+          } ]
+        },
+        "step" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "how far one step of a control moves it, or null"
+        },
+        "per" : {
+          "type" : [ "string", "null" ],
+          "description" : "the unit it is counted per — V per unit —, or null"
+        },
+        "flags" : {
+          "description" : "how it is offered, as written: log, integer, exact, animate, live",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "what it is, for a reader; empty when not written"
+        }
+      },
+      "required" : [ "name", "value", "range", "step", "per", "flags", "description" ],
+      "description" : "A parameter of a component or a circuit: its name, its value, and what a reader may set it to — a range, a step, a unit it is counted per, and how it is offered (log, integer, live…).",
+      "additionalProperties" : false
+    },
+    "Part" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "what the circuit calls it — R1 —, unique in the circuit"
+        },
+        "component" : {
+          "type" : "string",
+          "description" : "the component it is, by slug — resistor, lm358@3 for a unit of one"
+        },
+        "connections" : {
+          "description" : "what each of its pins is connected to, in pin order or by pin",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Connection"
+          }
+        },
+        "settings" : {
+          "description" : "what its parameters are set to",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Setting"
+          }
+        },
+        "symbol" : {
+          "type" : [ "string", "null" ],
+          "description" : "the symbol it is drawn with when not its component's own, or null"
+        },
+        "footprint" : {
+          "type" : [ "string", "null" ],
+          "description" : "the footprint it sits on when not its component's own, or null"
+        },
+        "pads" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "description" : "which pin each pad of that footprint takes, by pad, where this part's differ from what its component says: a footprint another product numbers its own way — a KiCad diode's pad 1 is its cathode. Empty otherwise."
+        }
+      },
+      "required" : [ "reference", "component", "connections", "settings", "symbol", "footprint", "pads" ],
+      "description" : "A part of a circuit: its reference, the component it is — resistor, lm358@3 for a unit of one —, what it is connected to, what it is set to, and how it is drawn or seated when not as its component says. ⚠️ Every part is a component. A resistor and a microcontroller are the same kind of thing here; which of them the engine solves natively is the engine's to say, from the component, never a second sort of part.",
+      "additionalProperties" : false
+    },
+    "Placement.BusLine" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the name the line is known by — B1 —, unique on the sheet"
+        },
+        "bus" : {
+          "type" : "string",
+          "description" : "the bus it draws, by name"
+        },
+        "via" : {
+          "description" : "its corners, in order",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Point"
+          }
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "reference", "bus", "via", "arrangement" ],
+      "description" : "A line of a bus: the thick line it is drawn as on the sheet. It names one of the circuit's buses, which says what it carries; a sheet may draw one bus as several lines. It joins nothing by itself — an entry on it is a mark of a member's net.",
+      "additionalProperties" : false
+    },
+    "Placement.Drawn" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the name its line is known by — R1, wire-3 —, unique on the sheet"
+        },
+        "shape" : {
+          "type" : "string",
+          "enum" : [ "LINE", "RECTANGLE", "CIRCLE", "ARC" ],
+          "description" : "what it is"
+        },
+        "via" : {
+          "description" : "its points: a line's corners, a rectangle's two opposite corners, a circle's centre and a point on it, an arc's two ends and a point it goes through",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Point"
+          }
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "reference", "shape", "via", "arrangement" ],
+      "description" : "A line or a shape drawn on a sheet for whoever reads it: it joins nothing.",
+      "additionalProperties" : false
+    },
+    "Placement.Mark" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the name its line is known by — R1, wire-3 —, unique on the sheet"
+        },
+        "symbol" : {
+          "type" : "string",
+          "description" : "what it is — junction, ground, label… —, as written"
+        },
+        "net" : {
+          "type" : [ "string", "null" ],
+          "description" : "the net it names — label vp, ground agnd —, or null"
+        },
+        "at" : {
+          "$ref" : "#/$defs/Point",
+          "description" : "where it stands"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far it is turned, degrees"
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "reference", "symbol", "net", "at", "rotation", "arrangement" ],
+      "description" : "A mark that is no part: a junction, a ground, a common, a label, a power flag.",
+      "additionalProperties" : false
+    },
+    "Placement.Note" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the name its line is known by — R1, wire-3 —, unique on the sheet"
+        },
+        "words" : {
+          "type" : "string",
+          "description" : "what it says"
+        },
+        "at" : {
+          "$ref" : "#/$defs/Point",
+          "description" : "where it stands"
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "reference", "words", "at", "arrangement" ],
+      "description" : "Words written on a sheet for whoever reads it: they join nothing.",
+      "additionalProperties" : false
+    },
+    "Placement.PlacedPart" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the part it places, as the circuit names it"
+        },
+        "unit" : {
+          "type" : [ "string", "null" ],
+          "description" : "the block placed on its own, B; null for the part as a whole"
+        },
+        "at" : {
+          "$ref" : "#/$defs/Point",
+          "description" : "where its centre stands"
+        },
+        "rotation" : {
+          "type" : "number",
+          "description" : "how far it is turned, degrees"
+        },
+        "mirrored" : {
+          "type" : "boolean",
+          "description" : "whether it is drawn mirrored"
+        },
+        "name" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Point"
+          } ],
+          "description" : "where its reference is written, from its centre, or null where the sheet puts it"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Point"
+          } ],
+          "description" : "where its value is written, from its centre, or null"
+        },
+        "readings" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Point"
+          } ],
+          "description" : "where an instrument's readings are written, from its centre, or null"
+        },
+        "size" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Point"
+          } ],
+          "description" : "a placed sheet's box, as KiCad sizes a hierarchical sheet, or null for a part drawn by its symbol"
+        },
+        "shows" : {
+          "description" : "what an instrument's display shows — rms, graph —, as written",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "ports" : {
+          "description" : "where a placed sheet's ports stand on its frame, as written; a port it does not place stands where the sheet puts it",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Placement.PortPlace"
+          }
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "reference", "unit", "at", "rotation", "mirrored", "name", "value", "readings", "size", "shows", "ports", "arrangement" ],
+      "description" : "A part where it stands — or one block of it, placed on its own: U4.B at ….",
+      "additionalProperties" : false
+    },
+    "Placement.PortPlace" : {
+      "type" : "object",
+      "properties" : {
+        "port" : {
+          "type" : "string",
+          "description" : "the port, by its net on the sheet placed"
+        },
+        "edge" : {
+          "type" : "string",
+          "enum" : [ "LEFT", "RIGHT", "TOP", "BOTTOM" ],
+          "description" : "the frame's edge it stands on"
+        },
+        "along" : {
+          "type" : "number",
+          "description" : "how far from the edge's start, in the sheet's units"
+        }
+      },
+      "required" : [ "port", "edge", "along" ],
+      "description" : "Where a port of a placed sheet stands on the sheet's frame — in left 60 —: the edge, and how far along it from its start, the top of a side edge and the left of the top and bottom ones. KiCad draws a hierarchical sheet's pins wherever its author put them, and a wire drawn to one comes back to the same point only if the port does.",
+      "additionalProperties" : false
+    },
+    "Placement.Wire" : {
+      "type" : "object",
+      "properties" : {
+        "reference" : {
+          "type" : "string",
+          "description" : "the name its line is known by — R1, wire-3 —, unique on the sheet"
+        },
+        "from" : {
+          "type" : "string",
+          "description" : "where it starts, as its line writes it: a part's pin — R1.negative — or a mark, by its reference"
+        },
+        "to" : {
+          "type" : "string",
+          "description" : "where it ends, written as from is"
+        },
+        "via" : {
+          "description" : "its corners between its ends, in order",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/Point"
+          }
+        },
+        "arrangement" : {
+          "$ref" : "#/$defs/Arrangement",
+          "description" : "the group it is chosen and moved with, and whether it is locked where it stands"
+        }
+      },
+      "required" : [ "reference", "from", "to", "via", "arrangement" ],
+      "description" : "A wire from one pin to another — R1.negative —, through its corners.",
+      "additionalProperties" : false
+    },
+    "Point" : {
+      "type" : "object",
+      "properties" : {
+        "x" : {
+          "type" : "number",
+          "description" : "across, in its drawing's units"
+        },
+        "y" : {
+          "type" : "number",
+          "description" : "down, in its drawing's units"
+        }
+      },
+      "required" : [ "x", "y" ],
+      "description" : "A place on a sheet or a pcb, in its units.",
+      "additionalProperties" : false
+    },
+    "Probe" : {
+      "type" : "object",
+      "properties" : {
+        "channel" : {
+          "type" : "string",
+          "description" : "the channel's name on the oscilloscope: A, B …"
+        },
+        "reading" : {
+          "type" : "string",
+          "description" : "voltage, current or level"
+        },
+        "subject" : {
+          "type" : "string",
+          "description" : "what it reads: a net, or the part whose current it reads"
+        },
+        "reference" : {
+          "type" : [ "string", "null" ],
+          "description" : "the second net of a voltage, or null for ground"
+        },
+        "scale" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "a division's worth — 2 V/div —, or null where the bench chooses"
+        },
+        "shows" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "what the screen shows, X being the reading, or null for the reading itself"
+        }
+      },
+      "required" : [ "channel", "reading", "subject", "reference", "scale", "shows" ],
+      "description" : "A channel of a bench's oscilloscope: what it reads — a net's voltage, a part's current, a logic level —, against which net, at what scale, and what its screen shows of the reading.",
+      "additionalProperties" : false
+    },
+    "Range.Between" : {
+      "type" : "object",
+      "properties" : {
+        "low" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its low end"
+        },
+        "high" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "its high end"
+        }
+      },
+      "required" : [ "low", "high" ],
+      "description" : "low .. high: every value from one end to the other.",
+      "additionalProperties" : false
+    },
+    "Range.Listed" : {
+      "type" : "object",
+      "properties" : {
+        "values" : {
+          "$ref" : "#/$defs/Formula",
+          "description" : "the values, as written"
+        }
+      },
+      "required" : [ "values" ],
+      "description" : "The list as written, brackets and all, for jMF to read.",
+      "additionalProperties" : false
+    },
+    "Setting" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the parameter it sets, or the word that stands alone"
+        },
+        "value" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/Formula",
+            "description" : "what it is set to: a formula, or a text"
+          }, {
+            "$ref" : "#/$defs/Text",
+            "description" : "what it is set to: a formula, or a text"
+          } ]
+        }
+      },
+      "required" : [ "name", "value" ],
+      "description" : "A name a part is set by — resistance = R, bytes = \"8 0\" —, or one standing alone, closed.",
+      "additionalProperties" : false
+    },
+    "SheetBoundary" : {
+      "type" : "object",
+      "properties" : {
+        "ports" : {
+          "description" : "the nets it hands to the block that places it, each a pin of that block",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/SheetBoundary.Port"
+          }
+        },
+        "nets" : {
+          "description" : "the nets named for what they are beyond the sheet",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/SheetBoundary.Net"
+          }
+        },
+        "empty" : {
+          "type" : "boolean",
+          "description" : "Whether it hands nothing across: a circuit that is no sheet of another.",
+          "readOnly" : true
+        }
+      },
+      "required" : [ "ports", "nets", "empty" ],
+      "description" : "What a circuit hands across its sheet's edge when it is placed as a block in another: its ports — each a net and which way it goes, input in —, and the nets it shares with every sheet of its project by name, vcc global.",
+      "additionalProperties" : false
+    },
+    "SheetBoundary.Net" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "the net's name"
+        },
+        "ground" : {
+          "type" : "boolean",
+          "description" : "whether it is the ground everything is measured from"
+        },
+        "global" : {
+          "type" : "boolean",
+          "description" : "whether every sheet of the project shares it by its name"
+        }
+      },
+      "required" : [ "name", "ground", "global" ],
+      "description" : "A net named for what it is beyond the sheet.",
+      "additionalProperties" : false
+    },
+    "SheetBoundary.Port" : {
+      "type" : "object",
+      "properties" : {
+        "net" : {
+          "type" : "string",
+          "description" : "the net it hands across"
+        },
+        "direction" : {
+          "type" : "string",
+          "description" : "input, output, power, ground or analog"
+        }
+      },
+      "required" : [ "net", "direction" ],
+      "description" : "A net the sheet hands to its parent, a pin of the block that places it.",
+      "additionalProperties" : false
+    },
+    "Text" : {
+      "type" : "object",
+      "properties" : {
+        "text" : {
+          "type" : "string",
+          "description" : "what it says, without its quotes"
+        }
+      },
+      "required" : [ "text" ],
+      "description" : "A text a name is given — operation = \"write\" —: what it says, without its quotes.",
+      "additionalProperties" : false
+    },
+    "View" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "what it is: transient_response, frequency_response …"
+        },
+        "primary" : {
+          "type" : "boolean",
+          "description" : "whether it is the view the circuit is first shown in"
+        },
+        "parameter" : {
+          "type" : [ "string", "null" ],
+          "description" : "the parameter it sweeps, or null"
+        },
+        "from" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "where the sweep starts, or null"
+        },
+        "to" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "where the sweep ends, or null"
+        },
+        "points" : {
+          "anyOf" : [ {
+            "type" : "null"
+          }, {
+            "$ref" : "#/$defs/Formula"
+          } ],
+          "description" : "how many points the sweep is taken at, or null"
+        }
+      },
+      "required" : [ "name", "primary", "parameter", "from", "to", "points" ],
+      "description" : "A view a circuit is shown in — transient_response, frequency_response from 1 to 100000 points 200, a sweep of one of its parameters.",
+      "additionalProperties" : false
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "head" : {
+      "$ref" : "#/$defs/DocumentHead",
+      "description" : "what the document says of itself: its slug, its title, its role and its meta fields"
+    },
+    "parameters" : {
+      "description" : "its parameters, which its parts' settings may name",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Parameter"
+      }
+    },
+    "parts" : {
+      "description" : "its parts, each between named nets",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Part"
+      }
+    },
+    "layout" : {
+      "description" : "where each part, wire, mark, note and drawing stands on its sheet",
+      "type" : "array",
+      "items" : {
+        "anyOf" : [ {
+          "$ref" : "#/$defs/Placement.PlacedPart"
+        }, {
+          "$ref" : "#/$defs/Placement.Mark"
+        }, {
+          "$ref" : "#/$defs/Placement.Note"
+        }, {
+          "$ref" : "#/$defs/Placement.Drawn"
+        }, {
+          "$ref" : "#/$defs/Placement.BusLine"
+        }, {
+          "$ref" : "#/$defs/Placement.Wire"
+        } ]
+      }
+    },
+    "probes" : {
+      "description" : "the channels the bench's oscilloscope reads",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Probe"
+      }
+    },
+    "timeBase" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/Formula"
+      } ],
+      "description" : "the oscilloscope's time a division — time 5 ms/div —, or null"
+    },
+    "expectations" : {
+      "description" : "what it says it does, to be checked by running it",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Expectation"
+      }
+    },
+    "analysis" : {
+      "anyOf" : [ {
+        "type" : "null"
+      }, {
+        "$ref" : "#/$defs/Analysis"
+      } ],
+      "description" : "how it is run, or null where whoever runs it says"
+    },
+    "views" : {
+      "description" : "the views it is shown in: a run in time, a sweep",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/View"
+      }
+    },
+    "frame" : {
+      "type" : [ "string", "null" ],
+      "description" : "the frame its sheet stands in, by slug — frame iso-a4-landscape-frame —, or null"
+    },
+    "boundary" : {
+      "$ref" : "#/$defs/SheetBoundary",
+      "description" : "what it hands across its sheet's edge when it is placed as a block"
+    },
+    "buses" : {
+      "description" : "its buses: the named sets of its nets that travel together, drawn by its bus lines",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/Bus"
+      }
+    },
+    "groups" : {
+      "description" : "the groups its layout's items are chosen and moved with, each with its own state",
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/$defs/DrawnGroup"
+      }
+    }
+  },
+  "required" : [ "head", "parameters", "parts", "layout", "probes", "timeBase", "expectations", "analysis", "views", "frame", "boundary", "buses", "groups" ],
+  "description" : "A circuit: its parameters, its parts between named nets — net GROUND the reference —, where they are drawn, what the bench probes, what it is expected to show, and how it is run.",
+  "additionalProperties" : false
+}

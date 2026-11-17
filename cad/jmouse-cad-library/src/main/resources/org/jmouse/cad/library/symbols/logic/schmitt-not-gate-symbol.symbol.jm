@@ -1,7 +1,7 @@
 symbol:schmitt-not-gate-symbol("Schmitt-trigger inverter") {
     meta {
         summary: "An inverter with Schmitt-trigger input, as drawn on a schematic: the hysteresis loop inside the triangle"
-        code: "SY.GATE:NOT-SCHMITT"
+        code: "GATE:NOT-SCHMITT:S"
         category: logic
         tags: electronics, schematic, logic
         authors: "jMouse"

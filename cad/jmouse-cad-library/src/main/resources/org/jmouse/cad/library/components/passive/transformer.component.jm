@@ -58,13 +58,13 @@ component:transformer("Transformer", type: transformer) {
 
 
     # An EI30 printed-circuit transformer, schematic 1: the primary 1 (•) to 5, the secondary 7 (•) to 9.
-    footprint("FP.TRAFO:EI30-2VA-1S") {
+    footprint("TRAFO:EI30-2VA-1S:F") {
         pad:1(primary_one)
         pad:5(primary_two)
         pad:7(secondary_one)
         pad:9(secondary_two)
     }
-    symbol(uses: ["SY.TRANSFORMER:MAGNETIC-CORE", "SY.TRANSFORMER:AIR-CORE"]) {
+    symbol(uses: ["TRANSFORMER:MAGNETIC-CORE:S", "TRANSFORMER:AIR-CORE:S"]) {
         bind:failed(failed)
     }
 

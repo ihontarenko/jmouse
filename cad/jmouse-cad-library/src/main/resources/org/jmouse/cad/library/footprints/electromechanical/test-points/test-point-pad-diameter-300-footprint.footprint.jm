@@ -1,7 +1,7 @@
 footprint:test-point-pad-diameter-300-footprint("Test point, 3 mm pad") {
     meta {
         summary: "A bare round pad 3 mm across, for a probe"
-        code: "FP.TP:D3"
+        code: "TP:D3:F"
         category: test-points
         tags: electronics, footprint, surface
         source: "Probe pad sizes, IPC-9252"

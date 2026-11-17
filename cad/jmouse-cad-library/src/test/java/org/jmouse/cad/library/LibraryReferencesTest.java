@@ -29,7 +29,7 @@ class LibraryReferencesTest {
                     footprint(chip-resistor-0805-footprint)
                 }
                 """, "probe.component.jm");
-        assertEquals(List.of("probe names chip-resistor-0805-footprint by its slug; its code is FP.CHIP:R0805"),
+        assertEquals(List.of("probe names chip-resistor-0805-footprint by its slug; its code is CHIP:R0805:F"),
                 ReferenceAudit.faults(List.of(component), word -> library.find(word).or(Optional::empty)));
     }
 }

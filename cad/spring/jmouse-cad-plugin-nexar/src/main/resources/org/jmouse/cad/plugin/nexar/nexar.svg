@@ -1,7 +1,7 @@
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- viewBox="0 0 512.000000 512.000000"
- preserveAspectRatio="xMidYMid meet">
-<!-- Nexar's mark, as its own site serves it (https://nexar.com/safari-pinned-tab.svg), in the colour it names; the mark is Altium's trademark, shown to name what the plugin speaks for. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Nexar's mark, as its own site serves it (https://nexar.com/safari-pinned-tab.svg), in the colour it names, its corners rounded as every tile's are; the mark is Altium's trademark, shown to name what the plugin speaks for -->
+  <clipPath id="corners"><rect width="24" height="24" rx="5"/></clipPath>
+  <g clip-path="url(#corners)"><svg width="24" height="24" viewBox="0 0 512.000000 512.000000">
 <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
 fill="#000d2a" stroke="none">
 <path d="M0 2560 l0 -2560 2560 0 2560 0 0 2560 0 2560 -2560 0 -2560 0 0
@@ -12,4 +12,5 @@ m2246 637 c-1 -19 -1838 -2768 -1852 -2771 -10 -2 -144 202 -424 644 -225 357
 -410 654 -412 661 -5 21 5 16 76 -38 535 -405 1299 -24 2304 1152 73 86 169
 201 213 257 73 93 96 115 95 95z"/>
 </g>
+</svg></g>
 </svg>

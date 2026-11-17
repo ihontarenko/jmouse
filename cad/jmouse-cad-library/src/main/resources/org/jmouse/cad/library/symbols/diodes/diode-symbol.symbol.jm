@@ -1,7 +1,7 @@
 symbol:diode-symbol("Diode") {
     meta {
         summary: "Diode, as drawn on a schematic: lit inside while it conducts, its bar thickening as it blocks, hot in breakdown"
-        code: "SY.DIODE:RECTIFIER"
+        code: "DIODE:RECTIFIER:S"
         category: diodes
         tags: electronics, schematic
         authors: "jMouse"

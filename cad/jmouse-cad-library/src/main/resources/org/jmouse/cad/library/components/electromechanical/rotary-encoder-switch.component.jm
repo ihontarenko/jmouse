@@ -17,5 +17,5 @@ component:rotary-encoder-switch("Rotary encoder with switch", type: encoder) {
     pin:switch_one(analog, "S1, the push switch")
     pin:switch_two(analog, "S2, the push switch")
 
-    symbol(uses: "SY.SWITCH:ROTARY-ENCODER")
+    symbol(uses: "SWITCH:ROTARY-ENCODER:S")
 }

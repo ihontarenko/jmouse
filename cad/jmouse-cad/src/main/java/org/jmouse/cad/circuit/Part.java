@@ -1,5 +1,6 @@
 package org.jmouse.cad.circuit;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.Text;
 import org.jmouse.cad.Setting;
 
@@ -16,14 +17,17 @@ import java.util.Optional;
  * <p>⚠️ Every part is a component. A resistor and a microcontroller are the same kind of thing here; which of them the
  * engine solves natively is the engine's to say, from the component, never a second sort of part.</p>
  *
- * @param symbol    the symbol it is drawn with when not its component's own, or null
- * @param footprint the footprint it sits on when not its component's own, or null
- * @param pads      which pin each pad of that footprint takes, by pad, where this part's differ from what its component
- *                  says: a footprint another product numbers its own way — a KiCad diode's pad 1 is its cathode. Empty
- *                  otherwise.
+ * @param reference   what the circuit calls it — {@code R1} —, unique in the circuit
+ * @param component   the component it is, by slug — {@code resistor}, {@code lm358@3} for a unit of one
+ * @param connections what each of its pins is connected to, in pin order or by pin
+ * @param settings    what its parameters are set to
+ * @param symbol      the symbol it is drawn with when not its component's own, or null
+ * @param footprint   the footprint it sits on when not its component's own, or null
+ * @param pads        which pin each pad of that footprint takes, by pad, where this part's differ from what its component says: a
+ *                    footprint another product numbers its own way — a KiCad diode's pad 1 is its cathode. Empty otherwise.
  */
 public record Part(String reference, String component, List<Connection> connections, List<Setting> settings,
-                   String symbol, String footprint, Map<String, String> pads) {
+                   @Nullable String symbol, @Nullable String footprint, Map<String, String> pads) {
 
     /** The setting a part's value in words is written under. */
     public static final String VALUE = "value";

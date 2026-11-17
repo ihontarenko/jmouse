@@ -1,7 +1,7 @@
 model:relay-sanyou-srd-form-c-model("SANYOU SRD relay, form C") {
     meta {
         summary: "SANYOU SRD relay, form C — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RELAY:SRD-C"
+        code: "RELAY:SRD-C:M3D"
         category: relays
         tags: electronics, model, pinned
         source: "SANYOU SRD series data sheet, form C (one changeover): 1 the arm, 2 and 5 the coil, 3 normally open, 4 normally closed"

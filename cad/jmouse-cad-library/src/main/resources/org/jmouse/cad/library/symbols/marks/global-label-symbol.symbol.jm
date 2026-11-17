@@ -1,7 +1,7 @@
 symbol:global-label-symbol("Global net label") {
     meta {
         summary: "A net that is one name across every sheet of a project, as KiCad's global label: the rails a power symbol draws. Every global label of one name, on any sheet, is that net."
-        code: "SY.MARK:GLOBAL-LABEL"
+        code: "MARK:GLOBAL-LABEL:S"
         category: marks
         tags: electronics, schematic
         authors: "jMouse"

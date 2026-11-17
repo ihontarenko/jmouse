@@ -1,7 +1,7 @@
 model:sot-323-model("SOT-323, 1.25 mm body") {
     meta {
         summary: "SOT-323, 1.25 mm body — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.SOT323:3"
+        code: "SOT323:3:M3D"
         category: surface-transistor-outline
         tags: electronics, model, gull-wing
         source: "JEDEC MO-203 AA, the makers' tighter outline (Nexperia SOT323)"

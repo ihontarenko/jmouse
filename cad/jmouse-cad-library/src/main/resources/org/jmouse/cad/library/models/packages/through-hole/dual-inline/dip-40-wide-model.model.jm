@@ -1,7 +1,7 @@
 model:dip-40-wide-model("DIP-40, 15.24 mm rows") {
     meta {
         summary: "DIP-40, 15.24 mm rows — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.DIP:40-W15.24"
+        code: "DIP:40-W15.24:M3D"
         category: dual-inline
         tags: electronics, model, dual-inline
         source: "JEDEC MS-011"

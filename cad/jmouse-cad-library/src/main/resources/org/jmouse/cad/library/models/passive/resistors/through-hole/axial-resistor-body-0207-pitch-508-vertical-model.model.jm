@@ -1,7 +1,7 @@
 model:axial-resistor-body-0207-pitch-508-vertical-model("Axial resistor DIN 0207, vertical, 5.08 mm") {
     meta {
         summary: "Axial resistor DIN 0207, vertical, 5.08 mm — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.AXIAL:R0207-P5.08-V"
+        code: "AXIAL:R0207-P5.08-V:M3D"
         category: resistors-through-hole
         tags: electronics, model, axial
         source: "IEC 60286-1 bodies, DIN 44051 size codes"

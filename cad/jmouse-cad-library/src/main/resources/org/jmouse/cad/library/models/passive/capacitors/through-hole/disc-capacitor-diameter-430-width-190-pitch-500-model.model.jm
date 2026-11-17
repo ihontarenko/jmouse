@@ -1,7 +1,7 @@
 model:disc-capacitor-diameter-430-width-190-pitch-500-model("Ceramic disc capacitor, 4.3 mm disc, 5 mm pitch") {
     meta {
         summary: "Ceramic disc capacitor, 4.3 mm disc, 5 mm pitch — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.RADIAL:CD-4.3X1.9-P5"
+        code: "RADIAL:CD-4.3X1.9-P5:M3D"
         category: capacitors-through-hole
         tags: electronics, model, radial
         source: "IEC 60286-2 lead spacing, makers' disc sizes"

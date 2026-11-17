@@ -1,7 +1,7 @@
 footprint:mounting-hole-m6-pad-footprint("Mounting hole M6, a plated ring under the head") {
     meta {
         summary: "M6 screw, 6.4 mm hole, a plated ring under the head"
-        code: "FP.MH:M6-PAD"
+        code: "MH:M6-PAD:F"
         category: mounting-holes
         tags: electronics, footprint, through-hole
         source: "ISO 273 fine clearance, ISO 7045 and DIN 965 heads"

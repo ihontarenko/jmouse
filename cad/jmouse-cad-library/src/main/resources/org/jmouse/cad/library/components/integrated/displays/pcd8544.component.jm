@@ -28,9 +28,9 @@ component:pcd8544("PCD8544 LCD module", type: display) {
     pin:light(analog, 7, "BL, the backlight: not modelled")
     pin:GND(ground, 8)
 
-    footprint("FP.HDR:1X8-P2.54-V")
+    footprint("HDR:1X8-P2.54-V:F")
 
-    symbol(uses: "SY.DISPLAY:LCD-84X48")
+    symbol(uses: "DISPLAY:LCD-84X48:S")
 
     state:memory[504](0, discrete, "the display memory: six banks of 84 bytes, each byte eight pixels down")
     state:bits(0, discrete, "bits of the byte shifted in so far")

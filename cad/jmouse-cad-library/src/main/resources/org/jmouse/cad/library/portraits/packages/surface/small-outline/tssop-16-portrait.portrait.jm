@@ -2,7 +2,7 @@
 portrait:tssop-16-portrait("TSSOP-16") {
     meta {
         summary: "16-lead TSSOP, 4.4 mm body from above: pin 1 at the bottom left, beside the dot"
-        code: "PT.TSSOP:16-P0.65-W4.4"
+        code: "TSSOP:16-P0.65-W4.4:P"
         category: small-outline
         tags: electronics, portrait, package, surface-mount
         source: "JEDEC MO-153"

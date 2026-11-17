@@ -12,14 +12,19 @@ import org.jmouse.kicad.KiCadValue;
 import org.jmouse.kicad.connectivity.KiCadConnection;
 import org.jmouse.kicad.connectivity.KiCadConnectivity;
 import org.jmouse.kicad.connectivity.KiCadNet;
+import org.jmouse.kicad.schematic.KiCadBus;
+import org.jmouse.kicad.schematic.KiCadBusEntry;
+import org.jmouse.kicad.schematic.KiCadBusLines;
 import org.jmouse.kicad.schematic.KiCadLabel;
 import org.jmouse.kicad.schematic.KiCadSchematic;
 import org.jmouse.kicad.schematic.KiCadSheet;
 import org.jmouse.kicad.schematic.KiCadSymbolInstance;
 import org.jmouse.kicad.symbol.KiCadPin;
+import org.jmouse.kicad.symbol.KiCadPinType;
 import org.jmouse.kicad.symbol.KiCadSymbolDefinition;
 import org.jmouse.cad.circuit.Circuit;
 import org.jmouse.cad.circuit.Placement;
+import org.jmouse.cad.circuit.SheetBoundary;
 import org.jmouse.cad.exchange.imported.ImportedCircuit;
 import org.jmouse.cad.exchange.imported.ImportedCircuit.Item;
 import org.jmouse.cad.exchange.imported.ImportedCircuit.Part;
@@ -111,6 +116,12 @@ public final class KiCadSheetImport {
     private final List<String> connectors = new ArrayList<>();
     private final List<String> notes = new ArrayList<>();
     private final List<String> ports = new ArrayList<>();
+    /** The buses the sheet hands across its edge whole, by name: its hierarchical labels naming a bus. */
+    private final List<String> busPorts = new ArrayList<>();
+    /** The buses the sheet declares: those its bus lines, its bus ports and its boxes' bus pins name. */
+    private final ImportedBuses declaredBuses = new ImportedBuses();
+    /** The design's bus aliases, by which a label or a pin may name a bus. */
+    private final Map<String, List<String>> busAliases;
     private final Set<String> globals = new LinkedHashSet<>();
     /** The terminal at each connection point, by the point's key, and where the terminal is drawn. */
     private final Map<String, Terminal> terminals = new LinkedHashMap<>();
@@ -131,11 +142,12 @@ public final class KiCadSheetImport {
     /** The label a far pin is reached by, once per pin. */
     private final Map<String, Terminal> pinLabels = new HashMap<>();
 
-    private KiCadSheetImport(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
+    private KiCadSheetImport(KiCadSchematic schematic, String instancePath, KiCadDesignNets designNets, KiCadLibraryMap library,
                              String ownLibrary, KiCadCatalogue catalogue, Function<String, String> sheetSlug,
                              Function<String, Map<String, String>> portsOf, SheetMarks marks) {
         this.marks = marks;
-        this.nets = new ImportedNetNames(ground, KiCadNetNames::local);
+        this.nets = designNets.names();
+        this.busAliases = designNets.busAliases();
         this.schematic = schematic;
         this.library = library;
         this.ownLibrary = ownLibrary + ":";
@@ -150,17 +162,17 @@ public final class KiCadSheetImport {
     /**
      * @param instancePath the path of the place the sheet stands in whose references the parts take: KiCad numbers
      *                     a sheet's parts for each place it stands, and the first place's numbers are the document's
-     * @param ground       the KiCad net that is node 0: the design's reference ground
+     * @param designNets   how the design names its nets: node 0, and the net each name joining across the design is
      * @param ownLibrary   the KiCad library an export writes a component with no KiCad counterpart under: a symbol of it
      *                     is that component again, when the catalogue holds it
      * @param sheetSlug    the slug of the circuit a sheet file becomes, for a box placing it
      * @param portsOf      the port each hierarchical label of a sheet file is, by the label's words, for a box's pins to meet
      * @param marks        how the sheet's marks are drawn
      */
-    public static ImportedSheet of(KiCadSchematic schematic, String instancePath, String ground, KiCadLibraryMap library,
+    public static ImportedSheet of(KiCadSchematic schematic, String instancePath, KiCadDesignNets designNets, KiCadLibraryMap library,
                                    String ownLibrary, KiCadCatalogue catalogue, Function<String, String> sheetSlug,
                                    Function<String, Map<String, String>> portsOf, SheetMarks marks) {
-        KiCadSheetImport sheet = new KiCadSheetImport(schematic, instancePath, ground, library, ownLibrary, catalogue,
+        KiCadSheetImport sheet = new KiCadSheetImport(schematic, instancePath, designNets, library, ownLibrary, catalogue,
                 sheetSlug, portsOf, marks);
         sheet.parts();
         sheet.marks();
@@ -168,8 +180,11 @@ public final class KiCadSheetImport {
         sheet.wires();
         sheet.touchingWires();
         sheet.noteConnectors();
-        return new ImportedSheet(new ImportedCircuit(sheet.elements, sheet.items, sheet.wires, sheet.railProbes(), sheet.ports,
-                sheet.globals, sheet.notes, sheet.buses()), sheet.symbols, sheet.components, sheet.partFootprints, sheet.identifiers, sheet.partPads);
+        List<ImportedCircuit.BusLine> busLines = sheet.busLines();
+        List<SheetBoundary.Port> ports = new ArrayList<>(sheet.ports.stream().map(ImportedCircuit::netPort).toList());
+        sheet.busPorts.forEach(bus -> ports.add(ImportedCircuit.busPort(bus)));
+        return new ImportedSheet(new ImportedCircuit(sheet.elements, sheet.items, sheet.wires, sheet.railProbes(), ports,
+                sheet.globals, sheet.notes, sheet.declaredBuses.buses(), busLines), sheet.symbols, sheet.components, sheet.partFootprints, sheet.identifiers, sheet.partPads);
     }
 
     // ─── parts ──────────────────────────────────────────────────────────────────────────────────────
@@ -215,19 +230,53 @@ public final class KiCadSheetImport {
 
     /**
      * The port each hierarchical label of a sheet is, by the label's words: its net as the sheet names it, as {@link #marks}
-     * names it, so two labels on one wire are one port.
+     * names it, so two labels on one wire are one port. A label naming a bus — {@code IRQ-[1..7]} — is the port of that bus, by the
+     * bus's name as the circuit declares it: KiCad hands the bus across whole, its nets member by member.
      */
-    public static Map<String, String> portsOf(KiCadSchematic schematic, String instancePath, String ground) {
+    public static Map<String, String> portsOf(KiCadSchematic schematic, String instancePath, KiCadDesignNets designNets) {
         KiCadProject alone = KiCadProject.single(schematic, instancePath);
         KiCadConnectivity connectivity = KiCadConnectivity.of(alone);
-        ImportedNetNames nets = new ImportedNetNames(ground, KiCadNetNames::local);
+        ImportedNetNames nets = designNets.names();
+        // Declared in the order the sheet's own import declares them, so a bus is called here what it is called there.
+        ImportedBuses names = new ImportedBuses();
         Map<String, String> ports = new LinkedHashMap<>();
         for (KiCadLabel label : schematic.labels()) {
-            if (label.kind() == KiCadLabel.Kind.HIERARCHICAL) {
+            if (label.kind() != KiCadLabel.Kind.HIERARCHICAL) {
+                continue;
+            }
+            Optional<KiCadBus> bus = KiCadBus.of(label.text(), designNets.busAliases());
+            if (bus.isPresent()) {
+                ports.put(label.text(), names.declare(bus.get().name(), membersHere(bus.get(), schematic, connectivity, instancePath, nets)));
+            } else {
                 ports.put(label.text(), connectivity.netAt(instancePath, label.at()).map(nets::of).orElse(nets.of(label.text())));
             }
         }
         return ports;
+    }
+
+    /**
+     * The net each of a bus's members is on a sheet, by the member's name, as KiCad joins it (checked with kicad-cli 10): the net an
+     * entry takes off a bus there, or a label of the name names — by name, an entry or none. A member no net of the sheet is named is
+     * left out.
+     */
+    private static Map<String, String> memberNetsOf(KiCadBus bus, KiCadSchematic schematic, KiCadConnectivity connectivity, String path,
+                                                    ImportedNetNames nets) {
+        Map<String, String> takenOff = new LinkedHashMap<>();
+        for (KiCadBusEntry entry : schematic.busEntries()) {
+            for (KiCadPoint end : List.of(entry.at(), entry.end())) {
+                connectivity.netAt(path, end).ifPresent(net -> takenOff.putIfAbsent(net.substring(net.lastIndexOf('/') + 1), net));
+            }
+        }
+        Map<String, String> members = new LinkedHashMap<>();
+        for (String member : bus.members()) {
+            Optional<String> net = Optional.ofNullable(takenOff.get(member));
+            if (net.isEmpty()) {
+                net = schematic.labels().stream().filter(label -> label.kind() != KiCadLabel.Kind.HIERARCHICAL && label.text().equals(member))
+                        .findFirst().flatMap(label -> connectivity.netAt(path, label.at()));
+            }
+            net.map(nets::of).ifPresent(named -> members.put(member, named));
+        }
+        return members;
     }
 
     /** A part's value left in words: KiCad's value, unless a number of it set the component's parameter or KiCad left it unsaid. */
@@ -569,13 +618,18 @@ public final class KiCadSheetImport {
                 continue;
             }
             KiCadPin pin = definition.get().pins().getFirst();
+            // A power symbol whose pin gives power — KiCad's power flag — names no net: ERC's, not the circuit's.
+            if (pin.type() != KiCadPinType.POWER_INPUT) {
+                continue;
+            }
             KiCadPoint point = instance.placement().place(pin.at());
             double radians = Math.toRadians(pin.angle());
             KiCadPoint into = instance.placement().place(new KiCadPoint(pin.at().x() + Math.cos(radians),
                     pin.at().y() + Math.sin(radians)));
             double[] body = {into.x() - point.x(), into.y() - point.y()};
             String value = instance.value();
-            String net = nets.of(value);
+            // Its net as the sheet's wires make it, as a label's and a part's pin's: two power symbols on one wire are one net, named once.
+            String net = connectivity.netAt(path, point).map(nets::of).orElse(nets.of(value));
             boolean ground = value.toUpperCase().startsWith("GND") || value.equalsIgnoreCase("VSS");
             if (ground) {
                 // A power symbol joins its net across the design, a second ground as much as a rail; only node 0 needs no saying.
@@ -584,12 +638,24 @@ public final class KiCadSheetImport {
             } else {
                 globals.add(net);
                 KiCadValue.volts(value).ifPresent(volts -> rails.putIfAbsent(net, volts));
-                mark("power", net, SheetMarks.GLOBAL, point, body);
+                mark("power", net, SheetMarks.POWER, point, body);
             }
         }
         for (KiCadLabel label : schematic.labels()) {
+            // A hierarchical label naming a bus hands each of its nets across the sheet's edge: each a port of the circuit.
+            Optional<KiCadBus> bus = KiCadBus.of(label.text(), busAliases);
+            if (label.kind() == KiCadLabel.Kind.HIERARCHICAL && bus.isPresent()) {
+                String declared = declared(bus.get());
+                if (!busPorts.contains(declared)) {
+                    busPorts.add(declared);
+                }
+                // Drawn where KiCad drew it: a port of the sheet naming the bus it hands across.
+                double turned = Math.toRadians(label.angle());
+                mark("port", declared, SheetMarks.PORT, label.at(), new double[] {Math.cos(turned), -Math.sin(turned)});
+                continue;
+            }
             // A label on a bus line names the line, and joins nothing: the bus takes its words.
-            if (ImportedBuses.onAnyBus(new double[] {label.at().x(), label.at().y()}, busLines())) {
+            if (ImportedBuses.onAnyBus(new double[] {label.at().x(), label.at().y()}, busStretches())) {
                 continue;
             }
             String net = connectivity.netAt(path, label.at()).map(nets::of).orElse(nets.of(label.text()));
@@ -608,6 +674,17 @@ public final class KiCadSheetImport {
                     mark("port", net, SheetMarks.PORT, label.at(), body);
                 }
             }
+        }
+        // A net a hidden power pin names joins across the design as a power symbol's does, with nothing drawn for it.
+        connectivity.globals().values().stream().map(nets::of).forEach(globals::add);
+        // A bus entry: a mark of the net its wire takes off the bus, its pin the wire's end, its body slanting back to the bus.
+        for (KiCadBusEntry entry : schematic.busEntries()) {
+            boolean startOnBus = ImportedBuses.onAnyBus(new double[] {entry.at().x(), entry.at().y()}, busStretches());
+            KiCadPoint onBus = startOnBus ? entry.at() : entry.end();
+            KiCadPoint wireEnd = startOnBus ? entry.end() : entry.at();
+            String net = connectivity.netAt(path, wireEnd).map(nets::of).orElse(null);
+            double[] body = {Math.signum(onBus.x() - wireEnd.x()), Math.signum(onBus.y() - wireEnd.y())};
+            mark("entry", net, SheetMarks.ENTRY, wireEnd, body);
         }
         // Node 0 is every sheet's already: a global label of the reference ground hands nothing across a sheet's edge.
         globals.removeIf(net -> ports.contains(net) || net.equals(Circuit.GROUND));
@@ -653,6 +730,11 @@ public final class KiCadSheetImport {
             List<Placement.PortPlace> placed = new ArrayList<>();
             Map<String, String> labelled = portsOf.apply(box.file());
             for (KiCadSheet.Pin pin : box.pins()) {
+                Optional<KiCadBus> bus = KiCadBus.of(pin.name(), busAliases);
+                if (bus.isPresent()) {
+                    busPin(id, box, pin, bus.get(), labelled, pins).ifPresent(port -> placed.add(portPlace(port, box, pin, centre, drawnSize)));
+                    continue;
+                }
                 String port = labelled.get(pin.name());
                 // Joined to nothing inside: KiCad only warns of it, and a circuit has no port to wire it to.
                 if (port == null) {
@@ -677,6 +759,39 @@ public final class KiCadSheetImport {
             elements.add(new Part(id, sheetSlug.apply(box.file()), pins, Map.of(), null, null));
             items.add(new Item(id, null, null, centre[0], centre[1], 0, false, null, drawnSize).withPorts(placed));
         }
+    }
+
+    /**
+     * A box's pin carrying a bus: the child's bus of its name wired to the bus of its name here, declared on this sheet with the nets
+     * its members are here — KiCad joins them member by member, which the circuit's unfolding does from the two declarations.
+     *
+     * @return the child's port the pin wires; empty when the child hands no bus of the pin's words across
+     */
+    private Optional<String> busPin(String id, KiCadSheet box, KiCadSheet.Pin pin, KiCadBus bus, Map<String, String> labelled,
+                                    Map<String, String> pins) {
+        String port = labelled.get(pin.name());
+        if (port == null) {
+            notes.add(id + ": its pin " + bus.text() + " has no label of that bus on " + box.file() + ", so it joins nothing.");
+            return Optional.empty();
+        }
+        // Bound to the bus the line reaching the pin is named by — another name's, in order, as KiCad binds it — else the pin's own.
+        KiCadBus above = new KiCadBusLines(schematic, busAliases).busReaching(pin.at()).filter(reached -> reached.members().size() == bus.members().size())
+                .orElse(bus);
+        String joined = pins.putIfAbsent(port, declared(above));
+        return joined == null ? Optional.of(port) : Optional.empty();
+    }
+
+    /** A bus KiCad names here, declared on this sheet: each member the net of its name here, else a net of the bus's own that joins nothing. */
+    private String declared(KiCadBus bus) {
+        return declaredBuses.declare(bus.name(), membersHere(bus, schematic, connectivity, path, nets));
+    }
+
+    /** The nets a bus KiCad names carries on a sheet: each the net of its member's name there, else an open net of the bus's own. */
+    private static List<String> membersHere(KiCadBus bus, KiCadSchematic schematic, KiCadConnectivity connectivity, String path,
+                                            ImportedNetNames nets) {
+        Map<String, String> here = memberNetsOf(bus, schematic, connectivity, path, nets);
+        String word = ImportedBuses.wordOf(bus.name());
+        return bus.members().stream().map(member -> here.getOrDefault(member, nets.of(word + "_" + member + "_open"))).toList();
     }
 
     /**
@@ -731,17 +846,23 @@ public final class KiCadSheetImport {
     }
 
     /** The sheet's bus stretches, each a line of KiCad's points. */
-    private List<List<double[]>> busLines() {
+    private List<List<double[]>> busStretches() {
         return schematic.buses().stream().map(bus -> bus.points().stream().map(point -> new double[] {point.x(), point.y()}).toList()).toList();
     }
 
-    /** The sheet's bus lines, each named by the label that stands on it. */
-    private List<ImportedCircuit.Bus> buses() {
-        List<ImportedCircuit.Bus> buses = new ArrayList<>();
-        for (List<double[]> line : ImportedBuses.joined(busLines())) {
+    /** The sheet's bus lines, each naming the bus the label standing on it declares. */
+    private List<ImportedCircuit.BusLine> busLines() {
+        List<ImportedCircuit.BusLine> buses = new ArrayList<>();
+        for (List<double[]> line : ImportedBuses.joined(busStretches())) {
             String written = ImportedBuses.writtenOn(line, schematic.labels(), label -> new double[] {label.at().x(), label.at().y()}, KiCadLabel::text);
-            buses.add(ImportedBuses.bus("B" + (buses.size() + 1), written,
-                    line.stream().map(point -> drawn(new KiCadPoint(point[0], point[1]))).toList(), nets::of));
+            String id = "B" + (buses.size() + 1);
+            List<double[]> via = line.stream().map(point -> drawn(new KiCadPoint(point[0], point[1]))).toList();
+            // KiCad's own bus syntax read by KiCad's reading, each member the net a label of its name is here; a word alone names the line.
+            // Named by a label on it; a line no label names takes the bus of the pin or the port it is drawn to, as KiCad takes it.
+            Optional<KiCadBus> named = Optional.ofNullable(written).flatMap(text -> KiCadBus.of(text, busAliases))
+                    .or(() -> new KiCadBusLines(schematic, busAliases).busReaching(new KiCadPoint(line.getFirst()[0], line.getFirst()[1])));
+            buses.add(named.map(bus -> new ImportedCircuit.BusLine(id, declared(bus), via))
+                    .orElseGet(() -> declaredBuses.line(id, written, via, nets::of)));
         }
         return buses;
     }

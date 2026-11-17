@@ -1,7 +1,7 @@
 footprint:qsop-28-footprint("QSOP-28, 3.9 mm body") {
     meta {
         summary: "28-lead QSOP, 3.9 mm body, gull-wing, 0.635 mm pitch, body 3.9 × 9.9 mm"
-        code: "FP.QSOP:28-P0.64"
+        code: "QSOP:28-P0.64:F"
         category: small-outline
         tags: electronics, footprint, surface
         source: "JEDEC MO-137"
@@ -43,5 +43,5 @@ footprint:qsop-28-footprint("QSOP-28, 3.9 mm body") {
     outline(silkscreen, width: 0.12, "M-3.425 -5.06H1.95M-1.95 5.06H1.95")
     outline(courtyard, width: 0.05, "M-3.7 -5.2H3.7V5.2H-3.7Z")
     body(height: 1.75)
-    model("MD.QSOP:28-P0.64")
+    model("QSOP:28-P0.64:M3D")
 }

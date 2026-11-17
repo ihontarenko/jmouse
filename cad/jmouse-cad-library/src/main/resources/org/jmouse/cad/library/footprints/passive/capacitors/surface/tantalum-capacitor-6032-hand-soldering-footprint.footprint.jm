@@ -1,7 +1,7 @@
 footprint:tantalum-capacitor-6032-hand-soldering-footprint("Tantalum capacitor Case C (6032-28 metric), hand soldering") {
     meta {
         summary: "Tantalum capacitor, Case C (6032-28 metric) body, pads lengthened for a soldering iron; pad 1 is the positive terminal"
-        code: "FP.CHIP:CT6032-HAND"
+        code: "CHIP:CT6032-HAND:F"
         category: capacitors-surface
         tags: electronics, footprint, surface
         source: "EIA-535-BAAC case sizes (KEMET T491), Case C (6032-28 metric)"
@@ -18,5 +18,5 @@ footprint:tantalum-capacitor-6032-hand-soldering-footprint("Tantalum capacitor C
     outline(silkscreen, width: 0.12, "M-3.935 -1.885V1.885")
     outline(courtyard, width: 0.05, "M-4.2 -2.3H4.2V2.3H-4.2Z")
     body(height: 2.8)
-    model("MD.CHIP:CT6032-HAND")
+    model("CHIP:CT6032-HAND:M3D")
 }

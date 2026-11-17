@@ -4,7 +4,7 @@
 portrait:chip-resistor-portrait("Chip resistor") {
     meta {
         summary: "A chip resistor from above with its printed EIA code, read from its resistance and tolerance"
-        code: "PT.RESISTOR:CHIP"
+        code: "RESISTOR:CHIP:P"
         category: resistors
         tags: electronics, portrait, resistor, surface-mount
         authors: "jMouse"

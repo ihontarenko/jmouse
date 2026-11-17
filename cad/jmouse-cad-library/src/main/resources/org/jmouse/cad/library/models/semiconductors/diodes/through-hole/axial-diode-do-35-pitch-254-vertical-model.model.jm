@@ -1,7 +1,7 @@
 model:axial-diode-do-35-pitch-254-vertical-model("Axial diode DO-35 (DO-204AH), vertical, 2.54 mm") {
     meta {
         summary: "Axial diode DO-35 (DO-204AH), vertical, 2.54 mm — its body drawn by jmCAD from the footprint and its package table"
-        code: "MD.AXIAL:DO-35-P2.54-V"
+        code: "AXIAL:DO-35-P2.54-V:M3D"
         category: diodes-through-hole
         tags: electronics, model, axial
         source: "JEDEC DO-204 outlines"

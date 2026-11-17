@@ -14,7 +14,7 @@ component:npn-transistor("NPN transistor", type: bjt) {
 
     parameter:polarity(1, "NPN")
 
-    symbol(uses: "SY.TRANSISTOR:BIPOLAR-NPN") {
+    symbol(uses: "TRANSISTOR:BIPOLAR-NPN:S") {
         bind:failed(failed)
     }
 

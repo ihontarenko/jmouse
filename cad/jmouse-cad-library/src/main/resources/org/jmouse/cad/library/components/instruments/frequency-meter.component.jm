@@ -26,7 +26,7 @@ component:frequency-meter("Frequency meter", type: meter) {
     lead:input(white, stripes: blue)
     lead:reference(grey)
     reading:reading(frequency, unit: Hz)
-    symbol(uses: "SY.METER:FREQUENCY") {
+    symbol(uses: "METER:FREQUENCY:S") {
         bind:a(pin: input)
         bind:b(pin: reference)
     }

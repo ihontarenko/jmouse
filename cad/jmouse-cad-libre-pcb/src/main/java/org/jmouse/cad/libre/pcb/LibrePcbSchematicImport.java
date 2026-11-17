@@ -80,7 +80,9 @@ final class LibrePcbSchematicImport {
     private final Map<String, Set<String>> namedPins;
     private final List<ImportedCircuit.Item> items = new ArrayList<>();
     private final List<ImportedCircuit.Wire> wires = new ArrayList<>();
-    private final List<ImportedCircuit.Bus> buses = new ArrayList<>();
+    private final List<ImportedCircuit.BusLine> busLines = new ArrayList<>();
+    /** The buses its bus lines declare, each once by its name. */
+    private final ImportedBuses declaredBuses = new ImportedBuses();
     /** How many stretches of wire each net of the file is drawn in. */
     private final Map<String, Long> segmentsOfNet = new HashMap<>();
     private final Set<String> globals = new LinkedHashSet<>();
@@ -291,7 +293,7 @@ final class LibrePcbSchematicImport {
         if (!ground) {
             globals.add(net);
         }
-        mark(ground ? "ground" : "power", net, ground ? SheetMarks.GROUND : SheetMarks.GLOBAL, point(symbol.transform().placed(pin.at())), inward(pin, symbol));
+        mark(ground ? "ground" : "power", net, ground ? SheetMarks.GROUND : SheetMarks.POWER, point(symbol.transform().placed(pin.at())), inward(pin, symbol));
     }
 
     /** The way a pin's line runs from where it connects into its body, on our sheet, Y downwards. */
@@ -323,7 +325,7 @@ final class LibrePcbSchematicImport {
         }
         LibrePcbCircuit.Bus named = project.circuit().buses().get(segment.bus());
         for (List<double[]> line : ImportedBuses.joined(stretches)) {
-            buses.add(ImportedBuses.bus("B" + (buses.size() + 1), named == null ? null : named.name(),
+            busLines.add(declaredBuses.line("B" + (busLines.size() + 1), named == null ? null : named.name(),
                     line.stream().map(point -> drawn(new SheetTracing.Point(point[0], point[1]))).toList(), nets::of));
         }
     }
@@ -446,7 +448,7 @@ final class LibrePcbSchematicImport {
         List<ImportedCircuit.Part> parts = new ArrayList<>();
         placed.values().forEach(part -> parts.add(new ImportedCircuit.Part(part.id(), part.component(), part.nets(), Map.of(), null, part.footprint(), part.pads())
                 .withValue(part.value())));
-        ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), List.of(), globals, notes, buses);
+        ImportedCircuit circuit = new ImportedCircuit(parts, items, wires, List.of(), List.of(), globals, notes, declaredBuses.buses(), busLines);
         // What a design is built from, each before what names it: a footprint before the component landing on it.
         List<DocumentNode> built = made.documents();
         DocumentNode design = ImportedCircuitDocument.of(LibrePcbNames.design(title), title, "Imported from LibrePCB: " + file, circuit, filing);

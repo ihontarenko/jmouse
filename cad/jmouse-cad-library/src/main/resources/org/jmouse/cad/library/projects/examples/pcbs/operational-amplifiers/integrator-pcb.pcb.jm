@@ -16,7 +16,7 @@ pcb:integrator-pcb("Op-amp integrator — pcb") {
     place(RP, at: 19 4)
     place(U1, at: 19.5 14)
     place(RL, at: 26.5 16.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 11.5)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 11.5)
     track(top, width: 0.25, from: 17.05 14.635, to: 18.65 14.635)
     track(top, width: 0.25, from: 26.5 17.5, to: 26.5 18.55)
     track(top, width: 0.25, from: 18.15 8, to: 18.15 4.15, to: 18 4)

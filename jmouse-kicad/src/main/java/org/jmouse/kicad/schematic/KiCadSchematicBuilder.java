@@ -269,6 +269,34 @@ public final class KiCadSchematicBuilder {
         return this;
     }
 
+    /** A bus line through the points, a segment between each two: it joins nothing — the labels on it name its bus. */
+    public KiCadSchematicBuilder bus(List<KiCadPoint> points) {
+        for (int index = 1; index < points.size(); index++) {
+            KiCadPoint start = points.get(index - 1);
+            KiCadPoint end = points.get(index);
+            if (start.sameAs(end)) {
+                continue;
+            }
+            reach(start);
+            reach(end);
+            connections.add(SExpressionList.of("bus", SExpressionList.of("pts", point(start), point(end)),
+                    SExpressionList.of("stroke", SExpressionList.of("width", SExpressionAtom.of(0)), SExpressionList.of("type", SExpressionAtom.of("default"))),
+                    SExpressionList.of("uuid", SExpressionString.of(identity("bus")))));
+        }
+        return this;
+    }
+
+    /** A bus entry from a point on a bus line to where a wire takes a net off it: drawing only, as KiCad keeps one. */
+    public KiCadSchematicBuilder busEntry(KiCadPoint onBus, KiCadPoint wireEnd) {
+        reach(onBus);
+        reach(wireEnd);
+        connections.add(SExpressionList.of("bus_entry", SExpressionList.of("at", number(onBus.x()), number(onBus.y())),
+                SExpressionList.of("size", number(wireEnd.x() - onBus.x()), number(wireEnd.y() - onBus.y())),
+                SExpressionList.of("stroke", SExpressionList.of("width", SExpressionAtom.of(0)), SExpressionList.of("type", SExpressionAtom.of("default"))),
+                SExpressionList.of("uuid", SExpressionString.of(identity("bus entry")))));
+        return this;
+    }
+
     public KiCadSchematicBuilder junction(KiCadPoint at) {
         reach(at);
         connections.add(SExpressionList.of("junction", SExpressionList.of("at", number(at.x()), number(at.y())),

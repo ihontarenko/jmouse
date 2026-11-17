@@ -20,7 +20,10 @@ import org.jmouse.cad.document.DocumentInput;
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.LanguageSchema;
+import org.jmouse.cad.document.DocumentModule;
+import org.jmouse.cad.document.DocumentSchemas;
 import org.jmouse.cad.library.CadLanguage;
+import tools.jackson.databind.node.ObjectNode;
 import org.jmouse.cad.schematic.SchematicModule;
 import org.jmouse.cad.schematic.drawing.DrawingStatements;
 import org.jmouse.cad.schematic.drawing.LivingDrawing;
@@ -38,6 +41,7 @@ import org.jmouse.el.node.Expression;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -64,6 +68,20 @@ public class LanguageEditing {
     /** The language as an editor builds its forms from it. */
     public LanguageSchema schema() {
         return language.schema();
+    }
+
+    /**
+     * The schema of every kind of document whose model the engine answers — its own modules' and its plugins' —, by kind: what
+     * each module keeps beside it ({@link DocumentSchemas}), so what is served is what its test holds to the model.
+     */
+    public Map<String, ObjectNode> documentSchemas() {
+        Map<String, ObjectNode> schemas = new TreeMap<>();
+        for (DocumentModule module : language.modules()) {
+            for (DocumentKind kind : module.models().keySet()) {
+                DocumentSchemas.kept(kind).ifPresent(schema -> schemas.put(kind.word(), schema));
+            }
+        }
+        return schemas;
     }
 
     /** What a text does not read as, where: an editor shows a half-written text with these rather than refusing it. */

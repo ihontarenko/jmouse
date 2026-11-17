@@ -39,7 +39,7 @@ import java.util.Set;
  * @param slug       its slug
  * @param title      its title
  * @param kind       the word its head opens with
- * @param code       {@code meta { code … }} — its technical code, {@code FP.CHIP:R0805}, by which it may be named
+ * @param code       {@code meta { code … }} — its technical code, {@code CHIP:R0805:F}, by which it may be named
  *                   besides its slug —, or null
  * @param summary    {@code meta { summary … }}, or null
  * @param category   {@code meta { category … }}, or null when it is filed nowhere

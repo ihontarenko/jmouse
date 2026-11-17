@@ -29,13 +29,13 @@ component:resistor("Resistor", type: resistor) {
     parameter:T_maximum(155 °C, "past this it fails on a realistic bench")
     pin:terminal_one(analog, 1, "first terminal")
     pin:terminal_two(analog, 2, "second terminal")
-    footprint("FP.CHIP:R0805")
-    footprint("FP.CHIP:R0603")
-    footprint("FP.CHIP:R1206")
-    footprint("FP.AXIAL:R0207-P10.16-H")
-    footprint("FP.AXIAL:R0207-P2.54-V")
+    footprint("CHIP:R0805:F")
+    footprint("CHIP:R0603:F")
+    footprint("CHIP:R1206:F")
+    footprint("AXIAL:R0207-P10.16-H:F")
+    footprint("AXIAL:R0207-P2.54-V:F")
 
-    symbol(uses: "SY.RESISTOR:FIXED") {
+    symbol(uses: "RESISTOR:FIXED:S") {
         bind:failed(failed)
         bind:load(power / power_rating)
         bind:flow(tanh((terminal_one - terminal_two) * 1000))
@@ -49,7 +49,7 @@ component:resistor("Resistor", type: resistor) {
     }
 
     # How it looks in the hand: its colour bands, read from its resistance and tolerance (IEC 60062).
-    portrait(uses: "PT.RESISTOR:AXIAL") {
+    portrait(uses: "RESISTOR:AXIAL:P") {
         bind:resistance(resistance)
         bind:tolerance(tolerance)
     }

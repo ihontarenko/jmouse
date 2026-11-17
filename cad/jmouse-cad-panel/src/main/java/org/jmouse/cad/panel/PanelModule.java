@@ -2,12 +2,11 @@ package org.jmouse.cad.panel;
 
 import org.jmouse.cad.document.DocumentKind;
 import org.jmouse.cad.document.DocumentModule;
-import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.DocumentModel;
 import org.jmouse.el.parser.Parser;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 /** The language of panels: one kind of document, written in {@link PanelLinesParser}'s lines. */
 public final class PanelModule implements DocumentModule {
@@ -20,8 +19,8 @@ public final class PanelModule implements DocumentModule {
     }
 
     @Override
-    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
-        return Map.of(PANEL, PanelDrawing::of);
+    public Map<DocumentKind, DocumentModel<?>> models() {
+        return Map.of(PANEL, DocumentModel.of(PanelDrawing.class, PanelDrawing::of));
     }
 
     @Override

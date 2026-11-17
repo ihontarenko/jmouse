@@ -36,14 +36,14 @@ component:ina240a1("INA240A1", type: amplifier) {
 
     state:follow(0, continuous, "where the output is heading, behind the input by the bandwidth")
 
-    footprint("FP.SOIC:8-P1.27-W3.9")
+    footprint("SOIC:8-P1.27-W3.9:F")
 
     # How it looks in the hand: its package from above, wired by its pin numbers and printed with its name.
-    portrait(uses: "PT.SOIC:8-P1.27-W3.9") {
+    portrait(uses: "SOIC:8-P1.27-W3.9:P") {
         bind:marking("INA240A1")
     }
 
-    symbol(uses: ["SY.AMPLIFIER:CURRENT-SENSE", "SY.AMPLIFIER:CURRENT-SENSE-WIDE"]) {
+    symbol(uses: ["AMPLIFIER:CURRENT-SENSE:S", "AMPLIFIER:CURRENT-SENSE-WIDE:S"]) {
         bind:failed(failed)
     }
 

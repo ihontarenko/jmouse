@@ -1,9 +1,11 @@
 package org.jmouse.cad.simulation;
 
 import org.jmouse.cad.document.ArrangementLines;
-import java.util.function.Function;
 import java.util.Map;
-import org.jmouse.cad.document.DocumentNode;
+import org.jmouse.cad.document.DocumentModel;
+import org.jmouse.cad.circuit.Circuit;
+import org.jmouse.cad.component.Component;
+import org.jmouse.cad.component.Family;
 import org.jmouse.el.grammar.ClauseBlockParser;
 import org.jmouse.el.grammar.ClauseBlockParser.Body;
 import org.jmouse.el.grammar.ClauseLineParser;
@@ -81,6 +83,7 @@ public final class SimulationModule implements DocumentModule {
                     SimulationLines.PLACE, ArrangementLines.GROUP_LINE))),
             ClauseBlockParser.of("ports", LineSet.of(SimulationLines.PORTS)),
             ClauseBlockParser.of("nets", LineSet.of(List.of(SimulationLines.NET))),
+            ClauseBlockParser.of(SimulationVocabulary.BUSES, LineSet.of(List.of(SimulationLines.BUS_DECLARATION))),
             ClauseBlockParser.of("probes", LineSet.of(List.of(SimulationLines.TIME_BASE, SimulationLines.PROBE))),
             ClauseBlockParser.of("view", LineSet.of(List.of(SimulationLines.VIEW))));
 
@@ -88,7 +91,7 @@ public final class SimulationModule implements DocumentModule {
                     "display", "measure", "leads", "equations", "formulas", "behaviour", "symbol", "portrait", "footprint",
                     "type", "bench", "expect", "parts")
             .repeating("type", "expect", "footprint");
-    public static final DocumentKind CIRCUIT   = DocumentKind.of("circuit", "parameters", "ports", "nets", "parts", "layout", "probes",
+    public static final DocumentKind CIRCUIT   = DocumentKind.of("circuit", "parameters", "ports", "nets", SimulationVocabulary.BUSES, "parts", "layout", "probes",
                     "analysis", "view", "expect", "run", "behaviour")
             .repeating("expect");
     public static final DocumentKind FAMILY    = DocumentKind.of("family", "parameters", "formulas");
@@ -102,9 +105,10 @@ public final class SimulationModule implements DocumentModule {
     }
 
     @Override
-    public Map<DocumentKind, Function<DocumentNode, Object>> models() {
-        return Map.of(COMPONENT, SimulationReading::component, FAMILY, SimulationReading::family,
-                      CIRCUIT, SimulationReading::circuit);
+    public Map<DocumentKind, DocumentModel<?>> models() {
+        return Map.of(COMPONENT, DocumentModel.of(Component.class, SimulationReading::component),
+                      FAMILY, DocumentModel.of(Family.class, SimulationReading::family),
+                      CIRCUIT, DocumentModel.of(Circuit.class, SimulationReading::circuit));
     }
 
     @Override

@@ -12,6 +12,9 @@ import org.jmouse.cad.store.editing.LanguageEditing.DrawnText;
 import org.jmouse.cad.store.editing.LanguageEditing.EditedDocument;
 import org.jmouse.cad.store.editing.LanguageEditing.LineEdit;
 import org.springframework.web.bind.annotation.GetMapping;
+import tools.jackson.databind.node.ObjectNode;
+
+import java.util.Map;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +54,16 @@ public class LanguageController {
     @PublicEndpoint("the language itself; nothing stored is read")
     public LanguageSchema schema() {
         return editing.schema();
+    }
+
+    /**
+     * The JSON Schema of every kind of document whose model the engine answers — a pcb, a footprint, a symbol, a circuit … —, by
+     * kind: what a document's {@code drawing} or model is, field by field, as its module's files say it.
+     */
+    @GetMapping("/language/documents")
+    @PublicEndpoint("the language's own models; nothing stored is read")
+    public Map<String, ObjectNode> documentSchemas() {
+        return editing.documentSchemas();
     }
 
     /** A text as a form, with what does not read in it. */

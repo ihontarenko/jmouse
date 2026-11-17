@@ -14,5 +14,5 @@ component:barrel-jack("DC barrel jack", type: connector) {
     pin:tip(analog, 1, "centre pin, usually +")
     pin:sleeve(analog, 2, "sleeve, usually −")
 
-    symbol(uses: "SY.CONNECTOR:BARREL-JACK")
+    symbol(uses: "CONNECTOR:BARREL-JACK:S")
 }

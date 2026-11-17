@@ -34,7 +34,25 @@ import java.util.Set;
  * A pcb as data an editor works on — the circuit it lays out, how it is made, its copper layers and edge, where each
  * part stands and the copper between them —, in millimetres, Y downwards. It is data; how it is sent is the product's.
  *
+ * @param circuit      the slug of the circuit it lays out; empty for a pcb of no circuit
+ * @param rules        how it is made — its maker's profile and what it changes of it —, where it says
+ * @param netClasses   the classes its nets are routed by: each one's track width, clearance and via
+ * @param sizes        the sizes it offers new copper in beside its classes'
+ * @param teardrops    where its tracks are widened as they enter copper, and how far
+ * @param pairs        its differential pairs: two nets routed side by side at one gap
  * @param copperLayers how many copper layers it has; 0 when it does not say
+ * @param outline      its edge, as path data; empty for a pcb with none drawn yet
+ * @param placements   where each part stands on it
+ * @param tracks       its straight tracks
+ * @param arcs         its tracks bent as arcs
+ * @param vias         its vias
+ * @param zones        its copper pours
+ * @param keepouts     the areas where copper is not laid
+ * @param dimensions   the measures drawn on it
+ * @param texts        the words printed on it
+ * @param holes        the holes drilled through it that are no part's
+ * @param shapes       what is drawn on its layers that no part brought
+ * @param outputs      what it is released as, each a set of formats written together
  * @param groups       the groups its items are chosen and moved with, each with its own state; a group only named by its members
  *                     is a free one
  */
@@ -173,6 +191,12 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
                 zones, keepouts, dimensions, texts, holes, shapes, outputs, groups);
     }
 
+    /** The same pcb with other arcs. */
+    public PcbDrawing withArcs(List<Arc> others) {
+        return new PcbDrawing(circuit, rules, netClasses, sizes, teardrops, pairs, copperLayers, outline, placements, tracks, others, vias,
+                zones, keepouts, dimensions, texts, holes, shapes, outputs, groups);
+    }
+
     /** The same pcb with other vias. */
     public PcbDrawing withVias(List<Via> others) {
         return new PcbDrawing(circuit, rules, netClasses, sizes, teardrops, pairs, copperLayers, outline, placements, tracks, arcs, others,
@@ -201,11 +225,21 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         return depth >= 0 && depth >= Math.min(from, to) && depth <= Math.max(from, to);
     }
 
-    /** A point of the pcb. */
+    /**
+     * A point of the pcb.
+     *
+     * @param x millimetres from the left
+     * @param y millimetres down
+     */
     public record Point(double x, double y) {
     }
 
-    /** @param changes the values the pcb changes of its way of making, by rule word, in millimetres */
+    /**
+     * How a pcb is made: its maker's profile, and what the pcb changes of it.
+     *
+     * @param profile the maker's profile it starts from, by its word
+     * @param changes the values the pcb changes of its way of making, by rule word, in millimetres
+     */
     public record Rules(String profile, Map<String, Double> changes) {
 
         public Rules {
@@ -213,7 +247,16 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** @param drill 0 with {@code diameter}: the pcb's usual via */
+    /**
+     * A class of nets, routed alike.
+     *
+     * @param name      what it is called
+     * @param width     the width its tracks are laid at, millimetres
+     * @param clearance how far its copper stands from other nets', millimetres
+     * @param drill     its vias' drill, millimetres; 0 with {@code diameter}: the pcb's usual via
+     * @param diameter  its vias' copper ring across, millimetres; 0 for the pcb's usual via
+     * @param nets      the nets it holds
+     */
     public record NetClass(String name, double width, double clearance, double drill, double diameter, List<String> nets) {
 
         public NetClass {
@@ -221,10 +264,12 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** @param target {@code round}, {@code surface} or {@code tracks} */
     /**
      * The sizes a pcb offers new copper in, beside what its classes say: track widths, and via drills each with its
      * diameter. Empty lists: the editor's own.
+     *
+     * @param tracks the track widths offered, millimetres
+     * @param vias   the vias offered, each a drill with its copper ring
      */
     public record Sizes(List<Double> tracks, List<ViaSize> vias) {
 
@@ -236,22 +281,53 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** A via's drill and the copper ring's diameter around it, millimetres. */
+    /**
+     * A via's drill and the copper ring's diameter around it, millimetres.
+     *
+     * @param drill    the hole's diameter
+     * @param diameter the copper ring's diameter around it
+     */
     public record ViaSize(double drill, double diameter) {
     }
 
+    /**
+     * Where a pcb widens its tracks as they enter copper, and how far: a drop's measures are shares of the copper it enters.
+     *
+     * @param target what the tracks enter: {@code round} pads and vias, {@code surface} pads, or other {@code tracks}
+     * @param length how far along the track a drop reaches, as a share of the copper it enters
+     * @param width  how wide a drop's base is, as a share of the copper it enters
+     * @param curved whether a drop's sides are curved rather than straight
+     */
     public record Teardrop(String target, double length, double width, boolean curved) {
     }
 
-    /** @param skew 0: the two lengths are not matched */
+    /**
+     * A differential pair: two nets routed side by side.
+     *
+     * @param name     what it is called
+     * @param width    the width each of its tracks is laid at, millimetres
+     * @param gap      how far apart its two tracks run, millimetres
+     * @param skew     how far the two lengths may differ, millimetres; 0: the two lengths are not matched
+     * @param positive its positive net
+     * @param negative its negative net
+     */
     public record Pair(String name, double width, double gap, double skew, String positive, String negative) {
     }
 
     /**
-     * @param side      {@code top} or {@code bottom}
-     * @param reference where its designator stands in the part's own frame; empty for where its footprint's field puts it
+     * Where a part stands on the pcb.
+     *
+     * @param designator  the part it places, as the circuit names it
+     * @param x           where its origin stands, millimetres from the left
+     * @param y           where its origin stands, millimetres down
+     * @param rotation    how far it is turned, degrees counter-clockwise as the pcb is seen
+     * @param side        {@code top} or {@code bottom}
+     * @param reference   where its designator stands in the part's own frame; empty for where its footprint's field puts it
+     * @param shown       what is printed for it where that is not its designator — {@code R1} for {@code S1_R1} —; empty for its designator
+     * @param footprint   the footprint a part that is only the pcb's stands on — a mounting hole, a logo —; empty for a part of the circuit
+     * @param nets        the pad a net stands on, by net — {@code nets (GND = 1)} —, for a part that is only the pcb's
      * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
-     * @param role      what it is to the copper beyond its pads: {@code link} for a 0 Ω link, its pads one piece of copper; empty for a part
+     * @param role        what it is to the copper beyond its pads: {@code link} for a 0 Ω link, its pads one piece of copper; empty for a part
      */
     public record Placement(String designator, double x, double y, double rotation, String side, Optional<Reference> reference,
                             Optional<String> shown, Optional<String> footprint, Map<String, String> nets, Arrangement arrangement, String role) {
@@ -303,9 +379,34 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
             double sine = Math.sin(radians);
             return new Point(x + mirroredX * cosine - footprintY * sine, y + mirroredX * sine + footprintY * cosine);
         }
+
+        /** The point of the part's footprint that lands on a point of the pcb: {@link #placed} undone. */
+        public Point footprintPointAt(Point onPcb) {
+            double radians = Math.toRadians(-rotation);
+            double cosine = Math.cos(radians);
+            double sine = Math.sin(radians);
+            double dx = onPcb.x() - x;
+            double dy = onPcb.y() - y;
+            double mirroredX = dx * cosine + dy * sine;
+            double footprintY = -dx * sine + dy * cosine;
+            return new Point(onBottom() ? -mirroredX : mirroredX, footprintY);
+        }
+
+        /** Where a point of the pcb that stood on this part goes when the part stands as {@code moved} does: the same spot of it. */
+        public Point carriedTo(Placement moved, Point onPcb) {
+            Point local = footprintPointAt(onPcb);
+            return moved.placed(local.x(), local.y());
+        }
     }
 
-    /** Where a part's designator stands in its own frame, and how it is turned. */
+    /**
+     * Where a part's designator stands in its own frame, and how it is turned.
+     *
+     * @param x        millimetres right of the part's origin
+     * @param y        millimetres below the part's origin
+     * @param rotation how far it is turned, degrees
+     * @param layer    the layer it is printed on; empty for its footprint's field's
+     */
     public record Reference(double x, double y, double rotation, String layer) {
 
         /** A designator standing where its footprint's field says it is printed. */
@@ -315,9 +416,14 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
     }
 
     /**
+     * A track: straight copper run through points on one layer.
+     *
+     * @param layer       the copper layer it is on: {@code top}, {@code inner-1} …, {@code bottom}
+     * @param width       how wide it is, millimetres
+     * @param rounding    how far its corners are rounded, millimetres; 0 for sharp corners
+     * @param points      the points it runs through, in order, at least two
      * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
-     * @param finish      what its copper is left as: {@link PcbVocabulary#FINISH_BARE}, the solder mask open along it for solder to be run on;
-     *               empty for under the mask
+     * @param finish      what its copper is left as: bare, the solder mask open along it for solder to be run on; empty for under the mask
      */
     public record Track(String layer, double width, double rounding, List<Point> points, Arrangement arrangement, String finish) {
 
@@ -352,7 +458,17 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** A track bent as an arc, through three points. */
+    /**
+     * A track bent as an arc, through three points.
+     *
+     * @param layer       the copper layer it is on
+     * @param width       how wide it is, millimetres
+     * @param from        where it starts
+     * @param through     a point it bends through, between its ends
+     * @param to          where it ends
+     * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
+     * @param finish      what its copper is left as: bare, the solder mask open along it; empty for under the mask
+     */
     public record Arc(String layer, double width, Point from, Point through, Point to, Arrangement arrangement, String finish) {
 
         public Arc {
@@ -375,7 +491,18 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** @param from the layer it starts on; empty for through the pcb */
+    /**
+     * A via: a plated hole joining copper layers.
+     *
+     * @param x           where it stands, millimetres from the left
+     * @param y           where it stands, millimetres down
+     * @param drill       its hole's diameter, millimetres
+     * @param diameter    its copper ring's diameter, millimetres
+     * @param from        the layer it starts on; empty for through the pcb
+     * @param to          the layer it ends on; empty for through the pcb
+     * @param open        where the solder mask is left open over it: {@code top}, {@code bottom} or {@code both}; empty for covered
+     * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
+     */
     public record Via(double x, double y, double drill, double diameter, String from, String to, String open, Arrangement arrangement) {
 
         public Via {
@@ -392,6 +519,25 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
             return new Via(x, y, drill, diameter, from, to, open, other);
         }
 
+        /** The same via standing at another point. */
+        public Via at(double otherX, double otherY) {
+            return new Via(otherX, otherY, drill, diameter, from, to, open, arrangement);
+        }
+
+        /** The copper layers it passes through, of a pcb's from the top down: from its first to its last. */
+        public List<String> layersOf(List<String> copperLayers) {
+            // A via named by no layers goes through the pcb; an unmodifiable list refuses to look for null.
+            if (from == null || to == null) {
+                return copperLayers;
+            }
+            int first = copperLayers.indexOf(from);
+            int last = copperLayers.indexOf(to);
+            if (first < 0 || last < 0) {
+                return copperLayers;
+            }
+            return copperLayers.subList(Math.min(first, last), Math.max(first, last) + 1);
+        }
+
         /** A via covered by the solder mask on both sides. */
         public Via(double x, double y, double drill, double diameter, String from, String to) {
             this(x, y, drill, diameter, from, to, "");
@@ -404,8 +550,16 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
 
     }
 
-    /** @param clearance 0 for the pcb's own */
-    /** @param finish what its copper is left as: {@link PcbVocabulary#FINISH_BARE}, the solder mask open over all of it; empty for under the mask */
+    /**
+     * A copper pour: an area of a layer filled with one net's copper, round whatever else stands in it.
+     *
+     * @param layer     the copper layer it is poured on
+     * @param net       the net its copper carries
+     * @param clearance how far it stands from other nets' copper, millimetres; 0 for the pcb's own
+     * @param priority  which pour is filled first where two claim an area: the higher; 0 for the lowest
+     * @param path      the area it fills, as path data
+     * @param finish    what its copper is left as: bare, the solder mask open over all of it; empty for under the mask
+     */
     public record Zone(String layer, String net, double clearance, int priority, String path, String finish) {
 
         public Zone {
@@ -422,6 +576,12 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
+    /**
+     * An area where no copper is laid.
+     *
+     * @param layers the layers it keeps copper off
+     * @param path   the area, as path data
+     */
     public record Keepout(List<String> layers, String path) {
 
         public Keepout {
@@ -429,12 +589,26 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
+    /**
+     * A measure drawn on the pcb: the distance between two points.
+     *
+     * @param from   where it is measured from
+     * @param to     where it is measured to
+     * @param offset how far its line is drawn aside of the two points, millimetres
+     */
     public record Dimension(Point from, Point to, double offset) {
     }
 
     /**
-     * @param layer  {@code top-silkscreen} or {@code bottom-silkscreen}
-     * @param anchor which part of the words stands on their point: {@code start}, {@code middle} — the usual — or {@code end}
+     * Words printed on the pcb.
+     *
+     * @param layer    {@code top-silkscreen} or {@code bottom-silkscreen}
+     * @param text     the words
+     * @param x        where they stand, millimetres from the left
+     * @param y        where they stand, millimetres down
+     * @param size     how tall their letters are, millimetres
+     * @param rotation how far they are turned, degrees
+     * @param anchor   which part of the words stands on their point: {@code start}, {@code middle} — the usual — or {@code end}
      */
     public record Text(String layer, String text, double x, double y, double size, double rotation, String anchor) {
 
@@ -479,7 +653,14 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
         }
     }
 
-    /** @param ring 0: a bare hole */
+    /**
+     * A hole drilled through the pcb that is no part's.
+     *
+     * @param x     where it stands, millimetres from the left
+     * @param y     where it stands, millimetres down
+     * @param drill its diameter, millimetres
+     * @param ring  the copper ring's diameter round it, millimetres; 0: a bare hole
+     */
     public record Hole(double x, double y, double drill, double ring) {
     }
 
@@ -490,8 +671,14 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
                                                     "edge", "place", "track", "arc", "via", "zone", "keepout", "dimension",
                                                     "text", "hole", "shape", "output");
 
-    /** A line's class, as a pcb editor draws it — its word —; empty for a statement no pcb editor draws. */
+    /**
+     * A line's class, as a pcb editor draws it — its word —; empty for a statement no pcb editor draws. A group's line is drawn too: it
+     * is the arrangement's grammar, shared with every drawing that keeps groups, not one of the pcb's own.
+     */
     public static Optional<String> classOf(Expression statement) {
+        if (ArrangementLines.isGroupLine(statement)) {
+            return Optional.of(ArrangementLines.GROUP);
+        }
         return statement instanceof ClauseLineNode line && line.word() != null && DRAWN.contains(line.word())
                 && PcbLinesParser.grammar(line.word()) == line.grammar() ? Optional.of(line.word()) : Optional.empty();
     }

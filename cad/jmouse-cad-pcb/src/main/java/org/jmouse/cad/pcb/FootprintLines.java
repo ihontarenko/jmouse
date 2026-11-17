@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb;
 
+import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.document.PathTextNode;
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.LineBuilder;
@@ -94,7 +95,7 @@ public final class FootprintLines {
      * @param anchor   which part of the letters stands on the point ({@link PcbVocabulary#TEXT_ANCHORS}); null for their
      *                 middle, the usual
      */
-    public record Field(String subject, double x, double y, double height, double rotation, String layer, String anchor) {
+    public record Field(String subject, double x, double y, double height, double rotation, @Nullable String layer, @Nullable String anchor) {
 
         /** A field standing on its middle. */
         public Field(String subject, double x, double y, double height, double rotation, String layer) {

@@ -17,7 +17,7 @@ pcb:differentiator-pcb("Op-amp differentiator — pcb") {
     place(CF, at: 20 4)
     place(U1, at: 19.5 18)
     place(RL, at: 26 16.5, rotate: 270)
-    place(J1, footprint: "FP.HDR:1X4-P2.54-V", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 13)
+    place(J1, footprint: "HDR:1X4-P2.54-V:F", nets: [0: 1, in: 2, vn: 3, vp: 4], at: 5.5 13)
     track(top, width: 0.25, from: 17.05 18.635, to: 18.65 18.635)
     track(top, width: 0.25, from: 26 17.5, to: 26 18.55)
     track(top, width: 0.25, from: 12.5 13, to: 15.15 13, to: 16.15 12)

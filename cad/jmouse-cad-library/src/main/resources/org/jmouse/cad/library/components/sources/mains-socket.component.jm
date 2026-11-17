@@ -19,7 +19,7 @@ component:mains-socket("Mains socket, 230 V 50 Hz", type: generator) {
     pin:positive(analog, 1, "line")
     pin:negative(analog, 2, "neutral")
 
-    symbol(uses: "SY.SOURCE:VOLTAGE-ALTERNATING") {
+    symbol(uses: "SOURCE:VOLTAGE-ALTERNATING:S") {
         bind:a(pin: positive)
         bind:b(pin: negative)
     }
