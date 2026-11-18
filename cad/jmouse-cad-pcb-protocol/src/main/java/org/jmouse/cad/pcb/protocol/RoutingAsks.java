@@ -1,4 +1,4 @@
-package org.jmouse.cad.routing.protocol;
+package org.jmouse.cad.pcb.protocol;
 
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;

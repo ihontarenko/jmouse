@@ -24,10 +24,10 @@
     </dependencyManagement>
 
     <packaging>jar</packaging>
-    <artifactId>jmouse-cad-routing-protocol</artifactId>
-    <name>jMouse - CAD Routing Protocol</name>
-    <description>jMouse Framework - CAD routing protocol: what an editor asks the router of one pcb and what it is answered — the same records and the same calls of the routing engine wherever it runs: behind the server's routes, in its live session, or compiled into a page — and the board it asks of, written and read as JSON.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-routing-protocol</url>
+    <artifactId>jmouse-cad-pcb-protocol</artifactId>
+    <name>jMouse - CAD PCB Protocol</name>
+    <description>jMouse Framework - CAD pcb protocol: what an editor asks the router of one pcb and what it is answered — the same records and the same calls of the routing engine wherever it runs: behind the server's routes, in its live session, or compiled into a page — and the board it asks of, written and read as JSON.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-pcb-protocol</url>
 
     <licenses>
         <license>
@@ -47,7 +47,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-routing-protocol</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-pcb-protocol</url>
     </scm>
 
     <properties>

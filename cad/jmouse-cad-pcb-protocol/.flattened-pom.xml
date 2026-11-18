@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-cad-routing-protocol</artifactId>
+  <artifactId>jmouse-cad-pcb-protocol</artifactId>
   <version>1.0.1</version>
-  <name>jMouse - CAD Routing Protocol</name>
-  <description>jMouse Framework - CAD routing protocol: what an editor asks the router of one pcb and what it is answered — the same records and the same calls of the routing engine wherever it runs: behind the server's routes, in its live session, or compiled into a page — and the board it asks of, written and read as JSON.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-routing-protocol</url>
+  <name>jMouse - CAD PCB Protocol</name>
+  <description>jMouse Framework - CAD pcb protocol: what an editor asks the router of one pcb and what it is answered — the same records and the same calls of the routing engine wherever it runs: behind the server's routes, in its live session, or compiled into a page — and the board it asks of, written and read as JSON.</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-pcb-protocol</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-routing-protocol</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/jmouse-cad-pcb-protocol</url>
   </scm>
   <dependencies>
     <dependency>

@@ -29,7 +29,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-cad-routing-protocol</artifactId>
+      <artifactId>jmouse-cad-pcb-protocol</artifactId>
       <version>1.0.1</version>
       <scope>compile</scope>
       <exclusions>

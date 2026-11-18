@@ -48,7 +48,7 @@
              TeaVM's slf4j; logback is the server's. -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-cad-routing-protocol</artifactId>
+            <artifactId>jmouse-cad-pcb-protocol</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>

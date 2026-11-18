@@ -2,9 +2,9 @@ package org.jmouse.cad.j2js.pcb;
 
 import org.jmouse.cad.pcb.routing.RoutingEngine;
 import org.jmouse.core.access.TypedValue;
-import org.jmouse.cad.routing.protocol.RoutingBoardJson;
-import org.jmouse.cad.routing.protocol.RoutingGesture;
-import org.jmouse.cad.routing.protocol.RoutingRefused;
+import org.jmouse.cad.pcb.protocol.RoutingBoardJson;
+import org.jmouse.cad.pcb.protocol.RoutingGesture;
+import org.jmouse.cad.pcb.protocol.RoutingRefused;
 import org.jmouse.j2js.Export;
 import org.jmouse.json.JsonMapper;
 import org.jmouse.json.JsonMappingException;

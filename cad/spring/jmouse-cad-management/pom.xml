@@ -53,7 +53,7 @@
         <!-- What an editor asks the router and is answered: the same records for the routes, the live session and a page. -->
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-cad-routing-protocol</artifactId>
+            <artifactId>jmouse-cad-pcb-protocol</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
