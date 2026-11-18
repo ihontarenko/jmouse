@@ -379,13 +379,18 @@ public final class Lines {
         return line;
     }
 
+    /** The point of the stretch between two others nearest a point. */
+    public static Point nearestOnStretch(Point point, Point from, Point to) {
+        double dx = to.x() - from.x();
+        double dy = to.y() - from.y();
+        double square = dx * dx + dy * dy;
+        double share = square == 0 ? 0 : Math.max(0, Math.min(1, ((point.x() - from.x()) * dx + (point.y() - from.y()) * dy) / square));
+        return from.toward(to, share);
+    }
+
     /** How far a point stands from the stretch between two others. */
     public static double distanceToStretch(Point point, Point from, Point to) {
-        double ax = to.x() - from.x();
-        double ay = to.y() - from.y();
-        double square = ax * ax + ay * ay;
-        double share = square == 0 ? 0 : Math.max(0, Math.min(1, ((point.x() - from.x()) * ax + (point.y() - from.y()) * ay) / square));
-        return Math.hypot(point.x() - from.x() - share * ax, point.y() - from.y() - share * ay);
+        return lengthBetween(point, nearestOnStretch(point, from, to));
     }
 
     /** A line run the other way. */

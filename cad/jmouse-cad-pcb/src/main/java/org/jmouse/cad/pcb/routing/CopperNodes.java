@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.core.graph.DisjointSets;
+
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
@@ -221,10 +223,7 @@ public final class CopperNodes {
                 endIndex.insert(new Envelope(end.at().x(), end.at().x(), end.at().y(), end.at().y()), position);
                 widest = Math.max(widest, end.width());
             }
-            int[] group = new int[loose.size()];
-            for (int position = 0; position < group.length; position++) {
-                group[position] = position;
-            }
+            DisjointSets meetingAt = new DisjointSets(loose.size());
             for (int position = 0; position < loose.size(); position++) {
                 Loose end = loose.get(position);
                 @SuppressWarnings("unchecked")
@@ -233,26 +232,18 @@ public final class CopperNodes {
                     Loose candidate = loose.get(other);
                     if (other != position && candidate.layer().equals(end.layer())
                         && Lines.lengthBetween(candidate.at(), end.at()) <= end.reachTo(candidate)) {
-                        group[rootOf(group, other)] = rootOf(group, position);
+                        meetingAt.join(other, position);
                     }
                 }
             }
             Map<Integer, List<Loose>> groups = new LinkedHashMap<>();
             for (int position = 0; position < loose.size(); position++) {
-                groups.computeIfAbsent(rootOf(group, position), ignored -> new ArrayList<>()).add(loose.get(position));
+                groups.computeIfAbsent(meetingAt.rootOf(position), ignored -> new ArrayList<>()).add(loose.get(position));
             }
             STRtree trackIndex = trackIndex();
             groups.values().forEach(meeting -> meetingNode(meeting, trackIndex));
         }
 
-        private static int rootOf(int[] group, int position) {
-            int root = position;
-            while (group[root] != root) {
-                group[root] = group[group[root]];
-                root = group[root];
-            }
-            return root;
-        }
 
         private void meetingNode(List<Loose> meeting, STRtree trackIndex) {
             Loose first = meeting.getFirst();

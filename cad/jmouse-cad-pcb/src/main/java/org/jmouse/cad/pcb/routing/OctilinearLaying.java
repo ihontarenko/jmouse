@@ -63,7 +63,7 @@ final class OctilinearLaying {
         if (postured.isPresent() || Lines.lengthBetween(from, to) < shortest) {
             return postured;
         }
-        Point middle = Lines.settled(new Point((from.x() + to.x()) / 2, (from.y() + to.y()) / 2));
+        Point middle = Lines.settled(from.halfwayTo(to));
         Optional<List<Point>> first = laidStretch(from, middle, coming, ran, fence, clearance, angleStep, shortest);
         if (first.isEmpty()) {
             return Optional.empty();
@@ -165,8 +165,8 @@ final class OctilinearLaying {
         }
         Point corner = posture.getFirst();
         Point to = posture.getLast();
-        Point firstMiddle = new Point((from.x() + corner.x()) / 2, (from.y() + corner.y()) / 2);
-        Point secondMiddle = new Point((corner.x() + to.x()) / 2, (corner.y() + to.y()) / 2);
+        Point firstMiddle = from.halfwayTo(corner);
+        Point secondMiddle = corner.halfwayTo(to);
         return distanceTo(ran, corner) + distanceTo(ran, firstMiddle) + distanceTo(ran, secondMiddle);
     }
 

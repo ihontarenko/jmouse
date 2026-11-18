@@ -56,7 +56,7 @@ final class StillCopper {
         WindowKey key = new WindowKey((BitSet) eased.clone(), window.getMinX(), window.getMinY(), window.getMaxX(), window.getMaxY());
         UnitedObstacles known = kept.get(key);
         if (known == null) {
-            known = UnitedObstacles.of(obstaclesIn.apply(window), KeptOut.SLACK, Plane.FACTORY);
+            known = UnitedObstacles.of(obstaclesIn.apply(window), KeptOut.SLACK, Plane.FACTORY, Plane.GRID);
             kept.put(key, known);
         }
         return known;

@@ -1,58 +1,49 @@
 package org.jmouse.cad.live;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.json.patch.JsonPatch;
 import org.jmouse.json.patch.JsonPatchOperation;
+import org.jmouse.json.reading.ChangedPaths;
+import org.jmouse.json.reading.JsonPatchChange;
+import org.jmouse.json.reading.StructuralReading;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The layouts a pcb's session holds, read: each slot's tree and the layout read from it, so an ask reads a layout once, not at every
- * step of a hand. A pcb a patch changed only inside some of its tracks — the points of the track carried, as every step of a drag
- * sends — reads those tracks again; the rest of it is the very pcb read before. A pcb of thousands of tracks was read whole again
- * at every step, and that was most of what a step cost the server.
+ * step of a hand — and a layout a patch changed is read again only where the patch reached ({@link StructuralReading}), everything
+ * else of it the very value read before. A pcb of thousands of items was read whole again at every step, and that was most of
+ * what a step cost the server.
  *
  * <p>Read and written on the socket's own thread alone, as the trees are.</p>
  */
 final class LayoutReading {
 
-    /** A track's place in a pcb's tree, and what of it a patch reaches past the track itself. */
-    private static final Pattern TRACK_PATH = Pattern.compile("^/tracks/(\\d+)(/.*)?$");
-
     /** A slot's tree and the layout read from it. */
     private record Kept(JsonNode tree, Object read) {
     }
 
-    private final ObjectMapper      mapper;
-    private final Map<String, Kept> kept = new HashMap<>();
+    private final StructuralReading<JsonNode> reading;
+    private final Map<String, Kept>           kept = new HashMap<>();
 
     LayoutReading(ObjectMapper mapper) {
-        this.mapper = mapper;
+        this.reading = new StructuralReading<>(new JacksonTreeAccess(mapper));
     }
 
     /**
-     * The layout a slot now holds, read as {@code type}: the one read before where its tree is the very tree; a pcb a patch changed
-     * only inside its tracks, those tracks read again over the pcb read before; anything else read whole.
+     * The layout a slot now holds, read as {@code type}: the one read before where its tree is the very tree; one a patch changed,
+     * read again where the patch reached; anything else read whole.
      */
     Object read(String slot, JsonNode tree, Optional<JsonPatch> patch, Class<?> type) {
         Kept before = kept.get(slot);
-        Object read = before != null && before.tree() == tree && type.isInstance(before.read()) ? before.read() : null;
-        if (read == null && before != null && type == PcbDrawing.class && before.read() instanceof PcbDrawing drawn && patch.isPresent()) {
-            read = tracksPatched(drawn, tree, patch.get()).orElse(null);
-        }
-        if (read == null) {
-            read = mapper.treeToValue(tree, type);
-        }
+        Object was = before != null && type.isInstance(before.read()) ? before.read() : null;
+        ChangedPaths changed = was == null ? ChangedPaths.none()
+                : before.tree() == tree ? ChangedPaths.none()
+                : patch.map(LayoutReading::changedBy).orElse(null);
+        Object read = changed == null ? reading.read(null, tree, type, ChangedPaths.none()) : reading.read(was, tree, type, changed);
         kept.put(slot, new Kept(tree, read));
         return read;
     }
@@ -66,60 +57,21 @@ final class LayoutReading {
         kept.clear();
     }
 
-    /**
-     * The pcb read before with the tracks a patch changed inside read again from the tree it left; empty where it did more — a track
-     * added or taken away, anything but tracks changed —, and the pcb is read whole.
-     */
-    private Optional<PcbDrawing> tracksPatched(PcbDrawing before, JsonNode tree, JsonPatch patch) {
-        JsonNode tracks = tree.path("tracks");
-        if (!tracks.isArray() || tracks.size() != before.tracks().size()) {
-            return Optional.empty();
-        }
-        Set<Integer> touched = new TreeSet<>();
-        for (JsonPatchOperation operation : patch.operations()) {
-            Optional<Integer> track = trackChangedBy(operation, before.tracks().size());
-            if (track.isEmpty()) {
-                return Optional.empty();
-            }
-            touched.add(track.get());
-        }
-        List<PcbDrawing.Track> now = new ArrayList<>(before.tracks());
-        for (int index : touched) {
-            now.set(index, mapper.treeToValue(tracks.get(index), PcbDrawing.Track.class));
-        }
-        return Optional.of(before.withTracks(List.copyOf(now)));
+    /** Where a patch changed a layout. */
+    private static ChangedPaths changedBy(JsonPatch patch) {
+        return ChangedPaths.of(patch.operations().stream().map(LayoutReading::changeOf).toList());
     }
 
-    /** The track an operation changes inside, or replaces whole; empty for an operation that does anything else. */
-    private static Optional<Integer> trackChangedBy(JsonPatchOperation operation, int tracks) {
-        String path;
-        boolean inside;
-        switch (operation) {
-            case JsonPatchOperation.Replace replace -> {
-                path = replace.path().toString();
-                inside = false;
-            }
-            case JsonPatchOperation.Add add -> {
-                path = add.path().toString();
-                inside = true;
-            }
-            case JsonPatchOperation.Remove remove -> {
-                path = remove.path().toString();
-                inside = true;
-            }
-            default -> {
-                return Optional.empty();
-            }
-        }
-        Matcher place = TRACK_PATH.matcher(path);
-        if (!place.matches()) {
-            return Optional.empty();
-        }
-        // A track added or taken away moves every one after it: only a change inside one, or one replaced whole, keeps their places.
-        if (inside && place.group(2) == null) {
-            return Optional.empty();
-        }
-        int index = Integer.parseInt(place.group(1));
-        return index < tracks ? Optional.of(index) : Optional.empty();
+    private static JsonPatchChange changeOf(JsonPatchOperation operation) {
+        return switch (operation) {
+            case JsonPatchOperation.Add add -> JsonPatchChange.at(JsonPatchChange.Operation.ADD, add.path().toString());
+            case JsonPatchOperation.Remove remove -> JsonPatchChange.at(JsonPatchChange.Operation.REMOVE, remove.path().toString());
+            case JsonPatchOperation.Replace replace -> JsonPatchChange.at(JsonPatchChange.Operation.REPLACE, replace.path().toString());
+            case JsonPatchOperation.Move move -> new JsonPatchChange(JsonPatchChange.Operation.MOVE, move.path().toString(),
+                    Optional.of(move.from().toString()));
+            case JsonPatchOperation.Copy copy -> new JsonPatchChange(JsonPatchChange.Operation.COPY, copy.path().toString(),
+                    Optional.of(copy.from().toString()));
+            case JsonPatchOperation.Test test -> JsonPatchChange.at(JsonPatchChange.Operation.TEST, test.path().toString());
+        };
     }
 }

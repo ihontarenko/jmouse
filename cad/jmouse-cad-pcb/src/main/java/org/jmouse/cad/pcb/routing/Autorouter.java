@@ -232,7 +232,7 @@ public final class Autorouter {
                     List<Point> points = new Tightening(fence, angleStep(), List.of(), board.settings().routing()).tightened(stretch.points())
                             .stream().map(this::written).toList();
                     String layer = layers.get(stretch.lane());
-                    tracks.add(new PcbDrawing.Track(layer, width, fence.roundingThatFits(points, request.rounding(), layer), points));
+                    tracks.add(new PcbDrawing.Track(layer, width, fence.roundingThatFits(points, request.rounding(), layer, board.settings().routing().roundingHalvings()), points));
                 }
                 case LayeredWaySearch.ViaHop hop -> vias.add(new PcbDrawing.Via(hop.at().x(), hop.at().y(), viaSize.drill(), viaSize.diameter(),
                         PcbDrawing.TOP, PcbDrawing.BOTTOM));
@@ -339,7 +339,7 @@ public final class Autorouter {
 
     /** How far a route stands from a connection's middle: the nearest is lifted first. */
     private static double distanceTo(LaidRoute route, CopperNets.Unlaid line) {
-        Point middle = new Point((line.from().x() + line.to().x()) / 2, (line.from().y() + line.to().y()) / 2);
+        Point middle = line.from().halfwayTo(line.to());
         return pointsOf(route).stream().mapToDouble(point -> Lines.lengthBetween(point, middle)).min().orElse(Double.POSITIVE_INFINITY);
     }
 

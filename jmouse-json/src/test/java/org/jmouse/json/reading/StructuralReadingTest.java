@@ -1,4 +1,4 @@
-package org.jmouse.json.patch;
+package org.jmouse.json.reading;
 
 import org.jmouse.json.Json;
 import org.junit.jupiter.api.Test;
@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.jmouse.json.patch.JsonPatchChange.Operation.ADD;
-import static org.jmouse.json.patch.JsonPatchChange.Operation.MOVE;
-import static org.jmouse.json.patch.JsonPatchChange.Operation.REMOVE;
-import static org.jmouse.json.patch.JsonPatchChange.Operation.REPLACE;
+import static org.jmouse.json.reading.JsonPatchChange.Operation.ADD;
+import static org.jmouse.json.reading.JsonPatchChange.Operation.MOVE;
+import static org.jmouse.json.reading.JsonPatchChange.Operation.REMOVE;
+import static org.jmouse.json.reading.JsonPatchChange.Operation.REPLACE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;

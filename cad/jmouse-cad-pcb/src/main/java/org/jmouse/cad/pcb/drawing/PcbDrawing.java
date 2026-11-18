@@ -243,6 +243,16 @@ public record PcbDrawing(String circuit, Optional<Rules> rules, List<NetClass> n
      * @param y millimetres down
      */
     public record Point(double x, double y) {
+
+        /** The point a share of the way from this one to another: 0 is this one, 1 the other. */
+        public Point toward(Point other, double share) {
+            return new Point(x + (other.x - x) * share, y + (other.y - y) * share);
+        }
+
+        /** The point halfway between this one and another. */
+        public Point halfwayTo(Point other) {
+            return new Point((x + other.x) / 2, (y + other.y) / 2);
+        }
     }
 
     /**

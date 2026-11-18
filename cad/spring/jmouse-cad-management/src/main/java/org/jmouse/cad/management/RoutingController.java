@@ -15,6 +15,7 @@ import org.jmouse.cad.routing.protocol.RoutingAsks.LegView;
 import org.jmouse.cad.routing.protocol.RoutingAsks.NodesRequest;
 import org.jmouse.cad.routing.protocol.RoutingAsks.NodesView;
 import org.jmouse.cad.routing.protocol.RoutingAsks.SegmentRequest;
+import org.jmouse.cad.routing.protocol.RoutingAsks.CornersView;
 import org.jmouse.cad.routing.protocol.RoutingAsks.TracksView;
 import org.jmouse.cad.routing.protocol.RoutingAsks.TuneRequest;
 import org.jmouse.cad.routing.protocol.RoutingAsks.TuneTrackRequest;
@@ -24,6 +25,7 @@ import org.jmouse.cad.routing.protocol.RoutingRefused;
 import org.jmouse.cad.store.catalogue.WrittenOwners;
 import org.jmouse.cad.store.editing.LanguageEditing;
 import org.jmouse.cad.store.exchange.RoutingBoards;
+import org.jmouse.cad.store.exchange.RoutingWork;
 import org.jmouse.cad.store.problem.CadProblem;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -130,19 +132,19 @@ public class RoutingController {
     @PostMapping("/pcb/routing/{board}/jogs")
     @PublicEndpoint("a board the caller opened from a text it sent")
     public TracksView jogs(@PathVariable String board, @RequestBody JogsRequest request) {
-        return RoutingAsks.jogs(boards.engineOf(board), request);
+        return RoutingAsks.jogs(boards.engineOf(board, RoutingWork.RESTING), request);
     }
 
     @PostMapping("/pcb/routing/{board}/corners")
     @PublicEndpoint("a board the caller opened from a text it sent")
-    public TracksView corners(@PathVariable String board, @RequestBody CornersRequest request) {
-        return RoutingAsks.corners(boards.engineOf(board), request);
+    public CornersView corners(@PathVariable String board, @RequestBody CornersRequest request) {
+        return RoutingAsks.corners(boards.engineOf(board, RoutingWork.RESTING), request);
     }
 
     @PostMapping("/pcb/routing/{board}/nodes")
     @PublicEndpoint("a board the caller opened from a text it sent")
     public NodesView nodes(@PathVariable String board, @RequestBody NodesRequest request) {
-        return RoutingAsks.nodes(boards.engineOf(board), request);
+        return RoutingAsks.nodes(boards.engineOf(board, RoutingWork.RESTING), request);
     }
 
     @PostMapping("/pcb/routing/{board}/tune")

@@ -868,7 +868,7 @@ class RoutingEngineTest {
         private RoutingBoard boardLettingJointsGo(PcbDrawing pcb) {
             RoutingSettings.Banding banding = SETTINGS.banding();
             RoutingSettings sliding = new RoutingSettings(SETTINGS.routing(), SETTINGS.carrying(), new RoutingSettings.Banding(banding.reach(), banding.stepShare(),
-                    banding.mostSteps(), banding.margin(), List.of(), banding.nodeRounds(), banding.pushPasses()), SETTINGS.pads(), SETTINGS.autorouting(), SETTINGS.tuning());
+                    banding.mostSteps(), banding.margin(), List.of(), banding.nodeRounds(), banding.pushPasses(), banding.jointHalvings()), SETTINGS.pads(), SETTINGS.autorouting(), SETTINGS.tuning());
             return new RoutingBoard(footprintsOf(pcb), namedOf(pcb), wired, VALUES, Map.of(LINK, CHIP), CHECKS, new PadOutline(CURVE_STEPS, 6), sliding);
         }
 
@@ -1216,6 +1216,29 @@ class RoutingEngineTest {
             assertLine(line(0, 0, 10, 10, 10.5, 9.5), kept.tracks().getFirst().points().subList(0, 3));
             assertEquals(kept.tracks().getFirst().points().size() - 1, merged.tracks().getFirst().points().size());
             assertClean(faultsOfLine(merged.tracks().getFirst().points()), "merged");
+        }
+
+        @Test
+        void carriedWithinAJogOfTheRunBesideItLandsOnThatRun() {
+            // A board as KiCad keeps it, one track a stretch: two flats a millimetre apart, a square step between. The lower one carried
+            // up to a step's width short of the other — a step nobody means —: merged, it lands on the other's line, which stays.
+            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.2),
+                    track(line(10, 0, 10, -1), PcbDrawing.TOP, 0.2), track(line(10, -1, 20, -1), PcbDrawing.TOP, 0.2),
+                    track(line(20, -1, 26, 5), PcbDrawing.TOP, 0.2));
+            Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
+            PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 27.5, 5)), tracks);
+            RoutingEngine engine = new RoutingEngine(board(pcb, parts));
+            PcbDrawing kept = engine.segmentCarried(pcb, 1, 0, 0, -0.83, style(45, Tightening.JogHandling.KEPT), Optional.empty()).orElseThrow();
+            PcbDrawing merged = engine.segmentCarried(pcb, 1, 0, 0, -0.83, style(45, Tightening.JogHandling.MERGED), Optional.empty()).orElseThrow();
+            List<Point> keptLine = JoinedTracks.joinedLine(new RoutingEngine(board(kept, parts)).worldOf(kept), 1).points();
+            List<Point> line = JoinedTracks.joinedLine(new RoutingEngine(board(merged, parts)).worldOf(merged), 1).points();
+            assertTrue(keptLine.stream().anyMatch(point -> Math.abs(point.y() + 0.83) < 1e-6), "kept, the step stays where the hand left it: " + keptLine);
+            for (int at = 1; at + 2 < line.size(); at++) {
+                assertTrue(Lines.lengthBetween(line.get(at), line.get(at + 1)) >= 0.4,
+                        "a step of " + Lines.lengthBetween(line.get(at), line.get(at + 1)) + " left in " + line);
+            }
+            assertTrue(line.stream().noneMatch(point -> Math.abs(point.y() + 0.83) < 1e-6), "merged, nothing stays a step off the run: " + line);
+            assertTrue(line.stream().anyMatch(point -> Math.abs(point.y() + 1) < 1e-6 && Math.abs(point.x() - 20) < 1e-6), "the run beside it stays: " + line);
         }
 
         @Test
@@ -1764,6 +1787,47 @@ class RoutingEngineTest {
         assertLine(seen, tightening.untangled(seen, Tightening.JogHandling.KEPT));
     }
 
+    @Nested
+    class CornersRounded {
+
+        @Test
+        void aLineOfStretchesChosenIsOneTrackRoundedAtItsJointsTheChoiceKeptOnIt() {
+            // As KiCad keeps a line: one track a stretch. All three chosen, rounded: one track, its corners its own, the choice on it.
+            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.2),
+                    track(line(10, 0, 15, 5), PcbDrawing.TOP, 0.2), track(line(30, 30, 40, 30), PcbDrawing.TOP, 0.2));
+            Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
+            PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 16.5, 5)), tracks);
+            CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(0, 1, 2));
+            assertEquals(2, rounded.pcb().tracks().size());
+            assertLine(line(-5, 5, 0, 0, 10, 0, 15, 5), rounded.pcb().tracks().getFirst().points());
+            assertTrue(rounded.pcb().tracks().getFirst().rounding() > 0, "rounded at its joints");
+            assertEquals(List.of(0), rounded.chosen());
+            assertSame(pcb.tracks().get(3), rounded.pcb().tracks().get(1));
+        }
+
+        @Test
+        void aStretchChosenIsItsLineChosen() {
+            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.2),
+                    track(line(10, 0, 15, 5), PcbDrawing.TOP, 0.2));
+            Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
+            PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 16.5, 5)), tracks);
+            CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(1));
+            assertEquals(1, rounded.pcb().tracks().size());
+            assertEquals(List.of(0), rounded.chosen());
+        }
+
+        @Test
+        void stretchesOfAnotherWidthStayTracksOfTheirOwn() {
+            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.5),
+                    track(line(10, 0, 15, 5), PcbDrawing.TOP, 0.2));
+            Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
+            PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 16.5, 5)), tracks);
+            CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(0, 1, 2));
+            assertEquals(3, rounded.pcb().tracks().size());
+            assertEquals(List.of(0, 1, 2), rounded.chosen());
+        }
+    }
+
     /** A track held where it stands — locked itself, or in a locked group —: no act of the router moves or reshapes it. */
     @Nested
     class HeldWhereItStands {
@@ -1780,7 +1844,7 @@ class RoutingEngineTest {
             RoutingEngine engine = new RoutingEngine(board(pcb, Map.of()));
             assertTrue(engine.segmentCarried(pcb, 0, 0, 0, 2, WALKING, Optional.empty()).isEmpty());
             assertSame(pcb, engine.cornerCarried(pcb, 0, 1, point(10, 5), WALKING));
-            assertEquals(pcb.tracks(), engine.withCorners(pcb, 2, List.of()).tracks());
+            assertEquals(pcb.tracks(), engine.cornersRounded(pcb, 2, List.of()).pcb().tracks());
             assertEquals(pcb.tracks(), engine.withoutJogs(pcb, List.of()).tracks());
         }
 

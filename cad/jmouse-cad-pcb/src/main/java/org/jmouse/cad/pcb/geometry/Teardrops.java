@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.numerics.Halving;
+
 import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -188,17 +190,7 @@ public final class Teardrops {
 
     /** Where the copper ends between a point on it and one off it, halved to it. */
     private static double edgeBetween(DoublePredicate inside, double on, double off, Shape shape) {
-        double low = on;
-        double high = off;
-        for (int halving = 0; halving < shape.halvings(); halving++) {
-            double middle = (low + high) / 2;
-            if (inside.test(middle)) {
-                low = middle;
-            } else {
-                high = middle;
-            }
-        }
-        return low;
+        return Halving.bracket(on, off, shape.halvings(), inside).holds();
     }
 
     /** How far to one side of the axis a drop's base can reach and still stand on the copper: no more than {@code widest}. */
@@ -206,17 +198,7 @@ public final class Teardrops {
         if (chordOf(copper, frame, sign * widest, size, shape).isPresent()) {
             return widest;
         }
-        double low = 0;
-        double high = widest;
-        for (int halving = 0; halving < shape.halvings(); halving++) {
-            double middle = (low + high) / 2;
-            if (chordOf(copper, frame, sign * middle, size, shape).isPresent()) {
-                low = middle;
-            } else {
-                high = middle;
-            }
-        }
-        return low;
+        return Halving.bracket(0, widest, shape.halvings(), reach -> chordOf(copper, frame, sign * reach, size, shape).isPresent()).holds();
     }
 
     /**

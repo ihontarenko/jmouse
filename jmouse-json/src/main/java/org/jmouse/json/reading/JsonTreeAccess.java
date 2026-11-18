@@ -1,4 +1,4 @@
-package org.jmouse.json.patch;
+package org.jmouse.json.reading;
 
 import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.reflection.InferredType;

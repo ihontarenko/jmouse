@@ -36,31 +36,31 @@
     <dependency>
       <groupId>org.teavm</groupId>
       <artifactId>teavm-classlib</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.0-jmouse.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.teavm</groupId>
       <artifactId>teavm-core</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.0-jmouse.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.teavm</groupId>
       <artifactId>teavm-extension-spi</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.0-jmouse.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.teavm</groupId>
       <artifactId>teavm-jso</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.0-jmouse.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.teavm</groupId>
       <artifactId>teavm-extras-slf4j</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.0-jmouse.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

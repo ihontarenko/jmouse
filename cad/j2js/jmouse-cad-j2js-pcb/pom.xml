@@ -12,10 +12,10 @@
     </parent>
 
     <packaging>jar</packaging>
-    <artifactId>jmouse-cad-j2js-routing</artifactId>
-    <name>jMouse - CAD J2JS Routing</name>
-    <description>jMouse Framework - the CAD router in the browser: the routing engine on a board the server worked out, answering the same gestures as the server's routes — compiled to an ES module and to WebAssembly, run in a worker, so an editor routes with no request.</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-routing</url>
+    <artifactId>jmouse-cad-j2js-pcb</artifactId>
+    <name>jMouse - CAD J2JS PCB</name>
+    <description>jMouse Framework - the CAD pcb engine in the browser: its routing on a board the server worked out, answering the same gestures as the server's routes — compiled to an ES module and to WebAssembly, run in a worker, so an editor routes with no request.</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-pcb</url>
 
     <licenses>
         <license>
@@ -35,12 +35,12 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-routing</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-pcb</url>
     </scm>
 
     <properties>
-        <!-- The module's name: routing.js, routing.wasm and routing.d.ts. -->
-        <j2js.module>routing</j2js.module>
+        <!-- The module's name: pcb.js, pcb.wasm and pcb.d.ts. -->
+        <j2js.module>pcb</j2js.module>
     </properties>
 
     <dependencies>
@@ -136,7 +136,7 @@
                             <goal>compile</goal>
                         </goals>
                         <configuration>
-                            <mainClass>org.jmouse.cad.j2js.routing.RoutingInBrowserExports</mainClass>
+                            <mainClass>org.jmouse.cad.j2js.pcb.RoutingInBrowserExports</mainClass>
                             <targetType>JAVASCRIPT</targetType>
                             <targetDirectory>${project.build.directory}/javascript</targetDirectory>
                             <targetFileName>${j2js.module}.js</targetFileName>
@@ -152,7 +152,7 @@
                             <goal>compile</goal>
                         </goals>
                         <configuration>
-                            <mainClass>org.jmouse.cad.j2js.routing.RoutingInBrowserExports</mainClass>
+                            <mainClass>org.jmouse.cad.j2js.pcb.RoutingInBrowserExports</mainClass>
                             <targetType>JAVASCRIPT</targetType>
                             <targetDirectory>${project.build.directory}/javascript-readable</targetDirectory>
                             <targetFileName>${j2js.module}.js</targetFileName>

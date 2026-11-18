@@ -1,4 +1,4 @@
-package org.jmouse.cad.j2js.routing;
+package org.jmouse.cad.j2js.pcb;
 
 import org.jmouse.cad.pcb.routing.RoutingEngine;
 import org.jmouse.core.access.TypedValue;
@@ -9,9 +9,15 @@ import org.jmouse.j2js.Export;
 import org.jmouse.json.JsonMapper;
 import org.jmouse.json.JsonMappingException;
 import org.jmouse.json.JsonSyntaxException;
+import org.jmouse.json.reading.ChangedPaths;
+import org.jmouse.json.reading.JsonTreeAccess;
+import org.jmouse.json.reading.JsonTreePatch;
+import org.jmouse.json.reading.StructuralReading;
 
 import java.lang.reflect.RecordComponent;
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,8 +27,9 @@ import java.util.Optional;
  *
  * <p>A gesture's layouts — the pcb as it stands, before and after a part carried — are kept here by slot, as the server's live
  * session keeps them: sent whole once, then named by their slot alone while they stand unchanged — a drag's every frame asks of
- * the same pcb, and reading it again is most of what a frame costs. A slot not held is answered {@code layout-unknown}, and the
- * editor sends it whole.</p>
+ * the same pcb, and reading it again is most of what a frame costs —, or sent as the change made to it, a JSON Patch: applied to
+ * the tree kept, and only what it reached read again ({@link StructuralReading}). A slot not held, or a change that does not fit
+ * it, is answered {@code layout-unknown}, and the editor sends it whole.</p>
  *
  * <p>An answer is JSON: {@code {"answer": …}}, the gesture's answer as the server writes it; or {@code {"refusal": {"status",
  * "code", "detail"}}}, as the server writes a problem. A few boards are kept, the least recently asked of let go first, as the
@@ -48,13 +55,29 @@ public final class RoutingInBrowser {
     /** How many layouts are kept read, by slot: a board's pcb, and before and after a carry, for a few boards. */
     private static final int KEPT_LAYOUTS = 32;
 
-    /** Each layout as it was read — a {@code PcbDrawing} —, by its slot. */
-    private static final Map<String, Object> LAYOUTS = new LinkedHashMap<>(KEPT_LAYOUTS, 0.75f, true) {
+    /** The member of a layout sent naming its slot. */
+    private static final String SLOT = "slot";
+
+    /** The member of a layout sent whole. */
+    private static final String WHOLE = "whole";
+
+    /** The member of a layout sent as the change to the one its slot holds: a JSON Patch. */
+    private static final String PATCH = "patch";
+
+    /** A layout kept: the tree it was sent as, kept up to date by the patches after, and what was read from it. */
+    private record KeptLayout(Object tree, Object read) {
+    }
+
+    /** Each layout kept, by its slot. */
+    private static final Map<String, KeptLayout> LAYOUTS = new LinkedHashMap<>(KEPT_LAYOUTS, 0.75f, true) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Object> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, KeptLayout> eldest) {
             return size() > KEPT_LAYOUTS;
         }
     };
+
+    /** A layout read again only where a patch changed it. */
+    private static final StructuralReading<Object> READING = new StructuralReading<>(new JsonTreeAccess(JSON));
 
     private static int opened;
 
@@ -123,24 +146,46 @@ public final class RoutingInBrowser {
         }
         for (Map.Entry<String, Object> layout : ((Map<String, Object>) JSON.read(layouts)).entrySet()) {
             Map<String, Object> written = (Map<String, Object>) layout.getValue();
-            String              slot    = (String) written.get("slot");
-            if (written.containsKey("whole")) {
-                LAYOUTS.put(slot, JSON.convert(written.get("whole"), TypedValue.of(fieldType(request, layout.getKey()))));
+            String              slot    = (String) written.get(SLOT);
+            Type                type    = fieldType(request, layout.getKey());
+            if (written.containsKey(WHOLE)) {
+                Object tree = written.get(WHOLE);
+                LAYOUTS.put(slot, new KeptLayout(tree, READING.read(null, tree, type, ChangedPaths.none())));
+            } else if (written.containsKey(PATCH)) {
+                KeptLayout kept = LAYOUTS.get(slot);
+                if (kept == null || !patched(slot, kept, (List<?>) written.get(PATCH), type)) {
+                    return Optional.of(slot);
+                }
             }
-            Object held = LAYOUTS.get(slot);
+            KeptLayout held = LAYOUTS.get(slot);
             if (held == null) {
                 return Optional.of(slot);
             }
-            fields.put(layout.getKey(), held);
+            fields.put(layout.getKey(), held.read());
         }
         return Optional.empty();
     }
 
+    /**
+     * The layout a slot holds changed by a patch, read again where the patch reached; false — the slot let go — where the patch does
+     * not fit the tree kept, and the editor sends the layout whole.
+     */
+    private static boolean patched(String slot, KeptLayout kept, List<?> patch, Type type) {
+        try {
+            Object tree = JsonTreePatch.applied(kept.tree(), patch);
+            LAYOUTS.put(slot, new KeptLayout(tree, READING.read(kept.read(), tree, type, JsonTreePatch.changedBy(patch))));
+            return true;
+        } catch (JsonMappingException misfit) {
+            LAYOUTS.remove(slot);
+            return false;
+        }
+    }
+
     /** The type of a request's field: the component of that name. */
-    private static Class<?> fieldType(Class<?> request, String field) {
+    private static Type fieldType(Class<?> request, String field) {
         for (RecordComponent component : request.getRecordComponents()) {
             if (component.getName().equals(field)) {
-                return component.getType();
+                return component.getGenericType();
             }
         }
         throw new JsonMappingException("A " + request.getSimpleName() + " has no layout " + field);

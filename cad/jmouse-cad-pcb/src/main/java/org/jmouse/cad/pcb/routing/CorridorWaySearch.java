@@ -103,7 +103,7 @@ final class CorridorWaySearch {
         List<Obstacle> moving = keptOut(fence.movingNear(window.getMinX(), window.getMinY(), window.getMaxX(), window.getMaxY(), eased),
                 fence, window);
         Geometry ground = Areas.unionOf(List.of(endGround(from, fence), endGround(to, fence)));
-        return ObstacleField.of(still, moving, ground, KeptOut.SLACK, Plane.FACTORY);
+        return ObstacleField.of(still, moving, ground, KeptOut.SLACK, Plane.FACTORY, Plane.GRID);
     }
 
     /** Copper a track keeps clear of, as the room its centre line keeps out of within a region: each grown by its gap and half the track. */

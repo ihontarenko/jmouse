@@ -18,6 +18,6 @@
     <description>jMouse Framework - CAD in the browser: CAD modules compiled to JavaScript and WebAssembly through jmouse-j2js, beside the CAD modules they are made of.</description>
 
     <modules>
-        <module>jmouse-cad-j2js-routing</module>
+        <module>jmouse-cad-j2js-pcb</module>
     </modules>
 </project>

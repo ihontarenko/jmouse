@@ -1,5 +1,9 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.numerics.Halving;
+import java.util.OptionalDouble;
+import java.util.function.DoubleFunction;
+
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
@@ -28,7 +32,6 @@ final class SlidingJoints {
     }
 
     /** How many halvings a joint's way is shortened by before it stays where it is. */
-    private static final int HALVINGS = 6;
 
     /** How near a joint's place a joint is taken to rest at: the precision a point is kept to. */
     private static final double RESTED = Lines.SAME_POINT;
@@ -160,17 +163,10 @@ final class SlidingJoints {
 
     /** As far towards a target as the way there is clear of other nets' copper on every layer the joint is on — halved until it is. */
     private static Point clearTowards(RoutingWorld world, Joint joint, Point target) {
-        Point towards = Lines.settled(target);
-        for (int halving = 0; halving <= HALVINGS; halving++) {
-            Point to = towards;
-            boolean clear = joint.layers().stream().allMatch(layer -> world.fence(layer, joint.net(), joint.width())
-                    .leaving(List.of(joint.at())).lineClear(List.of(joint.at(), to)));
-            if (clear) {
-                return to;
-            }
-            towards = Lines.settled(new Point((joint.at().x() + towards.x()) / 2, (joint.at().y() + towards.y()) / 2));
-        }
-        return joint.at();
+        DoubleFunction<Point> at = share -> Lines.settled(joint.at().toward(target, share));
+        OptionalDouble share = Halving.firstHeldShare(world.settings().banding().jointHalvings(), tried -> joint.layers().stream()
+                .allMatch(layer -> world.fence(layer, joint.net(), joint.width()).leaving(List.of(joint.at())).lineClear(List.of(joint.at(), at.apply(tried)))));
+        return share.isPresent() ? at.apply(share.getAsDouble()) : joint.at();
     }
 
     private static List<PcbDrawing.Via> viasWith(PcbDrawing pcb, int index, Point at) {

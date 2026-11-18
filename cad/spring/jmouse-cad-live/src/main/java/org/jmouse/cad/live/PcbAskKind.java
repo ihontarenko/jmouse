@@ -20,10 +20,10 @@ enum PcbAskKind {
     CORNER(Waiting.NEWEST, Lane.ROUTING),
     FOLLOWING(Waiting.NEWEST, Lane.ROUTING),
     LAID(Waiting.NEWEST, Lane.ROUTING),
-    JOGS(Waiting.NEWEST, Lane.ROUTING),
-    CORNERS(Waiting.NEWEST, Lane.ROUTING),
+    JOGS(Waiting.NEWEST, Lane.RESTING),
+    CORNERS(Waiting.NEWEST, Lane.RESTING),
     /** Where the copper's lines end and meet, for the pcb as it stands now. */
-    NODES(Waiting.NEWEST, Lane.ROUTING),
+    NODES(Waiting.NEWEST, Lane.RESTING),
     TUNE(Waiting.NEWEST, Lane.ROUTING),
     TUNE_TRACK(Waiting.NEWEST, Lane.ROUTING),
     DERIVED(Waiting.NEWEST, Lane.DERIVED);
@@ -42,8 +42,10 @@ enum PcbAskKind {
      * goes on beside them, never between a hand and its track.
      */
     enum Lane {
-        /** What the board's routing engine answers: a track laid or carried, a part followed, the nodes, the jogs. */
+        /** What the hand waits on, answered by the board's gestures' engine: a track laid or carried, a part followed. */
         ROUTING,
+        /** What the pcb is looked over for once it rests — its nodes, its jogs, its corners —, by an engine of its own over the board. */
+        RESTING,
         /** What is derived of the pcb as it stands — the copper poured, the checks —: worked out beside the routing, never before it. */
         DERIVED
     }

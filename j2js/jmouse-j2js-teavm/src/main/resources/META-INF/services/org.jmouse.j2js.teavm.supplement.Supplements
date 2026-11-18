@@ -1,6 +1,7 @@
 org.jmouse.j2js.teavm.supplement.jdk.ClassSupplements
 org.jmouse.j2js.teavm.supplement.jdk.CharacterSupplements
 org.jmouse.j2js.teavm.supplement.jdk.DoubleSupplements
+org.jmouse.j2js.teavm.supplement.jdk.MathSupplements
 org.jmouse.j2js.teavm.supplement.jdk.DateSupplements
 org.jmouse.j2js.teavm.supplement.jdk.CalendarSupplements
 org.jmouse.j2js.teavm.supplement.jdk.GregorianCalendarSupplements

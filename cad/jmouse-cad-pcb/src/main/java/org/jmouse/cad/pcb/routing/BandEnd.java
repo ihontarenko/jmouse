@@ -28,7 +28,7 @@ sealed interface BandEnd {
 
         @Override
         public Point at(DragMotion motion, double share) {
-            return share >= 1 ? to : new Point(was.x() + (to.x() - was.x()) * share, was.y() + (to.y() - was.y()) * share);
+            return share >= 1 ? to : was.toward(to, share);
         }
     }
 

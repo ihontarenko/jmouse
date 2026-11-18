@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.numerics.Halving;
+
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShape;
@@ -225,13 +227,31 @@ public final class TrackFence {
     }
 
     /** The largest of the corners asked for down to none that keeps this line's gaps, its corners measured as they are drawn. */
-    public double roundingThatFits(List<Point> points, double wanted, String layer) {
-        for (double rounding : new double[] {wanted, wanted / 2, wanted / 4}) {
-            if (rounding > 0 && copperClear(CopperShapes.track(new PcbDrawing.Track(layer, width, rounding, points), curveSteps))) {
-                return rounding;
+    public double roundingThatFits(List<Point> points, double wanted, String layer, int halvings) {
+        if (wanted <= 0 || points.size() < 3) {
+            return Math.max(0, wanted);
+        }
+        if (cornersClear(points, wanted, layer)) {
+            return wanted;
+        }
+        // Halved toward the widest that keeps every corner's gaps: the least rounding is no rounding.
+        return Halving.bracket(0, wanted, halvings, tried -> cornersClear(points, tried, layer)).holds();
+    }
+
+    /**
+     * Whether a line's corners, rounded so, keep their gaps: each corner by its own copper — the stretch coming in, the corner as rounded,
+     * the stretch going on, the very arc the whole line is drawn with —, one corner at a time.
+     */
+    private boolean cornersClear(List<Point> points, double rounding, String layer) {
+        for (int corner = 1; corner + 1 < points.size(); corner++) {
+            Point before = points.get(corner - 1);
+            Point at = points.get(corner);
+            Point after = points.get(corner + 1);
+            if (!copperClear(CopperShapes.track(new PcbDrawing.Track(layer, width, rounding, List.of(before, at, after)), curveSteps))) {
+                return false;
             }
         }
-        return 0;
+        return true;
     }
 
     /**

@@ -53,9 +53,14 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
             Point first = line.get(at);
             Point second = line.get(at + 1);
             Point next = line.get(at + 2);
-            // A corner the reader holds keeps a jog of theirs; a step nobody can mean moves less than anyone could see, and goes whatever is held.
-            boolean holds = !least && (isHeld(first) || isHeld(second) || held.stream().anyMatch(point -> Lines.liesBetween(point, first, second)));
-            if (Lines.lengthBetween(first, second) >= shortest || holds) {
+            // A step the reader holds — both its corners, or a point on it — is theirs and stays. Held on one side only, it is a step
+            // nobody means between what they hold and the copper that stood there: that copper stays, and what they hold lands on its
+            // line. A step nobody can mean at all moves less than anyone could see, and goes whatever is held.
+            boolean firstHeld = !least && isHeld(first);
+            boolean secondHeld = !least && isHeld(second);
+            boolean stepHeld = !least && held.stream().anyMatch(point -> Lines.liesBetween(point, first, second)
+                    && !Lines.samePoint(point, first) && !Lines.samePoint(point, second));
+            if (Lines.lengthBetween(first, second) >= shortest || stepHeld || (firstHeld && secondHeld)) {
                 continue;
             }
             Optional<Point> inWay = Lines.wayBetween(previous, first);
@@ -72,15 +77,17 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
                 }
                 continue;
             }
-            // Two runs one direction, side by side: a step out of line. The shorter run goes, the longer going on until it meets what came after.
-            boolean firstLonger = Lines.lengthBetween(previous, first) >= Lines.lengthBetween(second, next);
+            // Two runs one direction, side by side: a step out of line. One run goes, the other going on until it meets what came after
+            // the gone one: the run not held stays where one side is held, else the longer.
+            boolean firstLonger = firstHeld || secondHeld ? secondHeld : Lines.lengthBetween(previous, first) >= Lines.lengthBetween(second, next);
+            boolean heldGives = firstHeld || secondHeld;
             int goneAt = firstLonger ? at + 2 : at - 1;
             int beyond = firstLonger ? at + 3 : at - 2;
             Point gone = line.get(goneAt);
             Point after = beyond >= 0 && beyond < line.size() ? line.get(beyond) : null;
             Point kept = firstLonger ? first : second;
             Point way = firstLonger ? inWay.get() : outWay.get();
-            Optional<Point> onward = after != null && (least || !isHeld(gone)) ? Lines.wayBetween(after, gone) : Optional.empty();
+            Optional<Point> onward = after != null && (least || heldGives || !isHeld(gone)) ? Lines.wayBetween(after, gone) : Optional.empty();
             Optional<Point> meeting = onward.flatMap(direction -> Lines.crossingOf(kept, way, after, direction));
             if (meeting.isPresent()) {
                 Point settled = Lines.settled(meeting.get());

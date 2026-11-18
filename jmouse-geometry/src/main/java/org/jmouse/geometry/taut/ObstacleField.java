@@ -27,9 +27,12 @@ public final class ObstacleField {
     private final PreparedGeometry prepared;
     private final Geometry         slack;
     private final List<Coordinate> insides;
+    /** How the field's areas are combined: the free room is cut from the window the same way. */
+    private final Areas.Grid       grid;
 
-    private ObstacleField(GeometryFactory factory, Geometry area, Geometry slack, List<Coordinate> insides) {
+    private ObstacleField(GeometryFactory factory, Geometry area, Geometry slack, List<Coordinate> insides, Areas.Grid grid) {
         this.factory = factory;
+        this.grid = grid;
         this.area = area;
         this.prepared = PreparedGeometryFactory.prepare(area);
         this.slack = slack;
@@ -55,15 +58,23 @@ public final class ObstacleField {
      * @param slack  how far outside the area a path is laid round it
      */
     public static ObstacleField of(UnitedObstacles still, List<Obstacle> moving, Geometry ground, double slack, GeometryFactory factory) {
+        return of(still, moving, ground, slack, factory, Areas.Grid.FLOATING);
+    }
+
+    /**
+     * The field of obstacles united before and of more besides them, its areas combined on a grid ({@link Areas#onGrid}): what a dense
+     * board's near-misses cannot make fail, in any runtime.
+     */
+    public static ObstacleField of(UnitedObstacles still, List<Obstacle> moving, Geometry ground, double slack, GeometryFactory factory,
+                                   Areas.Grid grid) {
         List<Geometry> movingParts = new ArrayList<>();
         moving.forEach(obstacle -> movingParts.addAll(obstacle.parts()));
-        Geometry movingArea = Areas.unionOf(movingParts, factory);
-        Geometry area = united(factory, still.area(), movingArea);
-        Geometry grown = united(factory, still.slack(), UnitedObstacles.grown(movingArea, slack));
+        Geometry movingArea = grid.unionOf(movingParts, factory);
+        Geometry area = united(grid, still.area(), movingArea);
+        Geometry grown = united(grid, still.slack(), UnitedObstacles.grown(movingArea, slack));
         boolean grounded = !ground.isEmpty();
-        Geometry kept = grounded && !area.isEmpty() ? Areas.difference(area, ground) : area;
-        // Cut as robustly as the area is: an overlay that is not snapped again where its edges cross too nearly fails on a dense board.
-        Geometry slackArea = grounded && !grown.isEmpty() ? Areas.difference(grown, ground) : grown;
+        Geometry kept = grounded && !area.isEmpty() ? grid.difference(area, ground) : area;
+        Geometry slackArea = grounded && !grown.isEmpty() ? grid.difference(grown, ground) : grown;
         List<Coordinate> insides = new ArrayList<>();
         PreparedGeometry groundPrepared = PreparedGeometryFactory.prepare(ground);
         List<Obstacle> every = new ArrayList<>(still.obstacles());
@@ -74,22 +85,27 @@ public final class ObstacleField {
                 continue;
             }
             // A point cut out with the ground no longer tells anything: one of what is left of its obstacle does.
-            Geometry left = Areas.difference(Areas.unionOf(obstacle.parts(), factory), ground);
+            Geometry left = grid.difference(grid.unionOf(obstacle.parts(), factory), ground);
             if (!left.isEmpty()) {
                 insides.add(left.getInteriorPoint().getCoordinate());
             }
         }
-        return new ObstacleField(factory, kept, slackArea, insides);
+        return new ObstacleField(factory, kept, slackArea, insides, grid);
     }
 
-    private static Geometry united(GeometryFactory factory, Geometry one, Geometry other) {
+    private static Geometry united(Areas.Grid grid, Geometry one, Geometry other) {
         if (one.isEmpty()) {
             return other;
         }
         if (other.isEmpty()) {
             return one;
         }
-        return Areas.union(one, other);
+        return grid.union(one, other);
+    }
+
+    /** How the field's areas are combined. */
+    public Areas.Grid grid() {
+        return grid;
     }
 
     public GeometryFactory factory() {

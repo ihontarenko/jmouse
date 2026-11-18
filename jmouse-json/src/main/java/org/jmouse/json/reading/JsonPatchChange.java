@@ -1,4 +1,4 @@
-package org.jmouse.json.patch;
+package org.jmouse.json.reading;
 
 import java.util.Locale;
 import java.util.Optional;

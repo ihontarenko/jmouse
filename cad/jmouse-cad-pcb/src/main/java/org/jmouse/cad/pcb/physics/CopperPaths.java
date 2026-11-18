@@ -1,5 +1,9 @@
 package org.jmouse.cad.pcb.physics;
 
+import org.jmouse.core.graph.DisjointSets;
+
+import org.jmouse.numerics.Halving;
+
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.BoxIndex;
@@ -140,30 +144,6 @@ public final class CopperPaths {
         }
     }
 
-    /** Nodes joined as one conductor: a union-find that grows as nodes are made. */
-    private static final class Nodes {
-
-        private final List<Integer> parents = new ArrayList<>();
-
-        int made() {
-            parents.add(parents.size());
-            return parents.size() - 1;
-        }
-
-        int find(int node) {
-            int found = node;
-            while (parents.get(found) != found) {
-                parents.set(found, parents.get(parents.get(found)));
-                found = parents.get(found);
-            }
-            return found;
-        }
-
-        void join(int one, int other) {
-            parents.set(find(one), find(other));
-        }
-    }
-
     /** A resistor between two nodes. */
     private record Resistor(Branch branch, int from, int to) {
     }
@@ -174,7 +154,8 @@ public final class CopperPaths {
     private final CopperPhysics       physics;
     private final int                 curveSteps;
     private final double              temperatureRise;
-    private final Nodes               nodes = new Nodes();
+    /** Nodes joined as one conductor, growing as nodes are made. */
+    private final DisjointSets        nodes = new DisjointSets();
     private final List<Piece>         pieces = new ArrayList<>();
     private final List<Resistor>      resistors = new ArrayList<>();
 
@@ -207,12 +188,12 @@ public final class CopperPaths {
         if (network.probes().get(1).isEmpty()) {
             return new Refused("The second point is on no copper.");
         }
-        int sourceRoot = nodes.find(network.probes().get(0).get());
-        int sinkRoot = nodes.find(network.probes().get(1).get());
+        int sourceRoot = nodes.rootOf(network.probes().get(0).get());
+        int sinkRoot = nodes.rootOf(network.probes().get(1).get());
         Map<Integer, List<Integer>> links = new HashMap<>();
         for (Resistor resistor : resistors) {
-            int one = nodes.find(resistor.from());
-            int other = nodes.find(resistor.to());
+            int one = nodes.rootOf(resistor.from());
+            int other = nodes.rootOf(resistor.to());
             if (one != other) {
                 links.computeIfAbsent(one, ignored -> new ArrayList<>()).add(other);
                 links.computeIfAbsent(other, ignored -> new ArrayList<>()).add(one);
@@ -224,7 +205,7 @@ public final class CopperPaths {
         }
         List<Integer> pours = new ArrayList<>();
         for (int zone = 0; zone < network.zoneNodes().size(); zone++) {
-            if (reached.contains(nodes.find(network.zoneNodes().get(zone)))) {
+            if (reached.contains(nodes.rootOf(network.zoneNodes().get(zone)))) {
                 pours.add(zone);
             }
         }
@@ -233,14 +214,14 @@ public final class CopperPaths {
         }
         Map<Integer, Integer> numbers = new LinkedHashMap<>();
         reached.forEach(root -> numbers.put(root, numbers.size()));
-        List<Resistor> inside = resistors.stream().filter(resistor -> numbers.containsKey(nodes.find(resistor.from()))
-                && nodes.find(resistor.from()) != nodes.find(resistor.to())).toList();
+        List<Resistor> inside = resistors.stream().filter(resistor -> numbers.containsKey(nodes.rootOf(resistor.from()))
+                && nodes.rootOf(resistor.from()) != nodes.rootOf(resistor.to())).toList();
         double[] solved = potentials(numbers.size(), inside, numbers, numbers.get(sourceRoot), numbers.get(sinkRoot));
         double resistance = solved[numbers.get(sourceRoot)];
         List<Flow> flows = new ArrayList<>();
         for (Resistor resistor : inside) {
             Branch branch = resistor.branch();
-            double share = Math.abs(solved[numbers.get(nodes.find(resistor.from()))] - solved[numbers.get(nodes.find(resistor.to()))]) / branch.resistance();
+            double share = Math.abs(solved[numbers.get(nodes.rootOf(resistor.from()))] - solved[numbers.get(nodes.rootOf(resistor.to()))]) / branch.resistance();
             if (share < physics.carrying()) {
                 continue;
             }
@@ -264,26 +245,26 @@ public final class CopperPaths {
         double resistivity = physics.resistivityAtAmbient();
         List<String> layers = pcb.copperLayerIds();
         List<Integer> padNodes = new ArrayList<>();
-        nets.pads().forEach(pad -> padNodes.add(nodes.made()));
+        nets.pads().forEach(pad -> padNodes.add(nodes.add()));
         List<Map<String, Integer>> viaNodes = new ArrayList<>();
         List<CopperShape> viaShapes = new ArrayList<>();
         for (PcbDrawing.Via via : pcb.vias()) {
             Map<String, Integer> reached = new LinkedHashMap<>();
-            layers.stream().filter(layer -> pcb.reaches(via, layer)).forEach(layer -> reached.put(layer, nodes.made()));
+            layers.stream().filter(layer -> pcb.reaches(via, layer)).forEach(layer -> reached.put(layer, nodes.add()));
             viaNodes.add(reached);
             viaShapes.add(CopperShape.circle(via.x(), via.y(), via.diameter() / 2));
         }
         List<Integer> zoneNodes = new ArrayList<>();
-        pcb.zones().forEach(zone -> zoneNodes.add(nodes.made()));
+        pcb.zones().forEach(zone -> zoneNodes.add(nodes.add()));
         List<Integer> probeNodes = new ArrayList<>();
-        probes.forEach(probe -> probeNodes.add(nodes.made()));
+        probes.forEach(probe -> probeNodes.add(nodes.add()));
         boolean[] probeTouches = new boolean[probes.size()];
 
         for (int index = 0; index < pcb.tracks().size(); index++) {
             PcbDrawing.Track track = pcb.tracks().get(index);
             int[] corners = new int[track.points().size()];
             for (int corner = 0; corner < corners.length; corner++) {
-                corners[corner] = nodes.made();
+                corners[corner] = nodes.add();
             }
             for (int segment = 1; segment < track.points().size(); segment++) {
                 PcbDrawing.Point from = track.points().get(segment - 1);
@@ -294,7 +275,7 @@ public final class CopperPaths {
         }
         for (int index = 0; index < pcb.arcs().size(); index++) {
             PcbDrawing.Arc arc = pcb.arcs().get(index);
-            int[] ends = {nodes.made(), nodes.made()};
+            int[] ends = {nodes.add(), nodes.add()};
             List<PcbDrawing.Point> points = List.of(arc.from(), arc.to());
             for (int end = 0; end < 2; end++) {
                 PcbDrawing.Point point = points.get(end);
@@ -312,7 +293,7 @@ public final class CopperPaths {
         List<Area> areas = new ArrayList<>();
         for (CopperShapes.Drawn drawn : CopperShapes.drawn(pcb, curveSteps)) {
             if (drawn.shape().area()) {
-                areas.add(new Area(nodes.made(), drawn.layer(), drawn.shape()));
+                areas.add(new Area(nodes.add(), drawn.layer(), drawn.shape()));
                 continue;
             }
             double width = drawn.shape().radius() * 2;
@@ -321,8 +302,8 @@ public final class CopperPaths {
             for (double[] segment : drawn.shape().pieces()) {
                 PcbDrawing.Point from = new PcbDrawing.Point(segment[0], segment[1]);
                 PcbDrawing.Point to = new PcbDrawing.Point(segment[2], segment[3]);
-                int start = lastPoint != null && distance(lastPoint, from) <= CopperNets.JOIN_TOLERANCE ? lastNode : nodes.made();
-                int end = nodes.made();
+                int start = lastPoint != null && distance(lastPoint, from) <= CopperNets.JOIN_TOLERANCE ? lastNode : nodes.add();
+                int end = nodes.add();
                 pieces.add(new Piece(Thing.SHAPE, drawn.index(), drawn.layer(), from, to, width, CopperShape.line(List.of(from, to), width / 2),
                         new int[] {start, end}, true));
                 lastPoint = to;
@@ -594,25 +575,17 @@ public final class CopperPaths {
                 return (int) tap[1];
             }
         }
-        int node = nodes.made();
+        int node = nodes.add();
         piece.taps.add(new double[] {along, node});
         return node;
     }
 
     /** How far along a piece, one of whose ends is inside an area and the other not, it crosses the area's edge: found by halving. */
     private double edgeAlong(Piece piece, CopperShape area, boolean fromInside) {
-        double inside = fromInside ? 0 : 1;
-        double outside = fromInside ? 1 : 0;
-        for (int halving = 0; halving < physics.edgeHalvings(); halving++) {
-            double middle = (inside + outside) / 2;
-            PcbDrawing.Point point = pointAlong(piece.from, piece.to, middle);
-            if (area.encloses(point.x(), point.y())) {
-                inside = middle;
-            } else {
-                outside = middle;
-            }
-        }
-        return (inside + outside) / 2;
+        return Halving.bracket(fromInside ? 0 : 1, fromInside ? 1 : 0, physics.edgeHalvings(), along -> {
+            PcbDrawing.Point point = pointAlong(piece.from, piece.to, along);
+            return area.encloses(point.x(), point.y());
+        }).middle();
     }
 
     /**
@@ -626,8 +599,8 @@ public final class CopperPaths {
             neighbours.add(new ArrayList<>());
         }
         for (Resistor resistor : inside) {
-            int from = numbers.get(nodes.find(resistor.from()));
-            int to = numbers.get(nodes.find(resistor.to()));
+            int from = numbers.get(nodes.rootOf(resistor.from()));
+            int to = numbers.get(nodes.rootOf(resistor.to()));
             double conductance = 1 / resistor.branch().resistance();
             diagonal[from] += conductance;
             diagonal[to] += conductance;
@@ -707,7 +680,7 @@ public final class CopperPaths {
     }
 
     private static PcbDrawing.Point pointAlong(PcbDrawing.Point from, PcbDrawing.Point to, double along) {
-        return new PcbDrawing.Point(from.x() + (to.x() - from.x()) * along, from.y() + (to.y() - from.y()) * along);
+        return from.toward(to, along);
     }
 
     /** The share along a piece of the point on it nearest to a point. */

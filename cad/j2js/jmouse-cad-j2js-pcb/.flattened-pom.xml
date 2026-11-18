@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-cad-j2js-routing</artifactId>
+  <artifactId>jmouse-cad-j2js-pcb</artifactId>
   <version>1.0.1</version>
-  <name>jMouse - CAD J2JS Routing</name>
-  <description>jMouse Framework - the CAD router in the browser: the routing engine on a board the server worked out, answering the same gestures as the server's routes — compiled to an ES module and to WebAssembly, run in a worker, so an editor routes with no request.</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-routing</url>
+  <name>jMouse - CAD J2JS PCB</name>
+  <description>jMouse Framework - the CAD pcb engine in the browser: its routing on a board the server worked out, answering the same gestures as the server's routes — compiled to an ES module and to WebAssembly, run in a worker, so an editor routes with no request.</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-pcb</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-routing</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/cad/j2js/jmouse-cad-j2js-pcb</url>
   </scm>
   <dependencies>
     <dependency>

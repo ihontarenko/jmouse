@@ -81,7 +81,7 @@ final class FreeSpace {
     static Optional<FreeSpace> of(ObstacleField field, Envelope window) {
         GeometryFactory factory = field.factory();
         Geometry box = factory.toGeometry(window);
-        Geometry room = field.area().isEmpty() ? box : Areas.difference(box, field.area());
+        Geometry room = field.area().isEmpty() ? box : field.grid().difference(box, field.area());
         Geometry cut;
         try {
             cut = ConstrainedDelaunayTriangulator.triangulate(room);

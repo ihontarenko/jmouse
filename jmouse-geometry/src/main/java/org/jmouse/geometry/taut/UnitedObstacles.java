@@ -24,11 +24,16 @@ public record UnitedObstacles(Geometry area, Geometry slack, List<Obstacle> obst
 
     /** These obstacles united, their area grown by a slack. */
     public static UnitedObstacles of(List<Obstacle> obstacles, double slack, GeometryFactory factory) {
+        return of(obstacles, slack, factory, Areas.Grid.FLOATING);
+    }
+
+    /** These obstacles united on a grid ({@link Areas#onGrid}), their area grown by a slack. */
+    public static UnitedObstacles of(List<Obstacle> obstacles, double slack, GeometryFactory factory, Areas.Grid grid) {
         List<Geometry> parts = new ArrayList<>();
         for (Obstacle obstacle : obstacles) {
             parts.addAll(obstacle.parts());
         }
-        Geometry area = Areas.unionOf(parts, factory);
+        Geometry area = grid.unionOf(parts, factory);
         return new UnitedObstacles(area, grown(area, slack), obstacles);
     }
 

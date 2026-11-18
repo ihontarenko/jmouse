@@ -73,7 +73,7 @@ public final class JoinedTracks {
      * own direction; halfway between their ends where they run on in one direction, or would meet far from the joint.
      */
     private static Point cornerBetween(Point before, Point end, Point start, Point after) {
-        Point halfway = new Point((end.x() + start.x()) / 2, (end.y() + start.y()) / 2);
+        Point halfway = end.halfwayTo(start);
         Optional<Point> coming = Lines.wayBetween(before, end);
         Optional<Point> going = Lines.wayBetween(start, after);
         Optional<Point> met = coming.isPresent() && going.isPresent() ? Lines.crossingOf(end, coming.get(), start, going.get()) : Optional.empty();
@@ -146,7 +146,7 @@ public final class JoinedTracks {
                 int after = Math.min(Math.max(from, 1), result.size() - 1);
                 Point a = result.get(after - 1);
                 Point b = result.get(after);
-                result.add(after, new Point((a.x() + b.x()) / 2, (a.y() + b.y()) / 2));
+                result.add(after, a.halfwayTo(b));
                 best = after;
             }
             at.add(best);

@@ -112,6 +112,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- A layout read again only where a patch changed it: the structural reading the page's own router shares. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Servlet API, for the listener that registers the endpoint. Provided by the container. -->
         <dependency>
             <groupId>jakarta.servlet</groupId>

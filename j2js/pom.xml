@@ -21,7 +21,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <!-- One TeaVM for the binding, its class library and the plugin that compiles a browser module. -->
-        <teavm.version>0.16.0</teavm.version>
+        <teavm.version>0.16.0-jmouse.1</teavm.version>
     </properties>
 
     <modules>

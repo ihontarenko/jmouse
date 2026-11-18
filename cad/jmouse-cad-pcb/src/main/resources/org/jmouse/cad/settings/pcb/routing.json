@@ -9,7 +9,8 @@
     "stopHalvings": 14,
     "bucket": 2,
     "corridorMargins": [4, 15, 60],
-    "relaidAtMost": 64
+    "relaidAtMost": 64,
+    "roundingHalvings": 10
   },
   "carrying": {
     "holdSteps": 7,
@@ -25,7 +26,8 @@
     "margin": 1.5,
     "heldNodes": ["junction", "via"],
     "nodeRounds": 4,
-    "pushPasses": 4
+    "pushPasses": 4,
+    "jointHalvings": 6
   },
   "pads": {
     "exit": "smart",

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 /**
  * What an editor asks of the router for one pcb: everything a person does to copper by hand, as one thing. A drag is asked of
@@ -103,7 +104,7 @@ public final class RoutingEngine {
         TrackFence fence = laidOn.fence(layer, net, width, own).leaving(List.of(from, found.getLast()));
         RoutingSettings.Pads pads = settings().pads();
         List<Point> line = pads.exitKind() == PadExit.SMART ? PadBreakouts.atPads(laidOn, layer, found, fence, angleStep, pads) : found;
-        double fits = fence.roundingThatFits(line, rounding, layer);
+        double fits = fence.roundingThatFits(line, rounding, layer, board.settings().routing().roundingHalvings());
         return new LaidLeg(new TrackRouter.RoutedLeg(line.subList(1, line.size()), leg.reached()), fits);
     }
 
@@ -143,18 +144,13 @@ public final class RoutingEngine {
     }
 
     /** The pcb's tracks with their corners rounded so, those chosen or every one where none is, each only as far as its gaps let it. */
-    public synchronized PcbDrawing withCorners(PcbDrawing pcb, double rounding, List<Integer> chosen) {
-        RoutingWorld world = worldOf(pcb);
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
-        for (int index = 0; index < tracks.size(); index++) {
-            if (!chosen.isEmpty() && !chosen.contains(index) || held(pcb, index)) {
-                continue;
-            }
-            PcbDrawing.Track track = tracks.get(index);
-            TrackFence fence = world.fenceOfTrack(track, index, world.netOfTrack(index));
-            tracks.set(index, track.withRounding(fence.roundingThatFits(track.points(), rounding, track.layer())));
-        }
-        return pcb.withTracks(tracks);
+    /**
+     * The chosen tracks' corners rounded as a person sees each line: its stretches on one layer at one width made one track, rounded
+     * at its joints too ({@link CornerRounding}); none chosen, every track. Where each chosen track now stands comes back with it.
+     */
+    public synchronized CornerRounding.Rounded cornersRounded(PcbDrawing pcb, double rounding, List<Integer> chosen) {
+        List<Integer> asked = chosen.isEmpty() ? IntStream.range(0, pcb.tracks().size()).boxed().toList() : chosen;
+        return new CornerRounding(worldOf(pcb), rounding).rounded(asked);
     }
 
     /** The track under a point on a layer bent to a length, the meander where it was pointed at; or why it cannot be. */

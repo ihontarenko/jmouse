@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.numerics.Halving;
+
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShape;
@@ -66,7 +68,7 @@ final class TrackReshaping {
             Point to = old.get(segment + 1);
             // Taken by the point of the stretch under where it was pressed: the point of the band the pointer carries. A stretch is
             // pulled across itself, as it is shifted in free space, so it presses on what stands in front of it.
-            Point taken = nearestOnStretch(pressed.orElse(new Point((from.x() + to.x()) / 2, (from.y() + to.y()) / 2)), from, to);
+            Point taken = Lines.nearestOnStretch(pressed.orElse(from.halfwayTo(to)), from, to);
             Optional<Point> along = Lines.wayBetween(from, to);
             Point pointer = along.map(way -> {
                 double across = -way.y() * dx + way.x() * dy;
@@ -94,8 +96,7 @@ final class TrackReshaping {
             Point standing = old.get(corner);
             Optional<Point> before = corner > 0 ? Optional.of(old.get(corner - 1)) : Optional.empty();
             Optional<Point> after = corner + 1 < old.size() ? Optional.of(old.get(corner + 1)) : Optional.empty();
-            DoubleFunction<Point> target = share -> Lines.settled(new Point(standing.x() + (to.x() - standing.x()) * share,
-                    standing.y() + (to.y() - standing.y()) * share));
+            DoubleFunction<Point> target = share -> Lines.settled(standing.toward(to, share));
             return reshapedTrack(new ReshapeRequest(engine.worldOf(working), index, style, share -> {
                 Point at = target.apply(share);
                 List<Point> coming = before.map(point -> Lines.stepKeepingRun(point, standing, at, style.angleStep())).orElse(List.of(at));
@@ -157,15 +158,6 @@ final class TrackReshaping {
     private static Optional<Point> onRun(Point from, Point way, Point after, Point run) {
         return Lines.crossingOf(from, way, after, run)
                 .filter(met -> Lines.reachAlong(from, way, met) > 0 && Lines.reachAlong(after, run, met) >= 0).map(Lines::settled);
-    }
-
-    /** The point of a stretch nearest a point: where on it the reader took it. */
-    private static Point nearestOnStretch(Point point, Point from, Point to) {
-        double dx = to.x() - from.x();
-        double dy = to.y() - from.y();
-        double length = dx * dx + dy * dy;
-        double share = length == 0 ? 0 : Math.max(0, Math.min(1, ((point.x() - from.x()) * dx + (point.y() - from.y()) * dy) / length));
-        return new Point(from.x() + dx * share, from.y() + dy * share);
     }
 
     /**
@@ -259,11 +251,12 @@ final class TrackReshaping {
     }
 
     /** A pcb with a track's line in place and its corners rounded as far as they still fit. */
-    private static PcbDrawing withLine(List<PcbDrawing.Track> tracks, PcbDrawing pcb, int index, List<Point> line, TrackFence against) {
-        List<PcbDrawing.Track> changed = new ArrayList<>(tracks);
+    private static PcbDrawing withLine(RoutingWorld world, int index, List<Point> line, TrackFence against) {
+        List<PcbDrawing.Track> changed = new ArrayList<>(world.pcb().tracks());
         PcbDrawing.Track track = changed.get(index);
-        changed.set(index, track.withPoints(line).withRounding(against.roundingThatFits(line, track.rounding(), track.layer())));
-        return pcb.withTracks(changed);
+        double rounding = against.roundingThatFits(line, track.rounding(), track.layer(), world.settings().routing().roundingHalvings());
+        changed.set(index, track.withPoints(line).withRounding(rounding));
+        return world.pcb().withTracks(changed);
     }
 
     /**
@@ -288,7 +281,7 @@ final class TrackReshaping {
             if (Lines.isTangled(tight) || !held.stream().allMatch(point -> Lines.passesThrough(tight, point))) {
                 return Optional.empty();
             }
-            return Optional.of(withLine(world.pcb().tracks(), world.pcb(), index, tight, fence));
+            return Optional.of(withLine(world, index, tight, fence));
         };
         List<List<Point>> stretches = new ArrayList<>();
         for (int at = 0; at < isNew.length; at++) {
@@ -425,7 +418,7 @@ final class TrackReshaping {
                 }
             }
         }
-        return tight.map(points -> withLine(world.pcb().tracks(), world.pcb(), index, points, fence));
+        return tight.map(points -> withLine(world, index, points, fence));
     }
 
     /** How far a line turns at one of its corners, in degrees: 0 where it runs straight on, or where the point is no corner of it. */
@@ -452,19 +445,8 @@ final class TrackReshaping {
 
     /** The shape asked for at the largest share of the way that can be laid, found by halving; empty where none can. */
     private static Optional<PcbDrawing> farthestHeld(ReshapeRequest request) {
-        double low = 0;
-        double high = 1;
-        Optional<PcbDrawing> best = Optional.empty();
-        for (int halving = 0; halving < request.world().settings().carrying().holdSteps(); halving++) {
-            double share = (low + high) / 2;
-            Optional<PcbDrawing> held = request.shapeAt().apply(share).flatMap(shape -> shapeLaid(request, shape, true));
-            if (held.isPresent()) {
-                best = held;
-                low = share;
-            } else {
-                high = share;
-            }
-        }
+        Optional<PcbDrawing> best = Halving.farthestMade(0, 1, request.world().settings().carrying().holdSteps(),
+                share -> request.shapeAt().apply(share).flatMap(shape -> shapeLaid(request, shape, true)));
         return best;
     }
 }

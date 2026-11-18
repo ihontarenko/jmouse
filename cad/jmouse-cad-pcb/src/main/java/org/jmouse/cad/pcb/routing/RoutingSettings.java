@@ -49,6 +49,7 @@ public record RoutingSettings(@Label("Routing") Routing routing,
      * @param relaidAtMost    how many tracks a layout may have laid again since the board was worked out whole and still be worked
      *                        out from it — the rest of its copper, nets and index kept, those tracks kept clear of on their own —:
      *                        past that, the board is worked out whole again, which then costs less
+     * @param roundingHalvings how many halvings find the widest rounding a track's corners keep their gaps at
      */
     public record Routing(@Label("Shortest run") double shortestRun,
                           @Label("Least step") double leastStep,
@@ -59,7 +60,8 @@ public record RoutingSettings(@Label("Routing") Routing routing,
                           @Label("Stop halvings") int stopHalvings,
                           @Label(value = "Fence index cell", unit = "mm") double bucket,
                           @Label(value = "Corridor margins", unit = "mm") List<Double> corridorMargins,
-                          @Label("Relaid at most") int relaidAtMost) {
+                          @Label("Relaid at most") int relaidAtMost,
+                          @Label("Rounding halvings") int roundingHalvings) {
 
         public Routing {
             neckShares = List.copyOf(neckShares);
@@ -127,6 +129,7 @@ public record RoutingSettings(@Label("Routing") Routing routing,
      *                   at it are shortest
      * @param nodeRounds how many times the sliding joints are moved and their lines pulled again
      * @param pushPasses how many times, in one step, the bands another band was pushed into are pulled again round it
+     * @param jointHalvings how many times a sliding joint's way toward where it is drawn is halved before it stays where it stands
      */
     public record Banding(@Label(value = "Reach", unit = "mm") double reach,
                          @Label("Step share") double stepShare,
@@ -134,7 +137,8 @@ public record RoutingSettings(@Label("Routing") Routing routing,
                          @Label(value = "Margin", unit = "mm") double margin,
                          @Label("Held joints") List<String> heldNodes,
                          @Label("Joint rounds") int nodeRounds,
-                         @Label("Push passes") int pushPasses) {
+                         @Label("Push passes") int pushPasses,
+                         @Label("Joint halvings") int jointHalvings) {
 
         public Banding {
             heldNodes = List.copyOf(heldNodes);

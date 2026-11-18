@@ -12,6 +12,7 @@ import org.jmouse.cad.pcb.routing.Tightening;
 import org.jmouse.cad.pcb.routing.TrackRouter;
 import org.jmouse.cad.pcb.routing.TuningPattern;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -40,7 +41,35 @@ public final class RoutingAsks {
         }
     }
 
-    public record TracksView(List<PcbDrawing.Track> tracks) {
+    /** A track an answer leaves other than it was asked of, at its index among the pcb's tracks. */
+    public record TrackChange(int index, PcbDrawing.Track track) {
+    }
+
+    /**
+     * The tracks an answer leaves, said as what changed in the tracks it was asked of: as many tracks as there are now, and each one not
+     * the same as the track at its index before. A gesture moves a few tracks of thousands, and the rest are neither sent back nor read
+     * again, so an editor keeps every untouched track as the very object it held. Both none where the gesture cannot move at all.
+     */
+    public record TracksView(Integer count, List<TrackChange> changed) {
+
+        /** No tracks: the gesture cannot move at all. */
+        public static final TracksView NONE = new TracksView(null, null);
+
+        /** What `after` changed in `before`. */
+        public static TracksView between(List<PcbDrawing.Track> before, List<PcbDrawing.Track> after) {
+            List<TrackChange> changed = new ArrayList<>();
+            for (int index = 0; index < after.size(); index++) {
+                PcbDrawing.Track now = after.get(index);
+                if (index >= before.size() || !sameTrack(before.get(index), now)) {
+                    changed.add(new TrackChange(index, now));
+                }
+            }
+            return new TracksView(after.size(), changed);
+        }
+
+        private static boolean sameTrack(PcbDrawing.Track was, PcbDrawing.Track now) {
+            return was == now || was.equals(now);
+        }
     }
 
     public record LegRequest(PcbDrawing drawing, Integer own, String layer, String net, double width, Point from, Point to, double angleStep,
@@ -64,6 +93,10 @@ public final class RoutingAsks {
     }
 
     public record JogsRequest(PcbDrawing drawing, List<Integer> chosen) {
+    }
+
+    /** Tracks whose corners were rounded, and where each chosen track now stands: the stretches of a line made one track. */
+    public record CornersView(TracksView tracks, List<Integer> chosen) {
     }
 
     public record CornersRequest(PcbDrawing drawing, double rounding, List<Integer> chosen) {
@@ -111,36 +144,40 @@ public final class RoutingAsks {
 
     /** A track's segment carried; its tracks none where it cannot move at all. */
     public static TracksView segment(RoutingEngine engine, SegmentRequest request) {
-        return new TracksView(engine.segmentCarried(request.drawing(), request.track(), request.segment(), request.dx(), request.dy(),
-                request.style().style(), Optional.ofNullable(request.pressed())).map(PcbDrawing::tracks).orElse(null));
+        return engine.segmentCarried(request.drawing(), request.track(), request.segment(), request.dx(), request.dy(),
+                        request.style().style(), Optional.ofNullable(request.pressed()))
+                .map(carried -> TracksView.between(request.drawing().tracks(), carried.tracks()))
+                .orElse(TracksView.NONE);
     }
 
     /** A track's corner carried to a point. */
     public static TracksView corner(RoutingEngine engine, CornerRequest request) {
-        return new TracksView(engine.cornerCarried(request.drawing(), request.track(), request.corner(), request.to(), request.style().style()).tracks());
+        return TracksView.between(request.drawing().tracks(),
+                engine.cornerCarried(request.drawing(), request.track(), request.corner(), request.to(), request.style().style()).tracks());
     }
 
     /** The tracks as moved parts go. */
     public static TracksView following(RoutingEngine engine, CarriedRequest request) {
-        return new TracksView(engine.tracksFollowing(request.drag()).tracks());
+        return TracksView.between(request.moved().tracks(), engine.tracksFollowing(request.drag()).tracks());
     }
 
     /** The tracks as moved parts are let go; refused where they cannot stand there. */
     public static TracksView laid(RoutingEngine engine, CarriedRequest request) {
         return switch (engine.tracksLaid(request.drag())) {
-            case RoutingEngine.Release.Laid laid -> new TracksView(laid.pcb().tracks());
+            case RoutingEngine.Release.Laid laid -> TracksView.between(request.moved().tracks(), laid.pcb().tracks());
             case RoutingEngine.Release.Refused refused -> throw new RoutingRefused(refused.reason());
         };
     }
 
     /** The tracks with their jogs merged, those chosen or every one. */
     public static TracksView jogs(RoutingEngine engine, JogsRequest request) {
-        return new TracksView(engine.withoutJogs(request.drawing(), chosenOf(request.chosen())).tracks());
+        return TracksView.between(request.drawing().tracks(), engine.withoutJogs(request.drawing(), chosenOf(request.chosen())).tracks());
     }
 
-    /** The tracks with their corners rounded, those chosen or every one. */
-    public static TracksView corners(RoutingEngine engine, CornersRequest request) {
-        return new TracksView(engine.withCorners(request.drawing(), request.rounding(), chosenOf(request.chosen())).tracks());
+    /** The tracks with their corners rounded, those chosen or every one; and where each chosen track now stands. */
+    public static CornersView corners(RoutingEngine engine, CornersRequest request) {
+        var rounded = engine.cornersRounded(request.drawing(), request.rounding(), chosenOf(request.chosen()));
+        return new CornersView(TracksView.between(request.drawing().tracks(), rounded.pcb().tracks()), rounded.chosen());
     }
 
     /** Where the pcb's copper lines end and meet. */

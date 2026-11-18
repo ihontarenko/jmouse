@@ -73,6 +73,10 @@
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-geometry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-numerics</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- the plane geometry copper is worked out in: which copper touches which, what a zone pours -->

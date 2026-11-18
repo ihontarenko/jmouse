@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.numerics.Halving;
+
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
@@ -97,18 +99,8 @@ public final class TrackRouter {
             }
             Point start = points.get(index - 1);
             Point end = points.get(index);
-            double low = 0;
-            double high = 1;
-            for (int halving = 0; halving < halvings; halving++) {
-                double middle = (low + high) / 2;
-                Point reached = new Point(start.x() + (end.x() - start.x()) * middle, start.y() + (end.y() - start.y()) * middle);
-                if (fence.lineClear(List.of(start, reached))) {
-                    low = middle;
-                } else {
-                    high = middle;
-                }
-            }
-            Point stop = Lines.settled(new Point(start.x() + (end.x() - start.x()) * low, start.y() + (end.y() - start.y()) * low));
+            double low = Halving.bracket(0, 1, halvings, share -> fence.lineClear(List.of(start, start.toward(end, share)))).holds();
+            Point stop = Lines.settled(start.toward(end, low));
             List<Point> kept = Lines.withoutStraightPoints(Lines.joined(List.of(from), points.subList(1, index), List.of(stop)));
             return kept.size() > 1 ? List.copyOf(kept.subList(1, kept.size())) : List.of(from);
         }
