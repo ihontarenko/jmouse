@@ -1,6 +1,7 @@
 package org.jmouse.cad.plugin.gerber;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.gerber.GerberFile;
 import org.jmouse.gerber.GerberPoint;
 import org.jmouse.gerber.compose.GerberComposer;
@@ -31,8 +32,8 @@ final class PcbGerber {
     }
 
     /** A point of a part's footprint where the part stands, as Gerber's. */
-    static GerberPoint placedOut(PcbDrawing.Placement placement, double x, double y) {
-        PcbDrawing.Point placed = placement.placed(x, y);
+    static GerberPoint placedOut(Placement placement, double x, double y) {
+        Point placed = placement.placed(x, y);
         return out(placed.x(), placed.y());
     }
 }

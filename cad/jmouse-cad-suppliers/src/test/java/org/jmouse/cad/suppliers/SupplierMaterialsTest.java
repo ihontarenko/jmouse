@@ -1,6 +1,6 @@
 package org.jmouse.cad.suppliers;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.exchange.pcb.BillOfMaterials;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
 import org.jmouse.suppliers.PriceBreak;
@@ -35,7 +35,7 @@ class SupplierMaterialsTest {
     private static BillOfMaterials.Line line(String component, String... designators) {
         List<PcbFabrication.SeatedPart> parts = new ArrayList<>();
         for (String designator : designators) {
-            parts.add(new PcbFabrication.SeatedPart(new PcbDrawing.Placement(designator, 0, 0, 0, "top", Optional.empty()),
+            parts.add(new PcbFabrication.SeatedPart(new Placement(designator, 0, 0, 0, "top", Optional.empty()),
                     component, component, Optional.empty(), Optional.empty(), Map.of()));
         }
         return new BillOfMaterials.Line(component, component, Optional.empty(), parts);

@@ -1,7 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
-
+import org.jmouse.cad.Point;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +25,7 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
     }
 
     private boolean isHeld(Point point) {
-        return held.stream().anyMatch(candidate -> Lines.samePoint(candidate, point));
+        return held.stream().anyMatch(candidate -> Precision.samePoint(candidate, point));
     }
 
     /**
@@ -34,13 +33,13 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
      * shorter than {@code shortestRun} track widths, or — {@code least} — only one shorter than {@code leastStep}.
      */
     public List<Point> withoutShortJogs(List<Point> points, boolean least) {
-        List<Point> line = Lines.withoutStraightPoints(points);
+        List<Point> line = LineCleaning.withoutStraightPoints(points);
         for (int round = points.size(); round > 0; round--) {
             Optional<List<Point>> next = withoutShortJog(line, least);
             if (next.isEmpty()) {
                 break;
             }
-            line = Lines.withoutStraightPoints(next.get());
+            line = LineCleaning.withoutStraightPoints(next.get());
         }
         return line;
     }
@@ -58,28 +57,28 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
             // line. A step nobody can mean at all moves less than anyone could see, and goes whatever is held.
             boolean firstHeld = !least && isHeld(first);
             boolean secondHeld = !least && isHeld(second);
-            boolean stepHeld = !least && held.stream().anyMatch(point -> Lines.liesBetween(point, first, second)
-                    && !Lines.samePoint(point, first) && !Lines.samePoint(point, second));
-            if (Lines.lengthBetween(first, second) >= shortest || stepHeld || (firstHeld && secondHeld)) {
+            boolean stepHeld = !least && held.stream().anyMatch(point -> Stretches.liesBetween(point, first, second)
+                    && !Precision.samePoint(point, first) && !Precision.samePoint(point, second));
+            if (first.distanceTo(second) >= shortest || stepHeld || (firstHeld && secondHeld)) {
                 continue;
             }
-            Optional<Point> inWay = Lines.wayBetween(previous, first);
-            Optional<Point> outWay = Lines.wayBetween(next, second);
+            Optional<Point> inWay = Ways.wayBetween(previous, first);
+            Optional<Point> outWay = Ways.wayBetween(next, second);
             if (inWay.isEmpty() || outWay.isEmpty()) {
                 continue;
             }
-            Optional<Point> met = Lines.crossingOf(previous, inWay.get(), next, outWay.get());
+            Optional<Point> met = Ways.crossingOf(previous, inWay.get(), next, outWay.get());
             if (met.isPresent()) {
-                Point settled = Lines.settled(met.get());
-                List<Point> replaced = Lines.joined(line.subList(0, at), List.of(settled), line.subList(at + 2, line.size()));
-                if (fence.lineClear(List.of(previous, settled, next)) && !Lines.isTangled(replaced)) {
+                Point settled = Precision.settled(met.get());
+                List<Point> replaced = Polylines.joined(line.subList(0, at), List.of(settled), line.subList(at + 2, line.size()));
+                if (fence.lineClear(List.of(previous, settled, next)) && !LineCleaning.isTangled(replaced)) {
                     return Optional.of(replaced);
                 }
                 continue;
             }
             // Two runs one direction, side by side: a step out of line. One run goes, the other going on until it meets what came after
             // the gone one: the run not held stays where one side is held, else the longer.
-            boolean firstLonger = firstHeld || secondHeld ? secondHeld : Lines.lengthBetween(previous, first) >= Lines.lengthBetween(second, next);
+            boolean firstLonger = firstHeld || secondHeld ? secondHeld : previous.distanceTo(first) >= second.distanceTo(next);
             boolean heldGives = firstHeld || secondHeld;
             int goneAt = firstLonger ? at + 2 : at - 1;
             int beyond = firstLonger ? at + 3 : at - 2;
@@ -87,14 +86,14 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
             Point after = beyond >= 0 && beyond < line.size() ? line.get(beyond) : null;
             Point kept = firstLonger ? first : second;
             Point way = firstLonger ? inWay.get() : outWay.get();
-            Optional<Point> onward = after != null && (least || heldGives || !isHeld(gone)) ? Lines.wayBetween(after, gone) : Optional.empty();
-            Optional<Point> meeting = onward.flatMap(direction -> Lines.crossingOf(kept, way, after, direction));
+            Optional<Point> onward = after != null && (least || heldGives || !isHeld(gone)) ? Ways.wayBetween(after, gone) : Optional.empty();
+            Optional<Point> meeting = onward.flatMap(direction -> Ways.crossingOf(kept, way, after, direction));
             if (meeting.isPresent()) {
-                Point settled = Lines.settled(meeting.get());
+                Point settled = Precision.settled(meeting.get());
                 List<Point> replaced = firstLonger
-                        ? Lines.joined(line.subList(0, at), List.of(settled), line.subList(beyond, line.size()))
-                        : Lines.joined(line.subList(0, beyond + 1), List.of(settled), line.subList(at + 2, line.size()));
-                if (fence.lineClear(replaced) && !Lines.isTangled(replaced)) {
+                        ? Polylines.joined(line.subList(0, at), List.of(settled), line.subList(beyond, line.size()))
+                        : Polylines.joined(line.subList(0, beyond + 1), List.of(settled), line.subList(at + 2, line.size()));
+                if (fence.lineClear(replaced) && !LineCleaning.isTangled(replaced)) {
                     return Optional.of(replaced);
                 }
             } else if (goneAt == 0 || goneAt == line.size() - 1) {
@@ -102,9 +101,9 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
                 // longer run straight on into the end's copper, and the step taken there, where the pad it stands on hides it.
                 Point jog = new Point(second.x() - first.x(), second.y() - first.y());
                 List<Point> replaced = firstLonger
-                        ? Lines.joined(line.subList(0, at), List.of(Lines.settled(new Point(gone.x() - jog.x(), gone.y() - jog.y())), gone))
-                        : Lines.joined(List.of(gone, Lines.settled(new Point(gone.x() + jog.x(), gone.y() + jog.y()))), line.subList(at + 2, line.size()));
-                if (fence.lineClear(replaced) && !Lines.isTangled(replaced) && Lines.withoutStraightPoints(replaced).size() < line.size()) {
+                        ? Polylines.joined(line.subList(0, at), List.of(Precision.settled(new Point(gone.x() - jog.x(), gone.y() - jog.y())), gone))
+                        : Polylines.joined(List.of(gone, Precision.settled(new Point(gone.x() + jog.x(), gone.y() + jog.y()))), line.subList(at + 2, line.size()));
+                if (fence.lineClear(replaced) && !LineCleaning.isTangled(replaced) && LineCleaning.withoutStraightPoints(replaced).size() < line.size()) {
                     return Optional.of(replaced);
                 }
             }
@@ -125,13 +124,13 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
                 if (inside.stream().anyMatch(this::isHeld)) {
                     continue;
                 }
-                List<Point> direct = Lines.trackStep(line.get(from), line.get(to), angleStep);
-                List<Point> laid = Lines.joined(List.of(line.get(from)), direct);
-                double was = Lines.lengthOf(line.subList(from, to + 1));
-                double now = Lines.lengthOf(laid);
+                List<Point> direct = AngleSteps.trackStep(line.get(from), line.get(to), angleStep);
+                List<Point> laid = Polylines.joined(List.of(line.get(from)), direct);
+                double was = Polylines.lengthOf(line.subList(from, to + 1));
+                double now = Polylines.lengthOf(laid);
                 boolean shorter = now < was - settings.worthShortening();
                 if ((shorter || direct.size() < inside.size() + 1) && now <= was + settings.worthShortening() && fence.lineClear(laid)) {
-                    return Optional.of(Lines.joined(line.subList(0, from + 1), direct.subList(0, direct.size() - 1), line.subList(to, line.size())));
+                    return Optional.of(Polylines.joined(line.subList(0, from + 1), direct.subList(0, direct.size() - 1), line.subList(to, line.size())));
                 }
             }
         }
@@ -143,8 +142,8 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
      * {@code jogs} asks for it. Its way is theirs: what they pull changes as far as they pull it.
      */
     public List<Point> untangled(List<Point> points, JogHandling jogs) {
-        List<Point> clean = Lines.withoutFolds(Lines.withoutLoops(Lines.withoutStraightPoints(points)));
-        List<Point> line = fence.lineClear(clean) ? clean : Lines.withoutStraightPoints(points);
+        List<Point> clean = LineCleaning.withoutFolds(LineCleaning.withoutLoops(LineCleaning.withoutStraightPoints(points)));
+        List<Point> line = fence.lineClear(clean) ? clean : LineCleaning.withoutStraightPoints(points);
         // A step too short to be meant goes whatever the reader keeps; a jog, only when they ask for it.
         return withoutShortJogs(line, jogs != JogHandling.MERGED);
     }

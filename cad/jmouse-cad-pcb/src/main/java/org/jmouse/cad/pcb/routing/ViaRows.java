@@ -1,5 +1,11 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.ViaSize;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -41,7 +47,7 @@ public final class ViaRows {
     public sealed interface Placed permits Placed.Vias, Placed.Refused {
 
         /** The vias, through the pcb. */
-        record Vias(List<PcbDrawing.Via> vias) implements Placed {
+        record Vias(List<Via> vias) implements Placed {
         }
 
         /** Why none can stand. */
@@ -70,7 +76,7 @@ public final class ViaRows {
     }
 
     /** The closest two through vias of a size stand, centre to centre: pads apart, and holes a hole's gap apart. */
-    private double viaPitch(PcbDrawing.ViaSize via) {
+    private double viaPitch(ViaSize via) {
         return Math.max(via.diameter(), via.drill() + rules.value(PcbVocabulary.RULE_HOLE_CLEARANCE));
     }
 
@@ -111,7 +117,7 @@ public final class ViaRows {
      * every other net's on every layer it passes, its hole a hole's gap from every other hole, and a via of its own net no nearer
      * than their pads allow.
      */
-    private Geometry viaRoom(String net, Geometry room, PcbDrawing.ViaSize via) {
+    private Geometry viaRoom(String net, Geometry room, ViaSize via) {
         Optional<String> own = Optional.of(net);
         double radius = via.diameter() / 2;
         double holeClearance = rules.value(PcbVocabulary.RULE_HOLE_CLEARANCE);
@@ -136,16 +142,16 @@ public final class ViaRows {
             }
         }
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via other = pcb.vias().get(index);
+            Via other = pcb.vias().get(index);
             Optional<String> viaNet = nets.viaNets().get(index);
             double keep = Math.max(holeGap.applyAsDouble(other.drill()), other.diameter() / 2 + (viaNet.equals(own) ? radius : copperGap.apply(viaNet)));
             obstacles.add(circle(other.x(), other.y(), keep));
         }
-        for (PcbDrawing.Hole hole : pcb.holes()) {
+        for (Hole hole : pcb.holes()) {
             obstacles.add(circle(hole.x(), hole.y(), CopperShapes.reach(hole) + Math.max(copperGap.apply(Optional.empty()), holeGap.applyAsDouble(0))));
         }
         for (int index = 0; index < pcb.zones().size(); index++) {
-            PcbDrawing.Zone other = pcb.zones().get(index);
+            Zone other = pcb.zones().get(index);
             if (!other.net().equals(net) && pours.get(index).isPresent()) {
                 obstacles.add(offsets.grown(pours.get(index).get(), copperGap.apply(Optional.of(other.net()))));
             }
@@ -154,8 +160,8 @@ public final class ViaRows {
         return obstacles.isEmpty() ? shrunk : Areas.difference(shrunk, Areas.unionOf(obstacles, GEOMETRY));
     }
 
-    private static PcbDrawing.Via throughVia(double x, double y, PcbDrawing.ViaSize via) {
-        return new PcbDrawing.Via(Lines.settled(x), Lines.settled(y), via.drill(), via.diameter(), PcbDrawing.TOP, PcbDrawing.BOTTOM);
+    private static Via throughVia(double x, double y, ViaSize via) {
+        return new Via(Precision.settled(x), Precision.settled(y), via.drill(), via.diameter(), PcbVocabulary.TOP, PcbVocabulary.BOTTOM);
     }
 
     /**
@@ -165,19 +171,19 @@ public final class ViaRows {
      *
      * @param size the vias' size; empty for the one the zone's net is laid with
      */
-    public Placed stitching(int zoneIndex, double pitch, Optional<PcbDrawing.ViaSize> size) {
+    public Placed stitching(int zoneIndex, double pitch, Optional<ViaSize> size) {
         if (zoneIndex < 0 || zoneIndex >= pcb.zones().size() || pours.get(zoneIndex).isEmpty()) {
             return new Placed.Refused("Zone " + (zoneIndex + 1) + " has no copper poured yet");
         }
-        PcbDrawing.Zone zone = pcb.zones().get(zoneIndex);
-        PcbDrawing.ViaSize via = size.orElseGet(() -> rules.viaOf(Optional.of(zone.net())));
+        Zone zone = pcb.zones().get(zoneIndex);
+        ViaSize via = size.orElseGet(() -> rules.viaOf(Optional.of(zone.net())));
         double least = viaPitch(via);
         if (pitch < least) {
             return new Placed.Refused("Vias of " + number(via.diameter()) + " mm stand at least " + number(least) + " mm apart");
         }
         List<Geometry> partners = new ArrayList<>();
         for (int index = 0; index < pcb.zones().size(); index++) {
-            PcbDrawing.Zone other = pcb.zones().get(index);
+            Zone other = pcb.zones().get(index);
             if (index != zoneIndex && other.net().equals(zone.net()) && !other.layer().equals(zone.layer()) && pours.get(index).isPresent()) {
                 partners.add(pours.get(index).get());
             }
@@ -192,11 +198,11 @@ public final class ViaRows {
         }
         PreparedGeometry inside = PreparedGeometryFactory.prepare(area);
         Envelope box = area.getEnvelopeInternal();
-        List<PcbDrawing.Via> vias = new ArrayList<>();
+        List<Via> vias = new ArrayList<>();
         for (long row = (long) Math.ceil(box.getMinY() / pitch); row * pitch <= box.getMaxY(); row++) {
             for (long column = (long) Math.ceil(box.getMinX() / pitch); column * pitch <= box.getMaxX(); column++) {
-                double x = Lines.settled(column * pitch);
-                double y = Lines.settled(row * pitch);
+                double x = Precision.settled(column * pitch);
+                double y = Precision.settled(row * pitch);
                 if (inside.contains(GEOMETRY.createPoint(new Coordinate(x, y)))) {
                     vias.add(throughVia(x, y, via));
                 }
@@ -212,12 +218,12 @@ public final class ViaRows {
      *
      * @param size the vias' size; empty for the one the net is laid with
      */
-    public Placed fence(int trackIndex, String net, double pitch, Optional<PcbDrawing.ViaSize> size) {
-        PcbDrawing.ViaSize via = size.orElseGet(() -> rules.viaOf(Optional.of(net)));
+    public Placed fence(int trackIndex, String net, double pitch, Optional<ViaSize> size) {
+        ViaSize via = size.orElseGet(() -> rules.viaOf(Optional.of(net)));
         if (trackIndex < 0 || trackIndex >= pcb.tracks().size()) {
             return new Placed.Refused("There is no track " + (trackIndex + 1));
         }
-        PcbDrawing.Track track = pcb.tracks().get(trackIndex);
+        Track track = pcb.tracks().get(trackIndex);
         Optional<String> trackNet = nets.trackNets().get(trackIndex);
         if (trackNet.equals(Optional.of(net))) {
             return new Placed.Refused("Track " + (trackIndex + 1) + " is on " + net + " itself: a fence of its own net guards nothing");
@@ -228,7 +234,7 @@ public final class ViaRows {
         }
         Map<String, List<Geometry>> byLayer = new LinkedHashMap<>();
         for (int index = 0; index < pcb.zones().size(); index++) {
-            PcbDrawing.Zone zone = pcb.zones().get(index);
+            Zone zone = pcb.zones().get(index);
             if (zone.net().equals(net) && pours.get(index).isPresent()) {
                 byLayer.computeIfAbsent(zone.layer(), ignored -> new ArrayList<>()).add(pours.get(index).get());
             }
@@ -247,7 +253,7 @@ public final class ViaRows {
         PreparedGeometry inside = PreparedGeometryFactory.prepare(viaRoom(net, Areas.unionOf(overlaps, GEOMETRY), via));
         // The pours keep their zone's gap from the track — the wider of it and the track's own — and the fence stands past it.
         double gap = rules.clearanceOf(trackNet);
-        for (PcbDrawing.Zone zone : pcb.zones()) {
+        for (Zone zone : pcb.zones()) {
             if (zone.net().equals(net)) {
                 gap = Math.max(gap, rules.zoneGapOf(zone));
             }
@@ -256,14 +262,14 @@ public final class ViaRows {
         // pour's edge, each grown by the arc error so the gap is kept exactly — then a hundredth further, inside the room, not on its edge.
         double nearest = track.width() / 2 + gap + via.diameter() / 2 + 2 * offsets.arcError();
         double offset = Math.ceil(nearest / OFFSET_STEP) * OFFSET_STEP + INSIDE_THE_ROOM;
-        List<PcbDrawing.Via> vias = new ArrayList<>();
+        List<Via> vias = new ArrayList<>();
         for (int side : new int[] {1, -1}) {
             // The distance along the track is carried from segment to segment, so the pitch runs on round a corner.
             double carried = 0;
             for (int segment = 0; segment < track.points().size() - 1; segment++) {
-                PcbDrawing.Point from = track.points().get(segment);
-                PcbDrawing.Point to = track.points().get(segment + 1);
-                double length = Lines.lengthBetween(from, to);
+                Point from = track.points().get(segment);
+                Point to = track.points().get(segment + 1);
+                double length = from.distanceTo(to);
                 if (length == 0) {
                     continue;
                 }

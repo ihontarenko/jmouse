@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.geometry.index.BoxGrid;
+
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
 import java.util.List;
@@ -50,6 +52,7 @@ public record RoutingSettings(@Label("Routing") Routing routing,
      *                        out from it — the rest of its copper, nets and index kept, those tracks kept clear of on their own —:
      *                        past that, the board is worked out whole again, which then costs less
      * @param roundingHalvings how many halvings find the widest rounding a track's corners keep their gaps at
+     * @param mostIndexCells  the most cells a fence's index is cut into: a board with copper far apart is indexed in wider cells
      */
     public record Routing(@Label("Shortest run") double shortestRun,
                           @Label("Least step") double leastStep,
@@ -61,11 +64,17 @@ public record RoutingSettings(@Label("Routing") Routing routing,
                           @Label(value = "Fence index cell", unit = "mm") double bucket,
                           @Label(value = "Corridor margins", unit = "mm") List<Double> corridorMargins,
                           @Label("Relaid at most") int relaidAtMost,
-                          @Label("Rounding halvings") int roundingHalvings) {
+                          @Label("Rounding halvings") int roundingHalvings,
+                          @Label("Fence index cells at most") long mostIndexCells) {
 
         public Routing {
             neckShares = List.copyOf(neckShares);
             corridorMargins = List.copyOf(corridorMargins);
+        }
+
+        /** How a fence's index is cut: cells {@link #bucket} wide, at most {@link #mostIndexCells} of them. */
+        public BoxGrid.Cells fenceCells() {
+            return new BoxGrid.Cells(bucket, mostIndexCells);
         }
 
         /**

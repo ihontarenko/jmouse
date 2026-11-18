@@ -1,10 +1,14 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.ViaSize;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
@@ -70,7 +74,7 @@ public final class Autorouter {
      * @param reason  why it was given up, or the connection refused, in the checks' words
      * @param refused the connections refused so far in this round
      */
-    public record Moment(Step step, PcbDrawing pcb, Optional<CopperNets.Unlaid> line, List<PcbDrawing.Track> attempt, Optional<String> reason,
+    public record Moment(Step step, PcbDrawing pcb, Optional<CopperNets.Unlaid> line, List<Track> attempt, Optional<String> reason,
                          List<CopperNets.Unlaid> refused, int laid, int tried, int total, int round) {
     }
 
@@ -132,7 +136,7 @@ public final class Autorouter {
         return request.stopped().getAsBoolean() || System.nanoTime() > until;
     }
 
-    private void tell(Step step, PcbDrawing pcb, Optional<CopperNets.Unlaid> line, List<PcbDrawing.Track> attempt, Optional<String> reason) {
+    private void tell(Step step, PcbDrawing pcb, Optional<CopperNets.Unlaid> line, List<Track> attempt, Optional<String> reason) {
         request.moments().accept(new Moment(step, pcb, line, attempt, reason, refusedNow, Math.max(laidNow, laidBefore), tried, total, round));
     }
 
@@ -145,20 +149,20 @@ public final class Autorouter {
     }
 
     private static double lengthOf(CopperNets.Unlaid line) {
-        return Lines.lengthBetween(line.from(), line.to());
+        return line.from().distanceTo(line.to());
     }
 
     /** A point written to the settings' places: a step's arithmetic leaves no more than that worth saying. */
     private Point written(Point point) {
-        return new Point(Lines.writtenTo(point.x(), settings.decimals()), Lines.writtenTo(point.y(), settings.decimals()));
+        return new Point(Precision.writtenTo(point.x(), settings.decimals()), Precision.writtenTo(point.y(), settings.decimals()));
     }
 
     private static boolean surface(String layer) {
-        return PcbDrawing.TOP.equals(layer) || PcbDrawing.BOTTOM.equals(layer);
+        return PcbVocabulary.TOP.equals(layer) || PcbVocabulary.BOTTOM.equals(layer);
     }
 
     /** An end as a way starts from it: the lanes it reaches where the width fits there, else a neck out on the first lane one gets out on. */
-    private record Fanned(List<Integer> lanes, Point at, Optional<PcbDrawing.Track> neck) {
+    private record Fanned(List<Integer> lanes, Point at, Optional<Track> neck) {
     }
 
     private Optional<Fanned> fan(RoutingWorld world, List<String> layers, Optional<String> net, double width, Point end) {
@@ -177,7 +181,7 @@ public final class Autorouter {
                 free.add(lane);
             } else if (necked.isEmpty() && out.isPresent()) {
                 FanOut.Neck neck = out.get().neck().get();
-                necked = Optional.of(new Fanned(List.of(lane), out.get().at(), Optional.of(new PcbDrawing.Track(layers.get(lane), neck.width(), 0,
+                necked = Optional.of(new Fanned(List.of(lane), out.get().at(), Optional.of(new Track(layers.get(lane), neck.width(), 0,
                         List.of(written(neck.from()), written(neck.to()))))));
             }
         }
@@ -194,7 +198,7 @@ public final class Autorouter {
     private Optional<PcbDrawing> wayOf(RoutingWorld world, CopperNets.Unlaid line, List<String> layers, boolean linking, double width) {
         PcbDrawing pcb = world.pcb();
         Optional<String> net = Optional.of(line.net());
-        PcbDrawing.ViaSize viaSize = world.rules().viaOf(net);
+        ViaSize viaSize = world.rules().viaOf(net);
         List<LayeredWaySearch.Lane> lanes = layers.stream().map(layer -> new LayeredWaySearch.Lane(world.fence(layer, net, width),
                 settings.directionOf(layer).map(direction -> new LayeredWaySearch.Preferred(direction, settings.againstDirection())))).toList();
         Optional<Fanned> start = fan(world, layers, net, width, line.from());
@@ -219,11 +223,11 @@ public final class Autorouter {
         if (parts.isEmpty()) {
             return Optional.empty();
         }
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
+        List<Track> tracks = new ArrayList<>(pcb.tracks());
         start.get().neck().ifPresent(tracks::add);
         goal.get().neck().ifPresent(tracks::add);
-        List<PcbDrawing.Via> vias = new ArrayList<>(pcb.vias());
-        List<PcbDrawing.Placement> placements = new ArrayList<>(pcb.placements());
+        List<Via> vias = new ArrayList<>(pcb.vias());
+        List<Placement> placements = new ArrayList<>(pcb.placements());
         int links = 0;
         for (LayeredWaySearch.WayPart part : parts.get()) {
             switch (part) {
@@ -232,10 +236,10 @@ public final class Autorouter {
                     List<Point> points = new Tightening(fence, angleStep(), List.of(), board.settings().routing()).tightened(stretch.points())
                             .stream().map(this::written).toList();
                     String layer = layers.get(stretch.lane());
-                    tracks.add(new PcbDrawing.Track(layer, width, fence.roundingThatFits(points, request.rounding(), layer, board.settings().routing().roundingHalvings()), points));
+                    tracks.add(new Track(layer, width, fence.roundingThatFits(points, request.rounding(), layer, board.settings().routing().roundingHalvings()), points));
                 }
-                case LayeredWaySearch.ViaHop hop -> vias.add(new PcbDrawing.Via(hop.at().x(), hop.at().y(), viaSize.drill(), viaSize.diameter(),
-                        PcbDrawing.TOP, PcbDrawing.BOTTOM));
+                case LayeredWaySearch.ViaHop hop -> vias.add(new Via(hop.at().x(), hop.at().y(), viaSize.drill(), viaSize.diameter(),
+                        PcbVocabulary.TOP, PcbVocabulary.BOTTOM));
                 case LayeredWaySearch.LinkHop hop -> placements.add(linkPlacement(placements, links++, layers.get(hop.lane()), hop.from(), hop.to(), line.net()));
             }
         }
@@ -243,7 +247,7 @@ public final class Autorouter {
     }
 
     /** A 0 Ω link where a way needs one: its two pads on the two points, on the layer's side, both on the net. */
-    private PcbDrawing.Placement linkPlacement(List<PcbDrawing.Placement> placements, int among, String layer, Point from, Point to, String net) {
+    private Placement linkPlacement(List<Placement> placements, int among, String layer, Point from, Point to, String net) {
         RoutingSettings.Link link = settings.link();
         Set<String> taken = new HashSet<>();
         placements.forEach(placement -> taken.add(placement.designator()));
@@ -254,8 +258,8 @@ public final class Autorouter {
         Map<String, String> nets = new LinkedHashMap<>();
         nets.put("1", net);
         nets.put("2", net);
-        return new PcbDrawing.Placement(link.designator() + number, (from.x() + to.x()) / 2, (from.y() + to.y()) / 2, from.y() == to.y() ? 0 : 90,
-                PcbDrawing.BOTTOM.equals(layer) ? PcbDrawing.BOTTOM : PcbDrawing.TOP, Optional.empty(), Optional.empty(), Optional.of(link.footprint()),
+        return new Placement(link.designator() + number, (from.x() + to.x()) / 2, (from.y() + to.y()) / 2, from.y() == to.y() ? 0 : 90,
+                PcbVocabulary.BOTTOM.equals(layer) ? PcbVocabulary.BOTTOM : PcbVocabulary.TOP, Optional.empty(), Optional.empty(), Optional.of(link.footprint()),
                 nets, Arrangement.FREE, PcbVocabulary.ROLE_LINK);
     }
 
@@ -294,7 +298,7 @@ public final class Autorouter {
     }
 
     /** A connection this routing laid, and the copper it laid for it: what may be lifted to make room. */
-    private record LaidRoute(CopperNets.Unlaid line, List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias, List<PcbDrawing.Placement> links) {
+    private record LaidRoute(CopperNets.Unlaid line, List<Track> tracks, List<Via> vias, List<Placement> links) {
     }
 
     /** What a layout gained over the one it was laid on: a laid connection only ever adds tracks, vias and links at the end. */
@@ -313,9 +317,9 @@ public final class Autorouter {
 
     /** The layout without a route's copper. */
     private static PcbDrawing lifted(PcbDrawing pcb, LaidRoute route) {
-        Set<PcbDrawing.Track> tracks = identities(route.tracks());
-        Set<PcbDrawing.Via> vias = identities(route.vias());
-        Set<PcbDrawing.Placement> links = identities(route.links());
+        Set<Track> tracks = identities(route.tracks());
+        Set<Via> vias = identities(route.vias());
+        Set<Placement> links = identities(route.links());
         return pcb.withTracks(pcb.tracks().stream().filter(track -> !tracks.contains(track)).toList())
                 .withVias(pcb.vias().stream().filter(via -> !vias.contains(via)).toList())
                 .withPlacements(pcb.placements().stream().filter(placement -> !links.contains(placement)).toList());
@@ -340,7 +344,7 @@ public final class Autorouter {
     /** How far a route stands from a connection's middle: the nearest is lifted first. */
     private static double distanceTo(LaidRoute route, CopperNets.Unlaid line) {
         Point middle = line.from().halfwayTo(line.to());
-        return pointsOf(route).stream().mapToDouble(point -> Lines.lengthBetween(point, middle)).min().orElse(Double.POSITIVE_INFINITY);
+        return pointsOf(route).stream().mapToDouble(point -> point.distanceTo(middle)).min().orElse(Double.POSITIVE_INFINITY);
     }
 
     /** Routing as it goes: the layout, the connections it laid, and those it could not. */
@@ -545,9 +549,9 @@ public final class Autorouter {
             if (drop.isEmpty()) {
                 continue;
             }
-            List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
+            List<Track> tracks = new ArrayList<>(pcb.tracks());
             tracks.add(drop.get().track().withPoints(drop.get().track().points().stream().map(this::written).toList()));
-            List<PcbDrawing.Via> vias = new ArrayList<>(pcb.vias());
+            List<Via> vias = new ArrayList<>(pcb.vias());
             vias.add(drop.get().via());
             PcbDrawing tried = pcb.withTracks(tracks).withVias(vias);
             if (worldOf(tried).faults().size() <= world.faults().size()) {

@@ -10,7 +10,8 @@
     "bucket": 2,
     "corridorMargins": [4, 15, 60],
     "relaidAtMost": 64,
-    "roundingHalvings": 10
+    "roundingHalvings": 10,
+    "mostIndexCells": 1048576
   },
   "carrying": {
     "holdSteps": 7,

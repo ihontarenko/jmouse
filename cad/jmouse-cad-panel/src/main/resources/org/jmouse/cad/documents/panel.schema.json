@@ -86,7 +86,7 @@
       "type" : "object",
       "properties" : {
         "at" : {
-          "$ref" : "#/$defs/PcbDrawing.Point",
+          "$ref" : "#/$defs/Point",
           "description" : "where it stands, millimetres"
         },
         "diameter" : {
@@ -135,7 +135,7 @@
       "type" : "object",
       "properties" : {
         "at" : {
-          "$ref" : "#/$defs/PcbDrawing.Point",
+          "$ref" : "#/$defs/Point",
           "description" : "where it stands, millimetres"
         },
         "drill" : {
@@ -147,20 +147,20 @@
       "description" : "A tooling hole set by hand: a hole a machine holds the panel by.",
       "additionalProperties" : false
     },
-    "PcbDrawing.Point" : {
+    "Point" : {
       "type" : "object",
       "properties" : {
         "x" : {
           "type" : "number",
-          "description" : "millimetres from the left"
+          "description" : "across, in its drawing's units"
         },
         "y" : {
           "type" : "number",
-          "description" : "millimetres down"
+          "description" : "down, in its drawing's units"
         }
       },
       "required" : [ "x", "y" ],
-      "description" : "A point of the pcb.",
+      "description" : "A place on a sheet or a pcb, in its units.",
       "additionalProperties" : false
     }
   },

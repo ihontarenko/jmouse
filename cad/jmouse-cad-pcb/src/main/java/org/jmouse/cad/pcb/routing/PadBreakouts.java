@@ -1,7 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
 import org.jmouse.geometry.Areas;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.locationtech.jts.algorithm.MinimumAreaRectangle;
 import org.locationtech.jts.geom.Coordinate;
@@ -29,7 +29,7 @@ final class PadBreakouts {
     private static final double RAY_REACH = 4;
 
     /** How far off a breakout's way a line's first stretch may run and still be taken as leaving along it: a point's precision. */
-    private static final double ALONG = Lines.SAME_POINT;
+    private static final double ALONG = Precision.SAME_POINT;
 
     private PadBreakouts() {
     }
@@ -105,7 +105,7 @@ final class PadBreakouts {
         double reach = RAY_REACH * Math.max(shape.getEnvelopeInternal().getWidth(), shape.getEnvelopeInternal().getHeight());
         List<Breakout> breakouts = new ArrayList<>();
         for (double[] way : ways) {
-            edgeAlong(shape, from, way, reach).map(exit -> new Breakout(from, Lines.settled(exit))).ifPresent(breakouts::add);
+            edgeAlong(shape, from, way, reach).map(exit -> new Breakout(from, Precision.settled(exit))).ifPresent(breakouts::add);
         }
         return breakouts;
     }
@@ -117,11 +117,11 @@ final class PadBreakouts {
         Point nearest = null;
         for (Coordinate crossing : Areas.crossing(shape.getBoundary(), ray).getCoordinates()) {
             Point point = new Point(crossing.x, crossing.y);
-            if (nearest == null || Lines.lengthBetween(from, point) < Lines.lengthBetween(from, nearest)) {
+            if (nearest == null || from.distanceTo(point) < from.distanceTo(nearest)) {
                 nearest = point;
             }
         }
-        return Optional.ofNullable(nearest).filter(point -> Lines.lengthBetween(from, point) > Lines.SAME_POINT);
+        return Optional.ofNullable(nearest).filter(point -> from.distanceTo(point) > Precision.SAME_POINT);
     }
 
     /**
@@ -137,7 +137,7 @@ final class PadBreakouts {
         List<Point> started = padAt(world, layer, line.getFirst())
                 .map(pad -> fromPad(line, of(pad, line.getFirst(), pads.slantedUpTo()), fence, angleStep, pads.lookAhead())).orElse(line);
         return padAt(world, layer, started.getLast())
-                .map(pad -> Lines.reversed(fromPad(Lines.reversed(started), of(pad, started.getLast(), pads.slantedUpTo()), fence, angleStep,
+                .map(pad -> Polylines.reversed(fromPad(Polylines.reversed(started), of(pad, started.getLast(), pads.slantedUpTo()), fence, angleStep,
                         pads.lookAhead())))
                 .orElse(started);
     }
@@ -156,10 +156,10 @@ final class PadBreakouts {
         double shortest = Double.POSITIVE_INFINITY;
         for (Breakout breakout : breakouts) {
             for (int corner = 1; corner <= Math.min(lookAhead, line.size() - 1); corner++) {
-                for (List<Point> posture : Lines.posturesOf(breakout.exit(), line.get(corner), angleStep)) {
-                    List<Point> out = Lines.joined(List.of(breakout.exit()), posture);
-                    List<Point> candidate = Lines.joined(List.of(breakout.from()), out, line.subList(corner + 1, line.size()));
-                    double length = Lines.lengthBetween(breakout.from(), breakout.exit()) + Lines.lengthOf(out);
+                for (List<Point> posture : AngleSteps.posturesOf(breakout.exit(), line.get(corner), angleStep)) {
+                    List<Point> out = Polylines.joined(List.of(breakout.exit()), posture);
+                    List<Point> candidate = Polylines.joined(List.of(breakout.from()), out, line.subList(corner + 1, line.size()));
+                    double length = breakout.from().distanceTo(breakout.exit()) + Polylines.lengthOf(out);
                     if (length < shortest && !turnsBackAnywhere(candidate, corner + 2) && fence.lineClear(out)) {
                         shortest = length;
                         best = candidate;
@@ -167,6 +167,6 @@ final class PadBreakouts {
                 }
             }
         }
-        return best == null ? line : Lines.withoutStraightPoints(best);
+        return best == null ? line : LineCleaning.withoutStraightPoints(best);
     }
 }

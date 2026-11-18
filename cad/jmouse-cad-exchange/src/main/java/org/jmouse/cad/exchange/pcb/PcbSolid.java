@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.geometry.Areas;
 import org.jmouse.cad.pcb.geometry.PcbDrills;
@@ -58,7 +59,7 @@ public record PcbSolid(Geometry substrate, Map<String, Side> sides, List<PartBod
         Geometry holes = drillArea(drilled, drillSteps);
         List<String> stack = artwork.fabrication().pcb().copperLayerIds();
         Map<String, Side> sides = new LinkedHashMap<>();
-        for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
+        for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
             if (!stack.contains(side)) {
                 Geometry mask = Areas.difference(pcb, holes);
                 Geometry nothing = AREAS.createPolygon();

@@ -1,7 +1,12 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.ViaSize;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 
@@ -22,7 +27,7 @@ public final class PlaneDrops {
     }
 
     /** A drop: the track out of its pad and the via at its far end. */
-    public record PlaneDrop(PcbDrawing.Track track, PcbDrawing.Via via) {
+    public record PlaneDrop(Track track, Via via) {
     }
 
     /**
@@ -50,7 +55,7 @@ public final class PlaneDrops {
         CopperNets copper = world.nets();
         int curveSteps = world.board().checks().curveSteps();
         List<DroppablePad> found = new ArrayList<>();
-        for (PcbDrawing.Zone zone : pcb.zones()) {
+        for (Zone zone : pcb.zones()) {
             if (!nets.isEmpty() && !nets.contains(zone.net())) {
                 continue;
             }
@@ -68,7 +73,7 @@ public final class PlaneDrops {
                 }
             }
             for (int index = 0; index < pcb.vias().size(); index++) {
-                PcbDrawing.Via via = pcb.vias().get(index);
+                Via via = pcb.vias().get(index);
                 if (copper.viaNets().get(index).equals(net) && plane.encloses(via.x(), via.y())) {
                     onPlane.add(copper.viaGroup(index));
                 }
@@ -103,7 +108,7 @@ public final class PlaneDrops {
         }
         String layer = surface.get();
         Optional<String> net = Optional.of(droppable.net());
-        PcbDrawing.ViaSize via = world.rules().viaOf(net);
+        ViaSize via = world.rules().viaOf(net);
         double width = world.trackWidthOf(net);
         double clearance = world.clearanceOf(net);
         TrackFence track = world.fence(layer, net, width);
@@ -112,9 +117,9 @@ public final class PlaneDrops {
         Point from = pad.centre();
         Point best = null;
         double shortest = Double.POSITIVE_INFINITY;
-        for (Point way : Lines.STRAIGHT_FIRST_WAYS) {
+        for (Point way : Ways.STRAIGHT_FIRST_WAYS) {
             for (double out = settings.step(); out <= settings.reach() && out < shortest; out += settings.step()) {
-                Point at = Lines.settled(Lines.offset(from, way, out));
+                Point at = Precision.settled(from.moved(way, out));
                 if (!track.lineClear(List.of(from, at))) {
                     break;
                 }
@@ -129,7 +134,7 @@ public final class PlaneDrops {
         if (best == null) {
             return Optional.empty();
         }
-        return Optional.of(new PlaneDrop(new PcbDrawing.Track(layer, width, 0, List.of(from, best)),
-                new PcbDrawing.Via(best.x(), best.y(), via.drill(), via.diameter(), PcbDrawing.TOP, PcbDrawing.BOTTOM)));
+        return Optional.of(new PlaneDrop(new Track(layer, width, 0, List.of(from, best)),
+                new Via(best.x(), best.y(), via.drill(), via.diameter(), PcbVocabulary.TOP, PcbVocabulary.BOTTOM)));
     }
 }

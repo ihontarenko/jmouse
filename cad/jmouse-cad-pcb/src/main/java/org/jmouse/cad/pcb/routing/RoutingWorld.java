@@ -1,12 +1,20 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Keepout;
+import org.jmouse.cad.pcb.drawing.Hole;
+import org.jmouse.geometry.index.BoxIndex;
+import org.jmouse.geometry.index.BoxGrid;
+
 import org.jmouse.cad.document.FindingSeverity;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.checks.PcbFinding;
 import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperPieces;
 import org.jmouse.cad.pcb.geometry.CopperShape;
@@ -49,11 +57,11 @@ public final class RoutingWorld {
     /** What a via's hole keeps clear of, by its drill. */
     private final Map<Double, TrackFence>    holeFences = new HashMap<>();
     private final Map<String, LayerCopper>   layers = new HashMap<>();
-    private final Map<String, ObstacleCells> layerCells = new HashMap<>();
+    private final Map<String, BoxIndex> layerCells = new HashMap<>();
     /** The world whose copper and index this one shares: itself, for a world of its own. */
     private final RoutingWorld               root;
     /** The tracks laid over the root since, by their places: the root's copper of them left out, theirs kept clear of instead. */
-    private final Map<Integer, PcbDrawing.Track> relaid;
+    private final Map<Integer, Track> relaid;
     /** The board this layout was dragged from, whose names its copper keeps; none, for a layout named as it joins. */
     private final Optional<RoutingWorld>     namedBy;
     private final Map<Integer, CopperShape>  relaidCopper = new HashMap<>();
@@ -79,7 +87,7 @@ public final class RoutingWorld {
         this.namedBy = namedBy;
     }
 
-    private RoutingWorld(PcbDrawing pcb, RoutingWorld root, Map<Integer, PcbDrawing.Track> relaid) {
+    private RoutingWorld(PcbDrawing pcb, RoutingWorld root, Map<Integer, Track> relaid) {
         this.pcb = pcb;
         this.board = root.board;
         this.rules = root.rules;
@@ -99,7 +107,7 @@ public final class RoutingWorld {
      */
     public RoutingWorld withTrack(int index, List<Point> points) {
         PcbDrawing laid = pcb.withTrackPoints(index, points);
-        Map<Integer, PcbDrawing.Track> now = new HashMap<>(relaid);
+        Map<Integer, Track> now = new HashMap<>(relaid);
         now.put(index, laid.tracks().get(index));
         return new RoutingWorld(laid, root, Map.copyOf(now));
     }
@@ -113,10 +121,10 @@ public final class RoutingWorld {
         if (root != this || other.tracks().size() != pcb.tracks().size() || !other.withTracks(pcb.tracks()).equals(pcb)) {
             return Optional.empty();
         }
-        Map<Integer, PcbDrawing.Track> changed = new HashMap<>();
+        Map<Integer, Track> changed = new HashMap<>();
         int most = settings().routing().relaidAtMost();
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = other.tracks().get(index);
+            Track track = other.tracks().get(index);
             if (!track.equals(pcb.tracks().get(index))) {
                 changed.put(index, track);
                 if (changed.size() > most) {
@@ -278,19 +286,19 @@ public final class RoutingWorld {
             }
         }
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             if (track.layer().equals(layer) && CopperShapes.track(track, curveSteps()).covers(point.x(), point.y())) {
                 return nets().trackNets().get(index);
             }
         }
         for (int index = 0; index < pcb.arcs().size(); index++) {
-            PcbDrawing.Arc arc = pcb.arcs().get(index);
+            Arc arc = pcb.arcs().get(index);
             if (arc.layer().equals(layer) && CopperShapes.arc(arc, curveSteps()).covers(point.x(), point.y())) {
                 return nets().arcNets().get(index);
             }
         }
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             if (Math.hypot(via.x() - point.x(), via.y() - point.y()) <= via.diameter() / 2) {
                 return nets().viaNets().get(index);
             }
@@ -313,14 +321,14 @@ public final class RoutingWorld {
             }
         }
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             if (nets().trackNets().get(index).equals(net) && track.points().stream()
-                    .anyMatch(corner -> Lines.lengthBetween(corner, point) <= track.width() / 2)) {
+                    .anyMatch(corner -> corner.distanceTo(point) <= track.width() / 2)) {
                 reached.add(track.layer());
             }
         }
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             if (nets().viaNets().get(index).equals(net) && Math.hypot(via.x() - point.x(), via.y() - point.y()) <= via.diameter() / 2) {
                 every.stream().filter(layer -> pcb.reaches(via, layer)).forEach(reached::add);
             }
@@ -425,7 +433,7 @@ public final class RoutingWorld {
         return layers.computeIfAbsent(layer, on -> {
             List<CopperPieces.Piece> onLayer = pieces().stream().filter(piece -> piece.onLayer().test(on)).toList();
             List<CopperShape> shapes = new ArrayList<>(onLayer.stream().map(CopperPieces.Piece::shape).toList());
-            for (PcbDrawing.Keepout keepout : pcb.keepouts()) {
+            for (Keepout keepout : pcb.keepouts()) {
                 if (keepout.layers().contains(on)) {
                     CopperShape.ofPath(keepout.path(), true, 0, curveSteps()).ifPresent(shapes::add);
                 }
@@ -437,11 +445,12 @@ public final class RoutingWorld {
     }
 
     /** A layer's shapes by the cells of the board, shared by every fence over the layer. */
-    private ObstacleCells cellsOn(String layer) {
+    private BoxIndex cellsOn(String layer) {
         if (root != this) {
             return root.cellsOn(layer);
         }
-        return layerCells.computeIfAbsent(layer, on -> new ObstacleCells(copperOn(on).shapes(), settings().routing().bucket()));
+        return layerCells.computeIfAbsent(layer, on -> BoxGrid.of(copperOn(on).shapes().stream().map(CopperShape::box).toList(),
+                settings().routing().fenceCells()));
     }
 
     /**
@@ -472,7 +481,7 @@ public final class RoutingWorld {
     /** A fence over these obstacles, for a track this wide keeping this clearance, measured as the router measures. */
     public TrackFence fenceOver(double width, double clearance, List<TrackFence.Obstacle> obstacles) {
         RoutingSettings.Routing routing = settings().routing();
-        return new TrackFence(width, clearance, obstacles, routing.bucket(), curveSteps());
+        return new TrackFence(width, clearance, obstacles, routing.fenceCells(), curveSteps());
     }
 
     /**
@@ -488,10 +497,10 @@ public final class RoutingWorld {
                     holes.add(new TrackFence.Obstacle(CopperShapes.hole(pad.placement(), pad.pad()), keep));
                 }
             }
-            for (PcbDrawing.Via via : pcb.vias()) {
+            for (Via via : pcb.vias()) {
                 holes.add(new TrackFence.Obstacle(CopperShape.circle(via.x(), via.y(), via.drill() / 2), keep));
             }
-            for (PcbDrawing.Hole hole : pcb.holes()) {
+            for (Hole hole : pcb.holes()) {
                 holes.add(new TrackFence.Obstacle(CopperShape.circle(hole.x(), hole.y(), hole.drill() / 2), keep));
             }
             return fenceOver(drill, keep, holes);
@@ -514,7 +523,7 @@ public final class RoutingWorld {
             LayerCopper copper = copperOn(layer);
             return new TrackFence(width, clearanceOf(net), copper.shapes(), gapsOf(copper, net, except, OptionalDouble.empty()),
                                   cellsOn(layer), curveSteps())
-                    .alsoKeepingClearOf(relaidObstacles(layer, net, except, OptionalDouble.empty()), settings().routing().bucket());
+                    .alsoKeepingClearOf(relaidObstacles(layer, net, except, OptionalDouble.empty()), settings().routing().fenceCells());
         });
     }
 
@@ -522,7 +531,7 @@ public final class RoutingWorld {
      * What a track of the board keeps clear of where it would run as this one does, every other track among it and its own ends let
      * leave where they stand — copper they already stand too near need not be left at once.
      */
-    public TrackFence fenceOfTrack(PcbDrawing.Track track, int index, Optional<String> net) {
+    public TrackFence fenceOfTrack(Track track, int index, Optional<String> net) {
         List<Point> line = track.points();
         return fence(track.layer(), net, track.width(), OptionalInt.of(index)).leaving(List.of(line.getFirst(), line.getLast()));
     }

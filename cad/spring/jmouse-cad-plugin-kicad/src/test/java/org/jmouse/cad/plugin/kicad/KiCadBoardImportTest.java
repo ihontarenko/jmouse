@@ -1,5 +1,9 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Shape;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.cad.drawing.DrawnState;
@@ -271,8 +275,8 @@ class KiCadBoardImportTest {
         String board = LOCKED_BOARD;
         PcbDrawing pcb = fabricated(imported(board)).pcb();
         assertEquals(List.of(new DrawnGroup("front-panel", DrawnState.LOCKED)), pcb.groups());
-        PcbDrawing.Placement diode = pcb.placements().stream().filter(placement -> placement.designator().equals("D1")).findFirst().orElseThrow();
-        PcbDrawing.Placement hole = pcb.placements().stream().filter(placement -> placement.printed().equals("H1")).findFirst().orElseThrow();
+        Placement diode = pcb.placements().stream().filter(placement -> placement.designator().equals("D1")).findFirst().orElseThrow();
+        Placement hole = pcb.placements().stream().filter(placement -> placement.printed().equals("H1")).findFirst().orElseThrow();
         assertEquals(Arrangement.in("front-panel"), diode.arrangement());
         assertEquals(new Arrangement("front-panel", DrawnState.LOCKED), hole.arrangement());
         assertTrue(pcb.tracks().getFirst().arrangement().locked());
@@ -289,13 +293,13 @@ class KiCadBoardImportTest {
     @Test
     void aFootprintOnTheBackStandsWhereKiCadPutsIt() {
         PcbFabrication fabrication = fabricated(imported());
-        PcbDrawing.Placement diode = fabrication.parts().stream().filter(part -> part.designator().equals("D1")).findFirst().orElseThrow().placement();
-        assertEquals(PcbDrawing.BOTTOM, diode.side());
+        Placement diode = fabrication.parts().stream().filter(part -> part.designator().equals("D1")).findFirst().orElseThrow().placement();
+        assertEquals(PcbVocabulary.BOTTOM, diode.side());
         // KiCad's frame less the edge's corner.
         assertEquals(10, diode.x());
         assertEquals(10, diode.y());
         // Pad 2 is 7.62 along the footprint: KiCad mirrors Y then turns by 90, which lands it straight up the page.
-        PcbDrawing.Point pad = diode.placed(7.62, 0);
+        Point pad = diode.placed(7.62, 0);
         assertEquals(10, pad.x(), 1e-6);
         assertEquals(10 - 7.62, pad.y(), 1e-6);
     }
@@ -330,9 +334,9 @@ class KiCadBoardImportTest {
     @Test
     void everyLayerTheBoardDrawsOnIsKept() {
         PcbFabrication fabrication = fabricated(imported());
-        Set<String> layers = fabrication.pcb().shapes().stream().map(PcbDrawing.Shape::layer).collect(Collectors.toSet());
+        Set<String> layers = fabrication.pcb().shapes().stream().map(Shape::layer).collect(Collectors.toSet());
         assertEquals(Set.of("top-silkscreen", "bottom-mask", "top-adhesive", "comments"), layers);
-        PcbDrawing.Shape window = fabrication.pcb().shapes().stream().filter(shape -> shape.layer().equals("bottom-mask")).findFirst().orElseThrow();
+        Shape window = fabrication.pcb().shapes().stream().filter(shape -> shape.layer().equals("bottom-mask")).findFirst().orElseThrow();
         assertTrue(window.filled());
         assertEquals(2, fabrication.pcb().shapes().stream().filter(shape -> shape.layer().equals("bottom-mask")).count(), "a pour on copper and on the mask at once keeps its window");
         assertTrue(fabrication.pcb().texts().stream().anyMatch(text -> text.layer().equals("documentation") && text.text().equals("Note")));
@@ -349,9 +353,9 @@ class KiCadBoardImportTest {
         FootprintDrawing.Pad pasted = point.pads().stream().filter(pad -> pad.number().equals("2")).findFirst().orElseThrow();
         assertTrue(pasted.opensPaste());
         assertEquals(-0.2, pasted.pasteMargin(), 1e-9);
-        assertTrue(fabrication.pcb().vias().getFirst().opensMaskOn(PcbDrawing.TOP));
-        assertFalse(fabrication.pcb().vias().getFirst().opensMaskOn(PcbDrawing.BOTTOM));
-        assertFalse(fabrication.pcb().vias().getLast().opensMaskOn(PcbDrawing.TOP));
+        assertTrue(fabrication.pcb().vias().getFirst().opensMaskOn(PcbVocabulary.TOP));
+        assertFalse(fabrication.pcb().vias().getFirst().opensMaskOn(PcbVocabulary.BOTTOM));
+        assertFalse(fabrication.pcb().vias().getLast().opensMaskOn(PcbVocabulary.TOP));
     }
 
     @Test

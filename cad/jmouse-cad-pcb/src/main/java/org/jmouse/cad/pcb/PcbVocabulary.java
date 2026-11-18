@@ -28,6 +28,16 @@ public final class PcbVocabulary {
     /** The shape a pad is cut in. */
     public static final Set<String> PAD_SHAPES = Set.of(CIRCLE, RECTANGLE, OVAL, "trapezoid", ROUNDED_RECTANGLE, CUSTOM);
 
+    /** The sides of a pcb — a part stands on one, and they are its outer copper layers. */
+    public static final String TOP    = "top";
+    public static final String BOTTOM = "bottom";
+
+    /** What an inner copper layer's id starts with, before its number: {@code inner-1}. */
+    public static final String INNER_COPPER = "inner";
+
+    /** What joins the parts of a layer's id: a side and a purpose, {@code top-silkscreen}; inner copper and its number, {@code inner-1}. */
+    public static final String LAYER_JOINER = "-";
+
     public static final String SILKSCREEN  = "silkscreen";
     public static final String FABRICATION = "fabrication";
     public static final String COURTYARD   = "courtyard";
@@ -61,7 +71,7 @@ public final class PcbVocabulary {
     /** What copper may be left as. */
     public static final Set<String> COPPER_FINISHES = Set.of(FINISH_BARE);
 
-    public static final Set<String> VIA_OPENINGS = Set.of("top", "bottom", VIA_OPEN_BOTH);
+    public static final Set<String> VIA_OPENINGS = Set.of(TOP, BOTTOM, VIA_OPEN_BOTH);
 
     /** The layers a footprint draws an outline on: drawn on the mask or the paste, it opens them beside what its pads open. */
     public static final Set<String> OUTLINE_LAYERS = Set.of(SILKSCREEN, FABRICATION, COURTYARD, "copper", "mask", "paste",
@@ -80,7 +90,7 @@ public final class PcbVocabulary {
     public static final Set<String> TEXT_ANCHORS = Set.of(TEXT_START, TEXT_MIDDLE, TEXT_END);
 
     /** The sides a part stands on. */
-    public static final Set<String> SIDES = Set.of("top", "bottom");
+    public static final Set<String> SIDES = Set.of(TOP, BOTTOM);
 
     /** What a pcb's teardrops are said for. */
     public static final Set<String> TEARDROP_TARGETS = Set.of("round", "surface", "tracks");

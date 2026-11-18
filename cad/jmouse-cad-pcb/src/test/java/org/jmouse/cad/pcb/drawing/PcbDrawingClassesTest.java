@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.drawing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.cad.drawing.DrawnState;
 import org.jmouse.el.grammar.ClauseLineNode;
@@ -18,12 +20,12 @@ class PcbDrawingClassesTest {
 
     @Test
     void everyLineAPcbWritesHasAClassItsGroupsTooAsTheGroupsLine() {
-        List<PcbDrawing.Track> tracks = List.of(new PcbDrawing.Track(PcbDrawing.TOP, 0.25, 0, List.of(new PcbDrawing.Point(0, 0), new PcbDrawing.Point(5, 0))));
+        List<Track> tracks = List.of(new Track(PcbVocabulary.TOP, 0.25, 0, List.of(new Point(0, 0), new Point(5, 0))));
         PcbDrawing pcb = new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, null, List.of(), tracks, List.of(),
                 List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
                 List.of(new DrawnGroup("Power", DrawnState.LOCKED), new DrawnGroup("Analogue", DrawnState.FREE)));
         List<ClauseLineNode> lines = pcb.lines();
-        assertEquals(List.of(), lines.stream().filter(line -> PcbDrawing.classOf(line).isEmpty()).map(ClauseLineNode::toSource).toList());
-        assertEquals(2, lines.stream().filter(line -> PcbDrawing.classOf(line).equals(Optional.of("group"))).count());
+        assertEquals(List.of(), lines.stream().filter(line -> PcbDocumentReading.classOf(line).isEmpty()).map(ClauseLineNode::toSource).toList());
+        assertEquals(2, lines.stream().filter(line -> PcbDocumentReading.classOf(line).equals(Optional.of("group"))).count());
     }
 }

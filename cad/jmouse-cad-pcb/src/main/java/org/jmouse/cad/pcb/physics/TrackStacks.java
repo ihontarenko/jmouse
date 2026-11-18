@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.physics;
 
+import org.jmouse.cad.pcb.PcbLayers;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
@@ -67,7 +68,7 @@ public final class TrackStacks {
         if (copperLayers.size() < 2) {
             return new Unplaned("A one-layer pcb has no plane under its tracks: their impedance is not set by the stack.");
         }
-        boolean inner = copperLayers.contains(layer) && PcbDrawing.isInnerCopper(layer);
+        boolean inner = copperLayers.contains(layer) && PcbLayers.isInnerCopper(layer);
         double evenly = values.get(PcbVocabulary.RULE_PCB_THICKNESS) / (copperLayers.size() - 1);
         double thickness = values.get(inner ? PcbVocabulary.RULE_INNER_COPPER_THICKNESS : PcbVocabulary.RULE_COPPER_THICKNESS);
         return new Stands(new Stack(inner ? StackPhysics.TrackLine.STRIPLINE : StackPhysics.TrackLine.MICROSTRIP, height.orElse(evenly),

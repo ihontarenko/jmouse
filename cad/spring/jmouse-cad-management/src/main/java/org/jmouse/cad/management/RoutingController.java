@@ -1,5 +1,8 @@
 package org.jmouse.cad.management;
 
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
 import org.jmouse.access.enforcement.PublicEndpoint;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.CopperNets;
@@ -163,7 +166,7 @@ public class RoutingController {
     }
 
     /** What a routing laid beyond the layout it was asked of: the tracks, vias and links after the layout's own. */
-    public record AddedView(List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias, List<PcbDrawing.Placement> placements) {
+    public record AddedView(List<Track> tracks, List<Via> vias, List<Placement> placements) {
 
         static AddedView of(PcbDrawing start, PcbDrawing now) {
             return new AddedView(now.tracks().subList(start.tracks().size(), now.tracks().size()),
@@ -173,7 +176,7 @@ public class RoutingController {
     }
 
     /** A moment of a routing, as a line of the stream. */
-    public record MomentView(String step, CopperNets.Unlaid line, List<PcbDrawing.Track> attempt, String reason, List<CopperNets.Unlaid> refused,
+    public record MomentView(String step, CopperNets.Unlaid line, List<Track> attempt, String reason, List<CopperNets.Unlaid> refused,
                              int laid, int tried, int total, int round, AddedView added) {
     }
 

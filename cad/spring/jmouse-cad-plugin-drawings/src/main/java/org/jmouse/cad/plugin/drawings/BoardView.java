@@ -1,7 +1,7 @@
 package org.jmouse.cad.plugin.drawings;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.exchange.pcb.PcbProfile;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
 import java.util.List;
 
@@ -20,11 +20,11 @@ record BoardView(Bounds bounds, double factor, double left, double bottom, boole
     record Bounds(double minimumX, double minimumY, double maximumX, double maximumY) {
 
         static Bounds of(PcbProfile profile) {
-            List<PcbDrawing.Point> outline = profile.outline();
-            return new Bounds(outline.stream().mapToDouble(PcbDrawing.Point::x).min().orElse(0),
-                    outline.stream().mapToDouble(PcbDrawing.Point::y).min().orElse(0),
-                    outline.stream().mapToDouble(PcbDrawing.Point::x).max().orElse(0),
-                    outline.stream().mapToDouble(PcbDrawing.Point::y).max().orElse(0));
+            List<Point> outline = profile.outline();
+            return new Bounds(outline.stream().mapToDouble(Point::x).min().orElse(0),
+                    outline.stream().mapToDouble(Point::y).min().orElse(0),
+                    outline.stream().mapToDouble(Point::x).max().orElse(0),
+                    outline.stream().mapToDouble(Point::y).max().orElse(0));
         }
 
         double width() {
@@ -36,7 +36,7 @@ record BoardView(Bounds bounds, double factor, double left, double bottom, boole
         }
     }
 
-    Sheet.Point at(PcbDrawing.Point point) {
+    Sheet.Point at(Point point) {
         return at(point.x(), point.y());
     }
 
@@ -45,7 +45,7 @@ record BoardView(Bounds bounds, double factor, double left, double bottom, boole
         return new Sheet.Point(left + across * factor, bottom + (bounds.maximumY() - y) * factor);
     }
 
-    List<Sheet.Point> at(List<PcbDrawing.Point> points) {
+    List<Sheet.Point> at(List<Point> points) {
         return points.stream().map(this::at).toList();
     }
 

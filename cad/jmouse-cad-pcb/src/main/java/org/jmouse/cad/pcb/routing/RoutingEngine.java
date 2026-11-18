@@ -1,8 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
-
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -100,7 +100,7 @@ public final class RoutingEngine {
                                     double angleStep, double rounding) {
         RoutingWorld laidOn = worldOf(pcb);
         TrackRouter.RoutedLeg leg = TrackRouter.routedLeg(TrackRouter.LegRequest.of(laidOn, own, layer, net, width, from, to, angleStep));
-        List<Point> found = Lines.joined(List.of(from), leg.points());
+        List<Point> found = Polylines.joined(List.of(from), leg.points());
         TrackFence fence = laidOn.fence(layer, net, width, own).leaving(List.of(from, found.getLast()));
         RoutingSettings.Pads pads = settings().pads();
         List<Point> line = pads.exitKind() == PadExit.SMART ? PadBreakouts.atPads(laidOn, layer, found, fence, angleStep, pads) : found;
@@ -127,12 +127,12 @@ public final class RoutingEngine {
     /** The pcb's tracks with their jogs merged, those chosen or every one where none is, each only where the corner left keeps its gaps. */
     public synchronized PcbDrawing withoutJogs(PcbDrawing pcb, List<Integer> chosen) {
         RoutingWorld world = worldOf(pcb);
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
+        List<Track> tracks = new ArrayList<>(pcb.tracks());
         for (int index = 0; index < tracks.size(); index++) {
             if (!chosen.isEmpty() && !chosen.contains(index) || held(pcb, index)) {
                 continue;
             }
-            PcbDrawing.Track track = tracks.get(index);
+            Track track = tracks.get(index);
             List<Point> line = track.points();
             TrackFence fence = world.fenceOfTrack(track, index, world.netOfTrack(index));
             List<Point> merged = new Tightening(fence, 45, List.of(), settings().routing()).withoutShortJogs(line, false);

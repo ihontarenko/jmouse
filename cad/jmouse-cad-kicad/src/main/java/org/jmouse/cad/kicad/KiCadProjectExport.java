@@ -1,5 +1,6 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.pcb.drawing.NetClass;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.sexpression.node.SExpressionList;
 import org.jmouse.kicad.footprint.KiCadFootprint;
@@ -141,11 +142,11 @@ public final class KiCadProjectExport {
      */
     private static KiCadProjectSettings settingsOf(PcbDrawing pcb, Map<String, Double> rules, KiCadLibraries libraries,
                                                    Map<String, String> kicadNets) {
-        KiCadProjectSettings.NetClass usual = new KiCadProjectSettings.NetClass("", rules.get(PcbDrawing.RULE_TRACK_WIDTH),
-                rules.get(PcbDrawing.RULE_CLEARANCE), rules.get(PcbDrawing.RULE_VIA_DRILL), rules.get(PcbDrawing.RULE_VIA_DIAMETER));
+        KiCadProjectSettings.NetClass usual = new KiCadProjectSettings.NetClass("", rules.get(PcbVocabulary.RULE_TRACK_WIDTH),
+                rules.get(PcbVocabulary.RULE_CLEARANCE), rules.get(PcbVocabulary.RULE_VIA_DRILL), rules.get(PcbVocabulary.RULE_VIA_DIAMETER));
         List<KiCadProjectSettings.NetClass> classes = new ArrayList<>();
         Map<String, String> classOf = new LinkedHashMap<>();
-        for (PcbDrawing.NetClass netClass : pcb.netClasses()) {
+        for (NetClass netClass : pcb.netClasses()) {
             classes.add(new KiCadProjectSettings.NetClass(netClass.name(), netClass.width(), netClass.clearance(), netClass.drill(),
                     netClass.diameter()));
             netClass.nets().forEach(net -> classOf.put(kicadNets.getOrDefault(net, net), netClass.name()));

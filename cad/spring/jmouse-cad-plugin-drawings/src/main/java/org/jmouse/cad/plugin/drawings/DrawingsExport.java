@@ -9,7 +9,7 @@ import org.jmouse.cad.exchange.ExportedFile;
 import org.jmouse.cad.exchange.ExportedFiles;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.simulation.CatalogueDocuments;
@@ -103,7 +103,7 @@ public final class DrawingsExport implements DocumentExport {
         }
         PcbArtwork drawn = PcbArtwork.of(fabrication, rules, sections.read(PcbArtwork.SECTION), strokes);
         String revision = catalogue.revisionOf(document).orElse(sheets().words().unsaved());
-        return new Designed(new FactorySheets(sheets(), lettering(), drawn, sections.read(PcbLayers.SECTION), thickness, document.title(), revision,
+        return new Designed(new FactorySheets(sheets(), lettering(), drawn, sections.read(PcbSolidLayers.SECTION), thickness, document.title(), revision,
                 slug -> catalogue.find(slug).map(DocumentNode::title).orElse(slug)), revision);
     }
 

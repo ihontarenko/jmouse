@@ -1,7 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
-
+import org.jmouse.cad.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +61,7 @@ final class FermatPoints {
             for (int second = first + 1; second < through.size(); second++) {
                 for (Point firstWay : ways) {
                     for (Point secondWay : ways) {
-                        Optional<Point> crossing = Lines.crossingOf(through.get(first), firstWay, through.get(second), secondWay);
+                        Optional<Point> crossing = Ways.crossingOf(through.get(first), firstWay, through.get(second), secondWay);
                         crossing.ifPresent(candidates::add);
                     }
                 }
@@ -72,9 +71,9 @@ final class FermatPoints {
         double shortest = Double.POSITIVE_INFINITY;
         for (Point candidate : candidates) {
             double length = points.stream().mapToDouble(point -> laidLength(candidate, point, angleStep)).sum();
-            boolean shorter = length < shortest - Lines.SAME_POINT;
-            boolean asShortAndNearer = Math.abs(length - shortest) <= Lines.SAME_POINT
-                                       && Lines.lengthBetween(candidate, from) < Lines.lengthBetween(best, from);
+            boolean shorter = length < shortest - Precision.SAME_POINT;
+            boolean asShortAndNearer = Math.abs(length - shortest) <= Precision.SAME_POINT
+                                       && candidate.distanceTo(from) < best.distanceTo(from);
             if (shorter || asShortAndNearer) {
                 shortest = Math.min(shortest, length);
                 best = candidate;
@@ -91,7 +90,7 @@ final class FermatPoints {
             double y = 0;
             double weight = 0;
             for (Point point : points) {
-                double distance = Lines.lengthBetween(at, point);
+                double distance = at.distanceTo(point);
                 if (distance < RESTED) {
                     return point;
                 }
@@ -100,7 +99,7 @@ final class FermatPoints {
                 weight += 1 / distance;
             }
             Point next = new Point(x / weight, y / weight);
-            boolean rested = Lines.lengthBetween(next, at) < RESTED;
+            boolean rested = next.distanceTo(at) < RESTED;
             at = next;
             if (rested) {
                 break;

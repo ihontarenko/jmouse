@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.gerber;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.pcb.drawing.Rules;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -46,7 +48,7 @@ public final class GerberSet {
     private record Side(String id, String letter, String word) {
     }
 
-    private static final List<Side> SIDES = List.of(new Side(PcbDrawing.TOP, "F", "Top"), new Side(PcbDrawing.BOTTOM, "B", "Bot"));
+    private static final List<Side> SIDES = List.of(new Side(PcbVocabulary.TOP, "F", "Top"), new Side(PcbVocabulary.BOTTOM, "B", "Bot"));
 
     /** Its numbers and its README's words — the plugin's sections —, and the pcb's artwork, as the installation has them now. */
     private final CadSettings sections;
@@ -114,8 +116,8 @@ public final class GerberSet {
     /** KiCad's name for a copper layer's file: F_Cu, In1_Cu …, B_Cu. */
     private static String copperName(String layer, int position) {
         return switch (layer) {
-            case PcbDrawing.TOP -> "F_Cu.gbr";
-            case PcbDrawing.BOTTOM -> "B_Cu.gbr";
+            case PcbVocabulary.TOP -> "F_Cu.gbr";
+            case PcbVocabulary.BOTTOM -> "B_Cu.gbr";
             default -> "In" + position + "_Cu.gbr";
         };
     }
@@ -123,8 +125,8 @@ public final class GerberSet {
     /** A copper layer's side as its file's function names it: Top, Bot, or Inr for one inside. */
     private static String sideWord(String layer) {
         return switch (layer) {
-            case PcbDrawing.TOP -> "Top";
-            case PcbDrawing.BOTTOM -> "Bot";
+            case PcbVocabulary.TOP -> "Top";
+            case PcbVocabulary.BOTTOM -> "Bot";
             default -> "Inr";
         };
     }
@@ -149,7 +151,7 @@ public final class GerberSet {
         lines.add("");
         lines.add(String.format(Locale.ROOT, "PCB: %.2f × %.2f mm, %d copper layer%s.", extent[0], extent[1],
                 pcb.copperLayerIds().size(), pcb.copperLayerIds().size() == 1 ? "" : "s"));
-        lines.add("Rules: " + pcb.rules().map(PcbDrawing.Rules::profile).orElse("standard") + ".");
+        lines.add("Rules: " + pcb.rules().map(Rules::profile).orElse("standard") + ".");
         lines.add("Units: millimetres. Gerber X2, absolute coordinates; Excellon drills in decimal millimetres.");
         lines.add("Coordinates: the PCB's origin, Y upwards.");
         lines.addAll(remarks);

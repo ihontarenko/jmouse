@@ -1,5 +1,11 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Shape;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.junit.jupiter.api.Test;
 
@@ -17,19 +23,19 @@ class DrawnCopperTest {
 
     private static final int CURVE_STEPS = 16;
 
-    private static PcbDrawing.Shape square(String layer, String net, String path) {
-        return new PcbDrawing.Shape(layer, 0, true, net, path);
+    private static Shape square(String layer, String net, String path) {
+        return new Shape(layer, 0, true, net, path);
     }
 
-    private static PcbDrawing.Shape square(String net) {
-        return square(PcbDrawing.TOP, net, "M0 0H10V10H0Z");
+    private static Shape square(String net) {
+        return square(PcbVocabulary.TOP, net, "M0 0H10V10H0Z");
     }
 
-    private static PcbDrawing.Track trackThrough(double y, String layer) {
-        return new PcbDrawing.Track(layer, 0.5, 0, List.of(new PcbDrawing.Point(-5, y), new PcbDrawing.Point(15, y)));
+    private static Track trackThrough(double y, String layer) {
+        return new Track(layer, 0.5, 0, List.of(new Point(-5, y), new Point(15, y)));
     }
 
-    private static PcbDrawing pcb(List<PcbDrawing.Shape> shapes, List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias, List<PcbDrawing.Arc> arcs) {
+    private static PcbDrawing pcb(List<Shape> shapes, List<Track> tracks, List<Via> vias, List<Arc> arcs) {
         return new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, null, List.of(), tracks, arcs, vias, List.of(),
                 List.of(), List.of(), List.of(), List.of(), shapes, List.of(), List.of());
     }
@@ -47,14 +53,14 @@ class DrawnCopperTest {
 
     @Test
     void isOnePieceForEachOutlineItHas() {
-        assertEquals(2, CopperShapes.drawn(pcb(List.of(square(PcbDrawing.TOP, "", "M0 0H1V1H0Z M5 5H6V6H5Z")), List.of(), List.of(), List.of()),
+        assertEquals(2, CopperShapes.drawn(pcb(List.of(square(PcbVocabulary.TOP, "", "M0 0H1V1H0Z M5 5H6V6H5Z")), List.of(), List.of(), List.of()),
                 CURVE_STEPS).size());
     }
 
     @Test
     void joinsTheTracksItTouchesAndGivesThemTheNetItSays() {
-        CopperNets nets = netsOf(pcb(List.of(square("POWER")), List.of(trackThrough(5, PcbDrawing.TOP), trackThrough(20, PcbDrawing.TOP),
-                trackThrough(5, PcbDrawing.BOTTOM)), List.of(), List.of()));
+        CopperNets nets = netsOf(pcb(List.of(square("POWER")), List.of(trackThrough(5, PcbVocabulary.TOP), trackThrough(20, PcbVocabulary.TOP),
+                trackThrough(5, PcbVocabulary.BOTTOM)), List.of(), List.of()));
         assertEquals(List.of(Optional.of("POWER")), nets.drawnNets());
         assertEquals(List.of(Optional.of("POWER"), Optional.empty(), Optional.empty()), nets.trackNets());
         assertEquals(nets.trackGroup(0), nets.drawnGroup(0));
@@ -62,23 +68,23 @@ class DrawnCopperTest {
 
     @Test
     void saidOnOneNetAndTouchingCopperOfAnotherIsAShort() {
-        CopperNets nets = netsOf(pcb(List.of(square("POWER"), square(PcbDrawing.TOP, "GROUND", "M9 0H19V10H9Z")), List.of(), List.of(), List.of()));
+        CopperNets nets = netsOf(pcb(List.of(square("POWER"), square(PcbVocabulary.TOP, "GROUND", "M9 0H19V10H9Z")), List.of(), List.of(), List.of()));
         assertEquals(List.of(List.of("GROUND", "POWER")), nets.shorts().stream().map(found -> found.nets().stream().sorted().toList()).toList());
         assertEquals(List.of(Optional.empty(), Optional.empty()), nets.drawnNets());
     }
 
     @Test
     void keepsArcsAndViasInTheirOwnPlaces() {
-        PcbDrawing.Arc arc = new PcbDrawing.Arc(PcbDrawing.BOTTOM, 0.2, new PcbDrawing.Point(30, 0), new PcbDrawing.Point(31, 1), new PcbDrawing.Point(32, 0));
-        CopperNets nets = netsOf(pcb(List.of(square("POWER")), List.of(), List.of(new PcbDrawing.Via(5, 5, 0.3, 0.6, null, null)), List.of(arc)));
+        Arc arc = new Arc(PcbVocabulary.BOTTOM, 0.2, new Point(30, 0), new Point(31, 1), new Point(32, 0));
+        CopperNets nets = netsOf(pcb(List.of(square("POWER")), List.of(), List.of(new Via(5, 5, 0.3, 0.6, null, null)), List.of(arc)));
         assertEquals(List.of(Optional.of("POWER")), nets.viaNets());
         assertEquals(List.of(Optional.empty()), nets.arcNets());
     }
 
     @Test
     void countsInItsNetsLengthWhereItIsLinesAndNotWhereItIsAnArea() {
-        PcbDrawing.Shape lines = new PcbDrawing.Shape(PcbDrawing.TOP, 0.5, false, "POWER", "M0 0H10V5");
-        PcbDrawing pcb = pcb(List.of(lines, square(PcbDrawing.TOP, "POWER", "M20 20H30V30H20Z")), List.of(), List.of(), List.of());
+        Shape lines = new Shape(PcbVocabulary.TOP, 0.5, false, "POWER", "M0 0H10V5");
+        PcbDrawing pcb = pcb(List.of(lines, square(PcbVocabulary.TOP, "POWER", "M20 20H30V30H20Z")), List.of(), List.of(), List.of());
         assertEquals(15, NetLengths.of(pcb, netsOf(pcb), 0).get("POWER").copper(), 1e-6);
     }
 }

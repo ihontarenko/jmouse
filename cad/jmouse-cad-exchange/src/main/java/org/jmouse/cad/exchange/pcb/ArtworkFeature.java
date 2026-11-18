@@ -1,6 +1,7 @@
 package org.jmouse.cad.exchange.pcb;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 
 import org.jmouse.svg.path.node.CircularArc;
@@ -23,15 +24,15 @@ public sealed interface ArtworkFeature {
     String net();
 
     /** Straight runs between the points, drawn with a round pen as wide as {@code width}. */
-    record Stroke(List<PcbDrawing.Point> points, double width, Role role, String net) implements ArtworkFeature {
+    record Stroke(List<Point> points, double width, Role role, String net) implements ArtworkFeature {
     }
 
     /** An arc of a circle from a point through another to a third, drawn with a round pen; three in a line are straight. */
-    record Arc(PcbDrawing.Point from, PcbDrawing.Point through, PcbDrawing.Point to, double width, Role role, String net)
+    record Arc(Point from, Point through, Point to, double width, Role role, String net)
             implements ArtworkFeature {
 
         /** The circle an arc runs on: its centre, in the pcb's frame, and whether it turns clockwise as the pcb is seen. */
-        public record Circle(PcbDrawing.Point centre, boolean clockwise) {
+        public record Circle(Point centre, boolean clockwise) {
         }
 
         /** The circle through its three points; empty for three in a line, which a format draws as a straight run. */
@@ -39,20 +40,20 @@ public sealed interface ArtworkFeature {
             return CircularArc.through(from.x(), from.y(), through.x(), through.y(), to.x(), to.y()).map(found -> {
                 // The pcb's Y grows downwards: a turn that winds positively in its numbers is clockwise to the eye.
                 double winding = (through.x() - from.x()) * (to.y() - through.y()) - (through.y() - from.y()) * (to.x() - through.x());
-                return new Circle(new PcbDrawing.Point(found.centerX(), found.centerY()), winding > 0);
+                return new Circle(new Point(found.centerX(), found.centerY()), winding > 0);
             });
         }
     }
 
     /** A pad where its part stands it, grown all round by {@code growth}. */
-    record Pad(PcbDrawing.Placement placement, FootprintDrawing.Pad pad, double growth, Role role, String net) implements ArtworkFeature {
+    record Pad(Placement placement, FootprintDrawing.Pad pad, double growth, Role role, String net) implements ArtworkFeature {
     }
 
     /** A filled circle. */
-    record Disc(PcbDrawing.Point centre, double diameter, Role role, String net) implements ArtworkFeature {
+    record Disc(Point centre, double diameter, Role role, String net) implements ArtworkFeature {
     }
 
     /** A filled area: its outline, less its holes. */
-    record Region(List<PcbDrawing.Point> outline, List<List<PcbDrawing.Point>> holes, Role role, String net) implements ArtworkFeature {
+    record Region(List<Point> outline, List<List<Point>> holes, Role role, String net) implements ArtworkFeature {
     }
 }

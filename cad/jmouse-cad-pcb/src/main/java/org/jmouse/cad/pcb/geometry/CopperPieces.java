@@ -1,5 +1,11 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
@@ -58,11 +64,11 @@ public final class CopperPieces {
     }
 
     /** A pad as it stands on the pcb: what a pad's copper is the copper of. */
-    public record PadAt(FootprintDrawing.Pad pad, PcbDrawing.Placement placement) {
+    public record PadAt(FootprintDrawing.Pad pad, Placement placement) {
     }
 
     /** One outline of a shape drawn in copper: what a drawn piece is the copper of. */
-    public record DrawnAt(PcbDrawing.Shape shape, int outline) {
+    public record DrawnAt(Shape shape, int outline) {
     }
 
     /**
@@ -106,12 +112,12 @@ public final class CopperPieces {
                     new PadAt(pad.pad(), pad.placement())));
         }
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             pieces.add(new Piece(Kind.TRACK, index, key("track", index), "Track " + (index + 1), Optional.empty(),
                     CopperShapes.track(track, curveSteps), track.layer()::equals, nets.trackNets().get(index), nets.trackGroup(index), track));
         }
         for (int index = 0; index < pcb.arcs().size(); index++) {
-            PcbDrawing.Arc arc = pcb.arcs().get(index);
+            Arc arc = pcb.arcs().get(index);
             pieces.add(new Piece(Kind.ARC, index, key("arc", index), "Arc " + (index + 1), Optional.empty(),
                     CopperShapes.arc(arc, curveSteps), arc.layer()::equals, nets.arcNets().get(index), nets.arcGroup(index), arc));
         }
@@ -122,12 +128,12 @@ public final class CopperPieces {
                     new DrawnAt(pcb.shapes().get(drawn.index()), drawn.outline())));
         }
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             pieces.add(new Piece(Kind.VIA, index, key("via", index), "Via " + (index + 1), Optional.empty(), CopperShapes.via(via),
                     layer -> pcb.reaches(via, layer), nets.viaNets().get(index), nets.viaGroup(index), via));
         }
         for (int index = 0; index < pcb.holes().size(); index++) {
-            PcbDrawing.Hole hole = pcb.holes().get(index);
+            Hole hole = pcb.holes().get(index);
             pieces.add(new Piece(Kind.HOLE, index, key("hole", index), "Hole " + (index + 1), Optional.empty(),
                     CopperShape.circle(hole.x(), hole.y(), CopperShapes.reach(hole)), layer -> true, Optional.empty(), -1 - index, hole));
         }

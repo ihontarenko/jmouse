@@ -1,5 +1,14 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Keepout;
+import org.jmouse.geometry.index.BoxTree;
+
+import org.jmouse.geometry.index.BoxIndex;
+
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.svg.path.node.PathPolylines;
@@ -12,7 +21,6 @@ import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
-import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.jmouse.geometry.Areas;
@@ -91,7 +99,7 @@ public final class ZonePours {
         order.sort(Comparator.comparingInt((Integer index) -> -pcb.zones().get(index).priority())
                 .thenComparingDouble(sizes::get).thenComparingInt(index -> index));
         for (int index : order) {
-            PcbDrawing.Zone zone = pcb.zones().get(index);
+            Zone zone = pcb.zones().get(index);
             Geometry poured = poured(zone, pcbArea, pours);
             pours.set(index, poured.isEmpty() ? Optional.empty() : Optional.of(poured));
         }
@@ -99,20 +107,20 @@ public final class ZonePours {
     }
 
     /** What a zone's area is made of beyond the zone: where any of it differs, the zone is poured all over again. */
-    private record AreaInputs(String outline, double edgeClearance, List<PcbDrawing.Keepout> keepouts, int curveSteps, double arcError) {
+    private record AreaInputs(String outline, double edgeClearance, List<Keepout> keepouts, int curveSteps, double arcError) {
     }
 
     /** A zone poured before this one, of another net on its layer, kept clear of by its gap. */
     private record EarlierPour(Geometry pour, double gap) {
     }
 
-    private Geometry poured(PcbDrawing.Zone zone, Optional<Geometry> pcbArea, List<Optional<Geometry>> pours) {
+    private Geometry poured(Zone zone, Optional<Geometry> pcbArea, List<Optional<Geometry>> pours) {
         Geometry area = area(zone.path());
         if (pcbArea.isPresent()) {
             area = Areas.common(area, pcbArea.get());
         }
-        List<PcbDrawing.Keepout> keepouts = new ArrayList<>();
-        for (PcbDrawing.Keepout keepout : pcb.keepouts()) {
+        List<Keepout> keepouts = new ArrayList<>();
+        for (Keepout keepout : pcb.keepouts()) {
             if (keepout.layers().contains(zone.layer())) {
                 keepouts.add(keepout);
                 area = Areas.difference(area, area(keepout.path()));
@@ -127,7 +135,7 @@ public final class ZonePours {
             }
         }
         for (int index = 0; index < pours.size(); index++) {
-            PcbDrawing.Zone earlier = pcb.zones().get(index);
+            Zone earlier = pcb.zones().get(index);
             if (pours.get(index).isPresent() && earlier.layer().equals(zone.layer()) && !earlier.net().equals(zone.net())) {
                 Geometry pour = pours.get(index).get();
                 double gap = Math.max(zoneGap, clearanceOf(Optional.of(earlier.net())));
@@ -165,7 +173,7 @@ public final class ZonePours {
      * thermal gap by spokes, or solid, its points what the pour must reach —; of no net, stitching the zone or kept clear of, as its kind
      * says; of another net, kept clear of by the gap the two keep.
      */
-    private void meet(CopperPieces.Piece piece, PcbDrawing.Zone zone, double zoneGap, List<PourMemory.Piece> pieces, List<Anchor> anchors) {
+    private void meet(CopperPieces.Piece piece, Zone zone, double zoneGap, List<PourMemory.Piece> pieces, List<Anchor> anchors) {
         String item = piece.kind() + ":" + piece.index();
         boolean ownNet = piece.net().equals(Optional.of(zone.net()));
         boolean stitches = piece.net().isEmpty() && piece.kind().netless() == CopperPieces.NetlessCopper.STITCHES;
@@ -257,7 +265,7 @@ public final class ZonePours {
         for (double[] along : new double[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
             double x = along[0] * reach;
             double y = along[1] * reach;
-            PcbDrawing.Point end = pad.placement().placed(pad.pad().x() + x * Math.cos(turn) - y * Math.sin(turn),
+            Point end = pad.placement().placed(pad.pad().x() + x * Math.cos(turn) - y * Math.sin(turn),
                     pad.pad().y() + x * Math.sin(turn) + y * Math.cos(turn));
             Coordinate centre = new Coordinate(pad.centre().x(), pad.centre().y());
             spokes.add(BufferOp.bufferOp(GEOMETRY.createLineString(new Coordinate[] {centre, new Coordinate(end.x(), end.y())}),
@@ -277,12 +285,11 @@ public final class ZonePours {
      * was what a pour cost — seconds after every change.</p>
      */
     private static Geometry withoutIslands(Geometry filled, List<Anchor> anchors) {
-        STRtree anchorsIndexed = new STRtree();
-        anchors.forEach(anchor -> anchorsIndexed.insert(new Envelope(anchor.at()), anchor));
+        BoxIndex anchorsIndexed = BoxTree.of(anchors.stream().map(anchor -> Box.point(anchor.at().x, anchor.at().y)).toList());
         List<Geometry> kept = new ArrayList<>();
         for (int index = 0; index < filled.getNumGeometries(); index++) {
             Geometry island = filled.getGeometryN(index);
-            if (joinsEnough(island, anchorsIndexed)) {
+            if (joinsEnough(island, anchors, anchorsIndexed)) {
                 kept.add(island);
             }
         }
@@ -290,11 +297,12 @@ public final class ZonePours {
     }
 
     /** Whether an island reaches as many things as joining takes: the anchors within its box asked through its outline prepared. */
-    private static boolean joinsEnough(Geometry island, STRtree anchors) {
+    private static boolean joinsEnough(Geometry island, List<Anchor> anchors, BoxIndex anchorsIndexed) {
         PreparedGeometry outline = PreparedGeometryFactory.prepare(island);
         Set<String> joined = new HashSet<>();
-        for (Object near : anchors.query(island.getEnvelopeInternal())) {
-            Anchor anchor = (Anchor) near;
+        Envelope reach = island.getEnvelopeInternal();
+        for (int number : anchorsIndexed.near(new Box(reach.getMinX(), reach.getMinY(), reach.getMaxX(), reach.getMaxY()))) {
+            Anchor anchor = anchors.get(number);
             if (!joined.contains(anchor.item()) && outline.intersects(GEOMETRY.createPoint(anchor.at()))) {
                 joined.add(anchor.item());
                 if (joined.size() >= JOINED) {

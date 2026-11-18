@@ -1,5 +1,8 @@
 package org.jmouse.cad.pcb.layout;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.junit.jupiter.api.Test;
@@ -67,7 +70,7 @@ class CircuitLayoutTest {
     }
 
     /** The box a placed part's courtyard takes, its corners turned and set where it stands: what the layout keeps apart. */
-    private static double[] boxOf(PcbDrawing.Placement placement) {
+    private static double[] boxOf(Placement placement) {
         // A resistor's courtyard round its 10 mm, the header's round its two pins.
         double[][] corners = placement.designator().startsWith("R") ? new double[][] {{-6.5, -1.5}, {6.5, 1.5}} : new double[][] {{-1.5, -1.5}, {1.5, 2.54 + 1.5}};
         double left = Double.POSITIVE_INFINITY;
@@ -75,7 +78,7 @@ class CircuitLayoutTest {
         double right = Double.NEGATIVE_INFINITY;
         double bottom = Double.NEGATIVE_INFINITY;
         for (double[] corner : new double[][] {corners[0], {corners[1][0], corners[0][1]}, {corners[0][0], corners[1][1]}, corners[1]}) {
-            PcbDrawing.Point placed = placement.placed(corner[0], corner[1]);
+            Point placed = placement.placed(corner[0], corner[1]);
             left = Math.min(left, placed.x());
             top = Math.min(top, placed.y());
             right = Math.max(right, placed.x());
@@ -99,7 +102,7 @@ class CircuitLayoutTest {
                         + pcb.placements().get(second).designator());
             }
         }
-        for (PcbDrawing.Placement placement : pcb.placements()) {
+        for (Placement placement : pcb.placements()) {
             assertEquals(0, Math.abs(placement.x() / SETTINGS.grid() - Math.round(placement.x() / SETTINGS.grid())), 1e-9);
             assertEquals(0, Math.abs(placement.y() / SETTINGS.grid() - Math.round(placement.y() / SETTINGS.grid())), 1e-9);
         }
@@ -110,11 +113,11 @@ class CircuitLayoutTest {
     void bringsTheBenchsNetsOutOnAHeaderOfItsOwnTheGroundFirstAndPoursTheGround() {
         PcbDrawing pcb = laidOut(Map.of("R1", new CircuitLayout.SheetPlace(100, 100, 0), "R2", new CircuitLayout.SheetPlace(120, 110, 0),
                 "R3", new CircuitLayout.SheetPlace(125, 105, 0)), List.of("0", "in"), Optional.of("0"));
-        PcbDrawing.Placement connector = pcb.placements().stream().filter(placement -> placement.designator().equals("J1")).findFirst().orElseThrow();
+        Placement connector = pcb.placements().stream().filter(placement -> placement.designator().equals("J1")).findFirst().orElseThrow();
         assertEquals(Map.of("1", "0", "2", "in"), connector.nets());
         assertEquals(Optional.of(SETTINGS.connector().footprintFor(2)), connector.footprint());
         assertEquals(1, pcb.zones().size());
-        assertEquals(PcbDrawing.BOTTOM, pcb.zones().getFirst().layer());
+        assertEquals(PcbVocabulary.BOTTOM, pcb.zones().getFirst().layer());
         assertEquals("0", pcb.zones().getFirst().net());
     }
 

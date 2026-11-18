@@ -1,9 +1,12 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.numerics.Halving;
 
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 
 import java.util.ArrayList;
@@ -68,18 +71,18 @@ final class TrackReshaping {
             Point to = old.get(segment + 1);
             // Taken by the point of the stretch under where it was pressed: the point of the band the pointer carries. A stretch is
             // pulled across itself, as it is shifted in free space, so it presses on what stands in front of it.
-            Point taken = Lines.nearestOnStretch(pressed.orElse(from.halfwayTo(to)), from, to);
-            Optional<Point> along = Lines.wayBetween(from, to);
+            Point taken = Stretches.nearestOnStretch(pressed.orElse(from.halfwayTo(to)), from, to);
+            Optional<Point> along = Ways.wayBetween(from, to);
             Point pointer = along.map(way -> {
                 double across = -way.y() * dx + way.x() * dy;
-                return Lines.settled(new Point(taken.x() - way.y() * across, taken.y() + way.x() * across));
-            }).orElse(Lines.settled(new Point(taken.x() + dx, taken.y() + dy)));
+                return Precision.settled(new Point(taken.x() - way.y() * across, taken.y() + way.x() * across));
+            }).orElse(Precision.settled(new Point(taken.x() + dx, taken.y() + dy)));
             Pull pull = new Pull(taken, pointer, Math.max(0, segment - 1), Math.min(old.size() - 1, segment + 2));
             RoutingWorld world = engine.worldOf(working);
             return reshapedTrack(new ReshapeRequest(world, index, style,
-                    share -> StretchShift.shifted(old, segment, dx * share, dy * share, style.angleStep()).map(Lines::withoutFolds),
+                    share -> StretchShift.shifted(old, segment, dx * share, dy * share, style.angleStep()).map(LineCleaning::withoutFolds),
                     // What is held is the segment where it now stands: the corners that were not on the track before.
-                    shape -> shape.stream().filter(point -> old.stream().noneMatch(was -> Lines.samePoint(was, point))).toList(),
+                    shape -> shape.stream().filter(point -> old.stream().noneMatch(was -> Precision.samePoint(was, point))).toList(),
                     Optional.of(pull), sweptPast(world, index, from, to, new Point(pointer.x() - taken.x(), pointer.y() - taken.y()))));
         });
     }
@@ -96,13 +99,13 @@ final class TrackReshaping {
             Point standing = old.get(corner);
             Optional<Point> before = corner > 0 ? Optional.of(old.get(corner - 1)) : Optional.empty();
             Optional<Point> after = corner + 1 < old.size() ? Optional.of(old.get(corner + 1)) : Optional.empty();
-            DoubleFunction<Point> target = share -> Lines.settled(standing.toward(to, share));
+            DoubleFunction<Point> target = share -> Precision.settled(standing.toward(to, share));
             return reshapedTrack(new ReshapeRequest(engine.worldOf(working), index, style, share -> {
                 Point at = target.apply(share);
-                List<Point> coming = before.map(point -> Lines.stepKeepingRun(point, standing, at, style.angleStep())).orElse(List.of(at));
-                List<Point> going = after.map(point -> leavingCorner(at, before.map(previous -> Lines.joined(List.of(previous), coming)).orElse(coming),
+                List<Point> coming = before.map(point -> AngleSteps.stepKeepingRun(point, standing, at, style.angleStep())).orElse(List.of(at));
+                List<Point> going = after.map(point -> leavingCorner(at, before.map(previous -> Polylines.joined(List.of(previous), coming)).orElse(coming),
                         point, standing, style.angleStep())).orElse(List.of());
-                return Optional.of(Lines.withoutStraightPoints(Lines.joined(old.subList(0, Math.max(0, corner - 1)),
+                return Optional.of(LineCleaning.withoutStraightPoints(Polylines.joined(old.subList(0, Math.max(0, corner - 1)),
                         before.map(List::of).orElse(List.of()), coming, going, old.subList(Math.min(old.size(), corner + 2), old.size()))));
             }, shape -> List.of(target.apply(1)), Optional.empty(), List.of()));
         }).orElse(pcb);
@@ -115,33 +118,33 @@ final class TrackReshaping {
      * pulled, and no spike is drawn.
      */
     private List<Point> leavingCorner(Point at, List<Point> coming, Point after, Point standing, double angleStep) {
-        List<Point> kept = Lines.reversed(Lines.stepKeepingRun(after, standing, at, angleStep));
-        List<Point> plain = Lines.joined(kept.subList(1, kept.size()), List.of(after));
+        List<Point> kept = Polylines.reversed(AngleSteps.stepKeepingRun(after, standing, at, angleStep));
+        List<Point> plain = Polylines.joined(kept.subList(1, kept.size()), List.of(after));
         Optional<Point> before = coming.size() > 1 ? Optional.of(coming.get(coming.size() - 2)) : Optional.empty();
-        Optional<Point> into = before.flatMap(point -> Lines.wayBetween(point, at));
-        Optional<Point> outOf = Lines.wayBetween(at, plain.getFirst());
-        Optional<Point> run = Lines.wayBetween(after, standing);
+        Optional<Point> into = before.flatMap(point -> Ways.wayBetween(point, at));
+        Optional<Point> outOf = Ways.wayBetween(at, plain.getFirst());
+        Optional<Point> run = Ways.wayBetween(after, standing);
         if (before.isEmpty() || into.isEmpty() || outOf.isEmpty() || run.isEmpty()) {
             return plain;
         }
-        double towards = Lines.cross(into.get(), outOf.get()) > 0 ? 1 : -1;
-        double stub = Math.min(engine.board().settings().carrying().endStub(), Lines.lengthBetween(at, standing));
+        double towards = into.get().cross(outOf.get()) > 0 ? 1 : -1;
+        double stub = Math.min(engine.board().settings().carrying().endStub(), at.distanceTo(standing));
         List<List<Point>> shapes = new ArrayList<>();
         shapes.add(plain);
         shapes.addAll(shapesTo(towards, at, into.get(), after, run.get(), stub, angleStep));
         shapes.addAll(shapesTo(-towards, at, into.get(), after, run.get(), stub, angleStep));
         // The first in order that is not tangled and is no way round for nothing: back to the run, not past it and out again.
-        double direct = Lines.lengthBetween(at, after) * engine.board().settings().carrying().widestDetour() + stub;
+        double direct = at.distanceTo(after) * engine.board().settings().carrying().widestDetour() + stub;
         List<List<Point>> fit = shapes.stream()
-                .filter(shape -> !Lines.isTangled(Lines.withoutStraightPoints(Lines.joined(List.of(before.get(), at), shape)))).toList();
-        return fit.stream().filter(shape -> Lines.lengthOf(Lines.joined(List.of(at), shape)) <= direct).findFirst()
+                .filter(shape -> !LineCleaning.isTangled(LineCleaning.withoutStraightPoints(Polylines.joined(List.of(before.get(), at), shape)))).toList();
+        return fit.stream().filter(shape -> Polylines.lengthOf(Polylines.joined(List.of(at), shape)) <= direct).findFirst()
                 .orElse(fit.isEmpty() ? plain : fit.getLast());
     }
 
     /** To one side, the shapes a line may go on by from a carried corner to its run. */
     private static List<List<Point>> shapesTo(double side, Point at, Point into, Point after, Point run, double stub, double angleStep) {
         Point across = new Point(-into.y() * side, into.x() * side);
-        Point shoulder = Lines.settled(Lines.offset(at, across, stub));
+        Point shoulder = Precision.settled(at.moved(across, stub));
         List<List<Point>> shapes = new ArrayList<>();
         onRun(at, across, after, run).ifPresent(point -> shapes.add(List.of(point, after)));
         if (angleStep != 90) {
@@ -150,14 +153,14 @@ final class TrackReshaping {
                     .ifPresent(point -> shapes.add(List.of(shoulder, point, after)));
         }
         onRun(shoulder, new Point(-into.x(), -into.y()), after, run).ifPresent(point -> shapes.add(List.of(shoulder, point, after)));
-        shapes.add(Lines.joined(List.of(shoulder), Lines.trackStep(shoulder, after, angleStep)));
+        shapes.add(Polylines.joined(List.of(shoulder), AngleSteps.trackStep(shoulder, after, angleStep)));
         return shapes;
     }
 
     /** Where a way from a point meets the run going back from the corner that stayed, ahead of both. */
     private static Optional<Point> onRun(Point from, Point way, Point after, Point run) {
-        return Lines.crossingOf(from, way, after, run)
-                .filter(met -> Lines.reachAlong(from, way, met) > 0 && Lines.reachAlong(after, run, met) >= 0).map(Lines::settled);
+        return Ways.crossingOf(from, way, after, run)
+                .filter(met -> Ways.reachAlong(from, way, met) > 0 && Ways.reachAlong(after, run, met) >= 0).map(Precision::settled);
     }
 
     /**
@@ -200,7 +203,7 @@ final class TrackReshaping {
         if (pulled == 0) {
             return List.of();
         }
-        PcbDrawing.Track track = world.pcb().tracks().get(index);
+        Track track = world.pcb().tracks().get(index);
         Optional<String> net = world.netOfTrack(index);
         double alongX = to.x() - from.x();
         double alongY = to.y() - from.y();
@@ -210,14 +213,14 @@ final class TrackReshaping {
                 new Point(to.x() + way.x(), to.y() + way.y())));
         List<TrackFence.Obstacle> shadows = new ArrayList<>();
         for (TrackFence.Obstacle obstacle : world.obstacles(track.layer(), net, OptionalInt.of(index), OptionalDouble.empty())) {
-            CopperShape.Box box = obstacle.shape().box();
+            Box box = obstacle.shape().box();
             Point middle = new Point((box.left() + box.right()) / 2, (box.top() + box.bottom()) / 2);
             // Only what the stretch is pulled onto: copper it swept and passed clear of is behind it, nothing to be caught on.
             if (!sweptOver(middle, from, alongX, alongY, way) || TrackFence.keepsClear(pulledTo, obstacle.shape(), obstacle.gap())) {
                 continue;
             }
             double half = Math.max(box.right() - box.left(), box.bottom() - box.top()) / 2;
-            shadows.add(new TrackFence.Obstacle(CopperShape.line(List.of(middle, Lines.offset(middle, unit, reach)), half), obstacle.gap()));
+            shadows.add(new TrackFence.Obstacle(CopperShape.line(List.of(middle, middle.moved(unit, reach)), half), obstacle.gap()));
         }
         return shadows;
     }
@@ -236,14 +239,14 @@ final class TrackReshaping {
     }
 
     /** The legs of a shape that were no legs of the track: what the carrying changed. */
-    private static boolean[] newStretches(PcbDrawing.Track track, List<Point> shape) {
+    private static boolean[] newStretches(Track track, List<Point> shape) {
         boolean[] changed = new boolean[shape.size() - 1];
         for (int index = 0; index < changed.length; index++) {
             Point from = shape.get(index);
             Point to = shape.get(index + 1);
             boolean had = false;
             for (int at = 1; at < track.points().size() && !had; at++) {
-                had = Lines.samePoint(track.points().get(at - 1), from) && Lines.samePoint(track.points().get(at), to);
+                had = Precision.samePoint(track.points().get(at - 1), from) && Precision.samePoint(track.points().get(at), to);
             }
             changed[index] = !had;
         }
@@ -252,8 +255,8 @@ final class TrackReshaping {
 
     /** A pcb with a track's line in place and its corners rounded as far as they still fit. */
     private static PcbDrawing withLine(RoutingWorld world, int index, List<Point> line, TrackFence against) {
-        List<PcbDrawing.Track> changed = new ArrayList<>(world.pcb().tracks());
-        PcbDrawing.Track track = changed.get(index);
+        List<Track> changed = new ArrayList<>(world.pcb().tracks());
+        Track track = changed.get(index);
         double rounding = against.roundingThatFits(line, track.rounding(), track.layer(), world.settings().routing().roundingHalvings());
         changed.set(index, track.withPoints(line).withRounding(rounding));
         return world.pcb().withTracks(changed);
@@ -266,7 +269,7 @@ final class TrackReshaping {
     private static Optional<PcbDrawing> shapeLaid(ReshapeRequest request, List<Point> shape, boolean walking) {
         RoutingWorld world = request.world();
         int index = request.track();
-        PcbDrawing.Track track = world.pcb().tracks().get(index);
+        Track track = world.pcb().tracks().get(index);
         Optional<String> net = world.netOfTrack(index);
         RoutingSettings settings = world.settings();
         boolean[] isNew = newStretches(track, shape);
@@ -278,7 +281,7 @@ final class TrackReshaping {
             // Each leg the router walked came pulled tight already; the whole is the person's, and only cleaned.
             List<Point> tight = tightening.untangled(line, request.style().jogs());
             // What cannot be cleaned here is no shape to show; nor is a line that cleaning cut what the reader holds out of.
-            if (Lines.isTangled(tight) || !held.stream().allMatch(point -> Lines.passesThrough(tight, point))) {
+            if (LineCleaning.isTangled(tight) || !held.stream().allMatch(point -> Polylines.passesThrough(tight, point))) {
                 return Optional.empty();
             }
             return Optional.of(withLine(world, index, tight, fence));
@@ -303,8 +306,8 @@ final class TrackReshaping {
             }
             // A walk longer than the line asked for by its share is not the line being pulled: this leg may come out no longer than
             // what that leaves it, the rest of the shape standing at its straight length at least.
-            double stretch = Lines.lengthOf(List.of(shape.get(at - 1), shape.get(at)));
-            double budget = Lines.lengthOf(shape) * settings.carrying().longestWalk() - (Lines.lengthOf(shape) - stretch);
+            double stretch = Polylines.lengthOf(List.of(shape.get(at - 1), shape.get(at)));
+            double budget = Polylines.lengthOf(shape) * settings.carrying().longestWalk() - (Polylines.lengthOf(shape) - stretch);
             TrackRouter.RoutedLeg leg = TrackRouter.routedLeg(TrackRouter.LegRequest.walked(world, track, net, shape.get(at - 1), shape.get(at), request.style().angleStep(), index,
                     held, ends).keepingClearOf(request.sweptPast()).noLongerThan(budget));
             if (!leg.reached()) {
@@ -314,7 +317,7 @@ final class TrackReshaping {
         }
         // A walk goes round what is in the way, near it: one that came out much longer than the line asked for went round
         // something else — round a whole part, or the far end of a track — and is not the line the reader is pulling.
-        if (Lines.lengthOf(line) > Lines.lengthOf(shape) * settings.carrying().longestWalk()) {
+        if (Polylines.lengthOf(line) > Polylines.lengthOf(shape) * settings.carrying().longestWalk()) {
             return Optional.empty();
         }
         return allOf.apply(line);
@@ -343,7 +346,7 @@ final class TrackReshaping {
     /** Whether the point a track is pulled by gets all the way to the pointer with nothing in its way. */
     private static boolean pulledFreely(ReshapeRequest request, Pull pull) {
         RoutingWorld world = request.world();
-        PcbDrawing.Track track = world.pcb().tracks().get(request.track());
+        Track track = world.pcb().tracks().get(request.track());
         return world.fenceOfTrack(track, request.track(), world.netOfTrack(request.track())).lineClear(List.of(pull.taken(), pull.pointer()));
     }
 
@@ -357,7 +360,7 @@ final class TrackReshaping {
         RoutingWorld world = request.world();
         int index = request.track();
         double angleStep = request.style().angleStep();
-        PcbDrawing.Track track = world.pcb().tracks().get(index);
+        Track track = world.pcb().tracks().get(index);
         Optional<String> net = world.netOfTrack(index);
         List<Point> line = track.points();
         if (pull.from() < 0 || pull.to() >= line.size()) {
@@ -371,25 +374,25 @@ final class TrackReshaping {
             return Optional.empty();
         }
         RoutingSettings settings = world.settings();
-        List<Point> kept = Lines.joined(line.subList(0, pull.from() + 1), line.subList(pull.to(), line.size()));
+        List<Point> kept = Polylines.joined(line.subList(0, pull.from() + 1), line.subList(pull.to(), line.size()));
         Function<Point, Optional<List<Point>>> through = pin -> {
-            TrackRouter.RoutedLeg coming = Lines.samePoint(before, pin) ? null : TrackRouter.routedLeg(TrackRouter.LegRequest.walked(world, track, net, before, pin, angleStep, index,
+            TrackRouter.RoutedLeg coming = Precision.samePoint(before, pin) ? null : TrackRouter.routedLeg(TrackRouter.LegRequest.walked(world, track, net, before, pin, angleStep, index,
                     List.of(), ends).keepingClearOf(request.sweptPast()));
-            TrackRouter.RoutedLeg going = Lines.samePoint(pin, after) ? null : TrackRouter.routedLeg(TrackRouter.LegRequest.walked(world, track, net, after, pin, angleStep, index,
+            TrackRouter.RoutedLeg going = Precision.samePoint(pin, after) ? null : TrackRouter.routedLeg(TrackRouter.LegRequest.walked(world, track, net, after, pin, angleStep, index,
                     List.of(), ends).keepingClearOf(request.sweptPast()));
             if ((coming != null && !coming.reached()) || (going != null && !going.reached())) {
                 return Optional.empty();
             }
             List<Point> comingBack = new ArrayList<>();
             if (going != null) {
-                List<Point> back = Lines.reversed(going.points());
+                List<Point> back = Polylines.reversed(going.points());
                 comingBack.addAll(back.subList(1, back.size()));
                 comingBack.add(after);
             }
-            List<Point> band = Lines.joined(line.subList(0, pull.from() + 1), coming == null ? List.of() : coming.points(), comingBack,
+            List<Point> band = Polylines.joined(line.subList(0, pull.from() + 1), coming == null ? List.of() : coming.points(), comingBack,
                     line.subList(pull.to() + 1, line.size()));
-            List<Point> tight = new Tightening(fence, angleStep, Lines.joined(List.of(pin), kept), settings.routing()).tightened(band);
-            boolean shapely = !Lines.isTangled(tight) && Lines.passesThrough(tight, pin) && fence.lineClear(tight) && turnAt(tight, pin) <= angleStep + 1e-6;
+            List<Point> tight = new Tightening(fence, angleStep, Polylines.joined(List.of(pin), kept), settings.routing()).tightened(band);
+            boolean shapely = !LineCleaning.isTangled(tight) && Polylines.passesThrough(tight, pin) && fence.lineClear(tight) && turnAt(tight, pin) <= angleStep + 1e-6;
             return shapely ? Optional.of(tight) : Optional.empty();
         };
         // The point goes towards the pointer as far as copper lets it, and no further than the band can follow it; set in whole
@@ -399,7 +402,7 @@ final class TrackReshaping {
         double distance = Math.hypot(dx, dy);
         double step = settings.carrying().bandStep();
         IntFunction<Point> pinAt = steps -> distance == 0 ? pull.taken()
-                : Lines.settled(new Point(pull.taken().x() + dx / distance * steps * step, pull.taken().y() + dy / distance * steps * step));
+                : Precision.settled(new Point(pull.taken().x() + dx / distance * steps * step, pull.taken().y() + dy / distance * steps * step));
         IntFunction<Optional<List<Point>>> bandAt = steps -> fence.lineClear(List.of(pull.taken(), pinAt.apply(steps)))
                 ? through.apply(pinAt.apply(steps)) : Optional.empty();
         int low = 0;
@@ -425,7 +428,7 @@ final class TrackReshaping {
     private static double turnAt(List<Point> line, Point corner) {
         int at = -1;
         for (int index = 0; index < line.size(); index++) {
-            if (Lines.samePoint(line.get(index), corner)) {
+            if (Precision.samePoint(line.get(index), corner)) {
                 at = index;
                 break;
             }

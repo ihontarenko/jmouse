@@ -1,9 +1,13 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Pair;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.PadOutline;
 import org.jmouse.cad.pcb.geometry.PlacedDesignator;
 import org.jmouse.cad.pcb.geometry.Teardrops;
@@ -36,11 +40,11 @@ class LengthTuningTest {
             new FootprintDrawing.Pad("1", "surface", "rectangle", 0, 0, 0, 1, 1, 0, 0, 0, "", "", "", null, null),
             new FootprintDrawing.Pad("2", "surface", "rectangle", 0, 1.5, 0, 1, 1, 0, 0, 0, "", "", "", null, null)), List.of(), List.of(), null, List.of());
 
-    private static final List<PcbDrawing.Pair> PAIRS = List.of(new PcbDrawing.Pair("D", 0.25, 0.2, 0, "D_P", "D_N"));
+    private static final List<Pair> PAIRS = List.of(new Pair("D", 0.25, 0.2, 0, "D_P", "D_N"));
 
-    private static final PcbDrawing.Track LONGER = line(0, 0, 20, 0, 20, -6, 30, -6, 30, 0, 40, 0);
+    private static final Track LONGER = line(0, 0, 20, 0, 20, -6, 30, -6, 30, 0, 40, 0);
 
-    private static final PcbDrawing.Track SHORTER = line(0, 1.5, 40, 1.5);
+    private static final Track SHORTER = line(0, 1.5, 40, 1.5);
 
     private static RoutingSettings read() {
         try (InputStream stream = RoutingSettings.class.getResourceAsStream(RoutingSettings.SECTION.resource())) {
@@ -50,21 +54,21 @@ class LengthTuningTest {
         }
     }
 
-    private static PcbDrawing.Track line(double... coordinates) {
+    private static Track line(double... coordinates) {
         List<Point> points = new java.util.ArrayList<>();
         for (int index = 0; index < coordinates.length; index += 2) {
             points.add(new Point(coordinates[index], coordinates[index + 1]));
         }
-        return new PcbDrawing.Track(PcbDrawing.TOP, 0.25, 0, points);
+        return new Track(PcbVocabulary.TOP, 0.25, 0, points);
     }
 
     private static double lengthOf(List<Point> points) {
-        return Lines.lengthOf(points);
+        return Polylines.lengthOf(points);
     }
 
-    private static LengthTuning tuningOf(List<PcbDrawing.Track> tracks, List<PcbDrawing.Pair> pairs) {
-        List<PcbDrawing.Placement> placements = List.of(new PcbDrawing.Placement("A", 0, 0, 0, PcbDrawing.TOP, Optional.empty()),
-                new PcbDrawing.Placement("B", 40, 0, 0, PcbDrawing.TOP, Optional.empty()));
+    private static LengthTuning tuningOf(List<Track> tracks, List<Pair> pairs) {
+        List<Placement> placements = List.of(new Placement("A", 0, 0, 0, PcbVocabulary.TOP, Optional.empty()),
+                new Placement("B", 40, 0, 0, PcbVocabulary.TOP, Optional.empty()));
         PcbDrawing pcb = new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), pairs, 2, "M-100 -100H100V100H-100Z", placements,
                 tracks, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         Map<String, Map<String, String>> parts = Map.of("A", Map.of("1", "D_P", "2", "D_N"), "B", Map.of("1", "D_P", "2", "D_N"));
@@ -77,7 +81,7 @@ class LengthTuningTest {
     @Test
     void lengthensTheShorterTrackOfAPairToItsPartner() {
         LengthTuning.Tuned tuned = assertInstanceOf(LengthTuning.Tuned.class,
-                tuningOf(List.of(LONGER, SHORTER), PAIRS).tunedAt(PcbDrawing.TOP, new Point(20, 1.5), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE));
+                tuningOf(List.of(LONGER, SHORTER), PAIRS).tunedAt(PcbVocabulary.TOP, new Point(20, 1.5), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE));
         assertTrue(Math.abs(lengthOf(tuned.points()) - lengthOf(LONGER.points())) < 1);
         assertEquals(new Point(0, 1.5), tuned.points().getFirst());
         assertEquals(new Point(40, 1.5), tuned.points().getLast());
@@ -87,10 +91,10 @@ class LengthTuningTest {
     void lengthensAnyTrackToALengthAskedFor() {
         LengthTuning tuning = tuningOf(List.of(SHORTER), List.of());
         LengthTuning.Tuned tuned = assertInstanceOf(LengthTuning.Tuned.class,
-                tuning.tunedAt(PcbDrawing.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(50), TuningPattern.SQUARE));
+                tuning.tunedAt(PcbVocabulary.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(50), TuningPattern.SQUARE));
         assertTrue(Math.abs(lengthOf(tuned.points()) - 50) < 1);
         LengthTuning.Refused already = assertInstanceOf(LengthTuning.Refused.class,
-                tuning.tunedAt(PcbDrawing.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(30), TuningPattern.SQUARE));
+                tuning.tunedAt(PcbVocabulary.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(30), TuningPattern.SQUARE));
         assertTrue(already.refusal().contains("long already"), already.refusal());
     }
 
@@ -100,7 +104,7 @@ class LengthTuningTest {
         LengthTuning tuning = tuningOf(List.of(SHORTER), List.of());
         for (TuningPattern pattern : TuningPattern.values()) {
             LengthTuning.Tuned tuned = assertInstanceOf(LengthTuning.Tuned.class,
-                    tuning.tunedAt(PcbDrawing.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(50), pattern), pattern.name());
+                    tuning.tunedAt(PcbVocabulary.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(50), pattern), pattern.name());
             assertTrue(Math.abs(lengthOf(tuned.points()) - 50) < 1, pattern + ": " + lengthOf(tuned.points()));
             assertEquals(SHORTER.points().getFirst(), tuned.points().getFirst(), pattern.name());
             assertEquals(SHORTER.points().getLast(), tuned.points().getLast(), pattern.name());
@@ -111,7 +115,7 @@ class LengthTuningTest {
     @Test
     void anAccordionBendsToBothSides() {
         LengthTuning.Tuned tuned = assertInstanceOf(LengthTuning.Tuned.class, tuningOf(List.of(SHORTER), List.of())
-                .tunedAt(PcbDrawing.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(50), TuningPattern.ACCORDION));
+                .tunedAt(PcbVocabulary.TOP, new Point(20, 1.5), 0.5, OptionalDouble.of(50), TuningPattern.ACCORDION));
         assertTrue(tuned.points().stream().anyMatch(point -> point.y() > 1.6), "above: " + tuned.points());
         assertTrue(tuned.points().stream().anyMatch(point -> point.y() < 1.4), "below: " + tuned.points());
     }
@@ -119,12 +123,12 @@ class LengthTuningTest {
     @Test
     void saysWhyWhenItCannot() {
         LengthTuning paired = tuningOf(List.of(LONGER, SHORTER), PAIRS);
-        assertTrue(assertInstanceOf(LengthTuning.Refused.class, paired.tunedAt(PcbDrawing.TOP, new Point(10, 0), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE))
+        assertTrue(assertInstanceOf(LengthTuning.Refused.class, paired.tunedAt(PcbVocabulary.TOP, new Point(10, 0), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE))
                 .refusal().contains("already as long"));
         String noPair = assertInstanceOf(LengthTuning.Refused.class, tuningOf(List.of(LONGER, SHORTER), List.of())
-                .tunedAt(PcbDrawing.TOP, new Point(10, 0), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE)).refusal();
+                .tunedAt(PcbVocabulary.TOP, new Point(10, 0), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE)).refusal();
         assertTrue(noPair.contains("no differential pair") && noPair.contains("write the length"), noPair);
-        assertTrue(assertInstanceOf(LengthTuning.Refused.class, paired.tunedAt(PcbDrawing.TOP, new Point(10, 40), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE))
+        assertTrue(assertInstanceOf(LengthTuning.Refused.class, paired.tunedAt(PcbVocabulary.TOP, new Point(10, 40), 0.5, OptionalDouble.empty(), TuningPattern.SQUARE))
                 .refusal().contains("Point at a track"));
     }
 }

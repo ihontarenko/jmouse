@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.drawing;
 
+import org.jmouse.cad.pcb.PcbLayers;
 import org.jspecify.annotations.Nullable;
 import org.jmouse.cad.pcb.PcbWords;
 import org.jmouse.cad.pcb.FootprintLines;
@@ -120,10 +121,10 @@ public record FootprintDrawing(List<Pad> pads, List<Outline> outlines, List<Fiel
         }
 
         /** Whether it has copper on a layer: on every layer when it goes through the pcb, on its part's side when on its surface. */
-        public boolean hasCopperOn(String layer, PcbDrawing.Placement placement) {
+        public boolean hasCopperOn(String layer, Placement placement) {
             return switch (type) {
                 case THROUGH_HOLE, CONNECTOR -> true;
-                case SURFACE -> (PcbVocabulary.FACE_FAR.equals(face) ? PcbDrawing.otherSide(placement.side()) : placement.side()).equals(layer);
+                case SURFACE -> (PcbVocabulary.FACE_FAR.equals(face) ? PcbLayers.otherSide(placement.side()) : placement.side()).equals(layer);
                 default -> false;
             };
         }

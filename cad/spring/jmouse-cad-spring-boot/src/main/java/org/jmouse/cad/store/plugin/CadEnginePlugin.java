@@ -4,7 +4,7 @@ import org.jmouse.cad.table.ShippedTable;
 
 import org.jmouse.settings.Label;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.exchange.sheet.SheetChecks;
 import org.jmouse.cad.document.DocumentKindNames;
 import org.jmouse.cad.pcb.PcbLayerCodes;
@@ -62,7 +62,7 @@ public final class CadEnginePlugin implements Plugin {
      * sections are the plugin's.
      */
     static final List<SettingsSection<?>> CORE_SECTIONS = List.of(PcbLayout.SECTION, RoutingSettings.SECTION, CopperPhysics.SECTION,
-            StackPhysics.SECTION, PcbArtwork.SECTION, PcbLayers.SECTION, PcbLayerCodes.SECTION, SheetChecks.SECTION, SheetLettering.SECTION,
+            StackPhysics.SECTION, PcbArtwork.SECTION, PcbSolidLayers.SECTION, PcbLayerCodes.SECTION, SheetChecks.SECTION, SheetLettering.SECTION,
             DocumentKindNames.SECTION, OUTPUT_JOBS);
 
     private final List<Section> settings;

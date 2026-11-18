@@ -1,6 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
+import org.jmouse.cad.Point;
 import org.jmouse.geometry.taut.CorridorSearch;
 import org.jmouse.geometry.taut.Obstacle;
 import org.jmouse.geometry.taut.ObstacleField;

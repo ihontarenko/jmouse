@@ -1,5 +1,9 @@
 package org.jmouse.cad.plugin.gerber;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
@@ -54,7 +58,7 @@ final class TestNetlist {
             CopperNets.PlacedPad placed = nets.pads().get(index);
             FootprintDrawing.Pad pad = placed.pad();
             boolean through = !pad.isSurface();
-            boolean top = placed.placement().side().equals(PcbDrawing.TOP);
+            boolean top = placed.placement().side().equals(PcbVocabulary.TOP);
             double drill = Math.min(pad.drillWidth(), pad.drillHeight() > 0 ? pad.drillHeight() : pad.drillWidth());
             records.add(new TestRecord(through ? THROUGH : SURFACE, nets.padNets().get(index).orElse(UNCONNECTED),
                     placed.placement().printed(), pad.number(), false, through ? drill : 0, through ? 0 : top ? 1 : bottom,
@@ -65,7 +69,7 @@ final class TestNetlist {
         for (PcbFabrication.SeatedPart part : fabrication.parts()) {
             for (FootprintDrawing.Pad pad : part.drawing().map(FootprintDrawing::pads).orElse(List.of())) {
                 if (pad.isUnplated()) {
-                    PcbDrawing.Point at = part.placement().placed(pad.x(), pad.y());
+                    Point at = part.placement().placed(pad.x(), pad.y());
                     records.add(new TestRecord(MECHANICAL, UNCONNECTED, part.printed(), pad.number(), false, pad.drillWidth(),
                             0, at.x(), at.y(), pad.drillWidth(), pad.drillWidth(), 0, 0));
                 }
@@ -73,12 +77,12 @@ final class TestNetlist {
         }
         // Vias are tented: the mask covers them, so the tester reaches them through the copper alone.
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             records.add(new TestRecord(THROUGH, nets.viaNets().get(index).orElse(UNCONNECTED), "VIA", "", true, via.drill(), 0,
                     via.x(), via.y(), via.diameter(), via.diameter(), 0, 0));
         }
         for (int index = 0; index < pcb.holes().size(); index++) {
-            PcbDrawing.Hole hole = pcb.holes().get(index);
+            Hole hole = pcb.holes().get(index);
             boolean plated = hole.ring() > 0;
             double size = plated ? hole.ring() : hole.drill();
             records.add(new TestRecord(plated ? THROUGH : MECHANICAL, UNCONNECTED, "HOLE", String.valueOf(index + 1), false,

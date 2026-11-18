@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.checks.PcbFinding;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -52,7 +53,7 @@ public final class PcbFabrication {
      * @param drawing   the footprint's drawing; empty when it cannot be read
      * @param padNets   the net each of its pads carries, by pad number, as the circuit wires it
      */
-    public record SeatedPart(PcbDrawing.Placement placement, String component, String value, Optional<String> footprint,
+    public record SeatedPart(Placement placement, String component, String value, Optional<String> footprint,
                              Optional<FootprintDrawing> drawing, Map<String, String> padNets) {
 
         public String designator() {
@@ -117,7 +118,7 @@ public final class PcbFabrication {
         ComponentFacts facts = new ComponentFacts(catalogue);
         List<SeatedPart> seated = new ArrayList<>();
         List<String> notes = new ArrayList<>();
-        for (PcbDrawing.Placement placement : pcb.placements()) {
+        for (Placement placement : pcb.placements()) {
             if (placement.ownedByPcb()) {
                 seated.add(ownedByPcb(placement, catalogue, notes));
                 continue;
@@ -142,7 +143,7 @@ public final class PcbFabrication {
     }
 
     /** A part only the pcb has, on the footprint it names itself, its pads on the nets it says. */
-    private static SeatedPart ownedByPcb(PcbDrawing.Placement placement, CatalogueDocuments catalogue, List<String> notes) {
+    private static SeatedPart ownedByPcb(Placement placement, CatalogueDocuments catalogue, List<String> notes) {
         String slug = placement.footprint().orElseThrow();
         Optional<FootprintDrawing> drawing = catalogue.find(slug).map(FootprintDrawing::of);
         if (drawing.isEmpty()) {

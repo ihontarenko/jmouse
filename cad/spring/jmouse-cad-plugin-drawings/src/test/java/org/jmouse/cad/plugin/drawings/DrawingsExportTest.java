@@ -1,5 +1,8 @@
 package org.jmouse.cad.plugin.drawings;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.document.DocumentLanguage;
 import org.jmouse.cad.document.DocumentNode;
@@ -8,7 +11,7 @@ import org.jmouse.cad.exchange.ExportedFiles;
 import org.jmouse.cad.exchange.pcb.ArtworkFeature;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -56,7 +59,7 @@ class DrawingsExportTest {
         PcbFabrication fabrication = PcbFabrication.of(document, CIRCUIT);
         Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(fabrication.pcb().rules());
         PcbArtwork drawn = PcbArtwork.of(fabrication, rules, CadSettings.shipped().read(PcbArtwork.SECTION), FONT);
-        return new FactorySheets(SETTINGS, LETTERING, drawn, CadSettings.shipped().read(PcbLayers.SECTION),
+        return new FactorySheets(SETTINGS, LETTERING, drawn, CadSettings.shipped().read(PcbSolidLayers.SECTION),
                 rules.get("pcb-thickness"), document.title(), "r1", slug -> slug).sheets();
     }
 
@@ -84,7 +87,7 @@ class DrawingsExportTest {
         PcbFabrication fabrication = PcbFabrication.of(document, CIRCUIT);
         Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(fabrication.pcb().rules());
         PcbArtwork.Settings settings = CadSettings.shipped().read(PcbArtwork.SECTION);
-        List<ArtworkFeature> top = PcbArtwork.of(fabrication, rules, settings, FONT).maskOpenings(PcbDrawing.TOP);
+        List<ArtworkFeature> top = PcbArtwork.of(fabrication, rules, settings, FONT).maskOpenings(PcbVocabulary.TOP);
         List<ArtworkFeature.Stroke> strokes = top.stream().filter(ArtworkFeature.Stroke.class::isInstance).map(ArtworkFeature.Stroke.class::cast).toList();
         assertEquals(1, strokes.size(), "only the track left bare on this side: " + top);
         assertEquals(2 + settings.maskExpansion() * 2, strokes.getFirst().width(), 1e-9, "wider than its copper by the mask's expansion");
@@ -137,8 +140,8 @@ class DrawingsExportTest {
 
     @Test
     void holesOfOneToolShareAMarkAndPlatedOnesComeFirst() {
-        PcbDrawing.Point at = new PcbDrawing.Point(0, 0);
-        PcbDrawing.Point along = new PcbDrawing.Point(3, 0);
+        Point at = new Point(0, 0);
+        Point along = new Point(3, 0);
         List<FactorySheets.HoleTool> tools = FactorySheets.toolsOf(List.of(new PcbDrills.Drill(false, 3.2, at, at), new PcbDrills.Drill(true, 0.8, at, at),
                 new PcbDrills.Drill(true, 0.8, at, at), new PcbDrills.Drill(true, 1, at, along)));
         assertEquals(List.of("A", "B", "C"), tools.stream().map(FactorySheets.HoleTool::mark).toList());

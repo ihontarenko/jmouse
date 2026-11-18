@@ -1,6 +1,7 @@
 package org.jmouse.cad.plugin.odb;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.exchange.pcb.ArtworkFeature;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
@@ -69,7 +70,7 @@ final class PcbOdbConnectivity {
     }
 
     /** A hole, in the subnet that stands at it; a hole nothing stands at is no part of any net. */
-    void hole(PcbDrawing.Point at, String layer, int number) {
+    void hole(Point at, String layer, int number) {
         Place place = standing.get(key(at.x(), at.y()));
         if (place != null) {
             eda.feature(place.net(), place.subnet(), OdbEda.FeatureType.HOLE, layer, number);
@@ -81,7 +82,7 @@ final class PcbOdbConnectivity {
         OdbComponents written = new OdbComponents(side);
         boolean any = false;
         for (PcbFabrication.SeatedPart part : fabrication.parts()) {
-            PcbDrawing.Placement placement = part.placement();
+            Placement placement = part.placement();
             if (part.drawing().isEmpty()) {
                 notes.add(part.designator() + " has no footprint to read, so it is no component of the job.");
                 continue;
@@ -94,7 +95,7 @@ final class PcbOdbConnectivity {
             for (int index = 0; index < drawing.pads().size(); index++) {
                 FootprintDrawing.Pad pad = drawing.pads().get(index);
                 Place place = toeprintOf(placement, pad, part.padNets().get(pad.number()));
-                PcbDrawing.Point at = placement.placed(pad.x(), pad.y());
+                Point at = placement.placed(pad.x(), pad.y());
                 toeprintsOfPart.add(new OdbComponents.Toeprint(index, at.x(), upward(at.y()), place.net(), place.subnet(), pad.number()));
             }
             written.add(new OdbComponents.Component(eda.packageOf(packageOf(part, drawing)), placement.x(), upward(placement.y()),
@@ -121,13 +122,13 @@ final class PcbOdbConnectivity {
     }
 
     /** A pad of a part is one toeprint, however many layers it is on. */
-    private Place toeprintOf(PcbDrawing.Placement placement, FootprintDrawing.Pad pad, String net) {
+    private Place toeprintOf(Placement placement, FootprintDrawing.Pad pad, String net) {
         int toeprint = fabrication.parts().stream().filter(part -> part.designator().equals(placement.designator())).findFirst()
                 .flatMap(PcbFabrication.SeatedPart::drawing).map(drawing -> drawing.pads().indexOf(pad)).orElse(-1);
         return toeprints.computeIfAbsent(placement.designator() + "/" + toeprint, ignored -> {
             int number = eda.net(net);
             Place place = new Place(number, eda.subnet(number, new OdbEda.Toeprint(sideOf(placement), componentNumbers.get(placement.designator()), toeprint)));
-            PcbDrawing.Point at = placement.placed(pad.x(), pad.y());
+            Point at = placement.placed(pad.x(), pad.y());
             standing.put(key(at.x(), at.y()), place);
             return place;
         });
@@ -179,7 +180,7 @@ final class PcbOdbConnectivity {
         return nearest == Double.MAX_VALUE ? 0 : nearest;
     }
 
-    private static OdbComponents.Side sideOf(PcbDrawing.Placement placement) {
+    private static OdbComponents.Side sideOf(Placement placement) {
         return placement.onBottom() ? OdbComponents.Side.BOTTOM : OdbComponents.Side.TOP;
     }
 

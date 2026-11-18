@@ -1,5 +1,6 @@
 package org.jmouse.cad.store.exchange;
 
+import org.jmouse.cad.pcb.drawing.Output;
 import org.jmouse.cad.document.DocumentLanguage;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.exchange.OutputJob;
@@ -28,8 +29,8 @@ class PcbOutputLinesTest {
     @Test
     void outputsAreReadAndWrittenBack() {
         DocumentNode read = LANGUAGE.readOne(BOARD, "with-outputs");
-        List<PcbDrawing.Output> expected = List.of(new PcbDrawing.Output("factory", List.of("gerber", "step"), "For the factory"),
-                new PcbDrawing.Output("order", List.of("jlcpcb"), "The order"));
+        List<Output> expected = List.of(new Output("factory", List.of("gerber", "step"), "For the factory"),
+                new Output("order", List.of("jlcpcb"), "The order"));
         assertEquals(expected, PcbDrawing.of(read).outputs());
         assertEquals(expected, PcbDrawing.of(LANGUAGE.readOne(LANGUAGE.write(read), "with-outputs")).outputs());
     }

@@ -1,5 +1,12 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.NetClass;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.drawing.DrawnGroup;
@@ -7,7 +14,6 @@ import org.jmouse.cad.drawing.DrawnState;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
 import org.jmouse.cad.pcb.geometry.PadOutline;
 import org.jmouse.cad.pcb.geometry.PlacedDesignator;
@@ -113,29 +119,29 @@ class RoutingEngineTest {
         return points;
     }
 
-    private static PcbDrawing.Track track(List<Point> points) {
-        return track(points, PcbDrawing.TOP, 0.25);
+    private static Track track(List<Point> points) {
+        return track(points, PcbVocabulary.TOP, 0.25);
     }
 
-    private static PcbDrawing.Track track(List<Point> points, String layer, double width) {
-        return new PcbDrawing.Track(layer, width, 0, points);
+    private static Track track(List<Point> points, String layer, double width) {
+        return new Track(layer, width, 0, points);
     }
 
-    private static PcbDrawing.Placement place(String designator, double x, double y) {
-        return new PcbDrawing.Placement(designator, x, y, 0, PcbDrawing.TOP, Optional.empty());
+    private static Placement place(String designator, double x, double y) {
+        return new Placement(designator, x, y, 0, PcbVocabulary.TOP, Optional.empty());
     }
 
-    private static PcbDrawing.Via via(double x, double y, double diameter) {
-        return new PcbDrawing.Via(x, y, 0.3, diameter, PcbDrawing.TOP, PcbDrawing.BOTTOM);
+    private static Via via(double x, double y, double diameter) {
+        return new Via(x, y, 0.3, diameter, PcbVocabulary.TOP, PcbVocabulary.BOTTOM);
     }
 
-    private static PcbDrawing pcb(List<PcbDrawing.Placement> placements, List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias,
-                                  List<PcbDrawing.Zone> zones, List<PcbDrawing.NetClass> netClasses) {
+    private static PcbDrawing pcb(List<Placement> placements, List<Track> tracks, List<Via> vias,
+                                  List<Zone> zones, List<NetClass> netClasses) {
         return new PcbDrawing("circuit", Optional.empty(), netClasses, null, List.of(), List.of(), 2, OUTLINE, placements, tracks, List.of(), vias,
                 zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
-    private static PcbDrawing pcb(List<PcbDrawing.Placement> placements, List<PcbDrawing.Track> tracks) {
+    private static PcbDrawing pcb(List<Placement> placements, List<Track> tracks) {
         return pcb(placements, tracks, List.of(), List.of(), List.of());
     }
 
@@ -206,7 +212,7 @@ class RoutingEngineTest {
             if (at >= 2) {
                 Point before = points.get(at - 1);
                 Point was = points.get(at - 2);
-                double inward = ((before.x() - was.x()) * dx + (before.y() - was.y()) * dy) / (Lines.lengthBetween(was, before) * length);
+                double inward = ((before.x() - was.x()) * dx + (before.y() - was.y()) * dy) / (was.distanceTo(before) * length);
                 if (inward < -1e-3) {
                     faults.add("a stretch turning back on the one before it: " + said);
                 }
@@ -228,7 +234,7 @@ class RoutingEngineTest {
 
     /** What is wrong with a track where it stands on a pcb: its shape, and what it comes too near. */
     private static List<String> faultsOfTrack(RoutingBoard board, PcbDrawing pcb, int index, boolean octilinear) {
-        PcbDrawing.Track line = pcb.tracks().get(index);
+        Track line = pcb.tracks().get(index);
         RoutingWorld world = new RoutingWorld(pcb, board);
         TrackFence fence = world.fence(line.layer(), world.netOfTrack(index), line.width(), OptionalInt.of(index));
         List<String> faults = new ArrayList<>(faultsOfLine(line.points(), octilinear));
@@ -249,7 +255,7 @@ class RoutingEngineTest {
     private static void assertLine(List<Point> expected, List<Point> actual) {
         assertEquals(expected.size(), actual.size(), "" + actual);
         for (int index = 0; index < expected.size(); index++) {
-            assertTrue(Lines.lengthBetween(expected.get(index), actual.get(index)) < 1e-6, "expected " + expected + " but was " + actual);
+            assertTrue(expected.get(index).distanceTo(actual.get(index)) < 1e-6, "expected " + expected + " but was " + actual);
         }
     }
 
@@ -342,22 +348,22 @@ class RoutingEngineTest {
 
         @Test
         void aTrackEndingInAViaIsTheViasOnEveryLayerItJoins() {
-            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 5, 0)), track(line(5.1, 0, 5.1, 5), PcbDrawing.BOTTOM, 0.25)),
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 5, 0)), track(line(5.1, 0, 5.1, 5), PcbVocabulary.BOTTOM, 0.25)),
                     List.of(via(5, 0, 0.6)), List.of(), List.of());
             CopperNodes nodes = nodesOf(pcb);
             CopperNode via = nodes.atEnd(0, CopperNode.End.LAST);
             assertEquals(CopperNodeKind.VIA, via.kind());
             assertSame(via, nodes.atEnd(1, CopperNode.End.FIRST));
-            assertTrue(via.on(PcbDrawing.TOP) && via.on(PcbDrawing.BOTTOM));
+            assertTrue(via.on(PcbVocabulary.TOP) && via.on(PcbVocabulary.BOTTOM));
         }
 
         @Test
         void theNodeNearestAPointIsFoundWithinAReachAndNotPastIt() {
             PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 5, 0))));
             CopperNodes nodes = nodesOf(pcb);
-            assertEquals(CopperNodeKind.TRACK_TIP, nodes.near(PcbDrawing.TOP, point(6, 0), 1.5, node -> true).orElseThrow().kind());
-            assertTrue(nodes.near(PcbDrawing.TOP, point(8, 0), 1.5, node -> true).isEmpty());
-            assertTrue(nodes.near(PcbDrawing.BOTTOM, point(6, 0), 1.5, node -> true).isEmpty());
+            assertEquals(CopperNodeKind.TRACK_TIP, nodes.near(PcbVocabulary.TOP, point(6, 0), 1.5, node -> true).orElseThrow().kind());
+            assertTrue(nodes.near(PcbVocabulary.TOP, point(8, 0), 1.5, node -> true).isEmpty());
+            assertTrue(nodes.near(PcbVocabulary.BOTTOM, point(6, 0), 1.5, node -> true).isEmpty());
         }
     }
 
@@ -366,14 +372,14 @@ class RoutingEngineTest {
 
         private final Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
 
-        private Point padOf(PcbDrawing.Placement placement, int side) {
+        private Point padOf(Placement placement, int side) {
             return point(placement.x() + side * 1.5, placement.y());
         }
 
         /** The part B moved by an offset, as the editor says it: the part alone — the copper it carries is the engine's to work out. */
         private PcbDrawing moved(PcbDrawing pcb, double dx, double dy) {
             return pcb.withPlacements(pcb.placements().stream().map(placement -> placement.designator().equals("B")
-                    ? new PcbDrawing.Placement("B", placement.x() + dx, placement.y() + dy, 0, PcbDrawing.TOP, Optional.empty()) : placement).toList());
+                    ? new Placement("B", placement.x() + dx, placement.y() + dy, 0, PcbVocabulary.TOP, Optional.empty()) : placement).toList());
         }
 
         private boolean onThePartBeside(double dx, double dy) {
@@ -386,8 +392,8 @@ class RoutingEngineTest {
          */
         @Test
         void aFrameShowsWhatALetGoKeeps() {
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
             PcbDrawing pcb = pcb(List.of(a, b), List.of(track(List.of(padOf(a, 1), padOf(b, -1)))));
             RoutingEngine engine = new RoutingEngine(board(pcb, parts));
             PcbDrawing following = engine.tracksBanded(drag(pcb, moved(pcb, 3, 5), 45));
@@ -403,8 +409,8 @@ class RoutingEngineTest {
          */
         @Test
         void aReconnectingFrameStretchesTheLineStraightToThePad() {
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
             PcbDrawing pcb = pcb(List.of(a, b), List.of(track(List.of(padOf(a, 1), padOf(b, -1)))));
             RoutingEngine engine = new RoutingEngine(board(pcb, parts));
             List<Point> ran = pcb.tracks().getFirst().points();
@@ -416,8 +422,8 @@ class RoutingEngineTest {
         /** Detached, a part moves alone: its line stays where it ran, and only the ratsnest says the pad is to be reached again. */
         @Test
         void aPartMovedDetachedLeavesItsLineWhereItRan() {
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
             PcbDrawing pcb = pcb(List.of(a, b), List.of(track(List.of(padOf(a, 1), padOf(b, -1)))));
             RoutingEngine engine = new RoutingEngine(board(pcb, parts));
             RoutingEngine.Release.Laid laid = assertInstanceOf(RoutingEngine.Release.Laid.class,
@@ -433,9 +439,9 @@ class RoutingEngineTest {
         @Test
         void aLineThatCannotBeLaidAgainIsCutBackAndTheMoveKept() {
             Map<String, Map<String, String>> wired = nets("A", "2", "N", "B", "1", "N", "C", "1", "M");
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
-            PcbDrawing.Placement c = place("C", -60, 5);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
+            Placement c = place("C", -60, 5);
             PcbDrawing pcb = pcb(List.of(a, b, c), List.of(track(List.of(padOf(a, 1), padOf(b, -1))), track(List.of(padOf(c, -1), point(100, 5)))));
             RoutingEngine engine = new RoutingEngine(board(pcb, wired));
             // B carried across the wall: N's line would have to cross M's.
@@ -452,15 +458,15 @@ class RoutingEngineTest {
         @Test
         void aLineCutBackIsLaidAfreshRoundTheWayTheBandCouldNotGo() {
             Map<String, Map<String, String>> wired = nets("A", "2", "N", "B", "1", "N", "C", "1", "M", "C", "2", "M");
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
-            PcbDrawing.Placement c = place("C", -20, 5);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
+            Placement c = place("C", -20, 5);
             PcbDrawing pcb = pcb(List.of(a, b, c), List.of(track(List.of(padOf(a, 1), padOf(b, -1))), track(List.of(padOf(c, -1), point(18, 5)))));
             RoutingBoard board = board(pcb, wired);
             // B carried across the wall: the band cannot cross it; a way round its far end, past x = 18, is open.
             RoutingEngine.Release.Laid laid = assertInstanceOf(RoutingEngine.Release.Laid.class,
                     new RoutingEngine(board).tracksLaid(drag(pcb, moved(pcb, 0, 10), 45)));
-            List<PcbDrawing.Track> tracks = laid.pcb().tracks();
+            List<Track> tracks = laid.pcb().tracks();
             assertEquals(2, tracks.size(), "M's wall, and N's line laid afresh: " + tracks);
             assertTrue(new RoutingWorld(laid.pcb(), board(laid.pcb(), wired)).nets().unlaid().isEmpty(), "A and B joined again");
             for (int index = 0; index < tracks.size(); index++) {
@@ -475,9 +481,9 @@ class RoutingEngineTest {
         @Test
         void aPartLetGoWhereItsPadWouldStandOnCopperOfAnotherNetIsRefused() {
             Map<String, Map<String, String>> wired = nets("A", "2", "N", "B", "1", "N", "C", "1", "M");
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
-            PcbDrawing.Placement c = place("C", 0, 10);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
+            Placement c = place("C", 0, 10);
             Point stitch = point(20, 4);
             PcbDrawing pcb = pcb(List.of(a, b, c), List.of(track(List.of(padOf(a, 1), padOf(b, -1))), track(List.of(padOf(c, -1), stitch))),
                     List.of(via(stitch.x(), stitch.y(), 0.8)), List.of(), List.of());
@@ -492,8 +498,8 @@ class RoutingEngineTest {
 
         @Test
         void keepsAShapelyLineWhereverItGoesInFreeSpace() {
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
             Map<String, java.util.function.BiFunction<Point, Point, List<Point>>> shapes = new LinkedHashMap<>();
             shapes.put("straight", (from, to) -> List.of(from, to));
             shapes.put("a jog", (from, to) -> List.of(from, point(from.x() + 2, from.y()), point(to.x() - 2, to.y()), to));
@@ -517,10 +523,10 @@ class RoutingEngineTest {
                             // A way round nothing the reader laid comes no longer for the drag than the part went: a rubber band slips
                             // off a corner it folds at, and where it does not it stands as the reader laid it.
                             List<Point> laidByReader = shape.apply(padOf(a, 1), padOf(b, -1));
-                            assertTrue(Lines.lengthOf(line) <= Lines.lengthOf(laidByReader) + Math.hypot(dx, dy) + 0.01, name + " by " + dx + ", " + dy + ": " + line);
+                            assertTrue(Polylines.lengthOf(line) <= Polylines.lengthOf(laidByReader) + Math.hypot(dx, dy) + 0.01, name + " by " + dx + ", " + dy + ": " + line);
                         } else {
                             // Pulled as a rubber band, a jog round nothing comes as short as its ends allow.
-                            assertTrue(Lines.lengthOf(line) <= across(line.getFirst(), line.getLast()) + 0.01, name + " by " + dx + ", " + dy + ": " + line);
+                            assertTrue(Polylines.lengthOf(line) <= across(line.getFirst(), line.getLast()) + 0.01, name + " by " + dx + ", " + dy + ": " + line);
                         }
                     }
                 }
@@ -529,8 +535,8 @@ class RoutingEngineTest {
 
         @Test
         void goesRoundWhatStandsInTheWay() {
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
             PcbDrawing pcb = pcb(List.of(a, b), List.of(track(List.of(padOf(a, 1), padOf(b, -1)))), List.of(via(6, 6, 1.2)), List.of(), List.of());
             RoutingBoard board = board(pcb, parts);
             RoutingEngine engine = new RoutingEngine(board);
@@ -548,8 +554,8 @@ class RoutingEngineTest {
 
         @Test
         void answersTheSameAFrameAtATimeAsWhenItIsLetGoInFreeSpace() {
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement b = place("B", 12, 0);
+            Placement a = place("A", 0, 0);
+            Placement b = place("B", 12, 0);
             PcbDrawing pcb = pcb(List.of(a, b), List.of(track(List.of(padOf(a, 1), padOf(b, -1)))));
             RoutingBoard board = board(pcb, parts);
             RoutingEngine engine = new RoutingEngine(board);
@@ -568,11 +574,11 @@ class RoutingEngineTest {
 
         private final Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
 
-        private PcbDrawing.Placement placed(String designator, double x, double y, double rotation, String side) {
-            return new PcbDrawing.Placement(designator, x, y, rotation, side, Optional.empty());
+        private Placement placed(String designator, double x, double y, double rotation, String side) {
+            return new Placement(designator, x, y, rotation, side, Optional.empty());
         }
 
-        private PcbDrawing ended(PcbDrawing pcb, PcbDrawing.Placement b) {
+        private PcbDrawing ended(PcbDrawing pcb, Placement b) {
             return new RoutingEngine(board(pcb, parts)).tracksBanded(drag(pcb, pcb.withPlacements(List.of(pcb.placements().getFirst(), b)),
                     45));
         }
@@ -586,23 +592,23 @@ class RoutingEngineTest {
         @Test
         void aTurnedPartCarriesTheEndToWhereTheTurnTookThatSpot() {
             PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 12, 0)), List.of(track(line(1.5, 0, 6, 0, 10.5, 0))));
-            PcbDrawing.Placement turned = placed("B", 12, 0, 90, PcbDrawing.TOP);
+            Placement turned = placed("B", 12, 0, 90, PcbVocabulary.TOP);
             Point pad = turned.placed(-1.5, 0);
             Point end = ended(pcb, turned).tracks().getFirst().points().getLast();
-            assertTrue(Lines.samePoint(pad, end), "the end stands at " + end + ", the pad at " + pad);
+            assertTrue(Precision.samePoint(pad, end), "the end stands at " + end + ", the pad at " + pad);
         }
 
         @Test
         void aPartPutOnTheOtherSideLeavesTheTracksOfTheSideItLeft() {
             PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 12, 0)), List.of(track(line(1.5, 0, 6, 0, 10.5, 0))));
-            assertEquals(pcb.tracks(), ended(pcb, placed("B", 12, 0, 0, PcbDrawing.BOTTOM)).tracks());
+            assertEquals(pcb.tracks(), ended(pcb, placed("B", 12, 0, 0, PcbVocabulary.BOTTOM)).tracks());
         }
 
         @Test
         void anArcHeldByOneEndGoesWithItsPadKeepingItsBulge() {
             PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 12, 0)), List.of())
-                    .withArcs(List.of(new PcbDrawing.Arc(PcbDrawing.TOP, 0.25, point(1.5, 0), point(6, 3), point(10.5, 0))));
-            PcbDrawing.Arc arc = new RoutingEngine(board(pcb, parts)).tracksBanded(drag(pcb, pcb.withPlacements(List.of(place("A", 0, 0),
+                    .withArcs(List.of(new Arc(PcbVocabulary.TOP, 0.25, point(1.5, 0), point(6, 3), point(10.5, 0))));
+            Arc arc = new RoutingEngine(board(pcb, parts)).tracksBanded(drag(pcb, pcb.withPlacements(List.of(place("A", 0, 0),
                     place("B", 12, 2))), 45)).arcs().getFirst();
             assertEquals(point(1.5, 0), arc.from());
             assertEquals(point(10.5, 2), arc.to());
@@ -613,7 +619,7 @@ class RoutingEngineTest {
         @Test
         void copperOfAnotherNetBesideARoundPadIsNotCarried() {
             Map<String, Map<String, String>> wired = nets("A", "1", "N", "B", "1", "N", "C", "1", "M");
-            List<PcbDrawing.Placement> placements = List.of(place("A", 0, 0), place("B", 12, 0), place("C", 30, 1));
+            List<Placement> placements = List.of(place("A", 0, 0), place("B", 12, 0), place("C", 30, 1));
             PcbDrawing pcb = pcb(placements, List.of(track(line(0, 0, 12, 0)), track(line(12.95, 0.95, 20, 1, 30, 1))));
             RoutingEngine engine = new RoutingEngine(board(pcb, wired, PIN));
             PcbDrawing moved = pcb.withPlacements(List.of(placements.get(0), place("B", 12, 4), placements.get(2)));
@@ -633,9 +639,9 @@ class RoutingEngineTest {
 
         // A and B on N, joined; C and D on M, joined by a long track the length of the board; B is put down on it.
         private final Map<String, Map<String, String>> wired = nets("A", "2", "N", "B", "1", "N", "C", "2", "M", "D", "1", "M");
-        private final List<PcbDrawing.Placement> placements = List.of(place("A", 0, 0), place("B", 12, 0), place("C", -20, 6), place("D", 40, 6));
+        private final List<Placement> placements = List.of(place("A", 0, 0), place("B", 12, 0), place("C", -20, 6), place("D", 40, 6));
         // Net-less copper too near A's pad 1, standing so before the drag, nowhere near where B goes.
-        private final PcbDrawing.Track tooNear = track(line(-6, -0.9, -1.5, -0.9));
+        private final Track tooNear = track(line(-6, -0.9, -1.5, -0.9));
         private final PcbDrawing pcb = pcb(placements, List.of(track(line(1.5, 0, 10.5, 0)), track(line(-18.5, 6, 38.5, 6)), tooNear));
         private final PcbDrawing moved = pcb.withPlacements(List.of(placements.get(0), place("B", 12, 6), placements.get(2), placements.get(3)));
         private final RoutingBoard board = board(pcb, wired);
@@ -673,10 +679,10 @@ class RoutingEngineTest {
             FootprintDrawing.Pad third = new FootprintDrawing.Pad("3", "through-hole", "oval", 5.45, 0, 0, 2.5, 4.5, 1.2, 1.2, 0, "", "", "", null, null);
             FootprintDrawing transistor = new FootprintDrawing(List.of(first, second, third), List.of(), List.of(), null, List.of());
             Map<String, Map<String, String>> wired = nets("B", "1", "M", "B", "2", "N", "B", "3", "E", "C", "3", "M", "D", "1", "M");
-            List<PcbDrawing.Placement> standing = List.of(place("B", 12, 11), place("C", -25, 6), place("D", 45.45, 6));
-            PcbDrawing.Track firstHalf = track(line(-19.55, 6, 6.8, 6), PcbDrawing.TOP, 1.5);
-            PcbDrawing junctioned = pcb(standing, List.of(firstHalf, track(line(6.8, 6, 40, 6), PcbDrawing.TOP, 1.5),
-                    track(line(6.55, 11, 6.8, 6), PcbDrawing.TOP, 1.5)));
+            List<Placement> standing = List.of(place("B", 12, 11), place("C", -25, 6), place("D", 45.45, 6));
+            Track firstHalf = track(line(-19.55, 6, 6.8, 6), PcbVocabulary.TOP, 1.5);
+            PcbDrawing junctioned = pcb(standing, List.of(firstHalf, track(line(6.8, 6, 40, 6), PcbVocabulary.TOP, 1.5),
+                    track(line(6.55, 11, 6.8, 6), PcbVocabulary.TOP, 1.5)));
             PcbDrawing putDown = junctioned.withPlacements(List.of(place("B", 12, 6), standing.get(1), standing.get(2)));
             RoutingBoard junctionBoard = board(junctioned, wired, transistor);
             PcbDrawing laid = assertInstanceOf(RoutingEngine.Release.Laid.class, new RoutingEngine(junctionBoard)
@@ -700,12 +706,12 @@ class RoutingEngineTest {
         @Test
         void aPartWanderedWithLeavesNothingBehindIt() {
             Map<String, Map<String, String>> wired = nets("A", "2", "N", "B", "1", "N", "C", "1", "M");
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement c = place("C", 0, 10);
+            Placement a = place("A", 0, 0);
+            Placement c = place("C", 0, 10);
             PcbDrawing pcb = pcb(List.of(a, place("B", 12, 0), c), List.of(track(line(1.5, 0, 10.5, 0)), track(line(-1.5, 10, 6, 3))),
                     List.of(via(6, 3, 0.8)), List.of(), List.of());
             java.util.function.DoubleFunction<PcbDrawing> at = turn -> pcb.withPlacements(List.of(a,
-                    place("B", Lines.settled(12 + 4 * Math.cos(turn)), Lines.settled(4 * Math.sin(turn))), c));
+                    place("B", Precision.settled(12 + 4 * Math.cos(turn)), Precision.settled(4 * Math.sin(turn))), c));
             RoutingEngine wandered = new RoutingEngine(board(pcb, wired));
             for (double turn = 0; turn < 6 * Math.PI; turn += 0.3) {
                 wandered.tracksBanded(new PartDrag(pcb, at.apply(turn), 45, PartDragMode.RECONNECT));
@@ -720,8 +726,8 @@ class RoutingEngineTest {
         @Test
         void neverBreakATrackOff() {
             Map<String, Map<String, String>> wired = nets("A", "2", "N", "B", "1", "N", "C", "1", "M");
-            PcbDrawing.Placement a = place("A", 0, 0);
-            PcbDrawing.Placement c = place("C", 0, 10);
+            Placement a = place("A", 0, 0);
+            Placement c = place("C", 0, 10);
             // M's via stands between A and where B goes: a straight step from A's pad to B's is never clear.
             PcbDrawing pcb = pcb(List.of(a, place("B", 12, 0), c), List.of(track(line(1.5, 0, 10.5, 0)), track(line(-1.5, 10, 6, 3))),
                     List.of(via(6, 3, 0.8)), List.of(), List.of());
@@ -732,7 +738,7 @@ class RoutingEngineTest {
                 assertEquals(pcb.tracks().size(), shown.tracks().size(), "a track was taken off at " + up);
                 List<Point> line = shown.tracks().getFirst().points();
                 assertEquals(point(1.5, 0), line.getFirst(), "broken off A's pad at " + up + ": " + line);
-                assertTrue(Lines.samePoint(point(10.5, up), line.getLast()), "broken off B's pad at " + up + ": " + line);
+                assertTrue(Precision.samePoint(point(10.5, up), line.getLast()), "broken off B's pad at " + up + ": " + line);
             }
         }
     }
@@ -756,14 +762,14 @@ class RoutingEngineTest {
 
         private final Map<String, Map<String, String>> wired = nets("BZ", "1", "PLUS", "BZ", "2", "BUZZER", "C", "1", "PLUS", "D", "1", "BUZZER");
 
-        private final PcbDrawing.Placement c = place("C", 73.95, 27.85);
+        private final Placement c = place("C", 73.95, 27.85);
 
-        private final PcbDrawing.Placement d = place("D", 67.175, 43.1);
+        private final Placement d = place("D", 67.175, 43.1);
 
         // As the control board has them: pin 1's track out to the right and up, pin 2's coming down from above and in to it.
         private final PcbDrawing pcb = pcb(List.of(place("BZ", 70.2, 66.65), c, d), List.of(
-                track(line(70.2, 66.65, 73.95, 62.9, 73.95, 27.85), PcbDrawing.TOP, 0.4),
-                track(line(67.175, 43.1, 67.175, 56.025, 70.2, 59.05), PcbDrawing.TOP, 0.2)));
+                track(line(70.2, 66.65, 73.95, 62.9, 73.95, 27.85), PcbVocabulary.TOP, 0.4),
+                track(line(67.175, 43.1, 67.175, 56.025, 70.2, 59.05), PcbVocabulary.TOP, 0.2)));
 
         private RoutingBoard board() {
             Map<String, FootprintDrawing> footprints = new LinkedHashMap<>();
@@ -776,7 +782,7 @@ class RoutingEngineTest {
         }
 
         private PartDrag carried(double dx, double dy) {
-            PcbDrawing moved = pcb.withPlacements(List.of(place("BZ", Lines.settled(70.2 + dx), Lines.settled(66.65 + dy)), c, d));
+            PcbDrawing moved = pcb.withPlacements(List.of(place("BZ", Precision.settled(70.2 + dx), Precision.settled(66.65 + dy)), c, d));
             return new PartDrag(pcb, moved, 45, PartDragMode.RECONNECT);
         }
 
@@ -789,7 +795,7 @@ class RoutingEngineTest {
             for (double dx = -FARTHEST; dx <= FARTHEST; dx += STEP) {
                 for (double dy = -FARTHEST; dy <= FARTHEST; dy += STEP) {
                     PartDrag drag = carried(dx, dy);
-                    String where = "carried by " + Lines.settled(dx) + ", " + Lines.settled(dy);
+                    String where = "carried by " + Precision.settled(dx) + ", " + Precision.settled(dy);
                     PcbDrawing frame = hand.tracksBanded(drag);
                     faultsOfTrack(board, frame, 0).forEach(fault -> faults.add(where + ", in a frame: " + fault));
                     switch (new RoutingEngine(board).tracksLaid(drag)) {
@@ -808,9 +814,9 @@ class RoutingEngineTest {
         @Test
         void copperGoingWholeWithThePartMovesWithItStepByStep() {
             PcbDrawing stubbed = pcb(List.of(place("BZ", 70.2, 66.65), c, d), List.of(
-                    track(line(70.2, 66.65, 71.8, 65.05, 71.8, 27.85), PcbDrawing.TOP, 0.4),
-                    track(line(67.175, 43.1, 67.175, 56.025, 70.2, 59.05), PcbDrawing.TOP, 0.2),
-                    track(line(70.2, 59.05, 70.9, 59.05), PcbDrawing.TOP, 0.2)));
+                    track(line(70.2, 66.65, 71.8, 65.05, 71.8, 27.85), PcbVocabulary.TOP, 0.4),
+                    track(line(67.175, 43.1, 67.175, 56.025, 70.2, 59.05), PcbVocabulary.TOP, 0.2),
+                    track(line(70.2, 59.05, 70.9, 59.05), PcbVocabulary.TOP, 0.2)));
             RoutingBoard board = board();
             PcbDrawing laid = laidBy(new RoutingEngine(board), stubbed, stubbed.withPlacements(List.of(place("BZ", 72.7, 66.65), c, d)), 45);
             assertEquals(point(73.4, 59.05), laid.tracks().get(2).points().getLast(), "the stub went with the pin");
@@ -830,10 +836,10 @@ class RoutingEngineTest {
             double y = 66.65;
             for (int release = 1; release <= 10; release++) {
                 RoutingEngine hand = new RoutingEngine(board);
-                PcbDrawing.Placement put = null;
+                Placement put = null;
                 for (int move = 0; move < 2; move++) {
-                    x = Lines.settled(x + Math.round((generator.next() * 2 - 1) * 6) / 2.0);
-                    y = Lines.settled(y + Math.round((generator.next() * 2 - 1) * 6) / 2.0);
+                    x = Precision.settled(x + Math.round((generator.next() * 2 - 1) * 6) / 2.0);
+                    y = Precision.settled(y + Math.round((generator.next() * 2 - 1) * 6) / 2.0);
                     put = place("BZ", x, y);
                     hand.tracksBanded(new PartDrag(standing, standing.withPlacements(List.of(put, c, d)), 45, PartDragMode.RECONNECT));
                 }
@@ -848,8 +854,8 @@ class RoutingEngineTest {
                     assertClean(faultsOfTrack(board, standing, index), about);
                     // A drag pulls tight only the region it works in, so a line may keep a corner beyond it — never a snake: no more
                     // corners than it was laid with and two, none turning back (faultsOfTrack).
-                    int corners = Lines.cornersOf(line).size() - 2;
-                    assertTrue(corners <= Lines.cornersOf(pcb.tracks().get(index).points()).size(), about + " has " + corners + " corners: " + line);
+                    int corners = Polylines.cornersOf(line).size() - 2;
+                    assertTrue(corners <= Polylines.cornersOf(pcb.tracks().get(index).points()).size(), about + " has " + corners + " corners: " + line);
                 }
             }
         }
@@ -886,12 +892,12 @@ class RoutingEngineTest {
 
         // Three pins on one net, their tracks meeting at a junction well off where they would meet shortest — near R, which is moved,
         // within the region a drag works in.
-        private final List<PcbDrawing.Placement> placements = List.of(place("P", 0, 0), place("Q", 20, 0), place("R", 10, 20));
+        private final List<Placement> placements = List.of(place("P", 0, 0), place("Q", 20, 0), place("R", 10, 20));
         private final PcbDrawing junctioned = pcb(placements, List.of(track(line(0, 0, 10, 17)), track(line(20, 0, 10, 17)), track(line(10, 20, 10, 17))));
         private final PcbDrawing nudged = junctioned.withPlacements(List.of(placements.get(0), placements.get(1), place("R", 10.5, 20)));
 
         private static double lengthOfAll(PcbDrawing pcb) {
-            return pcb.tracks().stream().mapToDouble(track -> Lines.lengthOf(track.points())).sum();
+            return pcb.tracks().stream().mapToDouble(track -> Polylines.lengthOf(track.points())).sum();
         }
 
         /** The drag laid with every joint held, as the settings have it by default. */
@@ -910,7 +916,7 @@ class RoutingEngineTest {
             RoutingBoard board = boardLettingJointsGo(junctioned);
             PcbDrawing laid = laidBy(new RoutingEngine(board), junctioned, nudged, 45);
             Point joint = laid.tracks().getFirst().points().getLast();
-            laid.tracks().forEach(track -> assertTrue(Lines.samePoint(joint, track.points().getLast()), "the lines still meet: " + laid.tracks()));
+            laid.tracks().forEach(track -> assertTrue(Precision.samePoint(joint, track.points().getLast()), "the lines still meet: " + laid.tracks()));
             // Where three lines from a triangle's corners are shortest together: well below where they met, towards P and Q.
             assertTrue(joint.y() < 15, "the junction slid towards where its lines are shortest: " + joint);
             PcbDrawing held = laidHeld();
@@ -923,15 +929,15 @@ class RoutingEngineTest {
         @Test
         void aViaLetGoSlidesToWhereItsLinesAreShortest() {
             // P's track runs on the top to a via off the way to Q — near Q, which is moved —, Q's on the bottom from it.
-            PcbDrawing viaed = pcb(placements, List.of(track(line(0, 0, 17, 3)), track(line(17, 3, 20, 0), PcbDrawing.BOTTOM, 0.25)),
+            PcbDrawing viaed = pcb(placements, List.of(track(line(0, 0, 17, 3)), track(line(17, 3, 20, 0), PcbVocabulary.BOTTOM, 0.25)),
                     List.of(via(17, 3, 0.8)), List.of(), List.of());
             PcbDrawing moved = viaed.withPlacements(List.of(placements.get(0), place("Q", 20.5, 0), placements.get(2)));
             RoutingBoard board = boardLettingJointsGo(viaed);
             PcbDrawing laid = laidBy(new RoutingEngine(board), viaed, moved, 45);
-            PcbDrawing.Via via = laid.vias().getFirst();
+            Via via = laid.vias().getFirst();
             assertTrue(via.y() < 2.5, "the via slid towards the way between the pins: " + via);
-            assertTrue(Lines.samePoint(point(via.x(), via.y()), laid.tracks().getFirst().points().getLast()), "the top line still ends on it");
-            assertTrue(Lines.samePoint(point(via.x(), via.y()), laid.tracks().get(1).points().getFirst()), "the bottom line still starts on it");
+            assertTrue(Precision.samePoint(point(via.x(), via.y()), laid.tracks().getFirst().points().getLast()), "the top line still ends on it");
+            assertTrue(Precision.samePoint(point(via.x(), via.y()), laid.tracks().get(1).points().getFirst()), "the bottom line still starts on it");
             assertTrue(lengthOfAll(laid) < lengthOfAll(viaed), "shorter together: " + laid.tracks());
         }
     }
@@ -953,9 +959,9 @@ class RoutingEngineTest {
             List<FootprintDrawing.Pad> row = new ArrayList<>();
             Map<String, Map<String, String>> wired = new LinkedHashMap<>();
             Map<String, String> pins = new LinkedHashMap<>();
-            List<PcbDrawing.Track> tracks = new ArrayList<>();
+            List<Track> tracks = new ArrayList<>();
             for (int pin = 0; pin < PINS; pin++) {
-                double x = Lines.settled((pin - (PINS - 1) / 2.0) * PITCH);
+                double x = Precision.settled((pin - (PINS - 1) / 2.0) * PITCH);
                 row.add(new FootprintDrawing.Pad(String.valueOf(pin + 1), "surface", "rectangle", x, 3, 0, 0.35, 1.5, 0, 0, 0, "", "", "", null, null));
                 pins.put(String.valueOf(pin + 1), "N" + pin);
                 tracks.add(track(line(x, 3, x, 15)));
@@ -1101,7 +1107,7 @@ class RoutingEngineTest {
 
         // The inverting amplifier as the editor sets it out: a line of N under a long straight track of M, both from pad to pad.
         private final Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N", "C", "2", "M", "D", "1", "M");
-        private final List<PcbDrawing.Placement> placements = List.of(place("A", 0, 10), place("B", 20, 10), place("C", -5, 6.5), place("D", 25, 6.5));
+        private final List<Placement> placements = List.of(place("A", 0, 10), place("B", 20, 10), place("C", -5, 6.5), place("D", 25, 6.5));
         private final List<Point> under = line(1.5, 10, 4, 7.5, 16, 7.5, 18.5, 10);
         private final List<Point> over = line(-3.5, 6.5, 23.5, 6.5);
 
@@ -1110,7 +1116,7 @@ class RoutingEngineTest {
             PcbDrawing pcb = pcb(placements, List.of(track(under), track(over)));
             RoutingBoard board = board(pcb, parts);
             RoutingEngine engine = new RoutingEngine(board);
-            double asked = Lines.lengthOf(under);
+            double asked = Polylines.lengthOf(under);
             for (double pull = 0.1; pull <= 4; pull += 0.1) {
                 Optional<PcbDrawing> answer = engine.segmentCarried(pcb, 0, 1, 0, -pull, style(45, Tightening.JogHandling.MERGED), Optional.empty());
                 if (answer.isEmpty()) {
@@ -1120,7 +1126,7 @@ class RoutingEngineTest {
                     assertClean(faultsOfTrack(board, answer.get(), index), "track " + index + ", pulled " + pull);
                 }
                 List<Point> line = answer.get().tracks().getFirst().points();
-                assertTrue(Lines.lengthOf(line) <= asked * SETTINGS.carrying().longestWalk() + 2 * pull, "pulled " + pull + ": " + line);
+                assertTrue(Polylines.lengthOf(line) <= asked * SETTINGS.carrying().longestWalk() + 2 * pull, "pulled " + pull + ": " + line);
             }
         }
     }
@@ -1129,9 +1135,9 @@ class RoutingEngineTest {
     class ALineMadeOfSeveralTracksAsABoardReadFromAFileHasIt {
 
         private final Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
-        private final List<PcbDrawing.Placement> placements = List.of(place("A", 0, 0), place("B", 21.5, 15));
-        private final List<PcbDrawing.Track> tracks = List.of(track(line(1.5, 0, 1.5, 10), PcbDrawing.TOP, 0.5),
-                track(line(1.5, 10, 6.5, 15), PcbDrawing.TOP, 0.4), track(line(20, 15, 6.5, 15), PcbDrawing.TOP, 0.3));
+        private final List<Placement> placements = List.of(place("A", 0, 0), place("B", 21.5, 15));
+        private final List<Track> tracks = List.of(track(line(1.5, 0, 1.5, 10), PcbVocabulary.TOP, 0.5),
+                track(line(1.5, 10, 6.5, 15), PcbVocabulary.TOP, 0.4), track(line(20, 15, 6.5, 15), PcbVocabulary.TOP, 0.3));
 
         @Test
         void movesTheDiagonalParallelTheTracksEitherSideGrowingAndShrinkingEachKeepingItsOwnWidth() {
@@ -1140,7 +1146,7 @@ class RoutingEngineTest {
             assertLine(line(1.5, 0, 1.5, 14), answer.tracks().get(0).points());
             assertLine(line(1.5, 14, 2.5, 15), answer.tracks().get(1).points());
             assertLine(line(20, 15, 2.5, 15), answer.tracks().get(2).points());
-            assertEquals(List.of(0.5, 0.4, 0.3), answer.tracks().stream().map(PcbDrawing.Track::width).toList());
+            assertEquals(List.of(0.5, 0.4, 0.3), answer.tracks().stream().map(Track::width).toList());
         }
 
         @Test
@@ -1149,8 +1155,8 @@ class RoutingEngineTest {
             RoutingEngine engine = new RoutingEngine(board(pcb, parts));
             for (double distance : new double[] {0.5, 1, 1.5, 2, 3}) {
                 PcbDrawing answer = engine.segmentCarried(pcb, 1, 0, distance, -distance, WALKING, Optional.empty()).orElseThrow();
-                List<Point> third = Lines.reversed(answer.tracks().get(2).points());
-                List<Point> whole = Lines.joined(answer.tracks().get(0).points(), answer.tracks().get(1).points().subList(1, answer.tracks().get(1).points().size()),
+                List<Point> third = Polylines.reversed(answer.tracks().get(2).points());
+                List<Point> whole = Polylines.joined(answer.tracks().get(0).points(), answer.tracks().get(1).points().subList(1, answer.tracks().get(1).points().size()),
                         third.subList(1, third.size()));
                 assertEquals(4, whole.size(), "" + whole);
                 assertClean(faultsOfLine(whole), "by " + distance);
@@ -1169,7 +1175,7 @@ class RoutingEngineTest {
         void joinsTracksWhoseEndsOnlyMeetInTheirCopperAndTurnsWhereTheirOwnDirectionsMeet() {
             // LINEAR_500W_PS-1, D1's anode: the vertical ends at 83.966 44.819, the diagonal starts at 83.922 44.863.
             PcbDrawing pcb = pcb(List.of(place("A", 87.375, 49.816), place("B", 85.466, 25.671)),
-                    List.of(track(line(83.966, 44.819, 83.966, 27.171), PcbDrawing.TOP, 2.5), track(line(88.875, 49.816, 83.922, 44.863), PcbDrawing.TOP, 2.5)));
+                    List.of(track(line(83.966, 44.819, 83.966, 27.171), PcbVocabulary.TOP, 2.5), track(line(88.875, 49.816, 83.922, 44.863), PcbVocabulary.TOP, 2.5)));
             RoutingEngine engine = new RoutingEngine(board(pcb, nets("A", "1", "N", "A", "2", "N", "B", "1", "N", "B", "2", "N")));
             for (double distance : new double[] {0.5, 1, 2, 3}) {
                 PcbDrawing answer = engine.segmentCarried(pcb, 1, 0, -distance, distance, WALKING, Optional.empty()).orElseThrow();
@@ -1179,14 +1185,14 @@ class RoutingEngineTest {
                 assertEquals(83.966, vertical.getFirst().x(), 1e-3, "by " + distance + ": the vertical stays vertical");
                 assertTrue(vertical.getFirst().y() > 44.9, "by " + distance + ": it grows down");
                 assertTrue(diagonal.size() <= 4, "by " + distance + ": " + diagonal);
-                List<Point> back = Lines.reversed(diagonal);
-                assertClean(faultsOfLine(Lines.joined(Lines.reversed(vertical), back.subList(1, back.size()))), "by " + distance);
+                List<Point> back = Polylines.reversed(diagonal);
+                assertClean(faultsOfLine(Polylines.joined(Polylines.reversed(vertical), back.subList(1, back.size()))), "by " + distance);
             }
         }
 
         @Test
         void isNotJoinedAcrossAPadOrAVia() {
-            PcbDrawing pcb = pcb(placements, tracks, List.of(new PcbDrawing.Via(1.5, 10, 0.3, 0.6, null, null)), List.of(), List.of());
+            PcbDrawing pcb = pcb(placements, tracks, List.of(new Via(1.5, 10, 0.3, 0.6, null, null)), List.of(), List.of());
             PcbDrawing answer = new RoutingEngine(board(pcb, parts)).segmentCarried(pcb, 1, 0, -2, 2, WALKING, Optional.empty()).orElseThrow();
             assertLine(line(1.5, 0, 1.5, 10), answer.tracks().get(0).points());
             assertLine(List.of(point(1.5, 10)), List.of(answer.tracks().get(1).points().getFirst()));
@@ -1201,14 +1207,14 @@ class RoutingEngineTest {
 
         @Test
         void isKeptWhereItIsLongerThanTheTrackIsWide() {
-            PcbDrawing pcb = pcb(List.of(), List.of(track(jogged, PcbDrawing.TOP, 0.2)));
+            PcbDrawing pcb = pcb(List.of(), List.of(track(jogged, PcbVocabulary.TOP, 0.2)));
             assertLine(jogged, new RoutingEngine(board(pcb, Map.of())).withoutJogs(pcb, List.of()).tracks().getFirst().points());
         }
 
         @Test
         void isMergedByADragOnlyWhenTheReaderAsksForIt() {
             // A jog one can see — 0.7 mm on a 1 mm track: longer than a step nobody means, shorter than a run.
-            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 10, 10, 10.5, 9.5, 30, 9.5, 40.5, 20, 50, 20), PcbDrawing.TOP, 1)));
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 10, 10, 10.5, 9.5, 30, 9.5, 40.5, 20, 50, 20), PcbVocabulary.TOP, 1)));
             RoutingEngine engine = new RoutingEngine(board(pcb, Map.of()));
             PcbDrawing kept = engine.segmentCarried(pcb, 0, 3, 0, 1, WALKING, Optional.empty()).orElseThrow();
             PcbDrawing merged = engine.segmentCarried(pcb, 0, 3, 0, 1, style(45, Tightening.JogHandling.MERGED),
@@ -1222,9 +1228,9 @@ class RoutingEngineTest {
         void carriedWithinAJogOfTheRunBesideItLandsOnThatRun() {
             // A board as KiCad keeps it, one track a stretch: two flats a millimetre apart, a square step between. The lower one carried
             // up to a step's width short of the other — a step nobody means —: merged, it lands on the other's line, which stays.
-            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.2),
-                    track(line(10, 0, 10, -1), PcbDrawing.TOP, 0.2), track(line(10, -1, 20, -1), PcbDrawing.TOP, 0.2),
-                    track(line(20, -1, 26, 5), PcbDrawing.TOP, 0.2));
+            List<Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbVocabulary.TOP, 0.2), track(line(0, 0, 10, 0), PcbVocabulary.TOP, 0.2),
+                    track(line(10, 0, 10, -1), PcbVocabulary.TOP, 0.2), track(line(10, -1, 20, -1), PcbVocabulary.TOP, 0.2),
+                    track(line(20, -1, 26, 5), PcbVocabulary.TOP, 0.2));
             Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
             PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 27.5, 5)), tracks);
             RoutingEngine engine = new RoutingEngine(board(pcb, parts));
@@ -1234,8 +1240,8 @@ class RoutingEngineTest {
             List<Point> line = JoinedTracks.joinedLine(new RoutingEngine(board(merged, parts)).worldOf(merged), 1).points();
             assertTrue(keptLine.stream().anyMatch(point -> Math.abs(point.y() + 0.83) < 1e-6), "kept, the step stays where the hand left it: " + keptLine);
             for (int at = 1; at + 2 < line.size(); at++) {
-                assertTrue(Lines.lengthBetween(line.get(at), line.get(at + 1)) >= 0.4,
-                        "a step of " + Lines.lengthBetween(line.get(at), line.get(at + 1)) + " left in " + line);
+                assertTrue(line.get(at).distanceTo(line.get(at + 1)) >= 0.4,
+                        "a step of " + line.get(at).distanceTo(line.get(at + 1)) + " left in " + line);
             }
             assertTrue(line.stream().noneMatch(point -> Math.abs(point.y() + 0.83) < 1e-6), "merged, nothing stays a step off the run: " + line);
             assertTrue(line.stream().anyMatch(point -> Math.abs(point.y() + 1) < 1e-6 && Math.abs(point.x() - 20) < 1e-6), "the run beside it stays: " + line);
@@ -1243,7 +1249,7 @@ class RoutingEngineTest {
 
         @Test
         void isMergedOnAFinishedBoardOnlyOnTheTracksAskedAndNeverIntoAnotherNetsCopper() {
-            PcbDrawing pcb = pcb(List.of(), List.of(track(jogged, PcbDrawing.TOP, 1), track(line(30, 0, 40, 10, 40.3, 9.7, 50, 9.7), PcbDrawing.TOP, 1)));
+            PcbDrawing pcb = pcb(List.of(), List.of(track(jogged, PcbVocabulary.TOP, 1), track(line(30, 0, 40, 10, 40.3, 9.7, 50, 9.7), PcbVocabulary.TOP, 1)));
             PcbDrawing answer = new RoutingEngine(board(pcb, Map.of())).withoutJogs(pcb, List.of(0));
             assertLine(line(0, 0, 9.7, 9.7, 20, 9.7), answer.tracks().getFirst().points());
             assertSame(pcb.tracks().get(1), answer.tracks().get(1));
@@ -1335,7 +1341,7 @@ class RoutingEngineTest {
 
         private final Map<String, Map<String, String>> parts = nets("A", "1", "P", "A", "2", "Q", "B", "1", "Q", "B", "2", "R", "C", "1", "R", "C", "2", "S",
                 "D", "1", "S", "D", "2", "T", "E", "1", "T", "E", "2", "P", "F", "1", "Q", "F", "2", "S");
-        private final List<PcbDrawing.Placement> placements = List.of(place("A", 0, 0), place("B", 15, 0), place("C", 30, 0), place("D", 30, 15),
+        private final List<Placement> placements = List.of(place("A", 0, 0), place("B", 15, 0), place("C", 30, 0), place("D", 30, 15),
                 place("E", 15, 15), place("F", 0, 15));
 
         @Test
@@ -1360,14 +1366,14 @@ class RoutingEngineTest {
             int refused = 0;
             for (int drag = 0; drag < 40; drag++) {
                 int chosen = (int) Math.floor(random.next() * now.placements().size());
-                PcbDrawing.Placement part = now.placements().get(chosen);
+                Placement part = now.placements().get(chosen);
                 // Moved as the editor moves a part: to the precision a point is kept to.
-                double dx = Lines.settled((random.next() - 0.5) * 6);
-                double dy = Lines.settled((random.next() - 0.5) * 6);
+                double dx = Precision.settled((random.next() - 0.5) * 6);
+                double dy = Precision.settled((random.next() - 0.5) * 6);
                 // The part alone, as the editor says it: the copper it carries — a track between two of its pads goes whole — is the engine's.
-                List<PcbDrawing.Placement> placed = new ArrayList<>(now.placements());
-                placed.set(chosen, new PcbDrawing.Placement(part.designator(), Lines.settled(part.x() + dx), Lines.settled(part.y() + dy), 0,
-                        PcbDrawing.TOP, Optional.empty()));
+                List<Placement> placed = new ArrayList<>(now.placements());
+                placed.set(chosen, new Placement(part.designator(), Precision.settled(part.x() + dx), Precision.settled(part.y() + dy), 0,
+                        PcbVocabulary.TOP, Optional.empty()));
                 // A part let go where its copper cannot stand is refused, and stays where it was: a move not taken.
                 switch (engine.tracksLaid(drag(now, now.withPlacements(placed), 45))) {
                     case RoutingEngine.Release.Laid laid -> now = laid.pcb();
@@ -1444,13 +1450,13 @@ class RoutingEngineTest {
     void aTrackBeingLaidGoesRoundAWallWithAWayRoundItAndStopsAtOneWithNone() {
         PcbDrawing pcb = pcb(List.of(), List.of(track(line(-3, 5, 13, 5))));
         RoutingBoard board = board(pcb, Map.of());
-        TrackRouter.RoutedLeg round = new RoutingEngine(board).leg(pcb, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.25, point(5, 0), point(5, 10), 45, 0).leg();
+        TrackRouter.RoutedLeg round = new RoutingEngine(board).leg(pcb, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.25, point(5, 0), point(5, 10), 45, 0).leg();
         assertTrue(round.reached());
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
-        tracks.add(track(Lines.joined(List.of(point(5, 0)), round.points())));
+        List<Track> tracks = new ArrayList<>(pcb.tracks());
+        tracks.add(track(Polylines.joined(List.of(point(5, 0)), round.points())));
         assertClean(faultsOfTrack(board, pcb.withTracks(tracks), 1), "the leg laid");
         PcbDrawing walled = pcb(List.of(), List.of(track(line(-100, 5, 100, 5))));
-        assertFalse(new RoutingEngine(board(walled, Map.of())).leg(walled, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.25, point(5, 0), point(5, 10), 45, 0).leg().reached());
+        assertFalse(new RoutingEngine(board(walled, Map.of())).leg(walled, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.25, point(5, 0), point(5, 10), 45, 0).leg().reached());
     }
 
     /**
@@ -1468,21 +1474,21 @@ class RoutingEngineTest {
         PcbDrawing pcb = pcb(List.of(place("T", 0, 0)), List.of());
         RoutingBoard rowBoard = board(pcb, nets("T", "1", "B", "T", "2", "A", "T", "3", "C"), thin);
         RoutingEngine engine = new RoutingEngine(rowBoard);
-        List<Point> slanted = engine.leg(pcb, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.2, point(0, 0), point(5, -5), 45, 0).leg().points();
+        List<Point> slanted = engine.leg(pcb, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.2, point(0, 0), point(5, -5), 45, 0).leg().points();
         // Straight down along the pad before it turns, clear of its neighbours.
-        assertEquals(0, slanted.getFirst().x(), Lines.SAME_POINT, "leaves along the pad: " + slanted);
+        assertEquals(0, slanted.getFirst().x(), Precision.SAME_POINT, "leaves along the pad: " + slanted);
         assertLine(line(5, -5), List.of(slanted.getLast()));
-        PcbDrawing laid = pcb.withTracks(List.of(track(Lines.joined(List.of(point(0, 0)), slanted), PcbDrawing.TOP, 0.2)));
+        PcbDrawing laid = pcb.withTracks(List.of(track(Polylines.joined(List.of(point(0, 0)), slanted), PcbVocabulary.TOP, 0.2)));
         assertClean(faultsOfTrack(rowBoard, laid, 0), "out between its neighbours");
-        List<Point> along = engine.leg(pcb, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.2, point(0, 0), point(0, -5), 45, 0).leg().points();
+        List<Point> along = engine.leg(pcb, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.2, point(0, 0), point(0, -5), 45, 0).leg().points();
         assertLine(line(0, -5), along);
         // A thin pad standing alone, nothing in the way: the way found runs on a slant straight out of its middle, over its corner; it
         // is laid out of the pad's side instead.
         FootprintDrawing alone = new FootprintDrawing(List.of(row.get(1)), List.of(), List.of(), null, List.of());
         RoutingEngine single = new RoutingEngine(board(pcb, nets("T", "2", "A"), alone));
-        List<Point> out = single.leg(pcb, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.2, point(0, 0), point(5, -5), 45, 0).leg().points();
+        List<Point> out = single.leg(pcb, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.2, point(0, 0), point(5, -5), 45, 0).leg().points();
         Point first = out.getFirst();
-        assertTrue(Math.abs(first.x()) < Lines.SAME_POINT || Math.abs(first.y()) < Lines.SAME_POINT, "out of a side, square to it: " + out);
+        assertTrue(Math.abs(first.x()) < Precision.SAME_POINT || Math.abs(first.y()) < Precision.SAME_POINT, "out of a side, square to it: " + out);
     }
 
     /**
@@ -1493,7 +1499,7 @@ class RoutingEngineTest {
     void aTrackOnNoNetIsCarriedOnFromItsEndItsOwnCopperNotInItsWay() {
         PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 5, 0))));
         RoutingEngine engine = new RoutingEngine(board(pcb, Map.of()));
-        TrackRouter.RoutedLeg carriedOn = engine.leg(pcb, OptionalInt.of(0), PcbDrawing.TOP, Optional.empty(), 0.25, point(5, 0), point(10, 5), 45, 0).leg();
+        TrackRouter.RoutedLeg carriedOn = engine.leg(pcb, OptionalInt.of(0), PcbVocabulary.TOP, Optional.empty(), 0.25, point(5, 0), point(10, 5), 45, 0).leg();
         assertTrue(carriedOn.reached(), "laid on from its own end");
         assertLine(line(10, 5), List.of(carriedOn.points().getLast()));
     }
@@ -1533,10 +1539,10 @@ class RoutingEngineTest {
         PcbDrawing pcb = pcb(List.of(), List.of(track(line(-100, 5, 30, 5)), track(line(34, 5, 100, 5))));
         RoutingBoard board = board(pcb, Map.of());
         RoutingEngine engine = new RoutingEngine(board);
-        TrackRouter.RoutedLeg corridor = engine.leg(pcb, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.25, point(5, 0), point(5, 10), 45, 0).leg();
+        TrackRouter.RoutedLeg corridor = engine.leg(pcb, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.25, point(5, 0), point(5, 10), 45, 0).leg();
         assertTrue(corridor.reached(), "round through the gap: " + corridor.points());
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
-        tracks.add(track(Lines.joined(List.of(point(5, 0)), corridor.points())));
+        List<Track> tracks = new ArrayList<>(pcb.tracks());
+        tracks.add(track(Polylines.joined(List.of(point(5, 0)), corridor.points())));
         assertClean(faultsOfTrack(board, pcb.withTracks(tracks), 2), "the leg laid round the wall");
     }
 
@@ -1548,16 +1554,16 @@ class RoutingEngineTest {
     @Test
     void aTrackBeingLaidIsDrawnOnlyWithCornersThatKeepItsGaps() {
         // A via inside the corner a leg turns at, clear of both its runs and in the way of a corner rounded by 4 mm.
-        PcbDrawing pcb = pcb(List.of(), List.of(), List.of(new PcbDrawing.Via(8.8, 1.2, 0.2, 0.4, PcbDrawing.TOP, PcbDrawing.BOTTOM)), List.of(), List.of());
+        PcbDrawing pcb = pcb(List.of(), List.of(), List.of(new Via(8.8, 1.2, 0.2, 0.4, PcbVocabulary.TOP, PcbVocabulary.BOTTOM)), List.of(), List.of());
         RoutingBoard board = board(pcb, Map.of());
-        RoutingEngine.LaidLeg laid = new RoutingEngine(board).leg(pcb, OptionalInt.empty(), PcbDrawing.TOP, Optional.of("A"), 0.25, point(0, 0), point(10, 10), 90, 4);
+        RoutingEngine.LaidLeg laid = new RoutingEngine(board).leg(pcb, OptionalInt.empty(), PcbVocabulary.TOP, Optional.of("A"), 0.25, point(0, 0), point(10, 10), 90, 4);
         assertLine(line(10, 0, 10, 10), laid.leg().points());
         assertTrue(laid.leg().reached());
         assertTrue(laid.rounding() < 4, "corners of 4 mm would run over the via: " + laid.rounding());
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
-        tracks.add(new PcbDrawing.Track(PcbDrawing.TOP, 0.25, laid.rounding(), Lines.joined(List.of(point(0, 0)), laid.leg().points())));
+        List<Track> tracks = new ArrayList<>(pcb.tracks());
+        tracks.add(new Track(PcbVocabulary.TOP, 0.25, laid.rounding(), Polylines.joined(List.of(point(0, 0)), laid.leg().points())));
         RoutingWorld world = new RoutingWorld(pcb.withTracks(tracks), board);
-        assertTrue(world.fence(PcbDrawing.TOP, Optional.of("A"), 0.25, OptionalInt.of(0)).copperClear(
+        assertTrue(world.fence(PcbVocabulary.TOP, Optional.of("A"), 0.25, OptionalInt.of(0)).copperClear(
                 CopperShapes.track(tracks.getLast(), CURVE_STEPS)), "drawn as answered, it keeps its gaps");
     }
 
@@ -1566,7 +1572,7 @@ class RoutingEngineTest {
 
         private final Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
 
-        private List<Double> angles(PcbDrawing.Track line) {
+        private List<Double> angles(Track line) {
             List<Double> angles = new ArrayList<>();
             for (int index = 1; index < line.points().size(); index++) {
                 Point from = line.points().get(index - 1);
@@ -1576,7 +1582,7 @@ class RoutingEngineTest {
             return angles;
         }
 
-        private Autorouter.Routed route(double angleStep, double rounding, List<PcbDrawing.Track> tracks, List<PcbDrawing.NetClass> netClasses) {
+        private Autorouter.Routed route(double angleStep, double rounding, List<Track> tracks, List<NetClass> netClasses) {
             PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 12, 7)), tracks, List.of(), List.of(), netClasses);
             return autorouted(board(pcb, parts), pcb, angleStep, rounding, Autorouter.Crossing.VIAS, moment -> {
             });
@@ -1586,7 +1592,7 @@ class RoutingEngineTest {
         void laysAtRightAnglesWhenAsked() {
             Autorouter.Routed answer = route(90, 0, List.of(), List.of());
             assertEquals(List.of(), answer.unrouted());
-            for (PcbDrawing.Track line : answer.pcb().tracks()) {
+            for (Track line : answer.pcb().tracks()) {
                 for (double angle : angles(line)) {
                     assertTrue(Math.abs(angle / 90 - Math.round(angle / 90)) < 0.001, "" + line.points());
                 }
@@ -1602,14 +1608,14 @@ class RoutingEngineTest {
 
         @Test
         void takesANetClassesWidthAndKeepsItsClearance() {
-            List<PcbDrawing.NetClass> classes = List.of(new PcbDrawing.NetClass("power", 0.5, 0.4, 0, 0, List.of("N", "W")));
+            List<NetClass> classes = List.of(new NetClass("power", 0.5, 0.4, 0, 0, List.of("N", "W")));
             Autorouter.Routed answer = route(45, 0, List.of(track(line(-100, 3.2, 3, 3.2, 3, 100))), classes);
-            List<PcbDrawing.Track> laid = answer.pcb().tracks().subList(1, answer.pcb().tracks().size());
+            List<Track> laid = answer.pcb().tracks().subList(1, answer.pcb().tracks().size());
             assertFalse(laid.isEmpty());
             assertTrue(laid.stream().allMatch(line -> line.width() == 0.5));
             RoutingWorld world = new RoutingWorld(answer.pcb(), board(answer.pcb(), parts));
-            TrackFence fence = world.fence(PcbDrawing.TOP, Optional.of("N"), 0.5);
-            for (PcbDrawing.Track line : laid) {
+            TrackFence fence = world.fence(PcbVocabulary.TOP, Optional.of("N"), 0.5);
+            for (Track line : laid) {
                 assertTrue(fence.lineClear(line.points()), "" + line.points());
             }
             assertEquals(0.4, world.clearanceOf(Optional.of("N")));
@@ -1637,7 +1643,7 @@ class RoutingEngineTest {
             PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 12, 0)), List.of());
             Autorouter.Routed answer = autorouted(board(pcb, parts), pcb);
             assertEquals(List.of(), answer.unrouted());
-            assertTrue(answer.pcb().tracks().stream().allMatch(line -> line.layer().equals(PcbDrawing.TOP)));
+            assertTrue(answer.pcb().tracks().stream().allMatch(line -> line.layer().equals(PcbVocabulary.TOP)));
             assertEquals(List.of(), answer.pcb().vias());
         }
 
@@ -1647,11 +1653,11 @@ class RoutingEngineTest {
             Autorouter.Routed answer = autorouted(board(pcb, parts), pcb);
             assertEquals(List.of(), answer.unrouted());
             assertEquals(2, answer.pcb().vias().size());
-            List<PcbDrawing.Track> laid = answer.pcb().tracks().subList(1, answer.pcb().tracks().size());
-            assertTrue(laid.stream().anyMatch(line -> line.layer().equals(PcbDrawing.BOTTOM)));
+            List<Track> laid = answer.pcb().tracks().subList(1, answer.pcb().tracks().size());
+            assertTrue(laid.stream().anyMatch(line -> line.layer().equals(PcbVocabulary.BOTTOM)));
             for (Point end : line(1.5, 0, 1.5, 12, -1.5, 12)) {
-                assertTrue(laid.stream().filter(line -> line.points().stream().anyMatch(point -> Lines.lengthBetween(point, end) < 0.001))
-                        .allMatch(line -> line.layer().equals(PcbDrawing.TOP)));
+                assertTrue(laid.stream().filter(line -> line.points().stream().anyMatch(point -> point.distanceTo(end) < 0.001))
+                        .allMatch(line -> line.layer().equals(PcbVocabulary.TOP)));
             }
         }
 
@@ -1659,14 +1665,14 @@ class RoutingEngineTest {
         void crossesByALinkWhereNothingElseGoesAndOnlyWhenAllowed() {
             // A wall on both layers: no via gets past it, only a part standing over the top one.
             PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 0, 12)), List.of(track(line(-300, 6, 300, 6)),
-                    track(line(-300, 6, 300, 6), PcbDrawing.BOTTOM, 0.25)));
+                    track(line(-300, 6, 300, 6), PcbVocabulary.BOTTOM, 0.25)));
             RoutingBoard board = board(pcb, parts);
             Autorouter.Routed refused = autorouted(board, pcb, 45, 0, Autorouter.Crossing.VIAS, moment -> {
             });
             assertEquals(1, refused.unrouted().size());
             Autorouter.Routed linked = autorouted(board, pcb, 45, 0, Autorouter.Crossing.LINKS, moment -> {
             });
-            List<PcbDrawing.Placement> links = linked.pcb().placements().stream().filter(placement -> placement.footprint().isPresent()).toList();
+            List<Placement> links = linked.pcb().placements().stream().filter(placement -> placement.footprint().isPresent()).toList();
             assertEquals(List.of(), linked.unrouted());
             assertEquals(1, links.size());
             assertEquals(Map.of("1", "N", "2", "N"), links.getFirst().nets());
@@ -1701,7 +1707,7 @@ class RoutingEngineTest {
     @Nested
     class APlane {
 
-        private final PcbDrawing.Zone ground = new PcbDrawing.Zone(PcbDrawing.BOTTOM, "0", 0.4, 0, "M-20 -20H20V20H-20Z");
+        private final Zone ground = new Zone(PcbVocabulary.BOTTOM, "0", 0.4, 0, "M-20 -20H20V20H-20Z");
 
         @Test
         void takesTheSurfacePadsOfItsNetOnTheOtherSideEachByADropOfItsOwn() {
@@ -1710,8 +1716,8 @@ class RoutingEngineTest {
             assertEquals(List.of(), answer.unrouted());
             assertEquals(2, answer.pcb().vias().size());
             assertEquals(2, answer.pcb().tracks().size());
-            for (PcbDrawing.Track drop : answer.pcb().tracks()) {
-                assertTrue(Lines.lengthOf(drop.points()) < SETTINGS.autorouting().planeDrops().reach());
+            for (Track drop : answer.pcb().tracks()) {
+                assertTrue(Polylines.lengthOf(drop.points()) < SETTINGS.autorouting().planeDrops().reach());
             }
         }
 
@@ -1755,7 +1761,7 @@ class RoutingEngineTest {
                 double rightmost = line.subList(1, line.size() - 1).stream().mapToDouble(Point::x).max().orElse(0);
                 assertTrue(rightmost <= 16.5 - 1.15 - 0.2 - 0.125 + 1e-3, "" + line);
                 // It was pulled: it presses on the column rather than lying where it was.
-                assertTrue(Lines.lengthOf(line) > Lines.lengthOf(pcb.tracks().getFirst().points()) + 1);
+                assertTrue(Polylines.lengthOf(line) > Polylines.lengthOf(pcb.tracks().getFirst().points()) + 1);
             }
         }
 
@@ -1769,7 +1775,7 @@ class RoutingEngineTest {
             for (double by : new double[] {1, 2, 3, 4, 6}) {
                 List<Point> line = pulled(by).tracks().getFirst().points();
                 for (int index = 2; index < line.size() - 1; index++) {
-                    assertTrue(Lines.lengthBetween(line.get(index - 1), line.get(index)) >= 0.25 * SETTINGS.routing().leastStep(), "" + line);
+                    assertTrue(line.get(index - 1).distanceTo(line.get(index)) >= 0.25 * SETTINGS.routing().leastStep(), "" + line);
                 }
             }
         }
@@ -1778,7 +1784,7 @@ class RoutingEngineTest {
     @Test
     void aStepNobodyCanMeanGoesFromALineWhateverBecomesOfJogs() {
         PcbDrawing pcb = pcb(List.of(), List.of());
-        TrackFence fence = new RoutingWorld(pcb, board(pcb, Map.of())).fence(PcbDrawing.TOP, Optional.empty(), 0.25);
+        TrackFence fence = new RoutingWorld(pcb, board(pcb, Map.of())).fence(PcbVocabulary.TOP, Optional.empty(), 0.25);
         Tightening tightening = new Tightening(fence, 45, List.of(), SETTINGS.routing());
         assertLine(line(52.5, 22.78, 60.85, 22.78, 60.88, 22.75),
                 tightening.untangled(line(52.5, 22.78, 59.85, 22.78, 59.88, 22.75, 60.88, 22.75), Tightening.JogHandling.KEPT));
@@ -1793,8 +1799,8 @@ class RoutingEngineTest {
         @Test
         void aLineOfStretchesChosenIsOneTrackRoundedAtItsJointsTheChoiceKeptOnIt() {
             // As KiCad keeps a line: one track a stretch. All three chosen, rounded: one track, its corners its own, the choice on it.
-            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.2),
-                    track(line(10, 0, 15, 5), PcbDrawing.TOP, 0.2), track(line(30, 30, 40, 30), PcbDrawing.TOP, 0.2));
+            List<Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbVocabulary.TOP, 0.2), track(line(0, 0, 10, 0), PcbVocabulary.TOP, 0.2),
+                    track(line(10, 0, 15, 5), PcbVocabulary.TOP, 0.2), track(line(30, 30, 40, 30), PcbVocabulary.TOP, 0.2));
             Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
             PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 16.5, 5)), tracks);
             CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(0, 1, 2));
@@ -1807,8 +1813,8 @@ class RoutingEngineTest {
 
         @Test
         void aStretchChosenIsItsLineChosen() {
-            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.2),
-                    track(line(10, 0, 15, 5), PcbDrawing.TOP, 0.2));
+            List<Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbVocabulary.TOP, 0.2), track(line(0, 0, 10, 0), PcbVocabulary.TOP, 0.2),
+                    track(line(10, 0, 15, 5), PcbVocabulary.TOP, 0.2));
             Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
             PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 16.5, 5)), tracks);
             CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(1));
@@ -1818,8 +1824,8 @@ class RoutingEngineTest {
 
         @Test
         void stretchesOfAnotherWidthStayTracksOfTheirOwn() {
-            List<PcbDrawing.Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbDrawing.TOP, 0.2), track(line(0, 0, 10, 0), PcbDrawing.TOP, 0.5),
-                    track(line(10, 0, 15, 5), PcbDrawing.TOP, 0.2));
+            List<Track> tracks = List.of(track(line(-5, 5, 0, 0), PcbVocabulary.TOP, 0.2), track(line(0, 0, 10, 0), PcbVocabulary.TOP, 0.5),
+                    track(line(10, 0, 15, 5), PcbVocabulary.TOP, 0.2));
             Map<String, Map<String, String>> parts = nets("A", "2", "N", "B", "1", "N");
             PcbDrawing pcb = pcb(List.of(place("A", -6.5, 5), place("B", 16.5, 5)), tracks);
             CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(0, 1, 2));

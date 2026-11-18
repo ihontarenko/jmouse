@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.geometry.taut.TautPath;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ record Band(JoinedTracks.JoinedLine line, String layer, double width, Optional<S
 
     /** A band of a whole line, from end to end, as it runs. */
     static Band whole(JoinedTracks.JoinedLine line, String layer, double width, Optional<String> net, BandEnd start, BandEnd end) {
-        return of(line, layer, width, net, BandReach.whole(Lines.cornersOf(line.points()), start, end));
+        return of(line, layer, width, net, BandReach.whole(Polylines.cornersOf(line.points()), start, end));
     }
 
     /**
@@ -130,12 +131,12 @@ record Band(JoinedTracks.JoinedLine line, String layer, double width, Optional<S
     List<Point> wholeAlong(List<Point> stretch) {
         List<Point> head = head();
         List<Point> tail = tail();
-        return Lines.withoutStraightPoints(Lines.joined(head.isEmpty() ? List.of() : head.subList(0, head.size() - 1), stretch,
+        return LineCleaning.withoutStraightPoints(Polylines.joined(head.isEmpty() ? List.of() : head.subList(0, head.size() - 1), stretch,
                                                         tail.isEmpty() ? List.of() : tail.subList(1, tail.size())));
     }
 
     /** Its whole line as one track: its first track's layer, its widest width. */
-    PcbDrawing.Track asTrack(PcbDrawing pcb) {
+    Track asTrack(PcbDrawing pcb) {
         return pcb.tracks().get(track()).withPoints(fullPath());
     }
 

@@ -1,6 +1,6 @@
 package org.jmouse.cad.pcb.geometry;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.Zone;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -66,19 +66,19 @@ public final class PourMemory {
      * @param reach how far from a piece's copper the pour can change with it: what the pour is shrunk by and grown back by, each
      *              with what an offset followed in chords may stand off
      */
-    record Frame(PcbDrawing.Zone zone, Object area, double reach) {
+    record Frame(Zone zone, Object area, double reach) {
     }
 
     /** A zone's last pour: what framed it, the pieces it was made of by their keys, and what it poured before islands were taken off. */
     private record Kept(Frame frame, Map<Key, Piece> pieces, Geometry opened) {
     }
 
-    private final Map<PcbDrawing.Zone, Kept> kept;
+    private final Map<Zone, Kept> kept;
 
     private PourMemory(int zonesKept) {
         this.kept = new LinkedHashMap<>(Math.max(1, zonesKept), 0.75f, true) {
             @Override
-            protected boolean removeEldestEntry(Map.Entry<PcbDrawing.Zone, Kept> eldest) {
+            protected boolean removeEldestEntry(Map.Entry<Zone, Kept> eldest) {
                 return size() > zonesKept;
             }
         };

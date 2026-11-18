@@ -1,10 +1,23 @@
 package org.jmouse.cad.pcb.checks;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.NetClass;
+import org.jmouse.cad.pcb.drawing.Pair;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Keepout;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.geometry.index.BoxIndex;
+import org.jmouse.geometry.index.BoxTree;
+
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.geometry.BoxIndex;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperPieces;
 import org.jmouse.cad.pcb.geometry.CopperShape;
@@ -95,7 +108,7 @@ public final class PcbChecks {
         this.pcb = subject.pcb();
         this.nets = nets;
         this.pieces = pieces;
-        this.piecesNear = BoxIndex.of(pieces.stream().map(piece -> piece.shape().box()).toList());
+        this.piecesNear = BoxTree.of(pieces.stream().map(piece -> piece.shape().box()).toList());
         pieces.forEach(piece -> piecesByKind.computeIfAbsent(piece.kind(), kind -> new HashMap<>()).putIfAbsent(piece.index(), piece));
     }
 
@@ -114,7 +127,7 @@ public final class PcbChecks {
         String joins = "Copper joins " + String.join(" and ", joined.nets()) + ", which the circuit keeps apart";
         Set<String> keys = new LinkedHashSet<>();
         List<String> named = new ArrayList<>();
-        Optional<PcbDrawing.Point> at = Optional.empty();
+        Optional<Point> at = Optional.empty();
         for (CopperNets.Joined join : joined.joins()) {
             join.chain().forEach(member -> keys.add(keyOf(member)));
             List<CopperNets.Member> chain = join.chain();
@@ -134,7 +147,7 @@ public final class PcbChecks {
     }
 
     /** Where two pieces in the middle of a chain touch: the place a short is shown at. */
-    private Optional<PcbDrawing.Point> touchIn(List<CopperNets.Member> chain) {
+    private Optional<Point> touchIn(List<CopperNets.Member> chain) {
         int middle = Math.max(0, chain.size() / 2 - 1);
         Optional<CopperPieces.Piece> first = pieceOf(chain.get(middle));
         Optional<CopperPieces.Piece> second = pieceOf(chain.get(Math.min(chain.size() - 1, middle + 1)));
@@ -220,7 +233,7 @@ public final class PcbChecks {
         List<PcbFinding> findings = new ArrayList<>();
         Set<Long> compared = new HashSet<>();
         int unnamed = 0;
-        double widest = Stream.concat(Stream.of(rule(values, PcbVocabulary.RULE_CLEARANCE)), pcb.netClasses().stream().map(PcbDrawing.NetClass::clearance))
+        double widest = Stream.concat(Stream.of(rule(values, PcbVocabulary.RULE_CLEARANCE)), pcb.netClasses().stream().map(NetClass::clearance))
                 .mapToDouble(Double::doubleValue).max().orElse(0);
         for (String layer : pcb.copperLayerIds()) {
             List<Integer> onLayer = new ArrayList<>();
@@ -230,7 +243,7 @@ public final class PcbChecks {
                 }
             }
             // Each piece measured against those whose boxes come within the widest gap of its own — never every other on the layer.
-            BoxIndex onLayerNear = BoxIndex.of(onLayer.stream().map(index -> pieces.get(index).shape().box()).toList());
+            BoxIndex onLayerNear = BoxTree.of(onLayer.stream().map(index -> pieces.get(index).shape().box()).toList());
             for (int first = 0; first < onLayer.size(); first++) {
                 for (int second : onLayerNear.near(pieces.get(onLayer.get(first)).shape().box(), widest)) {
                     if (second <= first) {
@@ -309,23 +322,23 @@ public final class PcbChecks {
     private List<PcbFinding> holeFindings(Map<String, Double> values) {
         List<Hole> holes = new ArrayList<>();
         for (int index = 0; index < pcb.placements().size(); index++) {
-            PcbDrawing.Placement placement = pcb.placements().get(index);
+            Placement placement = pcb.placements().get(index);
             int at = index;
             footprintOf(placement).ifPresent(footprint -> footprint.pads().stream().filter(pad -> pad.drillWidth() > 0)
                     .forEach(pad -> holes.add(new Hole(key("placement", at), "the hole of " + placement.printed() + " pad "
                             + (pad.number().isEmpty() ? "—" : pad.number()), Optional.of(placement.designator()), CopperShapes.hole(placement, pad)))));
         }
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             holes.add(new Hole(key("via", index), "via " + (index + 1), Optional.empty(), CopperShape.circle(via.x(), via.y(), via.drill() / 2)));
         }
         for (int index = 0; index < pcb.holes().size(); index++) {
-            PcbDrawing.Hole hole = pcb.holes().get(index);
+            org.jmouse.cad.pcb.drawing.Hole hole = pcb.holes().get(index);
             holes.add(new Hole(key("hole", index), "hole " + (index + 1), Optional.empty(), CopperShape.circle(hole.x(), hole.y(), hole.drill() / 2)));
         }
         double keep = rule(values, PcbVocabulary.RULE_HOLE_CLEARANCE);
         List<PcbFinding> findings = new ArrayList<>();
-        BoxIndex holesNear = BoxIndex.of(holes.stream().map(hole -> hole.shape().box()).toList());
+        BoxIndex holesNear = BoxTree.of(holes.stream().map(hole -> hole.shape().box()).toList());
         for (int first = 0; first < holes.size(); first++) {
             for (int second : holesNear.near(holes.get(first).shape().box(), keep)) {
                 if (second <= first) {
@@ -358,7 +371,7 @@ public final class PcbChecks {
             if (PathOutlines.isClosed(outline)) {
                 continue;
             }
-            List<PcbDrawing.Point> ends = PathOutlines.openEnds(outline, settings.curveSteps());
+            List<Point> ends = PathOutlines.openEnds(outline, settings.curveSteps());
             if (ends.isEmpty()) {
                 continue;
             }
@@ -378,7 +391,7 @@ public final class PcbChecks {
         double keep = rule(values, PcbVocabulary.RULE_EDGE_CLEARANCE);
         Set<String> outside = new LinkedHashSet<>();
         Set<String> near = new LinkedHashSet<>();
-        PcbDrawing.Point nearAt = null;
+        Point nearAt = null;
         for (CopperPieces.Piece piece : pieces) {
             double[] first = piece.shape().pieces().getFirst();
             if (!edge.get().encloses(first[0], first[1])) {
@@ -412,7 +425,7 @@ public final class PcbChecks {
     private List<PcbFinding> keepoutFindings() {
         List<PcbFinding> findings = new ArrayList<>();
         for (int index = 0; index < pcb.keepouts().size(); index++) {
-            PcbDrawing.Keepout keepout = pcb.keepouts().get(index);
+            Keepout keepout = pcb.keepouts().get(index);
             Optional<CopperShape> area = CopperShape.ofPath(keepout.path(), true, 0, settings.curveSteps());
             if (area.isEmpty()) {
                 continue;
@@ -435,7 +448,7 @@ public final class PcbChecks {
         Set<String> circuitNets = subject.partNets().values().stream().flatMap(nets -> nets.values().stream()).collect(Collectors.toSet());
         List<PcbFinding> findings = new ArrayList<>();
         for (int index = 0; index < pcb.zones().size(); index++) {
-            PcbDrawing.Zone zone = pcb.zones().get(index);
+            Zone zone = pcb.zones().get(index);
             if (!circuitNets.contains(zone.net())) {
                 findings.add(new PcbFinding(WARNING, "Zone " + (index + 1) + " is poured for " + zone.net() + ", a net the circuit does not have",
                         List.of(key("zone", index))));
@@ -447,14 +460,14 @@ public final class PcbChecks {
     // ─── parts and markings ────────────────────────────────────────────────────────────────────────────
 
     /** The box of a part with no courtyard: far from anything, so no courtyard is ever found near it. */
-    private static final CopperShape.Box NO_COURTYARD = new CopperShape.Box(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+    private static final Box NO_COURTYARD = new Box(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
     /** Parts on one side whose courtyards overlap: the room a part needs to be placed and soldered is taken. */
     private List<PcbFinding> courtyardFindings() {
-        List<Optional<CopperShape.Box>> boxes = pcb.placements().stream().map(this::courtyardBox).toList();
+        List<Optional<Box>> boxes = pcb.placements().stream().map(this::courtyardBox).toList();
         List<PcbFinding> findings = new ArrayList<>();
         // Parts with no courtyard stand nowhere: an empty box, which no other box comes near.
-        BoxIndex courtyardsNear = BoxIndex.of(boxes.stream().map(box -> box.orElse(NO_COURTYARD)).toList());
+        BoxIndex courtyardsNear = BoxTree.of(boxes.stream().map(box -> box.orElse(NO_COURTYARD)).toList());
         for (int first = 0; first < boxes.size(); first++) {
             if (boxes.get(first).isEmpty()) {
                 continue;
@@ -463,15 +476,15 @@ public final class PcbChecks {
                 if (second <= first) {
                     continue;
                 }
-                PcbDrawing.Placement placement = pcb.placements().get(first);
-                PcbDrawing.Placement other = pcb.placements().get(second);
+                Placement placement = pcb.placements().get(first);
+                Placement other = pcb.placements().get(second);
                 if (boxes.get(first).isEmpty() || boxes.get(second).isEmpty() || !placement.side().equals(other.side())) {
                     continue;
                 }
-                CopperShape.Box one = boxes.get(first).get();
-                CopperShape.Box two = boxes.get(second).get();
+                Box one = boxes.get(first).get();
+                Box two = boxes.get(second).get();
                 if (one.overlaps(two)) {
-                    PcbDrawing.Point at = new PcbDrawing.Point((Math.max(one.left(), two.left()) + Math.min(one.right(), two.right())) / 2,
+                    Point at = new Point((Math.max(one.left(), two.left()) + Math.min(one.right(), two.right())) / 2,
                             (Math.max(one.top(), two.top()) + Math.min(one.bottom(), two.bottom())) / 2);
                     findings.add(new PcbFinding(WARNING, placement.printed() + " and " + other.printed() + " crowd each other: their courtyards overlap",
                             List.of(key("placement", first), key("placement", second)), at));
@@ -482,7 +495,7 @@ public final class PcbChecks {
     }
 
     /** The box a placed part's courtyard covers; empty for a footprint that draws none. */
-    private Optional<CopperShape.Box> courtyardBox(PcbDrawing.Placement placement) {
+    private Optional<Box> courtyardBox(Placement placement) {
         List<FootprintDrawing.Outline> outlines = footprintOf(placement).map(footprint -> footprint.outlines().stream()
                 .filter(outline -> PcbVocabulary.COURTYARD.equals(outline.layer())).toList()).orElse(List.of());
         double left = Double.POSITIVE_INFINITY;
@@ -490,24 +503,24 @@ public final class PcbChecks {
         double right = Double.NEGATIVE_INFINITY;
         double bottom = Double.NEGATIVE_INFINITY;
         for (FootprintDrawing.Outline outline : outlines) {
-            Optional<CopperShape.Box> drawn = pathBox(outline.path());
+            Optional<Box> drawn = pathBox(outline.path());
             if (drawn.isEmpty()) {
                 continue;
             }
-            CopperShape.Box box = drawn.get();
+            Box box = drawn.get();
             for (double[] corner : new double[][] {{box.left(), box.top()}, {box.right(), box.top()}, {box.left(), box.bottom()}, {box.right(), box.bottom()}}) {
-                PcbDrawing.Point placed = placement.placed(corner[0], corner[1]);
+                Point placed = placement.placed(corner[0], corner[1]);
                 left = Math.min(left, placed.x());
                 right = Math.max(right, placed.x());
                 top = Math.min(top, placed.y());
                 bottom = Math.max(bottom, placed.y());
             }
         }
-        return left > right ? Optional.empty() : Optional.of(new CopperShape.Box(left, top, right, bottom));
+        return left > right ? Optional.empty() : Optional.of(new Box(left, top, right, bottom));
     }
 
     /** A marking that may be printed cut: what it is named by and as, its side, the box it covers and its corners. */
-    private record Marking(String key, String label, String side, CopperShape.Box box, List<PcbDrawing.Point> corners) {
+    private record Marking(String key, String label, String side, Box box, List<Point> corners) {
     }
 
     /**
@@ -518,18 +531,18 @@ public final class PcbChecks {
     private List<PcbFinding> silkscreenFindings() {
         List<Marking> markings = new ArrayList<>();
         for (int index = 0; index < pcb.placements().size(); index++) {
-            PcbDrawing.Placement placement = pcb.placements().get(index);
+            Placement placement = pcb.placements().get(index);
             PlacedDesignator standing = PlacedDesignator.of(placement, footprintOf(placement), settings.designator());
             if (!standing.printed()) {
                 continue;
             }
-            CopperShape.Box box = standing.bounds(placement.designator(), settings.designator());
+            Box box = standing.bounds(placement.designator(), settings.designator());
             markings.add(new Marking(key("designator", index), placement.printed() + "'s designator", placement.side(), box, cornersOf(box)));
         }
         int textIndex = 0;
-        for (PcbDrawing.Text text : pcb.texts()) {
+        for (Lettering text : pcb.texts()) {
             if (text.layer().endsWith(SILKSCREEN_SUFFIX)) {
-                List<PcbDrawing.Point> corners = textCorners(text);
+                List<Point> corners = textCorners(text);
                 markings.add(new Marking(key("text", textIndex), "Text \"" + text.text() + "\"",
                         text.layer().substring(0, text.layer().length() - SILKSCREEN_SUFFIX.length()), boxOf(corners), corners));
             }
@@ -538,7 +551,7 @@ public final class PcbChecks {
         Optional<CopperShape> edge = CopperShape.ofPath(pcb.outline(), true, 0, settings.curveSteps());
         List<PcbFinding> findings = new ArrayList<>();
         for (Marking marking : markings) {
-            PcbDrawing.Point at = new PcbDrawing.Point((marking.box().left() + marking.box().right()) / 2, (marking.box().top() + marking.box().bottom()) / 2);
+            Point at = new Point((marking.box().left() + marking.box().right()) / 2, (marking.box().top() + marking.box().bottom()) / 2);
             Optional<CopperNets.PlacedPad> pad = nets.pads().stream()
                     .filter(candidate -> (candidate.pad().isPlatedThrough() || candidate.pad().hasCopperOn(marking.side(), candidate.placement()))
                                          && marking.box().overlaps(padBox(candidate)))
@@ -565,9 +578,9 @@ public final class PcbChecks {
     private List<PcbFinding> looseEndFindings() {
         List<PcbFinding> findings = new ArrayList<>();
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             String own = key("track", index);
-            for (PcbDrawing.Point end : List.of(track.points().getFirst(), track.points().getLast())) {
+            for (Point end : List.of(track.points().getFirst(), track.points().getLast())) {
                 CopperShape point = CopperShape.circle(end.x(), end.y(), 0);
                 boolean reached = Arrays.stream(piecesNear.near(point.box(), 0)).mapToObj(pieces::get)
                         .anyMatch(piece -> !piece.key().equals(own) && piece.onLayer().test(track.layer())
@@ -591,7 +604,7 @@ public final class PcbChecks {
         double thickness = subject.values().map(values -> values.getOrDefault(PcbVocabulary.RULE_PCB_THICKNESS, 0.0)).orElse(0.0);
         Map<String, NetLengths.Length> lengths = NetLengths.of(pcb, nets, thickness);
         List<PcbFinding> findings = new ArrayList<>();
-        for (PcbDrawing.Pair pair : pcb.pairs()) {
+        for (Pair pair : pcb.pairs()) {
             List<String> otherWidth = new ArrayList<>();
             for (int index = 0; index < pcb.tracks().size(); index++) {
                 Optional<String> net = nets.trackNets().get(index);
@@ -632,7 +645,7 @@ public final class PcbChecks {
 
     private static final String SILKSCREEN_SUFFIX = "-" + PcbVocabulary.SILKSCREEN;
 
-    private Optional<FootprintDrawing> footprintOf(PcbDrawing.Placement placement) {
+    private Optional<FootprintDrawing> footprintOf(Placement placement) {
         return Optional.ofNullable(subject.footprints().get(placement.designator()));
     }
 
@@ -697,46 +710,46 @@ public final class PcbChecks {
     }
 
     /** The box a placed pad covers: its width and height, turned a quarter where its turn and its part's make one. */
-    private static CopperShape.Box padBox(CopperNets.PlacedPad pad) {
+    private static Box padBox(CopperNets.PlacedPad pad) {
         double turned = (((pad.pad().rotation() + pad.placement().rotation()) % 180) + 180) % 180;
         double across = turned == 90 ? pad.pad().height() : pad.pad().width();
         double down = turned == 90 ? pad.pad().width() : pad.pad().height();
-        return new CopperShape.Box(pad.centre().x() - across / 2, pad.centre().y() - down / 2, pad.centre().x() + across / 2, pad.centre().y() + down / 2);
+        return new Box(pad.centre().x() - across / 2, pad.centre().y() - down / 2, pad.centre().x() + across / 2, pad.centre().y() + down / 2);
     }
 
-    private static CopperShape.Box holeBox(PcbDrawing.Hole hole) {
+    private static Box holeBox(org.jmouse.cad.pcb.drawing.Hole hole) {
         double reach = CopperShapes.reach(hole);
-        return new CopperShape.Box(hole.x() - reach, hole.y() - reach, hole.x() + reach, hole.y() + reach);
+        return new Box(hole.x() - reach, hole.y() - reach, hole.x() + reach, hole.y() + reach);
     }
 
     /** A text's four corners, turned as it stands: as wide as its letters advance, as tall as its size, on its point by its anchor. */
-    private List<PcbDrawing.Point> textCorners(PcbDrawing.Text text) {
+    private List<Point> textCorners(Lettering text) {
         double width = text.text().length() * text.size() * settings.designator().advance();
         double left = PcbVocabulary.TEXT_START.equals(text.anchor()) ? 0 : PcbVocabulary.TEXT_END.equals(text.anchor()) ? -width : -width / 2;
         double half = text.size() / 2;
         double angle = Math.toRadians(text.rotation());
         double cosine = Math.cos(angle);
         double sine = Math.sin(angle);
-        Function<double[], PcbDrawing.Point> turned = corner -> new PcbDrawing.Point(text.x() + corner[0] * cosine + corner[1] * sine,
+        Function<double[], Point> turned = corner -> new Point(text.x() + corner[0] * cosine + corner[1] * sine,
                 text.y() - corner[0] * sine + corner[1] * cosine);
         return Stream.of(new double[] {left, -half}, new double[] {left + width, -half}, new double[] {left + width, half}, new double[] {left, half})
                 .map(turned).toList();
     }
 
-    private static CopperShape.Box boxOf(List<PcbDrawing.Point> corners) {
-        return new CopperShape.Box(corners.stream().mapToDouble(PcbDrawing.Point::x).min().orElse(0),
-                corners.stream().mapToDouble(PcbDrawing.Point::y).min().orElse(0),
-                corners.stream().mapToDouble(PcbDrawing.Point::x).max().orElse(0),
-                corners.stream().mapToDouble(PcbDrawing.Point::y).max().orElse(0));
+    private static Box boxOf(List<Point> corners) {
+        return new Box(corners.stream().mapToDouble(Point::x).min().orElse(0),
+                corners.stream().mapToDouble(Point::y).min().orElse(0),
+                corners.stream().mapToDouble(Point::x).max().orElse(0),
+                corners.stream().mapToDouble(Point::y).max().orElse(0));
     }
 
-    private static List<PcbDrawing.Point> cornersOf(CopperShape.Box box) {
-        return List.of(new PcbDrawing.Point(box.left(), box.top()), new PcbDrawing.Point(box.right(), box.top()),
-                new PcbDrawing.Point(box.right(), box.bottom()), new PcbDrawing.Point(box.left(), box.bottom()));
+    private static List<Point> cornersOf(Box box) {
+        return List.of(new Point(box.left(), box.top()), new Point(box.right(), box.top()),
+                new Point(box.right(), box.bottom()), new Point(box.left(), box.bottom()));
     }
 
     /** The box a path covers. */
-    private Optional<CopperShape.Box> pathBox(String path) {
+    private Optional<Box> pathBox(String path) {
         if (path == null || path.isBlank()) {
             return Optional.empty();
         }
@@ -744,7 +757,7 @@ public final class PcbChecks {
         if (points.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(new CopperShape.Box(points.stream().mapToDouble(point -> point[0]).min().orElseThrow(),
+        return Optional.of(new Box(points.stream().mapToDouble(point -> point[0]).min().orElseThrow(),
                 points.stream().mapToDouble(point -> point[1]).min().orElseThrow(),
                 points.stream().mapToDouble(point -> point[0]).max().orElseThrow(),
                 points.stream().mapToDouble(point -> point[1]).max().orElseThrow()));

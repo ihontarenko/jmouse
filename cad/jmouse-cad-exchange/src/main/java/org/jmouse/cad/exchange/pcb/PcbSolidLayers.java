@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Colour;
 import org.jmouse.settings.Label;
@@ -22,7 +23,7 @@ import java.util.Map;
  * is. The layers are drawn from the same {@link PcbArtwork} as the Gerber files: the copper clipped to the pcb, the
  * mask the pcb less its openings, the silkscreen only where the mask is, and every hole left open through all of them.
  */
-public final class PcbLayers {
+public final class PcbSolidLayers {
 
     /** Its section of the settings tree (ADR 0004): its file and schema under org/jmouse/cad/settings/solid/layers. */
     public static final SettingsSection<Settings> SECTION = new SettingsSection<>("solid/layers", "PCB layers in 3D", Settings.class);
@@ -82,7 +83,7 @@ public final class PcbLayers {
 
     private final Settings settings;
 
-    public PcbLayers(Settings settings) {
+    public PcbSolidLayers(Settings settings) {
         this.settings = settings;
     }
 
@@ -99,12 +100,12 @@ public final class PcbLayers {
         List<String> stack = drawn.fabrication().pcb().copperLayerIds();
         String name = drawn.fabrication().name();
         List<RaisedArea> layers = new ArrayList<>();
-        for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
+        for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
             if (!stack.contains(side)) {
                 continue;
             }
             PcbSolid.Side made = solid.side(side).orElseThrow();
-            boolean top = side.equals(PcbDrawing.TOP);
+            boolean top = side.equals(PcbVocabulary.TOP);
             double face = top ? thickness : 0;
             double reached = 0;
             for (Map.Entry<Layer, Geometry> layer : List.of(Map.entry(settings.copper(), made.copper()), Map.entry(settings.mask(), made.mask()),
@@ -129,7 +130,7 @@ public final class PcbLayers {
             ring.add(ring.getFirst());
         }
         Polygon outline = AREAS.createPolygon(ring.toArray(Coordinate[]::new));
-        boolean bottomSide = PcbDrawing.BOTTOM.equals(body.side());
+        boolean bottomSide = PcbVocabulary.BOTTOM.equals(body.side());
         double height = body.height().orElseThrow(() -> new IllegalArgumentException(body.designator() + "'s footprint gives no body height"));
         return new RaisedArea(body.designator(), settings.body(), bottomSide ? -height : thickness, height,
                 outline.isValid() ? outline : outline.buffer(0));

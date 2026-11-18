@@ -1,7 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.geometry.Areas;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateFilter;
@@ -42,7 +42,7 @@ final class Plane {
     }
 
     /** A shape with every point of it moved as a part takes it from where it stood to where it stands. */
-    static Geometry carried(Geometry shape, PcbDrawing.Placement from, PcbDrawing.Placement to) {
+    static Geometry carried(Geometry shape, Placement from, Placement to) {
         return moved(shape, point -> from.carriedTo(to, point));
     }
 

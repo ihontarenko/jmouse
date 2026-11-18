@@ -1,5 +1,11 @@
 package org.jmouse.cad.pcb.layout;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
@@ -92,8 +98,6 @@ public final class CircuitLayout {
                           List<String> benchNets, Optional<String> ground) {
     }
 
-    private record Box(double left, double top, double right, double bottom) {
-    }
 
     private final Settings           settings;
     private final PcbLayout.Unseated unseated;
@@ -106,14 +110,14 @@ public final class CircuitLayout {
 
     /** The pcb laid out: its placements, edge and ground, no copper. */
     public PcbDrawing laidOut(Request request) {
-        List<PcbDrawing.Placement> placements = new ArrayList<>();
+        List<Placement> placements = new ArrayList<>();
         Map<String, Optional<FootprintDrawing>> footprints = new LinkedHashMap<>();
         Box sheet = spanOf(request.places().values().stream().map(place -> new double[] {place.x(), place.y()}).toList());
         for (BoardPart part : request.parts()) {
             SheetPlace place = request.places().get(part.designator());
             double rotation = place == null ? 0 : ((360 - place.rotation()) % 360 + 360) % 360;
-            placements.add(new PcbDrawing.Placement(part.designator(), place == null ? sheet.left() : place.x(), place == null ? sheet.top() : place.y(),
-                    rotation, PcbDrawing.TOP, Optional.empty()));
+            placements.add(new Placement(part.designator(), place == null ? sheet.left() : place.x(), place == null ? sheet.top() : place.y(),
+                    rotation, PcbVocabulary.TOP, Optional.empty()));
             footprints.put(part.designator(), part.footprint().map(request.footprints()::get));
         }
         if (!request.benchNets().isEmpty()) {
@@ -123,8 +127,8 @@ public final class CircuitLayout {
             for (int index = 0; index < request.benchNets().size(); index++) {
                 nets.put(Integer.toString(index + 1), request.benchNets().get(index));
             }
-            placements.add(new PcbDrawing.Placement(designator, sheet.left() - settings.connector().beforeSheet(), (sheet.top() + sheet.bottom()) / 2, 0,
-                    PcbDrawing.TOP, Optional.empty(), Optional.empty(), Optional.of(footprint), nets));
+            placements.add(new Placement(designator, sheet.left() - settings.connector().beforeSheet(), (sheet.top() + sheet.bottom()) / 2, 0,
+                    PcbVocabulary.TOP, Optional.empty(), Optional.empty(), Optional.of(footprint), nets));
             footprints.put(designator, Optional.ofNullable(request.footprints().get(footprint)));
         }
         // The sheet's longer span scaled to the side of a square whose area the parts fill the share the settings ask for: a sheet
@@ -136,8 +140,8 @@ public final class CircuitLayout {
         Box span = spanOf(placements.stream().map(placement -> new double[] {placement.x(), placement.y()}).toList());
         double scale = Math.sqrt(partsArea / settings.partsShare())
                        / Math.max(1, Math.max(span.right() - span.left(), span.bottom() - span.top()));
-        List<PcbDrawing.Placement> laid = new ArrayList<>();
-        for (PcbDrawing.Placement placement : placements) {
+        List<Placement> laid = new ArrayList<>();
+        for (Placement placement : placements) {
             laid.add(moved(placement, (placement.x() - span.left()) * scale, (placement.y() - span.top()) * scale));
         }
         // Apart by the gap and one step of the grid, then on the grid: a snap moves each part half a step at most, so two parts
@@ -151,12 +155,12 @@ public final class CircuitLayout {
         double bottom = boxes.stream().mapToDouble(Box::bottom).max().orElse(0);
         double shiftX = settings.margin() - Math.floor(left / settings.grid()) * settings.grid();
         double shiftY = settings.margin() - Math.floor(top / settings.grid()) * settings.grid();
-        List<PcbDrawing.Placement> placed = laid.stream().map(placement -> moved(placement, written(placement.x() + shiftX), written(placement.y() + shiftY)))
+        List<Placement> placed = laid.stream().map(placement -> moved(placement, written(placement.x() + shiftX), written(placement.y() + shiftY)))
                 .toList();
         double width = Math.ceil(right + shiftX + settings.margin());
         double height = Math.ceil(bottom + shiftY + settings.margin());
         double inset = settings.planeInset();
-        List<PcbDrawing.Zone> zones = request.ground().map(net -> List.of(new PcbDrawing.Zone(PcbDrawing.BOTTOM, net, settings.planeClearance(), 0,
+        List<Zone> zones = request.ground().map(net -> List.of(new Zone(PcbVocabulary.BOTTOM, net, settings.planeClearance(), 0,
                 "M" + number(inset) + " " + number(inset) + "H" + number(width - inset) + "V" + number(height - inset) + "H" + number(inset) + "Z")))
                 .orElse(List.of());
         return new PcbDrawing(request.circuit(), Optional.empty(), List.of(), null, List.of(), List.of(), 2, rectangularOutline(width, height, settings.corner()),
@@ -164,8 +168,8 @@ public final class CircuitLayout {
     }
 
     /** A placement at another place, all else kept. */
-    private static PcbDrawing.Placement moved(PcbDrawing.Placement placement, double x, double y) {
-        return new PcbDrawing.Placement(placement.designator(), x, y, placement.rotation(), placement.side(), placement.reference(), placement.shown(),
+    private static Placement moved(Placement placement, double x, double y) {
+        return new Placement(placement.designator(), x, y, placement.rotation(), placement.side(), placement.reference(), placement.shown(),
                 placement.footprint(), placement.nets(), placement.arrangement(), placement.role());
     }
 
@@ -190,7 +194,7 @@ public final class CircuitLayout {
         for (FootprintDrawing.Outline outline : footprint.get().outlines()) {
             Optional<CopperShape> drawn = CopperShape.ofPath(outline.path(), false, 0, CURVE_STEPS);
             if (drawn.isPresent()) {
-                CopperShape.Box box = drawn.get().box();
+                Box box = drawn.get().box();
                 left = Math.min(left, box.left());
                 top = Math.min(top, box.top());
                 right = Math.max(right, box.right());
@@ -201,7 +205,7 @@ public final class CircuitLayout {
     }
 
     /** The box a placed part takes on the pcb: its footprint's turned and set where it stands. */
-    private Box boundsOf(PcbDrawing.Placement placement, Optional<FootprintDrawing> footprint) {
+    private Box boundsOf(Placement placement, Optional<FootprintDrawing> footprint) {
         Box extent = extentOf(footprint);
         double left = Double.POSITIVE_INFINITY;
         double top = Double.POSITIVE_INFINITY;
@@ -209,7 +213,7 @@ public final class CircuitLayout {
         double bottom = Double.NEGATIVE_INFINITY;
         for (double[] corner : new double[][] {{extent.left(), extent.top()}, {extent.right(), extent.top()}, {extent.left(), extent.bottom()},
                                                {extent.right(), extent.bottom()}}) {
-            PcbDrawing.Point placed = placement.placed(corner[0], corner[1]);
+            Point placed = placement.placed(corner[0], corner[1]);
             left = Math.min(left, placed.x());
             top = Math.min(top, placed.y());
             right = Math.max(right, placed.x());
@@ -219,14 +223,14 @@ public final class CircuitLayout {
     }
 
     /** Courtyards pushed apart: each pair nearer than the gap along the way it overlaps least, half each way. */
-    private List<PcbDrawing.Placement> apart(List<PcbDrawing.Placement> placements, Map<String, Optional<FootprintDrawing>> footprints, double gap) {
-        List<PcbDrawing.Placement> moved = new ArrayList<>(placements);
+    private List<Placement> apart(List<Placement> placements, Map<String, Optional<FootprintDrawing>> footprints, double gap) {
+        List<Placement> moved = new ArrayList<>(placements);
         for (int pass = 0; pass < settings.passes(); pass++) {
             boolean pushed = false;
             for (int first = 0; first < moved.size(); first++) {
                 for (int second = first + 1; second < moved.size(); second++) {
-                    PcbDrawing.Placement one = moved.get(first);
-                    PcbDrawing.Placement two = moved.get(second);
+                    Placement one = moved.get(first);
+                    Placement two = moved.get(second);
                     Box a = boundsOf(one, footprints.get(one.designator()));
                     Box b = boundsOf(two, footprints.get(two.designator()));
                     double acrossX = Math.min(a.right(), b.right()) - Math.max(a.left(), b.left()) + gap;
@@ -253,7 +257,7 @@ public final class CircuitLayout {
         return moved;
     }
 
-    private List<PcbDrawing.Placement> snapped(List<PcbDrawing.Placement> placements) {
+    private List<Placement> snapped(List<Placement> placements) {
         double grid = settings.grid();
         return placements.stream().map(placement -> moved(placement, Math.round(placement.x() / grid) * grid, Math.round(placement.y() / grid) * grid))
                 .toList();

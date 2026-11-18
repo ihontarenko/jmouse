@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -43,7 +44,7 @@ final class DragBands {
             if (fixed) {
                 continue;
             }
-            PcbDrawing.Track track = was.tracks().get(index);
+            Track track = was.tracks().get(index);
             Optional<String> net = before.netOfTrack(index);
             double width = members.stream().mapToDouble(member -> was.tracks().get(member).width()).max().orElse(track.width());
             BandEnd start = endAt(pads, motion, track.layer(), line.points().getFirst(), net);
@@ -65,7 +66,7 @@ final class DragBands {
      */
     private static Band cutBy(Envelope region, JoinedTracks.JoinedLine line, String layer, double width, Optional<String> net, BandEnd start,
                               BandEnd end) {
-        return Band.of(line, layer, width, net, RegionCut.of(Lines.cornersOf(line.points()), region, start, end));
+        return Band.of(line, layer, width, net, RegionCut.of(Polylines.cornersOf(line.points()), region, start, end));
     }
 
     private static BandEnd endAt(List<RigidCopper.MovedPad> pads, DragMotion motion, String layer, Point point, Optional<String> net) {

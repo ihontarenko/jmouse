@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import org.jmouse.cad.pcb.geometry.CopperNets;
 
@@ -164,8 +165,8 @@ final class PartDragging {
             TrackRouter.RoutedLeg leg = TrackRouter.routedLeg(TrackRouter.LegRequest.of(engine.worldOf(board), OptionalInt.empty(), band.layer(),
                     band.net(), band.width(), from, to, drag.angleStep()));
             if (leg.reached()) {
-                List<PcbDrawing.Track> tracks = new ArrayList<>(board.tracks());
-                tracks.add(uncut.tracks().get(band.track()).withPoints(Lines.joined(List.of(from), leg.points())));
+                List<Track> tracks = new ArrayList<>(board.tracks());
+                tracks.add(uncut.tracks().get(band.track()).withPoints(Polylines.joined(List.of(from), leg.points())));
                 board = board.withTracks(tracks);
             }
         }

@@ -1,6 +1,6 @@
 package org.jmouse.cad.plugin.gerber;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
 import org.jmouse.cad.exchange.pcb.ArtworkFeature;
 import org.jmouse.gerber.GerberPoint;
 import org.jmouse.gerber.GerberShape;
@@ -64,7 +64,7 @@ final class ArtworkGerber {
             return;
         }
         composer.polarity(false);
-        for (List<PcbDrawing.Point> hole : region.holes()) {
+        for (List<Point> hole : region.holes()) {
             composer.region(List.of(hole.stream().map(ArtworkGerber::out).toList()));
         }
         composer.polarity(true);
@@ -82,7 +82,7 @@ final class ArtworkGerber {
         };
     }
 
-    private static GerberPoint out(PcbDrawing.Point point) {
+    private static GerberPoint out(Point point) {
         return PcbGerber.out(point.x(), point.y());
     }
 }

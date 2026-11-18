@@ -7,7 +7,7 @@ import org.jmouse.settings.Section;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.DocumentExport;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.plugin.mesh.ModelDocuments;
 import org.jmouse.core.process.PipedProgram;
 import org.jmouse.settings.ParameterValues;
@@ -106,6 +106,6 @@ public class StepPluginConfiguration {
                                                                            TableSource tables) {
         StrokeFont font = StrokeFont.newStroke();
         return variant -> new PcbStepExport(program, models::getObject, () -> sections.read(StepPlugin.EXPORT), variant,
-                () -> sections.read(PcbArtwork.SECTION), () -> sections.read(PcbLayers.SECTION), font, standards, tables);
+                () -> sections.read(PcbArtwork.SECTION), () -> sections.read(PcbSolidLayers.SECTION), font, standards, tables);
     }
 }

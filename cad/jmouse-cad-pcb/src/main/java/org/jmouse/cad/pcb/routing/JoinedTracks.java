@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public final class JoinedTracks {
 
     private static List<Point> pointsOf(PcbDrawing pcb, Member member) {
         List<Point> points = pcb.tracks().get(member.index()).points();
-        return member.reversed() ? Lines.reversed(points) : points;
+        return member.reversed() ? Polylines.reversed(points) : points;
     }
 
     /**
@@ -74,11 +75,11 @@ public final class JoinedTracks {
      */
     private static Point cornerBetween(Point before, Point end, Point start, Point after) {
         Point halfway = end.halfwayTo(start);
-        Optional<Point> coming = Lines.wayBetween(before, end);
-        Optional<Point> going = Lines.wayBetween(start, after);
-        Optional<Point> met = coming.isPresent() && going.isPresent() ? Lines.crossingOf(end, coming.get(), start, going.get()) : Optional.empty();
-        double farthest = Math.max(Lines.lengthBetween(end, start) * FARTHEST_MEETING, NEAREST_MEETING);
-        return met.filter(point -> Lines.lengthBetween(point, halfway) <= farthest).orElse(halfway);
+        Optional<Point> coming = Ways.wayBetween(before, end);
+        Optional<Point> going = Ways.wayBetween(start, after);
+        Optional<Point> met = coming.isPresent() && going.isPresent() ? Ways.crossingOf(end, coming.get(), start, going.get()) : Optional.empty();
+        double farthest = Math.max(end.distanceTo(start) * FARTHEST_MEETING, NEAREST_MEETING);
+        return met.filter(point -> point.distanceTo(halfway) <= farthest).orElse(halfway);
     }
 
     /** The line a track is part of: the track alone where it joins nothing at a plain joint. */
@@ -137,7 +138,7 @@ public final class JoinedTracks {
             int last = result.size() - 2 - left;
             int best = -1;
             for (int corner = from; corner <= last; corner++) {
-                if (best < 0 || Lines.lengthBetween(result.get(corner), joint) < Lines.lengthBetween(result.get(best), joint)) {
+                if (best < 0 || result.get(corner).distanceTo(joint) < result.get(best).distanceTo(joint)) {
                     best = corner;
                 }
             }
@@ -169,9 +170,9 @@ public final class JoinedTracks {
         for (int position = 0; position < joined.members().size(); position++) {
             Member member = joined.members().get(position);
             List<Point> piece = placed.line().subList(bounds.get(position), bounds.get(position + 1) + 1);
-            pieces.put(member.index(), member.reversed() ? Lines.reversed(piece) : List.copyOf(piece));
+            pieces.put(member.index(), member.reversed() ? Polylines.reversed(piece) : List.copyOf(piece));
         }
-        List<PcbDrawing.Track> tracks = new ArrayList<>(pcb.tracks());
+        List<Track> tracks = new ArrayList<>(pcb.tracks());
         pieces.forEach((index, points) -> tracks.set(index, tracks.get(index).withPoints(points)));
         return pcb.withTracks(tracks);
     }

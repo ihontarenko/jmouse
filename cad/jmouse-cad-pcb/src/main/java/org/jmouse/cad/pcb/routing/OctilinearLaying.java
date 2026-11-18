@@ -1,7 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
-
+import org.jmouse.cad.Point;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -41,7 +40,7 @@ final class OctilinearLaying {
         for (int corner = 1; corner < path.size(); corner++) {
             Point from = laid.getLast();
             Point to = path.get(corner);
-            Optional<Point> into = laid.size() >= 2 ? Lines.wayBetween(laid.get(laid.size() - 2), from) : coming;
+            Optional<Point> into = laid.size() >= 2 ? Ways.wayBetween(laid.get(laid.size() - 2), from) : coming;
             Optional<List<Point>> stretch = laidStretch(from, to, into, ran, fence, clearance, angleStep, fence.width() * settings.leastStep());
             if (stretch.isEmpty()) {
                 return Optional.empty();
@@ -60,17 +59,17 @@ final class OctilinearLaying {
     private static Optional<List<Point>> laidStretch(Point from, Point to, Optional<Point> coming, List<Point> ran, TrackFence fence,
                                                      Clearance clearance, double angleStep, double shortest) {
         Optional<List<Point>> postured = postured(from, to, coming, ran, fence, clearance, angleStep);
-        if (postured.isPresent() || Lines.lengthBetween(from, to) < shortest) {
+        if (postured.isPresent() || from.distanceTo(to) < shortest) {
             return postured;
         }
-        Point middle = Lines.settled(from.halfwayTo(to));
+        Point middle = Precision.settled(from.halfwayTo(to));
         Optional<List<Point>> first = laidStretch(from, middle, coming, ran, fence, clearance, angleStep, shortest);
         if (first.isEmpty()) {
             return Optional.empty();
         }
-        List<Point> half = Lines.joined(List.of(from), first.get());
-        Optional<Point> onward = Lines.wayBetween(half.get(half.size() - 2), half.getLast());
-        return laidStretch(middle, to, onward, ran, fence, clearance, angleStep, shortest).map(second -> Lines.joined(first.get(), second));
+        List<Point> half = Polylines.joined(List.of(from), first.get());
+        Optional<Point> onward = Ways.wayBetween(half.get(half.size() - 2), half.getLast());
+        return laidStretch(middle, to, onward, ran, fence, clearance, angleStep, shortest).map(second -> Polylines.joined(first.get(), second));
     }
 
     /**
@@ -84,18 +83,18 @@ final class OctilinearLaying {
         for (int corner = 0; corner < path.size(); corner++) {
             boolean end = corner == 0 || corner == path.size() - 1;
             if (end) {
-                settled.add(Lines.settled(path.get(corner)));
+                settled.add(Precision.settled(path.get(corner)));
                 continue;
             }
             Point at = path.get(corner);
-            Optional<Point> back = Lines.wayBetween(at, path.get(corner - 1));
-            Optional<Point> on = Lines.wayBetween(at, path.get(corner + 1));
+            Optional<Point> back = Ways.wayBetween(at, path.get(corner - 1));
+            Optional<Point> on = Ways.wayBetween(at, path.get(corner + 1));
             Point away = back.isPresent() && on.isPresent()
                     ? new Point(-back.get().x() - on.get().x(), -back.get().y() - on.get().y()) : new Point(0, 0);
-            Point preferred = Lines.settledTowards(at, away);
-            Point kept = fence.pointClear(preferred) ? preferred : Lines.keptPointsAround(at).stream()
+            Point preferred = Precision.settledTowards(at, away);
+            Point kept = fence.pointClear(preferred) ? preferred : Precision.keptPointsAround(at).stream()
                     .filter(fence::pointClear)
-                    .min(Comparator.comparingDouble(candidate -> Lines.lengthBetween(candidate, preferred)))
+                    .min(Comparator.comparingDouble(candidate -> candidate.distanceTo(preferred)))
                     .orElse(preferred);
             settled.add(kept);
         }
@@ -113,13 +112,13 @@ final class OctilinearLaying {
      */
     static Optional<List<Point>> postured(Point from, Point to, Optional<Point> coming, List<Point> ran, TrackFence fence,
                                                   Clearance clearance, double angleStep) {
-        List<List<Point>> ordered = Lines.posturesOf(from, to, angleStep).stream()
+        List<List<Point>> ordered = AngleSteps.posturesOf(from, to, angleStep).stream()
                 .sorted(Comparator.comparing((List<Point> posture) -> breaksInto(coming, from, posture))
                         .thenComparingInt(posture -> -endsAsItRan(ran, from, posture))
                         .thenComparingDouble(posture -> awayFrom(ran, from, posture)))
                 .toList();
         for (List<Point> posture : ordered) {
-            if (clearance == Clearance.OVERLOOKED || fence.lineClear(Lines.joined(List.of(from), posture))) {
+            if (clearance == Clearance.OVERLOOKED || fence.lineClear(Polylines.joined(List.of(from), posture))) {
                 return Optional.of(posture);
             }
         }
@@ -128,20 +127,20 @@ final class OctilinearLaying {
 
     /** Whether the line breaks where it comes into a posture's first run — a right angle or sharper —; never where it starts there. */
     private static boolean breaksInto(Optional<Point> coming, Point from, List<Point> posture) {
-        Optional<Point> setting = Lines.wayBetween(from, posture.getFirst());
-        return coming.isPresent() && setting.isPresent() && Lines.dot(coming.get(), setting.get()) <= Lines.SAME_POINT;
+        Optional<Point> setting = Ways.wayBetween(from, posture.getFirst());
+        return coming.isPresent() && setting.isPresent() && coming.get().dot(setting.get()) <= Precision.SAME_POINT;
     }
 
     /** The way the line ran at its stretch nearest a point, as a unit; empty for a line of no length there. */
     private static Optional<Point> wayRanNear(List<Point> ran, Point point) {
         int nearest = 1;
         for (int corner = 2; corner < ran.size(); corner++) {
-            if (Lines.distanceToStretch(point, ran.get(corner - 1), ran.get(corner))
-                < Lines.distanceToStretch(point, ran.get(nearest - 1), ran.get(nearest))) {
+            if (Stretches.distanceToStretch(point, ran.get(corner - 1), ran.get(corner))
+                < Stretches.distanceToStretch(point, ran.get(nearest - 1), ran.get(nearest))) {
                 nearest = corner;
             }
         }
-        return ran.size() < 2 ? Optional.empty() : Lines.wayBetween(ran.get(nearest - 1), ran.get(nearest));
+        return ran.size() < 2 ? Optional.empty() : Ways.wayBetween(ran.get(nearest - 1), ran.get(nearest));
     }
 
     /** At how many of its two ends a posture runs the way the line ran there: its first run where it starts, its last where it ends. */
@@ -153,8 +152,8 @@ final class OctilinearLaying {
 
     /** Whether the run between two points goes the way the line ran, either way along it. */
     private static boolean runsAs(Optional<Point> wayRan, Point from, Point to) {
-        return wayRan.isPresent() && Lines.wayBetween(from, to)
-                .filter(way -> Lines.samePoint(way, wayRan.get()) || Lines.samePoint(way, new Point(-wayRan.get().x(), -wayRan.get().y())))
+        return wayRan.isPresent() && Ways.wayBetween(from, to)
+                .filter(way -> Precision.samePoint(way, wayRan.get()) || Precision.samePoint(way, new Point(-wayRan.get().x(), -wayRan.get().y())))
                 .isPresent();
     }
 
@@ -174,9 +173,9 @@ final class OctilinearLaying {
     private static double distanceTo(List<Point> line, Point point) {
         double nearest = Double.POSITIVE_INFINITY;
         for (int corner = 1; corner < line.size(); corner++) {
-            nearest = Math.min(nearest, Lines.distanceToStretch(point, line.get(corner - 1), line.get(corner)));
+            nearest = Math.min(nearest, Stretches.distanceToStretch(point, line.get(corner - 1), line.get(corner)));
         }
-        return line.size() == 1 ? Lines.lengthBetween(point, line.getFirst()) : nearest;
+        return line.size() == 1 ? point.distanceTo(line.getFirst()) : nearest;
     }
 
 }

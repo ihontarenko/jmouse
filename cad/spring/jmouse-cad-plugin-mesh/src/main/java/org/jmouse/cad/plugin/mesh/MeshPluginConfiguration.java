@@ -5,7 +5,7 @@ import org.jmouse.cad.table.TableSource;
 import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.management.CadAccessRules;
 import org.jmouse.cad.mesh.ModelSource;
@@ -34,7 +34,7 @@ public class MeshPluginConfiguration {
     @Bean
     public MeshPlugin cadMeshPlugin(ObjectProvider<Extensions> extensions, ObjectProvider<ModelMeshService> meshes, CadSettings sections, CadStandards standards) {
         PcbGlbExport pcb = new PcbGlbExport(() -> sections.read(MeshPlugin.GLB), () -> sections.read(PcbArtwork.SECTION),
-                () -> sections.read(PcbLayers.SECTION), StrokeFont.newStroke(), meshes::getObject, standards);
+                () -> sections.read(PcbSolidLayers.SECTION), StrokeFont.newStroke(), meshes::getObject, standards);
         return new MeshPlugin(() -> extensions.getObject().contributions(ModelSource.POINT), List.of(pcb));
     }
 

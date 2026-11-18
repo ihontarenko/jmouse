@@ -1,6 +1,6 @@
 package org.jmouse.cad.panel;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
 import org.jmouse.svg.path.node.PathData;
 import org.jmouse.svg.path.node.PathMotion;
 import org.jmouse.svg.path.parser.PathParser;
@@ -15,13 +15,13 @@ record BoardMotion(double rotation, double acrossX, double acrossY) {
 
     private static final PathParser PATHS = new PathParser();
 
-    PcbDrawing.Point point(PcbDrawing.Point point) {
+    Point point(Point point) {
         // The drawing's Y grows downwards: what is seen as counter-clockwise runs against the frame's own angle.
         double radians = Math.toRadians(-rotation);
         // A board turns a quarter at a time: these are whole numbers, and must stay so.
         double cosine = Math.rint(Math.cos(radians));
         double sine = Math.rint(Math.sin(radians));
-        return new PcbDrawing.Point(point.x() * cosine - point.y() * sine + acrossX, point.x() * sine + point.y() * cosine + acrossY);
+        return new Point(point.x() * cosine - point.y() * sine + acrossX, point.x() * sine + point.y() * cosine + acrossY);
     }
 
     String path(String path) {

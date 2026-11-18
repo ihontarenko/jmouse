@@ -1,7 +1,12 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.geometry.index.BoxIndex;
+import org.jmouse.geometry.index.BoxGrid;
+
+import org.jmouse.geometry.index.Box;
+
 import org.jspecify.annotations.Nullable;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.svg.path.node.PathPolylines;
 import org.jmouse.svg.path.parser.PathParser;
 
@@ -22,7 +27,7 @@ import java.util.function.DoublePredicate;
  * @param box    the box it covers, radius included: what is compared first
  * @param cells  its pieces by the cells of a grid, for a shape of many — a pour's outline —; null for one of a few
  */
-public record CopperShape(List<double[]> pieces, boolean area, double radius, Box box, @Nullable PieceCells cells) {
+public record CopperShape(List<double[]> pieces, boolean area, double radius, Box box, @Nullable BoxIndex cells) {
 
     /** How many pieces make a shape worth its cells: below it, walking every piece costs less than the cells do. */
     private static final int INDEXED_FROM = 32;
@@ -32,31 +37,21 @@ public record CopperShape(List<double[]> pieces, boolean area, double radius, Bo
         this(pieces, area, radius, box, null);
     }
 
-    /** A box: left, top, right, bottom. */
-    public record Box(double left, double top, double right, double bottom) {
-
-        /** Whether another box comes within a distance of this one. */
-        public boolean within(Box other, double distance) {
-            return left - distance <= other.right && other.left - distance <= right && top - distance <= other.bottom
-                   && other.top - distance <= bottom;
-        }
-
-        /** Whether it overlaps another box, not only touches it. */
-        public boolean overlaps(Box other) {
-            return left < other.right && other.left < right && top < other.bottom && other.top < bottom;
-        }
-    }
-
     /** How near two shapes come — 0 or less where they touch or overlap —, and where: the middle of the gap. */
-    public record Gap(double gap, PcbDrawing.Point at) {
+    public record Gap(double gap, Point at) {
     }
 
     private static final PathParser PATHS = new PathParser();
 
+    /** The box a piece — a stretch from one point to another — takes. */
+    private static Box boxOfPiece(double[] piece) {
+        return new Box(Math.min(piece[0], piece[2]), Math.min(piece[1], piece[3]), Math.max(piece[0], piece[2]), Math.max(piece[1], piece[3]));
+    }
+
     public CopperShape {
         pieces = List.copyOf(pieces);
         if (cells == null && pieces.size() >= INDEXED_FROM) {
-            cells = new PieceCells(pieces);
+            cells = BoxGrid.even(pieces.stream().map(CopperShape::boxOfPiece).toList());
         }
     }
 
@@ -81,26 +76,26 @@ public record CopperShape(List<double[]> pieces, boolean area, double radius, Bo
     }
 
     /** A line a round pen draws through its points, grown by the pen's radius. */
-    public static CopperShape line(List<PcbDrawing.Point> points, double radius) {
+    public static CopperShape line(List<Point> points, double radius) {
         List<double[]> pieces = new ArrayList<>();
         for (int index = 1; index < points.size(); index++) {
-            PcbDrawing.Point from = points.get(index - 1);
-            PcbDrawing.Point to = points.get(index);
+            Point from = points.get(index - 1);
+            Point to = points.get(index);
             pieces.add(new double[] {from.x(), from.y(), to.x(), to.y()});
         }
         if (pieces.isEmpty()) {
-            PcbDrawing.Point only = points.getFirst();
+            Point only = points.getFirst();
             pieces.add(new double[] {only.x(), only.y(), only.x(), only.y()});
         }
         return of(pieces, false, radius);
     }
 
     /** The area a ring of points closes, its line not grown. */
-    public static CopperShape ring(List<PcbDrawing.Point> points) {
+    public static CopperShape ring(List<Point> points) {
         List<double[]> pieces = new ArrayList<>();
         for (int index = 0; index < points.size(); index++) {
-            PcbDrawing.Point from = points.get(index);
-            PcbDrawing.Point to = points.get((index + 1) % points.size());
+            Point from = points.get(index);
+            Point to = points.get((index + 1) % points.size());
             pieces.add(new double[] {from.x(), from.y(), to.x(), to.y()});
         }
         return of(pieces, true, 0);
@@ -192,10 +187,10 @@ public record CopperShape(List<double[]> pieces, boolean area, double radius, Bo
         double[] first = pieces.getFirst();
         double[] second = other.pieces.getFirst();
         if ((area && encloses(second[0], second[1])) || (other.area && other.encloses(first[0], first[1]))) {
-            PcbDrawing.Point at = area ? new PcbDrawing.Point(second[0], second[1]) : new PcbDrawing.Point(first[0], first[1]);
+            Point at = area ? new Point(second[0], second[1]) : new Point(first[0], first[1]);
             return new Gap(-Math.max(radius, other.radius), at);
         }
-        return new Gap(best - radius - other.radius, new PcbDrawing.Point((from[0] + to[0]) / 2, (from[1] + to[1]) / 2));
+        return new Gap(best - radius - other.radius, new Point((from[0] + to[0]) / 2, (from[1] + to[1]) / 2));
     }
 
     /**
@@ -276,8 +271,7 @@ public record CopperShape(List<double[]> pieces, boolean area, double radius, Bo
         boolean indexedIsThis = indexed == this;
         CopperShape walked = indexedIsThis ? other : this;
         for (double[] one : walked.pieces) {
-            boolean found = indexed.cells.anyNear(Math.min(one[0], one[2]) - reach, Math.min(one[1], one[3]) - reach,
-                    Math.max(one[0], one[2]) + reach, Math.max(one[1], one[3]) + reach, index -> {
+            boolean found = indexed.cells.anyNear(boxOfPiece(one).grown(reach), index -> {
                         double[] two = indexed.pieces.get(index);
                         return indexedIsThis ? question.test(two, one) : question.test(one, two);
                     });

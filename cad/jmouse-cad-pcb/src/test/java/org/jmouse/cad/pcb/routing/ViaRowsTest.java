@@ -1,5 +1,12 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.ViaSize;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.NetRules;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -33,7 +40,7 @@ class ViaRowsTest {
     private static final Map<String, Double> VALUES = Map.of("clearance", 0.2, "edge-clearance", 0.3, "hole-clearance", 0.25, "thermal-gap", 0.3,
             "thermal-spoke-width", 0.3, "least-track-width", 0.15);
 
-    private static final PcbDrawing.ViaSize VIA = new PcbDrawing.ViaSize(0.3, 0.6);
+    private static final ViaSize VIA = new ViaSize(0.3, 0.6);
 
     private static final String SQUARE = "M0 0H20V20H0Z";
 
@@ -42,11 +49,11 @@ class ViaRowsTest {
             0.8, 0.8, 0, "", "", "", null, null)), List.of(), List.of(), null, List.of());
 
     /** A pcb poured with ground on both sides, or one, a ground test point in two corners, and a signal track between two of its own. */
-    private static ViaRows rowsOf(List<PcbDrawing.Zone> zones, PcbDrawing.Track track) {
-        List<PcbDrawing.Placement> points = List.of(new PcbDrawing.Placement("TP1", 2, 2, 0, PcbDrawing.TOP, Optional.empty()),
-                new PcbDrawing.Placement("TP2", 18, 18, 0, PcbDrawing.TOP, Optional.empty()),
-                new PcbDrawing.Placement("TP3", 2, 10, 0, PcbDrawing.TOP, Optional.empty()),
-                new PcbDrawing.Placement("TP4", 18, 10, 0, PcbDrawing.TOP, Optional.empty()));
+    private static ViaRows rowsOf(List<Zone> zones, Track track) {
+        List<Placement> points = List.of(new Placement("TP1", 2, 2, 0, PcbVocabulary.TOP, Optional.empty()),
+                new Placement("TP2", 18, 18, 0, PcbVocabulary.TOP, Optional.empty()),
+                new Placement("TP3", 2, 10, 0, PcbVocabulary.TOP, Optional.empty()),
+                new Placement("TP4", 18, 10, 0, PcbVocabulary.TOP, Optional.empty()));
         PcbDrawing pcb = new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, SQUARE, points, List.of(track), List.of(),
                 List.of(), zones, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         CopperNets nets = CopperNets.of(pcb, Map.of("TP1", POINT, "TP2", POINT, "TP3", POINT, "TP4", POINT), Map.of("TP1", Map.of("1", "GND"),
@@ -56,22 +63,22 @@ class ViaRowsTest {
         return new ViaRows(pcb, nets, pours, new NetRules(pcb, VALUES), new AreaOffsets(ARC_ERROR), CURVE_STEPS);
     }
 
-    private static final PcbDrawing.Track SIGNAL = new PcbDrawing.Track(PcbDrawing.TOP, 0.25, 0,
-            List.of(new PcbDrawing.Point(2, 10), new PcbDrawing.Point(18, 10)));
+    private static final Track SIGNAL = new Track(PcbVocabulary.TOP, 0.25, 0,
+            List.of(new Point(2, 10), new Point(18, 10)));
 
-    private static final List<PcbDrawing.Zone> BOTH = List.of(new PcbDrawing.Zone(PcbDrawing.TOP, "GND", 0, 0, SQUARE),
-            new PcbDrawing.Zone(PcbDrawing.BOTTOM, "GND", 0, 0, SQUARE));
+    private static final List<Zone> BOTH = List.of(new Zone(PcbVocabulary.TOP, "GND", 0, 0, SQUARE),
+            new Zone(PcbVocabulary.BOTTOM, "GND", 0, 0, SQUARE));
 
     /** Whether a via keeps the gap the rules give from the signal track. */
-    private static boolean clearOfSignal(PcbDrawing.Via via) {
+    private static boolean clearOfSignal(Via via) {
         return CopperShapes.via(via).gapTo(CopperShapes.track(SIGNAL, CURVE_STEPS)).gap() >= 0.2 - 1e-6;
     }
 
     @Test
     void stitchesAZoneToItsNetsPourOnTheOtherSideOnTheGridAndClearOfOtherCopper() {
-        List<PcbDrawing.Via> vias = assertInstanceOf(ViaRows.Placed.Vias.class, rowsOf(BOTH, SIGNAL).stitching(0, 2.5, Optional.of(VIA))).vias();
+        List<Via> vias = assertInstanceOf(ViaRows.Placed.Vias.class, rowsOf(BOTH, SIGNAL).stitching(0, 2.5, Optional.of(VIA))).vias();
         assertFalse(vias.isEmpty());
-        for (PcbDrawing.Via via : vias) {
+        for (Via via : vias) {
             assertEquals(0, Math.abs(via.x() / 2.5 - Math.round(via.x() / 2.5)), 1e-9, "on the pcb's grid: " + via);
             assertTrue(clearOfSignal(via), "clear of the signal: " + via);
         }
@@ -89,14 +96,14 @@ class ViaRowsTest {
 
     @Test
     void fencesATrackDownEachSideAsNearAsItsGapAllows() {
-        List<PcbDrawing.Via> vias = assertInstanceOf(ViaRows.Placed.Vias.class, rowsOf(BOTH, SIGNAL).fence(0, "GND", 1.5, Optional.of(VIA))).vias();
+        List<Via> vias = assertInstanceOf(ViaRows.Placed.Vias.class, rowsOf(BOTH, SIGNAL).fence(0, "GND", 1.5, Optional.of(VIA))).vias();
         assertTrue(vias.stream().anyMatch(via -> via.y() < 10) && vias.stream().anyMatch(via -> via.y() > 10), "both sides: " + vias);
-        for (PcbDrawing.Via via : vias) {
+        for (Via via : vias) {
             assertTrue(clearOfSignal(via), "clear of the track it guards: " + via);
             assertTrue(Math.abs(via.y() - 10) < 1.5, "near the track: " + via);
         }
-        String own = assertInstanceOf(ViaRows.Placed.Refused.class, rowsOf(BOTH, new PcbDrawing.Track(PcbDrawing.TOP, 0.25, 0,
-                List.of(new PcbDrawing.Point(2, 10), new PcbDrawing.Point(18, 10)))).fence(0, "SIGNAL", 1.5, Optional.of(VIA))).refusal();
+        String own = assertInstanceOf(ViaRows.Placed.Refused.class, rowsOf(BOTH, new Track(PcbVocabulary.TOP, 0.25, 0,
+                List.of(new Point(2, 10), new Point(18, 10)))).fence(0, "SIGNAL", 1.5, Optional.of(VIA))).refusal();
         assertTrue(own.contains("No two layers pour SIGNAL"), own);
     }
 

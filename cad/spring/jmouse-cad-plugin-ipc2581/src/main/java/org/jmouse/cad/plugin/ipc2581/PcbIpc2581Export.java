@@ -1,5 +1,9 @@
 package org.jmouse.cad.plugin.ipc2581;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -17,7 +21,7 @@ import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PadStandardShape;
 import org.jmouse.cad.exchange.pcb.PcbProfile;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.simulation.CatalogueDocuments;
 import org.jmouse.ipc2581.Ipc2581Composer;
@@ -64,7 +68,7 @@ public final class PcbIpc2581Export implements DocumentExport {
 
         /** The one on a side: {@code top} or {@code bottom}. */
         String of(String side) {
-            return PcbDrawing.TOP.equals(side) ? top : bottom;
+            return PcbVocabulary.TOP.equals(side) ? top : bottom;
         }
     }
 
@@ -125,7 +129,7 @@ public final class PcbIpc2581Export implements DocumentExport {
 
     private final Supplier<Settings>              settings;
     private final Supplier<PcbArtwork.Settings> artwork;
-    private final Supplier<PcbLayers.Settings>  layers;
+    private final Supplier<PcbSolidLayers.Settings>  layers;
     private final StrokeFont            font;
     private final Clock                 clock;
 
@@ -137,7 +141,7 @@ public final class PcbIpc2581Export implements DocumentExport {
     /** The ways a pcb is made, read through the engine's tables. */
     private final CadStandards standards;
 
-    public PcbIpc2581Export(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, Supplier<PcbLayers.Settings> layers, StrokeFont font,
+    public PcbIpc2581Export(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, Supplier<PcbSolidLayers.Settings> layers, StrokeFont font,
                               Clock clock, CadStandards standards) {
         this.standards = standards;
         this.settings = settings;
@@ -183,7 +187,7 @@ public final class PcbIpc2581Export implements DocumentExport {
         for (String layer : copper) {
             artworkOf(composer, copperName(layer, copper), drawn.copper(layer), drawn.outlines(), fabrication);
         }
-        for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
+        for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
             artworkOf(composer, settings.get().mask().of(side), drawn.maskOpenings(side), drawn.outlines(), null);
             artworkOf(composer, settings.get().paste().of(side), drawn.paste(side), drawn.outlines(), null);
             artworkOf(composer, settings.get().silkscreen().of(side), drawn.silkscreen(side), drawn.outlines(), null);
@@ -227,7 +231,7 @@ public final class PcbIpc2581Export implements DocumentExport {
     }
 
     private String copperName(String layer, List<String> copper) {
-        if (PcbDrawing.TOP.equals(layer) || PcbDrawing.BOTTOM.equals(layer)) {
+        if (PcbVocabulary.TOP.equals(layer) || PcbVocabulary.BOTTOM.equals(layer)) {
             return settings.get().copper().of(layer);
         }
         return settings.get().copper().inner().formatted(copper.indexOf(layer));
@@ -255,7 +259,7 @@ public final class PcbIpc2581Export implements DocumentExport {
             String packageName = line.footprint().get();
             composer.packageOf(packageOf(packageName, line.parts().getFirst().drawing().get(), outlines));
             for (PcbFabrication.SeatedPart part : line.parts()) {
-                PcbDrawing.Placement placement = part.placement();
+                Placement placement = part.placement();
                 composer.component(new Ipc2581Composer.Component(part.printed(), packageName, partNumberOf(line),
                         settings.get().copper().of(placement.side()), part.throughHole(), turn(-placement.rotation()), placement.onBottom(),
                         upward(placement.x(), placement.y())));
@@ -281,7 +285,7 @@ public final class PcbIpc2581Export implements DocumentExport {
 
     /** A footprint as a package: its pads as pins in its own frame, its outline the box round them, a margin off. */
     private Ipc2581Composer.Package packageOf(String name, FootprintDrawing footprint, PadOutline outlines) {
-        PcbDrawing.Placement origin = new PcbDrawing.Placement(name, 0, 0, 0, PcbDrawing.TOP, Optional.empty());
+        Placement origin = new Placement(name, 0, 0, 0, PcbVocabulary.TOP, Optional.empty());
         List<Ipc2581Composer.Pin> pins = new ArrayList<>();
         double left = Double.MAX_VALUE;
         double top = Double.MAX_VALUE;
@@ -290,7 +294,7 @@ public final class PcbIpc2581Export implements DocumentExport {
         for (FootprintDrawing.Pad pad : footprint.pads()) {
             pins.add(new Ipc2581Composer.Pin(pad.number(), !pad.isSurface(), upward(pad.x(), pad.y()),
                     shapeOf(origin, pad, 0, outlines)));
-            for (PcbDrawing.Point corner : outlines.placed(origin, pad, 0)) {
+            for (Point corner : outlines.placed(origin, pad, 0)) {
                 left = Math.min(left, corner.x());
                 right = Math.max(right, corner.x());
                 top = Math.min(top, corner.y());
@@ -320,7 +324,7 @@ public final class PcbIpc2581Export implements DocumentExport {
         for (ArtworkFeature feature : features) {
             switch (feature) {
                 case ArtworkFeature.Pad pad -> {
-                    PcbDrawing.Point centre = pad.placement().placed(pad.pad().x(), pad.pad().y());
+                    Point centre = pad.placement().placed(pad.pad().x(), pad.pad().y());
                     Ipc2581Shape shape = shapeOf(pad.placement(), pad.pad(), pad.growth(), outlines);
                     if (fabrication == null) {
                         composer.flash(layer, null, shape, upward(centre.x(), centre.y()));
@@ -381,7 +385,7 @@ public final class PcbIpc2581Export implements DocumentExport {
      * A pad as a standard shape where it is one turned a whole quarter — a circle, a rectangle, a rounded one, an oval —,
      * else as its outline round its centre.
      */
-    private static Ipc2581Shape shapeOf(PcbDrawing.Placement placement, FootprintDrawing.Pad pad, double growth, PadOutline outlines) {
+    private static Ipc2581Shape shapeOf(Placement placement, FootprintDrawing.Pad pad, double growth, PadOutline outlines) {
         Ipc2581Shape standard = PadStandardShape.of(placement, pad, growth).map(shape -> switch (shape) {
             case PadStandardShape.Circle circle -> (Ipc2581Shape) new Ipc2581Shape.Circle(circle.diameter());
             case PadStandardShape.Rectangle rectangle -> new Ipc2581Shape.RectCenter(rectangle.width(), rectangle.height());
@@ -391,7 +395,7 @@ public final class PcbIpc2581Export implements DocumentExport {
         if (standard != null) {
             return standard;
         }
-        PcbDrawing.Point centre = placement.placed(pad.x(), pad.y());
+        Point centre = placement.placed(pad.x(), pad.y());
         List<Ipc2581Point> outline = outlines.placed(placement, pad, growth).stream()
                 .map(point -> new Ipc2581Point(point.x() - centre.x(), centre.y() - point.y())).toList();
         return new Ipc2581Shape.Contour(Ipc2581Polygon.of(withoutRepeatedEnd(outline)));
@@ -406,7 +410,7 @@ public final class PcbIpc2581Export implements DocumentExport {
                 .orElseGet(() -> new Ipc2581Graphic.Line(from, to, arc.width()));
     }
 
-    private static List<Ipc2581Point> points(List<PcbDrawing.Point> drawn) {
+    private static List<Ipc2581Point> points(List<Point> drawn) {
         return withoutRepeatedEnd(drawn.stream().map(point -> upward(point.x(), point.y())).toList());
     }
 

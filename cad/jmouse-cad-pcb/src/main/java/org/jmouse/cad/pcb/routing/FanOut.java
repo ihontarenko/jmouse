@@ -1,7 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.PcbVocabulary;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,14 +47,14 @@ public final class FanOut {
             }
             Point best = null;
             double shortest = Double.POSITIVE_INFINITY;
-            for (Point way : Lines.STRAIGHT_FIRST_WAYS) {
+            for (Point way : Ways.STRAIGHT_FIRST_WAYS) {
                 for (double reach = settings.fanOutStep(); reach <= settings.fanOutReach() && reach < shortest; reach += settings.fanOutStep()) {
-                    Point point = Lines.offset(end, way, reach);
+                    Point point = end.moved(way, reach);
                     if (!neck.lineClear(List.of(end, point))) {
                         break;
                     }
                     if (full.pointClear(point)) {
-                        best = Lines.settled(point);
+                        best = Precision.settled(point);
                         shortest = reach;
                         break;
                     }

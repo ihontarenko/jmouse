@@ -1,7 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
-
+import org.jmouse.cad.Point;
 import java.util.List;
 import java.util.Optional;
 

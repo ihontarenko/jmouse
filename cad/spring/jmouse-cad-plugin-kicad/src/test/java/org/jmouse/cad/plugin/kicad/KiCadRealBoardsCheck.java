@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.settings.CadSettings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +18,6 @@ import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
 import org.jmouse.cad.library.CadLibrary;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.PadOutline;
 import org.jmouse.cad.simulation.CatalogueDocuments;
@@ -141,13 +142,13 @@ class KiCadRealBoardsCheck {
                 for (FootprintDrawing.Pad pad : part.drawing().get().pads()) {
                     Optional<FootprintDrawing.Pad> other = read.get().drawing().get().pads().stream()
                             .filter(candidate -> candidate.number().equals(pad.number())).filter(candidate -> {
-                                PcbDrawing.Point there = part.placement().placed(pad.x(), pad.y());
-                                PcbDrawing.Point here = read.get().placement().placed(candidate.x(), candidate.y());
+                                Point there = part.placement().placed(pad.x(), pad.y());
+                                Point here = read.get().placement().placed(candidate.x(), candidate.y());
                                 return Math.hypot(there.x() - here.x(), there.y() - here.y()) <= SAME_PLACE;
                             }).findFirst();
                     pads++;
                     if (other.isEmpty()) {
-                        PcbDrawing.Point there = part.placement().placed(pad.x(), pad.y());
+                        Point there = part.placement().placed(pad.x(), pad.y());
                         moved.add(board.getFileName() + " " + part.designator() + "." + pad.number() + " moved from " + there + " (part "
                                 + part.placement() .x() + "," + part.placement().y() + " " + part.placement().rotation() + " " + part.placement().side()
                                 + ", footprint " + part.footprint().orElse("?") + ") to part " + read.get().placement().x() + ","
@@ -228,7 +229,7 @@ class KiCadRealBoardsCheck {
                 misplaced.add(footprint.reference() + " is not seated on " + pcb.name());
                 continue;
             }
-            PcbDrawing.Placement placement = part.placement();
+            Placement placement = part.placement();
             double left = footprint.at().x() - placement.x();
             double top = footprint.at().y() - placement.y();
             Map<String, FootprintDrawing.Pad> ours = new LinkedHashMap<>();
@@ -244,7 +245,7 @@ class KiCadRealBoardsCheck {
                     continue;
                 }
                 KiCadPoint theirs = footprint.onBoard(pad.at());
-                PcbDrawing.Point placed = placement.placed(drawn.x(), drawn.y());
+                Point placed = placement.placed(drawn.x(), drawn.y());
                 compared++;
                 if (Math.abs(theirs.x() - left - placed.x()) > SAME_PLACE || Math.abs(theirs.y() - top - placed.y()) > SAME_PLACE) {
                     misplaced.add(footprint.reference() + " pad " + pad.number() + " on " + pcb.name() + " " + footprint.side() + " "

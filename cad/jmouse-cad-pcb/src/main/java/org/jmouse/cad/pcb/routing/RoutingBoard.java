@@ -1,5 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -42,7 +43,7 @@ public record RoutingBoard(Map<String, FootprintDrawing> footprints, Map<String,
     /** Each part's footprint on a layout of the pcb: the seated parts', and what the layout places itself on a footprint read. */
     public Map<String, FootprintDrawing> footprintsOn(PcbDrawing pcb) {
         Map<String, FootprintDrawing> seated = new LinkedHashMap<>(footprints);
-        for (PcbDrawing.Placement placement : pcb.placements()) {
+        for (Placement placement : pcb.placements()) {
             if (!seated.containsKey(placement.designator()) && placement.ownedByPcb()) {
                 placement.footprint().map(ownFootprints::get).ifPresent(drawing -> seated.put(placement.designator(), drawing));
             }
@@ -53,7 +54,7 @@ public record RoutingBoard(Map<String, FootprintDrawing> footprints, Map<String,
     /** Each placement's named footprint on a layout: what the layout places itself names its own. */
     public Map<String, Optional<String>> namedOn(PcbDrawing pcb) {
         Map<String, Optional<String>> seated = new LinkedHashMap<>(named);
-        for (PcbDrawing.Placement placement : pcb.placements()) {
+        for (Placement placement : pcb.placements()) {
             if (!seated.containsKey(placement.designator()) && placement.ownedByPcb()) {
                 seated.put(placement.designator(), placement.footprint());
             }
@@ -64,7 +65,7 @@ public record RoutingBoard(Map<String, FootprintDrawing> footprints, Map<String,
     /** Each part's pads and their nets on a layout: what the layout places itself is on the nets it says. */
     public Map<String, Map<String, String>> partNetsOn(PcbDrawing pcb) {
         Map<String, Map<String, String>> seated = new LinkedHashMap<>(partNets);
-        for (PcbDrawing.Placement placement : pcb.placements()) {
+        for (Placement placement : pcb.placements()) {
             if (!seated.containsKey(placement.designator()) && placement.ownedByPcb()) {
                 seated.put(placement.designator(), placement.nets());
             }

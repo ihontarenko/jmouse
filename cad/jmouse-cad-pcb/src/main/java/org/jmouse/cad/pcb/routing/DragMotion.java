@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.locationtech.jts.geom.Envelope;
 
@@ -17,10 +18,10 @@ import java.util.Optional;
  */
 final class DragMotion {
 
-    private final Map<String, PcbDrawing.Placement> from;
-    private final Map<String, PcbDrawing.Placement> to;
+    private final Map<String, Placement> from;
+    private final Map<String, Placement> to;
 
-    private DragMotion(Map<String, PcbDrawing.Placement> from, Map<String, PcbDrawing.Placement> to) {
+    private DragMotion(Map<String, Placement> from, Map<String, Placement> to) {
         this.from = from;
         this.to = to;
     }
@@ -32,12 +33,12 @@ final class DragMotion {
 
     /** The motion of every part that stands otherwise in {@code moved} than in {@code before}. */
     static DragMotion of(PcbDrawing before, PcbDrawing moved) {
-        Map<String, PcbDrawing.Placement> standing = new LinkedHashMap<>();
+        Map<String, Placement> standing = new LinkedHashMap<>();
         before.placements().forEach(placement -> standing.putIfAbsent(placement.designator(), placement));
-        Map<String, PcbDrawing.Placement> from = new LinkedHashMap<>();
-        Map<String, PcbDrawing.Placement> to = new LinkedHashMap<>();
-        for (PcbDrawing.Placement now : moved.placements()) {
-            PcbDrawing.Placement was = standing.get(now.designator());
+        Map<String, Placement> from = new LinkedHashMap<>();
+        Map<String, Placement> to = new LinkedHashMap<>();
+        for (Placement now : moved.placements()) {
+            Placement was = standing.get(now.designator());
             if (was != null && !was.equals(now) && !to.containsKey(now.designator())) {
                 from.put(now.designator(), was);
                 to.put(now.designator(), now);
@@ -51,19 +52,19 @@ final class DragMotion {
     }
 
     /** Where a moved part stood before the drag. */
-    PcbDrawing.Placement from(String designator) {
+    Placement from(String designator) {
         return from.get(designator);
     }
 
     /** Where a moved part stands at the end of the drag. */
-    PcbDrawing.Placement to(String designator) {
+    Placement to(String designator) {
         return to.get(designator);
     }
 
     /** Where a moved part stands a share of the way along: 0 where it stood, 1 where it is let go. */
-    PcbDrawing.Placement at(String designator, double share) {
-        PcbDrawing.Placement was = from.get(designator);
-        PcbDrawing.Placement now = to.get(designator);
+    Placement at(String designator, double share) {
+        Placement was = from.get(designator);
+        Placement now = to.get(designator);
         if (share <= 0) {
             return was;
         }
@@ -71,7 +72,7 @@ final class DragMotion {
             return now;
         }
         double turn = ((now.rotation() - was.rotation()) % 360 + 540) % 360 - 180;
-        return new PcbDrawing.Placement(now.designator(), was.x() + (now.x() - was.x()) * share, was.y() + (now.y() - was.y()) * share,
+        return new Placement(now.designator(), was.x() + (now.x() - was.x()) * share, was.y() + (now.y() - was.y()) * share,
                 was.rotation() + turn * share, now.side(), now.reference(), now.shown(), now.footprint(), now.nets(), now.arrangement(), now.role());
     }
 
@@ -105,17 +106,17 @@ final class DragMotion {
     double farthest(List<CopperNets.PlacedPad> pads) {
         double farthest = 0;
         for (CopperNets.PlacedPad pad : pads) {
-            Optional<PcbDrawing.Placement> was = Optional.ofNullable(from.get(pad.designator()));
+            Optional<Placement> was = Optional.ofNullable(from.get(pad.designator()));
             if (was.isEmpty()) {
                 continue;
             }
-            PcbDrawing.Placement now = to.get(pad.designator());
+            Placement now = to.get(pad.designator());
             double turn = Math.toRadians(Math.abs(((now.rotation() - was.get().rotation()) % 360 + 540) % 360 - 180));
             for (double[] piece : pad.copper().pieces()) {
                 for (int end = 0; end < 2; end++) {
                     Point corner = new Point(piece[2 * end], piece[2 * end + 1]);
                     double reach = Math.hypot(corner.x() - was.get().x(), corner.y() - was.get().y()) + pad.copper().radius();
-                    farthest = Math.max(farthest, Lines.lengthBetween(corner, was.get().carriedTo(now, corner)) + turn * reach);
+                    farthest = Math.max(farthest, corner.distanceTo(was.get().carriedTo(now, corner)) + turn * reach);
                 }
             }
         }

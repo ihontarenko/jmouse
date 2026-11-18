@@ -1,6 +1,5 @@
 package org.jmouse.cad.mesh;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.mesh.MeshFormats;
 import org.jmouse.mesh.Placement;
@@ -35,7 +34,7 @@ public final class ModelPlacement {
      *
      * @param surface the height its side's face is at: the pcb's top for a part on the top, its bottom else
      */
-    public static Placement onBoard(PcbDrawing.Placement part, FootprintDrawing.Model model, double surface) {
+    public static Placement onBoard(org.jmouse.cad.pcb.drawing.Placement part, FootprintDrawing.Model model, double surface) {
         Placement set = Placement.translation(model.offset().get(0), model.offset().get(1), model.offset().get(2))
                 .then(about(0, 0, 1, model.rotation().get(2)))
                 .then(about(0, 1, 0, model.rotation().get(1)))

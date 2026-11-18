@@ -1,5 +1,12 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -19,15 +26,15 @@ public final class CopperShapes {
     }
 
     /** A track's copper: its centre line, its rounded corners followed along their arcs, grown by half its width. */
-    public static CopperShape track(PcbDrawing.Track track, int curveSteps) {
-        List<PcbDrawing.Point> points = new ArrayList<>();
+    public static CopperShape track(Track track, int curveSteps) {
+        List<Point> points = new ArrayList<>();
         for (RoundedTrack.Piece piece : RoundedTrack.of(track)) {
-            List<PcbDrawing.Point> along = switch (piece) {
+            List<Point> along = switch (piece) {
                 case RoundedTrack.Run run -> run.points();
-                case RoundedTrack.Bend bend -> CopperNets.arcPoints(new PcbDrawing.Arc(track.layer(), track.width(), bend.from(),
+                case RoundedTrack.Bend bend -> CopperNets.arcPoints(new Arc(track.layer(), track.width(), bend.from(),
                         bend.through(), bend.to(), track.arrangement(), track.finish()), curveSteps);
             };
-            for (PcbDrawing.Point point : along) {
+            for (Point point : along) {
                 if (points.isEmpty() || !points.getLast().equals(point)) {
                     points.add(point);
                 }
@@ -37,17 +44,17 @@ public final class CopperShapes {
     }
 
     /** An arc track's copper: its centre line along the arc — the straight run where its three points stand on one line. */
-    public static CopperShape arc(PcbDrawing.Arc arc, int curveSteps) {
+    public static CopperShape arc(Arc arc, int curveSteps) {
         return CopperShape.line(CopperNets.arcPoints(arc, curveSteps), arc.width() / 2);
     }
 
     /** A via's copper: its ring, as wide as its diameter. */
-    public static CopperShape via(PcbDrawing.Via via) {
+    public static CopperShape via(Via via) {
         return CopperShape.circle(via.x(), via.y(), via.diameter() / 2);
     }
 
     /** How far a hole of the pcb reaches from its centre: its ring's edge, else its drill's. */
-    public static double reach(PcbDrawing.Hole hole) {
+    public static double reach(Hole hole) {
         return Math.max(hole.ring(), hole.drill()) / 2;
     }
 
@@ -55,17 +62,17 @@ public final class CopperShapes {
      * A placed pad's copper: a circle; an oval as its long axis grown by half its short side; a rounded rectangle as its
      * inner rectangle grown by its corner; any other shape as its rectangle.
      */
-    public static CopperShape pad(PcbDrawing.Placement placement, FootprintDrawing.Pad pad) {
+    public static CopperShape pad(Placement placement, FootprintDrawing.Pad pad) {
         double halfWidth = pad.width() / 2;
         double halfHeight = pad.height() / 2;
         if (PcbVocabulary.CIRCLE.equals(pad.shape())) {
-            PcbDrawing.Point centre = onPcb(placement, pad, 0, 0);
+            Point centre = onPcb(placement, pad, 0, 0);
             return CopperShape.circle(centre.x(), centre.y(), Math.min(halfWidth, halfHeight));
         }
         if (PcbVocabulary.OVAL.equals(pad.shape())) {
             double radius = Math.min(halfWidth, halfHeight);
-            PcbDrawing.Point from = halfWidth >= halfHeight ? onPcb(placement, pad, -(halfWidth - radius), 0) : onPcb(placement, pad, 0, -(halfHeight - radius));
-            PcbDrawing.Point to = halfWidth >= halfHeight ? onPcb(placement, pad, halfWidth - radius, 0) : onPcb(placement, pad, 0, halfHeight - radius);
+            Point from = halfWidth >= halfHeight ? onPcb(placement, pad, -(halfWidth - radius), 0) : onPcb(placement, pad, 0, -(halfHeight - radius));
+            Point to = halfWidth >= halfHeight ? onPcb(placement, pad, halfWidth - radius, 0) : onPcb(placement, pad, 0, halfHeight - radius);
             return CopperShape.line(List.of(from, to), radius);
         }
         double corner = PcbVocabulary.ROUNDED_RECTANGLE.equals(pad.shape()) ? Math.min(halfWidth, halfHeight) * 2 * pad.roundness() : 0;
@@ -77,8 +84,8 @@ public final class CopperShapes {
     }
 
     /** A pad's hole where its part stands: a round hole, or a slot as its long axis grown by half its width. */
-    public static CopperShape hole(PcbDrawing.Placement placement, FootprintDrawing.Pad pad) {
-        PcbDrawing.Point centre = placement.placed(pad.x(), pad.y());
+    public static CopperShape hole(Placement placement, FootprintDrawing.Pad pad) {
+        Point centre = placement.placed(pad.x(), pad.y());
         double width = pad.drillWidth();
         double height = pad.drillHeight() > 0 ? pad.drillHeight() : pad.drillWidth();
         if (Math.abs(width - height) < 1e-9) {
@@ -89,8 +96,8 @@ public final class CopperShapes {
         double along = (Math.max(width, height) - Math.min(width, height)) / 2;
         double dx = width > height ? along : 0;
         double dy = width > height ? 0 : along;
-        PcbDrawing.Point from = placement.placed(pad.x() - dx * Math.cos(turn) + dy * Math.sin(turn), pad.y() - dx * Math.sin(turn) - dy * Math.cos(turn));
-        PcbDrawing.Point to = placement.placed(pad.x() + dx * Math.cos(turn) - dy * Math.sin(turn), pad.y() + dx * Math.sin(turn) + dy * Math.cos(turn));
+        Point from = placement.placed(pad.x() - dx * Math.cos(turn) + dy * Math.sin(turn), pad.y() - dx * Math.sin(turn) - dy * Math.cos(turn));
+        Point to = placement.placed(pad.x() + dx * Math.cos(turn) - dy * Math.sin(turn), pad.y() + dx * Math.sin(turn) + dy * Math.cos(turn));
         return CopperShape.line(List.of(from, to), radius);
     }
 
@@ -103,7 +110,7 @@ public final class CopperShapes {
         Set<String> layers = Set.copyOf(pcb.copperLayerIds());
         List<Drawn> drawn = new ArrayList<>();
         for (int index = 0; index < pcb.shapes().size(); index++) {
-            PcbDrawing.Shape shape = pcb.shapes().get(index);
+            Shape shape = pcb.shapes().get(index);
             if (!layers.contains(shape.layer())) {
                 continue;
             }
@@ -119,7 +126,7 @@ public final class CopperShapes {
     }
 
     /** A point of a pad's own frame on the pcb: turned with the pad, then placed with its part. */
-    private static PcbDrawing.Point onPcb(PcbDrawing.Placement placement, FootprintDrawing.Pad pad, double x, double y) {
+    private static Point onPcb(Placement placement, FootprintDrawing.Pad pad, double x, double y) {
         double turn = Math.toRadians(-pad.rotation());
         return placement.placed(pad.x() + x * Math.cos(turn) - y * Math.sin(turn), pad.y() + x * Math.sin(turn) + y * Math.cos(turn));
     }

@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.panel;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.access.enforcement.PublicEndpoint;
@@ -93,7 +94,7 @@ public class PanelController {
     public record Picture(String outline, List<Run> runs, List<Round> rounds, List<PictureShape> shapes) {
     }
 
-    public record Run(String layer, double width, List<PcbDrawing.Point> points) {
+    public record Run(String layer, double width, List<Point> points) {
     }
 
     public record Round(double x, double y, double diameter) {
@@ -127,9 +128,9 @@ public class PanelController {
         Optional<PanelDrawing.Frame> frame = Optional.ofNullable(form.frame()).map(given -> new PanelDrawing.Frame(optional(given.rail()),
                 PanelSide.ofWords(given.sides() == null ? List.of() : given.sides()), optional(given.fiducials()), optional(given.tooling())));
         List<PanelDrawing.Fiducial> fiducials = (form.fiducials() == null ? List.<MarkForm>of() : form.fiducials()).stream().map(mark -> new PanelDrawing.Fiducial(
-                new PcbDrawing.Point(mark.x(), mark.y()), optional(mark.diameter()), optional(mark.opening()))).toList();
+                new Point(mark.x(), mark.y()), optional(mark.diameter()), optional(mark.opening()))).toList();
         List<PanelDrawing.Tooling> tooling = (form.tooling() == null ? List.<MarkForm>of() : form.tooling()).stream().map(mark -> new PanelDrawing.Tooling(
-                new PcbDrawing.Point(mark.x(), mark.y()), optional(mark.drill()))).toList();
+                new Point(mark.x(), mark.y()), optional(mark.drill()))).toList();
         return new PanelDrawing(boards, PanelSeparation.ofWord(form.separation()), frame, fiducials, tooling, form.groups());
     }
 

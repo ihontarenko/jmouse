@@ -1,16 +1,22 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.geometry.index.Box;
+import org.jmouse.geometry.index.BoxIndex;
+import org.jmouse.geometry.index.BoxTree;
+
 import org.jmouse.core.graph.DisjointSets;
 
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.index.strtree.STRtree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,16 +49,15 @@ public final class CopperNodes {
     private final List<CopperNode>                         nodes;
     private final Map<CopperNode.TrackEnd, CopperNode>     byTrackEnd;
     private final Map<CopperNode, CopperShape>             padCopper;
-    private final STRtree                                  index = new STRtree();
+    private final BoxIndex                                 index;
 
     private CopperNodes(List<CopperNode> nodes, Map<CopperNode.TrackEnd, CopperNode> byTrackEnd, Map<CopperNode, CopperShape> padCopper) {
         this.nodes = List.copyOf(nodes);
         this.byTrackEnd = Map.copyOf(byTrackEnd);
         this.padCopper = padCopper;
         for (CopperNode node : this.nodes) {
-            index.insert(envelopeOf(node), node);
         }
-        index.build();
+        this.index = BoxTree.of(this.nodes.stream().map(this::boxOf).toList());
     }
 
     /** The nodes of a board as it stands. */
@@ -77,19 +82,17 @@ public final class CopperNodes {
 
     /** The nearest node on a layer a test lets through, within a distance of a point — past its own reach —; empty where none is. */
     public Optional<CopperNode> near(String layer, Point point, double within, Predicate<CopperNode> wanted) {
-        @SuppressWarnings("unchecked")
-        List<CopperNode> found = index.query(new Envelope(point.x() - within, point.x() + within, point.y() - within, point.y() + within));
-        return found.stream()
+        return Arrays.stream(index.near(Box.around(point.x(), point.y(), within))).mapToObj(nodes::get)
                 .filter(node -> node.on(layer) && wanted.test(node))
-                .filter(node -> holds(node, point) || Lines.lengthBetween(node.at(), point) <= node.reach() + within)
+                .filter(node -> holds(node, point) || node.at().distanceTo(point) <= node.reach() + within)
                 .min(Comparator.comparingDouble((CopperNode node) -> holds(node, point) ? 0 : 1)
-                        .thenComparingDouble(node -> Lines.lengthBetween(node.at(), point)));
+                        .thenComparingDouble(node -> node.at().distanceTo(point)));
     }
 
     /** The box a node takes: a pad's copper's, a square of the rest's reach. */
-    public CopperShape.Box boxOf(CopperNode node) {
-        Envelope bounds = envelopeOf(node);
-        return new CopperShape.Box(bounds.getMinX(), bounds.getMinY(), bounds.getMaxX(), bounds.getMaxY());
+    public Box boxOf(CopperNode node) {
+        CopperShape copper = padCopper.get(node);
+        return copper != null ? copper.box() : Box.around(node.at().x(), node.at().y(), node.reach());
     }
 
     private boolean holds(CopperNode node, Point point) {
@@ -97,17 +100,6 @@ public final class CopperNodes {
         return copper != null ? copper.covers(point.x(), point.y()) : node.holds(point);
     }
 
-    private Envelope envelopeOf(CopperNode node) {
-        CopperShape copper = padCopper.get(node);
-        if (copper != null) {
-            return envelopeOfBox(copper.box());
-        }
-        return new Envelope(node.at().x() - node.reach(), node.at().x() + node.reach(), node.at().y() - node.reach(), node.at().y() + node.reach());
-    }
-
-    private static Envelope envelopeOfBox(CopperShape.Box box) {
-        return new Envelope(box.left(), box.right(), box.top(), box.bottom());
-    }
 
     /** The nodes worked out of a board: pads and vias take the ends on them, the rest are grouped where they stand together. */
     private static final class Building {
@@ -135,12 +127,12 @@ public final class CopperNodes {
         private List<Loose> looseEnds() {
             List<Loose> ends = new ArrayList<>();
             for (int index = 0; index < pcb.tracks().size(); index++) {
-                PcbDrawing.Track track = pcb.tracks().get(index);
+                Track track = pcb.tracks().get(index);
                 ends.add(new Loose(OptionalInt.of(index), CopperNode.End.FIRST, OptionalInt.empty(), track.points().getFirst(), track.layer(), track.width()));
                 ends.add(new Loose(OptionalInt.of(index), CopperNode.End.LAST, OptionalInt.empty(), track.points().getLast(), track.layer(), track.width()));
             }
             for (int index = 0; index < pcb.arcs().size(); index++) {
-                PcbDrawing.Arc arc = pcb.arcs().get(index);
+                Arc arc = pcb.arcs().get(index);
                 ends.add(new Loose(OptionalInt.empty(), CopperNode.End.FIRST, OptionalInt.of(index), arc.from(), arc.layer(), arc.width()));
                 ends.add(new Loose(OptionalInt.empty(), CopperNode.End.LAST, OptionalInt.of(index), arc.to(), arc.layer(), arc.width()));
             }
@@ -153,24 +145,19 @@ public final class CopperNodes {
             List<String> copperLayers = pcb.copperLayerIds();
             Map<Integer, List<Loose>> taken = new LinkedHashMap<>();
             List<Loose> left = new ArrayList<>();
-            STRtree padIndex = new STRtree();
-            for (int index = 0; index < pads.size(); index++) {
-                padIndex.insert(envelopeOfBox(pads.get(index).copper().box()), index);
-            }
+            BoxIndex padIndex = BoxTree.of(pads.stream().map(pad -> pad.copper().box()).toList());
             for (Loose end : loose) {
-                @SuppressWarnings("unchecked")
-                List<Integer> under = padIndex.query(new Envelope(end.at().x(), end.at().x(), end.at().y(), end.at().y()));
-                Optional<Integer> pad = under.stream().sorted()
+                Optional<Integer> pad = Arrays.stream(padIndex.near(Box.point(end.at().x(), end.at().y()))).boxed()
                         .filter(index -> pads.get(index).on(end.layer()) && pads.get(index).copper().covers(end.at().x(), end.at().y()))
                         .findFirst();
                 pad.ifPresentOrElse(index -> taken.computeIfAbsent(index, ignored -> new ArrayList<>()).add(end), () -> left.add(end));
             }
             for (int index = 0; index < pads.size(); index++) {
                 CopperNets.PlacedPad pad = pads.get(index);
-                Envelope bounds = envelopeOfBox(pad.copper().box());
+                Box bounds = pad.copper().box();
                 Set<String> layers = new HashSet<>();
                 copperLayers.stream().filter(pad::on).forEach(layers::add);
-                CopperNode node = node(CopperNodeKind.PAD, pad.centre(), Math.min(bounds.getWidth(), bounds.getHeight()) / 2, layers,
+                CopperNode node = node(CopperNodeKind.PAD, pad.centre(), Math.min(bounds.width(), bounds.height()) / 2, layers,
                         OptionalInt.of(index), taken.getOrDefault(index, List.of()), List.of());
                 padCopper.put(node, pad.copper());
             }
@@ -182,23 +169,18 @@ public final class CopperNodes {
             List<String> copperLayers = pcb.copperLayerIds();
             // The ends indexed by where they stand: a via asks those within its own box, never every end of the pcb; an end one via
             // took is taken from the next.
-            STRtree endIndex = new STRtree();
-            for (int position = 0; position < loose.size(); position++) {
-                Point at = loose.get(position).at();
-                endIndex.insert(new Envelope(at.x(), at.x(), at.y(), at.y()), position);
-            }
+            BoxIndex endIndex = BoxTree.of(loose.stream().map(end -> Box.point(end.at().x(), end.at().y())).toList());
             boolean[] taken = new boolean[loose.size()];
             for (int index = 0; index < pcb.vias().size(); index++) {
-                PcbDrawing.Via via = pcb.vias().get(index);
+                Via via = pcb.vias().get(index);
                 Point middle = new Point(via.x(), via.y());
                 double radius = via.diameter() / 2;
                 Set<String> layers = Set.copyOf(via.layersOf(copperLayers));
-                List<?> near = endIndex.query(new Envelope(via.x() - radius, via.x() + radius, via.y() - radius, via.y() + radius));
-                int[] positions = near.stream().mapToInt(position -> (Integer) position).sorted().toArray();
+                int[] positions = endIndex.near(Box.around(via.x(), via.y(), radius));
                 List<Loose> within = new ArrayList<>();
                 for (int position : positions) {
                     Loose end = loose.get(position);
-                    if (!taken[position] && layers.contains(end.layer()) && Lines.lengthBetween(end.at(), middle) <= radius) {
+                    if (!taken[position] && layers.contains(end.layer()) && end.at().distanceTo(middle) <= radius) {
                         taken[position] = true;
                         within.add(end);
                     }
@@ -216,22 +198,15 @@ public final class CopperNodes {
 
         /** The ends left grouped where they stand together, layer by layer, each group a node of what meets there. */
         private void meetingsOf(List<Loose> loose) {
-            STRtree endIndex = new STRtree();
-            double widest = 0;
-            for (int position = 0; position < loose.size(); position++) {
-                Loose end = loose.get(position);
-                endIndex.insert(new Envelope(end.at().x(), end.at().x(), end.at().y(), end.at().y()), position);
-                widest = Math.max(widest, end.width());
-            }
+            BoxIndex endIndex = BoxTree.of(loose.stream().map(end -> Box.point(end.at().x(), end.at().y())).toList());
+            double widest = loose.stream().mapToDouble(Loose::width).max().orElse(0);
             DisjointSets meetingAt = new DisjointSets(loose.size());
             for (int position = 0; position < loose.size(); position++) {
                 Loose end = loose.get(position);
-                @SuppressWarnings("unchecked")
-                List<Integer> near = endIndex.query(new Envelope(end.at().x() - widest, end.at().x() + widest, end.at().y() - widest, end.at().y() + widest));
-                for (int other : near) {
+                for (int other : endIndex.near(Box.around(end.at().x(), end.at().y(), widest))) {
                     Loose candidate = loose.get(other);
                     if (other != position && candidate.layer().equals(end.layer())
-                        && Lines.lengthBetween(candidate.at(), end.at()) <= end.reachTo(candidate)) {
+                        && candidate.at().distanceTo(end.at()) <= end.reachTo(candidate)) {
                         meetingAt.join(other, position);
                     }
                 }
@@ -240,12 +215,12 @@ public final class CopperNodes {
             for (int position = 0; position < loose.size(); position++) {
                 groups.computeIfAbsent(meetingAt.rootOf(position), ignored -> new ArrayList<>()).add(loose.get(position));
             }
-            STRtree trackIndex = trackIndex();
+            BoxIndex trackIndex = trackIndex();
             groups.values().forEach(meeting -> meetingNode(meeting, trackIndex));
         }
 
 
-        private void meetingNode(List<Loose> meeting, STRtree trackIndex) {
+        private void meetingNode(List<Loose> meeting, BoxIndex trackIndex) {
             Loose first = meeting.getFirst();
             Set<Integer> ending = new HashSet<>();
             meeting.forEach(end -> end.track().ifPresent(ending::add));
@@ -268,26 +243,22 @@ public final class CopperNodes {
         }
 
         /** The tracks on a layer whose copper a point stands on, away from their ends: those it is a T on. */
-        private List<Integer> throughAt(Point point, String layer, Set<Integer> ending, STRtree trackIndex) {
-            @SuppressWarnings("unchecked")
-            List<Integer> near = trackIndex.query(new Envelope(point.x(), point.x(), point.y(), point.y()));
-            return near.stream().sorted()
+        private List<Integer> throughAt(Point point, String layer, Set<Integer> ending, BoxIndex trackIndex) {
+            return Arrays.stream(trackIndex.near(Box.point(point.x(), point.y()))).boxed()
                     .filter(index -> !ending.contains(index) && pcb.tracks().get(index).layer().equals(layer))
                     .filter(index -> trackCopper.computeIfAbsent(index, ignored -> CopperShapes.track(pcb.tracks().get(index), world.board().checks().curveSteps()))
                             .covers(point.x(), point.y()))
                     .toList();
         }
 
-        private STRtree trackIndex() {
-            STRtree tracks = new STRtree();
-            for (int index = 0; index < pcb.tracks().size(); index++) {
-                PcbDrawing.Track track = pcb.tracks().get(index);
-                Envelope bounds = new Envelope();
-                track.points().forEach(point -> bounds.expandToInclude(point.x(), point.y()));
-                bounds.expandBy(track.width() / 2);
-                tracks.insert(bounds, index);
-            }
-            return tracks;
+        private BoxIndex trackIndex() {
+            return BoxTree.of(pcb.tracks().stream().map(Building::boxOfTrack).toList());
+        }
+
+        /** The box a track's copper takes: its points', grown half its width. */
+        private static Box boxOfTrack(Track track) {
+            Box points = track.points().stream().map(point -> Box.point(point.x(), point.y())).reduce(Box::joined).orElse(Box.point(0, 0));
+            return points.grown(track.width() / 2);
         }
 
         private CopperNode node(CopperNodeKind kind, Point at, double reach, Set<String> layers, OptionalInt item, List<Loose> meeting,

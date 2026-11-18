@@ -85,7 +85,7 @@ public enum TuningPattern {
 
     /** The track's rounding as far as bumps a spacing wide bear it: what the meander is laid and measured with. */
     double roundingFor(double rounding, double spacing) {
-        return Lines.settled(Math.min(rounding, spacing * roundingShare));
+        return Precision.settled(Math.min(rounding, spacing * roundingShare));
     }
 
     /** The points of one bump, from where it leaves the segment to where it comes back to it. */

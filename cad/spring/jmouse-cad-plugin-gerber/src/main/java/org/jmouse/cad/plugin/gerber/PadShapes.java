@@ -1,6 +1,6 @@
 package org.jmouse.cad.plugin.gerber;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.exchange.pcb.PadStandardShape;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.geometry.PadOutline;
@@ -27,7 +27,7 @@ final class PadShapes {
      * @param growth  how far the pad is grown all round
      * @param purpose the aperture's function — {@code SMDPad,CuDef}, {@code ComponentPad} —; null where a layer has none
      */
-    void draw(GerberComposer composer, PcbDrawing.Placement placement, FootprintDrawing.Pad pad, double growth, String purpose) {
+    void draw(GerberComposer composer, Placement placement, FootprintDrawing.Pad pad, double growth, String purpose) {
         // A rounded rectangle has no standard aperture: it is filled as its outline.
         GerberShape standard = PadStandardShape.of(placement, pad, growth).map(shape -> switch (shape) {
             case PadStandardShape.Circle circle -> new GerberShape.Circle(circle.diameter());

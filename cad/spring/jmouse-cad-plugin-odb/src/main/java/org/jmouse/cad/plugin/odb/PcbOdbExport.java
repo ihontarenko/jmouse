@@ -1,5 +1,7 @@
 package org.jmouse.cad.plugin.odb;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -52,7 +54,7 @@ public final class PcbOdbExport implements DocumentExport {
 
         /** The one on a side: {@code top} or {@code bottom}. */
         String of(String side) {
-            return PcbDrawing.TOP.equals(side) ? top : bottom;
+            return PcbVocabulary.TOP.equals(side) ? top : bottom;
         }
     }
 
@@ -149,8 +151,8 @@ public final class PcbOdbExport implements DocumentExport {
         notes.addAll(profile.notes());
         job.profile(new OdbFeatures().surface(contour(profile.outline()), profile.cutouts().stream().map(PcbOdbExport::contour).toList(), true));
         PadOutline outlines = drawn.outlines();
-        String top = PcbDrawing.TOP;
-        String bottom = PcbDrawing.BOTTOM;
+        String top = PcbVocabulary.TOP;
+        String bottom = PcbVocabulary.BOTTOM;
         List<String> copper = fabrication.pcb().copperLayerIds();
         List<String> linked = new ArrayList<>(copper.stream().map(layer -> copperName(layer, copper)).toList());
         linked.add(settings.get().drill());
@@ -179,7 +181,7 @@ public final class PcbOdbExport implements DocumentExport {
     }
 
     private String copperName(String layer, List<String> copper) {
-        if (PcbDrawing.TOP.equals(layer) || PcbDrawing.BOTTOM.equals(layer)) {
+        if (PcbVocabulary.TOP.equals(layer) || PcbVocabulary.BOTTOM.equals(layer)) {
             return settings.get().copper().of(layer);
         }
         return settings.get().copper().inner().formatted(copper.indexOf(layer));
@@ -206,7 +208,7 @@ public final class PcbOdbExport implements DocumentExport {
             int first = features.count();
             switch (feature) {
                 case ArtworkFeature.Pad pad -> {
-                    PcbDrawing.Point centre = pad.placement().placed(pad.pad().x(), pad.pad().y());
+                    Point centre = pad.placement().placed(pad.pad().x(), pad.pad().y());
                     PadStandardShape.of(pad.placement(), pad.pad(), pad.growth()).ifPresentOrElse(
                             shape -> features.pad(upward(centre), symbolOf(shape), 0, true),
                             () -> features.surface(contour(outlines.placed(pad.placement(), pad.pad(), pad.growth())), List.of(), true));
@@ -214,7 +216,7 @@ public final class PcbOdbExport implements DocumentExport {
                 case ArtworkFeature.Disc disc -> features.pad(upward(disc.centre()), new OdbSymbol.Round(disc.diameter()), 0, true);
                 case ArtworkFeature.Stroke stroke -> {
                     OdbSymbol pen = new OdbSymbol.Round(stroke.width());
-                    List<PcbDrawing.Point> points = stroke.points();
+                    List<Point> points = stroke.points();
                     if (points.size() == 1) {
                         features.pad(upward(points.getFirst()), pen, 0, true);
                     }
@@ -264,13 +266,13 @@ public final class PcbOdbExport implements DocumentExport {
     }
 
     /** A ring of the drawing as a contour, its closing point not repeated. */
-    private static OdbFeatures.Contour contour(List<PcbDrawing.Point> ring) {
-        List<PcbDrawing.Point> open = ring.size() > 1 && ring.getFirst().equals(ring.getLast()) ? ring.subList(0, ring.size() - 1) : ring;
+    private static OdbFeatures.Contour contour(List<Point> ring) {
+        List<Point> open = ring.size() > 1 && ring.getFirst().equals(ring.getLast()) ? ring.subList(0, ring.size() - 1) : ring;
         return new OdbFeatures.Contour(open.stream().map(PcbOdbExport::upward).toList());
     }
 
     /** A point of the drawing, whose Y grows downwards, in the job's frame, whose Y grows upwards. */
-    private static OdbFeatures.Point upward(PcbDrawing.Point point) {
+    private static OdbFeatures.Point upward(Point point) {
         return new OdbFeatures.Point(point.x(), point.y() == 0 ? 0 : -point.y());
     }
 }

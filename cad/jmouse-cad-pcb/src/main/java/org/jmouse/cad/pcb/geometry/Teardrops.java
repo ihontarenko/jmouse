@@ -1,5 +1,8 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Teardrop;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.numerics.Halving;
 
 import org.jmouse.settings.Bounds;
@@ -54,7 +57,7 @@ public final class Teardrops {
     }
 
     /** A drop: the layer it is on, the track it widens, and its outline in millimetres. */
-    public record Drop(String layer, int track, List<PcbDrawing.Point> outline) {
+    public record Drop(String layer, int track, List<Point> outline) {
     }
 
     /** What a track's end stands in: the target's kind, its copper, and its size — what a drop's measures are shares of. */
@@ -70,10 +73,10 @@ public final class Teardrops {
     }
 
     /** The track's end and the way it goes: what every point of a drop is measured from. */
-    private record Frame(PcbDrawing.Point end, double[] along) {
+    private record Frame(Point end, double[] along) {
 
-        PcbDrawing.Point at(double distance, double lateral) {
-            return new PcbDrawing.Point(end.x() + along[0] * distance - along[1] * lateral, end.y() + along[1] * distance + along[0] * lateral);
+        Point at(double distance, double lateral) {
+            return new Point(end.x() + along[0] * distance - along[1] * lateral, end.y() + along[1] * distance + along[0] * lateral);
         }
     }
 
@@ -89,19 +92,19 @@ public final class Teardrops {
         if (pcb.teardrops().isEmpty()) {
             return List.of();
         }
-        Map<String, PcbDrawing.Teardrop> settings = pcb.teardrops().stream()
-                .collect(Collectors.toMap(PcbDrawing.Teardrop::target, Function.identity(), (first, second) -> first));
+        Map<String, Teardrop> settings = pcb.teardrops().stream()
+                .collect(Collectors.toMap(Teardrop::target, Function.identity(), (first, second) -> first));
         List<Drop> drops = new ArrayList<>();
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
-            List<PcbDrawing.Point> points = track.points();
+            Track track = pcb.tracks().get(index);
+            List<Point> points = track.points();
             if (points.size() < 2) {
                 continue;
             }
-            for (PcbDrawing.Point[] ends : List.of(new PcbDrawing.Point[] {points.getFirst(), points.get(1)},
-                    new PcbDrawing.Point[] {points.getLast(), points.get(points.size() - 2)})) {
-                PcbDrawing.Point end = ends[0];
-                PcbDrawing.Point next = ends[1];
+            for (Point[] ends : List.of(new Point[] {points.getFirst(), points.get(1)},
+                    new Point[] {points.getLast(), points.get(points.size() - 2)})) {
+                Point end = ends[0];
+                Point next = ends[1];
                 double length = Math.hypot(next.x() - end.x(), next.y() - end.y());
                 if (length == 0) {
                     continue;
@@ -109,7 +112,7 @@ public final class Teardrops {
                 Frame frame = new Frame(end, new double[] {(next.x() - end.x()) / length, (next.y() - end.y()) / length});
                 int trackIndex = index;
                 Optional<Entered> entered = viaAt(pcb, track, end).or(() -> padAt(pads, track, end)).or(() -> trackAt(pcb, trackIndex, track, end));
-                Optional<PcbDrawing.Teardrop> setting = entered.map(Entered::target).map(settings::get);
+                Optional<Teardrop> setting = entered.map(Entered::target).map(settings::get);
                 if (entered.isPresent() && setting.isPresent()) {
                     outline(entered.get(), setting.get(), frame, track.width(), length, shape)
                             .ifPresent(outline -> drops.add(new Drop(track.layer(), trackIndex, outline)));
@@ -119,14 +122,14 @@ public final class Teardrops {
         return drops;
     }
 
-    private static Optional<Entered> viaAt(PcbDrawing pcb, PcbDrawing.Track track, PcbDrawing.Point end) {
+    private static Optional<Entered> viaAt(PcbDrawing pcb, Track track, Point end) {
         return pcb.vias().stream()
                 .filter(via -> pcb.reaches(via, track.layer()) && Math.hypot(via.x() - end.x(), via.y() - end.y()) <= via.diameter() / 2)
                 .findFirst()
                 .map(via -> new Entered(ROUND, CopperShape.circle(via.x(), via.y(), via.diameter() / 2), via.diameter()));
     }
 
-    private static Optional<Entered> padAt(List<CopperNets.PlacedPad> pads, PcbDrawing.Track track, PcbDrawing.Point end) {
+    private static Optional<Entered> padAt(List<CopperNets.PlacedPad> pads, Track track, Point end) {
         for (CopperNets.PlacedPad pad : pads) {
             if (pad.on(track.layer()) && pad.copper().covers(end.x(), end.y())) {
                 return Optional.of(new Entered(pad.pad().isSurface() ? SURFACE : ROUND, pad.copper(),
@@ -136,15 +139,15 @@ public final class Teardrops {
         return Optional.empty();
     }
 
-    private static Optional<Entered> trackAt(PcbDrawing pcb, int index, PcbDrawing.Track track, PcbDrawing.Point end) {
+    private static Optional<Entered> trackAt(PcbDrawing pcb, int index, Track track, Point end) {
         for (int otherIndex = 0; otherIndex < pcb.tracks().size(); otherIndex++) {
-            PcbDrawing.Track other = pcb.tracks().get(otherIndex);
+            Track other = pcb.tracks().get(otherIndex);
             if (otherIndex == index || !other.layer().equals(track.layer())) {
                 continue;
             }
             for (int segment = 0; segment < other.points().size() - 1; segment++) {
-                PcbDrawing.Point from = other.points().get(segment);
-                PcbDrawing.Point to = other.points().get(segment + 1);
+                Point from = other.points().get(segment);
+                Point to = other.points().get(segment + 1);
                 double dx = to.x() - from.x();
                 double dy = to.y() - from.y();
                 double squared = dx * dx + dy * dy;
@@ -153,7 +156,7 @@ public final class Teardrops {
                 if (share <= 0 || share >= 1) {
                     continue;
                 }
-                PcbDrawing.Point foot = new PcbDrawing.Point(from.x() + share * dx, from.y() + share * dy);
+                Point foot = new Point(from.x() + share * dx, from.y() + share * dy);
                 if (Math.hypot(end.x() - foot.x(), end.y() - foot.y()) <= other.width() / 2) {
                     return Optional.of(new Entered(TRACKS, CopperShape.line(List.of(from, to), other.width() / 2), other.width()));
                 }
@@ -169,7 +172,7 @@ public final class Teardrops {
      */
     private static Optional<Chord> chordOf(CopperShape copper, Frame frame, double lateral, double size, Shape shape) {
         DoublePredicate inside = distance -> {
-            PcbDrawing.Point point = frame.at(distance, lateral);
+            Point point = frame.at(distance, lateral);
             return copper.covers(point.x(), point.y());
         };
         double reach = 2 * size;
@@ -207,7 +210,7 @@ public final class Teardrops {
      * at {@code length} of its size past where the track leaves the copper — no farther than the track's first segment
      * reaches —, its sides straight or curved in. Empty where the track is already as wide as the drop would be on both sides.
      */
-    private static Optional<List<PcbDrawing.Point>> outline(Entered entered, PcbDrawing.Teardrop setting, Frame frame, double trackWidth,
+    private static Optional<List<Point>> outline(Entered entered, Teardrop setting, Frame frame, double trackWidth,
                                                               double segmentLength, Shape shape) {
         double size = entered.size();
         double widest = Math.min(setting.width(), shape.widestShare()) * size / 2;
@@ -233,8 +236,8 @@ public final class Teardrops {
         if (sides.stream().allMatch(side -> side.chord().isEmpty())) {
             return Optional.empty();
         }
-        List<PcbDrawing.Point> outline = new ArrayList<>(side(sides.get(0), frame, leaves, reach, halfTrack, setting.curved(), shape));
-        List<PcbDrawing.Point> other = new ArrayList<>(side(sides.get(1), frame, leaves, reach, halfTrack, setting.curved(), shape));
+        List<Point> outline = new ArrayList<>(side(sides.get(0), frame, leaves, reach, halfTrack, setting.curved(), shape));
+        List<Point> other = new ArrayList<>(side(sides.get(1), frame, leaves, reach, halfTrack, setting.curved(), shape));
         Collections.reverse(other);
         outline.addAll(other);
         return Optional.of(outline);
@@ -245,25 +248,25 @@ public final class Teardrops {
      * track's own edge; else it starts inside the copper and, curved in, leaves the copper square to the track and comes onto
      * the track's edge in line with it, joining both with no corner.
      */
-    private static List<PcbDrawing.Point> side(Side side, Frame frame, double leaves, double reach, double halfTrack, boolean curved,
+    private static List<Point> side(Side side, Frame frame, double leaves, double reach, double halfTrack, boolean curved,
                                                  Shape shape) {
-        PcbDrawing.Point to = frame.at(reach, side.sign() * halfTrack);
+        Point to = frame.at(reach, side.sign() * halfTrack);
         if (side.chord().isEmpty()) {
             return List.of(frame.at(Math.min(leaves, reach), side.sign() * halfTrack), to);
         }
         Chord chord = side.chord().get();
         double middle = (chord.from() + chord.to()) / 2;
         double base = middle + (chord.to() - middle) * shape.insideEdge();
-        PcbDrawing.Point from = frame.at(base, side.sign() * side.half());
+        Point from = frame.at(base, side.sign() * side.half());
         if (!curved) {
             return List.of(from, to);
         }
-        PcbDrawing.Point bend = frame.at(Math.max(base, leaves), side.sign() * halfTrack);
-        List<PcbDrawing.Point> points = new ArrayList<>();
+        Point bend = frame.at(Math.max(base, leaves), side.sign() * halfTrack);
+        List<Point> points = new ArrayList<>();
         for (int step = 0; step <= shape.curveSteps(); step++) {
             double share = (double) step / shape.curveSteps();
             double rest = 1 - share;
-            points.add(new PcbDrawing.Point(rest * rest * from.x() + 2 * rest * share * bend.x() + share * share * to.x(),
+            points.add(new Point(rest * rest * from.x() + 2 * rest * share * bend.x() + share * share * to.x(),
                     rest * rest * from.y() + 2 * rest * share * bend.y() + share * share * to.y()));
         }
         return points;

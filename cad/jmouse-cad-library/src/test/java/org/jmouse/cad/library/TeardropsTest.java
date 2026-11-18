@@ -1,5 +1,6 @@
 package org.jmouse.cad.library;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.CopperNets;
@@ -76,10 +77,10 @@ class TeardropsTest {
             double length = Math.hypot(next[0] - end[0], next[1] - end[1]);
             double[] along = {(next[0] - end[0]) / length, (next[1] - end[1]) / length};
             for (Teardrops.Drop drop : laid.drops()) {
-                List<PcbDrawing.Point> corners = drop.outline();
-                PcbDrawing.Point first = corners.getFirst();
-                PcbDrawing.Point last = corners.getLast();
-                for (PcbDrawing.Point base : List.of(first, last)) {
+                List<Point> corners = drop.outline();
+                Point first = corners.getFirst();
+                Point last = corners.getLast();
+                for (Point base : List.of(first, last)) {
                     assertTrue(onCopper(laid.copper(), base) || Math.abs(lateral(along, end, base)) <= HALF_TRACK + SLACK,
                             example.name() + ": base " + base + " stands on the pad");
                 }
@@ -91,9 +92,9 @@ class TeardropsTest {
                 assertEquals(-HALF_TRACK, tip.getFirst(), SLACK, example.name() + ": the narrow end's one edge");
                 assertEquals(HALF_TRACK, tip.getLast(), SLACK, example.name() + ": the narrow end's other edge");
                 // No fishtail: on each side, nothing stands farther out than that side's base, or the track's own edge.
-                for (PcbDrawing.Point corner : corners) {
+                for (Point corner : corners) {
                     double out = lateral(along, end, corner);
-                    PcbDrawing.Point sideBase = (out >= 0) == (lateral(along, end, first) >= 0) ? first : last;
+                    Point sideBase = (out >= 0) == (lateral(along, end, first) >= 0) ? first : last;
                     double limit = Math.max(HALF_TRACK, Math.abs(lateral(along, end, sideBase)));
                     assertTrue(Math.abs(out) <= limit + SLACK, example.name() + ": " + corner + " stands out of the drop's side");
                 }
@@ -103,9 +104,9 @@ class TeardropsTest {
 
     @Test
     void isAsWideOnBothSidesWhenTheTrackEntersTheCopperMiddle() {
-        List<PcbDrawing.Point> corners = laid("circle, at: 0 0, size: 1.7 x 1.7", 0, new double[][] {{10, 10}, {10, 16}}).drops().getFirst().outline();
-        double left = corners.stream().map(PcbDrawing.Point::x).min(Comparator.naturalOrder()).orElseThrow();
-        double right = corners.stream().map(PcbDrawing.Point::x).max(Comparator.naturalOrder()).orElseThrow();
+        List<Point> corners = laid("circle, at: 0 0, size: 1.7 x 1.7", 0, new double[][] {{10, 10}, {10, 16}}).drops().getFirst().outline();
+        double left = corners.stream().map(Point::x).min(Comparator.naturalOrder()).orElseThrow();
+        double right = corners.stream().map(Point::x).max(Comparator.naturalOrder()).orElseThrow();
         assertEquals(10 - left, right - 10, SLACK);
         assertTrue(right - left > 0.4);
     }
@@ -113,12 +114,12 @@ class TeardropsTest {
     @Test
     void isWidenedOnlyOnTheSideThePadIsForATrackAtItsEdge() {
         // The track's right edge stands just past the pad's right side: there is no copper to widen into on the right.
-        List<PcbDrawing.Point> corners = laid("rectangle, at: 0 0, size: 1.7 x 1.7", 0, new double[][] {{10.8, 10.4}, {10.8, 16}}).drops().getFirst().outline();
-        assertTrue(corners.stream().mapToDouble(PcbDrawing.Point::x).max().orElseThrow() <= 10.8 + HALF_TRACK + SLACK);
-        assertTrue(corners.stream().mapToDouble(PcbDrawing.Point::x).min().orElseThrow() < 10.8 - HALF_TRACK - 0.1);
+        List<Point> corners = laid("rectangle, at: 0 0, size: 1.7 x 1.7", 0, new double[][] {{10.8, 10.4}, {10.8, 16}}).drops().getFirst().outline();
+        assertTrue(corners.stream().mapToDouble(Point::x).max().orElseThrow() <= 10.8 + HALF_TRACK + SLACK);
+        assertTrue(corners.stream().mapToDouble(Point::x).min().orElseThrow() < 10.8 - HALF_TRACK - 0.1);
     }
 
-    private static boolean onCopper(CopperShape copper, PcbDrawing.Point point) {
+    private static boolean onCopper(CopperShape copper, Point point) {
         double[][] steps = {{0, 0}, {SLACK, 0}, {-SLACK, 0}, {0, SLACK}, {0, -SLACK}};
         for (double[] step : steps) {
             if (copper.covers(point.x() + step[0], point.y() + step[1])) {
@@ -128,11 +129,11 @@ class TeardropsTest {
         return false;
     }
 
-    private static double lateral(double[] along, double[] end, PcbDrawing.Point point) {
+    private static double lateral(double[] along, double[] end, Point point) {
         return along[0] * (point.y() - end[1]) - along[1] * (point.x() - end[0]);
     }
 
-    private static double forward(double[] along, double[] end, PcbDrawing.Point point) {
+    private static double forward(double[] along, double[] end, Point point) {
         return along[0] * (point.x() - end[0]) + along[1] * (point.y() - end[1]);
     }
 }

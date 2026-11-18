@@ -1,7 +1,7 @@
 package org.jmouse.cad.packages.pcb;
 
+import org.jmouse.cad.pcb.drawing.Rules;
 import org.jmouse.cad.pcb.PcbVocabulary;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.packages.PackageTable;
 import org.jmouse.sheet.Sheet;
 import org.jmouse.sheet.SheetEntry;
@@ -36,8 +36,8 @@ public record PcbRules(String usual, List<Profile> profiles) {
      * The values a pcb is held to: those of the way it names, else of the usual way, with the pcb's own changes over
      * them — a change to a word no way has is not a rule, and is passed over.
      */
-    public Map<String, Double> valuesOf(Optional<PcbDrawing.Rules> rules) {
-        String chosen = rules.map(PcbDrawing.Rules::profile).orElse(usual);
+    public Map<String, Double> valuesOf(Optional<Rules> rules) {
+        String chosen = rules.map(Rules::profile).orElse(usual);
         Profile profile = profiles.stream().filter(candidate -> candidate.id().equals(chosen)).findFirst()
                 .or(() -> profiles.stream().filter(candidate -> candidate.id().equals(usual)).findFirst())
                 .orElseThrow();

@@ -1,5 +1,6 @@
 package org.jmouse.cad.panel;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.document.ArrangementLines;
 import org.jmouse.cad.drawing.ArrangedDrawing;
 import org.jmouse.cad.drawing.Arrangement;
@@ -7,7 +8,6 @@ import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.cad.drawing.DrawnGroups;
 import org.jmouse.cad.drawing.StandingItem;
 import org.jmouse.cad.document.DocumentNode;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.el.grammar.ClauseLineNode;
 import org.jmouse.el.grammar.LineBuilder;
 import org.jmouse.el.grammar.Nodes;
@@ -103,7 +103,7 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
      * @param diameter its copper's diameter, millimetres; empty for the usual
      * @param opening  the solder mask's opening round it, millimetres; empty for the usual
      */
-    public record Fiducial(PcbDrawing.Point at, OptionalDouble diameter, OptionalDouble opening) {
+    public record Fiducial(Point at, OptionalDouble diameter, OptionalDouble opening) {
     }
 
     /**
@@ -112,7 +112,7 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
      * @param at    where it stands, millimetres
      * @param drill its diameter, millimetres; empty for the usual
      */
-    public record Tooling(PcbDrawing.Point at, OptionalDouble drill) {
+    public record Tooling(Point at, OptionalDouble drill) {
     }
 
     /** The panel a panel document's lines make. */
@@ -195,7 +195,7 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
     }
 
     private static Board boardOf(ClauseLineNode line) {
-        PcbDrawing.Point at = point(line);
+        Point at = point(line);
         return new Board(line.name("pcb").orElseThrow(), at.x(), at.y(), line.quantity("rotate").orElse(0.0),
                 line.quantity("across").map(Double::intValue).orElse(1), line.quantity("down").map(Double::intValue).orElse(1),
                 quantity(line, "gap"), ArrangementLines.arrangementOf(line));
@@ -206,9 +206,9 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
         return new Frame(quantity(line, "rail"), sides, whole(line, "fiducials"), whole(line, "tooling"));
     }
 
-    private static PcbDrawing.Point point(ClauseLineNode line) {
+    private static Point point(ClauseLineNode line) {
         PointNode at = line.point("at").orElseThrow();
-        return new PcbDrawing.Point(at.x(), at.y());
+        return new Point(at.x(), at.y());
     }
 
     private static OptionalDouble quantity(ClauseLineNode line, String name) {

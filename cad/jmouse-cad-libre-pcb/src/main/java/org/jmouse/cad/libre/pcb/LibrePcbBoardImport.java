@@ -1,5 +1,18 @@
 package org.jmouse.cad.libre.pcb;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Rules;
+import org.jmouse.cad.pcb.drawing.NetClass;
+import org.jmouse.cad.pcb.drawing.Sizes;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Reference;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.MetaNode;
 import org.jmouse.cad.exchange.imported.FootprintOutlines;
@@ -34,7 +47,7 @@ import java.util.TreeSet;
 /**
  * A board of a project as a jM pcb, laid out from the circuit its sheets were read into. LibrePCB draws in millimetres with Y
  * upwards; a pcb is drawn from its top left with Y downwards. A device stands the same on both: mirrored, turned by the same
- * angle, moved ({@link LibrePcbBoard.DeviceOnBoard}, {@link PcbDrawing.Placement#placed}).
+ * angle, moved ({@link LibrePcbBoard.DeviceOnBoard}, {@link Placement#placed}).
  */
 final class LibrePcbBoardImport {
 
@@ -68,10 +81,10 @@ final class LibrePcbBoardImport {
     static Pcb read(LibrePcbProject project, LibrePcbBoard board, LibrePcbSchematicImport.Converted circuit, String file, String title, LibrePcbFiling filing) {
         LibrePcbBoardImport reading = new LibrePcbBoardImport(project, board, circuit, filing);
         reading.frame();
-        List<PcbDrawing.Track> tracks = new ArrayList<>();
-        List<PcbDrawing.Via> vias = new ArrayList<>();
+        List<Track> tracks = new ArrayList<>();
+        List<Via> vias = new ArrayList<>();
         reading.copper(tracks, vias);
-        PcbDrawing drawing = new PcbDrawing(circuit.circuit(), reading.rules(), reading.netClasses(), PcbDrawing.Sizes.NONE, List.of(), List.of(),
+        PcbDrawing drawing = new PcbDrawing(circuit.circuit(), reading.rules(), reading.netClasses(), Sizes.NONE, List.of(), List.of(),
                 2 + board.innerLayers(), reading.outline(), reading.placements(), tracks, List.of(), vias, reading.zones(), List.of(), List.of(),
                 reading.texts(), reading.holes(), reading.shapes(), List.of(), List.of());
         DocumentNode document = new DocumentNode(PcbModule.PCB, title, LibrePcbNames.pcb(title), null, 1);
@@ -104,22 +117,22 @@ final class LibrePcbBoardImport {
         top = points.stream().mapToDouble(LibrePcbPoint::y).max().orElse(0);
     }
 
-    private Optional<PcbDrawing.Rules> rules() {
+    private Optional<Rules> rules() {
         Map<String, Double> changes = new LinkedHashMap<>();
         if (board.rules().traceWidth() > 0) {
-            changes.put(PcbDrawing.RULE_TRACK_WIDTH, board.rules().traceWidth());
+            changes.put(PcbVocabulary.RULE_TRACK_WIDTH, board.rules().traceWidth());
         }
         if (board.rules().viaDrill() > 0) {
-            changes.put(PcbDrawing.RULE_VIA_DRILL, board.rules().viaDrill());
+            changes.put(PcbVocabulary.RULE_VIA_DRILL, board.rules().viaDrill());
         }
         filing.pcbRuleNames().forEach((ours, theirs) -> Optional.ofNullable(board.rules().checks().get(theirs)).ifPresent(value -> changes.put(ours, value)));
-        return changes.isEmpty() ? Optional.empty() : Optional.of(new PcbDrawing.Rules(filing.pcbRules(), changes));
+        return changes.isEmpty() ? Optional.empty() : Optional.of(new Rules(filing.pcbRules(), changes));
     }
 
     /** Each class that says more than the board's rules do, with the nets it takes. */
-    private List<PcbDrawing.NetClass> netClasses() {
+    private List<NetClass> netClasses() {
         UniqueIdentifiers identifiers = new UniqueIdentifiers(filing.classOpening(), UniqueIdentifiers.UNLIMITED);
-        List<PcbDrawing.NetClass> classes = new ArrayList<>();
+        List<NetClass> classes = new ArrayList<>();
         for (LibrePcbCircuit.NetClass netClass : project.circuit().netClasses().values()) {
             if (netClass.traceWidth().isEmpty() && netClass.clearance() <= 0) {
                 continue;
@@ -127,7 +140,7 @@ final class LibrePcbBoardImport {
             TreeSet<String> nets = new TreeSet<>();
             project.circuit().nets().values().stream().filter(net -> net.netClass().equals(netClass.id())).forEach(net -> nets.add(circuit.nets().of(net.name())));
             if (!nets.isEmpty()) {
-                classes.add(new PcbDrawing.NetClass(identifiers.of(netClass.name()), round.rounded(netClass.traceWidth().orElse(board.rules().traceWidth())),
+                classes.add(new NetClass(identifiers.of(netClass.name()), round.rounded(netClass.traceWidth().orElse(board.rules().traceWidth())),
                         round.rounded(netClass.clearance()), 0, 0, List.copyOf(nets)));
             }
         }
@@ -147,7 +160,7 @@ final class LibrePcbBoardImport {
             switch (graphic) {
                 case LibrePcbGraphic.Polygon polygon -> stretchesOf(polygon.vertices(), stretches);
                 case LibrePcbGraphic.Circle circle -> {
-                    PcbDrawing.Point centre = point(circle.centre());
+                    Point centre = point(circle.centre());
                     path.circle(centre.x(), centre.y(), circle.diameter() / 2);
                 }
                 case LibrePcbGraphic.Text ignored -> {
@@ -168,14 +181,14 @@ final class LibrePcbBoardImport {
     }
 
     private SheetTracing.Point traced(LibrePcbPoint at) {
-        PcbDrawing.Point point = point(at);
+        Point point = point(at);
         return new SheetTracing.Point(point.x(), point.y());
     }
 
     // ─── parts and copper ────────────────────────────────────────────────────────────────────────────────────────────
 
-    private List<PcbDrawing.Placement> placements() {
-        List<PcbDrawing.Placement> placements = new ArrayList<>();
+    private List<Placement> placements() {
+        List<Placement> placements = new ArrayList<>();
         List<String> unplaced = new ArrayList<>();
         for (LibrePcbBoard.DeviceOnBoard device : board.devices()) {
             String id = circuit.partIds().get(device.id());
@@ -183,9 +196,9 @@ final class LibrePcbBoardImport {
                 unplaced.add(device.id());
                 continue;
             }
-            PcbDrawing.Point at = point(device.transform().at());
-            placements.add(new PcbDrawing.Placement(id, at.x(), at.y(), round.rounded(device.transform().rotation()),
-                    device.transform().mirrored() ? PcbDrawing.BOTTOM : PcbDrawing.TOP, Optional.of(referenceOf(device, at))));
+            Point at = point(device.transform().at());
+            placements.add(new Placement(id, at.x(), at.y(), round.rounded(device.transform().rotation()),
+                    device.transform().mirrored() ? PcbVocabulary.BOTTOM : PcbVocabulary.TOP, Optional.of(referenceOf(device, at))));
         }
         if (!unplaced.isEmpty()) {
             notes.add(unplaced.size() + " devices of the board are no part of the circuit, so they are not placed.");
@@ -197,38 +210,38 @@ final class LibrePcbBoardImport {
      * Where a part's name stands and whether it is printed: on a layer the board's silkscreen is made of, or for the assembly
      * alone. LibrePCB draws each device's name where its author left it, or nowhere, and then nothing is printed.
      */
-    private PcbDrawing.Reference referenceOf(LibrePcbBoard.DeviceOnBoard device, PcbDrawing.Point at) {
+    private Reference referenceOf(LibrePcbBoard.DeviceOnBoard device, Point at) {
         Optional<LibrePcbGraphic.Text> name = device.texts().stream().filter(text -> LibrePcbPlaceholder.NAME.isAll(text.value())).findFirst();
         if (name.isEmpty()) {
-            return new PcbDrawing.Reference(0, 0, 0, PcbVocabulary.FABRICATION);
+            return new Reference(0, 0, 0, PcbVocabulary.FABRICATION);
         }
-        PcbDrawing.Point stands = point(name.get().at());
+        Point stands = point(name.get().at());
         double dx = stands.x() - at.x();
         double dy = stands.y() - at.y();
         double radians = Math.toRadians(device.transform().rotation());
-        // A placed point turned back: what {@link PcbDrawing.Placement#placed} turned, undone.
+        // A placed point turned back: what {@link Placement#placed} turned, undone.
         double along = dx * Math.cos(radians) - dy * Math.sin(radians);
         double across = dx * Math.sin(radians) + dy * Math.cos(radians);
-        return new PcbDrawing.Reference(round.rounded(device.transform().mirrored() ? -along : along), round.rounded(across),
+        return new Reference(round.rounded(device.transform().mirrored() ? -along : along), round.rounded(across),
                 round.rounded(((name.get().rotation() - device.transform().rotation()) % 360 + 360) % 360),
                 board.printedLayers().contains(name.get().layer()) ? PcbVocabulary.SILKSCREEN : PcbVocabulary.FABRICATION);
     }
 
     /** Every trace of a segment, a track from one of its ends to the other; every via, open as it or the rules say. */
-    private void copper(List<PcbDrawing.Track> tracks, List<PcbDrawing.Via> vias) {
+    private void copper(List<Track> tracks, List<Via> vias) {
         Map<String, LibrePcbBoard.DeviceOnBoard> devices = new HashMap<>();
         board.devices().forEach(device -> devices.put(device.id(), device));
         for (LibrePcbBoard.Segment segment : board.segments()) {
             for (LibrePcbBoard.Via via : segment.vias()) {
-                PcbDrawing.Point at = point(via.at());
+                Point at = point(via.at());
                 boolean through = LibrePcbLayer.TOP_COPPER.equals(via.from()) && LibrePcbLayer.BOTTOM_COPPER.equals(via.to());
-                vias.add(new PcbDrawing.Via(at.x(), at.y(), round.rounded(via.drill()), round.rounded(via.size()),
+                vias.add(new Via(at.x(), at.y(), round.rounded(via.drill()), round.rounded(via.size()),
                         through ? null : copperOf(via.from()).orElse(null), through ? null : copperOf(via.to()).orElse(null), openOf(via)));
             }
             for (LibrePcbBoard.Trace trace : segment.traces()) {
                 Optional<String> layer = copperOf(trace.layer());
                 if (layer.isPresent()) {
-                    tracks.add(new PcbDrawing.Track(layer.get(), round.rounded(trace.width()), 0,
+                    tracks.add(new Track(layer.get(), round.rounded(trace.width()), 0,
                             List.of(point(where(trace.from(), segment, devices)), point(where(trace.to(), segment, devices)))));
                 }
             }
@@ -267,8 +280,8 @@ final class LibrePcbBoardImport {
                 .orElseThrow(() -> new IllegalArgumentException("A trace ends on a pad its device's footprint does not have."));
     }
 
-    private List<PcbDrawing.Zone> zones() {
-        List<PcbDrawing.Zone> zones = new ArrayList<>();
+    private List<Zone> zones() {
+        List<Zone> zones = new ArrayList<>();
         for (LibrePcbBoard.Plane plane : board.planes()) {
             Optional<String> layer = copperOf(plane.layer());
             LibrePcbCircuit.Net net = project.circuit().nets().get(plane.net());
@@ -280,15 +293,15 @@ final class LibrePcbBoardImport {
             if (!closed.isEmpty() && !closed.getFirst().at().equals(closed.getLast().at())) {
                 closed.add(closed.getFirst());
             }
-            zones.add(new PcbDrawing.Zone(layer.get(), circuit.nets().of(net.name()), round.rounded(plane.clearance()), plane.priority(), pathOf(closed)));
+            zones.add(new Zone(layer.get(), circuit.nets().of(net.name()), round.rounded(plane.clearance()), plane.priority(), pathOf(closed)));
         }
         return zones;
     }
 
     // ─── everything else it draws ────────────────────────────────────────────────────────────────────────────────────
 
-    private List<PcbDrawing.Shape> shapes() {
-        List<PcbDrawing.Shape> shapes = new ArrayList<>();
+    private List<Shape> shapes() {
+        List<Shape> shapes = new ArrayList<>();
         int elsewhere = 0;
         for (LibrePcbGraphic graphic : board.graphics()) {
             if (LibrePcbLayer.isEdge(graphic.layer()) || graphic instanceof LibrePcbGraphic.Text) {
@@ -300,12 +313,12 @@ final class LibrePcbBoardImport {
                 continue;
             }
             switch (graphic) {
-                case LibrePcbGraphic.Polygon polygon -> shapes.add(new PcbDrawing.Shape(layer.get(), polygon.filled() ? 0 : round.rounded(polygon.width()), polygon.filled(), "", pathOf(polygon.vertices())));
+                case LibrePcbGraphic.Polygon polygon -> shapes.add(new Shape(layer.get(), polygon.filled() ? 0 : round.rounded(polygon.width()), polygon.filled(), "", pathOf(polygon.vertices())));
                 case LibrePcbGraphic.Circle circle -> {
                     RoundedPath path = new RoundedPath(PLACES);
-                    PcbDrawing.Point centre = point(circle.centre());
+                    Point centre = point(circle.centre());
                     path.circle(centre.x(), centre.y(), circle.diameter() / 2);
-                    shapes.add(new PcbDrawing.Shape(layer.get(), circle.filled() ? 0 : round.rounded(circle.width()), circle.filled(), "", path.build().toSource()));
+                    shapes.add(new Shape(layer.get(), circle.filled() ? 0 : round.rounded(circle.width()), circle.filled(), "", path.build().toSource()));
                 }
                 case LibrePcbGraphic.Text ignored -> {
                 }
@@ -317,8 +330,8 @@ final class LibrePcbBoardImport {
         return shapes;
     }
 
-    private List<PcbDrawing.Text> texts() {
-        List<PcbDrawing.Text> texts = new ArrayList<>();
+    private List<Lettering> texts() {
+        List<Lettering> texts = new ArrayList<>();
         int elsewhere = 0;
         for (LibrePcbGraphic graphic : board.graphics()) {
             if (graphic instanceof LibrePcbGraphic.Text text) {
@@ -341,7 +354,7 @@ final class LibrePcbBoardImport {
      * What a device's own words print besides its name, which its placement says: a logo's value on the silkscreen. They
      * stand where the board says, what they stand for written in.
      */
-    private void devicesWords(LibrePcbBoard.DeviceOnBoard device, List<PcbDrawing.Text> texts) {
+    private void devicesWords(LibrePcbBoard.DeviceOnBoard device, List<Lettering> texts) {
         LibrePcbCircuit.Part part = project.circuit().parts().get(device.id());
         if (part == null) {
             return;
@@ -352,8 +365,8 @@ final class LibrePcbBoardImport {
         own.put(LibrePcbPlaceholder.VALUE, part.value());
         for (LibrePcbGraphic.Text text : device.texts()) {
             if (!LibrePcbPlaceholder.NAME.isAll(text.value()) && board.printedLayers().contains(text.layer())) {
-                String side = LibrePcbLayer.isBottom(text.layer()) ? PcbDrawing.BOTTOM : PcbDrawing.TOP;
-                lettered(text.filled(own), PcbDrawing.layerOf(side, PcbVocabulary.SILKSCREEN), texts);
+                String side = LibrePcbLayer.isBottom(text.layer()) ? PcbVocabulary.BOTTOM : PcbVocabulary.TOP;
+                lettered(text.filled(own), PcbLayers.layerOf(side, PcbVocabulary.SILKSCREEN), texts);
             }
         }
     }
@@ -362,7 +375,7 @@ final class LibrePcbBoardImport {
      * Words of several lines are as many texts, one under another, and a text stands middle on its point: each is moved down
      * its own line from where the format aligns the whole, turned with it.
      */
-    private void lettered(LibrePcbGraphic.Text text, String layer, List<PcbDrawing.Text> texts) {
+    private void lettered(LibrePcbGraphic.Text text, String layer, List<Lettering> texts) {
         List<String> lines = text.lines();
         double pitch = text.height() * filing.lineSpacing();
         double first = switch (text.across()) {
@@ -373,25 +386,25 @@ final class LibrePcbBoardImport {
         double radians = Math.toRadians(text.rotation());
         for (int index = 0; index < lines.size(); index++) {
             double down = first + pitch * index;
-            PcbDrawing.Point at = point(new LibrePcbPoint(text.at().x() + down * Math.sin(radians), text.at().y() - down * Math.cos(radians)));
-            texts.add(new PcbDrawing.Text(layer, LibrePcbPlaceholder.filled(lines.get(index), words), at.x(), at.y(), round.rounded(text.height()),
+            Point at = point(new LibrePcbPoint(text.at().x() + down * Math.sin(radians), text.at().y() - down * Math.cos(radians)));
+            texts.add(new Lettering(layer, LibrePcbPlaceholder.filled(lines.get(index), words), at.x(), at.y(), round.rounded(text.height()),
                     round.rounded(text.rotation()), anchorOf(text)));
         }
     }
 
     private static String anchorOf(LibrePcbGraphic.Text text) {
         return switch (text.alignment()) {
-            case LEFT -> PcbDrawing.START;
-            case CENTRE -> PcbDrawing.MIDDLE;
-            case RIGHT -> PcbDrawing.END;
+            case LEFT -> PcbVocabulary.TEXT_START;
+            case CENTRE -> PcbVocabulary.TEXT_MIDDLE;
+            case RIGHT -> PcbVocabulary.TEXT_END;
         };
     }
 
-    private List<PcbDrawing.Hole> holes() {
-        List<PcbDrawing.Hole> holes = new ArrayList<>();
+    private List<Hole> holes() {
+        List<Hole> holes = new ArrayList<>();
         for (LibrePcbLibrary.Hole hole : board.holes()) {
-            PcbDrawing.Point at = point(hole.vertices().getFirst().at());
-            holes.add(new PcbDrawing.Hole(at.x(), at.y(), round.rounded(hole.diameter()), 0));
+            Point at = point(hole.vertices().getFirst().at());
+            holes.add(new Hole(at.x(), at.y(), round.rounded(hole.diameter()), 0));
             if (hole.vertices().size() > 1) {
                 notes.add("A slot of the board is drilled as a round hole where it starts: a pcb's own holes are round.");
             }
@@ -404,12 +417,12 @@ final class LibrePcbBoardImport {
     /** Our copper layer a LibrePCB one is. */
     private Optional<String> copperOf(String layer) {
         if (LibrePcbLayer.TOP_COPPER.equals(layer)) {
-            return Optional.of(PcbDrawing.TOP);
+            return Optional.of(PcbVocabulary.TOP);
         }
         if (LibrePcbLayer.BOTTOM_COPPER.equals(layer)) {
-            return Optional.of(PcbDrawing.BOTTOM);
+            return Optional.of(PcbVocabulary.BOTTOM);
         }
-        return LibrePcbLayer.innerCopper(layer).map(PcbDrawing::innerCopper);
+        return LibrePcbLayer.innerCopper(layer).map(PcbLayers::innerCopper);
     }
 
     /** Our layer a LibrePCB one is: copper by its place in the stack, the rest by what it is for and its side. */
@@ -418,21 +431,21 @@ final class LibrePcbBoardImport {
         if (copper.isPresent()) {
             return copper;
         }
-        return filing.layerOf(layer).filter(purpose -> !COPPER.equals(purpose)).map(purpose -> LibrePcbLayer.isTop(layer) ? PcbDrawing.layerOf(PcbDrawing.TOP, purpose)
-                : LibrePcbLayer.isBottom(layer) ? PcbDrawing.layerOf(PcbDrawing.BOTTOM, purpose) : purpose);
+        return filing.layerOf(layer).filter(purpose -> !COPPER.equals(purpose)).map(purpose -> LibrePcbLayer.isTop(layer) ? PcbLayers.layerOf(PcbVocabulary.TOP, purpose)
+                : LibrePcbLayer.isBottom(layer) ? PcbLayers.layerOf(PcbVocabulary.BOTTOM, purpose) : purpose);
     }
 
     private String pathOf(List<LibrePcbGraphic.Vertex> vertices) {
         RoundedPath path = new RoundedPath(PLACES);
         LibrePcbPaths.corners(vertices, path, at -> {
-            PcbDrawing.Point point = point(at);
+            Point point = point(at);
             return new double[] {point.x(), point.y()};
         });
         return path.build().toSource();
     }
 
     /** A point of the board, Y upwards, on the pcb: from its top left, Y downwards. */
-    private PcbDrawing.Point point(LibrePcbPoint at) {
-        return new PcbDrawing.Point(round.rounded(at.x() - left), round.rounded(top - at.y()));
+    private Point point(LibrePcbPoint at) {
+        return new Point(round.rounded(at.x() - left), round.rounded(top - at.y()));
     }
 }

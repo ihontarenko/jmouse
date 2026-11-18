@@ -11,7 +11,7 @@ import org.jmouse.cad.exchange.ExportedFiles;
 import org.jmouse.cad.exchange.pcb.ArtworkAreas;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.exchange.pcb.PartBodies;
 import org.jmouse.cad.exchange.pcb.PcbSolid;
 import org.jmouse.cad.library.CadStandards;
@@ -71,7 +71,7 @@ public final class PcbGlbExport implements DocumentExport {
 
     private final Supplier<Settings>                  settings;
     private final Supplier<PcbArtwork.Settings>     artwork;
-    private final Supplier<PcbLayers.Settings>               layers;
+    private final Supplier<PcbSolidLayers.Settings>               layers;
     private final StrokeFont                font;
     private final Supplier<ModelMeshService> meshes;
     private final Placement                 frame = MeshFormats.standard().byId(FORMAT).orElseThrow().frame();
@@ -85,7 +85,7 @@ public final class PcbGlbExport implements DocumentExport {
     /** The ways a pcb is made, read through the engine's tables. */
     private final CadStandards standards;
 
-    public PcbGlbExport(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, Supplier<PcbLayers.Settings> layers, StrokeFont font,
+    public PcbGlbExport(Supplier<Settings> settings, Supplier<PcbArtwork.Settings> artwork, Supplier<PcbSolidLayers.Settings> layers, StrokeFont font,
                           Supplier<ModelMeshService> meshes, CadStandards standards) {
         this.standards = standards;
         this.settings = settings;
@@ -126,16 +126,16 @@ public final class PcbGlbExport implements DocumentExport {
         }
         List<Mesh> bodies = new ArrayList<>();
         List<MeshScene.Node> nodes = new ArrayList<>();
-        raised(new PcbLayers.RaisedArea(fabrication.name() + " " + PCB, new PcbLayers(layers.get()).settings().core(), 0, thickness, pcb), bodies,
+        raised(new PcbSolidLayers.RaisedArea(fabrication.name() + " " + PCB, new PcbSolidLayers(layers.get()).settings().core(), 0, thickness, pcb), bodies,
                 nodes);
-        new PcbLayers(layers.get()).layersOf(made, drawn, thickness).forEach(layer ->
-                raised(new PcbLayers.RaisedArea(layer.name(), layer.finish(), layer.bottom(), layer.thickness(),
+        new PcbSolidLayers(layers.get()).layersOf(made, drawn, thickness).forEach(layer ->
+                raised(new PcbSolidLayers.RaisedArea(layer.name(), layer.finish(), layer.bottom(), layer.thickness(),
                         TopologyPreservingSimplifier.simplify(layer.area(), settings.get().areaTolerance())), bodies, nodes));
         Map<String, Optional<Integer>> models = new LinkedHashMap<>();
         for (PcbFabrication.SeatedPart part : fabrication.parts()) {
             List<FootprintDrawing.Model> shown = part.drawing().map(ModelPlacement::shownOf).orElse(List.of());
             if (shown.isEmpty()) {
-                partBodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> raised(new PcbLayers(layers.get()).bodyOf(body, thickness), bodies, nodes),
+                partBodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> raised(new PcbSolidLayers(layers.get()).bodyOf(body, thickness), bodies, nodes),
                         () -> notes.add(part.designator() + " has neither a 3D model nor a body; left out."));
                 continue;
             }
@@ -154,7 +154,7 @@ public final class PcbGlbExport implements DocumentExport {
     }
 
     /** An area raised into a body of its own, standing where it was drawn. */
-    private static void raised(PcbLayers.RaisedArea area, List<Mesh> bodies, List<MeshScene.Node> nodes) {
+    private static void raised(PcbSolidLayers.RaisedArea area, List<Mesh> bodies, List<MeshScene.Node> nodes) {
         MeshBuilder builder = new MeshBuilder();
         AreaPrisms.raise(builder, AreaPrisms.materialOf(area.name(), area.finish()), area.area(), area.bottom(), area.thickness());
         nodes.add(new MeshScene.Node(area.name(), bodies.size(), Placement.IDENTITY));

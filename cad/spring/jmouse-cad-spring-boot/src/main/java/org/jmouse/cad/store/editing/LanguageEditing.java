@@ -2,6 +2,7 @@ package org.jmouse.cad.store.editing;
 
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.PcbDocumentReading;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.document.DocumentEditing;
 import org.jmouse.cad.document.DocumentEditing.AddBlock;
@@ -229,7 +230,7 @@ public class LanguageEditing {
             throw CadProblem.invalid("A PCB editor sends what it laid out as 'drawing'.");
         }
         Redrawing redrawing = new Redrawing(drawnOrNone(() -> PcbDrawing.of(document).lines()), drawnLines(drawing::lines),
-                                            PcbDrawing::classOf);
+                                            PcbDocumentReading::classOf);
         return redrawn(document, redrawing, new Head(title, category));
     }
 

@@ -1,6 +1,6 @@
 package org.jmouse.cad.plugin.mesh;
 
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.mesh.MeshBuilder;
 import org.jmouse.mesh.MeshMaterial;
 import org.locationtech.jts.algorithm.Orientation;
@@ -50,7 +50,7 @@ final class AreaPrisms {
     }
 
     /** {@code #rrggbb} and how it reflects as a glTF material, its sRGB colour made linear as glTF's factors are. */
-    static MeshMaterial materialOf(String name, PcbLayers.Finish finish) {
+    static MeshMaterial materialOf(String name, PcbSolidLayers.Finish finish) {
         int value = Integer.parseInt(finish.colour().substring(1), 16);
         return new MeshMaterial(name, linear(value >> 16 & 0xff), linear(value >> 8 & 0xff), linear(value & 0xff), 1,
                 finish.metallic(), finish.roughness());

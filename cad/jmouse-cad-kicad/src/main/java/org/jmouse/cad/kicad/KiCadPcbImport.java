@@ -1,5 +1,21 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Rules;
+import org.jmouse.cad.pcb.drawing.NetClass;
+import org.jmouse.cad.pcb.drawing.Sizes;
+import org.jmouse.cad.pcb.drawing.ViaSize;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Reference;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Keepout;
+import org.jmouse.cad.pcb.drawing.Dimension;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.cad.pcb.drawing.Shape;
 import org.jmouse.cad.document.DocumentParser;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.drawing.DrawnGroup;
@@ -73,7 +89,7 @@ public final class KiCadPcbImport {
     private final ComponentFacts facts;
     private final KiCadLibraries filing;
     /** What the board's zones draw on no copper: windows in its mask and its paste. */
-    private final List<PcbDrawing.Shape> areasOffCopper = new ArrayList<>();
+    private final List<Shape> areasOffCopper = new ArrayList<>();
     private final String ownPart;
     private final UniqueIdentifiers ownIdentifiers;
     private final RoundedPath round = new RoundedPath(PLACES);
@@ -179,9 +195,9 @@ public final class KiCadPcbImport {
         KiCadPcbImport reading = new KiCadPcbImport(pcb, identifiers, ground, design, documents, filing);
         reading.frame();
         reading.layers();
-        List<PcbDrawing.Placement> placements = reading.placements();
-        List<PcbDrawing.Zone> zones = new ArrayList<>();
-        List<PcbDrawing.Keepout> keepouts = new ArrayList<>();
+        List<Placement> placements = reading.placements();
+        List<Zone> zones = new ArrayList<>();
+        List<Keepout> keepouts = new ArrayList<>();
         reading.areas(zones, keepouts);
         PcbDrawing drawing = new PcbDrawing(circuit, rulesOf(settings, filing), reading.netClasses(settings, filing), sizesOf(settings), List.of(), List.of(),
                 reading.copper.size(), reading.outline(), placements, reading.tracks(), reading.arcs(), reading.vias(), zones,
@@ -196,34 +212,34 @@ public final class KiCadPcbImport {
     // ─── how it is made ─────────────────────────────────
 
     /** The rules it was laid out to: the usual way of making a pcb, each value as the project sets it. */
-    private static Optional<PcbDrawing.Rules> rulesOf(KiCadProjectSettings settings, KiCadLibraries filing) {
+    private static Optional<Rules> rulesOf(KiCadProjectSettings settings, KiCadLibraries filing) {
         if (settings.usual().isEmpty() && settings.rules().isEmpty()) {
             return Optional.empty();
         }
         Map<String, Double> changes = new LinkedHashMap<>();
         settings.usual().ifPresent(usual -> {
-            changes.put(PcbDrawing.RULE_CLEARANCE, usual.clearance());
-            changes.put(PcbDrawing.RULE_TRACK_WIDTH, usual.trackWidth());
-            changes.put(PcbDrawing.RULE_VIA_DRILL, usual.viaDrill());
-            changes.put(PcbDrawing.RULE_VIA_DIAMETER, usual.viaDiameter());
+            changes.put(PcbVocabulary.RULE_CLEARANCE, usual.clearance());
+            changes.put(PcbVocabulary.RULE_TRACK_WIDTH, usual.trackWidth());
+            changes.put(PcbVocabulary.RULE_VIA_DRILL, usual.viaDrill());
+            changes.put(PcbVocabulary.RULE_VIA_DIAMETER, usual.viaDiameter());
         });
         filing.pcbRuleNames().forEach((ours, theirs) -> Optional.ofNullable(settings.rules().get(theirs))
                 .ifPresent(value -> changes.put(ours, value)));
-        return Optional.of(new PcbDrawing.Rules(filing.pcbRules(), changes));
+        return Optional.of(new Rules(filing.pcbRules(), changes));
     }
 
-    private static PcbDrawing.Sizes sizesOf(KiCadProjectSettings settings) {
-        return new PcbDrawing.Sizes(settings.trackWidths(), settings.viaSizes().stream()
-                .map(size -> new PcbDrawing.ViaSize(size.drill(), size.diameter())).toList());
+    private static Sizes sizesOf(KiCadProjectSettings settings) {
+        return new Sizes(settings.trackWidths(), settings.viaSizes().stream()
+                .map(size -> new ViaSize(size.drill(), size.diameter())).toList());
     }
 
     /** Each class of the project with the nets of the board it takes; a class no net of the board is in is not said. */
-    private List<PcbDrawing.NetClass> netClasses(KiCadProjectSettings settings, KiCadLibraries filing) {
+    private List<NetClass> netClasses(KiCadProjectSettings settings, KiCadLibraries filing) {
         Map<String, Set<String>> nets = new LinkedHashMap<>();
         netsOfBoard.forEach((boardNet, net) -> settings.classOf(boardNet).ifPresent(
                 netClass -> nets.computeIfAbsent(netClass, ignored -> new TreeSet<>()).add(net)));
         return settings.classes().stream().filter(netClass -> nets.containsKey(netClass.name()))
-                .map(netClass -> new PcbDrawing.NetClass(new UniqueIdentifiers(filing.pcbClassOpening(), UniqueIdentifiers.UNLIMITED).of(netClass.name()), netClass.trackWidth(), netClass.clearance(),
+                .map(netClass -> new NetClass(new UniqueIdentifiers(filing.pcbClassOpening(), UniqueIdentifiers.UNLIMITED).of(netClass.name()), netClass.trackWidth(), netClass.clearance(),
                         netClass.viaDrill(), netClass.viaDiameter(), List.copyOf(nets.get(netClass.name())))).toList();
     }
 
@@ -246,11 +262,11 @@ public final class KiCadPcbImport {
         int inner = 0;
         for (String layer : pcb.copper()) {
             if (layer.equals(FRONT_COPPER)) {
-                copper.put(layer, PcbDrawing.TOP);
+                copper.put(layer, PcbVocabulary.TOP);
             } else if (layer.equals(BACK_COPPER)) {
-                copper.put(layer, PcbDrawing.BOTTOM);
+                copper.put(layer, PcbVocabulary.BOTTOM);
             } else {
-                copper.put(layer, PcbDrawing.innerCopper(++inner));
+                copper.put(layer, PcbLayers.innerCopper(++inner));
             }
         }
     }
@@ -318,8 +334,8 @@ public final class KiCadPcbImport {
     // ─── footprints ─────────────────────────────────────
 
     /** Every footprint: each with a symbol a part of the design, and those only the board has named once the parts are. */
-    private List<PcbDrawing.Placement> placements() {
-        List<PcbDrawing.Placement> placements = new ArrayList<>();
+    private List<Placement> placements() {
+        List<Placement> placements = new ArrayList<>();
         Set<String> disagreeing = new TreeSet<>();
         List<KiCadPcbFootprint> own = new ArrayList<>();
         Set<String> lostSymbols = new TreeSet<>();
@@ -381,14 +397,14 @@ public final class KiCadPcbImport {
     }
 
 
-    private PcbDrawing.Placement placed(KiCadPcbFootprint footprint, String designator, Optional<String> shown,
+    private Placement placed(KiCadPcbFootprint footprint, String designator, Optional<String> shown,
                                         Optional<String> ownFootprint, Map<String, String> nets) {
         boolean back = footprint.side() == KiCadSide.BACK;
         double turned = back ? footprint.angle() + 180 : footprint.angle();
-        Optional<PcbDrawing.Reference> reference = footprint.lettering().map(lettering -> new PcbDrawing.Reference(
+        Optional<Reference> reference = footprint.lettering().map(lettering -> new Reference(
                 round.rounded(lettering.at().x()), round.rounded(lettering.at().y()), round.rounded(normalized(lettering.angle()))));
-        return new PcbDrawing.Placement(designator, round.rounded(footprint.at().x() - left), round.rounded(footprint.at().y() - top),
-                round.rounded(normalized(turned)), back ? PcbDrawing.BOTTOM : PcbDrawing.TOP, reference, shown, ownFootprint, nets)
+        return new Placement(designator, round.rounded(footprint.at().x() - left), round.rounded(footprint.at().y() - top),
+                round.rounded(normalized(turned)), back ? PcbVocabulary.BOTTOM : PcbVocabulary.TOP, reference, shown, ownFootprint, nets)
                 .arranged(arrangementOf(footprint.standing()));
     }
 
@@ -428,40 +444,40 @@ public final class KiCadPcbImport {
 
     // ─── copper ─────────────────────────────────────────
 
-    private List<PcbDrawing.Track> tracks() {
-        List<PcbDrawing.Track> tracks = new ArrayList<>();
+    private List<Track> tracks() {
+        List<Track> tracks = new ArrayList<>();
         for (KiCadPcb.Track track : pcb.tracks()) {
-            Optional.ofNullable(copper.get(track.layer())).ifPresent(layer -> tracks.add(new PcbDrawing.Track(layer,
+            Optional.ofNullable(copper.get(track.layer())).ifPresent(layer -> tracks.add(new Track(layer,
                     round.rounded(track.width()), 0, List.of(point(track.start()), point(track.end()))).arranged(arrangementOf(track.standing()))));
         }
         return tracks;
     }
 
-    private List<PcbDrawing.Arc> arcs() {
-        List<PcbDrawing.Arc> arcs = new ArrayList<>();
+    private List<Arc> arcs() {
+        List<Arc> arcs = new ArrayList<>();
         for (KiCadPcb.Arc arc : pcb.arcs()) {
-            Optional.ofNullable(copper.get(arc.layer())).ifPresent(layer -> arcs.add(new PcbDrawing.Arc(layer,
+            Optional.ofNullable(copper.get(arc.layer())).ifPresent(layer -> arcs.add(new Arc(layer,
                     round.rounded(arc.width()), point(arc.start()), point(arc.middle()), point(arc.end())).arranged(arrangementOf(arc.standing()))));
         }
         return arcs;
     }
 
     /** Every via: through the pcb unless its layers say less. */
-    private List<PcbDrawing.Via> vias() {
-        List<PcbDrawing.Via> vias = new ArrayList<>();
+    private List<Via> vias() {
+        List<Via> vias = new ArrayList<>();
         for (KiCadPcb.Via via : pcb.vias()) {
-            PcbDrawing.Point at = point(via.at());
+            Point at = point(via.at());
             String from = via.layers().isEmpty() ? null : copper.get(via.layers().getFirst());
             String to = via.layers().isEmpty() ? null : copper.get(via.layers().getLast());
-            boolean through = PcbDrawing.TOP.equals(from) && PcbDrawing.BOTTOM.equals(to);
-            vias.add(new PcbDrawing.Via(at.x(), at.y(), round.rounded(via.drill()), round.rounded(via.diameter()),
+            boolean through = PcbVocabulary.TOP.equals(from) && PcbVocabulary.BOTTOM.equals(to);
+            vias.add(new Via(at.x(), at.y(), round.rounded(via.drill()), round.rounded(via.diameter()),
                     through ? null : from, through ? null : to, openOf(via.tenting())).arranged(arrangementOf(via.standing())));
         }
         return vias;
     }
 
     /** Each area: a pour for each of its copper layers, a keepout on all of them. */
-    private void areas(List<PcbDrawing.Zone> zones, List<PcbDrawing.Keepout> keepouts) {
+    private void areas(List<Zone> zones, List<Keepout> keepouts) {
         int beside = 0;
         int netless = 0;
         for (KiCadPcb.Zone zone : pcb.zones()) {
@@ -476,7 +492,7 @@ public final class KiCadPcbImport {
                 return !outline.isEmpty();
             }).toList();
             offCopper.stream().map(this::pcbLayerOf).flatMap(Optional::stream).forEach(layer -> outlines.forEach(outline ->
-                    areasOffCopper.add(new PcbDrawing.Shape(layer, 0, true, "", pathOf(outline)))));
+                    areasOffCopper.add(new Shape(layer, 0, true, "", pathOf(outline)))));
             if (layers.isEmpty()) {
                 beside += offCopper.stream().map(this::pcbLayerOf).allMatch(Optional::isEmpty) ? 1 : 0;
                 continue;
@@ -484,7 +500,7 @@ public final class KiCadPcbImport {
             for (KiCadOutline outline : outlines) {
                 String path = pathOf(outline);
                 if (zone.kind() == KiCadPcb.ZoneKind.KEEPOUT) {
-                    keepouts.add(new PcbDrawing.Keepout(layers, path));
+                    keepouts.add(new Keepout(layers, path));
                     continue;
                 }
                 Optional<String> net = netOfZone(zone);
@@ -492,7 +508,7 @@ public final class KiCadPcbImport {
                     netless++;
                     continue;
                 }
-                layers.forEach(layer -> zones.add(new PcbDrawing.Zone(layer, net.get(), round.rounded(zone.clearance()),
+                layers.forEach(layer -> zones.add(new Zone(layer, net.get(), round.rounded(zone.clearance()),
                         zone.priority(), path)));
             }
         }
@@ -515,8 +531,8 @@ public final class KiCadPcbImport {
             if (layer.equals(KiCadLayer.ALL_COPPER)) {
                 named.addAll(copper.values());
             } else if (layer.equals(KiCadLayer.BOTH_SIDES_COPPER)) {
-                named.add(PcbDrawing.TOP);
-                named.add(PcbDrawing.BOTTOM);
+                named.add(PcbVocabulary.TOP);
+                named.add(PcbVocabulary.BOTTOM);
             } else if (copper.containsKey(layer)) {
                 named.add(copper.get(layer));
             }
@@ -561,8 +577,8 @@ public final class KiCadPcbImport {
         if (copper.containsKey(kicad)) {
             return Optional.of(copper.get(kicad));
         }
-        return filing.layerOf(kicad).map(purpose -> KiCadLayer.isFront(kicad) ? PcbDrawing.layerOf(PcbDrawing.TOP, purpose)
-                : KiCadLayer.isBack(kicad) ? PcbDrawing.layerOf(PcbDrawing.BOTTOM, purpose) : purpose);
+        return filing.layerOf(kicad).map(purpose -> KiCadLayer.isFront(kicad) ? PcbLayers.layerOf(PcbVocabulary.TOP, purpose)
+                : KiCadLayer.isBack(kicad) ? PcbLayers.layerOf(PcbVocabulary.BOTTOM, purpose) : purpose);
     }
 
     /** Which side's mask a via is left bare on, in our word; nothing for one covered on both. */
@@ -570,20 +586,20 @@ public final class KiCadPcbImport {
         if (tenting.front() && tenting.back()) {
             return "";
         }
-        return !tenting.front() && !tenting.back() ? PcbVocabulary.VIA_OPEN_BOTH : tenting.front() ? PcbDrawing.BOTTOM : PcbDrawing.TOP;
+        return !tenting.front() && !tenting.back() ? PcbVocabulary.VIA_OPEN_BOTH : tenting.front() ? PcbVocabulary.BOTTOM : PcbVocabulary.TOP;
     }
 
     /** A graphic of the board in the frame of ours: from the edge's corner, as all of a pcb is. */
     private KiCadFootprintGraphic framed(KiCadFootprintGraphic graphic) {
         return mapped(graphic, position -> {
-            PcbDrawing.Point ours = point(position);
+            Point ours = point(position);
             return new KiCadPoint(ours.x(), ours.y());
         });
     }
 
     /** What the board draws on its layers besides its copper and its edge. A filled graphic is an area, the rest are lines. */
-    private List<PcbDrawing.Shape> shapes() {
-        List<PcbDrawing.Shape> shapes = new ArrayList<>(areasOffCopper);
+    private List<Shape> shapes() {
+        List<Shape> shapes = new ArrayList<>(areasOffCopper);
         int elsewhere = 0;
         for (KiCadFootprintGraphic graphic : pcb.graphics()) {
             if (graphic.layer().equals(KiCadLayer.EDGE)) {
@@ -594,7 +610,7 @@ public final class KiCadPcbImport {
                 elsewhere++;
                 continue;
             }
-            shapes.add(new PcbDrawing.Shape(layer.get(), graphic.filled() ? 0 : round.rounded(graphic.width()), graphic.filled(), "",
+            shapes.add(new Shape(layer.get(), graphic.filled() ? 0 : round.rounded(graphic.width()), graphic.filled(), "",
                     KiCadFootprintDrawing.pathOf(framed(graphic))));
         }
         if (elsewhere > 0) {
@@ -603,8 +619,8 @@ public final class KiCadPcbImport {
         return shapes;
     }
 
-    private List<PcbDrawing.Text> texts() {
-        List<PcbDrawing.Text> texts = new ArrayList<>();
+    private List<Lettering> texts() {
+        List<Lettering> texts = new ArrayList<>();
         int elsewhere = 0;
         for (KiCadPcb.Text text : pcb.texts()) {
             String layer = pcbLayerOf(text.layer()).orElse(null);
@@ -613,9 +629,9 @@ public final class KiCadPcbImport {
                 continue;
             }
             String anchor = switch (text.along()) {
-                case LEFT -> PcbDrawing.START;
-                case RIGHT -> PcbDrawing.END;
-                case CENTRE -> PcbDrawing.MIDDLE;
+                case LEFT -> PcbVocabulary.TEXT_START;
+                case RIGHT -> PcbVocabulary.TEXT_END;
+                case CENTRE -> PcbVocabulary.TEXT_MIDDLE;
             };
             // A line of a pcb's words is one line of its text: words of several lines are as many texts, one under another.
             List<String> lines = text.text().lines().toList();
@@ -626,8 +642,8 @@ public final class KiCadPcbImport {
                 case MIDDLE -> -pitch * (lines.size() - 1) / 2;
             };
             for (int index = 0; index < lines.size(); index++) {
-                PcbDrawing.Point at = point(across(text, first + pitch * index));
-                texts.add(new PcbDrawing.Text(layer, lines.get(index), at.x(), at.y(), round.rounded(text.height()),
+                Point at = point(across(text, first + pitch * index));
+                texts.add(new Lettering(layer, lines.get(index), at.x(), at.y(), round.rounded(text.height()),
                         round.rounded(normalized(text.angle())), anchor));
             }
         }
@@ -643,8 +659,8 @@ public final class KiCadPcbImport {
         return new KiCadPoint(text.at().x() + down * Math.sin(radians), text.at().y() + down * Math.cos(radians));
     }
 
-    private List<PcbDrawing.Dimension> dimensions() {
-        return pcb.dimensions().stream().map(dimension -> new PcbDrawing.Dimension(point(dimension.start()), point(dimension.end()),
+    private List<Dimension> dimensions() {
+        return pcb.dimensions().stream().map(dimension -> new Dimension(point(dimension.start()), point(dimension.end()),
                 round.rounded(dimension.height()))).toList();
     }
 
@@ -657,8 +673,8 @@ public final class KiCadPcbImport {
 
     // ─── geometry ───────────────────────────────────────
 
-    private PcbDrawing.Point point(KiCadPoint point) {
-        return new PcbDrawing.Point(round.rounded(point.x() - left), round.rounded(point.y() - top));
+    private Point point(KiCadPoint point) {
+        return new Point(round.rounded(point.x() - left), round.rounded(point.y() - top));
     }
 
     private SheetTracing.Point traced(KiCadPoint point) {

@@ -1,5 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.library.CadLibrary;
@@ -76,12 +77,12 @@ class PcbMadeTest {
     }
 
     private static PcbSolid.Side top(Made made) {
-        return made.solid().side(PcbDrawing.TOP).orElseThrow();
+        return made.solid().side(PcbVocabulary.TOP).orElseThrow();
     }
 
     @Test
     void copperUnderTheMaskOpensNoWindow() {
-        assertTrue(made("    track(top, width: 2, from: 0 0, to: 20 0)").windows(PcbDrawing.TOP).isEmpty());
+        assertTrue(made("    track(top, width: 2, from: 0 0, to: 20 0)").windows(PcbVocabulary.TOP).isEmpty());
     }
 
     @Test
@@ -89,26 +90,26 @@ class PcbMadeTest {
         Made made = made("    track(top, width: 2, from: 0 0, to: 20 0, finish: bare)");
         // The track grown all round by the mask's expansion: 20 long, its round ends a circle.
         double half = 1 + ARTWORK.maskExpansion();
-        assertEquals(20 * 2 * half + Math.PI * half * half, made.windows(PcbDrawing.TOP).getArea(), 0.05);
-        assertTrue(made.windows(PcbDrawing.BOTTOM).isEmpty());
-        assertEquals(made.solid().side(PcbDrawing.TOP).orElseThrow().copper().getArea(), top(made).bare().getArea(), 0.05);
+        assertEquals(20 * 2 * half + Math.PI * half * half, made.windows(PcbVocabulary.TOP).getArea(), 0.05);
+        assertTrue(made.windows(PcbVocabulary.BOTTOM).isEmpty());
+        assertEquals(made.solid().side(PcbVocabulary.TOP).orElseThrow().copper().getArea(), top(made).bare().getArea(), 0.05);
     }
 
     @Test
     void whatThePcbDrawsOnTheMaskIsAWindowAnAreaOrALine() {
         Made area = made("    shape(top-mask, filled, \"M0 0H10V5H0Z\")");
-        assertEquals(50, area.windows(PcbDrawing.TOP).getArea(), 0.05);
+        assertEquals(50, area.windows(PcbVocabulary.TOP).getArea(), 0.05);
         Made line = made("    shape(top-mask, width: 1.5, \"M0 0H4\")\n    shape(top-silkscreen, width: 1.5, \"M0 10H4\")");
-        assertEquals(4 * 1.5 + Math.PI * 0.75 * 0.75, line.windows(PcbDrawing.TOP).getArea(), 0.05);
+        assertEquals(4 * 1.5 + Math.PI * 0.75 * 0.75, line.windows(PcbVocabulary.TOP).getArea(), 0.05);
     }
 
     @Test
     void aPartsWindowStandsWhereThePartStandsOnThePartsSide() {
         Made made = made("    place(U1, footprint: windowed, at: 10 20)");
-        Geometry windows = made.windows(PcbDrawing.TOP);
+        Geometry windows = made.windows(PcbVocabulary.TOP);
         assertEquals(4, windows.getArea(), 1e-6);
         assertTrue(windows.contains(windows.getFactory().createPoint(new org.locationtech.jts.geom.Coordinate(11, 21))));
-        assertTrue(made.windows(PcbDrawing.BOTTOM).isEmpty());
+        assertTrue(made.windows(PcbVocabulary.BOTTOM).isEmpty());
     }
 
     @Test

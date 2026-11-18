@@ -1,5 +1,7 @@
 package org.jmouse.cad.management;
 
+import org.jmouse.cad.pcb.drawing.ViaSize;
+import org.jmouse.cad.pcb.drawing.Via;
 import org.jmouse.cad.pcb.checks.PcbFinding;
 import org.jmouse.cad.exchange.pcb.CopperRefresh;
 import org.jmouse.cad.exchange.pcb.LayoutMoment;
@@ -317,8 +319,8 @@ public class ExchangeController {
     public record ViaSizeView(double drill, double diameter) {
 
         /** The size asked for; none asked, the one the net is laid with. */
-        static Optional<PcbDrawing.ViaSize> of(ViaSizeView view) {
-            return Optional.ofNullable(view).map(asked -> new PcbDrawing.ViaSize(asked.drill(), asked.diameter()));
+        static Optional<ViaSize> of(ViaSizeView view) {
+            return Optional.ofNullable(view).map(asked -> new ViaSize(asked.drill(), asked.diameter()));
         }
     }
 
@@ -331,7 +333,7 @@ public class ExchangeController {
     }
 
     /** Vias made in a row, or why none can stand, in words: exactly one of them. */
-    public record ViaRowView(List<PcbDrawing.Via> vias, String refusal) {
+    public record ViaRowView(List<Via> vias, String refusal) {
 
         static ViaRowView of(ViaRows.Placed placed) {
             return switch (placed) {

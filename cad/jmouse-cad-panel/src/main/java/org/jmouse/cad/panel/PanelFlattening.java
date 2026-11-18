@@ -1,5 +1,17 @@
 package org.jmouse.cad.panel;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.NetClass;
+import org.jmouse.cad.pcb.drawing.Teardrop;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Reference;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Keepout;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.circuit.Connection;
 import org.jmouse.cad.circuit.Part;
 import org.jmouse.cad.Setting;
@@ -150,42 +162,42 @@ public final class PanelFlattening implements DocumentFlattening {
     /** What the boards' copies come to, together. */
     private static final class Merged {
 
-        private final List<PcbDrawing.NetClass> netClasses = new ArrayList<>();
-        private final List<PcbDrawing.Placement> placements = new ArrayList<>();
-        private final List<PcbDrawing.Track> tracks = new ArrayList<>();
-        private final List<PcbDrawing.Arc> arcs = new ArrayList<>();
-        private final List<PcbDrawing.Via> vias = new ArrayList<>();
-        private final List<PcbDrawing.Zone> zones = new ArrayList<>();
-        private final List<PcbDrawing.Keepout> keepouts = new ArrayList<>();
-        private final List<PcbDrawing.Text> texts = new ArrayList<>();
-        private final List<PcbDrawing.Hole> holes = new ArrayList<>();
-        private final List<PcbDrawing.Shape> shapes = new ArrayList<>();
+        private final List<NetClass> netClasses = new ArrayList<>();
+        private final List<Placement> placements = new ArrayList<>();
+        private final List<Track> tracks = new ArrayList<>();
+        private final List<Arc> arcs = new ArrayList<>();
+        private final List<Via> vias = new ArrayList<>();
+        private final List<Zone> zones = new ArrayList<>();
+        private final List<Keepout> keepouts = new ArrayList<>();
+        private final List<org.jmouse.cad.pcb.drawing.Lettering> texts = new ArrayList<>();
+        private final List<Hole> holes = new ArrayList<>();
+        private final List<Shape> shapes = new ArrayList<>();
         private final List<Part> parts = new ArrayList<>();
 
         void addPcb(PcbDrawing pcb, BoardMotion motion, String prefix) {
-            for (PcbDrawing.NetClass netClass : pcb.netClasses()) {
-                netClasses.add(new PcbDrawing.NetClass(prefix + netClass.name(), netClass.width(), netClass.clearance(), netClass.drill(), netClass.diameter(),
+            for (NetClass netClass : pcb.netClasses()) {
+                netClasses.add(new NetClass(prefix + netClass.name(), netClass.width(), netClass.clearance(), netClass.drill(), netClass.diameter(),
                         netClass.nets().stream().map(net -> prefix + net).toList()));
             }
             pcb.placements().forEach(placement -> placements.add(placed(placement, motion, prefix)));
-            pcb.tracks().forEach(track -> tracks.add(new PcbDrawing.Track(track.layer(), track.width(), track.rounding(),
+            pcb.tracks().forEach(track -> tracks.add(new Track(track.layer(), track.width(), track.rounding(),
                     track.points().stream().map(motion::point).toList(), track.arrangement(), track.finish())));
-            pcb.arcs().forEach(arc -> arcs.add(new PcbDrawing.Arc(arc.layer(), arc.width(), motion.point(arc.from()), motion.point(arc.through()), motion.point(arc.to()), arc.arrangement(), arc.finish())));
-            for (PcbDrawing.Via via : pcb.vias()) {
-                PcbDrawing.Point at = motion.point(new PcbDrawing.Point(via.x(), via.y()));
-                vias.add(new PcbDrawing.Via(at.x(), at.y(), via.drill(), via.diameter(), via.from(), via.to(), via.open()));
+            pcb.arcs().forEach(arc -> arcs.add(new Arc(arc.layer(), arc.width(), motion.point(arc.from()), motion.point(arc.through()), motion.point(arc.to()), arc.arrangement(), arc.finish())));
+            for (Via via : pcb.vias()) {
+                Point at = motion.point(new Point(via.x(), via.y()));
+                vias.add(new Via(at.x(), at.y(), via.drill(), via.diameter(), via.from(), via.to(), via.open()));
             }
-            pcb.zones().forEach(zone -> zones.add(new PcbDrawing.Zone(zone.layer(), netOf(zone.net(), prefix), zone.clearance(), zone.priority(), motion.path(zone.path()), zone.finish())));
-            pcb.keepouts().forEach(keepout -> keepouts.add(new PcbDrawing.Keepout(keepout.layers(), motion.path(keepout.path()))));
-            for (PcbDrawing.Text text : pcb.texts()) {
-                PcbDrawing.Point at = motion.point(new PcbDrawing.Point(text.x(), text.y()));
-                texts.add(new PcbDrawing.Text(text.layer(), text.text(), at.x(), at.y(), text.size(), text.rotation() + motion.rotation(), text.anchor()));
+            pcb.zones().forEach(zone -> zones.add(new Zone(zone.layer(), netOf(zone.net(), prefix), zone.clearance(), zone.priority(), motion.path(zone.path()), zone.finish())));
+            pcb.keepouts().forEach(keepout -> keepouts.add(new Keepout(keepout.layers(), motion.path(keepout.path()))));
+            for (org.jmouse.cad.pcb.drawing.Lettering text : pcb.texts()) {
+                Point at = motion.point(new Point(text.x(), text.y()));
+                texts.add(new org.jmouse.cad.pcb.drawing.Lettering(text.layer(), text.text(), at.x(), at.y(), text.size(), text.rotation() + motion.rotation(), text.anchor()));
             }
-            for (PcbDrawing.Hole hole : pcb.holes()) {
-                PcbDrawing.Point at = motion.point(new PcbDrawing.Point(hole.x(), hole.y()));
-                holes.add(new PcbDrawing.Hole(at.x(), at.y(), hole.drill(), hole.ring()));
+            for (Hole hole : pcb.holes()) {
+                Point at = motion.point(new Point(hole.x(), hole.y()));
+                holes.add(new Hole(at.x(), at.y(), hole.drill(), hole.ring()));
             }
-            pcb.shapes().forEach(shape -> shapes.add(new PcbDrawing.Shape(shape.layer(), shape.width(), shape.filled(), netOf(shape.net(), prefix), motion.path(shape.path()))));
+            pcb.shapes().forEach(shape -> shapes.add(new Shape(shape.layer(), shape.width(), shape.filled(), netOf(shape.net(), prefix), motion.path(shape.path()))));
         }
 
         void addParts(Map<String, Part> boardParts, PcbFabrication board, String prefix) {
@@ -203,20 +215,20 @@ public final class PanelFlattening implements DocumentFlattening {
         }
 
         /** The teardrops every board asks: they are rules of the sheet, not of one board. */
-        List<PcbDrawing.Teardrop> teardrops(Map<String, PcbDrawing> drawings) {
+        List<Teardrop> teardrops(Map<String, PcbDrawing> drawings) {
             return drawings.values().stream().flatMap(pcb -> pcb.teardrops().stream()).distinct().toList();
         }
 
-        private static PcbDrawing.Placement placed(PcbDrawing.Placement placement, BoardMotion motion, String prefix) {
-            PcbDrawing.Point at = motion.point(new PcbDrawing.Point(placement.x(), placement.y()));
-            Optional<PcbDrawing.Reference> reference = placement.reference().map(moved -> {
-                PcbDrawing.Point there = motion.point(new PcbDrawing.Point(moved.x(), moved.y()));
-                return new PcbDrawing.Reference(there.x(), there.y(), moved.rotation() + motion.rotation(), moved.layer());
+        private static Placement placed(Placement placement, BoardMotion motion, String prefix) {
+            Point at = motion.point(new Point(placement.x(), placement.y()));
+            Optional<Reference> reference = placement.reference().map(moved -> {
+                Point there = motion.point(new Point(moved.x(), moved.y()));
+                return new Reference(there.x(), there.y(), moved.rotation() + motion.rotation(), moved.layer());
             });
             Map<String, String> nets = new LinkedHashMap<>();
             placement.nets().forEach((pad, net) -> nets.put(pad, prefix + net));
             // Each copy prints what the board prints; its name on the panel only tells the copies apart.
-            return new PcbDrawing.Placement(prefix + placement.designator(), at.x(), at.y(), placement.rotation() + motion.rotation(), placement.side(), placement.reference(),
+            return new Placement(prefix + placement.designator(), at.x(), at.y(), placement.rotation() + motion.rotation(), placement.side(), placement.reference(),
                     Optional.of(placement.printed()), placement.footprint(), nets);
         }
 

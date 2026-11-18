@@ -1,5 +1,8 @@
 package org.jmouse.cad.panel;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.library.CadStandards;
 import org.jmouse.cad.document.DocumentLanguage;
 import org.jmouse.cad.document.DocumentModule;
@@ -84,8 +87,8 @@ class PanelFlatteningTest {
     @Test
     void copiesStandInAGridAndTheirCopperMovesWithThem() {
         PcbDrawing pcb = pcb("board(square, at: 100 200, across: 2, gap: 3)\nframe(rail: 5)");
-        assertEquals(List.of(new PcbDrawing.Point(101, 201), new PcbDrawing.Point(105, 201)), pcb.tracks().getFirst().points());
-        assertEquals(new PcbDrawing.Point(124, 201), pcb.tracks().get(1).points().getFirst(), "20 wide and a gap of 3 on");
+        assertEquals(List.of(new Point(101, 201), new Point(105, 201)), pcb.tracks().getFirst().points());
+        assertEquals(new Point(124, 201), pcb.tracks().get(1).points().getFirst(), "20 wide and a gap of 3 on");
         assertEquals(102, pcb.holes().getFirst().x(), 1e-9);
         assertEquals(125, pcb.holes().get(1).x(), 1e-9);
     }
@@ -94,14 +97,14 @@ class PanelFlatteningTest {
     void aQuarterTurnTurnsTheBoardAndStillStandsWhereItIsTold() {
         PcbDrawing pcb = pcb("board(square, at: 0 0, rotate: 90)");
         // Counter-clockwise as seen, Y down: (x, y) goes to (y, -x), then moved so its bounds start at the origin.
-        assertEquals(new PcbDrawing.Point(1, 19), pcb.tracks().getFirst().points().getFirst());
-        assertEquals(new PcbDrawing.Point(1, 15), pcb.tracks().getFirst().points().get(1));
+        assertEquals(new Point(1, 19), pcb.tracks().getFirst().points().getFirst());
+        assertEquals(new Point(1, 15), pcb.tracks().getFirst().points().get(1));
     }
 
     @Test
     void netsOfCopiesAreToldApart() {
         PcbDrawing pcb = pcb("board(square, at: 0 0, across: 2, gap: 0)\nseparate(v-score)");
-        assertEquals(List.of("B1_GND", "B2_GND"), pcb.zones().stream().map(PcbDrawing.Zone::net).toList());
+        assertEquals(List.of("B1_GND", "B2_GND"), pcb.zones().stream().map(Zone::net).toList());
     }
 
     @Test
@@ -117,7 +120,7 @@ class PanelFlatteningTest {
     void theFrameSetsItsHolesAndFiducialsOnItsRails() {
         PcbDrawing pcb = pcb("board(square, at: 0 0)\nframe(rail: 5, sides: [top, bottom], fiducials: 3, tooling: 4)");
         assertEquals(4, pcb.holes().stream().filter(hole -> hole.drill() == 3.2).count());
-        assertEquals(new PcbDrawing.Hole(2.5, -2.5, 3.2, 0), pcb.holes().stream().filter(hole -> hole.drill() == 3.2).findFirst().orElseThrow());
+        assertEquals(new Hole(2.5, -2.5, 3.2, 0), pcb.holes().stream().filter(hole -> hole.drill() == 3.2).findFirst().orElseThrow());
         assertEquals(3 * 4, pcb.shapes().size(), "copper and opening, on both faces");
     }
 
@@ -153,7 +156,7 @@ class PanelFlatteningTest {
         assertEquals(List.of("B1_R1", "B2_R1"), fabrication.parts().stream().map(PcbFabrication.SeatedPart::designator).toList());
         assertEquals(List.of("R1", "R1"), fabrication.parts().stream().map(PcbFabrication.SeatedPart::printed).toList());
         assertEquals(List.of("10 kΩ", "10 kΩ"), fabrication.parts().stream().map(PcbFabrication.SeatedPart::value).toList());
-        assertEquals(new PcbDrawing.Point(27, 5), new PcbDrawing.Point(fabrication.parts().get(1).placement().x(), fabrication.parts().get(1).placement().y()), "20 wide and a gap of 2 on");
+        assertEquals(new Point(27, 5), new Point(fabrication.parts().get(1).placement().x(), fabrication.parts().get(1).placement().y()), "20 wide and a gap of 2 on");
     }
 
     @Test

@@ -1,6 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.geometry.CopperNets;
 import org.jmouse.cad.pcb.geometry.CopperPieces;
 import org.jmouse.geometry.taut.Obstacle;

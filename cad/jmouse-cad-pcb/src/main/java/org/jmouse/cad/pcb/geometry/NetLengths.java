@@ -1,5 +1,9 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
 import java.util.HashMap;
@@ -43,7 +47,7 @@ public final class NetLengths {
             nets.trackNets().get(index).ifPresent(net -> lengths.merge(net, none.plusCopper(length), NetLengths::sum));
         }
         for (int index = 0; index < pcb.arcs().size(); index++) {
-            PcbDrawing.Arc arc = pcb.arcs().get(index);
+            Arc arc = pcb.arcs().get(index);
             double length = arcLength(arc.from(), arc.through(), arc.to());
             nets.arcNets().get(index).ifPresent(net -> lengths.merge(net, none.plusCopper(length), NetLengths::sum));
         }
@@ -59,7 +63,7 @@ public final class NetLengths {
         List<String> layers = pcb.copperLayerIds();
         double layerGap = thickness / Math.max(1, layers.size() - 1);
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             int from = via.from() == null || via.from().isEmpty() ? 0 : layers.indexOf(via.from());
             int to = via.to() == null || via.to().isEmpty() ? layers.size() - 1 : layers.indexOf(via.to());
             double barrel = layerGap * Math.abs(to - from);
@@ -76,8 +80,8 @@ public final class NetLengths {
      * A track's length along its copper: each rounded corner cuts the two straight ends it replaces, 2·cut, and runs the
      * arc between instead, radius·turn.
      */
-    public static double trackLength(PcbDrawing.Track track) {
-        List<PcbDrawing.Point> points = track.points();
+    public static double trackLength(Track track) {
+        List<Point> points = track.points();
         double length = 0;
         for (int index = 1; index < points.size(); index++) {
             length += Math.hypot(points.get(index).x() - points.get(index - 1).x(), points.get(index).y() - points.get(index - 1).y());
@@ -86,9 +90,9 @@ public final class NetLengths {
             return length;
         }
         for (int index = 1; index < points.size() - 1; index++) {
-            PcbDrawing.Point previous = points.get(index - 1);
-            PcbDrawing.Point corner = points.get(index);
-            PcbDrawing.Point next = points.get(index + 1);
+            Point previous = points.get(index - 1);
+            Point corner = points.get(index);
+            Point next = points.get(index + 1);
             double inLength = Math.hypot(corner.x() - previous.x(), corner.y() - previous.y());
             double outLength = Math.hypot(next.x() - corner.x(), next.y() - corner.y());
             if (inLength == 0 || outLength == 0) {
@@ -108,7 +112,7 @@ public final class NetLengths {
     }
 
     /** An arc's length through three points: the circle through them, the angle swept from the first by the middle to the last. */
-    public static double arcLength(PcbDrawing.Point from, PcbDrawing.Point through, PcbDrawing.Point to) {
+    public static double arcLength(Point from, Point through, Point to) {
         double ax = from.x();
         double ay = from.y();
         double bx = through.x();

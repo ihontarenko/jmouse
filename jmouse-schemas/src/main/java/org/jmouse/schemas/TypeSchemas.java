@@ -1,5 +1,6 @@
 package org.jmouse.schemas;
 
+import org.jmouse.cad.pcb.drawing.Track;
 import com.fasterxml.classmate.ResolvedType;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.FieldScope;
@@ -346,7 +347,7 @@ public final class TypeSchemas {
                && !WRITTEN_AS_TEXT.contains(type);
     }
 
-    /** A type as its schema names it: its name inside its package — {@code PcbDrawing.Track}. */
+    /** A type as its schema names it: its name inside its package — {@code Track}. */
     public static String nameOf(Class<?> type) {
         String name = type.getName();
         String inPackage = type.getPackageName().isEmpty() ? name : name.substring(type.getPackageName().length() + 1);

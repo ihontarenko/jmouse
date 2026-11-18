@@ -1,5 +1,11 @@
 package org.jmouse.cad.plugin.kicad;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
 import org.jmouse.cad.kicad.InstalledKiCadLibraries;
 import org.jmouse.cad.settings.CadSettings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,10 +104,10 @@ class KiCadProjectExportTest {
         PcbDrawing before = fabricated(first).pcb();
         PcbDrawing after = fabricated(read(filesOf(written(first)), "design.kicad_pro")).pcb();
         assertEquals(before.groups(), after.groups());
-        assertEquals(before.placements().stream().map(PcbDrawing.Placement::arrangement).toList(),
-                after.placements().stream().map(PcbDrawing.Placement::arrangement).toList());
-        assertEquals(before.tracks().stream().map(PcbDrawing.Track::arrangement).toList(),
-                after.tracks().stream().map(PcbDrawing.Track::arrangement).toList());
+        assertEquals(before.placements().stream().map(Placement::arrangement).toList(),
+                after.placements().stream().map(Placement::arrangement).toList());
+        assertEquals(before.tracks().stream().map(Track::arrangement).toList(),
+                after.tracks().stream().map(Track::arrangement).toList());
     }
 
     @Test
@@ -118,8 +124,8 @@ class KiCadProjectExportTest {
         for (PcbFabrication.SeatedPart part : before.parts()) {
             PcbFabrication.SeatedPart read = after.parts().stream().filter(candidate -> candidate.designator().equals(part.designator()))
                     .findFirst().orElseThrow();
-            PcbDrawing.Placement was = part.placement();
-            PcbDrawing.Placement is = read.placement();
+            Placement was = part.placement();
+            Placement is = read.placement();
             assertEquals(was.side(), is.side(), part.designator());
             assertEquals(was.x(), is.x(), 1e-3, part.designator());
             assertEquals(was.y(), is.y(), 1e-3, part.designator());
@@ -129,15 +135,15 @@ class KiCadProjectExportTest {
             for (var pad : part.drawing().orElseThrow().pads()) {
                 var other = read.drawing().orElseThrow().pads().stream().filter(candidate -> candidate.number().equals(pad.number()))
                         .findFirst().orElseThrow();
-                PcbDrawing.Point there = was.placed(pad.x(), pad.y());
-                PcbDrawing.Point here = is.placed(other.x(), other.y());
+                Point there = was.placed(pad.x(), pad.y());
+                Point here = is.placed(other.x(), other.y());
                 assertEquals(there.x(), here.x(), 1e-3, part.designator() + "." + pad.number());
                 assertEquals(there.y(), here.y(), 1e-3, part.designator() + "." + pad.number());
             }
         }
         assertEquals(before.pcb().tracks().size(), after.pcb().tracks().size());
         assertEquals(before.pcb().vias().size(), after.pcb().vias().size());
-        assertEquals(before.pcb().zones().stream().map(PcbDrawing.Zone::net).toList(), after.pcb().zones().stream().map(PcbDrawing.Zone::net).toList());
+        assertEquals(before.pcb().zones().stream().map(Zone::net).toList(), after.pcb().zones().stream().map(Zone::net).toList());
         assertTrue(after.pcb().texts().stream().anyMatch(text -> text.text().equals("Note") && text.layer().equals("documentation")));
     }
 
@@ -156,7 +162,7 @@ class KiCadProjectExportTest {
     void aViaLeftOpenIsAnOpeningOnItsSidesMask() {
         ImportedDocuments again = read(filesOf(written(original())), "design.kicad_pro");
         PcbDrawing pcb = fabricated(again).pcb();
-        PcbDrawing.Via open = pcb.vias().getFirst();
+        Via open = pcb.vias().getFirst();
         // The opening KiCad keeps as a drawing on the front's mask, round the via.
         assertTrue(pcb.shapes().stream().anyMatch(shape -> shape.layer().equals("top-mask") && shape.filled()
                 && shape.path().contains(String.valueOf((int) open.x()))), String.valueOf(pcb.shapes()));
@@ -178,8 +184,8 @@ class KiCadProjectExportTest {
         ImportedDocuments first = original();
         Map<String, Double> rules = CadStandards.shipped().pcbRules().valuesOf(PcbDrawing.of(first.root()).rules());
         KiCadProjectSettings settings = KiCadProjectSettings.of(filesOf(written(first)).get("design.kicad_pro"));
-        assertEquals(rules.get(PcbDrawing.RULE_CLEARANCE), settings.usual().orElseThrow().clearance(), 1e-9);
-        assertEquals(rules.get(PcbDrawing.RULE_TRACK_WIDTH), settings.usual().orElseThrow().trackWidth(), 1e-9);
+        assertEquals(rules.get(PcbVocabulary.RULE_CLEARANCE), settings.usual().orElseThrow().clearance(), 1e-9);
+        assertEquals(rules.get(PcbVocabulary.RULE_TRACK_WIDTH), settings.usual().orElseThrow().trackWidth(), 1e-9);
         assertTrue(settings.rules().containsKey("min_track_width"), String.valueOf(settings.rules()));
     }
 }

@@ -1,5 +1,15 @@
 package org.jmouse.cad.eagle;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Sizes;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Shape;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.document.DocumentNode;
@@ -57,7 +67,7 @@ final class EaglePcbImport {
         EaglePcbImport reading = new EaglePcbImport(pcb, circuit, filing);
         reading.frame();
         reading.layers();
-        PcbDrawing drawing = new PcbDrawing(circuit.circuit(), Optional.empty(), List.of(), PcbDrawing.Sizes.NONE, List.of(),
+        PcbDrawing drawing = new PcbDrawing(circuit.circuit(), Optional.empty(), List.of(), Sizes.NONE, List.of(),
                 List.of(), reading.copper.size(), reading.outline(), reading.placements(), reading.tracks(), reading.arcs(),
                 reading.vias(), reading.zones(), List.of(), List.of(), List.of(), List.of(), reading.shapes(), List.of(), List.of());
         DocumentNode document = new DocumentNode(PcbModule.PCB, title, EagleNames.pcb(title), null, 1);
@@ -103,8 +113,8 @@ final class EaglePcbImport {
         used.removeIf(layer -> layer < EagleBoard.TOP || layer > EagleBoard.BOTTOM);
         int inner = 0;
         for (int layer : used) {
-            copper.put(layer, layer == EagleBoard.TOP ? PcbDrawing.TOP
-                    : layer == EagleBoard.BOTTOM ? PcbDrawing.BOTTOM : PcbDrawing.innerCopper(++inner));
+            copper.put(layer, layer == EagleBoard.TOP ? PcbVocabulary.TOP
+                    : layer == EagleBoard.BOTTOM ? PcbVocabulary.BOTTOM : PcbLayers.innerCopper(++inner));
         }
     }
 
@@ -151,8 +161,8 @@ final class EaglePcbImport {
     // ─── parts and copper ───────────────────────────────────────────────────────────────────────────
 
     /** Each element of a part the circuit places, where Eagle places it; one the circuit does not hold is said. */
-    private List<PcbDrawing.Placement> placements() {
-        List<PcbDrawing.Placement> placements = new ArrayList<>();
+    private List<Placement> placements() {
+        List<Placement> placements = new ArrayList<>();
         List<String> unplaced = new ArrayList<>();
         for (EagleBoard.Element element : pcb.elements()) {
             String id = circuit.partIds().get(element.name());
@@ -163,8 +173,8 @@ final class EaglePcbImport {
             double[] at = placed(element.x(), element.y());
             boolean bottom = element.rotation().mirrored();
             double rotation = bottom ? (360 - element.rotation().angle()) % 360 : element.rotation().angle();
-            placements.add(new PcbDrawing.Placement(id, at[0], at[1], round.rounded(rotation),
-                    bottom ? PcbDrawing.BOTTOM : PcbDrawing.TOP, Optional.empty()));
+            placements.add(new Placement(id, at[0], at[1], round.rounded(rotation),
+                    bottom ? PcbVocabulary.BOTTOM : PcbVocabulary.TOP, Optional.empty()));
         }
         if (!unplaced.isEmpty()) {
             notes.add(String.join(", ", unplaced) + ": on the pcb, not on the circuit — a frame, a logo, a fiducial — so "
@@ -174,13 +184,13 @@ final class EaglePcbImport {
     }
 
     /** Every straight wire of a signal on copper, a track of its own. */
-    private List<PcbDrawing.Track> tracks() {
-        List<PcbDrawing.Track> tracks = new ArrayList<>();
+    private List<Track> tracks() {
+        List<Track> tracks = new ArrayList<>();
         for (EagleBoard.Signal signal : pcb.signals()) {
             for (EagleGraphic.Wire wire : signal.wires()) {
                 String layer = copper.get(wire.layer());
                 if (layer != null && wire.curve() == 0) {
-                    tracks.add(new PcbDrawing.Track(layer, round.rounded(wire.width()), 0,
+                    tracks.add(new Track(layer, round.rounded(wire.width()), 0,
                             List.of(point(wire.x1(), wire.y1()), point(wire.x2(), wire.y2()))));
                 }
             }
@@ -189,14 +199,14 @@ final class EaglePcbImport {
     }
 
     /** Every bent wire of a signal on copper, an arc through its middle. */
-    private List<PcbDrawing.Arc> arcs() {
-        List<PcbDrawing.Arc> arcs = new ArrayList<>();
+    private List<Arc> arcs() {
+        List<Arc> arcs = new ArrayList<>();
         for (EagleBoard.Signal signal : pcb.signals()) {
             for (EagleGraphic.Wire wire : signal.wires()) {
                 String layer = copper.get(wire.layer());
                 if (layer != null && wire.curve() != 0) {
                     double[] middle = EagleGeometry.arcMiddle(wire.x1(), wire.y1(), wire.x2(), wire.y2(), wire.curve());
-                    arcs.add(new PcbDrawing.Arc(layer, round.rounded(wire.width()), point(wire.x1(), wire.y1()),
+                    arcs.add(new Arc(layer, round.rounded(wire.width()), point(wire.x1(), wire.y1()),
                             point(middle[0], middle[1]), point(wire.x2(), wire.y2())));
                 }
             }
@@ -205,8 +215,8 @@ final class EaglePcbImport {
     }
 
     /** Every via: its ring as Eagle draws it, or as the design rules give it; through the pcb unless it says less. */
-    private List<PcbDrawing.Via> vias() {
-        List<PcbDrawing.Via> vias = new ArrayList<>();
+    private List<Via> vias() {
+        List<Via> vias = new ArrayList<>();
         for (EagleBoard.Signal signal : pcb.signals()) {
             for (EagleBoard.Via via : signal.vias()) {
                 double[] at = placed(via.x(), via.y());
@@ -214,8 +224,8 @@ final class EaglePcbImport {
                 String[] extent = via.extent() == null ? new String[0] : via.extent().split("-");
                 String from = extent.length == 2 ? copper.get(Integer.parseInt(extent[0].strip())) : null;
                 String to = extent.length == 2 ? copper.get(Integer.parseInt(extent[1].strip())) : null;
-                boolean through = PcbDrawing.TOP.equals(from) && PcbDrawing.BOTTOM.equals(to);
-                vias.add(new PcbDrawing.Via(at[0], at[1], round.rounded(via.drill()), round.rounded(diameter),
+                boolean through = PcbVocabulary.TOP.equals(from) && PcbVocabulary.BOTTOM.equals(to);
+                vias.add(new Via(at[0], at[1], round.rounded(via.drill()), round.rounded(diameter),
                         through ? null : from, through ? null : to));
             }
         }
@@ -223,8 +233,8 @@ final class EaglePcbImport {
     }
 
     /** Every polygon a signal pours, a zone of its net on its layer. */
-    private List<PcbDrawing.Zone> zones() {
-        List<PcbDrawing.Zone> zones = new ArrayList<>();
+    private List<Zone> zones() {
+        List<Zone> zones = new ArrayList<>();
         for (EagleBoard.Signal signal : pcb.signals()) {
             for (EagleGraphic.Polygon polygon : signal.polygons()) {
                 String layer = copper.get(polygon.layer());
@@ -234,7 +244,7 @@ final class EaglePcbImport {
                 RoundedPath path = new RoundedPath(PLACES);
                 EagleGeometry.polygon(polygon, path, this::placed);
                 if (!path.isEmpty()) {
-                    zones.add(new PcbDrawing.Zone(layer, circuit.nets().of(signal.name()), 0, 0, path.build().toSource()));
+                    zones.add(new Zone(layer, circuit.nets().of(signal.name()), 0, 0, path.build().toSource()));
                 }
             }
         }
@@ -245,7 +255,7 @@ final class EaglePcbImport {
 
     /** A point of Eagle's pcb, millimetres with Y upwards, on ours from its top left, Y downwards, to a micrometre. */
     /** What the pcb draws on its layers besides its edge, none of it a signal's: a window in the mask, a logo on the silkscreen, copper of no net. */
-    private List<PcbDrawing.Shape> shapes() {
+    private List<Shape> shapes() {
         FootprintOutlines drawn = new FootprintOutlines();
         BiFunction<Double, Double, double[]> place = this::placed;
         for (EagleGraphic graphic : pcb.plain()) {
@@ -265,7 +275,7 @@ final class EaglePcbImport {
                 }
             }
         }
-        return drawn.outlines().stream().map(outline -> new PcbDrawing.Shape(outline.layer(), outline.filled() ? 0 : outline.width(), outline.filled(), "",
+        return drawn.outlines().stream().map(outline -> new Shape(outline.layer(), outline.filled() ? 0 : outline.width(), outline.filled(), "",
                 outline.path().toSource())).toList();
     }
 
@@ -275,15 +285,15 @@ final class EaglePcbImport {
             return Optional.of(copper.get(layer));
         }
         return filing.layerOf(String.valueOf(layer)).filter(purpose -> layer > EagleBoard.BOTTOM)
-                .map(purpose -> PcbDrawing.layerOf(layer % 2 == 1 ? PcbDrawing.TOP : PcbDrawing.BOTTOM, purpose));
+                .map(purpose -> PcbLayers.layerOf(layer % 2 == 1 ? PcbVocabulary.TOP : PcbVocabulary.BOTTOM, purpose));
     }
 
     private double[] placed(double x, double y) {
         return new double[] {round.rounded(x - left), round.rounded(top - y)};
     }
 
-    private PcbDrawing.Point point(double x, double y) {
+    private Point point(double x, double y) {
         double[] at = placed(x, y);
-        return new PcbDrawing.Point(at[0], at[1]);
+        return new Point(at[0], at[1]);
     }
 }

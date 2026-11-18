@@ -1,5 +1,6 @@
 package org.jmouse.cad.store.exchange;
 
+import org.jmouse.cad.pcb.drawing.ViaSize;
 import org.jmouse.cad.settings.CadSettings;
 import org.jmouse.cad.store.plugin.CadEnginePlugin;
 import org.jmouse.cad.store.CadRead;
@@ -330,7 +331,7 @@ public class DocumentExchange {
             PcbArtwork artwork = PcbArtwork.of(fabrication, values, artworkSettings(), SILKSCREEN_FONT, pours);
             ArtworkAreas areas = new ArtworkAreas(artwork.outlines(), artworkSettings().areas().steps());
             Map<String, MaskAreas> masks = new LinkedHashMap<>();
-            for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
+            for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
                 masks.put(side, new MaskAreas(areas.areaOf(artwork.maskOpenings(side)), areas.areaOf(artwork.maskWindows(side)),
                         areas.areaOf(artwork.paste(side))));
             }
@@ -404,7 +405,7 @@ public class DocumentExchange {
      * pitch, where both pours lie under a via's whole pad, clear of everything else — or why none can stand, in words.
      */
     @CadRead
-    public ViaRows.Placed stitching(String source, DocumentOwner owner, int zone, double pitch, Optional<PcbDrawing.ViaSize> via) {
+    public ViaRows.Placed stitching(String source, DocumentOwner owner, int zone, double pitch, Optional<ViaSize> via) {
         return viaRowsOf(source, owner).stitching(zone, pitch, via);
     }
 
@@ -413,7 +414,7 @@ public class DocumentExchange {
      * gaps allow, where two layers pour the net — or why none can stand, in words.
      */
     @CadRead
-    public ViaRows.Placed fence(String source, DocumentOwner owner, int track, String net, double pitch, Optional<PcbDrawing.ViaSize> via) {
+    public ViaRows.Placed fence(String source, DocumentOwner owner, int track, String net, double pitch, Optional<ViaSize> via) {
         return viaRowsOf(source, owner).fence(track, net, pitch, via);
     }
 

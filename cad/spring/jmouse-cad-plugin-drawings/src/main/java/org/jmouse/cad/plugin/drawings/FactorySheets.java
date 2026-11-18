@@ -1,10 +1,16 @@
 package org.jmouse.cad.plugin.drawings;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Rules;
+import org.jmouse.cad.pcb.drawing.Dimension;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.cad.pcb.drawing.Shape;
 import org.jmouse.cad.exchange.pcb.ArtworkAreas;
 import org.jmouse.cad.exchange.pcb.ArtworkFeature;
 import org.jmouse.cad.exchange.pcb.BillOfMaterials;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.exchange.pcb.PcbProfile;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -45,7 +51,7 @@ final class FactorySheets {
     private final SheetSettings.Ink     ink;
     private final SheetLettering        lettering;
     private final PcbArtwork            drawn;
-    private final PcbLayers.Settings    layers;
+    private final PcbSolidLayers.Settings    layers;
     private final double                thickness;
     private final String                title;
     private final String                revision;
@@ -60,7 +66,7 @@ final class FactorySheets {
      * @param revision        the revision it is of
      * @param footprintTitles what a person calls a footprint, by its slug
      */
-    FactorySheets(SheetSettings settings, SheetLettering lettering, PcbArtwork drawn, PcbLayers.Settings layers, double thickness, String title, String revision,
+    FactorySheets(SheetSettings settings, SheetLettering lettering, PcbArtwork drawn, PcbSolidLayers.Settings layers, double thickness, String title, String revision,
                   UnaryOperator<String> footprintTitles) {
         this.settings = settings;
         this.words = settings.words();
@@ -102,8 +108,8 @@ final class FactorySheets {
         List<SheetPage> pages = new ArrayList<>();
         overview(pages);
         copper(pages);
-        assembly(pages, PcbDrawing.TOP, "assembly-top", words.assemblyTopSheet(), false);
-        assembly(pages, PcbDrawing.BOTTOM, "assembly-bottom", words.assemblyBottomSheet(), true);
+        assembly(pages, PcbVocabulary.TOP, "assembly-top", words.assemblyTopSheet(), false);
+        assembly(pages, PcbVocabulary.BOTTOM, "assembly-bottom", words.assemblyBottomSheet(), true);
         List<HoleTool> tools = toolsOf(PcbDrills.of(drawn.fabrication().pcb(), drawn.fabrication().footprints()));
         fabrication(pages, tools);
         tables(pages, tools);
@@ -118,7 +124,7 @@ final class FactorySheets {
         BoardView view = viewOn(fitted, false);
         substrate(page, view);
         layerNames().reversed().forEach(layer -> drawInk(page, view, drawn.copper(layer), inkOf(layer)));
-        drawInk(page, view, drawn.silkscreen(PcbDrawing.TOP), ink.silkscreen());
+        drawInk(page, view, drawn.silkscreen(PcbVocabulary.TOP), ink.silkscreen());
         drills(page, view);
         outline(page, view);
     }
@@ -140,16 +146,16 @@ final class FactorySheets {
     private List<String> layerNames() {
         int count = drawn.fabrication().pcb().copperLayers();
         List<String> names = new ArrayList<>();
-        names.add(PcbDrawing.TOP);
+        names.add(PcbVocabulary.TOP);
         for (int inner = 1; inner < Math.max(count, 2) - 1; inner++) {
-            names.add(PcbDrawing.innerCopper(inner));
+            names.add(PcbLayers.innerCopper(inner));
         }
-        names.add(PcbDrawing.BOTTOM);
+        names.add(PcbVocabulary.BOTTOM);
         return names;
     }
 
     private String inkOf(String layer) {
-        return PcbDrawing.TOP.equals(layer) ? ink.copperTop() : PcbDrawing.BOTTOM.equals(layer) ? ink.copperBottom() : ink.copperInner();
+        return PcbVocabulary.TOP.equals(layer) ? ink.copperTop() : PcbVocabulary.BOTTOM.equals(layer) ? ink.copperBottom() : ink.copperInner();
     }
 
     private void fabrication(List<SheetPage> pages, List<HoleTool> tools) {
@@ -160,7 +166,7 @@ final class FactorySheets {
         tools.forEach(tool -> holes(page, view, tool));
         documentation(page, view);
         overallDimensions(page, view);
-        for (PcbDrawing.Dimension dimension : drawn.fabrication().pcb().dimensions()) {
+        for (Dimension dimension : drawn.fabrication().pcb().dimensions()) {
             ownDimension(page, view, dimension);
         }
     }
@@ -264,7 +270,7 @@ final class FactorySheets {
     private void outline(SheetPage page, BoardView view) {
         double pen = settings.penOf(SheetLayer.OUTLINE).pen();
         page.add(new Sheet.Mark.Line(SheetLayer.OUTLINE, view.at(profile.outline()), true, pen));
-        for (List<PcbDrawing.Point> cutout : profile.cutouts()) {
+        for (List<Point> cutout : profile.cutouts()) {
             page.add(new Sheet.Mark.Line(SheetLayer.OUTLINE, view.at(cutout), true, pen));
         }
     }
@@ -312,7 +318,7 @@ final class FactorySheets {
 
     /** What the pcb itself draws for the factory's eyes: on a panel, its score lines. */
     private void documentation(SheetPage page, BoardView view) {
-        for (PcbDrawing.Shape shape : drawn.fabrication().pcb().shapes()) {
+        for (Shape shape : drawn.fabrication().pcb().shapes()) {
             if (!PcbVocabulary.SHEET_LAYERS.contains(shape.layer())) {
                 continue;
             }
@@ -329,7 +335,7 @@ final class FactorySheets {
         page.dimension(new Sheet.Point(view.left(), view.bottom()), new Sheet.Point(view.left(), view.top()), offset, length(bounds.height()));
     }
 
-    private void ownDimension(SheetPage page, BoardView view, PcbDrawing.Dimension dimension) {
+    private void ownDimension(SheetPage page, BoardView view, Dimension dimension) {
         double measured = Math.hypot(dimension.to().x() - dimension.from().x(), dimension.to().y() - dimension.from().y());
         page.dimension(view.at(dimension.from()), view.at(dimension.to()), dimension.offset() * view.factor(), length(measured));
     }
@@ -372,7 +378,7 @@ final class FactorySheets {
         };
     }
 
-    private List<Sheet.Mark> runOf(BoardView view, List<PcbDrawing.Point> points, double width) {
+    private List<Sheet.Mark> runOf(BoardView view, List<Point> points, double width) {
         if (points.size() < 2) {
             return List.of();
         }
@@ -437,14 +443,14 @@ final class FactorySheets {
 
     private List<String> notes() {
         PcbDrawing pcb = drawn.fabrication().pcb();
-        String rules = pcb.rules().map(PcbDrawing.Rules::profile).orElse("standard");
+        String rules = pcb.rules().map(Rules::profile).orElse("standard");
         List<String> notes = new ArrayList<>();
         for (String note : settings.fabricationNotes()) {
             notes.add(note.replace("{thickness}", length(thickness)).replace("{copperLayers}", String.valueOf(pcb.copperLayers()))
                     .replace("{rules}", rules));
         }
         // What the pcb itself writes on its documentation layer is said to the factory beside the general notes.
-        pcb.texts().stream().filter(text -> PcbVocabulary.SHEET_LAYERS.contains(text.layer())).map(PcbDrawing.Text::text)
+        pcb.texts().stream().filter(text -> PcbVocabulary.SHEET_LAYERS.contains(text.layer())).map(Lettering::text)
                 .filter(text -> !text.isBlank()).forEach(notes::add);
         return notes;
     }

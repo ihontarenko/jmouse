@@ -1,5 +1,9 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 
@@ -22,7 +26,7 @@ public final class PcbDrills {
      *
      * @param width the tool's width, millimetres
      */
-    public record Drill(boolean plated, double width, PcbDrawing.Point from, PcbDrawing.Point to) {
+    public record Drill(boolean plated, double width, Point from, Point to) {
 
         public boolean round() {
             return from.equals(to);
@@ -35,13 +39,13 @@ public final class PcbDrills {
     /** @param footprints each seated part's footprint drawing, by designator; a part without one has no holes */
     public static List<Drill> of(PcbDrawing pcb, Map<String, FootprintDrawing> footprints) {
         List<Drill> drills = new ArrayList<>();
-        for (PcbDrawing.Via via : pcb.vias()) {
-            drills.add(round(true, via.drill(), new PcbDrawing.Point(via.x(), via.y())));
+        for (Via via : pcb.vias()) {
+            drills.add(round(true, via.drill(), new Point(via.x(), via.y())));
         }
-        for (PcbDrawing.Hole hole : pcb.holes()) {
-            drills.add(round(hole.ring() > 0, hole.drill(), new PcbDrawing.Point(hole.x(), hole.y())));
+        for (Hole hole : pcb.holes()) {
+            drills.add(round(hole.ring() > 0, hole.drill(), new Point(hole.x(), hole.y())));
         }
-        for (PcbDrawing.Placement placement : pcb.placements()) {
+        for (Placement placement : pcb.placements()) {
             FootprintDrawing footprint = footprints.get(placement.designator());
             if (footprint == null) {
                 continue;
@@ -55,11 +59,11 @@ public final class PcbDrills {
         return List.copyOf(drills);
     }
 
-    private static Drill round(boolean plated, double width, PcbDrawing.Point at) {
+    private static Drill round(boolean plated, double width, Point at) {
         return new Drill(plated, width, at, at);
     }
 
-    private static Drill padDrill(PcbDrawing.Placement placement, FootprintDrawing.Pad pad) {
+    private static Drill padDrill(Placement placement, FootprintDrawing.Pad pad) {
         boolean plated = pad.isPlatedThrough();
         double height = pad.drillHeight() > 0 ? pad.drillHeight() : pad.drillWidth();
         double narrow = Math.min(pad.drillWidth(), height);

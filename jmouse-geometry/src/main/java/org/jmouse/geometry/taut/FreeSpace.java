@@ -1,5 +1,13 @@
 package org.jmouse.geometry.taut;
 
+import java.util.Arrays;
+
+import org.jmouse.geometry.index.BoxTree;
+
+import org.jmouse.geometry.index.BoxIndex;
+
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.geometry.Areas;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Coordinate;
@@ -7,7 +15,6 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
 
 import java.util.ArrayList;
@@ -63,18 +70,21 @@ final class FreeSpace {
     private static final double EDGE_NEAR = 1e-9;
 
     private final List<Triangle> triangles;
-    private final STRtree        index;
+    private final BoxIndex       index;
 
     private FreeSpace(List<Triangle> triangles) {
         this.triangles = triangles;
-        this.index = new STRtree();
-        for (int number = 0; number < triangles.size(); number++) {
-            Envelope envelope = new Envelope();
-            for (Coordinate corner : triangles.get(number).corners()) {
-                envelope.expandToInclude(corner);
-            }
-            index.insert(envelope, number);
+        this.index = BoxTree.of(triangles.stream().map(FreeSpace::boxOf).toList());
+    }
+
+    /** The box a triangle takes: its corners'. */
+    private static Box boxOf(Triangle triangle) {
+        Box box = null;
+        for (Coordinate corner : triangle.corners()) {
+            Box at = Box.point(corner.x, corner.y);
+            box = box == null ? at : box.joined(at);
         }
+        return box;
     }
 
     /** The free room of a field within a window; empty where it cannot be cut into triangles. */
@@ -147,8 +157,6 @@ final class FreeSpace {
 
     /** The triangle a point is in; empty where it is in none — outside the window, or in an obstacle. */
     Optional<Integer> triangleAt(Coordinate point) {
-        @SuppressWarnings("unchecked")
-        List<Integer> near = index.query(new Envelope(point));
-        return near.stream().filter(number -> triangles.get(number).holds(point)).findFirst();
+        return Arrays.stream(index.near(Box.point(point.x, point.y))).boxed().filter(number -> triangles.get(number).holds(point)).findFirst();
     }
 }

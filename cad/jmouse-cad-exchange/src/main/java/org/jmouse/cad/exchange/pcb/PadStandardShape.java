@@ -1,6 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 
 import java.util.Optional;
@@ -28,7 +28,7 @@ public sealed interface PadStandardShape {
      * The pad's standard shape where its part stands it, grown all round by {@code growth}; empty for a custom or a
      * trapezoid pad, and for a rectangle, a rounded one or an oval turned other than a whole quarter.
      */
-    static Optional<PadStandardShape> of(PcbDrawing.Placement placement, FootprintDrawing.Pad pad, double growth) {
+    static Optional<PadStandardShape> of(Placement placement, FootprintDrawing.Pad pad, double growth) {
         double turn = (((pad.rotation() + placement.rotation()) % 360) + 360) % 360;
         boolean quarter = turn % 90 == 0;
         boolean across = turn == 90 || turn == 270;

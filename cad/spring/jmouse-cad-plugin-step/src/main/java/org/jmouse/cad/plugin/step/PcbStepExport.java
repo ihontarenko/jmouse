@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.step;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.table.ReadTable;
 import org.jmouse.cad.table.TableSource;
 import org.jmouse.settings.Label;
@@ -14,7 +15,7 @@ import org.jmouse.cad.exchange.ExportedFiles;
 import org.jmouse.cad.exchange.pcb.ArtworkAreas;
 import org.jmouse.cad.exchange.pcb.PcbArtwork;
 import org.jmouse.cad.exchange.pcb.PcbFabrication;
-import org.jmouse.cad.exchange.pcb.PcbLayers;
+import org.jmouse.cad.exchange.pcb.PcbSolidLayers;
 import org.jmouse.cad.exchange.pcb.PartBodies;
 import org.jmouse.cad.exchange.pcb.PcbSolid;
 import org.jmouse.cad.library.CadStandards;
@@ -179,7 +180,7 @@ public final class PcbStepExport implements DocumentExport {
     private final Supplier<Settings>                 settings;
     private final Variant                  variant;
     private final Supplier<PcbArtwork.Settings>    artwork;
-    private final Supplier<PcbLayers.Settings>              layers;
+    private final Supplier<PcbSolidLayers.Settings>              layers;
     private final StrokeFont               font;
     private final MeshFormats              formats = MeshFormats.standard();
 
@@ -194,7 +195,7 @@ public final class PcbStepExport implements DocumentExport {
     private final ReadTable<ModelMaterials> materials;
 
     public PcbStepExport(PipedProgram program, Supplier<ModelDocuments> models, Supplier<Settings> settings, Variant variant,
-                           Supplier<PcbArtwork.Settings> artwork, Supplier<PcbLayers.Settings> layers, StrokeFont font, CadStandards standards, TableSource tables) {
+                           Supplier<PcbArtwork.Settings> artwork, Supplier<PcbSolidLayers.Settings> layers, StrokeFont font, CadStandards standards, TableSource tables) {
         this.standards = standards;
         this.materials = ModelMaterials.readFrom(tables);
         this.program = program;
@@ -248,7 +249,7 @@ public final class PcbStepExport implements DocumentExport {
         for (PcbFabrication.SeatedPart part : fabrication.parts()) {
             List<FootprintDrawing.Model> shown = part.drawing().map(ModelPlacement::shownOf).orElse(List.of());
             if (shown.isEmpty()) {
-                bodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> solids.add(solidOf(new PcbLayers(layers.get()).bodyOf(body, thickness), false)),
+                bodies.of(part).filter(PartBodies.PartBody::raised).ifPresentOrElse(body -> solids.add(solidOf(new PcbSolidLayers(layers.get()).bodyOf(body, thickness), false)),
                         () -> notes.add(part.designator() + " has neither a 3D model nor a body; left out."));
                 continue;
             }
@@ -270,10 +271,10 @@ public final class PcbStepExport implements DocumentExport {
         if (variant.layers()) {
             PcbArtwork drawn = PcbArtwork.of(fabrication, rules, artwork.get(), font);
             PcbSolid made = PcbSolid.of(drawn, new ArtworkAreas(drawn.outlines(), settings.get().areaSteps()), drilled, settings.get().areaSteps(), bodies);
-            new PcbLayers(layers.get()).layersOf(made, drawn, thickness)
+            new PcbSolidLayers(layers.get()).layersOf(made, drawn, thickness)
                     .forEach(layer -> solids.add(solidOf(layer, true)));
         }
-        String pcbColour = (variant.layers() ? new PcbLayers(layers.get()).settings().core() : new PcbLayers(layers.get()).settings().bare()).colour();
+        String pcbColour = (variant.layers() ? new PcbSolidLayers(layers.get()).settings().core() : new PcbSolidLayers(layers.get()).settings().bare()).colour();
         Request request = new Request(fabrication.name(), thickness, colourOf(pcbColour), outline, drills, stepModels, parts,
                 solids);
         PipedProgram.Ran ran;
@@ -294,7 +295,7 @@ public final class PcbStepExport implements DocumentExport {
      * An area raised into a solid as OpenCascade takes it, in the model's frame; a layer of the artwork is simplified
      * first, as far as {@code areaTolerance}, so it is not written with a face for every step of every curve.
      */
-    private RaisedSolid solidOf(PcbLayers.RaisedArea raised, boolean simplified) {
+    private RaisedSolid solidOf(PcbSolidLayers.RaisedArea raised, boolean simplified) {
         Geometry area = simplified ? TopologyPreservingSimplifier.simplify(raised.area(), settings.get().areaTolerance()) : raised.area();
         return new RaisedSolid(raised.name(), colourOf(raised.finish().colour()), raised.bottom(), raised.thickness(),
                 polygonsOf(area));
@@ -429,7 +430,7 @@ public final class PcbStepExport implements DocumentExport {
         return new double[] {point.x(), -point.y()};
     }
 
-    private static double[] upward(PcbDrawing.Point point) {
+    private static double[] upward(Point point) {
         return new double[] {point.x(), -point.y()};
     }
 

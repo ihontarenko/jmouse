@@ -1,6 +1,7 @@
 package org.jmouse.cad.pcb.geometry;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.svg.path.node.PathPolylines;
 import org.jmouse.svg.path.parser.PathParser;
@@ -39,7 +40,7 @@ public final class PadOutline {
     }
 
     /** The outline in the footprint's frame about the pad's centre. */
-    public List<PcbDrawing.Point> of(FootprintDrawing.Pad pad, double growth) {
+    public List<Point> of(FootprintDrawing.Pad pad, double growth) {
         double turn = Math.toRadians(pad.rotation());
         double cosine = Math.cos(turn);
         double sine = Math.sin(turn);
@@ -62,12 +63,12 @@ public final class PadOutline {
             corners.addAll(corner(insetX, -insetY, 3 * Math.PI / 2, radius));
         }
         return corners.stream()
-                .map(point -> new PcbDrawing.Point(point[0] * cosine + point[1] * sine, -point[0] * sine + point[1] * cosine))
+                .map(point -> new Point(point[0] * cosine + point[1] * sine, -point[0] * sine + point[1] * cosine))
                 .toList();
     }
 
     /** The outline where its part stands it on the pcb. */
-    public List<PcbDrawing.Point> placed(PcbDrawing.Placement placement, FootprintDrawing.Pad pad, double growth) {
+    public List<Point> placed(Placement placement, FootprintDrawing.Pad pad, double growth) {
         return of(pad, growth).stream().map(point -> placement.placed(pad.x() + point.x(), pad.y() + point.y())).toList();
     }
 

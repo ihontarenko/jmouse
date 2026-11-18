@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.geometry.taut.TautPath;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ final class OctilinearBands {
         List<Fault> faults = new ArrayList<>();
         for (Band band : bands) {
             String named = "Track " + (band.track() + 1);
-            PcbDrawing.Track track = band.asTrack(world.pcb());
+            Track track = band.asTrack(world.pcb());
             TrackFence fence = world.fenceOfTrack(track, band.track(), band.net());
             List<Point> laid;
             if (band.tautness() == TautPath.Tautness.SQUEEZED) {
@@ -74,10 +75,10 @@ final class OctilinearBands {
     /** The line as it ran, point for point, where laying it again comes to the same line: copper nothing changed is left as it is. */
     private static List<Point> asItRanIfUnchanged(Band band, List<Point> laid) {
         List<Point> ran = band.line().points();
-        List<Point> was = Lines.withoutStraightPoints(ran);
+        List<Point> was = LineCleaning.withoutStraightPoints(ran);
         boolean same = was.size() == laid.size();
         for (int point = 0; same && point < was.size(); point++) {
-            same = Lines.samePoint(was.get(point), laid.get(point));
+            same = Precision.samePoint(was.get(point), laid.get(point));
         }
         return same ? ran : laid;
     }
@@ -85,7 +86,7 @@ final class OctilinearBands {
     /** The band's path laid stretch by stretch at the reader's angles; empty where a stretch could not be laid clear at all. */
     private static Optional<List<Point>> laidAlong(RoutingWorld world, Band band, TrackFence fence, PartDrag drag, OctilinearLaying.Clearance clearance) {
         List<Point> head = band.head();
-        Optional<Point> coming = head.size() >= 2 ? Lines.wayBetween(head.get(head.size() - 2), head.getLast()) : Optional.empty();
+        Optional<Point> coming = head.size() >= 2 ? Ways.wayBetween(head.get(head.size() - 2), head.getLast()) : Optional.empty();
         return OctilinearLaying.laid(band.path(), coming, band.line().points(), fence, drag.angleStep(), world.settings().routing(), clearance);
     }
 
@@ -99,18 +100,18 @@ final class OctilinearBands {
         if (path.size() < 2) {
             return path;
         }
-        List<Point> laid = new ArrayList<>(List.of(Lines.settled(path.getFirst())));
+        List<Point> laid = new ArrayList<>(List.of(Precision.settled(path.getFirst())));
         for (int corner = 1; corner < path.size(); corner++) {
             Point from = laid.getLast();
-            Point to = Lines.settled(path.get(corner));
-            boolean intoMovedEnd = corner == 1 && !Lines.samePoint(from, ran.getFirst())
-                                   || corner == path.size() - 1 && !Lines.samePoint(to, ran.getLast());
+            Point to = Precision.settled(path.get(corner));
+            boolean intoMovedEnd = corner == 1 && !Precision.samePoint(from, ran.getFirst())
+                                   || corner == path.size() - 1 && !Precision.samePoint(to, ran.getLast());
             List<Point> stretch = intoMovedEnd
                     ? OctilinearLaying.postured(from, to, Optional.empty(), band.line().points(), fence, OctilinearLaying.Clearance.OVERLOOKED, angleStep).orElse(List.of(to))
                     : List.of(to);
             laid.addAll(stretch);
         }
-        return Lines.withoutStraightPoints(laid);
+        return LineCleaning.withoutStraightPoints(laid);
     }
 
 

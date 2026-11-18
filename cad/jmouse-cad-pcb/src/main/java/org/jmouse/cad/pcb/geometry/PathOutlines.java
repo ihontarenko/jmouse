@@ -1,7 +1,7 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.PcbVocabulary;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.svg.path.node.PathBuilder;
 import org.jmouse.svg.path.node.PathPolylines;
 import org.locationtech.jts.geom.Coordinate;
@@ -45,8 +45,8 @@ public final class PathOutlines {
     }
 
     /** Where a path is still open: both ends of every outline of it that does not close. */
-    public static List<PcbDrawing.Point> openEnds(String path, int curveSteps) {
-        List<PcbDrawing.Point> ends = new ArrayList<>();
+    public static List<Point> openEnds(String path, int curveSteps) {
+        List<Point> ends = new ArrayList<>();
         for (String subpath : subpaths(path)) {
             if (isClosed(subpath)) {
                 continue;
@@ -56,8 +56,8 @@ public final class PathOutlines {
                 continue;
             }
             List<double[]> run = runs.getFirst();
-            ends.add(new PcbDrawing.Point(run.getFirst()[0], run.getFirst()[1]));
-            ends.add(new PcbDrawing.Point(run.getLast()[0], run.getLast()[1]));
+            ends.add(new Point(run.getFirst()[0], run.getFirst()[1]));
+            ends.add(new Point(run.getLast()[0], run.getLast()[1]));
         }
         return ends;
     }
@@ -80,10 +80,10 @@ public final class PathOutlines {
     }
 
     /** A closed outline through these points as path data; empty for none. */
-    public static String pathOf(List<PcbDrawing.Point> outline) {
+    public static String pathOf(List<Point> outline) {
         PathBuilder path = PathBuilder.path();
         for (int index = 0; index < outline.size(); index++) {
-            PcbDrawing.Point point = outline.get(index);
+            Point point = outline.get(index);
             if (index == 0) {
                 path.moveTo(written(point.x()), written(point.y()));
             } else {
@@ -120,10 +120,10 @@ public final class PathOutlines {
      * An area as closed rings of points, each without its closing point: every outline turning one way and every hole the
      * other, as JTS normalises them — what a 3D view fills by their turning.
      */
-    public static List<List<PcbDrawing.Point>> ringsOf(Geometry area) {
+    public static List<List<Point>> ringsOf(Geometry area) {
         Geometry normal = area.copy();
         normal.normalize();
-        List<List<PcbDrawing.Point>> rings = new ArrayList<>();
+        List<List<Point>> rings = new ArrayList<>();
         for (int index = 0; index < normal.getNumGeometries(); index++) {
             if (normal.getGeometryN(index) instanceof Polygon polygon && !polygon.isEmpty()) {
                 rings.add(pointsOf(polygon.getExteriorRing().getCoordinates()));
@@ -143,12 +143,12 @@ public final class PathOutlines {
      */
     public static Map<String, String> ringPathsOf(Geometry area) {
         Map<String, String> rings = new LinkedHashMap<>();
-        for (List<PcbDrawing.Point> ring : ringsOf(area)) {
+        for (List<Point> ring : ringsOf(area)) {
             double left = Double.POSITIVE_INFINITY;
             double top = Double.POSITIVE_INFINITY;
             double right = Double.NEGATIVE_INFINITY;
             double bottom = Double.NEGATIVE_INFINITY;
-            for (PcbDrawing.Point point : ring) {
+            for (Point point : ring) {
                 left = Math.min(left, point.x());
                 top = Math.min(top, point.y());
                 right = Math.max(right, point.x());
@@ -164,11 +164,11 @@ public final class PathOutlines {
         return rings;
     }
 
-    private static List<PcbDrawing.Point> pointsOf(Coordinate[] ring) {
+    private static List<Point> pointsOf(Coordinate[] ring) {
         int last = ring.length > 1 && ring[0].equals2D(ring[ring.length - 1]) ? ring.length - 1 : ring.length;
-        List<PcbDrawing.Point> points = new ArrayList<>(last);
+        List<Point> points = new ArrayList<>(last);
         for (int index = 0; index < last; index++) {
-            points.add(new PcbDrawing.Point(written(ring[index].x), written(ring[index].y)));
+            points.add(new Point(written(ring[index].x), written(ring[index].y)));
         }
         return points;
     }

@@ -1,9 +1,14 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.geometry.index.BoxIndex;
+import org.jmouse.geometry.index.BoxGrid;
+
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.numerics.Halving;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
 
@@ -16,14 +21,14 @@ import java.util.List;
  * What one track, this wide, must keep clear of: pieces of copper, each with the gap it keeps from this one, indexed so a point
  * or a stretch is measured only against the copper near it. A fence is made once for a board and a track, and asked many times.
  *
- * <p>The pieces and their index may be a whole layer's, shared by every fence over it ({@link ObstacleCells}): a fence is then
+ * <p>The pieces and their index may be a whole layer's, shared by every fence over it ({@link BoxGrid}): a fence is then
  * only the gaps it keeps — none ({@code NaN}) from a piece that is not its obstacle —, so a board's many fences cost a gap
  * apiece, not an index apiece.</p>
  */
 public final class TrackFence {
 
     /** How much nearer than its gap copper may come and still keep it: what a millimetre written to the pcb's places loses, as the checks forgive. */
-    public static final double GAP_TOLERANCE = Lines.SAME_POINT;
+    public static final double GAP_TOLERANCE = Precision.SAME_POINT;
 
     /**
      * What arithmetic in binary loses of millimetres written to the pcb's places, far below them: a gap measured exactly at the
@@ -40,7 +45,7 @@ public final class TrackFence {
     private final List<CopperShape> shapes;
     /** The gap kept from each piece, by its number; {@code NaN} where the piece is not this fence's obstacle. */
     private final double[]          gaps;
-    private final ObstacleCells     cells;
+    private final BoxIndex     cells;
     private final int               curveSteps;
     private final double            reachOut;
     /** A few obstacles more, kept clear of as well — the tracks laid over a world since its copper was indexed —; null where none. */
@@ -56,20 +61,20 @@ public final class TrackFence {
     /**
      * A fence over obstacles of its own, indexed for it alone.
      *
-     * @param bucket     how wide a cell of the index is, in millimetres
+     * @param grid       how the index's grid is cut
      * @param curveSteps how many straight pieces a rounded corner is followed in
      */
-    public TrackFence(double width, double clearance, List<Obstacle> obstacles, double bucket, int curveSteps) {
+    public TrackFence(double width, double clearance, List<Obstacle> obstacles, BoxGrid.Cells grid, int curveSteps) {
         this(width, clearance, obstacles.stream().map(Obstacle::shape).toList(), obstacles.stream().mapToDouble(Obstacle::gap).toArray(),
-             new ObstacleCells(obstacles.stream().map(Obstacle::shape).toList(), bucket), curveSteps);
+             BoxGrid.of(obstacles.stream().map(obstacle -> obstacle.shape().box()).toList(), grid), curveSteps);
     }
 
     /** A fence over pieces already indexed — a layer's —, keeping these gaps from them ({@code NaN}: not an obstacle). */
-    TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, ObstacleCells cells, int curveSteps) {
+    TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, BoxIndex cells, int curveSteps) {
         this(width, clearance, shapes, gaps, cells, curveSteps, null, null);
     }
 
-    private TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, ObstacleCells cells, int curveSteps,
+    private TrackFence(double width, double clearance, List<CopperShape> shapes, double[] gaps, BoxIndex cells, int curveSteps,
                        TrackFence also, TrackFence base) {
         this.also = also;
         this.base = base;
@@ -92,13 +97,13 @@ public final class TrackFence {
      * This fence keeping clear of a few obstacles more as well, indexed apart: what a world asks once tracks were laid over it,
      * so its own copper is not indexed again for each one laid.
      *
-     * @param bucket how wide a cell of their index is, in millimetres
+     * @param grid how their index's grid is cut
      */
-    TrackFence alsoKeepingClearOf(List<Obstacle> more, double bucket) {
+    TrackFence alsoKeepingClearOf(List<Obstacle> more, BoxGrid.Cells grid) {
         if (more.isEmpty()) {
             return this;
         }
-        TrackFence extra = new TrackFence(width, clearance, more, bucket, curveSteps);
+        TrackFence extra = new TrackFence(width, clearance, more, grid, curveSteps);
         return new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, also == null ? extra : also.joined(extra), base());
     }
 
@@ -172,7 +177,7 @@ public final class TrackFence {
 
     /** The numbers of this fence's obstacles whose cells a box reaches, in order. */
     private BitSet near(double left, double top, double right, double bottom) {
-        BitSet near = cells.near(left, top, right, bottom);
+        BitSet near = cells.nearSet(new Box(left, top, right, bottom));
         for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
             if (Double.isNaN(gaps[number])) {
                 near.clear(number);
@@ -201,7 +206,7 @@ public final class TrackFence {
 
     /** Whether a piece of copper keeps its gap from everything near it. */
     public boolean copperClear(CopperShape copper) {
-        CopperShape.Box box = copper.box();
+        Box box = copper.box();
         BitSet near = near(box.left() - reachOut, box.top() - reachOut, box.right() + reachOut, box.bottom() + reachOut);
         for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
             if (!keepsClear(copper, shapes.get(number), gaps[number])) {
@@ -247,7 +252,7 @@ public final class TrackFence {
             Point before = points.get(corner - 1);
             Point at = points.get(corner);
             Point after = points.get(corner + 1);
-            if (!copperClear(CopperShapes.track(new PcbDrawing.Track(layer, width, rounding, List.of(before, at, after)), curveSteps))) {
+            if (!copperClear(CopperShapes.track(new Track(layer, width, rounding, List.of(before, at, after)), curveSteps))) {
                 return false;
             }
         }
@@ -264,7 +269,7 @@ public final class TrackFence {
         double[] tightest = null;
         for (Point point : points) {
             CopperShape end = CopperShape.circle(point.x(), point.y(), width / 2);
-            CopperShape.Box box = end.box();
+            Box box = end.box();
             BitSet near = near(box.left() - reachOut, box.top() - reachOut, box.right() + reachOut, box.bottom() + reachOut);
             for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
                 CopperShape shape = shapes.get(number);

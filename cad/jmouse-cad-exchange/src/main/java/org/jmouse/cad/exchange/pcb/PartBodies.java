@@ -1,6 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.svg.path.node.PathPolylines;
 import org.jmouse.svg.path.parser.PathParser;
@@ -29,7 +29,7 @@ public final class PartBodies {
      * @param height  how high it stands over the face its part is on; empty where its footprint gives no height, when it is
      *                its outline alone
      */
-    public record PartBody(String designator, String side, List<PcbDrawing.Point> outline, OptionalDouble height) {
+    public record PartBody(String designator, String side, List<Point> outline, OptionalDouble height) {
 
         /** Whether it stands up from its face: whether its footprint gives its height. */
         public boolean raised() {
@@ -67,7 +67,7 @@ public final class PartBodies {
         if (widest == null) {
             return Optional.empty();
         }
-        List<PcbDrawing.Point> placed = new ArrayList<>();
+        List<Point> placed = new ArrayList<>();
         for (double[] point : widest) {
             placed.add(part.placement().placed(point[0], point[1]));
         }

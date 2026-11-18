@@ -1,6 +1,6 @@
 package org.jmouse.cad.exchange.pcb;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.geometry.PadOutline;
 import org.jmouse.svg.path.node.CircularArc;
 import org.locationtech.jts.geom.Coordinate;
@@ -50,14 +50,14 @@ public final class ArtworkAreas {
         };
     }
 
-    private Geometry stroked(List<PcbDrawing.Point> points, double width) {
+    private Geometry stroked(List<Point> points, double width) {
         Coordinate[] line = points.stream().map(ArtworkAreas::coordinate).toArray(Coordinate[]::new);
         Geometry centre = line.length == 1 ? GEOMETRY.createPoint(line[0]) : GEOMETRY.createLineString(line);
         return centre.buffer(width / 2, curveSteps);
     }
 
     /** The arc as straight pieces from its start through its middle to its end; three in a line are a straight run. */
-    public List<PcbDrawing.Point> arcPoints(ArtworkFeature.Arc arc) {
+    public List<Point> arcPoints(ArtworkFeature.Arc arc) {
         Optional<CircularArc> circle = CircularArc.through(arc.from().x(), arc.from().y(), arc.through().x(), arc.through().y(),
                 arc.to().x(), arc.to().y());
         if (circle.isEmpty()) {
@@ -73,10 +73,10 @@ public final class ArtworkAreas {
             sweep -= 2 * Math.PI;
         }
         int steps = Math.max(2, (int) Math.ceil(curveSteps * Math.abs(sweep) / (Math.PI / 2)));
-        List<PcbDrawing.Point> points = new ArrayList<>();
+        List<Point> points = new ArrayList<>();
         for (int step = 0; step <= steps; step++) {
             double angle = start + sweep * step / steps;
-            points.add(new PcbDrawing.Point(centreX + radius * Math.cos(angle), centreY + radius * Math.sin(angle)));
+            points.add(new Point(centreX + radius * Math.cos(angle), centreY + radius * Math.sin(angle)));
         }
         return points;
     }
@@ -87,7 +87,7 @@ public final class ArtworkAreas {
         return turn < 0 ? turn + 2 * Math.PI : turn;
     }
 
-    private static Optional<Geometry> polygon(List<PcbDrawing.Point> outline, List<List<PcbDrawing.Point>> holes) {
+    private static Optional<Geometry> polygon(List<Point> outline, List<List<Point>> holes) {
         Optional<LinearRing> shell = ring(outline);
         if (shell.isEmpty()) {
             return Optional.empty();
@@ -98,7 +98,7 @@ public final class ArtworkAreas {
         return Optional.of(polygon.isValid() ? polygon : polygon.buffer(0));
     }
 
-    private static Optional<LinearRing> ring(List<PcbDrawing.Point> points) {
+    private static Optional<LinearRing> ring(List<Point> points) {
         List<Coordinate> coordinates = new ArrayList<>(points.stream().map(ArtworkAreas::coordinate).toList());
         if (coordinates.size() < 3) {
             return Optional.empty();
@@ -109,7 +109,7 @@ public final class ArtworkAreas {
         return coordinates.size() < 4 ? Optional.empty() : Optional.of(GEOMETRY.createLinearRing(coordinates.toArray(Coordinate[]::new)));
     }
 
-    private static Coordinate coordinate(PcbDrawing.Point point) {
+    private static Coordinate coordinate(Point point) {
         return new Coordinate(point.x(), point.y());
     }
 }

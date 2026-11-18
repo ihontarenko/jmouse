@@ -1,6 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
+import org.jmouse.cad.Point;
 import org.jmouse.geometry.taut.CorridorSearch;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -110,7 +110,7 @@ final class LayeredWaySearch {
 
     /** The hops from a point of a lane: a via to each other lane where one stands clear, a link each straight way where its pads do. */
     private static List<CorridorSearch.Hop<HopKind>> hopsFrom(Request request, int lane, Coordinate at) {
-        Point point = Lines.settled(new Point(at.x, at.y));
+        Point point = Precision.settled(new Point(at.x, at.y));
         List<CorridorSearch.Hop<HopKind>> hops = new ArrayList<>();
         request.via().filter(via -> viaStands(request, via, point)).ifPresent(via -> {
             for (int other = 0; other < request.lanes().size(); other++) {
@@ -121,7 +121,7 @@ final class LayeredWaySearch {
         });
         request.link().ifPresent(link -> link.fence().apply(lane).filter(pads -> pads.pointClear(point)).ifPresent(pads -> {
             for (Point way : STRAIGHT) {
-                Point far = Lines.settled(Lines.offset(point, way, link.reach()));
+                Point far = Precision.settled(point.moved(way, link.reach()));
                 if (pads.pointClear(far)) {
                     hops.add(new CorridorSearch.Hop<>(Plane.coordinateOf(point), lane, Plane.coordinateOf(far), link.cost(), HopKind.LINK));
                 }
@@ -131,7 +131,7 @@ final class LayeredWaySearch {
     }
 
     private static boolean viaStands(Request request, ViaMove via, Point point) {
-        double offEnds = Math.min(Lines.lengthBetween(point, request.from()), Lines.lengthBetween(point, request.to()));
+        double offEnds = Math.min(point.distanceTo(request.from()), point.distanceTo(request.to()));
         return offEnds >= via.offEnds() && via.fences().stream().allMatch(fence -> fence.pointClear(point));
     }
 

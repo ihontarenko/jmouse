@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.pcb.drawing.Shape;
 import org.jmouse.cad.pcb.checks.PcbChecks;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.geometry.PadOutline;
@@ -21,14 +23,14 @@ class RoutingWorldTest {
     @Test
     void copperDrawnAsAShapeIsInTheWayOfATrackOnAnotherNetAndNotOfOneOnItsOwn() {
         PcbDrawing pcb = new PcbDrawing("circuit", Optional.empty(), List.of(), null, List.of(), List.of(), 2, null, List.of(), List.of(), List.of(),
-                List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(new PcbDrawing.Shape(PcbDrawing.TOP, 0, true, "POWER", "M0 0H10V10H0Z")),
+                List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(new Shape(PcbVocabulary.TOP, 0, true, "POWER", "M0 0H10V10H0Z")),
                 List.of(), List.of());
         RoutingBoard board = new RoutingBoard(Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), new PcbChecks.Settings(0.005, 6, 3, 16,
                 new PlacedDesignator.Rules(0.6, 0.9, 1.6, 0.25, 0.6), new Teardrops.Shape(8, 0.9, 0.8, 14, 24)), new PadOutline(16, 6), null);
         RoutingWorld world = new RoutingWorld(pcb, board);
         OptionalDouble none = OptionalDouble.of(0);
-        assertEquals(1, world.obstacles(PcbDrawing.TOP, Optional.of("GROUND"), OptionalInt.empty(), none).size());
-        assertEquals(0, world.obstacles(PcbDrawing.TOP, Optional.of("POWER"), OptionalInt.empty(), none).size());
-        assertEquals(0, world.obstacles(PcbDrawing.BOTTOM, Optional.of("GROUND"), OptionalInt.empty(), none).size());
+        assertEquals(1, world.obstacles(PcbVocabulary.TOP, Optional.of("GROUND"), OptionalInt.empty(), none).size());
+        assertEquals(0, world.obstacles(PcbVocabulary.TOP, Optional.of("POWER"), OptionalInt.empty(), none).size());
+        assertEquals(0, world.obstacles(PcbVocabulary.BOTTOM, Optional.of("GROUND"), OptionalInt.empty(), none).size());
     }
 }

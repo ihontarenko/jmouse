@@ -1,9 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.numerics.Halving;
-
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +73,7 @@ public final class TrackRouter {
         }
 
         /** A leg of a track already on the pcb, walked round what it meets, joined at the given points. */
-        public static LegRequest walked(RoutingWorld world, PcbDrawing.Track track, Optional<String> net, Point from, Point to, double angleStep,
+        public static LegRequest walked(RoutingWorld world, Track track, Optional<String> net, Point from, Point to, double angleStep,
                                         int own, List<Point> held, List<Point> joins) {
             return new LegRequest(world, track.layer(), net, track.width(), from, to, angleStep, OptionalInt.of(own), held, Optional.of(joins),
                     List.of(), OptionalDouble.empty());
@@ -92,7 +91,7 @@ public final class TrackRouter {
 
     /** The straight step cut where it would first come too near copper: as far as a track can go towards what it cannot reach. */
     private static List<Point> stoppedShort(TrackFence fence, Point from, List<Point> straight, int halvings) {
-        List<Point> points = Lines.joined(List.of(from), straight);
+        List<Point> points = Polylines.joined(List.of(from), straight);
         for (int index = 1; index < points.size(); index++) {
             if (fence.lineClear(points.subList(index - 1, index + 1))) {
                 continue;
@@ -100,8 +99,8 @@ public final class TrackRouter {
             Point start = points.get(index - 1);
             Point end = points.get(index);
             double low = Halving.bracket(0, 1, halvings, share -> fence.lineClear(List.of(start, start.toward(end, share)))).holds();
-            Point stop = Lines.settled(start.toward(end, low));
-            List<Point> kept = Lines.withoutStraightPoints(Lines.joined(List.of(from), points.subList(1, index), List.of(stop)));
+            Point stop = Precision.settled(start.toward(end, low));
+            List<Point> kept = LineCleaning.withoutStraightPoints(Polylines.joined(List.of(from), points.subList(1, index), List.of(stop)));
             return kept.size() > 1 ? List.copyOf(kept.subList(1, kept.size())) : List.of(from);
         }
         return straight;
@@ -118,9 +117,9 @@ public final class TrackRouter {
             return endOnNet ? List.of(request.from(), request.to()) : List.of(request.from());
         });
         TrackFence fence = world.fence(request.layer(), request.net(), request.width(), request.own()).leaving(joins)
-                .alsoKeepingClearOf(request.also(), settings.bucket());
-        List<Point> straight = Lines.trackStep(request.from(), request.to(), request.angleStep());
-        List<Point> straightLine = Lines.joined(List.of(request.from()), straight);
+                .alsoKeepingClearOf(request.also(), settings.fenceCells());
+        List<Point> straight = AngleSteps.trackStep(request.from(), request.to(), request.angleStep());
+        List<Point> straightLine = Polylines.joined(List.of(request.from()), straight);
         if (fence.lineClear(straightLine)) {
             return new RoutedLeg(straight, true);
         }

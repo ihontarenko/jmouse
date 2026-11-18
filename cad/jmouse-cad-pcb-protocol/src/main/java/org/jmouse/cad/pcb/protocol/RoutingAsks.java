@@ -1,7 +1,10 @@
 package org.jmouse.cad.pcb.protocol;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShape;
 import org.jmouse.cad.pcb.routing.CopperNodes;
 import org.jmouse.cad.pcb.routing.LengthTuning;
@@ -42,7 +45,7 @@ public final class RoutingAsks {
     }
 
     /** A track an answer leaves other than it was asked of, at its index among the pcb's tracks. */
-    public record TrackChange(int index, PcbDrawing.Track track) {
+    public record TrackChange(int index, Track track) {
     }
 
     /**
@@ -56,10 +59,10 @@ public final class RoutingAsks {
         public static final TracksView NONE = new TracksView(null, null);
 
         /** What `after` changed in `before`. */
-        public static TracksView between(List<PcbDrawing.Track> before, List<PcbDrawing.Track> after) {
+        public static TracksView between(List<Track> before, List<Track> after) {
             List<TrackChange> changed = new ArrayList<>();
             for (int index = 0; index < after.size(); index++) {
-                PcbDrawing.Track now = after.get(index);
+                Track now = after.get(index);
                 if (index >= before.size() || !sameTrack(before.get(index), now)) {
                     changed.add(new TrackChange(index, now));
                 }
@@ -67,7 +70,7 @@ public final class RoutingAsks {
             return new TracksView(after.size(), changed);
         }
 
-        private static boolean sameTrack(PcbDrawing.Track was, PcbDrawing.Track now) {
+        private static boolean sameTrack(Track was, Track now) {
             return was == now || was.equals(now);
         }
     }
@@ -108,7 +111,7 @@ public final class RoutingAsks {
     public record TrackEndView(int track, String end) {
     }
 
-    public record NodeView(String kind, Point at, double reach, CopperShape.Box box, List<String> layers, Integer item, List<TrackEndView> ends) {
+    public record NodeView(String kind, Point at, double reach, Box box, List<String> layers, Integer item, List<TrackEndView> ends) {
     }
 
     public record NodesView(List<NodeView> nodes) {

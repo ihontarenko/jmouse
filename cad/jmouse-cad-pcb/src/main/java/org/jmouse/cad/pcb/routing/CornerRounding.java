@@ -1,7 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public record CornerRounding(RoutingWorld world, double rounding) {
     }
 
     /** One run of a line's chosen stretches made one track: where it stands, the stretches it takes the place of, its points. */
-    private record Merge(int at, List<Integer> gone, PcbDrawing.Track track) {
+    private record Merge(int at, List<Integer> gone, Track track) {
     }
 
     public Rounded rounded(List<Integer> chosen) {
@@ -54,7 +55,7 @@ public record CornerRounding(RoutingWorld world, double rounding) {
         while (from < line.members().size()) {
             int to = from;
             if (takes(pcb, wanted, line.members().get(from).index())) {
-                PcbDrawing.Track first = pcb.tracks().get(line.members().get(from).index());
+                Track first = pcb.tracks().get(line.members().get(from).index());
                 while (to + 1 < line.members().size() && takes(pcb, wanted, line.members().get(to + 1).index())
                         && alike(first, pcb.tracks().get(line.members().get(to + 1).index()))) {
                     to++;
@@ -74,11 +75,11 @@ public record CornerRounding(RoutingWorld world, double rounding) {
                 : line.points().subList(line.starts().get(from), end + 1);
         List<Integer> indexes = line.members().subList(from, to + 1).stream().map(JoinedTracks.Member::index).sorted().toList();
         int at = indexes.getFirst();
-        PcbDrawing.Track first = pcb.tracks().get(line.members().get(from).index());
+        Track first = pcb.tracks().get(line.members().get(from).index());
         TrackFence fence = world.fenceOfTrack(first.withPoints(points), at, world.netOfTrack(at));
         // Rounding changes copper at corners alone: a line with none takes the radius asked, for the corners it may yet be given.
         double fits = fence.roundingThatFits(points, rounding, first.layer(), world.settings().routing().roundingHalvings());
-        PcbDrawing.Track merged = first.withPoints(points).withRounding(fits);
+        Track merged = first.withPoints(points).withRounding(fits);
         return new Merge(at, indexes.subList(1, indexes.size()), merged);
     }
 
@@ -86,13 +87,13 @@ public record CornerRounding(RoutingWorld world, double rounding) {
         return wanted.contains(index) && !RoutingEngine.held(pcb, index);
     }
 
-    private static boolean alike(PcbDrawing.Track one, PcbDrawing.Track other) {
+    private static boolean alike(Track one, Track other) {
         return one.layer().equals(other.layer()) && one.width() == other.width();
     }
 
     /** The tracks with each merge in place, the stretches it took gone; and where every chosen track now stands. */
     private static Rounded written(PcbDrawing pcb, TreeSet<Integer> wanted, List<Merge> merges) {
-        Map<Integer, PcbDrawing.Track> placed = new HashMap<>();
+        Map<Integer, Track> placed = new HashMap<>();
         TreeSet<Integer> gone = new TreeSet<>();
         Map<Integer, Integer> mergedInto = new HashMap<>();
         for (Merge merge : merges) {
@@ -100,7 +101,7 @@ public record CornerRounding(RoutingWorld world, double rounding) {
             gone.addAll(merge.gone());
             merge.gone().forEach(index -> mergedInto.put(index, merge.at()));
         }
-        List<PcbDrawing.Track> tracks = new ArrayList<>();
+        List<Track> tracks = new ArrayList<>();
         for (int index = 0; index < pcb.tracks().size(); index++) {
             if (!gone.contains(index)) {
                 tracks.add(placed.getOrDefault(index, pcb.tracks().get(index)));

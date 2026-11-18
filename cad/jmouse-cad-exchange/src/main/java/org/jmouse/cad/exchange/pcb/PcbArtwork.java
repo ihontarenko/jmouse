@@ -1,5 +1,16 @@
 package org.jmouse.cad.exchange.pcb;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
 import org.jmouse.cad.settings.SettingsSection;
@@ -217,29 +228,29 @@ public final class PcbArtwork {
             }
         }
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             if (track.layer().equals(layer)) {
                 features.addAll(trackOf(track, nets.trackNets().get(index).orElse(null)));
             }
         }
         for (int index = 0; index < pcb.arcs().size(); index++) {
-            PcbDrawing.Arc arc = pcb.arcs().get(index);
+            Arc arc = pcb.arcs().get(index);
             if (arc.layer().equals(layer)) {
                 features.add(new ArtworkFeature.Arc(arc.from(), arc.through(), arc.to(), arc.width(), Role.CONDUCTOR,
                         nets.arcNets().get(index).orElse(null)));
             }
         }
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             if (pcb.reaches(via, layer)) {
-                features.add(new ArtworkFeature.Disc(new PcbDrawing.Point(via.x(), via.y()), via.diameter(), Role.VIA_PAD,
+                features.add(new ArtworkFeature.Disc(new Point(via.x(), via.y()), via.diameter(), Role.VIA_PAD,
                         nets.viaNets().get(index).orElse(null)));
             }
         }
         // A plated mounting hole's ring, on every copper layer of the stack.
-        for (PcbDrawing.Hole hole : pcb.holes()) {
+        for (Hole hole : pcb.holes()) {
             if (hole.ring() > 0 && pcb.copperLayerIds().contains(layer)) {
-                features.add(new ArtworkFeature.Disc(new PcbDrawing.Point(hole.x(), hole.y()), hole.ring(), Role.COMPONENT_PAD, null));
+                features.add(new ArtworkFeature.Disc(new Point(hole.x(), hole.y()), hole.ring(), Role.COMPONENT_PAD, null));
             }
         }
         for (Teardrops.Drop drop : drops) {
@@ -258,15 +269,15 @@ public final class PcbArtwork {
      */
     public List<ArtworkFeature> maskOpenings(String side) {
         List<ArtworkFeature> features = new ArrayList<>(pads(side, pad -> pad.maskMargin() != null ? pad.maskMargin() : settings.maskExpansion(), FootprintDrawing.Pad::opensMask));
-        for (PcbDrawing.Via via : fabrication.pcb().vias()) {
+        for (Via via : fabrication.pcb().vias()) {
             if (via.opensMaskOn(side)) {
-                features.add(new ArtworkFeature.Disc(new PcbDrawing.Point(via.x(), via.y()),
+                features.add(new ArtworkFeature.Disc(new Point(via.x(), via.y()),
                         via.diameter() + settings.maskExpansion() * 2, Role.OPENING, null));
             }
         }
-        for (PcbDrawing.Hole hole : fabrication.pcb().holes()) {
+        for (Hole hole : fabrication.pcb().holes()) {
             if (hole.ring() > 0) {
-                features.add(new ArtworkFeature.Disc(new PcbDrawing.Point(hole.x(), hole.y()),
+                features.add(new ArtworkFeature.Disc(new Point(hole.x(), hole.y()),
                         hole.ring() + settings.maskExpansion() * 2, Role.OPENING, null));
             }
         }
@@ -289,18 +300,18 @@ public final class PcbArtwork {
         PcbDrawing pcb = fabrication.pcb();
         double growth = settings.maskExpansion() * 2;
         List<ArtworkFeature> features = new ArrayList<>();
-        for (PcbDrawing.Track track : pcb.tracks()) {
+        for (Track track : pcb.tracks()) {
             if (track.bare() && track.layer().equals(side)) {
-                trackOf(new PcbDrawing.Track(track.layer(), track.width() + growth, track.rounding(), track.points()), null).stream().map(PcbArtwork::asOpening).forEach(features::add);
+                trackOf(new Track(track.layer(), track.width() + growth, track.rounding(), track.points()), null).stream().map(PcbArtwork::asOpening).forEach(features::add);
             }
         }
-        for (PcbDrawing.Arc arc : pcb.arcs()) {
+        for (Arc arc : pcb.arcs()) {
             if (arc.bare() && arc.layer().equals(side)) {
                 features.add(new ArtworkFeature.Arc(arc.from(), arc.through(), arc.to(), arc.width() + growth, Role.OPENING, null));
             }
         }
         for (int index = 0; index < pours.size(); index++) {
-            PcbDrawing.Zone zone = pcb.zones().get(index);
+            Zone zone = pcb.zones().get(index);
             if (zone.bare() && zone.layer().equals(side)) {
                 pours.get(index).ifPresent(pour -> regionsOf(pour.buffer(settings.maskExpansion()), null).stream().map(PcbArtwork::asOpening).forEach(features::add));
             }
@@ -351,9 +362,9 @@ public final class PcbArtwork {
                 }
             }
         }
-        String layer = PcbDrawing.layerOf(side, purpose);
+        String layer = PcbLayers.layerOf(side, purpose);
         features.addAll(shapesOn(layer, role));
-        for (PcbDrawing.Text words : fabrication.pcb().texts()) {
+        for (Lettering words : fabrication.pcb().texts()) {
             if (words.layer().equals(layer)) {
                 features.addAll(lettered(words.text(), words.x(), words.y(), words.size(), words.rotation(), side, anchorOf(words.anchor())));
             }
@@ -364,13 +375,13 @@ public final class PcbArtwork {
     /** The shapes the pcb itself draws on a layer: an area, or lines with a round pen. */
     private List<ArtworkFeature> shapesOn(String layer, Role role) {
         List<ArtworkFeature> features = new ArrayList<>();
-        for (PcbDrawing.Shape shape : fabrication.pcb().shapes()) {
+        for (Shape shape : fabrication.pcb().shapes()) {
             if (!shape.layer().equals(layer)) {
                 continue;
             }
             String net = shape.net().isEmpty() ? null : shape.net();
             for (List<double[]> run : runs(shape.path())) {
-                List<PcbDrawing.Point> points = run.stream().map(point -> new PcbDrawing.Point(point[0], point[1])).toList();
+                List<Point> points = run.stream().map(point -> new Point(point[0], point[1])).toList();
                 features.add(shape.filled() ? new ArtworkFeature.Region(points, List.of(), role, net)
                         : new ArtworkFeature.Stroke(points, shape.width() > 0 ? shape.width() : settings.silkscreenWidth(), role, net));
             }
@@ -424,10 +435,10 @@ public final class PcbArtwork {
     }
 
     /** A footprint's drawing placed with its part: filled as an area, or stroked with a round pen of {@code width}. */
-    private List<ArtworkFeature> outlineOf(PcbDrawing.Placement placement, FootprintDrawing.Outline outline, double width, Role role) {
+    private List<ArtworkFeature> outlineOf(Placement placement, FootprintDrawing.Outline outline, double width, Role role) {
         List<ArtworkFeature> features = new ArrayList<>();
         for (List<double[]> run : runs(outline.path())) {
-            List<PcbDrawing.Point> placed = run.stream().map(point -> placement.placed(point[0], point[1])).toList();
+            List<Point> placed = run.stream().map(point -> placement.placed(point[0], point[1])).toList();
             features.add(outline.filled() ? new ArtworkFeature.Region(placed, List.of(), role, null)
                     : new ArtworkFeature.Stroke(placed, width, role, null));
         }
@@ -437,8 +448,8 @@ public final class PcbArtwork {
     /** Which part of the letters stands on their point, as the stroke font says it. */
     private static StrokeText.Anchor anchorOf(String anchor) {
         return switch (anchor) {
-            case PcbDrawing.START -> StrokeText.Anchor.START;
-            case PcbDrawing.END -> StrokeText.Anchor.END;
+            case PcbVocabulary.TEXT_START -> StrokeText.Anchor.START;
+            case PcbVocabulary.TEXT_END -> StrokeText.Anchor.END;
             default -> StrokeText.Anchor.MIDDLE;
         };
     }
@@ -446,7 +457,7 @@ public final class PcbArtwork {
     private List<ArtworkFeature> lettered(String words, double x, double y, double height, double rotation, String side, StrokeText.Anchor anchor) {
         StrokeText laid = StrokeText.lay(font, words, height, anchor, StrokeText.Baseline.MIDDLE, settings.curveSteps());
         double angle = Math.toRadians(rotation);
-        double mirror = PcbDrawing.BOTTOM.equals(side) ? -1 : 1;
+        double mirror = PcbVocabulary.BOTTOM.equals(side) ? -1 : 1;
         List<ArtworkFeature> features = new ArrayList<>();
         for (List<StrokeText.Point> stroke : laid.strokes()) {
             if (stroke.size() < 2) {
@@ -454,7 +465,7 @@ public final class PcbArtwork {
             }
             features.add(new ArtworkFeature.Stroke(stroke.stream().map(point -> {
                 double across = point.x() * mirror;
-                return new PcbDrawing.Point(x + across * Math.cos(angle) + point.y() * Math.sin(angle),
+                return new Point(x + across * Math.cos(angle) + point.y() * Math.sin(angle),
                         y - across * Math.sin(angle) + point.y() * Math.cos(angle));
             }).toList(), height * settings.letterStroke(), Role.LEGEND, null));
         }
@@ -462,7 +473,7 @@ public final class PcbArtwork {
     }
 
     /** A track as its copper runs ({@link RoundedTrack}): each run a stroke, each rounded corner an arc. */
-    private static List<ArtworkFeature> trackOf(PcbDrawing.Track track, String net) {
+    private static List<ArtworkFeature> trackOf(Track track, String net) {
         return RoundedTrack.of(track).stream().<ArtworkFeature>map(piece -> switch (piece) {
             case RoundedTrack.Run run -> new ArtworkFeature.Stroke(run.points(), track.width(), Role.CONDUCTOR, net);
             case RoundedTrack.Bend bend -> new ArtworkFeature.Arc(bend.from(), bend.through(), bend.to(), track.width(), Role.CONDUCTOR, net);
@@ -473,7 +484,7 @@ public final class PcbArtwork {
     private static List<ArtworkFeature> regionsOf(Geometry pour, String net) {
         List<ArtworkFeature> regions = new ArrayList<>();
         for (Polygon polygon : ZonePours.polygonsOf(pour)) {
-            List<List<PcbDrawing.Point>> holes = new ArrayList<>();
+            List<List<Point>> holes = new ArrayList<>();
             for (int hole = 0; hole < polygon.getNumInteriorRing(); hole++) {
                 holes.add(ring(polygon.getInteriorRingN(hole)));
             }
@@ -482,7 +493,7 @@ public final class PcbArtwork {
         return regions;
     }
 
-    private static List<PcbDrawing.Point> ring(LineString ring) {
-        return Arrays.stream(ring.getCoordinates()).map((Coordinate point) -> new PcbDrawing.Point(point.x, point.y)).toList();
+    private static List<Point> ring(LineString ring) {
+        return Arrays.stream(ring.getCoordinates()).map((Coordinate point) -> new Point(point.x, point.y)).toList();
     }
 }

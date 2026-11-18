@@ -1,8 +1,8 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.PcbVocabulary;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 import org.jmouse.cad.pcb.geometry.CopperShapes;
 import org.jmouse.cad.pcb.geometry.NetLengths;
 
@@ -78,9 +78,9 @@ public final class LengthTuning {
     public Tuning tunedAt(String layer, Point point, double reach, OptionalDouble length, TuningPattern pattern) {
         Place best = null;
         double bestGap = Double.POSITIVE_INFINITY;
-        List<PcbDrawing.Track> tracks = world.pcb().tracks();
+        List<Track> tracks = world.pcb().tracks();
         for (int index = 0; index < tracks.size(); index++) {
-            PcbDrawing.Track track = tracks.get(index);
+            Track track = tracks.get(index);
             if (!track.layer().equals(layer)) {
                 continue;
             }
@@ -117,7 +117,7 @@ public final class LengthTuning {
         for (int segment = 0; segment < points.size() - 1; segment++) {
             segments.add(segment);
         }
-        segments.sort(Comparator.comparingDouble((Integer segment) -> -Lines.lengthBetween(points.get(segment), points.get(segment + 1))));
+        segments.sort(Comparator.comparingDouble((Integer segment) -> -points.get(segment).distanceTo(points.get(segment + 1))));
         Tuning first = null;
         for (int segment : segments) {
             Tuning answer = meanderOn(new Place(index, segment, 0.5), length, pattern);
@@ -136,7 +136,7 @@ public final class LengthTuning {
      */
     private static Optional<List<Point>> bumpsOf(TuningPattern pattern, Point from, Point to, double along, int count, double height, double spacing,
                                                  int side) {
-        double length = Lines.lengthBetween(from, to);
+        double length = from.distanceTo(to);
         double span = (2 * count - 1) * spacing;
         if (span + 2 * spacing > length) {
             return Optional.empty();
@@ -152,7 +152,7 @@ public final class LengthTuning {
             for (double[] corner : pattern.bump(start + bump * 2 * spacing, spacing, height)) {
                 Point point = new Point(from.x() + unitX * corner[0] + normalX * corner[1], from.y() + unitY * corner[0] + normalY * corner[1]);
                 // A pattern whose bump starts where its last point stood — a rounded top on no shoulder — gives that corner once.
-                if (points.isEmpty() || !Lines.samePoint(points.getLast(), point)) {
+                if (points.isEmpty() || !Precision.samePoint(points.getLast(), point)) {
                     points.add(point);
                 }
             }
@@ -160,8 +160,8 @@ public final class LengthTuning {
         return Optional.of(points);
     }
 
-    private static List<Point> withBumps(PcbDrawing.Track track, int segment, List<Point> bumps) {
-        return Lines.joined(track.points().subList(0, segment + 1), bumps, track.points().subList(segment + 1, track.points().size()));
+    private static List<Point> withBumps(Track track, int segment, List<Point> bumps) {
+        return Polylines.joined(track.points().subList(0, segment + 1), bumps, track.points().subList(segment + 1, track.points().size()));
     }
 
     private static String millimetres(double value) {
@@ -183,11 +183,11 @@ public final class LengthTuning {
             String partner = tuned.partner().get();
             return new Refused(tuned.net().orElse("") + " is already as long as " + partner + (missing < 0 ? ": lengthen " + partner + "'s track instead" : ""));
         }
-        PcbDrawing.Track standing = world.pcb().tracks().get(place.track());
+        Track standing = world.pcb().tracks().get(place.track());
         double gap = world.clearanceOf(tuned.net());
         double spacing = Math.max(standing.width() * settings.spacing(), standing.width() + gap);
         // The track as the meander is laid on it: its corners rounded no more than the bumps bear, or a zigzag's teeth are rounded away.
-        PcbDrawing.Track track = standing.withRounding(pattern.roundingFor(standing.rounding(), spacing));
+        Track track = standing.withRounding(pattern.roundingFor(standing.rounding(), spacing));
         Point from = track.points().get(place.segment());
         Point to = track.points().get(place.segment() + 1);
         double tallest = settings.amplitude();
@@ -198,7 +198,7 @@ public final class LengthTuning {
                 NetLengths.trackLength(track.withPoints(withBumps(track, place.segment(), bumps))) - before;
         int curveSteps = world.board().checks().curveSteps();
         java.util.function.Predicate<List<Point>> clear = bumps ->
-                fence.copperClear(CopperShapes.track(track.withPoints(Lines.joined(List.of(from), bumps, List.of(to))), curveSteps));
+                fence.copperClear(CopperShapes.track(track.withPoints(Polylines.joined(List.of(from), bumps, List.of(to))), curveSteps));
         // Whether a meander long enough was laid and refused for the copper beside it, not for want of segment.
         boolean blocked = false;
         int fewest = Math.max(1, (int) Math.ceil(missing / (2 * tallest)));
@@ -226,7 +226,7 @@ public final class LengthTuning {
                         high = middle;
                     }
                 }
-                List<Point> laid = at.apply(Lines.settled(high)).orElseThrow().stream().map(Lines::settled).toList();
+                List<Point> laid = at.apply(Precision.settled(high)).orElseThrow().stream().map(Precision::settled).toList();
                 if (clear.test(laid)) {
                     return new Tuned(place.track(), withBumps(track, place.segment(), laid), track.rounding(), added.applyAsDouble(laid), tuned.net(),
                             tuned.own(), target);

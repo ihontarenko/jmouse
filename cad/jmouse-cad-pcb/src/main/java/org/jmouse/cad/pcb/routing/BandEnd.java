@@ -1,6 +1,6 @@
 package org.jmouse.cad.pcb.routing;
 
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
+import org.jmouse.cad.Point;
 
 /**
  * What holds one end of a band: a point that stays where it is — a pad the drag did not move, a joint —, or a pad of a moved part,
@@ -37,7 +37,7 @@ sealed interface BandEnd {
 
         @Override
         public Point at(DragMotion motion, double share) {
-            return Lines.settled(motion.carried(designator, was, share));
+            return Precision.settled(motion.carried(designator, was, share));
         }
     }
 }

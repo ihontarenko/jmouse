@@ -1,5 +1,11 @@
 package org.jmouse.cad.panel;
 
+import org.jmouse.cad.pcb.PcbLayers;
+import org.jmouse.cad.pcb.PcbVocabulary;
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.svg.path.node.PathBuilder;
 import org.jmouse.svg.path.node.PathPolylines;
@@ -44,9 +50,9 @@ final class PanelLayout {
     private static final String MASK = "mask";
 
     private final List<Copy> copies = new ArrayList<>();
-    private final List<PcbDrawing.Hole> holes = new ArrayList<>();
-    private final List<PcbDrawing.Shape> shapes = new ArrayList<>();
-    private final List<PcbDrawing.Text> texts = new ArrayList<>();
+    private final List<Hole> holes = new ArrayList<>();
+    private final List<Shape> shapes = new ArrayList<>();
+    private final List<Lettering> texts = new ArrayList<>();
     private final List<String> notes = new ArrayList<>();
     private final List<Geometry> material = new ArrayList<>();
     private final PanelDefaults defaults;
@@ -83,7 +89,7 @@ final class PanelLayout {
         }
         panel.fiducials().forEach(fiducial -> layout.fiducial(fiducial.at(), fiducial.diameter().orElse(defaults.fiducialDiameter()),
                 fiducial.opening().orElse(defaults.fiducialOpening())));
-        panel.tooling().forEach(tooling -> layout.holes.add(new PcbDrawing.Hole(tooling.at().x(), tooling.at().y(),
+        panel.tooling().forEach(tooling -> layout.holes.add(new Hole(tooling.at().x(), tooling.at().y(),
                 tooling.drill().orElse(defaults.toolingDrill()), 0)));
         layout.closeOutline();
         return layout;
@@ -101,15 +107,15 @@ final class PanelLayout {
         return extent;
     }
 
-    List<PcbDrawing.Hole> holes() {
+    List<Hole> holes() {
         return holes;
     }
 
-    List<PcbDrawing.Shape> shapes() {
+    List<Shape> shapes() {
         return shapes;
     }
 
-    List<PcbDrawing.Text> texts() {
+    List<Lettering> texts() {
         return texts;
     }
 
@@ -180,7 +186,7 @@ final class PanelLayout {
     private static Geometry moved(Geometry area, BoardMotion motion) {
         Geometry copy = area.copy();
         copy.apply((Coordinate coordinate) -> {
-            PcbDrawing.Point moved = motion.point(new PcbDrawing.Point(coordinate.x, coordinate.y));
+            Point moved = motion.point(new Point(coordinate.x, coordinate.y));
             coordinate.x = moved.x();
             coordinate.y = moved.y();
         });
@@ -227,19 +233,19 @@ final class PanelLayout {
         if (right) {
             material.add(rectangle(inner.getMaxX(), outer.getMaxX(), outer.getMinY(), outer.getMaxY()));
         }
-        List<PcbDrawing.Point> corners = cornersOnRails(outer, rail, top, bottom, left, right);
+        List<Point> corners = cornersOnRails(outer, rail, top, bottom, left, right);
         frame.tooling().ifPresent(count -> {
-            for (PcbDrawing.Point corner : upTo(corners, count)) {
-                holes.add(new PcbDrawing.Hole(corner.x(), corner.y(), defaults.toolingDrill(), 0));
+            for (Point corner : upTo(corners, count)) {
+                holes.add(new Hole(corner.x(), corner.y(), defaults.toolingDrill(), 0));
             }
         });
         frame.fiducials().ifPresent(count -> {
             double along = defaults.toolingDrill() + defaults.fiducialOpening();
-            for (PcbDrawing.Point corner : upTo(corners, count)) {
+            for (Point corner : upTo(corners, count)) {
                 boolean alongX = top || bottom;
                 double direction = alongX ? Math.signum(outer.centre().x - corner.x()) : Math.signum(outer.centre().y - corner.y());
-                fiducial(alongX ? new PcbDrawing.Point(corner.x() + direction * along, corner.y())
-                                : new PcbDrawing.Point(corner.x(), corner.y() + direction * along),
+                fiducial(alongX ? new Point(corner.x() + direction * along, corner.y())
+                                : new Point(corner.x(), corner.y() + direction * along),
                         defaults.fiducialDiameter(), defaults.fiducialOpening());
             }
         });
@@ -247,25 +253,25 @@ final class PanelLayout {
     }
 
     /** The middle of a rail's width at each corner of the panel, as far as there are rails. */
-    private static List<PcbDrawing.Point> cornersOnRails(Envelope outer, double rail, boolean top, boolean bottom, boolean left, boolean right) {
+    private static List<Point> cornersOnRails(Envelope outer, double rail, boolean top, boolean bottom, boolean left, boolean right) {
         double half = rail / 2;
-        List<PcbDrawing.Point> corners = new ArrayList<>();
+        List<Point> corners = new ArrayList<>();
         if (top || left) {
-            corners.add(new PcbDrawing.Point(outer.getMinX() + half, outer.getMinY() + half));
+            corners.add(new Point(outer.getMinX() + half, outer.getMinY() + half));
         }
         if (top || right) {
-            corners.add(new PcbDrawing.Point(outer.getMaxX() - half, outer.getMinY() + half));
+            corners.add(new Point(outer.getMaxX() - half, outer.getMinY() + half));
         }
         if (bottom || left) {
-            corners.add(new PcbDrawing.Point(outer.getMinX() + half, outer.getMaxY() - half));
+            corners.add(new Point(outer.getMinX() + half, outer.getMaxY() - half));
         }
         if (bottom || right) {
-            corners.add(new PcbDrawing.Point(outer.getMaxX() - half, outer.getMaxY() - half));
+            corners.add(new Point(outer.getMaxX() - half, outer.getMaxY() - half));
         }
         return corners;
     }
 
-    private List<PcbDrawing.Point> upTo(List<PcbDrawing.Point> corners, int count) {
+    private List<Point> upTo(List<Point> corners, int count) {
         if (count > corners.size()) {
             notes.add("The frame has room for " + corners.size() + " at its corners, not " + count + ".");
         }
@@ -273,14 +279,14 @@ final class PanelLayout {
     }
 
     /** A fiducial on both faces: bare copper in an opening of the mask. */
-    private void fiducial(PcbDrawing.Point at, double diameter, double opening) {
-        for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
-            shapes.add(new PcbDrawing.Shape(side, 0, true, "", circle(at, diameter / 2)));
-            shapes.add(new PcbDrawing.Shape(PcbDrawing.layerOf(side, MASK), 0, true, "", circle(at, opening / 2)));
+    private void fiducial(Point at, double diameter, double opening) {
+        for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
+            shapes.add(new Shape(side, 0, true, "", circle(at, diameter / 2)));
+            shapes.add(new Shape(PcbLayers.layerOf(side, MASK), 0, true, "", circle(at, opening / 2)));
         }
     }
 
-    private static String circle(PcbDrawing.Point at, double radius) {
+    private static String circle(Point at, double radius) {
         return PathBuilder.path().moveTo(at.x() - radius, at.y()).arcTo(radius, radius, 0, true, true, at.x() + radius, at.y())
                 .arcTo(radius, radius, 0, true, true, at.x() - radius, at.y()).close().build().toSource();
     }
@@ -329,8 +335,8 @@ final class PanelLayout {
         }
     }
 
-    private static PcbDrawing.Shape scoreLine(double fromX, double fromY, double toX, double toY) {
-        return new PcbDrawing.Shape(DOCUMENTATION, SCORE_WIDTH, false, "",
+    private static Shape scoreLine(double fromX, double fromY, double toX, double toY) {
+        return new Shape(DOCUMENTATION, SCORE_WIDTH, false, "",
                 PathBuilder.path().moveTo(fromX, fromY).lineTo(toX, toY).build().toSource());
     }
 
@@ -409,8 +415,8 @@ final class PanelLayout {
             material.add(horizontalEdge ? rectangle(centre - half, centre + half, Math.min(into, facing), Math.max(into, facing))
                                         : rectangle(Math.min(into, facing), Math.max(into, facing), centre - half, centre + half));
             for (double along = centre - half + defaults.bitePitch() / 2; along < centre + half; along += defaults.bitePitch()) {
-                holes.add(horizontalEdge ? new PcbDrawing.Hole(along, reached, defaults.biteDrill(), 0)
-                                         : new PcbDrawing.Hole(reached, along, defaults.biteDrill(), 0));
+                holes.add(horizontalEdge ? new Hole(along, reached, defaults.biteDrill(), 0)
+                                         : new Hole(reached, along, defaults.biteDrill(), 0));
             }
         }
     }

@@ -1,8 +1,12 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Reference;
+import org.jmouse.geometry.index.Box;
+
 import org.jmouse.settings.Bounds;
 import org.jmouse.settings.Label;
-import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.PcbVocabulary;
 import org.jmouse.svg.path.node.PathPolylines;
 import org.jmouse.svg.path.parser.PathParser;
@@ -49,7 +53,7 @@ public record PlacedDesignator(double x, double y, double height, double rotatio
      * The box the designator's letters cover, a part named {@code name}: as wide as its letters advance, as tall as they
      * are, standing on the point as its anchor says, upright or turned a quarter.
      */
-    public CopperShape.Box bounds(String name, Rules rules) {
+    public Box bounds(String name, Rules rules) {
         double along = name.length() * height * rules.advance();
         boolean upright = ((rotation % 180) + 180) % 180 != 90;
         double width = upright ? along : height;
@@ -58,22 +62,22 @@ public record PlacedDesignator(double x, double y, double height, double rotatio
         double turn = Math.toRadians(rotation);
         double middleX = x + shift * Math.cos(turn);
         double middleY = y - shift * Math.sin(turn);
-        return new CopperShape.Box(middleX - width / 2, middleY - tall / 2, middleX + width / 2, middleY + tall / 2);
+        return new Box(middleX - width / 2, middleY - tall / 2, middleX + width / 2, middleY + tall / 2);
     }
 
-    public static PlacedDesignator of(PcbDrawing.Placement placement, Optional<FootprintDrawing> footprint, Rules rules) {
+    public static PlacedDesignator of(Placement placement, Optional<FootprintDrawing> footprint, Rules rules) {
         Optional<FootprintDrawing.Field> field = footprint.flatMap(drawing -> drawing.fields().stream()
                 .filter(candidate -> PcbVocabulary.FIELD_REFERENCE.equals(candidate.subject())).findFirst());
         String anchor = field.map(FootprintDrawing.Field::anchor).orElse(PcbVocabulary.TEXT_MIDDLE);
         if (placement.reference().isPresent()) {
-            PcbDrawing.Reference moved = placement.reference().get();
+            Reference moved = placement.reference().get();
             double height = field.map(FootprintDrawing.Field::height).orElse(rules.least());
-            PcbDrawing.Point at = placement.placed(moved.x(), moved.y());
+            Point at = placement.placed(moved.x(), moved.y());
             String layer = moved.layer() == null || moved.layer().isEmpty() ? field.map(FootprintDrawing.Field::layer).orElse(PcbVocabulary.SILKSCREEN) : moved.layer();
             return new PlacedDesignator(at.x(), at.y(), height, moved.rotation() + placement.rotation(), layer, anchor);
         }
         if (field.isPresent()) {
-            PcbDrawing.Point at = placement.placed(field.get().x(), field.get().y());
+            Point at = placement.placed(field.get().x(), field.get().y());
             return new PlacedDesignator(at.x(), at.y(), field.get().height(), field.get().rotation() + placement.rotation(), field.get().layer(), anchor);
         }
         double[] box = bounds(placement, footprint);
@@ -88,7 +92,7 @@ public record PlacedDesignator(double x, double y, double height, double rotatio
      * the silkscreen, its courtyard —, turned with it, as the interface measures a part ({@code footprintExtent}); a part
      * with no footprint yet a 2 mm square at its place.
      */
-    private static double[] bounds(PcbDrawing.Placement placement, Optional<FootprintDrawing> footprint) {
+    private static double[] bounds(Placement placement, Optional<FootprintDrawing> footprint) {
         List<double[]> corners = new ArrayList<>();
         footprint.ifPresent(drawing -> {
             for (FootprintDrawing.Pad pad : drawing.pads()) {
@@ -116,7 +120,7 @@ public record PlacedDesignator(double x, double y, double height, double rotatio
         double[] box = {Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
         for (double[] corner : List.of(new double[] {left, top}, new double[] {right, top}, new double[] {left, bottom},
                 new double[] {right, bottom})) {
-            PcbDrawing.Point placed = placement.placed(corner[0], corner[1]);
+            Point placed = placement.placed(corner[0], corner[1]);
             box[0] = Math.min(box[0], placed.x());
             box[1] = Math.min(box[1], placed.y());
             box[2] = Math.max(box[2], placed.x());

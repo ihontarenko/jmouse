@@ -1,11 +1,13 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Via;
 import org.jmouse.numerics.Halving;
 import java.util.OptionalDouble;
 import java.util.function.DoubleFunction;
 
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,7 +36,7 @@ final class SlidingJoints {
     /** How many halvings a joint's way is shortened by before it stays where it is. */
 
     /** How near a joint's place a joint is taken to rest at: the precision a point is kept to. */
-    private static final double RESTED = Lines.SAME_POINT;
+    private static final double RESTED = Precision.SAME_POINT;
 
     private final RoutingWorld            standing;
     private final BandPulling             pulling;
@@ -60,7 +62,7 @@ final class SlidingJoints {
             for (Joint joint : jointsOf(world, bands)) {
                 bands = withBandsMeeting(world, bands, joint);
                 Point target = clearTowards(world, joint, FermatPoints.of(joint.at(), neighboursOf(bands, joint), angleStep));
-                if (Lines.lengthBetween(target, joint.at()) > RESTED) {
+                if (target.distanceTo(joint.at()) > RESTED) {
                     moves.put(joint, target);
                     if (joint.via().isPresent()) {
                         world = RoutingWorld.draggedFrom(world, world.pcb().withVias(viasWith(world.pcb(), joint.via().get(), target)));
@@ -71,7 +73,7 @@ final class SlidingJoints {
                 break;
             }
             List<Band> sliding = bands.stream().map(band -> slidingEnds(band, moves)).toList();
-            double farthest = moves.entrySet().stream().mapToDouble(move -> Lines.lengthBetween(move.getKey().at(), move.getValue())).max().orElse(0);
+            double farthest = moves.entrySet().stream().mapToDouble(move -> move.getKey().at().distanceTo(move.getValue())).max().orElse(0);
             DragMotion still = DragMotion.still();
             bands = pulling.pulled(sliding, new BandField(world, still, sliding, Map.of()), still, farthest).stream().map(SlidingJoints::rested).toList();
         }
@@ -106,7 +108,7 @@ final class SlidingJoints {
         boolean onlyLineEnds = node.arcs().isEmpty() && node.ends().stream().noneMatch(end -> RoutingEngine.held(pcb, end.track()));
         return switch (node.kind()) {
             case VIA -> {
-                PcbDrawing.Via via = pcb.vias().get(node.item().getAsInt());
+                Via via = pcb.vias().get(node.item().getAsInt());
                 boolean free = onlyLineEnds && !pcb.drawnGroups().holds(via.arrangement());
                 yield free ? Optional.of(new Joint(node.at(), CopperNodeKind.VIA, Optional.of(node.item().getAsInt()), node.layers(), band.net(),
                         via.diameter())) : Optional.empty();
@@ -120,7 +122,7 @@ final class SlidingJoints {
 
     /** Whether a point stands at a joint: within its copper. */
     private static boolean at(Joint joint, Point point) {
-        return Lines.lengthBetween(joint.at(), point) <= joint.width() / 2;
+        return joint.at().distanceTo(point) <= joint.width() / 2;
     }
 
     /** The bands with every line ending at a joint made one, held at its other end, where it is not one yet. */
@@ -130,7 +132,7 @@ final class SlidingJoints {
         List<Band> more = new ArrayList<>(bands);
         PcbDrawing pcb = world.pcb();
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             boolean endsHere = joint.layers().contains(track.layer()) && (at(joint, track.points().getFirst()) || at(joint, track.points().getLast()));
             if (!endsHere || banded.contains(index)) {
                 continue;
@@ -163,14 +165,14 @@ final class SlidingJoints {
 
     /** As far towards a target as the way there is clear of other nets' copper on every layer the joint is on — halved until it is. */
     private static Point clearTowards(RoutingWorld world, Joint joint, Point target) {
-        DoubleFunction<Point> at = share -> Lines.settled(joint.at().toward(target, share));
+        DoubleFunction<Point> at = share -> Precision.settled(joint.at().toward(target, share));
         OptionalDouble share = Halving.firstHeldShare(world.settings().banding().jointHalvings(), tried -> joint.layers().stream()
                 .allMatch(layer -> world.fence(layer, joint.net(), joint.width()).leaving(List.of(joint.at())).lineClear(List.of(joint.at(), at.apply(tried)))));
         return share.isPresent() ? at.apply(share.getAsDouble()) : joint.at();
     }
 
-    private static List<PcbDrawing.Via> viasWith(PcbDrawing pcb, int index, Point at) {
-        List<PcbDrawing.Via> vias = new ArrayList<>(pcb.vias());
+    private static List<Via> viasWith(PcbDrawing pcb, int index, Point at) {
+        List<Via> vias = new ArrayList<>(pcb.vias());
         vias.set(index, vias.get(index).at(at.x(), at.y()));
         return vias;
     }
@@ -189,7 +191,7 @@ final class SlidingJoints {
             for (Map.Entry<Joint, Point> move : moves.entrySet()) {
                 Joint joint = move.getKey();
                 if (at(joint, held.was())) {
-                    Point to = Lines.settled(new Point(held.was().x() + move.getValue().x() - joint.at().x(),
+                    Point to = Precision.settled(new Point(held.was().x() + move.getValue().x() - joint.at().x(),
                                                        held.was().y() + move.getValue().y() - joint.at().y()));
                     return new BandEnd.Sliding(held.was(), to);
                 }

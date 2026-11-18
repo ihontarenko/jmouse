@@ -1,7 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
-import org.jmouse.cad.pcb.drawing.PcbDrawing.Point;
 
 import java.util.List;
 import java.util.OptionalInt;
@@ -52,7 +52,7 @@ public record CopperNode(CopperNodeKind kind, Point at, double reach, Set<String
 
     /** Whether a point stands at it: within its reach. */
     public boolean holds(Point point) {
-        return Lines.lengthBetween(at, point) <= reach;
+        return at.distanceTo(point) <= reach;
     }
 
     /** The other track's end at a plain joint, from one of its two. */

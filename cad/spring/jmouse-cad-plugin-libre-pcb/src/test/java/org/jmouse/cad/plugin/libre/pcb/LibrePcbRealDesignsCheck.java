@@ -1,5 +1,6 @@
 package org.jmouse.cad.plugin.libre.pcb;
 
+import org.jmouse.cad.Point;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.document.DocumentLanguage;
 import org.jmouse.cad.document.DocumentModule;
@@ -65,7 +66,7 @@ class LibrePcbRealDesignsCheck {
             long onPads = 0;
             for (PcbFabrication.SeatedPart part : fabrication.parts()) {
                 for (var pad : part.drawing().map(drawing -> drawing.pads()).orElse(List.of())) {
-                    PcbDrawing.Point at = part.placement().placed(pad.x(), pad.y());
+                    Point at = part.placement().placed(pad.x(), pad.y());
                     onPads += pcb.tracks().stream().flatMap(track -> track.points().stream())
                             .filter(end -> Math.hypot(end.x() - at.x(), end.y() - at.y()) < NEAR).count();
                 }

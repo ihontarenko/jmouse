@@ -1,5 +1,17 @@
 package org.jmouse.cad.kicad;
 
+import org.jmouse.cad.Point;
+import org.jmouse.cad.pcb.drawing.Placement;
+import org.jmouse.cad.pcb.drawing.Reference;
+import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.drawing.Arc;
+import org.jmouse.cad.pcb.drawing.Via;
+import org.jmouse.cad.pcb.drawing.Zone;
+import org.jmouse.cad.pcb.drawing.Keepout;
+import org.jmouse.cad.pcb.drawing.Dimension;
+import org.jmouse.cad.pcb.drawing.Lettering;
+import org.jmouse.cad.pcb.drawing.Shape;
+import org.jmouse.cad.pcb.drawing.Hole;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.drawing.DrawnGroup;
 import org.jmouse.cad.drawing.DrawnGroups;
@@ -206,7 +218,7 @@ public final class KiCadPcbExport {
                 withoutDrawing.add(part.designator());
                 continue;
             }
-            PcbDrawing.Placement placement = part.placement();
+            Placement placement = part.placement();
             FootprintDrawing drawing = part.drawing().get();
             String libraryId = footprintIds.of(part.footprint().get());
             Optional<KiCadSchematicExport.Symbol> symbol = placement.ownedByPcb() ? Optional.empty()
@@ -242,11 +254,11 @@ public final class KiCadPcbExport {
 
     /** Where a part's reference prints, in its footprint's frame: where its line moved it, else its footprint's field, else above it. */
     private KiCadPcbBuilder.Field referenceField(PcbFabrication.SeatedPart part, FootprintDrawing drawing) {
-        PcbDrawing.Placement placement = part.placement();
+        Placement placement = part.placement();
         Optional<FootprintDrawing.Field> field = fieldOf(drawing, REFERENCE);
         PlacedDesignator placed = PlacedDesignator.of(placement, Optional.of(drawing), artwork.designator());
         if (placement.reference().isPresent()) {
-            PcbDrawing.Reference moved = placement.reference().get();
+            Reference moved = placement.reference().get();
             return new KiCadPcbBuilder.Field(new KiCadPoint(moved.x(), moved.y()), moved.rotation(), footprints.fieldLayer(placed.layer()),
                     placed.height(), false, KiCadFootprintDrawing.alongOf(placed.anchor()));
         }
@@ -270,8 +282,8 @@ public final class KiCadPcbExport {
         return drawing.fields().stream().filter(field -> field.subject().equals(subject)).findFirst();
     }
 
-    /** A point of the pcb in a part's own frame: {@link PcbDrawing.Placement#placed} undone. */
-    private static KiCadPoint partFrame(PcbDrawing.Placement placement, double x, double y) {
+    /** A point of the pcb in a part's own frame: {@link Placement#placed} undone. */
+    private static KiCadPoint partFrame(Placement placement, double x, double y) {
         double radians = Math.toRadians(-placement.rotation());
         double across = x - placement.x();
         double down = y - placement.y();
@@ -313,7 +325,7 @@ public final class KiCadPcbExport {
     private void holes() {
         UniqueIdentifiers references = new UniqueIdentifiers(libraries.pcbOwnPart(), UniqueIdentifiers.UNLIMITED);
         fabrication.parts().forEach(part -> references.of(part.designator()));
-        for (PcbDrawing.Hole hole : pcb.holes()) {
+        for (Hole hole : pcb.holes()) {
             boolean plated = hole.ring() > 0;
             double size = plated ? hole.ring() : hole.drill();
             String name = libraries.holeFootprint().formatted(SExpressionNumbers.written(hole.drill()));
@@ -334,7 +346,7 @@ public final class KiCadPcbExport {
 
     private void copper() {
         for (int index = 0; index < pcb.tracks().size(); index++) {
-            PcbDrawing.Track track = pcb.tracks().get(index);
+            Track track = pcb.tracks().get(index);
             String net = nets.trackNets().get(index).map(this::kicadNet).orElse("");
             String layer = copperOf(track.layer());
             // Copper left bare is the mask opened along it, as wide as the track and the mask's own opening past copper.
@@ -363,7 +375,7 @@ public final class KiCadPcbExport {
             }
         }
         for (int index = 0; index < pcb.arcs().size(); index++) {
-            PcbDrawing.Arc arc = pcb.arcs().get(index);
+            Arc arc = pcb.arcs().get(index);
             board.arc(point(arc.from()), point(arc.through()), point(arc.to()), arc.width(), copperOf(arc.layer()),
                     nets.arcNets().get(index).map(this::kicadNet).orElse(""), kicadArrangement(arc.arrangement()));
             if (arc.bare()) {
@@ -373,13 +385,13 @@ public final class KiCadPcbExport {
         }
         List<String> layers = pcb.copperLayerIds();
         for (int index = 0; index < pcb.vias().size(); index++) {
-            PcbDrawing.Via via = pcb.vias().get(index);
+            Via via = pcb.vias().get(index);
             String from = via.from() == null || via.from().isBlank() ? layers.getFirst() : via.from();
             String to = via.to() == null || via.to().isBlank() ? layers.getLast() : via.to();
             board.via(point(via.x(), via.y()), via.diameter(), via.drill(), copperOf(from), copperOf(to),
                     nets.viaNets().get(index).map(this::kicadNet).orElse(""), kicadArrangement(via.arrangement()));
             // KiCad tents its vias board-wide; one left open on a side is an opening drawn on that side's mask, as wide as its own would be.
-            for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
+            for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
                 if (via.opensMaskOn(side)) {
                     String mask = maskLayer(side);
                     KiCadPoint centre = point(via.x(), via.y());
@@ -393,11 +405,11 @@ public final class KiCadPcbExport {
     // ─── areas ──────────────────────────────────────────────────────────────────────────────────────
 
     private void areas() {
-        double clearance = rules.get(PcbDrawing.RULE_CLEARANCE);
+        double clearance = rules.get(PcbVocabulary.RULE_CLEARANCE);
         double leastWidth = rules.get(PcbVocabulary.RULE_LEAST_TRACK_WIDTH);
         double thermalGap = rules.get(PcbVocabulary.RULE_THERMAL_GAP);
         double thermalSpoke = rules.get(PcbVocabulary.RULE_THERMAL_SPOKE_WIDTH);
-        for (PcbDrawing.Zone zone : pcb.zones()) {
+        for (Zone zone : pcb.zones()) {
             for (List<KiCadPoint> outline : graphics.outlines(zone.path())) {
                 board.area(new KiCadPcbBuilder.Area(KiCadPcbBuilder.AreaKind.POUR, kicadNet(zone.net()), List.of(copperOf(zone.layer())),
                         zone.clearance() > 0 ? zone.clearance() : clearance, zone.priority(), leastWidth, thermalGap, thermalSpoke, outline));
@@ -406,7 +418,7 @@ public final class KiCadPcbExport {
                 maskOf(zone.layer()).ifPresent(mask -> graphics.filled(zone.path(), mask).forEach(board::graphic));
             }
         }
-        for (PcbDrawing.Keepout keepout : pcb.keepouts()) {
+        for (Keepout keepout : pcb.keepouts()) {
             List<String> layers = keepout.layers().stream().filter(copper::containsKey).map(copper::get).toList();
             if (layers.isEmpty()) {
                 continue;
@@ -421,26 +433,26 @@ public final class KiCadPcbExport {
     // ─── words, measures, drawings ──────────────────────────────────────────────────────────────────
 
     private void drawings() {
-        for (PcbDrawing.Text text : pcb.texts()) {
+        for (Lettering text : pcb.texts()) {
             Optional<String> layer = kicadLayerOf(text.layer());
             if (layer.isEmpty()) {
                 notes.add("The words \"" + text.text() + "\" are on " + text.layer() + ", a layer KiCad has no place for; left out.");
                 continue;
             }
             KiCadPcb.Along along = switch (text.anchor()) {
-                case PcbDrawing.START -> KiCadPcb.Along.LEFT;
-                case PcbDrawing.END -> KiCadPcb.Along.RIGHT;
+                case PcbVocabulary.TEXT_START -> KiCadPcb.Along.LEFT;
+                case PcbVocabulary.TEXT_END -> KiCadPcb.Along.RIGHT;
                 default -> KiCadPcb.Along.CENTRE;
             };
             board.text(text.text(), point(text.x(), text.y()), text.rotation(), layer.get(), text.size(),
                     new KiCadPcbBuilder.Justification(along, KiCadPcb.Across.MIDDLE));
         }
         String measures = libraries.kicadLayerOf(PcbVocabulary.DOCUMENTATION, false).orElseThrow();
-        for (PcbDrawing.Dimension dimension : pcb.dimensions()) {
+        for (Dimension dimension : pcb.dimensions()) {
             board.dimension(point(dimension.from()), point(dimension.to()), dimension.offset(), measures);
         }
         int netted = 0;
-        for (PcbDrawing.Shape shape : pcb.shapes()) {
+        for (Shape shape : pcb.shapes()) {
             Optional<String> layer = kicadLayerOf(shape.layer());
             if (layer.isEmpty()) {
                 notes.add("A shape on " + shape.layer() + ", a layer KiCad has no place for, is left out.");
@@ -494,10 +506,10 @@ public final class KiCadPcbExport {
         if (copper.containsKey(layer)) {
             return Optional.of(copper.get(layer));
         }
-        for (String side : List.of(PcbDrawing.TOP, PcbDrawing.BOTTOM)) {
+        for (String side : List.of(PcbVocabulary.TOP, PcbVocabulary.BOTTOM)) {
             String opening = side + "-";
             if (layer.startsWith(opening)) {
-                return libraries.kicadLayerOf(layer.substring(opening.length()), PcbDrawing.BOTTOM.equals(side));
+                return libraries.kicadLayerOf(layer.substring(opening.length()), PcbVocabulary.BOTTOM.equals(side));
             }
         }
         return libraries.kicadLayerOf(layer, false);
@@ -505,14 +517,14 @@ public final class KiCadPcbExport {
 
     /** The mask over a copper layer of the outside; none over an inner one. */
     private Optional<String> maskOf(String layer) {
-        return PcbDrawing.TOP.equals(layer) || PcbDrawing.BOTTOM.equals(layer) ? Optional.of(maskLayer(layer)) : Optional.empty();
+        return PcbVocabulary.TOP.equals(layer) || PcbVocabulary.BOTTOM.equals(layer) ? Optional.of(maskLayer(layer)) : Optional.empty();
     }
 
     private String maskLayer(String side) {
-        return (PcbDrawing.BOTTOM.equals(side) ? KiCadSide.BACK : KiCadSide.FRONT).layer(KiCadLayer.MASK_SUFFIX);
+        return (PcbVocabulary.BOTTOM.equals(side) ? KiCadSide.BACK : KiCadSide.FRONT).layer(KiCadLayer.MASK_SUFFIX);
     }
 
-    private static KiCadPoint point(PcbDrawing.Point point) {
+    private static KiCadPoint point(Point point) {
         return new KiCadPoint(point.x(), point.y());
     }
 
