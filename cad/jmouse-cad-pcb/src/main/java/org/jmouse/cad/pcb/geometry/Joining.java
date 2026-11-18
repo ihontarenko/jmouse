@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.core.graph.DisjointSets;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -10,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntFunction;
-import java.util.stream.IntStream;
 
 /**
  * Which pieces of copper are one, and through which touches: the pieces joined in groups, each group named by its first piece —
@@ -19,39 +20,28 @@ import java.util.stream.IntStream;
  */
 final class Joining {
 
-    private final int[]       parents;
+    private final DisjointSets groups;
     /** Every touch, as the two pieces that touch: what a short is traced through. */
     private final List<int[]> touches = new ArrayList<>();
 
     Joining(int pieces) {
-        this.parents = IntStream.range(0, pieces).toArray();
+        this.groups = new DisjointSets(pieces);
     }
 
     /** The group a piece is in: its first piece. */
     int groupOf(int piece) {
-        int root = piece;
-        while (parents[root] != root) {
-            parents[root] = parents[parents[root]];
-            root = parents[root];
-        }
-        return root;
+        return groups.rootOf(piece);
     }
 
     /** Two pieces that touch: one group from now on, its first piece naming it. */
     void join(int one, int other) {
         touches.add(new int[] {one, other});
-        int first = groupOf(one);
-        int second = groupOf(other);
-        parents[Math.max(first, second)] = Math.min(first, second);
+        groups.join(one, other);
     }
 
     /** Every piece's group, worked out once. */
     int[] groups() {
-        int[] groups = new int[parents.length];
-        for (int piece = 0; piece < groups.length; piece++) {
-            groups[piece] = groupOf(piece);
-        }
-        return groups;
+        return groups.roots();
     }
 
     /**

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A track as its copper runs: straight between its points, each corner rounded by its {@code rounding} — the arc cut back
+ * A track as its copper runs: straight between its points, each corner rounded by its own radius ({@link Track#roundingAt}) — the arc cut back
  * from the corner as far as the turn allows, never past half a leg. What every format a track is written in draws.
  */
 public final class RoundedTrack {
@@ -44,7 +44,7 @@ public final class RoundedTrack {
         List<Piece> pieces = new ArrayList<>();
         List<Point> run = new ArrayList<>(List.of(points.getFirst()));
         for (int index = 1; index < points.size() - 1; index++) {
-            Optional<Bend> rounded = corner(points.get(index - 1), points.get(index), points.get(index + 1), track.rounding());
+            Optional<Bend> rounded = corner(points.get(index - 1), points.get(index), points.get(index + 1), track.roundingAt(index - 1));
             if (rounded.isEmpty()) {
                 run.add(points.get(index));
                 continue;

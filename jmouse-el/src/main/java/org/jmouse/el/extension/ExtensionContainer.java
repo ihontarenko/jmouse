@@ -23,6 +23,11 @@ import java.util.Optional;
  */
 public interface ExtensionContainer {
 
+    /** Input-independent grammar bindings; legacy containers may opt into this capability. */
+    default org.jmouse.el.parser.ParseRuleRegistry parseRules() {
+        throw new UnsupportedOperationException("This extension container does not provide typed parse rules");
+    }
+
     List<AttributeResolver> getAttributeResolvers();
 
     /**

@@ -61,6 +61,7 @@ public class SyntaxErrorException extends RuntimeException {
     private static String buildMessage(TokenizableSource source, Token actual, Token.Type... expected) {
         return "Syntax error: expected token '%s', but encountered token '%s' at offset %d (at line: %d, source '%s')."
                 .formatted(Arrays.toString(expected), actual.type(), actual.offset(),
-                        source.getLineNumber(actual.offset()), source.getName());
+                        source == null ? actual.lineNumber() : source.getLineNumber(actual.offset()),
+                        source == null ? "<unknown>" : source.getName());
     }
 }

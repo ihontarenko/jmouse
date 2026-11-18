@@ -27,7 +27,7 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * 🏗️ Constructs an empty extension container.
      */
     protected AbstractObjectContainer() {
-        this.extensions = new HashMap<>();
+        this.extensions = new LinkedHashMap<>();
     }
 
     /**
@@ -36,8 +36,10 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * @param extension 🛠️ the extension to register
      */
     @Override
-    public void register(E extension) {
-        extensions.put(keyFor(extension), extension);
+    public synchronized void register(E extension) {
+        Objects.requireNonNull(extension, "extension");
+        extensions.put(Objects.requireNonNull(keyFor(extension), "extension key"), extension);
+        sortedValues = null;
     }
 
     /**
@@ -46,9 +48,10 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * @param extension 🗑️ the extension to remove
      */
     @Override
-    public void remove(E extension) {
+    public synchronized void remove(E extension) {
         if (contains(extension)) {
             extensions.remove(keyFor(extension));
+            sortedValues = null;
         }
     }
 
@@ -59,7 +62,7 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * @return 🧩 the extension corresponding to the key, or {@code null} if not found
      */
     @Override
-    public E get(K name) {
+    public synchronized E get(K name) {
         return extensions.get(name);
     }
 
@@ -69,12 +72,11 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * @return 📦 a list of registered objects
      */
     @Override
-    public List<E> values() {
-        List<E> values = List.copyOf(extensions.values());
-
+    public synchronized List<E> values() {
         if (sortedValues == null) {
-            sortedValues = new ArrayList<>(values);
-            sortedValues.sort(Sorter.PRIORITY_COMPARATOR);
+            List<E> ordered = new ArrayList<>(extensions.values());
+            ordered.sort(Sorter.PRIORITY_COMPARATOR);
+            sortedValues = List.copyOf(ordered);
         }
 
         return sortedValues;
@@ -86,8 +88,8 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * @return 🗂️ a set of all keys
      */
     @Override
-    public Set<K> keys() {
-        return extensions.keySet();
+    public synchronized Set<K> keys() {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(extensions.keySet()));
     }
 
     @Override

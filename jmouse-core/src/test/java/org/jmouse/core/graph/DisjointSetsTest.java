@@ -21,6 +21,18 @@ class DisjointSetsTest {
     }
 
     @Test
+    void aSetIsNamedByItsSmallestElement() {
+        DisjointSets sets = new DisjointSets(6);
+        sets.join(5, 3);
+        sets.join(4, 5);
+        sets.join(3, 1);
+        assertEquals(1, sets.rootOf(5));
+        assertEquals(1, sets.rootOf(4));
+        assertEquals(2, sets.rootOf(2));
+        assertEquals(1, sets.roots()[3]);
+    }
+
+    @Test
     void growsAsElementsAreAdded() {
         DisjointSets sets = new DisjointSets();
         for (int element = 0; element < 1000; element++) {

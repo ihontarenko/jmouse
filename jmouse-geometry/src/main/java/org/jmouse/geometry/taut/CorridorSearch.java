@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * 🧭 A way through the free room of one field or of several layered over each other, from a point to another, found over the room's
@@ -143,6 +144,29 @@ public final class CorridorSearch {
             rooms.add(room.get());
         }
         return new Search<>(request, rooms).found();
+    }
+
+    /**
+     * A way searched for in widening windows, each in turn, until one is found that is taken: a window whose search finds the start's
+     * room closed in ends it — no larger window goes round —; one whose way is not taken leaves the next, larger window to try.
+     *
+     * @param windows   the windows to search in, the smallest first
+     * @param requestIn what is asked in a window
+     * @param accepted  what is made of a way found; empty where it is not taken
+     */
+    public static <K, T> Optional<T> firstAccepted(List<Envelope> windows, Function<Envelope, Request<K>> requestIn,
+                                                   Function<List<Part<K>>, Optional<T>> accepted) {
+        for (Envelope window : windows) {
+            Outcome<K> searched = searched(requestIn.apply(window));
+            if (searched instanceof ClosedIn<K>) {
+                return Optional.empty();
+            }
+            Optional<T> taken = searched.parts().flatMap(accepted);
+            if (taken.isPresent()) {
+                return taken;
+            }
+        }
+        return Optional.empty();
     }
 
     /** A triangle of a layer, as one key. */

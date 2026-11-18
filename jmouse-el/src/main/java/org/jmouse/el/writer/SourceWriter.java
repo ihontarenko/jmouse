@@ -17,6 +17,11 @@ import java.util.function.Consumer;
  */
 public interface SourceWriter {
 
+    /** An already encoded source fragment, composed in the current line without adding line breaks. */
+    default SourceWriter inline(String source) {
+        return word(source);
+    }
+
     /** A word; null or empty writes nothing. */
     SourceWriter word(String word);
 

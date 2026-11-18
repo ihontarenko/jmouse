@@ -302,7 +302,7 @@ public final class PcbArtwork {
         List<ArtworkFeature> features = new ArrayList<>();
         for (Track track : pcb.tracks()) {
             if (track.bare() && track.layer().equals(side)) {
-                trackOf(new Track(track.layer(), track.width() + growth, track.rounding(), track.points()), null).stream().map(PcbArtwork::asOpening).forEach(features::add);
+                trackOf(track.withWidth(track.width() + growth), null).stream().map(PcbArtwork::asOpening).forEach(features::add);
             }
         }
         for (Arc arc : pcb.arcs()) {

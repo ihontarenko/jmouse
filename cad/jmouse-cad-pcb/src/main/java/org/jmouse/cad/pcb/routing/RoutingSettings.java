@@ -219,6 +219,7 @@ public record RoutingSettings(@Label("Routing") Routing routing,
      * @param rounds           how many rounds a routing has, each giving the refused the room first
      * @param viaCost          what changing layer costs, as the millimetres of track it is worth
      * @param link             a 0 Ω link over what is in the way, where the reader allows one
+     * @param keptLayouts      how many layouts a routing keeps worked out before it lets them go: it comes to a new one with each step
      */
     public record Autorouting(@Label("Angle step") double angleStep,
                               @Label(value = "Via off ends", unit = "mm") double viaOffEnds,
@@ -232,7 +233,8 @@ public record RoutingSettings(@Label("Routing") Routing routing,
                               @Label("Rip up") RipUp ripUp,
                               @Label("Rounds") int rounds,
                               @Label(value = "Via cost", unit = "mm") double viaCost,
-                              @Label("Link") Link link) {
+                              @Label("Link") Link link,
+                              @Label("Kept layouts") int keptLayouts) {
 
         public Autorouting {
             layerDirections = Map.copyOf(layerDirections);

@@ -3,7 +3,6 @@ package org.jmouse.cad.pcb.routing;
 import org.jmouse.cad.Point;
 import org.jmouse.geometry.taut.CorridorSearch;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,27 +80,13 @@ final class LayeredWaySearch {
     static Optional<List<WayPart>> way(Request request, RoutingSettings.Routing settings) {
         Map<HopAt, List<CorridorSearch.Hop<HopKind>>> known = new HashMap<>();
         CorridorSearch.Hops<HopKind> hops = (layer, at) -> known.computeIfAbsent(new HopAt(layer, at.x, at.y), ignored -> hopsFrom(request, layer, at));
-        for (double margin : settings.corridorMargins()) {
-            Envelope asked = new Envelope(request.from().x(), request.to().x(), request.from().y(), request.to().y());
-            asked.expandBy(margin);
-            // Laid on the grid, as a leg's window is: its copper united once for the windows near it.
-            Envelope window = StillCopper.onGrid(asked, settings.corridorGrid());
-            List<CorridorSearch.Layer> layers = request.lanes().stream()
-                    .map(lane -> new CorridorSearch.Layer(CorridorWaySearch.fieldOf(lane.fence(), window, request.from(), request.to()), costOf(lane)))
-                    .toList();
-            CorridorSearch.Outcome<HopKind> searched = CorridorSearch.searched(new CorridorSearch.Request<>(layers, window,
-                    Plane.coordinateOf(request.from()), Plane.coordinateOf(request.to()), new HashSet<>(request.startLanes()),
-                    new HashSet<>(request.goalLanes()), hops));
-            if (searched instanceof CorridorSearch.ClosedIn<HopKind>) {
-                // The room the start reaches is closed in on every layer: no larger window goes round.
-                return Optional.empty();
-            }
-            Optional<List<WayPart>> laid = searched.parts().flatMap(found -> laidAtAngles(request, found, settings));
-            if (laid.isPresent()) {
-                return laid;
-            }
-        }
-        return Optional.empty();
+        // Laid on the grid, as a leg's window is: its copper united once for the windows near it.
+        return CorridorSearch.firstAccepted(CorridorWaySearch.windowsOf(request.from(), request.to(), settings.corridorMargins(), settings),
+                window -> new CorridorSearch.Request<>(request.lanes().stream()
+                        .map(lane -> new CorridorSearch.Layer(CorridorWaySearch.fieldOf(lane.fence(), window, request.from(), request.to()), costOf(lane)))
+                        .toList(), window, Plane.coordinateOf(request.from()), Plane.coordinateOf(request.to()), new HashSet<>(request.startLanes()),
+                        new HashSet<>(request.goalLanes()), hops),
+                found -> laidAtAngles(request, found, settings));
     }
 
     /** Where hops were asked from: a layer and a point. */

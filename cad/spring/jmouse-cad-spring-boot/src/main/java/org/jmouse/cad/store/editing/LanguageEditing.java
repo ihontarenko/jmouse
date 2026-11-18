@@ -3,6 +3,7 @@ package org.jmouse.cad.store.editing;
 import org.jmouse.cad.pcb.PcbModule;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 import org.jmouse.cad.pcb.drawing.PcbDocumentReading;
+import org.jmouse.cad.pcb.drawing.FootprintDocumentReading;
 import org.jmouse.cad.pcb.drawing.FootprintDrawing;
 import org.jmouse.cad.document.DocumentEditing;
 import org.jmouse.cad.document.DocumentEditing.AddBlock;
@@ -216,7 +217,7 @@ public class LanguageEditing {
             throw CadProblem.invalid("A footprint editor sends what it drew as 'drawing'.");
         }
         Redrawing redrawing = new Redrawing(drawnOrNone(() -> FootprintDrawing.of(document).lines()), drawnLines(drawing::lines),
-                                            FootprintDrawing::classOf);
+                                            FootprintDocumentReading::classOf);
         return redrawn(document, redrawing, new Head(title, category));
     }
 

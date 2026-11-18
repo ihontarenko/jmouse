@@ -12,6 +12,11 @@ import java.util.Optional;
 
 public class DefaultParserContext implements ParserContext {
 
+    @Override
+    public ParseRuleRegistry parseRules() {
+        return extensions.parseRules();
+    }
+
     private final ExtensionContainer                    extensions;
     private final ContextScope<Class<? extends Parser>> scope = new ContextScope<>();
 

@@ -46,7 +46,7 @@ public interface Expression extends Node, SourceWritable {
      */
     @Override
     default void writeSource(SourceWriter writer) {
-        writer.verbatim(toSource());
+        writer.inline(toSource());
     }
 
 }

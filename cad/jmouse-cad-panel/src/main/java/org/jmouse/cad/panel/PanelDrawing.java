@@ -1,7 +1,6 @@
 package org.jmouse.cad.panel;
 
 import org.jmouse.cad.Point;
-import org.jmouse.cad.document.ArrangementLines;
 import org.jmouse.cad.drawing.ArrangedDrawing;
 import org.jmouse.cad.drawing.Arrangement;
 import org.jmouse.cad.drawing.DrawnGroup;
@@ -9,13 +8,8 @@ import org.jmouse.cad.drawing.DrawnGroups;
 import org.jmouse.cad.drawing.StandingItem;
 import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.el.grammar.ClauseLineNode;
-import org.jmouse.el.grammar.LineBuilder;
-import org.jmouse.el.grammar.Nodes;
-import org.jmouse.el.grammar.PointNode;
-import org.jmouse.el.node.Expression;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -115,107 +109,17 @@ public record PanelDrawing(List<Board> boards, PanelSeparation separation, Optio
     public record Tooling(Point at, OptionalDouble drill) {
     }
 
-    /** The panel a panel document's lines make. */
-    public static PanelDrawing of(DocumentNode panel) {
-        List<Board> boards = new ArrayList<>();
-        PanelSeparation separation = PanelSeparation.NONE;
-        Frame frame = null;
-        List<Fiducial> fiducials = new ArrayList<>();
-        List<Tooling> tooling = new ArrayList<>();
-        List<DrawnGroup> groups = new ArrayList<>();
-        for (Expression statement : panel.getExpressions()) {
-            if (!(statement instanceof ClauseLineNode line)) {
-                continue;
-            }
-            // A group is named as every item is, by its term: it has no word of its own.
-            if (line.grammar() == ArrangementLines.GROUP_LINE) {
-                groups.add(ArrangementLines.groupOf(line));
-                continue;
-            }
-            switch (line.word()) {
-                case PanelLinesParser.BOARD -> boards.add(boardOf(line));
-                case PanelLinesParser.SEPARATE -> separation = PanelSeparation.ofWord(line.name("kind").orElseThrow());
-                case PanelLinesParser.FRAME -> frame = frameOf(line);
-                case PanelLinesParser.FIDUCIAL -> fiducials.add(new Fiducial(point(line), quantity(line, "diameter"), quantity(line, "opening")));
-                case PanelLinesParser.TOOLING -> tooling.add(new Tooling(point(line), quantity(line, "drill")));
-                default -> {
-                    // A line another module's grammar owns is not the panel's to read.
-                }
-            }
-        }
-        return new PanelDrawing(boards, separation, Optional.ofNullable(frame), fiducials, tooling, groups);
-    }
-
-    /** The panel's lines, as {@link #of} reads them. */
+    /**
+     * The panel as its document's lines, built on the grammars that read them.
+     *
+     * @throws IllegalArgumentException when a path does not read as path data
+     */
     public List<ClauseLineNode> lines() {
-        List<ClauseLineNode> lines = new ArrayList<>();
-        groups.forEach(group -> lines.add(ArrangementLines.groupLine(group)));
-        for (Board board : boards) {
-            LineBuilder line = line(PanelLinesParser.BOARD).slot("pcb", Nodes.word(board.pcb())).clause("at", Nodes.point(board.x(), board.y()));
-            if (board.rotation() != 0) {
-                line.clause("rotate", Nodes.number(board.rotation()));
-            }
-            if (board.across() != 1) {
-                line.clause("across", Nodes.number(board.across()));
-            }
-            if (board.down() != 1) {
-                line.clause("down", Nodes.number(board.down()));
-            }
-            board.gap().ifPresent(gap -> line.clause("gap", Nodes.number(gap)));
-            ArrangementLines.write(line, board.arrangement());
-            lines.add(line.build());
-        }
-        if (separation != PanelSeparation.NONE) {
-            lines.add(line(PanelLinesParser.SEPARATE).slot("kind", Nodes.word(separation.word())).build());
-        }
-        frame.ifPresent(given -> {
-            LineBuilder line = line(PanelLinesParser.FRAME);
-            given.rail().ifPresent(rail -> line.clause("rail", Nodes.number(rail)));
-            line.clause("sides", Nodes.words(given.sides().stream().map(PanelSide::word).toList()));
-            given.fiducials().ifPresent(count -> line.clause("fiducials", Nodes.number(count)));
-            given.tooling().ifPresent(count -> line.clause("tooling", Nodes.number(count)));
-            lines.add(line.build());
-        });
-        for (Fiducial fiducial : fiducials) {
-            LineBuilder line = line(PanelLinesParser.FIDUCIAL).clause("at", Nodes.point(fiducial.at().x(), fiducial.at().y()));
-            fiducial.diameter().ifPresent(diameter -> line.clause("diameter", Nodes.number(diameter)));
-            fiducial.opening().ifPresent(opening -> line.clause("opening", Nodes.number(opening)));
-            lines.add(line.build());
-        }
-        for (Tooling hole : tooling) {
-            LineBuilder line = line(PanelLinesParser.TOOLING).clause("at", Nodes.point(hole.at().x(), hole.at().y()));
-            hole.drill().ifPresent(drill -> line.clause("drill", Nodes.number(drill)));
-            lines.add(line.build());
-        }
-        return lines;
+        return PanelDocumentWriting.written(this);
     }
 
-    private static LineBuilder line(String word) {
-        return LineBuilder.line(PanelLinesParser.grammar(word));
-    }
-
-    private static Board boardOf(ClauseLineNode line) {
-        Point at = point(line);
-        return new Board(line.name("pcb").orElseThrow(), at.x(), at.y(), line.quantity("rotate").orElse(0.0),
-                line.quantity("across").map(Double::intValue).orElse(1), line.quantity("down").map(Double::intValue).orElse(1),
-                quantity(line, "gap"), ArrangementLines.arrangementOf(line));
-    }
-
-    private static Frame frameOf(ClauseLineNode line) {
-        List<PanelSide> sides = line.names("sides").isEmpty() ? List.of(PanelSide.values()) : PanelSide.ofWords(line.names("sides"));
-        return new Frame(quantity(line, "rail"), sides, whole(line, "fiducials"), whole(line, "tooling"));
-    }
-
-    private static Point point(ClauseLineNode line) {
-        PointNode at = line.point("at").orElseThrow();
-        return new Point(at.x(), at.y());
-    }
-
-    private static OptionalDouble quantity(ClauseLineNode line, String name) {
-        return line.quantity(name).map(OptionalDouble::of).orElseGet(OptionalDouble::empty);
-    }
-
-    private static OptionalInt whole(ClauseLineNode line, String name) {
-        return line.quantity(name).map(value -> OptionalInt.of(value.intValue())).orElseGet(OptionalInt::empty);
+    /** The panel a panel document's lines make. */
+    public static PanelDrawing of(DocumentNode document) {
+        return PanelDocumentReading.read(document);
     }
 }

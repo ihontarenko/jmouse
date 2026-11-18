@@ -27,6 +27,13 @@ import java.util.Optional;
  */
 public class StandardExtensionContainer implements ExtensionContainer {
 
+    private final org.jmouse.el.parser.ParseRuleRegistry parseRules = new org.jmouse.el.parser.ParseRuleRegistry();
+
+    @Override
+    public org.jmouse.el.parser.ParseRuleRegistry parseRules() {
+        return parseRules;
+    }
+
     private final ObjectContainer<Class<? extends Parser>, Parser> parsers;
     private final ObjectContainer<String, TagParser>               tags;
     private final ObjectContainer<Token.Type, Operator>            operators;

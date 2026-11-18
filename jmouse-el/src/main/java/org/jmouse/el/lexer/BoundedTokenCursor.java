@@ -32,6 +32,7 @@ public final class BoundedTokenCursor implements TokenCursor {
     private final TokenCursor cursor;
     private final Boundary boundary;
     private final int start;
+    private int limit = -1;
 
     public BoundedTokenCursor(TokenCursor cursor, Boundary boundary) {
         this.cursor = cursor;
@@ -46,25 +47,30 @@ public final class BoundedTokenCursor implements TokenCursor {
 
     @Override
     public boolean hasNext() {
-        return cursor.hasNext() && !endsAt(0);
+        return cursor.position() >= start && cursor.hasNext() && !endsAt(0);
     }
 
     @Override
     public boolean hasPrevious() {
-        return cursor.position() > start;
+        return Math.min(cursor.position(), limit()) > start;
     }
 
     @Override
     public Token next() {
-        if (endsAt(0)) {
-            return end(cursor.lookAt(0));
+        if (!hasNext()) {
+            return end(cursor.lookAt(limit() - cursor.position()));
         }
         return cursor.next();
     }
 
     @Override
     public Token previous() {
-        return cursor.previous();
+        if (!hasPrevious()) {
+            return null;
+        }
+        int target = Math.min(cursor.position(), limit()) - 1;
+        cursor.restore(() -> target);
+        return cursor.peek();
     }
 
     @Override
@@ -74,12 +80,11 @@ public final class BoundedTokenCursor implements TokenCursor {
 
     @Override
     public Token lookAt(int offset) {
-        for (int ahead = 0; ahead <= offset; ahead++) {
-            if (endsAt(ahead)) {
-                return end(cursor.lookAt(ahead));
-            }
+        long target = (long) cursor.position() + offset;
+        if (target >= limit()) {
+            return end(cursor.lookAt(limit() - cursor.position()));
         }
-        return cursor.lookAt(offset);
+        return cursor.lookAt((int) Math.max(start - cursor.position(), offset));
     }
 
     @Override
@@ -94,19 +99,24 @@ public final class BoundedTokenCursor implements TokenCursor {
 
     @Override
     public Token lookBefore(Token.Type type) {
-        return cursor.lookBefore(type);
+        for (int position = Math.min(cursor.position(), limit() - 1); position > start; position--) {
+            if (cursor.lookAt(position - cursor.position()).type() == type) {
+                return cursor.lookAt(position - cursor.position() - 1);
+            }
+        }
+        return null;
     }
 
     @Override
     public void shift(int count) {
-        for (int shifted = 0; shifted < count && hasNext(); shifted++) {
-            cursor.next();
-        }
+        int target = (int) Math.min((long) cursor.position() + Math.abs((long) count), limit());
+        cursor.restore(() -> target);
     }
 
     @Override
     public void retract(int count) {
-        cursor.retract(count);
+        int target = (int) Math.max((long) cursor.position() - Math.abs((long) count), start);
+        cursor.restore(() -> target);
     }
 
     @Override
@@ -114,7 +124,7 @@ public final class BoundedTokenCursor implements TokenCursor {
         if (!isCurrent(expected)) {
             throw new SyntaxErrorException(source(), peek(), expected);
         }
-        return cursor.expect(expected);
+        return next();
     }
 
     @Override
@@ -122,11 +132,14 @@ public final class BoundedTokenCursor implements TokenCursor {
         if (!isCurrent(expected)) {
             throw new SyntaxErrorException(source(), peek(), expected);
         }
-        return cursor.ensure(expected);
+        return next();
     }
 
     @Override
     public void restore(Savepoint savepoint) {
+        if (savepoint.getPosition() < start || savepoint.getPosition() > limit()) {
+            throw new IllegalArgumentException("Savepoint is outside the bounded cursor");
+        }
         cursor.restore(savepoint);
     }
 
@@ -147,17 +160,14 @@ public final class BoundedTokenCursor implements TokenCursor {
 
     @Override
     public int remaining() {
-        int remaining = 0;
-        while (cursor.position() + remaining < cursor.total() && !endsAt(remaining)) {
-            remaining++;
-        }
-        return remaining;
+        return Math.max(0, limit() - cursor.position());
     }
 
     @Override
     public Iterator<Token> iterator() {
         List<Token> visible = new ArrayList<>();
-        for (int ahead = 0; ahead < remaining(); ahead++) {
+        int count = remaining();
+        for (int ahead = 0; ahead < count; ahead++) {
             visible.add(cursor.lookAt(ahead));
         }
         return visible.iterator();
@@ -165,20 +175,41 @@ public final class BoundedTokenCursor implements TokenCursor {
 
     /** Whether the view ends at the token {@code ahead} of the cursor. */
     private boolean endsAt(int ahead) {
+        return (long) cursor.position() + ahead >= limit();
+    }
+
+    /**
+     * Boundaries are pure predicates over an immutable token stream. Compute the first boundary
+     * once, even when another view moves the shared cursor or a savepoint is restored.
+     */
+    private int limit() {
+        if (limit >= 0) {
+            return limit;
+        }
         int depth = 0;
-        for (int at = start - cursor.position(); at < ahead; at++) {
-            Token.Type type = cursor.lookAt(at).type();
+        for (int position = start; position < cursor.total(); position++) {
+            int offset = position - cursor.position();
+            Token token = cursor.lookAt(offset);
+            if (boundary.endsAt(token, cursor.lookAt(offset + 1), depth)) {
+                limit = position;
+                return limit;
+            }
+            Token.Type type = token.type();
             if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
                 depth++;
             } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
                 depth--;
             }
         }
-        return boundary.endsAt(cursor.lookAt(ahead), cursor.lookAt(ahead + 1), depth);
+        limit = cursor.total();
+        return limit;
     }
 
     /** The end of the view, where a token stands: what a parser reads as the end of a text. */
     private static Token end(Token at) {
+        if (at == null) {
+            return new Token("", BasicToken.T_EOL, 0, 0, 1);
+        }
         return new Token("", BasicToken.T_EOL, 0, at.offset(), at.lineNumber());
     }
 }

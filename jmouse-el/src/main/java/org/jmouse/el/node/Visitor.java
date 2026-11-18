@@ -4,6 +4,15 @@ import org.jmouse.el.node.expression.*;
 
 public interface Visitor {
 
+    /** Called before dispatch; existing visitors continue through the complete subtree. */
+    default TraversalAction enter(Node node) {
+        return TraversalAction.CONTINUE;
+    }
+
+    /** Called after dispatch and children, including a node whose children were skipped. */
+    default void leave(Node node) {
+    }
+
     default void visit(Node node) {
 
     }

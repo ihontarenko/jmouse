@@ -180,8 +180,7 @@ public final class PanelFlattening implements DocumentFlattening {
                         netClass.nets().stream().map(net -> prefix + net).toList()));
             }
             pcb.placements().forEach(placement -> placements.add(placed(placement, motion, prefix)));
-            pcb.tracks().forEach(track -> tracks.add(new Track(track.layer(), track.width(), track.rounding(),
-                    track.points().stream().map(motion::point).toList(), track.arrangement(), track.finish())));
+            pcb.tracks().forEach(track -> tracks.add(track.withPoints(track.points().stream().map(motion::point).toList())));
             pcb.arcs().forEach(arc -> arcs.add(new Arc(arc.layer(), arc.width(), motion.point(arc.from()), motion.point(arc.through()), motion.point(arc.to()), arc.arrangement(), arc.finish())));
             for (Via via : pcb.vias()) {
                 Point at = motion.point(new Point(via.x(), via.y()));

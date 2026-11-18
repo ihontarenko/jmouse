@@ -3,9 +3,9 @@ package org.jmouse.core.graph;
 import java.util.Arrays;
 
 /**
- * Elements joined into sets, each set named by one of its elements — its root —: copper nodes that conduct as one, track ends that
- * meet at one point. An element is added as a set of its own, and two sets joined become one; asking an element's root shortens the
- * way to it for every later ask. Elements are numbered as they are added, from 0.
+ * Elements joined into sets, each set named by its smallest element — its root —, so a set is named the same however its joins
+ * came: copper nodes that conduct as one, track ends that meet at one point, pieces of copper that are one. An element is added as
+ * a set of its own, and two sets joined become one; asking an element's root shortens the way to it for every later ask. Elements are numbered as they are added, from 0.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -53,9 +53,20 @@ public final class DisjointSets {
         return root;
     }
 
-    /** The sets two elements are in, one set; named by the second's root. */
+    /** The sets two elements are in, one set; named by the smaller of their roots. */
     public void join(int one, int other) {
-        parents[rootOf(one)] = rootOf(other);
+        int first = rootOf(one);
+        int second = rootOf(other);
+        parents[Math.max(first, second)] = Math.min(first, second);
+    }
+
+    /** Every element's root, worked out once: by element. */
+    public int[] roots() {
+        int[] roots = new int[size];
+        for (int element = 0; element < size; element++) {
+            roots[element] = rootOf(element);
+        }
+        return roots;
     }
 
     /** Whether two elements are in one set. */

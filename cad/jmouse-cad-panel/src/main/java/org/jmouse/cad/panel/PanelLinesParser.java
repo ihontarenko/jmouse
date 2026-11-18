@@ -23,20 +23,15 @@ import static org.jmouse.el.grammar.Values.WORD;
  */
 public final class PanelLinesParser extends GrammarLinesParser {
 
-    static final String BOARD    = "board";
-    static final String SEPARATE = "separate";
-    static final String FRAME    = "frame";
-    static final String FIDUCIAL = "fiducial";
-    static final String TOOLING  = "tooling";
 
     private static final List<LineGrammar> LINES = List.of(
-            LineGrammar.line(BOARD).slot("pcb", WORD).required("at", POINT).optional("rotate", QUANTITY).optional("across", QUANTITY)
-                    .optional("down", QUANTITY).optional("gap", QUANTITY).including(ArrangementLines.CLAUSES).build(),
-            LineGrammar.line(SEPARATE).slot("kind", WORD, PanelSeparation.words()).build(),
-            LineGrammar.line(FRAME).optional("rail", QUANTITY).optional("sides", NAMES).optional("fiducials", QUANTITY)
-                    .optional("tooling", QUANTITY).build(),
-            LineGrammar.line(FIDUCIAL).required("at", POINT).optional("diameter", QUANTITY).optional("opening", QUANTITY).build(),
-            LineGrammar.line(TOOLING).required("at", POINT).optional("drill", QUANTITY).build(),
+            LineGrammar.line(PanelWords.BOARD).slot(PanelWords.PCB, WORD).required(PanelWords.AT, POINT).optional(PanelWords.ROTATE, QUANTITY).optional(PanelWords.ACROSS, QUANTITY)
+                    .optional(PanelWords.DOWN, QUANTITY).optional(PanelWords.GAP, QUANTITY).including(ArrangementLines.CLAUSES).build(),
+            LineGrammar.line(PanelWords.SEPARATE).slot(PanelWords.KIND, WORD, PanelSeparation.words()).build(),
+            LineGrammar.line(PanelWords.FRAME).optional(PanelWords.RAIL, QUANTITY).optional(PanelWords.SIDES, NAMES).optional(PanelWords.FIDUCIALS, QUANTITY)
+                    .optional(PanelWords.TOOLING, QUANTITY).build(),
+            LineGrammar.line(PanelWords.FIDUCIAL).required(PanelWords.AT, POINT).optional(PanelWords.DIAMETER, QUANTITY).optional(PanelWords.OPENING, QUANTITY).build(),
+            LineGrammar.line(PanelWords.TOOLING).required(PanelWords.AT, POINT).optional(PanelWords.DRILL, QUANTITY).build(),
             ArrangementLines.GROUP_LINE);
 
     /** The grammar of a panel's line by its word: what a program makes the line with. */

@@ -1,6 +1,7 @@
 package org.jmouse.cad.pcb.routing;
 
 import org.jmouse.cad.Point;
+import org.jmouse.geometry.Segments;
 
 /** One straight stretch between two points: whether a point lies on it, and the point of it nearest another. */
 public final class Stretches {
@@ -18,11 +19,7 @@ public final class Stretches {
 
     /** The point of the stretch between two others nearest a point. */
     public static Point nearestOnStretch(Point point, Point from, Point to) {
-        double dx = to.x() - from.x();
-        double dy = to.y() - from.y();
-        double square = dx * dx + dy * dy;
-        double share = square == 0 ? 0 : Math.max(0, Math.min(1, ((point.x() - from.x()) * dx + (point.y() - from.y()) * dy) / square));
-        return from.toward(to, share);
+        return from.toward(to, Segments.shareNearest(from.x(), from.y(), to.x(), to.y(), point.x(), point.y()));
     }
 
     /** How far a point stands from the stretch between two others. */

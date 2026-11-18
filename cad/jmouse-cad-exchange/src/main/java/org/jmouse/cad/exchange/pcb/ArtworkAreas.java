@@ -2,7 +2,7 @@ package org.jmouse.cad.exchange.pcb;
 
 import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.geometry.PadOutline;
-import org.jmouse.svg.path.node.CircularArc;
+import org.jmouse.svg.path.node.ArcThrough;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -58,34 +58,20 @@ public final class ArtworkAreas {
 
     /** The arc as straight pieces from its start through its middle to its end; three in a line are a straight run. */
     public List<Point> arcPoints(ArtworkFeature.Arc arc) {
-        Optional<CircularArc> circle = CircularArc.through(arc.from().x(), arc.from().y(), arc.through().x(), arc.through().y(),
+        Optional<ArcThrough> circle = ArcThrough.of(arc.from().x(), arc.from().y(), arc.through().x(), arc.through().y(),
                 arc.to().x(), arc.to().y());
         if (circle.isEmpty()) {
             return List.of(arc.from(), arc.to());
         }
-        double centreX = circle.get().centerX();
-        double centreY = circle.get().centerY();
-        double radius = circle.get().radius();
-        double start = Math.atan2(arc.from().y() - centreY, arc.from().x() - centreX);
-        double sweep = turned(start, Math.atan2(arc.to().y() - centreY, arc.to().x() - centreX));
-        // The arc goes the way round that passes its middle.
-        if (turned(start, Math.atan2(arc.through().y() - centreY, arc.through().x() - centreX)) > sweep) {
-            sweep -= 2 * Math.PI;
-        }
-        int steps = Math.max(2, (int) Math.ceil(curveSteps * Math.abs(sweep) / (Math.PI / 2)));
+        int steps = Math.max(2, (int) Math.ceil(curveSteps * Math.abs(circle.get().sweep()) / (Math.PI / 2)));
         List<Point> points = new ArrayList<>();
         for (int step = 0; step <= steps; step++) {
-            double angle = start + sweep * step / steps;
-            points.add(new Point(centreX + radius * Math.cos(angle), centreY + radius * Math.sin(angle)));
+            double[] at = circle.get().pointAt(step, steps);
+            points.add(new Point(at[0], at[1]));
         }
         return points;
     }
 
-    /** How far round from one angle another is, counter-clockwise in the frame's own sense, in [0, 2π). */
-    private static double turned(double from, double to) {
-        double turn = (to - from) % (2 * Math.PI);
-        return turn < 0 ? turn + 2 * Math.PI : turn;
-    }
 
     private static Optional<Geometry> polygon(List<Point> outline, List<List<Point>> holes) {
         Optional<LinearRing> shell = ring(outline);

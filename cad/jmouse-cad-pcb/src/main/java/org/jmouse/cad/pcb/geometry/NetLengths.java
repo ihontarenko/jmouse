@@ -1,5 +1,7 @@
 package org.jmouse.cad.pcb.geometry;
 
+import org.jmouse.svg.path.node.ArcThrough;
+
 import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.Arc;
@@ -81,60 +83,23 @@ public final class NetLengths {
      * arc between instead, radius·turn.
      */
     public static double trackLength(Track track) {
-        List<Point> points = track.points();
         double length = 0;
-        for (int index = 1; index < points.size(); index++) {
-            length += Math.hypot(points.get(index).x() - points.get(index - 1).x(), points.get(index).y() - points.get(index - 1).y());
-        }
-        if (track.rounding() <= 0) {
-            return length;
-        }
-        for (int index = 1; index < points.size() - 1; index++) {
-            Point previous = points.get(index - 1);
-            Point corner = points.get(index);
-            Point next = points.get(index + 1);
-            double inLength = Math.hypot(corner.x() - previous.x(), corner.y() - previous.y());
-            double outLength = Math.hypot(next.x() - corner.x(), next.y() - corner.y());
-            if (inLength == 0 || outLength == 0) {
-                continue;
+        // Along its copper as it is drawn: each run straight, each rounded corner along its arc.
+        for (RoundedTrack.Piece piece : RoundedTrack.of(track)) {
+            switch (piece) {
+                case RoundedTrack.Run run -> {
+                    for (int index = 1; index < run.points().size(); index++) {
+                        length += run.points().get(index - 1).distanceTo(run.points().get(index));
+                    }
+                }
+                case RoundedTrack.Bend bend -> length += arcLength(bend.from(), bend.through(), bend.to());
             }
-            double cosine = ((previous.x() - corner.x()) * (next.x() - corner.x()) + (previous.y() - corner.y()) * (next.y() - corner.y()))
-                            / (inLength * outLength);
-            double between = Math.acos(Math.max(-1, Math.min(1, cosine)));
-            if (between > Math.PI - 1e-6 || between < 1e-6) {
-                continue;
-            }
-            double tangent = Math.tan(between / 2);
-            double cut = Math.min(track.rounding() / tangent, Math.min(inLength / 2, outLength / 2));
-            length += cut * tangent * (Math.PI - between) - 2 * cut;
         }
         return length;
     }
 
     /** An arc's length through three points: the circle through them, the angle swept from the first by the middle to the last. */
     public static double arcLength(Point from, Point through, Point to) {
-        double ax = from.x();
-        double ay = from.y();
-        double bx = through.x();
-        double by = through.y();
-        double cx = to.x();
-        double cy = to.y();
-        double determinant = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
-        if (Math.abs(determinant) < 1e-12) {
-            return Math.hypot(cx - ax, cy - ay);
-        }
-        double ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / determinant;
-        double uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / determinant;
-        double radius = Math.hypot(ax - ux, ay - uy);
-        double start = Math.atan2(ay - uy, ax - ux);
-        double sweep = turn(start, Math.atan2(cy - uy, cx - ux));
-        // The middle point decides which way round: outside the counter-clockwise sweep, the arc is the other way.
-        double swept = turn(start, Math.atan2(by - uy, bx - ux)) <= sweep ? sweep : 2 * Math.PI - sweep;
-        return radius * swept;
-    }
-
-    private static double turn(double start, double end) {
-        double turned = (end - start) % (2 * Math.PI);
-        return turned < 0 ? turned + 2 * Math.PI : turned;
+        return ArcThrough.of(from.x(), from.y(), through.x(), through.y(), to.x(), to.y()).map(ArcThrough::length).orElse(from.distanceTo(to));
     }
 }

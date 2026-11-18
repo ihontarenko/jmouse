@@ -48,7 +48,8 @@
     "ripUp": { "passes": 3, "candidates": 6, "margin": 2.5 },
     "rounds": 3,
     "viaCost": 10,
-    "link": { "footprint": "CHIP:R0805:F", "designator": "JP", "cost": 50 }
+    "link": { "footprint": "CHIP:R0805:F", "designator": "JP", "cost": 50 },
+    "keptLayouts": 64
   },
   "tuning": {
     "amplitude": 1,

@@ -150,7 +150,7 @@ public class Cursor implements TokenCursor {
      */
     @Override
     public Token lookBefore(Token.Type type) {
-        for (int i = cursor; i > 0; i--) {
+        for (int i = Math.min(cursor, tokens.size() - 1); i > 0; i--) {
             if (tokens.get(i).type() == type) {
                 return tokens.get(i - 1);
             }

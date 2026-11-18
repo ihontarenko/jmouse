@@ -5,7 +5,6 @@ import org.jmouse.geometry.taut.CorridorSearch;
 import org.jmouse.geometry.taut.Obstacle;
 import org.jmouse.geometry.taut.ObstacleField;
 import org.jmouse.geometry.taut.UnitedObstacles;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.jmouse.geometry.Areas;
@@ -40,29 +39,26 @@ final class CorridorWaySearch {
      */
     static Optional<List<Point>> way(TrackFence fence, Point from, Point to, double angleStep, RoutingSettings.Routing settings,
                                      OptionalDouble longest) {
-        List<Double> margins = marginsWithin(settings.corridorMargins(), longest, from, to);
+        return CorridorSearch.firstAccepted(windowsOf(from, to, marginsWithin(settings.corridorMargins(), longest, from, to), settings),
+                window -> CorridorSearch.alone(fieldOf(fence, window, from, to), window, Plane.coordinateOf(from), Plane.coordinateOf(to)),
+                parts -> {
+                    List<Point> path = Plane.pointsOf(((CorridorSearch.Run<Void>) parts.getFirst()).points());
+                    return OctilinearLaying.laid(path, Optional.empty(), path, fence, angleStep, settings, OctilinearLaying.Clearance.KEPT);
+                });
+    }
+
+    /**
+     * The windows a way between two points is searched in, a margin round the box of its ends each, laid on the grid: the window the
+     * next step near this one asks for is this very window, its copper united already ({@link StillCopper}).
+     */
+    static List<Envelope> windowsOf(Point from, Point to, List<Double> margins, RoutingSettings.Routing settings) {
+        List<Envelope> windows = new ArrayList<>();
         for (double margin : margins) {
             Envelope asked = new Envelope(from.x(), to.x(), from.y(), to.y());
             asked.expandBy(margin);
-            // Laid on the grid: the window the next step near this one asks for is this very window, its copper united already.
-            Envelope window = StillCopper.onGrid(asked, settings.corridorGrid());
-            CorridorSearch.Outcome<Void> searched = CorridorSearch.searched(CorridorSearch.alone(fieldOf(fence, window, from, to), window,
-                    Plane.coordinateOf(from), Plane.coordinateOf(to)));
-            if (searched instanceof CorridorSearch.ClosedIn<Void>) {
-                // The room the start reaches is closed in: no larger window goes round.
-                return Optional.empty();
-            }
-            Optional<List<Coordinate>> taut = searched.parts().map(parts -> ((CorridorSearch.Run<Void>) parts.getFirst()).points());
-            if (taut.isPresent()) {
-                List<Point> path = Plane.pointsOf(taut.get());
-                Optional<List<Point>> laid = OctilinearLaying.laid(path, Optional.empty(), path, fence, angleStep, settings,
-                        OctilinearLaying.Clearance.KEPT);
-                if (laid.isPresent()) {
-                    return laid;
-                }
-            }
+            windows.add(StillCopper.onGrid(asked, settings.corridorGrid()));
         }
-        return Optional.empty();
+        return windows;
     }
 
     /**
