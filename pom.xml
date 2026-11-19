@@ -200,6 +200,8 @@
         <module>jmouse-git-hosting</module>
         <module>jmouse-java-model</module>
         <module>jmouse-java</module>
+        <module>jmouse-java-27</module>
+        <module>jmouse-java-bytecode</module>
         <module>jmouse-java-analysis</module>
         <module>jmouse-java-index</module>
         <module>jmouse-java-index-store</module>

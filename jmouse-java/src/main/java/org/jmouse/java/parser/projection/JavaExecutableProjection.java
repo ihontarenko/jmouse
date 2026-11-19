@@ -43,8 +43,16 @@ public final class JavaExecutableProjection implements Translator<JavaSourceFile
                     JavaProjectionCapabilities.DECLARATION_METADATA,
                     JavaProjectionCapabilities.EXECUTABLE_METADATA);
     private final JavaSyntaxResult<JavaCompilationUnitNode> syntax;
+    private final JavaProjectionConfiguration configuration;
 
     public JavaExecutableProjection(JavaSyntaxResult<JavaCompilationUnitNode> syntax) {
+        this(syntax, JavaProjectionConfiguration.standard());
+    }
+
+    public JavaExecutableProjection(
+            JavaSyntaxResult<JavaCompilationUnitNode> syntax,
+            JavaProjectionConfiguration configuration) {
+        this.configuration = Objects.requireNonNull(configuration, "configuration");
         this.syntax = Objects.requireNonNull(syntax, "syntax");
         if (syntax.mode() != JavaParsingMode.COMPLETE || !syntax.omittedRegions().isEmpty()) {
             throw new TranslationRefusedException(
@@ -68,9 +76,14 @@ public final class JavaExecutableProjection implements Translator<JavaSourceFile
                     "Executable metadata requires its source root and no runtime bindings");
         }
         JavaCompilationUnitNode unit = syntax.root();
-        JavaProjectionContext context = new JavaProjectionContext(syntax.source(), unit);
+        JavaProjectionContext context =
+                new JavaProjectionContext(syntax.source(), unit, configuration);
         JavaSourceFile file =
-                new JavaDeclarationProjection(syntax.source(), syntax.problems())
+                new JavaDeclarationProjection(
+                                syntax.source(),
+                                syntax.problems(),
+                                syntax.coverage(),
+                                configuration)
                         .translate(unit, context);
         JavaExecutableBodyProjection bodyProjection = new JavaExecutableBodyProjection(context);
         List<ExecutableBody> bodies = new ArrayList<>();

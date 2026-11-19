@@ -1,12 +1,5 @@
 package org.jmouse.java.parser.projection;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.jmouse.java.parser.grammar.JavaOperatorCatalog;
 import org.jmouse.java.parser.model.BodyReference;
 import org.jmouse.java.parser.model.Expression;
@@ -14,22 +7,42 @@ import org.jmouse.java.parser.model.SymbolId;
 import org.jmouse.java.parser.node.expression.JavaAssignmentOperator;
 import org.jmouse.java.parser.node.expression.JavaUnaryOperator;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /** Reference roles over navigation records; this never reads or interprets source tokens. */
 final class JavaBodyReferenceProjection {
-    private record Pending(Expression expression, BodyReference.Role role) {
-    }
+    private record Pending(Expression expression, BodyReference.Role role) {}
 
     private final Set<String> writingOperators;
     private final String assignment;
 
     JavaBodyReferenceProjection() {
         JavaOperatorCatalog operators = JavaOperatorCatalog.standard();
-        assignment = operators.require(JavaOperatorCatalog.Kind.ASSIGNMENT, JavaAssignmentOperator.ASSIGN.name()).spelling();
-        writingOperators = operators.definitions().stream()
-                .filter(definition -> definition.kind() == JavaOperatorCatalog.Kind.ASSIGNMENT
-                        || definition.identity().equals(JavaUnaryOperator.INCREMENT.name())
-                        || definition.identity().equals(JavaUnaryOperator.DECREMENT.name()))
-                .map(JavaOperatorCatalog.Definition::spelling).collect(Collectors.toUnmodifiableSet());
+        assignment =
+                operators
+                        .require(
+                                JavaOperatorCatalog.Kind.ASSIGNMENT,
+                                JavaAssignmentOperator.ASSIGN.name())
+                        .spelling();
+        writingOperators =
+                operators.definitions().stream()
+                        .filter(
+                                definition ->
+                                        definition.kind() == JavaOperatorCatalog.Kind.ASSIGNMENT
+                                                || definition
+                                                        .identity()
+                                                        .equals(JavaUnaryOperator.INCREMENT.name())
+                                                || definition
+                                                        .identity()
+                                                        .equals(JavaUnaryOperator.DECREMENT.name()))
+                        .map(JavaOperatorCatalog.Definition::spelling)
+                        .collect(Collectors.toUnmodifiableSet());
     }
 
     List<BodyReference> references(List<Expression> expressions, SymbolId owner, SymbolId type) {
@@ -41,16 +54,17 @@ final class JavaBodyReferenceProjection {
         while (!pending.isEmpty()) {
             Pending item = pending.removeFirst();
             Expression expression = item.expression();
-            BodyReference.Role role = switch (expression.kind()) {
-                case CALL -> BodyReference.Role.CALLS;
-                case NEW -> BodyReference.Role.INSTANTIATES;
-                case METHOD_REFERENCE -> BodyReference.Role.METHOD_REFERENCE;
-                default -> item.role();
-            };
+            BodyReference.Role role =
+                    switch (expression.kind()) {
+                        case CALL -> BodyReference.Role.CALLS;
+                        case NEW -> BodyReference.Role.INSTANTIATES;
+                        case METHOD_REFERENCE -> BodyReference.Role.METHOD_REFERENCE;
+                        default -> item.role();
+                    };
             switch (expression.kind()) {
-                case NAME, FIELD, CALL, NEW, METHOD_REFERENCE -> references.add(new BodyReference(expression, role, owner, type));
-                default -> {
-                }
+                case NAME, FIELD, CALL, NEW, METHOD_REFERENCE ->
+                        references.add(new BodyReference(expression, role, owner, type));
+                default -> {}
             }
             if (expression.receiver() != null) {
                 pending.addLast(new Pending(expression.receiver(), BodyReference.Role.READS));

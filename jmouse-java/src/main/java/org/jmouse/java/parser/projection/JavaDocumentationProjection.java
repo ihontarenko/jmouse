@@ -1,5 +1,18 @@
 package org.jmouse.java.parser.projection;
 
+import org.jmouse.el.node.Node;
+import org.jmouse.el.node.Visitor;
+import org.jmouse.java.parser.javadoc.JavaDocParser;
+import org.jmouse.java.parser.lexer.JavaComment;
+import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;
+import org.jmouse.java.parser.model.JavaDoc;
+import org.jmouse.java.parser.model.JavaDocOwner;
+import org.jmouse.java.parser.node.JavaSyntaxNode;
+import org.jmouse.java.parser.node.body.JavaAnonymousClassBodyNode;
+import org.jmouse.java.parser.node.body.JavaConstructorBodySyntaxNode;
+import org.jmouse.java.parser.node.statement.JavaBlockNode;
+import org.jmouse.java.parser.source.SourceSpan;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,18 +22,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import org.jmouse.el.node.Node;
-import org.jmouse.el.node.Visitor;
-import org.jmouse.java.parser.javadoc.JavaDocParser;
-import org.jmouse.java.parser.lexer.JavaComment;
-import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;
-import org.jmouse.java.parser.model.JavaDoc;
-import org.jmouse.java.parser.model.JavaDocOwner;
-import org.jmouse.java.parser.node.body.JavaAnonymousClassBodyNode;
-import org.jmouse.java.parser.node.body.JavaConstructorBodySyntaxNode;
-import org.jmouse.java.parser.node.JavaSyntaxNode;
-import org.jmouse.java.parser.node.statement.JavaBlockNode;
-import org.jmouse.java.parser.source.SourceSpan;
 
 /** Owns documentation bindings and preserves the declaration view's treatment of body comments. */
 final class JavaDocumentationProjection {
@@ -39,21 +40,24 @@ final class JavaDocumentationProjection {
                 documentation.put(comment.span().start().offset(), comment);
             }
         }
-        root.accept(new Visitor() {
-            @Override
-            public void visit(Node node) {
-                if (node instanceof JavaBlockNode || node instanceof JavaConstructorBodySyntaxNode
-                        || node instanceof JavaAnonymousClassBodyNode) {
-                    bodies.add(((JavaSyntaxNode) node).span());
-                }
-            }
-        });
+        root.accept(
+                new Visitor() {
+                    @Override
+                    public void visit(Node node) {
+                        if (node instanceof JavaBlockNode
+                                || node instanceof JavaConstructorBodySyntaxNode
+                                || node instanceof JavaAnonymousClassBodyNode) {
+                            bodies.add(((JavaSyntaxNode) node).span());
+                        }
+                    }
+                });
     }
 
     JavaDoc owner(JavaSyntaxNode syntax, JavaDocOwner owner) {
         int start = syntax.span().start().offset();
         Map.Entry<Integer, JavaComment> candidate = documentation.floorEntry(start);
-        if (candidate == null || candidate.getKey() < source.endBefore(start)
+        if (candidate == null
+                || candidate.getKey() < source.endBefore(start)
                 || candidate.getValue().span().end().offset() > start) {
             return null;
         }
@@ -65,16 +69,20 @@ final class JavaDocumentationProjection {
 
     List<JavaDoc> documents() {
         List<JavaDoc> documents = new ArrayList<>(owned);
-        List<SourceSpan> sortedBodies = bodies.stream()
-                .sorted(Comparator.comparingInt(span -> span.start().offset())).toList();
+        List<SourceSpan> sortedBodies =
+                bodies.stream()
+                        .sorted(Comparator.comparingInt(span -> span.start().offset()))
+                        .toList();
         int bodyIndex = 0;
         int coveredUntil = -1;
         for (JavaComment comment : documentation.values()) {
             while (bodyIndex < sortedBodies.size()
-                    && sortedBodies.get(bodyIndex).start().offset() <= comment.span().start().offset()) {
+                    && sortedBodies.get(bodyIndex).start().offset()
+                            <= comment.span().start().offset()) {
                 coveredUntil = Math.max(coveredUntil, sortedBodies.get(bodyIndex++).end().offset());
             }
-            if (!claimed.contains(comment.span().start().offset()) && comment.span().end().offset() > coveredUntil) {
+            if (!claimed.contains(comment.span().start().offset())
+                    && comment.span().end().offset() > coveredUntil) {
                 documents.add(parsed(comment));
             }
         }
@@ -83,7 +91,8 @@ final class JavaDocumentationProjection {
     }
 
     private JavaDoc parsed(JavaComment comment) {
-        return parsed.computeIfAbsent(comment.span().start().offset(),
+        return parsed.computeIfAbsent(
+                comment.span().start().offset(),
                 offset -> parser.parse(comment.text(), offset, source.lines(), null));
     }
 }

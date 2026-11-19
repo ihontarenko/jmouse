@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+    </parent>
+    <artifactId>jmouse-java-27</artifactId>
+    <name>jMouse - Java 27 Extension Example</name>
+    <description>Demonstration release profile extending Java syntax and projections through public contracts; not a Java 27 specification implementation.</description>
+    <dependencies>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-java</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

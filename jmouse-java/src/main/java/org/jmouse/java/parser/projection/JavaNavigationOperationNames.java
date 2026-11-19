@@ -8,6 +8,5 @@ public final class JavaNavigationOperationNames {
     public static final String CONDITIONAL = "?:";
     public static final String LAMBDA = "->";
 
-    private JavaNavigationOperationNames() {
-    }
+    private JavaNavigationOperationNames() {}
 }

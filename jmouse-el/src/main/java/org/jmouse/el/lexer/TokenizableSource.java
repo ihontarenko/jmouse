@@ -1,6 +1,8 @@
 package org.jmouse.el.lexer;
 
 import org.jmouse.core.Streamable;
+import org.jmouse.el.InputUnit;
+import org.jmouse.el.Source;
 
 /**
  * Represents a tokenizable character sequence that allows type extraction and iteration.
@@ -10,7 +12,17 @@ import org.jmouse.core.Streamable;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface TokenizableSource extends CharSequence, Streamable<TokenizableSource.Entry> {
+public interface TokenizableSource extends Source, CharSequence, Streamable<TokenizableSource.Entry> {
+
+    @Override
+    default InputUnit unit() {
+        return InputUnit.UTF16_CODE_UNIT;
+    }
+
+    @Override
+    default long contentLength() {
+        return length();
+    }
 
     /**
      * Calculates the number of lines up to a given offset.

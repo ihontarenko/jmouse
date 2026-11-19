@@ -27,6 +27,7 @@ import org.jmouse.java.parser.node.statement.JavaCatchClauseNode;
 import org.jmouse.java.parser.node.statement.JavaEnhancedForStatementNode;
 import org.jmouse.java.parser.node.statement.JavaForStatementNode;
 import org.jmouse.java.parser.node.statement.JavaLocalVariableDeclarationStatementNode;
+import org.jmouse.java.parser.node.statement.JavaStatementNode;
 import org.jmouse.java.parser.node.statement.JavaTryStatementNode;
 import org.jmouse.java.parser.node.type.JavaInferredTypeNode;
 import org.jmouse.java.parser.source.SourceSpan;
@@ -44,7 +45,7 @@ final class JavaExecutableBodyProjection {
 
     JavaExecutableBodyProjection(JavaProjectionContext context) {
         this.context = context;
-        projection = new JavaExpressionProjection(context);
+        projection = context.expressionProjection();
     }
 
     ExecutableBody read(
@@ -81,6 +82,23 @@ final class JavaExecutableBodyProjection {
                         if (node instanceof JavaTypeDeclarationNode
                                 || node instanceof JavaAnonymousClassBodyNode) {
                             return TraversalAction.SKIP_CHILDREN;
+                        }
+                        if (node instanceof JavaStatementNode statement) {
+                            JavaStatementProjection contribution =
+                                    context.configuration
+                                            .statements()
+                                            .apply(
+                                                    statement,
+                                                    new JavaStatementProjectionContext(
+                                                            context,
+                                                            owner,
+                                                            type,
+                                                            localScope(statement, span)));
+                            expressions.addAll(contribution.expressions());
+                            variables.addAll(contribution.bindings());
+                            if (contribution.traversal() != TraversalAction.CONTINUE) {
+                                return contribution.traversal();
+                            }
                         }
                         if (node instanceof JavaParameterNode parameter) {
                             variables.add(parameter(parameter, localScope(parameter, span)));

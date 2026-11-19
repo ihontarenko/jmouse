@@ -4,6 +4,7 @@ import org.jmouse.el.lexer.TokenizableSource.Entry;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.translate.Bindings;
 import org.jmouse.el.translate.Capabilities;
+import org.jmouse.el.translate.NodeOperationRegistry;
 import org.jmouse.el.translate.TranslationRefusedException;
 import org.jmouse.el.translate.Translator;
 import org.jmouse.java.parser.JavaSyntaxResult;
@@ -38,6 +39,7 @@ public final class JavaDeclarationProjection implements Translator<JavaSourceFil
             Capabilities.of(
                     JavaDeclarationProjection.class.getName(),
                     JavaProjectionCapabilities.DECLARATION_METADATA);
+    private final JavaProjectionConfiguration configuration;
     private final JavaLexicalSnapshot source;
     private final List<ParseProblem> problems;
     private final JavaSourceCoverage coverage;
@@ -52,6 +54,15 @@ public final class JavaDeclarationProjection implements Translator<JavaSourceFil
 
     public JavaDeclarationProjection(
             JavaLexicalSnapshot source, List<ParseProblem> problems, JavaSourceCoverage coverage) {
+        this(source, problems, coverage, JavaProjectionConfiguration.standard());
+    }
+
+    public JavaDeclarationProjection(
+            JavaLexicalSnapshot source,
+            List<ParseProblem> problems,
+            JavaSourceCoverage coverage,
+            JavaProjectionConfiguration configuration) {
+        this.configuration = Objects.requireNonNull(configuration, "configuration");
         this.source = Objects.requireNonNull(source, "source");
         this.problems = List.copyOf(problems);
         this.coverage = Objects.requireNonNull(coverage, "coverage");
@@ -77,7 +88,7 @@ public final class JavaDeclarationProjection implements Translator<JavaSourceFil
             throw new TranslationRefusedException(
                     "Declaration metadata requires a compilation unit and no runtime bindings");
         }
-        JavaProjectionContext context = new JavaProjectionContext(source, unit);
+        JavaProjectionContext context = new JavaProjectionContext(source, unit, configuration);
         return translate(unit, context);
     }
 
@@ -88,7 +99,9 @@ public final class JavaDeclarationProjection implements Translator<JavaSourceFil
                         .orElse(null);
         String packageName = packageDeclaration == null ? "" : packageDeclaration.name();
         List<ImportDeclaration> imports =
-                unit.imports().stream().map(JavaDeclarationProjection::importDeclaration).toList();
+                unit.imports().stream()
+                        .map(node -> configuration.imports().apply(node, context.source))
+                        .toList();
         ModuleDeclaration moduleDeclaration =
                 unit.module().map(node -> moduleDeclaration(context, node)).orElse(null);
         List<TypeDeclaration> types = new ArrayList<>();
@@ -125,6 +138,13 @@ public final class JavaDeclarationProjection implements Translator<JavaSourceFil
                         DeclarationKind.PACKAGE,
                         name,
                         JavaKeyword.PACKAGE.spelling() + " " + name));
+    }
+
+    static void install(NodeOperationRegistry<JavaLexicalSnapshot, ImportDeclaration> registry) {
+        registry.bind(
+                JavaImportDeclarationNode.KIND,
+                JavaDeclarationProjection.class.getName(),
+                (node, source) -> importDeclaration(node));
     }
 
     private static ImportDeclaration importDeclaration(JavaImportNode syntax) {

@@ -777,7 +777,17 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-27</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-java-index</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-bytecode</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>

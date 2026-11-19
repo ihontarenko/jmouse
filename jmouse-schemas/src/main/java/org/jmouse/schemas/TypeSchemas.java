@@ -1,6 +1,5 @@
 package org.jmouse.schemas;
 
-import org.jmouse.cad.pcb.drawing.Track;
 import com.fasterxml.classmate.ResolvedType;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.FieldScope;

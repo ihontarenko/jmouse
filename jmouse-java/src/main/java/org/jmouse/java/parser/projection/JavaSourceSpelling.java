@@ -1,7 +1,5 @@
 package org.jmouse.java.parser.projection;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.jmouse.java.parser.lexer.JavaKeyword;
 import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;
 import org.jmouse.java.parser.node.JavaSyntaxNode;
@@ -14,6 +12,9 @@ import org.jmouse.java.parser.node.type.JavaPrimitiveTypeNode;
 import org.jmouse.java.parser.node.type.JavaTypeSyntaxNode;
 import org.jmouse.java.parser.node.type.JavaVoidTypeNode;
 import org.jmouse.java.parser.source.SourceSpan;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** Written metadata and as-written identity spellings, never name resolution or reparsing. */
 final class JavaSourceSpelling {
@@ -36,17 +37,26 @@ final class JavaSourceSpelling {
     }
 
     static String name(JavaQualifiedNameNode name) {
-        return name.segments().stream().map(JavaIdentifierNode::name).collect(Collectors.joining("."));
+        return name.segments().stream()
+                .map(JavaIdentifierNode::name)
+                .collect(Collectors.joining("."));
     }
 
     static String identity(JavaTypeSyntaxNode type) {
         return switch (type) {
-            case JavaPrimitiveTypeNode primitive -> JavaKeyword.valueOf(primitive.kind().name()).spelling();
+            case JavaPrimitiveTypeNode primitive ->
+                    JavaKeyword.valueOf(primitive.kind().name()).spelling();
             case JavaVoidTypeNode ignored -> JavaKeyword.VOID.spelling();
-            case JavaNamedTypeNode named -> named.segments().stream().map(segment -> segment.name().name())
-                    .collect(Collectors.joining("."));
-            case JavaArrayTypeNode array -> identity(array.elementType()) + "[]".repeat(array.dimensions().size());
-            default -> throw new IllegalArgumentException("This syntax cannot form a declaration identity: " + type.schema().kind().name());
+            case JavaNamedTypeNode named ->
+                    named.segments().stream()
+                            .map(segment -> segment.name().name())
+                            .collect(Collectors.joining("."));
+            case JavaArrayTypeNode array ->
+                    identity(array.elementType()) + "[]".repeat(array.dimensions().size());
+            default ->
+                    throw new IllegalArgumentException(
+                            "This syntax cannot form a declaration identity: "
+                                    + type.schema().kind().name());
         };
     }
 

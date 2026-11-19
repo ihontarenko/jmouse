@@ -1,6 +1,7 @@
 package org.jmouse.el.lexer;
 
 import org.jmouse.core.Streamable;
+import org.jmouse.el.InputUnit;
 
 /**
  * TokenCursor provides an advanced API for navigating a stream of tokens.
@@ -10,7 +11,22 @@ import org.jmouse.core.Streamable;
  * <p>This interface is intended to be used by parsers to inspect and consume tokens
  * with support for backtracking and lookahead. It is built on top of an underlying token list.</p>
  */
-public interface TokenCursor extends Streamable<Token> {
+public interface TokenCursor extends SourceCursor<TokenizableSource>, Streamable<Token> {
+
+    @Override
+    default InputUnit positionUnit() {
+        return InputUnit.TOKEN;
+    }
+
+    @Override
+    default long offset() {
+        return position();
+    }
+
+    @Override
+    default long remainingUnits() {
+        return remaining();
+    }
 
     /**
      * Returns the source these tokens were read from, when the cursor knows it.

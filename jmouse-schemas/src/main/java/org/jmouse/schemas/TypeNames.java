@@ -1,6 +1,5 @@
 package org.jmouse.schemas;
 
-import org.jmouse.cad.pcb.drawing.Track;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;

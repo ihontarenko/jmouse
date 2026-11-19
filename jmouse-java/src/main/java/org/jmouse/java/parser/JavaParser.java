@@ -40,8 +40,14 @@ public final class JavaParser {
     public JavaSourceFile parse(String sourceName, CharSequence text, Level level) {
         JavaSyntaxResult<JavaCompilationUnitNode> result = parseSyntax(sourceName, text, level);
         return level == Level.EXPRESSIONS
-                ? JavaExecutableProjection.project(result)
-                : JavaDeclarationProjection.project(result);
+                ? new JavaExecutableProjection(result, syntax.language().projections())
+                        .translate(result.root())
+                : new JavaDeclarationProjection(
+                                result.source(),
+                                result.problems(),
+                                result.coverage(),
+                                syntax.language().projections())
+                        .translate(result.root());
     }
 
     /**

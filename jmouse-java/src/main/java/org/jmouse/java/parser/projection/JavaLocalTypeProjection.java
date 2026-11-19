@@ -59,8 +59,7 @@ final class JavaLocalTypeProjection {
                             ? LocalTypeKind.ENUM_CONSTANT
                             : LocalTypeKind.ANONYMOUS;
             List<Declaration> members = new ArrayList<>();
-            JavaTypeProjection.Scope memberScope =
-                    new JavaTypeProjection.Scope(qualified, List.of());
+            JavaDeclarationScope memberScope = new JavaDeclarationScope(qualified, List.of());
             body.declarations()
                     .forEach(
                             member ->

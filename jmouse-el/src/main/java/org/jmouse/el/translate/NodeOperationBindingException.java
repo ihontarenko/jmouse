@@ -11,6 +11,11 @@ public final class NodeOperationBindingException extends TranslationRefusedExcep
         this.nodeKind = nodeKind;
     }
 
-    public String operation() { return operation; }
-    public String nodeKind() { return nodeKind; }
+    public String operation() {
+        return operation;
+    }
+
+    public String nodeKind() {
+        return nodeKind;
+    }
 }

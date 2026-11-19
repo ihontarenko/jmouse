@@ -4,6 +4,7 @@ import org.jmouse.el.lexer.TokenizableSource.Entry;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.TraversalAction;
 import org.jmouse.el.node.Visitor;
+import org.jmouse.el.translate.NodeOperationRegistry;
 import org.jmouse.el.translate.TranslationRefusedException;
 import org.jmouse.java.model.type.JavaPlatformTypeNames;
 import org.jmouse.java.parser.grammar.JavaOperatorCatalog;
@@ -107,7 +108,172 @@ final class JavaExpressionProjection {
                 node.arguments().stream().map(this::read).toList());
     }
 
+    static void install(NodeOperationRegistry<JavaProjectionContext, Expression> registry) {
+        registry.bind(
+                JavaErrorExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaErrorExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaNameExpressionNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaNameExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaThisExpressionNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaThisExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaSuperQualifierNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaSuperQualifierNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaClassLiteralExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaClassLiteralExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaCastExpressionNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaCastExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaConditionalExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaConditionalExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaInstanceOfExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaInstanceOfExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaFieldAccessExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaFieldAccessExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaMethodInvocationExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaMethodInvocationExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaClassInstanceCreationExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaClassInstanceCreationExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaMethodReferenceExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaMethodReferenceExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaAssignmentExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaAssignmentExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaArrayInitializerNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaArrayInitializerNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaArrayCreationExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaArrayCreationExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaArrayAccessExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaArrayAccessExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaPrefixExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaPrefixExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaPostfixExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaPostfixExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaBinaryExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaBinaryExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaParenthesizedExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaParenthesizedExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaLambdaExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaLambdaExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaSwitchExpressionNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaSwitchExpressionNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaBooleanLiteralNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaBooleanLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaCharacterLiteralNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaCharacterLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaStringLiteralNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaStringLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaTextBlockLiteralNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaTextBlockLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaNullLiteralNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaNullLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaIntegerLiteralNode.KIND,
+                JavaExpressionProjection.class.getName() + "#" + JavaIntegerLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+        registry.bind(
+                JavaFloatingPointLiteralNode.KIND,
+                JavaExpressionProjection.class.getName()
+                        + "#"
+                        + JavaFloatingPointLiteralNode.KIND.name(),
+                (node, context) -> context.expressionProjection().standard(node));
+    }
+
     private Expression project(JavaExpressionNode node) {
+        return context.configuration.expressions().apply(node, context);
+    }
+
+    private Expression standard(JavaExpressionNode node) {
         if (node instanceof JavaErrorExpressionNode) {
             return expression(node, Expression.Kind.UNKNOWN, "", node.span(), null, List.of());
         }

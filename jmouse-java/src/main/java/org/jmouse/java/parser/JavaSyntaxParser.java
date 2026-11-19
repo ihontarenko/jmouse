@@ -85,6 +85,10 @@ public final class JavaSyntaxParser {
         this.rules = language.rules();
     }
 
+    public JavaSourceLanguage language() {
+        return language;
+    }
+
     public JavaExpressionNode parseExpression(String sourceName, CharSequence text) {
         return parse(JavaParseRoles.EXPRESSION, sourceName, text);
     }
