@@ -11,12 +11,12 @@ import java.util.Optional;
 public final class JvmTypeParameterNode extends JvmTextNode {
     public static final NodeKind<JvmTypeParameterNode> KIND =
             new NodeKind<>(JvmTextNames.TYPE_PARAMETER, JvmTypeParameterNode.class);
-    public static final ChildRole<JvmReferenceTypeSignatureNode> CLASSBOUND =
+    public static final ChildRole<JvmReferenceTypeSignatureNode> CLASS_BOUND =
             ChildRole.optional(JvmTextNames.CLASS_BOUND, JvmReferenceTypeSignatureNode.class);
-    public static final ChildRole<JvmReferenceTypeSignatureNode> INTERFACEBOUNDS =
+    public static final ChildRole<JvmReferenceTypeSignatureNode> INTERFACE_BOUNDS =
             ChildRole.list(JvmTextNames.INTERFACE_BOUNDS, JvmReferenceTypeSignatureNode.class);
     public static final NodeSchema<JvmTypeParameterNode> SCHEMA =
-            NodeSchema.of(KIND, CLASSBOUND, INTERFACEBOUNDS);
+            NodeSchema.of(KIND, CLASS_BOUND, INTERFACE_BOUNDS);
     private final String name;
 
     public JvmTypeParameterNode(
@@ -28,8 +28,8 @@ public final class JvmTypeParameterNode extends JvmTextNode {
             List<JvmReferenceTypeSignatureNode> interfaceBounds) {
         super(SCHEMA, source, start, end);
         this.name = name;
-        setChild(CLASSBOUND, classBound);
-        interfaceBounds.forEach(value -> addChild(INTERFACEBOUNDS, value));
+        setChild(CLASS_BOUND, classBound);
+        interfaceBounds.forEach(value -> addChild(INTERFACE_BOUNDS, value));
     }
 
     public String name() {
@@ -37,10 +37,10 @@ public final class JvmTypeParameterNode extends JvmTextNode {
     }
 
     public Optional<JvmReferenceTypeSignatureNode> classBound() {
-        return optionalChild(CLASSBOUND);
+        return optionalChild(CLASS_BOUND);
     }
 
     public List<JvmReferenceTypeSignatureNode> interfaceBounds() {
-        return children(INTERFACEBOUNDS);
+        return children(INTERFACE_BOUNDS);
     }
 }

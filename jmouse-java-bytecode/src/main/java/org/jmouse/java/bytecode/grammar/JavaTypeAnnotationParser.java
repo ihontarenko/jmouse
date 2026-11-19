@@ -64,62 +64,77 @@ public final class JavaTypeAnnotationParser
         long start = bytes.position();
         return switch (target) {
             case CLASS_TYPE_PARAMETER, METHOD_TYPE_PARAMETER -> {
-                int value0 = bytes.unsigned8();
+                int parameterIndex = bytes.unsigned8();
                 yield new JavaTypeParameterTargetNode(
-                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, value0);
+                        bytes.source(),
+                        new BytecodeSpan(start, bytes.position()),
+                        target,
+                        parameterIndex);
             }
             case SUPERTYPE -> {
-                int value0 = bytes.unsigned16();
+                int supertypeIndex = bytes.unsigned16();
                 yield new JavaSupertypeTargetNode(
-                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, value0);
+                        bytes.source(),
+                        new BytecodeSpan(start, bytes.position()),
+                        target,
+                        supertypeIndex);
             }
             case CLASS_TYPE_PARAMETER_BOUND, METHOD_TYPE_PARAMETER_BOUND -> {
-                int value0 = bytes.unsigned8();
-                int value1 = bytes.unsigned8();
+                int parameterIndex = bytes.unsigned8();
+                int boundIndex = bytes.unsigned8();
                 yield new JavaTypeParameterBoundTargetNode(
                         bytes.source(),
                         new BytecodeSpan(start, bytes.position()),
                         target,
-                        value0,
-                        value1);
+                        parameterIndex,
+                        boundIndex);
             }
             case FIELD, METHOD_RETURN, METHOD_RECEIVER -> {
                 yield new JavaEmptyTypeAnnotationTargetNode(
                         bytes.source(), new BytecodeSpan(start, bytes.position()), target);
             }
             case METHOD_FORMAL_PARAMETER -> {
-                int value0 = bytes.unsigned8();
+                int parameterIndex = bytes.unsigned8();
                 yield new JavaFormalParameterTargetNode(
-                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, value0);
+                        bytes.source(),
+                        new BytecodeSpan(start, bytes.position()),
+                        target,
+                        parameterIndex);
             }
             case THROWS -> {
-                int value0 = bytes.unsigned16();
+                int throwsIndex = bytes.unsigned16();
                 yield new JavaThrowsTargetNode(
-                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, value0);
+                        bytes.source(),
+                        new BytecodeSpan(start, bytes.position()),
+                        target,
+                        throwsIndex);
             }
             case EXCEPTION_PARAMETER -> {
-                int value0 = bytes.unsigned16();
+                int exceptionIndex = bytes.unsigned16();
                 yield new JavaCatchTargetNode(
-                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, value0);
+                        bytes.source(),
+                        new BytecodeSpan(start, bytes.position()),
+                        target,
+                        exceptionIndex);
             }
             case INSTANCEOF, NEW, CONSTRUCTOR_REFERENCE, METHOD_REFERENCE -> {
-                int value0 = bytes.unsigned16();
+                int offset = bytes.unsigned16();
                 yield new JavaOffsetTargetNode(
-                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, value0);
+                        bytes.source(), new BytecodeSpan(start, bytes.position()), target, offset);
             }
             case CAST,
                     CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT,
                     METHOD_INVOCATION_TYPE_ARGUMENT,
                     CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT,
                     METHOD_REFERENCE_TYPE_ARGUMENT -> {
-                int value0 = bytes.unsigned16();
-                int value1 = bytes.unsigned8();
+                int offset = bytes.unsigned16();
+                int argumentIndex = bytes.unsigned8();
                 yield new JavaTypeArgumentTargetNode(
                         bytes.source(),
                         new BytecodeSpan(start, bytes.position()),
                         target,
-                        value0,
-                        value1);
+                        offset,
+                        argumentIndex);
             }
             case LOCAL_VARIABLE, RESOURCE_VARIABLE -> {
                 int count = bytes.unsigned16();

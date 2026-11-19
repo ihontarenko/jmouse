@@ -181,3 +181,7 @@ constant-pool	DYNAMIC	17
 constant-pool	INVOKE_DYNAMIC	18
 constant-pool	MODULE	19
 constant-pool	PACKAGE	20
+module-name	ESCAPE	92
+module-name	COLON	58
+module-name	AT_SIGN	64
+module-name	CONTROL	0..31

@@ -50,6 +50,29 @@ public final class JavaMemberStructureValidation {
     public static JvmValidationOutcome method(JavaMethodNode node, JvmValidationContext context) {
         context.methodName(node.name());
         JavaMethodDescriptor descriptor = context.method(node.descriptor());
+        if (node.name().equals(JavaJvmNames.CLASS_INITIALIZER)) {
+            context.require(
+                    descriptor.result() == JavaVoidType.VOID
+                            && (context.root().version().major()
+                                            < JvmValidationVersions.STATIC_CLASS_INITIALIZER
+                                    || descriptor.parameters().isEmpty()),
+                    node,
+                    "Invalid class initializer descriptor");
+            context.require(
+                    context.root().version().major()
+                                    < JvmValidationVersions.STATIC_CLASS_INITIALIZER
+                            || (node.accessFlags() & JvmMethodAccessFlag.STATIC.code()) != 0,
+                    node,
+                    "A class initializer must be static");
+            context.require(
+                    node.attributes().stream()
+                                    .filter(JavaCodeAttributeNode.class::isInstance)
+                                    .count()
+                            == 1,
+                    node,
+                    "A class initializer requires exactly one Code attribute");
+            return JvmValidationOutcome.VALID;
+        }
         int flags = node.accessFlags();
         int visibility =
                 flags
@@ -82,7 +105,38 @@ public final class JavaMemberStructureValidation {
                             | JvmMethodAccessFlag.FINAL.code()
                             | JvmMethodAccessFlag.SYNCHRONIZED.code()
                             | JvmMethodAccessFlag.NATIVE.code();
+            if (JvmValidationVersions.strictSemantics(context.root().version())) {
+                forbidden |= JvmMethodAccessFlag.STRICT.code();
+            }
             context.require((flags & forbidden) == 0, node, "Invalid abstract method access flags");
+        }
+        if (context.isInterface()) {
+            int forbidden =
+                    JvmMethodAccessFlag.PROTECTED.code()
+                            | JvmMethodAccessFlag.FINAL.code()
+                            | JvmMethodAccessFlag.SYNCHRONIZED.code()
+                            | JvmMethodAccessFlag.NATIVE.code();
+            context.require(
+                    (flags & forbidden) == 0, node, "Invalid interface method access flags");
+            if (context.root().version().major()
+                    < JvmValidationVersions.INTERFACE_STATIC_SPECIAL_CALLS) {
+                int required =
+                        JvmMethodAccessFlag.PUBLIC.code() | JvmMethodAccessFlag.ABSTRACT.code();
+                context.require(
+                        (flags & required) == required,
+                        node,
+                        "An interface method in this classfile version must be public and"
+                            + " abstract");
+            } else {
+                context.require(
+                        Integer.bitCount(
+                                        flags
+                                                & (JvmMethodAccessFlag.PUBLIC.code()
+                                                        | JvmMethodAccessFlag.PRIVATE.code()))
+                                == 1,
+                        node,
+                        "An interface method requires exactly one of public and private");
+            }
         }
         if (node.name().equals(JavaJvmNames.CONSTRUCTOR)) {
             context.require(
@@ -98,18 +152,6 @@ public final class JavaMemberStructureValidation {
                             | JvmMethodAccessFlag.SYNCHRONIZED.code()
                             | JvmMethodAccessFlag.BRIDGE.code();
             context.require((flags & forbidden) == 0, node, "Invalid constructor access flags");
-        }
-        if (node.name().equals(JavaJvmNames.CLASS_INITIALIZER)) {
-            context.require(
-                    descriptor.parameters().isEmpty() && descriptor.result() == JavaVoidType.VOID,
-                    node,
-                    "A class initializer requires the ()V descriptor");
-            context.require(
-                    context.root().version().major()
-                                    < JvmValidationVersions.STATIC_CLASS_INITIALIZER
-                            || isStatic,
-                    node,
-                    "A class initializer must be static");
         }
         return JvmValidationOutcome.VALID;
     }

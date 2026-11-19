@@ -15,6 +15,7 @@ import org.jmouse.java.bytecode.node.constant.JavaConstantNode;
 import org.jmouse.java.bytecode.node.constant.JavaConstantPoolNode;
 import org.jmouse.java.bytecode.validation.JavaBytecodeValidation;
 import org.jmouse.java.bytecode.vocabulary.JvmAttributeContext;
+import org.jmouse.java.bytecode.vocabulary.JvmClassAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmFormatLimits;
 import org.jmouse.java.model.version.ClassFileVersion;
 import org.jmouse.java.model.version.VersionAdmission;
@@ -185,7 +186,15 @@ public final class JavaBytecodeParser {
         }
         List<JavaAttributeNode> attributes =
                 JavaAttributeTableParser.read(
-                        bytes, pool, JvmAttributeContext.CLASS, version, mode, language, session);
+                        bytes,
+                        pool,
+                        (flags & JvmClassAccessFlag.MODULE.code()) != 0
+                                ? JvmAttributeContext.MODULE
+                                : JvmAttributeContext.CLASS,
+                        version,
+                        mode,
+                        language,
+                        session);
         bytes.requireEnd();
         JavaClassFileNode root =
                 new JavaClassFileNode(

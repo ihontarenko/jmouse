@@ -11,15 +11,28 @@ public final class TextSourceWriter implements SourceWriter {
 
     private static final char LINE_BREAK = '\n';
 
-    private final SourceLayout  layout;
+    private final SourceLayout layout;
+    private final int maximumCharacters;
     private final StringBuilder written = new StringBuilder();
-    private final StringBuilder line    = new StringBuilder();
-    private       int           depth;
-    /** Whether the next word is joined to what came before: at the start of a line, and after an opening mark. */
-    private       boolean       joinsNext = true;
+    private final StringBuilder line = new StringBuilder();
+    private int depth;
+
+    /**
+     * Whether the next word is joined to what came before: at the start of a line, and after an
+     * opening mark.
+     */
+    private boolean joinsNext = true;
 
     public TextSourceWriter(SourceLayout layout) {
+        this(layout, Integer.MAX_VALUE);
+    }
+
+    public TextSourceWriter(SourceLayout layout, int maximumCharacters) {
+        if (maximumCharacters <= 0) {
+            throw new IllegalArgumentException("The source output limit must be positive");
+        }
         this.layout = layout;
+        this.maximumCharacters = maximumCharacters;
     }
 
     /** A piece's source, laid out by this layout. */
@@ -32,6 +45,7 @@ public final class TextSourceWriter implements SourceWriter {
         if (word == null || word.isEmpty()) {
             return this;
         }
+        requireLineAppend((long) word.length() + (joinsNext ? 0 : layout.wordSeparator().length()));
         if (!joinsNext) {
             line.append(layout.wordSeparator());
         }
@@ -42,6 +56,7 @@ public final class TextSourceWriter implements SourceWriter {
 
     @Override
     public SourceWriter join(String mark) {
+        requireLineAppend(String.valueOf(mark).length());
         line.append(mark);
         joinsNext = false;
         return this;
@@ -49,6 +64,7 @@ public final class TextSourceWriter implements SourceWriter {
 
     @Override
     public SourceWriter opening(String mark) {
+        requireLineAppend(String.valueOf(mark).length());
         line.append(mark);
         joinsNext = true;
         return this;
@@ -84,8 +100,10 @@ public final class TextSourceWriter implements SourceWriter {
         if (number == Math.rint(number) && Math.abs(number) < WHOLE_EXACT) {
             return number((long) number);
         }
-        // Double.toString writes the shortest digits that read back as the same double, plainly between a thousandth and ten
-        // million — a fraction, never a trailing zero —; only past those does it take an exponent, written plain through BigDecimal.
+        // Double.toString writes the shortest digits that read back as the same double, plainly
+        // between a thousandth and ten
+        // million — a fraction, never a trailing zero —; only past those does it take an exponent,
+        // written plain through BigDecimal.
         String shortest = Double.toString(number);
         return shortest.indexOf('E') < 0 ? word(shortest) : number(new BigDecimal(shortest));
     }
@@ -122,6 +140,7 @@ public final class TextSourceWriter implements SourceWriter {
     @Override
     public SourceWriter endLine() {
         if (!line.isEmpty()) {
+            requireLength((long) length() + 1);
             written.append(layout.indentation().repeat(depth)).append(line).append(LINE_BREAK);
             line.setLength(0);
         }
@@ -132,6 +151,7 @@ public final class TextSourceWriter implements SourceWriter {
     @Override
     public SourceWriter blankLine() {
         endLine();
+        requireLength((long) written.length() + 1);
         written.append(LINE_BREAK);
         return this;
     }
@@ -145,22 +165,36 @@ public final class TextSourceWriter implements SourceWriter {
     public SourceWriter block(String opening, String closing, Consumer<SourceWriter> body) {
         word(opening).endLine();
         depth++;
-        body.accept(this);
-        endLine();
-        depth--;
+        try {
+            body.accept(this);
+            endLine();
+        } finally {
+            depth--;
+        }
         return word(closing);
     }
 
     @Override
     public SourceWriter verbatim(String text) {
         endLine();
-        for (String physical : text.split("\n", -1)) {
-            String stripped = physical.endsWith("\r") ? physical.substring(0, physical.length() - 1) : physical;
-            if (stripped.isEmpty()) {
-                written.append(LINE_BREAK);
-            } else {
-                written.append(layout.indentation().repeat(depth)).append(stripped).append(LINE_BREAK);
+        int start = 0;
+        while (true) {
+            int newline = text.indexOf(LINE_BREAK, start);
+            int end = newline < 0 ? text.length() : newline;
+            if (end > start && text.charAt(end - 1) == '\r') {
+                end--;
             }
+            int characters = end - start;
+            long indentation = characters == 0 ? 0 : (long) layout.indentation().length() * depth;
+            requireLength((long) written.length() + indentation + characters + 1);
+            if (characters > 0) {
+                written.append(layout.indentation().repeat(depth)).append(text, start, end);
+            }
+            written.append(LINE_BREAK);
+            if (newline < 0) {
+                break;
+            }
+            start = newline + 1;
         }
         joinsNext = true;
         return this;
@@ -172,5 +206,23 @@ public final class TextSourceWriter implements SourceWriter {
             return written.toString();
         }
         return written + layout.indentation().repeat(depth) + line;
+    }
+
+    @Override
+    public int length() {
+        return written.length()
+                + (line.isEmpty() ? 0 : layout.indentation().length() * depth + line.length());
+    }
+
+    private void requireLineAppend(long additional) {
+        long characters = line.length() + additional;
+        long indentation = characters == 0 ? 0 : (long) layout.indentation().length() * depth;
+        requireLength(written.length() + indentation + characters);
+    }
+
+    private void requireLength(long requested) {
+        if (requested > maximumCharacters) {
+            throw new SourceWritingLimitException(maximumCharacters, requested);
+        }
     }
 }

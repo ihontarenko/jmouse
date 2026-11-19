@@ -115,7 +115,9 @@ public final class JavaAttributeParser implements ParseRule<JavaAttributeInput, 
                             case CLASS -> JvmSignatureRoles.CLASS;
                             case METHOD -> JvmSignatureRoles.METHOD;
                             case FIELD, RECORD_COMPONENT -> JvmSignatureRoles.REFERENCE;
-                            case CODE -> throw bytes.failure("Signature is not a Code attribute");
+                            case CODE, MODULE ->
+                                    throw bytes.failure(
+                                            "Signature is not allowed in this attribute context");
                         };
                 JvmTextNode syntax =
                         JvmTextGrammar.parseEmbedded(
@@ -200,18 +202,18 @@ public final class JavaAttributeParser implements ParseRule<JavaAttributeInput, 
                 List<JavaInnerClassNode> entries = new ArrayList<>(count);
                 for (int index = 0; index < count; index++) {
                     long start = bytes.position();
-                    int value0 = bytes.unsigned16();
-                    int value1 = bytes.unsigned16();
-                    int value2 = bytes.unsigned16();
-                    int value3 = bytes.unsigned16();
+                    int innerClassIndex = bytes.unsigned16();
+                    int outerClassIndex = bytes.unsigned16();
+                    int innerNameIndex = bytes.unsigned16();
+                    int accessFlags = bytes.unsigned16();
                     entries.add(
                             new JavaInnerClassNode(
                                     bytes.source(),
                                     new BytecodeSpan(start, bytes.position()),
-                                    value0,
-                                    value1,
-                                    value2,
-                                    value3));
+                                    innerClassIndex,
+                                    outerClassIndex,
+                                    innerNameIndex,
+                                    accessFlags));
                 }
                 yield new JavaInnerClassesAttributeNode(
                         bytes.source(), input.span(), input.pool(), input.nameIndex(), entries);
@@ -221,77 +223,45 @@ public final class JavaAttributeParser implements ParseRule<JavaAttributeInput, 
                 List<JavaLineNumberNode> entries = new ArrayList<>(count);
                 for (int index = 0; index < count; index++) {
                     long start = bytes.position();
-                    int value0 = bytes.unsigned16();
-                    int value1 = bytes.unsigned16();
+                    int startPc = bytes.unsigned16();
+                    int lineNumber = bytes.unsigned16();
                     entries.add(
                             new JavaLineNumberNode(
                                     bytes.source(),
                                     new BytecodeSpan(start, bytes.position()),
-                                    value0,
-                                    value1));
+                                    startPc,
+                                    lineNumber));
                 }
                 yield new JavaLineNumberTableAttributeNode(
                         bytes.source(), input.span(), input.pool(), input.nameIndex(), entries);
             }
-            case LOCAL_VARIABLE_TABLE -> {
-                int count = bytes.unsigned16();
-                List<JavaLocalVariableNode> entries = new ArrayList<>(count);
-                for (int index = 0; index < count; index++) {
-                    long start = bytes.position();
-                    int value0 = bytes.unsigned16();
-                    int value1 = bytes.unsigned16();
-                    int value2 = bytes.unsigned16();
-                    int value3 = bytes.unsigned16();
-                    int value4 = bytes.unsigned16();
-                    entries.add(
-                            new JavaLocalVariableNode(
-                                    bytes.source(),
-                                    new BytecodeSpan(start, bytes.position()),
-                                    value0,
-                                    value1,
-                                    value2,
-                                    value3,
-                                    value4));
-                }
-                yield new JavaLocalVariableTableAttributeNode(
-                        bytes.source(), input.span(), input.pool(), input.nameIndex(), entries);
-            }
-            case LOCAL_VARIABLE_TYPE_TABLE -> {
-                int count = bytes.unsigned16();
-                List<JavaLocalVariableNode> entries = new ArrayList<>(count);
-                for (int index = 0; index < count; index++) {
-                    long start = bytes.position();
-                    int value0 = bytes.unsigned16();
-                    int value1 = bytes.unsigned16();
-                    int value2 = bytes.unsigned16();
-                    int value3 = bytes.unsigned16();
-                    int value4 = bytes.unsigned16();
-                    entries.add(
-                            new JavaLocalVariableNode(
-                                    bytes.source(),
-                                    new BytecodeSpan(start, bytes.position()),
-                                    value0,
-                                    value1,
-                                    value2,
-                                    value3,
-                                    value4));
-                }
-                yield new JavaLocalVariableTypeTableAttributeNode(
-                        bytes.source(), input.span(), input.pool(), input.nameIndex(), entries);
-            }
+            case LOCAL_VARIABLE_TABLE ->
+                    new JavaLocalVariableTableAttributeNode(
+                            bytes.source(),
+                            input.span(),
+                            input.pool(),
+                            input.nameIndex(),
+                            localVariables(bytes));
+            case LOCAL_VARIABLE_TYPE_TABLE ->
+                    new JavaLocalVariableTypeTableAttributeNode(
+                            bytes.source(),
+                            input.span(),
+                            input.pool(),
+                            input.nameIndex(),
+                            localVariables(bytes));
             case METHOD_PARAMETERS -> {
                 int count = bytes.unsigned8();
                 List<JavaMethodParameterNode> entries = new ArrayList<>(count);
                 for (int index = 0; index < count; index++) {
                     long start = bytes.position();
-                    int value0 = bytes.unsigned16();
-                    int value1 = bytes.unsigned16();
+                    int nameIndex = bytes.unsigned16();
+                    int accessFlags = bytes.unsigned16();
                     entries.add(
                             new JavaMethodParameterNode(
                                     bytes.source(),
                                     new BytecodeSpan(start, bytes.position()),
-                                    value0,
-                                    value1));
+                                    nameIndex,
+                                    accessFlags));
                 }
                 yield new JavaMethodParametersAttributeNode(
                         bytes.source(), input.span(), input.pool(), input.nameIndex(), entries);
@@ -408,6 +378,29 @@ public final class JavaAttributeParser implements ParseRule<JavaAttributeInput, 
                                     new JavaAnnotationInput(bytes, input.pool())));
             case MODULE -> new JavaModuleAttributeParser().parse(input, session);
         };
+    }
+
+    private static List<JavaLocalVariableNode> localVariables(BytesCursor bytes) {
+        int count = bytes.unsigned16();
+        List<JavaLocalVariableNode> entries = new ArrayList<>(count);
+        for (int index = 0; index < count; index++) {
+            long start = bytes.position();
+            int startPc = bytes.unsigned16();
+            int length = bytes.unsigned16();
+            int nameIndex = bytes.unsigned16();
+            int typeIndex = bytes.unsigned16();
+            int slot = bytes.unsigned16();
+            entries.add(
+                    new JavaLocalVariableNode(
+                            bytes.source(),
+                            new BytecodeSpan(start, bytes.position()),
+                            startPc,
+                            length,
+                            nameIndex,
+                            typeIndex,
+                            slot));
+        }
+        return List.copyOf(entries);
     }
 
     private static JavaCodeAttributeNode code(JavaAttributeInput input, ParseSession session) {

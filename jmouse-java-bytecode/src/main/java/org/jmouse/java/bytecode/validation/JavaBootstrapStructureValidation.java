@@ -14,17 +14,7 @@ public final class JavaBootstrapStructureValidation {
             context.at(
                     bootstrap,
                     () -> {
-                        JavaMethodHandleConstantNode handle =
-                                context.constant(
-                                        bootstrap.methodHandleIndex(),
-                                        JavaMethodHandleConstantNode.class);
-                        context.require(
-                                handle.referenceKind() == JvmReferenceKind.REF_INVOKE_STATIC
-                                        || handle.referenceKind()
-                                                == JvmReferenceKind.REF_NEW_INVOKE_SPECIAL,
-                                bootstrap,
-                                "A bootstrap method handle requires invoke-static or"
-                                        + " new-invoke-special");
+                        context.constant(bootstrap.methodHandleIndex(), JavaMethodHandleConstantNode.class);
                         for (int index : bootstrap.argumentIndices()) {
                             context.session().step();
                             JavaInstructionStructureValidation.loadableSlots(

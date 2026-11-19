@@ -24,7 +24,8 @@ public final class JavaStackMapStructureValidation {
         JvmCodeLayout layout = context.codeLayout(node);
         JavaMethodNode method = JvmValidationContext.enclosing(node, JavaMethodNode.class);
         List<Integer> locals = new ArrayList<>();
-        if ((method.accessFlags() & JvmMethodAccessFlag.STATIC.code()) == 0) {
+        if (!method.name().equals(JavaJvmNames.CLASS_INITIALIZER)
+                && (method.accessFlags() & JvmMethodAccessFlag.STATIC.code()) == 0) {
             locals.add(1);
         }
         context.method(method.descriptor())

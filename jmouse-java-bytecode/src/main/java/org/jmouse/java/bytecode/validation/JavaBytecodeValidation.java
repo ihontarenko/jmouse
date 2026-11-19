@@ -111,7 +111,7 @@ public final class JavaBytecodeValidation {
                 rules,
                 JavaNoOperandInstructionNode.KIND,
                 JavaInstructionStructureValidation.class.getName(),
-                JavaInstructionStructureValidation::local);
+                JavaInstructionStructureValidation::noOperand);
         bindInstruction(
                 rules,
                 JavaImmediateInstructionNode.KIND,
@@ -234,14 +234,14 @@ public final class JavaBytecodeValidation {
                 JavaModuleConstantNode.KIND,
                 (node, context) -> {
                     moduleConstant(node, context);
-                    context.utf8(node.nameIndex());
+                    JavaModuleStructureValidation.moduleName(node.index(), context);
                 });
         bind(
                 rules,
                 JavaPackageConstantNode.KIND,
                 (node, context) -> {
                     moduleConstant(node, context);
-                    context.utf8(node.nameIndex());
+                    JavaModuleStructureValidation.packageName(node.index(), context);
                 });
         return rules;
     }

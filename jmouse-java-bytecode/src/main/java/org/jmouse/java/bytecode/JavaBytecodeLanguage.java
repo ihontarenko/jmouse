@@ -9,6 +9,7 @@ import org.jmouse.java.bytecode.grammar.JavaAnnotationParser;
 import org.jmouse.java.bytecode.grammar.JavaAnnotationValueParser;
 import org.jmouse.java.bytecode.grammar.JavaAttributeInput;
 import org.jmouse.java.bytecode.grammar.JavaAttributeParser;
+import org.jmouse.java.bytecode.grammar.JavaAttributePolicy;
 import org.jmouse.java.bytecode.grammar.JavaBytecodeRoles;
 import org.jmouse.java.bytecode.grammar.JavaConstantInput;
 import org.jmouse.java.bytecode.grammar.JavaConstantParser;
@@ -16,6 +17,7 @@ import org.jmouse.java.bytecode.grammar.JavaInstructionParser;
 import org.jmouse.java.bytecode.grammar.JavaStackMapFrameParser;
 import org.jmouse.java.bytecode.grammar.JavaTypeAnnotationParser;
 import org.jmouse.java.bytecode.grammar.JavaVerificationTypeParser;
+import org.jmouse.java.bytecode.grammar.JvmStandardAttributePolicy;
 import org.jmouse.java.bytecode.node.attribute.JavaAttributeNode;
 import org.jmouse.java.bytecode.node.constant.JavaConstantNode;
 import org.jmouse.java.bytecode.signature.JvmSignatureParser;
@@ -40,6 +42,7 @@ public final class JavaBytecodeLanguage {
 
     private final BytecodeProfile profile;
     private final Lexer textLexer;
+    private final JavaAttributePolicy attributePolicy;
     private final NodeOperationRegistry<JvmValidationContext, JvmValidationOutcome> validations;
     private final ParseRuleRegistry rules;
     private final Map<String, ParseRole<JavaAttributeInput, JavaAttributeNode>> attributes;
@@ -48,6 +51,7 @@ public final class JavaBytecodeLanguage {
     private JavaBytecodeLanguage(Builder builder) {
         profile = Objects.requireNonNull(builder.profile, "profile");
         textLexer = Objects.requireNonNull(builder.textLexer, "textLexer");
+        attributePolicy = Objects.requireNonNull(builder.attributePolicy, "attributePolicy");
         validations = builder.validations.snapshot();
         rules = builder.rules.snapshot();
         attributes = Map.copyOf(builder.attributes);
@@ -74,6 +78,10 @@ public final class JavaBytecodeLanguage {
         return textLexer;
     }
 
+    public JavaAttributePolicy attributePolicy() {
+        return attributePolicy;
+    }
+
     public NodeOperationRegistry<JvmValidationContext, JvmValidationOutcome> validations() {
         return validations;
     }
@@ -98,6 +106,7 @@ public final class JavaBytecodeLanguage {
     public static final class Builder {
         private BytecodeProfile profile;
         private Lexer textLexer;
+        private JavaAttributePolicy attributePolicy;
         private final NodeOperationRegistry<JvmValidationContext, JvmValidationOutcome> validations;
         private final ParseRuleRegistry rules;
         private final Map<String, ParseRole<JavaAttributeInput, JavaAttributeNode>> attributes;
@@ -109,6 +118,7 @@ public final class JavaBytecodeLanguage {
                     new BytecodeProfile(
                             catalog.defaultRelease(), PreviewPolicy.disabled(), catalog);
             textLexer = new JvmTextLexer();
+            attributePolicy = new JvmStandardAttributePolicy();
             validations = JavaBytecodeValidation.standardRules();
             rules = JvmSignatureParser.standardRules();
             attributes = new HashMap<>();
@@ -118,6 +128,7 @@ public final class JavaBytecodeLanguage {
         private Builder(JavaBytecodeLanguage language) {
             profile = language.profile;
             textLexer = language.textLexer;
+            attributePolicy = language.attributePolicy;
             validations = language.validations.fork();
             rules = language.rules.fork();
             attributes = new HashMap<>(language.attributes);
@@ -140,6 +151,11 @@ public final class JavaBytecodeLanguage {
 
         public ParseRuleRegistry rules() {
             return rules;
+        }
+
+        public Builder attributePolicy(JavaAttributePolicy policy) {
+            attributePolicy = Objects.requireNonNull(policy, "policy");
+            return this;
         }
 
         public Builder attribute(

@@ -10,16 +10,16 @@ import java.util.List;
 public final class JvmMethodSignatureNode extends JvmTextNode {
     public static final NodeKind<JvmMethodSignatureNode> KIND =
             new NodeKind<>(JvmTextNames.METHOD_SIGNATURE, JvmMethodSignatureNode.class);
-    public static final ChildRole<JvmTypeParameterNode> TYPEPARAMETERS =
+    public static final ChildRole<JvmTypeParameterNode> TYPE_PARAMETERS =
             ChildRole.list(JvmTextNames.TYPE_PARAMETERS, JvmTypeParameterNode.class);
     public static final ChildRole<JvmTypeSyntaxNode> PARAMETERS =
             ChildRole.list(JvmTextNames.PARAMETERS, JvmTypeSyntaxNode.class);
     public static final ChildRole<JvmTypeSyntaxNode> RESULT =
             ChildRole.required(JvmTextNames.RESULT, JvmTypeSyntaxNode.class);
-    public static final ChildRole<JvmThrowsSignatureNode> THROWNTYPES =
+    public static final ChildRole<JvmThrowsSignatureNode> THROWN_TYPES =
             ChildRole.list(JvmTextNames.THROWN_TYPES, JvmThrowsSignatureNode.class);
     public static final NodeSchema<JvmMethodSignatureNode> SCHEMA =
-            NodeSchema.of(KIND, TYPEPARAMETERS, PARAMETERS, RESULT, THROWNTYPES);
+            NodeSchema.of(KIND, TYPE_PARAMETERS, PARAMETERS, RESULT, THROWN_TYPES);
 
     public JvmMethodSignatureNode(
             TokenizableSource source,
@@ -31,14 +31,14 @@ public final class JvmMethodSignatureNode extends JvmTextNode {
             List<JvmThrowsSignatureNode> thrownTypes) {
         super(SCHEMA, source, start, end);
 
-        typeParameters.forEach(value -> addChild(TYPEPARAMETERS, value));
+        typeParameters.forEach(value -> addChild(TYPE_PARAMETERS, value));
         parameters.forEach(value -> addChild(PARAMETERS, value));
         setChild(RESULT, result);
-        thrownTypes.forEach(value -> addChild(THROWNTYPES, value));
+        thrownTypes.forEach(value -> addChild(THROWN_TYPES, value));
     }
 
     public List<JvmTypeParameterNode> typeParameters() {
-        return children(TYPEPARAMETERS);
+        return children(TYPE_PARAMETERS);
     }
 
     public List<JvmTypeSyntaxNode> parameters() {
@@ -50,6 +50,6 @@ public final class JvmMethodSignatureNode extends JvmTextNode {
     }
 
     public List<JvmThrowsSignatureNode> thrownTypes() {
-        return children(THROWNTYPES);
+        return children(THROWN_TYPES);
     }
 }

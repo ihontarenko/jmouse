@@ -8,6 +8,7 @@ import org.jmouse.java.bytecode.vocabulary.JvmMethodAccessFlag;
 import org.jmouse.java.model.descriptor.JavaClassDescriptor;
 import org.jmouse.java.model.descriptor.JavaMethodDescriptor;
 import org.jmouse.java.model.descriptor.JavaTypeDescriptor;
+import org.jmouse.java.model.symbol.JavaJvmNames;
 
 public final class JavaCodeStructureValidation {
     private JavaCodeStructureValidation() {}
@@ -19,7 +20,12 @@ public final class JavaCodeStructureValidation {
         JavaMethodDescriptor descriptor = context.method(method.descriptor());
         int slots =
                 descriptor.parameters().stream().mapToInt(JavaTypeDescriptor::parameterSlots).sum()
-                        + ((method.accessFlags() & JvmMethodAccessFlag.STATIC.code()) != 0 ? 0 : 1);
+                        + (method.name().equals(JavaJvmNames.CLASS_INITIALIZER)
+                                        || (method.accessFlags()
+                                                        & JvmMethodAccessFlag.STATIC.code())
+                                                != 0
+                                ? 0
+                                : 1);
         context.require(
                 node.maximumLocals() >= slots,
                 node,

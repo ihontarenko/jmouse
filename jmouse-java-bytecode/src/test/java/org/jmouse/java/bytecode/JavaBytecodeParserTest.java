@@ -8,6 +8,9 @@ import org.jmouse.java.bytecode.node.attribute.JavaBootstrapMethodsAttributeNode
 import org.jmouse.java.bytecode.node.attribute.JavaCodeAttributeNode;
 import org.jmouse.java.bytecode.node.attribute.JavaStackMapTableAttributeNode;
 import org.jmouse.java.bytecode.node.constant.JavaUtf8ConstantNode;
+import org.jmouse.java.bytecode.node.constant.JavaMethodHandleConstantNode;
+import org.jmouse.java.bytecode.node.constant.JavaFieldReferenceConstantNode;
+import org.jmouse.java.bytecode.vocabulary.JvmReferenceKind;
 import org.jmouse.java.bytecode.node.instruction.JavaBranchInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaConstantInstructionNode;
 import org.jmouse.java.bytecode.vocabulary.JvmOpcode;
@@ -20,6 +23,39 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 class JavaBytecodeParserTest {
+    @Test
+    void bootstrapHandleInvocationCompatibilityIsDeferredToBootstrapResolution() throws Exception {
+        byte[] bytes;
+        try (InputStream input = ComplexFixture.class.getResourceAsStream("JavaBytecodeParserTest$ComplexFixture.class")) {
+            bytes = input.readAllBytes();
+        }
+        JavaClassFileNode root = new JavaBytecodeParser().parse("ComplexFixture.class", bytes).requireComplete();
+        JavaBootstrapMethodsAttributeNode table = root.attributes().stream().filter(JavaBootstrapMethodsAttributeNode.class::isInstance)
+                .map(JavaBootstrapMethodsAttributeNode.class::cast).findFirst().orElseThrow();
+        JavaMethodHandleConstantNode handle = root.pool().require(table.entries().getFirst().methodHandleIndex(), JavaMethodHandleConstantNode.class);
+        int field = root.pool().entries().stream().filter(JavaFieldReferenceConstantNode.class::isInstance).findFirst().orElseThrow().index();
+        int offset = Math.toIntExact(handle.span().start());
+        bytes[offset + 1] = (byte) JvmReferenceKind.REF_GET_FIELD.code();
+        bytes[offset + 2] = (byte) (field >>> Byte.SIZE);
+        bytes[offset + 3] = (byte) field;
+        assertDoesNotThrow(() -> new JavaBytecodeParser().parse("deferred-bootstrap.class", bytes).requireComplete());
+    }
+
+    @Test
+    void aReturnInstructionMustMatchTheMethodsErasedResultType() throws Exception {
+        byte[] bytes;
+        try (InputStream input = Fixture.class.getResourceAsStream("JavaBytecodeParserTest$Fixture.class")) {
+            bytes = input.readAllBytes();
+        }
+        JavaClassFileNode root = new JavaBytecodeParser().parse("Fixture.class", bytes).requireComplete();
+        JavaCodeAttributeNode code = root.methods().stream().filter(method -> method.name().equals("value"))
+                .flatMap(method -> method.attributes().stream()).filter(JavaCodeAttributeNode.class::isInstance)
+                .map(JavaCodeAttributeNode.class::cast).findFirst().orElseThrow();
+        int offset = Math.toIntExact(code.instructions().getLast().span().start());
+        bytes[offset] = (byte) JvmOpcode.RETURN.code();
+        assertThrows(IllegalArgumentException.class, () -> new JavaBytecodeParser().parse("wrong-return.class", bytes));
+    }
+
     @Test
     void obsoleteSubroutinesAreRejectedInModernClassfileVersions() throws Exception {
         byte[] bytes;

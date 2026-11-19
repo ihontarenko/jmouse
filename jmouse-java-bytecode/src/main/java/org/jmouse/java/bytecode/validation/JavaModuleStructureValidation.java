@@ -6,6 +6,7 @@ import org.jmouse.java.bytecode.node.constant.JavaModuleConstantNode;
 import org.jmouse.java.bytecode.node.constant.JavaPackageConstantNode;
 import org.jmouse.java.bytecode.vocabulary.JvmClassAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmModuleAccessFlag;
+import org.jmouse.java.bytecode.vocabulary.JvmModuleNames;
 import org.jmouse.java.model.descriptor.JavaClassDescriptor;
 
 import java.util.HashSet;
@@ -102,9 +103,7 @@ public final class JavaModuleStructureValidation {
 
     public static String moduleName(int index, JvmValidationContext context) {
         JavaModuleConstantNode module = context.constant(index, JavaModuleConstantNode.class);
-        String name = context.utf8(module.nameIndex());
-        context.require(!name.isEmpty(), module, "A module name cannot be empty");
-        return name;
+        return JvmModuleNames.decode(context.utf8(module.nameIndex()));
     }
 
     public static String packageName(int index, JvmValidationContext context) {
