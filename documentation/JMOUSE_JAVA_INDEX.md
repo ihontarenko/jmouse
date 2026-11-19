@@ -1,7 +1,7 @@
 # jmouse-java-index
 
 Reusable source-code index and resolvers, without I/O, Spring or a global materialized graph.
-Depends on `jmouse-java-parser`. Coordinates: `org.jmouse:jmouse-java-index:1.0.1`.
+Depends on `jmouse-java`. Coordinates: `org.jmouse:jmouse-java-index:1.0.1`.
 
 ## File contributions
 

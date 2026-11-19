@@ -39,6 +39,22 @@ public final class Ways {
         return (point.x() - from.x()) * way.x() + (point.y() - from.y()) * way.y();
     }
 
+    /** How far from a step, as a share of its length, two lines may meet and still be turning there rather than running on beside each other. */
+    private static final double FARTHEST_MEETING = 4;
+
+    /** The least distance a meeting is measured against, in millimetres. */
+    private static final double NEAREST_MEETING = 1e-3;
+
+    /**
+     * Where the lines through a step's two ends, each going its way, meet as a turn of the line: near the step. Lines meeting far from
+     * it — nearly parallel, as an import leaves two runs that are one direction a hair apart — run on beside each other; empty.
+     */
+    public static Optional<Point> turnAt(Point end, Point endWay, Point start, Point startWay) {
+        Point halfway = end.halfwayTo(start);
+        double farthest = Math.max(end.distanceTo(start) * FARTHEST_MEETING, NEAREST_MEETING);
+        return crossingOf(end, endWay, start, startWay).filter(point -> point.distanceTo(halfway) <= farthest);
+    }
+
     /** Where the lines through two points, each going a way, cross; empty for lines that run together. */
     public static Optional<Point> crossingOf(Point first, Point firstWay, Point second, Point secondWay) {
         // Ways are unit lengths, so this is the sine of the angle between them.

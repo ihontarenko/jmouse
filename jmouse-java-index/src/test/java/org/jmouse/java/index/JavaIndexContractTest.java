@@ -2,17 +2,21 @@ package org.jmouse.java.index;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.jmouse.java.index.binary.ClassFileIndexer;
 import org.jmouse.java.parser.JavaParser;
 import org.jmouse.java.parser.model.BodyReference;
+import org.jmouse.java.parser.model.ExecutableBody;
 import org.jmouse.java.parser.source.ParseProblem;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 class JavaIndexContractTest {
     private final JavaParser parser = new JavaParser();
 
-    protected FileIndex file(String source, String text) {
+    private FileIndex file(String source, String text) {
         return FileIndex.of(parser.parse(source, text, JavaParser.Level.EXPRESSIONS));
     }
 
@@ -43,7 +47,7 @@ class JavaIndexContractTest {
                     + "/** See {@link Service#run(int)}. */\r\n"
                     + "class Service { int count; void run(int value) { this.count += value; } }";
         FileIndex file = file("Service.java", text);
-        var occurrences = SourceReferences.of(file);
+        List<SourceReference> occurrences = SourceReferences.of(file);
         assertTrue(
                 occurrences.stream()
                         .anyMatch(
@@ -76,7 +80,7 @@ class JavaIndexContractTest {
                             + " service.run(\"text\"); other.run(2); } }");
         CodeIndex symbols = new CodeIndex();
         symbols.put(file);
-        var targets =
+        List<String> targets =
                 file.bodies().stream()
                         .flatMap(body -> body.references().stream())
                         .filter(
@@ -111,7 +115,7 @@ class JavaIndexContractTest {
         assertTrue(
                 file.problems().stream()
                         .allMatch(problem -> problem.phase() == ParseProblem.Phase.BODY));
-        var broken =
+        ExecutableBody broken =
                 file.bodies().stream()
                         .filter(body -> body.owner().value().contains("broken"))
                         .findFirst()
@@ -138,7 +142,7 @@ class JavaIndexContractTest {
                                 + " absent; void use() { run(missing); } }");
         CodeIndex symbols = new CodeIndex();
         symbols.put(file);
-        var call =
+        BodyReference call =
                 file.bodies().stream()
                         .flatMap(body -> body.references().stream())
                         .filter(reference -> reference.name().equals("run"))
@@ -173,7 +177,7 @@ class JavaIndexContractTest {
                             + " Caller { void use(First target) { work(1); { Second target = new"
                             + " Second(); target.run(2); } target.run(3); } }");
         symbols.put(caller);
-        var targets =
+        List<String> targets =
                 caller.bodies().stream()
                         .flatMap(body -> body.references().stream())
                         .filter(reference -> reference.role() == BodyReference.Role.CALLS)
@@ -203,14 +207,14 @@ class JavaIndexContractTest {
                                 + " {} Object reference() { return this::run; } }");
         CodeIndex symbols = new CodeIndex();
         symbols.put(file);
-        var variable =
+        IndexedReference variable =
                 file.references().stream()
                         .filter(reference -> reference.name().equals("T"))
                         .findFirst()
                         .orElseThrow();
         assertInstanceOf(
                 Resolution.TypeVariable.class, new TypeResolver(symbols).resolve(file, variable));
-        var reference =
+        BodyReference reference =
                 file.bodies().stream()
                         .flatMap(body -> body.references().stream())
                         .filter(item -> item.role() == BodyReference.Role.METHOD_REFERENCE)
@@ -226,9 +230,9 @@ class JavaIndexContractTest {
     @Test
     void binaryDeclarationsAndExternalSymbolsUseTheSameLookupContract() throws Exception {
         FileIndex external;
-        try (var bytes = java.util.List.class.getResourceAsStream("List.class")) {
+        try (InputStream bytes = List.class.getResourceAsStream("List.class")) {
             external =
-                    new org.jmouse.java.index.binary.ClassFileIndexer()
+                    new ClassFileIndexer()
                             .index("jdk/java/util/List.class", bytes.readAllBytes())
                             .file();
         }
@@ -237,16 +241,52 @@ class JavaIndexContractTest {
                 new ExternalSymbols(
                         name ->
                                 name.equals("java.util.List")
-                                        ? java.util.Optional.of(external)
-                                        : java.util.Optional.empty()));
+                                        ? Optional.of(external)
+                                        : Optional.empty()));
         FileIndex consumer =
                 file("Consumer.java", "import java.util.List; class Consumer { List values; }");
         assertInstanceOf(
                 Resolution.Resolved.class,
                 new TypeResolver(symbols).resolve(consumer, consumer.references().getFirst()));
-        var list = symbols.findTypes("java.util.List").getFirst();
+        TypeSymbol list = symbols.findTypes("java.util.List").getFirst();
         assertTrue(
                 symbols.findMembers(list).stream()
                         .anyMatch(member -> member.name().equals("size")));
+    }
+
+    @Test
+    void aLocalClassCanResolveItsOwnMethodsWithoutBecomingAPackageType() {
+        FileIndex indexed =
+                file(
+                        "Example.java",
+                        "class Example { void use() { class Local { void run() {} void inside() {"
+                                + " run(); } } Local value = new Local(); value.run(); } }");
+        CodeIndex symbols = new CodeIndex();
+        symbols.put(indexed);
+        BodyReference inside =
+                indexed.bodies().stream()
+                        .flatMap(body -> body.references().stream())
+                        .filter(
+                                reference ->
+                                        reference.role() == BodyReference.Role.CALLS
+                                                && reference.name().equals("run"))
+                        .filter(reference -> reference.owner().value().contains("inside"))
+                        .findFirst()
+                        .orElseThrow();
+
+        assertInstanceOf(
+                MemberResolution.Resolved.class, symbols.resolveMember(indexed.source(), inside));
+        indexed.bodies().stream()
+                .flatMap(body -> body.references().stream())
+                .filter(
+                        reference ->
+                                reference.role() == BodyReference.Role.CALLS
+                                        && reference.name().equals("run"))
+                .forEach(
+                        reference ->
+                                assertInstanceOf(
+                                        MemberResolution.Resolved.class,
+                                        symbols.resolveMember(indexed.source(), reference)));
+        assertEquals(0, symbols.findTypes("Local").size());
     }
 }

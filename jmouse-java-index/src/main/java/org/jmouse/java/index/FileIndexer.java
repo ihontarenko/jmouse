@@ -3,6 +3,7 @@ package org.jmouse.java.index;
 import org.jmouse.java.parser.model.ConstructorDeclaration;
 import org.jmouse.java.parser.model.Declaration;
 import org.jmouse.java.parser.model.JavaSourceFile;
+import org.jmouse.java.parser.model.LocalTypeDeclaration;
 import org.jmouse.java.parser.model.MethodDeclaration;
 import org.jmouse.java.parser.model.SymbolId;
 import org.jmouse.java.parser.model.TypeDeclaration;
@@ -11,6 +12,7 @@ import org.jmouse.java.parser.model.TypeReference;
 import org.jmouse.java.parser.source.SourceSpan;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -26,6 +28,18 @@ final class FileIndexer {
         for (TypeDeclaration type : file.types()) {
             collect(type, null, declarations);
         }
+        for (LocalTypeDeclaration type : file.localTypes()) {
+            collect(type.declaration(), type.enclosing(), declarations);
+        }
+        declarations.sort(
+                Comparator.comparingInt(
+                                (IndexedDeclaration declaration) ->
+                                        declaration.span().start().offset())
+                        .thenComparing(
+                                Comparator.comparingInt(
+                                                (IndexedDeclaration declaration) ->
+                                                        declaration.span().end().offset())
+                                        .reversed()));
         List<IndexedReference> references = new ArrayList<>();
         for (TypeReference reference : file.typeReferences()) {
             references.add(
@@ -49,7 +63,9 @@ final class FileIndexer {
                 file.problems(),
                 members,
                 file.bodies(),
-                file.javaDocs());
+                file.javaDocs(),
+                file.localTypes(),
+                file.coverage());
     }
 
     private static void collect(

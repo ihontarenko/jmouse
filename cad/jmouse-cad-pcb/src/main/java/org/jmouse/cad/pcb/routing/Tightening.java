@@ -67,7 +67,8 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
             if (inWay.isEmpty() || outWay.isEmpty()) {
                 continue;
             }
-            Optional<Point> met = Ways.crossingOf(previous, inWay.get(), next, outWay.get());
+            // Where the runs either side turn into each other; runs a hair from one direction run on beside each other: a step out of line.
+            Optional<Point> met = Ways.turnAt(first, inWay.get(), second, outWay.get());
             if (met.isPresent()) {
                 Point settled = Precision.settled(met.get());
                 List<Point> replaced = Polylines.joined(line.subList(0, at), List.of(settled), line.subList(at + 2, line.size()));

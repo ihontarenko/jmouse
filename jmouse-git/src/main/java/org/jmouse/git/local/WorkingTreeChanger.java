@@ -1,6 +1,10 @@
 package org.jmouse.git.local;
 
+import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeCommand;
+import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -9,6 +13,7 @@ import org.eclipse.jgit.errors.LargeObjectException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
@@ -102,6 +107,76 @@ final class WorkingTreeChanger {
         } catch (IOException | GitAPIException exception) {
             throw JGitLocalGit.storage("The branch could not be switched to.");
         }
+    }
+
+    /**
+     * Another branch brought into the one in hand: moved up to it where the one in hand has nothing of its own, else joined by a merge
+     * commit by `author` — the repository's own identity where none is given. Refused over changes in hand; where the two changed the
+     * same lines, refused with the files named, and nothing is changed: the repository is left as it was.
+     */
+    synchronized MergeOutcome mergeBranch(Path directory, String name, CommitAuthor author) {
+        try (Repository repository = RepositoryAccess.require(directory)) {
+            requireSafe(repository);
+            requireNoOwnFilter(repository);
+            String reference = Constants.R_HEADS + name;
+            Ref other = name == null || !Repository.isValidRefName(reference) ? null : repository.exactRef(reference);
+            if (other == null) {
+                throw new LocalGitException(LocalGitException.Reason.NOT_FOUND, "There is no branch '" + name + "'.");
+            }
+            String into = repository.getBranch();
+            if (reference.equals(repository.getFullBranch())) {
+                throw new LocalGitException(LocalGitException.Reason.CONFLICT, "A branch is not brought into itself.");
+            }
+            Git git = Git.wrap(repository);
+            int changed = trackedChanges(git.status().call());
+            if (changed > 0) {
+                throw new LocalGitException(LocalGitException.Reason.CONFLICT,
+                        "Commit or take back the " + changed + " changed file" + (changed == 1 ? "" : "s") + " first.");
+            }
+            if (author == null && !GitAuthor.read(repository).configured()) {
+                throw new LocalGitException(LocalGitException.Reason.IDENTITY_REQUIRED, "Configure Git user.name and user.email before merging.");
+            }
+            MergeResult merged = git.merge().include(other).setCommit(false).setFastForward(MergeCommand.FastForwardMode.FF).call();
+            return switch (merged.getMergeStatus()) {
+                case ALREADY_UP_TO_DATE -> new MergeOutcome(name, into, MergeOutcome.State.ALREADY_HERE, headOf(repository));
+                case FAST_FORWARD -> new MergeOutcome(name, into, MergeOutcome.State.FAST_FORWARD, headOf(repository));
+                case MERGED_NOT_COMMITTED -> {
+                    CommitCommand commit = git.commit().setMessage("Merge branch '" + name + "' into '" + into + "'").setNoVerify(true).setSign(false);
+                    if (author != null) {
+                        PersonIdent person = new PersonIdent(author.name(), author.email());
+                        commit.setAuthor(person).setCommitter(person);
+                    }
+                    yield new MergeOutcome(name, into, MergeOutcome.State.MERGED, commit.call().name());
+                }
+                case CONFLICTING -> {
+                    List<String> files = merged.getConflicts() == null ? List.of() : List.copyOf(merged.getConflicts().keySet());
+                    abandonMerge(git, repository);
+                    throw new LocalGitException(LocalGitException.Reason.CONFLICT, "'" + name + "' and '" + into + "' changed the same lines of "
+                            + String.join(", ", files) + ". Nothing was changed.");
+                }
+                default -> {
+                    abandonMerge(git, repository);
+                    throw new LocalGitException(LocalGitException.Reason.CONFLICT, "It could not be brought in: " + merged.getMergeStatus() + ". Nothing was changed.");
+                }
+            };
+        } catch (CheckoutConflictException exception) {
+            throw new LocalGitException(LocalGitException.Reason.CONFLICT,
+                    "New files here would be overwritten by that branch: " + String.join(", ", exception.getConflictingPaths()));
+        } catch (IOException | GitAPIException exception) {
+            throw JGitLocalGit.storage("The branch could not be brought in.");
+        }
+    }
+
+    /** A merge left half done put away: the working tree and the index back at the branch's head, no merge in hand. */
+    private static void abandonMerge(Git git, Repository repository) throws GitAPIException, IOException {
+        repository.writeMergeCommitMsg(null);
+        repository.writeMergeHeads(null);
+        git.reset().setMode(ResetCommand.ResetType.HARD).setRef(Constants.HEAD).call();
+    }
+
+    private static String headOf(Repository repository) throws IOException {
+        ObjectId head = repository.resolve(Constants.HEAD);
+        return head == null ? "" : head.name();
     }
 
     /**

@@ -1,4 +1,4 @@
-# jmouse-java-parser
+# jmouse-java
 
 Structural Java parser: a `.java` text goes in; the package, imports, every type (nested ones included)
 and every member come out — modifiers, annotations, type parameters, parameters, `throws`, the signature
@@ -11,7 +11,7 @@ It is built on the jME (`jmouse-el`) lexing and tree contracts — `Token`, `Tok
 `Visitor` — and adds the Java grammar, source ranges and an immutable record projection on top. No
 Spring, persistence or product code. Depends on `jmouse-el` only (which brings `jmouse-core`).
 
-Coordinates: `org.jmouse:jmouse-java-parser:1.0.1`. Tracked as `JMF-347`; first adopter Raccoon
+Coordinates: `org.jmouse:jmouse-java:1.0.1`. Tracked as `JMF-347`; first adopter Raccoon
 (`COON-23`).
 
 ## Why a module of its own
@@ -103,7 +103,7 @@ most 64 deep.
 
 ## Declaration baseline verification (initial release)
 
-`mvn -o -q install -pl jmouse-java-parser -am` — 38 JUnit tests, no network:
+`mvn -o -q install -pl jmouse-java -am` — 38 JUnit tests, no network:
 
 - every construct: package/imports (static, wildcard), all five type kinds, sealed/non-sealed/permits,
   nested types, multi-declarator fields, generic methods with bounds, varargs, receiver parameters,

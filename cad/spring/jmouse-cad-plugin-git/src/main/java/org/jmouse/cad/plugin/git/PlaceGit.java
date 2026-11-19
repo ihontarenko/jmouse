@@ -12,6 +12,7 @@ import org.jmouse.git.local.CommitSelection.SelectedFile;
 import org.jmouse.git.local.CommitSelection;
 import org.jmouse.git.local.LocalGit;
 import org.jmouse.git.local.LocalGitException;
+import org.jmouse.git.local.MergeOutcome;
 import org.jmouse.git.local.PushOutcome;
 import org.jmouse.git.local.WorkingTreeDiff;
 import org.jmouse.git.local.WorkingTreeStatus;
@@ -162,7 +163,7 @@ public final class PlaceGit {
         return told(() -> git.status(folder, author()));
     }
 
-    /** The mount moved to a branch; the status it leaves. */
+    /** The place moved to a branch; the status it leaves. */
     public WorkingTreeStatus switchBranch(GitPlace place, String name) {
         Path folder = folders.changeable(place);
         told(() -> {
@@ -170,6 +171,17 @@ public final class PlaceGit {
             return null;
         });
         return told(() -> git.status(folder, author()));
+    }
+
+    /** What bringing a branch in came to, and the status it leaves. */
+    public record Merged(MergeOutcome outcome, WorkingTreeStatus status) {
+    }
+
+    /** Another branch brought into the one the place is on, by the signed-in person; what it came to, and the status it leaves. */
+    public Merged mergeBranch(GitPlace place, String name) {
+        Path folder = folders.changeable(place);
+        MergeOutcome outcome = told(() -> git.mergeBranch(folder, name, author()));
+        return new Merged(outcome, told(() -> git.status(folder, author())));
     }
 
     /** A file put back as its last commit has it, at the version the reader was shown; the status it leaves. */

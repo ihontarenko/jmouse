@@ -767,7 +767,12 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-java-parser</artifactId>
+                <artifactId>jmouse-java</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-analysis</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>

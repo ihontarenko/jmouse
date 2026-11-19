@@ -3,6 +3,7 @@ package org.jmouse.el.lexer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A view of a cursor that ends where a {@link Boundary} says — the stream goes on, but not for whoever reads through
@@ -31,12 +32,18 @@ public final class BoundedTokenCursor implements TokenCursor {
 
     private final TokenCursor cursor;
     private final Boundary boundary;
+    private final TokenNesting nesting;
     private final int start;
     private int limit = -1;
 
     public BoundedTokenCursor(TokenCursor cursor, Boundary boundary) {
-        this.cursor = cursor;
-        this.boundary = boundary;
+        this(cursor, boundary, TokenNesting.standard());
+    }
+
+    public BoundedTokenCursor(TokenCursor cursor, Boundary boundary, TokenNesting nesting) {
+        this.cursor = Objects.requireNonNull(cursor, "cursor");
+        this.boundary = Objects.requireNonNull(boundary, "boundary");
+        this.nesting = Objects.requireNonNull(nesting, "nesting");
         this.start = cursor.position();
     }
 
@@ -194,12 +201,7 @@ public final class BoundedTokenCursor implements TokenCursor {
                 limit = position;
                 return limit;
             }
-            Token.Type type = token.type();
-            if (type == BasicToken.T_OPEN_PAREN || type == BasicToken.T_OPEN_BRACKET) {
-                depth++;
-            } else if (type == BasicToken.T_CLOSE_PAREN || type == BasicToken.T_CLOSE_BRACKET) {
-                depth--;
-            }
+            depth += nesting.depthChange(token.type());
         }
         limit = cursor.total();
         return limit;

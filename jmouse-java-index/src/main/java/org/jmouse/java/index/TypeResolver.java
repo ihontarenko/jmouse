@@ -1,9 +1,12 @@
 package org.jmouse.java.index;
 
 import org.jmouse.java.parser.model.ImportDeclaration;
+import org.jmouse.java.parser.model.LocalTypeDeclaration;
+import org.jmouse.java.parser.model.LocalTypeKind;
 import org.jmouse.java.parser.model.SymbolId;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +99,19 @@ public final class TypeResolver {
      */
     private Optional<Resolution> resolveInScope(
             FileIndex file, IndexedReference reference, String name) {
+        Optional<LocalTypeDeclaration> local =
+                file.localTypes().stream()
+                        .filter(
+                                type ->
+                                        type.kind() == LocalTypeKind.NAMED
+                                                && type.declaration().name().equals(name)
+                                                && type.scope().contains(reference.span())
+                                                && type.declaration().nameSpan().start().offset()
+                                                        <= reference.span().start().offset())
+                        .min(Comparator.comparingInt(type -> type.scope().length()));
+        if (local.isPresent()) {
+            return Optional.of(byCanonicalName(local.get().declaration().qualifiedName(), name));
+        }
         Optional<IndexedDeclaration> owner =
                 Optional.ofNullable(reference.owner()).flatMap(file::declaration);
         // A method's variables, or — for a reference in a type's own header — that type's

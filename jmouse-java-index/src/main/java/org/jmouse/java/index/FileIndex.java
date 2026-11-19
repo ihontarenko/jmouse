@@ -5,12 +5,15 @@ import org.jmouse.java.parser.model.ExecutableBody;
 import org.jmouse.java.parser.model.ImportDeclaration;
 import org.jmouse.java.parser.model.JavaDoc;
 import org.jmouse.java.parser.model.JavaSourceFile;
+import org.jmouse.java.parser.model.LocalTypeDeclaration;
 import org.jmouse.java.parser.model.SymbolId;
+import org.jmouse.java.parser.source.JavaSourceCoverage;
 import org.jmouse.java.parser.source.ParseProblem;
 import org.jmouse.java.parser.source.ParseValidity;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -34,9 +37,59 @@ public record FileIndex(
         List<ParseProblem> problems,
         List<MemberSymbol> members,
         List<ExecutableBody> bodies,
-        List<JavaDoc> javaDocs) {
+        List<JavaDoc> javaDocs,
+        List<LocalTypeDeclaration> localTypes,
+        JavaSourceCoverage coverage) {
 
-    public static final String REVISION = "3";
+    public FileIndex(
+            String source,
+            String packageName,
+            List<ImportDeclaration> imports,
+            List<IndexedDeclaration> declarations,
+            List<IndexedReference> references,
+            List<ParseProblem> problems,
+            List<MemberSymbol> members,
+            List<ExecutableBody> bodies,
+            List<JavaDoc> javaDocs,
+            List<LocalTypeDeclaration> localTypes) {
+        this(
+                source,
+                packageName,
+                imports,
+                declarations,
+                references,
+                problems,
+                members,
+                bodies,
+                javaDocs,
+                localTypes,
+                JavaSourceCoverage.unspecified());
+    }
+
+    public FileIndex(
+            String source,
+            String packageName,
+            List<ImportDeclaration> imports,
+            List<IndexedDeclaration> declarations,
+            List<IndexedReference> references,
+            List<ParseProblem> problems,
+            List<MemberSymbol> members,
+            List<ExecutableBody> bodies,
+            List<JavaDoc> javaDocs) {
+        this(
+                source,
+                packageName,
+                imports,
+                declarations,
+                references,
+                problems,
+                members,
+                bodies,
+                javaDocs,
+                List.of());
+    }
+
+    public static final String REVISION = "4";
 
     /** Source-compatible construction for indexes without retained JavaDoc. */
     public FileIndex(
@@ -82,6 +135,8 @@ public record FileIndex(
     /** Copies the lists. */
     public FileIndex {
         javaDocs = List.copyOf(javaDocs);
+        localTypes = List.copyOf(localTypes);
+        Objects.requireNonNull(coverage, "coverage");
         imports = List.copyOf(imports);
         declarations = List.copyOf(declarations);
         references = List.copyOf(references);
@@ -127,11 +182,17 @@ public record FileIndex(
                 problems,
                 rebased,
                 bodies,
-                javaDocs);
+                javaDocs,
+                localTypes,
+                coverage);
     }
 
     public boolean isStructureComplete() {
         return ParseValidity.structureComplete(problems);
+    }
+
+    public boolean isSyntaxComplete() {
+        return coverage.fullyRead() && problems.isEmpty();
     }
 
     public boolean isDeclarationComplete(SymbolId symbolId) {

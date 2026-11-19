@@ -285,6 +285,11 @@ public final class JGitLocalGit implements LocalGit {
     }
 
     @Override
+    public MergeOutcome mergeBranch(Path directory, String name, CommitAuthor author) {
+        return changer.mergeBranch(directory, name, author);
+    }
+
+    @Override
     public Optional<String> remote(Path directory) {
         return pusher.remote(directory);
     }

@@ -114,6 +114,56 @@ class WorkingTreeChangesTest {
     }
 
     @Test
+    void aBranchAheadIsBroughtInByMovingUpToIt() throws IOException {
+        String first = git.status(folder, AUTHOR).branch();
+        git.createBranch(folder, "idea");
+        git.switchBranch(folder, "idea");
+        write("board/main.txt", "two\n");
+        String idea = commitAll("The idea");
+        git.switchBranch(folder, first);
+        MergeOutcome outcome = git.mergeBranch(folder, "idea", AUTHOR);
+        assertEquals(MergeOutcome.State.FAST_FORWARD, outcome.state());
+        assertEquals(idea, outcome.head());
+        assertEquals("two\n", read("board/main.txt"));
+    }
+
+    @Test
+    void twoBranchesThatWentTwoWaysAreJoinedByAMergeCommit() throws IOException {
+        String first = git.status(folder, AUTHOR).branch();
+        git.createBranch(folder, "idea");
+        git.switchBranch(folder, "idea");
+        write("board/idea.txt", "an idea\n");
+        commitAll("The idea");
+        git.switchBranch(folder, first);
+        write("board/main.txt", "two\n");
+        commitAll("Main moved on");
+        MergeOutcome outcome = git.mergeBranch(folder, "idea", AUTHOR);
+        assertEquals(MergeOutcome.State.MERGED, outcome.state());
+        assertEquals("an idea\n", read("board/idea.txt"));
+        assertEquals("two\n", read("board/main.txt"));
+        CommitInfo merge = git.log(folder, 1).getFirst();
+        assertEquals(outcome.head(), merge.id());
+        assertEquals("Person", merge.author());
+        assertEquals(2, merge.parents().size());
+    }
+
+    @Test
+    void aMergeOverTheSameLinesIsRefusedAndChangesNothing() throws IOException {
+        String first = git.status(folder, AUTHOR).branch();
+        git.createBranch(folder, "idea");
+        git.switchBranch(folder, "idea");
+        write("board/main.txt", "the idea\n");
+        commitAll("The idea");
+        git.switchBranch(folder, first);
+        write("board/main.txt", "the main line\n");
+        String head = commitAll("Main moved on");
+        assertEquals(LocalGitException.Reason.CONFLICT, reasonOf(() -> git.mergeBranch(folder, "idea", AUTHOR)));
+        assertEquals(head, git.status(folder, AUTHOR).head());
+        assertTrue(git.status(folder, AUTHOR).changes().isEmpty(), "nothing is left half merged");
+        assertEquals("the main line\n", read("board/main.txt"));
+    }
+
+    @Test
     void noSuchBranchIsNotFound() {
         assertEquals(LocalGitException.Reason.NOT_FOUND, reasonOf(() -> git.switchBranch(folder, "nowhere")));
     }

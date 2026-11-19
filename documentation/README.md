@@ -119,8 +119,8 @@ Coverage: **94 public reactor modules**, **76 new module manuals** in this docum
 | `jmouse-grabber` | [JMOUSE_GRABBER.md](JMOUSE_GRABBER.md) | Page Grabber (fluent assembly, page context, routes, policies, resumable visit journal) |
 | `jmouse-git` | [JMOUSE_GIT.md](JMOUSE_GIT.md) | Bounded Git checkouts over JGit — shallow, hook-free, timed and size-capped — with a credentials seam and typed refusals; no hosting knowledge. |
 | `jmouse-git-hosting` | [JMOUSE_GIT_HOSTING.md](JMOUSE_GIT_HOSTING.md) | GitHub and GitLab behind one interface — repository addresses, visibility, default branches, token inspection and listing — over a bounded JDK HTTP transport; no external SDKs. |
-| `jmouse-java-parser` | [JMOUSE_JAVA_PARSER.md](JMOUSE_JAVA_PARSER.md) | Structural Java source parser on the jME lexer, cursor and node contracts: package, imports, types, members, signatures and JavaDoc with exact source spans and stable symbol ids; bodies stay opaque, nothing is resolved or executed. |
-| `jmouse-java-index` | [JMOUSE_JAVA_INDEX.md](JMOUSE_JAVA_INDEX.md) | Code intelligence over jmouse-java-parser results: what one file declares and which type names it writes, the Java rules that decide what such a name denotes, and an in-memory index of a whole source tree answering declaration, subtype, usage and name-search queries. Pure functions and in-memory state: no I/O, no class loading, nothing executed. |
+| `jmouse-java` | [JMOUSE_JAVA_PARSER.md](JMOUSE_JAVA_PARSER.md) | Structural Java source parser on the jME lexer, cursor and node contracts: package, imports, types, members, signatures and JavaDoc with exact source spans and stable symbol ids; bodies stay opaque, nothing is resolved or executed. |
+| `jmouse-java-index` | [JMOUSE_JAVA_INDEX.md](JMOUSE_JAVA_INDEX.md) | Code intelligence over jmouse-java results: what one file declares and which type names it writes, the Java rules that decide what such a name denotes, and an in-memory index of a whole source tree answering declaration, subtype, usage and name-search queries. Pure functions and in-memory state: no I/O, no class loading, nothing executed. |
 
 ## Spring integrations
 

@@ -103,6 +103,12 @@ public interface LocalGit {
     void switchBranch(Path directory, String name);
 
     /**
+     * Another branch brought into the one in hand, by {@code author} — the repository's own identity where it is null. Refused over changes
+     * in hand and where both changed the same lines; then nothing is changed.
+     */
+    MergeOutcome mergeBranch(Path directory, String name, CommitAuthor author);
+
+    /**
      * A file put back as the last commit has it, in the index and on the disk.
      *
      * @param expectedVersion the {@link WorkingTreeChange#version() version} the reader was shown; refused when it is not the

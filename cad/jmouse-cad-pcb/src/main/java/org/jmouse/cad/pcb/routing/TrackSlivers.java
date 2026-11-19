@@ -12,9 +12,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Slivers untied: a straight track shorter than its own width, standing between two other tracks' ends — as an import leaves one
- * at a joint. Inside the copper of both tracks it joins, it carries nothing and makes the joint a knot: the three overlap, so the
- * joint reads as a junction and the line through it is no line. Untied, the sliver goes and the two tracks meet where their lines
+ * Slivers untied: a track shorter, all along, than its own width — straight, or knotted on itself —, standing between two other
+ * tracks' ends, as an import leaves one at a joint. Inside the copper of both tracks it joins, it carries nothing and makes the joint
+ * a knot: the three overlap, so the joint reads as a junction and the line through it is no line. Untied, the sliver goes and the two tracks meet where their lines
  * cross, as any two joined stretches turn ({@link JoinedTracks#cornerBetween}); the joint is then a plain one, and what a line
  * does at a joint — a jog merged, a corner rounded — is done there too.
  */
@@ -48,7 +48,7 @@ final class TrackSlivers implements LineMerging {
     private static boolean untiable(List<Via> vias, List<Track> tracks, List<Boolean> asked, int index) {
         Track track = tracks.get(index);
         List<Point> points = track.points();
-        if (points.size() != 2 || points.getFirst().distanceTo(points.getLast()) >= track.width()) {
+        if (Polylines.lengthOf(points) >= track.width()) {
             return false;
         }
         if (vias.stream().anyMatch(via -> points.stream().anyMatch(point -> Precision.samePoint(point, new Point(via.x(), via.y()))))) {

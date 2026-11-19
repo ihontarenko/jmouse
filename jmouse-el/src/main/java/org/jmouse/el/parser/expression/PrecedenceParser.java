@@ -29,7 +29,7 @@ public final class PrecedenceParser {
         Objects.requireNonNull(grammar, "grammar");
         ExpressionReader<N> expressions = precedence -> parse(input, precedence, grammar, session);
         long start = grammar.position(input);
-        N left = Objects.requireNonNull(grammar.primary(input, expressions), "primary expression");
+        N left = Objects.requireNonNull(grammar.primary(input, minimum, expressions), "primary expression");
         if (grammar.position(input) <= start) {
             throw new ParseException("A primary expression rule did not consume input");
         }

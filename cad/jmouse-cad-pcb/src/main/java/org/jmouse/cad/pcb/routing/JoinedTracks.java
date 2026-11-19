@@ -21,12 +21,6 @@ import java.util.Set;
  */
 public final class JoinedTracks {
 
-    /** How far apart, as a share of the two ends' distance, the stretches' own meeting may stand before halfway is taken instead. */
-    private static final double FARTHEST_MEETING = 4;
-
-    /** The least distance a meeting is measured against, in millimetres. */
-    private static final double NEAREST_MEETING = 1e-3;
-
     private JoinedTracks() {
     }
 
@@ -74,12 +68,10 @@ public final class JoinedTracks {
      * own direction; halfway between their ends where they run on in one direction, or would meet far from the joint.
      */
     static Point cornerBetween(Point before, Point end, Point start, Point after) {
-        Point halfway = end.halfwayTo(start);
         Optional<Point> coming = Ways.wayBetween(before, end);
         Optional<Point> going = Ways.wayBetween(start, after);
-        Optional<Point> met = coming.isPresent() && going.isPresent() ? Ways.crossingOf(end, coming.get(), start, going.get()) : Optional.empty();
-        double farthest = Math.max(end.distanceTo(start) * FARTHEST_MEETING, NEAREST_MEETING);
-        return met.filter(point -> point.distanceTo(halfway) <= farthest).orElse(halfway);
+        Optional<Point> met = coming.isPresent() && going.isPresent() ? Ways.turnAt(end, coming.get(), start, going.get()) : Optional.empty();
+        return met.orElse(end.halfwayTo(start));
     }
 
     /** The line a track is part of: the track alone where it joins nothing at a plain joint. */

@@ -3,24 +3,30 @@ package org.jmouse.java.model.version;
 import java.util.Objects;
 
 /** Binary admission is separate from decode capability and source-language feature availability. */
-public record BytecodeProfile(JavaRelease targetRelease, PreviewPolicy preview,
-                              JavaSpecificationCatalog specification) {
+public record BytecodeProfile(
+        JavaRelease targetRelease, PreviewPolicy preview, JavaSpecificationCatalog specification) {
     public BytecodeProfile {
         Objects.requireNonNull(targetRelease, "targetRelease");
         Objects.requireNonNull(preview, "preview");
         Objects.requireNonNull(specification, "specification");
         specification.classFileVersion(targetRelease);
-        if (preview instanceof PreviewPolicy.EnabledForRelease(JavaRelease release) && !targetRelease.equals(release)) {
-            throw new IllegalArgumentException("Preview release differs from binary target release");
+        if (preview instanceof PreviewPolicy.EnabledForRelease(JavaRelease release)
+                && !targetRelease.equals(release)) {
+            throw new IllegalArgumentException(
+                    "Preview release differs from binary target release");
         }
     }
 
     public VersionAdmission admission(ClassFileVersion actual) {
         Objects.requireNonNull(actual, "actual");
         ClassFileVersionRules rules = specification.classFileRules();
-        int maximumKnown = specification.knownReleases().stream()
-                .mapToInt(release -> specification.classFileVersion(release).major()).max().orElseThrow();
-        if (actual.major() < rules.minimumMajor() || actual.major() > maximumKnown) {
+        boolean knownMajor =
+                specification.knownReleases().stream()
+                        .anyMatch(
+                                release ->
+                                        specification.classFileVersion(release).major()
+                                                == actual.major());
+        if (actual.major() < rules.minimumMajor() || !knownMajor) {
             return VersionAdmission.UNKNOWN_FORMAT;
         }
         int targetMajor = specification.classFileVersion(targetRelease).major();

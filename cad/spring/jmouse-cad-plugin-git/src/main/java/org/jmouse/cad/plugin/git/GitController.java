@@ -96,6 +96,12 @@ public class GitController {
         return git.createBranch(GitPlace.of(places, place), request.name());
     }
 
+    @PostMapping("/merge")
+    @PublicEndpoint("only where the reader may change the place, checked in the service")
+    public PlaceGit.Merged mergeBranch(@PathVariable String places, @PathVariable String place, @RequestBody BranchRequest request) {
+        return git.mergeBranch(GitPlace.of(places, place), request.name());
+    }
+
     @PostMapping("/switch")
     @PublicEndpoint("only where the reader may change the place, checked in the service")
     public WorkingTreeStatus switchBranch(@PathVariable String places, @PathVariable String place, @RequestBody BranchRequest request) {
