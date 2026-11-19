@@ -59,6 +59,8 @@ public final class PcbWords {
     public static final String ROLE = "role";
     public static final String ROTATE = "rotate";
     public static final String ROUNDING = "rounding";
+    /** The radius each corner of a track keeps where it keeps one of its own: {@code corners (1, 0.4, 1)}. */
+    public static final String CORNERS = "corners";
     public static final String ROUNDNESS = "roundness";
     public static final String RULES = "rules";
     public static final String SCALE = "scale";

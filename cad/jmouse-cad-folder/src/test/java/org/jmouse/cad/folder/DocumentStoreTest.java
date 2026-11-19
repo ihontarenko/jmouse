@@ -2,9 +2,6 @@ package org.jmouse.cad.folder;
 
 import org.jmouse.cad.document.DocumentOwner;
 import org.jmouse.cad.document.DocumentStatus;
-import org.jmouse.git.local.CommitAuthor;
-import org.jmouse.git.local.JGitLocalGit;
-import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -24,13 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The documents are the library folder's files: a write is a commit of the file where the document stands, a document
- * filed elsewhere moves with its files and keeps its history, and the folder opened again gives every revision back —
- * what was put there by hand recorded as found.
+ * The documents are the library folder's files, no repository made: a write is the file where the document stands, a document
+ * filed elsewhere moves with its files, the run keeps every revision, and the folder opened again is its files as they stand
+ * — what was put there by hand included.
  */
 class DocumentStoreTest {
 
-    private static final CommitAuthor FOLDER = new CommitAuthor("library", "library@example.org");
     private static final DocumentOwner WORKSPACE = DocumentOwner.of("WORKSPACE", "w1");
 
     /** A layout in words: an owner's type its folder's word, the owner's identifier its name; a kind's folder its word with an s. */
@@ -54,8 +50,7 @@ class DocumentStoreTest {
     };
 
     private static DocumentStore storeOf(Path folder) {
-        return new DocumentStore(() -> folder, LAYOUT, new JGitLocalGit(), actor -> Optional.of(new CommitAuthor(actor, actor + "@example.org")),
-                FOLDER);
+        return new DocumentStore(() -> folder, LAYOUT);
     }
 
     /** What a reader of the text hands the store: the index of a revision. */
@@ -107,15 +102,13 @@ class DocumentStoreTest {
     }
 
     @Test
-    void theFolderLetsGitReadItsLongPaths(@TempDir Path folder) throws IOException {
+    void theFolderIsFilesAndNoRepositoryIsMade(@TempDir Path folder) {
         storeOf(folder).open();
-        try (Git opened = Git.open(folder.toFile())) {
-            assertEquals("true", opened.getRepository().getConfig().getString("core", null, "longpaths"));
-        }
+        assertFalse(Files.exists(folder.resolve(".git")), "opening the library folder makes no repository");
     }
 
     @Test
-    void aDocumentIsItsFileAndEveryRevisionACommit(@TempDir Path folder) throws IOException {
+    void aDocumentIsItsFileAndEveryRevisionOfTheRunIsKept(@TempDir Path folder) throws IOException {
         DocumentStore store = storeOf(folder);
         assertEquals(List.of(), store.open());
         Instant first = Instant.parse("2026-10-23T08:00:00Z");
@@ -123,7 +116,7 @@ class DocumentStoreTest {
         index(resistor, 1, first, "passive");
         store.appendSource("resistor", 1, "one", null, RevisionOrigin.IMPORTED, first);
         assertTrue(Files.exists(folder.resolve("workspaces/w1/components/passive/resistor.component.jm")));
-        store.keepFile("resistor", "body.step", new byte[] {1, 2, 3}, "anna");
+        store.keepFile("resistor", "body.step", new byte[] {1, 2, 3});
 
         // Filed in another category: the file moves, its files with it.
         Instant second = Instant.parse("2026-10-23T09:00:00Z");
@@ -133,7 +126,20 @@ class DocumentStoreTest {
         assertFalse(Files.exists(folder.resolve("workspaces/w1/components/passive/resistor.component.jm")));
         assertEquals(List.of("body.step"), store.fileNames("resistor"));
 
-        // Opened again, the folder gives every revision back, and a change made by hand there is recorded as found.
+        // While the engine runs, every revision written is kept, the one written over its file too.
+        List<DocumentRevision> revisions = store.revisions("resistor");
+        assertEquals(List.of(2, 1), revisions.stream().map(DocumentRevision::revision).toList());
+        assertEquals(List.of(RevisionOrigin.WRITTEN, RevisionOrigin.IMPORTED), revisions.stream().map(DocumentRevision::origin).toList());
+        assertEquals("anna", revisions.getFirst().writtenBy());
+        // A revision is named by its number, or as the newest: nothing else — no day, no label — names one.
+        assertEquals(Optional.of(2), store.revisionWritten("resistor", "latest"));
+        assertEquals(Optional.of(1), store.revisionWritten("resistor", "1"));
+        assertEquals(Optional.empty(), store.revisionWritten("resistor", "3"));
+        assertEquals(Optional.empty(), store.revisionWritten("resistor", "20261023_001"));
+        assertEquals(Optional.of("one"), store.sourceAt("resistor", 1));
+        assertEquals(Optional.of("two"), store.sourceAt("resistor", 2));
+
+        // Opened again, the folder is its files: the document is its file as it stands, its first revision.
         Files.writeString(folder.resolve("workspaces/w1/components/resistors/resistor.component.jm"), "three", StandardCharsets.UTF_8);
         DocumentStore opened = storeOf(folder);
         List<StoredDocument> held = opened.open();
@@ -142,22 +148,11 @@ class DocumentStoreTest {
         assertEquals("resistor", read.getId());
         assertEquals(Optional.of(WORKSPACE), read.owner());
         assertEquals("three", opened.heldText(read));
-        List<DocumentRevision> revisions = opened.revisions("resistor");
-        assertEquals(List.of(3, 2, 1), revisions.stream().map(DocumentRevision::revision).toList());
-        assertEquals(List.of(RevisionOrigin.WRITTEN, RevisionOrigin.WRITTEN, RevisionOrigin.IMPORTED),
-                revisions.stream().map(DocumentRevision::origin).toList());
-        assertEquals("anna", revisions.get(1).writtenBy());
-        assertEquals(first, revisions.get(2).writtenAt());
-        // A revision is named by its number, or as the newest: nothing else — no day, no label — names one.
-        assertEquals(Optional.of(3), opened.revisionWritten("resistor", "latest"));
-        assertEquals(Optional.of(2), opened.revisionWritten("resistor", "2"));
-        assertEquals(Optional.empty(), opened.revisionWritten("resistor", "4"));
-        assertEquals(Optional.empty(), opened.revisionWritten("resistor", "20261023_001"));
-        assertEquals(Optional.of("one"), opened.sourceAt("resistor", 1));
-        assertEquals(Optional.of("two"), opened.sourceAt("resistor", 2));
-        assertEquals(Optional.of(new byte[] {1, 2, 3}).map(bytes -> bytes.length), opened.readFile("resistor", "body.step").map(bytes -> bytes.length));
+        assertEquals(List.of(1), opened.revisions("resistor").stream().map(DocumentRevision::revision).toList());
+        assertEquals(Optional.of("three"), opened.sourceAt("resistor", 1));
+        assertEquals(Optional.of(3), opened.readFile("resistor", "body.step").map(bytes -> bytes.length));
 
-        opened.remove(read, "anna");
+        opened.remove(read);
         assertFalse(Files.exists(folder.resolve("workspaces/w1/components/resistors/resistor.component.jm")));
         assertEquals(List.of(), storeOf(folder).open());
     }

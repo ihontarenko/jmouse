@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -1831,6 +1832,120 @@ class RoutingEngineTest {
             CornerRounding.Rounded rounded = new RoutingEngine(board(pcb, parts)).cornersRounded(pcb, 1, List.of(0, 1, 2));
             assertEquals(3, rounded.pcb().tracks().size());
             assertEquals(List.of(0, 1, 2), rounded.chosen());
+        }
+
+        @Test
+        void everyCornerTakesTheRadiusAskedWhateverStandsNear() {
+            // Copper inside the second turn: the corners are rounded as asked all the same — the gap is the checks' to say, the reader's to make.
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 10, 0, 10, 10, 20, 10), PcbVocabulary.TOP, 0.2),
+                    track(line(11, 9, 11.1, 8.9), PcbVocabulary.TOP, 0.2)));
+            Track rounded = new RoutingEngine(board(pcb, Map.of())).cornersRounded(pcb, 3, List.of(0)).pcb().tracks().getFirst();
+            assertEquals(3, rounded.rounding());
+            assertEquals(List.of(), rounded.corners(), "every corner keeps the radius asked");
+        }
+
+        @Test
+        void aShortLegHoldsNoOtherLineBack() {
+            // A long line and a short one chosen together, 3 asked: both are asked 3 — the short one's legs alone cut its own corner.
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 50, 0, 50, 50), PcbVocabulary.TOP, 0.2),
+                    track(line(0, 20, 0.4, 20, 0.4, 20.4), PcbVocabulary.TOP, 0.2)));
+            List<Track> rounded = new RoutingEngine(board(pcb, Map.of())).cornersRounded(pcb, 3, List.of(0, 1)).pcb().tracks();
+            assertEquals(3, rounded.get(0).rounding(), 1e-9);
+            assertEquals(3, rounded.get(1).rounding(), 1e-9);
+            assertEquals(List.of(), rounded.get(0).corners());
+        }
+
+        @Test
+        void aTrackMovedKeepsItsCornersOrTheLeastOfThem() {
+            Track track = track(line(0, 0, 10, 0, 10, 10, 20, 10), PcbVocabulary.TOP, 0.2).withCorners(2, List.of(2.0, 0.5));
+            assertEquals(List.of(2.0, 0.5), track.withPoints(line(0, 1, 10, 1, 10, 11, 20, 11)).corners());
+            assertEquals(List.of(0.5), track.withPoints(line(0, 0, 10, 0, 10, 10)).corners());
+            assertEquals(List.of(), track.withCorners(2, List.of(2.0, 2.0)).corners());
+        }
+    }
+
+    /**
+     * The magnet on, a track carried along another of its net within the gap becomes one with it: it runs into the other's line and
+     * ends there, a T; where it leaves the line again it goes on as a track of its own.
+     */
+    @Nested
+    class MergedAsCarried {
+
+        private final Map<String, Map<String, String>> parts = nets("A", "1", "N", "B", "1", "N", "C", "1", "N", "D", "1", "N");
+
+        /** A from pad to pad along y = 0; B a U of the same net whose middle runs 0.6 above it. */
+        private final PcbDrawing pcb = pcb(List.of(place("A", 0, 0), place("B", 5, -5), place("C", 20, 0), place("D", 11.5, -5)),
+                List.of(track(line(-1.5, 0, 18.5, 0)), track(line(3.5, -5, 3.5, 0.6, 10, 0.6, 10, -5))));
+
+        private PcbDrawing carriedDown(double by, OptionalDouble merging) {
+            TrackRouter.LayingStyle magnet = new TrackRouter.LayingStyle(45, Tightening.JogHandling.KEPT, merging);
+            return new RoutingEngine(board(pcb, parts)).segmentCarried(pcb, 1, 1, 0, -by, magnet, Optional.empty()).orElseThrow();
+        }
+
+        @Test
+        void carriedWithinTheGapItEndsOnTheOtherLineTwice() {
+            PcbDrawing merged = carriedDown(0.5, OptionalDouble.of(0.3));
+            assertEquals(3, merged.tracks().size(), "B leaves A's line again on the other side: two tracks of it");
+            assertLine(line(3.5, -5, 3.5, 0), merged.tracks().get(1).points());
+            assertLine(line(10, 0, 10, -5), merged.tracks().get(2).points());
+        }
+
+        @Test
+        void carriedFartherThanTheGapItStaysWhole() {
+            assertEquals(2, carriedDown(0.2, OptionalDouble.of(0.3)).tracks().size());
+        }
+
+        @Test
+        void theMagnetOffMergesNothing() {
+            assertEquals(2, carriedDown(0.5, OptionalDouble.empty()).tracks().size());
+        }
+    }
+
+    /** A jog is the line's, not a track's: one standing at the joint of two tracks is merged as one inside a track is. */
+    @Nested
+    class JogsOfALine {
+
+        @Test
+        void aJogAtTheJointOfTwoTracksIsMerged() {
+            // The first track runs to the joint at 10, 0; the second steps 0.2 aside there and runs on beside the first's line.
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 10, 0)), track(line(10, 0, 10.2, 0.2, 20, 0.2))));
+            PcbDrawing merged = new RoutingEngine(board(pcb, Map.of())).withoutJogs(pcb, List.of(0));
+            List<Point> points = merged.tracks().stream().flatMap(track -> track.points().stream()).toList();
+            assertTrue(points.stream().noneMatch(point -> point.x() > 1 && point.x() < 19 && Math.abs(point.y()) > 1e-6),
+                    "no step is left between the ends: " + merged.tracks().stream().map(Track::points).toList());
+        }
+    }
+
+    /** A track left standing too near another — a conflict its reader made — is carried out of it, never deeper into it. */
+    @Nested
+    class OutOfAConflict {
+
+        /** Two tracks 0.3 apart, centre to centre: at 0.25 wide, 0.05 of copper between them, far under any gap. */
+        private PcbDrawing tooNear() {
+            return pcb(List.of(), List.of(track(line(0, 0, 10, 0, 20, 0, 30, 0)), track(line(0, 0.3, 30, 0.3))));
+        }
+
+        @Test
+        void aTrackInCopperJoiningTwoNetsIsCarriedLikeAnyOther() {
+            // A's two pads are on two nets, and the two tracks join them: a short, so neither track has a net. The copper each is joined
+            // to is still its own — the other track at their joint, the pads it ends on —, never what it must keep clear of.
+            PcbDrawing pcb = pcb(List.of(place("A", 0, 0)), List.of(track(line(-1.5, 0, -1.5, -5, 5, -5)), track(line(5, -5, 5, 0, 1.5, 0))));
+            PcbDrawing answer = new RoutingEngine(board(pcb, nets("A", "1", "N1", "A", "2", "N2"))).segmentCarried(pcb, 0, 1, 0, -2, WALKING, Optional.empty())
+                    .orElseThrow(() -> new AssertionError("the track is held by the copper it is joined to"));
+            double highest = answer.tracks().getFirst().points().stream().mapToDouble(Point::y).min().orElseThrow();
+            assertTrue(highest < -6, "the stretch moved: " + answer.tracks().getFirst().points());
+        }
+
+        private Optional<PcbDrawing> carried(PcbDrawing pcb, double dy) {
+            return new RoutingEngine(board(pcb, Map.of())).segmentCarried(pcb, 0, 1, 0, dy, WALKING, Optional.empty());
+        }
+
+        @Test
+        void aStretchStandingTooNearIsNeverCarriedNearer() {
+            PcbDrawing pcb = tooNear();
+            Optional<PcbDrawing> answer = carried(pcb, 0.2);
+            double highest = answer.orElse(pcb).tracks().getFirst().points().stream().mapToDouble(Point::y).max().orElseThrow();
+            assertTrue(highest <= 1e-9, "the stretch came nearer than it stood: " + answer.map(drawing -> drawing.tracks().getFirst().points()));
         }
     }
 

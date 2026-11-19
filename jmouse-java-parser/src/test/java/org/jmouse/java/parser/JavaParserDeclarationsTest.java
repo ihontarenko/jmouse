@@ -26,8 +26,12 @@ class JavaParserDeclarationsTest {
 
     private final JavaParser parser = new JavaParser();
 
+    protected JavaSourceFile read(String sourceName, CharSequence text) {
+        return parser.parse(sourceName, text);
+    }
+
     private JavaSourceFile parseComplete(String text) {
-        JavaSourceFile file = parser.parse("Test.java", text);
+        JavaSourceFile file = read("Test.java", text);
         assertTrue(file.isComplete(), () -> "Unexpected problems: " + file.problems());
         return file;
     }
@@ -307,7 +311,7 @@ class JavaParserDeclarationsTest {
 
     @Test
     void duplicateIdentitiesAreNumbered() {
-        JavaSourceFile file = parser.parse("Twice.java", """
+        JavaSourceFile file = read("Twice.java", """
                 class Twice {
                     void same() {}
                     void same() {}

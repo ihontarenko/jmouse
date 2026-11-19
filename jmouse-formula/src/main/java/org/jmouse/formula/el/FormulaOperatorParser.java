@@ -12,6 +12,11 @@ import org.jmouse.el.node.expression.unary.NegativeUnaryOperation;
 import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.PrimaryExpressionParser;
+import org.jmouse.el.parser.expression.Associativity;
+import org.jmouse.el.parser.expression.ExpressionReader;
+import org.jmouse.el.parser.expression.InfixBinding;
+import org.jmouse.el.parser.expression.PrecedenceGrammar;
+import org.jmouse.el.parser.expression.PrecedenceParser;
 
 import java.util.Set;
 
@@ -43,45 +48,95 @@ public class FormulaOperatorParser extends OperatorParser {
     }
 
     private Expression expression(TokenCursor cursor, ParserContext context, int minimumPrecedence) {
-        Expression left = unary(cursor, context);
-        while (cursor.hasNext()) {
-            Token token = cursor.peek();
-            Operator operator = context.getOperator(token.type());
-            boolean implicit = operator == null && STARTS_PRIMARY.contains(token.type());
-            if (implicit) {
-                operator = MathematicOperator.MULTIPLY;
-            }
-            if (operator == null || operator.getPrecedence() < minimumPrecedence) {
-                break;
-            }
-            if (!implicit) {
-                cursor.next();
-            }
-            boolean power = isPower(operator);
-            // Power binds to the right: the right side is parsed at the same precedence, so x^y^2 nests rightwards.
-            Expression right = power ? powerOperand(cursor, context) : expression(cursor, context, operator.getPrecedence() + 1);
-            left = new BinaryOperation(left, operator, right);
-        }
-        return left;
+        return PrecedenceParser.parse(new Input(cursor, context), minimumPrecedence, new FormulaGrammar());
     }
 
     /** The right side of a power may carry its own sign: 2^-x. */
     private Expression powerOperand(TokenCursor cursor, ParserContext context) {
-        if (cursor.isCurrent(BasicToken.T_MINUS)) {
-            cursor.next();
-            return new NegativeUnaryOperation(powerOperand(cursor, context));
+        return PrecedenceParser.parse(new Input(cursor, context), POWER_PRECEDENCE, new PowerGrammar());
+    }
+
+    private record Input(TokenCursor cursor, ParserContext context) {}
+
+    private enum Spelling { EXPLICIT, IMPLICIT }
+
+    private record FormulaOperation(Operator operator, Spelling spelling) {}
+
+    private class FormulaGrammar implements PrecedenceGrammar<Input, Expression, FormulaOperation> {
+        @Override
+        public Expression primary(Input input, ExpressionReader<Expression> expressions) {
+            return unary(input.cursor(), input.context());
         }
-        if (cursor.isCurrent(BasicToken.T_PLUS)) {
-            cursor.next();
-            return powerOperand(cursor, context);
+
+        @Override
+        public InfixBinding<FormulaOperation> infix(Input input, Expression left) {
+            if (!input.cursor().hasNext()) {
+                return null;
+            }
+            Token token = input.cursor().peek();
+            Operator operator = input.context().getOperator(token.type());
+            Spelling spelling = Spelling.EXPLICIT;
+            if (operator == null && STARTS_PRIMARY.contains(token.type())) {
+                operator = MathematicOperator.MULTIPLY;
+                spelling = Spelling.IMPLICIT;
+            }
+            if (operator == null) {
+                return null;
+            }
+            return binding(operator, spelling);
         }
-        Expression base = primary(cursor, context);
-        Operator next = cursor.hasNext() ? context.getOperator(cursor.peek().type()) : null;
-        if (next != null && isPower(next)) {
-            cursor.next();
-            return new BinaryOperation(base, next, powerOperand(cursor, context));
+
+        protected InfixBinding<FormulaOperation> binding(Operator operator, Spelling spelling) {
+            return new InfixBinding<>(new FormulaOperation(operator, spelling), operator.getPrecedence(),
+                    isPower(operator) ? Associativity.RIGHT : Associativity.LEFT);
         }
-        return base;
+
+        @Override
+        public Expression reduce(Input input, Expression left, InfixBinding<FormulaOperation> binding,
+                                 ExpressionReader<Expression> expressions) {
+            if (binding.operator().spelling() == Spelling.EXPLICIT) {
+                input.cursor().next();
+            }
+            return new BinaryOperation(left, binding.operator().operator(), readRight(input, binding, expressions));
+        }
+
+        protected Expression readRight(Input input, InfixBinding<FormulaOperation> binding,
+                                       ExpressionReader<Expression> expressions) {
+            return isPower(binding.operator().operator()) ? powerOperand(input.cursor(), input.context())
+                    : expressions.parse(binding.rightMinimum());
+        }
+
+        @Override
+        public long position(Input input) {
+            return input.cursor().position();
+        }
+    }
+
+    /** The signed, power-only right operand retains the formula language's original grammar. */
+    private final class PowerGrammar extends FormulaGrammar {
+        @Override
+        public Expression primary(Input input, ExpressionReader<Expression> expressions) {
+            if (input.cursor().consumeIf(BasicToken.T_MINUS)) {
+                return new NegativeUnaryOperation(expressions.parse(POWER_PRECEDENCE));
+            }
+            if (input.cursor().consumeIf(BasicToken.T_PLUS)) {
+                return expressions.parse(POWER_PRECEDENCE);
+            }
+            return FormulaOperatorParser.this.primary(input.cursor(), input.context());
+        }
+
+        @Override
+        public InfixBinding<FormulaOperation> infix(Input input, Expression left) {
+            Operator operator = input.cursor().hasNext()
+                    ? input.context().getOperator(input.cursor().peek().type()) : null;
+            return operator != null && isPower(operator) ? binding(operator, Spelling.EXPLICIT) : null;
+        }
+
+        @Override
+        protected Expression readRight(Input input, InfixBinding<FormulaOperation> binding,
+                                       ExpressionReader<Expression> expressions) {
+            return expressions.parse(binding.rightMinimum());
+        }
     }
 
     private Expression unary(TokenCursor cursor, ParserContext context) {

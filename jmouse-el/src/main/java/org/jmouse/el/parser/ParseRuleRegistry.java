@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /** Typed role bindings with explicit replacement and immutable session snapshots. */
 public final class ParseRuleRegistry {
@@ -52,6 +53,26 @@ public final class ParseRuleRegistry {
     public synchronized ParseRuleRegistry snapshot() {
         return state == State.FROZEN ? this
                 : new ParseRuleRegistry(Map.copyOf(bindings), State.FROZEN);
+    }
+
+    /** A new configuration can extend a frozen language without altering its existing sessions. */
+    public synchronized ParseRuleRegistry fork() {
+        return new ParseRuleRegistry(new LinkedHashMap<>(bindings), State.BUILDING);
+    }
+
+    public synchronized String identity(ParseRole<?, ?> role) {
+        return require(role).identity();
+    }
+
+    public synchronized <I, N extends Node> void decorate(ParseRole<I, N> role, String expectedIdentity,
+            String identity, Function<ParseRule<I, N>, ParseRule<I, N>> decoration) {
+        requireBuilding();
+        Binding previous = require(role);
+        if (!previous.identity().equals(expectedIdentity)) {
+            throw new IllegalArgumentException("Parse binding changed for " + role.name());
+        }
+        ParseRule<I, N> decorated = Objects.requireNonNull(decoration, "decoration").apply(rule(role));
+        bindings.put(role.name(), binding(role, identity, Objects.requireNonNull(decorated, "decorated rule")));
     }
 
     public synchronized List<BindingDescription> descriptions() {

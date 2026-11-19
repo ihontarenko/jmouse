@@ -37,10 +37,12 @@ public final class RoutingAsks {
 
     // -------------------------------------------------------------------------------------------------------------- records
 
-    public record StyleView(double angleStep, String jogs) {
+    /** @param merging the gap a carried track merges into its net's copper within; none, merging off */
+    public record StyleView(double angleStep, String jogs, Double merging) {
 
         TrackRouter.LayingStyle style() {
-            return new TrackRouter.LayingStyle(angleStep, Tightening.JogHandling.valueOf(jogs.toUpperCase(Locale.ROOT)));
+            return new TrackRouter.LayingStyle(angleStep, Tightening.JogHandling.valueOf(jogs.toUpperCase(Locale.ROOT)),
+                    merging == null ? OptionalDouble.empty() : OptionalDouble.of(merging));
         }
     }
 

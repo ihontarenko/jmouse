@@ -1,5 +1,7 @@
 package org.jmouse.el.extension;
 
+import org.jmouse.el.parser.ParseRuleRegistry;
+
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
@@ -24,7 +26,7 @@ import java.util.Optional;
 public interface ExtensionContainer {
 
     /** Input-independent grammar bindings; legacy containers may opt into this capability. */
-    default org.jmouse.el.parser.ParseRuleRegistry parseRules() {
+    default ParseRuleRegistry parseRules() {
         throw new UnsupportedOperationException("This extension container does not provide typed parse rules");
     }
 

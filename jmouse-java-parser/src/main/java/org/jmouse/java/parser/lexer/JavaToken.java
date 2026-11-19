@@ -13,7 +13,7 @@ import org.jmouse.el.lexer.Token;
  * <p>The templates are the fixed spellings of punctuation; word kinds have none, because keywords are
  * told apart by their {@link Token#value() value}.
  */
-public enum JavaTokenKind implements Token.Type {
+public enum JavaToken implements Token.Type {
 
     /** A name, including the contextual keywords {@code record}, {@code sealed}, {@code permits}, {@code var}, {@code yield}. */
     IDENTIFIER(10000),
@@ -102,7 +102,7 @@ public enum JavaTokenKind implements Token.Type {
     private final int      typeId;
     private final String[] templates;
 
-    JavaTokenKind(int typeId, String... templates) {
+    JavaToken(int typeId, String... templates) {
         this.typeId = typeId;
         this.templates = templates;
     }
@@ -121,12 +121,20 @@ public enum JavaTokenKind implements Token.Type {
     @Override
     @SuppressWarnings("unchecked")
     public <E extends Enum<E>> Class<E> getBundleType() {
-        return (Class<E>) JavaTokenKind.class;
+        return (Class<E>) JavaToken.class;
     }
 
     @Override
     public String[] getTokenTemplates() {
         return templates.clone();
+    }
+
+    /** The fixed spelling of punctuation or a singleton literal category. */
+    public String spelling() {
+        if (templates.length != 1) {
+            throw new IllegalStateException("This token has no single fixed spelling: " + this);
+        }
+        return templates[0];
     }
 
     @Override
@@ -155,6 +163,10 @@ public enum JavaTokenKind implements Token.Type {
         return KEYWORD.matches(token) && token.value().equals(keyword);
     }
 
+    public static boolean isKeyword(Token token, JavaKeywordDefinition keyword) {
+        return isKeyword(token, keyword.spelling());
+    }
+
     /**
      * Returns whether a token is an identifier with a given spelling — how contextual keywords are tested.
      *
@@ -164,5 +176,9 @@ public enum JavaTokenKind implements Token.Type {
      */
     public static boolean isIdentifier(Token token, String name) {
         return IDENTIFIER.matches(token) && token.value().equals(name);
+    }
+
+    public static boolean isIdentifier(Token token, JavaKeywordDefinition keyword) {
+        return isIdentifier(token, keyword.spelling());
     }
 }

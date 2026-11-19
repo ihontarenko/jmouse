@@ -41,9 +41,6 @@ import org.jmouse.formula.FormulaDocumentation;
 import org.jmouse.cad.store.library.PartLibrary;
 import org.jmouse.cad.store.library.ShippedDocuments;
 import org.jmouse.cad.store.library.CatalogueIndexing;
-import org.jmouse.git.local.CommitAuthor;
-import org.jmouse.git.local.CommitAuthors;
-import org.jmouse.git.local.JGitLocalGit;
 import org.jmouse.cad.store.parts.PartSearch;
 import org.jmouse.cad.store.plugin.CadEnginePlugin;
 import org.jmouse.cad.store.plugin.EngineConfiguration;
@@ -210,8 +207,8 @@ public class CadStoreAutoConfiguration {
     /** The files documents hold besides their text: files of the library folder beside each document's own. */
     @Bean
     @ConditionalOnMissingBean
-    public DocumentFiles cadDocumentFiles(DocumentStore documents, CadAuthority authority) {
-        return new DocumentFiles(documents, authority);
+    public DocumentFiles cadDocumentFiles(DocumentStore documents) {
+        return new DocumentFiles(documents);
     }
 
     /** Where the engine's own pages of documentation are kept: one Markdown file for each window of the interface. */
@@ -371,7 +368,7 @@ public class CadStoreAutoConfiguration {
         return new FeaturedDesigns(documents, catalogue, library);
     }
 
-    /** The documents the installation ships, read in place from their files (ADR 0001). */
+    /** The documents the installation ships, read in place from their files. */
     @Bean
     @ConditionalOnMissingBean
     public ShippedDocuments cadShippedDocuments(ResourcePatternResolver resources, CadProperties properties,
@@ -387,23 +384,20 @@ public class CadStoreAutoConfiguration {
     }
 
     /**
-     * 📚 The documents: the library folder's files and their commits, and the index read from them and from the shipped
-     * files (ADR 0002). A commit a person makes is by the author the host names, when it names one.
+     * 📚 The documents: the library folder's files, and the index read from them and from the shipped files; git is the
+     * projects' plugin, never the library's.
      */
     @Bean
     @ConditionalOnMissingBean
-    public DocumentStore cadDocumentStore(CadProperties properties, EngineConfiguration configuration,
-                                          ObjectProvider<CommitAuthors> authors, CadHostPlaces host, CadSettings settings) {
-        CadProperties.Identity identity = properties.library().identity();
-        return new DocumentStore(configuration::workingFolder, new CadFolderLayout(host, settings), new JGitLocalGit(), authors.getIfAvailable(() -> CommitAuthors.NONE),
-                new CommitAuthor(identity.name(), identity.email()));
+    public DocumentStore cadDocumentStore(EngineConfiguration configuration, CadHostPlaces host, CadSettings settings) {
+        return new DocumentStore(configuration::workingFolder, new CadFolderLayout(host, settings));
     }
 
     @Bean
     @ConditionalOnMissingBean
     public CatalogueIndexing cadCatalogueIndexing(CadCatalogue catalogue, ShippedDocuments shipped, DocumentStore documents,
-                                                  CadLanguage language) {
-        return new CatalogueIndexing(catalogue, shipped, documents, language);
+                                                  DocumentReading reading) {
+        return new CatalogueIndexing(catalogue, shipped, documents, reading);
     }
 
     /**

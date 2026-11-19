@@ -472,7 +472,7 @@
         },
         "rounding" : {
           "type" : "number",
-          "description" : "how far its corners are rounded, millimetres; 0 for sharp corners"
+          "description" : "the radius its corners are asked to be rounded with, millimetres; 0 for sharp corners"
         },
         "points" : {
           "description" : "the points it runs through, in order, at least two",
@@ -488,10 +488,17 @@
         "finish" : {
           "type" : "string",
           "description" : "what its copper is left as: bare, the solder mask open along it for solder to be run on; empty for under the mask"
+        },
+        "corners" : {
+          "description" : "the radius each corner between its points keeps, in order; empty where every corner keeps rounding",
+          "type" : "array",
+          "items" : {
+            "type" : "number"
+          }
         }
       },
-      "required" : [ "layer", "width", "rounding", "points", "arrangement", "finish" ],
-      "description" : "A track: straight copper run through points on one layer.",
+      "required" : [ "layer", "width", "rounding", "points", "arrangement", "finish", "corners" ],
+      "description" : "A track: straight copper run through points on one layer, its corners rounded. Its corners are rounded by rounding, the radius asked of them; a corner keeps a radius of its own (corners) where it is rounded otherwise — smaller where it cannot keep its gaps so, so one tight corner does not hold the others back; larger where it turns about one centre with the lines of a bus inside it.",
       "additionalProperties" : false
     },
     "Via" : {

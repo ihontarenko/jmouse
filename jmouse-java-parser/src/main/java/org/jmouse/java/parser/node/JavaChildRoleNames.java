@@ -1,0 +1,84 @@
+package org.jmouse.java.parser.node;
+
+/** Structural child names shared by Java source schemas. */
+public final class JavaChildRoleNames {
+    public static final String ANNOTATIONS = "annotations";
+    public static final String ARGUMENTS = "arguments";
+    public static final String BINDING = "binding";
+    public static final String BLOCK = "block";
+    public static final String BODY = "body";
+    public static final String BOUND = "bound";
+    public static final String BOUNDS = "bounds";
+    public static final String CATCHES = "catches";
+    public static final String COMPONENTS = "components";
+    public static final String CONDITION = "condition";
+    public static final String CONSTANTS = "constants";
+    public static final String DECLARATION = "declaration";
+    public static final String DECLARATIONS = "declarations";
+    public static final String DEFAULT_VALUE = "defaultValue";
+    public static final String DETAIL = "detail";
+    public static final String DIAMOND = "diamond";
+    public static final String DIMENSIONS = "dimensions";
+    public static final String DIRECTIVES = "directives";
+    public static final String ELEMENTS = "elements";
+    public static final String ELEMENT_TYPE = "elementType";
+    public static final String ELLIPSIS_ANNOTATIONS = "ellipsisAnnotations";
+    public static final String ELSE_EXPRESSION = "elseExpression";
+    public static final String ELSE_STATEMENT = "elseStatement";
+    public static final String ENTRIES = "entries";
+    public static final String EXPRESSION = "expression";
+    public static final String FINALLY_CLAUSE = "finallyClause";
+    public static final String GUARD = "guard";
+    public static final String IMPORTS = "imports";
+    public static final String INDEX = "index";
+    public static final String INITIALIZER = "initializer";
+    public static final String INITIALIZERS = "initializers";
+    public static final String INTERFACES = "interfaces";
+    public static final String INVOCATION = "invocation";
+    public static final String ITERABLE = "iterable";
+    public static final String LABEL = "label";
+    public static final String LABELS = "labels";
+    public static final String LEFT = "left";
+    public static final String LENGTH = "length";
+    public static final String MODIFIERS = "modifiers";
+    public static final String MODULE = "module";
+    public static final String MONITOR = "monitor";
+    public static final String NAME = "name";
+    public static final String OPERAND = "operand";
+    public static final String OUTCOME = "outcome";
+    public static final String PACKAGE_DECLARATION = "packageDeclaration";
+    public static final String PARAMETER = "parameter";
+    public static final String PARAMETERS = "parameters";
+    public static final String PATTERN = "pattern";
+    public static final String PERMITTED_TYPES = "permittedTypes";
+    public static final String PROVIDERS = "providers";
+    public static final String QUALIFIER = "qualifier";
+    public static final String RECEIVER = "receiver";
+    public static final String REFERENCE = "reference";
+    public static final String RESOURCES = "resources";
+    public static final String RESULT_TYPE = "resultType";
+    public static final String RIGHT = "right";
+    public static final String SEGMENTS = "segments";
+    public static final String SELECTOR = "selector";
+    public static final String SERVICE = "service";
+    public static final String STATEMENT = "statement";
+    public static final String STATEMENTS = "statements";
+    public static final String SUPERCLASS = "superclass";
+    public static final String TARGET = "target";
+    public static final String TARGETS = "targets";
+    public static final String THEN_EXPRESSION = "thenExpression";
+    public static final String THEN_STATEMENT = "thenStatement";
+    public static final String THROWN_TYPES = "thrownTypes";
+    public static final String TYPE = "type";
+    public static final String TYPE_ARGUMENTS = "typeArguments";
+    public static final String TYPE_PARAMETERS = "typeParameters";
+    public static final String TYPES = "types";
+    public static final String UPDATES = "updates";
+    public static final String VALUE = "value";
+    public static final String VALUES = "values";
+    public static final String VARIABLE = "variable";
+    public static final String VARIABLES = "variables";
+
+    private JavaChildRoleNames() {
+    }
+}

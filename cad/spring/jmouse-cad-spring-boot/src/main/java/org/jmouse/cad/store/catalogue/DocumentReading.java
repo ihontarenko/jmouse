@@ -11,6 +11,7 @@ import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.el.grammar.GrammarRefusal;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +28,8 @@ public class DocumentReading {
 
     private final EngineConfiguration       configuration;
     private final Map<String, ReadDocument> cache;
+    /** The readings of the pass this thread is in ({@link #readingEachOnce}); none outside one. */
+    private final ThreadLocal<Map<String, ReadDocument>> pass = new ThreadLocal<>();
     private final CadLanguage               language;
 
     public DocumentReading(CadProperties properties, EngineConfiguration configuration, CadLanguage language) {
@@ -61,13 +64,7 @@ public class DocumentReading {
             throw CadProblem.invalid("A document is at most " + maximumLength + " characters.");
         }
         String checksum = DocumentStore.checksumOf(source);
-        ReadDocument cached = cache.get(checksum);
-        if (cached != null) {
-            return cached;
-        }
-        ReadDocument read = parse(source, checksum, origin);
-        cache.put(checksum, read);
-        return read;
+        return kept(checksum, () -> source, origin);
     }
 
     /**
@@ -78,13 +75,41 @@ public class DocumentReading {
      * @param origin   what a refusal names it by
      */
     public ReadDocument stored(String checksum, Supplier<String> source, String origin) {
-        ReadDocument cached = cache.get(checksum);
-        if (cached != null) {
-            return cached;
+        return kept(checksum, source, origin);
+    }
+
+    /**
+     * Work that reads many documents more than once — the catalogue's index, made at start: within it each text is read once,
+     * however many there are, the most recently used kept besides as always. Outside it the readings kept are only those.
+     */
+    public <T> T readingEachOnce(Supplier<T> work) {
+        Map<String, ReadDocument> outer = pass.get();
+        if (outer != null) {
+            return work.get();
         }
-        ReadDocument read = parse(source.get(), checksum, origin);
-        cache.put(checksum, read);
-        return read;
+        pass.set(new HashMap<>());
+        try {
+            return work.get();
+        } finally {
+            pass.remove();
+        }
+    }
+
+    /** What was read under a checksum: kept by the pass or the cache, else read now and kept by both. */
+    private ReadDocument kept(String checksum, Supplier<String> source, String origin) {
+        Map<String, ReadDocument> passing = pass.get();
+        ReadDocument known = passing != null ? passing.get(checksum) : null;
+        if (known == null) {
+            known = cache.get(checksum);
+        }
+        if (known == null) {
+            known = parse(source.get(), checksum, origin);
+            cache.put(checksum, known);
+        }
+        if (passing != null) {
+            passing.put(checksum, known);
+        }
+        return known;
     }
 
     private ReadDocument parse(String source, String checksum, String origin) {

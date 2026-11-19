@@ -1,6 +1,9 @@
 package org.jmouse.el;
 
 import org.jmouse.el.extension.FunctionContainer;
+import org.jmouse.el.extension.Function;
+import java.util.List;
+import java.util.Set;
 import org.jmouse.el.extension.function.MaxFunction;
 import org.jmouse.el.extension.function.MinFunction;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,8 @@ class ExtensionSnapshotTest {
         MinFunction minimum = new MinFunction();
         MaxFunction maximum = new MaxFunction();
         functions.register(minimum);
-        var first = functions.values();
-        var firstKeys = functions.keys();
+        List<Function> first = functions.values();
+        Set<String> firstKeys = functions.keys();
         functions.register(maximum);
 
         assertEquals(1, first.size());
@@ -26,7 +29,7 @@ class ExtensionSnapshotTest {
         assertThrows(UnsupportedOperationException.class, () -> functions.keys().clear());
 
         functions.remove(minimum);
-        assertEquals(java.util.List.of(maximum), functions.values());
+        assertEquals(List.of(maximum), functions.values());
         assertSame(maximum, functions.get("max"));
     }
 }

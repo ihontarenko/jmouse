@@ -5,9 +5,11 @@ import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -104,19 +106,33 @@ public final class RoutingEngine {
         TrackFence fence = laidOn.fence(layer, net, width, own).leaving(List.of(from, found.getLast()));
         RoutingSettings.Pads pads = settings().pads();
         List<Point> line = pads.exitKind() == PadExit.SMART ? PadBreakouts.atPads(laidOn, layer, found, fence, angleStep, pads) : found;
-        double fits = fence.roundingThatFits(line, rounding, layer, board.settings().routing().roundingHalvings());
+        // A leg is laid on: what it answers is the least any of its corners keeps, the corner it joins at not yet fitted.
+        double fits = fence.roundingsThatFit(line, rounding, layer, board.settings().routing().roundingHalvings()).stream()
+                .mapToDouble(Double::doubleValue).min().orElse(Math.max(0, rounding));
         return new LaidLeg(new TrackRouter.RoutedLeg(line.subList(1, line.size()), leg.reached()), fits);
     }
 
     /** The pcb with a track's segment carried by (dx, dy), its neighbours following; empty where it cannot move at all. */
     public synchronized Optional<PcbDrawing> segmentCarried(PcbDrawing pcb, int index, int own, double dx, double dy,
                                                             TrackRouter.LayingStyle style, Optional<Point> pressed) {
-        return reshaping.segmentCarried(pcb, index, own, dx, dy, style, pressed);
+        return reshaping.segmentCarried(pcb, index, own, dx, dy, style, pressed).map(carried -> mergedAsCarried(pcb, carried, index, style));
     }
 
     /** The pcb with a track's corner carried to a point, the runs either side of it kept. */
     public synchronized PcbDrawing cornerCarried(PcbDrawing pcb, int index, int own, Point to, TrackRouter.LayingStyle style) {
-        return reshaping.cornerCarried(pcb, index, own, to, style);
+        return mergedAsCarried(pcb, reshaping.cornerCarried(pcb, index, own, to, style), index, style);
+    }
+
+    /**
+     * A carried track as merging leaves it: run along its net's other copper within the style's gap, it ends on that line — a
+     * junction. One that would be gone whole stays as carried: the track in hand never vanishes from under it.
+     */
+    private PcbDrawing mergedAsCarried(PcbDrawing before, PcbDrawing carried, int index, TrackRouter.LayingStyle style) {
+        if (style.merging().isEmpty() || style.merging().getAsDouble() <= 0) {
+            return carried;
+        }
+        PcbDrawing merged = new CoincidentStretches(worldOf(before), style.merging().getAsDouble()).merged(carried, List.of(index));
+        return merged.tracks().size() < carried.tracks().size() ? carried : merged;
     }
 
     /** Where the pcb's copper lines end and meet: its pads, vias, junctions, arcs' ends, free tips and joints. */
@@ -124,23 +140,32 @@ public final class RoutingEngine {
         return worldOf(pcb).nodes();
     }
 
-    /** The pcb's tracks with their jogs merged, those chosen or every one where none is, each only where the corner left keeps its gaps. */
+    /**
+     * The pcb's lines with their jogs merged — of the tracks chosen, or of every one where none is —, each only where the corner left
+     * keeps its gaps. A jog is the line's, not a track's: one standing at a joint, a track ending and the next beginning, is merged as
+     * any other, and each track takes its own part of the line back. A line holding a track held where it stands is left as it is.
+     */
     public synchronized PcbDrawing withoutJogs(PcbDrawing pcb, List<Integer> chosen) {
         RoutingWorld world = worldOf(pcb);
-        List<Track> tracks = new ArrayList<>(pcb.tracks());
-        for (int index = 0; index < tracks.size(); index++) {
-            if (!chosen.isEmpty() && !chosen.contains(index) || held(pcb, index)) {
+        PcbDrawing merged = pcb;
+        Set<Integer> seen = new HashSet<>();
+        for (int index = 0; index < pcb.tracks().size(); index++) {
+            if (!chosen.isEmpty() && !chosen.contains(index) || seen.contains(index)) {
                 continue;
             }
-            Track track = tracks.get(index);
-            List<Point> line = track.points();
-            TrackFence fence = world.fenceOfTrack(track, index, world.netOfTrack(index));
-            List<Point> merged = new Tightening(fence, 45, List.of(), settings().routing()).withoutShortJogs(line, false);
-            if (merged.size() < line.size()) {
-                tracks.set(index, track.withPoints(merged));
+            JoinedTracks.JoinedLine joined = JoinedTracks.joinedLine(world, index);
+            joined.members().forEach(member -> seen.add(member.index()));
+            if (joined.members().stream().anyMatch(member -> held(pcb, member.index()))) {
+                continue;
+            }
+            List<Point> line = joined.points();
+            TrackFence fence = world.fenceOfTrack(pcb.tracks().get(index).withPoints(line), index, world.netOfTrack(index));
+            List<Point> without = new Tightening(fence, 45, List.of(), settings().routing()).withoutShortJogs(line, false);
+            if (without.size() < line.size()) {
+                merged = JoinedTracks.withJoinedLine(merged, joined, without);
             }
         }
-        return pcb.withTracks(tracks);
+        return merged;
     }
 
     /** The pcb's tracks with their corners rounded so, those chosen or every one where none is, each only as far as its gaps let it. */

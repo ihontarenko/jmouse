@@ -195,6 +195,11 @@ public class CadCatalogue {
         }
     }
 
+    /** What a category means when a listing is narrowed to it: it and every category under it; null for no category, meaning any. */
+    public Set<String> categoriesWithin(String category) {
+        return blankToNull(category) == null ? null : CategoryDocument.within(category.strip(), catalogueCategories());
+    }
+
     private List<CategoryDocument> catalogueCategories() {
         return documents.findByKind(SimulationModule.CATEGORY.word()).stream()
                 .filter(document -> document.isCatalogue() && document.getStatus() == DocumentStatus.PUBLISHED)
@@ -268,8 +273,7 @@ public class CadCatalogue {
                 : EnumSet.of(DocumentStatus.PUBLISHED);
         // The store matches the words as written, anywhere in a title, a summary or a slug: no pattern language between them.
         String wanted = text == null || text.isBlank() ? null : text.strip();
-        // A category means what is filed in it and in every category under it.
-        Set<String> categories = blankToNull(category) == null ? null : CategoryDocument.within(category.strip(), catalogueCategories());
+        Set<String> categories = categoriesWithin(category);
         return documents.browse(statuses, categories, blankToNull(kind), featured, wanted,
                                 blankToNull(tag), blankToNull(benchRole), page, size).map(DocumentSummary::of);
     }
@@ -563,7 +567,7 @@ public class CadCatalogue {
             throw CadProblem.conflict("'" + document.getSlug() + "' is named by " + String.join(", ", naming)
                                       + ": change those first.");
         }
-        documents.remove(document, authority.requireActor());
+        documents.remove(document);
         document.owner().ifPresent(owner -> places.recordChange(owner, clock.instant()));
     }
 
@@ -642,22 +646,25 @@ public class CadCatalogue {
      * Derives a document's relations from its text, once everything it may name is indexed. A reference to something
      * the catalogue does not hold is left out and logged, never fatal: the application must start. So is an owner the
      * host does not know — a folder of an account or a project it has no row for —: the document is indexed as its
-     * file holds it, refused with the reason, and relates to nothing until its owner exists.
+     * file holds it, refused with the reason, and relates to nothing until its owner exists. Each owner is asked of the host
+     * once, however many documents it keeps.
      */
-    public void indexRelations(String slug) {
-        documents.findBySlug(slug).ifPresent(document -> {
-            // Its owner unknown, or its text one the language refuses: indexed as its file holds it, refused with the reason.
-            ReadDocument head;
-            StoredDocuments scope;
-            try {
-                scope = scope(document.owner().orElse(null));
-                head = scope.head(document);
-            } catch (CadProblem refusal) {
-                refuse(document, refusal);
-                return;
-            }
-            document.replaceRelations(relationsOf(document, head, Strictness.LEAVE_OUT));
-        });
+    public void indexRelations(List<String> slugs) {
+        Map<Optional<DocumentOwner>, StoredDocuments> scopes = new HashMap<>();
+        for (String slug : slugs) {
+            documents.findBySlug(slug).ifPresent(document -> {
+                // Its owner unknown, or its text one the language refuses: indexed as its file holds it, refused with the reason.
+                ReadDocument head;
+                try {
+                    StoredDocuments scope = scopes.computeIfAbsent(document.owner(), owner -> scope(owner.orElse(null)));
+                    head = scope.head(document);
+                } catch (CadProblem refusal) {
+                    refuse(document, refusal);
+                    return;
+                }
+                document.replaceRelations(relationsOf(document, head, Strictness.LEAVE_OUT));
+            });
+        }
     }
 
     // ── One revision ─────────────────────────────────────────────────────────────────────────────────────────────

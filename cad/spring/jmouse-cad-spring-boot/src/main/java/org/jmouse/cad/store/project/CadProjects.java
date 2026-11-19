@@ -24,6 +24,7 @@ import org.jmouse.cad.store.problem.CadProblem;
 import org.jmouse.core.io.PortablePaths;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -192,6 +193,28 @@ public class CadProjects {
     private List<StoredDocument> ownedProjects(DocumentOwner owner) {
         authority.require(CadCapability.OWNER_READ, places.requireOwner(owner));
         return documents.owned(owner, PROJECT);
+    }
+
+    /**
+     * The folder a project's documents stand in on the server's disk, for whoever may read the project: where a plugin that keeps
+     * history — Git — keeps the project's. Empty for a project whose file is no file of the library folder (a shipped one).
+     */
+    @CadRead
+    public Optional<Path> folderForReading(String slug) {
+        return folderOf(requireProject(slug));
+    }
+
+    /** The same folder, for whoever may change the project; refused for whoever may only read it. */
+    @CadRead
+    public Optional<Path> folderForChanging(String slug) {
+        StoredDocument project = requireProject(slug);
+        access.requireWritable(project);
+        return folderOf(project);
+    }
+
+    private Optional<Path> folderOf(StoredDocument project) {
+        return documents.pathInFolder(project.getId())
+                .map(file -> documents.folder().resolve(file).getParent());
     }
 
     private StoredDocument requireProject(String slug) {

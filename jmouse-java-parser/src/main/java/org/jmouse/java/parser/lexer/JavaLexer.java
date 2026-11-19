@@ -3,6 +3,9 @@ package org.jmouse.java.parser.lexer;
 import org.jmouse.el.lexer.Cursor;
 import org.jmouse.el.lexer.Lexer;
 import org.jmouse.el.lexer.TokenCursor;
+import java.util.Objects;
+import org.jmouse.java.model.version.JavaSourceProfile;
+import org.jmouse.java.model.version.JavaSpecificationCatalog;
 
 /**
  * The jME {@link Lexer} for Java: a text in, a {@link TokenCursor} over its tokens out.
@@ -15,7 +18,15 @@ import org.jmouse.el.lexer.TokenCursor;
  */
 public final class JavaLexer implements Lexer {
 
-    private final JavaTokenizer tokenizer = new JavaTokenizer();
+    private final JavaTokenizer tokenizer;
+
+    public JavaLexer() {
+        this(JavaSourceProfile.standard(JavaSpecificationCatalog.standard().defaultRelease()), JavaLexicalProfile.standard());
+    }
+
+    public JavaLexer(JavaSourceProfile profile, JavaLexicalProfile lexical) {
+        tokenizer = new JavaTokenizer(Objects.requireNonNull(profile, "profile"), Objects.requireNonNull(lexical, "lexical"));
+    }
 
     @Override
     public TokenCursor tokenize(CharSequence text) {

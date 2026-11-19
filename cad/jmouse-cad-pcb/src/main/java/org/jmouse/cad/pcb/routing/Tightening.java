@@ -52,14 +52,14 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
             Point first = line.get(at);
             Point second = line.get(at + 1);
             Point next = line.get(at + 2);
-            // A step the reader holds — both its corners, or a point on it — is theirs and stays. Held on one side only, it is a step
-            // nobody means between what they hold and the copper that stood there: that copper stays, and what they hold lands on its
-            // line. A step nobody can mean at all moves less than anyone could see, and goes whatever is held.
+            // A point the reader holds on the step itself is theirs, and the step stays. Its corners held — the ends of a stretch the hand
+            // carries — the step is one nobody means between what they carry and the line beside it: merging, what they carry lands on
+            // that line, a held side kept where only one is. A step nobody can mean at all goes whatever is held.
             boolean firstHeld = !least && isHeld(first);
             boolean secondHeld = !least && isHeld(second);
             boolean stepHeld = !least && held.stream().anyMatch(point -> Stretches.liesBetween(point, first, second)
                     && !Precision.samePoint(point, first) && !Precision.samePoint(point, second));
-            if (first.distanceTo(second) >= shortest || stepHeld || (firstHeld && secondHeld)) {
+            if (first.distanceTo(second) >= shortest || stepHeld) {
                 continue;
             }
             Optional<Point> inWay = Ways.wayBetween(previous, first);

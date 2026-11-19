@@ -63,10 +63,6 @@
             <artifactId>jmouse-storage</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-git</artifactId>
-        </dependency>
         <!-- The one move of the documents out of the database they were kept in (ADR 0002): its tool reads MySQL. -->
         <dependency>
             <groupId>com.mysql</groupId>

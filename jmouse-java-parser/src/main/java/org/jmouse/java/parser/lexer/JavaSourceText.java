@@ -3,6 +3,7 @@ package org.jmouse.java.parser.lexer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.java.parser.source.LineIndex;
@@ -41,9 +42,9 @@ public final class JavaSourceText implements TokenizableSource {
      * @param original the text exactly as stored
      */
     public JavaSourceText(String name, CharSequence original) {
-        this.name = name;
-        this.original = original;
-        this.lines = LineIndex.of(original);
+        this.name = Objects.requireNonNull(name, "name");
+        this.original = Objects.requireNonNull(original, "original").toString();
+        this.lines = LineIndex.of(this.original);
     }
 
     @Override

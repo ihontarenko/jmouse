@@ -140,14 +140,18 @@ final class WorldFences {
 
     /**
      * The gap a track of {@code net} keeps from each of a layer's shapes, by its number; {@code NaN} where the shape is not its
-     * obstacle — its own net's copper, the track left out, the edge where the gap is fixed (see {@link #obstacles}).
+     * obstacle — its own net's copper, the copper the moving track is joined to, the track left out, the edge where the gap is
+     * fixed (see {@link #obstacles}).
      */
     private double[] gapsOf(LayerCopper copper, Optional<String> net, OptionalInt except, OptionalDouble fixedGap) {
         double own = world.clearanceOf(net);
         double[] gaps = new double[copper.shapes().size()];
+        OptionalInt joined = except.isPresent() ? OptionalInt.of(world.joinedCopperOfTrack(except.getAsInt())) : OptionalInt.empty();
         int number = 0;
         for (CopperPieces.Piece piece : copper.pieces()) {
-            boolean ofAnother = net.isEmpty() || !piece.net().equals(net);
+            // Copper the moving track is joined to is its own, whatever its net is named: a track in copper joining two nets has none,
+            // and would otherwise keep clear of the very copper it stands on — held where it is, unable to move out.
+            boolean ofAnother = (net.isEmpty() || !piece.net().equals(net)) && (joined.isEmpty() || piece.group() != joined.getAsInt());
             // A track laid over the root since is kept clear of as it now runs (relaidObstacles), not as the root had it.
             boolean leftOut = (piece.kind() == CopperPieces.Kind.TRACK || piece.kind() == CopperPieces.Kind.DROP)
                               && (except.isPresent() && piece.index() == except.getAsInt() || world.relaid().containsKey(piece.index()));
@@ -200,16 +204,29 @@ final class WorldFences {
     /**
      * What a track must keep clear of, on this board.
      *
-     * @param except the track of the pcb that is moving, left out of what it must keep clear of
+     * @param except the track of the pcb that is moving, left out of what it must keep clear of. Copper it already stands too
+     *               near — a conflict its reader left — it may come no nearer, but need not leave at once: so it can always be
+     *               moved out of a conflict, never deeper into one.
      */
     TrackFence fence(String layer, Optional<String> net, double width, OptionalInt except) {
         // Every fence over a layer shares the layer's shapes and cells: it is the gaps it keeps, no index of its own.
         return fences.computeIfAbsent(new FenceKey(layer, net, width, except), key -> {
             LayerCopper copper = copperOn(layer);
-            return new TrackFence(width, world.clearanceOf(net), copper.shapes(), gapsOf(copper, net, except, OptionalDouble.empty()),
-                                  cellsOn(layer), world.curveSteps())
+            TrackFence fence = new TrackFence(width, world.clearanceOf(net), copper.shapes(), gapsOf(copper, net, except, OptionalDouble.empty()),
+                                              cellsOn(layer), world.curveSteps())
                     .alsoKeepingClearOf(relaidObstacles(layer, net, except, OptionalDouble.empty()), world.settings().routing().fenceCells());
+            return standingTrack(layer, except)
+                    .map(standing -> fence.standingAs(List.of(CopperShapes.track(standing, world.curveSteps())))).orElse(fence);
         });
+    }
+
+    /** The moving track as it stands now, on this layer; none for a fence of no track, or one on another layer. */
+    private Optional<Track> standingTrack(String layer, OptionalInt except) {
+        if (except.isEmpty() || except.getAsInt() < 0 || except.getAsInt() >= world.pcb().tracks().size()) {
+            return Optional.empty();
+        }
+        Track track = world.pcb().tracks().get(except.getAsInt());
+        return track.layer().equals(layer) ? Optional.of(track) : Optional.empty();
     }
 
     /**

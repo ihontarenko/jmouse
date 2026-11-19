@@ -259,6 +259,17 @@ public final class RoutingWorld {
     }
 
     /**
+     * Which piece of joined copper a track is in, as the board it was dragged from had it — two of one number are one conductor,
+     * whatever their nets are named: the copper it already stands on.
+     */
+    public int joinedCopperOfTrack(int index) {
+        if (namedBy.isPresent() && index < namedBy.get().pcb().tracks().size()) {
+            return namedBy.get().joinedCopperOfTrack(index);
+        }
+        return root.nets().trackGroup(index);
+    }
+
+    /**
      * The net the copper under a point is on, on a layer: a pad's, as the circuit wires it; else a track's, an arc's or a via's,
      * as the pads it reaches are. What a new track started there joins. A zone is not asked: copper of any net may cross one,
      * which clears round it.

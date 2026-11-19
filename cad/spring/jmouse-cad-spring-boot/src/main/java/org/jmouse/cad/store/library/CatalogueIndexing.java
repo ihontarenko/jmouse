@@ -1,13 +1,14 @@
 package org.jmouse.cad.store.library;
 
 import org.jmouse.cad.document.DocumentInput;
+import org.jmouse.cad.document.DocumentNode;
 import org.jmouse.cad.folder.DocumentStore;
 import org.jmouse.cad.folder.StoredDocument;
-import org.jmouse.cad.library.CadLanguage;
 import org.jmouse.cad.simulation.CategoryDocument;
 import org.jmouse.cad.simulation.SimulationModule;
 import org.jmouse.cad.store.catalogue.CadCatalogue;
 import org.jmouse.cad.store.catalogue.CadCatalogue.ShippedOutcome;
+import org.jmouse.cad.store.catalogue.DocumentReading;
 import org.jmouse.cad.store.library.ShippedDocuments.ShippedDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The catalogue's index, made on every start from the files behind it: the documents libraries ship, read in place
- * (ADR 0001), and the library folder's, each with its revisions (ADR 0002). Nothing of it is kept anywhere else.
+ * The catalogue's index, made on every start from the files behind it: the documents libraries ship, read in place,
+ * and the library folder's, its files as they stand. Nothing of it is kept anywhere else.
  *
  * <p>Categories first, each after the one it stands under — every other document is filed in one —; circuits last,
  * since a circuit's drawing is checked against the parts it places; relations once everything they may name exists.</p>
@@ -36,13 +37,13 @@ public class CatalogueIndexing {
     private final CadCatalogue     catalogue;
     private final ShippedDocuments shipped;
     private final DocumentStore    folder;
-    private final CadLanguage      language;
+    private final DocumentReading  reading;
 
-    public CatalogueIndexing(CadCatalogue catalogue, ShippedDocuments shipped, DocumentStore folder, CadLanguage language) {
+    public CatalogueIndexing(CadCatalogue catalogue, ShippedDocuments shipped, DocumentStore folder, DocumentReading reading) {
         this.catalogue = catalogue;
         this.shipped = shipped;
         this.folder = folder;
-        this.language = language;
+        this.reading = reading;
     }
 
     /** One document to index: shipped in a jar, or held in the library folder. */
@@ -71,8 +72,12 @@ public class CatalogueIndexing {
         }
     }
 
-    /** Indexes everything, and says what it indexed. */
+    /** Indexes everything, and says what it indexed: every text read once, however many passes ask it. */
     public String index() {
+        return reading.readingEachOnce(this::indexEverything);
+    }
+
+    private String indexEverything() {
         List<Indexed> all = new ArrayList<>();
         // The library folder's first: a document written there holds its address against one a jar ships.
         for (StoredDocument held : folder.open()) {
@@ -95,7 +100,7 @@ public class CatalogueIndexing {
                 index(document, outcomes, indexed);
             }
         }
-        indexed.forEach(catalogue::indexRelations);
+        catalogue.indexRelations(indexed);
         String summary = indexed.size() + " documents indexed — shipped " + outcomes + ", the library folder's "
                 + all.stream().filter(Held.class::isInstance).count();
         LOGGER.info("📚 Catalogue: {}", summary);
@@ -109,11 +114,23 @@ public class CatalogueIndexing {
      */
     private Held heldOf(StoredDocument held) {
         try {
-            var read = language.language().readOne(DocumentInput.text(held.getSlug(), folder.heldText(held)));
+            DocumentNode read = documentOf(folder.heldText(held), held.getSlug());
             CategoryDocument category = read.kind().equals(SimulationModule.CATEGORY) ? CategoryDocument.of(read) : null;
             return new Held(held, read.kind().word(), category);
         } catch (RuntimeException unreadable) {
             return new Held(held, held.getKind(), null);
+        }
+    }
+
+    /**
+     * A text as the language reads it: the catalogue's reading — kept, so its index reads it no more —; one whose model is refused
+     * by its grammar alone, which is all a kind and a category ask.
+     */
+    private DocumentNode documentOf(String source, String origin) {
+        try {
+            return reading.read(source, origin).document();
+        } catch (RuntimeException modelRefused) {
+            return reading.language().language().readOne(DocumentInput.text(origin, source));
         }
     }
 
@@ -160,8 +177,7 @@ public class CatalogueIndexing {
                     yield Optional.empty();
                 }
                 try {
-                    yield Optional.of(CategoryDocument.of(language.language().readOne(
-                            DocumentInput.text(shippedDocument.document().origin(), shippedDocument.document().source()))));
+                    yield Optional.of(CategoryDocument.of(documentOf(shippedDocument.document().source(), shippedDocument.document().origin())));
                 } catch (RuntimeException unreadable) {
                     yield Optional.empty();
                 }

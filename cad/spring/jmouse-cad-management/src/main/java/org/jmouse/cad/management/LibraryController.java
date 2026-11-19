@@ -74,6 +74,20 @@ public class LibraryController {
         return library.shelf(kind, WrittenOwners.optional(owner));
     }
 
+    /**
+     * A page of a shelf, narrowed by words and a branch: what the library browses — a shelf of thousands, a page at a time, the tree's
+     * counts beside it.
+     */
+    @GetMapping("/shelves/{kind}/pages")
+    @PublicEndpoint("the catalogue's documents the reader may see, and an owner's only where the reader may read")
+    public PartLibrary.ShelfPage shelfPage(@PathVariable String kind, @RequestParam(required = false) String owner,
+                                           @RequestParam(required = false) String text, @RequestParam(required = false) String category,
+                                           @RequestParam(required = false) PartLibrary.ShelfHolder holder,
+                                           @RequestParam(required = false) String project,
+                                           @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "60") int size) {
+        return library.shelfPage(kind, WrittenOwners.optional(owner), text, new PartLibrary.ShelfBranch(category, holder, project), page, size);
+    }
+
     @GetMapping("/footprints/{slug}")
     @PublicEndpoint("a footprint the reader may see, and only the components on it the reader may see")
     public FootprintDetail footprint(@PathVariable String slug) {

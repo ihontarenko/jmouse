@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.1</version>
+    </parent>
+    <artifactId>jmouse-java-model</artifactId>
+    <name>jMouse - Java Model</name>
+    <description>Immutable Java specification profiles, language features and canonical vocabulary shared by source and binary tooling.</description>
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

@@ -64,6 +64,36 @@ public final class Polylines {
         return line;
     }
 
+    /**
+     * The part of a line between two lengths along it, its corners between kept: from the point {@code from} along it to the point
+     * {@code to} along it, each held within the line's own length.
+     */
+    public static List<Point> between(List<Point> line, double from, double to) {
+        List<Point> part = new ArrayList<>();
+        double walked = 0;
+        for (int index = 1; index < line.size(); index++) {
+            Point start = line.get(index - 1);
+            Point end = line.get(index);
+            double length = start.distanceTo(end);
+            double after = walked + length;
+            if (part.isEmpty() && from <= after) {
+                part.add(Precision.settled(start.toward(end, length == 0 ? 0 : Math.max(0, from - walked) / length)));
+            }
+            if (!part.isEmpty() && to <= after) {
+                part.add(Precision.settled(start.toward(end, length == 0 ? 1 : Math.max(0, to - walked) / length)));
+                return part;
+            }
+            if (!part.isEmpty()) {
+                part.add(end);
+            }
+            walked = after;
+        }
+        if (part.isEmpty()) {
+            part.add(line.getLast());
+        }
+        return part;
+    }
+
     /** A line run the other way. */
     public static List<Point> reversed(List<Point> line) {
         return new ArrayList<>(line).reversed();

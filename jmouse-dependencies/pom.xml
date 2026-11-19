@@ -762,6 +762,11 @@
             <!-- Java sources — structural parser: declarations, signatures, JavaDoc, exact spans -->
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-java-model</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-java-parser</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>

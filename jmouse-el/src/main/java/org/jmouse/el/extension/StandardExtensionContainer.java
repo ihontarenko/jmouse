@@ -1,5 +1,7 @@
 package org.jmouse.el.extension;
 
+import org.jmouse.el.parser.ParseRuleRegistry;
+
 import org.jmouse.el.ObjectContainer;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
@@ -27,10 +29,10 @@ import java.util.Optional;
  */
 public class StandardExtensionContainer implements ExtensionContainer {
 
-    private final org.jmouse.el.parser.ParseRuleRegistry parseRules = new org.jmouse.el.parser.ParseRuleRegistry();
+    private final ParseRuleRegistry parseRules = new ParseRuleRegistry();
 
     @Override
-    public org.jmouse.el.parser.ParseRuleRegistry parseRules() {
+    public ParseRuleRegistry parseRules() {
         return parseRules;
     }
 

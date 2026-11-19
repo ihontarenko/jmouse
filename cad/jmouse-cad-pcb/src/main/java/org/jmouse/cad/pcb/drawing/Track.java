@@ -10,8 +10,9 @@ import java.util.List;
 /**
  * A track: straight copper run through points on one layer, its corners rounded.
  *
- * <p>Its corners are rounded by {@code rounding}, the radius asked of them; a corner that cannot keep its gaps so keeps a smaller one
- * of its own ({@code corners}), so one tight corner — a bus's inner line — does not hold every other corner of the track back.</p>
+ * <p>Its corners are rounded by {@code rounding}, the radius asked of them; a corner keeps a radius of its own ({@code corners}) where it
+ * is rounded otherwise — smaller where it cannot keep its gaps so, so one tight corner does not hold the others back; larger where it
+ * turns about one centre with the lines of a bus inside it.</p>
  *
  * @param layer       the copper layer it is on: {@code top}, {@code inner-1} …, {@code bottom}
  * @param width       how wide it is, millimetres
@@ -19,8 +20,7 @@ import java.util.List;
  * @param points      the points it runs through, in order, at least two
  * @param arrangement the group it is chosen and moved with, and whether it is locked where it stands
  * @param finish      what its copper is left as: bare, the solder mask open along it for solder to be run on; empty for under the mask
- * @param corners     the radius each corner between its points keeps, in order, none above {@code rounding}; empty where every corner
- *                    keeps {@code rounding}
+ * @param corners     the radius each corner between its points keeps, in order; empty where every corner keeps {@code rounding}
  */
 public record Track(String layer, double width, double rounding, List<Point> points, Arrangement arrangement, String finish,
                     List<Double> corners) {
@@ -42,9 +42,7 @@ public record Track(String layer, double width, double rounding, List<Point> poi
         this(layer, width, rounding, points, arrangement, finish, List.of());
     }
 
-    /**
-     * Corners as kept: none where every one keeps the rounding; each at most the rounding. Refused where they are not one a corner.
-     */
+    /** Corners as kept: none where every one keeps the rounding; none below 0. Refused where they are not one a corner. */
     private static List<Double> cornersOf(double rounding, int points, List<Double> corners) {
         if (corners.isEmpty()) {
             return List.of();
@@ -52,7 +50,7 @@ public record Track(String layer, double width, double rounding, List<Point> poi
         if (corners.size() != Math.max(0, points - 2)) {
             throw new IllegalArgumentException("A track of " + points + " points has " + Math.max(0, points - 2) + " corners, not " + corners.size());
         }
-        List<Double> kept = corners.stream().map(radius -> Math.max(0, Math.min(radius, rounding))).toList();
+        List<Double> kept = corners.stream().map(radius -> Math.max(0, radius)).toList();
         return kept.stream().allMatch(radius -> radius == rounding) ? List.of() : kept;
     }
 

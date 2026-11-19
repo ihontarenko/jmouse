@@ -50,12 +50,10 @@ public record CadProperties(@DefaultValue Documents documents, @DefaultValue Lib
     /**
      * @param includeEngine whether jmouse-cad-library's own documents are among the shipped ones
      * @param locations     the product's own shipped documents, as resource patterns: {@code classpath:catalogue/**}
-     * @param folder        the library folder: every document written here is a file of it, every revision a commit
-     *                      (ADR 0002); the installation's, set by whoever runs it
-     * @param identity      who a commit is by when no person is named: the engine writing, a file found in the folder
+     * @param folder        the library folder: every document written here is a file of it; the installation's,
+     *                      set by whoever runs it
      */
-    public record Library(@DefaultValue("true") boolean includeEngine, @DefaultValue List<String> locations, Path folder,
-                          @DefaultValue Identity identity) {
+    public record Library(@DefaultValue("true") boolean includeEngine, @DefaultValue List<String> locations, Path folder) {
 
         public Library {
             if (folder == null) {
@@ -63,13 +61,6 @@ public record CadProperties(@DefaultValue Documents documents, @DefaultValue Lib
                         + "its files, so the installation says where it is");
             }
         }
-    }
-
-    /**
-     * @param name  the name a commit nobody named is by
-     * @param email its address
-     */
-    public record Identity(@DefaultValue("jMouse CAD") String name, @DefaultValue("library@jmouse.invalid") String email) {
     }
 
     /**

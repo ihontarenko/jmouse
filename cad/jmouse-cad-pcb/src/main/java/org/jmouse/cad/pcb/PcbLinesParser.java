@@ -89,8 +89,12 @@ public class PcbLinesParser extends GrammarLinesParser {
                             .build())
                     .build(),
             LineGrammar.line(PcbWords.TRACK).slot(PcbWords.LAYER, WORD).required(PcbWords.WIDTH, QUANTITY).optional(PcbWords.ROUNDING, QUANTITY)
+                    .optional(PcbWords.CORNERS, QUANTITIES)
                     .required(PcbWords.FROM, POINT).repeated(PcbWords.TO, POINT).including(ArrangementLines.CLAUSES).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new))
                     .check((track, grammar) -> track.values("to").isEmpty() ? grammar.shape() : null)
+                    // A radius for each corner: one fewer than the points it runs on to.
+                    .check((track, grammar) -> track.has(PcbWords.CORNERS) && track.quantities(PcbWords.CORNERS).size() != track.values("to").size() - 1
+                            ? grammar.shape() : null)
                     .build(),
             LineGrammar.line(PcbWords.ARC).slot(PcbWords.LAYER, WORD).required(PcbWords.WIDTH, QUANTITY).required(PcbWords.FROM, POINT)
                     .required(PcbWords.THROUGH, POINT).required(PcbWords.TO, POINT).including(ArrangementLines.CLAUSES).optional(PcbWords.FINISH, WORD, PcbVocabulary.COPPER_FINISHES.toArray(String[]::new))

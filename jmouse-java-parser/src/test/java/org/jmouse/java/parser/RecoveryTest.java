@@ -18,13 +18,17 @@ class RecoveryTest {
 
     private final JavaParser parser = new JavaParser();
 
+    protected JavaSourceFile read(String name, String text) {
+        return parser.parse(name, text);
+    }
+
     private static List<String> names(TypeDeclaration type) {
         return type.members().stream().map(Declaration::name).toList();
     }
 
     @Test
     void aBrokenMemberIsSkippedAndItsNeighboursKept() {
-        JavaSourceFile file = parser.parse("Broken.java", """
+        JavaSourceFile file = read("Broken.java", """
                 class Broken {
                     int before;
                     public void broken(int ) { return; }
@@ -44,7 +48,7 @@ class RecoveryTest {
 
     @Test
     void aBrokenTypeHeaderLosesOnlyThatType() {
-        JavaSourceFile file = parser.parse("Two.java", """
+        JavaSourceFile file = read("Two.java", """
                 class 123Wrong { int lost; }
                 class Right { int kept; }
                 """);
@@ -56,7 +60,7 @@ class RecoveryTest {
 
     @Test
     void anUnclosedBodyIsReportedAndKeptToTheEnd() {
-        JavaSourceFile file = parser.parse("Open.java", """
+        JavaSourceFile file = read("Open.java", """
                 class Open {
                     int kept;
                     void open() {
@@ -70,7 +74,7 @@ class RecoveryTest {
 
     @Test
     void aBrokenEnumConstantKeepsTheOthers() {
-        JavaSourceFile file = parser.parse("Colours.java", """
+        JavaSourceFile file = read("Colours.java", """
                 enum Colours {
                     RED, 42, BLUE;
                     int value;
@@ -83,7 +87,7 @@ class RecoveryTest {
 
     @Test
     void aMissingSemicolonIsAProblemNotACrash() {
-        JavaSourceFile file = parser.parse("Missing.java", """
+        JavaSourceFile file = read("Missing.java", """
                 class Missing {
                     int first
                     int second;
@@ -97,7 +101,7 @@ class RecoveryTest {
 
     @Test
     void strayTopLevelTokensAndBracesAreSkipped() {
-        JavaSourceFile file = parser.parse("Stray.java", """
+        JavaSourceFile file = read("Stray.java", """
                 package p;
                 }
                 garbage here;
@@ -111,7 +115,7 @@ class RecoveryTest {
 
     @Test
     void anEmptyOrCommentOnlyFileIsComplete() {
-        assertTrue(parser.parse("Empty.java", "").isComplete());
-        assertTrue(parser.parse("Comments.java", "// only\n/* comments */").isComplete());
+        assertTrue(read("Empty.java", "").isComplete());
+        assertTrue(read("Comments.java", "// only\n/* comments */").isComplete());
     }
 }

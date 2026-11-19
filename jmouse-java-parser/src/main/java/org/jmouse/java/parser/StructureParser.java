@@ -14,7 +14,10 @@ import org.jmouse.java.parser.javadoc.JavaDocParser;
 import org.jmouse.java.parser.lexer.JavaComment;
 import org.jmouse.java.parser.lexer.JavaLexer;
 import org.jmouse.java.parser.lexer.JavaSourceText;
-import org.jmouse.java.parser.lexer.JavaTokenKind;
+import org.jmouse.java.parser.lexer.JavaToken;
+import org.jmouse.java.parser.lexer.JavaKeyword;
+import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
+import org.jmouse.java.parser.lexer.JavaKeywordSpellings;
 import org.jmouse.java.parser.model.Annotation;
 import org.jmouse.java.parser.model.ConstructorDeclaration;
 import org.jmouse.java.parser.model.DeclarationKind;
@@ -47,28 +50,28 @@ import org.jmouse.java.parser.source.ParseProblem;
 import org.jmouse.java.parser.source.ProblemKind;
 import org.jmouse.java.parser.source.SourceSpan;
 
-import static org.jmouse.java.parser.lexer.JavaTokenKind.AMPERSAND;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.ASSIGN;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.AT;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.COMMA;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.DOT;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.ELLIPSIS;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.END_OF_FILE;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.GREATER;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.IDENTIFIER;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.KEYWORD;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.LEFT_BRACE;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.LEFT_BRACKET;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.LEFT_PARENTHESIS;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.LESS;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.OPERATOR;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.QUESTION;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.RIGHT_BRACE;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.RIGHT_BRACKET;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.RIGHT_PARENTHESIS;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.SEMICOLON;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.isIdentifier;
-import static org.jmouse.java.parser.lexer.JavaTokenKind.isKeyword;
+import static org.jmouse.java.parser.lexer.JavaToken.AMPERSAND;
+import static org.jmouse.java.parser.lexer.JavaToken.ASSIGN;
+import static org.jmouse.java.parser.lexer.JavaToken.AT;
+import static org.jmouse.java.parser.lexer.JavaToken.COMMA;
+import static org.jmouse.java.parser.lexer.JavaToken.DOT;
+import static org.jmouse.java.parser.lexer.JavaToken.ELLIPSIS;
+import static org.jmouse.java.parser.lexer.JavaToken.END_OF_FILE;
+import static org.jmouse.java.parser.lexer.JavaToken.GREATER;
+import static org.jmouse.java.parser.lexer.JavaToken.IDENTIFIER;
+import static org.jmouse.java.parser.lexer.JavaToken.KEYWORD;
+import static org.jmouse.java.parser.lexer.JavaToken.LEFT_BRACE;
+import static org.jmouse.java.parser.lexer.JavaToken.LEFT_BRACKET;
+import static org.jmouse.java.parser.lexer.JavaToken.LEFT_PARENTHESIS;
+import static org.jmouse.java.parser.lexer.JavaToken.LESS;
+import static org.jmouse.java.parser.lexer.JavaToken.OPERATOR;
+import static org.jmouse.java.parser.lexer.JavaToken.QUESTION;
+import static org.jmouse.java.parser.lexer.JavaToken.RIGHT_BRACE;
+import static org.jmouse.java.parser.lexer.JavaToken.RIGHT_BRACKET;
+import static org.jmouse.java.parser.lexer.JavaToken.RIGHT_PARENTHESIS;
+import static org.jmouse.java.parser.lexer.JavaToken.SEMICOLON;
+import static org.jmouse.java.parser.lexer.JavaToken.isIdentifier;
+import static org.jmouse.java.parser.lexer.JavaToken.isKeyword;
 
 /**
  * One recursive-descent pass over one jME {@link TokenCursor}, building a jME node tree. Not reusable:
@@ -99,7 +102,7 @@ final class StructureParser {
     private static final int MAXIMUM_TYPE_NESTING = 64;
 
     private static final Set<String> PRIMITIVE_TYPES = Set.of(
-            "boolean", "byte", "char", "short", "int", "long", "float", "double", "void");
+            JavaKeywordSpellings.BOOLEAN, JavaKeywordSpellings.BYTE, JavaKeywordSpellings.CHAR, JavaKeywordSpellings.SHORT, JavaKeywordSpellings.INT, JavaKeywordSpellings.LONG, JavaKeywordSpellings.FLOAT, JavaKeywordSpellings.DOUBLE, JavaKeywordSpellings.VOID);
 
     private final TokenCursor          cursor;
     private final JavaSourceText       source;
@@ -139,12 +142,12 @@ final class StructureParser {
             try {
                 if (at(SEMICOLON)) {
                     advance();
-                } else if (atKeyword("import")) {
+                } else if (atKeyword(JavaKeyword.IMPORT)) {
                     int startIndex = position();
                     children.add(withTrivia(new ImportNode(parseImport()), startIndex));
                 } else {
                     Header header = parseHeader();
-                    if (atKeyword("package")) {
+                    if (atKeyword(JavaKeyword.PACKAGE)) {
                         children.add(withTrivia(new PackageNode(parsePackage(header)), header.startIndex()));
                     } else if (isModuleStart()) {
                         children.add(withTrivia(new ModuleNode(parseModule(header)), header.startIndex()));
@@ -176,7 +179,7 @@ final class StructureParser {
     private ImportDeclaration parseImport() {
         Token   keyword  = advance();
         boolean isStatic = false;
-        if (atKeyword("static")) {
+        if (atKeyword(JavaKeyword.STATIC)) {
             advance();
             isStatic = true;
         }
@@ -212,12 +215,12 @@ final class StructureParser {
     }
 
     private boolean isModuleStart() {
-        return isIdentifier(current(), "module") && IDENTIFIER.matches(peek(1))
-                || isIdentifier(current(), "open") && isIdentifier(peek(1), "module");
+        return isIdentifier(current(), JavaKeyword.MODULE) && IDENTIFIER.matches(peek(1))
+                || isIdentifier(current(), JavaKeyword.OPEN) && isIdentifier(peek(1), JavaKeyword.MODULE);
     }
 
     private ModuleDeclaration parseModule(Header header) {
-        boolean open = isIdentifier(current(), "open");
+        boolean open = isIdentifier(current(), JavaKeyword.OPEN);
         if (open) {
             advance();
         }
@@ -247,7 +250,7 @@ final class StructureParser {
 
         while (true) {
             Token token = current();
-            if (AT.matches(token) && !isKeyword(peek(1), "interface")) {
+            if (AT.matches(token) && !isKeyword(peek(1), JavaKeyword.INTERFACE)) {
                 annotations.add(parseAnnotation());
                 continue;
             }
@@ -257,7 +260,7 @@ final class StructureParser {
                 advance();
                 continue;
             }
-            if (isIdentifier(token, "sealed") && continuesDeclaration(peek(1))) {
+            if (isIdentifier(token, JavaKeyword.SEALED) && continuesDeclaration(peek(1))) {
                 modifiers.add(Modifier.SEALED);
                 advance();
                 continue;
@@ -275,7 +278,7 @@ final class StructureParser {
         Token first  = current();
         Token hyphen = peek(1);
         Token second = peek(2);
-        return isIdentifier(first, "non") && OPERATOR.matches(hyphen) && hyphen.value().equals("-") && isIdentifier(second, "sealed")
+        return isIdentifier(first, "non") && OPERATOR.matches(hyphen) && hyphen.value().equals("-") && isIdentifier(second, JavaKeyword.SEALED)
                 && endOf(first) == hyphen.offset() && endOf(hyphen) == second.offset();
     }
 
@@ -300,7 +303,7 @@ final class StructureParser {
 
     private List<Annotation> parseAnnotations() {
         List<Annotation> annotations = new ArrayList<>();
-        while (at(AT) && !isKeyword(peek(1), "interface")) {
+        while (at(AT) && !isKeyword(peek(1), JavaKeyword.INTERFACE)) {
             annotations.add(parseAnnotation());
         }
         return annotations;
@@ -318,9 +321,9 @@ final class StructureParser {
     // ------------------------------------------------------------------ types
 
     private boolean isTypeStart() {
-        return atKeyword("class") || atKeyword("interface") || atKeyword("enum")
-                || at(AT) && isKeyword(peek(1), "interface")
-                || isIdentifier(current(), "record") && IDENTIFIER.matches(peek(1));
+        return atKeyword(JavaKeyword.CLASS) || atKeyword(JavaKeyword.INTERFACE) || atKeyword(JavaKeyword.ENUM)
+                || at(AT) && isKeyword(peek(1), JavaKeyword.INTERFACE)
+                || isIdentifier(current(), JavaKeyword.RECORD) && IDENTIFIER.matches(peek(1));
     }
 
     /** What a member needs to know about the type it is declared in. */
@@ -354,11 +357,11 @@ final class StructureParser {
                     "Types are nested deeper than " + MAXIMUM_TYPE_NESTING + " levels.", source.span(current()));
         }
         DeclarationKind kind;
-        if (atKeyword("class")) {
+        if (atKeyword(JavaKeyword.CLASS)) {
             kind = DeclarationKind.CLASS;
-        } else if (atKeyword("interface")) {
+        } else if (atKeyword(JavaKeyword.INTERFACE)) {
             kind = DeclarationKind.INTERFACE;
-        } else if (atKeyword("enum")) {
+        } else if (atKeyword(JavaKeyword.ENUM)) {
             kind = DeclarationKind.ENUM;
         } else if (at(AT)) {
             kind = DeclarationKind.ANNOTATION_TYPE;
@@ -379,13 +382,13 @@ final class StructureParser {
         List<String>        permittedTypes   = List.of();
 
         while (true) {
-            if (atKeyword("extends")) {
+            if (atKeyword(JavaKeyword.EXTENDS)) {
                 advance();
                 extendedTypes = parseTypeList(TypeReferenceRole.EXTENDS);
-            } else if (atKeyword("implements")) {
+            } else if (atKeyword(JavaKeyword.IMPLEMENTS)) {
                 advance();
                 implementedTypes = parseTypeList(TypeReferenceRole.IMPLEMENTS);
-            } else if (isIdentifier(current(), "permits")) {
+            } else if (isIdentifier(current(), JavaKeyword.PERMITS)) {
                 advance();
                 permittedTypes = parseTypeList(TypeReferenceRole.PERMITS);
             } else {
@@ -453,7 +456,7 @@ final class StructureParser {
             List<Annotation> annotations = parseAnnotations();
             String           name        = expectIdentifier("a type parameter").value();
             List<String>     bounds      = new ArrayList<>();
-            if (atKeyword("extends")) {
+            if (atKeyword(JavaKeyword.EXTENDS)) {
                 advance();
                 bounds.add(parseTypeText(TypeReferenceRole.TYPE_PARAMETER_BOUND));
                 while (at(AMPERSAND)) {
@@ -523,7 +526,7 @@ final class StructureParser {
             members.add(parseInitializer(context, false));
             return;
         }
-        if (atKeyword("static") && LEFT_BRACE.matches(peek(1))) {
+        if (atKeyword(JavaKeyword.STATIC) && LEFT_BRACE.matches(peek(1))) {
             members.add(parseInitializer(context, true));
             return;
         }
@@ -569,7 +572,7 @@ final class StructureParser {
         String          qualified     = context.qualifiedName + "." + name;
         SymbolId        symbolId      = registerSymbol(context.qualifiedName + "#" + name + "[" + ordinal + "]");
         SourceSpan      signatureSpan = isStatic ? source.span(staticToken) : lines.span(body.start().offset(), body.start().offset());
-        String          signature     = isStatic ? "static" : "";
+        String          signature     = isStatic ? JavaKeywordSpellings.STATIC : "";
         SourceSpan      span          = spanFrom(startIndex);
         DeclarationKind kind          = isStatic ? DeclarationKind.STATIC_INITIALIZER : DeclarationKind.INITIALIZER;
         JavaDoc         javaDoc       = documentationFor(startIndex, new JavaDocOwner(symbolId, kind, qualified, signature, span));
@@ -588,7 +591,7 @@ final class StructureParser {
         List<String> thrownTypes   = parseThrows();
         SourceSpan   signatureSpan = spanFrom(header.startIndex());
         String       defaultValue  = null;
-        if (atKeyword("default")) {
+        if (atKeyword(JavaKeyword.DEFAULT)) {
             advance();
             int valueStart = current().offset();
             skipExpression();
@@ -785,10 +788,10 @@ final class StructureParser {
             }
             String  name;
             boolean receiver = false;
-            if (atKeyword("this")) {
+            if (atKeyword(JavaKeyword.THIS)) {
                 name = advance().value();
                 receiver = true;
-            } else if (at(IDENTIFIER) && DOT.matches(peek(1)) && isKeyword(peek(2), "this")) {
+            } else if (at(IDENTIFIER) && DOT.matches(peek(1)) && isKeyword(peek(2), JavaKeyword.THIS)) {
                 name = advance().value() + advance().value() + advance().value();
                 receiver = true;
             } else {
@@ -813,7 +816,7 @@ final class StructureParser {
     }
 
     private List<String> parseThrows() {
-        if (!atKeyword("throws")) {
+        if (!atKeyword(JavaKeyword.THROWS)) {
             return List.of();
         }
         advance();
@@ -910,7 +913,7 @@ final class StructureParser {
             }
             if (QUESTION.matches(tokenAt(scan))) {
                 scan++;
-                if (isKeyword(tokenAt(scan), "extends") || isKeyword(tokenAt(scan), "super")) {
+                if (isKeyword(tokenAt(scan), JavaKeyword.EXTENDS) || isKeyword(tokenAt(scan), JavaKeyword.SUPER)) {
                     scan = scanType(scan + 1);
                 }
             } else {
@@ -933,7 +936,7 @@ final class StructureParser {
     /** Where the annotations starting at absolute {@code position} end ({@code position} itself when none), or {@code -1}. */
     private int skipAnnotationsAt(int position) {
         int scan = position;
-        while (AT.matches(tokenAt(scan)) && !isKeyword(tokenAt(scan + 1), "interface")) {
+        while (AT.matches(tokenAt(scan)) && !isKeyword(tokenAt(scan + 1), JavaKeyword.INTERFACE)) {
             scan++;
             if (!IDENTIFIER.matches(tokenAt(scan))) {
                 return -1;
@@ -971,7 +974,7 @@ final class StructureParser {
         int scan = fromIndex;
         while (scan < toIndex) {
             Token token = tokenAt(scan);
-            if (AT.matches(token) && !isKeyword(tokenAt(scan + 1), "interface")) {
+            if (AT.matches(token) && !isKeyword(tokenAt(scan + 1), JavaKeyword.INTERFACE)) {
                 scan = recordTypeUseAnnotation(scan, toIndex);
             } else if (IDENTIFIER.matches(token)) {
                 scan = recordTypeName(scan, toIndex, role);
@@ -1083,7 +1086,7 @@ final class StructureParser {
         int           scan = fromIndex;
         while (scan < toIndex) {
             Token token = tokenAt(scan);
-            if (AT.matches(token) && !isKeyword(tokenAt(scan + 1), "interface")) {
+            if (AT.matches(token) && !isKeyword(tokenAt(scan + 1), JavaKeyword.INTERFACE)) {
                 int end = skipAnnotationsAt(scan);
                 scan = end < 0 ? toIndex : end;
                 continue;
@@ -1124,7 +1127,7 @@ final class StructureParser {
      *
      * @return the closing token, or {@code null} when the text ends first (reported)
      */
-    private Token skipBalanced(JavaTokenKind opening, JavaTokenKind closing) {
+    private Token skipBalanced(JavaToken opening, JavaToken closing) {
         Token open  = advance();
         int   depth = 1;
         while (true) {
@@ -1411,15 +1414,15 @@ final class StructureParser {
         return token;
     }
 
-    private boolean at(JavaTokenKind kind) {
+    private boolean at(JavaToken kind) {
         return kind.matches(current());
     }
 
-    private boolean atKeyword(String keyword) {
+    private boolean atKeyword(JavaKeywordDefinition keyword) {
         return isKeyword(current(), keyword);
     }
 
-    private Token expect(JavaTokenKind kind, String message) {
+    private Token expect(JavaToken kind, String message) {
         if (!at(kind)) {
             throw failure(message);
         }

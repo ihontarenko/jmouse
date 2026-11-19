@@ -4,6 +4,8 @@ package org.jmouse.java.parser.source;
  * Why part of a source could not be read as written.
  */
 public enum ProblemKind {
+    /** The parser's configured work budget was exhausted. */
+    WORK_BUDGET_EXCEEDED,
 
     /** Valid or incomplete syntax outside the optional body reader's supported grammar. */
     UNSUPPORTED_SYNTAX,

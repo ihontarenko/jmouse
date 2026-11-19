@@ -231,32 +231,33 @@ public final class TrackFence {
         return true;
     }
 
-    /** The largest of the corners asked for down to none that keeps this line's gaps, its corners measured as they are drawn. */
-    public double roundingThatFits(List<Point> points, double wanted, String layer, int halvings) {
+    /**
+     * The radius each corner of a line keeps, the one asked for down to none: for each corner by itself the widest that keeps its gaps,
+     * so a tight corner gives up its own rounding and no other's. Empty for a line of no corner, or none asked.
+     */
+    public List<Double> roundingsThatFit(List<Point> points, double wanted, String layer, int halvings) {
         if (wanted <= 0 || points.size() < 3) {
-            return Math.max(0, wanted);
+            return List.of();
         }
-        if (cornersClear(points, wanted, layer)) {
-            return wanted;
+        List<Double> kept = new ArrayList<>();
+        for (int corner = 1; corner + 1 < points.size(); corner++) {
+            int at = corner;
+            // Halved toward the widest that keeps the corner's gaps: the least rounding is no rounding.
+            kept.add(cornerClear(points, at, wanted, layer) ? wanted
+                    : Halving.bracket(0, wanted, halvings, tried -> cornerClear(points, at, tried, layer)).holds());
         }
-        // Halved toward the widest that keeps every corner's gaps: the least rounding is no rounding.
-        return Halving.bracket(0, wanted, halvings, tried -> cornersClear(points, tried, layer)).holds();
+        return kept;
     }
 
     /**
-     * Whether a line's corners, rounded so, keep their gaps: each corner by its own copper — the stretch coming in, the corner as rounded,
-     * the stretch going on, the very arc the whole line is drawn with —, one corner at a time.
+     * Whether a line's corner, rounded so, keeps its gaps: by its own copper — the stretch coming in, the corner as rounded, the stretch
+     * going on, the very arc the whole line is drawn with.
      */
-    private boolean cornersClear(List<Point> points, double rounding, String layer) {
-        for (int corner = 1; corner + 1 < points.size(); corner++) {
-            Point before = points.get(corner - 1);
-            Point at = points.get(corner);
-            Point after = points.get(corner + 1);
-            if (!copperClear(CopperShapes.track(new Track(layer, width, rounding, List.of(before, at, after)), curveSteps))) {
-                return false;
-            }
-        }
-        return true;
+    private boolean cornerClear(List<Point> points, int corner, double rounding, String layer) {
+        List<Point> around = List.of(points.get(corner - 1), points.get(corner), points.get(corner + 1));
+        // Rounding may never make a corner worse than it stands sharp: copper the sharp corner already stands too near is kept no nearer.
+        CopperShape sharp = CopperShapes.track(new Track(layer, width, 0, around), curveSteps);
+        return standingAs(List.of(sharp)).copperClear(CopperShapes.track(new Track(layer, width, rounding, around), curveSteps));
     }
 
     /**
@@ -265,10 +266,18 @@ public final class TrackFence {
      * cross it. Only the obstacles near an end are asked; the fence it answers keeps the same pieces and index, its gaps eased.
      */
     public TrackFence leaving(List<Point> points) {
-        // How near the nearest end stands to each piece it does not keep its gap from; infinite where every end keeps it.
+        return standingAs(points.stream().map(point -> CopperShape.circle(point.x(), point.y(), width / 2)).toList());
+    }
+
+    /**
+     * The fence as copper already standing here sees it: what that copper stands nearer than its gap may not be come nearer than it is
+     * now, but need not be left — a track's ends on a fine pitch, a corner of a line already laid too near its neighbour. Only the
+     * obstacles near that copper are asked; the fence it answers keeps the same pieces and index, its gaps eased.
+     */
+    public TrackFence standingAs(List<CopperShape> standing) {
+        // How near the copper stands to each piece it does not keep its gap from; infinite where all of it keeps it.
         double[] tightest = null;
-        for (Point point : points) {
-            CopperShape end = CopperShape.circle(point.x(), point.y(), width / 2);
+        for (CopperShape end : standing) {
             Box box = end.box();
             BitSet near = near(box.left() - reachOut, box.top() - reachOut, box.right() + reachOut, box.bottom() + reachOut);
             for (int number = near.nextSetBit(0); number >= 0; number = near.nextSetBit(number + 1)) {
@@ -283,7 +292,7 @@ public final class TrackFence {
                 }
             }
         }
-        TrackFence alsoLeaving = also == null ? null : also.leaving(points);
+        TrackFence alsoLeaving = also == null ? null : also.standingAs(standing);
         if (tightest == null) {
             return alsoLeaving == also ? this : new TrackFence(width, clearance, shapes, gaps, cells, curveSteps, alsoLeaving, base());
         }

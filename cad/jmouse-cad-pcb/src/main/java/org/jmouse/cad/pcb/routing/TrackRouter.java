@@ -22,8 +22,16 @@ public final class TrackRouter {
     private TrackRouter() {
     }
 
-    /** How the reader lays and carries copper now: the directions a track may take, what becomes of a jog. */
-    public record LayingStyle(double angleStep, Tightening.JogHandling jogs) {
+    /**
+     * How the reader lays and carries copper now: the directions a track may take, what becomes of a jog, and — merging on —
+     * the gap within which a carried track running along its net's other copper becomes one with it, a junction ({@link CoincidentStretches}).
+     */
+    public record LayingStyle(double angleStep, Tightening.JogHandling jogs, OptionalDouble merging) {
+
+        /** A style that merges nothing it carries. */
+        public LayingStyle(double angleStep, Tightening.JogHandling jogs) {
+            this(angleStep, jogs, OptionalDouble.empty());
+        }
     }
 
     /**

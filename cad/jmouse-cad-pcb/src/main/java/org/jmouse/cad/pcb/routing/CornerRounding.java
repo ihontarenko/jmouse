@@ -13,7 +13,9 @@ import java.util.TreeSet;
 /**
  * Chosen tracks' corners rounded, as a person sees the line: a stretch chosen is its line chosen ({@link JoinedTracks}) — its own corners
  * and the corners where it joins the rest. A board read from KiCad keeps one track a stretch, so its corners are all joints: the stretches
- * of a chosen line that run on one layer at one width become one track, its corners rounded as far as their gaps allow. KiCad gets it back as
+ * of a chosen line that run on one layer at one width become one track. Every chosen corner takes the radius asked; a corner whose
+ * legs are too short for it takes the widest they hold ({@link org.jmouse.cad.pcb.geometry.RoundedTrack}), no other corner held back; what
+ * stands near is not asked: a gap the rounding takes is the checks' to say and the reader's to make again. KiCad gets it back as
  * stretches and arcs. The merged track stands where the first of its stretches stood; what was chosen is said again by where it now
  * stands, so the choice stays on the same copper.
  *
@@ -28,6 +30,7 @@ public record CornerRounding(RoutingWorld world, double rounding) {
     /** One run of a line's chosen stretches made one track: where it stands, the stretches it takes the place of, its points. */
     private record Merge(int at, List<Integer> gone, Track track) {
     }
+
 
     public Rounded rounded(List<Integer> chosen) {
         PcbDrawing pcb = world.pcb();
@@ -76,11 +79,8 @@ public record CornerRounding(RoutingWorld world, double rounding) {
         List<Integer> indexes = line.members().subList(from, to + 1).stream().map(JoinedTracks.Member::index).sorted().toList();
         int at = indexes.getFirst();
         Track first = pcb.tracks().get(line.members().get(from).index());
-        TrackFence fence = world.fenceOfTrack(first.withPoints(points), at, world.netOfTrack(at));
-        // Rounding changes copper at corners alone: a line with none takes the radius asked, for the corners it may yet be given.
-        double fits = fence.roundingThatFits(points, rounding, first.layer(), world.settings().routing().roundingHalvings());
-        Track merged = first.withPoints(points).withRounding(fits);
-        return new Merge(at, indexes.subList(1, indexes.size()), merged);
+        // Every corner by the radius asked, each its own: no corner's short leg holds another back, what stands near is the checks'.
+        return new Merge(at, indexes.subList(1, indexes.size()), first.withPoints(points).withRounding(rounding));
     }
 
     private static boolean takes(PcbDrawing pcb, TreeSet<Integer> wanted, int index) {

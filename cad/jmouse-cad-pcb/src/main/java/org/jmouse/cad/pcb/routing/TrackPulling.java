@@ -2,6 +2,7 @@ package org.jmouse.cad.pcb.routing;
 
 import org.jmouse.cad.Point;
 import org.jmouse.cad.pcb.drawing.Track;
+import org.jmouse.cad.pcb.geometry.CopperShapes;
 import org.jmouse.geometry.index.Box;
 import org.jmouse.numerics.Halving;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
@@ -116,12 +117,12 @@ final class TrackPulling {
         return changed;
     }
 
-    /** A pcb with a track's line in place and its corners rounded as far as they still fit. */
-    static PcbDrawing withLine(RoutingWorld world, int index, List<Point> line, TrackFence against) {
+    /** A pcb with a track's line in place, every corner rounded by the track's radius. */
+    static PcbDrawing withLine(RoutingWorld world, int index, List<Point> line) {
         List<Track> changed = new ArrayList<>(world.pcb().tracks());
         Track track = changed.get(index);
-        double rounding = against.roundingThatFits(line, track.rounding(), track.layer(), world.settings().routing().roundingHalvings());
-        changed.set(index, track.withPoints(line).withRounding(rounding));
+        // Every corner keeps the radius the track is rounded by: the shape was judged rounded, as it is laid — never cut back after.
+        changed.set(index, track.withPoints(line).withRounding(track.rounding()));
         return world.pcb().withTracks(changed);
     }
 
@@ -147,15 +148,11 @@ final class TrackPulling {
             if (LineCleaning.isTangled(tight) || !held.stream().allMatch(point -> Polylines.passesThrough(tight, point))) {
                 return Optional.empty();
             }
-            return Optional.of(withLine(world, index, tight, fence));
+            return Optional.of(withLine(world, index, tight));
         };
-        List<List<Point>> stretches = new ArrayList<>();
-        for (int at = 0; at < isNew.length; at++) {
-            if (isNew[at]) {
-                stretches.add(List.of(shape.get(at), shape.get(at + 1)));
-            }
-        }
-        if (stretches.stream().allMatch(fence::lineClear)) {
+        // The shape as it would be laid — its corners rounded as the track's are —, never its sharp skeleton: a rounded corner's
+        // point stands where no copper will, and on a rounded bus it falls on the neighbour's arc.
+        if (fence.copperClear(CopperShapes.track(track.withPoints(shape), world.curveSteps()))) {
             return allOf.apply(shape);
         }
         if (!walking) {
@@ -284,7 +281,7 @@ final class TrackPulling {
                 }
             }
         }
-        return tight.map(points -> withLine(world, index, points, fence));
+        return tight.map(points -> withLine(world, index, points));
     }
 
     /** How far a line turns at one of its corners, in degrees: 0 where it runs straight on, or where the point is no corner of it. */

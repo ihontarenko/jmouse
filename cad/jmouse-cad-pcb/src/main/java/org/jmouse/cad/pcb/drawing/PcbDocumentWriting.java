@@ -93,6 +93,9 @@ public final class PcbDocumentWriting {
             if (track.rounding() > 0) {
                 line.clause(PcbWords.ROUNDING, Nodes.number(track.rounding()));
             }
+            if (!track.corners().isEmpty()) {
+                line.clause(PcbWords.CORNERS, Nodes.numbers(track.corners()));
+            }
             line.clause(PcbWords.FROM, point(track.points().getFirst()));
             track.points().stream().skip(1).forEach(point -> line.clause(PcbWords.TO, point(point)));
             ArrangementLines.write(line, track.arrangement());

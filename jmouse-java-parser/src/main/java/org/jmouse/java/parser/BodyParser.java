@@ -4,7 +4,11 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.java.parser.lexer.JavaLexer;
 import org.jmouse.java.parser.lexer.JavaSourceText;
-import org.jmouse.java.parser.lexer.JavaTokenKind;
+import org.jmouse.java.parser.lexer.JavaToken;
+import org.jmouse.java.model.type.JavaPlatformTypeNames;
+import org.jmouse.java.parser.lexer.JavaKeyword;
+import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
+import org.jmouse.java.parser.lexer.JavaKeywordSpellings;
 import org.jmouse.java.parser.model.BodyReference;
 import org.jmouse.java.parser.model.ConstructorDeclaration;
 import org.jmouse.java.parser.model.Declaration;
@@ -33,9 +37,9 @@ import java.util.Set;
 /** Recovery-oriented body reader. Reuses Java tokens and positions; never resolves names. */
 final class BodyParser {
     private static final Set<String> PRIMITIVES =
-            Set.of("boolean", "byte", "short", "char", "int", "long", "float", "double", "var");
+            Set.of(JavaKeywordSpellings.BOOLEAN, JavaKeywordSpellings.BYTE, JavaKeywordSpellings.SHORT, JavaKeywordSpellings.CHAR, JavaKeywordSpellings.INT, JavaKeywordSpellings.LONG, JavaKeywordSpellings.FLOAT, JavaKeywordSpellings.DOUBLE, JavaKeywordSpellings.VAR);
     private static final Set<String> CONTROL =
-            Set.of("if", "while", "switch", "synchronized", "catch", "for", "try");
+            Set.of(JavaKeywordSpellings.IF, JavaKeywordSpellings.WHILE, JavaKeywordSpellings.SWITCH, JavaKeywordSpellings.SYNCHRONIZED, JavaKeywordSpellings.CATCH, JavaKeywordSpellings.FOR, JavaKeywordSpellings.TRY);
     private static final Set<String> ASSIGNMENTS =
             Set.of("=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", ">>>=");
     private final JavaSourceText source;
@@ -51,7 +55,7 @@ final class BodyParser {
     private BodyParser(String name, CharSequence text, List<ParseProblem> problems) {
         source = new JavaSourceText(name, text);
         TokenCursor cursor = new JavaLexer().tokenize(source);
-        while (!JavaTokenKind.END_OF_FILE.matches(cursor.peek())) {
+        while (!JavaToken.END_OF_FILE.matches(cursor.peek())) {
             tokens.add(cursor.next());
         }
         tokens.add(cursor.peek());
@@ -222,25 +226,25 @@ final class BodyParser {
                     }
                     require(")");
                 }
-                if (!control.equals("try") || at("{")) {
+                if (!control.equals(JavaKeywordSpellings.TRY) || at("{")) {
                     statement(controlScope);
                 }
-            } else if (Set.of("else", "finally", "do").contains(word(position))) {
+            } else if (Set.of(JavaKeywordSpellings.ELSE, JavaKeywordSpellings.FINALLY, JavaKeywordSpellings.DO).contains(word(position))) {
                 position++;
                 statement(scope);
-            } else if (Set.of("return", "throw", "yield", "assert").contains(word(position))) {
+            } else if (Set.of(JavaKeywordSpellings.RETURN, JavaKeywordSpellings.THROW, JavaKeywordSpellings.YIELD, JavaKeywordSpellings.ASSERT).contains(word(position))) {
                 position++;
                 add(expression(0));
                 if (take(":")) {
                     add(expression(0));
                 }
                 require(";");
-            } else if (Set.of("break", "continue").contains(word(position))) {
+            } else if (Set.of(JavaKeywordSpellings.BREAK, JavaKeywordSpellings.CONTINUE).contains(word(position))) {
                 while (position < limit && !at(";") && !at("}")) {
                     position++;
                 }
                 take(";");
-            } else if (Set.of("class", "interface", "enum", "record").contains(word(position))) {
+            } else if (Set.of(JavaKeywordSpellings.CLASS, JavaKeywordSpellings.INTERFACE, JavaKeywordSpellings.ENUM, JavaKeywordSpellings.RECORD).contains(word(position))) {
                 unsupported("Local type declarations are not yet indexed.");
                 while (position < limit && !at("{") && !at(";") && !at("}")) {
                     position++;
@@ -248,7 +252,7 @@ final class BodyParser {
                 if (at("{") && closing[position] >= 0) {
                     position = closing[position] + 1;
                 }
-            } else if (at("case") || at("default")) {
+            } else if (at(JavaKeywordSpellings.CASE) || at(JavaKeywordSpellings.DEFAULT)) {
                 while (position < limit && !at(":") && !at("-") && !at("}")) {
                     position++;
                 }
@@ -270,7 +274,7 @@ final class BodyParser {
 
     private boolean local(SourceSpan scope) {
         int start = position;
-        take("final");
+        take(JavaKeywordSpellings.FINAL);
         int typeStart = position;
         int typeEnd = typeEnd(position);
         if (typeEnd < 0 || !identifier(typeEnd)) {
@@ -296,7 +300,7 @@ final class BodyParser {
             variables.add(
                     new LocalBinding(
                             name.value(),
-                            variableType.equals("var") ? null : variableType,
+                            variableType.equals(JavaKeywordSpellings.VAR) ? null : variableType,
                             source.span(name),
                             visibility,
                             initializer));
@@ -379,7 +383,7 @@ final class BodyParser {
                 if (precedence < minimum) {
                     break;
                 }
-                position += operator.equals("instanceof") ? 1 : operator.length();
+                position += operator.equals(JavaKeywordSpellings.INSTANCEOF) ? 1 : operator.length();
                 if (operator.equals("->")) {
                     SourceSpan lambdaScope =
                             at("{")
@@ -433,7 +437,7 @@ final class BodyParser {
         int start = position;
         Token token = tokens.get(position++);
         Expression result;
-        if (token.value().equals("switch")) {
+        if (token.value().equals(JavaKeywordSpellings.SWITCH)) {
             unsupported("Switch expressions are not yet indexed.");
             if (at("(") && closing[position] >= 0) {
                 position = closing[position] + 1;
@@ -443,13 +447,13 @@ final class BodyParser {
             }
             return node(
                     Expression.Kind.UNKNOWN,
-                    "switch",
+                    JavaKeywordSpellings.SWITCH,
                     source.span(token),
                     token.offset(),
                     endPrevious(),
                     null,
                     List.of());
-        } else if (token.value().equals("new")) {
+        } else if (token.value().equals(JavaKeywordSpellings.NEW)) {
             int end = typeEnd(position);
             if (end < 0) {
                 problem("Expected a type after 'new'.");
@@ -531,7 +535,7 @@ final class BodyParser {
                                 && word(castEnd).equals(")")
                                 && (PRIMITIVES.contains(word(position))
                                         || identifier(castEnd + 1)
-                                        || word(castEnd + 1).equals("new"));
+                                        || word(castEnd + 1).equals(JavaKeywordSpellings.NEW));
                 if (cast) {
                     String type = text(position, castEnd);
                     position = castEnd + 1;
@@ -568,11 +572,11 @@ final class BodyParser {
                             endPrevious(),
                             null,
                             operand == null ? List.of() : List.of(operand));
-        } else if (token.type() == JavaTokenKind.IDENTIFIER
-                || Set.of("this", "super").contains(token.value())
-                || ((PRIMITIVES.contains(token.value()) || token.value().equals("void"))
+        } else if (token.type() == JavaToken.IDENTIFIER
+                || Set.of(JavaKeywordSpellings.THIS, JavaKeywordSpellings.SUPER).contains(token.value())
+                || ((PRIMITIVES.contains(token.value()) || token.value().equals(JavaKeywordSpellings.VOID))
                         && at(".")
-                        && word(position + 1).equals("class"))) {
+                        && word(position + 1).equals(JavaKeywordSpellings.CLASS))) {
             result =
                     node(
                             Expression.Kind.NAME,
@@ -583,18 +587,18 @@ final class BodyParser {
                             null,
                             List.of());
         } else if (Set.of(
-                        JavaTokenKind.STRING_LITERAL,
-                        JavaTokenKind.TEXT_BLOCK,
-                        JavaTokenKind.CHARACTER_LITERAL,
-                        JavaTokenKind.NUMBER_LITERAL,
-                        JavaTokenKind.BOOLEAN_LITERAL,
-                        JavaTokenKind.NULL_LITERAL)
+                        JavaToken.STRING_LITERAL,
+                        JavaToken.TEXT_BLOCK,
+                        JavaToken.CHARACTER_LITERAL,
+                        JavaToken.NUMBER_LITERAL,
+                        JavaToken.BOOLEAN_LITERAL,
+                        JavaToken.NULL_LITERAL)
                 .contains(token.type())) {
             String type =
-                    switch ((JavaTokenKind) token.type()) {
-                        case STRING_LITERAL, TEXT_BLOCK -> "java.lang.String";
-                        case CHARACTER_LITERAL -> "char";
-                        case BOOLEAN_LITERAL -> "boolean";
+                    switch ((JavaToken) token.type()) {
+                        case STRING_LITERAL, TEXT_BLOCK -> JavaPlatformTypeNames.STRING;
+                        case CHARACTER_LITERAL -> JavaKeywordSpellings.CHAR;
+                        case BOOLEAN_LITERAL -> JavaKeywordSpellings.BOOLEAN;
                         case NULL_LITERAL -> "null";
                         default -> numberType(token.value());
                     };
@@ -637,10 +641,10 @@ final class BodyParser {
                     } while (position < limit && nesting > 0 && !at(";") && !at("}"));
                 }
                 if (!(identifier(position)
-                        || at("new")
-                        || at("class")
-                        || at("this")
-                        || at("super"))) {
+                        || at(JavaKeywordSpellings.NEW)
+                        || at(JavaKeywordSpellings.CLASS)
+                        || at(JavaKeywordSpellings.THIS)
+                        || at(JavaKeywordSpellings.SUPER))) {
                     problem("Expected a member name.");
                     break;
                 }
@@ -789,8 +793,8 @@ final class BodyParser {
                 found = combined;
             }
         }
-        if (at("instanceof")) {
-            return "instanceof";
+        if (at(JavaKeywordSpellings.INSTANCEOF)) {
+            return JavaKeywordSpellings.INSTANCEOF;
         }
         return found;
     }
@@ -806,7 +810,7 @@ final class BodyParser {
             case "^" -> 4;
             case "&" -> 5;
             case "==", "!=" -> 6;
-            case "<", ">", "<=", ">=", "instanceof" -> 7;
+            case "<", ">", "<=", ">=", JavaKeywordSpellings.INSTANCEOF -> 7;
             case "<<", ">>", ">>>" -> 8;
             case "+", "-" -> 9;
             case "*", "/", "%" -> 10;
@@ -856,20 +860,20 @@ final class BodyParser {
     private static String numberType(String literal) {
         String lower = literal.toLowerCase(Locale.ROOT);
         if (lower.endsWith("l")) {
-            return "long";
+            return JavaKeywordSpellings.LONG;
         }
         if (lower.startsWith("0x") && !lower.contains("p") && !lower.contains(".")) {
-            return "int";
+            return JavaKeywordSpellings.INT;
         }
         if (lower.endsWith("f")) {
-            return "float";
+            return JavaKeywordSpellings.FLOAT;
         }
         return lower.endsWith("d")
                         || lower.contains(".")
                         || lower.contains("e")
                         || lower.contains("p")
-                ? "double"
-                : "int";
+                ? JavaKeywordSpellings.DOUBLE
+                : JavaKeywordSpellings.INT;
     }
 
     private static boolean matches(String opening, String close) {
@@ -897,7 +901,7 @@ final class BodyParser {
     }
 
     private boolean identifier(int index) {
-        return index >= 0 && index < limit && JavaTokenKind.IDENTIFIER.matches(tokens.get(index));
+        return index >= 0 && index < limit && JavaToken.IDENTIFIER.matches(tokens.get(index));
     }
 
     private boolean at(String word) {

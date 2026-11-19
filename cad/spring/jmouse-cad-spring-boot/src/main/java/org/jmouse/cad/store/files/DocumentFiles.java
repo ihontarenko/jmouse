@@ -2,7 +2,6 @@ package org.jmouse.cad.store.files;
 
 import org.jmouse.cad.document.source.DocumentResources;
 import org.jmouse.cad.folder.DocumentStore;
-import org.jmouse.cad.store.authority.CadAuthority;
 import org.jmouse.core.io.Resource;
 
 import java.io.ByteArrayInputStream;
@@ -28,11 +27,9 @@ public class DocumentFiles {
     }
 
     private final DocumentStore documents;
-    private final CadAuthority  authority;
 
-    public DocumentFiles(DocumentStore documents, CadAuthority authority) {
+    public DocumentFiles(DocumentStore documents) {
         this.documents = documents;
-        this.authority = authority;
     }
 
     /** A file kept for a document, under the name the document gives it; one larger than {@link #LARGEST_FILE} is refused. */
@@ -43,7 +40,7 @@ public class DocumentFiles {
                 throw new IllegalArgumentException("The file " + name + " is larger than a document's file may be ("
                         + LARGEST_FILE / (1024 * 1024) + " MB)");
             }
-            documents.keepFile(documentId, name, bytes, authority.actor().orElse(null));
+            documents.keepFile(documentId, name, bytes);
         } catch (IOException unreadable) {
             throw new UncheckedIOException("The file " + name + " could not be read to be kept", unreadable);
         }
@@ -79,7 +76,7 @@ public class DocumentFiles {
         if (!documents.fileNames(documentId).contains(name)) {
             return false;
         }
-        documents.keepFile(documentId, name, null, authority.actor().orElse(null));
+        documents.keepFile(documentId, name, null);
         return true;
     }
 

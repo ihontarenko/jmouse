@@ -81,8 +81,9 @@ final class ConnectionWay {
                     List<Point> points = new Tightening(fence, session.angleStep(), List.of(), board.settings().routing()).tightened(stretch.points())
                             .stream().map(session::written).toList();
                     String layer = layers.get(stretch.lane());
-                    tracks.add(new Track(layer, width, fence.roundingThatFits(points, session.request().rounding(), layer,
-                            board.settings().routing().roundingHalvings()), points));
+                    double asked = session.request().rounding();
+                    tracks.add(new Track(layer, width, asked, points).withCorners(asked,
+                            fence.roundingsThatFit(points, asked, layer, board.settings().routing().roundingHalvings())));
                 }
                 case LayeredWaySearch.ViaHop hop -> vias.add(new Via(hop.at().x(), hop.at().y(), viaSize.drill(), viaSize.diameter(),
                         PcbVocabulary.TOP, PcbVocabulary.BOTTOM));

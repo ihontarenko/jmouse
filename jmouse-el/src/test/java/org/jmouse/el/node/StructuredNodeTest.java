@@ -36,7 +36,7 @@ class StructuredNodeTest {
         Branch first = Branch.leaf("first");
         Branch second = Branch.leaf("second");
         parent.setChild(Branch.HEAD, first);
-        var genericView = parent.getChildren();
+        List<Node> genericView = parent.getChildren();
         parent.setChild(Branch.HEAD, second);
 
         assertNull(first.getParent());

@@ -1,5 +1,6 @@
 package org.jmouse.java.parser.model;
 
+import org.jmouse.java.parser.lexer.JavaKeyword;
 import org.jmouse.java.parser.source.SourceSpan;
 
 /**
@@ -19,7 +20,7 @@ public record BodyReference(Expression expression, Role role, SymbolId owner, Sy
     public String name() {
         String name = expression.name();
         if (expression.kind() == Expression.Kind.METHOD_REFERENCE
-                && name.equals("new")
+                && name.equals(JavaKeyword.NEW.spelling())
                 && expression.receiver() != null) {
             name = expression.receiver().name();
         }

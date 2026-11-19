@@ -5,11 +5,15 @@ import org.jmouse.el.extension.operator.FilterOperator;
 import org.jmouse.el.extension.operator.InOperator;
 import org.jmouse.el.extension.operator.NullCoalesceOperator;
 import org.jmouse.el.extension.operator.TestOperator;
-import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.*;
+import org.jmouse.el.parser.expression.Associativity;
+import org.jmouse.el.parser.expression.ExpressionReader;
+import org.jmouse.el.parser.expression.InfixBinding;
+import org.jmouse.el.parser.expression.PrecedenceGrammar;
+import org.jmouse.el.parser.expression.PrecedenceParser;
 
 import static org.jmouse.el.lexer.BasicToken.*;
 
@@ -42,62 +46,73 @@ public class OperatorParser implements Parser {
      * @return the parsed expression node
      */
     private Expression parseExpression(TokenCursor cursor, ParserContext context, int precedence) {
-        Expression left = parsePrimaryExpression(cursor, context);
+        return PrecedenceParser.parse(new Input(cursor, context), precedence, new Grammar());
+    }
 
-        while (cursor.hasNext()) {
-            Token    token    = cursor.peek();
-            Operator operator = context.getOperator(token.type());
+    private record Input(TokenCursor cursor, ParserContext context) {}
 
-            if (operator == null || precedence > operator.getPrecedence()) {
-                break;
+    /** jME's operators and node construction, over the shared ordering mechanism. */
+    private final class Grammar implements PrecedenceGrammar<Input, Expression, Operator> {
+
+        @Override
+        public Expression primary(Input input, ExpressionReader<Expression> expressions) {
+            return parsePrimaryExpression(input.cursor(), input.context());
+        }
+
+        @Override
+        public InfixBinding<Operator> infix(Input input, Expression left) {
+            if (!input.cursor().hasNext()) {
+                return null;
             }
 
-            cursor.next();
+            Operator operator = input.context().getOperator(input.cursor().peek().type());
 
-            switch (operator) {
+            return operator == null ? null
+                    : new InfixBinding<>(operator, operator.getPrecedence(), Associativity.LEFT);
+        }
+
+        @Override
+        public Expression reduce(Input input, Expression left, InfixBinding<Operator> binding,
+                                 ExpressionReader<Expression> expressions) {
+            TokenCursor cursor = input.cursor();
+            ParserContext context = input.context();
+            cursor.next();
+            return switch (binding.operator()) {
                 case InOperator.IN -> {
-                    InOperationNode inNode = new InOperationNode();
-                    inNode.setLeft(left);
-                    // The right operand binds at this operator's own precedence, exactly as every binary
-                    // operator does below. Restarting at zero here let it swallow everything that
-                    // followed: "x in list and y == 1" parsed as "x in (list and (y == 1))", whose right
-                    // side is a boolean rather than a collection — and membership of a boolean is false,
-                    // silently, for every row.
-                    inNode.setRight(parseExpression(cursor, context, operator.getPrecedence() + 1));
-                    left = inNode;
+                    InOperationNode node = new InOperationNode();
+                    node.setLeft(left);
+                    node.setRight(expressions.parse(binding.rightMinimum()));
+                    yield node;
                 }
                 case TestOperator.IS -> {
-                    TestNode test = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
-                    test.setLeft(left);
-                    left = test;
+                    TestNode node = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
+                    node.setLeft(left);
+                    yield node;
                 }
                 case NullCoalesceOperator.NULL_COALESCE -> {
                     NullSafeFallbackNode node = new NullSafeFallbackNode();
                     node.setNullable(left);
-                    // Same reasoning as the branch above: restarting at zero let the fallback swallow the
-                    // comparison after it, so "name ?? 'guest' == 'guest'" grouped as
-                    // "name ?? ('guest' == 'guest')" and answered with the name itself where a boolean was
-                    // meant — truthy, and therefore silently always true. Left-associativity is safe here:
-                    // (a ?? b) ?? c and a ?? (b ?? c) yield the same value for every input.
-                    node.setOtherwise(parseExpression(cursor, context, operator.getPrecedence() + 1));
-                    left = node;
+                    node.setOtherwise(expressions.parse(binding.rightMinimum()));
+                    yield node;
                 }
                 case FilterOperator.FILTER -> {
+                    Expression filtered = left;
                     while (cursor.hasNext() && cursor.isCurrent(T_IDENTIFIER)) {
                         if (context.getParser(FilterParser.class).parse(cursor, context) instanceof FilterNode filter) {
-                            filter.setLeft(left);
-                            left = filter;
+                            filter.setLeft(filtered);
+                            filtered = filter;
                         }
                     }
+                    yield filtered;
                 }
-                default -> {
-                    Expression right = parseExpression(cursor, context, operator.getPrecedence() + 1);
-                    left = new BinaryOperation(left, operator, right);
-                }
-            }
+                default -> new BinaryOperation(left, binding.operator(), expressions.parse(binding.rightMinimum()));
+            };
         }
 
-        return left;
+        @Override
+        public long position(Input input) {
+            return input.cursor().position();
+        }
     }
 
     /**

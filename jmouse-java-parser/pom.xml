@@ -24,6 +24,16 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-java-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el-grammar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- The token, cursor, tokenizer, source and node contracts the parser is built on. -->
         <dependency>
             <groupId>org.jmouse</groupId>

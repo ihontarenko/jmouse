@@ -113,7 +113,8 @@ public final class PcbDocumentReading {
                     points.add(point(line.point(PcbWords.FROM).orElseThrow()));
                     line.values("to").forEach(value -> points.add(point((PointNode) value)));
                     tracks.add(new Track(line.name(PcbWords.LAYER).orElseThrow(), line.quantity(PcbWords.WIDTH).orElseThrow(),
-                            line.quantity(PcbWords.ROUNDING).orElse(0.0), points, ArrangementLines.arrangementOf(line), line.word(PcbWords.FINISH).orElse("")));
+                            line.quantity(PcbWords.ROUNDING).orElse(0.0), points, ArrangementLines.arrangementOf(line), line.word(PcbWords.FINISH).orElse(""),
+                            line.quantities(PcbWords.CORNERS)));
                 }
                 case "arc" -> arcs.add(new Arc(line.name(PcbWords.LAYER).orElseThrow(), line.quantity(PcbWords.WIDTH).orElseThrow(),
                         point(line.point(PcbWords.FROM).orElseThrow()), point(line.point(PcbWords.THROUGH).orElseThrow()),

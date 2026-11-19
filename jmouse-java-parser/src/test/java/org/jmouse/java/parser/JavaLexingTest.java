@@ -6,7 +6,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.java.parser.lexer.JavaComment;
 import org.jmouse.java.parser.lexer.JavaLexer;
 import org.jmouse.java.parser.lexer.JavaSourceText;
-import org.jmouse.java.parser.lexer.JavaTokenKind;
+import org.jmouse.java.parser.lexer.JavaToken;
 import org.jmouse.java.parser.model.FieldDeclaration;
 import org.jmouse.java.parser.model.JavaSourceFile;
 import org.jmouse.java.parser.model.MethodDeclaration;
@@ -130,8 +130,8 @@ class JavaLexingTest {
         TokenCursor cursor = new JavaLexer().tokenize(new JavaSourceText("Tokens.java", "a /* c */ >>= \"s\""));
         List<Token> tokens = cursor.toList();
 
-        assertEquals(List.of(JavaTokenKind.IDENTIFIER, JavaTokenKind.GREATER, JavaTokenKind.GREATER, JavaTokenKind.ASSIGN,
-                JavaTokenKind.STRING_LITERAL, JavaTokenKind.END_OF_FILE), tokens.stream().map(Token::type).toList());
+        assertEquals(List.of(JavaToken.IDENTIFIER, JavaToken.GREATER, JavaToken.GREATER, JavaToken.ASSIGN,
+                JavaToken.STRING_LITERAL, JavaToken.END_OF_FILE), tokens.stream().map(Token::type).toList());
         assertEquals(List.of(0, 1, 2, 3, 4, 5), tokens.stream().map(Token::ordinal).toList());
         JavaSourceText source = JavaLexer.sourceOf(cursor);
         assertEquals(1, source.comments().size());

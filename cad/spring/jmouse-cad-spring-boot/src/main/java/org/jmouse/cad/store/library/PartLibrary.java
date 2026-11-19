@@ -46,10 +46,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The library a sheet and a pcb are built from, as an editor asks it — {@code JMOUSE_CAD_API.md} §2.3: the components
@@ -85,6 +89,22 @@ public class PartLibrary {
     public record ComponentView(SimulatedComponent component, List<String> lineage, List<DrawnPart> symbols,
                                 DrawnPart portrait, List<Seat> footprints, PartFace face,
                                 List<ParameterSliders.Slider> sheetParameters, PartRole role) {
+    }
+
+    /**
+     * A page of a shelf.
+     *
+     * @param rows       the page's documents, drawn
+     * @param page       which page, from 0
+     * @param size       how many a page holds
+     * @param total      how many the words and the branch find, every page
+     * @param found      how many the words find on the whole shelf: the tree's root
+     * @param categories how many the words find filed in each category, by its code — the tree counts a branch with those under it
+     * @param holders    how many the words find of each holder, by its name ({@link ShelfHolder})
+     * @param projects   how many the words find held by each project, by its identifier
+     */
+    public record ShelfPage(List<DrawnDocument> rows, int page, int size, long total, long found, Map<String, Long> categories,
+                            Map<String, Long> holders, Map<String, Long> projects) {
     }
 
     /** A drawn document — a symbol, a portrait, a frame, a footprint — with its drawing. */
@@ -255,6 +275,177 @@ public class PartLibrary {
             throw CadProblem.notFound("The kind of document '" + kind + "'");
         }
         return drawn(kind, owner);
+    }
+
+    /** Whose a document of a shelf is, as the library's tree tells them apart. */
+    public enum ShelfHolder {
+        /** Shipped: the catalogue's. */
+        CATALOGUE,
+        /** The reader's own library's. */
+        MINE,
+        /** A project's. */
+        PROJECT
+    }
+
+    /**
+     * The branch of a shelf a page is of: what a document must be to stand on it; every part left null narrows nothing.
+     *
+     * @param category a category and every one under it
+     * @param holder   whose it is
+     * @param project  the one project holding it
+     */
+    public record ShelfBranch(String category, ShelfHolder holder, String project) {
+    }
+
+    /**
+     * A page of a shelf: its documents of one kind narrowed by words and a branch, in title order, and only that page drawn — a
+     * shelf of thousands is never read whole. Beside it, how many of what the words find stand on each branch, for the tree.
+     *
+     * @param owner the reader's library — what is «mine» —, its place's documents beside the catalogue's; null, the catalogue alone
+     * @param text  words a title, a summary, an address or a code holds, any case; null for any
+     */
+    @CadRead
+    public ShelfPage shelfPage(String kind, DocumentOwner owner, String text, ShelfBranch branch, int page, int size) {
+        if (language.modules().stream().flatMap(module -> module.kinds().stream()).noneMatch(known -> known.word().equals(kind))) {
+            throw CadProblem.notFound("The kind of document '" + kind + "'");
+        }
+        if (page < 0 || size < 1) {
+            throw CadProblem.invalid("A page is counted from 0 and holds at least one document.");
+        }
+        String wanted = text == null || text.isBlank() ? null : text.strip().toLowerCase(Locale.ROOT);
+        List<ShelfCandidate> found = candidates(kind, owner).stream().filter(candidate -> candidate.holds(wanted)).toList();
+        Set<String> within = catalogue.categoriesWithin(branch.category());
+        List<ShelfCandidate> onBranch = found.stream()
+                .filter(candidate -> within == null || candidate.category() != null && within.contains(candidate.category()))
+                .filter(candidate -> branch.holder() == null || holderOf(candidate) == branch.holder())
+                .filter(candidate -> branch.project() == null || projectOf(candidate).filter(branch.project()::equals).isPresent())
+                .toList();
+        int from = Math.min(page * size, onBranch.size());
+        List<DrawnDocument> rows = onBranch.subList(from, Math.min(from + size, onBranch.size())).stream().map(ShelfCandidate::drawn).toList();
+        return new ShelfPage(rows, page, size, onBranch.size(), found.size(),
+                countedBy(found, candidate -> Optional.ofNullable(candidate.category())),
+                countedBy(found, candidate -> Optional.of(holderOf(candidate).name())),
+                countedBy(found, this::projectOf));
+    }
+
+    /** How many of the documents stand under each word a document says of itself; one that says none is not counted. */
+    private static Map<String, Long> countedBy(List<ShelfCandidate> found, Function<ShelfCandidate, Optional<String>> word) {
+        return found.stream().map(word).flatMap(Optional::stream)
+                .collect(Collectors.groupingBy(each -> each, TreeMap::new, Collectors.counting()));
+    }
+
+    private static ShelfHolder holderOf(ShelfCandidate candidate) {
+        if (candidate.owner() == null) {
+            return ShelfHolder.CATALOGUE;
+        }
+        return CadPlaces.PROJECT.equals(candidate.owner().type()) ? ShelfHolder.PROJECT : ShelfHolder.MINE;
+    }
+
+    private Optional<String> projectOf(ShelfCandidate candidate) {
+        return holderOf(candidate) == ShelfHolder.PROJECT ? Optional.of(candidate.owner().id()) : Optional.empty();
+    }
+
+    /**
+     * Every document of a shelf the reader may see, not yet drawn: what the place holds besides the store first, then the store's,
+     * each standing where a drawing of it would — and in title order.
+     */
+    private List<ShelfCandidate> candidates(String kind, DocumentOwner owner) {
+        StoredDocuments scope = catalogue.scope(owner);
+        List<PlaceSource.PlacedDocument> placed = placedOf(scope, kind);
+        List<ShelfCandidate> candidates = new ArrayList<>();
+        placed.forEach(document -> candidates.add(new PlacedCandidate(document, owner)));
+        besidePlaced(visible(kind, owner), placed).forEach(document -> candidates.add(new StoredCandidate(scope, document)));
+        candidates.sort(Comparator.comparing(ShelfCandidate::title, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+        return candidates;
+    }
+
+    /** A document of a shelf before it is drawn: what a search and a branch narrow it by, and its drawing when its page is asked. */
+    private sealed interface ShelfCandidate permits PlacedCandidate, StoredCandidate {
+
+        String slug();
+
+        String title();
+
+        String summary();
+
+        String code();
+
+        String category();
+
+        /** Whose it is: null for the catalogue's. */
+        DocumentOwner owner();
+
+        DrawnDocument drawn();
+
+        /** Whether the words — in lower case, null for any — stand in its title, summary, address or code. */
+        default boolean holds(String wanted) {
+            return wanted == null || Stream.of(slug(), title(), summary(), code())
+                    .anyMatch(field -> field != null && field.toLowerCase(Locale.ROOT).contains(wanted));
+        }
+    }
+
+    /** A document a place holds besides the store. */
+    private record PlacedCandidate(PlaceSource.PlacedDocument document, DocumentOwner owner) implements ShelfCandidate {
+
+        public String slug() {
+            return document.read().index().slug();
+        }
+
+        public String title() {
+            return document.read().index().title();
+        }
+
+        public String summary() {
+            return document.read().index().summary();
+        }
+
+        public String code() {
+            return document.read().index().code();
+        }
+
+        public String category() {
+            return document.read().index().category();
+        }
+
+        public DocumentOwner owner() {
+            return owner;
+        }
+
+        public DrawnDocument drawn() {
+            return drawnDocument(document, owner);
+        }
+    }
+
+    /** A document of the store, read against its owner's place only when drawn. */
+    private record StoredCandidate(StoredDocuments scope, StoredDocument document) implements ShelfCandidate {
+
+        public String slug() {
+            return document.getSlug();
+        }
+
+        public String title() {
+            return document.getTitle();
+        }
+
+        public String summary() {
+            return document.getSummary();
+        }
+
+        public String code() {
+            return document.getCode();
+        }
+
+        public String category() {
+            return document.getCategoryCode();
+        }
+
+        public DocumentOwner owner() {
+            return document.owner().orElse(null);
+        }
+
+        public DrawnDocument drawn() {
+            return drawnDocument(scope, document);
+        }
     }
 
     /**
