@@ -3,7 +3,6 @@ package org.jmouse.java.bytecode.validation;
 import org.jmouse.java.bytecode.node.attribute.JavaBootstrapMethodNode;
 import org.jmouse.java.bytecode.node.attribute.JavaBootstrapMethodsAttributeNode;
 import org.jmouse.java.bytecode.node.constant.JavaMethodHandleConstantNode;
-import org.jmouse.java.bytecode.vocabulary.JvmReferenceKind;
 
 public final class JavaBootstrapStructureValidation {
     private JavaBootstrapStructureValidation() {}
@@ -14,7 +13,8 @@ public final class JavaBootstrapStructureValidation {
             context.at(
                     bootstrap,
                     () -> {
-                        context.constant(bootstrap.methodHandleIndex(), JavaMethodHandleConstantNode.class);
+                        context.constant(
+                                bootstrap.methodHandleIndex(), JavaMethodHandleConstantNode.class);
                         for (int index : bootstrap.argumentIndices()) {
                             context.session().step();
                             JavaInstructionStructureValidation.loadableSlots(

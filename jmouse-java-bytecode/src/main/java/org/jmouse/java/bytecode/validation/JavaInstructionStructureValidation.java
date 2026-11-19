@@ -1,19 +1,16 @@
 package org.jmouse.java.bytecode.validation;
 
+import org.jmouse.java.bytecode.node.JavaMethodNode;
 import org.jmouse.java.bytecode.node.constant.*;
 import org.jmouse.java.bytecode.node.instruction.JavaConstantInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaIncrementInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaInstructionNode;
-import org.jmouse.java.bytecode.node.instruction.JavaNoOperandInstructionNode;
-import org.jmouse.java.bytecode.node.JavaMethodNode;
-import org.jmouse.java.model.descriptor.JavaTypeDescriptor;
-import org.jmouse.java.model.type.JavaPrimitiveType;
-import org.jmouse.java.model.type.JavaVoidType;
 import org.jmouse.java.bytecode.node.instruction.JavaInvokeDynamicInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaInvokeInterfaceInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaLocalInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaLookupSwitchInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaMultiArrayInstructionNode;
+import org.jmouse.java.bytecode.node.instruction.JavaNoOperandInstructionNode;
 import org.jmouse.java.bytecode.node.instruction.JavaTableSwitchInstructionNode;
 import org.jmouse.java.bytecode.vocabulary.JvmOpcode;
 import org.jmouse.java.bytecode.vocabulary.JvmOpcodeDefinition;
@@ -21,31 +18,44 @@ import org.jmouse.java.bytecode.vocabulary.JvmSignatureToken;
 import org.jmouse.java.bytecode.vocabulary.JvmVocabulary;
 import org.jmouse.java.model.descriptor.JavaArrayDescriptor;
 import org.jmouse.java.model.descriptor.JavaClassDescriptor;
+import org.jmouse.java.model.descriptor.JavaTypeDescriptor;
 import org.jmouse.java.model.symbol.JavaJvmNames;
+import org.jmouse.java.model.type.JavaPrimitiveType;
+import org.jmouse.java.model.type.JavaVoidType;
 
 public final class JavaInstructionStructureValidation {
     private JavaInstructionStructureValidation() {}
 
-    public static JvmValidationOutcome noOperand(JavaNoOperandInstructionNode node, JvmValidationContext context) {
+    public static JvmValidationOutcome noOperand(
+            JavaNoOperandInstructionNode node, JvmValidationContext context) {
         local(node, context);
         switch (node.opcode()) {
             case IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN -> {
                 JavaMethodNode method = JvmValidationContext.enclosing(node, JavaMethodNode.class);
                 JavaTypeDescriptor result = context.method(method.descriptor()).result();
-                boolean compatible = switch (node.opcode()) {
-                    case IRETURN -> result == JavaPrimitiveType.INT || result == JavaPrimitiveType.BOOLEAN
-                            || result == JavaPrimitiveType.BYTE || result == JavaPrimitiveType.CHAR
-                            || result == JavaPrimitiveType.SHORT;
-                    case LRETURN -> result == JavaPrimitiveType.LONG;
-                    case FRETURN -> result == JavaPrimitiveType.FLOAT;
-                    case DRETURN -> result == JavaPrimitiveType.DOUBLE;
-                    case ARETURN -> result instanceof JavaClassDescriptor || result instanceof JavaArrayDescriptor;
-                    case RETURN -> result == JavaVoidType.VOID;
-                    default -> throw new IllegalStateException("Unexpected return opcode");
-                };
-                context.require(compatible, node, "Return instruction does not match the method result descriptor");
+                boolean compatible =
+                        switch (node.opcode()) {
+                            case IRETURN ->
+                                    result == JavaPrimitiveType.INT
+                                            || result == JavaPrimitiveType.BOOLEAN
+                                            || result == JavaPrimitiveType.BYTE
+                                            || result == JavaPrimitiveType.CHAR
+                                            || result == JavaPrimitiveType.SHORT;
+                            case LRETURN -> result == JavaPrimitiveType.LONG;
+                            case FRETURN -> result == JavaPrimitiveType.FLOAT;
+                            case DRETURN -> result == JavaPrimitiveType.DOUBLE;
+                            case ARETURN ->
+                                    result instanceof JavaClassDescriptor
+                                            || result instanceof JavaArrayDescriptor;
+                            case RETURN -> result == JavaVoidType.VOID;
+                            default -> throw new IllegalStateException("Unexpected return opcode");
+                        };
+                context.require(
+                        compatible,
+                        node,
+                        "Return instruction does not match the method result descriptor");
             }
-            default -> { }
+            default -> {}
         }
         return JvmValidationOutcome.VALID;
     }

@@ -171,9 +171,9 @@ constant-pool	LONG	5
 constant-pool	DOUBLE	6
 constant-pool	CLASS	7
 constant-pool	STRING	8
-constant-pool	FIELDREF	9
-constant-pool	METHODREF	10
-constant-pool	INTERFACE_METHODREF	11
+constant-pool	FIELD_REFERENCE	9
+constant-pool	METHOD_REFERENCE	10
+constant-pool	INTERFACE_METHOD_REFERENCE	11
 constant-pool	NAME_AND_TYPE	12
 constant-pool	METHOD_HANDLE	15
 constant-pool	METHOD_TYPE	16

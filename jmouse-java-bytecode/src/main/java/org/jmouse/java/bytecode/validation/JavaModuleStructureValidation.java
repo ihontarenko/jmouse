@@ -7,7 +7,9 @@ import org.jmouse.java.bytecode.node.constant.JavaPackageConstantNode;
 import org.jmouse.java.bytecode.vocabulary.JvmClassAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmModuleAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmModuleNames;
+import org.jmouse.java.bytecode.vocabulary.JvmModuleRequiresFlag;
 import org.jmouse.java.model.descriptor.JavaClassDescriptor;
+import org.jmouse.java.model.symbol.JavaJvmNames;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,9 +38,28 @@ public final class JavaModuleStructureValidation {
                                 !name.equals(current) && required.add(name),
                                 entry,
                                 "Duplicate or self-referential module requirement");
+                        if (name.equals(JavaJvmNames.BASE_MODULE)) {
+                            int forbidden = JvmModuleRequiresFlag.SYNTHETIC.code();
+                            if (context.root().version().major()
+                                    >= JvmValidationVersions.BASE_MODULE_FLAGS) {
+                                forbidden |=
+                                        JvmModuleRequiresFlag.TRANSITIVE.code()
+                                                | JvmModuleRequiresFlag.STATIC_PHASE.code();
+                            }
+                            context.require(
+                                    (entry.accessFlags() & forbidden) == 0,
+                                    entry,
+                                    "Invalid access flags for the java.base requirement");
+                        }
                         optionalVersion(entry.versionIndex(), context);
                     });
         }
+        context.require(
+                current.equals(JavaJvmNames.BASE_MODULE)
+                        ? required.isEmpty()
+                        : required.contains(JavaJvmNames.BASE_MODULE),
+                node,
+                "A module must require java.base exactly once, except java.base itself");
         Set<String> exported = new HashSet<>();
         for (JavaModuleExportNode entry : node.exports()) {
             context.at(

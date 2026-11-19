@@ -1,8 +1,12 @@
 package org.jmouse.java.index.binary;
 
+import org.jmouse.java.bytecode.node.JavaMethodNode;
+import org.jmouse.java.bytecode.validation.JvmValidationVersions;
 import org.jmouse.java.bytecode.vocabulary.JvmClassAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmFieldAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmMethodAccessFlag;
+import org.jmouse.java.model.symbol.JavaJvmNames;
+import org.jmouse.java.model.version.ClassFileVersion;
 import org.jmouse.java.parser.model.Modifier;
 
 import java.util.EnumSet;
@@ -37,7 +41,16 @@ final class JvmModifiers {
                         JvmFieldAccessFlag.TRANSIENT.code(), Modifier.TRANSIENT));
     }
 
-    static Set<Modifier> method(int access) {
+    static Set<Modifier> method(JavaMethodNode method, ClassFileVersion version) {
+        int access = method.accessFlags();
+        if (!JvmValidationVersions.strictSemantics(version)) {
+            access &= ~JvmMethodAccessFlag.STRICT.code();
+        }
+        if (method.name().equals(JavaJvmNames.CLASS_INITIALIZER)) {
+            access =
+                    (access & JvmMethodAccessFlag.STRICT.code())
+                            | JvmMethodAccessFlag.STATIC.code();
+        }
         return read(
                 access,
                 Map.of(

@@ -4,8 +4,7 @@ import java.util.Objects;
 
 /** Decodes the JVMS module-name escaping, without applying Java source identifier restrictions. */
 public final class JvmModuleNames {
-    private JvmModuleNames() {
-    }
+    private JvmModuleNames() {}
 
     public static String decode(String encoded) {
         Objects.requireNonNull(encoded, "encoded");
@@ -24,11 +23,13 @@ public final class JvmModuleNames {
                     throw new IllegalArgumentException("Unterminated escape in module name");
                 }
                 character = encoded.charAt(index);
-                if (character != JvmModuleNameToken.ESCAPE.code() && character != JvmModuleNameToken.COLON.code()
+                if (character != JvmModuleNameToken.ESCAPE.code()
+                        && character != JvmModuleNameToken.COLON.code()
                         && character != JvmModuleNameToken.AT_SIGN.code()) {
                     throw new IllegalArgumentException("Invalid escape in module name");
                 }
-            } else if (character == JvmModuleNameToken.COLON.code() || character == JvmModuleNameToken.AT_SIGN.code()) {
+            } else if (character == JvmModuleNameToken.COLON.code()
+                    || character == JvmModuleNameToken.AT_SIGN.code()) {
                 throw new IllegalArgumentException("Unescaped reserved character in module name");
             }
             decoded.append(character);
@@ -36,4 +37,3 @@ public final class JvmModuleNames {
         return decoded.toString();
     }
 }
-

@@ -3,10 +3,12 @@ package org.jmouse.java.index.binary;
 import org.jmouse.el.writer.SourceWriter;
 import org.jmouse.java.bytecode.node.*;
 import org.jmouse.java.bytecode.node.attribute.*;
+import org.jmouse.java.bytecode.node.constant.JavaModuleConstantNode;
 import org.jmouse.java.bytecode.signature.*;
 import org.jmouse.java.bytecode.vocabulary.JvmClassAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmFieldAccessFlag;
 import org.jmouse.java.bytecode.vocabulary.JvmMethodAccessFlag;
+import org.jmouse.java.bytecode.vocabulary.JvmModuleNames;
 import org.jmouse.java.model.descriptor.JavaClassDescriptor;
 import org.jmouse.java.model.symbol.JavaJvmNames;
 import org.jmouse.java.parser.lexer.JavaKeyword;
@@ -41,7 +43,7 @@ final class BinaryDeclarationProjection {
         this.context = context;
         root = context.classFile();
         writer = context.writer();
-        qualifiedName = context.qualifiedName(root.internalName());
+        qualifiedName = declarationName();
         identity = BinarySymbolIds.type(qualifiedName);
         simpleName = simpleName();
         root.methods().forEach(method -> methodIdentities.merge(methodBase(method), 1L, Long::sum));
@@ -154,6 +156,9 @@ final class BinaryDeclarationProjection {
     }
 
     private String simpleName() {
+        if ((root.accessFlags() & JvmClassAccessFlag.MODULE.code()) != 0) {
+            return qualifiedName;
+        }
         for (JavaInnerClassesAttributeNode table :
                 root.attributes().stream()
                         .filter(JavaInnerClassesAttributeNode.class::isInstance)
@@ -203,6 +208,21 @@ final class BinaryDeclarationProjection {
         return (flags & JvmClassAccessFlag.INTERFACE.code()) != 0
                 ? DeclarationKind.INTERFACE
                 : DeclarationKind.CLASS;
+    }
+
+    private String declarationName() {
+        if ((root.accessFlags() & JvmClassAccessFlag.MODULE.code()) != 0) {
+            JavaModuleAttributeNode module =
+                    root.attributes().stream()
+                            .filter(JavaModuleAttributeNode.class::isInstance)
+                            .map(JavaModuleAttributeNode.class::cast)
+                            .findFirst()
+                            .orElseThrow();
+            JavaModuleConstantNode name =
+                    root.pool().require(module.moduleNameIndex(), JavaModuleConstantNode.class);
+            return JvmModuleNames.decode(root.pool().utf8(name.nameIndex()));
+        }
+        return context.qualifiedName(root.internalName());
     }
 
     private void recordComponents() {
@@ -307,7 +327,7 @@ final class BinaryDeclarationProjection {
                         : "";
         SymbolId symbol = new SymbolId(base + suffix);
         int start = writer.length();
-        Set<Modifier> modifiers = JvmModifiers.method(method.accessFlags());
+        Set<Modifier> modifiers = JvmModifiers.method(method, root.version());
         modifiers(modifiers);
         List<JvmTypeParameterNode> variables =
                 generic == null ? List.of() : generic.typeParameters();

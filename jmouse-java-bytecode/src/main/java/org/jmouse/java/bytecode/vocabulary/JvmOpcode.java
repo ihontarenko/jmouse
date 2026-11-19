@@ -1,6 +1,6 @@
 package org.jmouse.java.bytecode.vocabulary;
 
-public enum JvmOpcode {
+public enum JvmOpcode implements JvmInstructionKind {
     NOP,
     ACONST_NULL,
     ICONST_M1,

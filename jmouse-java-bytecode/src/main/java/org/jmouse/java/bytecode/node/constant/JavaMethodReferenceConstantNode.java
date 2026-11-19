@@ -10,7 +10,7 @@ import org.jmouse.java.bytecode.vocabulary.JvmConstantTag;
 public final class JavaMethodReferenceConstantNode extends JavaConstantNode {
     public static final NodeKind<JavaMethodReferenceConstantNode> KIND =
             new NodeKind<>(
-                    JavaBytecodeNames.NODE_NAMESPACE + JvmConstantTag.METHODREF.name(),
+                    JavaBytecodeNames.NODE_NAMESPACE + JvmConstantTag.METHOD_REFERENCE.name(),
                     JavaMethodReferenceConstantNode.class);
     public static final NodeSchema<JavaMethodReferenceConstantNode> SCHEMA = NodeSchema.of(KIND);
     private final int classIndex;
@@ -22,7 +22,7 @@ public final class JavaMethodReferenceConstantNode extends JavaConstantNode {
             int index,
             int classIndex,
             int nameAndTypeIndex) {
-        super(SCHEMA, source, span, index, JvmConstantTag.METHODREF);
+        super(SCHEMA, source, span, index, JvmConstantTag.METHOD_REFERENCE);
         this.classIndex = classIndex;
         this.nameAndTypeIndex = nameAndTypeIndex;
     }

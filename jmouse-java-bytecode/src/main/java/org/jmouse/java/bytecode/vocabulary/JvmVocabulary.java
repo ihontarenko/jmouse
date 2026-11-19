@@ -1,5 +1,7 @@
 package org.jmouse.java.bytecode.vocabulary;
 
+import org.jmouse.java.model.version.JavaFeatureId;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -70,7 +73,10 @@ public final class JvmVocabulary {
                             Arrays.stream(row[5].split(","))
                                     .map(JvmAttributeContext::valueOf)
                                     .collect(Collectors.toUnmodifiableSet()),
-                            JvmAttributeMultiplicity.valueOf(row[6])));
+                            JvmAttributeMultiplicity.valueOf(row[6]),
+                            row[7].isBlank()
+                                    ? Optional.empty()
+                                    : Optional.of(new JavaFeatureId(row[7]))));
         }
         try (InputStream input = open("jvm-namespaces.properties")) {
             NAMESPACES.load(input);

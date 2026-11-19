@@ -131,6 +131,17 @@ public final class JavaAttributeStructureValidation {
                         String name = context.className(entry.innerClassIndex());
                         new JavaClassDescriptor(name);
                         context.require(classes.add(name), entry, "Duplicate InnerClasses entry");
+                        context.require(
+                                entry.outerClassIndex() != entry.innerClassIndex(),
+                                entry,
+                                "An InnerClasses entry cannot name itself as its outer class");
+                        context.require(
+                                context.root().version().major()
+                                                < JvmValidationVersions.STATIC_CLASS_INITIALIZER
+                                        || entry.innerNameIndex() != 0
+                                        || entry.outerClassIndex() == 0,
+                                entry,
+                                "An anonymous inner class cannot declare an outer-class index");
                         if (entry.outerClassIndex() != 0) {
                             new JavaClassDescriptor(context.className(entry.outerClassIndex()));
                         }

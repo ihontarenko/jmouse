@@ -11,4 +11,3 @@ public enum JvmModuleNameToken implements JvmToken {
         return JvmVocabulary.namespace(JvmModuleNameToken.class);
     }
 }
-

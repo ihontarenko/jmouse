@@ -19,6 +19,7 @@ public final class JvmValidationVersions {
             major(Boundary.INTERFACE_STATIC_SPECIAL_CALLS);
     public static final int STATIC_CLASS_INITIALIZER = major(Boundary.STATIC_CLASS_INITIALIZER);
     public static final int MODULES = major(Boundary.MODULES);
+    public static final int BASE_MODULE_FLAGS = major(Boundary.BASE_MODULE_FLAGS);
     public static final int DYNAMIC_CONSTANTS = major(Boundary.DYNAMIC_CONSTANTS);
     public static final int STRICT_MINIMUM = major(Boundary.STRICT_MINIMUM);
     public static final int STRICT_MAXIMUM = major(Boundary.STRICT_MAXIMUM);
@@ -29,6 +30,7 @@ public final class JvmValidationVersions {
         INTERFACE_STATIC_SPECIAL_CALLS,
         STATIC_CLASS_INITIALIZER,
         MODULES,
+        BASE_MODULE_FLAGS,
         DYNAMIC_CONSTANTS,
         STRICT_MINIMUM,
         STRICT_MAXIMUM

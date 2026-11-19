@@ -38,7 +38,8 @@ public final class JavaMemberStructureValidation {
                     JvmFieldAccessFlag.PRIVATE.code()
                             | JvmFieldAccessFlag.PROTECTED.code()
                             | JvmFieldAccessFlag.VOLATILE.code()
-                            | JvmFieldAccessFlag.TRANSIENT.code();
+                            | JvmFieldAccessFlag.TRANSIENT.code()
+                            | JvmFieldAccessFlag.ENUM.code();
             context.require(
                     (flags & required) == required && (flags & forbidden) == 0,
                     node,
@@ -126,7 +127,7 @@ public final class JavaMemberStructureValidation {
                         (flags & required) == required,
                         node,
                         "An interface method in this classfile version must be public and"
-                            + " abstract");
+                                + " abstract");
             } else {
                 context.require(
                         Integer.bitCount(

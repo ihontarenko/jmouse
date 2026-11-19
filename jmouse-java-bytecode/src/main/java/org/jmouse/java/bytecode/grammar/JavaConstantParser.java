@@ -86,7 +86,7 @@ public final class JavaConstantParser implements ParseRule<JavaConstantInput, Ja
                         input.index(),
                         stringIndex);
             }
-            case FIELDREF -> {
+            case FIELD_REFERENCE -> {
                 int classIndex = bytes.unsigned16();
                 int nameAndTypeIndex = bytes.unsigned16();
                 yield new JavaFieldReferenceConstantNode(
@@ -96,7 +96,7 @@ public final class JavaConstantParser implements ParseRule<JavaConstantInput, Ja
                         classIndex,
                         nameAndTypeIndex);
             }
-            case METHODREF -> {
+            case METHOD_REFERENCE -> {
                 int classIndex = bytes.unsigned16();
                 int nameAndTypeIndex = bytes.unsigned16();
                 yield new JavaMethodReferenceConstantNode(
@@ -106,7 +106,7 @@ public final class JavaConstantParser implements ParseRule<JavaConstantInput, Ja
                         classIndex,
                         nameAndTypeIndex);
             }
-            case INTERFACE_METHODREF -> {
+            case INTERFACE_METHOD_REFERENCE -> {
                 int classIndex = bytes.unsigned16();
                 int nameAndTypeIndex = bytes.unsigned16();
                 yield new JavaInterfaceMethodReferenceConstantNode(

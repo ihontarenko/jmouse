@@ -56,6 +56,7 @@ import org.jmouse.java.bytecode.signature.JvmTextNode;
 import org.jmouse.java.bytecode.vocabulary.JvmAttributeContext;
 import org.jmouse.java.bytecode.vocabulary.JvmAttributeKind;
 import org.jmouse.java.bytecode.vocabulary.JvmFormatLimits;
+import org.jmouse.java.bytecode.vocabulary.JvmVocabulary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,8 @@ public final class JavaAttributeParser implements ParseRule<JavaAttributeInput, 
     @Override
     public JavaAttributeNode parse(JavaAttributeInput input, ParseSession session) {
         BytesCursor bytes = input.bytes();
-        if (input.version().major() < kind.minimumMajor()) {
+        if (!JvmVocabulary.attribute(kind)
+                .availableIn(input.version(), input.language().profile().specification())) {
             throw bytes.failure(
                     "Attribute is not available in this classfile version: " + kind.encodedName());
         }

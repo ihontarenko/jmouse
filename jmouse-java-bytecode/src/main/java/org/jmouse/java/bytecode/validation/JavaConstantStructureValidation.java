@@ -22,6 +22,10 @@ public final class JavaConstantStructureValidation {
         if (!descriptor.isEmpty()
                 && descriptor.charAt(0) == JvmSignatureToken.PARAMETERS_OPEN.code()) {
             context.methodName(name);
+            context.require(
+                    !name.equals(JavaJvmNames.CLASS_INITIALIZER),
+                    node,
+                    "NameAndType method entries cannot use the class initializer name");
             JavaMethodDescriptor method = context.method(descriptor);
             if (name.equals(JavaJvmNames.CONSTRUCTOR)) {
                 context.require(
