@@ -77,35 +77,51 @@ public record Tightening(TrackFence fence, double angleStep, List<Point> held, R
                 continue;
             }
             // Two runs one direction, side by side: a step out of line. One run goes, the other going on until it meets what came after
-            // the gone one: the run not held stays where one side is held, else the longer.
-            boolean firstLonger = firstHeld || secondHeld ? secondHeld : previous.distanceTo(first) >= second.distanceTo(next);
+            // the gone one: the run not held is the one that goes where one side is held; else the shorter first, then the longer where
+            // the shorter cannot — its going would turn the line back on itself.
             boolean heldGives = firstHeld || secondHeld;
-            int goneAt = firstLonger ? at + 2 : at - 1;
-            int beyond = firstLonger ? at + 3 : at - 2;
-            Point gone = line.get(goneAt);
-            Point after = beyond >= 0 && beyond < line.size() ? line.get(beyond) : null;
-            Point kept = firstLonger ? first : second;
-            Point way = firstLonger ? inWay.get() : outWay.get();
-            Optional<Point> onward = after != null && (least || heldGives || !isHeld(gone)) ? Ways.wayBetween(after, gone) : Optional.empty();
-            Optional<Point> meeting = onward.flatMap(direction -> Ways.crossingOf(kept, way, after, direction));
-            if (meeting.isPresent()) {
-                Point settled = Precision.settled(meeting.get());
-                List<Point> replaced = firstLonger
-                        ? Polylines.joined(line.subList(0, at), List.of(settled), line.subList(beyond, line.size()))
-                        : Polylines.joined(line.subList(0, beyond + 1), List.of(settled), line.subList(at + 2, line.size()));
-                if (fence.lineClear(replaced) && !LineCleaning.isTangled(replaced)) {
-                    return Optional.of(replaced);
+            List<Boolean> choices = heldGives ? List.of(secondHeld) : previous.distanceTo(first) >= second.distanceTo(next) ? List.of(true, false) : List.of(false, true);
+            for (boolean firstLonger : choices) {
+                Optional<List<Point>> stepped = withoutStepOutOfLine(line, at, firstLonger, least, heldGives, firstLonger ? inWay.get() : outWay.get());
+                if (stepped.isPresent()) {
+                    return stepped;
                 }
-            } else if (goneAt == 0 || goneAt == line.size() - 1) {
-                // The shorter run ends the line: its end does not move, so the step cannot go. It goes to the end instead — the
-                // longer run straight on into the end's copper, and the step taken there, where the pad it stands on hides it.
-                Point jog = new Point(second.x() - first.x(), second.y() - first.y());
-                List<Point> replaced = firstLonger
-                        ? Polylines.joined(line.subList(0, at), List.of(Precision.settled(new Point(gone.x() - jog.x(), gone.y() - jog.y())), gone))
-                        : Polylines.joined(List.of(gone, Precision.settled(new Point(gone.x() + jog.x(), gone.y() + jog.y()))), line.subList(at + 2, line.size()));
-                if (fence.lineClear(replaced) && !LineCleaning.isTangled(replaced) && LineCleaning.withoutStraightPoints(replaced).size() < line.size()) {
-                    return Optional.of(replaced);
-                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * A step out of line taken away: one of the two runs beside it goes — the second, `firstLonger`, else the first — and the other
+     * goes on until it meets what came after the gone one; where the gone run ends the line, the step is taken to that end instead.
+     */
+    private Optional<List<Point>> withoutStepOutOfLine(List<Point> line, int at, boolean firstLonger, boolean least, boolean heldGives, Point way) {
+        Point first = line.get(at);
+        Point second = line.get(at + 1);
+        int goneAt = firstLonger ? at + 2 : at - 1;
+        int beyond = firstLonger ? at + 3 : at - 2;
+        Point gone = line.get(goneAt);
+        Point after = beyond >= 0 && beyond < line.size() ? line.get(beyond) : null;
+        Point kept = firstLonger ? first : second;
+        Optional<Point> onward = after != null && (least || heldGives || !isHeld(gone)) ? Ways.wayBetween(after, gone) : Optional.empty();
+        Optional<Point> meeting = onward.flatMap(direction -> Ways.crossingOf(kept, way, after, direction));
+        if (meeting.isPresent()) {
+            Point settled = Precision.settled(meeting.get());
+            List<Point> replaced = firstLonger
+                    ? Polylines.joined(line.subList(0, at), List.of(settled), line.subList(beyond, line.size()))
+                    : Polylines.joined(line.subList(0, beyond + 1), List.of(settled), line.subList(at + 2, line.size()));
+            if (fence.lineClear(replaced) && !LineCleaning.isTangled(replaced)) {
+                return Optional.of(replaced);
+            }
+        } else if (goneAt == 0 || goneAt == line.size() - 1) {
+            // The shorter run ends the line: its end does not move, so the step cannot go. It goes to the end instead — the
+            // longer run straight on into the end's copper, and the step taken there, where the pad it stands on hides it.
+            Point jog = new Point(second.x() - first.x(), second.y() - first.y());
+            List<Point> replaced = firstLonger
+                    ? Polylines.joined(line.subList(0, at), List.of(Precision.settled(new Point(gone.x() - jog.x(), gone.y() - jog.y())), gone))
+                    : Polylines.joined(List.of(gone, Precision.settled(new Point(gone.x() + jog.x(), gone.y() + jog.y()))), line.subList(at + 2, line.size()));
+            if (fence.lineClear(replaced) && !LineCleaning.isTangled(replaced) && LineCleaning.withoutStraightPoints(replaced).size() < line.size()) {
+                return Optional.of(replaced);
             }
         }
         return Optional.empty();

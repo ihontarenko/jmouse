@@ -7,18 +7,29 @@ import org.jmouse.el.lexer.TokenizableSource.Entry;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.translate.Bindings;
 import org.jmouse.el.translate.Capabilities;
-import org.jmouse.el.translate.Translator;
 import org.jmouse.el.translate.TranslationRefusedException;
+import org.jmouse.el.translate.Translator;
 import org.jmouse.java.parser.JavaSyntaxResult;
 import org.jmouse.java.parser.lexer.JavaKeyword;
 import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;
-import org.jmouse.java.parser.model.*;
+import org.jmouse.java.parser.model.Declaration;
+import org.jmouse.java.parser.model.DeclarationKind;
+import org.jmouse.java.parser.model.ImportDeclaration;
+import org.jmouse.java.parser.model.JavaSourceFile;
+import org.jmouse.java.parser.model.ModuleDeclaration;
+import org.jmouse.java.parser.model.PackageDeclaration;
+import org.jmouse.java.parser.model.SymbolId;
+import org.jmouse.java.parser.model.TypeDeclaration;
 import org.jmouse.java.parser.node.declaration.JavaTypeDeclarationNode;
 import org.jmouse.java.parser.node.module.JavaModuleDeclarationNode;
 import org.jmouse.java.parser.node.module.JavaModuleKind;
-import org.jmouse.java.parser.node.unit.*;
-import org.jmouse.java.parser.source.SourceSpan;
+import org.jmouse.java.parser.node.unit.JavaCompilationUnitNode;
+import org.jmouse.java.parser.node.unit.JavaImportDeclarationNode;
+import org.jmouse.java.parser.node.unit.JavaImportKind;
+import org.jmouse.java.parser.node.unit.JavaImportNode;
+import org.jmouse.java.parser.node.unit.JavaPackageDeclarationNode;
 import org.jmouse.java.parser.source.ParseProblem;
+import org.jmouse.java.parser.source.SourceSpan;
 
 /** Declaration records are a translator view of the full AST, never a second source grammar. */
 public final class JavaDeclarationProjection implements Translator<JavaSourceFile> {
@@ -54,6 +65,10 @@ public final class JavaDeclarationProjection implements Translator<JavaSourceFil
             throw new TranslationRefusedException("Declaration metadata requires a compilation unit and no runtime bindings");
         }
         JavaProjectionContext context = new JavaProjectionContext(source, unit);
+        return translate(unit, context);
+    }
+
+    JavaSourceFile translate(JavaCompilationUnitNode unit, JavaProjectionContext context) {
         PackageDeclaration packageDeclaration = unit.packageDeclaration().map(node -> packageDeclaration(context, node)).orElse(null);
         String packageName = packageDeclaration == null ? "" : packageDeclaration.name();
         List<ImportDeclaration> imports = unit.imports().stream().map(JavaDeclarationProjection::importDeclaration).toList();

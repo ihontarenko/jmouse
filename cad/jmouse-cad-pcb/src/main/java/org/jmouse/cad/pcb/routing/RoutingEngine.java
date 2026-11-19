@@ -5,11 +5,9 @@ import org.jmouse.cad.pcb.drawing.Track;
 import org.jmouse.cad.pcb.drawing.PcbDrawing;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -125,13 +123,16 @@ public final class RoutingEngine {
 
     /**
      * A carried track as merging leaves it: run along its net's other copper within the style's gap, it ends on that line — a
-     * junction. One that would be gone whole stays as carried: the track in hand never vanishes from under it.
+     * junction ({@link CoincidentStretches}); a jog left along its line, at its joints too, is merged ({@link LineJogs}). One that would
+     * be gone whole stays as carried: the track in hand never vanishes from under it.
      */
     private PcbDrawing mergedAsCarried(PcbDrawing before, PcbDrawing carried, int index, TrackRouter.LayingStyle style) {
         if (style.merging().isEmpty() || style.merging().getAsDouble() <= 0) {
             return carried;
         }
-        PcbDrawing merged = new CoincidentStretches(worldOf(before), style.merging().getAsDouble()).merged(carried, List.of(index));
+        LineMerging merging = LineMerging.inOrder(List.of(new CoincidentStretches(worldOf(before), style.merging().getAsDouble()),
+                new LineJogs(this::worldOf, settings().routing())));
+        PcbDrawing merged = merging.merged(carried, List.of(index)).pcb();
         return merged.tracks().size() < carried.tracks().size() ? carried : merged;
     }
 
@@ -142,30 +143,12 @@ public final class RoutingEngine {
 
     /**
      * The pcb's lines with their jogs merged — of the tracks chosen, or of every one where none is —, each only where the corner left
-     * keeps its gaps. A jog is the line's, not a track's: one standing at a joint, a track ending and the next beginning, is merged as
-     * any other, and each track takes its own part of the line back. A line holding a track held where it stands is left as it is.
+     * keeps its gaps: a sliver knotting a joint untied first ({@link TrackSlivers}), so the joint is a plain one, then the jogs along
+     * each line ({@link LineJogs}), and last two tracks running straight on through a joint made one ({@link StraightJoints}).
      */
     public synchronized PcbDrawing withoutJogs(PcbDrawing pcb, List<Integer> chosen) {
-        RoutingWorld world = worldOf(pcb);
-        PcbDrawing merged = pcb;
-        Set<Integer> seen = new HashSet<>();
-        for (int index = 0; index < pcb.tracks().size(); index++) {
-            if (!chosen.isEmpty() && !chosen.contains(index) || seen.contains(index)) {
-                continue;
-            }
-            JoinedTracks.JoinedLine joined = JoinedTracks.joinedLine(world, index);
-            joined.members().forEach(member -> seen.add(member.index()));
-            if (joined.members().stream().anyMatch(member -> held(pcb, member.index()))) {
-                continue;
-            }
-            List<Point> line = joined.points();
-            TrackFence fence = world.fenceOfTrack(pcb.tracks().get(index).withPoints(line), index, world.netOfTrack(index));
-            List<Point> without = new Tightening(fence, 45, List.of(), settings().routing()).withoutShortJogs(line, false);
-            if (without.size() < line.size()) {
-                merged = JoinedTracks.withJoinedLine(merged, joined, without);
-            }
-        }
-        return merged;
+        return LineMerging.inOrder(List.of(new TrackSlivers(), new LineJogs(this::worldOf, settings().routing()), new StraightJoints(this::worldOf)))
+                .merged(pcb, chosen).pcb();
     }
 
     /** The pcb's tracks with their corners rounded so, those chosen or every one where none is, each only as far as its gaps let it. */

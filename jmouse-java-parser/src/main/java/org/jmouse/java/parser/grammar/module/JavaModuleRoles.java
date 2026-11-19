@@ -1,8 +1,7 @@
 package org.jmouse.java.parser.grammar.module;
 
-import org.jmouse.java.parser.grammar.JavaParseRoleNames;
-
 import org.jmouse.el.parser.ParseRole;
+import org.jmouse.java.parser.grammar.JavaParseRoleNames;
 import org.jmouse.java.parser.grammar.JavaParsingInput;
 import org.jmouse.java.parser.node.module.JavaExportsDirectiveNode;
 import org.jmouse.java.parser.node.module.JavaModuleDeclarationNode;

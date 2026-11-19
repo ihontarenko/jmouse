@@ -6,7 +6,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 import org.jmouse.el.lexer.Token;
-import org.jmouse.el.lexer.TokenCursor.Savepoint;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.parser.lexer.JavaKeyword;

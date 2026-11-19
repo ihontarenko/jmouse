@@ -7,9 +7,9 @@ import org.jmouse.java.parser.grammar.JavaParsingInput;
 import org.jmouse.java.parser.grammar.JavaRecoveryBoundaries;
 import org.jmouse.java.parser.grammar.JavaSyntaxRecovery;
 import org.jmouse.java.parser.lexer.JavaToken;
+import org.jmouse.java.parser.node.body.JavaTypeBodyNode;
 import org.jmouse.java.parser.source.ParseProblem;
 import org.jmouse.java.parser.source.SourceSpan;
-import org.jmouse.java.parser.node.body.JavaTypeBodyNode;
 
 public final class JavaTypeBodyParser implements ParseRule<JavaParsingInput, JavaTypeBodyNode> {
     @Override

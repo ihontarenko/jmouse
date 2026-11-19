@@ -1,12 +1,11 @@
 package org.jmouse.java.parser.node.name;
 
-import org.jmouse.java.parser.node.JavaNodeKindNames;
-
 import java.util.Objects;
 import org.jmouse.el.node.NodeKind;
 import org.jmouse.el.node.NodeSchema;
-import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
 import org.jmouse.java.parser.lexer.JavaKeywordCatalog;
+import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
+import org.jmouse.java.parser.node.JavaNodeKindNames;
 import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.source.SourceSpan;
 

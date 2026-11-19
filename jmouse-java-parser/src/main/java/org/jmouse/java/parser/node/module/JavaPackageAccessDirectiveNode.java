@@ -1,10 +1,9 @@
 package org.jmouse.java.parser.node.module;
 
-import org.jmouse.java.parser.node.JavaChildRoleNames;
-
 import java.util.List;
 import org.jmouse.el.node.ChildRole;
 import org.jmouse.el.node.NodeSchema;
+import org.jmouse.java.parser.node.JavaChildRoleNames;
 import org.jmouse.java.parser.node.name.JavaQualifiedNameNode;
 import org.jmouse.java.parser.source.SourceSpan;
 

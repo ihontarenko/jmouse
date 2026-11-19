@@ -68,6 +68,7 @@ public final class JavaParseRoleNames {
     public static final String RETURN_STATEMENT = "java.return-statement";
     public static final String STATEMENT = "java.statement";
     public static final String SWITCH_BLOCK = "java.switch-block";
+    public static final String SWITCH_ENTRY = "java.switch-entry";
     public static final String SWITCH_EXPRESSION = "java.switch-expression";
     public static final String SWITCH_STATEMENT = "java.switch-statement";
     public static final String SYNCHRONIZED_STATEMENT = "java.synchronized-statement";

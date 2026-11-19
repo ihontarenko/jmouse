@@ -3,6 +3,7 @@ package org.jmouse.java.parser.grammar.unit;
 import java.util.Optional;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;
+import org.jmouse.el.parser.ParsingLimitException;
 import org.jmouse.java.parser.grammar.declaration.JavaDeclarationRoles;
 import org.jmouse.java.parser.grammar.JavaParsingInput;
 import org.jmouse.java.parser.grammar.JavaRecoveryBoundaries;
@@ -11,9 +12,9 @@ import org.jmouse.java.parser.grammar.JavaTypeParser;
 import org.jmouse.java.parser.grammar.module.JavaModuleRoles;
 import org.jmouse.java.parser.lexer.JavaKeyword;
 import org.jmouse.java.parser.lexer.JavaToken;
-import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.declaration.JavaDeclarationNode;
 import org.jmouse.java.parser.node.declaration.JavaEmptyTypeDeclarationNode;
+import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.module.JavaModuleDeclarationNode;
 import org.jmouse.java.parser.node.unit.JavaCompilationUnitNode;
 import org.jmouse.java.parser.node.unit.JavaImportNode;
@@ -27,8 +28,14 @@ public final class JavaCompilationUnitParser implements ParseRule<JavaParsingInp
         int start = input.offset();
         JavaCompilationUnitNode node = new JavaCompilationUnitNode(input.name(), input.point());
         while (!input.atEnd()) {
-            Optional<JavaSyntaxNode> item = JavaSyntaxRecovery.attempt(input, session,
-                    JavaRecoveryBoundaries.TOP_LEVEL, ParseProblem.Phase.STRUCTURE, () -> item(input, session, node));
+            Optional<JavaSyntaxNode> item;
+            try {
+                item = JavaSyntaxRecovery.attempt(input, session,
+                        JavaRecoveryBoundaries.TOP_LEVEL, ParseProblem.Phase.STRUCTURE, () -> item(input, session, node));
+            } catch (ParsingLimitException exception) {
+                input.reportLimit(exception, input.point(), ParseProblem.Phase.STRUCTURE);
+                break;
+            }
             if (item.isPresent()) {
                 JavaSyntaxNode syntax = item.get();
                 if (syntax instanceof JavaPackageDeclarationNode declaration) {

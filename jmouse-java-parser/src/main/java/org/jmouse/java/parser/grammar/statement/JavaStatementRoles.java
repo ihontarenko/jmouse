@@ -1,11 +1,10 @@
 package org.jmouse.java.parser.grammar.statement;
 
-import org.jmouse.java.parser.grammar.JavaParseRoleNames;
-
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ParseRole;
+import org.jmouse.java.parser.grammar.JavaParseRoleNames;
 import org.jmouse.java.parser.grammar.JavaParsingInput;
-import org.jmouse.java.parser.lexer.JavaKeyword;
+import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.resource.JavaResourceNode;
 import org.jmouse.java.parser.node.statement.JavaAssertStatementNode;
 import org.jmouse.java.parser.node.statement.JavaBlockNode;
@@ -34,6 +33,8 @@ import org.jmouse.java.parser.node.statement.JavaYieldStatementNode;
 
 /** Addressable statement productions; syntax dispatch is configured independently. */
 public final class JavaStatementRoles {
+    public static final ParseRole<JavaParsingInput, JavaSyntaxNode> SWITCH_ENTRY =
+            role(JavaParseRoleNames.SWITCH_ENTRY, JavaSyntaxNode.class);
     public static final ParseRole<JavaParsingInput, JavaSwitchStatementNode> SWITCH_STATEMENT =
             role(JavaParseRoleNames.SWITCH_STATEMENT, JavaSwitchStatementNode.class);
     public static final ParseRole<JavaParsingInput, JavaSwitchBlockNode> SWITCH_BLOCK =

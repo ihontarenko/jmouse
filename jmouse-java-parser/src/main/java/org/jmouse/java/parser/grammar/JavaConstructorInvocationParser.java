@@ -25,6 +25,7 @@ public final class JavaConstructorInvocationParser implements ParseRule<JavaPars
         }
         JavaTypeParser.explicitArguments(input, session, arguments::add);
         arguments.forEach(node::addTypeArgument);
+        node.setKeywordSpan(input.point());
         if (input.take(JavaKeyword.THIS, session)) {
             if (node.qualifier().isPresent()) {
                 throw input.error("An explicit this constructor invocation cannot be qualified");

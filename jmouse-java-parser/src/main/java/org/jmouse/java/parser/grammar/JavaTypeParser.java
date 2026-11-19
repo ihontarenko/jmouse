@@ -1,8 +1,8 @@
 package org.jmouse.java.parser.grammar;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
+import java.util.List;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.model.version.JavaSourceFeatures;

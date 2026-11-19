@@ -2,11 +2,11 @@ package org.jmouse.java.parser.extension;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import org.jmouse.el.lexer.Lexer;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ParseRole;

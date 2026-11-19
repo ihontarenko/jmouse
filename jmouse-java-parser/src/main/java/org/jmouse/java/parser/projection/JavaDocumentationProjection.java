@@ -16,9 +16,9 @@ import org.jmouse.java.parser.lexer.JavaComment;
 import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;
 import org.jmouse.java.parser.model.JavaDoc;
 import org.jmouse.java.parser.model.JavaDocOwner;
-import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.body.JavaAnonymousClassBodyNode;
 import org.jmouse.java.parser.node.body.JavaConstructorBodySyntaxNode;
+import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.statement.JavaBlockNode;
 import org.jmouse.java.parser.source.SourceSpan;
 

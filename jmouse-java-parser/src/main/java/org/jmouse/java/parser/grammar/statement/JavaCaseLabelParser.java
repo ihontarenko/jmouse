@@ -1,6 +1,5 @@
 package org.jmouse.java.parser.grammar.statement;
 
-import org.jmouse.el.lexer.TokenCursor.Savepoint;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.model.version.JavaSourceFeatures;
@@ -8,6 +7,7 @@ import org.jmouse.java.parser.grammar.JavaParseRoles;
 import org.jmouse.java.parser.grammar.JavaParsingInput;
 import org.jmouse.java.parser.grammar.JavaSyntaxException;
 import org.jmouse.java.parser.lexer.JavaKeyword;
+import org.jmouse.java.parser.lexer.JavaToken;
 import org.jmouse.java.parser.node.pattern.JavaPatternNode;
 import org.jmouse.java.parser.node.statement.JavaCaseGuardNode;
 import org.jmouse.java.parser.node.statement.JavaCaseLabelNode;
@@ -21,7 +21,7 @@ public final class JavaCaseLabelParser implements ParseRule<JavaParsingInput, Ja
     @Override
     public JavaCaseLabelNode parse(JavaParsingInput input, ParseSession session) {
         int start = input.offset();
-        if (input.take("null", session)) {
+        if (input.take(JavaToken.NULL_LITERAL, session)) {
             input.requireFeature(JavaSourceFeatures.SWITCH_PATTERNS);
             return new JavaNullCaseLabelNode(input.name(), input.spanFrom(start));
         }

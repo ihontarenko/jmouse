@@ -7,7 +7,12 @@ import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;
 import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.name.JavaIdentifierNode;
 import org.jmouse.java.parser.node.name.JavaQualifiedNameNode;
-import org.jmouse.java.parser.node.type.*;
+import org.jmouse.java.parser.node.type.JavaArrayDimensionNode;
+import org.jmouse.java.parser.node.type.JavaArrayTypeNode;
+import org.jmouse.java.parser.node.type.JavaNamedTypeNode;
+import org.jmouse.java.parser.node.type.JavaPrimitiveTypeNode;
+import org.jmouse.java.parser.node.type.JavaTypeSyntaxNode;
+import org.jmouse.java.parser.node.type.JavaVoidTypeNode;
 import org.jmouse.java.parser.source.SourceSpan;
 
 /** Written metadata and as-written identity spellings, never name resolution or reparsing. */

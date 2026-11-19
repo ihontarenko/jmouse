@@ -8,8 +8,8 @@ import org.jmouse.java.parser.node.name.JavaModifiersNode;
 import org.jmouse.java.parser.node.parameter.JavaFormalParameterNode;
 import org.jmouse.java.parser.node.parameter.JavaParameterNode;
 import org.jmouse.java.parser.node.parameter.JavaVariableArityParameterNode;
-import org.jmouse.java.parser.node.type.JavaTypeSyntaxNode;
 import org.jmouse.java.parser.node.type.JavaInferredTypeNode;
+import org.jmouse.java.parser.node.type.JavaTypeSyntaxNode;
 import org.jmouse.java.parser.node.type.JavaVoidTypeNode;
 
 /** A written parameter, including annotations on an ellipsis and post-name dimensions. */

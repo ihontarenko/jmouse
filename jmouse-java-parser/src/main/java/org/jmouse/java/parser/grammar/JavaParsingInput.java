@@ -1,26 +1,28 @@
 package org.jmouse.java.parser.grammar;
 
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.parser.ParseSession;
+import org.jmouse.el.parser.ParsingLimitException;
+import org.jmouse.el.parser.ParsingLimitKind;
 import org.jmouse.java.model.version.JavaFeatureId;
 import org.jmouse.java.model.version.JavaSourceFeatures;
 import org.jmouse.java.model.version.JavaSourceProfile;
 import org.jmouse.java.parser.lexer.JavaKeyword;
-import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
 import org.jmouse.java.parser.lexer.JavaKeywordCatalog;
+import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
 import org.jmouse.java.parser.lexer.JavaLexer;
 import org.jmouse.java.parser.lexer.JavaSourceText;
 import org.jmouse.java.parser.lexer.JavaToken;
 import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.name.JavaIdentifierNode;
 import org.jmouse.java.parser.source.ParseProblem;
-import org.jmouse.java.parser.source.SourceSpan;
 import org.jmouse.java.parser.source.ProblemKind;
+import org.jmouse.java.parser.source.SourceSpan;
 
 /** Per-invocation Java state; token storage, checkpoints and bounds belong to jME. */
 public final class JavaParsingInput {
@@ -30,6 +32,7 @@ public final class JavaParsingInput {
     private final JavaRecoveryPolicy recovery;
     private final List<ParseProblem> problems;
     private final JavaKeywordCatalog keywords;
+    private JavaParsingState state = JavaParsingState.READING;
 
     public JavaParsingInput(TokenCursor cursor, JavaSourceProfile profile) {
         this(cursor, profile, JavaRecoveryPolicy.STRICT);
@@ -76,6 +79,22 @@ public final class JavaParsingInput {
 
     public List<ParseProblem> problems() {
         return List.copyOf(problems);
+    }
+
+    public JavaParsingState state() {
+        return state;
+    }
+
+    public void reportLimit(ParsingLimitException exception, SourceSpan span, ParseProblem.Phase phase) {
+        if (recovery == JavaRecoveryPolicy.STRICT) {
+            throw exception;
+        }
+        ProblemKind kind = exception.kind() == ParsingLimitKind.WORK
+                ? ProblemKind.WORK_BUDGET_EXCEEDED : ProblemKind.NESTING_TOO_DEEP;
+        problems.add(new ParseProblem(kind, exception.getMessage(), span, phase));
+        if (exception.kind() == ParsingLimitKind.WORK) {
+            state = JavaParsingState.WORK_LIMIT_REACHED;
+        }
     }
 
     public void report(JavaSyntaxException exception, ParseProblem.Phase phase) {
@@ -272,6 +291,9 @@ public final class JavaParsingInput {
     }
 
     public void requireEnd() {
+        if (state == JavaParsingState.WORK_LIMIT_REACHED) {
+            return;
+        }
         if (!atEnd()) {
             throw error("Unexpected trailing token '" + token().value() + "'");
         }

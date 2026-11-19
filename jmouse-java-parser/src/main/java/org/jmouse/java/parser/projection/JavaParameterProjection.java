@@ -6,9 +6,10 @@ import java.util.Set;
 import org.jmouse.java.parser.lexer.JavaKeyword;
 import org.jmouse.java.parser.model.Parameter;
 import org.jmouse.java.parser.model.TypeReferenceRole;
-import org.jmouse.java.parser.node.parameter.*;
-import org.jmouse.java.parser.node.type.JavaArrayDimensionNode;
-import org.jmouse.java.parser.node.type.JavaTypeSyntaxNode;
+import org.jmouse.java.parser.node.parameter.JavaFormalParameterNode;
+import org.jmouse.java.parser.node.parameter.JavaParameterNode;
+import org.jmouse.java.parser.node.parameter.JavaReceiverParameterNode;
+import org.jmouse.java.parser.node.parameter.JavaVariableArityParameterNode;
 
 final class JavaParameterProjection {
     private JavaParameterProjection() {

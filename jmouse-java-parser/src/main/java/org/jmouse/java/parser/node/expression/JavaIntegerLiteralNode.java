@@ -1,11 +1,10 @@
 package org.jmouse.java.parser.node.expression;
 
-import org.jmouse.java.parser.node.JavaNodeKindNames;
-
 import java.math.BigInteger;
 import java.util.Objects;
 import org.jmouse.el.node.NodeKind;
 import org.jmouse.el.node.NodeSchema;
+import org.jmouse.java.parser.node.JavaNodeKindNames;
 import org.jmouse.java.parser.source.SourceSpan;
 
 /** Typed integer-literal syntax, with role-owned children in source order. */
@@ -14,6 +13,7 @@ public final class JavaIntegerLiteralNode extends JavaLiteralNode {
     public static final NodeSchema<JavaIntegerLiteralNode> SCHEMA = NodeSchema.of(KIND);
     private String raw;
     private BigInteger value;
+    private JavaIntegerLiteralKind kind;
 
     public JavaIntegerLiteralNode(String sourceName, SourceSpan span) {
         super(SCHEMA, sourceName, span);
@@ -32,6 +32,15 @@ public final class JavaIntegerLiteralNode extends JavaLiteralNode {
         return value;
     }
 
+    public JavaIntegerLiteralKind kind() {
+        return kind;
+    }
+
+    public void setKind(JavaIntegerLiteralKind kind) {
+        requireBuilding();
+        this.kind = Objects.requireNonNull(kind, "kind");
+    }
+
     public void setValue(BigInteger value) {
         requireBuilding();
         this.value = Objects.requireNonNull(value, "value");
@@ -41,6 +50,7 @@ public final class JavaIntegerLiteralNode extends JavaLiteralNode {
     protected void validateStructure() {
         Objects.requireNonNull(raw, "raw");
         Objects.requireNonNull(value, "value");
+        Objects.requireNonNull(kind, "kind");
     }
 }
 

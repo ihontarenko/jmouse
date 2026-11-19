@@ -12,7 +12,7 @@ import java.util.List;
 class JavaIndexContractTest {
     private final JavaParser parser = new JavaParser();
 
-    private FileIndex file(String source, String text) {
+    protected FileIndex file(String source, String text) {
         return FileIndex.of(parser.parse(source, text, JavaParser.Level.EXPRESSIONS));
     }
 

@@ -73,7 +73,7 @@ public final class JoinedTracks {
      * Where two joined stretches turn: where the line of the one coming in meets the line of the one going on, so each keeps its
      * own direction; halfway between their ends where they run on in one direction, or would meet far from the joint.
      */
-    private static Point cornerBetween(Point before, Point end, Point start, Point after) {
+    static Point cornerBetween(Point before, Point end, Point start, Point after) {
         Point halfway = end.halfwayTo(start);
         Optional<Point> coming = Ways.wayBetween(before, end);
         Optional<Point> going = Ways.wayBetween(start, after);

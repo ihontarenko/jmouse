@@ -1,15 +1,13 @@
 package org.jmouse.java.parser.node.expression;
 
-import org.jmouse.java.parser.node.JavaChildRoleNames;
-
-import org.jmouse.java.parser.node.JavaNodeKindNames;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.jmouse.el.node.ChildRole;
 import org.jmouse.el.node.NodeKind;
 import org.jmouse.el.node.NodeSchema;
+import org.jmouse.java.parser.node.JavaChildRoleNames;
+import org.jmouse.java.parser.node.JavaNodeKindNames;
 import org.jmouse.java.parser.node.statement.JavaStatementNode;
 import org.jmouse.java.parser.node.type.JavaTypeSyntaxNode;
 import org.jmouse.java.parser.source.SourceSpan;
@@ -22,6 +20,7 @@ public final class JavaConstructorInvocationNode extends JavaStatementNode {
     public static final ChildRole<JavaExpressionNode> ARGUMENTS = ChildRole.list(JavaChildRoleNames.ARGUMENTS, JavaExpressionNode.class);
     public static final NodeSchema<JavaConstructorInvocationNode> SCHEMA = NodeSchema.of(KIND, QUALIFIER, TYPE_ARGUMENTS, ARGUMENTS);
     private JavaConstructorInvocationKind kind;
+    private SourceSpan keywordSpan;
 
     public JavaConstructorInvocationNode(String sourceName, SourceSpan span) {
         super(SCHEMA, sourceName, span);
@@ -55,6 +54,15 @@ public final class JavaConstructorInvocationNode extends JavaStatementNode {
         return kind;
     }
 
+    public SourceSpan keywordSpan() {
+        return keywordSpan;
+    }
+
+    public void setKeywordSpan(SourceSpan keywordSpan) {
+        requireBuilding();
+        this.keywordSpan = Objects.requireNonNull(keywordSpan, "keywordSpan");
+    }
+
     public void setKind(JavaConstructorInvocationKind value) {
         requireBuilding();
         this.kind = Objects.requireNonNull(value, "kind");
@@ -63,6 +71,7 @@ public final class JavaConstructorInvocationNode extends JavaStatementNode {
     @Override
     protected void validateStructure() {
         Objects.requireNonNull(kind, "kind");
+        Objects.requireNonNull(keywordSpan, "keywordSpan");
     }
 }
 

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * Two tracks of one net drawn along each other — on one layer, nearer than a gap — are one conductor drawn twice: the chosen one
@@ -17,7 +18,7 @@ import java.util.Optional;
  *
  * @param gap how far apart two lines may run and still be one, millimetres
  */
-record CoincidentStretches(RoutingWorld world, double gap) {
+record CoincidentStretches(RoutingWorld world, double gap) implements LineMerging {
 
     /** A stretch of another track of the net. */
     private record Stretch(Point from, Point to) {
@@ -27,9 +28,14 @@ record CoincidentStretches(RoutingWorld world, double gap) {
     private record Along(double from, double to) {
     }
 
-    /** The pcb with each chosen track merged into the copper of its net it runs along; a held track, or one along none, stays. */
-    PcbDrawing merged(PcbDrawing pcb, List<Integer> chosen) {
+    /**
+     * The pcb with each chosen track merged into the copper of its net it runs along; a held track, or one along none, stays. What is
+     * left of a chosen track — the piece standing where it stood, the pieces added after the rest — is still chosen.
+     */
+    @Override
+    public Merged merged(PcbDrawing pcb, List<Integer> chosen) {
         List<Track> tracks = new ArrayList<>(pcb.tracks());
+        List<Boolean> marked = new ArrayList<>(IntStream.range(0, tracks.size()).mapToObj(chosen::contains).toList());
         List<Track> added = new ArrayList<>();
         // The last chosen first: a track taken away moves none of those still to come.
         for (int index : chosen.stream().sorted(Comparator.reverseOrder()).toList()) {
@@ -42,13 +48,15 @@ record CoincidentStretches(RoutingWorld world, double gap) {
             }
             if (pieces.get().isEmpty()) {
                 tracks.remove(index);
+                marked.remove(index);
             } else {
                 tracks.set(index, pieces.get().getFirst());
                 added.addAll(pieces.get().subList(1, pieces.get().size()));
             }
         }
         tracks.addAll(added);
-        return pcb.withTracks(tracks);
+        added.forEach(piece -> marked.add(true));
+        return new Merged(pcb.withTracks(tracks), IntStream.range(0, tracks.size()).filter(marked::get).boxed().toList());
     }
 
     /** What is left of a track once what runs along its net's other copper is gone, in its order; empty where nothing runs along. */

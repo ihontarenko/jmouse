@@ -1,7 +1,7 @@
 package org.jmouse.java.parser;
 
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 import org.jmouse.el.node.NodeLifecycle;
 import org.jmouse.java.model.version.JavaSourceProfile;
 import org.jmouse.java.parser.lexer.JavaLexicalSnapshot;

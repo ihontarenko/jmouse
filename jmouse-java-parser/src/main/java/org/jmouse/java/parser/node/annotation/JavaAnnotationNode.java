@@ -1,11 +1,10 @@
 package org.jmouse.java.parser.node.annotation;
 
-import org.jmouse.java.parser.node.JavaChildRoleNames;
-
-import org.jmouse.el.node.NodeSchema;
 import org.jmouse.el.node.ChildRole;
-import org.jmouse.java.parser.node.name.JavaQualifiedNameNode;
+import org.jmouse.el.node.NodeSchema;
+import org.jmouse.java.parser.node.JavaChildRoleNames;
 import org.jmouse.java.parser.node.JavaSyntaxNode;
+import org.jmouse.java.parser.node.name.JavaQualifiedNameNode;
 import org.jmouse.java.parser.source.SourceSpan;
 
 /** The Annotation family in Java source syntax. */

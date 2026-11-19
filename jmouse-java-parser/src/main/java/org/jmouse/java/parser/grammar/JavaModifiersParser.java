@@ -1,16 +1,15 @@
 package org.jmouse.java.parser.grammar;
 
-import java.util.Objects;
-import java.util.Set;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
-import org.jmouse.java.parser.lexer.JavaKeywordCatalog;
+import java.util.Objects;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.model.version.JavaSourceFeatures;
 import org.jmouse.java.parser.lexer.JavaKeyword;
+import org.jmouse.java.parser.lexer.JavaKeywordCatalog;
+import org.jmouse.java.parser.lexer.JavaKeywordDefinition;
 import org.jmouse.java.parser.node.name.JavaModifierNode;
 import org.jmouse.java.parser.node.name.JavaModifiersNode;
 

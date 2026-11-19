@@ -5,12 +5,12 @@ import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.parser.grammar.JavaParseRoles;
 import org.jmouse.java.parser.grammar.JavaParsingInput;
 import org.jmouse.java.parser.node.declaration.JavaRecordComponentNode;
+import org.jmouse.java.parser.node.name.JavaModifierNode;
+import org.jmouse.java.parser.node.name.JavaModifiersNode;
 import org.jmouse.java.parser.node.parameter.JavaFormalParameterNode;
 import org.jmouse.java.parser.node.parameter.JavaParameterKind;
 import org.jmouse.java.parser.node.parameter.JavaParameterNode;
 import org.jmouse.java.parser.node.parameter.JavaVariableArityParameterNode;
-import org.jmouse.java.parser.node.name.JavaModifierNode;
-import org.jmouse.java.parser.node.name.JavaModifiersNode;
 
 public final class JavaRecordComponentParser implements ParseRule<JavaParsingInput, JavaRecordComponentNode> {
     @Override

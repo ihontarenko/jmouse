@@ -1,7 +1,6 @@
 package org.jmouse.java.parser.grammar.statement;
 
 import java.util.Map;
-import org.jmouse.el.lexer.TokenCursor.Savepoint;
 import org.jmouse.el.parser.ParseRole;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;

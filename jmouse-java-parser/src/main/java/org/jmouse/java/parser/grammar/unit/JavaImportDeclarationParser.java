@@ -6,8 +6,8 @@ import org.jmouse.java.parser.grammar.JavaParseRoles;
 import org.jmouse.java.parser.grammar.JavaParsingInput;
 import org.jmouse.java.parser.lexer.JavaKeyword;
 import org.jmouse.java.parser.node.unit.JavaImportDeclarationNode;
-import org.jmouse.java.parser.node.unit.JavaImportNode;
 import org.jmouse.java.parser.node.unit.JavaImportKind;
+import org.jmouse.java.parser.node.unit.JavaImportNode;
 
 public final class JavaImportDeclarationParser implements ParseRule<JavaParsingInput, JavaImportNode> {
     @Override

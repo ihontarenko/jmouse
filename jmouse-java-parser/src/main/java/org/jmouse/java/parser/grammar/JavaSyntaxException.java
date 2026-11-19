@@ -2,8 +2,8 @@ package org.jmouse.java.parser.grammar;
 
 import java.util.Objects;
 import org.jmouse.el.parser.ParseException;
-import org.jmouse.java.parser.source.SourceSpan;
 import org.jmouse.java.parser.source.ProblemKind;
+import org.jmouse.java.parser.source.SourceSpan;
 
 /** A grammar failure with a position in the original, untranslated source. */
 public final class JavaSyntaxException extends ParseException {

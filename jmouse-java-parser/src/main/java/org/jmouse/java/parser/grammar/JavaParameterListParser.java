@@ -1,7 +1,6 @@
 package org.jmouse.java.parser.grammar;
 
 import java.util.function.Consumer;
-import org.jmouse.el.lexer.TokenCursor.Savepoint;
 import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.parser.node.parameter.JavaParameterNode;
 import org.jmouse.java.parser.node.parameter.JavaReceiverParameterNode;

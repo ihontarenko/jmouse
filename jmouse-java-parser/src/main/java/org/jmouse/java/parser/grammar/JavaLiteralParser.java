@@ -19,6 +19,7 @@ import org.jmouse.java.parser.node.expression.JavaCharacterLiteralNode;
 import org.jmouse.java.parser.node.expression.JavaFloatingLiteralValue;
 import org.jmouse.java.parser.node.expression.JavaFloatingPointLiteralNode;
 import org.jmouse.java.parser.node.expression.JavaIntegerLiteralNode;
+import org.jmouse.java.parser.node.expression.JavaIntegerLiteralKind;
 import org.jmouse.java.parser.node.expression.JavaLiteralNode;
 import org.jmouse.java.parser.node.expression.JavaNullLiteralNode;
 import org.jmouse.java.parser.node.expression.JavaStringLiteralNode;
@@ -82,7 +83,9 @@ public final class JavaLiteralParser implements ParseRule<JavaParsingInput, Java
                 .findFirst().orElseThrow(() -> input.errorAt("Malformed numeric literal", span));
         String normalized = text.replace("_", "");
         if (form.kind() == NumericKind.INTEGER) {
+            JavaIntegerLiteralKind kind = JavaIntegerLiteralKind.INT;
             if (normalized.endsWith("l") || normalized.endsWith("L")) {
+                kind = JavaIntegerLiteralKind.LONG;
                 normalized = normalized.substring(0, normalized.length() - 1);
             }
             if (form.radix() == 16 || form.radix() == 2) {
@@ -90,6 +93,7 @@ public final class JavaLiteralParser implements ParseRule<JavaParsingInput, Java
             }
             JavaIntegerLiteralNode node = new JavaIntegerLiteralNode(input.name(), span);
             node.setRaw(raw);
+            node.setKind(kind);
             node.setValue(new BigInteger(normalized, form.radix()));
             return node;
         }

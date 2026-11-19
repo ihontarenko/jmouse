@@ -2,7 +2,6 @@ package org.jmouse.java.parser.grammar;
 
 import org.jmouse.el.parser.ParseRole;
 import org.jmouse.java.parser.node.annotation.JavaAnnotationNode;
-import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.body.JavaAnonymousClassBodyNode;
 import org.jmouse.java.parser.node.expression.JavaArrayInitializerNode;
 import org.jmouse.java.parser.node.expression.JavaCastExpressionNode;
@@ -11,6 +10,7 @@ import org.jmouse.java.parser.node.expression.JavaExpressionNode;
 import org.jmouse.java.parser.node.expression.JavaLambdaExpressionNode;
 import org.jmouse.java.parser.node.expression.JavaLiteralNode;
 import org.jmouse.java.parser.node.expression.JavaSwitchExpressionNode;
+import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.name.JavaModifiersNode;
 import org.jmouse.java.parser.node.name.JavaQualifiedNameNode;
 import org.jmouse.java.parser.node.parameter.JavaParameterNode;

@@ -45,6 +45,19 @@ public final class JavaOperatorCatalog {
                 && kinds.contains(definition.kind())).findFirst().orElse(null);
     }
 
+    public List<Definition> definitions() {
+        return definitions;
+    }
+
+    public Definition require(Kind kind, String identity) {
+        List<Definition> matches = definitions.stream()
+                .filter(definition -> definition.kind() == kind && definition.identity().equals(identity)).toList();
+        if (matches.size() != 1) {
+            throw new IllegalArgumentException("Expected one operator definition for " + kind + ":" + identity);
+        }
+        return matches.getFirst();
+    }
+
     public static JavaOperatorCatalog standard() {
         InputStream stream = JavaOperatorCatalog.class.getResourceAsStream("/org/jmouse/java/parser/operators.tsv");
         if (stream == null) {

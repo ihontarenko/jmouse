@@ -17,6 +17,7 @@ public final class JavaStatementGrammar {
         Map<String, ParseRole<JavaParsingInput, ? extends JavaStatementNode>> available = new HashMap<>();
         rules.bind(JavaStatementRoles.SWITCH_STATEMENT, JavaSwitchStatementParser.class.getName(), new JavaSwitchStatementParser());
         rules.bind(JavaStatementRoles.SWITCH_BLOCK, JavaSwitchBlockParser.class.getName(), new JavaSwitchBlockParser());
+        rules.bind(JavaStatementRoles.SWITCH_ENTRY, JavaSwitchEntryParser.class.getName(), new JavaSwitchEntryParser());
         rules.bind(JavaStatementRoles.CASE_LABEL, JavaCaseLabelParser.class.getName(), new JavaCaseLabelParser());
         available.put(JavaStatementRoles.SWITCH_STATEMENT.name(), JavaStatementRoles.SWITCH_STATEMENT);
         rules.bind(JavaStatementRoles.FOR_STATEMENT, JavaForStatementParser.class.getName(), new JavaForStatementParser());

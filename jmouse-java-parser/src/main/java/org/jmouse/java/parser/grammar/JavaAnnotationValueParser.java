@@ -3,8 +3,8 @@ package org.jmouse.java.parser.grammar;
 import org.jmouse.el.parser.ParseRule;
 import org.jmouse.el.parser.ParseSession;
 import org.jmouse.java.parser.lexer.JavaToken;
-import org.jmouse.java.parser.node.JavaSyntaxNode;
 import org.jmouse.java.parser.node.annotation.JavaAnnotationArrayValueNode;
+import org.jmouse.java.parser.node.JavaSyntaxNode;
 
 /** Annotation values have their own replaceable production, including recursive array values. */
 public final class JavaAnnotationValueParser implements ParseRule<JavaParsingInput, JavaSyntaxNode> {

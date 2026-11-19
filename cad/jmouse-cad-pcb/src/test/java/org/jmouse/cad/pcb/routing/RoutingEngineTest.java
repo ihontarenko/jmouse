@@ -1899,6 +1899,21 @@ class RoutingEngineTest {
         void theMagnetOffMergesNothing() {
             assertEquals(2, carriedDown(0.5, OptionalDouble.empty()).tracks().size());
         }
+
+        @Test
+        void aJogLeftAtTheJointOfWhatIsCarriedIsMergedToo() {
+            // Two diagonals one beside the other, joined by a step 0.15 long at their joint; the run after them carried a hair, merging on.
+            PcbDrawing jogged = pcb(List.of(), List.of(track(line(-10, 0, 0, 0, 5, 5)), track(line(5, 5, 5, 5.15, 10, 10.15, 20, 10.15))));
+            TrackRouter.LayingStyle merging = new TrackRouter.LayingStyle(45, Tightening.JogHandling.MERGED, OptionalDouble.of(0.3));
+            PcbDrawing carried = new RoutingEngine(board(jogged, Map.of())).segmentCarried(jogged, 1, 2, 0, 0.05, merging, Optional.empty())
+                    .orElseThrow();
+            // Between the line's two free ends — the far one carried along with the run, a hair of it left there.
+            List<Point> points = carried.tracks().stream().flatMap(track -> track.points().stream()).toList();
+            for (int at = 2; at < points.size() - 1; at++) {
+                double leg = points.get(at - 1).distanceTo(points.get(at));
+                assertTrue(leg < 1e-6 || leg > 0.3, "no step is left: " + carried.tracks().stream().map(Track::points).toList());
+            }
+        }
     }
 
     /** A jog is the line's, not a track's: one standing at the joint of two tracks is merged as one inside a track is. */
@@ -1913,6 +1928,26 @@ class RoutingEngineTest {
             List<Point> points = merged.tracks().stream().flatMap(track -> track.points().stream()).toList();
             assertTrue(points.stream().noneMatch(point -> point.x() > 1 && point.x() < 19 && Math.abs(point.y()) > 1e-6),
                     "no step is left between the ends: " + merged.tracks().stream().map(Track::points).toList());
+        }
+
+        @Test
+        void twoTracksRunningStraightOnThroughAJointAreOne() {
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(0, 0, 5, 5)), track(line(5, 5, 10, 10, 20, 10))));
+            PcbDrawing merged = new RoutingEngine(board(pcb, Map.of())).withoutJogs(pcb, List.of(0));
+            assertEquals(1, merged.tracks().size(), "one conductor: " + merged.tracks().stream().map(Track::points).toList());
+            assertLine(line(0, 0, 10, 10, 20, 10), merged.tracks().getFirst().points());
+        }
+
+        @Test
+        void aKnotOfASliverAtTheJointOfTwoTracksIsUntied() {
+            // As an import leaves it: one track runs down to B, a sliver 0.053 long goes on from B to A, and the third turns back
+            // from A — a knot at the joint, the line doubling back on itself, nobody's meaning.
+            PcbDrawing pcb = pcb(List.of(), List.of(track(line(162.888, 38.1, 162.888, 39.862)), track(line(162.888, 39.862, 162.925, 39.9)),
+                    track(line(162.925, 39.9, 150, 39.9))));
+            PcbDrawing merged = new RoutingEngine(board(pcb, Map.of())).withoutJogs(pcb, List.of(0));
+            List<Point> points = merged.tracks().stream().flatMap(track -> track.points().stream()).toList();
+            assertTrue(points.stream().noneMatch(point -> point.x() > 162.888 + 1e-6),
+                    "nothing doubles back past the vertical: " + merged.tracks().stream().map(Track::points).toList());
         }
     }
 

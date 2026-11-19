@@ -1,9 +1,8 @@
 package org.jmouse.java.parser.node.type;
 
-import org.jmouse.java.parser.node.JavaNodeKindNames;
-
 import org.jmouse.el.node.NodeKind;
 import org.jmouse.el.node.NodeSchema;
+import org.jmouse.java.parser.node.JavaNodeKindNames;
 import org.jmouse.java.parser.source.SourceSpan;
 
 /** Typed void-type syntax, with role-owned children in source order. */

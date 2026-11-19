@@ -1,14 +1,12 @@
 package org.jmouse.java.parser.node.statement;
 
-import org.jmouse.java.parser.node.JavaChildRoleNames;
-
-import org.jmouse.java.parser.node.JavaNodeKindNames;
-
 import java.util.Optional;
 import org.jmouse.el.node.ChildRole;
 import org.jmouse.el.node.NodeKind;
 import org.jmouse.el.node.NodeSchema;
 import org.jmouse.java.parser.node.expression.JavaExpressionNode;
+import org.jmouse.java.parser.node.JavaChildRoleNames;
+import org.jmouse.java.parser.node.JavaNodeKindNames;
 import org.jmouse.java.parser.source.SourceSpan;
 
 /** Typed assert-statement syntax, with role-owned children in source order. */
