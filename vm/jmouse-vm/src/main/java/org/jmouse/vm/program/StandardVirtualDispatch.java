@@ -49,11 +49,13 @@ public final class StandardVirtualDispatch implements VirtualDispatchStrategy {
         List<ProgramMethodDeclaration> overriding = new ArrayList<>();
         overriding.add(resolved);
         ExecutableMethodKey selected = null;
-        for (ProgramClassDeclaration declaration : hierarchy.classChain(receiver).reversed()) {
-            if (hierarchy.declarations().requireType(resolvedMethod.owner()).kind() == ProgramClassKind.CLASS
-                    && !hierarchy.isSubtype(declaration.type(), resolvedMethod.owner())) {
-                continue;
-            }
+        List<ProgramClassDeclaration> chain = hierarchy.classChain(receiver);
+        ProgramClassDeclaration resolvedOwner =
+                hierarchy.declarations().requireType(resolvedMethod.owner());
+        if (resolvedOwner.kind() == ProgramClassKind.CLASS) {
+            chain = chain.subList(0, chain.indexOf(resolvedOwner) + 1);
+        }
+        for (ProgramClassDeclaration declaration : chain.reversed()) {
             ProgramMethodDeclaration candidate = matching(declaration, resolvedMethod);
             if (candidate == null || candidate.modifiers().contains(JavaStandardModifier.PRIVATE)) {
                 continue;

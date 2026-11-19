@@ -772,6 +772,11 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-vm-typescript</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-java</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>

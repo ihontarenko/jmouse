@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/** Immutable closure. No partially explored graph is published after a failure. */
+/**
+ * Immutable closure of the contributed dependency rules. Executable-body validation and linking
+ * remain separate obligations. No partially explored graph is published after a failure.
+ */
 public final class ReachabilityResult {
 
     private final Set<ProgramRequirement> requirements;

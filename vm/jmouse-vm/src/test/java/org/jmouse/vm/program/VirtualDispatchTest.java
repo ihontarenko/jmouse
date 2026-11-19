@@ -9,6 +9,7 @@ import org.jmouse.java.model.symbol.JavaModifier;
 import org.jmouse.java.model.symbol.JavaModuleKey;
 import org.jmouse.java.model.symbol.JavaStandardModifier;
 import org.jmouse.java.model.symbol.JavaTypeKey;
+import org.jmouse.java.model.type.JavaPrimitiveType;
 import org.jmouse.java.model.type.JavaVoidType;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,127 @@ import java.util.Optional;
 import java.util.Set;
 
 class VirtualDispatchTest {
+
+    @Test
+    void aClassImplementationTakesPrecedenceOverAnInterfaceDefault() {
+        ProgramClassDeclaration contract =
+                type(
+                        "sample.Contract",
+                        ProgramClassKind.INTERFACE,
+                        Optional.empty(),
+                        List.of(),
+                        Set.of(JavaStandardModifier.PUBLIC));
+        ProgramClassDeclaration base =
+                type(
+                        "sample.Base",
+                        ProgramClassKind.CLASS,
+                        Optional.empty(),
+                        List.of(),
+                        Set.of(JavaStandardModifier.PUBLIC));
+        ProgramClassDeclaration receiver =
+                withoutMethods(
+                        type(
+                                "sample.Receiver",
+                                ProgramClassKind.CLASS,
+                                Optional.of(base.type()),
+                                List.of(contract.type()),
+                                Set.of()));
+
+        assertEquals(
+                base.methods().getFirst().key(),
+                dispatch(List.of(contract, base, receiver))
+                        .select(receiver.type(), contract.methods().getFirst().key())
+                        .orElseThrow());
+    }
+
+    @Test
+    void aResolvedPrivateMethodIsNotReplacedByASameSignatureSubclassMethod() {
+        ProgramClassDeclaration base =
+                type(
+                        "sample.Base",
+                        ProgramClassKind.CLASS,
+                        Optional.empty(),
+                        List.of(),
+                        Set.of(JavaStandardModifier.PRIVATE));
+        ProgramClassDeclaration receiver =
+                type(
+                        "sample.Receiver",
+                        ProgramClassKind.CLASS,
+                        Optional.of(base.type()),
+                        List.of(),
+                        Set.of(JavaStandardModifier.PUBLIC));
+
+        assertEquals(
+                base.methods().getFirst().key(),
+                dispatch(List.of(base, receiver))
+                        .select(receiver.type(), base.methods().getFirst().key())
+                        .orElseThrow());
+    }
+
+    @Test
+    void physicalReturnOnlyOverloadsAreNeverSelectedByNameAlone() {
+        ProgramClassDeclaration base =
+                type(
+                        "sample.Base",
+                        ProgramClassKind.CLASS,
+                        Optional.empty(),
+                        List.of(),
+                        Set.of(JavaStandardModifier.PUBLIC));
+        ProgramClassDeclaration receiver =
+                type(
+                        "sample.Receiver",
+                        ProgramClassKind.CLASS,
+                        Optional.of(base.type()),
+                        List.of(),
+                        Set.of(JavaStandardModifier.PUBLIC));
+        ProgramMethodDeclaration returnOnly =
+                new ProgramMethodDeclaration(
+                        new ExecutableMethodKey(
+                                receiver.type(),
+                                "call",
+                                new JavaMethodDescriptor(List.of(), JavaPrimitiveType.INT)),
+                        Set.of(JavaStandardModifier.PUBLIC),
+                        Optional.empty());
+        ProgramClassDeclaration overloaded =
+                new ProgramClassDeclaration(
+                        receiver.type(),
+                        receiver.origin(),
+                        receiver.kind(),
+                        receiver.modifiers(),
+                        receiver.superclass(),
+                        receiver.interfaces(),
+                        List.of(returnOnly, receiver.methods().getFirst()),
+                        List.of());
+
+        assertEquals(
+                receiver.methods().getFirst().key(),
+                dispatch(List.of(base, overloaded))
+                        .select(receiver.type(), base.methods().getFirst().key())
+                        .orElseThrow());
+    }
+
+    @Test
+    void cyclicInterfacesAreRefusedWithoutRecursion() {
+        JavaTypeKey secondKey = new JavaTypeKey(new JavaModuleKey(""), "sample.Second");
+        ProgramClassDeclaration first =
+                type(
+                        "sample.First",
+                        ProgramClassKind.INTERFACE,
+                        Optional.empty(),
+                        List.of(secondKey),
+                        Set.of(JavaStandardModifier.PUBLIC));
+        ProgramClassDeclaration second =
+                type(
+                        "sample.Second",
+                        ProgramClassKind.INTERFACE,
+                        Optional.empty(),
+                        List.of(first.type()),
+                        Set.of(JavaStandardModifier.PUBLIC));
+        ProgramHierarchy hierarchy =
+                new ProgramHierarchy(ProgramDeclarationSnapshot.assemble(List.of(first, second)));
+
+        assertThrows(IllegalArgumentException.class, () -> hierarchy.allInterfaces(first.type()));
+    }
 
     @Test
     void selectsAnOverrideAcrossPackagesThroughAnIntermediatePublicOverride() {

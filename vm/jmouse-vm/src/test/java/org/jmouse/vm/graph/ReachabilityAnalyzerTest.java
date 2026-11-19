@@ -9,8 +9,34 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 class ReachabilityAnalyzerTest {
+
+    @Test
+    void boundsAnUnendingRuleStreamBeforeMaterializingTheContributions() {
+        ProgramRequirement root = new Requirement("root");
+        DependencyProvider unending =
+                active ->
+                        () ->
+                                Stream.iterate(0, index -> index + 1)
+                                        .map(
+                                                index ->
+                                                        rule(
+                                                                Set.of(active),
+                                                                new Requirement(
+                                                                        "generated-" + index)))
+                                        .iterator();
+        ReachabilityAnalyzer analyzer =
+                new ReachabilityAnalyzer(List.of(unending), new ReachabilityLimits(100, 3, 1000));
+
+        ReachabilityLimitException failure =
+                assertThrows(
+                        ReachabilityLimitException.class,
+                        () -> analyzer.analyze(List.of(new EntryPoint(root, reason()))));
+
+        assertEquals(ReachabilityLimit.RULES, failure.limit());
+    }
 
     @Test
     void keepsEveryRootAndLateProofWithoutDependingOnRootOrder() {

@@ -203,7 +203,7 @@
         <module>jmouse-java-27</module>
         <module>jmouse-java-bytecode</module>
         <module>jmouse-java-analysis</module>
-        <module>vm/jmouse-vm</module>
+        <module>vm</module>
         <module>jmouse-java-index</module>
         <module>jmouse-java-index-store</module>
         <module>jmouse-java-index-jpa</module>

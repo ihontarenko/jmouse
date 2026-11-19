@@ -53,14 +53,27 @@ public final class ProgramHierarchy {
     }
 
     public Set<JavaTypeKey> allInterfaces(JavaTypeKey type) {
+        List<JavaTypeKey> roots = new ArrayList<>();
+        for (ProgramClassDeclaration owner : classChain(type)) {
+            roots.addAll(owner.interfaces());
+        }
+        return Set.copyOf(interfaceClosure(roots));
+    }
+
+    /**
+     * Declared interfaces in recursive parent-before-child declaration order, without duplicates.
+     */
+    public List<JavaTypeKey> declaredInterfaceClosure(JavaTypeKey type) {
+        return interfaceClosure(declarations.requireType(type).interfaces());
+    }
+
+    private List<JavaTypeKey> interfaceClosure(List<JavaTypeKey> roots) {
         Set<JavaTypeKey> interfaces = new LinkedHashSet<>();
         Map<JavaTypeKey, VisitState> states = new HashMap<>();
-        for (ProgramClassDeclaration owner : classChain(type)) {
-            for (JavaTypeKey direct : owner.interfaces()) {
-                collectInterfaces(direct, states, interfaces);
-            }
+        for (JavaTypeKey root : roots) {
+            collectInterfaces(root, states, interfaces);
         }
-        return Set.copyOf(interfaces);
+        return List.copyOf(interfaces);
     }
 
     public boolean isSubtype(JavaTypeKey subtype, JavaTypeKey supertype) {
@@ -79,6 +92,7 @@ public final class ProgramHierarchy {
             InterfaceVisit visit = pending.removeLast();
             if (visit.state() == VisitState.COMPLETE) {
                 states.put(visit.type(), VisitState.COMPLETE);
+                interfaces.add(visit.type());
                 continue;
             }
             VisitState state = states.get(visit.type());
@@ -94,7 +108,6 @@ public final class ProgramHierarchy {
                 throw new IllegalArgumentException(
                         "Invalid superinterface declaration: " + visit.type());
             }
-            interfaces.add(visit.type());
             states.put(visit.type(), VisitState.ENTERING);
             pending.addLast(new InterfaceVisit(visit.type(), VisitState.COMPLETE));
             for (JavaTypeKey parent : declaration.interfaces().reversed()) {
